@@ -50,6 +50,8 @@ export const Preferences = z
     showVexlSearchForCooSuggestion: z.boolean().default(true),
     showSuggestReencryptOffersMissingOnServer: z.boolean().default(false),
     lastDisplayOfDonationPromptTimestamp: UnixMilliseconds.optional(),
+    showTosSummaryForAlreadyLoggedInUser: z.boolean().default(true),
+    showCheckUpdatedPrivacyPolicySuggestion: z.boolean().default(true),
   })
   .readonly()
 
@@ -94,6 +96,12 @@ export const PreferencesE = Schema.Struct({
     }
   ),
   lastDisplayOfDonationPromptTimestamp: Schema.optional(UnixMillisecondsE),
+  showTosSummaryForAlreadyLoggedInUser: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
+  showCheckUpdatedPrivacyPolicySuggestion: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
 })
 
 export type Preferences = typeof PreferencesE.Type

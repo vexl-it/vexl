@@ -1,10 +1,4 @@
-import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {
-  type NewsAndAnnouncementsResponse,
-  type VexlBotNews,
-} from '@vexl-next/rest-api/src/services/content/contracts'
+import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
 import {NewsAndAnonouncementsEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
@@ -111,47 +105,41 @@ export const newsAndAnonouncementsHandler = Handler.make(
         //   cancelable: true,
         // }
 
-        const vexlBotNewsForBlog2: VexlBotNews = {
-          id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
-          type: 'info',
-          content:
-            'This week, we dive into how money became a tool to silence dissent.\nCensorship doesn’t need a courtroom—just a bank account. ➡️',
-          action: Option.some({
-            text: 'Read now',
-            url: Schema.decodeSync(HttpsUrlString)(
-              'https://vexl.it/post/money-as-a-tool-for-political-censorship'
-            ),
-          }),
-          cancelForever: true,
-          bubbleOrigin: Option.none(),
-          cancelable: true,
-        }
+        // const vexlBotNewsForBlog2: VexlBotNews = {
+        //   id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
+        //   type: 'info',
+        //   content:
+        //     'This week, we dive into how money became a tool to silence dissent.\nCensorship doesn’t need a courtroom—just a bank account. ➡️',
+        //   action: Option.some({
+        //     text: 'Read now',
+        //     url: Schema.decodeSync(HttpsUrlString)(
+        //       'https://vexl.it/post/money-as-a-tool-for-political-censorship'
+        //     ),
+        //   }),
+        //   cancelForever: true,
+        //   bubbleOrigin: Option.none(),
+        //   cancelable: true,
+        // }
 
-        const vexlBotNewsForBlog3: VexlBotNews = {
-          id: Schema.decodeSync(UuidE)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
-          type: 'info',
-          content:
-            'From permissionless to permissioned. This week we dive into how fast “your money” becomes theirs. ➡️',
-          action: Option.some({
-            text: 'Read now',
-            url: Schema.decodeSync(HttpsUrlString)(
-              'https://vexl.it/post/digital-money-vs-digital-cash'
-            ),
-          }),
-          cancelForever: true,
-          bubbleOrigin: Option.none(),
-          cancelable: true,
-        }
-
-        const newBlogReleaseAtMillis = 1751295600000
-        const showNewBlogLink =
-          headers.isDeveloper || unixMillisecondsNow() > newBlogReleaseAtMillis
+        // const vexlBotNewsForBlog3: VexlBotNews = {
+        //   id: Schema.decodeSync(UuidE)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
+        //   type: 'info',
+        //   content:
+        //     'From permissionless to permissioned. This week we dive into how fast “your money” becomes theirs. ➡️',
+        //   action: Option.some({
+        //     text: 'Read now',
+        //     url: Schema.decodeSync(HttpsUrlString)(
+        //       'https://vexl.it/post/digital-money-vs-digital-cash'
+        //     ),
+        //   }),
+        //   cancelForever: true,
+        //   bubbleOrigin: Option.none(),
+        //   cancelable: true,
+        // }
 
         return {
           fullScreenWarning: Option.none(),
-          vexlBotNews: [
-            showNewBlogLink ? vexlBotNewsForBlog3 : vexlBotNewsForBlog2,
-          ],
+          vexlBotNews: [],
         } satisfies NewsAndAnnouncementsResponse
       }),
       Schema.Void

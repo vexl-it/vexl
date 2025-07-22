@@ -1,10 +1,12 @@
-import {useState} from 'react'
+import {useSetAtom} from 'jotai'
+import {useEffect, useState} from 'react'
 import {Image, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import bigNameSvg from '../../../../images/bigNameSvg'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import clearMmkvStorageAndEmptyAtoms from '../../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../../utils/preferences'
 import SVGImage from '../../../Image'
 import {
   HeaderProxy,
@@ -18,8 +20,15 @@ type Props = LoginStackScreenProps<'Start'>
 
 function StartScreen({navigation}: Props): JSX.Element {
   const [touAgree, setTOUAgree] = useState(false)
+  const setShowTosSummaryForAlreadyLoggedInUser = useSetAtom(
+    showTosSummaryForAlreadyLoggedInUserAtom
+  )
 
   const {t} = useTranslation()
+
+  useEffect(() => {
+    setShowTosSummaryForAlreadyLoggedInUser(false)
+  }, [setShowTosSummaryForAlreadyLoggedInUser])
 
   return (
     <Stack testID="@startScreen" f={1} bg="$darkColorText">

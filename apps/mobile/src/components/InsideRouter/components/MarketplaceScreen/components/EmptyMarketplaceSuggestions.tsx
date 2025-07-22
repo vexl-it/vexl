@@ -10,7 +10,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import EnableNewOffersNotificationSuggestion from './EnableNewOffersNotificationSuggestion'
-import ImportNewContactsSuggestion from './ImportNewContactsSuggestion copy'
+import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
 
 interface Props {
   refreshing: boolean

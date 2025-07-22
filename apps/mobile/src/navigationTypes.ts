@@ -25,6 +25,7 @@ import {
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {type FaqType} from './components/FaqScreen/useContent'
+import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
 import {type ContactsFilter} from './state/contacts/domain'
 
@@ -55,7 +56,11 @@ export type RootStackParamsList = {
 
   NotificationPermissionsMissing: undefined
 
-  TermsAndConditions: undefined
+  TermsAndConditions:
+    | {
+        activeTab: TabType
+      }
+    | undefined
 
   Faqs:
     | {

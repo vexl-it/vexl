@@ -32,6 +32,7 @@ import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import ContainerWithTopBorderRadius from '../../ContainerWithTopBorderRadius'
 import AddListingTypeToOffersSuggestion from './AddListingTypeToOffersSuggestion'
 import BaseFilterDropdown from './BaseFilterDropdown'
+import CheckUpdatedPrivacyPolicySuggestion from './CheckUpdatedPrivacyPolicySuggestion'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 import ImportNewContactsSuggestion from './EnableNewOffersNotificationSuggestion'
 import FiatSatsDropdown from './FiatSatsDropdown'
@@ -130,6 +131,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
                   )}
               </XStack>
               <YStack gap="$6" mb="$6">
+                <CheckUpdatedPrivacyPolicySuggestion />
                 <ReencryptOffersSuggestion />
                 <VexlNewsSuggestions />
                 <RemovedClubsSuggestion />
@@ -139,6 +141,7 @@ function OffersListStateDisplayerContent(): JSX.Element {
             </Stack>
           ) : (
             <YStack gap="$6" mb="$6">
+              <CheckUpdatedPrivacyPolicySuggestion />
               <ReencryptOffersSuggestion />
               <VexlNewsSuggestions />
               <RemovedClubsSuggestion />

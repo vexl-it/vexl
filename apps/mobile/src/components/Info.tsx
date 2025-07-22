@@ -1,5 +1,5 @@
 import {atom, useAtom, type PrimitiveAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import Button from './Button'
@@ -9,7 +9,8 @@ import infoSvg from './images/infoSvg'
 
 interface Props {
   actionButtonText?: string
-  text: string
+  children?: React.ReactElement
+  text?: string
   onActionPress?: () => void
   hideCloseButton?: boolean
   visibleStateAtom?: PrimitiveAtom<boolean>
@@ -18,6 +19,7 @@ interface Props {
 
 function Info({
   actionButtonText,
+  children,
   text,
   onActionPress,
   hideCloseButton,
@@ -49,30 +51,37 @@ function Info({
             source={infoSvg}
           />
           <Stack fs={1}>
-            <Text
-              fos={14}
-              col={variant === 'pink' ? '$pink' : '$main'}
-              textAlign="justify"
-            >
-              {text}
-            </Text>
+            {!!text && (
+              <Text
+                fos={14}
+                col={variant === 'pink' ? '$pink' : '$main'}
+                textAlign="justify"
+              >
+                {text}
+              </Text>
+            )}
+            {!!children && children}
           </Stack>
         </XStack>
         {!hideCloseButton && (
-          <TouchableOpacity
-            onPress={() => {
-              setIsVisible(false)
-            }}
-          >
-            <SvgImage
-              stroke={
-                variant === 'pink'
-                  ? tokens.color.pink.val
-                  : tokens.color.main.val
-              }
-              source={closeSvg}
-            />
-          </TouchableOpacity>
+          <Stack als="flex-start">
+            <TouchableOpacity
+              onPress={() => {
+                setIsVisible(false)
+              }}
+            >
+              <SvgImage
+                height={18}
+                width={18}
+                stroke={
+                  variant === 'pink'
+                    ? tokens.color.pink.val
+                    : tokens.color.main.val
+                }
+                source={closeSvg}
+              />
+            </TouchableOpacity>
+          </Stack>
         )}
       </XStack>
       {!!onActionPress && (

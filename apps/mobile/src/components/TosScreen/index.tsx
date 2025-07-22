@@ -1,9 +1,11 @@
+import {useAtom} from 'jotai'
 import {useEffect, useRef, useState} from 'react'
 import {ScrollView} from 'react-native'
-import {Stack, XStack} from 'tamagui'
+import {Stack, Text, XStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import openUrl from '../../utils/openUrl'
+import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../utils/preferences'
 import Button from '../Button'
 import Info from '../Info'
 import Markdown from '../Markdown'
@@ -16,11 +18,17 @@ const TOS_LINK = 'https://vexl.it/terms-privacy'
 
 type Props = RootStackScreenProps<'TermsAndConditions'>
 
-function TosScreen({navigation}: Props): JSX.Element {
+function TosScreen({route: {params}, navigation}: Props): JSX.Element {
   const {t, isEnglish} = useTranslation()
   const content = useContent()
   const scrollViewRef = useRef<ScrollView>(null)
-  const [activeTab, setActiveTab] = useState<TabType>('termsOfUse')
+  const [activeTab, setActiveTab] = useState<TabType>(
+    params?.activeTab ?? 'termsOfUse'
+  )
+  const [
+    showTosSummaryForAlreadyLoggedInUser,
+    setShowTosSummaryForAlreadyLoggedInUser,
+  ] = useAtom(showTosSummaryForAlreadyLoggedInUserAtom)
 
   const onFaqsPress = (): void => {
     navigation.navigate('Faqs')
@@ -31,6 +39,12 @@ function TosScreen({navigation}: Props): JSX.Element {
       scrollViewRef.current.scrollTo({x: 0, y: 0, animated: false})
     }
   }, [activeTab])
+
+  useEffect(() => {
+    return () => {
+      setShowTosSummaryForAlreadyLoggedInUser(false)
+    }
+  }, [setShowTosSummaryForAlreadyLoggedInUser])
 
   return (
     <Screen customHorizontalPadding={16}>
@@ -47,7 +61,7 @@ function TosScreen({navigation}: Props): JSX.Element {
             variant={activeTab !== one.type ? 'blackOnDark' : 'secondary'}
             size="small"
             text={one.title}
-          ></Button>
+          />
         ))}
       </XStack>
       <Stack h={16} />
@@ -66,7 +80,25 @@ function TosScreen({navigation}: Props): JSX.Element {
         {activeTab === 'termsOfUse' ? (
           <Markdown>{t('termsOfUseMD')}</Markdown>
         ) : activeTab === 'privacyPolicy' ? (
-          <Markdown>{t('privacyPolicyMD')}</Markdown>
+          <Stack mt={showTosSummaryForAlreadyLoggedInUser ? '$4' : '$0'}>
+            {!!showTosSummaryForAlreadyLoggedInUser && (
+              <Info
+                variant="yellow"
+                visibleStateAtom={showTosSummaryForAlreadyLoggedInUserAtom}
+              >
+                <Stack gap="$1">
+                  <Text col="$main" ff="$body500" fos={18}>
+                    {t('privacyPolicy.whatsNew')}
+                  </Text>
+                  <Text col="$main">{`${t('privacyPolicy.analyticsAdded')}`}</Text>
+                  <Text col="$main">
+                    {`${t('privacyPolicy.consentOfFutureCahngesRemoved')}`}
+                  </Text>
+                </Stack>
+              </Info>
+            )}
+            <Markdown>{t('privacyPolicyMD')}</Markdown>
+          </Stack>
         ) : (
           <Markdown>{t('childAbusePrevention')}</Markdown>
         )}

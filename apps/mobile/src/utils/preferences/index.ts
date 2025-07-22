@@ -27,6 +27,8 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showVexlSearchForCooSuggestion: true,
     showSuggestReencryptOffersMissingOnServer: false,
     lastDisplayOfDonationPromptTimestamp: undefined,
+    showTosSummaryForAlreadyLoggedInUser: true,
+    showCheckUpdatedPrivacyPolicySuggestion: true,
   },
   Preferences
 )
@@ -73,4 +75,14 @@ export const showSuggestReencryptOffersMissingOnServerAtom = focusAtom(
 export const lastDisplayOfDonationPromptTimestampAtom = focusAtom(
   preferencesAtom,
   (o) => o.prop('lastDisplayOfDonationPromptTimestamp')
+)
+
+export const showTosSummaryForAlreadyLoggedInUserAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showTosSummaryForAlreadyLoggedInUser')
+)
+
+export const showCheckUpdatedPrivacyPolicySuggestionAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showCheckUpdatedPrivacyPolicySuggestion')
 )

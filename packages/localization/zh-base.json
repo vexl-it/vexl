@@ -939,6 +939,7 @@
   "suggestion.lookingForMoreoffers": "👋 寻找更多报价？今天就加入 Vexl 俱乐部。",
   "suggestion.enableNotificationsForNewOffers.text": "市场为空。启用通知功能，以便 Vexl 为您通知新的报价。",
   "suggestion.enableNotificationsForNewOffers.button": "开启",
+  "suggestion.ourPrivacyPolicyJustGotUpdate": "Our privacy policy just got an update. See what changed.",
   "addContactDialog.addContact": "添加联系人",
   "addContactDialog.addThisPhoneNumber": "您想要将此手机号码添加到您的 Vexl 通讯录吗？",
   "addContactDialog.addContactName": "添加联系人姓名",
@@ -1284,5 +1285,8 @@
   "phoneCooperation.code": "VEXL20",
   "phoneCooperation.forDiscount": "购买全球最安全的安卓系统 Nitrophone，即可享受 5% 的折扣。",
   "phoneCooperation.visitWebsite": "访问网站",
-  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone"
+  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone",
+  "privacyPolicy.whatsNew": "What’s New in the Privacy Policy?",
+  "privacyPolicy.analyticsAdded": "Vexl now collects anonymous usage data to improve the app. It's aggregated and can't identify you.",
+  "privacyPolicy.consentOfFutureCahngesRemoved": "Consent for Future Changes Removed: You won't be asked to agree again when the policy updates."
 }

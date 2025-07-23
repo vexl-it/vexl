@@ -939,6 +939,7 @@
   "suggestion.lookingForMoreoffers": "👋 Hľadáš ďalšie ponuky? Pripoj sa k Vexl klubom ešte dnes.",
   "suggestion.enableNotificationsForNewOffers.text": "Marketplace je prázdny. Povoľ notifikácie a Vexl ťa upozorní na nové ponuky.",
   "suggestion.enableNotificationsForNewOffers.button": "Zapnúť",
+  "suggestion.ourPrivacyPolicyJustGotUpdate": "Our privacy policy just got an update. See what changed.",
   "addContactDialog.addContact": "Pridať kontakt",
   "addContactDialog.addThisPhoneNumber": "Chceš pridať toto číslo medzi tvoje Vexl kontakty?",
   "addContactDialog.addContactName": "Pridať meno",
@@ -1284,5 +1285,8 @@
   "phoneCooperation.code": "VEXL20",
   "phoneCooperation.forDiscount": "pre 5% zľavu na Nitrophone, najbezpečnejší Android na svete.",
   "phoneCooperation.visitWebsite": "Prejsť na web",
-  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone"
+  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone",
+  "privacyPolicy.whatsNew": "What’s New in the Privacy Policy?",
+  "privacyPolicy.analyticsAdded": "Vexl now collects anonymous usage data to improve the app. It's aggregated and can't identify you.",
+  "privacyPolicy.consentOfFutureCahngesRemoved": "Consent for Future Changes Removed: You won't be asked to agree again when the policy updates."
 }

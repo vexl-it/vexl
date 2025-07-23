@@ -939,6 +939,7 @@
   "suggestion.lookingForMoreoffers": "👋 Suchen Sie nach weiteren Angeboten? Werden Sie noch heute Mitglied bei Vexl Clubs.",
   "suggestion.enableNotificationsForNewOffers.text": "Der Marktplatz ist leer. Aktivieren Sie Benachrichtigungen, damit Vexl Sie über neue Angebote informieren kann.",
   "suggestion.enableNotificationsForNewOffers.button": "Aktivieren",
+  "suggestion.ourPrivacyPolicyJustGotUpdate": "Our privacy policy just got an update. See what changed.",
   "addContactDialog.addContact": "Kontakt hinzufügen",
   "addContactDialog.addThisPhoneNumber": "Möchtest du diese Telefonnummer deinen Vexl-Kontakten hinzufügen?",
   "addContactDialog.addContactName": "Kontaktname hinzufügen",
@@ -1284,5 +1285,8 @@
   "phoneCooperation.code": "VEXL20",
   "phoneCooperation.forDiscount": "für einen Rabatt von 5% auf Nitrophone, das sicherste Android auf dem Planeten.",
   "phoneCooperation.visitWebsite": "Website besuchen",
-  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone"
+  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone",
+  "privacyPolicy.whatsNew": "What’s New in the Privacy Policy?",
+  "privacyPolicy.analyticsAdded": "Vexl now collects anonymous usage data to improve the app. It's aggregated and can't identify you.",
+  "privacyPolicy.consentOfFutureCahngesRemoved": "Consent for Future Changes Removed: You won't be asked to agree again when the policy updates."
 }

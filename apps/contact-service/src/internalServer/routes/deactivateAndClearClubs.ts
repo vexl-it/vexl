@@ -69,6 +69,7 @@ const sendNotificationToMembers = (
     )
 
     const notificationToIssue = new ClubDeactivatedNotificationData({
+      trackingId: Option.none(),
       clubUuid: club.uuid,
       reason,
     })

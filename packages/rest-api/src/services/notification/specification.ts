@@ -1,10 +1,12 @@
 import {Api} from 'effect-http'
 import {ServerSecurity} from '../../apiSecurity'
+import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   GetPublicKeyResponse,
   IssueNotificationErrors,
   IssueNotificationRequest,
   IssueNotificationResponse,
+  ReportNotificationProcessedRequest,
 } from './contract'
 
 export const IssueNotificationEndpoint = Api.post(
@@ -20,6 +22,15 @@ export const IssueNotificationEndpoint = Api.post(
   })
 )
 
+export const ReportNotificationProcessedEndpoint = Api.post(
+  'reportNotificationProcessed',
+  '/report-notification'
+).pipe(
+  Api.setRequestBody(ReportNotificationProcessedRequest),
+  Api.setResponseBody(NoContentResponse),
+  Api.setSecurity(ServerSecurity)
+)
+
 export const GetNotificationPublicKeyEndpoint = Api.get(
   'getNotificationPublicKey',
   '/cypher-public-key'
@@ -29,5 +40,6 @@ export const NotificationApiSpecification = Api.make({
   title: 'Notification service',
 }).pipe(
   Api.addEndpoint(IssueNotificationEndpoint),
+  Api.addEndpoint(ReportNotificationProcessedEndpoint),
   Api.addEndpoint(GetNotificationPublicKeyEndpoint)
 )

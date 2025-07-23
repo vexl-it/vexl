@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {FcmCypherE} from '@vexl-next/domain/src/general/notifications/index'
 import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {Schema} from 'effect'
 
 export const GetPublicKeyResponse = Schema.Struct({
@@ -18,6 +19,12 @@ export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequ
   sendNewChatMessageNotification: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
+}) {}
+
+export class ReportNotificationProcessedRequest extends Schema.Class<ReportNotificationProcessedRequest>(
+  'ReportNotificationProcessedRequest'
+)({
+  trackingId: NotificationTrackingId,
 }) {}
 
 export class IssueNotificationResponse extends Schema.Class<IssueNotificationResponse>(

@@ -72,6 +72,7 @@ const prepareNotificationsFromRedisData = (
       return Option.some({
         tokens: [token],
         data: new NewClubConnectionNotificationData({
+          trackingId: Option.none(),
           clubUuids: clubUuidsArray,
         }).toData(),
       })

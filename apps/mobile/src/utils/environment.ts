@@ -1,6 +1,10 @@
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
+import {
+  PLATFORM_ANDROID,
+  PLATFORM_IOS,
+} from '@vexl-next/rest-api/src/PlatformName'
 import {Schema} from 'effect'
 import Constants from 'expo-constants'
 import {getInstallationSource} from 'expo-installation-source'
@@ -35,6 +39,9 @@ export const isProd = apiPreset === 'prodEnv'
 export const commitHash = String(
   Constants.expoConfig?.extra?.commitHash ?? 'local'
 )
+
+export const platform =
+  Platform.OS === 'android' ? PLATFORM_ANDROID : PLATFORM_IOS
 
 const getAppSource = (): AppSource => {
   const parseAppSource = Schema.decodeSync(AppSource)

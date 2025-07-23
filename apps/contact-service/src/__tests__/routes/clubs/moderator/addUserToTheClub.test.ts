@@ -441,6 +441,7 @@ describe('Add user to the club', () => {
           {
             to: ['token'],
             data: new AdmitedToClubNetworkNotificationData({
+              trackingId: Option.none(),
               publicKey: user1.publicKeyPemBase64,
             }).toData(),
           },

@@ -9,7 +9,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
-import {version} from '../../../utils/environment'
+import {version, versionCode} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
@@ -42,9 +42,15 @@ const doesOfferNeedUpdateActionAtom = atom(
       // Cypher not valid, update it pls
       if (Option.isNone(partsOfTheCypher)) return true
 
+      // We always want expoV2
+      if (partsOfTheCypher.value.type !== 'expoV2') return true
+
+      // If the version has changed, update the token...
+      if (partsOfTheCypher.value.data.clientVersion !== versionCode) return true
+
       return (
         oneOffer.lastCommitedFcmToken !== expoNotificationToken ||
-        partsOfTheCypher.value.serverPublicKey !== publicKeyFromServer ||
+        partsOfTheCypher.value.data.serverPublicKey !== publicKeyFromServer ||
         !oneOffer.offerInfo.publicPart.fcmCypher ||
         !set(
           getKeyHolderForNotificationCypherActionAtom,

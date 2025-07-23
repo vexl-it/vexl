@@ -20,7 +20,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../../../api'
-import {version} from '../../../utils/environment'
+import {version, versionCode} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
@@ -155,15 +155,18 @@ function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
     const partsOfTheCypher = extractPartsOfNotificationCypher({
       notificationCypher: chatWithMessages.chat.lastReportedFcmToken.cypher,
     })
-    // Cyher is not valid. Update it!
-    if (Option.isNone(partsOfTheCypher)) return true
-    if (partsOfTheCypher.value.serverPublicKey !== publicKeyFromServer)
-      return true
 
     return (
-      chatWithMessages.chat.lastReportedFcmToken?.token !== notificationToken ||
-      partsOfTheCypher.value.serverPublicKey !== publicKeyFromServer ||
-      partsOfTheCypher.value.type !== 'expo'
+      // Cyher is not valid. Update it!
+      Option.isNone(partsOfTheCypher) ||
+      // we want to update token if expoV2 cypher is not used yet
+      partsOfTheCypher.value.type !== 'expoV2' ||
+      // The server public key has changed, update the token!
+      partsOfTheCypher.value.data.serverPublicKey !== publicKeyFromServer ||
+      // If the client version has changed, update the token!
+      partsOfTheCypher.value.data.clientVersion !== versionCode ||
+      // If the last reported token is not the same as the current token, update it!
+      chatWithMessages.chat.lastReportedFcmToken?.token !== notificationToken
     )
   }
 }

@@ -3,6 +3,8 @@ import {
   type NotificationCypher,
   NotificationCypherE,
 } from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import * as translations from '@vexl-next/localization/src/translations'
 import {decryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {
@@ -13,6 +15,7 @@ import {
 } from '@vexl-next/rest-api/src/services/notification/contract'
 import {IssueNotificationEndpoint} from '@vexl-next/rest-api/src/services/notification/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {type ConfigError, Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {fcmTokenPrivateKeyConfig} from '../../configs'
@@ -21,6 +24,7 @@ import {
   type FirebaseMessagingLayer,
   sendFirebaseMessage,
 } from '../../FirebaseMessagingLayer'
+import {reportNotificationSent} from '../../metrics'
 
 function getNotificationContentByLocale(locale: string): {
   title: string
@@ -55,7 +59,7 @@ const processNotificationCypher = (
 ): Effect.Effect<
   IssueNotificationResponse,
   InvalidFcmCypherError | ConfigError.ConfigError | SendingNotificationError,
-  FirebaseMessagingLayer | ExpoClientService
+  FirebaseMessagingLayer | ExpoClientService | MetricsClientService
 > =>
   Effect.gen(function* (_) {
     const privateKey = yield* _(fcmTokenPrivateKeyConfig)
@@ -74,6 +78,7 @@ const processNotificationCypher = (
           token: fcmToken,
           data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
             new NewChatMessageNoticeNotificationData({
+              trackingId: Option.none(),
               targetCypher: notificationCypher,
               includesSystemNotification: 'false',
             })
@@ -84,14 +89,35 @@ const processNotificationCypher = (
       return new IssueNotificationResponse({success: true})
     } else {
       const expoClient = yield* _(ExpoClientService)
+      const expoToken = notificationToken.expoToken
+
+      const locale =
+        notificationToken.type === 'expoV2'
+          ? notificationToken.data.locale
+          : notificationToken.locale
+
+      const trackingId = createNotificationTrackingId()
+      if (notificationToken.type === 'expoV2')
+        yield* _(
+          reportNotificationSent({
+            clientPlatform: notificationToken.data.clientPlatform,
+            clientVersion: notificationToken.data.clientVersion,
+            id: trackingId,
+            sentAt: unixMillisecondsNow(),
+          })
+        )
 
       if (sendSystemNotification) {
         yield* _(
           expoClient.sendNotification({
-            token: notificationToken.expoToken,
-            ...getNotificationContentByLocale(notificationToken.locale),
+            token: expoToken,
+            ...getNotificationContentByLocale(locale),
             data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
               new NewChatMessageNoticeNotificationData({
+                trackingId:
+                  notificationToken.type === 'expoV2'
+                    ? Option.some(trackingId)
+                    : Option.none(),
                 targetCypher: notificationCypher,
                 includesSystemNotification: 'true',
               })
@@ -102,9 +128,13 @@ const processNotificationCypher = (
 
       yield* _(
         expoClient.sendNotification({
-          token: notificationToken.expoToken,
+          token: expoToken,
           data: Schema.encodeSync(NewChatMessageNoticeNotificationData)(
             new NewChatMessageNoticeNotificationData({
+              trackingId:
+                notificationToken.type === 'expoV2'
+                  ? Option.some(trackingId)
+                  : Option.none(),
               targetCypher: notificationCypher,
               includesSystemNotification: 'false',
             })

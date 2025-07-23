@@ -8,6 +8,7 @@ import * as TO from 'fp-ts/TaskOption'
 import {type Option} from 'fp-ts/lib/Option'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
+import {platform, versionCode} from '../../utils/environment'
 import {i18nAtom} from '../../utils/localization/I18nProvider'
 import {registerNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from './fcmServerPublicKeyStore'
@@ -37,9 +38,11 @@ const addNotificationCypherToPublicPayloadActionAtom = atom(
         return TO.fromTaskEither(
           effectToTaskEither(
             ecnryptNotificationToken({
+              clientPlatform: platform,
+              clientVersion: versionCode,
               locale: get(i18nAtom).t('localeName'),
-              serverPublicKey: notificationServerPublicKey,
               notificationToken,
+              serverPublicKey: notificationServerPublicKey,
             })
           )
         )

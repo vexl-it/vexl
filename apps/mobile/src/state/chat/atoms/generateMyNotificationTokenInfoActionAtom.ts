@@ -8,6 +8,7 @@ import * as TE from 'fp-ts/TaskEither'
 import * as TO from 'fp-ts/TaskOption'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
+import {platform, versionCode} from '../../../utils/environment'
 import {i18nAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
@@ -38,6 +39,8 @@ const generateMyNotificationTokenInfoActionAtom = atom(
           effectToTaskEither(
             ecnryptNotificationToken({
               serverPublicKey: serverPublicKey.value,
+              clientPlatform: platform,
+              clientVersion: versionCode,
               notificationToken,
               locale: get(i18nAtom).t('localeName'),
             })

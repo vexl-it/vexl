@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {AdmitedToClubNetworkNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {ExpoNotificationsService} from './expoNotifications/ExpoNotificationsService'
 
 export const issueClubAdmissionNotification = ({
@@ -18,6 +18,7 @@ export const issueClubAdmissionNotification = ({
         {
           to: [notificationToken],
           data: new AdmitedToClubNetworkNotificationData({
+            trackingId: Option.none(),
             publicKey: admittedMemberPublickey,
           }).toData(),
         },

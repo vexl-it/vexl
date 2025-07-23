@@ -16,32 +16,64 @@ import {
   type FcmToken,
   FcmTokenE,
 } from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {
   CryptoError,
   eciesGTMDecryptE,
   EciesGTMECypher,
   eciesGTMEncryptE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {PlatformName} from '@vexl-next/rest-api'
 import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
-import {Array, Effect, Option, Schema, String} from 'effect'
+import {Array, Effect, Option, pipe, Schema, String} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 
 const EXPO_CYPHER_PREFIX = 'EXPO'
+const EXPO_V2_CYPHER_PREFIX = 'EXPO_V2'
+
+const ExpoV2CypherPayload = Schema.compose(
+  Schema.StringFromBase64,
+  Schema.parseJson(
+    Schema.Struct({
+      locale: Schema.String,
+      notificationTokenEncrypted: EciesGTMECypher,
+      clientVersion: VersionCode,
+      clientPlatform: PlatformName,
+      serverPublicKey: PublicKeyPemBase64E,
+    })
+  )
+)
+type ExpoV2CypherPayload = typeof ExpoV2CypherPayload.Type
 
 export function ecnryptNotificationToken({
   locale,
-  serverPublicKey,
   notificationToken,
+  clientVersion,
+  clientPlatform,
+  serverPublicKey,
 }: {
   locale: string
-  serverPublicKey: PublicKeyPemBase64
   notificationToken: ExpoNotificationToken
-}): Effect.Effect<NotificationCypher, CryptoError> {
+  clientVersion: VersionCode
+  clientPlatform: PlatformName
+  serverPublicKey: PublicKeyPemBase64
+}): Effect.Effect<NotificationCypher, CryptoError | ParseError> {
   return Effect.gen(function* (_) {
     const encryptedToken = yield* _(
       eciesGTMEncryptE(serverPublicKey)(notificationToken)
     )
-    return Schema.decodeSync(NotificationCypherE)(
-      `${EXPO_CYPHER_PREFIX}.${locale}.${serverPublicKey}.${encryptedToken}`
+
+    const dataToEncode: ExpoV2CypherPayload = {
+      locale,
+      notificationTokenEncrypted: encryptedToken,
+      clientVersion,
+      clientPlatform,
+      serverPublicKey,
+    }
+
+    return yield* _(
+      Schema.encode(ExpoV2CypherPayload)(dataToEncode),
+      Effect.flatMap(Schema.decode(NotificationCypherE))
     )
   })
 }
@@ -78,6 +110,7 @@ export function extractPartsOfNotificationCypher({
 }: {
   notificationCypher: NotificationCypher
 }): Option.Option<
+  | {type: 'expoV2'; data: ExpoV2CypherPayload}
   | {
       type: 'expo'
       serverPublicKey: PublicKeyPemBase64
@@ -91,6 +124,19 @@ export function extractPartsOfNotificationCypher({
     }
 > {
   try {
+    if (String.startsWith(EXPO_V2_CYPHER_PREFIX)(notificationCypher)) {
+      return pipe(
+        String.replace(`${EXPO_V2_CYPHER_PREFIX}.`, '')(notificationCypher),
+        Schema.decodeOption(ExpoV2CypherPayload),
+        Effect.map((data) => ({
+          type: 'expoV2' as const,
+          data,
+        })),
+        Effect.option,
+        Effect.runSync
+      )
+    }
+
     if (String.startsWith(EXPO_CYPHER_PREFIX)(notificationCypher)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_, locale, serverPublicKey, ...cypherParts] =
@@ -128,6 +174,11 @@ export function extractPartsOfNotificationCypher({
 
 type DecodeResult =
   | {
+      type: 'expoV2'
+      data: ExpoV2CypherPayload
+      expoToken: ExpoNotificationToken
+    }
+  | {
       type: 'expo'
       expoToken: ExpoNotificationToken
       locale: string
@@ -153,6 +204,21 @@ export const decryptNotificationToken = ({
         () => new InvalidFcmCypherError()
       )
     )
+
+    if (parts.type === 'expoV2') {
+      const {data} = parts
+      const decryptedToken = yield* _(
+        eciesGTMDecryptE(privateKey)(data.notificationTokenEncrypted),
+        Effect.flatMap(Schema.decode(ExpoNotificationTokenE)),
+        Effect.catchTag('ParseError', () => new InvalidFcmCypherError())
+      )
+
+      return {
+        type: 'expoV2' as const,
+        data,
+        expoToken: decryptedToken,
+      }
+    }
 
     const {cypher, type} = parts
 

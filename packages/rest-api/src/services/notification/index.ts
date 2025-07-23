@@ -10,7 +10,11 @@ import {
   handleCommonErrorsEffect,
   type LoggingFunction,
 } from '../../utils'
-import {IssueNotificationErrors, type IssueNotificationInput} from './contract'
+import {
+  IssueNotificationErrors,
+  type IssueNotificationInput,
+  type ReportNotificationProcessedRequest,
+} from './contract'
 import {NotificationApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -55,6 +59,12 @@ export function api({
       handleCommonAndExpectedErrorsEffect(
         client.issueNotification(issueNotificationInput),
         IssueNotificationErrors
+      ),
+    reportNotificationProcessed: (
+      request: ReportNotificationProcessedRequest
+    ) =>
+      handleCommonErrorsEffect(
+        client.reportNotificationProcessed({body: request})
       ),
   }
 }

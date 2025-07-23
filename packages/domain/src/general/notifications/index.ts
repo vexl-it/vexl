@@ -3,6 +3,7 @@ import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSc
 import {Brand, Schema as S, Schema} from 'effect'
 import {z} from 'zod'
 import {ClubUuidE} from '../clubs'
+import {NotificationTrackingId} from '../NotificationTrackingId.brand'
 import {NotificationCypherE} from './NotificationCypher.brand'
 
 export const FcmCypher = z
@@ -35,6 +36,7 @@ export const ChatNotificationType = S.Literal(
 export class ChatNotificationData extends S.Class<ChatNotificationData>(
   'NotificationData'
 )({
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   type: ChatNotificationType.pipe(orElseSchema('UNKNOWN')),
   inbox: PublicKeyPemBase64E,
   sender: PublicKeyPemBase64E,
@@ -47,6 +49,7 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
   'NewChatMessageNoticeNotificationData'
 )('NewChatMessageNoticeNotificationData', {
   targetCypher: NotificationCypherE,
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   // Notification payload does not allow booleans
   includesSystemNotification: Schema.Union(
     Schema.Literal('true'),
@@ -62,6 +65,7 @@ export class NewClubConnectionNotificationData extends Schema.TaggedClass<NewClu
   'NewClubConnectionNotificationData'
 )('NewClubConnectionNotificationData', {
   clubUuids: Schema.parseJson(Schema.NonEmptyArray(ClubUuidE)),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(NewClubConnectionNotificationData)(this)
@@ -71,6 +75,7 @@ export class NewSocialNetworkConnectionNotificationData extends Schema.TaggedCla
   'NewSocialNetworkConnectionNotificationData'
 )('NewSocialNetworkConnectionNotificationData', {
   type: Schema.Literal('NEW_APP_USER'), // backward compatibility
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(NewSocialNetworkConnectionNotificationData)(this)
@@ -80,6 +85,7 @@ export class AdmitedToClubNetworkNotificationData extends Schema.TaggedClass<Adm
   'AdmitedToClubNetworkNotificationData'
 )('AdmitedToClubNetworkNotificationData', {
   publicKey: PublicKeyPemBase64E,
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(AdmitedToClubNetworkNotificationData)(this)
@@ -90,6 +96,7 @@ export class ClubDeactivatedNotificationData extends Schema.TaggedClass<ClubDeac
 )('ClubDeactivatedNotificationData', {
   clubUuid: ClubUuidE,
   reason: Schema.Literal('EXPIRED', 'FLAGGED', 'OTHER'),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(ClubDeactivatedNotificationData)(this)
@@ -99,6 +106,7 @@ export class OpenBrowserLinkNotificationData extends Schema.TaggedClass<OpenBrow
   'OpenBrowserLinkNotificationData'
 )('OpenBrowserLinkNotificationData', {
   url: S.String,
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(OpenBrowserLinkNotificationData)(this)

@@ -44,6 +44,7 @@ import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {
   commitHash,
   enableHiddenFeatures,
+  platform,
   version,
   versionCode,
 } from '../../utils/environment'
@@ -576,6 +577,8 @@ function DebugScreen(): JSX.Element {
 
                     const cypher = yield* _(
                       fetchAndEncryptNotificationToken({
+                        clientPlatform: platform,
+                        clientVersion: versionCode,
                         expoToken: notificationToken,
                         notificationApi: store.get(apiAtom).notification,
                         locale: t('localeName'),

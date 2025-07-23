@@ -18,7 +18,7 @@ export const offersFilterInitialState = {
   sort: undefined,
   friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE'],
   currency: undefined,
-  location: [],
+  location: undefined,
   locationState: undefined,
   paymentMethod: undefined,
   btcNetwork: undefined,
@@ -86,6 +86,7 @@ export const isFilterActiveAtom = atom((get) => {
     // listingType and offerType are ignored as they are part of the main filter on marketplace
     listingType,
     offerType,
+    location,
     ...offersFilterFromStorage
   } = get(offersFilterFromStorageAtom)
 
@@ -101,6 +102,7 @@ export const isFilterActiveAtom = atom((get) => {
     {
       ...offersFilterFromStorage,
       singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,
+      location: location?.length === 0 ? undefined : location,
       clubsUuids:
         offersFilterFromStorage.clubsUuids?.length ===
         Record.values(get(clubsToKeyHolderAtom)).length

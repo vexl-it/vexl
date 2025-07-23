@@ -50,7 +50,7 @@ export const refocusMapActionAtom = atom(
     }
 
     const locationFilter = get(locationFilterAtom)
-    if (locationFilter) {
+    if (locationFilter && locationFilter.length > 0) {
       const oneLocation = locationFilter[0]
       const coordinates: LatLong[] = locationFilter.map((one) => ({
         latitude: one.latitude,

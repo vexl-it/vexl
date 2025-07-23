@@ -939,6 +939,7 @@
   "suggestion.lookingForMoreoffers": "👋 Търсите още оферти? Присъединете се към Vexl клубове днес.",
   "suggestion.enableNotificationsForNewOffers.text": "Пазарът е празен. Активирайте известията, за да може Vexl да ви уведомява за нови оферти.",
   "suggestion.enableNotificationsForNewOffers.button": "Активирай",
+  "suggestion.ourPrivacyPolicyJustGotUpdate": "Our privacy policy just got an update. See what changed.",
   "addContactDialog.addContact": "Добавяне на контакт",
   "addContactDialog.addThisPhoneNumber": "Искате ли да добавите този телефонен номер към контактите си във Vexl?",
   "addContactDialog.addContactName": "Добавете име на контакт",
@@ -1284,5 +1285,8 @@
   "phoneCooperation.code": "VEXL20",
   "phoneCooperation.forDiscount": "for a 5% discount on Nitrophone, the most secure Android on the planet.",
   "phoneCooperation.visitWebsite": "Visit website",
-  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone"
+  "phoneCooperation.nitroPhoneWeb": "https://shop.nitrokey.com/shop?search=nitrophone",
+  "privacyPolicy.whatsNew": "What’s New in the Privacy Policy?",
+  "privacyPolicy.analyticsAdded": "Vexl now collects anonymous usage data to improve the app. It's aggregated and can't identify you.",
+  "privacyPolicy.consentOfFutureCahngesRemoved": "Consent for Future Changes Removed: You won't be asked to agree again when the policy updates."
 }

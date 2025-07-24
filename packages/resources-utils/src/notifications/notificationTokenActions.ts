@@ -73,6 +73,7 @@ export function ecnryptNotificationToken({
 
     return yield* _(
       Schema.encode(ExpoV2CypherPayload)(dataToEncode),
+      Effect.map((one) => `${EXPO_V2_CYPHER_PREFIX}.${one}`),
       Effect.flatMap(Schema.decode(NotificationCypherE))
     )
   })

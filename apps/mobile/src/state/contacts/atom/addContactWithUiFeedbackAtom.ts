@@ -110,7 +110,7 @@ const editExistingContactActionAtom = atom(
       set(
         storedContactsAtom,
         importedContacts.map((contact) =>
-          contact.computedValues.hash === existingContact.computedValues.hash
+          contact.computedValues.hash !== existingContact.computedValues.hash
             ? {...contact, computedValues: Option.some(contact.computedValues)}
             : {
                 ...contact,

@@ -132,6 +132,12 @@ const AndroidInBackgroundNotification = Schema.Struct({
   }),
 })
 
+const AndroidInBackgroundNotification2 = Schema.Struct({
+  data: Schema.Struct({
+    body: Schema.parseJson(NotificationPayload),
+  }),
+})
+
 const IOSInHookNotification = Schema.Struct({
   request: Schema.Struct({
     content: Schema.Struct({
@@ -175,7 +181,18 @@ export function extractDataPayloadFromNotification(
           Option.map((one) => ({
             payload: one.notification.data.body,
             isHeadless: !one.notification.notification,
-          }))
+          })),
+          Option.orElse(() =>
+            pipe(
+              Schema.decodeUnknownOption(AndroidInBackgroundNotification2)(
+                data.data
+              ),
+              Option.map((one) => ({
+                payload: one.data.body,
+                isHeadless: true,
+              }))
+            )
+          )
         )
       }
 

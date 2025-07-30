@@ -1,3 +1,5 @@
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -16,6 +18,40 @@ function logLoadSessionProgress(text: string): void {
     subtitle: 'loadSessionProgress',
     body: text,
   })
+}
+
+type Listener = () => void
+type Unsubscribe = () => void
+const loadingSessionFinishedListeners: Listener[] = []
+
+const registerLoadingSessionFinishedListener = (l: Listener): Unsubscribe => {
+  loadingSessionFinishedListeners.push(l)
+  return () => {
+    const index = loadingSessionFinishedListeners.indexOf(l)
+    if (index > -1) {
+      loadingSessionFinishedListeners.splice(index, 1)
+    }
+  }
+}
+
+const callLoadingSessionFinishedOnAllListeners = (): void => {
+  loadingSessionFinishedListeners.forEach((l) => {
+    l()
+  })
+}
+
+const waitForLoadingSessionFinished = (
+  timeoutMillis: number = 5_000
+): Effect.Effect<void> => {
+  let unsubscribe: Unsubscribe
+  return Effect.async((callback) => {
+    unsubscribe = registerLoadingSessionFinishedListener(() => {
+      callback(Effect.succeed(undefined))
+    })
+  }).pipe(
+    Effect.timeout(timeoutMillis),
+    Effect.catchTag('TimeoutException', () => Effect.sync(unsubscribe))
+  )
 }
 
 export function loadSession(
@@ -44,7 +80,10 @@ export function loadSession(
     logLoadSessionProgress(
       `Skippign loadSession. Result: ${sessionState === 'loggedIn'}`
     )
-    return T.of(sessionState === 'loggedIn')
+    return pipe(
+      effectToTask(waitForLoadingSessionFinished()),
+      T.chain(() => T.of(sessionState === 'loggedIn'))
+    )
   }
 
   console.info('🔑Trying to find session in storage')
@@ -104,6 +143,10 @@ export function loadSession(
         })
         return true
       }
-    )
+    ),
+    T.chainFirst(() => {
+      callLoadingSessionFinishedOnAllListeners()
+      return T.of(null)
+    })
   )
 }

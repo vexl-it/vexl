@@ -247,8 +247,6 @@ export default {
         'organization': 'vexl',
       },
     ],
-    '@react-native-firebase/app',
-    './expo-plugins/disable-firebase-analytics.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',

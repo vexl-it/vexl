@@ -16,6 +16,7 @@ export const reportNotificationProcessedHandler = Handler.make(
             processedAt: unixMillisecondsNow(),
           })
         )
+        return {}
       }),
       Schema.Void
     )

@@ -74,16 +74,29 @@ export function loadSession(
     })})}`
   )
 
+  if (sessionState === 'loading' && !forceReload) {
+    logLoadSessionProgress(
+      `Session is already loading. Result: ${sessionState}`
+    )
+    return pipe(
+      effectToTask(waitForLoadingSessionFinished()),
+      T.chain(() => {
+        const sessionStateCurrent = store.get(sessionHolderAtom).state
+        logLoadSessionProgress(
+          `Loading finished after callback. Result: ${sessionStateCurrent}`
+        )
+        return T.of(sessionStateCurrent === 'loggedIn')
+      })
+    )
+  }
+
   if (
     !(sessionState === 'initial' || (forceReload && sessionState !== 'loading'))
   ) {
     logLoadSessionProgress(
       `Skippign loadSession. Result: ${sessionState === 'loggedIn'}`
     )
-    return pipe(
-      effectToTask(waitForLoadingSessionFinished()),
-      T.chain(() => T.of(sessionState === 'loggedIn'))
-    )
+    return T.of(store.get(sessionHolderAtom).state === 'loggedIn')
   }
 
   console.info('🔑Trying to find session in storage')

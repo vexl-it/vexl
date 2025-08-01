@@ -1,13 +1,19 @@
 export function replaceNonDecimalCharsInInput(input: string): string {
-  if (isNaN(Number(input))) {
+  const sanitizedInput = input.replace(/,/g, '.')
+
+  if (isNaN(Number(sanitizedInput))) {
     return '0'
   }
 
-  if (input.startsWith('0') && input !== '0' && !input.includes('.')) {
-    return input.replace(/^0+/, '')
+  if (
+    sanitizedInput.startsWith('0') &&
+    sanitizedInput !== '0' &&
+    !sanitizedInput.includes('.')
+  ) {
+    return sanitizedInput.replace(/^0+/, '')
   }
 
-  return input
+  return sanitizedInput
 }
 
 export function addThousandsSeparatorSpacesToNumberInput(

@@ -3,7 +3,6 @@ import {z} from 'zod'
 
 export const NotificationCypher = z
   .string()
-  .includes('.')
   .transform((v) =>
     Brand.nominal<typeof v & Brand.Brand<'NotificationCypher'>>()(v)
   )

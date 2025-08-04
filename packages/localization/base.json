@@ -897,6 +897,8 @@
   "reportIssue.somethingWentWrong": "Something went wrong?",
   "reportIssue.feelFreeToGetInTouch": "Feel free to get in touch with our support.",
   "reportIssue.predefinedBody": "Hi! I am reporting an issue...",
+  "reportIssue.appAndOperatingSystemInfo": "App and operating system info",
+  "reportIssue.pleaseDoNotDelete": "Please, don't delete",
   "AppLogs.title": "In app logs",
   "AppLogs.clear": "Clear logs",
   "AppLogs.export": "Export logs",

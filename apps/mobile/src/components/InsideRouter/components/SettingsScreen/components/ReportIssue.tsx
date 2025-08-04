@@ -1,7 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect} from 'effect/index'
 import {atom, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
@@ -22,26 +20,22 @@ import emailIconSvg from '../images/emailIconSvg'
 export const reportIssueDialogAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return pipe(
-    set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          type: 'StepWithChildren',
-          MainSectionComponent: ReportIssue,
-          positiveButtonText: t('reportIssue.openInEmail'),
-          negativeButtonText: t('common.gotIt'),
-        },
-      ],
+  return set(askAreYouSureActionAtom, {
+    variant: 'info',
+    steps: [
+      {
+        type: 'StepWithChildren',
+        MainSectionComponent: ReportIssue,
+        positiveButtonText: t('reportIssue.openInEmail'),
+        negativeButtonText: t('common.gotIt'),
+      },
+    ],
+  }).pipe(
+    Effect.tap(() => {
+      set(contactSupportActionAtom)
     }),
-    effectToTaskEither,
-    TE.match(
-      () => {},
-      () => {
-        set(contactSupportActionAtom)
-      }
-    )
-  )()
+    Effect.ignore
+  )
 })
 
 function ReportIssue(): JSX.Element {

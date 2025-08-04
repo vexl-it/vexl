@@ -15,7 +15,7 @@ import {
 import {screenshotsDisabledAtom} from '../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {createImportContactLink} from '../../../../utils/deepLinks/createLinks'
-import {version} from '../../../../utils/environment'
+import {version, versionCode} from '../../../../utils/environment'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../utils/openUrl'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
@@ -58,9 +58,8 @@ export const emailBodyAtom = atom<string>((get) => {
   const {t} = get(translationAtom)
 
   return encodeURIComponent(
-    `${t('reportIssue.predefinedBody')}\n\n${Platform.OS}-${version}-${
-      Platform.Version
-    }\n\n`
+    `${t('reportIssue.predefinedBody')}\n\n\n\n\n
+    ${t('reportIssue.appAndOperatingSystemInfo')} (${t('reportIssue.pleaseDoNotDelete')}): ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
   )
 })
 

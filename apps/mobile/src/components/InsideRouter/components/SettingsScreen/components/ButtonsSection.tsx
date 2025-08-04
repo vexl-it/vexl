@@ -280,7 +280,9 @@ function ButtonsSection(): JSX.Element {
             text: t('settings.items.reportIssue'),
             icon: customerSupportIconSvg,
             navigatesFurther: true,
-            onPress: setReportIssueDialogVisible,
+            onPress: () => {
+              Effect.runFork(setReportIssueDialogVisible())
+            },
           },
           {
             testID: '@buttonsSection/inAppLogsButton',

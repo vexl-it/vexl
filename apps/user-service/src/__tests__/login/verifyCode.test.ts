@@ -9,7 +9,7 @@ import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   checkVerificationMock,
   createVerificationMock,
-} from '../utils/mockedTwilioClient'
+} from '../utils/mockedPreludeClient'
 import {
   disposeRuntime,
   runPromiseInMockedEnvironment,

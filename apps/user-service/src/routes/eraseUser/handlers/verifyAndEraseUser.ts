@@ -10,7 +10,7 @@ import {createShortLivedTokenForErasingUser} from '@vexl-next/server-utils/src/s
 import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {loginCodeDummyForAll} from '../../../configs'
-import {TwilioVerificationClient} from '../../../utils/twilio'
+import {checkVerification} from '../../../utils/smsVerificationUtils'
 import {validateAndDecodeVerificationId} from '../utils'
 
 export const verifyAndEraseUser = Handler.make(
@@ -19,7 +19,6 @@ export const verifyAndEraseUser = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const verificationId = req.body.verificationId
-        const twilio = yield* _(TwilioVerificationClient)
 
         const dummyCodeForAll = yield* _(loginCodeDummyForAll)
         const decodedVerificationId = yield* _(
@@ -36,7 +35,7 @@ export const verifyAndEraseUser = Handler.make(
             )
         } else {
           yield* _(
-            twilio.checkVerification({
+            checkVerification({
               code: req.body.code,
               sid: decodedVerificationId.verificationId,
             })

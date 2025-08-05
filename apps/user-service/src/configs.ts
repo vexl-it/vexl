@@ -52,3 +52,15 @@ export const feedbackServiceUrlToRedirectToConfig = Config.string(
 
 export const oldHmacKeyUsedForHashingNumbersConfig =
   Config.string('OLD_HMAC_KEY')
+
+export const preludeApiTokenConfig = Config.string('PRELUDE_API_TOKEN')
+
+export const verificationProviderConfig = Config.string(
+  'VERIFICATION_PROVIDER'
+).pipe(
+  Config.validate({
+    message:
+      'Invalid verification provider. Should be one of "twilio" or "prelude"',
+    validation: (v) => v === 'twilio' || v === 'prelude',
+  })
+)

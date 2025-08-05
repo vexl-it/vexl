@@ -6,11 +6,11 @@ import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {mockedReportNewUserCreated} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {Effect, pipe, Schema} from 'effect'
 import {LoggedInUsersDbService} from '../../db/loggedInUsersDb'
-import {TwilioVerificationSid} from '../../utils/twilio'
+import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
 import {
   checkVerificationMock,
   createVerificationMock,
-} from '../utils/mockedTwilioClient'
+} from '../utils/mockedPreludeClient'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   disposeRuntime,
@@ -32,7 +32,7 @@ describe('loginFlow', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         createVerificationMock.mockReturnValueOnce(
-          Effect.succeed(Schema.decodeSync(TwilioVerificationSid)('123456'))
+          Effect.succeed(Schema.decodeSync(SmsVerificationSid)('123456'))
         )
         const client = yield* _(NodeTestingApp)
         const initResponse = yield* _(

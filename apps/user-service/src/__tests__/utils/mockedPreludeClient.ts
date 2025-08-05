@@ -1,23 +1,20 @@
 import {jest} from '@jest/globals'
 import {Effect, Layer, Schema} from 'effect'
+import {PreludeService, type PreludeOperations} from '../../utils/prelude'
 import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
-import {
-  TwilioVerificationClient,
-  type TwilioOperations,
-} from '../../utils/twilio'
 
 export const createVerificationMock = jest.fn(
-  (): ReturnType<TwilioOperations['createVerification']> =>
+  (): ReturnType<PreludeOperations['createVerification']> =>
     Effect.succeed(Schema.decodeSync(SmsVerificationSid)(String(Date.now())))
 )
 
 export const checkVerificationMock = jest.fn(
-  (): ReturnType<TwilioOperations['checkVerification']> =>
+  (): ReturnType<PreludeOperations['checkVerification']> =>
     Effect.succeed('valid' as const)
 )
 
-export const mockedTwilioLayer = Layer.effect(
-  TwilioVerificationClient,
+export const mockedPreludeClient = Layer.effect(
+  PreludeService,
   Effect.gen(function* (_) {
     return {
       createVerification: createVerificationMock,

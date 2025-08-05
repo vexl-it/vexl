@@ -30,6 +30,7 @@ import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
 import {logoutUserHandler} from './routes/logoutUser'
 import {regenerateCredentialsHandler} from './routes/regenerateSessionCredentials'
 import {submitFeedbackHandler} from './routes/submitFeedback'
+import {PreludeService} from './utils/prelude'
 import {TwilioVerificationClient} from './utils/twilio'
 
 export const app = RouterBuilder.make(UserApiSpecification).pipe(
@@ -48,6 +49,7 @@ export const app = RouterBuilder.make(UserApiSpecification).pipe(
 
 const MainLive = Layer.mergeAll(
   TwilioVerificationClient.Live,
+  PreludeService.Live,
   VerificationStateDbService.Live,
   LoggedInUsersDbService.Live,
   DashboardReportsService.make({

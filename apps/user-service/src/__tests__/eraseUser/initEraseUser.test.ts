@@ -11,7 +11,7 @@ import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   checkVerificationMock,
   createVerificationMock,
-} from '../utils/mockedTwilioClient'
+} from '../utils/mockedPreludeClient'
 import {
   disposeRuntime,
   runPromiseInMockedEnvironment,
@@ -39,7 +39,7 @@ describe('Initialize erase user', () => {
           })
         )
 
-        expect(createVerificationMock).toBeCalledWith('+420733333333')
+        expect(createVerificationMock).toHaveBeenCalledWith('+420733333333')
         expect(data.verificationId).toBeDefined()
         const crypto = yield* _(ServerCrypto)
         const tokenPayload = yield* _(

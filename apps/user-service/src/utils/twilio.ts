@@ -7,21 +7,19 @@ import {
 import {Context, Effect, Layer, Match, Schema} from 'effect'
 import Twilio from 'twilio'
 import {twilioConfig} from '../configs'
+import {
+  decodeSmsVerificationSid,
+  type SmsVerificationSid,
+} from './SmsVerificationSid.brand'
 import {lookupTwilioError} from './twilioErrors'
-
-export const TwilioVerificationSid = Schema.String.pipe(
-  Schema.brand('TwilioVerificationSid')
-)
-export type TwilioVerificationSid = typeof TwilioVerificationSid.Type
-const decodeVerificationSid = Schema.decode(TwilioVerificationSid)
 
 export interface TwilioOperations {
   createVerification: (
     phone: E164PhoneNumber
-  ) => Effect.Effect<TwilioVerificationSid, UnableToSendVerificationSmsError>
+  ) => Effect.Effect<SmsVerificationSid, UnableToSendVerificationSmsError>
 
   checkVerification: (args: {
-    sid: TwilioVerificationSid
+    sid: SmsVerificationSid
     code: string
   }) => Effect.Effect<
     'valid',
@@ -102,7 +100,7 @@ export class TwilioVerificationClient extends Context.Tag(
               )
             )
           ),
-          Effect.flatMap((v) => decodeVerificationSid(v.sid)),
+          Effect.flatMap((v) => decodeSmsVerificationSid(v.sid)),
           Effect.catchTag('ParseError', () =>
             Effect.fail(
               new UnableToSendVerificationSmsError({

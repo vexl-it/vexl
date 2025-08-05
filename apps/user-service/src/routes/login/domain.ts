@@ -7,7 +7,7 @@ import {
   VerificationChallenge,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Schema} from 'effect'
-import {TwilioVerificationSid} from '../../utils/twilio'
+import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
 
 export const ChallengeVerificationState = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
@@ -23,7 +23,7 @@ export const PhoneVerificationState = Schema.Union(
   Schema.Struct({
     id: PhoneNumberVerificationId,
     type: Schema.Literal('twilioSmsVerification'),
-    sid: TwilioVerificationSid,
+    sid: SmsVerificationSid,
     phoneNumber: HashedPhoneNumberE,
     countryPrefix: CountryPrefixE,
     expiresAt: UnixMillisecondsE,

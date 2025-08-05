@@ -6,7 +6,7 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
 import {Handler} from 'effect-http'
 import {loginCodeDummyForAll} from '../../../configs'
-import {TwilioVerificationClient} from '../../../utils/twilio'
+import {createVerification} from '../../../utils/smsVerificationUtils'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../../login/constants'
 import {createVerificationId, dummySid} from '../utils'
 export const initEraseUserEndpoint = Handler.make(
@@ -14,13 +14,11 @@ export const initEraseUserEndpoint = Handler.make(
   (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
-        const twilio = yield* _(TwilioVerificationClient)
-
         const dummyCodeForAll = yield* _(loginCodeDummyForAll)
 
         let sid
         if (Option.isSome(dummyCodeForAll)) sid = dummySid
-        else sid = yield* _(twilio.createVerification(req.body.phoneNumber))
+        else sid = yield* _(createVerification(req.body.phoneNumber))
 
         const verificationId = yield* _(
           createVerificationId({

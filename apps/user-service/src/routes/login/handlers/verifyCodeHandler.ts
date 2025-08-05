@@ -7,7 +7,7 @@ import {VerifyCodeEndpoint} from '@vexl-next/rest-api/src/services/user/specific
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {Handler} from 'effect-http'
-import {TwilioVerificationClient} from '../../../utils/twilio'
+import {checkVerification} from '../../../utils/smsVerificationUtils'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 import {type ChallengeVerificationState} from '../domain'
 import {generateVerificationChallenge} from '../utils/generateVerificationChallenge'
@@ -34,10 +34,7 @@ export const verifyCodeHandler = Handler.make(VerifyCodeEndpoint, (req) =>
           )
         )
       } else if (loginData.type === 'twilioSmsVerification') {
-        const twilio = yield* _(TwilioVerificationClient)
-        yield* _(
-          twilio.checkVerification({sid: loginData.sid, code: req.body.code})
-        )
+        yield* _(checkVerification({sid: loginData.sid, code: req.body.code}))
       }
 
       const verificationState = {

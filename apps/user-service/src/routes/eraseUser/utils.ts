@@ -14,15 +14,15 @@ import {
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type ParseError} from 'effect/ParseResult'
 import {type ConfigError, Effect, Schema} from 'effect/index'
-import {TwilioVerificationSid} from '../../utils/twilio'
+import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
 
 const VERIFICATION_EXPIRES_AFTER_MILIS = 1000 * 60 * 5 // 5 mins
-export const dummySid = Schema.decodeSync(TwilioVerificationSid)('dummy')
+export const dummySid = Schema.decodeSync(SmsVerificationSid)('dummy')
 
 export const VerificationIdPayload = Schema.parseJson(
   Schema.Struct({
     phoneNumber: E164PhoneNumberE,
-    verificationId: TwilioVerificationSid,
+    verificationId: SmsVerificationSid,
     expiresAt: UnixMillisecondsE,
   })
 )

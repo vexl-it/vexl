@@ -13,7 +13,7 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
 import {loginCodeDummies, loginCodeDummyForAll} from '../../../configs'
-import {TwilioVerificationClient} from '../../../utils/twilio'
+import {createVerification} from '../../../utils/smsVerificationUtils'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../constants'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 
@@ -27,7 +27,6 @@ export const initVerificationHandler = Handler.make(
   (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
-        const twilio = yield* _(TwilioVerificationClient)
         const loginDbService = yield* _(VerificationStateDbService)
         const expirationAt = unixMillisecondsFromNow(
           VERIFICATION_EXPIRES_AFTER_MILIS
@@ -103,7 +102,7 @@ export const initVerificationHandler = Handler.make(
           })
         }
 
-        const sid = yield* _(twilio.createVerification(req.body.phoneNumber))
+        const sid = yield* _(createVerification(req.body.phoneNumber))
         const verificationState = {
           id: generateVerificationId(),
           type: 'twilioSmsVerification' as const,

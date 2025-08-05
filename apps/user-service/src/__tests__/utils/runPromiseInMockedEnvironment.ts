@@ -13,6 +13,7 @@ import {type TwilioVerificationClient} from '../../utils/twilio'
 
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {NodeTestingApp} from './NodeTestingApp'
+import {mockedPreludeClient} from './mockedPreludeClient'
 import {mockedTwilioLayer} from './mockedTwilioClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
 
@@ -36,6 +37,7 @@ const context = NodeTestingApp.Live.pipe(
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(VerificationStateDbService.Live),
   Layer.provideMerge(mockedDashboardReportsService),
+  Layer.provideMerge(mockedPreludeClient),
   Layer.provideMerge(universalContext)
 )
 

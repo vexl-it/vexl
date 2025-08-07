@@ -13,6 +13,7 @@ import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../../../../stat
 import {type ClubWithMembers} from '../../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../../../utils/localization/localizedNumbersAtoms'
 import Button from '../../../../Button'
 import SvgImage from '../../../../Image'
 import {EmptyListPlaceholder} from './EmptyListPlaceholder'
@@ -21,6 +22,9 @@ function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
   const {club, members} = useAtomValue(atom)
   const navigation = useNavigation()
   const {t} = useTranslation()
+  const membersCount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: members.length,
+  })
 
   return (
     <XStack gap="$2" alignItems="center">
@@ -38,7 +42,7 @@ function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
           <SvgImage width={16} height={16} stroke="white" source={membersSvg} />
           <Text fontSize={16} fontFamily="$body400">
             {t('clubs.members', {
-              membersCount: members.length,
+              membersCount,
             })}
           </Text>
         </XStack>

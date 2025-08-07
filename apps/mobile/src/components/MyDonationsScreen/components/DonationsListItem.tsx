@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type InvoiceStatus} from '@vexl-next/rest-api/src/services/content/contracts'
+import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
@@ -8,6 +9,10 @@ import chevronRightSvg from '../../../images/chevronRightSvg'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {type MyDonation} from '../../../state/donations/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  localizedDecimalNumberActionAtom,
+  localizedPriceActionAtom,
+} from '../../../utils/localization/localizedNumbersAtoms'
 import Image from '../../Image'
 import bitcoinSvg from '../images/bitcoinSvg'
 import lightningSvg from '../images/lightningSvg'
@@ -55,6 +60,13 @@ function DonationsListItem({donation}: {donation: MyDonation}): JSX.Element {
       'minutes'
     ).minutes
   )
+  const localizedFiatAmount = useSetAtom(localizedPriceActionAtom)({
+    number: donation.fiatAmount,
+    currency: 'EUR',
+  })
+  const localizedSatsAmount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: satsAmount,
+  })
 
   return (
     <TouchableOpacity
@@ -80,7 +92,7 @@ function DonationsListItem({donation}: {donation: MyDonation}): JSX.Element {
                 : t('offerForm.network.onChain')}
             </Text>
             <Text fontFamily="$body500">
-              {`${t('donationPrompt.amount')}: ${donation.fiatAmount} € (${satsAmount} SATS)`}
+              {`${t('donationPrompt.amount')}: ${localizedFiatAmount} (${localizedSatsAmount} sats)`}
             </Text>
             {expiresIn > 0 && donation.status === 'New' && (
               <Text>{t('donations.expiresIn', {minutes: expiresIn})}</Text>

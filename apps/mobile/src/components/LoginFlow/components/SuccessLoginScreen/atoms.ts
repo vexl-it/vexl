@@ -12,6 +12,7 @@ import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
 import {SessionE, type Session} from '../../../../brands/Session.brand'
+import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
 import {sessionAtom} from '../../../../state/session'
 import {
   appSource,
@@ -217,6 +218,8 @@ export const finishLoginActionAtom = atom(
           })
         )
       }
+
+      set(defaultCurrencyBaseOnCountryCodeActionAtom)
     }).pipe(
       Effect.catchAll((e) => {
         Match.type<typeof e>().pipe(

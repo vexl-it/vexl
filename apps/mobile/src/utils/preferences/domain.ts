@@ -1,4 +1,6 @@
+import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
 import {
+  CurrencyCode,
   GoldenAvatarType,
   GoldenAvatarTypeE,
 } from '@vexl-next/domain/src/general/offers'
@@ -9,6 +11,7 @@ import {
 import {Schema} from 'effect'
 import {z} from 'zod'
 import {FiatOrSats, FiatOrSatsE} from '../../state/marketplace/domain'
+import {currencies} from '../localization/currency'
 
 const NotificationPreferences = z
   .object({
@@ -52,6 +55,7 @@ export const Preferences = z
     lastDisplayOfDonationPromptTimestamp: UnixMilliseconds.optional(),
     showTosSummaryForAlreadyLoggedInUser: z.boolean().default(true),
     showCheckUpdatedPrivacyPolicySuggestion: z.boolean().default(true),
+    defaultCurrency: CurrencyCode.optional().default(currencies.USD.code),
   })
   .readonly()
 
@@ -101,6 +105,9 @@ export const PreferencesE = Schema.Struct({
   }),
   showCheckUpdatedPrivacyPolicySuggestion: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
+  }),
+  defaultCurrency: Schema.optionalWith(CurrencyCodeE, {
+    default: () => currencies.USD.code,
   }),
 })
 

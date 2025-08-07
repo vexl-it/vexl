@@ -26,7 +26,7 @@ export const resetTradeCalculatorStateActionAtom = atom(null, (get, set) => {
     T.Do,
     T.map(() => {
       set(offerTypeAtom, 'SELL')
-      set(selectedCurrencyCodeAtom, getDefaultCurrency().code)
+      set(selectedCurrencyCodeAtom, getDefaultCurrency())
     }),
     T.chain(() => set(refreshCurrentBtcPriceActionAtom)),
     T.map(() => {

@@ -14,8 +14,8 @@ import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../api'
 import {atomWithParsedMmkvStorageE} from '../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {currencies} from '../utils/localization/currency'
+import {defaultCurrencyAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
-import {selectedCurrencyAtom} from './selectedCurrency'
 
 export const SATOSHIS_IN_BTC = 100_000_000
 export const DECIMALS_FOR_BTC_VALUE = 8
@@ -62,7 +62,7 @@ export function createBtcPriceForCurrencyAtom(
 }
 
 export const btcPriceForSelectedCurrencyAtom =
-  createBtcPriceForCurrencyAtom(selectedCurrencyAtom)
+  createBtcPriceForCurrencyAtom(defaultCurrencyAtom)
 
 export const refreshBtcPriceActionAtom = atom(
   undefined,

@@ -11,12 +11,11 @@ import {
   btcPriceForSelectedCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
-import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 import {
   getCurrentLocale,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
-import {preferencesAtom} from '../../../utils/preferences'
+import {defaultCurrencyAtom, preferencesAtom} from '../../../utils/preferences'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
@@ -24,7 +23,7 @@ import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndi
 function BitcoinPriceChart(): JSX.Element {
   const preferences = useAtomValue(preferencesAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
-  const selectedCurrency = useAtomValue(selectedCurrencyAtom)
+  const defaultCurrency = useAtomValue(defaultCurrencyAtom)
   const btcPriceForSelectedCurrency = useAtomValue(
     btcPriceForSelectedCurrencyAtom
   )
@@ -34,8 +33,8 @@ function BitcoinPriceChart(): JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      void refreshBtcPrice(selectedCurrency)()
-    }, [refreshBtcPrice, selectedCurrency])
+      void refreshBtcPrice(defaultCurrency)()
+    }, [refreshBtcPrice, defaultCurrency])
   )
 
   return (
@@ -46,7 +45,7 @@ function BitcoinPriceChart(): JSX.Element {
           <Stack />
           <TouchableOpacity
             onPress={() => {
-              void refreshBtcPrice(selectedCurrencyAtom)()
+              void refreshBtcPrice(defaultCurrency)()
               void pipe(
                 askAreYouSureAction({
                   variant: 'info',
@@ -102,7 +101,7 @@ function BitcoinPriceChart(): JSX.Element {
                 </Text>
               )}
               <Text fos={12} ff="$body700" color="$yellowAccent1">
-                {selectedCurrency}
+                {defaultCurrency}
               </Text>
             </XStack>
           </TouchableOpacity>

@@ -1,3 +1,4 @@
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import React, {useCallback} from 'react'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
@@ -17,6 +18,9 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
   const dialFriend = useCallback(() => {
     openUrl(`tel:${friend.computedValues.normalizedNumber}`)()
   }, [friend])
+  const internationalNumber = parsePhoneNumber(
+    friend.computedValues.normalizedNumber
+  ).number?.international
 
   return (
     <XStack ai="center">
@@ -40,7 +44,7 @@ function CommonFriendsListItem({friend}: Props): JSX.Element {
           {friend.info.name}
         </Text>
         <Text ff="$body600" col="$greyOnBlack" fos={14}>
-          {friend.computedValues.normalizedNumber}
+          {internationalNumber ?? friend.computedValues.normalizedNumber}
         </Text>
       </Stack>
       <Button

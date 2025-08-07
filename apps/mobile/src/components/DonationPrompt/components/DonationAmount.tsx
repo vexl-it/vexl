@@ -4,6 +4,7 @@ import {useEffect, useMemo, useRef} from 'react'
 import {type TextInput} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import SelectableCell, {
   type SelectableCellContentProps,
 } from '../../SelectableCell'
@@ -51,6 +52,9 @@ function DonationAmount(): JSX.Element {
   const resetDonationPromptValues = useSetAtom(
     resetDonationPromptValuesActionAtom
   )
+  const maxAmount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: MAX_DONATION_AMOUNT,
+  })
 
   useEffect(() => {
     resetDonationPromptValues()
@@ -71,7 +75,7 @@ function DonationAmount(): JSX.Element {
           <Text fontSize={18} color="$greyOnWhite" textAlign="left">
             {`${t(
               'donationPrompt.pleaseSelectThePaymentMethodAndAmountYouWantToDonate'
-            )} ${t('donationPrompt.maximumAmount', {maxAmount: MAX_DONATION_AMOUNT})}`}
+            )} ${t('donationPrompt.maximumAmount', {maxAmount})}`}
           </Text>
         </Stack>
         <Stack gap="$6">

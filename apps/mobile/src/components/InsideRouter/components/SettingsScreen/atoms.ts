@@ -17,6 +17,7 @@ import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getVal
 import {createImportContactLink} from '../../../../utils/deepLinks/createLinks'
 import {version, versionCode} from '../../../../utils/environment'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../../utils/localization/localizedNumbersAtoms'
 import openUrl from '../../../../utils/openUrl'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import QrScanner from './components/QrScanner'
@@ -98,9 +99,13 @@ export const qrScannerDialogAtom = atom(null, (get, set) => {
 
 export const showReachNumberDetailsActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
-  const clubsConnectionsReach = get(clubsConnectionsReachAtom)
-  const fistAndSecondLevelConnectionsReach = get(
-    fistAndSecondLevelConnectionsReachAtom
+  const clubsConnectionsReach = set(localizedDecimalNumberActionAtom, {
+    number: get(clubsConnectionsReachAtom),
+  })
+
+  const fistAndSecondLevelConnectionsReach = set(
+    localizedDecimalNumberActionAtom,
+    {number: get(fistAndSecondLevelConnectionsReachAtom)}
   )
 
   return pipe(

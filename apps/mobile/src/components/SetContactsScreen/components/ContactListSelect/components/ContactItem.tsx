@@ -3,6 +3,7 @@ import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
+import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
 import ContactPictureImage from '../../../../ContactPictureImage'
 import IconButton from '../../../../IconButton'
 import SvgImage from '../../../../Image'
@@ -56,7 +57,7 @@ function ContactItem({contactAtom}: Props): JSX.Element {
           col="$greyOnBlack"
           fos={14}
         >
-          {normalizedNumber}
+          {getInternationalPhoneNumber(normalizedNumber)}
         </Text>
       </Stack>
       <XStack gap="$2">

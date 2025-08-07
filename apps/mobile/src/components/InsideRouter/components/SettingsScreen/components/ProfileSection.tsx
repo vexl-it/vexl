@@ -1,6 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
+import {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, styled} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
@@ -10,6 +12,7 @@ import {
 } from '../../../../../state/session/userDataAtoms'
 import {andThenExpectBooleanNoErrors} from '../../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../../../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import SvgImage from '../../../../Image'
 import UserDataDisplay from '../../../../LoginFlow/components/AnonymizationAnimationScreen/components/UserDataDisplay'
@@ -32,7 +35,9 @@ const GrayBackContainer = styled(XStack, {
 function ProfileSection(): JSX.Element {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const reachNumber = useAtomValue(reachNumberAtom)
+  const reachNumber = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: useAtomValue(reachNumberAtom),
+  })
   const setQrCodeDialogVisible = useSetAtom(qrCodeDialogActionAtom)
   const setQrScannerDialogVisible = useSetAtom(qrScannerDialogAtom)
   const preferences = useAtomValue(preferencesAtom)
@@ -40,6 +45,10 @@ function ProfileSection(): JSX.Element {
 
   const userDataRealOrAnonymized = useAtomValue(userDataRealOrAnonymizedAtom)
   const userPhoneNumber = useAtomValue(userPhoneNumberAtom)
+  const formattedPhoneNumber = useMemo(
+    () => parsePhoneNumber(userPhoneNumber).number?.international,
+    [userPhoneNumber]
+  )
 
   return (
     <Stack ai="center" ml="$4" mr="$4">
@@ -66,7 +75,9 @@ function ProfileSection(): JSX.Element {
                 numberOfLines={1}
                 adjustsFontSizeToFit
               >
-                {t('settings.yourReach', {number: reachNumber})}
+                {t('settings.yourReach', {
+                  number: reachNumber,
+                })}
               </Text>
             </GrayBackContainer>
           </TouchableOpacity>
@@ -98,7 +109,7 @@ function ProfileSection(): JSX.Element {
       </XStack>
       <UserDataDisplay realLifeInfo={userDataRealOrAnonymized} />
       <Text ta="center" mt="$2" col="$greyOnBlack">
-        {userPhoneNumber}
+        {formattedPhoneNumber}
       </Text>
       {!!preferences.goldenAvatarType && <ParticipatedInMeetup />}
     </Stack>

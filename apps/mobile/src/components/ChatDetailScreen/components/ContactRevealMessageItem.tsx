@@ -2,6 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {effectToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useMolecule} from 'bunshi/dist/react'
 import {Option} from 'effect'
 import * as E from 'fp-ts/Either'
@@ -57,7 +58,11 @@ function RevealedContactMessageItem({
     <BigIconMessage
       isLatest={isLatest}
       smallerText={t('messages.phoneNumberRevealed')}
-      biggerText={fullPhoneNumber}
+      biggerText={
+        fullPhoneNumber
+          ? parsePhoneNumber(fullPhoneNumber).number?.international
+          : fullPhoneNumber
+      }
       bottomText={userName}
       onCopyToClipboardPress={() => {
         Clipboard.setString(fullPhoneNumber ?? '')

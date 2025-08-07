@@ -1,5 +1,6 @@
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {currencies} from '../localization/currency'
 import {Preferences} from './domain'
 
 export const preferencesAtom = atomWithParsedMmkvStorage(
@@ -29,6 +30,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     lastDisplayOfDonationPromptTimestamp: undefined,
     showTosSummaryForAlreadyLoggedInUser: true,
     showCheckUpdatedPrivacyPolicySuggestion: true,
+    defaultCurrency: currencies.USD.code,
   },
   Preferences
 )
@@ -85,4 +87,8 @@ export const showTosSummaryForAlreadyLoggedInUserAtom = focusAtom(
 export const showCheckUpdatedPrivacyPolicySuggestionAtom = focusAtom(
   preferencesAtom,
   (o) => o.prop('showCheckUpdatedPrivacyPolicySuggestion')
+)
+
+export const defaultCurrencyAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('defaultCurrency')
 )

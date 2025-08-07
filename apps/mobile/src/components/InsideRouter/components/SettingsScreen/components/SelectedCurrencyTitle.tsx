@@ -1,16 +1,16 @@
 import {useAtomValue} from 'jotai'
 import {styled, Text} from 'tamagui'
-import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
+import {defaultCurrencyAtom} from '../../../../../utils/preferences'
 
 export const ItemText = styled(Text, {
   fos: 18,
 })
 
 function SelectedCurrencyTitle(): JSX.Element {
-  const selectedCurrency = useAtomValue(selectedCurrencyAtom)
+  const defaultCurrency = useAtomValue(defaultCurrencyAtom)
   return (
     <ItemText ff="$body500" col="$white">
-      {selectedCurrency}
+      {defaultCurrency}
     </ItemText>
   )
 }

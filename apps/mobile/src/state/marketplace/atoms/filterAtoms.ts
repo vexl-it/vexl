@@ -4,7 +4,6 @@ import {focusAtom} from 'jotai-optics'
 import {type DropdownItemProps} from '../../../components/Dropdown'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
-import {currencies} from '../../../utils/localization/currency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {
@@ -29,7 +28,7 @@ export const offersFilterInitialState = {
   listingType: 'BITCOIN',
   singlePrice: undefined,
   text: undefined,
-  singlePriceCurrency: getDefaultCurrency().code ?? currencies.USD.code,
+  singlePriceCurrency: getDefaultCurrency(),
   clubsUuids: undefined,
 } satisfies OffersFilter
 

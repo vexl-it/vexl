@@ -38,7 +38,7 @@ import {
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Array, Effect, Option, pipe, Record} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
@@ -209,57 +209,65 @@ function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
   const defaultCurrency = getDefaultCurrency()
+  const amountTopLimit = pipe(
+    Array.findFirst(
+      Record.values(currencies),
+      (currency) => currency.code === defaultCurrency
+    ),
+    Option.map((currency) => currency.maxAmount),
+    Option.getOrElse(() => currencies.USD.maxAmount)
+  )
 
   return {
     offerPublicKey: PublicKeyPemBase64.parse('offerPublicKey'),
     location: [],
     offerDescription: '',
     amountBottomLimit: 0,
-    amountTopLimit: defaultCurrency.maxAmount ?? currencies.USD.maxAmount,
+    amountTopLimit,
     feeState: 'WITHOUT_FEE',
     feeAmount: 0,
     locationState: ['IN_PERSON'],
     paymentMethod: ['CASH'],
     btcNetwork: ['ON_CHAIN'],
-    currency: defaultCurrency.code ?? currencies.USD.code,
+    currency: defaultCurrency,
     offerType: 'SELL',
     spokenLanguages: getDefaultSpokenLanguage(),
     activePriceState: 'NONE',
     activePriceValue: 0,
-    activePriceCurrency: defaultCurrency.code ?? currencies.USD.code,
+    activePriceCurrency: defaultCurrency,
     active: true,
     groupUuids: [],
   }
 }
 
-export const dummyOffer: OneOfferInState = {
-  ownershipInfo: {
-    adminId: OfferAdminId.parse('offerAdminId'),
-    intendedConnectionLevel: 'ALL',
-    intendedClubs: [],
-  },
-  flags: {
-    reported: false,
-  },
-  offerInfo: {
-    id: IdNumeric.parse(1),
-    offerId: OfferId.parse(Uuid.parse(generateUuid())),
-    privatePart: {
-      commonFriends: [
-        HashedPhoneNumber.parse('Mike'),
-        HashedPhoneNumber.parse('John'),
-      ],
-      friendLevel: ['FIRST_DEGREE'],
-      symmetricKey: SymmetricKey.parse('symmetricKey'),
-      clubIds: [],
-    },
-    publicPart: createOfferDummyPublicPart(),
-    createdAt: IsoDatetimeString.parse(MINIMAL_DATE),
-    modifiedAt: IsoDatetimeString.parse(MINIMAL_DATE),
-  },
-}
-
 export const offerFormMolecule = molecule(() => {
+  const dummyOffer: OneOfferInState = {
+    ownershipInfo: {
+      adminId: OfferAdminId.parse('offerAdminId'),
+      intendedConnectionLevel: 'ALL',
+      intendedClubs: [],
+    },
+    flags: {
+      reported: false,
+    },
+    offerInfo: {
+      id: IdNumeric.parse(1),
+      offerId: OfferId.parse(Uuid.parse(generateUuid())),
+      privatePart: {
+        commonFriends: [
+          HashedPhoneNumber.parse('Mike'),
+          HashedPhoneNumber.parse('John'),
+        ],
+        friendLevel: ['FIRST_DEGREE'],
+        symmetricKey: SymmetricKey.parse('symmetricKey'),
+        clubIds: [],
+      },
+      publicPart: createOfferDummyPublicPart(),
+      createdAt: IsoDatetimeString.parse(MINIMAL_DATE),
+      modifiedAt: IsoDatetimeString.parse(MINIMAL_DATE),
+    },
+  }
+
   const offerAtom = atom<OneOfferInState>(dummyOffer)
   const nullableListingTypeAtom = atom<ListingType | undefined>(undefined)
   const nullableOfferTypeAtom = atom<OfferType | undefined>(undefined)

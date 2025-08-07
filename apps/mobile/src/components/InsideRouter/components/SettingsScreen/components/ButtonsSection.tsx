@@ -14,12 +14,12 @@ import {
 } from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
-import {selectedCurrencyAtom} from '../../../../../state/selectedCurrency'
 import {useLogout} from '../../../../../state/useLogout'
 import {enableHiddenFeatures} from '../../../../../utils/environment'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
 import openUrl from '../../../../../utils/openUrl'
+import {defaultCurrencyAtom} from '../../../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import CurrencySelect from '../../../../CurrencySelect'
 import SvgImage from '../../../../Image'
@@ -118,7 +118,7 @@ function ButtonsSection(): JSX.Element {
     changeCurrencyDialogVisibleAtom
   )
   const setReportIssueDialogVisible = useSetAtom(reportIssueDialogAtom)
-  const setSelectedCurrency = useSetAtom(selectedCurrencyAtom)
+  const setDefaultCurrency = useSetAtom(defaultCurrencyAtom)
   const toggleScreenshotsDisabled = useSetAtom(
     toggleScreenshotsDisabledActionAtom
   )
@@ -399,9 +399,9 @@ function ButtonsSection(): JSX.Element {
         </Fragment>
       ))}
       <CurrencySelect
-        selectedCurrencyCodeAtom={selectedCurrencyAtom}
+        selectedCurrencyCodeAtom={defaultCurrencyAtom}
         onItemPress={(currency) => {
-          setSelectedCurrency(currency)
+          setDefaultCurrency(currency)
         }}
         visibleAtom={changeCurrencyDialogVisibleAtom}
       />

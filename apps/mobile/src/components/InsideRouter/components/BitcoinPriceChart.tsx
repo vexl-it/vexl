@@ -11,23 +11,23 @@ import {
   btcPriceForSelectedCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
-import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedPriceActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
+import {defaultCurrencyAtom} from '../../../utils/preferences'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 
 function BitcoinPriceChart(): JSX.Element {
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
-  const selectedCurrency = useAtomValue(selectedCurrencyAtom)
+  const defaultCurrency = useAtomValue(defaultCurrencyAtom)
   const btcPriceForSelectedCurrency = useAtomValue(
     btcPriceForSelectedCurrencyAtom
   )
   const askAreYouSureAction = useSetAtom(askAreYouSureActionAtom)
   const btcPriceLocalized = useSetAtom(localizedPriceActionAtom)({
     number: Math.round(btcPriceForSelectedCurrency?.btcPrice?.BTC ?? 0),
-    currency: selectedCurrency,
+    currency: defaultCurrency,
     maximumFractionDigits: 0,
   })
 
@@ -35,8 +35,8 @@ function BitcoinPriceChart(): JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      void refreshBtcPrice(selectedCurrency)()
-    }, [refreshBtcPrice, selectedCurrency])
+      void refreshBtcPrice(defaultCurrency)()
+    }, [refreshBtcPrice, defaultCurrency])
   )
 
   return (
@@ -47,7 +47,7 @@ function BitcoinPriceChart(): JSX.Element {
           <Stack />
           <TouchableOpacity
             onPress={() => {
-              void refreshBtcPrice(selectedCurrencyAtom)()
+              void refreshBtcPrice(defaultCurrency)()
               void pipe(
                 askAreYouSureAction({
                   variant: 'info',

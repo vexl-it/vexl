@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Array, Effect, Option} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useMemo} from 'react'
 import {Image, Stack, Text, XStack, YStack} from 'tamagui'
@@ -8,6 +7,7 @@ import membersSvg from '../../../images/memberSvg'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {createOfferCountForClub} from '../../../state/marketplace/atoms/offersState'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
@@ -32,6 +32,9 @@ export function ClubDetail({
 
   const goBack = useSafeGoBack()
   const leaveClub = useSetAtom(leaveClubWithAreYouSureActionAtom)
+  const membersCount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: members.length,
+  })
 
   return (
     <YStack mt="$4" f={1} gap="$4">
@@ -57,7 +60,7 @@ export function ClubDetail({
             />
             <Text fontSize={12} ff="$body500" col="$greyOnBlack">
               {t('clubs.members', {
-                membersCount: pipe(members, Array.length),
+                membersCount,
               })}
             </Text>
 

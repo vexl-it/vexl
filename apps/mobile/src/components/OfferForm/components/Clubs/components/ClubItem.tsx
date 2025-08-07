@@ -1,8 +1,9 @@
-import {type Atom, useAtomValue, type WritableAtom} from 'jotai'
+import {type Atom, useAtomValue, useSetAtom, type WritableAtom} from 'jotai'
 import {type SetStateAction} from 'react'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import {type ClubWithMembers} from '../../../../../state/clubs/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../../../utils/localization/localizedNumbersAtoms'
 import {ImageUniversal} from '../../../../Image'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
 
@@ -19,7 +20,9 @@ function ClubItem({
 }: Props): JSX.Element {
   const {t} = useTranslation()
   const {club, members} = useAtomValue(clubWithMembersAtom)
-  const membersCount = members.length
+  const membersCount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: members.length,
+  })
 
   return (
     <XStack ai="center" jc="space-between">

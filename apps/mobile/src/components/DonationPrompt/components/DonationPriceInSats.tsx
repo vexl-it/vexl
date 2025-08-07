@@ -7,6 +7,7 @@ import {
   SATOSHIS_IN_BTC,
 } from '../../../state/currentBtcPriceAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 import {
   donationAmountAtom,
@@ -47,6 +48,9 @@ function DonationPriceInSats(): JSX.Element {
     donationAmount,
     selectedPredefinedDonationValue,
   ])
+  const localizedDonationInSats = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: donationInSats,
+  })
 
   useEffect(() => {
     void refreshBtcPrice('EUR')()
@@ -60,7 +64,7 @@ function DonationPriceInSats(): JSX.Element {
       {btcPriceWithState?.state === 'loading' ? (
         <VexlActivityIndicator size="small" bc="$greyAccent2" />
       ) : (
-        <Text col="$greyAccent2">{donationInSats}</Text>
+        <Text col="$greyAccent2">{localizedDonationInSats}</Text>
       )}
       <Text col="$greyAccent2">{t('common.SATS')}</Text>
       <Text col="$greyAccent2">{`(${t('settings.btcPriceSourceCreditYadio')})`}</Text>

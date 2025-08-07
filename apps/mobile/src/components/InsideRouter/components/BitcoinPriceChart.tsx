@@ -12,23 +12,24 @@ import {
   refreshBtcPriceActionAtom,
 } from '../../../state/currentBtcPriceAtoms'
 import {selectedCurrencyAtom} from '../../../state/selectedCurrency'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
-import {preferencesAtom} from '../../../utils/preferences'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {localizedPriceActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 
 function BitcoinPriceChart(): JSX.Element {
-  const preferences = useAtomValue(preferencesAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const selectedCurrency = useAtomValue(selectedCurrencyAtom)
   const btcPriceForSelectedCurrency = useAtomValue(
     btcPriceForSelectedCurrencyAtom
   )
   const askAreYouSureAction = useSetAtom(askAreYouSureActionAtom)
+  const btcPriceLocalized = useSetAtom(localizedPriceActionAtom)({
+    number: Math.round(btcPriceForSelectedCurrency?.btcPrice?.BTC ?? 0),
+    currency: selectedCurrency,
+    maximumFractionDigits: 0,
+  })
 
   const {t} = useTranslation()
 
@@ -94,16 +95,9 @@ function BitcoinPriceChart(): JSX.Element {
                   {btcPriceForSelectedCurrency?.state === 'error' ||
                   !btcPriceForSelectedCurrency?.btcPrice
                     ? '-'
-                    : Math.round(
-                        btcPriceForSelectedCurrency.btcPrice.BTC
-                      ).toLocaleString(
-                        preferences.appLanguage ?? getCurrentLocale()
-                      )}
+                    : btcPriceLocalized}
                 </Text>
               )}
-              <Text fos={12} ff="$body700" color="$yellowAccent1">
-                {selectedCurrency}
-              </Text>
             </XStack>
           </TouchableOpacity>
         </XStack>

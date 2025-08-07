@@ -6,6 +6,10 @@ import {Stack, Text, XStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {singleDonationAtom} from '../../../state/donations/atom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  localizedDecimalNumberActionAtom,
+  localizedPriceActionAtom,
+} from '../../../utils/localization/localizedNumbersAtoms'
 import BtcInvoiceStatus from '../../BtcInvoiceStatus'
 import {
   dummyDonation,
@@ -30,8 +34,17 @@ function DonationQrCodeOrStatus({invoiceId}: Props): JSX.Element {
   } =
     useAtomValue(useMemo(() => singleDonationAtom(invoiceId), [invoiceId])) ??
     dummyDonation
-  const satsAmount = Number(btcAmount) * SATOSHIS_IN_BTC
-  const exchangeRateInfo = Math.round(Number(exchangeRate)) / SATOSHIS_IN_BTC
+  const localizedSatsAmount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: Number(btcAmount) * SATOSHIS_IN_BTC,
+  })
+  const localizedFiatAmount = useSetAtom(localizedPriceActionAtom)({
+    number: fiatAmount,
+    currency,
+  })
+  const localizedExchangeRate = useSetAtom(localizedPriceActionAtom)({
+    number: exchangeRate,
+    currency,
+  })
   const updateSingleInvoiceStatusTypeRepeating = useSetAtom(
     updateSingleInvoiceStatusTypeRepeatingActionAtom
   )
@@ -58,7 +71,7 @@ function DonationQrCodeOrStatus({invoiceId}: Props): JSX.Element {
             {t('donationPrompt.totalPrice')}
           </Text>
           <Text col="$black" fos={14} ff="$body500">
-            {`${satsAmount} sats`}
+            {`${localizedSatsAmount} sats`}
           </Text>
         </XStack>
         <XStack ai="center" jc="space-between">
@@ -66,7 +79,7 @@ function DonationQrCodeOrStatus({invoiceId}: Props): JSX.Element {
             {t('donationPrompt.totalFiat')}
           </Text>
           <Text col="$black" fos={14} ff="$body500">
-            {`${fiatAmount} ${currency}`}
+            {localizedFiatAmount}
           </Text>
         </XStack>
         <XStack ai="center" jc="space-between">
@@ -74,7 +87,7 @@ function DonationQrCodeOrStatus({invoiceId}: Props): JSX.Element {
             {t('donationPrompt.exchangeRate')}
           </Text>
           <Text col="$black" fos={14} ff="$body500">
-            {`1 sat = ${exchangeRateInfo} ${currency}`}
+            {`1 BTC = ${localizedExchangeRate}`}
           </Text>
         </XStack>
         <XStack ai="center" jc="space-between">
@@ -82,7 +95,7 @@ function DonationQrCodeOrStatus({invoiceId}: Props): JSX.Element {
             {t('donationPrompt.amountDue')}
           </Text>
           <Text col="$black" fos={14} ff="$body500">
-            {`${satsAmount} sats`}
+            {`${localizedSatsAmount} sats`}
           </Text>
         </XStack>
       </Stack>

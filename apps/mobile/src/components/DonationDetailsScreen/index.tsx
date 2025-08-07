@@ -9,6 +9,10 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {SATOSHIS_IN_BTC} from '../../state/currentBtcPriceAtoms'
 import {singleDonationAtom} from '../../state/donations/atom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {
+  localizedDecimalNumberActionAtom,
+  localizedPriceActionAtom,
+} from '../../utils/localization/localizedNumbersAtoms'
 import BtcInvoiceStatus from '../BtcInvoiceStatus'
 import Button from '../Button'
 import {
@@ -36,8 +40,17 @@ function DonationDetailsScreen({
   )
   const storeId = mySingleDonation?.storeId ?? dummyDonation.storeId
   const satsAmount = Number(mySingleDonation?.btcAmount ?? 0) * SATOSHIS_IN_BTC
-  const exchangeRateInfo =
-    Math.round(Number(mySingleDonation?.exchangeRate ?? 0)) / SATOSHIS_IN_BTC
+  const localizedTotalSats = useSetAtom(localizedDecimalNumberActionAtom)({
+    number: satsAmount,
+  })
+  const localizedFiatAmount = useSetAtom(localizedPriceActionAtom)({
+    number: mySingleDonation?.fiatAmount ?? 0,
+    currency: mySingleDonation?.currency,
+  })
+  const localizedExchangeRate = useSetAtom(localizedPriceActionAtom)({
+    number: mySingleDonation?.exchangeRate ?? 0,
+    currency: mySingleDonation?.currency,
+  })
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const showClaimConfirmationDialog = useSetAtom(
     showClaimConfirmationDialogActionAtom
@@ -80,7 +93,7 @@ function DonationDetailsScreen({
                 {t('donationPrompt.totalPrice')}
               </Text>
               <Text col="$white" fos={14} ff="$body500">
-                {`${satsAmount} sats`}
+                {`${localizedTotalSats} sats`}
               </Text>
             </XStack>
             <XStack ai="center" jc="space-between">
@@ -88,7 +101,7 @@ function DonationDetailsScreen({
                 {t('donationPrompt.totalFiat')}
               </Text>
               <Text col="$white" fos={14} ff="$body500">
-                {`${mySingleDonation?.fiatAmount} ${mySingleDonation?.currency}`}
+                {localizedFiatAmount}
               </Text>
             </XStack>
             <XStack ai="center" jc="space-between">
@@ -96,7 +109,7 @@ function DonationDetailsScreen({
                 {t('donationPrompt.exchangeRate')}
               </Text>
               <Text col="$white" fos={14} ff="$body500">
-                {`1 sat = ${exchangeRateInfo} ${mySingleDonation?.currency}`}
+                {`1 BTC = ${localizedExchangeRate}`}
               </Text>
             </XStack>
             <XStack ai="center" jc="space-between">
@@ -104,7 +117,7 @@ function DonationDetailsScreen({
                 {t('donationPrompt.amountDue')}
               </Text>
               <Text col="$white" fos={14} ff="$body500">
-                {`${satsAmount} sats`}
+                {`${localizedTotalSats} sats`}
               </Text>
             </XStack>
             <XStack ai="center" jc="space-between">

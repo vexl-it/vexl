@@ -13,6 +13,10 @@ import {
   useTranslation,
 } from '../../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../../utils/localization/currency'
+import {
+  localizedDecimalNumberActionAtom,
+  localizedPercentActionAtom,
+} from '../../../../../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
 import showDonationPromptGiveLoveActionAtom from '../../../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
@@ -66,6 +70,32 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
   const showDonationPromptGiveLove = useSetAtom(
     showDonationPromptGiveLoveActionAtom
   )
+  const btcTradePrice = useSetAtom(localizedDecimalNumberActionAtom)({
+    number:
+      message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+        ? (message.message.tradeChecklistUpdate?.amount?.btcPrice ?? 0)
+        : 0,
+  })
+  const btcAmount = useSetAtom(localizedDecimalNumberActionAtom)({
+    number:
+      message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+        ? (message.message.tradeChecklistUpdate?.amount?.btcAmount ?? 0)
+        : 0,
+    minimumFractionDigits:
+      message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+        ? (message.message.tradeChecklistUpdate?.amount?.btcAmount
+            ?.toString()
+            .split('.')[1]?.length ?? 0)
+        : 0,
+  })
+  const feeAmount = useSetAtom(localizedPercentActionAtom)({
+    number:
+      message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+        ? message.message.tradeChecklistUpdate?.amount?.feeAmount
+          ? message.message.tradeChecklistUpdate.amount.feeAmount / 100
+          : 0
+        : 0,
+  })
 
   const toastContent: ToastNotificationState = useMemo(
     () => ({
@@ -166,25 +196,11 @@ function TradeChecklistAmountView({message}: Props): JSX.Element | null {
                 message.state === 'sent'
                   ? t('common.you')
                   : otherSideData.userName,
-              btcAmount: Number(
-                message.message.tradeChecklistUpdate.amount.btcAmount
-              )?.toLocaleString(currentLocale, {
-                minimumFractionDigits:
-                  String(
-                    message.message.tradeChecklistUpdate.amount.btcAmount
-                  ).split('.')[1]?.length ?? 0,
-                maximumFractionDigits:
-                  String(
-                    message.message.tradeChecklistUpdate.amount.btcAmount
-                  ).split('.')[1]?.length ?? 0,
-              }),
+              btcAmount,
               fiatAmount: fiatAmount?.toLocaleString(currentLocale),
               fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
-              feeAmount: message.message.tradeChecklistUpdate.amount.feeAmount,
-              btcTradePrice:
-                message.message.tradeChecklistUpdate.amount.btcPrice?.toLocaleString(
-                  currentLocale
-                ),
+              feeAmount,
+              btcTradePrice,
             }
           )}
         >

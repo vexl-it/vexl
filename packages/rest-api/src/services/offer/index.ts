@@ -52,6 +52,8 @@ export function api({
   isDeveloper,
   getUserSessionCredentials,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
@@ -62,6 +64,8 @@ export function api({
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
+  deviceModel?: string
+  osVersion?: string
 }) {
   const client = createClientInstanceWithAuth({
     api: OfferApiSpecification,
@@ -74,6 +78,8 @@ export function api({
     getUserSessionCredentials,
     url,
     loggingFunction,
+    deviceModel,
+    osVersion,
   })
 
   const addChallenge = addChallengeToRequest(client)

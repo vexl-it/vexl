@@ -126,6 +126,8 @@ export function createUserPublicApi(): userApi.UserApi {
   return userApi.api({
     url: getEnvPreset().userMs,
     ...apiMeta,
+    deviceModel: "web",
+    osVersion: "web",
   });
 }
 
@@ -133,6 +135,8 @@ export function createContactsPublicApi(): contactsApi.ContactApi {
   return contactsApi.api({
     url: getEnvPreset().contactMs,
     ...apiMeta,
+    deviceModel: "web",
+    osVersion: "web",
     getUserSessionCredentials: () => ({
       signature: "dumy",
       publicKey: "dummy" as PublicKeyPemBase64,

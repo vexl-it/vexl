@@ -102,7 +102,9 @@ export const initVerificationHandler = Handler.make(
           })
         }
 
-        const sid = yield* _(createVerification(req.body.phoneNumber))
+        const sid = yield* _(
+          createVerification(req.body.phoneNumber, req.headers)
+        )
         const verificationState = {
           id: generateVerificationId(),
           type: 'twilioSmsVerification' as const,

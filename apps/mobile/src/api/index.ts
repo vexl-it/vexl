@@ -18,7 +18,14 @@ import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
-import {apiPreset, appSource, version, versionCode} from '../utils/environment'
+import {
+  apiPreset,
+  appSource,
+  deviceModel,
+  osVersion,
+  version,
+  versionCode,
+} from '../utils/environment'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../utils/preferences'
 // import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
@@ -85,6 +92,8 @@ export const apiAtom = atom((get) => {
       clientVersion: versionCode,
       url: apiEnv.offerMs,
       isDeveloper,
+      deviceModel,
+      osVersion,
       getUserSessionCredentials,
     }),
     chat: chat.api({

@@ -1,5 +1,6 @@
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {AesGtmCypher} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   InitVerificationErrors,
   UnableToSendVerificationSmsError,
@@ -33,13 +34,19 @@ describe('Initialize erase user', () => {
         const client = yield* _(NodeTestingApp)
         const data = yield* _(
           client.initEraseUser({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
             body: {
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
           })
         )
 
-        expect(createVerificationMock).toHaveBeenCalledWith('+420733333333')
+        expect(createVerificationMock).toHaveBeenCalledWith(
+          '+420733333333',
+          expect.anything()
+        )
         expect(data.verificationId).toBeDefined()
         const crypto = yield* _(ServerCrypto)
         const tokenPayload = yield* _(
@@ -69,6 +76,9 @@ describe('Initialize erase user', () => {
 
         const result = yield* _(
           client.initEraseUser({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
             body: {
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },

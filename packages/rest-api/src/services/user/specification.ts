@@ -31,6 +31,7 @@ export const InitVerificationEndpoint = Api.post(
 ).pipe(
   Api.setRequestBody(InitPhoneVerificationRequest),
   Api.setResponseBody(InitPhoneVerificationResponse),
+  Api.setRequestHeaders(CommonHeaders),
   Api.addResponse({
     status: 400 as const,
     body: InitVerificationErrors,
@@ -84,6 +85,7 @@ export const InitEraseUserEndpoint = Api.post(
 ).pipe(
   Api.setRequestBody(InitEraseUserRequest),
   Api.setResponseBody(InitEraseUserResponse),
+  Api.setRequestHeaders(CommonHeaders),
   Api.setResponseStatus(200 as const),
   Api.addResponse({
     status: 400 as const,

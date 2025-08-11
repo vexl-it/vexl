@@ -29,6 +29,8 @@ export function api({
   getUserSessionCredentials,
   signal,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
@@ -37,7 +39,8 @@ export function api({
   isDeveloper: boolean
   clientSemver: SemverString
   url: ServiceUrl
-
+  deviceModel?: string
+  osVersion?: string
   getUserSessionCredentials: GetUserSessionCredentials
   signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
@@ -53,6 +56,8 @@ export function api({
     getUserSessionCredentials,
     url,
     loggingFunction,
+    deviceModel,
+    osVersion,
   })
 
   return {

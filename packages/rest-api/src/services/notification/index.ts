@@ -28,6 +28,8 @@ export function api({
   appSource,
   getUserSessionCredentials,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
@@ -38,6 +40,8 @@ export function api({
   url: ServiceUrl
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
+  deviceModel?: string
+  osVersion?: string
 }) {
   const client = createClientInstanceWithAuth({
     api: NotificationApiSpecification,
@@ -50,6 +54,8 @@ export function api({
     getUserSessionCredentials,
     url,
     loggingFunction,
+    deviceModel,
+    osVersion,
   })
 
   return {

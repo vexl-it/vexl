@@ -7,6 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/PlatformName'
 import {Schema} from 'effect'
 import Constants from 'expo-constants'
+import * as Device from 'expo-device'
 import {getInstallationSource} from 'expo-installation-source'
 import {isTestFlight} from 'expo-testflight'
 import {Platform} from 'react-native'
@@ -52,3 +53,6 @@ const getAppSource = (): AppSource => {
   }
 }
 export const appSource = getAppSource()
+
+export const deviceModel = Device.modelName ?? undefined
+export const osVersion = Device.osVersion ?? undefined

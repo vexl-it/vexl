@@ -18,7 +18,8 @@ export const initEraseUserEndpoint = Handler.make(
 
         let sid
         if (Option.isSome(dummyCodeForAll)) sid = dummySid
-        else sid = yield* _(createVerification(req.body.phoneNumber))
+        else
+          sid = yield* _(createVerification(req.body.phoneNumber, req.headers))
 
         const verificationId = yield* _(
           createVerificationId({

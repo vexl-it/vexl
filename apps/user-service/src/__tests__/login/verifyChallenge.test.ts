@@ -2,6 +2,7 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {ecdsaSign} from '@vexl-next/cryptography/src/operations/ecdsa'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {InvalidSignatureError} from '@vexl-next/rest-api/src/services/user/contracts'
 import {mockedReportNewUserCreated} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {Effect, Either, pipe, Schema} from 'effect'
@@ -37,6 +38,9 @@ describe('verify challenge', () => {
         const client = yield* _(NodeTestingApp)
         const initResponse = yield* _(
           client.initVerification({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
             body: {
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },

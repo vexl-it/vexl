@@ -1,6 +1,6 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
@@ -62,6 +62,8 @@ export function api({
   appSource,
   getUserSessionCredentials,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
@@ -69,6 +71,8 @@ export function api({
   url: ServiceUrl
   isDeveloper: boolean
   language: string
+  deviceModel?: string
+  osVersion?: string
   appSource: AppSource
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
@@ -84,6 +88,8 @@ export function api({
     getUserSessionCredentials,
     url,
     loggingFunction,
+    deviceModel,
+    osVersion,
   })
 
   const addChallenge = addChallengeToRequest(client)
@@ -95,6 +101,8 @@ export function api({
     platform,
     isDeveloper,
     language,
+    deviceModel: Option.fromNullable(deviceModel),
+    osVersion: Option.fromNullable(osVersion),
   })
 
   return {

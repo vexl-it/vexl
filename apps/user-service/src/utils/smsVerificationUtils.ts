@@ -1,4 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   type UnableToSendVerificationSmsError,
   type UnableToVerifySmsCodeError,
@@ -18,14 +19,17 @@ const getVerificationProvider = Effect.gen(function* (_) {
 })
 
 export const createVerification = (
-  phone: E164PhoneNumber
+  phone: E164PhoneNumber,
+  requestHeaders: CommonHeaders
 ): Effect.Effect<
   SmsVerificationSid,
   UnableToSendVerificationSmsError | ConfigError.ConfigError,
   TwilioVerificationClient | PreludeService
 > =>
   getVerificationProvider.pipe(
-    Effect.flatMap((provider) => provider.createVerification(phone))
+    Effect.flatMap((provider) =>
+      provider.createVerification(phone, requestHeaders)
+    )
   )
 
 export const checkVerification = (args: {

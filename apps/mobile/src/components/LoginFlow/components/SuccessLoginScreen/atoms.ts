@@ -13,7 +13,13 @@ import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
 import {SessionE, type Session} from '../../../../brands/Session.brand'
 import {sessionAtom} from '../../../../state/session'
-import {appSource, version, versionCode} from '../../../../utils/environment'
+import {
+  appSource,
+  deviceModel,
+  osVersion,
+  version,
+  versionCode,
+} from '../../../../utils/environment'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
 import {isDeveloperAtom} from '../../../../utils/preferences'
@@ -89,6 +95,8 @@ const deleteUserAndResetFlowActionAtom = atom(
       isDeveloper: get(isDeveloperAtom),
       language: get(translationAtom).t('localeName'),
       appSource,
+      deviceModel,
+      osVersion,
     })
 
     return userApi.deleteUser().pipe(

@@ -1,5 +1,6 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   UnableToVerifySmsCodeError,
   VerifyCodeErrors,
@@ -30,6 +31,9 @@ const initVerification = Effect.gen(function* (_) {
   const client = yield* _(NodeTestingApp)
   return yield* _(
     client.initVerification({
+      headers: Schema.decodeSync(CommonHeaders)({
+        'user-agent': 'Vexl/2 (1.0.0) IOS',
+      }),
       body: {
         phoneNumber: phoneNumberToTest,
       },

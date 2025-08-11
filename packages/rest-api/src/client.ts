@@ -7,7 +7,7 @@ import {
 } from '@effect/platform'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Context, Effect, Layer, Schema} from 'effect'
+import {Context, Effect, Layer, Option, Schema} from 'effect'
 import {Client, type Api} from 'effect-http'
 import {type PlatformName} from './PlatformName'
 import {type ServiceUrl} from './ServiceUrl.brand'
@@ -49,6 +49,8 @@ export interface ClientProps<A> {
   getUserSessionCredentials?: GetUserSessionCredentials
   url: ServiceUrl
   loggingFunction?: LoggingFunction | null
+  deviceModel?: string
+  osVersion?: string
 }
 
 const makeClient = ({
@@ -219,6 +221,8 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
   getUserSessionCredentials,
   url,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: ClientProps<A>): Client.Client<A> {
   const vexlAppMetaHeader: VexlAppMetaHeader = {
     platform,
@@ -227,6 +231,8 @@ export function createClientInstanceWithAuth<A extends Api.Api.Any>({
     appSource,
     language,
     isDeveloper,
+    deviceModel: Option.fromNullable(deviceModel),
+    osVersion: Option.fromNullable(osVersion),
   }
 
   return Client.make(api, {

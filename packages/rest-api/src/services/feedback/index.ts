@@ -20,6 +20,8 @@ export function api({
   isDeveloper,
   getUserSessionCredentials,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
@@ -30,6 +32,8 @@ export function api({
   appSource: AppSource
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
+  deviceModel?: string
+  osVersion?: string
 }) {
   const client = createClientInstanceWithAuth({
     api: FeedbackApiSpecification,
@@ -42,6 +46,8 @@ export function api({
     getUserSessionCredentials,
     url,
     loggingFunction,
+    deviceModel,
+    osVersion,
   })
 
   return {

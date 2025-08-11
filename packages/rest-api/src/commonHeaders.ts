@@ -45,6 +45,9 @@ export const VexlAppMetaHeader = Schema.Struct({
   appSource: AppSource,
   language: Schema.String,
   isDeveloper: Schema.Boolean,
+  // TODO backward compatibility
+  deviceModel: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  osVersion: Schema.optionalWith(Schema.String, {as: 'Option'}),
 })
 export type VexlAppMetaHeader = Schema.Schema.Type<typeof VexlAppMetaHeader>
 
@@ -140,6 +143,7 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   {
     'user-agent': UserAgentHeaderFromString,
     'vexl-app-meta': Schema.optional(Schema.parseJson(VexlAppMetaHeader)),
+    'cf-connecting-ip': Schema.optionalWith(Schema.String, {as: 'Option'}),
     [HEADER_CLIENT_VERSION]: Schema.optionalWith(
       Schema.compose(Schema.NumberFromString, VersionCode),
       {as: 'Option'}
@@ -147,6 +151,22 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
     [HEADER_PLATFORM]: Schema.optionalWith(PlatformName, {as: 'Option'}),
   }
 ) {
+  get deviceModelOrNone(): Option.Option<string> {
+    if (this['vexl-app-meta']) {
+      return this['vexl-app-meta'].deviceModel
+    }
+
+    return Option.none()
+  }
+
+  get osVersionOrNone(): Option.Option<string> {
+    if (this['vexl-app-meta']) {
+      return this['vexl-app-meta'].osVersion
+    }
+
+    return Option.none()
+  }
+
   get clientVersionOrNone(): Option.Option<VersionCode> {
     if (this['vexl-app-meta']) {
       return Option.some(this['vexl-app-meta'].versionCode)
@@ -210,6 +230,7 @@ export const makeCommonHeaders = (
 ): typeof CommonHeaders.Type => {
   return new CommonHeaders({
     'vexl-app-meta': VexlAppMetaHeader,
+    'cf-connecting-ip': Option.none(), // This is set by the server
     'user-agent': {
       _tag: 'VexlAppUserAgentHeader',
       platform: VexlAppMetaHeader.platform,

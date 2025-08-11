@@ -14,6 +14,7 @@ import {
   UserApiSpecification,
 } from './specification'
 
+import {Option} from 'effect/index'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type SubmitFeedbackInput} from '../feedback/contracts'
 import {
@@ -38,6 +39,8 @@ export interface UserApiProps {
   isDeveloper: boolean
   appSource: AppSource
   loggingFunction?: LoggingFunction | null
+  deviceModel?: string
+  osVersion?: string
   getUserSessionCredentials?: GetUserSessionCredentials
 }
 
@@ -52,6 +55,8 @@ export function api({
   appSource,
   getUserSessionCredentials,
   loggingFunction,
+  deviceModel,
+  osVersion,
 }: UserApiProps) {
   const client = createClientInstanceWithAuth({
     api: UserApiSpecification,
@@ -64,6 +69,8 @@ export function api({
     language,
     appSource,
     loggingFunction,
+    deviceModel,
+    osVersion,
   })
 
   const commonHeaders = makeCommonHeaders({
@@ -73,12 +80,17 @@ export function api({
     platform,
     isDeveloper,
     language,
+    deviceModel: Option.fromNullable(deviceModel),
+    osVersion: Option.fromNullable(osVersion),
   })
 
   return {
     initPhoneVerification: (initVerificationInput: InitVerificationInput) =>
       handleCommonAndExpectedErrorsEffect(
-        client.initVerification(initVerificationInput),
+        client.initVerification({
+          ...initVerificationInput,
+          headers: commonHeaders,
+        }),
         InitVerificationErrors
       ),
     verifyPhoneNumber: (verifyPhoneNumberInput: VerifyPhoneNumberInput) =>
@@ -108,6 +120,7 @@ export function api({
     initEraseUser: (request: InitEraseUserRequest) =>
       handleCommonAndExpectedErrorsEffect(
         client.initEraseUser({
+          headers: commonHeaders,
           body: request,
         }),
         InitVerificationErrors

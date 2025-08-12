@@ -131,6 +131,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         icon={identityIconSvg}
         variant="primary"
         onPress={() => {
+          Keyboard.dismiss()
           void revealIdentity('REQUEST_REVEAL')
         }}
       />
@@ -147,6 +148,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
         iconFill={getTokens().color.main.val}
         variant="primary"
         onPress={() => {
+          Keyboard.dismiss()
           void revealContact('REQUEST_REVEAL')
         }}
       />
@@ -160,6 +162,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
             icon={identityIconSvg}
             variant="primary"
             onPress={() => {
+              Keyboard.dismiss()
               void revealIdentity('REQUEST_REVEAL')
             }}
           />
@@ -171,6 +174,7 @@ function Button({type}: {type: ButtonType}): JSX.Element | null {
               iconFill={getTokens().color.main.val}
               variant="primary"
               onPress={() => {
+                Keyboard.dismiss()
                 void revealContact('REQUEST_REVEAL')
               }}
             />

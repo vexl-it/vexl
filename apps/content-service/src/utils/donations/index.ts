@@ -121,7 +121,7 @@ function createInvoiceInternal({
     },
     catch: (e: any) => {
       return new CreateInvoiceError({
-        cause: e,
+        cause: e.stack,
         message: e.message,
       })
     },
@@ -171,14 +171,14 @@ function getInvoiceInternal({
     catch: (e: any) => {
       if (e.response?.status === 404) {
         return new InvoiceNotFoundError({
-          cause: e,
+          cause: e.stack,
           message: 'Invoice not found',
           status: 404,
         })
       }
 
       return new GetInvoiceGeneralError({
-        cause: e,
+        cause: e.stack,
         message: e.message,
         status: 500,
       })
@@ -233,14 +233,14 @@ function getInvoicePaymentMethodsInternal({
     catch: (e: any) => {
       if (e.response?.status === 404) {
         return new InvoiceNotFoundError({
-          cause: e,
+          cause: e.stack,
           message: 'Invoice not found',
           status: 404,
         })
       }
 
       return new GetInvoicePaymentMethodsGeneralError({
-        cause: e,
+        cause: e.stack,
         message: e.message,
         status: 500,
       })

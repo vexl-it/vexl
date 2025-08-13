@@ -36,8 +36,8 @@ function SummaryScreen(): JSX.Element {
   return (
     <ScreenWrapper>
       <Section image={summarySvg} title={t('offerForm.summary')}>
-        <Stack>
-          <Text ff="$body500" mb="$4" col="$white" fos={16}>
+        <Stack gap="$4">
+          <Text ff="$body500" col="$white" fos={16}>
             {t('offerForm.summaryDescription')}
           </Text>
           <OfferWithBubbleTip

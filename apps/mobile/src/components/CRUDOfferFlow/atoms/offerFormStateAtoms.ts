@@ -973,7 +973,10 @@ export const offerFormMolecule = molecule(() => {
 
       yield* _(
         set(updateOfferActionAtom, {
-          payloadPublic,
+          payloadPublic: {
+            ...payloadPublic,
+            active: true,
+          },
           adminId: offer.ownershipInfo?.adminId ?? ('' as OfferAdminId),
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,
           intendedConnectionLevel,

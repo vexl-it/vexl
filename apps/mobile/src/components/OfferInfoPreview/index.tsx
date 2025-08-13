@@ -22,6 +22,7 @@ function OfferInfoPreview({
   negative,
   reduceDescriptionLength,
   showCommonFriends,
+  displayAsPreview,
 }: {
   showListingType?: boolean
   isMine?: boolean
@@ -30,6 +31,7 @@ function OfferInfoPreview({
   negative?: boolean
   reduceDescriptionLength?: boolean
   showCommonFriends?: boolean
+  displayAsPreview?: boolean
 }): JSX.Element {
   const {t} = useTranslation()
   const clubsForOffer = useGetAllClubsForIds(
@@ -63,7 +65,7 @@ function OfferInfoPreview({
               source={clockSvg}
             />
           )}
-          {!offer.publicPart.active && (
+          {!offer.publicPart.active && !displayAsPreview && (
             <SvgImage
               stroke={getTokens().color.$greyOnBlack.val}
               source={pauseSvg}

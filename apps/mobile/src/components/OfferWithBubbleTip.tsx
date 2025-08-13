@@ -41,6 +41,7 @@ export default function OfferWithBubbleTip({
       >
         <Stack bg={negative ? '$grey' : '$white'} p="$4" br="$5">
           <OfferInfoPreview
+            displayAsPreview={displayAsPreview}
             showCommonFriends={showCommonFriends}
             showListingType={showListingType}
             isMine={isMine}

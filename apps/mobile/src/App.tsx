@@ -1,6 +1,7 @@
 import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import {StatusBar} from 'expo-status-bar'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
+import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
@@ -46,18 +47,20 @@ function App(): JSX.Element {
           },
         }}
       >
-        <LoadingOverlayProvider>
-          <VersionMigrations>
-            <PhoneNumberHashBugMigration>
-              <OverlayInfoScreen>
-                <GestureHandlerRootView style={{flex: 1}}>
-                  <RootNavigation />
-                </GestureHandlerRootView>
-              </OverlayInfoScreen>
-            </PhoneNumberHashBugMigration>
-          </VersionMigrations>
-          <UploadingOfferProgressModal />
-        </LoadingOverlayProvider>
+        <KeyboardProvider>
+          <LoadingOverlayProvider>
+            <VersionMigrations>
+              <PhoneNumberHashBugMigration>
+                <OverlayInfoScreen>
+                  <GestureHandlerRootView style={{flex: 1}}>
+                    <RootNavigation />
+                  </GestureHandlerRootView>
+                </OverlayInfoScreen>
+              </PhoneNumberHashBugMigration>
+            </VersionMigrations>
+            <UploadingOfferProgressModal />
+          </LoadingOverlayProvider>
+        </KeyboardProvider>
         <AreYouSureDialog />
         <ToastNotification />
       </NavigationContainer>

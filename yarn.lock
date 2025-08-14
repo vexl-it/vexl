@@ -11155,6 +11155,7 @@ __metadata:
     react: 18.3.1
     react-dom: 18.3.1
     react-native: 0.76.9
+    react-native-autolink: ^4.2.0
     react-native-calendars: ^1.1301.0
     react-native-capture-protection: ^2.1.1
     react-native-color-matrix-image-filters: ^6.0.3
@@ -11163,8 +11164,7 @@ __metadata:
     react-native-element-dropdown: 2.10.0
     react-native-flags: ^1.0.0
     react-native-gesture-handler: ~2.20.2
-    react-native-hyperlink: ^0.0.22
-    react-native-keyboard-aware-scroll-view: ^0.9.5
+    react-native-keyboard-controller: ^1.18.4
     react-native-launch-arguments: ^4.0.2
     react-native-map-clustering: ^3.4.2
     react-native-maps: 1.18.0
@@ -11184,7 +11184,6 @@ __metadata:
     react-native-tab-view: ^3.5.1
     react-native-uuid: ^2.0.1
     react-native-web: ~0.19.6
-    react-navigation-heavy-screen: ^1.2.1
     react-test-renderer: ^18.2.0
     seed-random: ^2.2.0
     set-operations: ^2.0.2
@@ -12197,6 +12196,15 @@ __metadata:
   version: 1.0.0
   resolution: "at-least-node@npm:1.0.0"
   checksum: 463e2f8e43384f1afb54bc68485c436d7622acec08b6fad269b421cb1d29cebb5af751426793d0961ed243146fe4dc983402f6d5a51b720b277818dbf6f2e49e
+  languageName: node
+  linkType: hard
+
+"autolinker@npm:^3.16.2":
+  version: 3.16.2
+  resolution: "autolinker@npm:3.16.2"
+  dependencies:
+    tslib: ^2.3.0
+  checksum: 1d5d20ef23586629ec3c341052e6bb6250399cf5e66db21540c17b2f5b1137066435fb274a2115b57464d05e75b85afad61ef7cdf6ea693ef2920a3748b7249d
   languageName: node
   linkType: hard
 
@@ -21879,15 +21887,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"linkify-it@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "linkify-it@npm:4.0.1"
-  dependencies:
-    uc.micro: ^1.0.1
-  checksum: 3e0a29921269c14eb7ac6f5db2da68d4854ea9acca6e9014a323f75f2dd39b197ffab57c1fbd6a906ceb021aad3ee6d7ba7d0181236dd9630ffc452b392f7f71
-  languageName: node
-  linkType: hard
-
 "load-json-file@npm:^4.0.0":
   version: 4.0.0
   resolution: "load-json-file@npm:4.0.0"
@@ -25905,7 +25904,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.8.1, prop-types@npm:^15.5.10, prop-types@npm:^15.6.2, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
+"prop-types@npm:15.8.1, prop-types@npm:^15.5.10, prop-types@npm:^15.7.2, prop-types@npm:^15.8.0, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -26356,12 +26355,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-animatable@npm:^1.3.3":
-  version: 1.4.0
-  resolution: "react-native-animatable@npm:1.4.0"
+"react-native-autolink@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "react-native-autolink@npm:4.2.0"
   dependencies:
-    prop-types: ^15.8.1
-  checksum: a1b211aff745b97351d78643d641fa298f7d71524eaf22fee8a69257ce52e85d6b3caf8e7fd26a521af34984fba7402b7c632c35ea69d618769387d1dcb6b32a
+    autolinker: ^3.16.2
+  peerDependencies:
+    react: ">16.8.0"
+    react-native: ">=0.25.0"
+  checksum: 64eeefe2556b75e6d3676a42a65fd5de01769e2eba9c5ee31184a9c07b82233409779009620f4130413f77d6aa89f4e767455d4b60f934342d0c87b725eb87a1
   languageName: node
   linkType: hard
 
@@ -26538,37 +26540,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-hyperlink@npm:^0.0.22":
-  version: 0.0.22
-  resolution: "react-native-hyperlink@npm:0.0.22"
-  dependencies:
-    linkify-it: ^4.0.1
-    mdurl: ^1.0.1
+"react-native-is-edge-to-edge@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "react-native-is-edge-to-edge@npm:1.2.1"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: c459688c4d9541bc1be17bbed13d1ceac127097ac0a07013a7555a824821a630e76962c63e336cf77916d21f1cb703b8b5f0c98662e85eefe2055e7a7334c389
+  checksum: 8fb6d8ab7b953c7d7cec8c987cef24f1c5348a293a85cb49c7c53b54ef110c0ca746736ae730e297603c8c76020df912e93915fb17518c4f2f91143757177aba
   languageName: node
   linkType: hard
 
-"react-native-iphone-x-helper@npm:^1.0.3":
-  version: 1.3.1
-  resolution: "react-native-iphone-x-helper@npm:1.3.1"
-  peerDependencies:
-    react-native: ">=0.42.0"
-  checksum: 024376646009a966e33e12fc2358751830818b0fb73b1c601a64eb5e490d2dc43eec23668991b985a8c412a84d087f20eb45bb9b593567c08b66e741b7bddda5
-  languageName: node
-  linkType: hard
-
-"react-native-keyboard-aware-scroll-view@npm:^0.9.5":
-  version: 0.9.5
-  resolution: "react-native-keyboard-aware-scroll-view@npm:0.9.5"
+"react-native-keyboard-controller@npm:^1.18.4":
+  version: 1.18.4
+  resolution: "react-native-keyboard-controller@npm:1.18.4"
   dependencies:
-    prop-types: ^15.6.2
-    react-native-iphone-x-helper: ^1.0.3
+    react-native-is-edge-to-edge: ^1.2.1
   peerDependencies:
-    react-native: ">=0.48.4"
-  checksum: 5eec2aedb886213dfed4c8428a443b565dce80ba9fcf5897171e4c8829d4dd64c5011ac004d93f29adfc83ad6f88c2838d1a5b45255dc4a49bd1c0a169245800
+    react: "*"
+    react-native: "*"
+    react-native-reanimated: ">=3.0.0"
+  checksum: d005f3fd3a51233d1336b205e040f38ed12d2fda7e3a22879d748ee06225e0ea8e533f4fd1b02608462428db66d6ae033df35cb025c6a8748bee2732869be806
   languageName: node
   linkType: hard
 
@@ -26875,19 +26866,6 @@ __metadata:
   bin:
     react-native: cli.js
   checksum: cf621cef0649920bac2b730998be6eaaf9762d516bc65d9073b46f634bb640dfb6b9b5d64ce6a6e09da64d52d114d96d96435a91c9db8ec61b76c818fe209827
-  languageName: node
-  linkType: hard
-
-"react-navigation-heavy-screen@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "react-navigation-heavy-screen@npm:1.2.1"
-  dependencies:
-    hoist-non-react-statics: ^3.3.2
-    react-native-animatable: ^1.3.3
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 361ba7b27337bb7e87d71742b6959b5499c314a59c3aafffa324d8f4ceab62c847a3d6a9fd685b14789a40dd4590c107aad64e981659b772018dbf865e41ffcf
   languageName: node
   linkType: hard
 
@@ -30148,7 +30126,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.8.1, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.1.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.8.0":
+"tslib@npm:2.8.1, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.1.0, tslib@npm:^2.3.0, tslib@npm:^2.3.1, tslib@npm:^2.4.0, tslib@npm:^2.6.2, tslib@npm:^2.8.0":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
@@ -31187,6 +31165,7 @@ __metadata:
     eslint: ^8.57.1
     firebase-admin: ^12.3.1
     prettier: ^3.3.2
+    react-native-autolink: ^4.2.0
     tsx: ^4.16.0
     turbo: ^1.11.3
   languageName: unknown

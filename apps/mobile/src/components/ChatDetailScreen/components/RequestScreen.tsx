@@ -4,7 +4,7 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import {KeyboardAwareScrollView} from 'react-native-keyboard-controller'
 import {Stack, YStack, getTokens} from 'tamagui'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
@@ -152,7 +152,7 @@ function RequestScreen(): JSX.Element {
       <KeyboardAwareScrollView
         bounces={false}
         showsVerticalScrollIndicator={false}
-        extraHeight={SCROLL_EXTRA_OFFSET}
+        bottomOffset={SCROLL_EXTRA_OFFSET}
       >
         <YStack gap="$6" f={1} mx="$4" my="$6">
           {!!offer && (
@@ -196,47 +196,47 @@ function RequestScreen(): JSX.Element {
             )}
           </YStack>
         </YStack>
-      </KeyboardAwareScrollView>
-      <Stack mx="$4">
-        {requestState === 'requested' &&
-          (requestedByMe ? (
-            <YStack gap="$2">
+        <Stack mx="$4">
+          {requestState === 'requested' &&
+            (requestedByMe ? (
+              <YStack gap="$2">
+                <RerequestOrCancelButton
+                  onRerequestPressed={onRerequestPressed}
+                  rerequestButtonDisabled={!text.trim()}
+                />
+              </YStack>
+            ) : (
+              <AcceptDeclineButtons />
+            ))}
+          {requestState === 'cancelled' && (
+            <Stack gap="$2">
               <RerequestOrCancelButton
                 onRerequestPressed={onRerequestPressed}
                 rerequestButtonDisabled={!text.trim()}
               />
-            </YStack>
-          ) : (
-            <AcceptDeclineButtons />
-          ))}
-        {requestState === 'cancelled' && (
-          <Stack gap="$2">
+              <Button
+                text={t('messages.deleteChat')}
+                variant="primary"
+                onPress={() => {
+                  void Effect.runPromise(
+                    andThenExpectBooleanNoErrors((success) => {
+                      if (success) {
+                        safeGoBack()
+                      }
+                    })(deleteChatWithUiFeedback({skipAsk: false}))
+                  )
+                }}
+              />
+            </Stack>
+          )}
+          {requestState === 'denied' && (
             <RerequestOrCancelButton
               onRerequestPressed={onRerequestPressed}
               rerequestButtonDisabled={!text.trim()}
             />
-            <Button
-              text={t('messages.deleteChat')}
-              variant="primary"
-              onPress={() => {
-                void Effect.runPromise(
-                  andThenExpectBooleanNoErrors((success) => {
-                    if (success) {
-                      safeGoBack()
-                    }
-                  })(deleteChatWithUiFeedback({skipAsk: false}))
-                )
-              }}
-            />
-          </Stack>
-        )}
-        {requestState === 'denied' && (
-          <RerequestOrCancelButton
-            onRerequestPressed={onRerequestPressed}
-            rerequestButtonDisabled={!text.trim()}
-          />
-        )}
-      </Stack>
+          )}
+        </Stack>
+      </KeyboardAwareScrollView>
     </>
   )
 }

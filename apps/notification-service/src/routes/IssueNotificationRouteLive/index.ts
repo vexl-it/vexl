@@ -80,6 +80,7 @@ const processNotificationCypher = (
             new NewChatMessageNoticeNotificationData({
               trackingId: Option.none(),
               targetCypher: notificationCypher,
+              sentAt: unixMillisecondsNow(),
               includesSystemNotification: 'false',
             })
           ),
@@ -118,6 +119,7 @@ const processNotificationCypher = (
                   notificationToken.type === 'expoV2'
                     ? Option.some(trackingId)
                     : Option.none(),
+                sentAt: unixMillisecondsNow(),
                 targetCypher: notificationCypher,
                 includesSystemNotification: 'true',
               })
@@ -135,6 +137,7 @@ const processNotificationCypher = (
                 notificationToken.type === 'expoV2'
                   ? Option.some(trackingId)
                   : Option.none(),
+              sentAt: unixMillisecondsNow(),
               targetCypher: notificationCypher,
               includesSystemNotification: 'false',
             })

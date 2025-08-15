@@ -7,6 +7,7 @@ import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/a
 import {useCleanupRemovedClubsOnMount} from '../../state/clubs/atom/removedClubsAtom'
 import {useSyncConnections} from '../../state/connections'
 import {useRefreshContactsFromDeviceOnResume} from '../../state/contacts'
+import {useReportUIChatNotifications} from '../../state/notifications/useReportUIChatNotifications'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
@@ -72,6 +73,7 @@ function LoggedInHookGroup(): null {
   useCleanupRemovedClubsOnMount()
 
   useSetupBackgroundTask()
+  useReportUIChatNotifications()
 
   return null
 }

@@ -2,6 +2,7 @@ import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Brand, Schema as S, Schema} from 'effect'
 import {z} from 'zod'
+import {UnixMillisecondsE} from '../../utility/UnixMilliseconds.brand'
 import {ClubUuidE} from '../clubs'
 import {NotificationTrackingId} from '../NotificationTrackingId.brand'
 import {NotificationCypherE} from './NotificationCypher.brand'
@@ -50,6 +51,7 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
 )('NewChatMessageNoticeNotificationData', {
   targetCypher: NotificationCypherE,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  sentAt: Schema.compose(Schema.NumberFromString, UnixMillisecondsE),
   // Notification payload does not allow booleans
   includesSystemNotification: Schema.Union(
     Schema.Literal('true'),
@@ -76,6 +78,7 @@ export class NewSocialNetworkConnectionNotificationData extends Schema.TaggedCla
 )('NewSocialNetworkConnectionNotificationData', {
   type: Schema.Literal('NEW_APP_USER'), // backward compatibility
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  sentAt: Schema.compose(Schema.NumberFromString, UnixMillisecondsE),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(NewSocialNetworkConnectionNotificationData)(this)

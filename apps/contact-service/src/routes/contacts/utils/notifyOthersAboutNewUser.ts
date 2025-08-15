@@ -1,5 +1,6 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {NewSocialNetworkConnectionNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Effect, Option} from 'effect'
 import {UserDbService} from '../../../db/UserDbService'
 import {NotificationsTokensEquivalence} from '../../../db/UserDbService/domain'
@@ -59,6 +60,7 @@ export const notifyOthersAboutNewUserForked = ({
         data: new NewSocialNetworkConnectionNotificationData({
           type: 'NEW_APP_USER',
           trackingId: Option.none(),
+          sentAt: unixMillisecondsNow(),
         }).toData(),
         tokens: [...firstLevelTokens, ...secondLevelTokens],
       }),

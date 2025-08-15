@@ -12,6 +12,7 @@ import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
 import {AppState, Platform} from 'react-native'
+import {apiAtom} from '../api'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {extractDataPayloadFromNotification} from '../utils/notifications/extractDataFromNotification'
 import {getDefaultChannel} from '../utils/notifications/notificationChannels'
@@ -32,6 +33,7 @@ import {
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
+import {reportNewConnectionNotificationForked} from './notifications/reportNewConnectionNotification'
 
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
@@ -120,6 +122,9 @@ export function useHandleReceivedNotifications(): void {
       if (isNewSocialNetworkConnectionNotification) {
         console.info(
           '🔔 Received notification about new user. Checking and updating offers accordingly.'
+        )
+        await Effect.runPromise(
+          reportNewConnectionNotificationForked(store.get(apiAtom).metrics)
         )
         await Effect.runPromise(syncConnections())
         await Effect.runPromise(

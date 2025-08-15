@@ -1,4 +1,4 @@
 import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
-import {metricsServer} from './metricsServer'
+import {metricsService} from './metricsService'
 
-runMainInNode(metricsServer)
+runMainInNode(metricsService)

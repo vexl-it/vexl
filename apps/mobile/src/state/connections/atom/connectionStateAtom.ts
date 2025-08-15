@@ -5,6 +5,7 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Array, Effect} from 'effect'
@@ -13,8 +14,9 @@ import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import deduplicate from '../../../utils/deduplicate'
+import {getNotificationTokenE} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
-import reportError from '../../../utils/reportError'
+import reportError, {reportErrorE} from '../../../utils/reportError'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ConnectionsState} from '../domain'
 
@@ -61,6 +63,48 @@ export const syncConnectionsActionAtom = atom(
 
       const firstLevel = yield* _(fetchContacts('FIRST', api.contact))
       const secondLevel = yield* _(fetchContacts('SECOND', api.contact))
+
+      // report difference
+      const connectionState = get(connectionStateAtom)
+
+      if (
+        !!connectionState.lastUpdate &&
+        !!(yield* _(getNotificationTokenE()))
+      ) {
+        const newFirstLevelConnections = Array.difference(firstLevel)(
+          connectionState.firstLevel
+        )
+        const newSecondLevelConnections = Array.difference(secondLevel)(
+          connectionState.secondLevel
+        )
+        const newConnectionsUnique = pipe(
+          newFirstLevelConnections,
+          Array.appendAll(newSecondLevelConnections),
+          Array.dedupe
+        )
+
+        console.log('🦋 New connections:', newConnectionsUnique.length)
+        if (newFirstLevelConnections.length > 0)
+          yield* _(
+            api.metrics
+              .reportNotificationInteraction({
+                count: newConnectionsUnique.length,
+                notificationType: 'Network',
+                type: 'NewConnectionsReceived',
+                uuid: generateUuid(),
+              })
+              .pipe(
+                Effect.tapError((e) =>
+                  reportErrorE(
+                    'warn',
+                    new Error('Error reporting new connections'),
+                    {e}
+                  )
+                ),
+                Effect.forkDaemon
+              )
+          )
+      }
 
       const commonFriends = yield* _(
         api.contact.fetchCommonConnections({

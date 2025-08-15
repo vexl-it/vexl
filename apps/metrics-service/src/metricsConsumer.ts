@@ -1,15 +1,10 @@
 /* eslint-disable @typescript-eslint/no-invalid-void-type */
-import {NodeContext} from '@effect/platform-node'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
-import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type Job} from 'bullmq'
 import {Effect, Layer} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
-import {healthServerPortConfig, redisUrl} from './configs'
 import {MetricsDbService} from './db/MetricsDbService'
-import DbLayer from './db/layer'
 import {MetricsConsumerService} from './utils/MetricsConsumerService/index'
 
 const consumeMessage = (
@@ -46,15 +41,6 @@ const consumeMessage = (
     )
   )
 
-export const metricsServer = MetricsConsumerService.layer(consumeMessage).pipe(
-  Layer.provide(
-    healthServerLayer({
-      port: healthServerPortConfig,
-    })
-  ),
-  Layer.provide(MetricsDbService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provide(DbLayer),
-  Layer.provide(NodeContext.layer),
-  Layer.launch
-)
+export const metricsConsumerServiceEffect = MetricsConsumerService.layer(
+  consumeMessage
+).pipe(Layer.launch)

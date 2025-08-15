@@ -12,12 +12,14 @@ import {
   unixMillisecondsNow,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {Effect} from 'effect/index'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -47,6 +49,8 @@ import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionT
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
+
+const THIRTY_MINS_MS = 30 * 60 * 1000
 
 const handleOtherSideUpdatedActionAtom = atom(
   null,
@@ -356,6 +360,21 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         get(singleOfferAtom(inbox.inbox.offerId))
       )
     ),
+    TE.chainFirstW(({newMessages}) => {
+      const messagesToReport = newMessages.filter(
+        (one) => unixMillisecondsNow() - one.message.time > THIRTY_MINS_MS
+      )
+      if (messagesToReport.length === 0) return TE.of(undefined)
+      console.info('Reporting new messages')
+      return get(apiAtom)
+        .metrics.reportNotificationInteraction({
+          count: messagesToReport.length,
+          type: 'ChatMessageReceived',
+          notificationType: 'Chat',
+          uuid: generateUuid(),
+        })
+        .pipe(Effect.ignore, effectToTaskEither)
+    }),
     TE.matchEW(
       (
         error

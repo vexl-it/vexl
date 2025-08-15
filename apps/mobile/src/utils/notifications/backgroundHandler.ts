@@ -11,6 +11,7 @@ import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
 import {AppState, Platform} from 'react-native'
+import {apiAtom} from '../../api'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
 import {
   syncAllClubsHandleStateWhenNotFoundActionAtom,
@@ -23,6 +24,7 @@ import {
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
+import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
 import {translationAtom} from '../localization/I18nProvider'
 import reportError from '../reportError'
 import {extractDataPayloadFromNotification} from './extractDataFromNotification'
@@ -107,6 +109,11 @@ export async function processBackgroundMessage(
     if (isNewSocialNetworkConnectionNotification) {
       console.info(
         '📳 Received notification about new user. Checking and updating offers accordingly.'
+      )
+      await Effect.runPromise(
+        reportNewConnectionNotificationForked(
+          getDefaultStore().get(apiAtom).metrics
+        )
       )
       await Effect.runPromise(getDefaultStore().set(syncConnectionsActionAtom))
       await Effect.runPromise(

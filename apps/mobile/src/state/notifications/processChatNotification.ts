@@ -1,7 +1,12 @@
 import notifee from '@notifee/react-native'
 import {type NavigationState} from '@react-navigation/native'
+import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
+import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, Option} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -15,6 +20,64 @@ import {fetchAndStoreMessagesForInboxAtom} from '../chat/atoms/fetchNewMessagesA
 import {unreadChatsCountAtom} from '../chat/atoms/unreadChatsCountAtom'
 import {loadSession} from '../session/loadSession'
 import {getKeyHolderForNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
+
+const processChatNotificationProcessed = (
+  notificationTrackingId: NotificationTrackingId,
+  notificationApi: NotificationApi,
+  metricsApi: MetricsApi,
+  notificationData: NewChatMessageNoticeNotificationData
+): Effect.Effect<void> => {
+  const reportNotificationProcessedToNotificationService = notificationApi
+    .reportNotificationProcessed({
+      trackingId: notificationTrackingId,
+    })
+    .pipe(
+      Effect.tapError((e) =>
+        reportErrorE(
+          'warn',
+          new Error(
+            'Error while sending notification processed to notification'
+          ),
+          {
+            e,
+          }
+        )
+      ),
+      Effect.forkDaemon
+    )
+
+  const reportNotificationProcessedToMetricsService = metricsApi
+    .reportNotificationInteraction({
+      count: 1,
+      notificationType: 'Chat',
+      type: 'BackgroundMessageReceived',
+      uuid: generateUuid(),
+    })
+    .pipe(
+      Effect.tapError((e) =>
+        reportErrorE(
+          'warn',
+          new Error('Error while sending notification processed to metrics'),
+          {
+            e,
+          }
+        )
+      ),
+      Effect.forkDaemon
+    )
+
+  return Effect.all(
+    [
+      // TODO filter time
+      reportNotificationProcessedToNotificationService,
+      // Report only notifications older than 30 mins
+      unixMillisecondsNow() - notificationData.sentAt > 1000 * 60 * 30
+        ? reportNotificationProcessedToMetricsService
+        : Effect.void,
+    ],
+    {concurrency: 'unbounded'}
+  )
+}
 
 const processChatNotificationActionAtom = atom(
   null,
@@ -43,24 +106,15 @@ const processChatNotificationActionAtom = atom(
     return pipe(
       loadSession(),
       T.chainFirst(() => {
+        const api = get(apiAtom)
         if (Option.isSome(notification.trackingId))
           return effectToTask(
-            get(apiAtom)
-              .notification.reportNotificationProcessed({
-                trackingId: notification.trackingId.value,
-              })
-              .pipe(
-                Effect.tapError((e) =>
-                  reportErrorE(
-                    'warn',
-                    new Error('Error while sending notification processed'),
-                    {
-                      e,
-                    }
-                  )
-                ),
-                Effect.forkDaemon
-              )
+            processChatNotificationProcessed(
+              notification.trackingId.value,
+              api.notification,
+              api.metrics,
+              notification
+            )
           )
         return T.of(null)
       }),

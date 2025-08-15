@@ -6,7 +6,6 @@ import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Alert} from 'react-native'
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -29,7 +28,6 @@ import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
 import Info from '../../Info'
-import {MAP_SIZE} from '../../MarketplaceMap'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
@@ -37,27 +35,6 @@ import infoSvg from '../../images/infoSvg'
 import {showCommonFriendsExplanationActionAtom} from '../atoms'
 import RerequestInfo from './RerequestInfo'
 import Title from './Title'
-
-const SCROLL_EXTRA_OFFSET = 200
-
-function ContentContainer({
-  mapIsVisible,
-  children,
-}: {
-  mapIsVisible?: boolean
-  children: React.ReactElement | React.ReactElement[]
-}): JSX.Element {
-  return mapIsVisible ? (
-    <Stack>{children}</Stack>
-  ) : (
-    <KeyboardAwareScrollView
-      showsVerticalScrollIndicator={false}
-      extraHeight={SCROLL_EXTRA_OFFSET}
-    >
-      {children}
-    </KeyboardAwareScrollView>
-  )
-}
 
 function OfferInfo({
   mapIsVisible,
@@ -161,7 +138,7 @@ function OfferInfo({
   return (
     <Stack f={1} mx="$2" my="$4">
       {!mapIsVisible && <Title offer={offer} />}
-      <ContentContainer mapIsVisible={mapIsVisible}>
+      <Stack>
         <YStack gap="$2" mb="$2">
           <Stack mb="$2">
             <OfferWithBubbleTip
@@ -188,18 +165,8 @@ function OfferInfo({
             (requestState === 'cancelled' || requestState === 'deleted') && (
               <RerequestInfo chat={chatForOffer} />
             )}
-          {!!(!!enableHiddenFeatures || preferences.showOfferDetail) && (
-            <Text
-              onPress={() => {
-                Clipboard.setString(JSON.stringify(offer, null, 2))
-                Alert.alert(t('common.copied'))
-              }}
-            >
-              {JSON.stringify(offer, null, 2)}
-            </Text>
-          )}
         </YStack>
-      </ContentContainer>
+      </Stack>
       <Stack pt="$2">
         {showRequestButton ? (
           <ButtonWithPressTimeout
@@ -221,9 +188,17 @@ function OfferInfo({
             text={t('offer.goToChat')}
           />
         ) : null}
+        {!!(!!enableHiddenFeatures || preferences.showOfferDetail) && (
+          <Text
+            onPress={() => {
+              Clipboard.setString(JSON.stringify(offer, null, 2))
+              Alert.alert(t('common.copied'))
+            }}
+          >
+            {JSON.stringify(offer, null, 2)}
+          </Text>
+        )}
       </Stack>
-      {/* Needed to map scroll animation work correctly */}
-      {!!mapIsVisible && <Stack h={MAP_SIZE + MAP_SIZE / 2} />}
     </Stack>
   )
 }

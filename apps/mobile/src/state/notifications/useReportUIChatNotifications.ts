@@ -1,21 +1,24 @@
 import notifee from '@notifee/react-native'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Array, Effect, flow, Option, Schema} from 'effect/index'
 import {useStore} from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import {useCallback} from 'react'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorageE} from '../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {reportErrorE} from '../../utils/reportError'
 import {useOnFocusAndAppState} from '../../utils/useFocusAndAppState'
 
-const THIRTY_MINS_MS = 30 * 60 * 1000
-
-const reportedNotificationsIdsAtom = atomWithParsedMmkvStorageE(
+const reportedNotificationsIdsStorageAtom = atomWithParsedMmkvStorageE(
   'reportedUINotificationsIds',
-  [],
-  Schema.Array(Schema.String)
+  {data: []},
+  Schema.Struct({data: Schema.Array(Schema.String)})
+)
+
+const reportedNotificationsIdsAtom = focusAtom(
+  reportedNotificationsIdsStorageAtom,
+  (o) => o.prop('data')
 )
 
 export function useReportUIChatNotifications(): void {
@@ -47,9 +50,7 @@ export function useReportUIChatNotifications(): void {
           Array.filter(
             (one) =>
               // Report only notifications that were not already seen
-              !Array.contains(one.id)(reportedNotificationsIds) &&
-              // And notifications only older than 30mins
-              unixMillisecondsNow() - one.data.sentAt >= THIRTY_MINS_MS
+              !Array.contains(one.id)(reportedNotificationsIds)
           )
         ),
         Effect.tap((toReport) =>

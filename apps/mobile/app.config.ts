@@ -250,6 +250,14 @@ export default {
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',
+    [
+      'expo-build-properties',
+      {
+        android: {
+          targetSdkVersion: 35,
+        },
+      },
+    ],
     'expo-camera',
     [
       'react-native-capture-protection',

@@ -2,7 +2,6 @@ import notifee from '@notifee/react-native'
 import {type NavigationState} from '@react-navigation/native'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
@@ -20,8 +19,6 @@ import {fetchAndStoreMessagesForInboxAtom} from '../chat/atoms/fetchNewMessagesA
 import {unreadChatsCountAtom} from '../chat/atoms/unreadChatsCountAtom'
 import {loadSession} from '../session/loadSession'
 import {getKeyHolderForNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
-
-const THIRTY_MINS_MS = 30 * 60 * 1000
 
 const processChatNotificationProcessed = (
   notificationTrackingId: NotificationTrackingId,
@@ -72,10 +69,7 @@ const processChatNotificationProcessed = (
     [
       // TODO filter time
       reportNotificationProcessedToNotificationService,
-      // Report only notifications older than 30 mins
-      unixMillisecondsNow() - notificationData.sentAt > THIRTY_MINS_MS
-        ? reportNotificationProcessedToMetricsService
-        : Effect.void,
+      reportNotificationProcessedToMetricsService,
     ],
     {concurrency: 'unbounded'}
   )

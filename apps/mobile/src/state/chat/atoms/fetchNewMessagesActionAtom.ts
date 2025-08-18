@@ -50,8 +50,6 @@ import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessa
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
 
-const THIRTY_MINS_MS = 30 * 60 * 1000
-
 const handleOtherSideUpdatedActionAtom = atom(
   null,
   (
@@ -361,9 +359,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       )
     ),
     TE.chainFirstW(({newMessages}) => {
-      const messagesToReport = newMessages.filter(
-        (one) => unixMillisecondsNow() - one.message.time > THIRTY_MINS_MS
-      )
+      const messagesToReport = newMessages
       if (messagesToReport.length === 0) return TE.of(undefined)
       console.info('Reporting new messages')
       return get(apiAtom)

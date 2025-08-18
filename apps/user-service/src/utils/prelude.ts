@@ -78,6 +78,14 @@ export class PreludeService extends Context.Tag('PreludeService')<
                     ),
                   },
                 })
+            ).pipe(
+              Effect.catchAll(
+                () =>
+                  new UnableToSendVerificationSmsError({
+                    reason: 'Other',
+                    status: 400,
+                  })
+              )
             )
           ),
           Effect.tap((result) => Effect.log('Verification created', {result})),

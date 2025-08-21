@@ -11446,6 +11446,7 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/generic-utils": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
+    "@vexl-next/resources-utils": 0.0.0
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0

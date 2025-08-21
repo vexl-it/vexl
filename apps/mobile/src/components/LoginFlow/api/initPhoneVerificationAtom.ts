@@ -1,8 +1,8 @@
-import {
-  type InitPhoneVerificationResponse,
-  type InitVerificationInput,
-} from '@vexl-next/rest-api/src/services/user/contracts'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
+import {type InitPhoneVerificationResponse} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect} from 'effect'
+import {isString} from 'effect/Predicate'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -13,13 +13,37 @@ export const initPhoneVerificationAtom = atom(
   (
     get,
     _,
-    inputRequest: InitVerificationInput
+    phoneNumber: E164PhoneNumber
   ): Effect.Effect<InitPhoneVerificationResponse, string, never> => {
     const {t} = get(translationAtom)
-    const api = get(apiAtom)
+    return Effect.gen(function* (_) {
+      const api = get(apiAtom)
 
-    return api.user.initPhoneVerification(inputRequest).pipe(
+      const loginChallenge = yield* _(api.user.generateLoginChallenge())
+      const signedChallenge = yield* _(
+        signLoginChallenge(loginChallenge.challenge)
+      )
+
+      return yield* _(
+        api.user.initPhoneVerification({
+          body: {
+            challenge: {
+              challenge: loginChallenge.challenge,
+              clientSignature: signedChallenge,
+              serverSignature: loginChallenge.serverSignature,
+            },
+            phoneNumber,
+          },
+        })
+      )
+    }).pipe(
       Effect.catchTags({
+        UnsupportedVersionToLoginError: (e) =>
+          Effect.fail(
+            t('loginFlow.phoneNumber.errors.unsuportedVersion', {
+              version: String(e.lowestRequiredVersion),
+            })
+          ),
         PreviousCodeNotExpiredError: () =>
           Effect.fail(t('loginFlow.phoneNumber.errors.previousCodeNotExpired')),
         UnableToSendVerificationSmsError: (e) => {
@@ -47,6 +71,8 @@ export const initPhoneVerificationAtom = atom(
           new Error('Unexpected error while initializing phone verification'),
           {e}
         )
+
+        if (isString(e)) return Effect.fail(e)
 
         return Effect.fail(t('common.unknownError'))
       })

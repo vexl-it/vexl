@@ -4,9 +4,16 @@ import {
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {
+  InvalidLoginSignatureError,
+  LoginChallengeClientSignature,
+  LoginChallengeRequestEncoded,
+  LoginChallengeServerSignature,
+} from '@vexl-next/domain/src/general/loginChallenge'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Schema} from 'effect'
 export interface InvalidPhoneNumber {
@@ -48,6 +55,16 @@ export interface RequestCouldNotBeProcessedError {
 export interface InitPhoneNumberVerificationRequest {
   readonly phoneNumber: E164PhoneNumber
 }
+
+export const GenerateLoginChallengeResponse = Schema.Struct({
+  challenge: LoginChallengeRequestEncoded,
+  serverSignature: LoginChallengeServerSignature,
+})
+
+const CompletedLoginChallenge = Schema.Struct({
+  ...GenerateLoginChallengeResponse.fields,
+  clientSignature: LoginChallengeClientSignature,
+})
 
 export const VerificationId = Schema.Number.pipe(
   Schema.int(),
@@ -127,6 +144,7 @@ export class InitPhoneVerificationRequest extends Schema.Class<InitPhoneVerifica
   'InitPhoneVerificationRequest'
 )({
   phoneNumber: E164PhoneNumberE,
+  challenge: Schema.optional(CompletedLoginChallenge),
 }) {}
 
 export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoesNotMatchOldHashError>(
@@ -135,6 +153,13 @@ export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoe
   status: Schema.optionalWith(Schema.Literal(400), {
     default: () => 400 as const,
   }),
+}) {}
+
+export class UnsupportedVersionToLoginError extends Schema.TaggedError<UnsupportedVersionToLoginError>(
+  'UnsupportedVersionToLoginError'
+)('UnsupportedVersionToLoginError', {
+  status: Schema.Literal(400),
+  lowestRequiredVersion: VersionCode,
 }) {}
 
 export const PhoneNumberVerificationId = Schema.Int.pipe(
@@ -187,7 +212,9 @@ export class VerifyChallengeResponse extends Schema.Class<VerifyChallengeRespons
 
 export const InitVerificationErrors = Schema.Union(
   UnableToSendVerificationSmsError,
-  PreviousCodeNotExpiredError
+  PreviousCodeNotExpiredError,
+  UnsupportedVersionToLoginError,
+  InvalidLoginSignatureError
 )
 
 export const VerifyCodeErrors = Schema.Union(

@@ -8,6 +8,7 @@ import {mockedReportNewUserCreated} from '@vexl-next/server-utils/src/tests/mock
 import {Effect, Either, pipe, Schema} from 'effect'
 import {LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
+import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {
   checkVerificationMock,
   createVerificationMock,
@@ -42,6 +43,7 @@ describe('verify challenge', () => {
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
             body: {
+              challenge: yield* _(generateAndSignChallenge),
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
           })

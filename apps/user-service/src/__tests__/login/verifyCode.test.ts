@@ -7,6 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Either, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
+import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {
   checkVerificationMock,
   createVerificationMock,
@@ -35,6 +36,7 @@ const initVerification = Effect.gen(function* (_) {
         'user-agent': 'Vexl/2 (1.0.0) IOS',
       }),
       body: {
+        challenge: yield* _(generateAndSignChallenge),
         phoneNumber: phoneNumberToTest,
       },
     })

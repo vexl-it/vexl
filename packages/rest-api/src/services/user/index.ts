@@ -85,6 +85,8 @@ export function api({
   })
 
   return {
+    generateLoginChallenge: () =>
+      handleCommonErrorsEffect(client.generateLoginChallenge({})),
     initPhoneVerification: (initVerificationInput: InitVerificationInput) =>
       handleCommonAndExpectedErrorsEffect(
         client.initVerification({

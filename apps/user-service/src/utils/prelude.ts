@@ -7,7 +7,10 @@ import {
   type VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Context, Effect, Layer, Option, pipe, Schema} from 'effect/index'
-import {preludeApiTokenConfig} from '../configs'
+import {
+  allowLoginWithoutAllHeadersConfig,
+  preludeApiTokenConfig,
+} from '../configs'
 import {SmsVerificationSid} from './SmsVerificationSid.brand'
 
 export interface PreludeOperations {
@@ -33,6 +36,9 @@ export class PreludeService extends Context.Tag('PreludeService')<
     Effect.gen(function* (_) {
       const preludeApiToken = yield* _(preludeApiTokenConfig)
       const preludeClient = new Prelude({apiToken: preludeApiToken})
+      const allowLoginWithoutAllHeaders = yield* _(
+        allowLoginWithoutAllHeadersConfig
+      )
 
       const createVerification: PreludeOperations['createVerification'] = (
         phoneNumber: E164PhoneNumber,
@@ -43,7 +49,10 @@ export class PreludeService extends Context.Tag('PreludeService')<
           // TODO also add os version and device model once clients are force updated
           Option.isSome(headers['cf-connecting-ip']) &&
             Option.isSome(headers.clientSemverOrNone) &&
-            Option.isSome(headers.clientPlatformOrNone)
+            Option.isSome(headers.clientPlatformOrNone) &&
+            (allowLoginWithoutAllHeaders ||
+              (Option.isSome(headers.deviceModelOrNone) &&
+                Option.isSome(headers.osVersionOrNone)))
             ? Effect.void
             : Effect.fail(
                 new UnableToSendVerificationSmsError({

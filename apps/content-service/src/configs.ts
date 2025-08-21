@@ -31,3 +31,7 @@ export const btcPayServerStoreIdConfig = Config.string(
 export const btcPayServerWebhookSecretConfig = Config.string(
   'BTC_PAY_SERVER_WEBHOOK_SECRET'
 )
+
+export const forceUpdateForVersionAndLowerConfig = Config.number(
+  'FORCE_UPDATE_FOR_VERSION_AND_LOWER'
+).pipe(Config.withDefault(0))

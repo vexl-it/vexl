@@ -4,6 +4,7 @@ import {ServerSecurity} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {SubmitFeedbackRequest} from '../feedback/contracts'
 import {
+  GenerateLoginChallengeResponse,
   GetVersionServiceInfoResponse,
   InitEraseUserRequest,
   InitEraseUserResponse,
@@ -152,11 +153,20 @@ export const GetVersionServiceInfoEndpoint = Api.get(
   Api.setResponseStatus(200 as const)
 )
 
+export const GenerateLoginChallenge = Api.get(
+  'generateLoginChallenge',
+  '/api/v1/generate-login-challenge'
+).pipe(
+  Api.setResponseBody(GenerateLoginChallengeResponse),
+  Api.setResponseStatus(200 as const)
+)
+
 export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
   Api.addGroup(LoginGroup),
   Api.addGroup(EraseUserGroup),
   Api.addEndpoint(LogoutUserEndpoint),
   Api.addEndpoint(SubmitFeedbackEndpoint),
   Api.addEndpoint(RegenerateSessionCredentialsEndpoint),
-  Api.addEndpoint(GetVersionServiceInfoEndpoint)
+  Api.addEndpoint(GetVersionServiceInfoEndpoint),
+  Api.addEndpoint(GenerateLoginChallenge)
 )

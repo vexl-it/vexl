@@ -1,10 +1,7 @@
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {AesGtmCypher} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
-import {
-  InitVerificationErrors,
-  UnableToSendVerificationSmsError,
-} from '@vexl-next/rest-api/src/services/user/contracts'
+import {UnableToSendVerificationSmsError} from '@vexl-next/rest-api/src/services/user/contracts'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Effect, Schema} from 'effect'
 import {VerificationIdPayload} from '../../routes/eraseUser/utils'
@@ -90,7 +87,9 @@ describe('Initialize erase user', () => {
           return
         }
         const receivedError = yield* _(
-          Schema.decodeUnknown(InitVerificationErrors)(result.left.error)
+          Schema.decodeUnknown(UnableToSendVerificationSmsError)(
+            result.left.error
+          )
         )
         expect(receivedError.reason).toEqual('InvalidPhoneNumber')
       })

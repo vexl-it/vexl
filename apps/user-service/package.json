@@ -34,6 +34,7 @@
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
+    "@vexl-next/resources-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "dotenv": "^16.4.5",

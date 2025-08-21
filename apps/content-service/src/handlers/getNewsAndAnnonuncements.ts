@@ -1,8 +1,10 @@
+import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
 import {NewsAndAnonouncementsEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
 import {Handler} from 'effect-http'
+import {forceUpdateForVersionAndLowerConfig} from '../configs'
 
 // const data = {
 //   vexlBotNews: [
@@ -137,6 +139,29 @@ export const newsAndAnonouncementsHandler = Handler.make(
         //   cancelable: true,
         // }
 
+        const forceUpdateForVersionAndLower = yield* _(
+          forceUpdateForVersionAndLowerConfig
+        )
+        if (
+          !Option.isSome(headers.clientVersionOrNone) ||
+          headers.clientVersionOrNone.value <= forceUpdateForVersionAndLower
+        ) {
+          return {
+            fullScreenWarning: Option.some({
+              action: Option.none(),
+              cancelable: false,
+              cancelForever: false,
+              id: Schema.decodeSync(UuidE)(
+                '61362ca8-6ee2-4044-996f-cff885f8ae19'
+              ),
+              type: 'RED',
+              title: 'Update Required',
+              description:
+                'For your security and the best app experience, please update Vexl to the latest version (1.35.0 or higher). This update is required to continue using the app.',
+            }),
+            vexlBotNews: [],
+          } satisfies NewsAndAnnouncementsResponse
+        }
         return {
           fullScreenWarning: Option.none(),
           vexlBotNews: [],

@@ -14,8 +14,8 @@ import {Stack, Text, YStack, getTokens} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
-import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {preferencesAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import AnimatedModal from '../../AnimatedModal'
@@ -71,6 +71,10 @@ function NotificationTokenDebug({chat}: {chat: Chat}): JSX.Element {
     <>
       <Text>Last reported cypher: {lastReportedTokenS}</Text>
       <Text> gotNotificationToken: {lastReceivedTokenS}</Text>
+      <Text>
+        last reported token:{' '}
+        {JSON.stringify(chat.lastReportedFcmToken, null, 2)}
+      </Text>
     </>
   )
 }
@@ -118,6 +122,7 @@ function ChatInfoModal(): JSX.Element | null {
     otherSideSupportsTradingChecklistAtom
   )
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
+  const {showOfferDetail} = useAtomValue(preferencesAtom)
 
   if (!showModal) return null
 
@@ -132,7 +137,7 @@ function ChatInfoModal(): JSX.Element | null {
           <Stack mt="$4" mb="$7">
             <ChatRequestPreview mode="offerFirst" />
           </Stack>
-          {!!enableHiddenFeatures && (
+          {!!showOfferDetail && (
             <>
               <Text>
                 Last reported version: {chat.lastReportedVersion ?? 'none'} :

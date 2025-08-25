@@ -73,6 +73,7 @@ const processNotificationCypher = (
 
     if (notificationToken.type === 'fcm') {
       const {fcmToken} = notificationToken
+      yield* _(Effect.logInfo('Sending fcm notification'))
       yield* _(
         sendFirebaseMessage({
           token: fcmToken,
@@ -89,6 +90,7 @@ const processNotificationCypher = (
 
       return new IssueNotificationResponse({success: true})
     } else {
+      yield* _(Effect.logInfo('Sending expo notification'))
       const expoClient = yield* _(ExpoClientService)
       const expoToken = notificationToken.expoToken
 
@@ -109,6 +111,8 @@ const processNotificationCypher = (
         )
 
       if (sendSystemNotification) {
+        yield* _(Effect.logInfo('Sending expo system notification'))
+
         yield* _(
           expoClient.sendNotification({
             token: expoToken,
@@ -127,6 +131,7 @@ const processNotificationCypher = (
           })
         )
       }
+      yield* _(Effect.logInfo('Sending expo notification'))
 
       yield* _(
         expoClient.sendNotification({
@@ -148,6 +153,9 @@ const processNotificationCypher = (
 
     return new IssueNotificationResponse({success: true})
   }).pipe(
+    Effect.withSpan('processNotificationCypher', {
+      attributes: {notificationCypher, sendSystemNotification},
+    }),
     Effect.catchTag(
       'ExpoSdkError',
       () => new SendingNotificationError({tokenInvalid: false, status: 400})

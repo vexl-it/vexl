@@ -16,7 +16,7 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
 } from 'react-native'
-import Hyperlink from 'react-native-hyperlink'
+import Autolink from 'react-native-autolink'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -255,27 +255,29 @@ function TextMessage({
                   </TouchableWithoutFeedback>
                 </YStack>
               )}
-              <Hyperlink
-                linkDefault
+              <Autolink
+                text={messageText}
+                url
                 linkStyle={[
                   style.link,
                   {
                     color: isMine
                       ? getTokens().color.black.val
                       : getTokens().color.main.val,
+                    fontStyle: italic ? 'italic' : undefined,
+                    fontSize: 16,
+                    fontFamily: italic ? undefined : '$body500',
                   },
                 ]}
-              >
-                <Text
-                  fontStyle={italic ? 'italic' : undefined}
-                  selectable
-                  fos={16}
-                  fontFamily={italic ? undefined : '$body500'}
-                  color={isMine ? '$black' : '$white'}
-                >
-                  {messageText}
-                </Text>
-              </Hyperlink>
+                style={{
+                  color: isMine
+                    ? getTokens().color.black.val
+                    : getTokens().color.white.val,
+                  fontSize: 16,
+                  fontFamily: italic ? undefined : '$body500',
+                  fontStyle: italic ? 'italic' : undefined,
+                }}
+              />
             </Stack>
           </TouchableWithoutFeedback>
           {!!isExtended && (

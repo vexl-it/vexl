@@ -45,8 +45,8 @@ export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExist
 }) {}
 
 export class NotPermittedToSendMessageToTargetInboxError extends Schema.TaggedError<NotPermittedToSendMessageToTargetInboxError>(
-  'NotPermittedToSendMessageToTargetInbox'
-)('NotPermittedToSendMessageToTargetInbox', {
+  'NotPermittedToSendMessageToTargetInboxError'
+)('NotPermittedToSendMessageToTargetInboxError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
   code: Schema.optionalWith(Schema.Literal('100102'), {
     default: () => '100102',

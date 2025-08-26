@@ -10,7 +10,7 @@ import {
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {pipe} from 'effect'
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
@@ -40,7 +40,7 @@ export default updatesToBeSentAtom
 
 export const areThereUpdatesToBeSentAtom = atom(
   (get) =>
-    !fastDeepEqual(get(updatesToBeSentAtom), UPDATES_TO_BE_SENT_INITIAL_STATE)
+    !deepEqual(get(updatesToBeSentAtom), UPDATES_TO_BE_SENT_INITIAL_STATE)
 )
 
 const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {

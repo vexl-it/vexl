@@ -2,7 +2,7 @@ import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import {flow} from 'fp-ts/function'
-import {type ZodError, type ZodType} from 'zod'
+import {type ZodError, type infer as ZodInfer, type ZodType} from 'zod'
 
 export interface ZodParseError<T> extends BasicError<'ZodParseError'> {
   zodError: ZodError<T>
@@ -11,7 +11,7 @@ export interface ZodParseError<T> extends BasicError<'ZodParseError'> {
 
 export function safeParse<T extends ZodType>(
   zodType: T
-): (a: unknown) => E.Either<ZodParseError<Zod.infer<T>>, Zod.infer<T>> {
+): (a: unknown) => E.Either<ZodParseError<ZodInfer<T>>, ZodInfer<T>> {
   return flow(
     E.of,
     E.chainW((v) => {

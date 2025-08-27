@@ -60,7 +60,7 @@ export default function sendMessageActionAtom(
           onFailure(e) {
             if (
               e._tag === 'ReceiverInboxDoesNotExistError' ||
-              e._tag === 'NotPermittedToSendMessageToTargetInbox'
+              e._tag === 'NotPermittedToSendMessageToTargetInboxError'
             ) {
               return {
                 state: 'received',

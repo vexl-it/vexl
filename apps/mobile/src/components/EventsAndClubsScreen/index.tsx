@@ -4,7 +4,6 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import ClubsScreen from './components/ClubsScreen'
@@ -19,38 +18,36 @@ export default function EventsAndClubsScreen(): JSX.Element {
 
   return (
     <Screen>
-      <KeyboardAvoidingView>
-        <ScreenTitle
-          allowMultipleLines
-          mb="$5"
-          text={t('eventsAndClubs.title')}
-          mx="$4"
-        >
-          <IconButton
-            iconStroke="white"
-            variant="dark"
-            icon={closeSvg}
-            onPress={safeGoBack}
-          />
-        </ScreenTitle>
-        <Tab.Navigator
-          tabBar={TabBar}
-          screenOptions={{
-            animationEnabled: true,
-          }}
-        >
-          <Tab.Screen
-            options={{tabBarLabel: 'events'}}
-            name="Events"
-            component={EventsScreen}
-          />
-          <Tab.Screen
-            options={{tabBarLabel: 'clubs'}}
-            name="Clubs"
-            component={ClubsScreen}
-          />
-        </Tab.Navigator>
-      </KeyboardAvoidingView>
+      <ScreenTitle
+        allowMultipleLines
+        mb="$5"
+        text={t('eventsAndClubs.title')}
+        mx="$4"
+      >
+        <IconButton
+          iconStroke="white"
+          variant="dark"
+          icon={closeSvg}
+          onPress={safeGoBack}
+        />
+      </ScreenTitle>
+      <Tab.Navigator
+        tabBar={TabBar}
+        screenOptions={{
+          animationEnabled: true,
+        }}
+      >
+        <Tab.Screen
+          options={{tabBarLabel: 'events'}}
+          name="Events"
+          component={EventsScreen}
+        />
+        <Tab.Screen
+          options={{tabBarLabel: 'clubs'}}
+          name="Clubs"
+          component={ClubsScreen}
+        />
+      </Tab.Navigator>
     </Screen>
   )
 }

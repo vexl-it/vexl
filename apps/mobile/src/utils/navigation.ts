@@ -1,6 +1,6 @@
 import {createNavigationContainerRef} from '@react-navigation/native'
 import {ChatId} from '@vexl-next/domain/src/general/messaging'
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 import * as O from 'fp-ts/Option'
 import {pipe} from 'fp-ts/function'
 import {AppState} from 'react-native'
@@ -81,8 +81,7 @@ export function isOnSpecificChat(
     if (!activeRoute) return false
 
     return (
-      activeRoute.name === 'ChatDetail' &&
-      fastDeepEqual(activeRoute.params, keys)
+      activeRoute.name === 'ChatDetail' && deepEqual(activeRoute.params, keys)
     )
   } catch (e) {
     reportError('warn', new Error('Error in isOnSpecificChat'), {e})

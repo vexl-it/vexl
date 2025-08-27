@@ -15,6 +15,6 @@ export default Effect.flatMap(
       country_code varchar
     );
 
-    CREATE UNIQUE index "form_id_IX" ON feedback_submit (form_id);
+    CREATE UNIQUE INDEX "form_id_IX" ON feedback_submit (form_id);
   `
 )

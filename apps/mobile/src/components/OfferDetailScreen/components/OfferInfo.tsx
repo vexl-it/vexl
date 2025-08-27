@@ -5,8 +5,11 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Alert} from 'react-native'
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import {Alert, Platform} from 'react-native'
+import {
+  KeyboardAwareScrollView,
+  KeyboardStickyView,
+} from 'react-native-keyboard-controller'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -29,7 +32,6 @@ import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
 import Info from '../../Info'
-import {MAP_SIZE} from '../../MarketplaceMap'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
@@ -38,26 +40,7 @@ import {showCommonFriendsExplanationActionAtom} from '../atoms'
 import RerequestInfo from './RerequestInfo'
 import Title from './Title'
 
-const SCROLL_EXTRA_OFFSET = 200
-
-function ContentContainer({
-  mapIsVisible,
-  children,
-}: {
-  mapIsVisible?: boolean
-  children: React.ReactElement | React.ReactElement[]
-}): JSX.Element {
-  return mapIsVisible ? (
-    <Stack>{children}</Stack>
-  ) : (
-    <KeyboardAwareScrollView
-      showsVerticalScrollIndicator={false}
-      extraHeight={SCROLL_EXTRA_OFFSET}
-    >
-      {children}
-    </KeyboardAwareScrollView>
-  )
-}
+const BOTTOM_SCROLL_OFFSET = 250
 
 function OfferInfo({
   mapIsVisible,
@@ -158,10 +141,22 @@ function OfferInfo({
     offer.offerInfo.privatePart.friendLevel.length === 1 &&
     offer.offerInfo.privatePart.friendLevel[0] === 'CLUB'
 
+  const ContentContainer = offer.offerInfo.publicPart.locationState.includes(
+    'IN_PERSON'
+  )
+    ? YStack
+    : KeyboardAwareScrollView
+
+  const ButtonsContainer = offer.offerInfo.publicPart.locationState.includes(
+    'IN_PERSON'
+  )
+    ? YStack
+    : KeyboardStickyView
+
   return (
     <Stack f={1} mx="$2" my="$4">
       {!mapIsVisible && <Title offer={offer} />}
-      <ContentContainer mapIsVisible={mapIsVisible}>
+      <ContentContainer bottomOffset={BOTTOM_SCROLL_OFFSET}>
         <YStack gap="$2" mb="$2">
           <Stack mb="$2">
             <OfferWithBubbleTip
@@ -188,42 +183,45 @@ function OfferInfo({
             (requestState === 'cancelled' || requestState === 'deleted') && (
               <RerequestInfo chat={chatForOffer} />
             )}
-          {!!(!!enableHiddenFeatures || preferences.showOfferDetail) && (
-            <Text
-              onPress={() => {
-                Clipboard.setString(JSON.stringify(offer, null, 2))
-                Alert.alert(t('common.copied'))
-              }}
-            >
-              {JSON.stringify(offer, null, 2)}
-            </Text>
-          )}
         </YStack>
-      </ContentContainer>
-      <Stack pt="$2">
-        {showRequestButton ? (
-          <ButtonWithPressTimeout
-            disabled={!text.trim()}
-            onPress={onRequestPressed}
-            variant="secondary"
-            text={t('offer.sendRequest')}
-          />
-        ) : requestState !== 'cancelled' && requestState !== 'deleted' ? (
-          <Button
+        {!!(!!enableHiddenFeatures || preferences.showOfferDetail) && (
+          <Text
             onPress={() => {
-              if (!chatForOffer) return
-              navigation.navigate('ChatDetail', {
-                otherSideKey: chatForOffer.chat.otherSide.publicKey,
-                inboxKey: chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
-              })
+              Clipboard.setString(JSON.stringify(offer, null, 2))
+              Alert.alert(t('common.copied'))
             }}
-            variant="primary"
-            text={t('offer.goToChat')}
-          />
-        ) : null}
-      </Stack>
-      {/* Needed to map scroll animation work correctly */}
-      {!!mapIsVisible && <Stack h={MAP_SIZE + MAP_SIZE / 2} />}
+          >
+            {JSON.stringify(offer, null, 2)}
+          </Text>
+        )}
+      </ContentContainer>
+      <ButtonsContainer
+        offset={{closed: 10, opened: Platform.OS === 'ios' ? 30 : 0}}
+      >
+        <Stack pt="$2">
+          {showRequestButton ? (
+            <ButtonWithPressTimeout
+              disabled={!text.trim()}
+              onPress={onRequestPressed}
+              variant="secondary"
+              text={t('offer.sendRequest')}
+            />
+          ) : requestState !== 'cancelled' && requestState !== 'deleted' ? (
+            <Button
+              onPress={() => {
+                if (!chatForOffer) return
+                navigation.navigate('ChatDetail', {
+                  otherSideKey: chatForOffer.chat.otherSide.publicKey,
+                  inboxKey:
+                    chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
+                })
+              }}
+              variant="primary"
+              text={t('offer.goToChat')}
+            />
+          ) : null}
+        </Stack>
+      </ButtonsContainer>
     </Stack>
   )
 }

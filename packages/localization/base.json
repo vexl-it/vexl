@@ -366,6 +366,7 @@
   "settings.items.language.ja": "Japanese",
   "settings.items.language.nl": "Dutch",
   "settings.items.language.sw": "Swahili",
+  "settings.items.language.zh": "Chinese Simplified",
   "settings.noLogoutExplanation": "Can't find logout? There's no such thing.\nBut you can delete your account.",
   "settings.support": "If you like Vexl, support it’s improvement by sending some bitcoin as donation!",
   "settings.version": "Vexl App version: {{version}}",

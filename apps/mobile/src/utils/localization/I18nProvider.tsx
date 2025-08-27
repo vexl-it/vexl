@@ -15,6 +15,7 @@ export const supportedTranslations = {
   de: translations.de,
   cs: translations.cs,
   sk: translations.sk,
+  fr: translations.fr,
   pl: translations.pl,
   bg: translations.bg,
   ja: translations.ja,
@@ -23,6 +24,7 @@ export const supportedTranslations = {
   pt: translations.pt,
   nl: translations.nl,
   sw: translations.sw,
+  zh: translations.zh,
 }
 
 // SETUP I18n

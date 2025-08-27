@@ -54,6 +54,10 @@ import swChildAbusePrevention from '../sw-childSafetyAndSexAbusePrevention.json'
 import swPrivacyPolicyDev from '../sw-privacyPolicy.json'
 import swTermsOfUse from '../sw-termsOfUse.json'
 import termsOfUse from '../termsOfUse.json'
+import zhBase from '../zh-base.json'
+import zhChildAbusePrevention from '../zh-childSafetyAndSexAbusePrevention.json'
+import zhPrivacyPolicyDev from '../zh-privacyPolicy.json'
+import zhTermsOfUse from '../zh-termsOfUse.json'
 
 export const dev = {
   localeName: 'en_dev',
@@ -178,4 +182,13 @@ export const sw = {
   termsOfUseMD: swTermsOfUse.termsOfUseText,
   privacyPolicyMD: swPrivacyPolicyDev.privacyPolicyText,
   childAbusePrevention: swChildAbusePrevention.childSafetyAndSexAbusePrevention,
+} as const
+
+export const zh = {
+  flag: '🇨🇳',
+  ...unflatten<typeof zhBase, typeof base>(zhBase),
+  localeName: 'zh',
+  termsOfUseMD: zhTermsOfUse.termsOfUseText,
+  privacyPolicyMD: zhPrivacyPolicyDev.privacyPolicyText,
+  childAbusePrevention: zhChildAbusePrevention.childSafetyAndSexAbusePrevention,
 } as const

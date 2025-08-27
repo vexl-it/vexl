@@ -1,6 +1,7 @@
 import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import {StatusBar} from 'expo-status-bar'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
+import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
@@ -31,36 +32,38 @@ function App(): JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <BadgeCountManager />
-      <PreventScreenshots />
-      <DisableLogBoxForTests />
-      <NavigationContainer
-        ref={navigationRef}
-        theme={{
-          dark: true,
-          colors: {
-            ...DefaultTheme.colors,
-            primary: theme.background?.val,
-            background: 'transparent',
-            text: theme.color?.val,
-          },
-        }}
-      >
-        <LoadingOverlayProvider>
-          <VersionMigrations>
-            <PhoneNumberHashBugMigration>
-              <OverlayInfoScreen>
-                <GestureHandlerRootView style={{flex: 1}}>
-                  <RootNavigation />
-                </GestureHandlerRootView>
-              </OverlayInfoScreen>
-            </PhoneNumberHashBugMigration>
-          </VersionMigrations>
-          <UploadingOfferProgressModal />
-        </LoadingOverlayProvider>
-        <AreYouSureDialog />
-        <ToastNotification />
-      </NavigationContainer>
+      <KeyboardProvider statusBarTranslucent>
+        <BadgeCountManager />
+        <PreventScreenshots />
+        <DisableLogBoxForTests />
+        <NavigationContainer
+          ref={navigationRef}
+          theme={{
+            dark: true,
+            colors: {
+              ...DefaultTheme.colors,
+              primary: theme.background?.val,
+              background: 'transparent',
+              text: theme.color?.val,
+            },
+          }}
+        >
+          <LoadingOverlayProvider>
+            <VersionMigrations>
+              <PhoneNumberHashBugMigration>
+                <OverlayInfoScreen>
+                  <GestureHandlerRootView style={{flex: 1}}>
+                    <RootNavigation />
+                  </GestureHandlerRootView>
+                </OverlayInfoScreen>
+              </PhoneNumberHashBugMigration>
+            </VersionMigrations>
+            <UploadingOfferProgressModal />
+          </LoadingOverlayProvider>
+          <AreYouSureDialog />
+          <ToastNotification />
+        </NavigationContainer>
+      </KeyboardProvider>
     </SafeAreaProvider>
   )
 }

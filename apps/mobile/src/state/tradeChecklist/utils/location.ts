@@ -1,6 +1,6 @@
 import {type MeetingLocationChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 import {type TradeChecklistInState} from '../domain'
 
 type MeetingLocationInState = TradeChecklistInState['location']
@@ -29,7 +29,7 @@ export function getLatestMeetingLocationDataMessage(
   const status =
     !sentLocationData || !receivedLocationData
       ? 'pending'
-      : fastDeepEqual(
+      : deepEqual(
             extractLocation(sentLocationData),
             extractLocation(receivedLocationData)
           )

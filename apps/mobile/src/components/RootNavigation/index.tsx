@@ -1,6 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
 import {memo} from 'react'
+import {getTokens} from 'tamagui'
 import {type RootStackParamsList} from '../../navigationTypes'
 import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
@@ -91,6 +92,7 @@ function RootNavigation(): JSX.Element {
         screenOptions={{
           headerShown: false,
           presentation: 'card',
+          statusBarColor: getTokens().color.black.val,
         }}
       >
         {!isLoggedIn ? (

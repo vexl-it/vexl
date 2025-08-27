@@ -1,5 +1,5 @@
 import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 import {atom, type Atom} from 'jotai'
 import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
@@ -45,7 +45,7 @@ export default function createChecklistItemStatusAtom(
       if (
         tsSent &&
         tsReceived &&
-        fastDeepEqual(sentDataNoTimestamp, receivedDataNoTimestamp)
+        deepEqual(sentDataNoTimestamp, receivedDataNoTimestamp)
       )
         return 'accepted'
 

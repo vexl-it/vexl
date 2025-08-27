@@ -1,6 +1,6 @@
 import {type AmountChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 import calculatePercentageDifference from '../../../utils/calculatePercentageDifference'
 import {removeTrailingZerosFromNumberString} from '../../../utils/removeTrailingZerosFromNumberString'
 import {DECIMALS_FOR_BTC_VALUE} from '../../currentBtcPriceAtoms'
@@ -25,7 +25,7 @@ export function getLatestAmountDataMessage(
   const {timestamp: tsReceived, ...receivedDataNoTimestamp} = {
     ...receivedAmountData,
   }
-  const status = fastDeepEqual(sentDataNoTimestamp, receivedDataNoTimestamp)
+  const status = deepEqual(sentDataNoTimestamp, receivedDataNoTimestamp)
     ? 'accepted'
     : 'pending'
 

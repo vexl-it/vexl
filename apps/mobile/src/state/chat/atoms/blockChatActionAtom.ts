@@ -1,12 +1,18 @@
 import {
   generateChatMessageId,
   type ChatMessage,
+  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
+import sendMessage, {
+  type SendMessageApiErrors,
+} from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {
+  type JsonStringifyError,
+  type ZodParseError,
+} from '@vexl-next/resources-utils/src/utils/parsing'
 import {type Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
@@ -25,8 +31,19 @@ export default function blockChatActionAtom(
   [{text: string}],
   TE.TaskEither<
     | ErrorEncryptingMessage
-    | Effect.Effect.Error<ReturnType<ChatApi['blockInbox']>>
-    | Effect.Effect.Error<ReturnType<typeof sendMessage>>,
+    | Effect.Effect.Error<
+        Exclude<
+          SendMessageApiErrors,
+          {
+            _tag:
+              | 'ReceiverInboxDoesNotExistError'
+              | 'SenderInboxDoesNotExistError'
+              | 'NotPermittedToSendMessageToTargetInboxError'
+          }
+        >
+      >
+    | ZodParseError<ChatMessagePayload>
+    | JsonStringifyError,
     ChatMessageWithState
   >
 > {
@@ -56,11 +73,11 @@ export default function blockChatActionAtom(
         })
       ),
       TE.matchW(
-        (e): E.Either<typeof e, null> => {
+        (e) => {
           if (
             e._tag === 'SenderInboxDoesNotExistError' ||
             e._tag === 'ReceiverInboxDoesNotExistError' ||
-            e._tag === 'NotPermittedToSendMessageToTargetInbox'
+            e._tag === 'NotPermittedToSendMessageToTargetInboxError'
           ) {
             return E.right(null)
           }

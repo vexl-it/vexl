@@ -29,7 +29,7 @@ function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
         px={fullScreen ? 0 : '$2'}
         btlr={fullScreen ? 0 : '$7'}
         btrr={fullScreen ? 0 : '$7'}
-        pb={fullScreen ? 0 : bottom + 20}
+        pb={fullScreen ? 0 : bottom}
       >
         <Header />
         {children}

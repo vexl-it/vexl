@@ -1,4 +1,4 @@
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 import {useAtomValue} from 'jotai'
 import {memo} from 'react'
 import {Stack, getTokens} from 'tamagui'
@@ -44,4 +44,4 @@ function SetContactsScreen({route: {params}}: Props): JSX.Element {
   )
 }
 
-export default memo(SetContactsScreen, fastDeepEqual)
+export default memo(SetContactsScreen, deepEqual)

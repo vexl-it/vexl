@@ -1,4 +1,4 @@
-import fastDeepEqual from 'fast-deep-equal'
+import {deepEqual} from 'fast-equals'
 
 export function fastDeepEqualRemoveUndefineds<T extends object>(
   first: T,
@@ -12,5 +12,5 @@ export function fastDeepEqualRemoveUndefineds<T extends object>(
     Object.entries(second).filter(([_, v]) => v !== undefined)
   )
 
-  return fastDeepEqual(firstNoUndefineds, secondNoUndefineds)
+  return deepEqual(firstNoUndefineds, secondNoUndefineds)
 }

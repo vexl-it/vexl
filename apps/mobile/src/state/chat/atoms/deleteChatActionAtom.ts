@@ -31,7 +31,14 @@ export default function deleteChatActionAtom(
   [{text: string}],
   TE.TaskEither<
     | ErrorEncryptingMessage
-    | SendMessageApiErrors
+    | Exclude<
+        SendMessageApiErrors,
+        {
+          _tag:
+            | 'ReceiverInboxDoesNotExistError'
+            | 'NotPermittedToSendMessageToTargetInboxError'
+        }
+      >
     | ZodParseError<ChatMessagePayload>
     | JsonStringifyError,
     ChatMessageWithState
@@ -72,10 +79,10 @@ export default function deleteChatActionAtom(
             {}
           ),
       TE.matchW(
-        (e): E.Either<typeof e, null> => {
+        (e) => {
           if (
             e._tag === 'ReceiverInboxDoesNotExistError' ||
-            e._tag === 'NotPermittedToSendMessageToTargetInbox'
+            e._tag === 'NotPermittedToSendMessageToTargetInboxError'
           ) {
             return E.right(null)
           }

@@ -46,12 +46,7 @@ function PhoneNumberScreen({navigation}: Props): JSX.Element {
           </Text>
         </Stack>
         <Stack my="$4">
-          <PhoneNumberInput
-            onChange={(number) => {
-              console.log(`OnChange call`)
-              setPhoneNumber(number)
-            }}
-          />
+          <PhoneNumberInput onChange={setPhoneNumber} />
         </Stack>
         <AnonymizationCaption />
       </WhiteContainerWithScroll>

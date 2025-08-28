@@ -268,6 +268,7 @@
   "loginFlow.phoneNumber.errors.previousCodeNotExpired": "Verification for this phone number is already in progress. Please wait until it expires.",
   "loginFlow.phoneNumber.errors.unableToSendVerificationSms": "Unable to send verification SMS. Please try again later.",
   "loginFlow.phoneNumber.errors.unsuportedVersion": "To login, please update the app to version {{version}} or higher",
+  "loginFlow.phoneNumber.errors.tooManyLoginAttempts": "Too many login attempts. Please try again later.",
   "loginFlow.verificationCode.title": "We just sent you the verification code",
   "loginFlow.verificationCode.text": "Enter it below to verify",
   "loginFlow.verificationCode.inputPlaceholder": "Your verification code",

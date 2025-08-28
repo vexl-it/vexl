@@ -5,6 +5,10 @@ import {Effect} from 'effect'
 import {isString} from 'effect/Predicate'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {
+  allowLoginAgainAtom,
+  updateNumberOfLoginAttemptsActionAtom,
+} from '../../../state/numberOfLoginAttemptsMmkvAtom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 
@@ -12,7 +16,7 @@ export const initPhoneVerificationAtom = atom(
   null,
   (
     get,
-    _,
+    set,
     phoneNumber: E164PhoneNumber
   ): Effect.Effect<InitPhoneVerificationResponse, string, never> => {
     const {t} = get(translationAtom)
@@ -23,6 +27,13 @@ export const initPhoneVerificationAtom = atom(
       const signedChallenge = yield* _(
         signLoginChallenge(loginChallenge.challenge)
       )
+
+      set(updateNumberOfLoginAttemptsActionAtom, phoneNumber)
+
+      if (!get(allowLoginAgainAtom))
+        return yield* _(
+          Effect.fail({_tag: 'TooManyLoginAttemptsError' as const})
+        )
 
       return yield* _(
         api.user.initPhoneVerification({
@@ -64,6 +75,8 @@ export const initPhoneVerificationAtom = atom(
           )
           return Effect.fail(t('common.unexpectedServerResponse'))
         },
+        TooManyLoginAttemptsError: () =>
+          Effect.fail(t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')),
       }),
       Effect.catchAll((e) => {
         reportError(

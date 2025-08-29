@@ -25,7 +25,7 @@ function Info({
   hideCloseButton,
   visibleStateAtom: nullableVisibleStateAtom,
   variant = 'pink',
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const tokens = getTokens()
 
   const visibleStateAtom = useMemo(() => {

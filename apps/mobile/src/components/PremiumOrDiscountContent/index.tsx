@@ -1,5 +1,5 @@
 import {useAtom, type SetStateAction, type WritableAtom} from 'jotai'
-import {type ReactNode} from 'react'
+import React, {type ReactNode} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -32,7 +32,7 @@ function PremiumOrDiscountContent({
   feeAmountAtom,
   proceedToDetailDisabled,
   onProceedToDetailPress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [feeAmount, setFeeAmount] = useAtom(feeAmountAtom)
 

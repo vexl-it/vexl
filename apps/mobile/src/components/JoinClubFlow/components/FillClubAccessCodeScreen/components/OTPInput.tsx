@@ -1,13 +1,13 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {type Ref, useRef} from 'react'
+import React, {type Ref, useRef} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Input, XStack, YStack} from 'tamagui'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {accessCodeMolecule, CODE_LENGTH} from '../../../atoms'
 import CodeInputElement from './CodeInputElement'
 
-function OTPInput(): JSX.Element {
+function OTPInput(): React.ReactElement {
   const ref: Ref<Input> = useRef(null)
   const {accessCodeAtomsAtom, handleAccessCodeElementChangeActionAtom} =
     useMolecule(accessCodeMolecule)

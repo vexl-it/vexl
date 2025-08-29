@@ -5,7 +5,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Alert, ScrollView} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
@@ -30,7 +30,7 @@ import ButtonStack from './ButtonStack'
 import ChatRequestPreview from './ChatRequestPreview'
 import {PHOTO_AND_INFO_PHOTO_TOP_HEIGHT} from './OtherSideNamePhotoAndInfo'
 
-function NotificationTokenDebug({chat}: {chat: Chat}): JSX.Element {
+function NotificationTokenDebug({chat}: {chat: Chat}): React.ReactElement {
   const [lastReportedTokenS, setLastReportedTokenS] = useState('none')
   const [lastReceivedTokenS, setLastReceviedTokenS] = useState('none')
 
@@ -79,7 +79,7 @@ function NotificationTokenDebug({chat}: {chat: Chat}): JSX.Element {
   )
 }
 
-function ChatInfoModal(): JSX.Element | null {
+function ChatInfoModal(): React.ReactElement | null {
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,

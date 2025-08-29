@@ -1,6 +1,6 @@
 import {MoneyTextInput} from '@alexzunik/react-native-money-input'
 import {useAtom, useSetAtom} from 'jotai'
-import {useEffect, useMemo, useRef} from 'react'
+import React, {useEffect, useMemo, useRef} from 'react'
 import {type TextInput} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -39,7 +39,7 @@ function usePaymentMethodsContent(): Array<
   )
 }
 
-function DonationAmount(): JSX.Element {
+function DonationAmount(): React.ReactElement {
   const {t} = useTranslation()
   const moneyInputRef = useRef<TextInput>(null)
   const paymentMethods = usePaymentMethodsContent()

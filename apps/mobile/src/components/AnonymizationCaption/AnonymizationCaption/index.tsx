@@ -1,4 +1,4 @@
-import {type ComponentProps} from 'react'
+import React, {type ComponentProps} from 'react'
 import {Stack, Text, getTokens} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
@@ -10,7 +10,11 @@ interface Props {
   text?: string
 }
 
-function AnonymizationCaption({style, fontSize, text}: Props): JSX.Element {
+function AnonymizationCaption({
+  style,
+  fontSize,
+  text,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const textToDisplay = text ?? t('loginFlow.anonymityNotice')

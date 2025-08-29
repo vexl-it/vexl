@@ -2,7 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {type InvoiceStatus} from '@vexl-next/rest-api/src/services/content/contracts'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import chevronRightSvg from '../../../images/chevronRightSvg'
@@ -17,7 +17,11 @@ import Image from '../../Image'
 import bitcoinSvg from '../images/bitcoinSvg'
 import lightningSvg from '../images/lightningSvg'
 
-function IvoiceStatusIndicator({status}: {status: InvoiceStatus}): JSX.Element {
+function IvoiceStatusIndicator({
+  status,
+}: {
+  status: InvoiceStatus
+}): React.ReactElement {
   const {t} = useTranslation()
 
   const color = useMemo(() => {
@@ -49,7 +53,11 @@ function IvoiceStatusIndicator({status}: {status: InvoiceStatus}): JSX.Element {
   )
 }
 
-function DonationsListItem({donation}: {donation: MyDonation}): JSX.Element {
+function DonationsListItem({
+  donation,
+}: {
+  donation: MyDonation
+}): React.ReactElement {
   const navigation = useNavigation()
   const {t} = useTranslation()
 

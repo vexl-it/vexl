@@ -1,3 +1,4 @@
+import React from 'react'
 import {ScrollView} from 'react-native'
 import {Stack, styled} from 'tamagui'
 
@@ -21,7 +22,7 @@ export function WhiteContainerWithScroll({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <WhiteContainer noPadding>
       <ScrollView>

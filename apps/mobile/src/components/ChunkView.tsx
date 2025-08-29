@@ -11,7 +11,7 @@ interface Props {
 export default function ChunkView({
   children,
   displayOnProgress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const [batchIndex, setBatchIndexRaw] = useState(1)
   const focusedRef = useRef(true)
   const batchIndexRef = useRef(1)

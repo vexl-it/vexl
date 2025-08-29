@@ -1,6 +1,6 @@
 import {Option} from 'effect'
 import {getContactByIdAsync} from 'expo-contacts'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Image} from 'tamagui'
 import {type NonUniqueContactId} from '../state/contacts/domain'
 
@@ -14,7 +14,7 @@ export default function ContactPictureImage({
   contactId,
   fallback,
   ...props
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const [imageUri, setImageUri] = useState<string | null>(null)
 
   useEffect(() => {

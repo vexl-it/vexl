@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import React from 'react'
 import {type CRUDOfferStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ClubsComponent from '../../OfferForm/components/Clubs'
@@ -10,7 +11,7 @@ import ScreenWrapper from './ScreenWrapper'
 
 type Props = CRUDOfferStackScreenProps<'FriendLevelScreen'>
 
-function FriendLevelScreen({navigation}: Props): JSX.Element {
+function FriendLevelScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {intendedConnectionLevelAtom, createSelectClubAtom} =
     useMolecule(offerFormMolecule)

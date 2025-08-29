@@ -1,4 +1,3 @@
-import React from 'react'
 import {View} from 'react-native'
 import {fireEvent, render, screen} from 'testUtils'
 import ProgressJourney, {type Props} from './index'

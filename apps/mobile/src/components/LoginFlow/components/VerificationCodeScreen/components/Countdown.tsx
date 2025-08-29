@@ -1,5 +1,5 @@
 import type Luxon from 'luxon'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Text, type TextProps} from 'tamagui'
 
 interface Props extends TextProps {
@@ -7,7 +7,11 @@ interface Props extends TextProps {
   onFinished: () => void
 }
 
-function Countdown({countUntil, onFinished, ...props}: Props): JSX.Element {
+function Countdown({
+  countUntil,
+  onFinished,
+  ...props
+}: Props): React.ReactElement {
   const [secLeft, setSecLeft] = useState(
     Math.floor(countUntil.diffNow().as('seconds'))
   )

@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {getTokens} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
@@ -16,7 +17,9 @@ interface Props {
   message: ChatMessageWithState
 }
 
-function TradeChecklistNetworkView({message}: Props): JSX.Element | null {
+function TradeChecklistNetworkView({
+  message,
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const {otherSideDataAtom, tradeChecklistNetworkAtom} =
     useMolecule(chatMolecule)

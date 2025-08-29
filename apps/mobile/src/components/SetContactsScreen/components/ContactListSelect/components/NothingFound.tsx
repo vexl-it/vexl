@@ -1,7 +1,8 @@
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
-function NothingFound(): JSX.Element {
+function NothingFound(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

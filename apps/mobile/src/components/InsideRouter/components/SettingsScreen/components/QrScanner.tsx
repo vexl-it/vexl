@@ -2,7 +2,7 @@ import {Effect} from 'effect'
 import {Camera, CameraView} from 'expo-camera'
 import {useSetAtom} from 'jotai'
 import {useCallback, useEffect, useRef, useState} from 'react'
-import React, {Alert, Dimensions, Linking} from 'react-native'
+import {Alert, Dimensions, Linking} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import {handleDeepLinkActionAtom} from '../../../../../utils/deepLinks'
 import {type DeepLinkData} from '../../../../../utils/deepLinks/parseDeepLink'
@@ -23,7 +23,7 @@ function QrScanner({
 }: {
   title?: string
   allowOnlySpecificTypes?: Array<DeepLinkData['searchParams']['type']>
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const [error, setError] = useState<string | undefined>(undefined)
   const scanned = useRef(false)

@@ -1,5 +1,6 @@
 import {type Speaker} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Option} from 'effect'
+import React from 'react'
 import {Linking} from 'react-native'
 import {Image, Text, XStack} from 'tamagui'
 
@@ -7,7 +8,7 @@ export default function EventSpeaker({
   speaker,
 }: {
   speaker: Speaker
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <XStack
       padding="$1"

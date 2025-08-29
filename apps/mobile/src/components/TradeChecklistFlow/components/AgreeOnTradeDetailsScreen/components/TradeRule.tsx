@@ -1,3 +1,4 @@
+import React from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 
 interface Props {
@@ -5,7 +6,7 @@ interface Props {
   title: string
 }
 
-function TradeRule({ruleNumber, title}: Props): JSX.Element {
+function TradeRule({ruleNumber, title}: Props): React.ReactElement {
   return (
     <XStack ai="center" gap="$4">
       <Stack ai="center" jc="center" h={40} w={40} bc="$grey" br="$5">

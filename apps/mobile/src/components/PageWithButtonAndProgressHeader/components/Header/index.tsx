@@ -1,5 +1,5 @@
 import {useAtomValue} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Stack, styled, XStack} from 'tamagui'
 import backButtonSvg from '../../../../images/backButtonSvg'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
@@ -27,7 +27,7 @@ const ProgressBar = styled(Stack, {
   },
 })
 
-function Header(): JSX.Element | null {
+function Header(): React.ReactElement | null {
   const headerOptions = useAtomValue(headerStateAtom)
   const onPress = useCallback(() => {
     void dismissKeyboardAndResolveOnLayoutUpdate().then(headerOptions.goBack)

@@ -1,6 +1,6 @@
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {useAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack} from 'tamagui'
 import {
@@ -15,7 +15,9 @@ interface LanguageSelectItemProps {
   language: (typeof translations)[number]
 }
 
-function LanguageSelectItem({language}: LanguageSelectItemProps): JSX.Element {
+function LanguageSelectItem({
+  language,
+}: LanguageSelectItemProps): React.ReactElement {
   const {t} = useTranslation()
   const [isSelected, select] = useAtom(
     useMemo(() => createIsLanguageSelectedAtom(language), [language])

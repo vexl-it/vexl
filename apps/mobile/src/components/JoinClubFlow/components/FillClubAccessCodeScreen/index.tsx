@@ -3,6 +3,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import React from 'react'
 import {Keyboard, TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import {type JoinClubFlowStackScreenProps} from '../../../../navigationTypes'
@@ -20,7 +21,7 @@ import OTPInput from './components/OTPInput'
 
 type Props = JoinClubFlowStackScreenProps<'FillClubAccessCodeScreen'>
 
-function FillClubAccessCodeScreen({navigation}: Props): JSX.Element {
+function FillClubAccessCodeScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {isCodeFilledAtom, isCodeInvalidAtom, accessCodeAtom} =
     useMolecule(accessCodeMolecule)

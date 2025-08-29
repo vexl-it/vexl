@@ -1,8 +1,9 @@
 import {atom} from 'jotai'
+import React from 'react'
 import UserFeedback from '../../UserFeedback'
 import {generateInitialFeedback} from '../../UserFeedback/atoms'
 
-function ChatFeedbackDialogContent(): JSX.Element {
+function ChatFeedbackDialogContent(): React.ReactElement {
   return (
     <UserFeedback
       feedbackAtom={atom(generateInitialFeedback('CHAT_RATING'))}

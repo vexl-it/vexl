@@ -1,9 +1,10 @@
 import {useAtom, useAtomValue} from 'jotai/index'
+import React from 'react'
 import {baseFilterDropdownDataAtom} from '../../../state/marketplace/atoms/filterAtoms'
 import {Dropdown} from '../../Dropdown'
 import {baseFilterTempAtom} from '../atom'
 
-function BaseFilter(): JSX.Element {
+function BaseFilter(): React.ReactElement {
   const baseFilterDropdownData = useAtomValue(baseFilterDropdownDataAtom)
   const [baseFilterTemp, setBaseFilterTemp] = useAtom(baseFilterTempAtom)
 

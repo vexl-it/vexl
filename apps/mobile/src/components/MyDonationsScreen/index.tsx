@@ -1,6 +1,6 @@
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -13,7 +13,7 @@ import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import DonationsList from './components/DonationsList'
 
-function MyDonationsScreen(): JSX.Element {
+function MyDonationsScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const showDonationsPrompt = useSetAtom(showDonationPromptActionAtom)

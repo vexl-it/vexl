@@ -1,9 +1,10 @@
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
 
-function GoldenAvatarInfoModalContent(): JSX.Element {
+function GoldenAvatarInfoModalContent(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

@@ -1,5 +1,5 @@
 import {useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
@@ -25,7 +25,7 @@ function ChecklistCell({
   onPress,
   sideNote,
   subtitle,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const itemStatus = useAtomValue(
     useMemo(() => createChecklistItemStatusAtom(item), [item])

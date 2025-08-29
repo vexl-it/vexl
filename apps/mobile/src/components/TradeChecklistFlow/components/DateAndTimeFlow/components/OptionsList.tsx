@@ -34,7 +34,7 @@ function Item<T>({
   item: Atom<Item<T>>
   onPress: (item: T) => void
   showChevron?: boolean
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const item = useAtomValue(itemAtom)
   const {selected} = item
@@ -108,7 +108,7 @@ function OptionsList<T>({
   showChevron,
   items,
   onItemPress,
-}: Props<T>): JSX.Element {
+}: Props<T>): React.ReactElement {
   const renderItem = useCallback(
     ({item}: {item: Atom<Item<T>>}) => {
       return (

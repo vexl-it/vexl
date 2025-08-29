@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import DeliveryMethod from '../../OfferForm/components/DeliveryMethod'
 import Network from '../../OfferForm/components/Network'
@@ -8,7 +9,7 @@ import networkSvg from '../../images/networkSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function DeliveryMethodAndNetworkScreen(): JSX.Element {
+function DeliveryMethodAndNetworkScreen(): React.ReactElement {
   const {t} = useTranslation()
   const {
     locationAtom,

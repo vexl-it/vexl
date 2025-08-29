@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Text} from 'tamagui'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
@@ -20,7 +20,7 @@ import {
 
 const tempFeeAmountAtom = atom<number>(0)
 
-function PremiumOrDiscountScreen(): JSX.Element {
+function PremiumOrDiscountScreen(): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 

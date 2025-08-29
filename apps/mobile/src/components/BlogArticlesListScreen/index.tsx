@@ -2,7 +2,7 @@ import {type BlogArticlePreview} from '@vexl-next/rest-api/src/services/content/
 import dayjs from 'dayjs'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Dimensions, Linking} from 'react-native'
 import {Image, ScrollView, Stack, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -11,7 +11,7 @@ import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import {blogsStateAtom, loadBlogsActionAtom} from './state'
 
-function BlogItem({item}: {item: BlogArticlePreview}): JSX.Element {
+function BlogItem({item}: {item: BlogArticlePreview}): React.ReactElement {
   const {t} = useTranslation()
   return (
     <YStack gap="$4">
@@ -48,7 +48,7 @@ function BlogItem({item}: {item: BlogArticlePreview}): JSX.Element {
   )
 }
 
-export function BlogArticlesListScreen(): JSX.Element {
+export function BlogArticlesListScreen(): React.ReactElement {
   const loadBlogs = useSetAtom(loadBlogsActionAtom)
   const {data, error, loading} = useAtomValue(blogsStateAtom)
   const {t} = useTranslation()

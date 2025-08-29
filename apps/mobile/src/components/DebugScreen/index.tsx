@@ -13,6 +13,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import React from 'react'
 import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
 import {apiAtom, apiEnv} from '../../api'
@@ -76,7 +77,7 @@ import MmkvAtomTest from './components/mmkvAtomTest'
 //   },
 // })
 
-function DebugScreen(): JSX.Element {
+function DebugScreen(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const store = useStore()
   const session = useSessionAssumeLoggedIn()

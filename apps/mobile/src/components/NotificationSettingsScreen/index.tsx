@@ -16,7 +16,7 @@ const notificationPreferencesToShow = [
   'newOfferInMarketplace',
 ] as const
 
-function NotificationSettingsScreen(): JSX.Element {
+function NotificationSettingsScreen(): React.ReactElement {
   const {t} = useTranslation()
 
   const contents = useMemo(() => {

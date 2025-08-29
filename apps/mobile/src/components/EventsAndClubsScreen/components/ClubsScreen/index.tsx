@@ -1,5 +1,6 @@
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {Stack, XStack, YStack} from 'tamagui'
 import {type EventsAndClubsTabsScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -9,7 +10,7 @@ import {showClubAccessDialogActionAtom} from './utils/requestClubAccessDialog'
 
 type Props = EventsAndClubsTabsScreenProps<'Clubs'>
 
-function ClubsScreen({navigation}: Props): JSX.Element {
+function ClubsScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const showClubAccessDialog = useSetAtom(showClubAccessDialogActionAtom)

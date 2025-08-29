@@ -29,7 +29,7 @@ function CommonFriends({
   commonConnectionsHashes,
   variant,
   otherSideClubs,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const tokens = getTokens()
   const store = useStore()
   const navigation = useNavigation()

@@ -31,7 +31,7 @@ function SpokenLanguageSelect({
   onSubmit,
   resetSelectedSpokenLanguagesActionAtom,
   visible,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const resetSelectedSpokenLanguages = useSetAtom(
     resetSelectedSpokenLanguagesActionAtom

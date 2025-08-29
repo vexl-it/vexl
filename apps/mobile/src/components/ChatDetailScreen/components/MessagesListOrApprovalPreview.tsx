@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useAppState} from '../../../utils/useAppState'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
@@ -11,7 +11,7 @@ import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
 import MessagesScreen from './MessagesScreen'
 import RequestScreen from './RequestScreen'
 
-export default function MessagesListOrApprovalPreview(): JSX.Element {
+export default function MessagesListOrApprovalPreview(): React.ReactElement {
   const {chatUiModeAtom, chatAtom, publicKeyPemBase64Atom} =
     useMolecule(chatMolecule)
   const chatUiMode = useAtomValue(chatUiModeAtom)

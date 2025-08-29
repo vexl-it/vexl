@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {amountSettled} from '../../../../../state/tradeChecklist/utils/amount'
 import {contactRevealed} from '../../../../../state/tradeChecklist/utils/contact'
 import {dateAndTimeSettled} from '../../../../../state/tradeChecklist/utils/dateAndTime'
@@ -12,7 +13,7 @@ import TradeChecklistDateAndTimeSuggestionView from './TradeChecklistDateAndTime
 import TradeChecklistMeetingLocationSuggestionView from './TradeChecklistMeetingLocationSuggestionView'
 import TradeChecklistNetworkSuggestionView from './TradeChecklistNetworkSuggestionView'
 
-function VexlbotNextActionSuggestion(): JSX.Element | null {
+function VexlbotNextActionSuggestion(): React.ReactElement | null {
   const {
     offerForChatAtom,
     tradeChecklistDateAndTimeAtom,

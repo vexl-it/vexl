@@ -1,5 +1,5 @@
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useMemo, type ReactNode} from 'react'
+import React, {useMemo, type ReactNode} from 'react'
 import {Stack, styled} from 'tamagui'
 import VexlActivityIndicator from './VexlActivityIndicator'
 
@@ -20,7 +20,7 @@ interface Props {
 
 export const loadingOverlayDisplayedAtom = atom(false)
 
-function LoadingOverlayProvider({children}: Props): JSX.Element {
+function LoadingOverlayProvider({children}: Props): React.ReactElement {
   const isDisplayed = useAtomValue(loadingOverlayDisplayedAtom)
   return (
     <>

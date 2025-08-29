@@ -15,7 +15,9 @@ interface Props {
   onPremiumOrDiscountPress: () => void
 }
 
-function PremiumOrDiscount({onPremiumOrDiscountPress}: Props): JSX.Element {
+function PremiumOrDiscount({
+  onPremiumOrDiscountPress,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [premiumOrDiscountEnabled, setPremiumOrDiscountEnabled] = useAtom(
     premiumOrDiscountEnabledAtom

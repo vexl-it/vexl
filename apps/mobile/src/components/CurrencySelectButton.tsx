@@ -1,5 +1,6 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {useAtomValue, type Atom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Text, XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../images/chevronDownSvg'
@@ -10,7 +11,10 @@ interface Props extends TouchableOpacityProps {
   currencyAtom: Atom<CurrencyCode | undefined>
 }
 
-function CurrencySelectButton({currencyAtom, ...props}: Props): JSX.Element {
+function CurrencySelectButton({
+  currencyAtom,
+  ...props
+}: Props): React.ReactElement {
   const currency = useAtomValue(currencyAtom)
 
   return (

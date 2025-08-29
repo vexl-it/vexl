@@ -1,5 +1,6 @@
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
 import {finishPostLoginFlowActionAtom} from '../../../../state/postLoginOnboarding'
@@ -14,7 +15,7 @@ import findOffersInVexlClubsSvg from './image/findOffersInVexlClubsSvg'
 
 type Props = PostLoginFlowStackScreenProps<'FindOffersInVexlClubsScreen'>
 
-function FindOffersInVexlClubsScreen({navigation}: Props): JSX.Element {
+function FindOffersInVexlClubsScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
 

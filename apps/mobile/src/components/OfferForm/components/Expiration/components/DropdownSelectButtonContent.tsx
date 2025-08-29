@@ -1,6 +1,7 @@
 import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 import {useAtom, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack, getTokens} from 'tamagui'
 import {
@@ -14,7 +15,9 @@ interface Props {
   expirationDateAtom: PrimitiveAtom<JSDateString | undefined>
 }
 
-function DropdownSelectButtonContent({expirationDateAtom}: Props): JSX.Element {
+function DropdownSelectButtonContent({
+  expirationDateAtom,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
   const [expirationDate, setExpirationDate] = useAtom(expirationDateAtom)

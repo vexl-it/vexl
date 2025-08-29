@@ -5,7 +5,7 @@ import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
-import {Fragment, useCallback, useMemo} from 'react'
+import React, {Fragment, useCallback, useMemo} from 'react'
 import {
   Alert,
   Platform,
@@ -57,7 +57,7 @@ import {reportIssueDialogAtom} from './ReportIssue'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 
 interface ItemProps {
-  text: string | JSX.Element
+  text: string | React.ReactElement
   icon: SvgString
   iconFill?: ColorValue
   navigatesFurther?: boolean
@@ -76,7 +76,7 @@ function Item({
   onPress,
   children,
   hidden,
-}: ItemProps): JSX.Element | null {
+}: ItemProps): React.ReactElement | null {
   const tokens = getTokens()
   return !hidden ? (
     <TouchableWithoutFeedback testID={testID} onPress={onPress}>
@@ -109,7 +109,7 @@ function Item({
   ) : null
 }
 
-function ButtonsSection(): JSX.Element {
+function ButtonsSection(): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const logout = useLogout()

@@ -35,7 +35,7 @@ const Image = Styled.img`
   }
 `
 
-export default function NumberOfUsers(): JSX.Element {
+export default function NumberOfUsers(): React.ReactElement {
   const count = useAtomValue(totalNumberOfUsersAtom)
   return (
     <Root>

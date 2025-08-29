@@ -5,7 +5,7 @@ import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {some} from 'fp-ts/lib/Option'
 import {useStore} from 'jotai'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Spinner, YStack} from 'tamagui'
 import {apiAtom, apiEnv, platform} from '../../api'
 import {type Session} from '../../brands/Session.brand'
@@ -26,7 +26,7 @@ export default function PhoneNumberHashBugMigration({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   const [migrationDone, setMigrationDone] = useState(false)
   const store = useStore()
 

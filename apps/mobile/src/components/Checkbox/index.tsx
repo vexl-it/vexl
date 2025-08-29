@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   TouchableWithoutFeedback,
   type TouchableWithoutFeedbackProps,
@@ -37,7 +38,7 @@ function Checkbox({
   onChange,
   size = 'large',
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   return (
     <TouchableWithoutFeedback
       onPress={() => {

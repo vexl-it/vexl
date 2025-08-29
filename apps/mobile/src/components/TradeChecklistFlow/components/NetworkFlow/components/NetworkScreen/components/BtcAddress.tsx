@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
@@ -12,7 +13,7 @@ import {btcAddressAtom, btcNetworkAtom} from '../../../atoms'
 import btcSvg from '../images/btcSvg'
 import SectionTitle from './SectionTitle'
 
-function BtcAddress(): JSX.Element | null {
+function BtcAddress(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()

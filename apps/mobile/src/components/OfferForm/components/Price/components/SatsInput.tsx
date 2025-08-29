@@ -21,7 +21,7 @@ interface Props {
 function SatsInput({
   calculateFiatValueOnSatsValueChangeActionAtom,
   satsValueAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const ref = useRef<TextInput>(null)
 
   const [isFocused, setIsFocused] = useState<boolean>(false)

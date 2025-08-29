@@ -1,4 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import React from 'react'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import SvgImage from './Image'
 
@@ -27,7 +28,7 @@ function Section({
   image,
   imageFill,
   children,
-}: SectionProps): JSX.Element {
+}: SectionProps): React.ReactElement {
   return (
     <YStack mb="$4">
       <XStack ai="center" py="$4" gap="$2">

@@ -1,4 +1,5 @@
 import {type TradeChecklistItemStatus} from '@vexl-next/domain/src/general/tradeChecklist'
+import React from 'react'
 import {getTokens, Stack} from 'tamagui'
 import BlockIconSvg from '../../../../../images/blockIconSvg'
 import pendingSvg from '../../../../../images/pendingSvg'
@@ -12,7 +13,7 @@ interface Props {
 
 function empty(): void {}
 
-function StatusIndicator({itemStatus}: Props): JSX.Element {
+function StatusIndicator({itemStatus}: Props): React.ReactElement {
   return (
     <Stack
       ai="center"

@@ -3,6 +3,7 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {Linking, type StyleProp, type ViewStyle} from 'react-native'
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler'
 import {Text} from 'tamagui'
@@ -15,7 +16,7 @@ function VersionTextWithSecretDoor({
   style,
 }: {
   style?: StyleProp<ViewStyle>
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
 

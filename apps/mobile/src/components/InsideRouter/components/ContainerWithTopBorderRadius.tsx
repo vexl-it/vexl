@@ -1,4 +1,4 @@
-import {type ReactNode} from 'react'
+import React, {type ReactNode} from 'react'
 import {ScrollView, Stack, type StackProps} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from '../utils'
 
@@ -13,7 +13,7 @@ function ContainerWithTopBorderRadius({
   children,
   scrollView,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
   if (scrollView) {

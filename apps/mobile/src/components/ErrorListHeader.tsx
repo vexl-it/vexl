@@ -1,4 +1,4 @@
-import {useMemo, type ComponentProps} from 'react'
+import React, {useMemo, type ComponentProps} from 'react'
 import {Stack, Text} from 'tamagui'
 import useCommonErrorMessages from '../utils/useCommonErrorMessages'
 
@@ -13,7 +13,7 @@ export default function ErrorListHeader<T extends {_tag: string}>({
   topText,
   errorToMessage,
   ...rest
-}: Props<T>): JSX.Element | null {
+}: Props<T>): React.ReactElement | null {
   const commonErrorMessage = useCommonErrorMessages({
     _tag: 'NetworkError',
   } as const)

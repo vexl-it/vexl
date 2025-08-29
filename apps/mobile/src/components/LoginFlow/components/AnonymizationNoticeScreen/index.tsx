@@ -1,3 +1,4 @@
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import anonymizationNoticeSvg from '../../../../images/anonymizationNoticeSvg'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -11,7 +12,7 @@ import WhiteContainer from '../../../WhiteContainer'
 
 type Props = LoginStackScreenProps<'AnonymizationNotice'>
 
-function AnonymizationNoticeScreen({navigation}: Props): JSX.Element {
+function AnonymizationNoticeScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   return (

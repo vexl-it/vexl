@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../images/chevronDownSvg'
@@ -15,7 +16,7 @@ function DropdownSelectButton({
   clearButtonVisible,
   onClearPress,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tokens = getTokens()
 
   return (

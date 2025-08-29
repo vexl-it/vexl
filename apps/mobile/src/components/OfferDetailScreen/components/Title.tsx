@@ -15,7 +15,7 @@ interface Props {
   offer: OneOfferInState
 }
 
-function Title({offer}: Props): JSX.Element {
+function Title({offer}: Props): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const reportOffer = useSetAtom(reportOfferActionAtom)

@@ -1,7 +1,7 @@
 import {animated, useTransition} from '@react-spring/native'
 import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
-import {useMemo, useState} from 'react'
+import React, {useMemo, useState} from 'react'
 import {Stack, Text, styled} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -33,7 +33,7 @@ function AnonymizationAnimationScreen({
   route: {
     params: {realUserData},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [anonymized, setAnonymized] = useState(false)
 

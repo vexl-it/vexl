@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
@@ -11,7 +11,7 @@ import Checkbox from '../../../../Checkbox'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 
-function TradeChecklistReminder(): JSX.Element | null {
+function TradeChecklistReminder(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const [dontShowSwitchValue, setDontShowSwitchValue] = useState<boolean>(false)

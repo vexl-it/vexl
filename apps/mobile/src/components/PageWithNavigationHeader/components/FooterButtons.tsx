@@ -8,7 +8,7 @@ import {
   secondaryFooterButtonStateAtom,
 } from '../state/footerButtonStateAtom'
 
-function FooterButtons(): JSX.Element | null {
+function FooterButtons(): React.ReactElement | null {
   const primaryFooterButtonState = useAtomValue(primaryFooterButtonStateAtom)
   const secondaryFooterButtonState = useAtomValue(
     secondaryFooterButtonStateAtom

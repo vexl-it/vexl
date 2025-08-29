@@ -1,6 +1,6 @@
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Stack, Text} from 'tamagui'
 import {checkAndDeleteEmptyInboxesWithoutOfferAtom} from '../../../../state/chat/atoms/checkAndDeleteEmptyInboxesWithoutOfferAtom'
 import fetchMessagesForAllInboxesAtom from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
@@ -9,7 +9,7 @@ import {useAppState} from '../../../../utils/useAppState'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
 import ChatsList from './components/ChatsList'
 
-function MessagesScreen(): JSX.Element {
+function MessagesScreen(): React.ReactElement {
   const {t} = useTranslation()
   const fetchNewMessages = useSetAtom(fetchMessagesForAllInboxesAtom)
   const checkAndDeleteEmptyInboxesWithoutOffer = useSetAtom(

@@ -1,5 +1,5 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {getTokens, Stack, XStack} from 'tamagui'
 import {bigNumberToString} from '../../../utils/bigNumberToString'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
@@ -22,7 +22,7 @@ interface Props {
   offer: OfferInfo
 }
 
-function BtcOfferColumns({offer}: Props): JSX.Element {
+function BtcOfferColumns({offer}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const offerAmountTopLimit = useMemo(() => {

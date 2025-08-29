@@ -1,4 +1,4 @@
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import MapView, {
   Marker,
   PROVIDER_GOOGLE,
@@ -31,7 +31,7 @@ export default function MapSingleLocationDisplay({
   value,
   mapPadding,
   ...restProps
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
 
   return (

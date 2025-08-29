@@ -10,7 +10,7 @@ export default function VexlbotMessageItem({
   data,
 }: {
   data: TradingChecklistSuggestion
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {otherSideSupportsTradingChecklistAtom} = useMolecule(chatMolecule)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom

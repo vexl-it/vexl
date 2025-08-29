@@ -1,7 +1,7 @@
 import {type InvoiceId} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {singleDonationAtom} from '../../../state/donations/atom'
@@ -21,7 +21,7 @@ interface Props {
   readonly invoiceId: InvoiceId
 }
 
-function DonationQrCodeOrStatus({invoiceId}: Props): JSX.Element {
+function DonationQrCodeOrStatus({invoiceId}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {
     btcAmount,

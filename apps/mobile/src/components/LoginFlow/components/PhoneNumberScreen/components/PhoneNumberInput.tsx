@@ -3,7 +3,7 @@ import {
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import type * as O from 'fp-ts/Option'
-import {useCallback, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import PhoneInput, {
   type ICountry,
 } from 'react-native-international-phone-number'
@@ -14,7 +14,9 @@ interface Props {
   onChange: (e164: O.Option<E164PhoneNumber>) => void
 }
 
-export default function PhoneNumberInput({onChange}: Props): JSX.Element {
+export default function PhoneNumberInput({
+  onChange,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [selectedCountry, setSelectedCountry] = useState<null | ICountry>(null)
   const [phoneNumber, setPhoneNumber] = useState<string>('')

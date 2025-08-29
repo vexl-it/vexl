@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import Animated, {FadeIn} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import {backdropStyles} from '../../../utils/backdropStyles'
@@ -27,7 +27,7 @@ export default function TradeChecklistFlowPageContainer({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   const isFullScreen = useAtomValue(isTradeChecklistFullScreenAtom)
 
   return (

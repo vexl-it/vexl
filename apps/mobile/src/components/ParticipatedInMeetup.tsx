@@ -1,4 +1,5 @@
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -6,7 +7,7 @@ import {showGoldenAvatarInfoModalActionAton} from './GoldenAvatar/atoms'
 import Image from './Image'
 import goldenGlassesSvg from './images/goldenGlassesSvg'
 
-function ParticipatedInMeetup(): JSX.Element {
+function ParticipatedInMeetup(): React.ReactElement {
   const {t} = useTranslation()
   const showGoldenAvatarInfoModal = useSetAtom(
     showGoldenAvatarInfoModalActionAton

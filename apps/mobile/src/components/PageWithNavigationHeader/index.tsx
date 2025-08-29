@@ -17,7 +17,10 @@ interface Props {
   fullScreen?: boolean
 }
 
-function PageWithNavigationHeader({children, fullScreen}: Props): JSX.Element {
+function PageWithNavigationHeader({
+  children,
+  fullScreen,
+}: Props): React.ReactElement {
   const {bottom} = useSafeAreaInsets()
 
   return (

@@ -2,7 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
@@ -58,7 +58,7 @@ interface Props {
 
 export default function TradeChecklistMeetingLocationView({
   message,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const {
     addEventToCalendarActionAtom,

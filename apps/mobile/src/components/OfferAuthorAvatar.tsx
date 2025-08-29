@@ -1,7 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useChatForOffer} from '../state/chat/hooks/useChatForOffer'
@@ -26,7 +26,7 @@ function OfferAuthorAvatar({
   offer: OneOfferInState
   negative: boolean
   displayAsPreview?: boolean
-}): JSX.Element {
+}): React.ReactElement {
   const chatForOffer = useChatForOffer({
     offerPublicKey: offerInfo.publicPart.offerPublicKey,
   })

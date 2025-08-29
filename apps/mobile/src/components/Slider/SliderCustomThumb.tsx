@@ -1,10 +1,11 @@
+import React from 'react'
 import {Stack, type ColorTokens} from 'tamagui'
 
 interface Props {
   customKnobColor?: ColorTokens
 }
 
-function SliderCustomThumb({customKnobColor}: Props): JSX.Element {
+function SliderCustomThumb({customKnobColor}: Props): React.ReactElement {
   return (
     <Stack
       w={42}

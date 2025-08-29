@@ -120,7 +120,7 @@ function TextMessage({
   messageAtom,
 }: {
   messageAtom: Atom<MessagesListItem>
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const messageItem = useAtomValue(messageAtom)
   const {
     sendMessageAtom,

@@ -1,4 +1,4 @@
-import {type ReactNode} from 'react'
+import React, {type ReactNode} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -36,7 +36,7 @@ function VexlbotBubble({
   status,
   username,
   messageState,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   return (

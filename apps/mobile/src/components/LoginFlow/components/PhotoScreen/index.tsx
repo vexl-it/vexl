@@ -5,6 +5,7 @@ import {
 } from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {atom, useAtomValue} from 'jotai'
+import React from 'react'
 import {Stack, Text, useMedia} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -27,7 +28,7 @@ function PhotoScreen({
   route: {
     params: {userName},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const media = useMedia()
   const selectedImageUri = useAtomValue(selectedImageUriAtom)

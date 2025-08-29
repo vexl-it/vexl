@@ -1,7 +1,7 @@
 import { useNavigate } from "@remix-run/react";
 import { useEffect } from "react";
 
-export default function DeleteAccount4(): JSX.Element {
+export default function DeleteAccount4(): React.ReactElement {
   const navigate = useNavigate();
   useEffect(() => {
     sessionStorage.removeItem("keypair");

@@ -23,7 +23,7 @@ const myOffersSortingOptionsAtom = atom<Array<DropdownItemProps<Sort>>>(
   }
 )
 
-function MyOffersSortingDropdown(): JSX.Element {
+function MyOffersSortingDropdown(): React.ReactElement {
   const [myOffersSortingOption, setMyOffersSortingOption] = useAtom(
     selectedMyOffersSortingOptionAtom
   )

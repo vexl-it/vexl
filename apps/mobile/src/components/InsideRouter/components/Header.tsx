@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {LinearGradient} from 'expo-linear-gradient'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
 import {Stack, XStack, getTokens, styled} from 'tamagui'
@@ -19,7 +20,7 @@ const BackgroundImage = styled(LinearGradient, {
   colors: ['rgba(252, 205, 108, 0)', '#FCCD6C'],
 })
 
-function BtcPriceHeader(): JSX.Element {
+function BtcPriceHeader(): React.ReactElement {
   const navigation = useNavigation()
   const fontScale = getFontScaleSync()
 
@@ -84,7 +85,7 @@ function BtcPriceHeader(): JSX.Element {
   )
 }
 
-function Header(): JSX.Element | null {
+function Header(): React.ReactElement | null {
   return <BtcPriceHeader />
 }
 

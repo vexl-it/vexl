@@ -1,5 +1,6 @@
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {FlatList, RefreshControl} from 'react-native-gesture-handler'
 import {getTokens, Stack} from 'tamagui'
 import {
@@ -11,7 +12,7 @@ import {updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom} from '../../D
 import DonationsListItem from './DonationsListItem'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 
-function Separator(): JSX.Element {
+function Separator(): React.ReactElement {
   return (
     <Stack width="100%" height={32} jc="center" als="center">
       <Stack height={2} bg="$grey" />
@@ -19,11 +20,11 @@ function Separator(): JSX.Element {
   )
 }
 
-function renderItem({item}: {item: MyDonation}): JSX.Element {
+function renderItem({item}: {item: MyDonation}): React.ReactElement {
   return <DonationsListItem donation={item} />
 }
 
-function DonationsList(): JSX.Element {
+function DonationsList(): React.ReactElement {
   const myDonationsSorted = useAtomValue(myDonationsSortedAtom)
   const myDonationsLoading = useAtomValue(myDonationsStateAtom) === 'loading'
   const updateAllNonSettledOrExpiredInvoicesStatusTypes = useSetAtom(

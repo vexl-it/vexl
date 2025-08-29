@@ -1,6 +1,7 @@
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import SvgImage from '../../Image'
 import anonymousAvatarHappyGoldenGlassesNoBackgroundSvg from '../../images/anonymousAvatarHappyGoldenGlassesNoBackgroundSvg'
@@ -9,7 +10,7 @@ import anonymousAvatarSadGoldenGlassesNoBackgroundSvg from '../../images/anonymo
 import anonymousAvatarSadNoBackgroundSvg from '../../images/anonymousAvatarSadNoBackgroundSvg'
 import {feedbackMolecule} from '../atoms'
 
-function FeedbackAvatar(): JSX.Element {
+function FeedbackAvatar(): React.ReactElement {
   const {starRatingAtom} = useMolecule(feedbackMolecule)
   const starRating = useAtomValue(starRatingAtom)
   const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)

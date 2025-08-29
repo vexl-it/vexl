@@ -1,5 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {useCallback, type ReactNode} from 'react'
+import React, {useCallback, type ReactNode} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, XStack} from 'tamagui'
 import SvgImage from './Image'
@@ -27,7 +27,7 @@ export default function OfferWithBubbleTip({
   onInfoRectPress?: () => void
   reduceDescriptionLength?: boolean
   displayAsPreview?: boolean
-}): JSX.Element {
+}): React.ReactElement {
   const onPress = useCallback(() => {
     if (onInfoRectPress) onInfoRectPress()
   }, [onInfoRectPress])

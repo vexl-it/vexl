@@ -1,3 +1,4 @@
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
@@ -5,7 +6,7 @@ import ButtonsSection from './components/ButtonsSection'
 import ProfileSection from './components/ProfileSection'
 import VersionTextWithSecretDoor from './components/VersionTextWithSecretDoor'
 
-function SettingsScreen(): JSX.Element {
+function SettingsScreen(): React.ReactElement {
   const {t} = useTranslation()
   return (
     <ContainerWithTopBorderRadius scrollView>

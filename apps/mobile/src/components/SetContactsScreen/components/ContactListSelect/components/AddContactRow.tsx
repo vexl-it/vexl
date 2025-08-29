@@ -1,6 +1,7 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -13,7 +14,7 @@ function AddContactRow({
   contact,
 }: {
   contact: StoredContactWithComputedValues
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const {addAndSelectContactWithUiFeedbackAtom} = useMolecule(
     contactSelectMolecule

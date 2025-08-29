@@ -102,7 +102,7 @@
     "optics-ts": "^2.4.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-native": "0.79.5",
+    "react-native": "0.79.6",
     "react-native-autolink": "^4.2.0",
     "react-native-calendars": "^1.1301.0",
     "react-native-capture-protection": "^2.1.1",
@@ -177,7 +177,7 @@
     "prettier": "^3.3.2",
     "react-test-renderer": "^18.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "~5.8.3"
+    "typescript": "^5.9.2"
   },
   "installConfig": {
     "hoistingLimits": "workspaces"

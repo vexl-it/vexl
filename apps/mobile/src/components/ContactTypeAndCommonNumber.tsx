@@ -24,7 +24,7 @@ function ContactTypeAndCommonNumber({
   contactsHashes: readonly HashedPhoneNumber[]
   center?: boolean
   clubsIds?: readonly ClubUuid[]
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const clubsNamesForOffer = useGetAllClubsNamesForIds(clubsIds ?? [])

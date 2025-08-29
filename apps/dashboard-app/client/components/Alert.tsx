@@ -40,7 +40,7 @@ const ConnectedWrapper = styled(Wrapper)`
   animation: ${slideIn} 0.5s ease-in-out;
 `
 
-export default function Alert(): JSX.Element | null {
+export default function Alert(): React.ReactElement | null {
   const message = useAtomValue(connectionStateAtom)
 
   return Match.value(message).pipe(

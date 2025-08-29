@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {HashSet} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {Stack, type YStackProps} from 'tamagui'
 import {
   markRemovedClubAsHiddenForVexlbotActionAtom,
@@ -12,7 +13,7 @@ import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 
 export default function RemovedClubsSuggestion(
   props: YStackProps
-): JSX.Element | null {
+): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const removedClubs = useAtomValue(removedClubsAtom)

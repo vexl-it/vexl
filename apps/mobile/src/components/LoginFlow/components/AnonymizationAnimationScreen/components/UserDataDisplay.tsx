@@ -1,5 +1,5 @@
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {type ComponentProps} from 'react'
+import React, {type ComponentProps} from 'react'
 import {Image, Stack, Text} from 'tamagui'
 import resolveLocalUri from '../../../../../utils/resolveLocalUri'
 import SvgImage from '../../../../Image'
@@ -10,7 +10,11 @@ interface Props {
   style?: ComponentProps<typeof Stack>['style']
 }
 
-function UserDataDisplay({topText, realLifeInfo, style}: Props): JSX.Element {
+function UserDataDisplay({
+  topText,
+  realLifeInfo,
+  style,
+}: Props): React.ReactElement {
   return (
     <Stack ai="center" jc="center" style={style}>
       {!!topText && (

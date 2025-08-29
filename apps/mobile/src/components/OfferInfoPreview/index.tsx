@@ -1,4 +1,5 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import React from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import pauseSvg from '../../images/pauseSvg'
 import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
@@ -32,7 +33,7 @@ function OfferInfoPreview({
   reduceDescriptionLength?: boolean
   showCommonFriends?: boolean
   displayAsPreview?: boolean
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const clubsForOffer = useGetAllClubsForIds(
     (isMine ? offer.privatePart.intendedClubs : offer.privatePart.clubIds) ?? []

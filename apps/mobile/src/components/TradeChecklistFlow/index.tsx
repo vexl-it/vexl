@@ -31,7 +31,7 @@ export default function TradeChecklistFlow({
   route: {
     params: {chatId, inboxKey},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
 
   useEffect(() => {

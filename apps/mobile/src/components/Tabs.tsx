@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, XStack} from 'tamagui'
 import TabTitle from './TabTitle'
@@ -14,7 +15,7 @@ interface Props<T> {
   tabs: Array<TabProps<T>>
 }
 
-function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): JSX.Element {
+function Tabs<T>({activeTab, onTabPress, tabs}: Props<T>): React.ReactElement {
   return (
     <XStack ai="center" br="$5" bg="$grey" p="$1" gap="$1">
       {tabs.map((tab) => (

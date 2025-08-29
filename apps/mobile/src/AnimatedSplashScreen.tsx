@@ -1,5 +1,5 @@
 import * as SplashScreen from 'expo-splash-screen'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
 import Animated, {
   BounceOut,
@@ -48,7 +48,7 @@ function AnimatedSplashScreen({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const [isAppReady, setIsAppReady] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)

@@ -11,7 +11,7 @@ interface Props {
   limits: {width: number; height: number}
 }
 
-function UriImageWithSizeLimits({uri, limits}: Props): JSX.Element {
+function UriImageWithSizeLimits({uri, limits}: Props): React.ReactElement {
   const [dimensions, setDimensions] = useState({width: 0, height: 0})
 
   useEffect(() => {

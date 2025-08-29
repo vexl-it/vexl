@@ -2,7 +2,7 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {Effect} from 'effect'
 import * as O from 'fp-ts/Option'
 import {useSetAtom} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Alert} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -19,7 +19,7 @@ import PhoneNumberInput from './components/PhoneNumberInput'
 
 type Props = LoginStackScreenProps<'PhoneNumber'>
 
-function PhoneNumberScreen({navigation}: Props): JSX.Element {
+function PhoneNumberScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [phoneNumber, setPhoneNumber] = useState<O.Option<E164PhoneNumber>>(
     O.none

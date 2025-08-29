@@ -3,6 +3,7 @@ import {
   type PaymentMethod,
 } from '@vexl-next/domain/src/general/offers'
 import {useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
+import React from 'react'
 import {Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../Image'
@@ -18,7 +19,7 @@ interface Props {
 function PaymentMethodComponent({
   locationStateAtom,
   paymentMethodAtom,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const content = useContent()
   const tokens = getTokens()

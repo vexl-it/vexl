@@ -28,7 +28,7 @@ function PremiumOrDiscountDetail({
   offerTypeAtom,
   onClose,
   visible,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const offerType = useAtomValue(offerTypeAtom)

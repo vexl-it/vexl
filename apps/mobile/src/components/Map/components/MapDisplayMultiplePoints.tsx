@@ -12,7 +12,7 @@ import {
   type Atom,
   type WritableAtom,
 } from 'jotai'
-import {Fragment, useCallback, useRef} from 'react'
+import React, {Fragment, useCallback, useRef} from 'react'
 import {Platform} from 'react-native'
 import MapView from 'react-native-map-clustering'
 import {
@@ -71,7 +71,7 @@ function MMapView({
   inFocusMode: boolean
   onMapReady?: () => void
   onRegionChangeComplete?: (region: Region, d: Details) => void
-}): JSX.Element {
+}): React.ReactElement {
   const ref = useRef<MapView>(null)
   const setMapViewRef = useSetAtom(refAtom ?? emptyAtom)
   const loadedCallbackCalledRef = useRef(false)
@@ -139,7 +139,7 @@ export default function MapDisplayMultiplePoints<T>({
   onRegionChangeComplete,
   refAtom,
   onMapReady,
-}: Props<T>): JSX.Element {
+}: Props<T>): React.ReactElement {
   const points = useAtomValue(pointsAtom)
   const idsToFocus = useAtomValue(pointIdsToFocusAtom)
   const {focusedPoints, notFocusedPoints} = points.reduce(

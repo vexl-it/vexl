@@ -14,6 +14,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Image from '../../../Image'
 import clubsSvg from '../../../images/clubsSvg'
 
+import React from 'react'
 import ClubItem from './components/ClubItem'
 
 interface OfferFormProps {
@@ -33,7 +34,7 @@ interface FilterFormProps {
 
 type Props = OfferFormProps | FilterFormProps
 
-function ClubsComponent(props: Props): JSX.Element | null {
+function ClubsComponent(props: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
 

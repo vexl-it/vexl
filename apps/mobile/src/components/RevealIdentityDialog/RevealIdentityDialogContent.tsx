@@ -1,6 +1,6 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
-import {useEffect, type ReactNode} from 'react'
+import React, {useEffect, type ReactNode} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {
@@ -26,7 +26,7 @@ function Content({
   children,
   title,
   subtitle,
-}: ContentProps): JSX.Element {
+}: ContentProps): React.ReactElement {
   const {t} = useTranslation()
   const [checkboxValue, setCheckboxValue] = useAtom(checkboxValueAtom)
 
@@ -73,7 +73,7 @@ interface UsernameDialogProps {
 export function UsernameDialogContent({
   revealIdentityUsernameAtom,
   usernameSavedForFutureUseAtom,
-}: UsernameDialogProps): JSX.Element {
+}: UsernameDialogProps): React.ReactElement {
   const {t} = useTranslation()
   const realUserName = useAtomValue(realUserNameAtom)
   const [revealIdentityUsername, setRevealIdentityUsername] = useAtom(
@@ -110,7 +110,7 @@ interface ImageDialogProps {
 export function ImageDialogContent({
   imageSavedForFutureUseAtom,
   revealIdentityImageUriAtom,
-}: ImageDialogProps): JSX.Element {
+}: ImageDialogProps): React.ReactElement {
   const {t} = useTranslation()
   const realUserImage = useAtomValue(realUserImageAtom)
   const setRevealIdentityImageUri = useSetAtom(revealIdentityImageUriAtom)

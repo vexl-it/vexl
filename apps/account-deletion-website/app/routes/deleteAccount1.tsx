@@ -8,7 +8,7 @@ import { pipe } from "fp-ts/lib/function";
 import LoadingAwareSubmitButton from "../LoadingAwareSubmitButton";
 import { createUserPublicApi, parseFormData } from "../utils";
 
-export default function DeleteAccount1(): JSX.Element {
+export default function DeleteAccount1(): React.ReactElement {
   const actionData = useActionData<typeof action>();
 
   return (
@@ -40,11 +40,13 @@ export const action: ActionFunction = async ({ request }) => {
     TE.Do,
     TE.chainW(() =>
       effectToTaskEither(
-        parseFormData(Schema.Struct({ phoneNumber: E164PhoneNumberE }))(request)
-      )
+        parseFormData(Schema.Struct({ phoneNumber: E164PhoneNumberE }))(
+          request,
+        ),
+      ),
     ),
     TE.chainW(({ phoneNumber }) =>
-      effectToTaskEither(createUserPublicApi().initEraseUser({ phoneNumber }))
+      effectToTaskEither(createUserPublicApi().initEraseUser({ phoneNumber })),
     ),
     TE.matchW(
       (e) => {
@@ -56,9 +58,9 @@ export const action: ActionFunction = async ({ request }) => {
       },
       (result) => {
         return redirect(
-          `/deleteAccount2/${encodeURIComponent(String(result.verificationId))}`
+          `/deleteAccount2/${encodeURIComponent(String(result.verificationId))}`,
         );
-      }
-    )
+      },
+    ),
   )();
 };

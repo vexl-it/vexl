@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
+import React from 'react'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -17,7 +18,7 @@ interface Props {
 
 export default function TradeChecklistDateAndTimeView({
   message,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const {

@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Stack, XStack, debounce} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
@@ -8,7 +8,7 @@ import TextInput from '../../../../Input'
 import magnifyingGlass from '../../../../images/magnifyingGlass'
 import {contactSelectMolecule} from '../atom'
 
-function SearchBar(): JSX.Element {
+function SearchBar(): React.ReactElement {
   const {t} = useTranslation()
   const {
     areThereAnyContactsToDisplayForSelectedTabAtom,

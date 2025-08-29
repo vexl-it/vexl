@@ -1,7 +1,7 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useSetAtom, useStore} from 'jotai'
 import {type DateTime} from 'luxon'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -30,7 +30,7 @@ function PickTimeFromSuggestions({
   route: {
     params: {chosenDateTimes, pickedOption},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
 

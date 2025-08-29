@@ -1,6 +1,6 @@
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -17,7 +17,7 @@ function SuccessLoginScreen({
   route: {
     params: {verifyPhoneNumberResponse, privateKey, phoneNumber},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const finishLogin = useSetAtom(finishLoginActionAtom)
 

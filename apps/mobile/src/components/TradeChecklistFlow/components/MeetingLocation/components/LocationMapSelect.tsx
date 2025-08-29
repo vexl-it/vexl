@@ -1,6 +1,6 @@
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
 import {useSetAtom, useStore} from 'jotai'
-import {useMemo, useState} from 'react'
+import React, {useMemo, useState} from 'react'
 import {YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
@@ -31,7 +31,7 @@ export default function LocationMapSelect({
     params: {searchQuery, selectedLocation},
   },
   navigation: {goBack},
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const initialValue = useMemo(() => {
     const address = `${selectedLocation.userData.suggestFirstRow}, ${selectedLocation.userData.suggestSecondRow}`

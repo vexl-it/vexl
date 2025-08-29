@@ -1,5 +1,6 @@
 import {Effect} from 'effect'
 import {atom, useSetAtom} from 'jotai'
+import React from 'react'
 import {type YStackProps} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
@@ -26,7 +27,7 @@ const showEnableNewOfferNotificationAtom = atom(
 
 function EnableNewOffersNotificationSuggestion(
   props: YStackProps
-): JSX.Element | null {
+): React.ReactElement | null {
   const {t} = useTranslation()
   const checkAndAskForNotificationPermissions = useSetAtom(
     checkNotificationPermissionsAndAskIfPossibleActionAtom

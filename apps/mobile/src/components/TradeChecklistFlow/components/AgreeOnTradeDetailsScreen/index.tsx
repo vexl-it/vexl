@@ -20,7 +20,7 @@ import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 
 type Props = TradeChecklistStackScreenProps<'AgreeOnTradeDetails'>
 
-function AgreeOnTradeDetailsScreen({navigation}: Props): JSX.Element {
+function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const areThereUpdatesToBeSent = useAtomValue(areThereUpdatesToBeSentAtom)

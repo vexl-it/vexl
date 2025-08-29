@@ -22,7 +22,7 @@ function PremiumOrDiscount({
   feeAmountAtom,
   feeStateAtom,
   offerTypeAtom,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const tokens = getTokens()
   const {t} = useTranslation()
 

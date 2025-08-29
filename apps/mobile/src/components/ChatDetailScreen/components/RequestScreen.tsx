@@ -27,7 +27,7 @@ import RerequestOrCancelButton from './RerequestOrCancelButton'
 
 const SCROLL_EXTRA_OFFSET = 250
 
-function RequestScreen(): JSX.Element {
+function RequestScreen(): React.ReactElement {
   const {
     offerForChatAtom,
     requestMessageAtom,

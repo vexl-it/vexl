@@ -15,7 +15,7 @@ interface Props {
 function OfferTypeSection({
   listingTypeAtom,
   offerTypeAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const listingType = useAtomValue(listingTypeAtom)
   const [offerType, setOfferType] = useAtom(offerTypeAtom)

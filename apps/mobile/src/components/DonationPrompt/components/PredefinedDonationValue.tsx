@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import Image from '../../Image'
@@ -12,7 +13,7 @@ function PredefinedDonationValue({
   selected,
   title,
   ...rest
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   return (
     <TouchableOpacity {...rest}>
       <XStack gap="$2">

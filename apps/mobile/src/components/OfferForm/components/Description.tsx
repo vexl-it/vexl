@@ -27,7 +27,7 @@ function Description({
   listingTypeAtom,
   offerTypeAtom,
   offerDescriptionAtom,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const [offerDescription, setOfferDescription] = useAtom(offerDescriptionAtom)
   const listingType = useAtomValue(listingTypeAtom)

@@ -1,5 +1,5 @@
 import {atom, useAtom, useAtomValue, type WritableAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -34,7 +34,7 @@ function MarketplaceSuggestion({
   text,
   visibleStateAtom: nullableVisibleStateAtom,
   ...props
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const tokens = getTokens()
   const {t} = useTranslation()
 

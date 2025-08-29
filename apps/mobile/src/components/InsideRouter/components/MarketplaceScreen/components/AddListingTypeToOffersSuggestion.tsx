@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import React from 'react'
 import {type YStackProps} from 'tamagui'
 import {shouldDisplaySuggestionToAddListingTypeAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -6,7 +7,7 @@ import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 
 function AddListingTypeToOffersSuggestion(
   props: YStackProps
-): JSX.Element | null {
+): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
 

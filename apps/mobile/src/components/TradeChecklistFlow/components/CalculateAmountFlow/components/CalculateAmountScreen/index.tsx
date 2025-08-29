@@ -1,6 +1,6 @@
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {useCallback, useEffect, useMemo} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {
   chatWithMessagesKeys,
@@ -39,7 +39,7 @@ function CalculateAmountScreen({
   route: {
     params: {amountData},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const isOtherSideAmountDataNewerThanMine = useAtomValue(

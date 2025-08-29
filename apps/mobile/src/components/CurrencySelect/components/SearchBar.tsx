@@ -1,11 +1,11 @@
 import {useAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import TextInput, {type Props} from '../../Input'
 import magnifyingGlass from '../../images/magnifyingGlass'
 import {searchTextAtom} from '../atom'
 
-function SearchBar(props: Props): JSX.Element {
+function SearchBar(props: Props): React.ReactElement {
   const {t} = useTranslation()
   const [searchText, setSearchText] = useAtom(searchTextAtom)
 

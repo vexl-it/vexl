@@ -1,5 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type Atom} from 'jotai'
+import React from 'react'
 import {Stack} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
@@ -15,15 +16,15 @@ function renderItem({
   item,
 }: {
   item: Atom<StoredContactWithComputedValues>
-}): JSX.Element {
+}): React.ReactElement {
   return <ContactItem contactAtom={item} />
 }
 
-function ItemSeparatorComponent(): JSX.Element {
+function ItemSeparatorComponent(): React.ReactElement {
   return <Stack h={16} />
 }
 
-function ContactsList({contacts}: Props): JSX.Element {
+function ContactsList({contacts}: Props): React.ReactElement {
   return (
     <Stack f={1} pt="$2">
       <FlashList

@@ -159,7 +159,7 @@ function AnimatedBar({
 }: {
   first: boolean
   count: number
-}): JSX.Element {
+}): React.ReactElement {
   const springProps = useSpring({
     from: {number: 0},
     number: 100,
@@ -174,7 +174,7 @@ function AnimatedBar({
   )
 }
 
-export default function CountriesList(): JSX.Element {
+export default function CountriesList(): React.ReactElement {
   const maxCount = useAtomValue(maxCountryConnectionsCount)
   const barRef = useRef<HTMLDivElement>(null)
   const listContainerRef = useRef<HTMLDivElement>(null)

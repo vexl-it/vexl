@@ -63,7 +63,7 @@ const Content = Styled.div`
   gap: 24px;
 `
 
-export default function VexlBanner(): JSX.Element {
+export default function VexlBanner(): React.ReactElement {
   return (
     <Root>
       <Content>

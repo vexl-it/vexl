@@ -1,6 +1,6 @@
 import {type Sort} from '@vexl-next/domain/src/general/offers'
 import {atom, useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {
   translationAtom,
   useTranslation,
@@ -46,7 +46,7 @@ const dropdownRowsAtom = atom<Array<DropdownItemProps<Sort>>>((get) => {
   ]
 })
 
-function Sorting({sortingAtom}: Props): JSX.Element {
+function Sorting({sortingAtom}: Props): React.ReactElement {
   const {t} = useTranslation()
   const dropdownRows = useAtomValue(dropdownRowsAtom)
   const [sorting, setSorting] = useAtom(sortingAtom)

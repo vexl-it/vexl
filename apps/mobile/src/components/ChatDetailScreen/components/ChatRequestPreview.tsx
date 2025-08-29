@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -17,7 +17,7 @@ function ChatRequestPreview({
 }: {
   mode: 'commonFirst' | 'offerFirst'
   showRequestMessage?: boolean
-}): JSX.Element {
+}): React.ReactElement {
   const tokens = getTokens()
   const {
     offerForChatAtom,

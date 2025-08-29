@@ -4,7 +4,7 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Linking, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {
@@ -18,7 +18,7 @@ import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import VexlActivityIndicator from '../../LoadingOverlayProvider/VexlActivityIndicator'
 
-function BitcoinPriceChart(): JSX.Element {
+function BitcoinPriceChart(): React.ReactElement {
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const defaultCurrency = useAtomValue(defaultCurrencyAtom)
   const btcPriceForSelectedCurrency = useAtomValue(

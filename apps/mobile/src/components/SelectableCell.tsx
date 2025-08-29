@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import Image from './Image'
@@ -26,7 +27,7 @@ function SelectableCell<T>({
   subtitle,
   size = 'large',
   variant = 'dark',
-}: Props<T>): JSX.Element {
+}: Props<T>): React.ReactElement {
   return (
     <TouchableOpacity
       disabled={disabled}

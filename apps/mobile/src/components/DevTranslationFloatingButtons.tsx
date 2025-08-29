@@ -1,10 +1,11 @@
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {Dimensions} from 'react-native'
 import Draggable from 'react-native-draggable'
 import {getTokens} from 'tamagui'
 import {showDevLabelsAtom} from '../utils/localization/I18nProvider'
 
-function DevTranslationFloatingButton(): JSX.Element {
+function DevTranslationFloatingButton(): React.ReactElement {
   const setShowDevLabels = useSetAtom(showDevLabelsAtom)
   return (
     <Draggable

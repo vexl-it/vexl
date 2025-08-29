@@ -109,6 +109,7 @@ export default {
     },
   },
   'android': {
+    'edgeToEdgeEnabled': true,
     'versionCode': VERSION_CODE,
     'softwareKeyboardLayoutMode': 'resize',
     'adaptiveIcon': {
@@ -191,6 +192,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    'expo-background-task',
     ['expo-notifications', {enableBackgroundRemoteNotifications: true}],
     'expo-localization',
     [

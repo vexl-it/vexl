@@ -2,7 +2,7 @@ import {
   unixMillisecondsNow,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {useRef} from 'react'
+import React, {useRef} from 'react'
 import {Pressable, type StyleProp, type ViewStyle} from 'react-native'
 
 const TOUCH_DELAY_MS = 500
@@ -15,7 +15,7 @@ function SecretDoor({
   style?: StyleProp<ViewStyle>
   children: React.ReactNode
   onSecretDoorOpen: () => void
-}): JSX.Element {
+}): React.ReactElement {
   const pressState = useRef<{
     lastPress: UnixMilliseconds
     counter: number

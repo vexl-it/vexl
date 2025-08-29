@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useRef, useState} from 'react'
+import React, {useCallback, useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
 import CurrencySelect from '../../../../CurrencySelect'
@@ -14,7 +14,7 @@ import {
 import {replaceNonDecimalCharsInInput} from '../../../utils'
 import AmountInput from '../../TradeCalculator/components/AmountInput'
 
-function FiatOwnPriceInput(): JSX.Element {
+function FiatOwnPriceInput(): React.ReactElement {
   const ref = useRef<TextInput>(null)
 
   const [isFocused, setIsFocused] = useState<boolean>(false)

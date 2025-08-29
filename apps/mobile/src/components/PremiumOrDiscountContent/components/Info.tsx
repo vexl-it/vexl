@@ -1,5 +1,5 @@
 import {useAtomValue, type Atom} from 'jotai'
-import {useMemo, useState} from 'react'
+import React, {useMemo, useState} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, YStack, getTokens} from 'tamagui'
 import chevronRightSvg from '../../../images/chevronRightSvg'
@@ -19,7 +19,7 @@ function Info({
   feeAmountAtom,
   iAmTheBuyer,
   sliderThreshold,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tokens = getTokens()
   const {t} = useTranslation()
   const [helpVisible, setHelpVisible] = useState<boolean>(false)

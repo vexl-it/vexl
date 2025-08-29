@@ -65,7 +65,7 @@ function UserRow({
   atom,
 }: {
   atom: Atom<UserWithConnections>
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const user = useAtomValue(atom)
 
   const country = getCountryInfo(user?.countryPrefix ?? 0)
@@ -89,7 +89,7 @@ const UserRowMemoized = memo(
   (a1, a2) => a1.atom.toString() === a2.atom.toString()
 )
 
-function UsersList(): JSX.Element {
+function UsersList(): React.ReactElement {
   const atoms = useAtomValue(userAtoms)
 
   return (
@@ -101,7 +101,7 @@ function UsersList(): JSX.Element {
   )
 }
 
-export default function LatestConnections(): JSX.Element {
+export default function LatestConnections(): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

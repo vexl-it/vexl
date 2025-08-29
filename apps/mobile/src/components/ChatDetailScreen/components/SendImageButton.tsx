@@ -3,7 +3,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Alert} from 'react-native'
 import {getTokens} from 'tamagui'
 import {getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory} from '../../../utils/imagePickers'
@@ -13,7 +13,7 @@ import IconButton from '../../IconButton'
 import {chatMolecule} from '../atoms'
 import cameraSvg from '../images/cameraSvg'
 
-function SendImageButton(): JSX.Element {
+function SendImageButton(): React.ReactElement {
   const {selectedImageAtom} = useMolecule(chatMolecule)
   const setSelectedImage = useSetAtom(selectedImageAtom)
   const {t} = useTranslation()

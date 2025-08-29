@@ -18,7 +18,7 @@ function MessagePreview({
   lastMessageAtom: Atom<ChatMessageWithState>
   unread: boolean
   name: string
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {t} = useTranslation()
 
   const messageWithState = useAtomValue(lastMessageAtom)

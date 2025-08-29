@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import {debounce} from 'tamagui'
 import {
   searchTextAtom,
@@ -13,7 +13,7 @@ interface Props {
   postSearchActions?: () => void
 }
 
-function SearchOffers({postSearchActions}: Props): JSX.Element {
+function SearchOffers({postSearchActions}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const searchTextFromStorage = useAtomValue(searchTextAtom)

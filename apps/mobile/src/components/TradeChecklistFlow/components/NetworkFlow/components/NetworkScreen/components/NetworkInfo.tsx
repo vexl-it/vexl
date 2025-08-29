@@ -1,10 +1,11 @@
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import Info from '../../../../../../Info'
 import {btcNetworkAtom} from '../../../atoms'
 
-function NetworkInfo(): JSX.Element {
+function NetworkInfo(): React.ReactElement {
   const {t} = useTranslation()
   const btcNetwork = useAtomValue(btcNetworkAtom)
 

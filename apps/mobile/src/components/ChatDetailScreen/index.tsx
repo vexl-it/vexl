@@ -23,7 +23,7 @@ export default function ChatDetailScreen({
   route: {
     params: {otherSideKey, inboxKey},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const store = useStore()

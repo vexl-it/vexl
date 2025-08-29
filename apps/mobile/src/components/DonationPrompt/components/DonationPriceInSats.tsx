@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {Text, XStack} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
@@ -14,7 +14,7 @@ import {
   selectedPredefinedDonationValueAtom,
 } from '../atoms/stateAtoms'
 
-function DonationPriceInSats(): JSX.Element {
+function DonationPriceInSats(): React.ReactElement {
   const {t} = useTranslation()
 
   const donationAmount = useAtomValue(donationAmountAtom)

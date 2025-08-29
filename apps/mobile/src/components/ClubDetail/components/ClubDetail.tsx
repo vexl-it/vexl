@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {Image, Stack, Text, XStack, YStack} from 'tamagui'
 import membersSvg from '../../../images/memberSvg'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
@@ -21,7 +21,7 @@ export function ClubDetail({
   club: {club, members, isModerator},
 }: {
   club: ClubWithMembers
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const loadingOverlay = useShowLoadingOverlay()

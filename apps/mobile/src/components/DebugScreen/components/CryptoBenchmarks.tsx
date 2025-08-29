@@ -3,7 +3,7 @@ import {
   setEcdhComputeSecretImplementation,
 } from '@vexl-next/cryptography/src/implementations/ecdhComputeSecret'
 import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import Button from '../../Button'
@@ -34,7 +34,7 @@ const dummy10Implementation = createDummyImplementation(10)
 
 // setEcdhComputeSecretImplementation(createDummyImplementation(2))
 
-export default function CryptoBenchmarks(): JSX.Element {
+export default function CryptoBenchmarks(): React.ReactElement {
   const [text, setText] = useState('Not started yet')
 
   function addText(text: string): void {

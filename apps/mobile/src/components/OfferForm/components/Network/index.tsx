@@ -1,5 +1,6 @@
 import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {useAtom, type WritableAtom} from 'jotai'
+import React from 'react'
 import {YStack} from 'tamagui'
 import SelectableCell from '../../../SelectableCell'
 import useContent from './useContent'
@@ -12,7 +13,7 @@ interface Props {
   >
 }
 
-function Network({btcNetworkAtom}: Props): JSX.Element | null {
+function Network({btcNetworkAtom}: Props): React.ReactElement | null {
   const content = useContent()
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
 

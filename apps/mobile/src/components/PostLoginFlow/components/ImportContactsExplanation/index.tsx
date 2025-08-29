@@ -1,6 +1,6 @@
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
@@ -20,7 +20,7 @@ type Props = PostLoginFlowStackScreenProps<'ImportContactsExplanationScreen'>
 
 export default function ImportContactsExplanationScreen({
   navigation,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [contactsLoading, setContactsLoading] = useState(false)
   const submitContacts = useSetAtom(submitContactsActionAtom)

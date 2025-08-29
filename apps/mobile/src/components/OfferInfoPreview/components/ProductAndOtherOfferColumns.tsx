@@ -1,4 +1,5 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import React from 'react'
 import {getTokens, Stack, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SvgImage from '../../Image'
@@ -14,7 +15,7 @@ interface Props {
   offer: OfferInfo
 }
 
-function ProductAndOtherOfferColumns({offer}: Props): JSX.Element {
+function ProductAndOtherOfferColumns({offer}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   return (

@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useEffect} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
@@ -21,7 +21,7 @@ import {
 
 const btcAddressTempAtom = atom<string>('')
 
-function BtcAddressScreen(): JSX.Element {
+function BtcAddressScreen(): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const [displayParsingError, setDisplayParsingError] = useAtom(

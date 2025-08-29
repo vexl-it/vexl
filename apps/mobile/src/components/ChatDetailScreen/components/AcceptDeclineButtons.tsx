@@ -1,12 +1,13 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
 import {chatMolecule} from '../atoms'
 
-function AcceptDeclineButtons(): JSX.Element {
+function AcceptDeclineButtons(): React.ReactElement {
   const {t} = useTranslation()
   const {approveChatRequestActionAtom} = useMolecule(chatMolecule)
   const approveChat = useSetAtom(approveChatRequestActionAtom)

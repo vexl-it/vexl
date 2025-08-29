@@ -1,6 +1,7 @@
+import React from 'react'
 import {Stack} from 'tamagui'
 
-function ListFooter(): JSX.Element {
+function ListFooter(): React.ReactElement {
   return <Stack h={16} />
 }
 

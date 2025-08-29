@@ -1,3 +1,4 @@
+import React from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import NotificationsSvg from '../../images/notificationsSvg'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -8,7 +9,7 @@ import SvgImage from '../Image'
 import Screen from '../Screen'
 import WhiteContainer from '../WhiteContainer'
 
-export function NotificationPermissionsScreen(): JSX.Element {
+export function NotificationPermissionsScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const requestNotificationPermissions = useRequestNotificationPermissions()

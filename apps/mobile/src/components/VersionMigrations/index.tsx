@@ -1,6 +1,6 @@
 import {Effect} from 'effect'
 import {useStore} from 'jotai'
-import {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import {Spinner, Text, YStack} from 'tamagui'
 import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -12,7 +12,7 @@ export default function VersionMigrations({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
   const needToRunMigration = useMemo(() => {

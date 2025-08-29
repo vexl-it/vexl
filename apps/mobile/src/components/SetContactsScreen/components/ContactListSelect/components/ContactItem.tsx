@@ -1,6 +1,7 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
+import React from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
@@ -17,7 +18,7 @@ interface Props {
   contactAtom: Atom<StoredContactWithComputedValues>
 }
 
-function ContactItem({contactAtom}: Props): JSX.Element {
+function ContactItem({contactAtom}: Props): React.ReactElement {
   const {editContactActionAtom} = useMolecule(contactSelectMolecule)
   const contact = useAtomValue(contactAtom)
   const editContact = useSetAtom(editContactActionAtom)

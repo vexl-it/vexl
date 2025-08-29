@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -9,11 +9,11 @@ import SvgImage from '../../Image'
 import closeSvg from '../../images/closeSvg'
 import {chatMolecule} from '../atoms'
 
-function Bullet(): JSX.Element {
+function Bullet(): React.ReactElement {
   return <Stack bg="$greyOnWhite" w="$1" h="$1" br="$1" mx="$2" />
 }
 
-function StickyHeader(): JSX.Element | null {
+function StickyHeader(): React.ReactElement | null {
   const {t} = useTranslation()
   const {offerForChatAtom, otherSideDataAtom, showInfoBarAtom} =
     useMolecule(chatMolecule)

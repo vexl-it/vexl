@@ -1,4 +1,5 @@
 import {type MaterialTopTabBarProps} from '@react-navigation/material-top-tabs'
+import React from 'react'
 import {StyleSheet, TouchableOpacity, useWindowDimensions} from 'react-native'
 import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
@@ -13,7 +14,7 @@ interface TabTitleProps {
   title: string
 }
 
-function Tab({active, onPress, title}: TabTitleProps): JSX.Element {
+function Tab({active, onPress, title}: TabTitleProps): React.ReactElement {
   return (
     <Stack
       f={1}
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
   },
 })
 
-function AnimatedLine({isLeft}: {isLeft: boolean}): JSX.Element {
+function AnimatedLine({isLeft}: {isLeft: boolean}): React.ReactElement {
   const {width} = useWindowDimensions()
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -59,7 +60,7 @@ function AnimatedLine({isLeft}: {isLeft: boolean}): JSX.Element {
   return <Animated.View style={[styles.line, animatedStyle]} />
 }
 
-function CustomTabBar(props: MaterialTopTabBarProps): JSX.Element {
+function CustomTabBar(props: MaterialTopTabBarProps): React.ReactElement {
   const {t} = useTranslation()
   const {navigation} = props
 

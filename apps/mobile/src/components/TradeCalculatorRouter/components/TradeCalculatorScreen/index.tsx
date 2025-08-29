@@ -1,3 +1,4 @@
+import React from 'react'
 import {ScrollView} from 'react-native'
 import {Stack} from 'tamagui'
 import {type TradeCalculatorStackScreenProps} from '../../../../navigationTypes'
@@ -12,7 +13,7 @@ import TradeCalculator from '../../../TradeCalculator/components/TradeCalculator
 
 type Props = TradeCalculatorStackScreenProps<'TradeCalculator'>
 
-function TradeCalculatorScreen({navigation}: Props): JSX.Element {
+function TradeCalculatorScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 

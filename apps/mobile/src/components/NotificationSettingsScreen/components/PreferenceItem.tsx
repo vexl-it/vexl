@@ -1,4 +1,5 @@
 import {useAtom, type PrimitiveAtom} from 'jotai'
+import React from 'react'
 import {Text, XStack, YStack} from 'tamagui'
 import Switch from '../../Switch'
 
@@ -8,7 +9,7 @@ interface Props {
   atom: PrimitiveAtom<boolean>
 }
 
-function PreferenceItem({title, description, atom}: Props): JSX.Element {
+function PreferenceItem({title, description, atom}: Props): React.ReactElement {
   const [value, setValue] = useAtom(atom)
   return (
     <XStack>

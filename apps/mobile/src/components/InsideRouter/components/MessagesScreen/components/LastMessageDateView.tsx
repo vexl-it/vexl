@@ -10,7 +10,7 @@ function LastMessageDateView({
   lastMessageAtom,
 }: {
   lastMessageAtom: Atom<ChatMessageWithState | undefined>
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const date = useAtomValue(
     useMemo(
       () =>

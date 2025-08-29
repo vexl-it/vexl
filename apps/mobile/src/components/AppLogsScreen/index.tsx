@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import {Alert} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -19,7 +19,7 @@ import {
   setCustomLoggingEnabled,
 } from './utils/storage'
 
-function AppLogsScreen(): JSX.Element {
+function AppLogsScreen(): React.ReactElement {
   const {t} = useTranslation()
   const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)

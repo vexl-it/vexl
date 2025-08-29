@@ -1,5 +1,5 @@
 import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
-import {useRef, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
 import CurrencySelect from '../../../../CurrencySelect'
@@ -36,7 +36,7 @@ function FiatAmountInput({
   fiatValueAtom,
   showPremiumInfoMessage,
   editable = true,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
   const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)

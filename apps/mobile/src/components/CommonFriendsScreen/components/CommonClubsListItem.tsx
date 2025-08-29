@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import React from 'react'
 import {Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
@@ -9,7 +10,7 @@ interface Props {
   club: ClubInfo
 }
 
-function CommonClubListItem({club}: Props): JSX.Element {
+function CommonClubListItem({club}: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
 

@@ -2,7 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Alert, Keyboard, TouchableOpacity} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
@@ -28,7 +28,7 @@ type ButtonType =
   | 'contactReveal'
   | null
 
-function Button({type}: {type: ButtonType}): JSX.Element | null {
+function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const safeGoBack = useSafeGoBack()
   const navigation = useNavigation()
   const {t} = useTranslation()
@@ -220,7 +220,7 @@ function ChatHeader({
   leftButton: ButtonType
   rightButton: ButtonType
   onPressMiddle?: () => void
-}): JSX.Element {
+}): React.ReactElement {
   const handleMiddlePress = useCallback(() => {
     Keyboard.dismiss()
     onPressMiddle()

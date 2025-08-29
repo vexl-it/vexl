@@ -1,4 +1,5 @@
 import {type PrimitiveAtom} from 'jotai'
+import React from 'react'
 import PremiumOrDiscountContent from '../../../PremiumOrDiscountContent'
 import PriceTypeIndicator from '../PriceTypeIndicator'
 
@@ -10,7 +11,7 @@ interface Props {
 function PremiumOrDiscount({
   iAmTheBuyer,
   tempFeeAmountAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   return (
     <>
       <PremiumOrDiscountContent

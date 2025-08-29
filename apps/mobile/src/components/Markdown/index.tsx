@@ -1,3 +1,4 @@
+import React from 'react'
 import {StyleSheet} from 'react-native'
 import MarkdownDisplay from 'react-native-markdown-display'
 
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
   },
 })
 
-function Markdown({children}: Props): JSX.Element {
+function Markdown({children}: Props): React.ReactElement {
   const {strong, body, heading2, heading3} = styles
   return (
     <MarkdownDisplay

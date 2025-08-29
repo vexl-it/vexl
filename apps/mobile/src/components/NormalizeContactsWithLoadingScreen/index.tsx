@@ -1,7 +1,7 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
-import {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {AppState} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import normalizeStoredContactsActionAtom from '../../state/contacts/atom/normalizeStoredContactsActionAtom'
@@ -14,7 +14,7 @@ export default function NormalizeContactsWithLoadingScreen({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   const [state, setState] = useState<{
     progress?: {total: number; percentDone: number}
     done: boolean

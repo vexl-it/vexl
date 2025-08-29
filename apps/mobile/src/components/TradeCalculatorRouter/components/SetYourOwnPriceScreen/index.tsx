@@ -1,4 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {ScrollView} from 'react-native'
 import {Stack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
@@ -15,7 +16,7 @@ import {
 } from '../../../TradeCalculator/atoms'
 import SetYourOwnPrice from '../../../TradeCalculator/components/SetYourOwnPrice'
 
-function SetYourOwnPriceScreen(): JSX.Element {
+function SetYourOwnPriceScreen(): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 

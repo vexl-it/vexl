@@ -5,6 +5,7 @@ import {
   type PrimitiveAtom,
   type WritableAtom,
 } from 'jotai'
+import React from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import SvgImage from '../../../Image'
@@ -28,7 +29,7 @@ function ListingTypeSection({
   listingTypeAtom,
   updateListingTypeActionAtom,
   onTabPress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const content = useContent()
   const listingType = useAtomValue(listingTypeAtom)

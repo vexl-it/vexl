@@ -1,10 +1,11 @@
 import {useNavigation} from '@react-navigation/native'
+import React from 'react'
 import {type YStackProps} from 'tamagui'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 
-function ImportNewContactsSuggestion(props: YStackProps): JSX.Element {
+function ImportNewContactsSuggestion(props: YStackProps): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
 

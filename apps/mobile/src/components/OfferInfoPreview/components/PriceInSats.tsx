@@ -1,6 +1,6 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
@@ -22,7 +22,7 @@ interface Props {
   offer: OfferInfo
 }
 
-function PriceInSats({offer}: Props): JSX.Element {
+function PriceInSats({offer}: Props): React.ReactElement {
   const {t} = useTranslation()
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
   const btcPriceWithState = useAtomValue(

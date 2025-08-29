@@ -1,7 +1,7 @@
 import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -11,7 +11,7 @@ interface Props extends TouchableOpacityProps {
   objection: ObjectionType
 }
 
-function ObjectionCell({objection, ...props}: Props): JSX.Element {
+function ObjectionCell({objection, ...props}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {createIsObjectionSelectedAtom} = useMolecule(feedbackMolecule)
 

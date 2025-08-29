@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -15,7 +15,10 @@ import useContent from './useContent'
 
 type Props = RootStackScreenProps<'Faqs'>
 
-function FaqsScreen({navigation, route: {params}}: Props): JSX.Element | null {
+function FaqsScreen({
+  navigation,
+  route: {params},
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()

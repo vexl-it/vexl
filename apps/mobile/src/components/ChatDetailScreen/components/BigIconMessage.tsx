@@ -25,7 +25,7 @@ export default function BigIconMessage({
   icon,
   buttonText,
   onButtonPress,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   return (
     <Stack mb={isLatest ? '$10' : '$4'}>
       <YStack my="$5" gap="$4" alignItems="center">

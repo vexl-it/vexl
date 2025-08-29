@@ -1,4 +1,5 @@
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import calculatePercentageDifference from '../../../../../utils/calculatePercentageDifference'
 import {
   getCurrentLocale,
@@ -7,7 +8,7 @@ import {
 import Info from '../../../../Info'
 import {btcPriceForOfferWithStateAtom, ownPriceAtom} from '../../../atoms'
 
-function PriceInfo(): JSX.Element | null {
+function PriceInfo(): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
 

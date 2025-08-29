@@ -21,7 +21,7 @@ export interface Props
 
 function renderItem(
   info: ListRenderItemInfo<Atom<OneOfferInState>>
-): JSX.Element {
+): React.ReactElement {
   return <OffersListItem isFirst={info.index === 0} offerAtom={info.item} />
 }
 
@@ -37,7 +37,7 @@ function OffersList({
   ListHeaderComponent,
   ListFooterComponent,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
   const contentContainerStyle: ContentStyle = useMemo(

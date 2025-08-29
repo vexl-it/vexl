@@ -1,6 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {Effect} from 'effect'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {FlatList} from 'react-native'
 import {RefreshControl} from 'react-native-gesture-handler'
 import {getTokens, Image, Stack, Text, XStack, YStack} from 'tamagui'
@@ -18,7 +19,11 @@ import Button from '../../../../Button'
 import SvgImage from '../../../../Image'
 import {EmptyListPlaceholder} from './EmptyListPlaceholder'
 
-function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
+function ClubListItem({
+  atom,
+}: {
+  atom: Atom<ClubWithMembers>
+}): React.ReactElement {
   const {club, members} = useAtomValue(atom)
   const navigation = useNavigation()
   const {t} = useTranslation()
@@ -59,7 +64,7 @@ function ClubListItem({atom}: {atom: Atom<ClubWithMembers>}): JSX.Element {
   )
 }
 
-function Separator(): JSX.Element {
+function Separator(): React.ReactElement {
   return (
     <Stack width="100%" height={32} jc="center" als="center">
       <Stack height={2} bg="$grey" />
@@ -67,10 +72,10 @@ function Separator(): JSX.Element {
   )
 }
 
-function renderItem({item}: {item: Atom<ClubWithMembers>}): JSX.Element {
+function renderItem({item}: {item: Atom<ClubWithMembers>}): React.ReactElement {
   return <ClubListItem atom={item} />
 }
-export function ClubsList(): JSX.Element {
+export function ClubsList(): React.ReactElement {
   const syncAllClubsHandleStateWhenNotFound = useSetAtom(
     syncAllClubsHandleStateWhenNotFoundActionAtom
   )

@@ -12,7 +12,7 @@ const getColors = (user: UserWithConnections): Option.Option<string[]> =>
     Option.map((info) => info.colors)
   )
 
-export default function Confetti(): JSX.Element | null {
+export default function Confetti(): React.ReactElement | null {
   const {width, height} = useWindowSize()
   const [showConfetti, setShowConfetti] = useAtom(showConfettiAtom)
 

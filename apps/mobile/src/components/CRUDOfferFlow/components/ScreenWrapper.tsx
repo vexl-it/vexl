@@ -1,6 +1,10 @@
+import React from 'react'
 import {ScrollView, type ScrollViewProps} from 'tamagui'
 
-function ScreenWrapper({children, ...props}: ScrollViewProps): JSX.Element {
+function ScreenWrapper({
+  children,
+  ...props
+}: ScrollViewProps): React.ReactElement {
   return (
     <ScrollView
       f={1}

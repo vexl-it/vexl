@@ -1,6 +1,6 @@
 import {deepEqual} from 'fast-equals'
 import {useAtomValue} from 'jotai'
-import {memo} from 'react'
+import React, {memo} from 'react'
 import {Stack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
@@ -13,7 +13,7 @@ import ContactsListSelect from './components/ContactListSelect'
 
 type Props = RootStackScreenProps<'SetContacts'>
 
-function SetContactsScreen({route: {params}}: Props): JSX.Element {
+function SetContactsScreen({route: {params}}: Props): React.ReactElement {
   const {t} = useTranslation()
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
 

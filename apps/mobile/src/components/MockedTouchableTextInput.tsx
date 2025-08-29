@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text} from 'tamagui'
 
@@ -11,7 +12,7 @@ function MockedTouchableTextInput({
   text,
   placeholder,
   onPress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <Stack br="$4" f={1} bc="$grey" p="$4">

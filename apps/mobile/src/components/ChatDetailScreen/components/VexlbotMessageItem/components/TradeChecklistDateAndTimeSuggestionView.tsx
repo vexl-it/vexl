@@ -1,13 +1,14 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 
-function TradeChecklistDateAndTimeSuggestionView(): JSX.Element | null {
+function TradeChecklistDateAndTimeSuggestionView(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistDateAndTimeAtom} =

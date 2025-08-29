@@ -1,5 +1,5 @@
 import {useAtom} from 'jotai'
-import {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {ScrollView} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -18,7 +18,7 @@ const TOS_LINK = 'https://vexl.it/terms-privacy'
 
 type Props = RootStackScreenProps<'TermsAndConditions'>
 
-function TosScreen({route: {params}, navigation}: Props): JSX.Element {
+function TosScreen({route: {params}, navigation}: Props): React.ReactElement {
   const {t, isEnglish} = useTranslation()
   const content = useContent()
   const scrollViewRef = useRef<ScrollView>(null)

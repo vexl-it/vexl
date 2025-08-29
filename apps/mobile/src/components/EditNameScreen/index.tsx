@@ -1,6 +1,6 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {useAtom, useSetAtom} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Stack, getTokens} from 'tamagui'
 import {
   invalidUsernameUIFeedbackAtom,
@@ -14,7 +14,7 @@ import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 
-function EditNameScreen(): JSX.Element {
+function EditNameScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const tokens = getTokens()

@@ -162,7 +162,7 @@ function PickedLocationText({
   selectedRegionRadiusAtom: ReturnType<
     typeof useAtoms
   >['selectedRegionRadiusAtom']
-}): JSX.Element {
+}): React.ReactElement {
   const geocodingState = useAtomValue(geocodedRegionAtom)
   const {t} = useTranslation()
   const radius = useAtomValue(selectedRegionRadiusAtom)
@@ -225,7 +225,7 @@ export default function MapLocationWithRadiusSelect({
   topChildren,
   bottomChildren,
   ...restProps
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
   const mapRef = useRef<MapView>(null)
   const initialRegion = useMemo(

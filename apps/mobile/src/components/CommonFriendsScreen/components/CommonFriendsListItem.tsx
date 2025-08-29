@@ -13,7 +13,7 @@ interface Props {
   friend: StoredContactWithComputedValues
 }
 
-function CommonFriendsListItem({friend}: Props): JSX.Element {
+function CommonFriendsListItem({friend}: Props): React.ReactElement {
   const {t} = useTranslation()
   const dialFriend = useCallback(() => {
     openUrl(`tel:${friend.computedValues.normalizedNumber}`)()

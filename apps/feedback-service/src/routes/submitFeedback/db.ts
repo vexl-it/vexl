@@ -32,8 +32,7 @@ const makeInsertFeedbackService = Effect.gen(function* (_) {
         return sql`
           INSERT INTO
             feedback_submit ${sql.insert(requestsWithDate)}
-          ON CONFLICT (form_id) DO
-          UPDATE
+          ON CONFLICT (form_id) DO UPDATE
           SET
             stars = COALESCE(EXCLUDED.stars, feedback_submit.stars),
             objections = COALESCE(EXCLUDED.objections, feedback_submit.objections),

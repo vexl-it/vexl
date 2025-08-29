@@ -1,12 +1,12 @@
 import { type LinksFunction } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts } from "@remix-run/react";
-import rootCss from "./root.css?url";
+import rootCss from "./root.css";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: rootCss },
 ];
 
-export default function App(): JSX.Element {
+export default function App(): React.ReactElement {
   return (
     <html lang="en">
       <head>

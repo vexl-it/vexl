@@ -18,7 +18,7 @@ import RevealPhoneNumberCell from './RevealPhoneNumberCell'
 import SetNetworkCell from './SetNetworkCell'
 import TradeRule from './TradeRule'
 
-function OnlineOrInPersonTrade(): JSX.Element {
+function OnlineOrInPersonTrade(): React.ReactElement {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
   const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)

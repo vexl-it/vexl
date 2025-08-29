@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {type PrimitiveAtom, useAtomValue} from 'jotai'
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {accessCodeMolecule} from '../../../atoms'
 
@@ -8,7 +9,10 @@ interface Props {
   index: number
 }
 
-function CodeInputElement({accessCodeElementAtom, index}: Props): JSX.Element {
+function CodeInputElement({
+  accessCodeElementAtom,
+  index,
+}: Props): React.ReactElement {
   const {isCodeInvalidAtom} = useMolecule(accessCodeMolecule)
   const isCodeInvalid = useAtomValue(isCodeInvalidAtom)
   const accessCodeElement = useAtomValue(accessCodeElementAtom)

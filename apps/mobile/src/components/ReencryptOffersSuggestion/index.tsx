@@ -1,5 +1,6 @@
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {type YStackProps} from 'tamagui'
 import {areThereMissingOffersOnServerAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -8,7 +9,7 @@ import {reencryptOffersWithModalActionAtom} from './atoms'
 
 export default function ReencryptOffersSuggestion(
   props: YStackProps
-): JSX.Element | null {
+): React.ReactElement | null {
   const {t} = useTranslation()
   const areThereMissingOffersOnServer = useAtomValue(
     areThereMissingOffersOnServerAtom

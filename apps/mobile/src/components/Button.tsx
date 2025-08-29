@@ -1,5 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {useCallback, useMemo, type ComponentProps} from 'react'
+import React, {useCallback, useMemo, type ComponentProps} from 'react'
 import {TouchableOpacity, type ColorValue, type ViewStyle} from 'react-native'
 import {Stack, Text, getTokens, styled} from 'tamagui'
 import Image from './Image'
@@ -162,7 +162,7 @@ function Button({
   adjustTextToFitOneLine = false,
   size = 'large',
   numberOfLines,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tokens = getTokens()
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()

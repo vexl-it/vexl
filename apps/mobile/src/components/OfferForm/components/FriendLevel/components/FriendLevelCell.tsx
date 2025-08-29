@@ -1,6 +1,7 @@
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {userDataRealOrAnonymizedAtom} from '../../../../../state/session/userDataAtoms'
@@ -27,7 +28,7 @@ function FriendLevelCell({
   subtitle,
   title,
   type,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const userData = useAtomValue(userDataRealOrAnonymizedAtom)
   return (
     <Stack f={1}>

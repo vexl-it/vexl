@@ -1,4 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {styled, Text, YStack} from 'tamagui'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -13,7 +14,7 @@ const SubtitleText = styled(Text, {
   col: '$greyOnBlack',
 })
 
-function ContactsImportedTitle(): JSX.Element {
+function ContactsImportedTitle(): React.ReactElement {
   const {t} = useTranslation()
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const contactsCount = useSetAtom(localizedDecimalNumberActionAtom)({

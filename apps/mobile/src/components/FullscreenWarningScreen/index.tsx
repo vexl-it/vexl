@@ -1,6 +1,6 @@
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {useAppState} from '../../utils/useAppState'
 import {FullscreenWarningComponent} from './components/FullscreenWarning'
 import {
@@ -29,7 +29,7 @@ export function OverlayInfoScreen({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   const data = useAtomValue(fullScreenWarningDataAtom)
   const setCancelledIdAction = useSetAtom(setCancelledIdActionAtom)
   const isWarningClosed = useAtomValue(isWarningClosedAtom)

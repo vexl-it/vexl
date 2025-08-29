@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import ListingType from '../../OfferForm/components/ListingType'
 import OfferType from '../../OfferForm/components/OfferType'
@@ -9,7 +10,7 @@ import userSvg from '../../images/userSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function ListingAndOfferTypeScreen(): JSX.Element {
+function ListingAndOfferTypeScreen(): React.ReactElement {
   const {t} = useTranslation()
   const {listingTypeAtom, offerTypeAtom, updateListingTypeActionAtom} =
     useMolecule(offerFormMolecule)

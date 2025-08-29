@@ -1,7 +1,7 @@
 import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 import {useAtom, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import {
   getCurrentLocale,
@@ -23,7 +23,7 @@ interface Props {
 function Expiration({
   expirationDateAtom,
   offerExpirationModalVisibleAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const locale = getCurrentLocale()
   const [expirationDate, setExpirationDate] = useAtom(expirationDateAtom)

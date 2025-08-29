@@ -1,7 +1,7 @@
 import {hmac} from '@vexl-next/cryptography'
 import type * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
-import {useCallback, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import {Text, YStack} from 'tamagui'
 import formatNumber from '../../../utils/formatNumber'
 import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
@@ -34,7 +34,7 @@ function createIntensiveTasks(
     })
 }
 
-export default function AfterInteractionTaskDemo(): JSX.Element {
+export default function AfterInteractionTaskDemo(): React.ReactElement {
   const [progress, setProgress] = useState(0)
   const [result, setResult] = useState<string | undefined>(undefined)
 

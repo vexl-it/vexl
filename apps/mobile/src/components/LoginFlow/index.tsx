@@ -1,4 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import React from 'react'
 import {type LoginStackParamsList} from '../../navigationTypes'
 import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
 import AnonymizationAnimationScreen from './components/AnonymizationAnimationScreen'
@@ -13,7 +14,7 @@ import VerificationCodeScreen from './components/VerificationCodeScreen'
 
 const LoginStack = createNativeStackNavigator<LoginStackParamsList>()
 
-function LoginFlow(): JSX.Element {
+function LoginFlow(): React.ReactElement {
   return (
     <PageWithButtonAndProgressHeader>
       <LoginStack.Navigator

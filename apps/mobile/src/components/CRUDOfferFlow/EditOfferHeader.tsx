@@ -22,7 +22,7 @@ interface Props {
   offerId: OfferId | undefined
 }
 
-function EditOfferHeader({offerId}: Props): JSX.Element {
+function EditOfferHeader({offerId}: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
 

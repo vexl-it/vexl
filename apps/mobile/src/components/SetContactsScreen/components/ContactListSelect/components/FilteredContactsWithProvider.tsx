@@ -18,7 +18,7 @@ function FilteredContacts({
   route: {
     params: {filter},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {
     contactsFilterAtom,
     searchTextAsCustomContactAtom,

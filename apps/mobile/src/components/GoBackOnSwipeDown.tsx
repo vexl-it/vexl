@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   Directions,
   Gesture,
@@ -10,7 +11,7 @@ function GoBackOnSwipeDown({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   const goBack = useSafeGoBack()
 
   return (

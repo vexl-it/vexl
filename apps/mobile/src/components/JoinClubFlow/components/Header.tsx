@@ -1,9 +1,10 @@
+import React from 'react'
 import {Stack, type StackProps} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import IconButton from '../../IconButton'
 
-function Header(props: StackProps): JSX.Element {
+function Header(props: StackProps): React.ReactElement {
   const goBack = useSafeGoBack()
 
   return (

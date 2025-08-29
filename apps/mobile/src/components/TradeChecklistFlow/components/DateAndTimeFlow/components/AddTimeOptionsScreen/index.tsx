@@ -34,7 +34,7 @@ import TimeOptionsPerDate from './components/TimeOptionsPerDate'
 
 type Props = TradeChecklistStackScreenProps<'AddTimeOptions'>
 
-function AddTimeOptionsScreen({navigation}: Props): JSX.Element {
+function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const isThereAnyOutdatedDateTime = useAtomValue(
     isThereAnyOutdatedDateTimeAtom

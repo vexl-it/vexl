@@ -1,4 +1,5 @@
 import {useSetAtom, useStore} from 'jotai'
+import React from 'react'
 import {XStack, YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
@@ -26,7 +27,7 @@ export default function LocationMapPreview({
   route: {
     params: {selectedLocation},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const stageLocation = useSetAtom(addMeetingLocationActionAtom)
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const {t} = useTranslation()

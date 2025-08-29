@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Alert, TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -28,7 +28,7 @@ function VerificationCodeScreen({
   route: {
     params: {phoneNumber, initPhoneVerificationResponse},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const [userCode, setUserCode] = useState('')
   const [countdownFinished, setCountdownFinished] = useState(false)

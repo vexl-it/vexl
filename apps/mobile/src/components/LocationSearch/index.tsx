@@ -16,7 +16,7 @@ interface Props {
   sessionId: LocationSessionId
 }
 
-function LocationSearch({onPress, sessionId}: Props): JSX.Element {
+function LocationSearch({onPress, sessionId}: Props): React.ReactElement {
   return (
     <ScopeProvider scope={LocationSearchScope} value={{sessionId}}>
       <LocationSearchInput />

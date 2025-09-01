@@ -31,6 +31,8 @@ const processChatNotificationProcessed = (
       trackingId: notificationTrackingId,
     })
     .pipe(
+      Effect.timeout(500),
+      Effect.retry({times: 3}),
       Effect.tapError((e) =>
         reportErrorE(
           'warn',
@@ -53,6 +55,8 @@ const processChatNotificationProcessed = (
       uuid: generateUuid(),
     })
     .pipe(
+      Effect.timeout(500),
+      Effect.retry({times: 3}),
       Effect.tapError((e) =>
         reportErrorE(
           'warn',

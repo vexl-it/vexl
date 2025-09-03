@@ -107,7 +107,7 @@ const deleteUserAndResetFlowActionAtom = atom(
         })
         return Effect.fail(e)
       }),
-      Effect.andThen(() => resetNavigationToIntroScreen)
+      Effect.andThen(resetNavigationToIntroScreen)
     )
   }
 )

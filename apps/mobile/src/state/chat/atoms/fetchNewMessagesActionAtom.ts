@@ -12,14 +12,13 @@ import {
   unixMillisecondsNow,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Effect} from 'effect/index'
+import {Array, Effect} from 'effect/index'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -49,6 +48,7 @@ import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionT
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
+import {reportMessagesReceivedActionAtom} from './reportMessagesReceivedActionAtom'
 
 const handleOtherSideUpdatedActionAtom = atom(
   null,
@@ -361,15 +361,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
     TE.chainFirstW(({newMessages}) => {
       const messagesToReport = newMessages
       if (messagesToReport.length === 0) return TE.of(undefined)
-      console.info('Reporting new messages')
-      return get(apiAtom)
-        .metrics.reportNotificationInteraction({
-          count: messagesToReport.length,
-          type: 'ChatMessageReceived',
-          notificationType: 'Chat',
-          uuid: generateUuid(),
-        })
-        .pipe(Effect.ignore, effectToTaskEither)
+
+      return set(
+        reportMessagesReceivedActionAtom,
+        Array.map(messagesToReport, (o) => o.message.uuid)
+      ).pipe(Effect.ignore, effectToTaskEither)
     }),
     TE.matchEW(
       (

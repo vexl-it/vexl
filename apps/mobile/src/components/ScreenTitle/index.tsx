@@ -1,4 +1,4 @@
-import {type ReactNode} from 'react'
+import React, {type ReactNode} from 'react'
 import {
   Stack,
   Text,
@@ -30,7 +30,7 @@ function ScreenTitle({
   withBackButton,
   onBackButtonPress,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
 
   return (

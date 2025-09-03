@@ -1,12 +1,13 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom} from 'jotai'
+import React from 'react'
 import {getTokens, Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Input from '../../Input'
 import {feedbackMolecule} from '../atoms'
 
 const MAX_INPUT_LENGTH = 200
-function TextComment(): JSX.Element {
+function TextComment(): React.ReactElement {
   const {t} = useTranslation()
   const {textCommentAtom} = useMolecule(feedbackMolecule)
 

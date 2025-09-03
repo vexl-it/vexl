@@ -1,4 +1,5 @@
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
+import React from 'react'
 import {Linking, Platform} from 'react-native'
 import {TouchableOpacity} from 'react-native-gesture-handler'
 import {Stack, Text, XStack, YStack} from 'tamagui'
@@ -17,7 +18,11 @@ import EventSpeaker from './EventSpeaker'
 
 const BULLET = '•'
 
-export default function EventItem({atom}: {atom: Atom<ListData>}): JSX.Element {
+export default function EventItem({
+  atom,
+}: {
+  atom: Atom<ListData>
+}): React.ReactElement {
   const {t} = useTranslation()
   const data = useAtomValue(atom)
   const createEvent = useSetAtom(createEventActionAtom)

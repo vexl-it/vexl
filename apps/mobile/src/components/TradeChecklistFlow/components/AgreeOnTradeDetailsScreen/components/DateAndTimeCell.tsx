@@ -2,7 +2,7 @@ import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
-import {useCallback, useMemo} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
   otherSideDataAtom,
@@ -23,7 +23,7 @@ function formatDateTime(millis: UnixMilliseconds): string {
   )
 }
 
-function DateAndTimeCell(): JSX.Element {
+function DateAndTimeCell(): React.ReactElement {
   const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()

@@ -1,9 +1,10 @@
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {Spinner, Text, XStack, YStack} from 'tamagui'
 import ProgressBar from '../../ProgressBar'
 import {uploadingProgressDataForProgressIndicatorElementAtom} from '../atoms'
 
-function ProgressIndicator(): JSX.Element {
+function ProgressIndicator(): React.ReactElement {
   const data = useAtomValue(
     uploadingProgressDataForProgressIndicatorElementAtom
   )

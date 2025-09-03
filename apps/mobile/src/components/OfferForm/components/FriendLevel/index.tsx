@@ -2,6 +2,7 @@ import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {atom, useAtom, useAtomValue, type Atom} from 'jotai'
+import React from 'react'
 import {XStack} from 'tamagui'
 import {
   translationAtom,
@@ -54,7 +55,7 @@ interface Props {
 function FriendLevel({
   hideSubtitle,
   intendedConnectionLevelAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [intendedConnectionLevel, setIntendedConnectionLevel] = useAtom(
     intendedConnectionLevelAtom

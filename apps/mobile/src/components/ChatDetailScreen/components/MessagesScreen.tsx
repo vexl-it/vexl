@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack} from 'tamagui'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {chatMolecule} from '../atoms'
@@ -11,7 +11,7 @@ import MessagesList from './MessagesList'
 import QuickActionBanner from './QuickActionBanner'
 import StickyHeader from './StickyHeader'
 
-function MessagesScreen(): JSX.Element {
+function MessagesScreen(): React.ReactElement {
   const {
     showModalAtom,
     canSendMessagesAtom,

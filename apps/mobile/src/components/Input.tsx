@@ -1,5 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {
+import React, {
   forwardRef,
   useImperativeHandle,
   useRef,
@@ -31,7 +31,8 @@ const RootContainer = styled(XStack, {
         p: '$2',
       },
       medium: {
-        p: '$4',
+        px: '$4',
+        py: Platform.OS === 'android' ? '$0' : '$4',
       },
     },
     variant: {
@@ -153,7 +154,7 @@ function TextInput(
     ...restProps
   }: Props,
   ref: Ref<Input>
-): JSX.Element {
+): React.ReactElement {
   const tokens = getTokens()
   const inputRef: Ref<Input> = useRef(null)
   useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)

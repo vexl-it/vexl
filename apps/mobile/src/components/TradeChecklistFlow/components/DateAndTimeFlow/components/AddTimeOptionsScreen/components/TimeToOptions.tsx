@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {DateTime} from 'luxon'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'
 import unixMillisecondsToLocaleDateTime from '../../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import TimeToSelectableCell from './TimeToSelectableCell'
@@ -18,7 +18,7 @@ interface TimeOption {
   value: UnixMilliseconds
 }
 
-function TimeToOptions({timeFromTimestamp}: Props): JSX.Element {
+function TimeToOptions({timeFromTimestamp}: Props): React.ReactElement {
   const timeOptionsTo: TimeOption[] = useMemo(() => {
     const options: TimeOption[] = []
     const localizedTimestamp =

@@ -1,5 +1,6 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import React from 'react'
 import {SvgXml} from 'react-native-svg'
 import {FilterImage} from 'react-native-svg/filter-image'
 import {getTokens, Image} from 'tamagui'
@@ -27,7 +28,12 @@ function makeSvgIntoGrayscale(svg: SvgString): SvgString {
 }
 
 // TODO move grayScale images to a separate component
-function UserAvatar({userImage, grayScale, width, height}: Props): JSX.Element {
+function UserAvatar({
+  userImage,
+  grayScale,
+  width,
+  height,
+}: Props): React.ReactElement {
   // const roundedRect = useMemo(
   //   () => rrect(rect(0, 0, width, height), 12, 12),
   //   [height, width]

@@ -1,12 +1,13 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, getTokens} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
 import SvgImage from '../../Image'
 import {feedbackMolecule} from '../atoms'
 
-function BannerBackButton(): JSX.Element {
+function BannerBackButton(): React.ReactElement {
   const {currentFeedbackPageAtom, feedbackFlowFinishedAtom} =
     useMolecule(feedbackMolecule)
   const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)

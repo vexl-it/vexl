@@ -38,7 +38,7 @@ function DeliveryMethodComponent({
   locationStateAtom,
   randomizeLocation,
   updateLocationStateAndPaymentMethodAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [locations, setLocations] = useAtom(locationAtom)
   const locationState = useAtomValue(locationStateAtom)

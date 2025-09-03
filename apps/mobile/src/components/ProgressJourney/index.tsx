@@ -1,4 +1,4 @@
-import {useCallback, type ReactNode} from 'react'
+import React, {useCallback, type ReactNode} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, XStack, styled} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../utils/dismissKeyboardPromise'
@@ -52,7 +52,7 @@ function ProgressJourney({
   children,
   withBackButton,
   touchableOverlayDisabled = false,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const onNextOrFinish = useCallback(() => {

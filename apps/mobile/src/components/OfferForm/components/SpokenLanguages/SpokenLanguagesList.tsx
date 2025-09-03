@@ -14,15 +14,15 @@ interface Props {
   ) => WritableAtom<boolean, [SetStateAction<boolean>], void>
 }
 
-function ItemSeparatorComponent(): JSX.Element {
+function ItemSeparatorComponent(): React.ReactElement {
   return <Stack h={2} bc="$greyAccent1" />
 }
 
 function SpokenLanguagesList({
   createIsThisLanguageSelectedAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const renderItem = useCallback(
-    ({item}: {item: SpokenLanguage}): JSX.Element => (
+    ({item}: {item: SpokenLanguage}): React.ReactElement => (
       <SpokenLanguagesListItem
         createIsThisLanguageSelectedAtom={createIsThisLanguageSelectedAtom}
         spokenLanguage={item}

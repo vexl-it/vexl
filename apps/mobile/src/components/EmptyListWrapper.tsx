@@ -1,4 +1,5 @@
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {RefreshControl, ScrollView} from 'react-native'
 import {Stack, YStack, getTokens} from 'tamagui'
 import {goldenAvatarTypeAtom} from '../utils/preferences'
@@ -18,7 +19,7 @@ function EmptyListContent({
   children,
   buttonText,
   onButtonPress,
-}: ContentProps): JSX.Element {
+}: ContentProps): React.ReactElement {
   const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)
 
   return (
@@ -58,7 +59,7 @@ function EmptyListWrapper({
   onButtonPress,
   refreshing = false,
   onRefresh,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
   return inScrollView ? (

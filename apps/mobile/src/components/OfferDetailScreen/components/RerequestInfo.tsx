@@ -6,7 +6,11 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import InfoSquare from '../../InfoSquare'
 
-function RerequestInfo({chat}: {chat: ChatWithMessages}): JSX.Element | null {
+function RerequestInfo({
+  chat,
+}: {
+  chat: ChatWithMessages
+}): React.ReactElement | null {
   const {t} = useTranslation()
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
 

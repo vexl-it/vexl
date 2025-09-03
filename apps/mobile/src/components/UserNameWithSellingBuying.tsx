@@ -45,7 +45,11 @@ function getOtherSideIsBuyingOrSelling(
   }
 }
 
-function AfterNameText({offerInfo}: {offerInfo: OfferInfo}): JSX.Element {
+function AfterNameText({
+  offerInfo,
+}: {
+  offerInfo: OfferInfo
+}): React.ReactElement {
   const {t} = useTranslation()
 
   const buyingOrSelling = getOtherSideIsBuyingOrSelling(offerInfo)
@@ -66,7 +70,7 @@ function UserNameWithSellingBuying({
   userName: string
   center?: boolean
   offerInfo?: OfferInfo
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
   return (
     <Text

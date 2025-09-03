@@ -1,4 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import React from 'react'
 import {getTokens, Text, XStack, type XStackProps} from 'tamagui'
 import Image from '../../../../../../Image'
 
@@ -7,7 +8,7 @@ interface Props extends XStackProps {
   icon: SvgString
 }
 
-function SectionTitle({icon, text, ...props}: Props): JSX.Element {
+function SectionTitle({icon, text, ...props}: Props): React.ReactElement {
   return (
     <XStack ai="center" gap="$2" mb="$4" {...props}>
       <Image

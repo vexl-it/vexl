@@ -1,6 +1,6 @@
 import {Array} from 'effect'
 import {type PrimitiveAtom, useAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {Text, YStack} from 'tamagui'
 import {Dropdown} from '../../../../components/Dropdown'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -12,7 +12,7 @@ export function SelectClubComponent({
 }: {
   clubs: Array.NonEmptyReadonlyArray<ClubWithMembers>
   selectedClubAtom: PrimitiveAtom<ClubWithMembers>
-}): JSX.Element {
+}): React.ReactElement {
   const [selectedClub, setSelectedClub] = useAtom(selectedClubAtom)
   const {t} = useTranslation()
 

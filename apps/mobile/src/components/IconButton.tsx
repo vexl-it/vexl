@@ -1,5 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {useCallback, useMemo, type ComponentProps} from 'react'
+import React, {useCallback, useMemo, type ComponentProps} from 'react'
 import {TouchableOpacity, type ColorValue} from 'react-native'
 import {Stack, getTokens, styled} from 'tamagui'
 import Image from './Image'
@@ -72,7 +72,7 @@ function IconButton({
   oval,
   iconWidth,
   iconHeight,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const onPressInner = useCallback(() => {
     if (!disabled) onPress()
   }, [disabled, onPress])

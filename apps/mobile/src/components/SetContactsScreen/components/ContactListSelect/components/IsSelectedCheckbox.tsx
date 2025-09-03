@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, type Atom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import Checkbox from '../../../../Checkbox'
 import {contactSelectMolecule} from '../atom'
@@ -9,7 +9,7 @@ function IsSelectedCheckbox({
   contactAtom,
 }: {
   contactAtom: Atom<StoredContactWithComputedValues>
-}): JSX.Element {
+}): React.ReactElement {
   const {createSelectContactAtom} = useMolecule(contactSelectMolecule)
 
   const [isSelected, select] = useAtom(

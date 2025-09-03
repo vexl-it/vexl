@@ -25,7 +25,7 @@ interface Props extends StackProps {
   date: UnixMilliseconds
 }
 
-function TimeOptionsPerDate({date, ...props}: Props): JSX.Element {
+function TimeOptionsPerDate({date, ...props}: Props): React.ReactElement {
   const {t} = useTranslation()
   const availableDateTimesFrom = useAtomValue(availableDateTimesFromAtom)
   const removeTimestampFromAvailable = useSetAtom(

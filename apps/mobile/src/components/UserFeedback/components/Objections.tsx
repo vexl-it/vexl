@@ -5,11 +5,12 @@ import {
 } from '@vexl-next/domain/src/general/feedback'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {XStack} from 'tamagui'
 import {feedbackMolecule} from '../atoms'
 import ObjectionCell from './ObjectionCell'
 
-function Objections(): JSX.Element {
+function Objections(): React.ReactElement {
   const {starRatingAtom} = useMolecule(feedbackMolecule)
   const starRating = useAtomValue(starRatingAtom)
 

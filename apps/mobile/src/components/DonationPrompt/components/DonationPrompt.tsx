@@ -1,8 +1,9 @@
+import React from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {ImageUniversal} from '../../Image'
 
-function DonationPrompt(): JSX.Element {
+function DonationPrompt(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

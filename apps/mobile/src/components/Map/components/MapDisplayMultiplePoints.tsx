@@ -12,8 +12,8 @@ import {
   type Atom,
   type WritableAtom,
 } from 'jotai'
-import {Fragment, useCallback, useRef} from 'react'
-import {Platform} from 'react-native'
+import React, {Fragment, useCallback, useRef} from 'react'
+import {Dimensions, LayoutAnimation, Platform} from 'react-native'
 import MapView from 'react-native-map-clustering'
 import {
   Circle,
@@ -48,6 +48,36 @@ interface Props<T> {
   onMapReady?: () => void
 }
 
+// TODO: remove all dummy refs and func after react-native-map-clustering update to newer version
+// as default props do not work in new version of react therefore this causes errors after update do EXPO 53
+const mapClusteringDefaultProps = {
+  clusteringEnabled: true,
+  spiralEnabled: true,
+  animationEnabled: true,
+  preserveClusterPressBehavior: false,
+  layoutAnimationConf: LayoutAnimation.Presets.spring,
+  tracksViewChanges: false,
+  // SuperCluster parameters
+  radius: Dimensions.get('window').width * 0.06,
+  maxZoom: 20,
+  minZoom: 1,
+  minPoints: 2,
+  extent: 512,
+  nodeSize: 64,
+  // Map parameters
+  edgePadding: {top: 50, left: 50, right: 50, bottom: 50},
+  // Cluster styles
+  clusterColor: '#00B386',
+  clusterTextColor: '#FFFFFF',
+  spiderLineColor: '#FF0000',
+  // Callbacks
+  onRegionChangeComplete: () => {},
+  onClusterPress: () => {},
+  onMarkersChange: () => {},
+  superClusterRef: {},
+  mapRef: () => {},
+}
+
 const emptyAtom = atom<MapView | undefined>(undefined)
 
 const mapStyle = {
@@ -71,8 +101,10 @@ function MMapView({
   inFocusMode: boolean
   onMapReady?: () => void
   onRegionChangeComplete?: (region: Region, d: Details) => void
-}): JSX.Element {
+}): React.ReactElement {
   const ref = useRef<MapView>(null)
+  // TODO: remove after update of react-native-map-clustering
+  const dummySuperClusterRefFnc = useRef(null)
   const setMapViewRef = useSetAtom(refAtom ?? emptyAtom)
   const loadedCallbackCalledRef = useRef(false)
 
@@ -100,7 +132,9 @@ function MMapView({
 
   return (
     <MapView
+      {...mapClusteringDefaultProps}
       ref={ref}
+      superClusterRef={dummySuperClusterRefFnc}
       initialRegion={europeRegion}
       clusterColor={
         inFocusMode
@@ -139,7 +173,7 @@ export default function MapDisplayMultiplePoints<T>({
   onRegionChangeComplete,
   refAtom,
   onMapReady,
-}: Props<T>): JSX.Element {
+}: Props<T>): React.ReactElement {
   const points = useAtomValue(pointsAtom)
   const idsToFocus = useAtomValue(pointIdsToFocusAtom)
   const {focusedPoints, notFocusedPoints} = points.reduce(
@@ -218,7 +252,7 @@ export default function MapDisplayMultiplePoints<T>({
                 strokeColor={getTokens().color.main.val}
                 center={point}
                 radius={longitudeDeltaToMeters(point.radius, point.latitude)}
-              ></Circle>
+              />
             </Fragment>
           )
         })}

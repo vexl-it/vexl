@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import React from 'react'
 import {RefreshControl, ScrollView} from 'react-native'
 import {YStack} from 'tamagui'
 import {
@@ -20,7 +21,7 @@ interface Props {
 function EmptyMarketplaceSuggestions({
   refreshing,
   onRefresh,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()

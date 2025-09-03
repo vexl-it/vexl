@@ -7,7 +7,7 @@ import {
   type Atom,
   type PrimitiveAtom,
 } from 'jotai'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Text, XStack, YStack, getTokens, type TextProps} from 'tamagui'
 import {
@@ -37,7 +37,7 @@ function CurrentBtcPrice({
   disabled,
   postRefreshActions,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
   const customBtcPrice = useAtomValue(customBtcPriceAtom ?? emptyAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)

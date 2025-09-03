@@ -1,6 +1,6 @@
 import {useNavigationState} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {memo, useCallback} from 'react'
+import React, {memo, useCallback} from 'react'
 import {Stack, YStack} from 'tamagui'
 import {locationFilterAtom} from '../state/marketplace/atoms/filterAtoms'
 import {clearRegionAndRefocusActionAtom} from '../state/marketplace/atoms/map/focusedOffer'
@@ -62,7 +62,7 @@ function useIsCurrentRouteOfferDetail(): boolean {
   )
 }
 
-function MapBarAndButton(): JSX.Element | null {
+function MapBarAndButton(): React.ReactElement | null {
   const {t} = useTranslation()
   // const shouldShowMapBarAndButton = useShouldShowMapBarAndButton()
   const isMapRegionSet = useAtomValue(isMapRegionSetAtom)
@@ -147,7 +147,7 @@ function MapBarAndButton(): JSX.Element | null {
 const MapBarAndButtonMemoized = memo(MapBarAndButton)
 const MarketplaceMapMemoized = memo(MarketplaceMap)
 
-function MarketplaceMapContainer(): JSX.Element | null {
+function MarketplaceMapContainer(): React.ReactElement | null {
   const marketplaceLayoutMode = useAtomValue(marketplaceLayoutModeAtom)
   const shouldShowMap =
     useIsCurrentRouteOfferDetail() || marketplaceLayoutMode === 'map'

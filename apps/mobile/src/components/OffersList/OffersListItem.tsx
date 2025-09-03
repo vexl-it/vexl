@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {atom, useAtomValue, type Atom} from 'jotai'
-import {useCallback, useMemo} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import {Stack} from 'tamagui'
 import {useChatWithMessagesForOffer} from '../../state/chat/hooks/useChatForOffer'
 import {
@@ -24,7 +24,7 @@ interface Props {
   readonly offerAtom: Atom<OneOfferInState>
 }
 
-function OffersListItem({isFirst, offerAtom}: Props): JSX.Element {
+function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const offer = useAtomValue(offerAtom)

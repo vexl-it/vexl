@@ -1,5 +1,6 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {useAtom, useSetAtom, type PrimitiveAtom} from 'jotai'
+import React from 'react'
 import {
   TouchableOpacity,
   TouchableWithoutFeedback,
@@ -15,7 +16,9 @@ interface Props {
   selectedImageUriAtom: PrimitiveAtom<UriString | undefined>
 }
 
-function SelectProfilePicture({selectedImageUriAtom}: Props): JSX.Element {
+function SelectProfilePicture({
+  selectedImageUriAtom,
+}: Props): React.ReactElement {
   const selectImage = useSetAtom(selectImageActionAtom)
   const [selectedImageUri, setSelectedImageUri] = useAtom(selectedImageUriAtom)
   const {width} = useWindowDimensions()

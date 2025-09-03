@@ -1,5 +1,5 @@
 import * as SplashScreen from 'expo-splash-screen'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
 import Animated, {
   BounceOut,
@@ -27,8 +27,8 @@ const styles = StyleSheet.create({
     backgroundColor: getTokens().color.main.val,
   },
   image: {
-    height: 865,
-    width: 865,
+    width: 290,
+    height: 90,
   },
 })
 
@@ -48,7 +48,7 @@ function AnimatedSplashScreen({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const [isAppReady, setIsAppReady] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
@@ -109,7 +109,7 @@ function AnimatedSplashScreen({
             entering={BounceOut.duration(1000).withCallback((finished) => {
               runOnJS(setIsSplashAnimationComplete)(finished)
             })}
-            source={require('../assets/splash.png')}
+            source={require('./images/sunglasses.png')}
           />
         </Animated.View>
       )}

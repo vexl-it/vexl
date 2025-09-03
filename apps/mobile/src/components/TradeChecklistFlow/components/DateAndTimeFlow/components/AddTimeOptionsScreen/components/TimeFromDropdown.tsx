@@ -46,7 +46,7 @@ function createTimeOptionsFromData(
   return options
 }
 
-function TimeFromDropdown({availableDateTimeFrom}: Props): JSX.Element {
+function TimeFromDropdown({availableDateTimeFrom}: Props): React.ReactElement {
   const availableDateTimesFrom = useAtomValue(availableDateTimesFromAtom)
   const manageAvailableDateTimes = useSetAtom(
     manageAvailableDateTimesActionAtom

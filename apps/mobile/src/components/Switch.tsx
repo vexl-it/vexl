@@ -1,9 +1,10 @@
+import React from 'react'
 import {Switch as RnSwitch, type SwitchProps} from 'react-native'
 import {getTokens} from 'tamagui'
 
 interface Props extends Partial<SwitchProps> {}
 
-export default function Switch(props: Props): JSX.Element {
+export default function Switch(props: Props): React.ReactElement {
   const tokens = getTokens()
   return (
     <RnSwitch

@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,7 +10,7 @@ interface Props {
   percentDone: number
 }
 
-function ProgressBar({percentDone}: Props): JSX.Element {
+function ProgressBar({percentDone}: Props): React.ReactElement {
   const tokens = getTokens()
   const [progressContainerWidth, setProgressContainerWidth] =
     useState<number>(0)

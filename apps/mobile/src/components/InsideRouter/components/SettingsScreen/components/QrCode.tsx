@@ -1,7 +1,7 @@
 import {BlurView} from '@react-native-community/blur'
 import {Effect, pipe} from 'effect'
 import {atom, useAtomValue} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import {
   translationAtom,
@@ -33,7 +33,7 @@ export const qrCodeDialogActionAtom = atom(null, (get, set) => {
   )
 })
 
-function QrCode(): JSX.Element {
+function QrCode(): React.ReactElement {
   const {t} = useTranslation()
   const [sharePressed, setSharePressed] = useState(false)
   const [confirmPressed, setConfirmPressed] = useState(false)

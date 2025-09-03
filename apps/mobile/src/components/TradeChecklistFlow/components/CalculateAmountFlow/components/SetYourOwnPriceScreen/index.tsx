@@ -1,4 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
@@ -14,7 +15,7 @@ import {
 import SetYourOwnPrice from '../../../../../TradeCalculator/components/SetYourOwnPrice'
 import Content from '../../../Content'
 
-function SetYourOwnPriceScreen(): JSX.Element {
+function SetYourOwnPriceScreen(): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
 

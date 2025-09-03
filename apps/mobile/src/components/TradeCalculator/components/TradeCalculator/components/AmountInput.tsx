@@ -46,14 +46,14 @@ function AmountInput(
     ...props
   }: Props,
   ref: Ref<Input>
-): JSX.Element {
+): React.ReactElement {
   const fontScale = getFontScaleSync()
   const inputRef: Ref<Input> = useRef(null)
   useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
 
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
-      <>
+      <Stack>
         <XStack
           h={65 * fontScale}
           ai="center"
@@ -97,7 +97,7 @@ function AmountInput(
           </Stack>
         </XStack>
         {!!showPremiumInfoMessage && <PremiumIncluded />}
-      </>
+      </Stack>
     </TouchableWithoutFeedback>
   )
 }

@@ -1,4 +1,4 @@
-import {type ReactNode} from 'react'
+import React, {type ReactNode} from 'react'
 import {StyleSheet} from 'react-native'
 import Animated, {
   SlideInDown,
@@ -41,7 +41,7 @@ function AnimatedModal({
   exiting,
   entering,
   shown,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {bottom: bottomInset} = useSafeAreaInsets()
 
   if (shown === false) return null

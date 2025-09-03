@@ -2,7 +2,7 @@ import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeC
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -63,7 +63,7 @@ export default function PickDateFromSuggestionsScreen({
   route: {
     params: {chosenDateTimes},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(

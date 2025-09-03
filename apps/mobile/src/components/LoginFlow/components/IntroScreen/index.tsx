@@ -1,5 +1,5 @@
 import {useStore} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Image} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -15,7 +15,7 @@ import useContent from './useContent'
 
 type Props = LoginStackScreenProps<'Intro'>
 
-function Intro({navigation}: Props): JSX.Element {
+function Intro({navigation}: Props): React.ReactElement {
   const [page, setPage] = useState(0)
   const content = useContent()
   const store = useStore()

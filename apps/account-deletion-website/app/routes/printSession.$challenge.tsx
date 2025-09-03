@@ -17,7 +17,7 @@ import {
   parseFormData,
 } from "../utils";
 
-export default function PrintSession(): JSX.Element {
+export default function PrintSession(): React.ReactElement {
   const params = useParams();
   const [signature, setSignature] = useState<string | null>(null);
   const [keypair, setKeypair] = useState<PrivateKeyHolder | null>(null);
@@ -30,10 +30,13 @@ export default function PrintSession(): JSX.Element {
       getKeypair(),
       E.bindTo("keypair"),
       E.bindW("challenge", () =>
-        pipe(params.challenge, E.fromNullable({ _tag: "noChallenge" } as const))
+        pipe(
+          params.challenge,
+          E.fromNullable({ _tag: "noChallenge" } as const),
+        ),
       ),
       E.bindW("signature", ({ keypair, challenge }) =>
-        ecdsaSign(keypair)(challenge)
+        ecdsaSign(keypair)(challenge),
       ),
       E.matchW(
         (e) => {
@@ -43,8 +46,8 @@ export default function PrintSession(): JSX.Element {
         ({ signature, keypair }) => {
           setSignature(signature);
           setKeypair(keypair);
-        }
-      )
+        },
+      ),
     );
   }, [params.challenge]);
 
@@ -88,8 +91,8 @@ export const action: ActionFunction = async ({ request }) => {
         Schema.Struct({
           signature: EcdsaSignature,
           pubKey: PublicKeyPemBase64E,
-        })
-      )(request)
+        }),
+      )(request),
     ),
     TE.bindW("verificationResult", ({ pubKey, signature }) =>
       effectToTaskEither(
@@ -98,8 +101,8 @@ export const action: ActionFunction = async ({ request }) => {
             signature,
             userPublicKey: pubKey,
           },
-        })
-      )
+        }),
+      ),
     ),
     TE.matchW(
       (e) => {
@@ -117,7 +120,7 @@ export const action: ActionFunction = async ({ request }) => {
           hash: verificationResult.hash,
           publicKey: pubKey,
           signature: verificationResult.signature,
-        })
-    )
+        }),
+    ),
   )();
 };

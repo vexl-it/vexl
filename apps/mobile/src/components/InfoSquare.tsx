@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import infoSvg from './ChatDetailScreen/images/infoSvg'
@@ -11,7 +12,7 @@ function InfoSquare({
   children: string
   negative?: boolean
   onPress?: () => void
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <XStack

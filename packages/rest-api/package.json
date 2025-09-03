@@ -22,15 +22,15 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@effect/platform": "^0.82.0",
+    "@effect/platform": "^0.90.6",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
-    "effect": "^3.15.0",
-    "effect-http": "^0.82.0",
+    "effect": "^3.17.10",
+    "effect-http": "^0.87.0",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "url-join": "^5.0.0",

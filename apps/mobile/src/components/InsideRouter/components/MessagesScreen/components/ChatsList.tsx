@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
 import {useAtomValue, type Atom} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../../../../state/chat/domain'
@@ -36,11 +37,11 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
 
 const chatIdAtomsAtom = splitAtom(chatIdsAtom)
 
-function renderItem({item}: {item: Atom<ChatListData>}): JSX.Element {
+function renderItem({item}: {item: Atom<ChatListData>}): React.ReactElement {
   return <ChatListItem dataAtom={item} />
 }
 
-function ChatsList(): JSX.Element | null {
+function ChatsList(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const elementAtoms = useAtomValue(chatIdAtomsAtom)

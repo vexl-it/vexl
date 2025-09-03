@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Text} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
@@ -37,7 +37,10 @@ interface Props {
   onRefresh?: () => void
 }
 
-function EmptyListPlaceholder({refreshing, onRefresh}: Props): JSX.Element {
+function EmptyListPlaceholder({
+  refreshing,
+  onRefresh,
+}: Props): React.ReactElement {
   const navigation = useNavigation()
   const {t} = useTranslation()
 

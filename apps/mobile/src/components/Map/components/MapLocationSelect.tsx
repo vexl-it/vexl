@@ -4,7 +4,7 @@ import {Effect, Either, Exit, Fiber} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import MapView, {
   PROVIDER_GOOGLE,
   type EdgePadding,
@@ -116,7 +116,7 @@ function PickedLocationText({
   atom,
 }: {
   atom: ReturnType<typeof useAtoms>['getGeocodedRegion']
-}): JSX.Element {
+}): React.ReactElement {
   const geocodingState = useAtomValue(atom)
   const {t} = useTranslation()
 
@@ -146,7 +146,7 @@ export default function MapLocationSelect({
   bottomChildren,
   mapPadding,
   ...restProps
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
 
   const initialRegion = useMemo(

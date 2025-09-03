@@ -1,5 +1,6 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {type PrimitiveAtom, type WritableAtom} from 'jotai'
+import React from 'react'
 import {Stack, YStack, getTokens} from 'tamagui'
 import CurrentBtcPrice from '../../../../CurrentBtcPrice'
 import SvgImage from '../../../../Image'
@@ -37,7 +38,7 @@ function PriceCalculator({
   satsValueAtom,
   changePriceCurrencyActionAtom,
   currencySelectVisibleAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   return (
     <YStack gap="$2">
       <Stack als="flex-end">

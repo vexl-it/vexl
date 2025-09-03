@@ -1,4 +1,5 @@
 import {DateTime} from 'luxon'
+import React from 'react'
 import {StyleSheet} from 'react-native'
 import {
   Calendar as RNCalendar,
@@ -37,7 +38,7 @@ export const defaultMinDate = DateTime.now().toFormat(
   REACT_NATIVE_CALENDARS_DATE_FORMAT
 )
 
-function Calendar(props: CalendarProps): JSX.Element {
+function Calendar(props: CalendarProps): React.ReactElement {
   return (
     <RNCalendar
       enableSwipeMonths

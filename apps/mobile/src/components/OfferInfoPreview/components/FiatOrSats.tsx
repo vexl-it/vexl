@@ -1,6 +1,6 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
 import {marketplaceFiatOrSatsCurrencyAtom} from '../../../utils/preferences'
@@ -16,7 +16,7 @@ import PriceInSats from './PriceInSats'
 interface Props {
   offer: OfferInfo
 }
-function FiatOrSats({offer}: Props): JSX.Element | null {
+function FiatOrSats({offer}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const marketplaceFiatOrSatsCurrency = useAtomValue(
     marketplaceFiatOrSatsCurrencyAtom

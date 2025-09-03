@@ -55,7 +55,7 @@ function MessageItem({
   itemAtom,
 }: {
   itemAtom: Atom<MessagesListItem>
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const item = useAtomValue(itemAtom)
   const {
     chatFeedbackAtom,

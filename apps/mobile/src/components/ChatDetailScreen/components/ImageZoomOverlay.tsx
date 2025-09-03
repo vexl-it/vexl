@@ -87,7 +87,7 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
   )
 })
 
-function ImageZoomOverlay(): JSX.Element {
+function ImageZoomOverlay(): React.ReactElement {
   const {openedImageUriAtom} = useMolecule(chatMolecule)
   const [openedImageUri, setOpenedImageUri] = useAtom(openedImageUriAtom)
 

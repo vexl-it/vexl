@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Platform, useWindowDimensions, Vibration} from 'react-native'
 import Animated, {
   Easing,
@@ -34,7 +34,7 @@ export const forceHideGoldenAvatarAnimationActionAtom = atom(null, (_, set) => {
   set(showGoldenAvatarAnimationAtom, false)
 })
 
-function GoldenAvatar(): JSX.Element | null {
+function GoldenAvatar(): React.ReactElement | null {
   const {t} = useTranslation()
   const {height, width} = useWindowDimensions()
   const insets = useSafeAreaInsets()

@@ -1,5 +1,6 @@
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {useAtomValue, type Atom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import SvgImage from '../../Image'
@@ -10,7 +11,7 @@ interface Props {
   atom: Atom<LocationSuggestion>
 }
 
-function LocationCell({atom, onPress}: Props): JSX.Element {
+function LocationCell({atom, onPress}: Props): React.ReactElement {
   const data = useAtomValue(atom)
 
   return (

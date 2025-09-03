@@ -1,3 +1,4 @@
+import React from 'react'
 import {
   TouchableWithoutFeedback,
   type TouchableWithoutFeedbackProps,
@@ -7,7 +8,9 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SvgImage from '../../Image'
 import magnifyingGlass from '../../images/magnifyingGlass'
 
-function AddCityOrDistrict(props: TouchableWithoutFeedbackProps): JSX.Element {
+function AddCityOrDistrict(
+  props: TouchableWithoutFeedbackProps
+): React.ReactElement {
   const {t} = useTranslation()
 
   return (

@@ -14,7 +14,7 @@ const screenOptionsEmptyHeader = {
   header: () => null,
 }
 
-export default function InsideScreen(): JSX.Element {
+export default function InsideScreen(): React.ReactElement {
   return (
     <>
       <Header />

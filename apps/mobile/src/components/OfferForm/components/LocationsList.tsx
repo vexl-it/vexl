@@ -1,5 +1,6 @@
 import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Text, XStack} from 'tamagui'
 import {
@@ -17,7 +18,7 @@ interface Props {
 function LocationsList({
   locations,
   onLocationRemove,
-}: Props): JSX.Element[] | null {
+}: Props): React.ReactElement[] | null {
   const {t} = useTranslation()
 
   return locations

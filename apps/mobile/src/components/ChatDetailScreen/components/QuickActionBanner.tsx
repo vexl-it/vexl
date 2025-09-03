@@ -2,7 +2,7 @@ import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Keyboard} from 'react-native'
 import {Text, XStack, YStack, getTokens} from 'tamagui'
 import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
@@ -38,7 +38,7 @@ function QuickActionBannerUi({
   bottomText: string
   buttonText?: string
   icon?: SvgString
-}): JSX.Element {
+}): React.ReactElement {
   const tokens = getTokens()
   const headingStyle = {ff: '$body600', fos: 16, color: '$black'} as const
   const subtitleStyle = {ff: '$body500', color: '$greyOnWhite'} as const
@@ -84,7 +84,7 @@ function QuickActionBannerUi({
   )
 }
 
-function QuickActionBanner(): JSX.Element | null {
+function QuickActionBanner(): React.ReactElement | null {
   const {t} = useTranslation()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
 

@@ -1,3 +1,4 @@
+import React from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {iosHapticFeedback} from '../utils/iosHapticFeedback'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -17,7 +18,7 @@ function PremiumOrDiscountSlider({
   sliderThreshold,
   onValueChange,
   sliderValue,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tokens = getTokens()
   const {t} = useTranslation()
 

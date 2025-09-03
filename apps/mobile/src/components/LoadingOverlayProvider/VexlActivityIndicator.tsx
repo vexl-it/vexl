@@ -1,4 +1,4 @@
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -13,7 +13,7 @@ interface Props extends StackProps {
   description?: string
 }
 
-function DotObject({size, ...props}: Props): JSX.Element {
+function DotObject({size, ...props}: Props): React.ReactElement {
   const dimensions = useMemo(() => {
     switch (size) {
       case 'small':
@@ -42,7 +42,7 @@ function VexlActivityIndicator({
   description,
   size,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const translateY1 = useSharedValue(0)
   const translateY2 = useSharedValue(0)
   const translateY3 = useSharedValue(0)

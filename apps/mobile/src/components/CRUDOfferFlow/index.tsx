@@ -2,7 +2,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useState} from 'react'
+import React, {useCallback, useState} from 'react'
 import {StatusBar} from 'react-native'
 import {Stack} from 'tamagui'
 import {
@@ -31,7 +31,10 @@ const CRUDOfferStack = createNativeStackNavigator<CRUDOfferStackParamsList>()
 
 type Props = RootStackScreenProps<'CRUDOfferFlow'>
 
-function CRUDOfferFlow({route: {params}, navigation}: Props): JSX.Element {
+function CRUDOfferFlow({
+  route: {params},
+  navigation,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [page, setPage] = useState(0)
   const safeGoBack = useSafeGoBack()

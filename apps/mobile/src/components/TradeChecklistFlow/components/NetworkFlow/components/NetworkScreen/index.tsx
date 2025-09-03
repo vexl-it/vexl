@@ -1,5 +1,5 @@
 import {useSetAtom, useStore} from 'jotai'
-import {useCallback, useEffect} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -31,7 +31,7 @@ function NetworkScreen({
   route: {
     params: {networkData},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
   const saveLocalNetworkStateToMainState = useSetAtom(

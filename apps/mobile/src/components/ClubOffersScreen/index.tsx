@@ -1,5 +1,6 @@
 import {Option, pipe} from 'effect'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -10,7 +11,10 @@ import {useClubOffersAtoms} from './state'
 
 type Props = RootStackScreenProps<'ClubOffers'>
 
-export function ClubOffersScreen({navigation, route}: Props): JSX.Element {
+export function ClubOffersScreen({
+  navigation,
+  route,
+}: Props): React.ReactElement {
   const {clubOfferAtomAtoms, singleClubAtom} = useClubOffersAtoms(
     route.params.clubUuid
   )

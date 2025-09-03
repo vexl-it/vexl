@@ -1,5 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {useAtomValue, useStore, type Atom} from 'jotai'
+import React from 'react'
 import {Alert, Text as RNText} from 'react-native'
 import {Text, getTokens} from 'tamagui'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
@@ -13,7 +14,7 @@ const logTextStyle = {
   color: getTokens().color.white.val,
 }
 
-function LogItem({logAtom}: {logAtom: Atom<string>}): JSX.Element {
+function LogItem({logAtom}: {logAtom: Atom<string>}): React.ReactElement {
   const log = useAtomValue(logAtom)
   return (
     <RNText selectable style={logTextStyle}>
@@ -22,11 +23,11 @@ function LogItem({logAtom}: {logAtom: Atom<string>}): JSX.Element {
   )
 }
 
-function renderLogItem({item}: {item: Atom<string>}): JSX.Element {
+function renderLogItem({item}: {item: Atom<string>}): React.ReactElement {
   return <LogItem logAtom={item} />
 }
 
-function LogsList(): JSX.Element {
+function LogsList(): React.ReactElement {
   const logsAtoms = useAtomValue(appLogAtomsAtom)
   const {t} = useTranslation()
   const store = useStore()

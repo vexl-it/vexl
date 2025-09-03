@@ -2,7 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {Effect} from 'effect'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import Animated, {
   Extrapolation,
   interpolate,
@@ -42,7 +42,7 @@ import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
 import VexlNewsSuggestions from './VexlNewsSuggestions'
 
-function ListFooterComponent(): JSX.Element | null {
+function ListFooterComponent(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const minutesTillOffersDisplayed = useAtomValue(
@@ -67,7 +67,7 @@ function ListFooterComponent(): JSX.Element | null {
   )
 }
 
-function OffersListStateDisplayerContent(): JSX.Element {
+function OffersListStateDisplayerContent(): React.ReactElement {
   const insets = useSafeAreaInsets()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()

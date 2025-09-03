@@ -1,9 +1,10 @@
 import {useNavigation} from '@react-navigation/native'
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import useSafeGoBack from '../utils/useSafeGoBack'
 import Button from './Button'
 
-function TodoScreen(): JSX.Element {
+function TodoScreen(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   return (
     <Stack f={1}>

@@ -1,5 +1,5 @@
 import {DateTime} from 'luxon'
-import {useRef} from 'react'
+import React, {useRef} from 'react'
 import Button from './Button'
 
 const DISABLED_DURATION_MILLIS = 1000
@@ -8,7 +8,7 @@ function ButtonWithPressTimeout({
   onPress,
   variant,
   ...props
-}: React.ComponentProps<typeof Button>): JSX.Element {
+}: React.ComponentProps<typeof Button>): React.ReactElement {
   const lastPressedTimestampRef = useRef<DateTime | undefined>(undefined)
 
   function handleButtonPress(): void {

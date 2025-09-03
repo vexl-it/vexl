@@ -20,7 +20,7 @@ interface Props {
 function OfferExpirationModal({
   expirationDateAtom,
   offerExpirationModalVisibleAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const [expirationDate, setExpirationDate] = useAtom(expirationDateAtom)

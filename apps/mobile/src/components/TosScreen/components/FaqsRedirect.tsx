@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -7,7 +8,7 @@ interface Props {
   onPress: () => void
 }
 
-function FaqsRedirect({onPress}: Props): JSX.Element {
+function FaqsRedirect({onPress}: Props): React.ReactElement {
   const {t} = useTranslation()
   return (
     <TouchableOpacity onPress={onPress}>

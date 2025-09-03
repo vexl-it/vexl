@@ -5,7 +5,7 @@ import {
   type PrimitiveAtom,
   type WritableAtom,
 } from 'jotai'
-import {useRef, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
 import CurrencySelect from '../../../../CurrencySelect'
@@ -34,7 +34,7 @@ function FiatInput({
   currencyAtom,
   changePriceCurrencyActionAtom,
   currencySelectVisibleAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const ref = useRef<TextInput>(null)
 
   const [isFocused, setIsFocused] = useState<boolean>(false)

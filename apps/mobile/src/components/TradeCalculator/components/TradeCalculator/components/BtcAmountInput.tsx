@@ -1,5 +1,5 @@
 import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
-import {useRef, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import {TouchableOpacity, type TextInput} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../../../../../images/chevronDownSvg'
@@ -31,7 +31,7 @@ function BtcAmountInput({
   automaticCalculationDisabled,
   btcValueAtom,
   editable = true,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const ref = useRef<TextInput>(null)
   const [isFocused, setIsFocused] = useState<boolean>(false)
 

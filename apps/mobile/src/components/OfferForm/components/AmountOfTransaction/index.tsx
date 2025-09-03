@@ -1,7 +1,7 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {useAtom, useAtomValue, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {getFontScaleSync} from 'react-native-device-info'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {iosHapticFeedback} from '../../../../utils/iosHapticFeedback'
@@ -31,7 +31,7 @@ function AmountOfTransaction({
   amountTopLimitAtom,
   amountBottomLimitAtom,
   currencyAtom,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const tokens = getTokens()
   const fontScale = getFontScaleSync()

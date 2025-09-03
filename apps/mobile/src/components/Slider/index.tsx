@@ -1,5 +1,6 @@
 import {Slider as RNSlider} from '@miblanchard/react-native-slider'
 import {type SliderOnChangeCallback} from '@miblanchard/react-native-slider/lib/types'
+import React from 'react'
 import {getTokens, type ColorTokens} from 'tamagui'
 import SliderCustomThumb from './SliderCustomThumb'
 
@@ -23,7 +24,7 @@ function Slider({
   step,
   value,
   onValueChange,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tokens = getTokens()
   return (
     <RNSlider

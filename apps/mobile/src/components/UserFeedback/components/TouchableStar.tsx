@@ -1,7 +1,7 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens} from 'tamagui'
 import SvgImage from '../../Image'
@@ -12,7 +12,7 @@ interface Props {
   starOrderNumber: number
 }
 
-function TouchableStar({starOrderNumber}: Props): JSX.Element {
+function TouchableStar({starOrderNumber}: Props): React.ReactElement {
   const {
     createIsStarSelectedAtom,
     currentFeedbackPageAtom,

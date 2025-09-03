@@ -23,7 +23,7 @@ function OfferDetailScreen({
     params: {offerId},
   },
   navigation,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const setFocusedOffer = useSetAtom(focusOfferActionAtom)
   const {t} = useTranslation()

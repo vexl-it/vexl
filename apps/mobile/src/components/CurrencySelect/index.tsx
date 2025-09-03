@@ -21,7 +21,7 @@ function CurrencySelect({
   selectedCurrencyCodeAtom,
   onItemPress,
   visibleAtom,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const [visible, setVisible] = useAtom(visibleAtom)
   const toDisplay = useAtomValue(currenciesToDisplayAtomsAtom)

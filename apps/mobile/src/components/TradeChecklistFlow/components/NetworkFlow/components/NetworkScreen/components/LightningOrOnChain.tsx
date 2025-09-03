@@ -1,11 +1,12 @@
 import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {useAtom} from 'jotai'
+import React from 'react'
 import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import SelectableCell from '../../../../../../SelectableCell'
 import {btcNetworkAtom} from '../../../atoms'
 
-function LightningOrOnChain(): JSX.Element {
+function LightningOrOnChain(): React.ReactElement {
   const {t} = useTranslation()
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
 

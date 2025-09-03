@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
 import {Stack, styled} from 'tamagui'
 
@@ -40,7 +41,7 @@ interface Props extends TouchableOpacityProps {
   active: boolean
 }
 
-function RadioButton({active, ...props}: Props): JSX.Element {
+function RadioButton({active, ...props}: Props): React.ReactElement {
   return (
     <TouchableOpacity hitSlop={20} {...props}>
       <StyledRadioButton active={active}>

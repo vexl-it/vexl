@@ -3,6 +3,7 @@ import {
   type CurrencyInfo,
 } from '@vexl-next/domain/src/general/currency.brand'
 import {useAtomValue, type Atom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -19,7 +20,7 @@ function CurrencySelectListItem({
   currencyAtom,
   selectedCurrencyCodeAtom,
   onItemPress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const tokens = getTokens()
   const currency = useAtomValue(currencyAtom)

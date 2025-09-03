@@ -4,6 +4,7 @@ import {
   type PaymentLink,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -31,7 +32,7 @@ function BtcInvoiceStatus({
   paymentLink,
   status,
   isInModal,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const setToastNotification = useSetAtom(toastNotificationAtom)
 

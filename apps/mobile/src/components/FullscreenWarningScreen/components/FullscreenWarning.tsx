@@ -1,12 +1,12 @@
 import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Option} from 'effect'
+import React, {useMemo} from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import openUrl from '../../../utils/openUrl'
 import Button from '../../Button'
 import SVGImage from '../../Image'
 import Screen from '../../Screen'
 
-import {useMemo} from 'react'
 import cancelSvg from '../../ChatDetailScreen/images/cancelSvg'
 import faq1Svg from '../../FaqScreen/images/faq1Svg'
 import IconButton from '../../IconButton'
@@ -20,7 +20,7 @@ export function FullscreenWarningComponent({
 }: {
   data: Option.Option.Value<NewsAndAnnouncementsResponse['fullScreenWarning']>
   onCancel: () => void
-}): JSX.Element {
+}): React.ReactElement {
   const image = useMemo(() => {
     if (type === 'RED') {
       return redIllustrationSvg

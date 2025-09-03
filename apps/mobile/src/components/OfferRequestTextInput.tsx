@@ -17,7 +17,7 @@ function OfferRequestTextInput({
 }: {
   text: string
   onChange: (text: string) => void
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
 
   return (

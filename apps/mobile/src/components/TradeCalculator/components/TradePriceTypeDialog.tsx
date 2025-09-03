@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   flip: {transform: [{scaleY: -1}]},
 })
 
-function TradePriceTypeDialog(): JSX.Element | null {
+function TradePriceTypeDialog(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()

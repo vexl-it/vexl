@@ -1,10 +1,11 @@
+import React from 'react'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import Image, {ImageUniversal} from '../Image'
 import infoSvg from '../images/infoSvg'
 import clubsRevealIdentityGraphicSvg from './images/clubsRevealIdentityGraphicSvg'
 
-function ClubsRevealIdentityDialogContent(): JSX.Element {
+function ClubsRevealIdentityDialogContent(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

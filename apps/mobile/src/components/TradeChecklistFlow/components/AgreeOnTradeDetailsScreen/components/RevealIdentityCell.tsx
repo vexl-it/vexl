@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {
   identityRevealTriggeredFromChatAtom,
   identityRevealedAtom,
@@ -10,7 +10,7 @@ import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemSta
 import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
 import ChecklistCell from './ChecklistCell'
 
-function RevealIdentityCell(): JSX.Element {
+function RevealIdentityCell(): React.ReactElement {
   const {t} = useTranslation()
   const identityRevealed = useAtomValue(identityRevealedAtom)
   const itemStatus = useAtomValue(

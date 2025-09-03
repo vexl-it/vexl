@@ -9,7 +9,7 @@ import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../../../../s
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 
-function ContactsListEmpty(): JSX.Element {
+function ContactsListEmpty(): React.ReactElement {
   const {t} = useTranslation()
   const [permissionsGranted, setPermissionsGranted] = useState(false)
 

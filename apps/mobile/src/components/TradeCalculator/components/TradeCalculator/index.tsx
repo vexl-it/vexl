@@ -1,4 +1,5 @@
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {Stack, XStack} from 'tamagui'
 import CurrentBtcPrice from '../../../CurrentBtcPrice'
 import {
@@ -24,7 +25,7 @@ interface Props {
 function TradeCalculator({
   children,
   onPremiumOrDiscountPress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const setTradePriceTypeDialogVisible = useSetAtom(
     tradePriceTypeDialogVisibleAtom

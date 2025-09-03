@@ -26,7 +26,7 @@ interface Props extends InputProps {
 function CalculatorInput(
   {children, isFocused, onWrapperPress, ...props}: Props,
   ref: Ref<Input>
-): JSX.Element {
+): React.ReactElement {
   const inputRef: Ref<Input> = useRef(null)
   useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
 

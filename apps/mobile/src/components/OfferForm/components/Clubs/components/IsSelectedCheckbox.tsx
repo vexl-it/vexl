@@ -1,5 +1,5 @@
 import {useAtom, type Atom, type WritableAtom} from 'jotai'
-import {useMemo, type SetStateAction} from 'react'
+import React, {useMemo, type SetStateAction} from 'react'
 import {type ClubWithMembers} from '../../../../../state/clubs/domain'
 import Checkbox from '../../../../Checkbox'
 
@@ -11,7 +11,7 @@ function IsSelectedCheckbox({
   createSelectClubAtom: (
     clubWithMembersAtom: Atom<ClubWithMembers>
   ) => WritableAtom<boolean, [SetStateAction<boolean>], void>
-}): JSX.Element {
+}): React.ReactElement {
   const [isSelected, select] = useAtom(
     useMemo(
       () => createSelectClubAtom(clubWithMembersAtom),

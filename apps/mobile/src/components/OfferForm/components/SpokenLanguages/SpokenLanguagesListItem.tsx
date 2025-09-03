@@ -17,7 +17,7 @@ interface Props {
 function SpokenLanguagesListItem({
   createIsThisLanguageSelectedAtom,
   spokenLanguage,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const tokens = getTokens()
   const [isSelected, select] = useAtom(

@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import dayjs from 'dayjs'
 import {type DateTime} from 'luxon'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {
   useTranslation,
   type TFunction,
@@ -23,7 +23,7 @@ function getTimeToShow(date: DateTime, t: TFunction): string {
   return dayjs().to(dayjs(date.toJSDate()))
 }
 
-function FromNowComponent({date}: {date: DateTime}): JSX.Element {
+function FromNowComponent({date}: {date: DateTime}): React.ReactElement {
   const [toShow, setToShow] = useState('')
   const {t} = useTranslation()
   const navigation = useNavigation()

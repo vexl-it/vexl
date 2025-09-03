@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -10,7 +10,7 @@ function IsNewIndicator({
   contactAtom,
 }: {
   contactAtom: Atom<StoredContactWithComputedValues>
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {t} = useTranslation()
   const {createIsNewContactAtom} = useMolecule(contactSelectMolecule)
 

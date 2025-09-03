@@ -1,5 +1,6 @@
 import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
 import {StatusBar} from 'expo-status-bar'
+import React from 'react'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
@@ -24,7 +25,7 @@ import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
 import {useAppState} from './utils/useAppState'
 
-function App(): JSX.Element {
+function App(): React.ReactElement {
   const theme = useTheme()
 
   useAppState(setLastTimeAppWasRunningToNow, true)
@@ -68,7 +69,7 @@ function App(): JSX.Element {
   )
 }
 
-export default function _(): JSX.Element {
+export default function _(): React.ReactElement {
   return (
     <ThemeProvider>
       <StatusBar style="light" />

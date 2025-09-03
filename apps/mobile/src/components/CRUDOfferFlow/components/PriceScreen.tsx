@@ -1,10 +1,11 @@
 import {useMolecule} from 'bunshi/dist/react'
+import React from 'react'
 import Expiration from '../../OfferForm/components/Expiration'
 import Price from '../../OfferForm/components/Price'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function PriceScreen(): JSX.Element {
+function PriceScreen(): React.ReactElement {
   const {
     amountBottomLimitAtom,
     calculateSatsValueOnFiatValueChangeActionAtom,

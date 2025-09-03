@@ -1,8 +1,9 @@
+import React from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Image from '../../../../Image'
 
-function NitroPhoneCooperation(): JSX.Element {
+function NitroPhoneCooperation(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

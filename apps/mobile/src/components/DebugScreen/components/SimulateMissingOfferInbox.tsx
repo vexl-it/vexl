@@ -7,7 +7,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useStore} from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Alert} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import {apiAtom} from '../../../api'
@@ -18,7 +18,7 @@ import {myOffersAtom} from '../../../state/marketplace/atoms/myOffers'
 import {packageName, version} from '../../../utils/environment'
 import Button from '../../Button'
 
-function SimulateMissingOfferInbox(): JSX.Element {
+function SimulateMissingOfferInbox(): React.ReactElement {
   const offers = useAtomValue(myOffersAtom)
   const [selectedOffer, setSelectedOffer] = useState<OneOfferInState | null>(
     offers[0] ?? null

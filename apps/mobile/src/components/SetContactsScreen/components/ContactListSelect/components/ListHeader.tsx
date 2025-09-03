@@ -1,7 +1,8 @@
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
-function ListHeader(): JSX.Element {
+function ListHeader(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

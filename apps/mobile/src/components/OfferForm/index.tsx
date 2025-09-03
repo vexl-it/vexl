@@ -4,7 +4,7 @@ import ChunkView from '../ChunkView'
 import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
 import Section, {type Props} from '../Section'
 
-function LoaderComponent(): JSX.Element {
+function LoaderComponent(): React.ReactElement {
   const tokens = getTokens()
   return (
     <Stack pt="$8">
@@ -13,7 +13,7 @@ function LoaderComponent(): JSX.Element {
   )
 }
 
-function OfferForm({content}: {content: Props[]}): JSX.Element {
+function OfferForm({content}: {content: Props[]}): React.ReactElement {
   return (
     <ChunkView displayOnProgress={<LoaderComponent />}>
       {content.map((item) =>

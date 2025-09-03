@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {useCallback, type ReactNode} from 'react'
+import React, {useCallback, type ReactNode} from 'react'
 import {StatusBar as RNStatusBar, View} from 'react-native'
 import {Stack} from 'tamagui'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
@@ -16,7 +16,7 @@ function PageWithButtonAndProgressHeader({
   children,
 }: {
   children: ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <KeyboardAvoidingView>
       <Screen>

@@ -33,7 +33,7 @@ function RevealedContactMessageItem({
 }: {
   isLatest: boolean
   message: ChatMessage
-}): JSX.Element {
+}): React.ReactElement {
   const {t} = useTranslation()
 
   const {
@@ -150,7 +150,7 @@ function ContactRevealMessageItem({
 }: {
   message: ChatMessageWithState
   isLatest: boolean
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {t} = useTranslation()
   const {
     openedImageUriAtom,

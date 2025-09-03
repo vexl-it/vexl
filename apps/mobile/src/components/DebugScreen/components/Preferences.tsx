@@ -1,4 +1,5 @@
 import {useAtom} from 'jotai'
+import React from 'react'
 import {Text, XStack, YStack} from 'tamagui'
 import {preferencesAtom} from '../../../utils/preferences'
 import Switch from '../../Switch'
@@ -14,7 +15,7 @@ const preferencesToEdit = [
   'showOfferDetail',
 ] as const
 
-function Preferences(): JSX.Element {
+function Preferences(): React.ReactElement {
   const [preferences, setPreferences] = useAtom(preferencesAtom)
 
   return (

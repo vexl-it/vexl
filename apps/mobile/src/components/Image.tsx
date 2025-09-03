@@ -1,5 +1,6 @@
 import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import React from 'react'
 import {
   Image as RNImage,
   type ImageSourcePropType,
@@ -29,7 +30,7 @@ export type Props = (
 ) & {
   grayScale?: boolean
 }
-export default function Image({source, ...props}: Props): JSX.Element {
+export default function Image({source, ...props}: Props): React.ReactElement {
   if (isSvgString(source)) {
     // @ts-expect-error for some reasons onClick is passed and causes crash
     const {onClick, ...xmlProps} = props as XmlProps
@@ -54,7 +55,7 @@ export interface ImageUniversalProps {
 export function ImageUniversal({
   source,
   ...rest
-}: ImageUniversalProps): JSX.Element {
+}: ImageUniversalProps): React.ReactElement {
   if (source.type === 'svgXml') {
     return <SvgXml {...rest} xml={source.svgXml.xml} />
   } else if (source.type === 'imageUri') {

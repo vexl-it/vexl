@@ -3,7 +3,7 @@ import {
   getInfoAsync,
   readDirectoryAsync,
 } from 'expo-file-system'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Stack, Text} from 'tamagui'
 import urlJoin from 'url-join'
 
@@ -25,7 +25,7 @@ async function getFileOrDirectory(path: string): Promise<string> {
   }
 }
 
-function FilesInDocuments(): JSX.Element {
+function FilesInDocuments(): React.ReactElement {
   const [files, setFiles] = useState<string>('initial')
 
   useEffect(() => {

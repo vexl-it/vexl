@@ -1,4 +1,5 @@
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import React from 'react'
 import {Text, XStack} from 'tamagui'
 import {ImageUniversal} from '../../Image'
 
@@ -7,7 +8,7 @@ interface Props {
   variant: 'light' | 'dark'
 }
 
-function CommonClubCell({club, variant}: Props): JSX.Element {
+function CommonClubCell({club, variant}: Props): React.ReactElement {
   return (
     <XStack ai="center" mr="$3">
       <ImageUniversal

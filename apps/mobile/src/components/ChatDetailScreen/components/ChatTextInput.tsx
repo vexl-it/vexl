@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
 
 const responseImagePreviewLimits = {width: 200, height: 100}
 
-function ChatTextInput(): JSX.Element | null {
+function ChatTextInput(): React.ReactElement | null {
   const tokens = getTokens()
   const [value, setValue] = useState('')
   const {

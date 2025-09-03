@@ -1,7 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
-import {memo} from 'react'
-import {getTokens} from 'tamagui'
+import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
 import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
@@ -81,7 +80,7 @@ function LoggedInHookGroup(): null {
 
 const LoggedInHookGroupMemoized = memo(LoggedInHookGroup)
 
-function RootNavigation(): JSX.Element {
+function RootNavigation(): React.ReactElement {
   const isLoggedIn = useIsUserLoggedIn()
   const showTextDebugButton = useAtomValue(showTextDebugButtonAtom)
   const showGoldenAvatarAnimation = useAtomValue(showGoldenAvatarAnimationAtom)
@@ -92,7 +91,6 @@ function RootNavigation(): JSX.Element {
         screenOptions={{
           headerShown: false,
           presentation: 'card',
-          statusBarColor: getTokens().color.black.val,
         }}
       >
         {!isLoggedIn ? (

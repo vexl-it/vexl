@@ -2,7 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, ScrollView, Stack, Text, XStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -33,7 +33,7 @@ function DonationDetailsScreen({
   route: {
     params: {invoiceId},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const mySingleDonation = useAtomValue(
     useMemo(() => singleDonationAtom(invoiceId), [invoiceId])

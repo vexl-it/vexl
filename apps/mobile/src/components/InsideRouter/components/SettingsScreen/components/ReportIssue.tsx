@@ -1,7 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {Effect} from 'effect/index'
 import {atom, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {
@@ -38,7 +38,7 @@ export const reportIssueDialogAtom = atom(null, (get, set) => {
   )
 })
 
-function ReportIssue(): JSX.Element {
+function ReportIssue(): React.ReactElement {
   const {t} = useTranslation()
   const tokens = getTokens()
 

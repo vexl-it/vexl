@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   },
 })
 
-function FilterOffersScreen(): JSX.Element {
+function FilterOffersScreen(): React.ReactElement {
   const {t} = useTranslation()
   const tokens = getTokens()
   const safeGoBack = useSafeGoBack()

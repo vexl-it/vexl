@@ -31,7 +31,7 @@ interface Props {
 function AnimatedDialogWrapper({
   children,
   onBackButtonPressed,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const insets = useSafeAreaInsets()
 
   useFocusEffect(

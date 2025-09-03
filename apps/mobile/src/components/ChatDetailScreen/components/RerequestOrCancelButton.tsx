@@ -13,7 +13,7 @@ function RerequestOrCancelButton({
 }: {
   onRerequestPressed: () => void
   rerequestButtonDisabled: boolean
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {canBeRerequestedAtom, cancelRequestActionAtom, requestStateAtom} =
     useMolecule(chatMolecule)
   const safeGoBack = useSafeGoBack()

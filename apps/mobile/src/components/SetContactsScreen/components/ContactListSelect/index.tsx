@@ -31,7 +31,7 @@ function ContactsCountIndicator({
 }: {
   isFocused: boolean
   routeName: string
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {
     newContactsToDisplayCountAtom,
     submittedContactsToDisplayCountAtom,
@@ -88,7 +88,7 @@ function CustomTabBar({
   state,
   descriptors,
   navigation,
-}: MaterialTopTabBarProps): JSX.Element {
+}: MaterialTopTabBarProps): React.ReactElement {
   return (
     <Stack>
       <ScrollView
@@ -131,7 +131,11 @@ function CustomTabBar({
   )
 }
 
-function ContactsListSelect({filter}: {filter?: ContactsFilter}): JSX.Element {
+function ContactsListSelect({
+  filter,
+}: {
+  filter?: ContactsFilter
+}): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
   const {submitAllSelectedContactsActionAtom} = useMolecule(
@@ -220,7 +224,7 @@ function ContactListSelectWithProviderComponent({
   filter,
 }: {
   filter?: ContactsFilter
-}): JSX.Element {
+}): React.ReactElement {
   const store = useStore()
   const [reloadContactsValue, setReloadContacts] = useState(0)
 
@@ -254,7 +258,7 @@ export default function ContactListWithLoadStep({
   filter,
 }: {
   filter?: ContactsFilter
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <NormalizeContactsWithLoadingScreen>
       <ContactListSelectWithProvider filter={filter} />

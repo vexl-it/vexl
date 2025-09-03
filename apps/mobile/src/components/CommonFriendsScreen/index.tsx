@@ -28,14 +28,14 @@ function keyExtractor(item: ItemProps): string {
   return item.club.uuid
 }
 
-function renderItem({item}: {item: ItemProps}): JSX.Element {
+function renderItem({item}: {item: ItemProps}): React.ReactElement {
   if (item.tag === 'commonFriend')
     return <CommonFriendsListItem friend={item.friend} />
 
   return <CommonClubListItem club={item.club} />
 }
 
-function ItemSeparatorComponent(): JSX.Element {
+function ItemSeparatorComponent(): React.ReactElement {
   return <Stack h={16} />
 }
 
@@ -43,7 +43,7 @@ function CommonFriendsScreen({
   route: {
     params: {contactsHashes, clubsIds},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
   const safeGoBack = useSafeGoBack()

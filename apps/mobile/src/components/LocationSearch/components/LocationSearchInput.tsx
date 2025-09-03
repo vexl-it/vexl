@@ -1,5 +1,5 @@
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import {
+import React, {
   forwardRef,
   useImperativeHandle,
   useMemo,
@@ -17,7 +17,7 @@ import {useLocationSearchMolecule} from '../molecule'
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
 
-function LoadingIndicator(): JSX.Element | null {
+function LoadingIndicator(): React.ReactElement | null {
   const {isLoadingAtom} = useLocationSearchMolecule()
   const isLoading = useAtomValue(isLoadingAtom)
 
@@ -25,7 +25,10 @@ function LoadingIndicator(): JSX.Element | null {
   return null
 }
 
-function LocationSearchInput(_: Props, ref: Ref<TextInput>): JSX.Element {
+function LocationSearchInput(
+  _: Props,
+  ref: Ref<TextInput>
+): React.ReactElement {
   const inputRef = useRef<TextInput>(null)
   useImperativeHandle<TextInput | null, TextInput | null>(
     ref,
@@ -73,6 +76,7 @@ function LocationSearchInput(_: Props, ref: Ref<TextInput>): JSX.Element {
       placeholder={t('offerForm.location.addCityOrDistrict')}
       showClearButton={!!inputValue}
       onClearPress={onClearPress}
+      size="medium"
     />
   )
 }

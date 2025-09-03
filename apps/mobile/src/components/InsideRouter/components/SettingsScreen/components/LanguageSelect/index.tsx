@@ -1,7 +1,7 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Stack, Text} from 'tamagui'
 import {
   supportedTranslations,
@@ -13,7 +13,7 @@ import LanguageSelectItem from './components/LanguageSelectItem'
 
 const languages = keys(supportedTranslations)
 
-function LanguageSelect(): JSX.Element {
+function LanguageSelect(): React.ReactElement {
   const {t} = useTranslation()
   const currentAppLanguage = useAtomValue(currentAppLanguageAtom)
   const setSelectedAppLanguage = useSetAtom(selectedLanguageAtom)

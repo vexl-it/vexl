@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Location from '../../OfferForm/components/Location'
 import Network from '../../OfferForm/components/Network'
@@ -10,7 +11,7 @@ import paymentMethodSvg from '../../images/paymentMethod'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function LocationPaymentMethodAndNetworkScreen(): JSX.Element {
+function LocationPaymentMethodAndNetworkScreen(): React.ReactElement {
   const {t} = useTranslation()
   const {
     updateBtcNetworkAtom,

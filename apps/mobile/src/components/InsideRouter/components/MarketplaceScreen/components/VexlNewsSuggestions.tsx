@@ -1,7 +1,7 @@
 import {type VexlBotNews} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Option} from 'effect'
 import {atom, useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {YStack, type YStackProps} from 'tamagui'
 import openUrl from '../../../../../utils/openUrl'
 import {
@@ -10,7 +10,7 @@ import {
 } from '../../../../FullscreenWarningScreen/state'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 
-function Item({data}: {data: VexlBotNews}): JSX.Element {
+function Item({data}: {data: VexlBotNews}): React.ReactElement {
   const closedStateAtom = useMemo(() => {
     if (!data.cancelable) return atom(true)
 
@@ -32,7 +32,7 @@ function Item({data}: {data: VexlBotNews}): JSX.Element {
   )
 }
 
-function VexlNewsSuggestions(props: YStackProps): JSX.Element {
+function VexlNewsSuggestions(props: YStackProps): React.ReactElement {
   const newsAndAnnouncements = useAtomValue(announcmentsAtom)
 
   if (Option.isNone(newsAndAnnouncements)) return <></>

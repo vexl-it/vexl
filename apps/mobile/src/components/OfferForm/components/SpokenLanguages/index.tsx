@@ -7,7 +7,7 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -35,7 +35,7 @@ function SpokenLanguagesComponent({
   removeSpokenLanguageActionAtom,
   resetSelectedSpokenLanguagesActionAtom,
   saveSelectedSpokenLanguagesActionAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const resetSelectedSpokenLanguages = useSetAtom(
     resetSelectedSpokenLanguagesActionAtom

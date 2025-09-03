@@ -1,4 +1,5 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
+import React from 'react'
 import {type EventsAndClubsParamsList} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -12,7 +13,7 @@ import TabBar from './components/TabBar'
 
 const Tab = createMaterialTopTabNavigator<EventsAndClubsParamsList>()
 
-export default function EventsAndClubsScreen(): JSX.Element {
+export default function EventsAndClubsScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
 

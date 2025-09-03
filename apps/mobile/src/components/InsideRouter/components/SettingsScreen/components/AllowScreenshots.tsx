@@ -1,11 +1,12 @@
 import {useAtom} from 'jotai'
+import React from 'react'
 import {XStack} from 'tamagui'
 import {screenshotsDisabledAtom} from '../../../../../state/showYouDidNotAllowScreenshotsActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Switch from '../../../../Switch'
 import ItemText from './ButtonSectionItemText'
 
-function AllowScreenshots(): JSX.Element {
+function AllowScreenshots(): React.ReactElement {
   const {t} = useTranslation()
   const [screenshotsDisabled, setScreenshotsDisabled] = useAtom(
     screenshotsDisabledAtom

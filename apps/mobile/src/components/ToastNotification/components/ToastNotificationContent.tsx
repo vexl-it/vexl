@@ -1,4 +1,5 @@
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity, useWindowDimensions} from 'react-native'
 import Animated, {
   FadeInDown,
@@ -22,7 +23,7 @@ function ToastNotificationContent({
   position,
   bottomMargin,
   topMargin,
-}: ToastNotificationState): JSX.Element | null {
+}: ToastNotificationState): React.ReactElement | null {
   const {bottom} = useSafeAreaInsets()
   const bottomDefaultOffset =
     bottom + TAB_BAR_HEIGHT_PX + getTokens().space[5].val

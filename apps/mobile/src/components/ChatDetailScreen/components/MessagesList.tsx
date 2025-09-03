@@ -24,11 +24,11 @@ function renderItem({
   item,
 }: {
   item: Atom<MessagesListItem>
-}): JSX.Element | null {
+}): React.ReactElement | null {
   return <MessageItem itemAtom={item} />
 }
 
-function MessagesList(): JSX.Element {
+function MessagesList(): React.ReactElement {
   const {
     messagesListAtomAtoms,
     handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,

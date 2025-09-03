@@ -9,7 +9,7 @@ export default function AnimatedNumber({
 }: {
   n: number
   className?: string
-}): JSX.Element {
+}): React.ReactElement {
   const [springProps, setSpringProps] = useSpring(() => ({
     from: {number: 0},
     number: n,

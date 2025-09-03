@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import React from 'react'
 import {Platform} from 'react-native'
 import Animated, {
   scrollTo,
@@ -16,7 +17,7 @@ import spokenLanguagesSvg from '../../images/spokenLanguagesSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import descriptionSvg from '../images/descriptionSvg'
 
-function OfferDescriptionAndSpokenLanguagesScreen(): JSX.Element {
+function OfferDescriptionAndSpokenLanguagesScreen(): React.ReactElement {
   const {t} = useTranslation()
   const animatedRef: AnimatedRef<Animated.ScrollView> = useAnimatedRef()
   const isKeyboardShown = useIsKeyboardShown()

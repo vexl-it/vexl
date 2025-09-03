@@ -34,7 +34,7 @@ function ModeratorActionComponent({
   icon?: SvgString
   onPress?: () => void
   showBorderTop?: boolean
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <TouchableWithoutFeedback onPress={onPress ?? emptyFunction}>
       <XStack
@@ -53,7 +53,11 @@ function ModeratorActionComponent({
   )
 }
 
-export function ClubModeratorData({club}: {club: ClubInfo}): JSX.Element {
+export function ClubModeratorData({
+  club,
+}: {
+  club: ClubInfo
+}): React.ReactElement {
   const {t} = useTranslation()
 
   const isLoading = useAtomValue(isLoadingAtom)

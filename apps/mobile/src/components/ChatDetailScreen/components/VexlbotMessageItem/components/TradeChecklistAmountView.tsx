@@ -3,7 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useCallback, useMemo} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
@@ -37,7 +37,7 @@ interface Props {
   message: ChatMessageWithState
 }
 
-function TradeChecklistAmountView({message}: Props): JSX.Element | null {
+function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const {

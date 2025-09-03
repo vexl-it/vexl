@@ -1,6 +1,7 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {atom} from 'jotai'
+import React from 'react'
 import {type JoinClubFlowParamsList} from '../../navigationTypes'
 import {accessCodeDefaultValue, AccessCodeScope} from './atoms'
 import FillClubAccessCodeScreen from './components/FillClubAccessCodeScreen'
@@ -8,7 +9,7 @@ import ScanClubQrCodeScreen from './components/ScanClubQrCodeScreen'
 
 const JoinClubFlowStack = createNativeStackNavigator<JoinClubFlowParamsList>()
 
-function JoinClubFlow(): JSX.Element {
+function JoinClubFlow(): React.ReactElement {
   return (
     <ScopeProvider scope={AccessCodeScope} value={atom(accessCodeDefaultValue)}>
       <JoinClubFlowStack.Navigator

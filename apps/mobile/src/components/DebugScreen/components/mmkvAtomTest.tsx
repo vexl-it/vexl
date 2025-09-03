@@ -1,5 +1,6 @@
 import {Schema} from 'effect'
 import {useAtom} from 'jotai'
+import React from 'react'
 import {Text, YStack} from 'tamagui'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -25,7 +26,7 @@ const atom = atomWithParsedMmkvStorage(
     .readonly()
 )
 
-export default function MmkvAtomTest(): JSX.Element {
+export default function MmkvAtomTest(): React.ReactElement {
   const [stateE, setStateE] = useAtom(atomE)
   const [state, setState] = useAtom(atom)
 

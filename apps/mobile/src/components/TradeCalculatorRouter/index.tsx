@@ -1,6 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import Animated, {FadeIn} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import {type TradeCalculatorStackParamsList} from '../../navigationTypes'
@@ -16,7 +16,7 @@ import TradeCalculatorScreen from './components/TradeCalculatorScreen'
 const StackNavigator =
   createNativeStackNavigator<TradeCalculatorStackParamsList>()
 
-export default function TradeCalculatorFlow(): JSX.Element {
+export default function TradeCalculatorFlow(): React.ReactElement {
   const resetTradeCalculatorState = useSetAtom(
     resetTradeCalculatorStateActionAtom
   )

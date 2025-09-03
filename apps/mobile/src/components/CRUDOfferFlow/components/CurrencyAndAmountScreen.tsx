@@ -1,4 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
+import React from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import AmountOfTransaction from '../../OfferForm/components/AmountOfTransaction'
 import Currency from '../../OfferForm/components/Currency'
@@ -10,7 +11,7 @@ import coinsSvg from '../../images/coinsSvg'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import ScreenWrapper from './ScreenWrapper'
 
-function CurrencyAndAmountScreen(): JSX.Element {
+function CurrencyAndAmountScreen(): React.ReactElement {
   const {t} = useTranslation()
   const {
     currencyAtom,

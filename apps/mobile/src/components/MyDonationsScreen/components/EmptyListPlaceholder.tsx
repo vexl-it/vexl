@@ -1,9 +1,10 @@
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import anonymousAvatarSadNoBackgroundSvg from '../../images/anonymousAvatarSadNoBackgroundSvg'
 
-function EmptyListPlaceholder(): JSX.Element {
+function EmptyListPlaceholder(): React.ReactElement {
   const {t} = useTranslation()
 
   return (

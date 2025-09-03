@@ -2,6 +2,7 @@ import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import NotificationsSvg from '../../../../images/notificationsSvg'
 import {type PostLoginFlowStackScreenProps} from '../../../../navigationTypes'
@@ -18,7 +19,9 @@ import WhiteContainer from '../../../WhiteContainer'
 
 type Props = PostLoginFlowStackScreenProps<'AllowNotificationsExplanation'>
 
-function AllowNotificationsExplanationScreen({navigation}: Props): JSX.Element {
+function AllowNotificationsExplanationScreen({
+  navigation,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
   const requestNotificationPermissions = useRequestNotificationPermissions()

@@ -1,8 +1,9 @@
+import React from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, type YStackProps} from 'tamagui'
 
 interface Props extends YStackProps {
-  children: JSX.Element | JSX.Element[]
+  children: React.ReactElement | React.ReactElement[]
   customHorizontalPadding?: number
   customVerticalPadding?: number
 }
@@ -12,7 +13,7 @@ function Screen({
   customHorizontalPadding = 0,
   customVerticalPadding = 0,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const insets = useSafeAreaInsets()
   return (
     <Stack

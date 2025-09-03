@@ -1,11 +1,12 @@
 import {useNavigation} from '@react-navigation/native'
+import React from 'react'
 import {Text, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import {ImageUniversal} from '../../../../Image'
 import anonymousAvatarSvg from '../../../../images/anonymousAvatarSvg'
 
-export function EmptyListPlaceholder(): JSX.Element {
+export function EmptyListPlaceholder(): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
 

@@ -1,5 +1,6 @@
 import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import React from 'react'
 import {type StyleProp, type ViewStyle} from 'react-native'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
 import {type RandomSeed} from '../../utils/RandomSeed'
@@ -13,7 +14,7 @@ interface Props {
   style?: StyleProp<ViewStyle>
 }
 
-function AnonymousAvatar({avatarIndex, style}: Props): JSX.Element {
+function AnonymousAvatar({avatarIndex, style}: Props): React.ReactElement {
   return (
     <Image
       source={avatarsSvg[avatarIndex] ?? avatarsSvg[0]}
@@ -68,7 +69,7 @@ export function AnonymousAvatarFromSeed({
   width: number
   grayScale: boolean
   goldenAvatarType?: GoldenAvatarType
-}): JSX.Element {
+}): React.ReactElement {
   const avatar =
     goldenAvatarType === 'BACKGROUND_AND_GLASSES'
       ? avatarsGoldenGlassesAndBackgroundSvg[

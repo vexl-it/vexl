@@ -1,4 +1,5 @@
 import {type Option} from 'effect'
+import React from 'react'
 import {getTokens, Text, XStack} from 'tamagui'
 import {type NonUniqueContactId} from '../../../state/contacts/domain'
 import ContactPictureImage from '../../ContactPictureImage'
@@ -11,7 +12,11 @@ interface Props {
   variant: 'light' | 'dark'
 }
 
-function CommonFriendCell({contactId, name, variant}: Props): JSX.Element {
+function CommonFriendCell({
+  contactId,
+  name,
+  variant,
+}: Props): React.ReactElement {
   return (
     <XStack ai="center" mr="$3">
       <ContactPictureImage

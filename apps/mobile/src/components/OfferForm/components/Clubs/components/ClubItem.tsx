@@ -1,5 +1,5 @@
 import {type Atom, useAtomValue, useSetAtom, type WritableAtom} from 'jotai'
-import {type SetStateAction} from 'react'
+import React, {type SetStateAction} from 'react'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import {type ClubWithMembers} from '../../../../../state/clubs/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -17,7 +17,7 @@ interface Props {
 function ClubItem({
   clubWithMembersAtom,
   createSelectClubAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {club, members} = useAtomValue(clubWithMembersAtom)
   const membersCount = useSetAtom(localizedDecimalNumberActionAtom)({

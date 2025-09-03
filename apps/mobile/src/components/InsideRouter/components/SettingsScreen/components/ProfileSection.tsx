@@ -2,7 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, styled} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
@@ -32,7 +32,7 @@ const GrayBackContainer = styled(XStack, {
   pr: '$2',
 })
 
-function ProfileSection(): JSX.Element {
+function ProfileSection(): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const reachNumber = useSetAtom(localizedDecimalNumberActionAtom)({

@@ -235,7 +235,7 @@ export function useHandleReceivedNotifications(): void {
       }
     )
     return () => {
-      Notifications.removeNotificationSubscription(subscription)
+      subscription.remove()
     }
   }, [
     fetchMessagesForInbox,

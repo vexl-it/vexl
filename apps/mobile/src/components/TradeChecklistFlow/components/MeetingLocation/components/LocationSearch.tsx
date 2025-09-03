@@ -1,3 +1,4 @@
+import React from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import LocationSearch from '../../../../LocationSearch'
 import {newLocationSessionId} from '../../../../LocationSearch/molecule'
@@ -10,7 +11,9 @@ import Content from '../../Content'
 
 type Props = TradeChecklistStackScreenProps<'LocationSearch'>
 
-export default function LocationMapSearch({navigation}: Props): JSX.Element {
+export default function LocationMapSearch({
+  navigation,
+}: Props): React.ReactElement {
   return (
     <>
       <HeaderProxy />

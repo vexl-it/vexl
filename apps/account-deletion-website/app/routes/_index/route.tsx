@@ -1,7 +1,7 @@
 import { Link } from "@remix-run/react";
 import classes from "./route.module.css";
 
-export default function index(): JSX.Element {
+export default function index(): React.ReactElement {
   return (
     <div>
       <p>

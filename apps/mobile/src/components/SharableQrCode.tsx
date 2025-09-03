@@ -20,8 +20,8 @@ const saveAndShareBase64Strig = async (base64String: string): Promise<void> => {
 
 export function SharableQrCode(
   props: Omit<React.ComponentProps<typeof SvgQRCode>, 'getRef'>
-): JSX.Element {
-  const svgRef = useRef()
+): React.ReactElement {
+  const svgRef = useRef<SvgQRCode>(null)
 
   // This really does not matter if it fails. It's a nice feature to have
   // but not really worth the edgecase refining

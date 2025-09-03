@@ -1,5 +1,6 @@
 import {type SpokenLanguage} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, useSetAtom, type Atom, type WritableAtom} from 'jotai'
+import React from 'react'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import SelectableCell from '../../../SelectableCell'
 
@@ -15,7 +16,7 @@ interface Props {
 function OfferFormSpokenLanguageCell({
   spokenLanguageAtom,
   removeSpokenLanguageActionAtom,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const spokenLanguage = useAtomValue(spokenLanguageAtom)
   const removeSpokenLanguage = useSetAtom(removeSpokenLanguageActionAtom)

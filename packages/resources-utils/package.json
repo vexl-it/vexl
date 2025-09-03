@@ -20,7 +20,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@vexl-next/cryptography": "0.0.0",
@@ -28,7 +28,7 @@
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "awesome-phonenumber": "^7.4.0",
-    "effect": "^3.15.0",
+    "effect": "^3.17.10",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

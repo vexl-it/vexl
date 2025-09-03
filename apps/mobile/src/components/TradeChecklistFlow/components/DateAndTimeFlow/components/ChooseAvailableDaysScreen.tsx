@@ -2,7 +2,7 @@ import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {type MarkedDates} from 'react-native-calendars/src/types'
 import {getTokens, Stack} from 'tamagui'
 import {
@@ -34,7 +34,7 @@ function ChooseAvailableDaysScreen({
   route: {
     params: {chosenDateTimes},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()

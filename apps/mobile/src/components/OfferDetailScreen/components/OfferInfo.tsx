@@ -50,7 +50,7 @@ function OfferInfo({
   mapIsVisible?: boolean
   offer: OneOfferInState
   navigation: RootStackScreenProps<'OfferDetail'>['navigation']
-}): JSX.Element {
+}): React.ReactElement {
   const goBack = useSafeGoBack()
   const {bottom} = useSafeAreaInsets()
   const toastBottomMargin = bottom + getTokens().space[5].val

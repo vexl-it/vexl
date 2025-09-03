@@ -2,7 +2,7 @@ import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feed
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {newOfferFeedbackDoneAtom} from '../../../state/feedback/atoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -16,7 +16,9 @@ interface Props {
   autoCloseWhenFinished?: boolean
 }
 
-function FeedbackBannerContent({autoCloseWhenFinished}: Props): JSX.Element {
+function FeedbackBannerContent({
+  autoCloseWhenFinished,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {
     formIdAtom,

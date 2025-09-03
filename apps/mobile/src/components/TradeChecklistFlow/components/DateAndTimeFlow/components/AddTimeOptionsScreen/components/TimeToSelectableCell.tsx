@@ -15,7 +15,7 @@ function TimeToSelectableCell({
 }: {
   label: string | undefined
   value: UnixMilliseconds | undefined
-}): JSX.Element {
+}): React.ReactElement {
   const timestamp = Schema.decodeSync(UnixMillisecondsE)(
     value ?? UnixMilliseconds0
   )

@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
 
 const falseAtom = atom(false)
 
-function AreYouSureDialog(): JSX.Element | null {
+function AreYouSureDialog(): React.ReactElement | null {
   const [state, setState] = useAtom(areYouSureDialogAtom)
   const positiveButtonDisabled = useAtomValue(
     state?.steps[state.currentStep]?.positiveButtonDisabledAtom ?? falseAtom

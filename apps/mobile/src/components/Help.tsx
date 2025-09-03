@@ -1,5 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {type ReactNode} from 'react'
+import React, {type ReactNode} from 'react'
 import {Modal, ScrollView, StyleSheet, useWindowDimensions} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -22,7 +22,13 @@ const styles = StyleSheet.create({
   },
 })
 
-function Help({children, image, onClose, title, visible}: Props): JSX.Element {
+function Help({
+  children,
+  image,
+  onClose,
+  title,
+  visible,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const dimensions = useWindowDimensions()
   return (

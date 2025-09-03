@@ -2,7 +2,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {CameraView} from 'expo-camera'
 import {useSetAtom} from 'jotai'
-import {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {Mask, Rect} from 'react-native-svg'
@@ -24,7 +24,7 @@ const scannerStyle = {
   flex: 1,
 }
 
-function ScanClubQrCodeScreen({navigation}: Props): JSX.Element {
+function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const scanned = useRef(false)
   const {top, bottom} = useSafeAreaInsets()

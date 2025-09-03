@@ -1,5 +1,6 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue, type PrimitiveAtom} from 'jotai'
+import React from 'react'
 import {type TextInputProps} from 'react-native'
 import {
   getCurrencyLeftText,
@@ -10,7 +11,7 @@ interface Props extends Omit<TextInputProps, 'style'> {
   currencyAtom: PrimitiveAtom<CurrencyCode | undefined>
 }
 
-function LimitInput({currencyAtom, ...props}: Props): JSX.Element {
+function LimitInput({currencyAtom, ...props}: Props): React.ReactElement {
   const currency = useAtomValue(currencyAtom)
   return (
     <Input

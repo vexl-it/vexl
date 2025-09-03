@@ -1,3 +1,4 @@
+import React from 'react'
 import {Text, type TextProps} from 'tamagui'
 
 interface Props extends TextProps {
@@ -5,7 +6,7 @@ interface Props extends TextProps {
   title: string
 }
 
-function TabTitle({active, title, ...props}: Props): JSX.Element {
+function TabTitle({active, title, ...props}: Props): React.ReactElement {
   return (
     <Text
       col={active ? '$main' : '$greyOnBlack'}

@@ -1,13 +1,14 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 
-function TradeChecklistAmountSuggestionView(): JSX.Element | null {
+function TradeChecklistAmountSuggestionView(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const {chatIdAtom, publicKeyPemBase64Atom, tradeChecklistAmountAtom} =

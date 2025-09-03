@@ -1,4 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import React from 'react'
 import {type PostLoginFlowStackParamsList} from '../../navigationTypes'
 import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
 import FindOffersInVexlClubsScreen from './components/FindOffersInVexlClubsScreen'
@@ -6,7 +7,7 @@ import ImportContactsExplanationScreen from './components/ImportContactsExplanat
 
 const Stack = createNativeStackNavigator<PostLoginFlowStackParamsList>()
 
-export default function PostLoginFlow(): JSX.Element {
+export default function PostLoginFlow(): React.ReactElement {
   return (
     <PageWithButtonAndProgressHeader>
       <Stack.Navigator

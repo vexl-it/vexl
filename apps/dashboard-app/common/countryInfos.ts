@@ -1722,7 +1722,8 @@ export const countries = [
 console.log(
   pipe(
     Array.map(countries, (info) => info.name.length),
-    Array.max(Order.number)
+    (array) =>
+      Array.isNonEmptyArray(array) ? Array.max(array, Order.number) : 0
   )
 )
 

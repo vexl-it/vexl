@@ -7,7 +7,7 @@ import IconButton from '../../IconButton'
 import closeSvg from '../../images/closeSvg'
 import headerStateAtom from '../state/headerStateAtom'
 
-function Header(): JSX.Element | null {
+function Header(): React.ReactElement | null {
   const headerState = useAtomValue(headerStateAtom)
 
   const onBackButtonPress = useCallback(() => {

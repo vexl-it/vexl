@@ -20,7 +20,7 @@ type Props = RootStackScreenProps<'MyOffers'>
 
 const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
-function ListHeaderComponent(): JSX.Element {
+function ListHeaderComponent(): React.ReactElement {
   return (
     <Stack my="$4" gap="$6">
       <VexlNewsSuggestions />
@@ -29,7 +29,7 @@ function ListHeaderComponent(): JSX.Element {
   )
 }
 
-function MyOffersScreen({navigation}: Props): JSX.Element {
+function MyOffersScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)

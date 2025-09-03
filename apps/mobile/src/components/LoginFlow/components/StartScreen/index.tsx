@@ -1,5 +1,5 @@
 import {useSetAtom} from 'jotai'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Image, TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import bigNameSvg from '../../../../images/bigNameSvg'
@@ -18,7 +18,7 @@ import notepadSvg from './images/notepadSvg'
 
 type Props = LoginStackScreenProps<'Start'>
 
-function StartScreen({navigation}: Props): JSX.Element {
+function StartScreen({navigation}: Props): React.ReactElement {
   const [touAgree, setTOUAgree] = useState(false)
   const setShowTosSummaryForAlreadyLoggedInUser = useSetAtom(
     showTosSummaryForAlreadyLoggedInUserAtom

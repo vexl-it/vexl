@@ -1,6 +1,6 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {realUserImageAtom} from '../../state/session/userDataAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -12,7 +12,7 @@ import SelectProfilePicture from '../SelectProfilePicture'
 
 const selectedImageUriAtom = atom<UriString | undefined>(undefined)
 
-function ChangeProfilePictureScreen(): JSX.Element {
+function ChangeProfilePictureScreen(): React.ReactElement {
   const {t} = useTranslation()
   const tokens = getTokens()
   const safeGoBack = useSafeGoBack()

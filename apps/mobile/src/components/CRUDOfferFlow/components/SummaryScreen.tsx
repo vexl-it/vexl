@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
@@ -9,7 +9,7 @@ import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import summarySvg from '../images/summarySvg'
 import ScreenWrapper from './ScreenWrapper'
 
-function SummaryScreen(): JSX.Element {
+function SummaryScreen(): React.ReactElement {
   const {t} = useTranslation()
   const {offerAtom, selectedClubsUuidsAtom} = useMolecule(offerFormMolecule)
   const clubs = useAtomValue(selectedClubsUuidsAtom)

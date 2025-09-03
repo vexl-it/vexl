@@ -9,6 +9,8 @@ const workspaceRoot = path.resolve(projectRoot, '../..')
 
 const config = getSentryExpoConfig(projectRoot)
 
+config.resolver.unstable_enablePackageExports = false
+
 // 1. Watch all files within the monorepo
 config.watchFolders = [workspaceRoot]
 // 2. Let Metro know where to resolve packages and in what order

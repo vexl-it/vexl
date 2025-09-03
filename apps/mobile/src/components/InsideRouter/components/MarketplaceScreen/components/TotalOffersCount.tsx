@@ -1,4 +1,5 @@
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {Stack, Text} from 'tamagui'
 import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/filteredOffersCountAtoms'
 import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
@@ -8,7 +9,7 @@ interface Props {
   filteredOffersCount: number
 }
 
-function TotalOffersCount({filteredOffersCount}: Props): JSX.Element {
+function TotalOffersCount({filteredOffersCount}: Props): React.ReactElement {
   const {t} = useTranslation()
   const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
   const totalCount = useAtomValue(offersToSeeInMarketplaceCountAtom)

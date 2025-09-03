@@ -13,7 +13,7 @@ export function QrCodeComponent({
   logo?: string | ImageSourcePropType | undefined
   heading: string
   text: string
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <YStack gap="$4" my="$4">
       <Stack alignContent="center" alignItems="center" mb="$2">

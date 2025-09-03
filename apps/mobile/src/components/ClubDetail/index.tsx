@@ -1,6 +1,6 @@
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useMemo} from 'react'
+import React, {useMemo} from 'react'
 import {RefreshControl} from 'react-native-gesture-handler'
 import {getTokens, ScrollView, Stack, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -22,7 +22,7 @@ export function ClubDetailScreen({
   route: {
     params: {clubUuid},
   },
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const club = useAtomValue(useMemo(() => singleClubAtom(clubUuid), [clubUuid]))
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()

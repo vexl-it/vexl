@@ -1,5 +1,5 @@
 import {useAtom, useAtomValue} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import chevronDownSvg from '../../../../../images/chevronDownSvg'
 import {
@@ -13,7 +13,7 @@ import checkmarkSvg from '../../../../images/checkmarkSvg'
 function renderItem<T>(
   item: DropdownItemProps<T>,
   selected?: boolean | undefined
-): JSX.Element {
+): React.ReactElement {
   return (
     <XStack ai="center" jc="space-between" py="$3" pl="$4" pr="$2">
       <Stack flexShrink={1}>
@@ -37,7 +37,9 @@ interface Props {
   postSelectActions?: () => void
 }
 
-function BaseFilterDropdown({postSelectActions}: Props): JSX.Element | null {
+function BaseFilterDropdown({
+  postSelectActions,
+}: Props): React.ReactElement | null {
   const baseFilterDropdownData = useAtomValue(baseFilterDropdownDataAtom)
   const [baseFilter, setBaseFilter] = useAtom(baseFilterAtom)
 

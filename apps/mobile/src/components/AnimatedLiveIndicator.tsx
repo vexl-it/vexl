@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -13,7 +13,7 @@ interface AnimatedLiveIndicatorProps {
 
 export function AnimatedLiveIndicator({
   color,
-}: AnimatedLiveIndicatorProps): JSX.Element {
+}: AnimatedLiveIndicatorProps): React.ReactElement {
   const opacity = useSharedValue(0)
 
   useEffect(() => {

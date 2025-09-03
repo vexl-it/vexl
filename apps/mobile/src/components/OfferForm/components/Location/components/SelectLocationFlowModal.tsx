@@ -1,6 +1,6 @@
 import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom, type PrimitiveAtom} from 'jotai'
-import {useEffect, useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Modal} from 'react-native'
 import {Stack, YStack} from 'tamagui'
 import backButtonSvg from '../../../../../images/backButtonSvg'
@@ -29,7 +29,7 @@ export default function SelectLocationFlowModal({
   visible,
   randomizeLocation,
   onSetVisible,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const setOfferLocation = useSetAtom(locationAtom)
   const [selectedFromList, setSelectedFromList] = useState<MapValue | null>(

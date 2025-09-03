@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, YStack} from 'tamagui'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -15,7 +16,7 @@ interface Props {
 
 export const PHOTO_AND_INFO_PHOTO_TOP_HEIGHT = 81 + 16
 
-function OtherSideNamePhotoAndInfo({mode}: Props): JSX.Element {
+function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
   const {
     offerForChatAtom,
     openedImageUriAtom,

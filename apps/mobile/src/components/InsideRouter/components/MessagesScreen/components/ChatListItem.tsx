@@ -24,7 +24,11 @@ export interface ChatListData {
   lastMessage: ChatMessageWithState
 }
 
-function ChatListItem({dataAtom}: {dataAtom: Atom<ChatListData>}): JSX.Element {
+function ChatListItem({
+  dataAtom,
+}: {
+  dataAtom: Atom<ChatListData>
+}): React.ReactElement {
   const {t} = useTranslation()
   const swipeableRef = useRef<Swipeable>(null)
   const navigation = useNavigation()

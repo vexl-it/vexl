@@ -3,7 +3,7 @@
   "display": "Expo",
   "extends": "@vexl-next/tsconfig/base.json",
   "compilerOptions": {
-    "jsx": "react-native",
+    "jsx": "react-jsx",
     "lib": ["DOM", "ESNext"],
     "moduleResolution": "node",
     "noEmit": true,
@@ -17,7 +17,9 @@
     "declaration": false,
     "declarationMap": false,
     "allowSyntheticDefaultImports": true,
-    "checkJs": false
+    "checkJs": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",

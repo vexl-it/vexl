@@ -1,3 +1,4 @@
+import React from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Dropdown as RNEDropdown} from 'react-native-element-dropdown'
 import {type DropdownProps} from 'react-native-element-dropdown/lib/typescript/components/Dropdown/model'
@@ -15,7 +16,7 @@ export interface DropdownItemProps<T> {
 function renderItem<T>(
   item: DropdownItemProps<T>,
   selected?: boolean | undefined
-): JSX.Element {
+): React.ReactElement {
   return (
     <XStack ai="center" jc="space-between" py="$3" pl="$4" pr="$2">
       <Text ff="$body500" fos={16} col="$white">
@@ -51,7 +52,7 @@ export function Dropdown<T>({
   onClear,
   showClearButton,
   ...props
-}: Props<T>): JSX.Element {
+}: Props<T>): React.ReactElement {
   return (
     <RNEDropdown
       activeColor={getTokens().color.greyAccent1.val}

@@ -1,5 +1,6 @@
 import {type ChatMessageRequiringNewerVersion} from '@vexl-next/domain/src/general/messaging'
 import {compare} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import React from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -14,7 +15,7 @@ export default function MessageIncompatibleItem({
   message,
 }: {
   message: ChatMessageRequiringNewerVersion
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const {t} = useTranslation()
 
   // There is nothing we can do now. If we were unable to recover the message...

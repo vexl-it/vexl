@@ -15,7 +15,7 @@ interface Props {
   onItemPress: (currency: CurrencyCode) => void
 }
 
-function ItemSeparatorComponent(): JSX.Element {
+function ItemSeparatorComponent(): React.ReactElement {
   return <Stack h={2} bc="$greyAccent1" />
 }
 
@@ -23,9 +23,9 @@ function CurrenciesList({
   currencies,
   selectedCurrencyCodeAtom,
   onItemPress,
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const renderItem = useCallback(
-    ({item: currencyAtom}: {item: Atom<CurrencyInfo>}): JSX.Element => (
+    ({item: currencyAtom}: {item: Atom<CurrencyInfo>}): React.ReactElement => (
       <CurrencySelectListItem
         currencyAtom={currencyAtom}
         selectedCurrencyCodeAtom={selectedCurrencyCodeAtom}

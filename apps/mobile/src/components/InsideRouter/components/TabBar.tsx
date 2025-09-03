@@ -1,7 +1,7 @@
 import {type BottomTabBarProps} from '@react-navigation/bottom-tabs'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useAtom, useAtomValue} from 'jotai'
-import {Fragment} from 'react'
+import React, {Fragment} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
@@ -38,7 +38,7 @@ function getIconForRouteName(routeName: string): SvgString {
   }
 }
 
-function TabBar({state, navigation}: BottomTabBarProps): JSX.Element {
+function TabBar({state, navigation}: BottomTabBarProps): React.ReactElement {
   const {t} = useTranslation()
   const insets = useSafeAreaInsets()
   const tokens = getTokens()

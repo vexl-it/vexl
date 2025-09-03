@@ -16,7 +16,7 @@
     "@craftzdog/react-native-buffer": "^6.0.5",
     "@noble/secp256k1": "^2.0.0",
     "asn1.js": "^5.4.1",
-    "effect": "^3.15.0",
+    "effect": "^3.17.10",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "react-native-get-random-values": "^1.8.0",
@@ -32,7 +32,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.8.3"
   },
   "eslintConfig": {
     "root": true,

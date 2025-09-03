@@ -1,4 +1,5 @@
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {getTokens, Text, XStack, type XStackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
@@ -14,7 +15,7 @@ interface Props extends XStackProps {
 function PriceTypeIndicator({
   displayInGrayColor,
   ...props
-}: Props): JSX.Element {
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
 

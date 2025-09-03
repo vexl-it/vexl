@@ -1,5 +1,5 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {Fragment} from 'react'
+import React, {Fragment} from 'react'
 import {TouchableOpacity, type ColorValue} from 'react-native'
 import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
 import Image from '../../Image'
@@ -23,7 +23,7 @@ function StackButton({
   onPress,
   isNegative,
   switchValue,
-}: StackButtonProps): JSX.Element {
+}: StackButtonProps): React.ReactElement {
   return (
     <TouchableOpacity disabled={displaySwitch} onPress={onPress}>
       <XStack ai="center" jc="space-between" px="$4" py="$4">
@@ -57,7 +57,7 @@ export interface Props {
   buttons: StackButtonProps[]
 }
 
-function ButtonStack({buttons}: Props): JSX.Element {
+function ButtonStack({buttons}: Props): React.ReactElement {
   return (
     <YStack backgroundColor="$blackAccent1" borderRadius="$true">
       {buttons.map((one, i) => (

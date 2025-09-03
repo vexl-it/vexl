@@ -1,6 +1,7 @@
 import {type Feedback} from '@vexl-next/domain/src/general/feedback'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {type SetStateAction, type WritableAtom} from 'jotai'
+import React from 'react'
 import {FeedbackScope} from './atoms'
 import FeedbackBanner from './components/FeedbackBanner'
 
@@ -18,7 +19,7 @@ function UserFeedback({
   autoCloseWhenFinished,
   feedbackAtom,
   hideCloseButton,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   return (
     <ScopeProvider scope={FeedbackScope} value={feedbackAtom}>
       <FeedbackBanner

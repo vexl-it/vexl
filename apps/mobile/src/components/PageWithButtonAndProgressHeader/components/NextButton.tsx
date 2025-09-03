@@ -1,5 +1,5 @@
 import {useAtomValue} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {XStack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import Button from '../../Button'
@@ -7,7 +7,7 @@ import nextButtonStateAtom from '../state/nextButtonStateAtom'
 
 function emptyPress(): void {}
 
-function NextButton(): JSX.Element | null {
+function NextButton(): React.ReactElement | null {
   const nextButtonState = useAtomValue(nextButtonStateAtom)
 
   const onPrimaryButtonPress = useCallback(() => {

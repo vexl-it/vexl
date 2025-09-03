@@ -1,5 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
+import React from 'react'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SvgImage from '../../Image'
@@ -17,7 +18,7 @@ interface Props {
 function FeedbackBanner({
   autoCloseWhenFinished,
   hideCloseButton,
-}: Props): JSX.Element | null {
+}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const {chatFeedbackFinishedAtom} = useMolecule(feedbackMolecule)
   const chatFeedbackFinished = useAtomValue(chatFeedbackFinishedAtom)

@@ -1,10 +1,10 @@
 import {useAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack} from 'tamagui'
 import {toastNotificationAtom} from './atom'
 import ToastNotificationContent from './components/ToastNotificationContent'
 
-function ToastNotification(): JSX.Element {
+function ToastNotification(): React.ReactElement {
   const [state, setState] = useAtom(toastNotificationAtom)
 
   useEffect(() => {

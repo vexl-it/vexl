@@ -1,9 +1,9 @@
-import {useRef} from 'react'
+import React, {useRef} from 'react'
 import {type TextInput} from 'react-native'
 import {Text} from 'tamagui'
 import AmountInput from '../../TradeCalculator/components/AmountInput'
 
-function BtcOwnPriceInput(): JSX.Element {
+function BtcOwnPriceInput(): React.ReactElement {
   const ref = useRef<TextInput>(null)
 
   return (

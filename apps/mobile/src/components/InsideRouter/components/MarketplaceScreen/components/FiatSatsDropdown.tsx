@@ -7,7 +7,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {marketplaceFiatOrSatsCurrencyAtom} from '../../../../../utils/preferences'
 import Image from '../../../../Image'
 
-function FiatSatsDropdown(): JSX.Element {
+function FiatSatsDropdown(): React.ReactElement {
   const {t} = useTranslation()
   const [marketplaceFiatOrSatsCurrency, setMarketplaceFiatOrSatsCurrency] =
     useAtom(marketplaceFiatOrSatsCurrencyAtom)

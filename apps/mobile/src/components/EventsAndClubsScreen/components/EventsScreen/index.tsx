@@ -1,6 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -18,11 +18,15 @@ import {
   stickyHeadersIndiciesAtom,
 } from './state'
 
-function renderItem({item: itemAtom}: {item: Atom<ListData>}): JSX.Element {
+function renderItem({
+  item: itemAtom,
+}: {
+  item: Atom<ListData>
+}): React.ReactElement {
   return <EventItem atom={itemAtom} />
 }
 
-export default function EventsScreen(): JSX.Element {
+export default function EventsScreen(): React.ReactElement {
   const eventsLoading = useAtomValue(eventsLoadingAtom)
   const areThereEventsToShow = useAtomValue(areThereEventsToShowAtom)
   const loadEvents = useSetAtom(refreshEventsActionAtom)

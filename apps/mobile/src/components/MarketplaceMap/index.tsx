@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom, useStore} from 'jotai'
-import {useCallback} from 'react'
+import React, {useCallback} from 'react'
 import {Dimensions} from 'react-native'
 import {type Details, type Region} from 'react-native-maps'
 import {Stack} from 'tamagui'
@@ -20,11 +20,11 @@ function MarketplaceMapSizeContainer({
   children,
 }: {
   children: React.ReactNode
-}): JSX.Element {
+}): React.ReactElement {
   return <Stack h={MAP_SIZE}>{children}</Stack>
 }
 
-export default function MarketplaceMap(): JSX.Element {
+export default function MarketplaceMap(): React.ReactElement {
   const navigation = useNavigation()
   const store = useStore()
   const setSelectedRegion = useSetAtom(mapRegionAtom)

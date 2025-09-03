@@ -1,5 +1,5 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {useState} from 'react'
+import React, {useState} from 'react'
 import {Alert} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -16,7 +16,7 @@ type Props = LoginStackScreenProps<'Name'>
 
 const USERNAME_MAX_LENGTH = 25
 
-function NameScreen({navigation}: Props): JSX.Element {
+function NameScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const [value, setValue] = useState('')
 

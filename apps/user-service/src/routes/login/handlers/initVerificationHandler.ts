@@ -8,13 +8,14 @@ import {
   InitPhoneVerificationResponse,
   InitVerificationErrors,
   PhoneNumberVerificationId,
+  UnableToSendVerificationSmsError,
   UnsupportedVersionToLoginError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {InitVerificationEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {verifyLoginChallenge} from '@vexl-next/server-utils/src/loginChallengeServerOperations'
 import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {type ConfigError, Effect, Option, Schema} from 'effect'
+import {type ConfigError, Effect, Option, pipe, Schema, String} from 'effect'
 import {Handler} from 'effect-http'
 import {
   allowLoginWithoutChallengeConfig,
@@ -88,6 +89,20 @@ export const initVerificationHandler = Handler.make(
             })
           )
         }
+
+        if (
+          pipe(
+            req.headers.deviceModelOrNone,
+            Option.getOrElse(() => ''),
+            String.toLowerCase
+          ) === 'mainline'
+        )
+          return yield* _(
+            new UnableToSendVerificationSmsError({
+              reason: 'AntiFraudBlock',
+              status: 400,
+            })
+          )
 
         const loginDbService = yield* _(VerificationStateDbService)
         const expirationAt = unixMillisecondsFromNow(

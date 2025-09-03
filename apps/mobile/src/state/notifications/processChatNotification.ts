@@ -2,11 +2,11 @@ import notifee from '@notifee/react-native'
 import {type NavigationState} from '@react-navigation/native'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option, Schema} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -26,6 +26,8 @@ const processChatNotificationProcessed = (
   metricsApi: MetricsApi,
   notificationData: NewChatMessageNoticeNotificationData
 ): Effect.Effect<void> => {
+  console.info(`Reporting BackgroundMessageReceived`)
+
   const reportNotificationProcessedToNotificationService = notificationApi
     .reportNotificationProcessed({
       trackingId: notificationTrackingId,
@@ -52,7 +54,7 @@ const processChatNotificationProcessed = (
       count: 1,
       notificationType: 'Chat',
       type: 'BackgroundMessageReceived',
-      uuid: generateUuid(),
+      uuid: Schema.decodeSync(UuidE)(notificationTrackingId),
     })
     .pipe(
       Effect.timeout(500),

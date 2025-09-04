@@ -2,113 +2,24 @@ import {Option, pipe, Schema} from 'effect'
 import type * as Notifications from 'expo-notifications'
 import {Platform} from 'react-native'
 
-/*
-IOS in background task notification example:
-headless:
-"body": {
- !! This is what we want as not stringificed json (can be read without parsing) !!
-},
-  "aps": {
-    "content-available": 1
-  },
-}
-
-with body and title: NOT RECEIVED
-
-IOS in hook notification example:
-with body and title:
-
-{
-  "request": {
-    "trigger": {
-      ...
-    },
-    "identifier": "...",
-    "content": {
-      "body": "You have a new chat message",
-      "title": "en_dev New chat message",
-      "data": {
-        !!!This is what we want as not stringified json (can be read without parsing) !!!
-      },
-      ...
-    }
-  },
-  "date": ...
-}
-
-headless: NOT RECEIVED
-
-
-
-Android in background task notification example:
-headless:
-{
-  "notification": {
-    "notification": null, // THIS SIGNALS IT's HEADLESS
-    "data": {
-      "body": "!!! THIS IS WHAT WE WANT - IN STRINGIFIED JSON FORMAT !!!",
-    },
-  }
-}
-
-with body and title:
-{
-  "notification": {
-    "notification": {...}, !!! THIS SIGNALS WE HAVE NOTIFICATION WITH BODY AND TITLE !!!
-    "data": {
-      "message": "You have a new chat message",
-      "title": "en_dev New chat message",
-      "body": "!!! THIS IS WHAT WE WANT - IN STRINGIFIED JSON FORMAT !!!",
-    },
-  }
-}
-
-Android in hook notification example:
-with body and title:
-
-{
-  "request": {
-    "trigger": {
-      "remoteMessage": {
-        "notification": {} // THIS signals we have notification with body and title
-      },
-    }
-    "content": {
-      "body": "You have a new chat message",
-      "title": "en_dev New chat message",
-      "data": {
-      !!!This is what we want as not stringified json (can be read without parsing) !!!
-      }
-    },
-  },
-}
-
-
-headless:
-{
-  "request": {
-    "trigger": {
-      "remoteMessage": {
-        "notification": null, // !!! THIS SIGNALS WE DON'T HAVE NOTIFICATION WITH BODY AND TITLE !!!
-      },
-    },
-    "content": {
-      "title": null,
-      "badge": null,
-      "body": null,
-      "data": {
-        "body": "!!! THIS IS WHAT WE WANT - IN STRINGIFIED JSON FORMAT !!!",
-      },
-    },
-  },
-}
-*/
-
-const NotificationPayload = Schema.Record({
+const NotificationData = Schema.Record({
   key: Schema.String,
   value: Schema.Union(Schema.String, Schema.Number, Schema.Object),
 })
-export type NotificationPayload = typeof NotificationPayload.Type
+export type NotificationData = typeof NotificationData.Type
+
+const BackgroundNotificationSchema = Schema.Struct({
+  notification: Schema.NullOr(NotificationData),
+  data: Schema.Struct(
+    {
+      dataString: Schema.optional(Schema.parseJson(NotificationData)),
+    },
+    {
+      key: Schema.String,
+      value: Schema.Union(Schema.String, Schema.Number, Schema.Object),
+    }
+  ),
+})
 
 const AndroidInHookNotification = Schema.Struct({
   request: Schema.Struct({
@@ -123,35 +34,13 @@ const AndroidInHookNotification = Schema.Struct({
   }),
 })
 
-const AndroidInBackgroundNotification = Schema.Struct({
-  notification: Schema.Struct({
-    notification: Schema.NullOr(Schema.Unknown),
-    data: Schema.Struct({
-      body: Schema.parseJson(NotificationPayload),
-    }),
-  }),
-})
-
-const AndroidInBackgroundNotification2 = Schema.Struct({
-  data: Schema.Struct({
-    body: Schema.parseJson(NotificationPayload),
-  }),
-})
-
 const IOSInHookNotification = Schema.Struct({
   request: Schema.Struct({
     content: Schema.Struct({
       body: Schema.NullishOr(Schema.String),
-      data: NotificationPayload,
+      data: NotificationData,
     }),
   }),
-})
-
-const IOSInBackgroundNotification = Schema.Struct({
-  aps: Schema.Struct({
-    'content-available': Schema.NullishOr(Schema.Number),
-  }),
-  body: NotificationPayload,
 })
 
 /**
@@ -164,38 +53,26 @@ export function extractDataPayloadFromNotification(
   data:
     | {
         source: 'background'
-        data: unknown
+        data: Notifications.NotificationTaskPayload
       }
     | {
         source: 'hook'
         data: Notifications.Notification
       }
-): Option.Option<{payload: NotificationPayload; isHeadless: boolean}> {
+): Option.Option<{payload: NotificationData; isHeadless: boolean}> {
   try {
-    if (Platform.OS === 'android') {
-      if (data.source === 'background') {
-        return pipe(
-          Schema.decodeUnknownOption(AndroidInBackgroundNotification)(
-            data.data
-          ),
-          Option.map((one) => ({
-            payload: one.notification.data.body,
-            isHeadless: !one.notification.notification,
-          })),
-          Option.orElse(() =>
-            pipe(
-              Schema.decodeUnknownOption(AndroidInBackgroundNotification2)(
-                data.data
-              ),
-              Option.map((one) => ({
-                payload: one.data.body,
-                isHeadless: true,
-              }))
-            )
-          )
-        )
-      }
+    if (data.source === 'background') {
+      return pipe(
+        Schema.decodeUnknownOption(BackgroundNotificationSchema)(data.data),
+        Option.map((one) => ({
+          payload: one.data.dataString ?? {},
+          isHeadless: !!one.notification,
+        })),
+        Option.filter((one): boolean => !!one.payload)
+      )
+    }
 
+    if (Platform.OS === 'android') {
       if (data.source === 'hook') {
         return pipe(
           Schema.decodeUnknownOption(AndroidInHookNotification)(data.data),
@@ -205,9 +82,7 @@ export function extractDataPayloadFromNotification(
           })),
           Option.flatMap(({payload, isHeadless}) => {
             return pipe(
-              Schema.decodeOption(Schema.parseJson(NotificationPayload))(
-                payload
-              ),
+              Schema.decodeOption(Schema.parseJson(NotificationData))(payload),
               Option.map((one) => ({
                 payload: one,
                 isHeadless,
@@ -219,16 +94,6 @@ export function extractDataPayloadFromNotification(
     }
 
     if (Platform.OS === 'ios') {
-      if (data.source === 'background') {
-        return pipe(
-          Schema.decodeUnknownOption(IOSInBackgroundNotification)(data.data),
-          Option.map((one) => ({
-            payload: one.body,
-            isHeadless: one.aps['content-available'] === 1,
-          }))
-        )
-      }
-
       if (data.source === 'hook') {
         return pipe(
           Schema.decodeUnknownOption(IOSInHookNotification)(data.data),
@@ -242,6 +107,7 @@ export function extractDataPayloadFromNotification(
 
     return Option.none() // WHAT DA FUCK?
   } catch (e) {
+    console.error('Error parsing notification content', e)
     return Option.none()
   }
 }

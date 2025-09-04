@@ -33,18 +33,18 @@ import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
 
 export async function processBackgroundMessage(
-  unsafeData: unknown
+  data: Notifications.NotificationTaskPayload
 ): Promise<void> {
   try {
     const notificationPayloadO = extractDataPayloadFromNotification({
       source: 'background',
-      data: unsafeData,
+      data,
     })
 
     if (Option.isNone(notificationPayloadO)) {
       console.info(
         `📳 ‼️ Background notification and unable to parse ${JSON.stringify(
-          unsafeData,
+          data,
           null,
           2
         )}`
@@ -53,7 +53,7 @@ export async function processBackgroundMessage(
       void showDebugNotificationIfEnabled({
         title: `Error decoding background notification `,
         subtitle: 'notifInBackgroundHandler',
-        body: `${JSON.stringify(unsafeData, null, 2)}`,
+        body: `${JSON.stringify(data, null, 2)}`,
       })
       return
     }
@@ -224,9 +224,12 @@ export async function processBackgroundMessage(
 
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK'
 
-TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, async ({data}) => {
-  await processBackgroundMessage(data)
-})
+TaskManager.defineTask<Notifications.NotificationTaskPayload>(
+  BACKGROUND_NOTIFICATION_TASK,
+  async ({data}) => {
+    await processBackgroundMessage(data)
+  }
+)
 
 async function setupBackgroundMessaging(): Promise<void> {
   try {

@@ -32,12 +32,14 @@ export async function showDebugNotificationIfEnabled({
   title,
   subtitle,
   body,
+  force = false,
 }: {
   title: string
   subtitle?: string
   body: string
+  force?: boolean
 }): Promise<void> {
-  if (!getShowDebugNotifications()) return
+  if (!force && !getShowDebugNotifications()) return
 
   const channelId = await notifee.createChannel({
     id: 'test',

@@ -3,7 +3,7 @@ import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
-import {type NotificationPayload} from './extractDataFromNotification'
+import {type NotificationData} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {
   CREATE_OFFER_PROMPT,
@@ -13,7 +13,7 @@ import {
 } from './notificationTypes'
 
 export async function showUINotificationFromRemoteMessage(
-  data: NotificationPayload
+  data: NotificationData
 ): Promise<boolean> {
   const {t} = getDefaultStore().get(translationAtom)
   const notificationPreferences = getDefaultStore().get(

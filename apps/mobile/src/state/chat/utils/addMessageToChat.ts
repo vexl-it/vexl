@@ -1,3 +1,4 @@
+import {Array, Order, pipe} from 'effect'
 import {flow} from 'fp-ts/lib/function'
 import addToSortedArray from '../../../utils/addToSortedArray'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
@@ -64,6 +65,28 @@ export default function addMessageToChat(
           } satisfies ChatWithMessages),
     updateChatVersion(message),
     updateFcmToken(message)
+  )
+}
+
+export function addMessagesToChat(
+  messages: ChatMessageWithState[]
+): (chat: ChatWithMessages) => ChatWithMessages {
+  return flow(
+    (chat) =>
+      ({
+        ...chat,
+        messages: Array.appendAll(
+          chat.messages,
+          pipe(
+            messages,
+            Array.sortBy(
+              Order.mapInput(Order.number, (message) => message.message.time)
+            )
+          )
+        ),
+      }) satisfies ChatWithMessages,
+    (chat) => (messages[0] ? updateChatVersion(messages[0])(chat) : chat),
+    (chat) => (messages[0] ? updateFcmToken(messages[0])(chat) : chat)
   )
 }
 

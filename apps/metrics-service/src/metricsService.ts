@@ -7,6 +7,7 @@ import DbLayer from './db/layer'
 import {MetricsDbService} from './db/MetricsDbService'
 import {httpServerEffect} from './httpServer'
 import {metricsConsumerServiceEffect} from './metricsConsumer'
+import {reportLastReportedMetricsGaugeLive} from './utils/reportLastReportedMetricsGaugeLive'
 
 const MainLive = pipe(
   Layer.empty,
@@ -15,6 +16,7 @@ const MainLive = pipe(
       port: healthServerPortConfig,
     })
   ),
+  Layer.provideMerge(reportLastReportedMetricsGaugeLive),
   Layer.provideMerge(MetricsDbService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(DbLayer),

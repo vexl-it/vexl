@@ -11,7 +11,7 @@ const consumeMessage = (
   job: Job
 ): Effect.Effect<void, ParseError | UnexpectedServerError, MetricsDbService> =>
   Effect.gen(function* (_) {
-    const message = yield* _(MetricsMessage.fromJob(job))
+    const {message, meta} = yield* _(MetricsMessage.fromJob(job))
 
     yield* _(Effect.log('Received message', message))
     const metricsDb = yield* _(MetricsDbService)
@@ -20,6 +20,17 @@ const consumeMessage = (
       Effect.catchTag('MessageWithUuidAlreadyStoredError', (e) =>
         Effect.logWarning('Message with uuid already stored', message)
       )
+    )
+
+    yield* _(
+      metricsDb.insertLastReportedByService({
+        lastEventAt: message.timestamp,
+        serviceName: meta.serviceName,
+      }),
+      Effect.tapError((e) =>
+        Effect.logWarning('Error updating last reported by service', e)
+      ),
+      Effect.ignore
     )
   }).pipe(
     Effect.catchAll((e) =>

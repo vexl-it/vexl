@@ -212,13 +212,13 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
       return T.of(false)
     }
 
-    const updatesToBeSent = get(updatesToBeSentAtom)
-    if (Object.keys(updatesToBeSent).length === 0) return T.of(true) // No updates to be sent
+    if (Object.keys(get(updatesToBeSentAtom)).length === 0) return T.of(true) // No updates to be sent
 
     set(loadingOverlayDisplayedAtom, true)
 
     return pipe(
       set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
+      effectToTaskEither,
       TE.match(
         (e) => {
           showErrorAlert({

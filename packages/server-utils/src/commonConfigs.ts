@@ -3,7 +3,7 @@ import {
   PrivateKeyPemBase64E,
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Config, ConfigError, Effect, Either, Schema} from 'effect'
+import {Config, ConfigError, Effect, Either, Option, Schema} from 'effect'
 
 export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
   Config.withDefault('production'),
@@ -98,7 +98,10 @@ export const disableMetricsInDevelopmentConfig = Config.option(
 
 export const shouldDisableMetrics = Effect.gen(function* (_) {
   const isRunningInDevelopment = yield* _(isRunningInDevelopmentConfig)
-  const disableMetrics = yield* _(disableMetricsInDevelopmentConfig)
+  const disableMetrics = yield* _(
+    disableMetricsInDevelopmentConfig,
+    Effect.map(Option.getOrElse(() => false))
+  )
 
   if (disableMetrics && !isRunningInDevelopment) {
     yield* _(

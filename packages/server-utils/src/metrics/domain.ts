@@ -1,7 +1,8 @@
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type Job} from 'bullmq'
-import {Schema, type Effect} from 'effect'
+import {type ConfigError, Effect, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
+import {serviceNameConfig} from '../commonConfigs'
 
 export class MetricsMessage extends Schema.Class<MetricsMessage>(
   'MetricsMessage'
@@ -22,19 +23,35 @@ export class MetricsMessage extends Schema.Class<MetricsMessage>(
     default: () => 'Increment' as const,
   }),
 }) {
-  private static readonly encode = Schema.encode(MetricsMessage)
-  private static readonly decodeUnknwon = Schema.decodeUnknown(MetricsMessage)
-
   static readonly fromJob = (
     job: Job
-  ): Effect.Effect<MetricsMessage, ParseError> => {
-    return MetricsMessage.decodeUnknwon(job.data)
+  ): Effect.Effect<typeof MetricsMessageWithMetaData.Type, ParseError> => {
+    return Schema.decode(MetricsMessageWithMetaData)(job.data)
   }
 
-  get jobData(): Effect.Effect<typeof MetricsMessage.Encoded, ParseError> {
-    return MetricsMessage.encode(this)
+  get jobData(): Effect.Effect<
+    typeof MetricsMessageWithMetaData.Encoded,
+    ParseError | ConfigError.ConfigError
+  > {
+    return serviceNameConfig.pipe(
+      Effect.flatMap((serviceName) =>
+        Schema.encode(MetricsMessageWithMetaData)({
+          meta: {serviceName},
+          message: this,
+        })
+      )
+    )
   }
 }
+
+const MetricsMessageMetadata = Schema.Struct({
+  serviceName: Schema.String,
+})
+export const MetricsMessageWithMetaData = Schema.Struct({
+  meta: MetricsMessageMetadata,
+  message: MetricsMessage,
+})
+
 export class ReportingMetricsError extends Schema.TaggedError<ReportingMetricsError>(
   'ReportingMetricsError'
 )('ReportingMetricsError', {

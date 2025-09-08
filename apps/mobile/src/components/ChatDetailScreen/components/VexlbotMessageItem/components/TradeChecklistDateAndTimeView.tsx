@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
+import {Option} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
@@ -26,8 +27,10 @@ export default function TradeChecklistDateAndTimeView({
     tradeChecklistDateAndTimeAtom,
     otherSideDataAtom,
     chatAtom,
+    lastTradeChecklistMessageAtom,
   } = useMolecule(chatMolecule)
   const store = useStore()
+  const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
   const dateAndTimeData = useAtomValue(tradeChecklistDateAndTimeAtom)
   const latestDateAndTimeDataMessageTimestamp =
     dateAndTime.getLatestMessageTimestamp(dateAndTimeData)
@@ -66,7 +69,9 @@ export default function TradeChecklistDateAndTimeView({
               text={t('vexlbot.addEventToCalendar')}
             />
           </VexlbotBubble>
-          <VexlbotNextActionSuggestion />
+          {Option.isSome(lastTradeChecklistMessage) &&
+            lastTradeChecklistMessage.value.message.uuid ===
+              message.message.uuid && <VexlbotNextActionSuggestion />}
         </>
       )
     }

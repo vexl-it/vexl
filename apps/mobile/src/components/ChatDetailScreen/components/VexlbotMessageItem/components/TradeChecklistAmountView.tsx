@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
+import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
@@ -45,10 +46,12 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     tradeChecklistAmountAtom,
     tradeOrOriginOfferCurrencyAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
+    lastTradeChecklistMessageAtom,
   } = useMolecule(chatMolecule)
   const tradeOrOriginOfferCurrency = useAtomValue(
     tradeOrOriginOfferCurrencyAtom
   )
+  const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
   const preferences = useAtomValue(preferencesAtom)
   const currentLocale = preferences.appLanguage ?? getCurrentLocale()
   const amountData = useAtomValue(tradeChecklistAmountAtom)
@@ -268,9 +271,10 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
           </Stack>
         </VexlbotBubble>
         {!isMessageOutdated &&
-          latestAmountDataMessage.status === 'accepted' && (
-            <VexlbotNextActionSuggestion />
-          )}
+          latestAmountDataMessage.status === 'accepted' &&
+          Option.isSome(lastTradeChecklistMessage) &&
+          lastTradeChecklistMessage.value.message.uuid ===
+            message.message.uuid && <VexlbotNextActionSuggestion />}
       </>
     )
   }

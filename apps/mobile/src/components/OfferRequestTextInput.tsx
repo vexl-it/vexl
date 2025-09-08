@@ -22,6 +22,7 @@ function OfferRequestTextInput({
 
   return (
     <TextInput
+      py="$4"
       multiline
       tag="textarea"
       verticalAlign="top"

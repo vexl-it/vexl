@@ -7,7 +7,7 @@ import {
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Effect, Either, pipe} from 'effect'
+import {Array, Effect, Either, pipe} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -463,6 +463,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )()
   })
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
+  const lastTradeChecklistMessageAtom = selectAtom(
+    messagesAtom,
+    Array.findLast(
+      (message) => message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+    )
+  )
 
   const forceShowHistoryAtom = atom(false)
 
@@ -1262,5 +1268,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideGoldenAvatarTypeAtom,
     otherSideClubsIdsAtom,
     approveChatRequestActionAtom,
+    lastTradeChecklistMessageAtom,
   }
 })

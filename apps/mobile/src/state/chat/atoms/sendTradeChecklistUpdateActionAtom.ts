@@ -11,13 +11,11 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
+import {Array, Effect} from 'effect/index'
 import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -28,7 +26,7 @@ import removeFile from '../../../utils/removeFile'
 import {tradeChecklistDataAtom} from '../../tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
-import addMessageToChat from '../utils/addMessageToChat'
+import {addMessagesToChat} from '../utils/addMessageToChat'
 import processTradeChecklistContactRevealMessageIfAny from '../utils/processTradeChecklistContactRevealMessageIfAny'
 import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
@@ -39,12 +37,12 @@ export default function createSubmitChecklistUpdateActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<
   [TradeChecklistUpdate],
-  TE.TaskEither<
+  Effect.Effect<
+    ChatMessageWithState[],
     | SendMessageApiErrors
     | ErrorEncryptingMessage
     | JsonStringifyError
-    | ZodParseError<ChatMessagePayload>,
-    ChatMessageWithState
+    | ZodParseError<ChatMessagePayload>
   >
 > {
   return atom(null, (get, set, update: TradeChecklistUpdate) => {
@@ -52,94 +50,111 @@ export default function createSubmitChecklistUpdateActionAtom(
     const chatWithMessages = get(chatWithMessagesAtom)
     const tradeChecklistData = get(tradeChecklistDataAtom)
 
-    return pipe(
-      T.Do,
-      T.chain(() => replaceIdentityImageFileUriWithBase64(update.identity)),
-      T.map(
-        (identityUpdate) =>
+    return Effect.gen(function* (_) {
+      const updateKeys = Object.keys(update) as Array<
+        keyof TradeChecklistUpdate
+      >
+
+      const toSend = updateKeys.map(
+        (key) =>
           ({
             text: 'Checklist updated',
             messageType: 'TRADE_CHECKLIST_UPDATE',
-            tradeChecklistUpdate: {
-              ...update,
-              identity: identityUpdate,
-            },
+            tradeChecklistUpdate:
+              key === 'identity'
+                ? {
+                    identity: replaceIdentityImageFileUriWithBase64(
+                      update[key]
+                    ),
+                  }
+                : {
+                    [key]: update[key],
+                  },
             time: unixMillisecondsNow(),
             uuid: generateChatMessageId(),
             myVersion: version,
             senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
             minimalRequiredVersion: MINIMAL_REQUIRED_VERSION,
           }) as ChatMessage
-      ),
-      TE.fromTask,
-      TE.chainFirstW((message) =>
-        effectToTaskEither(
-          sendMessage({
-            api: api.chat,
-            senderKeypair: chatWithMessages.chat.inbox.privateKey,
-            receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
-            message,
-            notificationApi: api.notification,
-            theirNotificationCypher: chatWithMessages.chat.otherSideFcmCypher,
-            otherSideVersion: chatWithMessages.chat.otherSideVersion,
-          })
-        )
-      ),
-      TE.map((message): ChatMessageWithState => {
-        const successMessage: ChatMessageWithState = {
+      )
+
+      const sentMessages = yield* _(
+        Array.map(toSend, (message) =>
+          pipe(
+            Effect.Do,
+            Effect.map(() => message),
+            Effect.tap((message) =>
+              sendMessage({
+                api: api.chat,
+                senderKeypair: chatWithMessages.chat.inbox.privateKey,
+                receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
+                message,
+                notificationApi: api.notification,
+                theirNotificationCypher:
+                  chatWithMessages.chat.otherSideFcmCypher,
+                otherSideVersion: chatWithMessages.chat.otherSideVersion,
+              })
+            )
+          )
+        ),
+        Effect.allWith({concurrency: 'unbounded'})
+      )
+
+      const successMessages: ChatMessageWithState[] = Array.map(
+        sentMessages,
+        (message) => ({
           message: {
             ...message,
-            tradeChecklistUpdate: update,
+            tradeChecklistUpdate: message.tradeChecklistUpdate,
           },
           state: 'sent',
-        }
+        })
+      )
 
-        if (
-          update.identity?.status === 'DISAPPROVE_REVEAL' &&
-          tradeChecklistData.identity.received?.image
-        ) {
-          void removeFile(tradeChecklistData.identity.received.image)()
-        }
+      if (
+        update.identity?.status === 'DISAPPROVE_REVEAL' &&
+        tradeChecklistData.identity.received?.image
+      ) {
+        void removeFile(tradeChecklistData.identity.received.image)()
+      }
 
-        const realLifeInfo = (
-          update.identity?.status === 'APPROVE_REVEAL'
-            ? processTradeChecklistIdentityRevealMessageIfAny(
-                tradeChecklistData.identity.received,
-                chatWithMessages.chat
+      const realLifeInfo = (
+        update.identity?.status === 'APPROVE_REVEAL'
+          ? processTradeChecklistIdentityRevealMessageIfAny(
+              tradeChecklistData.identity.received,
+              chatWithMessages.chat
+            )
+          : update.contact?.status === 'APPROVE_REVEAL'
+            ? processTradeChecklistContactRevealMessageIfAny(
+                tradeChecklistData.contact.received,
+                chatWithMessages.chat.otherSide.realLifeInfo
               )
-            : update.contact?.status === 'APPROVE_REVEAL'
-              ? processTradeChecklistContactRevealMessageIfAny(
-                  tradeChecklistData.contact.received,
-                  chatWithMessages.chat.otherSide.realLifeInfo
-                )
-              : undefined
-        ) satisfies RealLifeInfo | undefined
+            : undefined
+      ) satisfies RealLifeInfo | undefined
 
-        set(
-          chatWithMessagesAtom,
-          flow(
-            (old) =>
-              ({
-                ...old,
-                chat: {
-                  ...old.chat,
-                  otherSide: {
-                    ...old.chat.otherSide,
-                    realLifeInfo:
-                      realLifeInfo ?? old.chat.otherSide.realLifeInfo,
-                  },
+      set(
+        chatWithMessagesAtom,
+        flow(
+          (old) =>
+            ({
+              ...old,
+              chat: {
+                ...old.chat,
+                otherSide: {
+                  ...old.chat.otherSide,
+                  realLifeInfo: realLifeInfo ?? old.chat.otherSide.realLifeInfo,
                 },
-                tradeChecklist: updateTradeChecklistState(old.tradeChecklist)({
-                  update,
-                  direction: 'sent',
-                }),
-              }) satisfies ChatWithMessages,
-            addMessageToChat(successMessage)
-          )
+              },
+              tradeChecklist: updateTradeChecklistState(old.tradeChecklist)({
+                update,
+                direction: 'sent',
+              }),
+            }) satisfies ChatWithMessages,
+          addMessagesToChat(successMessages)
         )
+      )
 
-        return successMessage
-      })
-    )
+      return successMessages
+    })
   })
 }

@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
+import {Option} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'
@@ -67,7 +68,9 @@ export default function TradeChecklistMeetingLocationView({
     tradeChecklistMeetingLocationAtom,
     otherSideDataAtom,
     chatAtom,
+    lastTradeChecklistMessageAtom,
   } = useMolecule(chatMolecule)
+  const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
   const meetingLocationData = useAtomValue(tradeChecklistMeetingLocationAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const store = useStore()
@@ -148,7 +151,9 @@ export default function TradeChecklistMeetingLocationView({
               )}
             </Stack>
           </VexlbotBubble>
-          <VexlbotNextActionSuggestion />
+          {Option.isSome(lastTradeChecklistMessage) &&
+            lastTradeChecklistMessage.value.message.uuid ===
+              message.message.uuid && <VexlbotNextActionSuggestion />}
         </>
       )
     }

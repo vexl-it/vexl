@@ -64,7 +64,6 @@ export function areContactsPermissionsGranted(): Effect.Effect<
       return contactsPermissions.granted
     },
     catch: (e) => {
-      console.log(`Error in permissions: ${JSON.stringify(e, null, 2)}`)
       return new UnknownContactsError({cause: e})
     },
   })

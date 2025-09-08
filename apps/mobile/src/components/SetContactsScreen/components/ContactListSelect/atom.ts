@@ -1,6 +1,10 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {createScope, molecule} from 'bunshi/dist/react'
 import {Array, Effect, Option, Schema, pipe} from 'effect'
+import {
+  getPermissionsAsync,
+  type ContactsPermissionResponse,
+} from 'expo-contacts'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
@@ -134,6 +138,23 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const allContactsToDisplayCountAtom = atom(
     (get) => get(allContactsToDisplayAtomsAtom).length
   )
+  const contactsAccessPrivilegesAtom = atom<
+    ContactsPermissionResponse['accessPrivileges'] | undefined
+  >()
+  const displayInfoAboutContactsAccessPrivilegesAtom = atom<boolean>(true)
+
+  const checkContactsAccessPrivilegesActionAtom = atom(null, (get, set) => {
+    return Effect.tryPromise({
+      try: async () => {
+        const contactsPermissions = await getPermissionsAsync()
+        set(contactsAccessPrivilegesAtom, contactsPermissions.accessPrivileges)
+      },
+      catch: () => {
+        // ignore errors here, it's used to display only info modal to user
+        set(contactsAccessPrivilegesAtom, undefined)
+      },
+    })
+  })
 
   const displayContactsCountAtom = atom((get) => !!get(searchTextAtom))
 
@@ -478,5 +499,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     allContactsToDisplayCountAtom,
     displayContactsCountAtom,
     editContactActionAtom,
+    contactsAccessPrivilegesAtom,
+    checkContactsAccessPrivilegesActionAtom,
+    displayInfoAboutContactsAccessPrivilegesAtom,
   }
 })

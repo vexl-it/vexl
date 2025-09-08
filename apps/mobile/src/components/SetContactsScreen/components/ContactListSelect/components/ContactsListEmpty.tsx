@@ -8,6 +8,7 @@ import {areContactsPermissionsGranted} from '../../../../../state/contacts/utils
 import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../../../../state/lastRouteMmkvAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
+import ContactsAccessPrivilegesInfoModal from './ContactsAccessPrivilegesInfoModal'
 
 function ContactsListEmpty(): React.ReactElement {
   const {t} = useTranslation()
@@ -55,6 +56,7 @@ function ContactsListEmpty(): React.ReactElement {
             ? t('contacts.didYouChangeYourMind')
             : t('postLoginFlow.contactsList.nothingFound.text')}
         </Text>
+        <ContactsAccessPrivilegesInfoModal mt="$4" />
       </Stack>
     </EmptyListWrapper>
   )

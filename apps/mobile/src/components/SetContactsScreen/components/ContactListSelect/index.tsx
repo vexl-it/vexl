@@ -138,9 +138,10 @@ function ContactsListSelect({
 }): React.ReactElement {
   const {t} = useTranslation()
   const goBack = useSafeGoBack()
-  const {submitAllSelectedContactsActionAtom} = useMolecule(
-    contactSelectMolecule
-  )
+  const {
+    submitAllSelectedContactsActionAtom,
+    checkContactsAccessPrivilegesActionAtom,
+  } = useMolecule(contactSelectMolecule)
 
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
@@ -148,12 +149,19 @@ function ContactsListSelect({
   const submitAllSelectedContacts = useSetAtom(
     submitAllSelectedContactsActionAtom
   )
+  const checkContactsAccessPrivileges = useSetAtom(
+    checkContactsAccessPrivilegesActionAtom
+  )
 
   useEffect(() => {
     return () => {
       resolveAllContactsAsSeen()
     }
   }, [resolveAllContactsAsSeen])
+
+  useEffect(() => {
+    Effect.runFork(checkContactsAccessPrivileges())
+  }, [checkContactsAccessPrivileges])
 
   return (
     <>

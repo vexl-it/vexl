@@ -1,7 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
@@ -19,7 +18,6 @@ import {
 } from '../../../../../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
-import showDonationPromptGiveLoveActionAtom from '../../../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {type ToastNotificationState} from '../../../../ToastNotification/domain'
@@ -67,9 +65,6 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   const btcPricePercentageDifference = useAtomValue(
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom
   )
-  const showDonationPromptGiveLove = useSetAtom(
-    showDonationPromptGiveLoveActionAtom
-  )
   const btcTradePrice = useSetAtom(localizedDecimalNumberActionAtom)({
     number:
       message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
@@ -113,12 +108,10 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
       void submitTradeChecklistUpdates()().finally(() => {
         showLoadingOverlay(false)
       })
-      Effect.runFork(showDonationPromptGiveLove())
     }
   }, [
     addAmount,
     amountData.received,
-    showDonationPromptGiveLove,
     showLoadingOverlay,
     submitTradeChecklistUpdates,
   ])

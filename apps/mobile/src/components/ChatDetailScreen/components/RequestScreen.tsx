@@ -4,9 +4,11 @@ import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import {Platform} from 'react-native'
 import {
   KeyboardAvoidingView,
   KeyboardAwareScrollView,
+  KeyboardStickyView,
 } from 'react-native-keyboard-controller'
 import {Stack, YStack, getTokens} from 'tamagui'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
@@ -18,7 +20,7 @@ import Button from '../../Button'
 import InfoSquare from '../../InfoSquare'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import {chatMolecule} from '../atoms'
+import {ApprovalStatusMessage, chatMolecule} from '../atoms'
 import infoSvg from '../images/infoSvg'
 import AcceptDeclineButtons from './AcceptDeclineButtons'
 import ChatHeader from './ChatHeader'
@@ -40,12 +42,14 @@ function RequestScreen(): React.ReactElement {
     canBeRerequestedAtom,
     otherSideDataAtom,
     rerequestOfferActionAtom,
+    deniedMessageAtom,
   } = useMolecule(chatMolecule)
   const offer = useAtomValue(offerForChatAtom)
   const {t} = useTranslation()
 
   const requestState = useAtomValue(requestStateAtom)
   const requestMessage = useAtomValue(requestMessageAtom)
+  const deniedMessage = useAtomValue(deniedMessageAtom)
   const wasDenied = useAtomValue(wasDeniedAtom)
   const wasCancelled = useAtomValue(wasCancelledAtom)
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
@@ -143,9 +147,10 @@ function RequestScreen(): React.ReactElement {
     t,
   ])
 
-  const ContentContainer = canBeRerequested.canBeRerequested
-    ? KeyboardAwareScrollView
-    : KeyboardAvoidingView
+  const ContentContainer =
+    canBeRerequested.canBeRerequested || !requestedByMe
+      ? KeyboardAwareScrollView
+      : KeyboardAvoidingView
 
   return (
     <>
@@ -162,7 +167,7 @@ function RequestScreen(): React.ReactElement {
         showsVerticalScrollIndicator={false}
         bottomOffset={SCROLL_EXTRA_OFFSET}
       >
-        <YStack gap="$6" f={1} mx="$4" my="$6">
+        <YStack gap="$6" f={1} mx="$4" mt="$6">
           {!!offer && (
             <ChatRequestPreview showRequestMessage mode="commonFirst" />
           )}
@@ -184,12 +189,12 @@ function RequestScreen(): React.ReactElement {
             {!!rerequestText && <InfoSquare>{rerequestText}</InfoSquare>}
             {requestState === 'denied' && (
               <InfoSquare negative>
-                {t(
+                {`${t(
                   requestedByMe
                     ? 'messages.deniedByThem'
                     : 'messages.deniedByMe',
                   {name: otherSideData.userName}
-                )}
+                )} \n${deniedMessage?.message.text !== ApprovalStatusMessage.disapproved && t('messages.deniedByMeReason', {reason: deniedMessage?.message.text})}`}
               </InfoSquare>
             )}
             {requestState === 'cancelled' && (
@@ -214,7 +219,11 @@ function RequestScreen(): React.ReactElement {
                 />
               </YStack>
             ) : (
-              <AcceptDeclineButtons />
+              <OfferRequestTextInput
+                text={text}
+                onChange={setText}
+                placeholder={t('offer.inputPlaceholderOptional')}
+              />
             ))}
           {requestState === 'cancelled' && (
             <Stack gap="$2">
@@ -245,6 +254,13 @@ function RequestScreen(): React.ReactElement {
           )}
         </Stack>
       </ContentContainer>
+      {requestState === 'requested' && !requestedByMe && (
+        <KeyboardStickyView
+          offset={{closed: 10, opened: Platform.OS === 'ios' ? 50 : 0}}
+        >
+          <AcceptDeclineButtons message={text} />
+        </KeyboardStickyView>
+      )}
     </>
   )
 }

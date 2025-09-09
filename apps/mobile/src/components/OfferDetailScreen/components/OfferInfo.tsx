@@ -5,7 +5,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Alert, Platform} from 'react-native'
+import {Alert} from 'react-native'
 import {
   KeyboardAwareScrollView,
   KeyboardStickyView,
@@ -195,9 +195,7 @@ function OfferInfo({
           </Text>
         )}
       </ContentContainer>
-      <ButtonsContainer
-        offset={{closed: 10, opened: Platform.OS === 'ios' ? 30 : 0}}
-      >
+      <ButtonsContainer offset={{closed: 10, opened: 30}}>
         <Stack pt="$2">
           {showRequestButton ? (
             <ButtonWithPressTimeout

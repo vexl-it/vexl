@@ -2,55 +2,25 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
-import {XStack} from 'tamagui'
+import {XStack, type XStackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Button from '../../Button'
 import {chatMolecule} from '../atoms'
 
-function AcceptDeclineButtons(): React.ReactElement {
+interface Props extends XStackProps {
+  message: string
+}
+
+function AcceptDeclineButtons({message, ...props}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {approveChatRequestActionAtom} = useMolecule(chatMolecule)
   const approveChat = useSetAtom(approveChatRequestActionAtom)
-  // const loadingOverlay = useShowLoadingOverlay()
-
-  // function approve(accept: boolean): () => void {
-  //   return () => {
-  //     loadingOverlay.show()
-  //     void pipe(
-  //       approveChat({
-  //         approve: accept,
-  //         chatAtom: chatWithMessagesAtom,
-  //         text: accept ? 'approved' : 'disapproved',
-  //       }),
-  //       TE.match(
-  //         (e) => {
-  //           loadingOverlay.hide()
-  //           if (e._tag === 'RequestCancelledError') {
-  //             Alert.alert(t('offer.requestWasCancelledByOtherSide'))
-  //           } else if (e._tag === 'RequestNotFoundError') {
-  //             Alert.alert(t('offer.requestNotFound'))
-  //           } else if (e._tag === 'ReceiverInboxDoesNotExistError') {
-  //             Alert.alert(t('offer.otherSideAccountDeleted'))
-  //           } else {
-  //             showErrorAlert({
-  //               title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-  //               error: e,
-  //             })
-  //           }
-  //         },
-  //         () => {
-  //           loadingOverlay.hide()
-  //         }
-  //       )
-  //     )()
-  //   }
-  // }
 
   return (
-    <XStack gap="$4">
+    <XStack gap="$4" px="$4" mb="$2" {...props}>
       <Button
         onPress={() => {
-          Effect.runFork(approveChat(false))
+          Effect.runFork(approveChat({approve: false, message}))
         }}
         fullSize
         variant="primary"
@@ -58,7 +28,7 @@ function AcceptDeclineButtons(): React.ReactElement {
       />
       <Button
         onPress={() => {
-          Effect.runFork(approveChat(true))
+          Effect.runFork(approveChat({approve: true, message}))
         }}
         variant="secondary"
         fullSize

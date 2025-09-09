@@ -31,7 +31,9 @@ import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAt
 import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
-import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
+import focusDenyRequestMessageAtom, {
+  focusWasDeniedAtom,
+} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
 import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
 import revealContactActionAtom, {
@@ -82,6 +84,10 @@ import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
 import buildMessagesListData from '../utils/buildMessagesListData'
 
 type ChatUIMode = 'approval' | 'messages'
+export const ApprovalStatusMessage = {
+  approved: 'approved',
+  disapproved: 'disapproved',
+} as const
 
 export type ExtraToSend =
   | {type: 'image'; image: SelectedImage}
@@ -1096,7 +1102,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const approveChatRequestActionAtom = atom(
     null,
-    (get, set, accept: boolean) => {
+    (get, set, {approve, message}: {approve: boolean; message: string}) => {
       const {t} = get(translationAtom)
 
       return Effect.gen(function* (_) {
@@ -1105,9 +1111,14 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         const result = yield* _(
           taskEitherToEffect(
             set(acceptMessagingRequestAtom, {
-              approve: accept,
+              approve,
               chatAtom: chatWithMessagesAtom,
-              text: accept ? 'approved' : 'disapproved',
+              text:
+                message !== ''
+                  ? message
+                  : approve
+                    ? ApprovalStatusMessage.approved
+                    : ApprovalStatusMessage.disapproved,
             })
           ),
           Effect.either
@@ -1201,6 +1212,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     chatUiModeAtom,
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
     requestMessageAtom: focusRequestMessageAtom(chatWithMessagesAtom),
+    deniedMessageAtom: focusDenyRequestMessageAtom(chatWithMessagesAtom),
     wasDeniedAtom: focusWasDeniedAtom(chatWithMessagesAtom),
     wasCancelledAtom: createIsCancelledAtom(chatWithMessagesAtom),
     otherSideDataAtom,

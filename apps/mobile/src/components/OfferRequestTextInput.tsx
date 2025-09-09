@@ -14,9 +14,11 @@ const style = StyleSheet.create({
 function OfferRequestTextInput({
   text,
   onChange,
+  placeholder,
 }: {
   text: string
   onChange: (text: string) => void
+  placeholder?: string
 }): React.ReactElement {
   const {t} = useTranslation()
 
@@ -31,7 +33,7 @@ function OfferRequestTextInput({
       onChangeText={onChange}
       rows={5}
       variant="greyOnBlack"
-      placeholder={t('offer.inputPlaceholder')}
+      placeholder={placeholder ?? t('offer.inputPlaceholder')}
       placeholderTextColor={getTokens().color.greyOnBlack.val}
     />
   )

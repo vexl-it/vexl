@@ -1,21 +1,18 @@
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import * as FileSystem from 'expo-file-system'
+import {File, Paths} from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import React, {useCallback, useRef} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack} from 'tamagui'
-import urlJoin from 'url-join'
 
 const saveAndShareBase64Strig = async (base64String: string): Promise<void> => {
-  const cacheDirectory = FileSystem.cacheDirectory
+  const cacheDirectory = Paths.cache
   if (!cacheDirectory) return
 
-  const filename = urlJoin(cacheDirectory, `${generateUuid()}.png`)
-  await FileSystem.writeAsStringAsync(filename, base64String, {
-    encoding: 'base64',
-  })
-  await Sharing.shareAsync(filename)
+  const file = new File(cacheDirectory, `${generateUuid()}.png`)
+  file.write(base64String)
+  await Sharing.shareAsync(file.uri)
 }
 
 export function SharableQrCode(

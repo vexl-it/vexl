@@ -25,7 +25,7 @@ function readAsBase64({
   path: UriString
 }): TE.TaskEither<ReadingFileError, UriString> {
   return TE.tryCatch(async () => {
-    const cacheDir = FileSystem.cacheDirectory
+    const cacheDir = FileSystem.Paths.cache
     if (!cacheDir) throw new Error('No cacheDir')
 
     const fromPath = (() => {

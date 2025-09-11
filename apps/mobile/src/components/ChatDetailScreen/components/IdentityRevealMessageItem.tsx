@@ -132,7 +132,7 @@ function IdentityRevealMessageItem({
                 height={80}
                 width={80}
                 borderRadius="$4"
-                source={{uri: image.imageUri}}
+                source={{uri: resolveLocalUri(image.imageUri)}}
               />
             </TouchableOpacity>
           ) : (

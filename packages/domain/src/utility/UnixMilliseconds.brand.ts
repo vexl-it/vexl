@@ -49,8 +49,12 @@ export function getNextMidnightOnSelectedDate(date: Date): UnixMilliseconds {
   )
 }
 
+/**
+ * @deprecated Use localizedDateTimeActionAtom instead
+ */
 export const unixMillisecondsToPretty =
   (unixMilliseconds: UnixMilliseconds) =>
   (template?: string): string => {
-    return dayjs(unixMilliseconds).format(template ?? 'lll')
+    console.log(`Template: ${template}`)
+    return dayjs(unixMilliseconds).format(template ?? 'MMM D, YYYY')
   }

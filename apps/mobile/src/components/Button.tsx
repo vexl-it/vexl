@@ -238,6 +238,7 @@ function Button({
             size={size}
             variant={variant}
             disabled={disabled}
+            textAlign="center"
           >
             {text}
           </TextStyled>

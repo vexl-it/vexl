@@ -1,5 +1,7 @@
 import {PathString} from '@vexl-next/domain/src/utility/PathString.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect} from 'effect'
 import * as FileSystem from 'expo-file-system'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
@@ -12,7 +14,7 @@ export interface FileSystemError {
   error: unknown
 }
 function documentDirectoryOrLeft(): E.Either<FileSystemError, string> {
-  const parseResult = UriString.safeParse(FileSystem.documentDirectory)
+  const parseResult = UriString.safeParse(FileSystem.Paths.document.uri)
   if (parseResult.success) {
     return E.right(parseResult.data)
   }
@@ -24,28 +26,25 @@ function documentDirectoryOrLeft(): E.Either<FileSystemError, string> {
   })
 }
 
-function copyFile({
+function copyFileE({
   from,
   to,
 }: {
   from: UriString
   to: UriString
-}): TE.TaskEither<FileSystemError, UriString> {
-  return TE.tryCatch(
-    async () => {
-      await FileSystem.copyAsync({
-        from,
-        to,
-      })
+}): Effect.Effect<UriString, FileSystemError> {
+  return Effect.try({
+    try: () => {
+      new FileSystem.File(from).copy(new FileSystem.File(to))
       return from
     },
-    (e) => {
+    catch(error) {
       return {
         _tag: 'fileSystemError',
-        error: e,
-      }
-    }
-  )
+        error,
+      } as FileSystemError
+    },
+  })
 }
 
 function filenameOrLeft(
@@ -70,12 +69,12 @@ export function copyFileToNewPath({
   return pipe(
     documentDirectoryOrLeft(),
     E.map((documentDirectory) =>
-      urlJoin(documentDirectory, localDirectoryFilePath)
+      FileSystem.Paths.join(documentDirectory, localDirectoryFilePath)
     ),
     E.chainW(safeParse(UriString)),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
-      copyFile({from: sourceUri, to: fullPathToNewFile})
+      effectToTaskEither(copyFileE({from: sourceUri, to: fullPathToNewFile}))
     ),
     TE.mapLeft((e) => {
       if (e._tag === 'ParseError') {

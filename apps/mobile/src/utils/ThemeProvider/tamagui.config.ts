@@ -30,6 +30,12 @@ const color = {
   yellowAccent1: '#957A44',
   yellowAccent2: '#4C3D20',
   yellowAccent3: '#322916',
+  // TODO: rework later with theming
+  // just to satisfy Tamagui warnings in console
+  borderColor: '#FFFFFF',
+  background: '#FFFFFF',
+  borderColorHover: '#FFFFFF',
+  borderColorFocus: '#FFFFFF',
 } as const
 
 const space = {

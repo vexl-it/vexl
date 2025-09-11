@@ -36,7 +36,6 @@ function CurrenciesList({
   )
   return (
     <FlashList
-      estimatedItemSize={63}
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       data={currencies}

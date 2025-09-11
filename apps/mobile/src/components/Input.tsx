@@ -70,15 +70,19 @@ const InputStyled = styled(Input, {
     variant: {
       greyOnWhite: {
         color: '$darkColorText',
+        bc: '$greyAccent5',
       },
       greyOnBlack: {
         color: '$main',
+        bc: '$grey',
       },
       transparentOnGrey: {
         color: '$greyOnBlack',
+        bc: 'transparent',
       },
       black: {
         color: '$white',
+        bc: '$black',
         selectionColor: getTokens().color.main.val,
       },
     },

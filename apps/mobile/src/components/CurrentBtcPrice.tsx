@@ -1,5 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {unixMillisecondsToPretty} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Option} from 'effect/index'
 import {
   atom,
   useAtomValue,
@@ -19,6 +19,7 @@ import {
   useTranslation,
 } from '../utils/localization/I18nProvider'
 import {currencies} from '../utils/localization/currency'
+import {localizedDateTimeActionAtom} from '../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../utils/preferences'
 import VexlActivityIndicator from './LoadingOverlayProvider/VexlActivityIndicator'
 
@@ -44,6 +45,24 @@ function CurrentBtcPrice({
   const btcPriceWithState = useAtomValue(
     useMemo(() => createBtcPriceForCurrencyAtom(currency), [currency])
   )
+  const localizedDateTime = useSetAtom(localizedDateTimeActionAtom)
+
+  const lastUpdatedAtFormattedValue = useMemo(() => {
+    if (
+      !customBtcPrice &&
+      btcPriceWithState?.btcPrice?.lastUpdatedAt &&
+      Option.isSome(btcPriceWithState.btcPrice.lastUpdatedAt)
+    ) {
+      return localizedDateTime({
+        unixMilliseconds: btcPriceWithState.btcPrice.lastUpdatedAt.value,
+      })
+    }
+    return null
+  }, [
+    btcPriceWithState?.btcPrice?.lastUpdatedAt,
+    customBtcPrice,
+    localizedDateTime,
+  ])
 
   const preferences = useAtomValue(preferencesAtom)
   const currentLocale = preferences.appLanguage ?? getCurrentLocale()
@@ -87,15 +106,11 @@ function CurrentBtcPrice({
                       )
               } ${currency}`}
             </Text>
-            {!customBtcPrice &&
-              btcPriceWithState?.btcPrice?.lastUpdatedAt?._tag === 'Some' && (
-                <Text fos={12}>
-                  {t('common.lastUpdated')}:{' '}
-                  {unixMillisecondsToPretty(
-                    btcPriceWithState.btcPrice.lastUpdatedAt.value
-                  )()}
-                </Text>
-              )}
+            {!!lastUpdatedAtFormattedValue && (
+              <Text fos={12}>
+                {t('common.lastUpdated')}: {lastUpdatedAtFormattedValue}
+              </Text>
+            )}
           </YStack>
         )}
       </XStack>

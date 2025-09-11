@@ -64,7 +64,6 @@ export default function EventsScreen(): React.ReactElement {
         <FlashList
           showsVerticalScrollIndicator={false}
           stickyHeaderIndices={stickyHeadersIndicies}
-          estimatedItemSize={112}
           data={listDataAtoms}
           keyExtractor={atomKeyExtractor}
           renderItem={renderItem}

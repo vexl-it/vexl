@@ -85,7 +85,7 @@ function DonationDetailsScreen({
         withBottomBorder
         withBackButton
       />
-      <ScrollView f={1}>
+      <ScrollView f={1} showsVerticalScrollIndicator={false}>
         <Stack gap="$4">
           <Stack gap="$2">
             <XStack ai="center" jc="space-between">

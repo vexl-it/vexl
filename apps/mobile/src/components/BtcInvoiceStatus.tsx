@@ -43,8 +43,8 @@ function BtcInvoiceStatus({
           <Stack
             ai="center"
             jc="center"
-            h={QR_CODE_SIZE + 1}
-            w={QR_CODE_SIZE + 1}
+            h={QR_CODE_SIZE + 10}
+            w={QR_CODE_SIZE + 10}
             bc="$white"
           >
             <SharableQrCode

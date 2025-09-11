@@ -5,13 +5,12 @@ import React, {useCallback, useRef} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import SvgQRCode from 'react-native-qrcode-svg'
 import {Stack} from 'tamagui'
-import urlJoin from 'url-join'
 
 const saveAndShareBase64Strig = async (base64String: string): Promise<void> => {
   const cacheDirectory = FileSystem.cacheDirectory
   if (!cacheDirectory) return
 
-  const filename = urlJoin(cacheDirectory, `${generateUuid()}.png`)
+  const filename = `${cacheDirectory}${generateUuid()}.png`
   await FileSystem.writeAsStringAsync(filename, base64String, {
     encoding: 'base64',
   })

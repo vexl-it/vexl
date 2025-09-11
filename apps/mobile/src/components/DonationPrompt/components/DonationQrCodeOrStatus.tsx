@@ -61,7 +61,7 @@ function DonationQrCodeOrStatus({invoiceId}: Props): React.ReactElement {
   }, [invoiceId, storeId, updateSingleInvoiceStatusTypeRepeating])
 
   return (
-    <Stack height={570} gap="$4">
+    <Stack f={1} gap="$4">
       <Text col="$black" fos={28} ff="$heading" textAlign="center">
         {t('donationPrompt.vexlFoundationDonate')}
       </Text>

@@ -1,6 +1,7 @@
 import {Option} from 'effect'
 import {getContactByIdAsync} from 'expo-contacts'
 import React, {useEffect, useState} from 'react'
+import {Platform} from 'react-native'
 import {Image} from 'tamagui'
 import {type NonUniqueContactId} from '../state/contacts/domain'
 
@@ -10,24 +11,34 @@ type Props = React.ComponentProps<typeof Image> & {
   fallback?: React.ReactNode
 }
 
+interface ImageDetails {
+  uri: string
+  isABImageOnIos: boolean
+}
+
 export default function ContactPictureImage({
   contactId,
   fallback,
   ...props
 }: Props): React.ReactElement | null {
-  const [imageUri, setImageUri] = useState<string | null>(null)
+  const [imageDetails, setImageDetails] = useState<ImageDetails | null>(null)
 
   useEffect(() => {
     if (Option.isNone(contactId)) return
 
-    setImageUri(null)
+    setImageDetails(null)
 
     void getContactByIdAsync(contactId.value)
       .then((contact) => {
         const contactImageUri = contact?.image?.uri
 
         if (contactImageUri) {
-          setImageUri(contactImageUri)
+          setImageDetails({
+            uri: contactImageUri,
+            isABImageOnIos: !!(
+              Platform.OS === 'ios' && contact.id?.includes(':ABPerson')
+            ),
+          })
         }
       })
       .catch((err) => {
@@ -35,8 +46,11 @@ export default function ContactPictureImage({
       })
   }, [contactId])
 
-  if (imageUri) {
-    return <Image {...props} source={{uri: imageUri}} />
+  // TODO: lets monitor this issue in https://github.com/vexl-it/vexl/issues/1984
+  // and then change back to previous behaviour once fixed
+  if (!imageDetails || imageDetails?.isABImageOnIos) {
+    return fallback ? <>{fallback}</> : null
   }
-  return fallback ? <>{fallback}</> : null
+
+  return <Image {...props} source={{uri: imageDetails.uri}} />
 }

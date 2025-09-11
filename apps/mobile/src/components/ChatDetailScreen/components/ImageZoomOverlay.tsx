@@ -4,7 +4,8 @@ import * as Sharing from 'expo-sharing'
 import {useAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Modal, Platform, useWindowDimensions} from 'react-native'
-import {gestureHandlerRootHOC} from 'react-native-gesture-handler'
+import {GestureHandlerRootView} from 'react-native-gesture-handler'
+import {type GestureHandlerRootViewProps} from 'react-native-gesture-handler/lib/typescript/components/GestureHandlerRootView'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -15,7 +16,9 @@ import {chatMolecule} from '../atoms'
 import shareAndroidSvg from '../images/shareAndroidSvg'
 import shareIosSvg from '../images/shareIosSvg'
 
-const ZoomedImage = gestureHandlerRootHOC(() => {
+const ZoomedImage = (
+  props: GestureHandlerRootViewProps
+): React.ReactElement => {
   const {t} = useTranslation()
   const {width} = useWindowDimensions()
   const {bottom, top, right, left} = useSafeAreaInsets()
@@ -36,56 +39,58 @@ const ZoomedImage = gestureHandlerRootHOC(() => {
   }, [openedImageUri, t])
 
   return (
-    <Stack
-      f={1}
-      pt={top}
-      pb={bottom}
-      pl={left}
-      pr={right}
-      jc="center"
-      ai="center"
-      bc="rgba(0,0,0,0.8)"
-    >
-      <XStack
-        pos="absolute"
+    <GestureHandlerRootView {...props}>
+      <Stack
+        f={1}
+        pt={top}
+        pb={bottom}
+        pl={left}
+        pr={right}
+        jc="center"
         ai="center"
-        gap="$2"
-        top={top}
-        right="$4"
-        zIndex="$100"
+        bc="rgba(0,0,0,0.8)"
       >
-        {!!openedImageUri && (
+        <XStack
+          pos="absolute"
+          ai="center"
+          gap="$2"
+          top={top}
+          right="$4"
+          zIndex="$100"
+        >
+          {!!openedImageUri && (
+            <IconButton
+              icon={Platform.OS === 'ios' ? shareIosSvg : shareAndroidSvg}
+              onPress={() => {
+                void shareImage()
+              }}
+            />
+          )}
           <IconButton
-            icon={Platform.OS === 'ios' ? shareIosSvg : shareAndroidSvg}
+            icon={closeSvg}
             onPress={() => {
-              void shareImage()
+              setOpenedImageUri(undefined)
             }}
           />
-        )}
-        <IconButton
-          icon={closeSvg}
-          onPress={() => {
-            setOpenedImageUri(undefined)
-          }}
-        />
-      </XStack>
-      <Stack f={1}>
-        {!!openedImageUri && (
-          <ImageZoom
-            imageContainerStyle={{flex: 1}}
-            containerStyle={{flex: 1}}
-            style={{
-              width: width * 0.9,
-            }}
-            uri={openedImageUri}
-            minScale={0.5}
-            maxScale={3}
-          />
-        )}
+        </XStack>
+        <Stack f={1}>
+          {!!openedImageUri && (
+            <ImageZoom
+              imageContainerStyle={{flex: 1}}
+              containerStyle={{flex: 1}}
+              style={{
+                width: width * 0.9,
+              }}
+              uri={openedImageUri}
+              minScale={0.5}
+              maxScale={3}
+            />
+          )}
+        </Stack>
       </Stack>
-    </Stack>
+    </GestureHandlerRootView>
   )
-})
+}
 
 function ImageZoomOverlay(): React.ReactElement {
   const {openedImageUriAtom} = useMolecule(chatMolecule)

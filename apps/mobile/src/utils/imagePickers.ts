@@ -39,26 +39,22 @@ export function moveImageToInternalDirectory({
   return Effect.tryPromise({
     try: async () => {
       const rootDirectory =
-        mode === 'cache'
-          ? FileSystem.cacheDirectory
-          : FileSystem.documentDirectory
+        mode === 'cache' ? FileSystem.Paths.cache : FileSystem.Paths.document
       if (!rootDirectory) throw new Error('document dir not found')
 
       const parentDirectory = directory
-        ? `${rootDirectory}${directory}`
-        : rootDirectory
+        ? `${rootDirectory.uri}${directory}`
+        : rootDirectory.uri
 
-      const dirInfo = await FileSystem.getInfoAsync(parentDirectory)
+      const dirInfo = FileSystem.Paths.info(parentDirectory)
       if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(parentDirectory, {
-          intermediates: true,
-        })
+        new FileSystem.Directory(parentDirectory).create()
       }
 
       const path = `${parentDirectory}${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
 
-      await FileSystem.copyAsync({from: imagePath, to: path})
-      const infoTo = await FileSystem.getInfoAsync(imagePath)
+      new FileSystem.File(imagePath).copy(new FileSystem.File(path))
+      const infoTo = new FileSystem.File(path)
       return Schema.decodeSync(UriStringE)(infoTo.uri)
     },
     catch(error) {
@@ -164,7 +160,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
     }
 
     const {assets, canceled} = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect,
       quality: 1,

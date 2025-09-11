@@ -28530,6 +28530,10 @@
         "yellowAccent1": "#957A44",
         "yellowAccent2": "#4C3D20",
         "yellowAccent3": "#322916",
+        "borderColor": "#FFFFFF",
+        "background": "#FFFFFF",
+        "borderColorHover": "#FFFFFF",
+        "borderColorFocus": "#FFFFFF",
         "id": "vexl"
       }
     },
@@ -28836,6 +28840,34 @@
           "key": "$yellowAccent3",
           "name": "c-yellowAccent3",
           "val": "#322916",
+          "variable": ""
+        },
+        "borderColor": {
+          "isVar": true,
+          "key": "$borderColor",
+          "name": "c-borderColor",
+          "val": "#FFFFFF",
+          "variable": ""
+        },
+        "background": {
+          "isVar": true,
+          "key": "$background",
+          "name": "c-background",
+          "val": "#FFFFFF",
+          "variable": ""
+        },
+        "borderColorHover": {
+          "isVar": true,
+          "key": "$borderColorHover",
+          "name": "c-borderColorHover",
+          "val": "#FFFFFF",
+          "variable": ""
+        },
+        "borderColorFocus": {
+          "isVar": true,
+          "key": "$borderColorFocus",
+          "name": "c-borderColorFocus",
+          "val": "#FFFFFF",
           "variable": ""
         }
       },
@@ -29474,6 +29506,34 @@
         "key": "$yellowAccent3",
         "name": "c-yellowAccent3",
         "val": "#322916",
+        "variable": ""
+      },
+      "$color.borderColor": {
+        "isVar": true,
+        "key": "$borderColor",
+        "name": "c-borderColor",
+        "val": "#FFFFFF",
+        "variable": ""
+      },
+      "$color.background": {
+        "isVar": true,
+        "key": "$background",
+        "name": "c-background",
+        "val": "#FFFFFF",
+        "variable": ""
+      },
+      "$color.borderColorHover": {
+        "isVar": true,
+        "key": "$borderColorHover",
+        "name": "c-borderColorHover",
+        "val": "#FFFFFF",
+        "variable": ""
+      },
+      "$color.borderColorFocus": {
+        "isVar": true,
+        "key": "$borderColorFocus",
+        "name": "c-borderColorFocus",
+        "val": "#FFFFFF",
         "variable": ""
       },
       "$size.0": {

@@ -15,15 +15,15 @@
     "@remix-run/react": "^2.16.8",
     "@remix-run/serve": "^2.16.8",
     "isbot": "^4.1.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.16.8",
     "@types/eslint-plugin-jsx-a11y": "^6",
-    "@types/react": "~19.0.10",
-    "@types/react-dom": "^18",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.4",
     "@vexl-next/domain": "0.0.0",
@@ -40,7 +40,7 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "prettier": "^3.3.2",
-    "typescript": "^5.8.3",
+    "typescript": "~5.9.2",
     "vite": "^6.1.6",
     "vite-tsconfig-paths": "^4.2.1",
     "zod": "^3.22.3"

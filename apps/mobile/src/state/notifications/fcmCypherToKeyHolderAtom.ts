@@ -1,13 +1,24 @@
-import {PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/index'
-import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {
+  type PrivateKeyHolder,
+  PrivateKeyHolderE,
+} from '@vexl-next/cryptography/src/KeyHolder/index'
+import {
+  type NotificationCypher,
+  NotificationCypherE,
+} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {Schema} from 'effect/index'
 import {atom} from 'jotai'
-import {z} from 'zod'
-import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageE} from '../../utils/atomUtils/atomWithParsedMmkvStorageE'
 
-export const notificationCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
+export const notificationCypherToKeyHolderAtom = atomWithParsedMmkvStorageE(
   'fcmCypherToKeyHolder',
   {data: {}},
-  z.object({data: z.record(NotificationCypher, PrivateKeyHolder)}).readonly()
+  Schema.Struct({
+    data: Schema.Record({
+      key: NotificationCypherE,
+      value: PrivateKeyHolderE,
+    }),
+  })
 )
 
 export const registerNotificationCypherActionAtom = atom(

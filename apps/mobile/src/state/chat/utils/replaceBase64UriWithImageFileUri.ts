@@ -5,20 +5,28 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   hashMD5,
   type CryptoError,
 } from '@vexl-next/resources-utils/src/utils/crypto'
-import * as FileSystem from 'expo-file-system'
+import {Effect, Schema, type Either} from 'effect'
+import {Directory, File, Paths} from 'expo-file-system'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import urlJoin from 'url-join'
 import {safeParse} from '../../../utils/fpUtils'
 import {IMAGES_DIRECTORY} from '../../../utils/fsDirectories'
 import reportError from '../../../utils/reportError'
 import {type ChatMessageWithState} from '../domain'
+
+export class WritingFileErrorE extends Schema.TaggedError<WritingFileErrorE>(
+  'WritingFileErrorE'
+)('WritingFileErrorE', {
+  cause: Schema.Unknown,
+  message: Schema.String,
+}) {}
 
 type NoDocumentDirectoryError = BasicError<'NoDocumentDirectoryError'>
 type CreatingDirectoryError = BasicError<'CreatingDirectoryError'>
@@ -47,10 +55,12 @@ function documentDirectoryOrLeft(): E.Either<
   NoDocumentDirectoryError,
   UriString
 > {
-  const parseResult = UriString.safeParse(FileSystem.documentDirectory)
+  const parseResult = UriString.safeParse(Paths.document.uri)
+
   if (parseResult.success) {
     return E.right(parseResult.data)
   }
+
   return E.left({
     _tag: 'NoDocumentDirectoryError',
     error: new Error(
@@ -63,28 +73,37 @@ function createDirectoryIfItDoesNotExist(
   dir: string
 ): TE.TaskEither<CreatingDirectoryError, true> {
   return TE.tryCatch(async () => {
-    const dirInfo = await FileSystem.getInfoAsync(dir)
-    if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(dir, {intermediates: true})
+    const directory = new Directory(dir)
+
+    if (!directory.exists) {
+      directory.create({intermediates: true})
     }
 
     return true as const
   }, toBasicError('CreatingDirectoryError'))
 }
 
-function writeAsStringAsync({
+function writeAsStringE({
   content,
   path,
 }: {
   content: string
   path: string
-}): TE.TaskEither<WritingFileError, true> {
-  return TE.tryCatch(async () => {
-    await FileSystem.writeAsStringAsync(path, content, {
-      encoding: FileSystem.EncodingType.Base64,
-    })
-    return true as const
-  }, toBasicError('WritingFileError'))
+}): Effect.Effect<Either.Either<true, WritingFileErrorE>> {
+  return Effect.try({
+    try: () => {
+      const fileToWrite = new File(path)
+
+      fileToWrite.write(content, {encoding: 'base64'})
+
+      return true as const
+    },
+    catch: (e) =>
+      new WritingFileErrorE({
+        cause: e,
+        message: 'Error while writing to file',
+      }),
+  }).pipe(Effect.either)
 }
 
 export type GettingImageSizeError = BasicError<'GettingImageSizeError'>
@@ -111,11 +130,11 @@ function saveBase64ImageToStorage(
     ),
     E.bindW('chatPath', () => hashMD5(`${myPublicKey}${otherSidePublicKey}`)),
     E.bindW('directoryPath', ({documentDir, chatPath}) =>
-      E.right(urlJoin(documentDir, IMAGES_DIRECTORY, chatPath))
+      E.right(Paths.join(documentDir, IMAGES_DIRECTORY, chatPath))
     ),
     E.bindW('filePath', ({directoryPath, fileName}) => {
       return pipe(
-        E.right(urlJoin(directoryPath, fileName)),
+        E.right(Paths.join(directoryPath, fileName)),
         E.chainW(safeParse(UriString)),
         E.mapLeft(toBasicError('BadFileName'))
       )
@@ -124,8 +143,10 @@ function saveBase64ImageToStorage(
     TE.chainFirstW(({directoryPath}) =>
       createDirectoryIfItDoesNotExist(directoryPath)
     ),
-    TE.chainFirstW(({documentDir, content, filePath}) =>
-      writeAsStringAsync({content: content.content, path: filePath})
+    TE.chainFirstW(({content, filePath}) =>
+      effectToTaskEither(
+        writeAsStringE({content: content.content, path: filePath})
+      )
     ),
     TE.map((one) => one.filePath)
   )

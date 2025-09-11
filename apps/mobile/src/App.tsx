@@ -33,7 +33,7 @@ function App(): React.ReactElement {
 
   return (
     <SafeAreaProvider>
-      <KeyboardProvider statusBarTranslucent>
+      <KeyboardProvider>
         <BadgeCountManager />
         <PreventScreenshots />
         <DisableLogBoxForTests />

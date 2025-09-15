@@ -22,6 +22,9 @@ const taskFunction = async (data: unknown): Promise<void> => {
 TaskManager.defineTask(BACKGROUND_TASK, taskFunction)
 
 export const setupBackgroundTask = async (): Promise<void> => {
+  await BackgroundTask.unregisterTaskAsync(BACKGROUND_TASK).catch(() => {
+    // Ignore, task is not registered yet.
+  })
   await BackgroundTask.registerTaskAsync(BACKGROUND_TASK, {
     minimumInterval: BACKGROUND_TASK_INTERVAL,
   })

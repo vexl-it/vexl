@@ -59,6 +59,7 @@ import {
 import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
 import reportError from '../../utils/reportError'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import Button from '../Button'
 import Screen from '../Screen'
 import WhiteContainer from '../WhiteContainer'
@@ -628,6 +629,27 @@ function DebugScreen(): React.ReactElement {
                 Alert.alert(
                   getShowDebugNotifications() ? 'Enabled' : 'Disabled'
                 )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Show are you sure thing"
+              onPress={() => {
+                store
+                  .set(askAreYouSureActionAtom, {
+                    variant: 'info',
+                    steps: [
+                      {
+                        type: 'StepWithText',
+                        title: 'Are you sure?',
+                        description: 'This is a description',
+                        negativeButtonText: 'Cancel',
+                        positiveButtonText: 'Yes, I am sure',
+                      },
+                    ],
+                  })
+                  .pipe(Effect.runFork)
               }}
             />
             <Button

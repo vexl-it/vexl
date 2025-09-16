@@ -19,7 +19,6 @@ import {getDefaultChannel} from '../utils/notifications/notificationChannels'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
-import {fetchAndStoreMessagesForInboxAtom} from './chat/atoms/fetchNewMessagesActionAtom'
 import {checkForClubsAdmissionActionAtom} from './clubs/atom/checkForClubsAdmissionActionAtom'
 import {
   syncAllClubsHandleStateWhenNotFoundActionAtom,
@@ -38,7 +37,6 @@ import {reportNewConnectionNotificationForked} from './notifications/reportNewCo
 export function useHandleReceivedNotifications(): void {
   const navigation = useNavigation()
   const store = useStore()
-  const fetchMessagesForInbox = useSetAtom(fetchAndStoreMessagesForInboxAtom)
   const updateOffersConnections = useSetAtom(
     updateAndReencryptAllOffersConnectionsActionAtom
   )
@@ -102,10 +100,12 @@ export function useHandleReceivedNotifications(): void {
 
       if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
         console.info('🔔 Received notification about new chat message')
-        await store.set(
-          processChatNotificationActionAtom,
-          newChatMessageNoticeNotificationDataOption.value
-        )()
+        await store
+          .set(
+            processChatNotificationActionAtom,
+            newChatMessageNoticeNotificationDataOption.value
+          )
+          .pipe(Effect.runPromise)
         return
       }
 
@@ -114,17 +114,20 @@ export function useHandleReceivedNotifications(): void {
         console.info('🔔 Handled notification in UI')
         return
       }
-      const isNewSocialNetworkConnectionNotification = Option.isSome(
+      const newSocialNetworkConnectionNotificationO =
         Schema.decodeUnknownOption(NewSocialNetworkConnectionNotificationData)(
           payload
         )
-      )
-      if (isNewSocialNetworkConnectionNotification) {
+
+      if (Option.isSome(newSocialNetworkConnectionNotificationO)) {
         console.info(
           '🔔 Received notification about new user. Checking and updating offers accordingly.'
         )
         await Effect.runPromise(
-          reportNewConnectionNotificationForked(store.get(apiAtom).metrics)
+          reportNewConnectionNotificationForked(
+            store.get(apiAtom).metrics,
+            newSocialNetworkConnectionNotificationO.value.trackingId
+          )
         )
         await Effect.runPromise(syncConnections())
         await Effect.runPromise(
@@ -238,7 +241,6 @@ export function useHandleReceivedNotifications(): void {
       subscription.remove()
     }
   }, [
-    fetchMessagesForInbox,
     checkForClubAdmission,
     navigation,
     store,

@@ -378,14 +378,13 @@ function DebugScreen(): React.ReactElement {
               size="small"
               text="Refresh chat state"
               onPress={() => {
-                void pipe(
+                pipe(
                   refreshMessaging(),
-                  T.map((result) => {
-                    if (result === 'done') {
-                      Alert.alert('done')
-                    }
-                  })
-                )()
+                  Effect.andThen((r) => {
+                    Alert.alert(r)
+                  }),
+                  Effect.runFork
+                )
               }}
             />
             <Button
@@ -396,21 +395,6 @@ function DebugScreen(): React.ReactElement {
                 store.set(offersAtom, (o) =>
                   o.map((one) => ({...one, ownershipInfo: undefined}))
                 )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Refresh messages state"
-              onPress={() => {
-                void pipe(
-                  refreshMessaging(),
-                  T.map((result) => {
-                    if (result === 'done') {
-                      Alert.alert('done')
-                    }
-                  })
-                )()
               }}
             />
             <Button

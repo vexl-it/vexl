@@ -1,7 +1,8 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {fetchAndStoreMessagesForInboxAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useAppState} from '../../../utils/useAppState'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 import Screen from '../../Screen'
@@ -16,15 +17,15 @@ export default function MessagesListOrApprovalPreview(): React.ReactElement {
     useMolecule(chatMolecule)
   const chatUiMode = useAtomValue(chatUiModeAtom)
   const fetchAndStoreMessagesForInbox = useSetAtom(
-    fetchAndStoreMessagesForInboxAtom
+    fetchAndStoreMessagesForInboxHandleNotificationsActionAtom
   )
   const publicKeyPemBase64 = useAtomValue(publicKeyPemBase64Atom)
 
   useAppState(
     useCallback(() => {
-      void fetchAndStoreMessagesForInbox({
+      fetchAndStoreMessagesForInbox({
         key: publicKeyPemBase64,
-      })()
+      }).pipe(Effect.runFork)
     }, [fetchAndStoreMessagesForInbox, publicKeyPemBase64])
   )
 

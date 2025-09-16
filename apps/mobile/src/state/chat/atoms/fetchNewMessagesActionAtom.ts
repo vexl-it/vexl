@@ -1,3 +1,4 @@
+import notifee from '@notifee/react-native'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -6,6 +7,7 @@ import {
   type Chat,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
+import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
@@ -16,7 +18,10 @@ import retrieveMessages, {
   type ApiErrorRetrievingMessages,
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  taskToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {Array, Effect} from 'effect/index'
 import * as A from 'fp-ts/Array'
@@ -30,7 +35,10 @@ import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
+import {isOnSpecificChat} from '../../../utils/navigation'
 import {getNotificationToken} from '../../../utils/notifications'
+import {cancelNewChatNotifications} from '../../../utils/notifications/cancelNewChatNotifications'
+import {showChatNotification} from '../../../utils/notifications/chatNotifications'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
 import {
@@ -43,12 +51,12 @@ import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
-import {checkAndDeleteOldChatsAndDataActionAtom} from './checkAndDeleteOldChatsAndDataActionAtom'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {sendFcmCypherUpdateMessageActionAtom} from './refreshNotificationTokensActionAtom'
 import {reportMessagesReceivedActionAtom} from './reportMessagesReceivedActionAtom'
+import {unreadChatsCountAtom} from './unreadChatsCountAtom'
 
 const handleOtherSideUpdatedActionAtom = atom(
   null,
@@ -465,45 +473,81 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   )
 })
 
+export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
+  null,
+  [
+    {
+      key: PublicKeyPemBase64
+      triggeredByNotification?: NewChatMessageNoticeNotificationData
+    },
+  ],
+  Effect.Effect<
+    | {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+    | undefined
+  >
+>(null, (get, set, {key}) =>
+  Effect.gen(function* (_) {
+    const updates = yield* _(
+      set(fetchAndStoreMessagesForInboxAtom, {
+        key,
+      }),
+      taskToEffect
+    )
+
+    if (!updates) return undefined
+
+    const {newMessages, updatedInbox: inbox} = updates
+    if (newMessages.length === 0) return undefined
+
+    newMessages.forEach((newMessage) => {
+      if (
+        isOnSpecificChat({
+          otherSideKey: newMessage.message.senderPublicKey,
+          inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
+        })
+      ) {
+        void cancelNewChatNotifications()
+        return
+      }
+      void showChatNotification({
+        newMessage,
+        inbox,
+      })
+    })
+
+    notifee.setBadgeCount(get(unreadChatsCountAtom)).catch((e: unknown) => {
+      reportError('warn', new Error('Unable to set badge count'), {e})
+    })
+    return updates
+  })
+)
+
 const lastRefreshAtom = atom<UnixMilliseconds>(UnixMilliseconds0)
 
 const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
-  const lastRefresh = get(lastRefreshAtom)
+  return Effect.gen(function* (_) {
+    const lastRefresh = get(lastRefreshAtom)
 
-  if (unixMillisecondsNow() - lastRefresh < 120) return T.of('done')
-  console.log(`Last refresh before ${unixMillisecondsNow() - lastRefresh}`)
+    if (unixMillisecondsNow() - lastRefresh < 120) return 'done' as const
+    console.log(`Last refresh before ${unixMillisecondsNow() - lastRefresh}`)
 
-  set(lastRefreshAtom, unixMillisecondsNow())
-  const measure = startMeasure('Fetch inboxes')
-  console.log('Refreshing all inboxes')
+    set(lastRefreshAtom, unixMillisecondsNow())
+    const measure = startMeasure('Fetch inboxes')
+    console.log('Refreshing all inboxes')
 
-  return pipe(
-    get(messagingStateAtom),
-    A.map((inbox) =>
-      pipe(
-        T.Do,
-        T.chain(() =>
-          set(fetchAndStoreMessagesForInboxAtom, {
-            key: inbox.inbox.privateKey.publicKeyPemBase64,
-          })
-        ),
-        T.map((values) => {
-          if (values) {
-            set(checkAndDeleteOldChatsAndDataActionAtom, {
-              key: values?.updatedInbox.inbox.privateKey.publicKeyPemBase64,
-            })
-          }
+    yield* _(
+      get(messagingStateAtom),
+      Array.map((inbox) =>
+        set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+          key: inbox.inbox.privateKey.publicKeyPemBase64,
+        }).pipe(Effect.either)
+      ),
+      Effect.allWith({concurrency: 'unbounded'})
+    )
 
-          return values
-        })
-      )
-    ),
-    T.sequenceSeqArray,
-    T.map(() => {
-      measure()
-      return 'done' as const
-    })
-  )
+    measure()
+    return 'done' as const
+  })
 })
 
 export default fetchMessagesForAllInboxesAtom

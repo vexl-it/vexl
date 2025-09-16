@@ -1,10 +1,12 @@
+import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
 export const ReportNotificationInteractionRequest = Schema.Struct({
   uuid: UuidE,
-  count: Schema.NumberFromString.pipe(Schema.positive()),
+  count: Schema.NumberFromString.pipe(Schema.greaterThanOrEqualTo(0)),
   notificationType: Schema.Literal('Chat', 'Network'),
+  trackingId: Schema.optional(NotificationTrackingId),
   type: Schema.Literal(
     'ChatMessageReceived',
     'BackgroundMessageReceived',

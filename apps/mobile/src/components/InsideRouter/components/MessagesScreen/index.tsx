@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
@@ -20,8 +21,10 @@ function MessagesScreen(): React.ReactElement {
     useCallback(
       (state) => {
         if (state === 'active')
-          void pipe(fetchNewMessages())().then(
-            checkAndDeleteEmptyInboxesWithoutOffer
+          void pipe(
+            fetchNewMessages(),
+            Effect.andThen(() => checkAndDeleteEmptyInboxesWithoutOffer),
+            Effect.runPromise
           )
       },
       [checkAndDeleteEmptyInboxesWithoutOffer, fetchNewMessages]

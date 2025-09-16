@@ -26,6 +26,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
 
   return useCallback(
     (notification) => {
+      console.log('I am here!')
       if (store.get(lastNotificationIdHandledAtom) === notification.id) return
       store.set(lastNotificationIdHandledAtom, notification.id)
 

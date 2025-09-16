@@ -18,6 +18,7 @@ export const reportNotificationInteraction = Handler.make(
             headers.clientPlatformOrNone,
             () => 'UNKNOWN'
           ),
+          ...(query.trackingId ? {trackingId: query.trackingId} : {}),
         }
 
         const eventName = `NOTIFICATION_INTERACTION_${query.notificationType}_${query.type}`

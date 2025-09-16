@@ -82,7 +82,7 @@ const processNotificationCypher = (
               trackingId: Option.none(),
               targetCypher: notificationCypher,
               sentAt: unixMillisecondsNow(),
-              includesSystemNotification: 'false',
+              includesSystemNotification: false,
             })
           ),
         })
@@ -125,7 +125,7 @@ const processNotificationCypher = (
                     : Option.none(),
                 sentAt: unixMillisecondsNow(),
                 targetCypher: notificationCypher,
-                includesSystemNotification: 'true',
+                includesSystemNotification: true,
               })
             ),
           })
@@ -144,7 +144,7 @@ const processNotificationCypher = (
                   : Option.none(),
               sentAt: unixMillisecondsNow(),
               targetCypher: notificationCypher,
-              includesSystemNotification: 'false',
+              includesSystemNotification: false,
             })
           ),
         })

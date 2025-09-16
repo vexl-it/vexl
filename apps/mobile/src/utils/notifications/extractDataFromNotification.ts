@@ -4,7 +4,13 @@ import {Platform} from 'react-native'
 
 const NotificationData = Schema.Record({
   key: Schema.String,
-  value: Schema.Union(Schema.String, Schema.Number, Schema.Object),
+  value: Schema.Union(
+    Schema.String,
+    Schema.Null,
+    Schema.Number,
+    Schema.Boolean,
+    Schema.Object
+  ),
 })
 export type NotificationData = typeof NotificationData.Type
 
@@ -16,7 +22,13 @@ const BackgroundNotificationSchema = Schema.Struct({
     },
     {
       key: Schema.String,
-      value: Schema.Union(Schema.String, Schema.Number, Schema.Object),
+      value: Schema.Union(
+        Schema.String,
+        Schema.Null,
+        Schema.Number,
+        Schema.Boolean,
+        Schema.Object
+      ),
     }
   ),
 })

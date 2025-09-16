@@ -1,22 +1,15 @@
-import notifee from '@notifee/react-native'
-import {type NavigationState} from '@react-navigation/native'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {generateUuid, UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, Option, Schema} from 'effect/index'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
+import {AppState} from 'react-native'
 import {apiAtom} from '../../api'
-import {isOnSpecificChat} from '../../utils/navigation'
-import {showChatNotification} from '../../utils/notifications/chatNotifications'
 import reportError, {reportErrorE} from '../../utils/reportError'
-import {fetchAndStoreMessagesForInboxAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
-import {unreadChatsCountAtom} from '../chat/atoms/unreadChatsCountAtom'
+import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
 import {loadSession} from '../session/loadSession'
 import {getKeyHolderForNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 
@@ -27,6 +20,33 @@ const processChatNotificationProcessed = (
   notificationData: NewChatMessageNoticeNotificationData
 ): Effect.Effect<void> => {
   console.info(`Reporting BackgroundMessageReceived`)
+
+  const reportUiNotificationReceivedIfAppInTheForeground = (
+    AppState.currentState === 'active' &&
+    notificationData.includesSystemNotification
+      ? metricsApi.reportNotificationInteraction({
+          count: 1,
+          notificationType: 'Chat',
+          type: 'UINotificationReceived',
+          uuid: generateUuid(),
+        })
+      : Effect.void
+  ).pipe(
+    Effect.timeout(500),
+    Effect.retry({times: 3}),
+    Effect.tapError((e) =>
+      reportErrorE(
+        'warn',
+        new Error(
+          'Error while sending UI notification processed to metrics from in app event'
+        ),
+        {
+          e,
+        }
+      )
+    ),
+    Effect.forkDaemon
+  )
 
   const reportNotificationProcessedToNotificationService = notificationApi
     .reportNotificationProcessed({
@@ -55,6 +75,7 @@ const processChatNotificationProcessed = (
       notificationType: 'Chat',
       type: 'BackgroundMessageReceived',
       uuid: Schema.decodeSync(UuidE)(notificationTrackingId),
+      trackingId: notificationTrackingId,
     })
     .pipe(
       Effect.timeout(500),
@@ -73,9 +94,9 @@ const processChatNotificationProcessed = (
 
   return Effect.all(
     [
-      // TODO filter time
       reportNotificationProcessedToNotificationService,
       reportNotificationProcessedToMetricsService,
+      reportUiNotificationReceivedIfAppInTheForeground,
     ],
     {concurrency: 'unbounded'}
   )
@@ -86,84 +107,56 @@ const processChatNotificationActionAtom = atom(
   (
     get,
     set,
-    notification: NewChatMessageNoticeNotificationData,
-    navigation: NavigationState<any> | undefined = undefined
-  ): T.Task<boolean> => {
-    console.info('📩 Refreshing inbox')
+    notification: NewChatMessageNoticeNotificationData
+  ): Effect.Effect<boolean> => {
+    return Effect.gen(function* (_) {
+      console.info('📩 Refreshing inbox')
+      const sessionLoaded = yield* _(taskToEffect(loadSession()))
 
-    const inbox = set(
-      getKeyHolderForNotificationCypherActionAtom,
-      notification.targetCypher
-    )
-    if (!inbox) {
-      reportError(
-        'warn',
-        new Error(
-          'Error decrypting notification FCM - unable to find private key for cypher'
-        )
-      )
-      return T.of(false)
-    }
-
-    return pipe(
-      loadSession(),
-      T.chainFirst(() => {
-        const api = get(apiAtom)
-        if (Option.isSome(notification.trackingId))
-          return effectToTask(
-            processChatNotificationProcessed(
-              notification.trackingId.value,
-              api.notification,
-              api.metrics,
-              notification
-            )
-          )
-        return T.of(null)
-      }),
-      TE.fromTask,
-      TE.filterOrElseW(
-        (v) => v,
-        () => {
-          console.info('📳 No session in storage. Skipping refreshing inbox')
-          reportError(
+      if (!sessionLoaded) {
+        yield* _(
+          reportErrorE(
             'warn',
             new Error(
               'Got notification but no session in storage. Skipping refreshing inbox'
             )
           )
-          return 'noSession' as const
-        }
-      ),
-      TE.chainTaskK(() =>
-        set(fetchAndStoreMessagesForInboxAtom, {key: inbox.publicKeyPemBase64})
-      ),
-      TE.map((updates) => {
-        if (!updates) return false
-        const {newMessages, updatedInbox: inbox} = updates
-        if (newMessages.length === 0) return false
+        )
+        return false
+      }
 
-        newMessages.forEach((newMessage) => {
-          if (
-            isOnSpecificChat({
-              otherSideKey: newMessage.message.senderPublicKey,
-              inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
-            })
+      const api = get(apiAtom)
+      if (Option.isSome(notification.trackingId))
+        yield* _(
+          processChatNotificationProcessed(
+            notification.trackingId.value,
+            api.notification,
+            api.metrics,
+            notification
           )
-            return
-          void showChatNotification({
-            newMessage,
-            inbox,
-            cypher: notification.targetCypher,
-          })
-        })
+        )
 
-        notifee.setBadgeCount(get(unreadChatsCountAtom)).catch((e: unknown) => {
-          reportError('warn', new Error('Unable to set badge count'), {e})
+      const inboxForCypher = set(
+        getKeyHolderForNotificationCypherActionAtom,
+        notification.targetCypher
+      )
+      if (!inboxForCypher) {
+        reportError(
+          'warn',
+          new Error(
+            'Error decrypting notification FCM - unable to find private key for cypher'
+          )
+        )
+        return false
+      }
+
+      const updates = yield* _(
+        set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+          key: inboxForCypher.publicKeyPemBase64,
         })
-        return true
-      }),
-      TE.getOrElseW(() => T.of(false))
-    )
+      )
+      return !!updates
+    })
   }
 )
 

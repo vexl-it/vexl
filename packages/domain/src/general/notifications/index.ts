@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Brand, Schema as S, Schema} from 'effect'
+import {BooleanFromString} from 'effect/Schema'
 import {z} from 'zod'
 import {UnixMillisecondsE} from '../../utility/UnixMilliseconds.brand'
 import {ClubUuidE} from '../clubs'
@@ -53,10 +54,7 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   sentAt: Schema.compose(Schema.NumberFromString, UnixMillisecondsE),
   // Notification payload does not allow booleans
-  includesSystemNotification: Schema.Union(
-    Schema.Literal('true'),
-    Schema.Literal('false')
-  ),
+  includesSystemNotification: BooleanFromString,
 }) {
   static parseUnkownOption = S.decodeUnknownOption(
     NewChatMessageNoticeNotificationData

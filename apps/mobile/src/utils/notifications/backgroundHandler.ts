@@ -87,10 +87,12 @@ export async function processBackgroundMessage(
     const newChatMessageNoticeNotificationDataOption =
       NewChatMessageNoticeNotificationData.parseUnkownOption(payload)
     if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
-      await getDefaultStore().set(
-        processChatNotificationActionAtom,
-        newChatMessageNoticeNotificationDataOption.value
-      )()
+      await getDefaultStore()
+        .set(
+          processChatNotificationActionAtom,
+          newChatMessageNoticeNotificationDataOption.value
+        )
+        .pipe(Effect.runPromise)
       return
     }
 
@@ -101,18 +103,18 @@ export async function processBackgroundMessage(
       return
     }
 
-    const isNewSocialNetworkConnectionNotification = Option.isSome(
-      Schema.decodeUnknownOption(NewSocialNetworkConnectionNotificationData)(
-        payload
-      )
-    )
-    if (isNewSocialNetworkConnectionNotification) {
+    const newSocialNetworkConnectionNotificationO = Schema.decodeUnknownOption(
+      NewSocialNetworkConnectionNotificationData
+    )(payload)
+
+    if (Option.isSome(newSocialNetworkConnectionNotificationO)) {
       console.info(
         '📳 Received notification about new user. Checking and updating offers accordingly.'
       )
       await Effect.runPromise(
         reportNewConnectionNotificationForked(
-          getDefaultStore().get(apiAtom).metrics
+          getDefaultStore().get(apiAtom).metrics,
+          newSocialNetworkConnectionNotificationO.value.trackingId
         )
       )
       await Effect.runPromise(getDefaultStore().set(syncConnectionsActionAtom))

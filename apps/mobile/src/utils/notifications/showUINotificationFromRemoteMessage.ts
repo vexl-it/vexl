@@ -30,7 +30,7 @@ export async function showUINotificationFromRemoteMessage(
     void notifee.displayNotification({
       title: t('notifications.loggingOnDifferentDevice.title'),
       body: t('notifications.loggingOnDifferentDevice.body'),
-      data,
+      // data,
       android: {
         channelId: await getDefaultChannel(),
         importance: AndroidImportance.HIGH,
@@ -53,7 +53,7 @@ export async function showUINotificationFromRemoteMessage(
     await notifee.displayNotification({
       title: t(`notifications.INACTIVITY_REMINDER.title`),
       body: t(`notifications.INACTIVITY_REMINDER.body`),
-      data,
+      // data,
       android: {
         channelId: await getDefaultChannel(),
         pressAction: {

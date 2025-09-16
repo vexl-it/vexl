@@ -7,7 +7,6 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {ChatNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {getDefaultStore} from 'jotai'
 import {useCallback} from 'react'
 import {Platform} from 'react-native'
@@ -74,13 +73,11 @@ async function getNotificationsForChat({
 export async function showChatNotification({
   newMessage,
   inbox,
-  cypher,
 }: {
   newMessage: ChatMessageWithState
   inbox: InboxInState
-  cypher: NotificationCypher
 }): Promise<void> {
-  await cancelNewChatNotifications(cypher)
+  await cancelNewChatNotifications()
 
   if (
     (await notifee.getDisplayedNotifications()).some(
@@ -139,7 +136,7 @@ export async function showChatNotification({
         threadId: groupId,
       },
       android: {
-        groupId,
+        // groupId // TODO this is broken,
         importance: AndroidImportance.HIGH,
         lightUpScreen: true,
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,

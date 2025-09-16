@@ -1,7 +1,8 @@
 import {Context, Effect, Layer} from 'effect'
-import {Expo, type ExpoPushToken} from 'expo-server-sdk'
+import {isNonEmptyArray, type NonEmptyArray} from 'effect/Array'
+import {Expo, type ExpoPushTicket, type ExpoPushToken} from 'expo-server-sdk'
 import {expoAccessToken} from '../configs'
-import {type ExpoSdkError, sendExpoPushNotification} from './utils'
+import {ExpoSdkError, sendExpoPushNotification} from './utils'
 
 interface ExpoClientOperations {
   sendNotification: (args: {
@@ -9,10 +10,7 @@ interface ExpoClientOperations {
     title?: string
     body?: string
     data: Record<string, string>
-  }) => Effect.Effect<
-    Awaited<ReturnType<Expo['sendPushNotificationsAsync']>>,
-    ExpoSdkError
-  >
+  }) => Effect.Effect<ExpoPushTicket, ExpoSdkError>
 }
 
 export class ExpoClientService extends Context.Tag('ExpoClientService')<
@@ -47,7 +45,18 @@ export class ExpoClientService extends Context.Tag('ExpoClientService')<
                 priority: 'high',
                 _contentAvailable: true,
               },
-        ])
+        ]).pipe(
+          Effect.filterOrFail(
+            (one): one is NonEmptyArray<ExpoPushTicket> => isNonEmptyArray(one),
+            () =>
+              new ExpoSdkError({
+                message:
+                  'Expected exactly one notification ticket in response from Expo',
+                cause: new Error('Unexpected number of tickets from Expo'),
+              })
+          ),
+          Effect.map((one) => one[0])
+        )
 
       return {
         sendNotification,

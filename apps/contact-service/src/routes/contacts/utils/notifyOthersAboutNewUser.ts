@@ -1,9 +1,13 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {NewSocialNetworkConnectionNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Effect, Option} from 'effect'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {Array, Effect, Either, Option, pipe} from 'effect'
+import {type ExpoPushTicket} from 'expo-server-sdk'
 import {UserDbService} from '../../../db/UserDbService'
 import {NotificationsTokensEquivalence} from '../../../db/UserDbService/domain'
+import {reportNewAppUser} from '../../../metrics'
 import {type ExpoNotificationsService} from '../../../utils/expoNotifications/ExpoNotificationsService'
 import {issueNotificationsToTokens} from '../../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../../utils/notifications/FirebaseMessagingService'
@@ -17,7 +21,10 @@ export const notifyOthersAboutNewUserForked = ({
 }): Effect.Effect<
   void,
   never,
-  UserDbService | FirebaseMessagingService | ExpoNotificationsService
+  | UserDbService
+  | FirebaseMessagingService
+  | ExpoNotificationsService
+  | MetricsClientService
 > =>
   Effect.gen(function* (_) {
     const userDbService = yield* _(UserDbService)
@@ -55,17 +62,25 @@ export const notifyOthersAboutNewUserForked = ({
       return
     }
 
-    yield* _(
+    const trackingId = createNotificationTrackingId()
+    const issuedNotifications = yield* _(
       issueNotificationsToTokens({
         data: new NewSocialNetworkConnectionNotificationData({
           type: 'NEW_APP_USER',
-          trackingId: Option.none(),
+          trackingId: Option.some(trackingId),
           sentAt: unixMillisecondsNow(),
         }).toData(),
         tokens: [...firstLevelTokens, ...secondLevelTokens],
       }),
       Effect.withSpan('Notify others about new connection')
     )
+    const successNotificationsLength = pipe(
+      issuedNotifications.expo,
+      Either.getOrElse(() => [] as ExpoPushTicket[]),
+      Array.filter((o) => o.status === 'ok'),
+      Array.length
+    )
+    yield* _(reportNewAppUser(successNotificationsLength, trackingId))
   }).pipe(
     Effect.tapBoth({
       onFailure: (e) =>

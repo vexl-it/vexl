@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql'
+import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
@@ -12,6 +13,8 @@ const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
 const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
 const USER_REFRESH = 'USER_REFRESH' as const
+const NEW_APP_USER_NOTIFICATIONS_SENT =
+  'NEW_APP_USER_NOTIFICATIONS_SENT' as const
 
 const CLUB_REPORTED = 'CLUB_REPORTED' as const
 const CLUB_DEACTIVATED = 'CLUB_DEACTIVATED' as const
@@ -67,6 +70,21 @@ export const reportUserRefresh = (): Effect.Effect<
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_REFRESH,
+    })
+  )
+
+export const reportNewAppUser = (
+  count: number,
+  trackingId: NotificationTrackingId
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      value: count,
+      type: 'Increment',
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      attributes: {trackingId},
+      name: NEW_APP_USER_NOTIFICATIONS_SENT,
     })
   )
 

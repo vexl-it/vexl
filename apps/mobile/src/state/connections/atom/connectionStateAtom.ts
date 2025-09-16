@@ -1,5 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
+import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
@@ -54,7 +55,11 @@ function fetchContacts(
 
 export const syncConnectionsActionAtom = atom(
   null,
-  (get, set): Effect.Effect<boolean> => {
+  (
+    get,
+    set,
+    notificationTrackingId?: NotificationTrackingId
+  ): Effect.Effect<boolean> => {
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
 
@@ -84,7 +89,9 @@ export const syncConnectionsActionAtom = atom(
         )
 
         console.log('🦋 New connections:', newConnectionsUnique.length)
-        if (newFirstLevelConnections.length > 0)
+
+        // only if notification tracking id has been passed
+        if (notificationTrackingId)
           yield* _(
             api.metrics
               .reportNotificationInteraction({
@@ -92,8 +99,11 @@ export const syncConnectionsActionAtom = atom(
                 notificationType: 'Network',
                 type: 'NewConnectionsReceived',
                 uuid: generateUuid(),
+                trackingId: notificationTrackingId,
               })
               .pipe(
+                Effect.timeout(500),
+                Effect.retry({times: 3}),
                 Effect.tapError((e) =>
                   reportErrorE(
                     'warn',

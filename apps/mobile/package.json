@@ -123,7 +123,7 @@
     "react-native-pager-view": "6.7.1",
     "react-native-qrcode-svg": "^6.2.0",
     "react-native-quick-base64": "^2.0.8",
-    "react-native-quick-crypto": "0.7.9",
+    "react-native-quick-crypto": "0.7.17",
     "react-native-reanimated": "~3.19.1",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",

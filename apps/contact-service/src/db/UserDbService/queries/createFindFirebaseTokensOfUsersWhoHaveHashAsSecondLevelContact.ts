@@ -2,6 +2,7 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
 import {NotificationTokens} from '../domain'
 
@@ -13,6 +14,14 @@ export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParam
 export type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   typeof createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams.Type
 
+export const FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult =
+  Schema.Struct({
+    ...NotificationTokens.fields,
+    clientVersion: Schema.NullOr(VersionCode),
+  })
+export type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult =
+  typeof FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult.Type
+
 export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact =
   Effect.gen(function* (_) {
     const sql = yield* _(PgClient.PgClient)
@@ -20,11 +29,12 @@ export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact =
     const query = SqlSchema.findAll({
       Request:
         createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams,
-      Result: NotificationTokens,
+      Result: FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult,
       execute: (params) => sql`
         SELECT DISTINCT
           (second_degree_friend.firebase_token) AS firebase_token,
-          (second_degree_friend.expo_token) AS expo_token
+          (second_degree_friend.expo_token) AS expo_token,
+          (second_degree_friend.client_version) AS client_version
         FROM
           user_contact connections_to_imported_contacts
           INNER JOIN users second_degree_friend ON second_degree_friend.hash = connections_to_imported_contacts.hash_from

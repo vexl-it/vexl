@@ -12,6 +12,8 @@ import {type ExpoNotificationsService} from '../../../utils/expoNotifications/Ex
 import {issueNotificationsToTokens} from '../../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../../utils/notifications/FirebaseMessagingService'
 
+const FIRST_VERSION_THAT_SUPPORTS_ANALYTICS = 563
+
 export const notifyOthersAboutNewUserForked = ({
   importedHashes,
   ownerHash,
@@ -62,20 +64,42 @@ export const notifyOthersAboutNewUserForked = ({
       return
     }
 
+    const mergedTokens = [...firstLevelTokens, ...secondLevelTokens]
+    const tokensForVersionWithoutAnalytics = Array.filter(
+      mergedTokens,
+      (one) => (one.clientVersion ?? 0) < FIRST_VERSION_THAT_SUPPORTS_ANALYTICS
+    )
+    const tokensForVersionWithAnalytics = Array.filter(
+      mergedTokens,
+      (one) => (one.clientVersion ?? 0) >= FIRST_VERSION_THAT_SUPPORTS_ANALYTICS
+    )
+
+    yield* _(
+      issueNotificationsToTokens({
+        data: new NewSocialNetworkConnectionNotificationData({
+          type: 'NEW_APP_USER',
+          trackingId: Option.none(),
+          sentAt: unixMillisecondsNow(),
+        }).toData(),
+        tokens: tokensForVersionWithoutAnalytics,
+      }),
+      Effect.withSpan('Notify others about new connection (without analytics)')
+    )
+
     const trackingId = createNotificationTrackingId()
-    const issuedNotifications = yield* _(
+    const issuedNotificationsWithAnalytics = yield* _(
       issueNotificationsToTokens({
         data: new NewSocialNetworkConnectionNotificationData({
           type: 'NEW_APP_USER',
           trackingId: Option.some(trackingId),
           sentAt: unixMillisecondsNow(),
         }).toData(),
-        tokens: [...firstLevelTokens, ...secondLevelTokens],
+        tokens: tokensForVersionWithAnalytics,
       }),
-      Effect.withSpan('Notify others about new connection')
+      Effect.withSpan('Notify others about new connection (with analytics)')
     )
     const successNotificationsLength = pipe(
-      issuedNotifications.expo,
+      issuedNotificationsWithAnalytics.expo,
       Either.getOrElse(() => [] as ExpoPushTicket[]),
       Array.filter((o) => o.status === 'ok'),
       Array.length

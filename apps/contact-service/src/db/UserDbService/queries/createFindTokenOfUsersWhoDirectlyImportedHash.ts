@@ -2,6 +2,7 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
 import {NotificationTokens} from '../domain'
 
@@ -12,17 +13,25 @@ export const FindTokensOfUsersWhoDirectlyImportedHashParams = Schema.Struct({
 export type FindTokensOfUsersWhoDirectlyImportedHashParams =
   typeof FindTokensOfUsersWhoDirectlyImportedHashParams.Type
 
+export const FindTokensOfUsersWhoDirectlyImportedHashResult = Schema.Struct({
+  ...NotificationTokens.fields,
+  clientVersion: Schema.NullOr(VersionCode),
+})
+export type FindTokensOfUsersWhoDirectlyImportedHashResult =
+  typeof FindTokensOfUsersWhoDirectlyImportedHashResult.Type
+
 export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
   function* (_) {
     const sql = yield* _(PgClient.PgClient)
 
     const query = SqlSchema.findAll({
       Request: FindTokensOfUsersWhoDirectlyImportedHashParams,
-      Result: NotificationTokens,
+      Result: FindTokensOfUsersWhoDirectlyImportedHashResult,
       execute: (params) => sql`
         SELECT DISTINCT
           u.firebase_token,
-          u.expo_token
+          u.expo_token,
+          u.client_version
         FROM
           users u
           JOIN user_contact uc ON u.hash = uc.hash_from

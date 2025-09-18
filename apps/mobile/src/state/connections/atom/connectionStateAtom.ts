@@ -9,13 +9,16 @@ import {
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import deduplicate from '../../../utils/deduplicate'
-import {getNotificationTokenE} from '../../../utils/notifications'
+import {
+  areNotificationsEnabledE,
+  getNotificationTokenE,
+} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError, {reportErrorE} from '../../../utils/reportError'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
@@ -91,12 +94,25 @@ export const syncConnectionsActionAtom = atom(
         console.log('🦋 New connections:', newConnectionsUnique.length)
 
         // only if notification tracking id has been passed
-        if (notificationTrackingId)
+        if (notificationTrackingId) {
+          const notificationsEnabled = yield* _(
+            areNotificationsEnabledE(),
+            Effect.option
+          )
+
           yield* _(
             api.metrics
               .reportNotificationInteraction({
                 count: newConnectionsUnique.length,
                 notificationType: 'Network',
+                ...(Option.isSome(notificationsEnabled)
+                  ? {
+                      notificationsEnabled:
+                        notificationsEnabled.value.notifications,
+                      backgroundTaskEnabled:
+                        notificationsEnabled.value.backgroundTasks,
+                    }
+                  : {}),
                 type: 'NewConnectionsReceived',
                 uuid: generateUuid(),
                 trackingId: notificationTrackingId,
@@ -114,6 +130,7 @@ export const syncConnectionsActionAtom = atom(
                 Effect.forkDaemon
               )
           )
+        }
       }
 
       const commonFriends = yield* _(

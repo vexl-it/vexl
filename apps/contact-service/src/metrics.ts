@@ -83,7 +83,7 @@ export const reportNewAppUser = (
       type: 'Increment',
       uuid: generateUuid(),
       timestamp: new Date(),
-      attributes: {trackingId, metricVersion: 2},
+      attributes: {trackingId, metricVersion: 3},
       name: NEW_APP_USER_NOTIFICATIONS_SENT,
     })
   )

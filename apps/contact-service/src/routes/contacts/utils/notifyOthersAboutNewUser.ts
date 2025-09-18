@@ -12,7 +12,7 @@ import {type ExpoNotificationsService} from '../../../utils/expoNotifications/Ex
 import {issueNotificationsToTokens} from '../../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../../utils/notifications/FirebaseMessagingService'
 
-const FIRST_VERSION_THAT_SUPPORTS_ANALYTICS = 563
+const FIRST_VERSION_THAT_SUPPORTS_ANALYTICS = 564
 
 export const notifyOthersAboutNewUserForked = ({
   importedHashes,

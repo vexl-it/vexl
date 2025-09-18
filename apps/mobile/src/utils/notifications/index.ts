@@ -1,13 +1,10 @@
 import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import {
-  toBasicError,
-  type BasicError,
-} from '@vexl-next/domain/src/utility/errors'
-import {
   ExpoNotificationTokenE,
   type ExpoNotificationToken,
 } from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Effect, Schema} from 'effect'
+import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
 import * as Notifications from 'expo-notifications'
 import * as E from 'fp-ts/Either'
 import type * as T from 'fp-ts/Task'
@@ -20,7 +17,11 @@ import {useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
 import {areNotificationsEnabledAtom} from './areNotificaitonsEnabledAtom'
 
-type UnknownErrorNotifications = BasicError<'UnknownErrorNotifications'>
+export class UnknownErrorNotifications extends Schema.TaggedError<UnknownErrorNotifications>(
+  'UnknownErrorNotifications'
+)('UnknownErrorNotifications', {
+  cause: Schema.Unknown,
+}) {}
 
 export function useRequestNotificationPermissions(): TE.TaskEither<
   UnknownErrorNotifications,
@@ -65,10 +66,11 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
         })
         .catch((e) => {
           resolve(
-            E.left({
-              _tag: 'UnknownErrorNotifications',
-              error: new Error('Error requesting permissions', {cause: e}),
-            } as const)
+            E.left(
+              new UnknownErrorNotifications({
+                cause: new Error('Error requesting permissions', {cause: e}),
+              })
+            )
           )
         })
     })
@@ -117,15 +119,43 @@ export function areNotificationsEnabled(): TE.TaskEither<
   UnknownErrorNotifications,
   NotificationsEnabledSettings
 > {
-  return TE.tryCatch(async () => {
-    const settings = await notifee.getNotificationSettings()
+  return TE.tryCatch(
+    async () => {
+      const settings = await notifee.getNotificationSettings()
+      const backgroundFetchStatus = await getStatusAsync()
 
-    return {
-      notifications:
-        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
-      backgroundTasks: true, // TODO how to find this out on IOS?
-    }
-  }, toBasicError('UnknownErrorNotifications'))
+      return {
+        notifications:
+          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
+        backgroundTasks:
+          backgroundFetchStatus === BackgroundTaskStatus.Available,
+      }
+    },
+    (e) =>
+      new UnknownErrorNotifications({
+        cause: e,
+      })
+  )
+}
+
+export function areNotificationsEnabledE(): Effect.Effect<
+  NotificationsEnabledSettings,
+  UnknownErrorNotifications
+> {
+  return Effect.tryPromise({
+    try: async () => {
+      const settings = await notifee.getNotificationSettings()
+      const backgroundFetchStatus = await getStatusAsync()
+
+      return {
+        notifications:
+          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
+        backgroundTasks:
+          backgroundFetchStatus === BackgroundTaskStatus.Available,
+      }
+    },
+    catch: (e) => new UnknownErrorNotifications({cause: e}),
+  })
 }
 
 export async function deactivateToken(): Promise<void> {

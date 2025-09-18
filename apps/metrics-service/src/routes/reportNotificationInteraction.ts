@@ -18,6 +18,12 @@ export const reportNotificationInteraction = Handler.make(
             headers.clientPlatformOrNone,
             () => 'UNKNOWN'
           ),
+          ...(query.notificationsEnabled
+            ? {notificationsEnabled: query.notificationsEnabled}
+            : {}),
+          ...(query.backgroundTaskEnabled
+            ? {backgroundTaskEnabled: query.backgroundTaskEnabled}
+            : {}),
           ...(query.trackingId ? {trackingId: query.trackingId} : {}),
         }
 

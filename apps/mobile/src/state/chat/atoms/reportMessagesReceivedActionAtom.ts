@@ -8,11 +8,12 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Array, Effect, pipe, Schema} from 'effect/index'
+import {Array, Effect, Option, pipe, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {areNotificationsEnabledE} from '../../../utils/notifications'
 import {reportErrorE} from '../../../utils/reportError'
 
 // 2 DAYS
@@ -66,13 +67,25 @@ export const reportMessagesReceivedActionAtom = atom(
         )
       )
 
-      if (firstTimeSeenIds.length > 0)
+      if (firstTimeSeenIds.length > 0) {
+        const notificationsEnabled = yield* _(
+          areNotificationsEnabledE(),
+          Effect.option
+        )
         yield* _(
           get(apiAtom)
             .metrics.reportNotificationInteraction({
               count: firstTimeSeenIds.length,
               type: 'ChatMessageReceived',
               notificationType: 'Chat',
+              ...(Option.isSome(notificationsEnabled)
+                ? {
+                    notificationsEnabled:
+                      notificationsEnabled.value.notifications,
+                    backgroundTaskEnabled:
+                      notificationsEnabled.value.backgroundTasks,
+                  }
+                : {}),
               uuid: generateUuid(),
             })
             .pipe(
@@ -88,6 +101,7 @@ export const reportMessagesReceivedActionAtom = atom(
               Effect.forkDaemon
             )
         )
+      }
     })
   }
 )

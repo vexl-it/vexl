@@ -8,6 +8,7 @@ import {Effect, Option, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../api'
+import {areNotificationsEnabledE} from '../../utils/notifications'
 import reportError, {reportErrorE} from '../../utils/reportError'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
 import {loadSession} from '../session/loadSession'
@@ -19,47 +20,38 @@ const processChatNotificationProcessed = (
   metricsApi: MetricsApi,
   notificationData: NewChatMessageNoticeNotificationData
 ): Effect.Effect<void> => {
-  console.info(`Reporting BackgroundMessageReceived`)
-
-  const reportUiNotificationReceivedIfAppInTheForeground = (
-    AppState.currentState === 'active' &&
-    notificationData.includesSystemNotification
-      ? metricsApi.reportNotificationInteraction({
-          count: 1,
-          notificationType: 'Chat',
-          type: 'UINotificationReceived',
-          uuid: generateUuid(),
-        })
-      : Effect.void
-  ).pipe(
-    Effect.timeout(500),
-    Effect.retry({times: 3}),
-    Effect.tapError((e) =>
-      reportErrorE(
-        'warn',
-        new Error(
-          'Error while sending UI notification processed to metrics from in app event'
-        ),
-        {
-          e,
-        }
-      )
-    ),
-    Effect.forkDaemon
-  )
-
-  const reportNotificationProcessedToNotificationService = notificationApi
-    .reportNotificationProcessed({
-      trackingId: notificationTrackingId,
-    })
-    .pipe(
+  return Effect.gen(function* (_) {
+    console.info(`Reporting BackgroundMessageReceived`)
+    const notificationsEnabled = yield* _(
+      areNotificationsEnabledE(),
+      Effect.option
+    )
+    const reportUiNotificationReceivedIfAppInTheForeground = (
+      AppState.currentState === 'active' &&
+      notificationData.includesSystemNotification
+        ? metricsApi.reportNotificationInteraction({
+            count: 1,
+            notificationType: 'Chat',
+            type: 'UINotificationReceived',
+            ...(Option.isSome(notificationsEnabled)
+              ? {
+                  notificationsEnabled:
+                    notificationsEnabled.value.notifications,
+                  backgroundTaskEnabled:
+                    notificationsEnabled.value.backgroundTasks,
+                }
+              : {}),
+            uuid: generateUuid(),
+          })
+        : Effect.void
+    ).pipe(
       Effect.timeout(500),
       Effect.retry({times: 3}),
       Effect.tapError((e) =>
         reportErrorE(
           'warn',
           new Error(
-            'Error while sending notification processed to notification'
+            'Error while sending UI notification processed to metrics from in app event'
           ),
           {
             e,
@@ -69,37 +61,61 @@ const processChatNotificationProcessed = (
       Effect.forkDaemon
     )
 
-  const reportNotificationProcessedToMetricsService = metricsApi
-    .reportNotificationInteraction({
-      count: 1,
-      notificationType: 'Chat',
-      type: 'BackgroundMessageReceived',
-      uuid: Schema.decodeSync(UuidE)(notificationTrackingId),
-      trackingId: notificationTrackingId,
-    })
-    .pipe(
-      Effect.timeout(500),
-      Effect.retry({times: 3}),
-      Effect.tapError((e) =>
-        reportErrorE(
-          'warn',
-          new Error('Error while sending notification processed to metrics'),
-          {
-            e,
-          }
-        )
-      ),
-      Effect.forkDaemon
-    )
+    const reportNotificationProcessedToNotificationService = notificationApi
+      .reportNotificationProcessed({
+        trackingId: notificationTrackingId,
+      })
+      .pipe(
+        Effect.timeout(500),
+        Effect.retry({times: 3}),
+        Effect.tapError((e) =>
+          reportErrorE(
+            'warn',
+            new Error(
+              'Error while sending notification processed to notification'
+            ),
+            {
+              e,
+            }
+          )
+        ),
+        Effect.forkDaemon
+      )
 
-  return Effect.all(
-    [
-      reportNotificationProcessedToNotificationService,
-      reportNotificationProcessedToMetricsService,
-      reportUiNotificationReceivedIfAppInTheForeground,
-    ],
-    {concurrency: 'unbounded'}
-  )
+    const reportNotificationProcessedToMetricsService = metricsApi
+      .reportNotificationInteraction({
+        count: 1,
+        notificationType: 'Chat',
+        type: 'BackgroundMessageReceived',
+        uuid: Schema.decodeSync(UuidE)(notificationTrackingId),
+        trackingId: notificationTrackingId,
+      })
+      .pipe(
+        Effect.timeout(500),
+        Effect.retry({times: 3}),
+        Effect.tapError((e) =>
+          reportErrorE(
+            'warn',
+            new Error('Error while sending notification processed to metrics'),
+            {
+              e,
+            }
+          )
+        ),
+        Effect.forkDaemon
+      )
+
+    return yield* _(
+      Effect.all(
+        [
+          reportNotificationProcessedToNotificationService,
+          reportNotificationProcessedToMetricsService,
+          reportUiNotificationReceivedIfAppInTheForeground,
+        ],
+        {concurrency: 'unbounded'}
+      )
+    )
+  })
 }
 
 const processChatNotificationActionAtom = atom(

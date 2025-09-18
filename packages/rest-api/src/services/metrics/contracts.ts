@@ -7,6 +7,8 @@ export const ReportNotificationInteractionRequest = Schema.Struct({
   count: Schema.NumberFromString.pipe(Schema.greaterThanOrEqualTo(0)),
   notificationType: Schema.Literal('Chat', 'Network'),
   trackingId: Schema.optional(NotificationTrackingId),
+  notificationsEnabled: Schema.optional(Schema.BooleanFromString),
+  backgroundTaskEnabled: Schema.optional(Schema.BooleanFromString),
   type: Schema.Literal(
     'ChatMessageReceived',
     'BackgroundMessageReceived',

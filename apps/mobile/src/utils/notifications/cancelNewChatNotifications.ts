@@ -5,6 +5,7 @@ import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {isNotUndefined} from 'effect/Predicate'
 import {getDefaultStore} from 'jotai'
 import {Platform} from 'react-native'
+import {areNotificationsEnabledE} from '.'
 import {apiAtom} from '../../api'
 import {reportErrorE} from '../reportError'
 
@@ -36,30 +37,46 @@ export async function cancelNewChatNotifications(): Promise<void> {
     Array.filter(isPlaceholderNotificationForChat()),
     Array.filter(isNotUndefined)
   )
-  if (notificationIdsToCancel.length > 0)
-    metrics
-      .reportNotificationInteraction({
-        count: notificationIdsToCancel.length,
-        notificationType: 'Chat',
-        type: 'UINotificationReceived',
-        uuid: generateUuid(),
-      })
-      .pipe(
-        Effect.timeout(500),
-        Effect.retry({times: 3}),
-        Effect.tapError((e) =>
-          reportErrorE(
-            'warn',
-            new Error(
-              'Error while sending UI notification received to metrics service'
-            ),
-            {
-              e,
-            }
-          )
-        ),
-        Effect.runFork
+  if (notificationIdsToCancel.length > 0) {
+    Effect.gen(function* (_) {
+      const notificationsEnabled = yield* _(
+        areNotificationsEnabledE(),
+        Effect.option
       )
+      yield* _(
+        metrics
+          .reportNotificationInteraction({
+            count: notificationIdsToCancel.length,
+            notificationType: 'Chat',
+            type: 'UINotificationReceived',
+            uuid: generateUuid(),
+            ...(Option.isSome(notificationsEnabled)
+              ? {
+                  notificationsEnabled:
+                    notificationsEnabled.value.notifications,
+                  backgroundTaskEnabled:
+                    notificationsEnabled.value.backgroundTasks,
+                }
+              : {}),
+          })
+          .pipe(
+            Effect.timeout(500),
+            Effect.retry({times: 3}),
+            Effect.tapError((e) =>
+              reportErrorE(
+                'warn',
+                new Error(
+                  'Error while sending UI notification received to metrics service'
+                ),
+                {
+                  e,
+                }
+              )
+            )
+          )
+      )
+    }).pipe(Effect.runFork)
+  }
 
   Array.forEach(notificationIdsToCancel, (n) => {
     if (n.id === undefined) return

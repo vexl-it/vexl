@@ -11,7 +11,7 @@ export const reportNotificationInteraction = Handler.make(
       Effect.gen(function* (_) {
         const dataToSave = {
           clientVersion: Option.getOrElse(
-            headers.clientSemverOrNone,
+            headers.clientVersionOrNone,
             () => 'UNKNOWN'
           ),
           clientPlatform: Option.getOrElse(

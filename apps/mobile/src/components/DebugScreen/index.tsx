@@ -5,7 +5,7 @@ import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.bran
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
-import {Array, Effect, Either, pipe as effectPipe} from 'effect'
+import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
 import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
 import {isTestFlight} from 'expo-testflight'
@@ -25,6 +25,7 @@ import offerToConnectionsAtom, {
   updateAndReencryptAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
+import {StoredContactE} from '../../state/contacts/domain'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
@@ -58,6 +59,7 @@ import {
 } from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
 import reportError from '../../utils/reportError'
+import {startMeasure} from '../../utils/reportTime'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import Button from '../Button'
@@ -70,6 +72,10 @@ import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 import MmkvAtomTest from './components/mmkvAtomTest'
+import {
+  generateTestContacts,
+  NUMBER_OF_TEST_CONTACTS,
+} from './utils/generateTestContacts'
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -647,6 +653,43 @@ function DebugScreen(): React.ReactElement {
                   Alert.alert(
                     `ios: ${isTestFlight ? 'TestFlight' : 'Not testflight'}`
                   )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text={`(Effect) Generate and measure decoding of ${NUMBER_OF_TEST_CONTACTS} contacts`}
+              onPress={() => {
+                Effect.gen(function* (_) {
+                  const contacts = generateTestContacts()
+                  const measureDecodingContacts = startMeasure(
+                    `Measure decoding large amount of ${NUMBER_OF_TEST_CONTACTS} contacts`
+                  )
+
+                  const result = pipe(
+                    contacts,
+                    Schema.decodeSync(
+                      Schema.parseJson(Schema.Array(StoredContactE))
+                    )
+                  )
+
+                  const time = measureDecodingContacts()
+                  Alert.alert(
+                    `BBBIn ${time}s decoded ${result.length} contacts`
+                  )
+                }).pipe(
+                  Effect.tapError((e) =>
+                    Effect.sync(() => {
+                      Alert.alert('Error')
+                    })
+                  ),
+                  Effect.tapDefect((e) =>
+                    Effect.sync(() => {
+                      Alert.alert('Defect')
+                    })
+                  ),
+                  Effect.runFork
+                )
               }}
             />
           </YStack>

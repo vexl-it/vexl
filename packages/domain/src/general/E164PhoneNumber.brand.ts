@@ -17,6 +17,10 @@ export const E164PhoneNumberE = Schema.String.pipe(
   Schema.brand('E164PhoneNumber')
 )
 
+export const E164PhoneNumberUnsafe = Schema.String.pipe(
+  Schema.brand('E164PhoneNumber')
+)
+
 export type E164PhoneNumber = Schema.Schema.Type<typeof E164PhoneNumberE>
 
 export function toE164PhoneNumberE(

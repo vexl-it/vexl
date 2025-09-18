@@ -23,6 +23,8 @@ export const localizedPriceActionAtom = atom(
     const locale =
       preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
 
+    if (Number.isNaN(Number(number))) return number
+
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency,
@@ -52,6 +54,8 @@ export const localizedDecimalNumberActionAtom = atom(
     const locale =
       preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
 
+    if (Number.isNaN(Number(number))) return number
+
     return Intl.NumberFormat(locale, {
       style: 'decimal',
       minimumFractionDigits,
@@ -73,6 +77,8 @@ export const localizedPercentActionAtom = atom(
     const preferences = get(preferencesAtom)
     const locale =
       preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
+
+    if (Number.isNaN(Number(number))) return number
 
     return Intl.NumberFormat(locale, {
       style: 'percent',

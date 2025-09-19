@@ -10,10 +10,12 @@ import {createFindFirebaseTokensOfInactiveUsers} from './queries/createFindFireb
 import {
   createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact,
   type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams,
+  type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult,
 } from './queries/createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact'
 import {
   createFindTokensOfUsersWhoDirectlyImportedHash,
   type FindTokensOfUsersWhoDirectlyImportedHashParams,
+  type FindTokensOfUsersWhoDirectlyImportedHashResult,
 } from './queries/createFindTokenOfUsersWhoDirectlyImportedHash'
 import {createFindTokensForNewContentNotification} from './queries/createFindTokensForNewContentNotification'
 import {createFindUserByHash} from './queries/createFindUserByHash'
@@ -69,11 +71,17 @@ export interface UserDbOperations {
 
   findFirebaseTokensOfUsersWhoDirectlyImportedHash: (
     args: FindTokensOfUsersWhoDirectlyImportedHashParams
-  ) => Effect.Effect<readonly NotificationTokens[], UnexpectedServerError>
+  ) => Effect.Effect<
+    readonly FindTokensOfUsersWhoDirectlyImportedHashResult[],
+    UnexpectedServerError
+  >
 
   findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact: (
     args: FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams
-  ) => Effect.Effect<readonly NotificationTokens[], UnexpectedServerError>
+  ) => Effect.Effect<
+    readonly FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult[],
+    UnexpectedServerError
+  >
 
   findFirebaseTokensOfInactiveUsers: (
     beforeRefreshetAt: Date

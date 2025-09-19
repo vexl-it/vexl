@@ -49,6 +49,7 @@ const presets = {
 // @ts-expect-error there is fallback there.
 const extra = presets[String(ENV_PRESET)] ?? presets.stage
 
+export const SPLASH_ICON_SIZE = 685
 export default {
   'name': extra.appName,
   'slug': 'vexl',
@@ -60,11 +61,6 @@ export default {
   'newArchEnabled': false,
   'scheme': 'app.vexl.it',
   'platforms': ['ios', 'android'],
-  'splash': {
-    'image': './assets/splash.png',
-    'resizeMode': 'contain',
-    'backgroundColor': '#FCCD6C',
-  },
   'updates': {
     'fallbackToCacheTimeout': 0,
     'url': 'https://u.expo.dev/dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
@@ -271,6 +267,15 @@ export default {
       'react-native-capture-protection',
       {
         'captureType': 'fullMediaCapture',
+      },
+    ],
+    [
+      'expo-splash-screen',
+      {
+        'image': './assets/splash.png',
+        'imageWidth': SPLASH_ICON_SIZE,
+        'resizeMode': 'contain',
+        'backgroundColor': '#FCCD6C',
       },
     ],
   ],

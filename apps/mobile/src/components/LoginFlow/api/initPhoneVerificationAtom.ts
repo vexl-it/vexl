@@ -1,6 +1,9 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
-import {type InitPhoneVerificationResponse} from '@vexl-next/rest-api/src/services/user/contracts'
+import {
+  type InitPhoneVerificationResponse,
+  type UnableToSendVerificationSmsError,
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect} from 'effect'
 import {isString} from 'effect/Predicate'
 import {atom} from 'jotai'
@@ -58,9 +61,20 @@ export const initPhoneVerificationAtom = atom(
         PreviousCodeNotExpiredError: () =>
           Effect.fail(t('loginFlow.phoneNumber.errors.previousCodeNotExpired')),
         UnableToSendVerificationSmsError: (e) => {
-          reportError('error', new Error('Unable to send verification sms'), {
-            e,
-          })
+          const reasonsToReport: Array<
+            UnableToSendVerificationSmsError['reason']
+          > = [
+            'AntiFraudBlock',
+            'AntiFraudBlock12h',
+            'AntiFraudBlockGeo',
+            'Other',
+          ]
+
+          if (reasonsToReport.includes(e.reason)) {
+            reportError('warn', new Error('Unable to send verification sms'), {
+              e,
+            })
+          }
           return Effect.fail(
             `${t('loginFlow.phoneNumber.errors.unableToSendVerificationSms')}: ${e.reason}`
           )

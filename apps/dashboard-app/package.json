@@ -35,7 +35,7 @@
     "@vexl-next/resources-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
-    "axios": "^1.8.2",
+    "axios": "^1.12.0",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
     "dynamic-import-polyfill": "^0.1.1",

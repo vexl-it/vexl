@@ -83,6 +83,7 @@ const processNotificationCypher = (
               targetCypher: notificationCypher,
               sentAt: unixMillisecondsNow(),
               includesSystemNotification: false,
+              systemNotificationSent: Option.none(),
             })
           ),
         })
@@ -103,6 +104,7 @@ const processNotificationCypher = (
       if (notificationToken.type === 'expoV2')
         yield* _(
           reportNotificationSent({
+            systemNotificationSent: sendSystemNotification,
             clientPlatform: notificationToken.data.clientPlatform,
             clientVersion: notificationToken.data.clientVersion,
             id: trackingId,
@@ -126,6 +128,7 @@ const processNotificationCypher = (
                 sentAt: unixMillisecondsNow(),
                 targetCypher: notificationCypher,
                 includesSystemNotification: true,
+                systemNotificationSent: Option.some(sendSystemNotification),
               })
             ),
           })
@@ -145,6 +148,7 @@ const processNotificationCypher = (
               sentAt: unixMillisecondsNow(),
               targetCypher: notificationCypher,
               includesSystemNotification: false,
+              systemNotificationSent: Option.some(sendSystemNotification),
             })
           ),
         })

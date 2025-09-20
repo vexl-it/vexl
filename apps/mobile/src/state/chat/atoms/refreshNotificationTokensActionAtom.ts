@@ -141,7 +141,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
 )
 
 function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-  notificationToken: ExpoNotificationToken,
+  notificationToken: ExpoNotificationToken | null,
   publicKeyFromServer: PublicKeyPemBase64
 ): (chat: ChatWithMessages) => boolean {
   return (chatWithMessages) => {
@@ -190,18 +190,19 @@ const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
       set(getOrFetchNotificationServerPublicKeyActionAtom)
     ),
     T.chain(({notificationToken, publicKeyFromServer}) => {
-      if (!notificationToken || O.isNone(publicKeyFromServer)) {
+      if (O.isNone(publicKeyFromServer)) {
         console.info(
           '🔥 Refresh notifications tokens',
-          'No notification token or public key from server'
+          'No public key from server'
         )
         void showDebugNotificationIfEnabled({
           title: 'chat refreshing notTokens',
           subtitle: 'refreshNotificationTokensActionAtom',
-          body: 'No notification token or public key from server',
+          body: 'No public key from server',
         })
         return T.of(undefined)
       }
+
       return pipe(
         get(allChatsAtom),
         A.flatten,

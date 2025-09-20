@@ -9,6 +9,8 @@ export const ReportNotificationInteractionRequest = Schema.Struct({
   trackingId: Schema.optional(NotificationTrackingId),
   notificationsEnabled: Schema.optional(Schema.BooleanFromString),
   backgroundTaskEnabled: Schema.optional(Schema.BooleanFromString),
+  isVisible: Schema.optional(Schema.BooleanFromString),
+  systemNotificationSent: Schema.optional(Schema.Boolean),
   type: Schema.Literal(
     'ChatMessageReceived',
     'BackgroundMessageReceived',

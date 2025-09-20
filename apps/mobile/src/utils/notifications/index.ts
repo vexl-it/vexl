@@ -3,6 +3,7 @@ import {
   ExpoNotificationTokenE,
   type ExpoNotificationToken,
 } from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, Schema} from 'effect'
 import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
 import * as Notifications from 'expo-notifications'
@@ -76,25 +77,8 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
     })
 }
 
-export function getNotificationToken(): T.Task<ExpoNotificationToken | null> {
-  return async () => {
-    try {
-      const token = await Notifications.getExpoPushTokenAsync({
-        projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
-      })
-      if (token.type !== 'expo') {
-        reportError('error', new Error('Token type is not expo'), {token})
-        return null
-      }
-      return Schema.decodeSync(ExpoNotificationTokenE)(token.data)
-    } catch (e) {
-      return null
-    }
-  }
-}
-
 export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | null> {
-  return Effect.promise(async () => {
+  const getExpoNotificationToken = Effect.promise(async () => {
     try {
       const token = await Notifications.getExpoPushTokenAsync({
         projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
@@ -108,6 +92,24 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
       return null
     }
   })
+
+  return Effect.gen(function* (_) {
+    const notificationEnabled = yield* _(
+      areNotificationsEnabledE(),
+      Effect.map((s) => s.notifications),
+      Effect.catchAll((e) => Effect.succeed(false))
+    )
+
+    if (!notificationEnabled) {
+      return null
+    }
+
+    return yield* _(getExpoNotificationToken)
+  })
+}
+
+export function getNotificationToken(): T.Task<ExpoNotificationToken | null> {
+  return effectToTask(getNotificationTokenE())
 }
 
 export interface NotificationsEnabledSettings {

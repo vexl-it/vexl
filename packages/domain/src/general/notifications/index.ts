@@ -53,8 +53,17 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
   targetCypher: NotificationCypherE,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   sentAt: Schema.compose(Schema.NumberFromString, UnixMillisecondsE),
-  // Notification payload does not allow booleans
+  // Is true if the notification was sent with a system notification
+  // (i.e. a notification that shows up in the system tray)
+  // This will be false for foreground notifications that do not show up in the system tray
+  // but are still sent to the device
   includesSystemNotification: BooleanFromString,
+  // wether there was also a system notification sent along with the chat notification
+  // Will be true for both background and foreground notifications if there was a
+  // system notification sent
+  systemNotificationSent: Schema.optionalWith(Schema.BooleanFromString, {
+    as: 'Option',
+  }),
 }) {
   static parseUnkownOption = S.decodeUnknownOption(
     NewChatMessageNoticeNotificationData

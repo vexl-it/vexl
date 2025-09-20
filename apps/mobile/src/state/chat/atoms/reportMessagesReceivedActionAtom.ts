@@ -37,8 +37,14 @@ const reportedMessagesAtom = focusAtom(reportedMessagesStorage, (p) =>
 
 export const reportMessagesReceivedActionAtom = atom(
   null,
-  (get, set, messagesIds: ChatMessageId[]) => {
+  (
+    get,
+    set,
+    messagesIds: ChatMessageId[],
+    areVisibleMessages: boolean
+  ): Effect.Effect<void> => {
     return Effect.gen(function* (_) {
+      if (messagesIds.length === 0) return
       const reportedMessages = get(reportedMessagesAtom)
       const firstTimeSeenIds = Array.difference(
         messagesIds,
@@ -78,6 +84,7 @@ export const reportMessagesReceivedActionAtom = atom(
               count: firstTimeSeenIds.length,
               type: 'ChatMessageReceived',
               notificationType: 'Chat',
+              isVisible: areVisibleMessages,
               ...(Option.isSome(notificationsEnabled)
                 ? {
                     notificationsEnabled:

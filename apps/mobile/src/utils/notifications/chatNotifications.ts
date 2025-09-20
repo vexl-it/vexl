@@ -136,7 +136,7 @@ export async function showChatNotification({
         threadId: groupId,
       },
       android: {
-        // groupId // TODO this is broken,
+        groupId,
         importance: AndroidImportance.HIGH,
         lightUpScreen: true,
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
@@ -184,6 +184,9 @@ export async function showChatNotification({
           channelId: await getChannelForMessages(),
           groupId,
           groupSummary: true,
+          pressAction: {
+            id: 'default',
+          },
         },
       })
     } else {
@@ -203,6 +206,9 @@ export async function showChatNotification({
           channelId: await getChannelForMessages(),
           groupId,
           groupSummary: true,
+          pressAction: {
+            id: 'default',
+          },
         },
       })
     }

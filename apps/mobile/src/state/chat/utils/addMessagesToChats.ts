@@ -83,6 +83,12 @@ export default function addMessagesToChats(
             one.message.messageType !== 'FCM_CYPHER_UPDATE'
         )
 
+        const fcmCypherUpdateFromOtherSide = messagesToAddToThisChat.findLast(
+          (one) =>
+            one.state === 'received' &&
+            one.message.messageType === 'FCM_CYPHER_UPDATE'
+        )
+
         return pipe(
           {
             ...oneChat,
@@ -103,9 +109,19 @@ export default function addMessagesToChats(
             chat: {
               ...oneChat.chat,
               isUnread: isOnlyMetadataUpdate ? oneChat.chat.isUnread : true,
-              otherSideFcmCypher: lastReceivedMessage?.message?.myFcmCypher
-                ? lastReceivedMessage?.message?.myFcmCypher
-                : oneChat.chat.otherSideFcmCypher,
+              // This is trash I know. Ideall fix would be to set myFcmCypher to Option<FcmCypher> | undefined but then
+              // there would be problem in handling older versions. So let's do it this way
+              otherSideFcmCypher: (() => {
+                // if we have received fcm cypher update message from the other side. And it includes null myFcmCypher
+                // it means the other side has deleted their notification token
+                if (fcmCypherUpdateFromOtherSide)
+                  return fcmCypherUpdateFromOtherSide.message.myFcmCypher
+
+                // In all other cases let's preserve the last received fcm cypher
+                return lastReceivedMessage?.message?.myFcmCypher
+                  ? lastReceivedMessage?.message?.myFcmCypher
+                  : oneChat.chat.otherSideFcmCypher
+              })(),
               otherSideVersion:
                 lastReceivedMessage?.message.myVersion ??
                 oneChat.chat.otherSideVersion,

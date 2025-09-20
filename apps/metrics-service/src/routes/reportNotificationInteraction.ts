@@ -25,6 +25,10 @@ export const reportNotificationInteraction = Handler.make(
             ? {backgroundTaskEnabled: query.backgroundTaskEnabled}
             : {}),
           ...(query.trackingId ? {trackingId: query.trackingId} : {}),
+          ...(query.isVisible ? {isVisible: query.isVisible} : {}),
+          ...(query.systemNotificationSent
+            ? {systemNotificationSent: query.systemNotificationSent}
+            : {}),
         }
 
         const eventName = `NOTIFICATION_INTERACTION_${query.notificationType}_${query.type}`

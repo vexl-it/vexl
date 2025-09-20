@@ -26,11 +26,13 @@ export const reportNotificationSent = ({
   id,
   clientVersion,
   clientPlatform,
+  systemNotificationSent,
   sentAt,
 }: {
   id: NotificationTrackingId
   clientVersion: VersionCode
   sentAt: UnixMilliseconds
+  systemNotificationSent: boolean
   clientPlatform: PlatformName
 }): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
@@ -41,6 +43,7 @@ export const reportNotificationSent = ({
       attributes: {
         trackingId: id,
         clientVersion,
+        systemNotificationSent,
         sentAt,
         clientPlatform,
       },

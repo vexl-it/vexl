@@ -88,6 +88,18 @@ const processChatNotificationProcessed = (
         notificationType: 'Chat',
         type: 'BackgroundMessageReceived',
         uuid: Schema.decodeSync(UuidE)(notificationTrackingId),
+        ...(Option.isSome(notificationsEnabled)
+          ? {
+              notificationsEnabled: notificationsEnabled.value.notifications,
+              backgroundTaskEnabled: notificationsEnabled.value.backgroundTasks,
+            }
+          : {}),
+        ...(Option.isSome(notificationData.systemNotificationSent)
+          ? {
+              systemNotificationSent:
+                notificationData.systemNotificationSent.value,
+            }
+          : {}),
         trackingId: notificationTrackingId,
       })
       .pipe(

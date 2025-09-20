@@ -367,13 +367,34 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       )
     ),
     TE.chainFirstW(({newMessages}) => {
-      const messagesToReport = newMessages
-      if (messagesToReport.length === 0) return TE.of(undefined)
+      const visibleMessagesToReport = newMessages.filter(
+        (one) =>
+          one.state === 'received' &&
+          !['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
+            one.message.messageType
+          )
+      )
 
-      return set(
-        reportMessagesReceivedActionAtom,
-        Array.map(messagesToReport, (o) => o.message.uuid)
-      ).pipe(Effect.ignore, effectToTaskEither)
+      const nonVisibleMessagesToReport = newMessages.filter(
+        (one) =>
+          one.state === 'received' &&
+          !['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
+            one.message.messageType
+          )
+      )
+
+      return Effect.all([
+        set(
+          reportMessagesReceivedActionAtom,
+          Array.map(visibleMessagesToReport, (o) => o.message.uuid),
+          true
+        ),
+        set(
+          reportMessagesReceivedActionAtom,
+          Array.map(nonVisibleMessagesToReport, (o) => o.message.uuid),
+          false
+        ),
+      ]).pipe(Effect.ignore, effectToTaskEither)
     }),
     TE.matchEW(
       (

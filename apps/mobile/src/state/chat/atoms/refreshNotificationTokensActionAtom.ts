@@ -27,7 +27,6 @@ import reportError from '../../../utils/reportError'
 import {useAppState} from '../../../utils/useAppState'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
-import isChatOpen from '../utils/isChatOpen'
 import allChatsAtom from './allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import generateMyNotificationTokenInfoActionAtom, {
@@ -141,12 +140,10 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
 )
 
 function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-  notificationToken: ExpoNotificationToken,
+  notificationToken: ExpoNotificationToken | null,
   publicKeyFromServer: PublicKeyPemBase64
 ): (chat: ChatWithMessages) => boolean {
   return (chatWithMessages) => {
-    if (!isChatOpen(chatWithMessages)) return false
-
     if (!notificationToken) return !!chatWithMessages.chat.lastReportedFcmToken
 
     // Notify if we have notification token but we did not report it yet
@@ -190,18 +187,19 @@ const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
       set(getOrFetchNotificationServerPublicKeyActionAtom)
     ),
     T.chain(({notificationToken, publicKeyFromServer}) => {
-      if (!notificationToken || O.isNone(publicKeyFromServer)) {
+      if (O.isNone(publicKeyFromServer)) {
         console.info(
           '🔥 Refresh notifications tokens',
-          'No notification token or public key from server'
+          'No public key from server'
         )
         void showDebugNotificationIfEnabled({
           title: 'chat refreshing notTokens',
           subtitle: 'refreshNotificationTokensActionAtom',
-          body: 'No notification token or public key from server',
+          body: 'No public key from server',
         })
         return T.of(undefined)
       }
+
       return pipe(
         get(allChatsAtom),
         A.flatten,

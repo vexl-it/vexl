@@ -27,7 +27,6 @@ import reportError from '../../../utils/reportError'
 import {useAppState} from '../../../utils/useAppState'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
-import isChatOpen from '../utils/isChatOpen'
 import allChatsAtom from './allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import generateMyNotificationTokenInfoActionAtom, {
@@ -145,8 +144,6 @@ function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
   publicKeyFromServer: PublicKeyPemBase64
 ): (chat: ChatWithMessages) => boolean {
   return (chatWithMessages) => {
-    if (!isChatOpen(chatWithMessages)) return false
-
     if (!notificationToken) return !!chatWithMessages.chat.lastReportedFcmToken
 
     // Notify if we have notification token but we did not report it yet

@@ -709,9 +709,6 @@ export const offerFormMolecule = molecule(() => {
 
           if (e._tag === 'NotificationPrompted') return Effect.succeed(false)
 
-          if (e._tag !== 'NetworkError')
-            reportError('error', new Error('Error while creating offer'), {e})
-
           if (
             e._tag === 'PrivatePayloadsConstructionError' &&
             importedContactsCount === 0
@@ -735,6 +732,9 @@ export const offerFormMolecule = molecule(() => {
               Effect.succeed(false)
             )
           }
+
+          if (e._tag !== 'NetworkError')
+            reportError('error', new Error('Error while creating offer'), {e})
 
           return Effect.zipRight(
             showErrorAlertE({

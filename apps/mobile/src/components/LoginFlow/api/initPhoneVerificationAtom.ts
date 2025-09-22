@@ -63,12 +63,7 @@ export const initPhoneVerificationAtom = atom(
         UnableToSendVerificationSmsError: (e) => {
           const reasonsToReport: Array<
             UnableToSendVerificationSmsError['reason']
-          > = [
-            'AntiFraudBlock',
-            'AntiFraudBlock12h',
-            'AntiFraudBlockGeo',
-            'Other',
-          ]
+          > = ['Other']
 
           if (reasonsToReport.includes(e.reason)) {
             reportError('warn', new Error('Unable to send verification sms'), {

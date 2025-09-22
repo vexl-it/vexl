@@ -2,7 +2,10 @@ import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  taskToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
@@ -17,8 +20,11 @@ import React from 'react'
 import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
 import {apiAtom, apiEnv} from '../../api'
+import allChatsAtom from '../../state/chat/atoms/allChatsAtom'
+import {sendUpdateNoticeMessageActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
+import focusChatByInboxKeyAndSenderKey from '../../state/chat/atoms/focusChatByInboxKeyAndSenderKey'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import offerToConnectionsAtom, {
   deleteOrphanRecordsActionAtom,
@@ -509,6 +515,29 @@ function DebugScreen(): React.ReactElement {
                     }
                   })
                 )()
+              }}
+            />
+
+            <Button
+              variant="primary"
+              size="small"
+              text="Send version update to all chats"
+              onPress={() => {
+                Effect.runFork(
+                  Effect.gen(function* (_) {
+                    const allChats = store.get(allChatsAtom).flat()
+                    const sendUpdate = Array.map(allChats, (one) => {
+                      const inboxAtom = focusChatByInboxKeyAndSenderKey({
+                        inboxKey: one.chat.inbox.privateKey.publicKeyPemBase64,
+                        senderKey: one.chat.otherSide.publicKey,
+                      })
+                      return taskToEffect(
+                        store.set(sendUpdateNoticeMessageActionAtom, inboxAtom)
+                      )
+                    })
+                    yield* _(Effect.all(sendUpdate))
+                  })
+                )
               }}
             />
 

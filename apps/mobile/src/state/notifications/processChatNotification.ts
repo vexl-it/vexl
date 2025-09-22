@@ -164,6 +164,8 @@ const processChatNotificationActionAtom = atom(
           )
         )
 
+      if (notification.includesSystemNotification) return false
+
       const inboxForCypher = set(
         getKeyHolderForNotificationCypherActionAtom,
         notification.targetCypher

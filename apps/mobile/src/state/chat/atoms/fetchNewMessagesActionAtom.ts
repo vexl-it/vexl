@@ -378,7 +378,7 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       const nonVisibleMessagesToReport = newMessages.filter(
         (one) =>
           one.state === 'received' &&
-          !['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
+          ['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
             one.message.messageType
           )
       )

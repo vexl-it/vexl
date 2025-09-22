@@ -25,7 +25,7 @@ export default function NormalizeContactsWithLoadingScreen({
   const normalize = useCallback(() => {
     void Effect.runPromise(
       andThenExpectVoidNoErrors(() => {
-        setState({done: true})
+        setState((prev) => (prev.done ? prev : {done: true}))
       })(
         normalizeStoredContacts({
           onProgress: ({total, percentDone}) => {

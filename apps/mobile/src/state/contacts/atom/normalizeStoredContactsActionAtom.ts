@@ -65,8 +65,6 @@ const normalizeStoredContactsActionAtom = atom(
     const measure = startMeasure('Normalizing contacts')
     const storedContacts = get(storedContactsAtom)
 
-    onProgress({total: storedContacts.length, percentDone: 0})
-
     const {normalized, toNormalize} = storedContacts.reduce(
       (acc, c) => {
         if (Option.isSome(c.computedValues)) {
@@ -77,6 +75,10 @@ const normalizeStoredContactsActionAtom = atom(
       },
       {normalized: [] as StoredContact[], toNormalize: [] as StoredContact[]}
     )
+
+    if (Array.isEmptyArray(toNormalize)) return Effect.void
+
+    onProgress({total: storedContacts.length, percentDone: 0})
 
     return pipe(
       toNormalize,

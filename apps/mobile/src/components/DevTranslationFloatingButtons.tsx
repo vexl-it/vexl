@@ -7,6 +7,7 @@ import {showDevLabelsAtom} from '../utils/localization/I18nProvider'
 
 function DevTranslationFloatingButton(): React.ReactElement {
   const setShowDevLabels = useSetAtom(showDevLabelsAtom)
+
   return (
     <Draggable
       x={Dimensions.get('window').width - 100}

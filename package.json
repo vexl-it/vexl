@@ -42,6 +42,7 @@
   },
   "resolutions": {
     "crypto-browserify@^3.12.0": "patch:crypto-browserify@npm%3A3.12.0#./.yarn/patches/crypto-browserify-npm-3.12.0-bed454fef0.patch",
-    "msgpackr@^1.11.2": "patch:msgpackr@npm%3A1.11.2#./.yarn/patches/msgpackr-npm-1.11.2-a21c5db6f8.patch"
+    "msgpackr@^1.11.2": "patch:msgpackr@npm%3A1.11.2#./.yarn/patches/msgpackr-npm-1.11.2-a21c5db6f8.patch",
+    "react-native-draggable@3.3.0": "patch:react-native-draggable@npm%3A3.3.0#./.yarn/patches/react-native-draggable-npm-3.3.0-af52e9b617.patch"
   }
 }

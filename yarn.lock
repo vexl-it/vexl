@@ -9786,9 +9786,9 @@ __metadata:
     react-native-autolink: ^4.2.0
     react-native-calendars: ^1.1301.0
     react-native-capture-protection: ^2.1.1
-    react-native-color-matrix-image-filters: ^6.0.3
+    "react-native-color-matrix-image-filters  ": ^6.0.3
     react-native-device-info: ^14.0.2
-    react-native-draggable: ^3.3.0
+    react-native-draggable: 3.3.0
     react-native-element-dropdown: 2.10.0
     react-native-flags: ^1.0.0
     react-native-gesture-handler: ~2.24.0
@@ -24115,9 +24115,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-color-matrix-image-filters@npm:^6.0.3":
+"react-native-color-matrix-image-filters  @npm:^6.0.3":
   version: 6.0.9
-  resolution: "react-native-color-matrix-image-filters@npm:6.0.9"
+  resolution: "react-native-color-matrix-image-filters  @npm:6.0.9::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Freact-native-color-matrix-image-filters%2F-%2Freact-native-color-matrix-image-filters-6.0.9.tgz"
   dependencies:
     concat-color-matrices: ^1.0.0
     rn-color-matrices: ^4.1.0
@@ -24125,7 +24125,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: e7b876d8da57a85031fcbc7b6b449af450cf62d04e87cb62b10d59d1719674bf2dbb04da860e8e84f436e7efcabd390c7d2d86bcea1e4343e1378d6d85f07276
+  checksum: c6bcdf3dd7d9d032f9e06fa38e7c48d5e26cf0896ecd8545437412f32a6c30f938ef6afd7d1357551879a3db8ee27c76344ef660b9a329fd820f5ebea331744b
   languageName: node
   linkType: hard
 
@@ -24148,12 +24148,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-draggable@npm:^3.3.0":
+"react-native-draggable@npm:3.3.0":
   version: 3.3.0
   resolution: "react-native-draggable@npm:3.3.0"
   dependencies:
     prop-types: ^15.7.2
   checksum: 868efdebc5ec94ca6a609fd4aba8fd086a1e1f14d8525e7845edc334ac7a6f30f4511c0785993f2352709d6733386b0fb1c2b8c7e4fc96e81164da2e71b99d07
+  languageName: node
+  linkType: hard
+
+"react-native-draggable@patch:react-native-draggable@npm%3A3.3.0#./.yarn/patches/react-native-draggable-npm-3.3.0-af52e9b617.patch::locator=vexl-next%40workspace%3A.":
+  version: 3.3.0
+  resolution: "react-native-draggable@patch:react-native-draggable@npm%3A3.3.0#./.yarn/patches/react-native-draggable-npm-3.3.0-af52e9b617.patch::version=3.3.0&hash=77aadc&locator=vexl-next%40workspace%3A."
+  dependencies:
+    prop-types: ^15.7.2
+  checksum: c35296aa8bb46cda21e8948795c91d39a55ff912f9422e02219bed00128ac98c7c5b6cf752d7c97d643cbda809ba993ccca9bf99559575cdff77adc262b472e6
   languageName: node
   linkType: hard
 

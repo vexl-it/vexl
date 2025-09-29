@@ -8,7 +8,7 @@ import {loadSession} from '../state/session/loadSession'
 import {newOffersNotificationBackgroundTask} from './newOffersNotificationBackgroundTask'
 
 const BACKGROUND_TASK = 'VEXL-BACKGROUND-TASK'
-const BACKGROUND_TASK_INTERVAL = 15
+const BACKGROUND_TASK_INTERVAL_MINS = 15
 
 TaskManager.defineTask(
   BACKGROUND_TASK,
@@ -29,7 +29,7 @@ TaskManager.defineTask(
       )
       return BackgroundTask.BackgroundTaskResult.Success
     } catch (error) {
-      console.log('Erro running background task', error)
+      console.log('Error running background task', error)
       return BackgroundTask.BackgroundTaskResult.Failed
     }
   }
@@ -37,9 +37,12 @@ TaskManager.defineTask(
 
 export const setupBackgroundTask = async (): Promise<void> => {
   console.log('Registering background task')
-  await BackgroundTask.registerTaskAsync(BACKGROUND_TASK, {
-    minimumInterval: BACKGROUND_TASK_INTERVAL,
-  })
+  const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK)
+  if (!isRegistered) {
+    await BackgroundTask.registerTaskAsync(BACKGROUND_TASK, {
+      minimumInterval: BACKGROUND_TASK_INTERVAL_MINS,
+    })
+  }
   console.log('Background task is registered', {
     isR: await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK),
   })
@@ -48,5 +51,9 @@ export const setupBackgroundTask = async (): Promise<void> => {
 export function useSetupBackgroundTask(): void {
   useEffect(() => {
     void setupBackgroundTask()
+
+    return () => {
+      void BackgroundTask.unregisterTaskAsync(BACKGROUND_TASK)
+    }
   }, [])
 }

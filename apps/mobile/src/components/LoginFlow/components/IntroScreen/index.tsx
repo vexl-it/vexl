@@ -1,3 +1,5 @@
+import {Effect} from 'effect/index'
+import {pipe} from 'fp-ts/lib/function'
 import {useStore} from 'jotai'
 import React, {useState} from 'react'
 import {Image} from 'react-native'
@@ -31,20 +33,28 @@ function Intro({navigation}: Props): React.ReactElement {
         numberOfPages={content.length}
         onPageChange={setPage}
         onFinish={() => {
-          void loadSession({
-            forceReload: true,
-            showErrorAlert: true,
-          })().then(() => {
-            if (!store.get(userLoggedInAtom)) navigation.replace('Start')
-          })
+          pipe(
+            loadSession({
+              forceReload: true,
+              showErrorAlert: true,
+            }),
+            Effect.andThen(() => {
+              if (!store.get(userLoggedInAtom)) navigation.replace('Start')
+            }),
+            Effect.runFork
+          )
         }}
         onSkip={() => {
-          void loadSession({
-            forceReload: true,
-            showErrorAlert: true,
-          })().then(() => {
-            if (!store.get(userLoggedInAtom)) navigation.replace('Start')
-          })
+          pipe(
+            loadSession({
+              forceReload: true,
+              showErrorAlert: true,
+            }),
+            Effect.andThen(() => {
+              if (!store.get(userLoggedInAtom)) navigation.replace('Start')
+            }),
+            Effect.runFork
+          )
         }}
       >
         <Stack f={1}>

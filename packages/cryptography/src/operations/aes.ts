@@ -2,6 +2,7 @@ import {CYPHER_ALGORITHM, PBKDF2ITER, SALT} from '../constants'
 import {getCrypto} from '../getCrypto'
 import {removeEmptyBytesAtTheEnd} from '../utils'
 import {appendVersion, parseStringWithVersion} from '../versionWrapper'
+import pbkdf2 from './pbkdf2Promise'
 
 export function aesGCMEncrypt({
   data,
@@ -170,6 +171,36 @@ export function aesCTRDecrypt({
   const crypto = getCrypto()
   const data = dataWithVersion
   const stretchedPass = crypto.pbkdf2Sync(
+    password,
+    SALT,
+    PBKDF2ITER,
+    32 + 16,
+    'sha1'
+  )
+  const cipherKey = stretchedPass.subarray(0, 32)
+
+  const iv = stretchedPass.subarray(32, 32 + 16)
+
+  const decipher = crypto.createDecipheriv('aes-256-ctr', cipherKey, iv)
+
+  const encrypted = data.split('.')[1]
+  if (!encrypted) throw new Error('Bad data')
+
+  return `${decipher.update(encrypted, 'base64', 'utf8')}${decipher.final(
+    'utf8'
+  )}`
+}
+
+export async function aesCTRDecryptPromise({
+  data: dataWithVersion,
+  password,
+}: {
+  data: string
+  password: string
+}): Promise<string> {
+  const crypto = getCrypto()
+  const data = dataWithVersion
+  const stretchedPass = await pbkdf2(
     password,
     SALT,
     PBKDF2ITER,

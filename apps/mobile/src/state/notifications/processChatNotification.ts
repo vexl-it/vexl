@@ -1,7 +1,6 @@
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {generateUuid, UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, Option, Schema} from 'effect/index'
@@ -139,7 +138,7 @@ const processChatNotificationActionAtom = atom(
   ): Effect.Effect<boolean> => {
     return Effect.gen(function* (_) {
       console.info('📩 Refreshing inbox')
-      const sessionLoaded = yield* _(taskToEffect(loadSession()))
+      const sessionLoaded = yield* _(loadSession())
 
       if (!sessionLoaded) {
         yield* _(

@@ -53,7 +53,7 @@ export async function showDebugNotificationIfEnabled({
       body: `${subtitle} logs`,
       android: {
         smallIcon: 'notification_icon',
-        groupId: subtitle,
+        groupId: subtitle ?? 'general-debug',
         channelId,
         groupSummary: true,
       },
@@ -66,7 +66,7 @@ export async function showDebugNotificationIfEnabled({
     subtitle,
     android: {
       smallIcon: 'notification_icon',
-      groupId: subtitle,
+      groupId: subtitle ?? 'general-debug',
       channelId,
       pressAction: {
         id: 'default',

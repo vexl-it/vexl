@@ -7,6 +7,7 @@ import {
   NewSocialNetworkConnectionNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {Effect, Option, Schema} from 'effect'
+import {BackgroundTaskResult} from 'expo-background-task'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
@@ -232,10 +233,12 @@ TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   async ({data}) => {
     try {
       await processBackgroundMessage(data)
+      return BackgroundTaskResult.Success
     } catch (e) {
       reportError('error', new Error('Error in background notification task'), {
         error: e,
       })
+      return BackgroundTaskResult.Failed
     }
   }
 )

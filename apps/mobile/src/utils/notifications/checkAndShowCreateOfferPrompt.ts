@@ -31,7 +31,9 @@ export default async function checkAndShowCreateOfferPrompt(
     })
   }
 
-  if (!(await loadSession()())) {
+  const sessionLoaded = await Effect.runPromise(loadSession())
+
+  if (!sessionLoaded) {
     console.info(
       'No session in storage. Skipping checkAndShowCreateOfferPrompt'
     )

@@ -11,6 +11,8 @@ import './src/components/AppLogsScreen/setupAppLogs'
 import './src/utils/notifications/backgroundHandler'
 // Order matters
 import './src/utils/setupCryptoImplementation'
+// order matters
+import './src/utils/backgroundTask'
 // INITIAL SETUP DONE
 
 import * as Sentry from '@sentry/react-native'
@@ -31,13 +33,4 @@ if (![].toSorted) {
   }
 }
 
-// eslint-disable-next-line
-function HeadlessCheck({isHeadless}) {
-  if (isHeadless) {
-    return null
-  }
-
-  return <App />
-}
-
-registerRootComponent(Sentry.wrap(HeadlessCheck))
+registerRootComponent(Sentry.wrap(App))

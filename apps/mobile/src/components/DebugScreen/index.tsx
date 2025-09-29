@@ -10,8 +10,10 @@ import {
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
+import * as BackgroundTask from 'expo-background-task'
 import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
+import * as TaskManager from 'expo-task-manager'
 import {isTestFlight} from 'expo-testflight'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -581,6 +583,48 @@ function DebugScreen(): React.ReactElement {
                 )
               }}
             />
+
+            <Button
+              variant="primary"
+              size="small"
+              text="Print background tasks"
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onPress={async () => {
+                const registeredTasks =
+                  await TaskManager.getRegisteredTasksAsync()
+                console.log(JSON.stringify(registeredTasks, null, 2))
+                Alert.alert(
+                  'Registered tasks',
+                  JSON.stringify(registeredTasks, null, 2),
+                  [
+                    {
+                      text: 'copy',
+                      onPress: () => {
+                        Clipboard.setString(
+                          JSON.stringify(registeredTasks, null, 2)
+                        )
+                      },
+                    },
+                    {
+                      text: 'calcel',
+                    },
+                  ]
+                )
+              }}
+            />
+
+            {/* Testing background tasks is only available in dev mode */}
+            {!!__DEV__ && (
+              <Button
+                variant="primary"
+                size="small"
+                text="Run test background tasks"
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onPress={async () => {
+                  await BackgroundTask.triggerTaskWorkerForTestingAsync()
+                }}
+              />
+            )}
 
             <Button
               variant="primary"

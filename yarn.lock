@@ -9740,7 +9740,7 @@ __metadata:
     eslint-plugin-promise: ^6.1.1
     eslint-plugin-react: ^7.33.2
     expo: ^53.0.0
-    expo-background-task: ~0.2.8
+    expo-background-task: ~1.0.8
     expo-build-properties: ~0.14.8
     expo-calendar: ~14.1.4
     expo-camera: ~16.1.10
@@ -9762,7 +9762,7 @@ __metadata:
     expo-splash-screen: ~0.30.10
     expo-status-bar: ~2.2.3
     expo-system-ui: ~5.0.10
-    expo-task-manager: ~13.1.6
+    expo-task-manager: ~14.0.7
     expo-testflight: ^0.3.0
     expo-updates: ~0.28.16
     fast-check: ^3.20.0
@@ -15269,14 +15269,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-background-task@npm:~0.2.8":
-  version: 0.2.8
-  resolution: "expo-background-task@npm:0.2.8"
+"expo-background-task@npm:~1.0.8":
+  version: 1.0.8
+  resolution: "expo-background-task@npm:1.0.8"
   dependencies:
-    expo-task-manager: ~13.1.6
+    expo-task-manager: ~14.0.7
   peerDependencies:
     expo: "*"
-  checksum: 45b79d9b516432b97a22aa71affce5cb0efbdc6f3e0c8668a58a19a4ec0a10ed1fb3215d985c548edfcf79ee5112e1e57af153b822f9f4973649c7613afc2405
+  checksum: 666f59449a93711f11549944ab8e7475913429dc388f35797bbef4e58b8e0ee64a3b3b6ec45ecfc77198e07798cb5a648d4436ae45e76287035e32a5727bd466
   languageName: node
   linkType: hard
 
@@ -15659,15 +15659,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-task-manager@npm:~13.1.6":
-  version: 13.1.6
-  resolution: "expo-task-manager@npm:13.1.6"
+"expo-task-manager@npm:~14.0.7":
+  version: 14.0.7
+  resolution: "expo-task-manager@npm:14.0.7"
   dependencies:
-    unimodules-app-loader: ~5.1.3
+    unimodules-app-loader: ~6.0.7
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: da1c289a4be309937037bf3e9b53d71256e9279ce8f3960b19279af8706672389429ef39978399df21f419e84f0308de3009d9fdaea42dd21231ce2c415e7a56
+  checksum: 08018938ef3505f00bff7d9c42e1e00c4236066810964d42bbb5e3fb545de8b42fd8da5413f50860e3eeff515fb54dce624f79b7cd778ec93b3b56ec363f684c
   languageName: node
   linkType: hard
 
@@ -28023,10 +28023,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unimodules-app-loader@npm:~5.1.3":
-  version: 5.1.3
-  resolution: "unimodules-app-loader@npm:5.1.3"
-  checksum: c0732694131716d460c4f366df5a3c022a0a1918cf0363b522c6fe4324a1716a9bcb3ec6db844d8e107b4f6b8229b1fafe87b19d7208cc6de0af46b240774fe4
+"unimodules-app-loader@npm:~6.0.7":
+  version: 6.0.7
+  resolution: "unimodules-app-loader@npm:6.0.7"
+  checksum: fc9fe74ff0517f68ce714ae93da34b94b7392634bf34f3e5df1eab7ffe672ec38aa0e934170f13c1cadbde59820004f0ddab539598c0541257b779fcbf60987b
   languageName: node
   linkType: hard
 

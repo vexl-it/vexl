@@ -4,6 +4,7 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
+  aesCTRDecryptPromise,
   aesGCMDecrypt,
   aesGCMEncrypt,
   aesGCMIgnoreTagDecrypt,
@@ -230,6 +231,27 @@ export const aesDecrpytE =
           })
       )
     )
+
+/**
+ * @deprecated use aesDecrypt that uses aes GCM instead of aes CTR
+ * @param password
+ * @returns
+ */
+export const aesCTRDecrypt =
+  (password: string) =>
+  (cypher: string): Effect.Effect<string, CryptoError> =>
+    Effect.tryPromise({
+      try: async () =>
+        await aesCTRDecryptPromise({
+          data: cypher,
+          password,
+        }),
+      catch: (e) =>
+        new CryptoError({
+          message: 'Error aes ctr decrypt',
+          error: e,
+        }),
+    })
 
 export const hashSha256 = (data: string): Effect.Effect<string, CryptoError> =>
   Effect.sync(() => sha256(data)).pipe(

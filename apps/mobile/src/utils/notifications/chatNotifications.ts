@@ -136,6 +136,7 @@ export async function showChatNotification({
         threadId: groupId,
       },
       android: {
+        smallIcon: 'notification_icon',
         groupId,
         importance: AndroidImportance.HIGH,
         lightUpScreen: true,
@@ -161,6 +162,7 @@ export async function showChatNotification({
         threadId: groupId,
       },
       android: {
+        smallIcon: 'notification_icon',
         groupId,
         groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
         lightUpScreen: true,
@@ -180,6 +182,7 @@ export async function showChatNotification({
         title: t('notifications.groupNotificationRequest.title'),
         subtitle: t('notifications.groupNotificationRequest.subtitle'),
         android: {
+          smallIcon: 'notification_icon',
           groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
           channelId: await getChannelForMessages(),
           groupId,
@@ -202,6 +205,7 @@ export async function showChatNotification({
           userName: userName ?? '[unknown]',
         }),
         android: {
+          smallIcon: 'notification_icon',
           groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
           channelId: await getChannelForMessages(),
           groupId,

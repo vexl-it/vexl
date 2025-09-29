@@ -212,6 +212,7 @@ export function useHandleReceivedNotifications(): void {
               {name: clubInfo.clubInfo.name}
             ),
             android: {
+              smallIcon: 'notification_icon',
               channelId: await getDefaultChannel(),
               pressAction: {
                 id: 'default',

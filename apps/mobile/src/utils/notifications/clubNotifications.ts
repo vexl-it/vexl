@@ -27,6 +27,7 @@ export function showInternalNotificationForClubAdmission(
         clubUuid: clubInfo.uuid,
       }).encoded,
       android: {
+        smallIcon: 'notification_icon',
         lightUpScreen: true,
         importance: AndroidImportance.HIGH,
         pressAction: {

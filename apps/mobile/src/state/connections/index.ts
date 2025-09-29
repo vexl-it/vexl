@@ -4,6 +4,7 @@ import {useCallback} from 'react'
 import {useAppState} from '../../utils/useAppState'
 import {checkForClubsAdmissionActionAtom} from '../clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../clubs/atom/refreshClubsActionAtom'
+import {checkUserNeedsToImportContactsAndReencryptOffersActionAtom} from './atom/checkUserNeedsToImportAndReencryptOffersActionAtom'
 import {syncConnectionsActionAtom} from './atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from './atom/offerToConnectionsAtom'
 
@@ -14,6 +15,9 @@ export function useSyncConnections(): void {
     updateAndReencryptAllOffersConnectionsActionAtom
   )
   const checkForClubAdmissions = useSetAtom(checkForClubsAdmissionActionAtom)
+  const checkUserNeedsToImportContactsAndReencryptOffers = useSetAtom(
+    checkUserNeedsToImportContactsAndReencryptOffersActionAtom
+  )
 
   useAppState(
     useCallback(
@@ -21,13 +25,22 @@ export function useSyncConnections(): void {
         if (state !== 'active') return
         pipe(
           syncConnections(),
+          Effect.andThen(() =>
+            checkUserNeedsToImportContactsAndReencryptOffers()
+          ),
           Effect.andThen(() => checkForClubAdmissions()),
           Effect.andThen(() => syncClubs()),
           Effect.andThen(() => updateOffers({isInBackground: false})),
           Effect.runFork
         )
       },
-      [checkForClubAdmissions, syncClubs, syncConnections, updateOffers]
+      [
+        checkForClubAdmissions,
+        checkUserNeedsToImportContactsAndReencryptOffers,
+        syncClubs,
+        syncConnections,
+        updateOffers,
+      ]
     )
   )
 }

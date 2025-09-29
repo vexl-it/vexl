@@ -2,6 +2,7 @@ import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   effectToTaskEither,
   taskToEffect,
@@ -16,6 +17,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {DateTime} from 'luxon'
 import React from 'react'
 import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
@@ -26,6 +28,7 @@ import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesA
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from '../../state/chat/atoms/focusChatByInboxKeyAndSenderKey'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
+import connectionStateAtom from '../../state/connections/atom/connectionStateAtom'
 import offerToConnectionsAtom, {
   deleteOrphanRecordsActionAtom,
   updateAndReencryptAllOffersConnectionsActionAtom,
@@ -96,6 +99,7 @@ function DebugScreen(): React.ReactElement {
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
 
+  const setConnectionsState = useSetAtom(connectionStateAtom)
   const refreshMessaging = useSetAtom(fetchMessagesForAllInboxesAtom)
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
   const updateConnections = useSetAtom(
@@ -648,6 +652,22 @@ function DebugScreen(): React.ReactElement {
                 Alert.alert(
                   getShowDebugNotifications() ? 'Enabled' : 'Disabled'
                 )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Simulate reach drop to 0"
+              onPress={() => {
+                setConnectionsState({
+                  lastUpdate: Schema.decodeSync(UnixMillisecondsE)(
+                    DateTime.now().toMillis()
+                  ),
+                  firstLevel: [],
+                  secondLevel: [],
+                  commonFriends: {commonContacts: []},
+                })
+                Alert.alert('Done')
               }}
             />
             <Button

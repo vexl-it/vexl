@@ -12,6 +12,10 @@ import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
+import {
+  updatePersistentDataAboutNumberOfImportedContactsActionAtom,
+  updatePersistentDataAboutReachActionAtom,
+} from '../../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {type StoredContactWithComputedValues} from '../domain'
 import {
   lastImportOfContactsAtom,
@@ -233,6 +237,9 @@ export const submitContactsActionAtom = atom(
         lastImportOfContactsAtom,
         IsoDatetimeString.parse(new Date().toISOString())
       )
+
+      set(updatePersistentDataAboutNumberOfImportedContactsActionAtom)
+      set(updatePersistentDataAboutReachActionAtom)
     }).pipe(
       Effect.tapError((e) => {
         if (e._tag === 'InitialImportContactsQuotaReachedError') {

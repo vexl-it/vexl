@@ -33,7 +33,6 @@ function CalculatorInput(
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
       <XStack
-        h={56}
         ai="center"
         jc="space-between"
         bc="$grey"

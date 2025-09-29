@@ -1,6 +1,7 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {type PrimitiveAtom, type WritableAtom} from 'jotai'
 import React from 'react'
+import {Platform} from 'react-native'
 import {Stack, YStack, getTokens} from 'tamagui'
 import CurrentBtcPrice from '../../../../CurrentBtcPrice'
 import SvgImage from '../../../../Image'
@@ -69,7 +70,7 @@ function PriceCalculator({
           p="$2"
           bw={2}
           zi={999}
-          top={35}
+          top={Platform.OS === 'ios' ? 35 : 50}
         >
           <SvgImage
             width={24}

@@ -6,6 +6,7 @@ import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../utils/localization/I18nProvider'
+import {showCheckUpdatedPrivacyPolicySuggestionAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
 import showErrorAlert from '../utils/showErrorAlert'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
@@ -42,6 +43,7 @@ export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
         })
       },
       onSuccess() {
+        set(showCheckUpdatedPrivacyPolicySuggestionAtom, false)
         set(postLoginFinishedAtom, true)
       },
     })

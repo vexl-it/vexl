@@ -301,6 +301,7 @@ function DebugScreen(): React.ReactElement {
                       title: 'summary',
                       subtitle: 'some summary',
                       android: {
+                        smallIcon: 'notification_icon',
                         channelId: await getChannelForMessages(),
                         groupSummary: true,
                         groupId: 'some',
@@ -316,6 +317,7 @@ function DebugScreen(): React.ReactElement {
                       threadId: 'some',
                     },
                     android: {
+                      smallIcon: 'notification_icon',
                       channelId: await getChannelForMessages(),
                       groupId: 'some',
                       groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,

@@ -76,6 +76,7 @@ export default async function checkAndShowCreateOfferPrompt(
       type: CREATE_OFFER_PROMPT,
     },
     android: {
+      smallIcon: 'notification_icon',
       channelId: await getDefaultChannel(),
       pressAction: {
         id: 'default',

@@ -193,6 +193,7 @@ export async function processBackgroundMessage(
           `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`
         ),
         android: {
+          smallIcon: 'notification_icon',
           channelId: await getDefaultChannel(),
           pressAction: {
             id: 'default',
@@ -229,7 +230,13 @@ const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK'
 TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   BACKGROUND_NOTIFICATION_TASK,
   async ({data}) => {
-    await processBackgroundMessage(data)
+    try {
+      await processBackgroundMessage(data)
+    } catch (e) {
+      reportError('error', new Error('Error in background notification task'), {
+        error: e,
+      })
+    }
   }
 )
 

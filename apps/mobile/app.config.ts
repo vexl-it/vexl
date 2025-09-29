@@ -192,7 +192,7 @@ export default {
     [
       'expo-notifications',
       {
-        icon: './assets/notifications-icon.png',
+        icon: './assets/notification_icon.png',
         enableBackgroundRemoteNotifications: true,
       },
     ],

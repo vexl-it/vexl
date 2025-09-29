@@ -32,6 +32,7 @@ export async function showUINotificationFromRemoteMessage(
       body: t('notifications.loggingOnDifferentDevice.body'),
       // data,
       android: {
+        smallIcon: 'notification_icon',
         channelId: await getDefaultChannel(),
         importance: AndroidImportance.HIGH,
         lightUpScreen: true,
@@ -55,6 +56,7 @@ export async function showUINotificationFromRemoteMessage(
       body: t(`notifications.INACTIVITY_REMINDER.body`),
       // data,
       android: {
+        smallIcon: 'notification_icon',
         channelId: await getDefaultChannel(),
         pressAction: {
           id: 'default',

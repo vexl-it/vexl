@@ -23,6 +23,8 @@ export function showInternalNotificationForNewOffers(): Effect.Effect<void> {
       title: t('notifications.NEW_OFFERS_IN_MARKETPLACE.title'),
       data: new NewOffersInternalNotificationData().encoded,
       android: {
+        smallIcon: 'notification_icon',
+
         lightUpScreen: true,
         importance: AndroidImportance.DEFAULT,
         pressAction: {

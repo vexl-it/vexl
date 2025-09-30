@@ -47,6 +47,7 @@ import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
+import {reachNumberAtom} from '../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../state/contacts/atom/contactsStore'
 import {
   createBtcPriceForCurrencyAtom,
@@ -67,6 +68,7 @@ import {
 } from '../../../utils/localization/I18nProvider'
 import {currencies} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
+import {navigationRef} from '../../../utils/navigation'
 import notEmpty from '../../../utils/notEmpty'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {preferencesAtom} from '../../../utils/preferences'
@@ -622,6 +624,7 @@ export const offerFormMolecule = molecule(() => {
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
       const importedContactsCount = get(importedContactsCountAtom)
+      const reachNumber = get(reachNumberAtom)
       const singlePriceActive = get(singlePriceActiveAtom)
 
       if (
@@ -729,6 +732,56 @@ export const offerFormMolecule = molecule(() => {
                   },
                 ],
               }).pipe(Effect.ignore),
+              Effect.succeed(false)
+            )
+          }
+
+          if (
+            e._tag === 'PrivatePayloadsConstructionError' &&
+            reachNumber === 0
+          ) {
+            return Effect.zipRight(
+              set(askAreYouSureActionAtom, {
+                variant: 'danger',
+                steps: [
+                  {
+                    type: 'StepWithText',
+                    imageSource: {
+                      type: 'requiredImage',
+                      image: require('../../../components/images/block.png'),
+                    },
+                    title: t('offerForm.errorCreatingOffer'),
+                    description: t('offerForm.youCurrentlyHaveNoConnections'),
+                    positiveButtonText: t('postLoginFlow.importContactsButton'),
+                    negativeButtonText: t('clubs.joinNewClub'),
+                  },
+                ],
+              }).pipe(
+                Effect.match({
+                  onSuccess() {
+                    if (navigationRef.isReady()) {
+                      navigationRef.navigate('SetContacts')
+                    }
+                  },
+                  onFailure(error) {
+                    if (error._tag === 'UserDeclinedError') {
+                      if (navigationRef.isReady()) {
+                        navigationRef.navigate('EventsAndClubs', {
+                          screen: 'Clubs',
+                        })
+                      }
+                    } else {
+                      reportError(
+                        'error',
+                        new Error('Error in offer creation'),
+                        {
+                          error,
+                        }
+                      )
+                    }
+                  },
+                })
+              ),
               Effect.succeed(false)
             )
           }

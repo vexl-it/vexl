@@ -41,7 +41,7 @@ export const updatePersistentDataAboutReachActionAtom = atom(
   (get, set) => {
     const currentReach = get(fistAndSecondLevelConnectionsReachAtom)
 
-    if (currentReach > 0) set(persistentDataAboutReachAtom, currentReach)
+    set(persistentDataAboutReachAtom, currentReach)
   }
 )
 
@@ -50,11 +50,7 @@ export const updatePersistentDataAboutNumberOfImportedContactsActionAtom = atom(
   (get, set) => {
     const importedContactsCount = get(importedContactsCountAtom)
 
-    if (importedContactsCount > 0)
-      set(
-        persistentDataAboutNumberOfImportedContactsAtom,
-        importedContactsCount
-      )
+    set(persistentDataAboutNumberOfImportedContactsAtom, importedContactsCount)
   }
 )
 

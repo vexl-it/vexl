@@ -81,6 +81,7 @@ import {shouldShowDonationPromptAtom} from '../../DonationPrompt/atoms/stateAtom
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
+import {type MessagesListItem} from '../components/MessageItem'
 import buildMessagesListData from '../utils/buildMessagesListData'
 
 type ChatUIMode = 'approval' | 'messages'
@@ -188,7 +189,14 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom = atom(
     null,
-    (get, set, info: {viewableItems: ViewToken[]; changed: ViewToken[]}) => {
+    (
+      get,
+      set,
+      info: {
+        viewableItems: Array<ViewToken<Atom<MessagesListItem>>>
+        changed: Array<ViewToken<Atom<MessagesListItem>>>
+      }
+    ) => {
       const {viewableItems} = info
       const identityRevealStatus = get(identityRevealStatusAtom)
       const contactRevealStatus = get(contactRevealStatusAtom)

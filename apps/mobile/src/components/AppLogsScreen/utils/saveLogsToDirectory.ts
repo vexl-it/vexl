@@ -2,7 +2,7 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import * as FileSystem from 'expo-file-system'
+import {File, Paths} from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import * as TE from 'fp-ts/TaskEither'
 import joinUrl from 'url-join'
@@ -17,14 +17,16 @@ export default function saveLogsToDirectoryAndShare(
 ): TE.TaskEither<LogsShareError, true> {
   return TE.tryCatch(
     async () => {
-      if (!FileSystem.documentDirectory) throw new Error('oj')
+      if (!Paths.document) throw new Error('oj')
       const logsUri = joinUrl(
-        FileSystem.documentDirectory,
+        Paths.document.uri,
         `vexl${version.replace(/ /g, '_')}-logs.txt`
       )
 
-      if ((await FileSystem.getInfoAsync(logsUri)).exists) {
-        await FileSystem.deleteAsync(logsUri)
+      const logsFile = new File(logsUri)
+
+      if (logsFile.info().exists) {
+        logsFile.delete()
       }
 
       const logsToExport = (() => {
@@ -35,9 +37,7 @@ export default function saveLogsToDirectoryAndShare(
         return logs
       })()
 
-      await FileSystem.writeAsStringAsync(logsUri, logsToExport, {
-        encoding: 'utf8',
-      })
+      logsFile.write(logsToExport, {encoding: 'utf8'})
 
       await Sharing.shareAsync(logsUri)
       return true as const

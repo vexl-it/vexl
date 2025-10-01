@@ -1,21 +1,17 @@
-import {
-  documentDirectory,
-  getInfoAsync,
-  readDirectoryAsync,
-} from 'expo-file-system'
+import {Directory, Paths} from 'expo-file-system'
 import React, {useEffect, useState} from 'react'
 import {Stack, Text} from 'tamagui'
 import urlJoin from 'url-join'
 
 async function getFileOrDirectory(path: string): Promise<string> {
   try {
-    const info = await getInfoAsync(path)
+    const info = Paths.info(path)
     const isDirectory = info.isDirectory
     let result = `${path} ${isDirectory ? 'D' : 'F'} \n`
-    if (info.isDirectory) {
-      const files = await readDirectoryAsync(info.uri)
+    if (isDirectory) {
+      const files = new Directory(path).list()
       for (const file of files) {
-        result += `${await getFileOrDirectory(`${path}${file}`)}`
+        result += `${await getFileOrDirectory(`${path}${file.uri}`)}`
       }
       return result
     }
@@ -31,8 +27,9 @@ function FilesInDocuments(): React.ReactElement {
   useEffect(() => {
     void (async () => {
       try {
+        const documentDirectory = Paths.document
         if (!documentDirectory) throw new Error('No document directory')
-        setFiles(await getFileOrDirectory(urlJoin(documentDirectory)))
+        setFiles(await getFileOrDirectory(urlJoin(documentDirectory.uri)))
       } catch (e) {
         setFiles(`Error reading files ${String(e)}`)
       }

@@ -41,10 +41,12 @@ function MessagesList(): React.ReactElement {
   return (
     <FlashList
       data={dataAtoms}
-      estimatedItemSize={54}
       contentContainerStyle={contentStyle.contentContainerStyle}
       keyExtractor={atomKeyExtractor}
-      inverted
+      maintainVisibleContentPosition={{
+        startRenderingFromBottom: true,
+        autoscrollToBottomThreshold: 0.2,
+      }}
       renderItem={renderItem}
       onViewableItemsChanged={
         handleIsRevealIdentityOrContactRevealMessageVisible

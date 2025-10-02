@@ -58,7 +58,6 @@ export default {
   'icon': extra.icon,
   'userInterfaceStyle': 'light',
   'jsEngine': 'hermes',
-  'newArchEnabled': true,
   'scheme': 'app.vexl.it',
   'platforms': ['ios', 'android'],
   'updates': {
@@ -72,7 +71,6 @@ export default {
     'bundleIdentifier': extra.packageName,
     'config': {
       'usesNonExemptEncryption': false,
-      'googleMapsApiKey': process.env.IOS_MAP_API_KEY,
     },
     'infoPlist': {
       'UIBackgroundModes': ['fetch', 'remote-notification', 'processing'],
@@ -111,11 +109,6 @@ export default {
     'adaptiveIcon': {
       'foregroundImage': extra.foregroundImage,
       'backgroundImage': extra.backgroundImage,
-    },
-    'config': {
-      'googleMaps': {
-        'apiKey': process.env.ANDROID_MAP_API_KEY,
-      },
     },
     'package': extra.packageName,
     'googleServicesFile': './creds/google-services.json',
@@ -276,6 +269,13 @@ export default {
         'imageWidth': SPLASH_ICON_SIZE,
         'resizeMode': 'contain',
         'backgroundColor': '#FCCD6C',
+      },
+    ],
+    [
+      'react-native-maps',
+      {
+        'iosGoogleMapsApiKey': process.env.IOS_MAP_API_KEY,
+        'androidGoogleMapsApiKey': process.env.ANDROID_MAP_API_KEY,
       },
     ],
   ],

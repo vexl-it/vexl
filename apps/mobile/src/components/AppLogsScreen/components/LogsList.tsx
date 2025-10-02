@@ -46,7 +46,6 @@ function LogsList(): React.ReactElement {
 
   return (
     <FlashList
-      estimatedItemSize={113}
       data={logsAtoms}
       keyExtractor={atomKeyExtractor}
       renderItem={renderLogItem}

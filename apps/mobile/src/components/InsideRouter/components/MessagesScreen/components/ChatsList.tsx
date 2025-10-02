@@ -73,7 +73,6 @@ function ChatsList(): React.ReactElement | null {
 
   return (
     <FlashList
-      estimatedItemSize={72}
       data={elementAtoms}
       keyExtractor={atomKeyExtractor}
       renderItem={renderItem}

@@ -78,7 +78,6 @@ function CommonFriendsScreen({
           withBackButton
         />
         <FlashList
-          estimatedItemSize={64}
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={useMemo(

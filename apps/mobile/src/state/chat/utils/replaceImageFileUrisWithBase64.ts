@@ -25,7 +25,7 @@ function readAsBase64({
   path: UriString
 }): TE.TaskEither<ReadingFileError, UriString> {
   return TE.tryCatch(async () => {
-    const cacheDir = FileSystem.cacheDirectory
+    const cacheDir = FileSystem.Paths.cache
     if (!cacheDir) throw new Error('No cacheDir')
 
     const fromPath = (() => {
@@ -34,8 +34,8 @@ function readAsBase64({
     })()
 
     const toPath = (() => {
-      if (Platform.OS === 'ios') return joinUrl(cacheDir)
-      else return joinUrl(cacheDir).replace('file://', '')
+      if (Platform.OS === 'ios') return joinUrl(cacheDir.uri)
+      else return joinUrl(cacheDir.uri).replace('file://', '')
     })()
 
     const resizeResponse = await ImageResizer.createResizedImage(
@@ -53,13 +53,9 @@ function readAsBase64({
       }
     )
 
-    const bytes = await FileSystem.readAsStringAsync(
-      `file://${resizeResponse.path}`,
-      {
-        encoding: FileSystem.EncodingType.Base64,
-      }
-    )
-
+    const bytes = new FileSystem.File(
+      `file://${resizeResponse.path}`
+    ).base64Sync()
     return UriString.parse(`data:image/jpeg;base64,${bytes}`)
   }, toBasicError('ReadingFileError'))
 }

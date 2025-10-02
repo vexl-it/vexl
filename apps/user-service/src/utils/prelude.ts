@@ -7,10 +7,7 @@ import {
   type VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Context, Effect, Layer, Option, pipe, Schema} from 'effect/index'
-import {
-  allowLoginWithoutAllHeadersConfig,
-  preludeApiTokenConfig,
-} from '../configs'
+import {preludeApiTokenConfig} from '../configs'
 import {SmsVerificationSid} from './SmsVerificationSid.brand'
 
 export interface PreludeOperations {
@@ -27,6 +24,15 @@ export interface PreludeOperations {
   >
 }
 
+const checkHeadersIncludeAllAntispamFields = (
+  headers: CommonHeaders
+): boolean =>
+  Option.isSome(headers['cf-connecting-ip']) &&
+  Option.isSome(headers.clientSemverOrNone) &&
+  Option.isSome(headers.clientPlatformOrNone) &&
+  Option.isSome(headers.deviceModelOrNone) &&
+  Option.isSome(headers.osVersionOrNone)
+
 export class PreludeService extends Context.Tag('PreludeService')<
   PreludeService,
   PreludeOperations
@@ -36,33 +42,24 @@ export class PreludeService extends Context.Tag('PreludeService')<
     Effect.gen(function* (_) {
       const preludeApiToken = yield* _(preludeApiTokenConfig)
       const preludeClient = new Prelude({apiToken: preludeApiToken})
-      const allowLoginWithoutAllHeaders = yield* _(
-        allowLoginWithoutAllHeadersConfig
-      )
 
       const createVerification: PreludeOperations['createVerification'] = (
         phoneNumber: E164PhoneNumber,
         headers
       ) =>
         pipe(
-          // Those 3 headers needs to be defined for antispam protection
-          // TODO also add os version and device model once clients are force updated
-          Option.isSome(headers['cf-connecting-ip']) &&
-            Option.isSome(headers.clientSemverOrNone) &&
-            Option.isSome(headers.clientPlatformOrNone) &&
-            (allowLoginWithoutAllHeaders ||
-              (Option.isSome(headers.deviceModelOrNone) &&
-                Option.isSome(headers.osVersionOrNone)))
-            ? Effect.void
-            : Effect.fail(
-                new UnableToSendVerificationSmsError({
-                  reason: 'AntiFraudBlock',
-                  status: 400,
-                })
-              ),
+          Effect.succeed(headers),
+          Effect.filterOrFail(
+            checkHeadersIncludeAllAntispamFields,
+            () =>
+              new UnableToSendVerificationSmsError({
+                reason: 'AntiFraudBlock',
+                status: 400,
+              })
+          ),
           Effect.zipRight(
-            Effect.promise(
-              async () =>
+            Effect.tryPromise({
+              try: async () =>
                 await preludeClient.verification.create({
                   target: {type: 'phone_number', value: phoneNumber},
                   signals: {
@@ -86,14 +83,15 @@ export class PreludeService extends Context.Tag('PreludeService')<
                       Option.getOrUndefined
                     ),
                   },
-                })
-            ).pipe(
-              Effect.catchAll(
-                () =>
-                  new UnableToSendVerificationSmsError({
-                    reason: 'Other',
-                    status: 400,
-                  })
+                }),
+              catch: () =>
+                new UnableToSendVerificationSmsError({
+                  reason: 'Other',
+                  status: 400,
+                }),
+            }).pipe(
+              Effect.tapError((e) =>
+                Effect.logWarning('Got unexpected prelude error', e)
               )
             )
           ),

@@ -1,6 +1,5 @@
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {InvalidLoginSignatureError} from '@vexl-next/domain/src/general/loginChallenge'
 import {fromMilliseconds} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -18,7 +17,6 @@ import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {type ConfigError, Effect, Option, pipe, Schema, String} from 'effect'
 import {Handler} from 'effect-http'
 import {
-  allowLoginWithoutChallengeConfig,
   loginCodeDummies,
   loginCodeDummyForAll,
   lowestSupportVersionToLoginConfig,
@@ -71,24 +69,14 @@ export const initVerificationHandler = Handler.make(
     makeEndpointEffect(
       Effect.gen(function* (_) {
         yield* _(checkClientVersion(req.headers.clientVersionOrNone))
-        const allowLoginWithoutChallenge = yield* _(
-          allowLoginWithoutChallengeConfig
+
+        yield* _(
+          verifyLoginChallenge({
+            clientSignature: req.body.challenge.clientSignature,
+            serverSignature: req.body.challenge.serverSignature,
+            encodedChallenge: req.body.challenge.challenge,
+          })
         )
-        if (!allowLoginWithoutChallenge) {
-          if (!req.body.challenge)
-            return yield* _(
-              new InvalidLoginSignatureError({
-                status: 400,
-              })
-            )
-          yield* _(
-            verifyLoginChallenge({
-              clientSignature: req.body.challenge.clientSignature,
-              serverSignature: req.body.challenge.serverSignature,
-              encodedChallenge: req.body.challenge.challenge,
-            })
-          )
-        }
 
         if (
           pipe(

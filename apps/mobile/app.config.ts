@@ -279,7 +279,6 @@ export default {
       },
     ],
   ],
-
   'extra': {
     'eas': {
       'projectId': 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',

@@ -144,7 +144,7 @@ export class InitPhoneVerificationRequest extends Schema.Class<InitPhoneVerifica
   'InitPhoneVerificationRequest'
 )({
   phoneNumber: E164PhoneNumberE,
-  challenge: Schema.optional(CompletedLoginChallenge),
+  challenge: CompletedLoginChallenge,
 }) {}
 
 export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoesNotMatchOldHashError>(

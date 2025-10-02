@@ -69,9 +69,3 @@ export const verificationProviderConfig = Config.string(
 export const lowestSupportVersionToLoginConfig = Config.number(
   'LOWEST_SUPPORT_VERSION_TO_LOGIN'
 ).pipe(Config.withDefault(0), Effect.flatMap(Schema.decode(VersionCode)))
-export const allowLoginWithoutAllHeadersConfig = Config.boolean(
-  'ALLOW_LOGIN_WITHOUT_ALL_HEADERS'
-).pipe(Config.withDefault(true))
-export const allowLoginWithoutChallengeConfig = Config.boolean(
-  'ALLOW_LOGIN_WITHOUT_CHALLENGE'
-).pipe(Config.withDefault(true))

@@ -1,3 +1,4 @@
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {getLocales} from 'expo-localization'
 import {atom} from 'jotai'
 import {preferencesAtom} from '../preferences'
@@ -85,5 +86,19 @@ export const localizedPercentActionAtom = atom(
 
       minimumFractionDigits,
     }).format(Number(number))
+  }
+)
+
+export const localizedDateTimeActionAtom = atom(
+  null,
+  (get, set, {unixMilliseconds}: {unixMilliseconds: UnixMilliseconds}) => {
+    const preferences = get(preferencesAtom)
+    const locale =
+      preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
+
+    return Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(unixMilliseconds)
   }
 )

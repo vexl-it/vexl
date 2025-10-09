@@ -4,6 +4,7 @@ import React from 'react'
 import {SvgXml} from 'react-native-svg'
 import {FilterImage} from 'react-native-svg/filter-image'
 import {getTokens, Image} from 'tamagui'
+import resolveLocalUri from '../utils/resolveLocalUri'
 
 interface Props {
   userImage: SvgStringOrImageUri
@@ -58,7 +59,7 @@ function UserAvatar({
           height={height}
           style={{borderRadius: getTokens().radius[3].val}}
           filters={[{name: 'feColorMatrix', type: 'saturate', values: '0.0'}]}
-          source={{uri: userImage.imageUri}}
+          source={{uri: resolveLocalUri(userImage.imageUri)}}
         ></FilterImage>
       )
     }
@@ -67,7 +68,7 @@ function UserAvatar({
         width={width}
         height={height}
         borderRadius="$3"
-        source={{uri: userImage.imageUri}}
+        source={{uri: resolveLocalUri(userImage.imageUri)}}
       ></Image>
     )
   }

@@ -160,7 +160,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
     }
 
     const {assets, canceled} = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       aspect,
       quality: 1,

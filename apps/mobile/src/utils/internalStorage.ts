@@ -69,7 +69,7 @@ export function copyFileToNewPath({
   return pipe(
     documentDirectoryOrLeft(),
     E.map((documentDirectory) =>
-      urlJoin(documentDirectory, localDirectoryFilePath)
+      FileSystem.Paths.join(documentDirectory, localDirectoryFilePath)
     ),
     E.chainW(safeParse(UriString)),
     TE.fromEither,

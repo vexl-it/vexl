@@ -278,7 +278,6 @@ export default {
         'androidGoogleMapsApiKey': process.env.ANDROID_MAP_API_KEY,
       },
     ],
-    ['react-native-quick-crypto'],
   ],
   'extra': {
     'eas': {

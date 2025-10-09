@@ -5,7 +5,6 @@ import {
 import {File, Paths} from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import * as TE from 'fp-ts/TaskEither'
-import joinUrl from 'url-join'
 import {version} from '../../../utils/environment'
 import removeSensitiveData from '../../../utils/removeSensitiveData'
 import {readLogsRaw} from './storage'
@@ -18,7 +17,7 @@ export default function saveLogsToDirectoryAndShare(
   return TE.tryCatch(
     async () => {
       if (!Paths.document) throw new Error('oj')
-      const logsUri = joinUrl(
+      const logsUri = Paths.join(
         Paths.document.uri,
         `vexl${version.replace(/ /g, '_')}-logs.txt`
       )

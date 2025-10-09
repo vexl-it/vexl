@@ -16,12 +16,10 @@ import {
   DuplicatedPublicKeyError,
   GetClubOffersByIdsRequest,
   GetClubOffersForMeCreatedOrModifiedAfterRequest,
-  GetClubOffersForMeRequest,
   GetOfferByIdsResponse,
   GetOffersByIdsRequest,
   GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
-  GetOffersForMeResponse,
   RefreshOfferRequest,
   RefreshOfferResponse,
   RemovedClubOfferIdsRequest,
@@ -56,25 +54,6 @@ export const GetClubOffersByIdsEndpint = Api.post(
   Api.setSecurity(ServerSecurity),
   Api.setRequestBody(GetClubOffersByIdsRequest),
   Api.setResponseBody(GetOfferByIdsResponse)
-)
-
-export const GetOffersForMeEndpoint = Api.get(
-  'getOffersForMe',
-  '/api/v2/offers/me',
-  {summary: 'Get offers for me'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseBody(GetOffersForMeResponse)
-)
-
-export const GetClubOffersForMeEndpoint = Api.post(
-  'getClubOffersForMe',
-  '/api/v2/clubOffers/me',
-  {summary: 'Get club offers for me'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(GetClubOffersForMeRequest),
-  Api.setResponseBody(GetOffersForMeResponse)
 )
 
 export const GetOffersForMeModifiedOrCreatedAfterEndpoint = Api.get(
@@ -243,8 +222,6 @@ export const OfferApiSpecification = Api.make({
 }).pipe(
   Api.addEndpoint(GetOffersByIdsEndpint),
   Api.addEndpoint(GetClubOffersByIdsEndpint),
-  Api.addEndpoint(GetOffersForMeEndpoint),
-  Api.addEndpoint(GetClubOffersForMeEndpoint),
   Api.addEndpoint(GetOffersForMeModifiedOrCreatedAfterEndpoint),
   Api.addEndpoint(GetClubOffersForMeModifiedOrCreatedAfterEndpoint),
   Api.addEndpoint(CreateNewOfferEndpoint),

@@ -29,7 +29,6 @@ import {
   type DeletePrivatePartInput,
   type GetClubOffersByIdsRequest,
   type GetClubOffersForMeCreatedOrModifiedAfterRequest,
-  type GetClubOffersForMeInput,
   type GetOffersByIdsInput,
   type GetOffersForMeModifiedOrCreatedAfterInput,
   type GetRemovedOffersInput,
@@ -95,11 +94,6 @@ export function api({
         Effect.flatMap((body) =>
           handleCommonErrorsEffect(client.getClubOffersByIds({body}))
         )
-      ),
-    getOffersForMe: () => handleCommonErrorsEffect(client.getOffersForMe({})),
-    getClubOffersForMe: (getClubOffersForMeInput: GetClubOffersForMeInput) =>
-      handleCommonErrorsEffect(
-        client.getClubOffersForMe(getClubOffersForMeInput)
       ),
     getOffersForMeModifiedOrCreatedAfter: (
       getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput

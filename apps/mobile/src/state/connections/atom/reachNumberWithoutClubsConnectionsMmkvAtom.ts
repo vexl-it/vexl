@@ -41,7 +41,7 @@ export const updatePersistentDataAboutReachActionAtom = atom(
   (get, set) => {
     const currentReach = get(fistAndSecondLevelConnectionsReachAtom)
 
-    if (currentReach > 0) set(persistentDataAboutReachAtom, currentReach)
+    set(persistentDataAboutReachAtom, currentReach)
   }
 )
 

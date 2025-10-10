@@ -6,7 +6,7 @@ import {submitContactsActionAtom} from '../../contacts/atom/submitContactsAction
 import {fistAndSecondLevelConnectionsReachAtom} from './connectionStateAtom'
 import {persistentDataAboutReachAndImportedContactsAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
 
-const THRESHOLD_REACH_NUMBER = 30
+const THRESHOLD_REACH_NUMBER = 50
 
 /**
  * This atom should check if user needs to be prompted to import contacts and re-encrypt offers

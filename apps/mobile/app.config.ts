@@ -67,6 +67,10 @@ export default {
   'assetBundlePatterns': ['**/*'],
   'ios': {
     buildNumber: String(VERSION_CODE),
+    'icon':
+      extra.apiPreset === 'prodEnv'
+        ? './assets/icon.icon'
+        : './assets/icon-stage.icon',
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,
     'config': {

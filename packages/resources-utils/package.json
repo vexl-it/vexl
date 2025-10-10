@@ -20,7 +20,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.8.3"
+    "typescript": "~5.9.2"
   },
   "dependencies": {
     "@vexl-next/cryptography": "0.0.0",

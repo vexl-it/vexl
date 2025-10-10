@@ -21,7 +21,7 @@
     "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
-    "typescript": "^5.8.3"
+    "typescript": "~5.9.2"
   },
   "files": [
     "base.json",

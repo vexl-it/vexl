@@ -1,36 +1,31 @@
 {
-  "fill" : {
-    "automatic-gradient" : "srgb:0.65476,0.92526,0.97996,1.00000"
+  "fill": {
+    "automatic-gradient": "srgb:0.65476,0.92526,0.97996,1.00000"
   },
-  "groups" : [
+  "groups": [
     {
-      "layers" : [
+      "layers": [
         {
-          "image-name" : "android-front.png",
-          "name" : "android-front",
-          "position" : {
-            "scale" : 1.4,
-            "translation-in-points" : [
-              5.400000000000091,
-              -6
-            ]
+          "image-name": "android-front.png",
+          "name": "android-front",
+          "position": {
+            "scale": 1.4,
+            "translation-in-points": [5.400000000000091, -6]
           }
         }
       ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
       },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
       }
     }
   ],
-  "supported-platforms" : {
-    "circles" : [
-      "watchOS"
-    ],
-    "squares" : "shared"
+  "supported-platforms": {
+    "circles": ["watchOS"],
+    "squares": "shared"
   }
 }

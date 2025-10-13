@@ -74,7 +74,10 @@ import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../uti
 import {preferencesAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import showErrorAlert, {showErrorAlertE} from '../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {
+  toCommonErrorMessage,
+  type SomeError,
+} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
@@ -1000,10 +1003,22 @@ export const offerFormMolecule = molecule(() => {
     }
 
     return Effect.gen(function* (_) {
-      const offer = get(offerAtom)
+      const {
+        offerInfo: {offerId},
+      } = get(offerAtom)
+      const offer = get(singleOfferAtom(offerId))
       const intendedConnectionLevel =
         get(intendedConnectionLevelAtom) ?? 'FIRST'
       const intendedClubs = get(selectedClubsUuidsAtom)
+
+      // this should never happen as we are setting the form from existing offer
+      if (!offer) {
+        return yield* _(
+          Effect.fail({
+            _tag: 'NotFoundError' as const,
+          } satisfies SomeError)
+        )
+      }
 
       const targetRecipientsHasChanged =
         intendedConnectionLevel !==

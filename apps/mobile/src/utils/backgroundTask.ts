@@ -1,9 +1,10 @@
 import {Effect} from 'effect/index'
 import * as BackgroundTask from 'expo-background-task'
 import * as TaskManager from 'expo-task-manager'
-import {getDefaultStore} from 'jotai'
+import {getDefaultStore, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import fetchMessagesForAllInboxesAtom from '../state/chat/atoms/fetchNewMessagesActionAtom'
+import {checkIsBackgroundFetchEnabledActionAtom} from '../state/notifications/isBackgroundFetchEnabledAtom'
 import {loadSession} from '../state/session/loadSession'
 import {newOffersNotificationBackgroundTask} from './newOffersNotificationBackgroundTask'
 
@@ -49,11 +50,16 @@ export const setupBackgroundTask = async (): Promise<void> => {
 }
 
 export function useSetupBackgroundTask(): void {
+  const checkIsBackgroundFetchEnabled = useSetAtom(
+    checkIsBackgroundFetchEnabledActionAtom
+  )
+
   useEffect(() => {
     void setupBackgroundTask()
+    Effect.runFork(checkIsBackgroundFetchEnabled())
 
     return () => {
       void BackgroundTask.unregisterTaskAsync(BACKGROUND_TASK)
     }
-  }, [])
+  }, [checkIsBackgroundFetchEnabled])
 }

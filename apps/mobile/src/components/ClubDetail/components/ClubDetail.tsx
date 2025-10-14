@@ -97,6 +97,16 @@ export function ClubDetail({
         />
         <Button
           size="large"
+          variant="secondary"
+          text={t('common.createOffer')}
+          onPress={() => {
+            navigation.navigate('CRUDOfferFlow', {
+              screen: 'ListingAndOfferType',
+            })
+          }}
+        />
+        <Button
+          size="large"
           variant="redDark"
           text={t('clubs.leaveClub')}
           onPress={() => {

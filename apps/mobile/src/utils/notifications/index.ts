@@ -160,6 +160,13 @@ export function areNotificationsEnabledE(): Effect.Effect<
   })
 }
 
+export function isBackgroundFetchEnabled(): Effect.Effect<boolean> {
+  return Effect.promise(async () => {
+    const status = await getStatusAsync()
+    return status === BackgroundTaskStatus.Available
+  })
+}
+
 export async function deactivateToken(): Promise<void> {
   await Notifications.unregisterForNotificationsAsync()
 }

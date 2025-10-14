@@ -23,6 +23,7 @@ import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/f
 import {joinVexlClubsSuggestionVisibleAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import EnableBackgroundFetchSuggestion from '../../../../EnableBackgroundFetchSuggestion'
 import ErrorListHeader from '../../../../ErrorListHeader'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
@@ -133,6 +134,7 @@ function OffersListStateDisplayerContent(): React.ReactElement {
               </XStack>
               <YStack gap="$6" mb="$6">
                 <CheckUpdatedPrivacyPolicySuggestion />
+                <EnableBackgroundFetchSuggestion />
                 <ReencryptOffersSuggestion />
                 <VexlNewsSuggestions />
                 <RemovedClubsSuggestion />
@@ -143,6 +145,7 @@ function OffersListStateDisplayerContent(): React.ReactElement {
           ) : (
             <YStack gap="$6" mb="$6">
               <CheckUpdatedPrivacyPolicySuggestion />
+              <EnableBackgroundFetchSuggestion />
               <ReencryptOffersSuggestion />
               <VexlNewsSuggestions />
               <RemovedClubsSuggestion />

@@ -1,9 +1,8 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import * as O from 'fp-ts/Option'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {Alert} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -57,23 +56,15 @@ function PhoneNumberScreen({navigation}: Props): React.ReactElement {
           if (phoneNumber._tag !== 'Some') return
 
           loadingOverlay.show()
-          void Effect.runPromise(
-            initPhoneVerification(phoneNumber.value).pipe(
-              Effect.tapBoth({
-                onFailure: (e) =>
-                  Effect.sync(() => {
-                    Alert.alert(e)
-                  }),
-                onSuccess: (value) =>
-                  Effect.sync(() => {
-                    navigation.navigate('VerificationCode', {
-                      phoneNumber: phoneNumber.value,
-                      initPhoneVerificationResponse: value,
-                    })
-                  }),
-              })
-            )
-          ).finally(loadingOverlay.hide)
+          void Effect.runPromise(initPhoneVerification(phoneNumber.value))
+            .then((result) => {
+              if (Option.isSome(result))
+                navigation.navigate('VerificationCode', {
+                  phoneNumber: phoneNumber.value,
+                  initPhoneVerificationResponse: result.value,
+                })
+            })
+            .finally(loadingOverlay.hide)
         }}
       />
     </Stack>

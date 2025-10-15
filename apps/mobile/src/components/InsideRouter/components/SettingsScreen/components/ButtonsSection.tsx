@@ -23,6 +23,7 @@ import {defaultCurrencyAtom} from '../../../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
 import CurrencySelect from '../../../../CurrencySelect'
 import SvgImage from '../../../../Image'
+import {reportIssueDialogAtom} from '../../../../ReportIssue'
 import editIconSvg from '../../../../images/editIconSvg'
 import spokenLanguagesSvg from '../../../../images/spokenLanguagesSvg'
 import {
@@ -53,7 +54,6 @@ import xSvg from '../images/xIconSvg'
 import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
 import ContactsImportedTitle from './ContactsImportedTitle'
-import {reportIssueDialogAtom} from './ReportIssue'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
 
 interface ItemProps {

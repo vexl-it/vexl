@@ -18,7 +18,6 @@ import {createImportContactLink} from '../../../../utils/deepLinks/createLinks'
 import {version, versionCode} from '../../../../utils/environment'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../../utils/localization/localizedNumbersAtoms'
-import openUrl from '../../../../utils/openUrl'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import QrScanner from './components/QrScanner'
 
@@ -62,17 +61,6 @@ export const emailBodyAtom = atom<string>((get) => {
     `${t('reportIssue.predefinedBody')}\n\n\n\n\n
     ${t('reportIssue.appAndOperatingSystemInfo')} (${t('reportIssue.pleaseDoNotDelete')}): ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
   )
-})
-
-export const contactSupportActionAtom = atom(null, (get, set) => {
-  const {t} = get(translationAtom)
-  const supportEmail = t('settings.items.supportEmail')
-  const emailBody = get(emailBodyAtom)
-
-  openUrl(
-    `mailto:${supportEmail}?body=${emailBody}`,
-    t('settings.items.supportEmail')
-  )()
 })
 
 export const qrScannerDialogAtom = atom(null, (get, set) => {

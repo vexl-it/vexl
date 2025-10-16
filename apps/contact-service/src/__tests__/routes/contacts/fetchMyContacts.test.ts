@@ -1,7 +1,6 @@
 import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql/SqlClient'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
-import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {Array, Effect, Order, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -10,6 +9,8 @@ import {
   generateKeysAndHasheForNumber,
   type DummyUser,
 } from './utils'
+
+const MAX_PAGE_SIZE = 2147483647
 
 let networkOne: [DummyUser, ...DummyUser[]]
 let networkTwo: [DummyUser, ...DummyUser[]]

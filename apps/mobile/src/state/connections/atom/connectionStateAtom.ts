@@ -7,7 +7,6 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Array, Effect, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
@@ -23,6 +22,8 @@ import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showD
 import reportError, {reportErrorE} from '../../../utils/reportError'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ConnectionsState} from '../domain'
+
+const MAX_PAGE_SIZE = 2147483647
 
 const connectionStateAtom = atomWithParsedMmkvStorageE(
   'connectionsState',

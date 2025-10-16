@@ -2,15 +2,16 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type ChatOrigin} from '@vexl-next/domain/src/general/messaging'
 import {
+  PrivatePartRecordId,
   type OfferAdminId,
   type OfferFlags,
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array} from 'effect'
+import {Array, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
-import {type Atom, atom, type WritableAtom} from 'jotai'
+import {atom, type Atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -18,9 +19,12 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 import {OffersState} from '../domain'
 import {offerWithoutSourceOrNone} from '../utils/offerWithoutSourceOrNone'
 
+const LAST_PRIVATE_PART_DEFAULT_ID = Schema.decodeSync(PrivatePartRecordId)('0')
+
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
   {
+    lastPrivatePartId: LAST_PRIVATE_PART_DEFAULT_ID,
     lastUpdatedAt1: MINIMAL_DATE,
     offers: [],
   },
@@ -36,6 +40,10 @@ export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
 
 export const lastUpdatedAtAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('lastUpdatedAt1')
+)
+
+export const lastPrivatePartIdAtom = focusAtom(offersStateAtom, (optic) =>
+  optic.prop('lastPrivatePartId')
 )
 
 export function singleOfferAtom(

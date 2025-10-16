@@ -10,6 +10,7 @@ import {
   OneOfferInState,
   OneOfferInStateE,
   PaymentMethodE,
+  PrivatePartRecordId,
   SortE,
   SpokenLanguageE,
 } from '@vexl-next/domain/src/general/offers'
@@ -36,6 +37,7 @@ export const OffersState = z
   .object({
     // changedName to force clients to refetch all offers after update of the offers location shape
     lastUpdatedAt1: IsoDatetimeString.catch(() => MINIMAL_DATE),
+    lastPrivatePartId: z.coerce.number().default(0),
     offers: z.array(OneOfferInState),
   })
   .readonly()
@@ -44,6 +46,9 @@ export const OffersStateE = Schema.Struct({
   lastUpdatedAt1: IsoDatetimeStringE.pipe(
     Schema.optionalWith({default: () => MINIMAL_DATE})
   ),
+  lastPrivatePartId: Schema.optionalWith(PrivatePartRecordId, {
+    default: () => Schema.decodeSync(PrivatePartRecordId)('0'),
+  }),
   offers: Schema.Array(OneOfferInStateE),
 })
 export type OffersState = typeof OffersStateE.Type

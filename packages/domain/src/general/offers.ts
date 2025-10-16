@@ -255,6 +255,11 @@ export const GoldenAvatarTypeE = Schema.Literal('BACKGROUND_AND_GLASSES').pipe(
 )
 export type GoldenAvatarType = typeof GoldenAvatarTypeE.Type
 
+export const PrivatePartRecordId = Schema.NumberFromString.pipe(
+  Schema.brand('PrivatePartRecordId')
+)
+export type PrivatePartRecordId = Schema.Schema.Type<typeof PrivatePartRecordId>
+
 export const OfferPrivatePart = z
   .object({
     commonFriends: z.array(HashedPhoneNumber).readonly(),

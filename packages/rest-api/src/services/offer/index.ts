@@ -30,6 +30,7 @@ import {
   type GetClubOffersByIdsRequest,
   type GetClubOffersForMeCreatedOrModifiedAfterRequest,
   type GetOffersByIdsInput,
+  type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
   type GetOffersForMeModifiedOrCreatedAfterInput,
   type GetRemovedOffersInput,
   type RefreshOfferInput,
@@ -102,6 +103,12 @@ export function api({
         client.getOffersForMeModifiedOrCreatedAfter(
           getOffersForMeModifiedOrCreatedAfterInput
         )
+      ),
+    getOffersForMeModifiedOrCreatedAfterPaginated: (
+      query: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
+    ) =>
+      handleCommonErrorsEffect(
+        client.getOffersForMeModifiedOrCreatedAfterPaginated({query})
       ),
     getClubOffersForMeModifiedOrCreatedAfter: (
       body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>

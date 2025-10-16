@@ -18,6 +18,8 @@ import {
   GetClubOffersForMeCreatedOrModifiedAfterRequest,
   GetOfferByIdsResponse,
   GetOffersByIdsRequest,
+  GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
+  GetOffersForMeCreatedOrModifiedAfterPaginatedResponse,
   GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
   RefreshOfferRequest,
@@ -64,6 +66,16 @@ export const GetOffersForMeModifiedOrCreatedAfterEndpoint = Api.get(
   Api.setSecurity(ServerSecurity),
   Api.setRequestQuery(GetOffersForMeCreatedOrModifiedAfterRequest),
   Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponse)
+)
+
+export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint = Api.get(
+  'getOffersForMeModifiedOrCreatedAfterPaginated',
+  '/api/v2/offers/me/modified/paginated',
+  {summary: 'Get offers for me modified or created after (paginated)'}
+).pipe(
+  Api.setSecurity(ServerSecurity),
+  Api.setRequestQuery(GetOffersForMeCreatedOrModifiedAfterPaginatedRequest),
+  Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
 )
 
 export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint = Api.post(
@@ -223,6 +235,7 @@ export const OfferApiSpecification = Api.make({
   Api.addEndpoint(GetOffersByIdsEndpint),
   Api.addEndpoint(GetClubOffersByIdsEndpint),
   Api.addEndpoint(GetOffersForMeModifiedOrCreatedAfterEndpoint),
+  Api.addEndpoint(GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint),
   Api.addEndpoint(GetClubOffersForMeModifiedOrCreatedAfterEndpoint),
   Api.addEndpoint(CreateNewOfferEndpoint),
   Api.addEndpoint(RefreshOfferEndpoint),

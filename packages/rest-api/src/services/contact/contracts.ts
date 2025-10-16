@@ -32,7 +32,7 @@ import {
 import {Schema} from 'effect'
 import {z} from 'zod'
 import {NoContentResponse} from '../../NoContentResponse.brand'
-import {PageRequest, PageResponse} from '../../Pagination.brand'
+import {PageRequestMeta, PageResponse} from '../../Pagination.brand'
 import {PlatformName} from '../../PlatformName'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
@@ -121,7 +121,7 @@ export const ImportContactsResponse = Schema.Struct({
 export type ImportContactsResponse = typeof ImportContactsResponse.Type
 
 export const FetchMyContactsRequest = Schema.Struct({
-  ...PageRequest.fields,
+  ...PageRequestMeta.fields,
   level: ConnectionLevelE,
 })
 export type FetchMyContactsRequest = typeof FetchMyContactsRequest.Type

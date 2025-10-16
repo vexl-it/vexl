@@ -4,6 +4,7 @@ import {
   OfferAdminIdE,
   OfferIdE,
   OfferTypeE,
+  PrivatePartRecordId,
   PrivatePayloadEncryptedE,
   PublicPayloadEncryptedE,
 } from '@vexl-next/domain/src/general/offers'
@@ -16,6 +17,7 @@ import {
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Schema} from 'effect'
 import {NoContentResponse} from '../../NoContentResponse.brand'
+import {createPageResponse, PageRequestMeta} from '../../Pagination.brand'
 
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(
   'ReportOfferLimitReachedError'
@@ -71,6 +73,15 @@ export const GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
 export type GetOffersForMeCreatedOrModifiedAfterRequest =
   typeof GetOffersForMeCreatedOrModifiedAfterRequest.Type
 
+export const GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
+  Schema.Struct({
+    ...PageRequestMeta.fields,
+    modifiedAt: IsoDatetimeStringE,
+    lastPrivatePartId: PrivatePartRecordId.pipe(Schema.greaterThanOrEqualTo(1)),
+  })
+export type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
+  typeof GetOffersForMeCreatedOrModifiedAfterPaginatedRequest.Type
+
 export const GetClubOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   modifiedAt: IsoDatetimeStringE,
@@ -83,6 +94,11 @@ export const GetOffersForMeCreatedOrModifiedAfterResponse = Schema.Struct({
 })
 export type GetOffersForMeCreatedOrModifiedAfterResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterResponse.Type
+
+export const GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
+  createPageResponse(ServerOffer)
+export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
+  typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
   userPublicKey: PublicKeyPemBase64E,

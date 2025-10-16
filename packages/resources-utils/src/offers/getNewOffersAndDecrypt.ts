@@ -38,6 +38,45 @@ const validateOfferIsFromContactNetwork = (offerInfo: OfferInfoE): boolean => {
 /**
  * Downloads new offers from the server and decrypts them with provided keypair
  */
+// export function getNewContactNetworkOffersAndDecryptPaginatedActionAtom({
+//   offersApi,
+//   keyPair,
+//   modifiedAt,
+//   lastPrivatePartId,
+// }: {
+//   /**
+//    * Offers API instance. Already handles auth for us.
+//    */
+//   offersApi: OfferApi
+//   /**
+//    * KeyPair to decrypt offers with.
+//    */
+//   keyPair: PrivateKeyHolderE
+//   /**
+//    * Only offers modified/created after this date will be fetched.
+//    */
+//   modifiedAt: IsoDatetimeStringE
+//   /**
+//    * Only offers with ids that were not previously fetched will be fetched.
+//    */
+//   lastPrivatePartId: PrivatePartRecordId
+// }): Effect.Effect<
+//   Array<
+//     Either.Either<
+//       OfferInfoE,
+//       | DecryptingOfferError
+//       | NonCompatibleOfferVersionError
+//       | NotOfferFromContactNetworkError
+//     >
+//   >,
+//   ApiErrorFetchingOffers
+// > {
+//   return Effect.gen(function* (_) {})
+// }
+
+/**
+ * Downloads new offers from the server and decrypts them with provided keypair
+ */
 export default function getNewContactNetworkOffersAndDecrypt({
   offersApi,
   keyPair,
@@ -67,7 +106,9 @@ export default function getNewContactNetworkOffersAndDecrypt({
   ApiErrorFetchingOffers
 > {
   return offersApi
-    .getOffersForMeModifiedOrCreatedAfter({query: {modifiedAt}})
+    .getOffersForMeModifiedOrCreatedAfter({
+      query: {modifiedAt},
+    })
     .pipe(
       Effect.map(({offers}) => offers),
       Effect.flatMap(

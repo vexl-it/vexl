@@ -228,6 +228,7 @@ function DebugScreen(): React.ReactElement {
                 store.set(offersStateAtom, {
                   lastUpdatedAt1: MINIMAL_DATE,
                   offers: [],
+                  lastPrivatePartId: 0,
                 })
                 Alert.alert('Done')
               }}

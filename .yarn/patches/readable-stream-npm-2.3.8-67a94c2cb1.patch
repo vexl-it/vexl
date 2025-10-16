@@ -1,0 +1,13 @@
+diff --git a/lib/_stream_writable.js b/lib/_stream_writable.js
+index e1e897ff3b098a263aa105d5704dbadce42d5862..e180367909800851690a2b569454f7082f7217d5 100644
+--- a/lib/_stream_writable.js
++++ b/lib/_stream_writable.js
+@@ -54,7 +54,7 @@ function CorkedRequest(state) {
+ /* </replacement> */
+ 
+ /*<replacement>*/
+-var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
++var asyncWrite = !process.browser && ['v0.10', 'v0.9.'].indexOf(process.version?.slice(0, 5)) > -1 ? setImmediate : pna.nextTick;
+ /*</replacement>*/
+ 
+ /*<replacement>*/

@@ -1,6 +1,5 @@
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import * as A from 'fp-ts/Array'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, pipe} from 'effect'
 import {type DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
@@ -81,12 +80,13 @@ export default function buildMessagesListData(
 ): MessagesListItem[] {
   return pipe(
     messages,
-    A.map(
+    Array.map(
       (message): MessageWithState => ({
         type: 'message',
         message,
       })
     ),
+    Array.reverse,
     messagesToListData
   )
 }

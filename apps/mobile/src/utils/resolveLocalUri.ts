@@ -1,5 +1,5 @@
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {cacheDirectory, documentDirectory} from 'expo-file-system'
+import {Paths} from 'expo-file-system'
 import {Platform} from 'react-native'
 
 export default function resolveLocalUri(uri: UriString): UriString {
@@ -9,16 +9,16 @@ export default function resolveLocalUri(uri: UriString): UriString {
     return uri
   }
 
-  if (!cacheDirectory || !documentDirectory) return uri
+  if (!Paths.cache || !Paths.document) return uri
 
   const replaced = uri
     .replace(
       /file:\/\/\/.*?Containers\/Data\/Application\/[A-Z0-9-]+\/Documents\//,
-      documentDirectory ?? ''
+      Paths.document.uri ?? ''
     )
     .replace(
       /file:\/\/\/.*?Containers\/Data\/Application\/[A-Z0-9-]+\/Library\/Caches\//,
-      cacheDirectory ?? ''
+      Paths.cache.uri ?? ''
     )
 
   const parsed = UriString.safeParse(replaced)

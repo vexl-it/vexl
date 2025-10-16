@@ -28,7 +28,6 @@ function ContactsList({contacts}: Props): React.ReactElement {
   return (
     <Stack f={1} pt="$2">
       <FlashList
-        estimatedItemSize={66}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={ListHeader}

@@ -11,6 +11,7 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -55,6 +56,10 @@ export default function createSubmitChecklistUpdateActionAtom(
         keyof TradeChecklistUpdate
       >
 
+      const identityRevealChatMessageOrUndefined = yield* _(
+        taskToEffect(replaceIdentityImageFileUriWithBase64(update.identity))
+      )
+
       const toSend = updateKeys.map(
         (key) =>
           ({
@@ -63,9 +68,7 @@ export default function createSubmitChecklistUpdateActionAtom(
             tradeChecklistUpdate:
               key === 'identity'
                 ? {
-                    identity: replaceIdentityImageFileUriWithBase64(
-                      update[key]
-                    ),
+                    identity: identityRevealChatMessageOrUndefined,
                   }
                 : {
                     [key]: update[key],

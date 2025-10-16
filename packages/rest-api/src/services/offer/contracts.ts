@@ -60,11 +60,6 @@ export type GetClubOffersByIdsRequest = typeof GetClubOffersByIdsRequest.Type
 export const GetOfferByIdsResponse = Schema.Array(ServerOffer)
 export type GetOfferByIdsResponse = typeof GetOfferByIdsResponse.Type
 
-export const GetOffersForMeResponse = Schema.Struct({
-  offers: Schema.Array(ServerOffer),
-})
-export type GetOffersForMeResponse = typeof GetOffersForMeResponse.Type
-
 export const GetClubOffersForMeRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
 })

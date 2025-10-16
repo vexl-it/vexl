@@ -47,6 +47,7 @@ function CalculatorInput(
             ref={inputRef}
             keyboardType="decimal-pad"
             rows={1}
+            bc="$grey"
             textAlign="left"
             selectTextOnFocus
             selectionColor={getTokens().color.yellowAccent1.val}

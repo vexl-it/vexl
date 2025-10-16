@@ -28,10 +28,8 @@ import {createPrivatePart} from './routes/createPrivatePart'
 import {deleteOffer} from './routes/deleteOffer'
 import {deletePrivatePart} from './routes/deletePrivatePart'
 import {getClubOffersByIds} from './routes/getClubOffersByIds'
-import {getClubOffersForMe} from './routes/getClubOffersForMe'
 import {getClubOffersForMeModifiedOrCreatedAfter} from './routes/getClubOffersForMeModifiedOrCreatedAfter'
 import {getOffersByIds} from './routes/getOffersByIds'
-import {getOffersForMe} from './routes/getOffersForMe'
 import {getOffersForMeModifiedOrCreatedAfter} from './routes/getOffersForMeModifiedOrCreatedAfter'
 import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
 import {getRemovedOffers} from './routes/getRemovedOffers'
@@ -47,8 +45,6 @@ export const app = RouterBuilder.make(OfferApiSpecification).pipe(
   // offers
   RouterBuilder.handle(getOffersByIds),
   RouterBuilder.handle(getClubOffersByIds),
-  RouterBuilder.handle(getOffersForMe),
-  RouterBuilder.handle(getClubOffersForMe),
   RouterBuilder.handle(getOffersForMeModifiedOrCreatedAfter),
   RouterBuilder.handle(getClubOffersForMeModifiedOrCreatedAfter),
   RouterBuilder.handle(getRemovedOffers),

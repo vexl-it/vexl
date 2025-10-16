@@ -5,7 +5,9 @@ import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import React, {useMemo, useRef} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Swipeable} from 'react-native-gesture-handler'
+import Swipeable, {
+  type SwipeableMethods,
+} from 'react-native-gesture-handler/ReanimatedSwipeable'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
@@ -30,7 +32,7 @@ function ChatListItem({
   dataAtom: Atom<ChatListData>
 }): React.ReactElement {
   const {t} = useTranslation()
-  const swipeableRef = useRef<Swipeable>(null)
+  const swipeableRef = useRef<SwipeableMethods>(null)
   const navigation = useNavigation()
   const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
 

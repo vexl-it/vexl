@@ -1,6 +1,5 @@
 import {
   FlashList,
-  type ContentStyle,
   type FlashListProps,
   type ListRenderItemInfo,
 } from '@shopify/flash-list'
@@ -40,7 +39,7 @@ function OffersList({
 }: Props): React.ReactElement {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
-  const contentContainerStyle: ContentStyle = useMemo(
+  const contentContainerStyle = useMemo(
     () => ({
       paddingBottom: bottomOffset + Number(getTokens().space[5].val),
     }),
@@ -60,7 +59,6 @@ function OffersList({
       progressViewOffset={20}
       ListHeaderComponent={ListHeaderComponent}
       ListFooterComponent={ListFooterComponent}
-      estimatedItemSize={151}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={contentContainerStyle}
       data={offersAtoms}

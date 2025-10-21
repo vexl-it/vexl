@@ -1,5 +1,4 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type Effect} from 'effect'
 import {sequenceS} from 'fp-ts/Apply'
@@ -9,6 +8,8 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+
+const MAX_PAGE_SIZE = 2147483647
 
 const numberOfFriendsStorageAtom = atom<
   E.Either<

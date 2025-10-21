@@ -10,9 +10,9 @@ import {updateOffersIdsForClubStatActionAtom} from '../../../clubs/atom/clubsWit
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
-import {lastUpdatedAtAtom, offersAtom, offersStateAtom} from '../offersState'
+import {offersAtom, offersStateAtom} from '../offersState'
 import {combineIncomingOffers} from './utils/combineIncomingOffers'
-import {fetchOffersReportErrors} from './utils/fetchOffersReportErrors'
+import {fetchOffersReportErrorsActionAtom} from './utils/fetchOffersReportErrorsActionAtom'
 import {getRemovedOffersIds} from './utils/getRemovedOffersIds'
 import {mergeIncomingOffersToState} from './utils/mergeIncomingOffersToState'
 
@@ -30,9 +30,8 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
     console.log('🦋 Refreshing offers')
 
     const {clubs: newClubsOffers, contact: newContactOffers} = yield* _(
-      fetchOffersReportErrors({
+      set(fetchOffersReportErrorsActionAtom, {
         offersApi: api.offer,
-        lastUpdate: get(lastUpdatedAtAtom),
         contactNetworkKeyPair: session.privateKey,
         clubs: myStoredClubs,
       })

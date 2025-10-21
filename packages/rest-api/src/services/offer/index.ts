@@ -17,9 +17,10 @@ import {
   type CreatePrivatePartInput,
   type DeleteOfferInput,
   type DeletePrivatePartInput,
-  type GetClubOffersByIdsRequest,
+  type GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest,
   type GetClubOffersForMeCreatedOrModifiedAfterRequest,
   type GetOffersByIdsInput,
+  type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
   type GetOffersForMeModifiedOrCreatedAfterInput,
   type GetRemovedOffersInput,
   type RefreshOfferInput,
@@ -81,18 +82,17 @@ export function api({
     return {
       getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
         client.getOffersByIds({urlParams: getOffersByIdsInput.query}),
-
-      getClubOffersByIds: (
-        getClubOffersByIdsInput: RequestWithGeneratableChallenge<GetClubOffersByIdsRequest>
-      ) =>
-        addChallenge(getClubOffersByIdsInput).pipe(
-          Effect.flatMap((body) => client.getClubOffersByIds({payload: body}))
-        ),
       getOffersForMeModifiedOrCreatedAfter: (
         getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput
       ) =>
         client.getOffersForMeModifiedOrCreatedAfter({
           urlParams: getOffersForMeModifiedOrCreatedAfterInput.query,
+        }),
+      getOffersForMeModifiedOrCreatedAfterPaginated: (
+        req: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
+      ) =>
+        client.getOffersForMeModifiedOrCreatedAfterPaginated({
+          urlParams: req,
         }),
       getClubOffersForMeModifiedOrCreatedAfter: (
         body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>
@@ -100,6 +100,16 @@ export function api({
         addChallenge(body).pipe(
           Effect.flatMap((body) =>
             client.getClubOffersForMeModifiedOrCreatedAfter({
+              payload: body,
+            })
+          )
+        ),
+      getClubOffersForMeModifiedOrCreatedAfterPaginated: (
+        body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest>
+      ) =>
+        addChallenge(body).pipe(
+          Effect.flatMap((body) =>
+            client.getClubOffersForMeModifiedOrCreatedAfterPaginated({
               payload: body,
             })
           )

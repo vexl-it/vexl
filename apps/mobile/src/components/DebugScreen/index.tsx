@@ -9,7 +9,6 @@ import {
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
-import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
 import * as BackgroundTask from 'expo-background-task'
@@ -42,7 +41,8 @@ import {StoredContactE} from '../../state/contacts/domain'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
-  lastUpdatedAtAtom,
+  clubOffersNextPageParamAtom,
+  contactOffersNextPageParamAtom,
   offersAtom,
   offersStateAtom,
 } from '../../state/marketplace/atoms/offersState'
@@ -51,6 +51,7 @@ import {
   reportOffersWithoutLocationActionAtom,
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
+import {getNewContactNetworkOffersAndDecryptPaginatedActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom/utils/getNewOffersAndDecrypt'
 import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
@@ -113,6 +114,9 @@ function DebugScreen(): React.ReactElement {
   const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
   const isDeveloper = useAtomValue(isDeveloperAtom)
   const showTextDebugButton = useSetAtom(showTextDebugButtonAtom)
+  const getNewContactNetworkOffersAndDecryptPaginated = useSetAtom(
+    getNewContactNetworkOffersAndDecryptPaginatedActionAtom
+  )
 
   if (!isDeveloper) {
     const buttonText = !isDeveloper
@@ -230,6 +234,8 @@ function DebugScreen(): React.ReactElement {
                 store.set(offersStateAtom, {
                   lastUpdatedAt1: MINIMAL_DATE,
                   offers: [],
+                  contactOffersNextPageParam: undefined,
+                  clubOffersNextPageParam: undefined,
                 })
                 Alert.alert('Done')
               }}
@@ -237,14 +243,14 @@ function DebugScreen(): React.ReactElement {
             <Button
               variant="primary"
               size="small"
-              text="Test get all offers and alert number"
+              text="Test get first page of offers and alert number"
               onPress={() => {
                 void pipe(
                   effectToTaskEither(
-                    getNewContactNetworkOffersAndDecrypt({
+                    getNewContactNetworkOffersAndDecryptPaginated({
                       keyPair: session.privateKey,
-                      modifiedAt: MINIMAL_DATE,
                       offersApi: store.get(apiAtom).offer,
+                      lastPrivatePartIdBase64: undefined,
                     })
                   ),
                   TE.matchW(
@@ -352,12 +358,12 @@ function DebugScreen(): React.ReactElement {
             <Button
               variant="primary"
               size="small"
-              text="Print lastUpdatedAtAtom"
+              text="Print contactOffersNextPageParamBase64"
               onPress={() => {
                 Alert.alert(
                   'Last updated at',
                   `inState: ${store.get(
-                    lastUpdatedAtAtom
+                    contactOffersNextPageParamAtom
                   )}, minimalDate: ${MINIMAL_DATE}`
                 )
               }}
@@ -365,12 +371,12 @@ function DebugScreen(): React.ReactElement {
             <Button
               variant="primary"
               size="small"
-              text="Print lastUpdatedAtAtom"
+              text="Print clubOffersNextPageParamBase64"
               onPress={() => {
                 Alert.alert(
                   'Last updated at',
                   `inState: ${store.get(
-                    lastUpdatedAtAtom
+                    clubOffersNextPageParamAtom
                   )}, minimalDate: ${MINIMAL_DATE}`
                 )
               }}

@@ -3,6 +3,7 @@ import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   OfferIdE,
   OfferTypeE,
+  PrivatePartRecordId,
   PrivatePayloadEncryptedE,
   PublicPayloadEncryptedE,
 } from '@vexl-next/domain/src/general/offers'
@@ -33,11 +34,6 @@ export class PublicPartRecord extends Schema.Class<PublicPartRecord>(
   refreshedAt: Schema.DateFromSelf,
   countryPrefix: CountryPrefixE,
 }) {}
-
-export const PrivatePartRecordId = Schema.NumberFromString.pipe(
-  Schema.brand('PrivatePartRecordId')
-)
-export type PrivatePartRecordId = Schema.Schema.Type<typeof PrivatePartRecordId>
 
 export class PrivatePartRecord extends Schema.Class<PrivatePartRecord>(
   'PrivatePartRecord'

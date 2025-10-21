@@ -1,22 +1,24 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {type IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
-import getNewClubsOffersAndDecrypt, {
-  type ApiErrorFetchingClubsOffers,
-  type NotOfferForExpectedClubError,
-} from '@vexl-next/resources-utils/src/offers/getNewClubsOffersAndDecrypt'
-import getNewContactNetworkOffersAndDecrypt, {
-  type ApiErrorFetchingOffers,
-  type NotOfferFromContactNetworkError,
-} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
+import {atom} from 'jotai'
 import reportError from '../../../../../utils/reportError'
+import {type NotOfferFromContactNetworkError} from '../../../domain'
+import {
+  clubOffersNextPageParamAtom,
+  contactOffersNextPageParamAtom,
+} from '../../offersState'
+import {
+  getNewClubsOffersAndDecryptPaginatedActionAtom,
+  type NotOfferForExpectedClubError,
+} from './getNewClubsOffersAndDecrypt'
+import {getNewContactNetworkOffersAndDecryptPaginatedActionAtom} from './getNewOffersAndDecrypt'
 
 type DecryptedOfferResult = Either.Either<
   OfferInfo,
@@ -67,47 +69,53 @@ const filterAndReportDecryptionErrors = (
   )
 }
 
-export const fetchOffersReportErrors = ({
-  offersApi,
-  lastUpdate,
-  contactNetworkKeyPair,
-  clubs,
-}: {
-  offersApi: OfferApi
-  lastUpdate: IsoDatetimeString
-  contactNetworkKeyPair: PrivateKeyHolder
-  clubs: Record<ClubUuid, PrivateKeyHolder>
-}): Effect.Effect<
-  {contact: readonly OfferInfo[]; clubs: readonly OfferInfo[]},
-  ApiErrorFetchingOffers | ApiErrorFetchingClubsOffers
-> =>
-  Effect.all({
-    contact: pipe(
-      getNewContactNetworkOffersAndDecrypt({
-        offersApi,
-        modifiedAt: lastUpdate,
-        keyPair: contactNetworkKeyPair,
-      }),
-      Effect.map(filterAndReportDecryptionErrors)
-    ),
+export const fetchOffersReportErrorsActionAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      offersApi,
+      contactNetworkKeyPair,
+      clubs,
+    }: {
+      offersApi: OfferApi
+      contactNetworkKeyPair: PrivateKeyHolder
+      clubs: Record<ClubUuid, PrivateKeyHolder>
+    }
+  ) => {
+    const contactOffersNextPageParam = get(contactOffersNextPageParamAtom)
+    const clubOffersNextPageParam = get(clubOffersNextPageParamAtom)
 
-    clubs: pipe(
-      Record.toEntries(clubs),
-      Array.map(([clubUuid, keyPair]) =>
-        getNewClubsOffersAndDecrypt({
+    return Effect.all({
+      contact: pipe(
+        set(getNewContactNetworkOffersAndDecryptPaginatedActionAtom, {
           offersApi,
-          modifiedAt: lastUpdate,
-          keyPair,
-          clubUuid,
-        }).pipe(
-          Effect.catchTag('NotFoundError', () => {
-            // Club not found, ignore
-            return Effect.succeed([])
-          })
-        )
+          keyPair: contactNetworkKeyPair,
+          lastPrivatePartIdBase64: contactOffersNextPageParam,
+        }),
+        Effect.map(filterAndReportDecryptionErrors)
       ),
-      Effect.all,
-      Effect.map(Array.flatten),
-      Effect.map(filterAndReportDecryptionErrors)
-    ),
-  })
+
+      clubs: pipe(
+        Record.toEntries(clubs),
+        Array.map(([clubUuid, keyPair]) =>
+          set(getNewClubsOffersAndDecryptPaginatedActionAtom, {
+            offersApi,
+            keyPair,
+            clubUuid,
+            lastPrivatePartIdBase64: clubOffersNextPageParam,
+          }).pipe(
+            Effect.catchTag('NotFoundError', () => {
+              // Club not found, ignore
+              return Effect.succeed([])
+            })
+          )
+        ),
+        Effect.all,
+        Effect.map(Array.flatten),
+        Effect.map(filterAndReportDecryptionErrors)
+      ),
+    })
+  }
+)

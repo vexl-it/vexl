@@ -1,15 +1,36 @@
+import {Base64StringE} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {Schema} from 'effect'
+
+const DEFAULT_PAGE_SIZE = 20
 
 export const PageRequest = Schema.Struct({
   page: Schema.NumberFromString.pipe(
     Schema.int(),
-    Schema.greaterThanOrEqualTo(0)
+    Schema.greaterThanOrEqualTo(0),
+    Schema.lessThanOrEqualTo(Number.MAX_SAFE_INTEGER)
   ),
-  limit: Schema.NumberFromString.pipe(
-    Schema.int(),
-    Schema.greaterThanOrEqualTo(0)
+  limit: Schema.optionalWith(
+    Schema.NumberFromString.pipe(
+      Schema.int(),
+      Schema.greaterThanOrEqualTo(0),
+      Schema.lessThanOrEqualTo(Number.MAX_SAFE_INTEGER)
+    ),
+    {default: () => DEFAULT_PAGE_SIZE}
   ),
 })
+
+export const PageRequestMeta = Schema.Struct({
+  limit: Schema.optionalWith(
+    Schema.NumberFromString.pipe(
+      Schema.int(),
+      Schema.greaterThanOrEqualTo(0),
+      Schema.lessThanOrEqualTo(Number.MAX_SAFE_INTEGER)
+    ),
+    {default: () => DEFAULT_PAGE_SIZE}
+  ),
+  nextPageToken: Schema.optional(Base64StringE),
+})
+export type PageRequestMeta = typeof PageRequestMeta.Type
 
 export const PageResponse = Schema.Struct({
   nextLink: Schema.Null,
@@ -21,4 +42,19 @@ export const PageResponse = Schema.Struct({
   itemsCountTotal: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
 })
 
-export const MAX_PAGE_SIZE = 2147483647
+export const PageResponseMeta = Schema.Struct({
+  nextPageToken: Schema.NullOr(Base64StringE),
+  hasNext: Schema.Boolean,
+  limit: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
+})
+
+export const createPageResponse = <A extends Schema.Struct<any>>(
+  s: A
+): Schema.Struct<
+  typeof PageResponseMeta.fields & {items: Schema.Array$<A>}
+> => {
+  return Schema.Struct({
+    ...PageResponseMeta.fields,
+    items: Schema.Array(s),
+  })
+}

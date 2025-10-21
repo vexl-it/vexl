@@ -5,6 +5,7 @@ import {
   OpenApi,
 } from '@effect/platform/index'
 import {
+  InvalidNextPageTokenError,
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
@@ -24,10 +25,10 @@ import {
   DeletePrivatePartRequest,
   DeletePrivatePartResponse,
   DuplicatedPublicKeyError,
-  GetClubOffersByIdsRequest,
+  GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest,
   GetClubOffersForMeCreatedOrModifiedAfterRequest,
-  GetOfferByIdsResponse,
-  GetOffersByIdsRequest,
+  GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
+  GetOffersForMeCreatedOrModifiedAfterPaginatedResponse,
   GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
   RefreshOfferRequest,
@@ -46,27 +47,6 @@ import {
   UpdateOfferResponse,
 } from './contracts'
 
-export const GetOffersByIdsEndpoint = HttpApiEndpoint.get(
-  'getOffersByIds',
-  '/api/v2/offers'
-)
-  .annotate(OpenApi.Summary, 'Get offers by ids')
-  .middleware(ServerSecurityMiddleware)
-  .setUrlParams(GetOffersByIdsRequest)
-  .addSuccess(GetOfferByIdsResponse)
-  .annotate(MaxExpectedDailyCall, 100)
-
-export const GetClubOffersByIdsEndpoint = HttpApiEndpoint.post(
-  'getClubOffersByIds',
-  '/api/v2/clubOffers'
-)
-  .annotate(OpenApi.Summary, 'Get club offers by ids')
-  .middleware(ServerSecurityMiddleware)
-  .setPayload(GetClubOffersByIdsRequest)
-  .addSuccess(GetOfferByIdsResponse)
-  .addError(InvalidChallengeError)
-  .annotate(MaxExpectedDailyCall, 100)
-
 export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
   'getOffersForMeModifiedOrCreatedAfter',
   '/api/v2/offers/me/modified'
@@ -76,6 +56,21 @@ export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
   .setUrlParams(GetOffersForMeCreatedOrModifiedAfterRequest)
   .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
   .annotate(MaxExpectedDailyCall, 200)
+
+export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
+  HttpApiEndpoint.get(
+    'getOffersForMeModifiedOrCreatedAfterPaginated',
+    '/api/v2/offers/me/modified/paginated'
+  )
+    .annotate(
+      OpenApi.Summary,
+      'Get offers for me modified or created after (paginated)'
+    )
+    .middleware(ServerSecurityMiddleware)
+    .setUrlParams(GetOffersForMeCreatedOrModifiedAfterPaginatedRequest)
+    .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
+    .addError(InvalidNextPageTokenError)
+    .annotate(MaxExpectedDailyCall, 600)
 
 export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
   HttpApiEndpoint.post(
@@ -91,6 +86,22 @@ export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
     .addError(InvalidChallengeError)
     .annotate(MaxExpectedDailyCall, 200)
+
+export const GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
+  HttpApiEndpoint.post(
+    'getClubOffersForMeModifiedOrCreatedAfterPaginated',
+    '/api/v2/clubOffers/me/modified/paginated'
+  )
+    .annotate(
+      OpenApi.Summary,
+      'Get club offers for me modified or created after (paginated)'
+    )
+    .middleware(ServerSecurityMiddleware)
+    .setPayload(GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest)
+    .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
+    .addError(InvalidChallengeError)
+    .addError(InvalidNextPageTokenError)
+    .annotate(MaxExpectedDailyCall, 600)
 
 export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
   'createNewOffer',
@@ -208,10 +219,10 @@ export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   .annotate(MaxExpectedDailyCall, 10)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
-  .add(GetOffersByIdsEndpoint)
-  .add(GetClubOffersByIdsEndpoint)
   .add(GetOffersForMeModifiedOrCreatedAfterEndpoint)
+  .add(GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint)
   .add(GetClubOffersForMeModifiedOrCreatedAfterEndpoint)
+  .add(GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint)
   .add(CreateNewOfferEndpoint)
   .add(RefreshOfferEndpoint)
   .add(DeleteOfferEndpoint)

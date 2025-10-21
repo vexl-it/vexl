@@ -127,7 +127,7 @@ export const FetchMyContactsRequest = Schema.Struct({
 })
 export type FetchMyContactsRequest = typeof FetchMyContactsRequest.Type
 
-export const FetchMyContactsResponseE = Schema.Struct({
+export const FetchMyContactsResponse = Schema.Struct({
   ...PageResponse.fields,
   items: Schema.Array(
     Schema.Struct({
@@ -135,7 +135,7 @@ export const FetchMyContactsResponseE = Schema.Struct({
     })
   ),
 })
-export type FetchMyContactsResponse = typeof FetchMyContactsResponseE.Type
+export type FetchMyContactsResponse = typeof FetchMyContactsResponse.Type
 
 export const FetchCommonConnectionsRequest = Schema.Struct({
   publicKeys: Schema.Array(PublicKeyPemBase64E),

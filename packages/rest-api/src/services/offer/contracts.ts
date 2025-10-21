@@ -16,6 +16,7 @@ import {
   RequestBaseWithChallenge,
 } from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
+import {createPageResponse, PageRequestMeta} from '../../Pagination.brand'
 
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(
   'ReportOfferLimitReachedError'
@@ -51,12 +52,6 @@ export const GetOffersByIdsRequest = Schema.Struct({
 })
 export type GetOffersByIdsRequest = typeof GetOffersByIdsRequest.Type
 
-export const GetClubOffersByIdsRequest = Schema.Struct({
-  ids: Schema.compose(Schema.split(','), Schema.Array(OfferIdE)),
-  ...RequestBaseWithChallenge.fields,
-})
-export type GetClubOffersByIdsRequest = typeof GetClubOffersByIdsRequest.Type
-
 export const GetOfferByIdsResponse = Schema.Array(ServerOffer)
 export type GetOfferByIdsResponse = typeof GetOfferByIdsResponse.Type
 
@@ -71,6 +66,11 @@ export const GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
 export type GetOffersForMeCreatedOrModifiedAfterRequest =
   typeof GetOffersForMeCreatedOrModifiedAfterRequest.Type
 
+export const GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
+  PageRequestMeta
+export type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
+  typeof GetOffersForMeCreatedOrModifiedAfterPaginatedRequest.Type
+
 export const GetClubOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   modifiedAt: IsoDatetimeStringE,
@@ -78,11 +78,27 @@ export const GetClubOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
 export type GetClubOffersForMeCreatedOrModifiedAfterRequest =
   typeof GetClubOffersForMeCreatedOrModifiedAfterRequest.Type
 
+export const GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest =
+  Schema.Struct({
+    ...RequestBaseWithChallenge.fields,
+    ...PageRequestMeta.fields,
+  })
+export type GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest =
+  typeof GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest.Type
+
 export const GetOffersForMeCreatedOrModifiedAfterResponse = Schema.Struct({
   offers: Schema.Array(ServerOffer),
 })
 export type GetOffersForMeCreatedOrModifiedAfterResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterResponse.Type
+
+export const GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
+  Schema.Struct({
+    ...createPageResponse(ServerOffer).fields,
+  })
+
+export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
+  typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
   userPublicKey: PublicKeyPemBase64E,
@@ -246,13 +262,6 @@ export const GetOffersByIdsInput = Schema.Struct({
   query: GetOffersByIdsRequest,
 })
 export type GetOffersByIdsInput = Schema.Schema.Type<typeof GetOffersByIdsInput>
-
-export const GetClubOffersByIdsInput = Schema.Struct({
-  body: GetClubOffersByIdsRequest,
-})
-export type GetClubOffersByIdsInput = Schema.Schema.Type<
-  typeof GetClubOffersByIdsInput
->
 
 export const GetClubOffersForMeInput = Schema.Struct({
   body: GetClubOffersForMeRequest,

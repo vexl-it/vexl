@@ -2,12 +2,14 @@ import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   InvalidChallengeError,
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {
   createMockedUser,
@@ -45,9 +47,13 @@ describe('Get club contacts', () => {
         const app = yield* _(NodeTestingApp)
         const forClubUuid = generateClubUuid()
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
+            },
+            payload: {
               club: {
                 clubImageUrl: SOME_URL,
                 name: 'someName',
@@ -57,9 +63,6 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
-            },
-            query: {
-              adminToken: ADMIN_TOKEN,
             },
           })
         )
@@ -73,20 +76,20 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink1 = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
-              clubUuid: forClubUuid,
-            },
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              clubUuid: forClubUuid,
             },
           })
         )
 
         // user1 joins the club
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink1.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
@@ -99,20 +102,20 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink2 = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
-              clubUuid: forClubUuid,
-            },
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              clubUuid: forClubUuid,
             },
           })
         )
 
         // user2 joins the club
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink2.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser2.signedChallenge,
@@ -129,8 +132,8 @@ describe('Get club contacts', () => {
         )
 
         const clubMembers = yield* _(
-          app.getClubContacts({
-            body: {
+          app.ClubsMember.getClubContacts({
+            payload: {
               clubUuid: forClubUuid,
               publicKey: secondChallengeForUser1.publicKey,
               signedChallenge: secondChallengeForUser1.signedChallenge,
@@ -157,8 +160,8 @@ describe('Get club contacts', () => {
         const forClubUuid = generateClubUuid()
 
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            payload: {
               club: {
                 clubImageUrl: SOME_URL,
                 name: 'someName',
@@ -169,7 +172,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -180,19 +183,19 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            payload: {
               clubUuid: forClubUuid,
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
         )
 
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser.signedChallenge,
@@ -209,8 +212,8 @@ describe('Get club contacts', () => {
         )
 
         const errorResponse = yield* _(
-          app.getClubContacts({
-            body: {
+          app.ClubsMember.getClubContacts({
+            payload: {
               clubUuid: forClubUuid,
               publicKey: secondChallengeForUser.publicKey,
               signedChallenge: {
@@ -235,8 +238,8 @@ describe('Get club contacts', () => {
         const forClubUuid2 = generateClubUuid()
 
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            payload: {
               club: {
                 clubImageUrl: SOME_URL,
                 name: 'someName',
@@ -247,7 +250,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -258,11 +261,11 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink1 = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            payload: {
               clubUuid: forClubUuid1,
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -270,8 +273,8 @@ describe('Get club contacts', () => {
 
         // user1 joins the first club
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink1.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
@@ -284,8 +287,8 @@ describe('Get club contacts', () => {
         )
 
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            payload: {
               club: {
                 clubImageUrl: SOME_URL,
                 name: 'someName',
@@ -296,7 +299,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -307,11 +310,11 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink2 = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            payload: {
               clubUuid: forClubUuid2,
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -319,8 +322,8 @@ describe('Get club contacts', () => {
 
         // user2 joins the second club
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink2.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser2.signedChallenge,
@@ -337,8 +340,8 @@ describe('Get club contacts', () => {
         )
 
         const errorResponse = yield* _(
-          app.getClubContacts({
-            body: {
+          app.ClubsMember.getClubContacts({
+            payload: {
               clubUuid: forClubUuid1,
               publicKey: secondChallengeForUser2.publicKey,
               signedChallenge: secondChallengeForUser2.signedChallenge,
@@ -346,12 +349,7 @@ describe('Get club contacts', () => {
           }),
           Effect.either
         )
-
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -364,8 +362,8 @@ describe('Get club contacts', () => {
         const notExistingClubUuid = generateClubUuid()
 
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            payload: {
               club: {
                 clubImageUrl: SOME_URL,
                 name: 'someName',
@@ -376,7 +374,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -387,11 +385,11 @@ describe('Get club contacts', () => {
         )
 
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            payload: {
               clubUuid: forClubUuid,
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -399,8 +397,8 @@ describe('Get club contacts', () => {
 
         // user1 joins the club
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
@@ -417,8 +415,8 @@ describe('Get club contacts', () => {
         )
 
         const errorResponse = yield* _(
-          app.getClubContacts({
-            body: {
+          app.ClubsMember.getClubContacts({
+            payload: {
               clubUuid: notExistingClubUuid,
               publicKey: challengeForUser2.publicKey,
               signedChallenge: challengeForUser2.signedChallenge,
@@ -427,10 +425,7 @@ describe('Get club contacts', () => {
           Effect.either
         )
 
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -442,8 +437,8 @@ describe('Get club contacts', () => {
         const forClubUuid = generateClubUuid()
 
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            payload: {
               club: {
                 clubImageUrl: SOME_URL,
                 name: 'someName',
@@ -454,18 +449,18 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
         )
 
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            payload: {
               clubUuid: forClubUuid,
             },
-            query: {
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
           })
@@ -477,8 +472,8 @@ describe('Get club contacts', () => {
 
         // user1 joins the club
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: inviteLink.link.code,
               contactsImported: false,
               signedChallenge: challengeForUser1.signedChallenge,
@@ -495,8 +490,8 @@ describe('Get club contacts', () => {
         )
 
         const errorResponse = yield* _(
-          app.getClubContacts({
-            body: {
+          app.ClubsMember.getClubContacts({
+            payload: {
               clubUuid: forClubUuid,
               publicKey: challengeForUser2.publicKey,
               signedChallenge: challengeForUser2.signedChallenge,
@@ -504,11 +499,7 @@ describe('Get club contacts', () => {
           }),
           Effect.either
         )
-
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })

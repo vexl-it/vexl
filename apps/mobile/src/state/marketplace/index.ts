@@ -3,14 +3,12 @@ import {
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
-import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Option} from 'effect'
 import {useAtomValue} from 'jotai'
 import {useMemo} from 'react'
 import {loadingStateAtom} from './atoms/loadingState'
 import {offerForChatOriginAtom, singleOfferAtom} from './atoms/offersState'
+import {type ErrorLoadingState} from './domain'
 
 export function useAreOffersLoading(): boolean {
   const offerState = useAtomValue(loadingStateAtom)
@@ -19,7 +17,7 @@ export function useAreOffersLoading(): boolean {
 }
 
 export function useOffersLoadingError(): Option.Option<
-  ApiErrorFetchingOffers | CryptoError | ErrorSigningChallenge
+  ErrorLoadingState['error']
 > {
   const offerState = useAtomValue(loadingStateAtom)
 

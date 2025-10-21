@@ -11,8 +11,12 @@ import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {VerificationStateDbService} from '../../routes/login/db/verificationStateDb'
 import {type TwilioVerificationClient} from '../../utils/twilio'
 
+import {NodeHttpServer} from '@effect/platform-node/index'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
-import {NodeTestingApp} from './NodeTestingApp'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {UserApiLive} from '../../httpServer'
 import {mockedPreludeClient} from './mockedPreludeClient'
 import {mockedTwilioLayer} from './mockedTwilioClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
@@ -20,18 +24,26 @@ import {mockedUsersDbService} from './mockedUsersDbService'
 export type MockedContexts =
   | TwilioVerificationClient
   | RedisService
-  | NodeTestingApp
   | ServerCrypto
   | LoggedInUsersDbService
   | DashboardReportsService
   | MetricsClientService
+  | HttpClient
+  | TestRequestHeaders
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
   ServerCrypto.layer(cryptoConfig)
 )
 
-const context = NodeTestingApp.Live.pipe(
+const TestServerLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(UserApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
+
+const context = Layer.empty.pipe(
+  Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedTwilioLayer),
   Layer.provideMerge(mockedUsersDbService),
   Layer.provideMerge(mockedMetricsClientService),

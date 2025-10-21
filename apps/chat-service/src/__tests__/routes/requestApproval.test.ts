@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -10,6 +9,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
@@ -39,28 +39,24 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const messagesForUser2 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox1.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messagesForUser2.messages).toHaveLength(1)
@@ -77,28 +73,23 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -111,16 +102,14 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -131,29 +120,23 @@ describe('Request approval', () => {
         `)
 
         const toNotFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expect(toNotFail._tag).toBe('Right')
 
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -166,43 +149,37 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.approveRequest(
-            {
-              body: yield* _(
-                user2.inbox1.addChallenge({
-                  message: 'approval message',
-                  approve: true,
-                  publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.approveRequest({
+            payload: yield* _(
+              user2.inbox1.addChallenge({
+                message: 'approval message',
+                approve: true,
+                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              })
+            ),
+          })
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -215,43 +192,37 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.approveRequest(
-            {
-              body: yield* _(
-                user2.inbox1.addChallenge({
-                  message: 'approval message',
-                  approve: false,
-                  publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.approveRequest({
+            payload: yield* _(
+              user2.inbox1.addChallenge({
+                message: 'approval message',
+                approve: false,
+                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              })
+            ),
+          })
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -264,41 +235,35 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.blockInbox(
-            {
-              body: yield* _(
-                user2.inbox1.addChallenge({
-                  publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.blockInbox({
+            payload: yield* _(
+              user2.inbox1.addChallenge({
+                publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
+              })
+            ),
+          })
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -311,40 +276,32 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         yield* _(
-          client.cancelRequestApproval(
-            {
-              body: {
-                message: 'cancel message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.cancelRequestApproval({
+            payload: {
+              message: 'cancel message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -357,28 +314,23 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         yield* _(
-          client.cancelRequestApproval(
-            {
-              body: {
-                message: 'cancel message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.cancelRequestApproval({
+            payload: {
+              message: 'cancel message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -389,30 +341,24 @@ describe('Request approval', () => {
         `)
 
         const toNotFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
         expect(toNotFail._tag).toBe('Right')
 
         const toFail = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
@@ -425,16 +371,14 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const failedResponse = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: generatePrivateKey().publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: generatePrivateKey().publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -448,24 +392,21 @@ describe('Request approval', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        const dummyAuthHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333332'),
+            publicKey: generatePrivateKey().publicKeyPemBase64,
+          })
+        )
+
+        yield* _(setAuthHeaders(dummyAuthHeaders))
         const failedResponse = yield* _(
-          client.requestApproval(
-            {
-              body: {
-                message: 'request message',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.requestApproval({
+            payload: {
+              message: 'request message',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333332'),
-                  publicKey: generatePrivateKey().publicKeyPemBase64,
-                })
-              )
-            )
-          ),
+          }),
           Effect.either
         )
 

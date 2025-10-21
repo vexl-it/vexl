@@ -88,14 +88,14 @@ export const processUserInactivity = Effect.gen(function* (_) {
       new UnexpectedServerError({
         status: 500,
         cause: e,
-        detail:
+        message:
           'Config error while processing user inactivity. Make sure inactivityNotificationAfterDays is set in the config',
       }),
     'RedisLockError': (e) =>
       new UnexpectedServerError({
         status: 500,
         cause: e,
-        detail:
+        message:
           'Error while acquiring / releasing redis lock for processing user inactivity',
       }),
   }),

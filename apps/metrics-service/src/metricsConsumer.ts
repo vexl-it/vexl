@@ -2,7 +2,7 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type Job} from 'bullmq'
-import {Effect, Layer} from 'effect'
+import {Effect} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
 import {MetricsDbService} from './db/MetricsDbService'
 import {MetricsConsumerService} from './utils/MetricsConsumerService/index'
@@ -52,6 +52,5 @@ const consumeMessage = (
     )
   )
 
-export const metricsConsumerServiceEffect = MetricsConsumerService.layer(
-  consumeMessage
-).pipe(Layer.launch)
+export const MetricsConsumerServiceLive =
+  MetricsConsumerService.layer(consumeMessage)

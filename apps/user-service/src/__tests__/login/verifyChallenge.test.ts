@@ -4,8 +4,9 @@ import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.br
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {InvalidSignatureError} from '@vexl-next/rest-api/src/services/user/contracts'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportNewUserCreated} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
-import {Effect, Either, pipe, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
 import {generateAndSignChallenge} from '../utils/loginChalenge'
@@ -38,11 +39,11 @@ describe('verify challenge', () => {
         )
         const client = yield* _(NodeTestingApp)
         const initResponse = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge: yield* _(generateAndSignChallenge),
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
@@ -55,8 +56,8 @@ describe('verify challenge', () => {
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
         const checkResponse = yield* _(
-          client.verifyCode({
-            body: {
+          client.Login.verifyCode({
+            payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               id: initResponse.verificationId,
               code: '123456',
@@ -75,8 +76,8 @@ describe('verify challenge', () => {
         )
 
         const verifyChallenge = yield* _(
-          client.verifyChallenge({
-            body: {
+          client.Login.verifyChallenge({
+            payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               signature: signedChallenge,
             },
@@ -84,13 +85,7 @@ describe('verify challenge', () => {
           Effect.either
         )
 
-        expect(verifyChallenge._tag).toEqual('Left')
-        if (Either.isLeft(verifyChallenge)) {
-          const parsedError = Schema.decodeUnknownEither(InvalidSignatureError)(
-            verifyChallenge.left.error
-          )
-          expect(parsedError._tag).toEqual('Right')
-        }
+        expectErrorResponse(InvalidSignatureError)(verifyChallenge)
 
         const usersDb = yield* _(LoggedInUsersDbService)
 

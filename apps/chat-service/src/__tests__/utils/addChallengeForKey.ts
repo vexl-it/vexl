@@ -1,4 +1,4 @@
-import {HttpClientRequest} from '@effect/platform'
+import {type HttpClient} from '@effect/platform'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -6,13 +6,21 @@ import {
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   ecdsaSignE,
-  type CryptoError,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Effect} from 'effect'
-import {type ClientError} from 'effect-http'
+import {
+  setAuthHeaders,
+  TestRequestHeaders,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'
+
+export class AddingChallengeError extends Schema.TaggedError<AddingChallengeError>(
+  'AddingChallengeError'
+)('AddingChallengeError', {
+  cause: Schema.Unknown,
+}) {}
 
 export const addChallengeForKey =
   (
@@ -32,19 +40,18 @@ export const addChallengeForKey =
       readonly senderPublicKey: PublicKeyPemBase64 // Make this compatible with all requests is ignored when ot used
       readonly signedChallenge: SignedChallenge
     },
-    CryptoError | ClientError.ClientError,
-    NodeTestingApp
+    AddingChallengeError,
+    HttpClient.HttpClient | TestRequestHeaders
   > =>
     Effect.gen(function* (_) {
       const client = yield* _(NodeTestingApp)
+      const initHeaders = yield* _(TestRequestHeaders.getHeaders)
 
+      yield* _(setAuthHeaders(authHeaders))
       const challenge = yield* _(
-        client.createChallenge(
-          {
-            body: {publicKey: key.publicKeyPemBase64},
-          },
-          HttpClientRequest.setHeaders(authHeaders)
-        )
+        client.Challenges.createChallenge({
+          payload: {publicKey: key.publicKeyPemBase64},
+        })
       )
 
       const signedChallenge = yield* _(
@@ -53,6 +60,7 @@ export const addChallengeForKey =
         )
       )
 
+      yield* _(TestRequestHeaders.setHeaders(initHeaders))
       return {
         ...request,
         publicKey: key.publicKeyPemBase64,
@@ -62,4 +70,4 @@ export const addChallengeForKey =
           signature: signedChallenge,
         },
       }
-    })
+    }).pipe(Effect.mapError((e) => new AddingChallengeError({cause: e})))

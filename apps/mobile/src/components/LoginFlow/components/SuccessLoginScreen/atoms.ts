@@ -1,3 +1,4 @@
+import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
@@ -5,7 +6,6 @@ import {
   ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {contact, user} from '@vexl-next/rest-api/src'
-import {UnknownClientError} from '@vexl-next/rest-api/src/Errors'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Match, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
@@ -49,20 +49,22 @@ const handleUserCreationActionAtom = atom(
     }
   ) => {
     const startedAt = Date.now()
-    const contactApi = contact.api({
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      url: apiEnv.contactMs,
-      getUserSessionCredentials: () => session.sessionCredentials,
-      appSource,
-      language: get(translationAtom).t('localeName'),
-      isDeveloper: get(isDeveloperAtom),
-    })
 
-    return contactApi
-      .createUser({body: {firebaseToken: null, expoToken: null}})
+    return contact
+      .api({
+        platform,
+        clientVersion: versionCode,
+        clientSemver: version,
+        url: apiEnv.contactMs,
+        getUserSessionCredentials: () => session.sessionCredentials,
+        appSource,
+        language: get(translationAtom).t('localeName'),
+        isDeveloper: get(isDeveloperAtom),
+      })
       .pipe(
+        Effect.flatMap((contactApi) =>
+          contactApi.createUser({body: {firebaseToken: null, expoToken: null}})
+        ),
         Effect.tapError((e) => {
           reportError('error', new Error('Error creating user at contact MS'), {
             e,
@@ -87,28 +89,29 @@ const handleUserCreationActionAtom = atom(
 const deleteUserAndResetFlowActionAtom = atom(
   null,
   (get, set, {session}: {session: Session}) => {
-    const userApi = user.api({
-      platform,
-      clientSemver: version,
-      clientVersion: versionCode,
-      url: apiEnv.userMs,
-      getUserSessionCredentials: () => session.sessionCredentials,
-      isDeveloper: get(isDeveloperAtom),
-      language: get(translationAtom).t('localeName'),
-      appSource,
-      deviceModel,
-      osVersion,
-    })
-
-    return userApi.deleteUser().pipe(
-      Effect.tapError((e) => {
-        reportError('error', new Error('Error deleting user in onboarding'), {
-          e,
-        })
-        return Effect.fail(e)
-      }),
-      Effect.andThen(resetNavigationToIntroScreen)
-    )
+    return user
+      .api({
+        platform,
+        clientSemver: version,
+        clientVersion: versionCode,
+        url: apiEnv.userMs,
+        getUserSessionCredentials: () => session.sessionCredentials,
+        isDeveloper: get(isDeveloperAtom),
+        language: get(translationAtom).t('localeName'),
+        appSource,
+        deviceModel,
+        osVersion,
+      })
+      .pipe(
+        Effect.flatMap((userApi) => userApi.deleteUser()),
+        Effect.tapError((e) => {
+          reportError('error', new Error('Error deleting user in onboarding'), {
+            e,
+          })
+          return Effect.fail(e)
+        }),
+        Effect.andThen(resetNavigationToIntroScreen)
+      )
   }
 )
 
@@ -159,28 +162,20 @@ export const finishLoginActionAtom = atom(
           phoneNumber,
           privateKey,
         })
-      ).pipe(
-        Effect.catchTag('ParseError', (e) =>
-          Effect.fail(
-            new UnknownClientError({
-              message:
-                'Error while parsing session data. Unable to normalize the session',
-              cause: e,
-            })
-          )
-        )
       )
 
-      const contactApi = contact.api({
-        platform,
-        clientVersion: versionCode,
-        clientSemver: version,
-        url: apiEnv.contactMs,
-        getUserSessionCredentials: () => session.sessionCredentials,
-        isDeveloper: get(isDeveloperAtom),
-        language: get(translationAtom).t('localeName'),
-        appSource,
-      })
+      const contactApi = yield* _(
+        contact.api({
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          url: apiEnv.contactMs,
+          getUserSessionCredentials: () => session.sessionCredentials,
+          isDeveloper: get(isDeveloperAtom),
+          language: get(translationAtom).t('localeName'),
+          appSource,
+        })
+      )
 
       const userExists = yield* _(
         contactApi.checkUserExists({
@@ -221,82 +216,105 @@ export const finishLoginActionAtom = atom(
 
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
     }).pipe(
+      Effect.provide(FetchHttpClient.layer),
       Effect.catchAll((e) => {
-        Match.type<typeof e>().pipe(
-          Match.tag('VerificationNotFoundError', (e) =>
-            Effect.sync(() => {
-              reportError('error', new Error('Verification not found'), {e})
-              showErrorAlert({
-                title: t(
-                  'loginFlow.verificationCode.errors.verificationNotFound'
-                ),
-                error: e,
-              })
-            })
-          ),
-          Match.tag('UnableToGenerateSignatureError', (e) =>
-            Effect.sync(() => {
-              reportError('error', new Error('Unable to generate signature'), {
-                e,
-              })
-              showErrorAlert({
-                title: t(
-                  'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-                ),
-              })
-            })
-          ),
-          Match.tag('InvalidSignatureError', (e) =>
-            Effect.sync(() => {
-              reportError(
-                'error',
-                new Error(
-                  'Public key or hash invalid while verifying challenge'
-                ),
-                {e}
-              )
-              showErrorAlert({
-                title: t(
-                  'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
-                ),
-              })
-            })
-          ),
-          Match.tag('InvalidVerificationError', (e) =>
-            Effect.sync(() => {
-              reportError('error', new Error('Invalid verification error.'), {
-                e,
-              })
-              showErrorAlert({
-                title: t(
-                  'loginFlow.verificationCode.errors.verificationExpired'
-                ),
-              })
-            })
-          ),
-          Match.tag('CryptoError', (e) =>
-            Effect.sync(() => {
-              reportError('error', new Error('Crypto error.'), {
-                e,
-              })
-              showErrorAlert({
-                title: t('common.cryptoError'),
-              })
-            })
-          ),
-          Match.tag('NetworkError', (e) => {
-            showErrorAlert({
-              title: t(`common.${e._tag}`),
-              error: e,
-            })
-          }),
+        const a: (arg: typeof e) => Effect.Effect<void> = Match.type<
+          typeof e
+        >().pipe(
           Match.tag(
-            'UnknownClientError',
-            'UnknownServerError',
+            'VerificationNotFoundError',
+            (e): Effect.Effect<void> =>
+              Effect.sync(() => {
+                reportError('error', new Error('Verification not found'), {e})
+                showErrorAlert({
+                  title: t(
+                    'loginFlow.verificationCode.errors.verificationNotFound'
+                  ),
+                  error: e,
+                })
+              })
+          ),
+          Match.tag(
+            'UnableToGenerateSignatureError',
+            (e): Effect.Effect<void> =>
+              Effect.sync(() => {
+                reportError(
+                  'error',
+                  new Error('Unable to generate signature'),
+                  {
+                    e,
+                  }
+                )
+                showErrorAlert({
+                  title: t(
+                    'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
+                  ),
+                })
+              })
+          ),
+          Match.tag(
+            'InvalidSignatureError',
+            (e): Effect.Effect<void> =>
+              Effect.sync(() => {
+                reportError(
+                  'error',
+                  new Error(
+                    'Public key or hash invalid while verifying challenge'
+                  ),
+                  {e}
+                )
+                showErrorAlert({
+                  title: t(
+                    'loginFlow.verificationCode.errors.challengeCouldNotBeGenerated'
+                  ),
+                })
+              })
+          ),
+          Match.tag(
+            'InvalidVerificationError',
+            (e): Effect.Effect<void> =>
+              Effect.sync(() => {
+                reportError('error', new Error('Invalid verification error.'), {
+                  e,
+                })
+                showErrorAlert({
+                  title: t(
+                    'loginFlow.verificationCode.errors.verificationExpired'
+                  ),
+                })
+              })
+          ),
+          Match.tag(
+            'CryptoError',
+            (e): Effect.Effect<void> =>
+              Effect.sync(() => {
+                reportError('error', new Error('Crypto error.'), {
+                  e,
+                })
+                showErrorAlert({
+                  title: t('common.cryptoError'),
+                })
+              })
+          ),
+          Match.tag(
+            'RequestError',
+            'ResponseError',
+            (e): Effect.Effect<void> => {
+              return Effect.sync(() => {
+                showErrorAlert({
+                  title: t(`common.NetworkError`),
+                  error: e,
+                })
+              })
+            }
+          ),
+          Match.tag(
+            'UnexpectedServerError',
             'NotFoundError',
             'UnauthorizedError',
-            'UnexpectedApiResponseError',
-            (e) =>
+            'HttpApiDecodeError',
+            'ParseError',
+            (e): Effect.Effect<void> =>
               Effect.sync(() => {
                 reportError('error', new Error(e._tag), {e})
                 showErrorAlert({
@@ -305,12 +323,23 @@ export const finishLoginActionAtom = atom(
                 })
               })
           ),
-          Match.exhaustive
+          Match.orElse(
+            (e): Effect.Effect<void> =>
+              Effect.sync(() => {
+                reportError('error', new Error(e), {e})
+                showErrorAlert({
+                  title: t(`common.UnknownClientError`),
+                  error: e,
+                })
+              })
+          )
         )
 
-        resetNavigationToIntroScreen()
-
-        return Effect.void
+        return a(e).pipe(
+          Effect.andThen(() => {
+            resetNavigationToIntroScreen()
+          })
+        )
       })
     )
   }

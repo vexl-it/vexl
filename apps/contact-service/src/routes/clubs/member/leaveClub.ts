@@ -1,18 +1,20 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {LeaveClubErrors} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {LeaveClubEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Array, Effect, flow} from 'effect'
-import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 
-export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
-  makeEndpointEffect(
+export const leaveClub = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsMember',
+  'leaveClub',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
@@ -20,7 +22,7 @@ export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
 
       const member = yield* _(
         membersDb.findClubMemberByPublicKey({
-          publicKey: req.body.publicKey,
+          publicKey: req.payload.publicKey,
         }),
         Effect.flatten,
         Effect.catchTag(
@@ -31,7 +33,7 @@ export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
 
       const club = yield* _(
         clubsDb.findClubByUuid({
-          uuid: req.body.clubUuid,
+          uuid: req.payload.clubUuid,
         }),
         Effect.flatten,
         Effect.catchTag(
@@ -63,12 +65,10 @@ export const leaveClub = Handler.make(LeaveClubEndpoint, (req) =>
       yield* _(
         membersDb.deleteClubMember({
           clubId: club.id,
-          publicKey: req.body.publicKey,
+          publicKey: req.payload.publicKey,
         })
       )
 
       return {}
-    }),
-    LeaveClubErrors
-  )
+    }).pipe(makeEndpointEffect)
 )

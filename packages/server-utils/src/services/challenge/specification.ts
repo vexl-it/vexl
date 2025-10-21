@@ -1,37 +1,34 @@
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {
   CreateChallengeRequest,
   CreateChallengeResponse,
   CreateChallengesRequest,
   CreateChallengesResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {Api, ApiGroup} from 'effect-http'
 
-export const CreateChallengeEndpoint = Api.post(
+export const CreateChallengeEndpoint = HttpApiEndpoint.post(
   'createChallenge',
   '/api/v1/challenges'
-).pipe(
-  // Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengeRequest),
-  Api.setResponseBody(CreateChallengeResponse)
 )
+  .setPayload(CreateChallengeRequest)
+  .addSuccess(CreateChallengeResponse)
 
-export const CreateChallengeBatchEndpoint = Api.post(
+export const CreateChallengeBatchEndpoint = HttpApiEndpoint.post(
   'createChallengeBatch',
   '/api/v1/challenges/batch'
-).pipe(
-  // Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateChallengesRequest),
-  Api.setResponseBody(CreateChallengesResponse)
 )
+  .setPayload(CreateChallengesRequest)
+  .addSuccess(CreateChallengesResponse)
 
-export const ChallengeApiGroup = ApiGroup.make('Challenges').pipe(
-  ApiGroup.addEndpoint(CreateChallengeEndpoint),
-  ApiGroup.addEndpoint(CreateChallengeBatchEndpoint)
-)
+export const ChallengeApiGroup = HttpApiGroup.make('Challenges')
+  .add(CreateChallengeEndpoint)
+  .add(CreateChallengeBatchEndpoint)
 
-export const ChallengeApiSpecification = Api.make({
-  title: 'Challenge API',
-  version: '1.0.0',
-}).pipe(Api.addGroup(ChallengeApiGroup))
+export const ChallengeApiSpecification = HttpApi.make('Challenge API')
+  .add(ChallengeApiGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

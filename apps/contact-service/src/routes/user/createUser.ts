@@ -1,10 +1,11 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {CreateUserEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect, Option, Schema} from 'effect'
-import {Handler} from 'effect-http'
+import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
@@ -37,25 +38,32 @@ const deleteIfExists = (
     )
   }).pipe(Effect.withSpan('Check and delete existing user'))
 
-export const createUser = Handler.make(CreateUserEndpoint, (req, security) =>
-  makeEndpointEffect(
-    Effect.gen(function* (_) {
-      const userDb = yield* _(UserDbService)
-      yield* _(deleteIfExists(security.hash))
+export const createUser = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'User',
+  'createUser',
+  (req) =>
+    CurrentSecurity.pipe(
+      Effect.flatMap((security) =>
+        Effect.gen(function* (_) {
+          const security = yield* _(CurrentSecurity)
+          const userDb = yield* _(UserDbService)
+          yield* _(deleteIfExists(security.hash))
 
-      yield* _(
-        userDb.insertUser({
-          publicKey: security['public-key'],
-          hash: security.hash,
-          expoToken: Option.fromNullable(req.body.expoToken),
-          firebaseToken: Option.fromNullable(req.body.firebaseToken),
-          clientVersion: req.headers.clientVersionOrNone,
-          platform: req.headers.clientPlatformOrNone,
-          appSource: req.headers.appSourceOrNone,
-        })
-      )
-      return {}
-    }).pipe(withDbTransaction, withUserActionRedisLock(security.hash)),
-    Schema.Void
-  )
+          yield* _(
+            userDb.insertUser({
+              publicKey: security['public-key'],
+              hash: security.hash,
+              expoToken: Option.fromNullable(req.payload.expoToken),
+              firebaseToken: Option.fromNullable(req.payload.firebaseToken),
+              clientVersion: req.headers.clientVersionOrNone,
+              platform: req.headers.clientPlatformOrNone,
+              appSource: req.headers.appSourceOrNone,
+            })
+          )
+          return {}
+        }).pipe(withDbTransaction, withUserActionRedisLock(security.hash))
+      ),
+      makeEndpointEffect
+    )
 )

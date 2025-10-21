@@ -1,15 +1,12 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {Effect} from 'effect/index'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {
-  handleCommonAndExpectedErrorsEffect,
-  handleCommonErrorsEffect,
-  type LoggingFunction,
-} from '../../utils'
+import {type LoggingFunction} from '../../utils'
 import {
   IssueNotificationErrors,
   type IssueNotificationInput,
@@ -43,36 +40,33 @@ export function api({
   deviceModel?: string
   osVersion?: string
 }) {
-  const client = createClientInstanceWithAuth({
-    api: NotificationApiSpecification,
-    platform,
-    clientVersion,
-    isDeveloper,
-    clientSemver,
-    language,
-    appSource,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: NotificationApiSpecification,
+        platform,
+        clientVersion,
+        isDeveloper,
+        clientSemver,
+        language,
+        appSource,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
+    return {
+      getNotificationPublicKey: () => client.getNotificationPublicKey({}),
+      issueNotification: (issueNotificationInput: IssueNotificationInput) =>
+        client.issueNotification({payload: issueNotificationInput.body}),
+      IssueNotificationErrors,
+      reportNotificationProcessed: (
+        request: ReportNotificationProcessedRequest
+      ) => client.reportNotificationProcessed({payload: request}),
+    }
   })
-
-  return {
-    getNotificationPublicKey: () =>
-      handleCommonErrorsEffect(client.getNotificationPublicKey({})),
-    issueNotification: (issueNotificationInput: IssueNotificationInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.issueNotification(issueNotificationInput),
-        IssueNotificationErrors
-      ),
-    reportNotificationProcessed: (
-      request: ReportNotificationProcessedRequest
-    ) =>
-      handleCommonErrorsEffect(
-        client.reportNotificationProcessed({body: request})
-      ),
-  }
 }
 
-export type NotificationApi = ReturnType<typeof api>
+export type NotificationApi = Effect.Effect.Success<ReturnType<typeof api>>

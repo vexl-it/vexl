@@ -1,15 +1,20 @@
+import {HttpApiBuilder} from '@effect/platform/index'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {RefreshUserEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserRefresh} from '../../metrics'
 
-export const refreshUser = Handler.make(RefreshUserEndpoint, (req, security) =>
-  makeEndpointEffect(
+export const refreshUser = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'User',
+  'refreshUser',
+  (req) =>
     Effect.gen(function* (_) {
       yield* _(reportUserRefresh())
+      const security = yield* _(CurrentSecurity)
       const userDb = yield* _(UserDbService)
       yield* _(
         userDb.findUserByPublicKeyAndHash({
@@ -27,13 +32,11 @@ export const refreshUser = Handler.make(RefreshUserEndpoint, (req, security) =>
           publicKey: security['public-key'],
           hash: security.hash,
           clientVersion: req.headers.clientVersionOrNone,
-          countryPrefix: req.body.countryPrefix,
+          countryPrefix: req.payload.countryPrefix,
           appSource: req.headers.appSourceOrNone,
           refreshedAt: new Date(),
         })
       )
       return {}
-    }),
-    UserNotFoundError
-  )
+    }).pipe(makeEndpointEffect)
 )

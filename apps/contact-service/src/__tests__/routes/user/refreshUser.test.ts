@@ -3,13 +3,15 @@ import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
+import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
@@ -25,21 +27,17 @@ beforeAll(async () => {
           publicKey: keys.publicKeyPemBase64,
         })
       )
+      yield* _(setAuthHeaders(authHeaders))
       yield* _(
-        app.createUser(
-          {
-            body: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
-            },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+        app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          HttpClientRequest.setHeaders({
-            ...authHeaders,
-          })
-        )
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          }),
+        })
       )
     })
   )
@@ -65,23 +63,21 @@ describe('Refresh user', () => {
           })
         )
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(authHeaders))
         yield* _(
-          app.refreshUser(
-            {
-              body: {
-                offersAlive: true,
-                countryPrefix: Option.some(
-                  Schema.decodeSync(CountryPrefixE)(420)
-                ),
-              },
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) ANDROID',
-                'vexl-app-meta':
-                  '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-              }),
+          app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              countryPrefix: Option.some(
+                Schema.decodeSync(CountryPrefixE)(420)
+              ),
             },
-            HttpClientRequest.setHeaders(authHeaders)
-          )
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+              'vexl-app-meta':
+                '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+            }),
+          })
         )
 
         const userInDb = yield* _(sql`
@@ -109,24 +105,20 @@ describe('Refresh user', () => {
           })
         )
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(authHeaders))
         const result = yield* _(
-          app.refreshUser(
-            {
-              body: {
-                offersAlive: true,
-                countryPrefix: Option.none(),
-              },
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) ANDROID',
-              }),
+          app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              countryPrefix: Option.none(),
             },
-            HttpClientRequest.setHeaders(authHeaders)
-          ),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+            }),
+          }),
           Effect.either
         )
-        expect(result._tag).toBe('Left')
-        if (result._tag !== 'Left') return
-        expect(result.left.error).toHaveProperty('_tag', 'UserNotFoundError')
+        expectErrorResponse(UserNotFoundError)(result)
       })
     )
   })

@@ -56,15 +56,15 @@ export function useRefreshUserOnContactService(): void {
               if (e._tag === 'UserNotFoundError') {
                 console.warn('🦋 🚨 User to refresh not found. Logging out')
                 void logout()
-              } else if (e._tag === 'NetworkError') {
+              } else if (
+                e._tag === 'ResponseError' ||
+                e._tag === 'RequestError'
+              ) {
                 console.warn(
                   '🦋 Network error refreshing user. Not logging out.',
                   e
                 )
-              } else if (
-                e._tag === 'UnknownClientError' ||
-                e._tag === 'UnknownServerError'
-              ) {
+              } else if (e._tag === 'UnexpectedServerError') {
                 reportError(
                   'warn',
                   new Error('Unknown error refreshing user. Not logging out.'),
@@ -74,11 +74,14 @@ export function useRefreshUserOnContactService(): void {
                   '🦋 🚨 Unknown error refreshing user. Not logging out.',
                   e._tag
                 )
-              } else if (e._tag === 'UnexpectedApiResponseError') {
+              } else if (
+                e._tag === 'HttpApiDecodeError' ||
+                e._tag === 'ParseError'
+              ) {
                 reportError(
                   'warn',
                   new Error(
-                    'UnexpectedApiResponseError error refreshing user. Not logging out.'
+                    'HttpApiDecodeError or ParseError error refreshing user. Not logging out.'
                   ),
                   {e}
                 )

@@ -1,13 +1,13 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {UpdateOfferErrors} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {UpdateOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {OfferDbService} from '../db/OfferDbService'
 import {reportOfferModified} from '../metrics'
 import {hashAdminId} from '../utils/hashAdminId'
@@ -15,12 +15,16 @@ import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'
 import {validatePrivatePartsWhenSavingAll} from '../utils/validatePrivatePartsWhenSavingAll'
 import {withOfferAdminActionRedisLock} from '../utils/withOfferAdminRedisLock'
 
-export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
-  makeEndpointEffect(
+export const updateOffer = HttpApiBuilder.handler(
+  OfferApiSpecification,
+  'root',
+  'updateOffer',
+  (req) =>
     Effect.gen(function* (_) {
+      const security = yield* _(CurrentSecurity)
       const offerDb = yield* _(OfferDbService)
 
-      const adminIdHashed = yield* _(hashAdminId(req.body.adminId))
+      const adminIdHashed = yield* _(hashAdminId(req.payload.adminId))
       const publicPartFromDb = yield* _(
         offerDb.queryPublicPartByAdminId(adminIdHashed),
         Effect.flatten,
@@ -29,10 +33,10 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
         )
       )
 
-      if (Array.isNonEmptyReadonlyArray(req.body.offerPrivateList)) {
+      if (Array.isNonEmptyReadonlyArray(req.payload.offerPrivateList)) {
         yield* _(
           validatePrivatePartsWhenSavingAll({
-            privateParts: req.body.offerPrivateList,
+            privateParts: req.payload.offerPrivateList,
             ownersPublicKey: security['public-key'],
           })
         )
@@ -40,7 +44,7 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
         yield* _(offerDb.deleteAllPrivatePartsForAdminId(adminIdHashed))
         yield* _(
           Effect.forEach(
-            req.body.offerPrivateList,
+            req.payload.offerPrivateList,
             (privatePart) =>
               offerDb.insertOfferPrivatePart({
                 ...privatePart,
@@ -55,7 +59,7 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
         offerDb.updateOfferPublicPayload({
           adminId: adminIdHashed,
           offerId: publicPartFromDb.offerId,
-          payloadPublic: req.body.payloadPublic,
+          payloadPublic: req.payload.payloadPublic,
         })
       )
 
@@ -78,9 +82,8 @@ export const updateOffer = Handler.make(UpdateOfferEndpoint, (req, security) =>
       )
     }).pipe(
       withDbTransaction,
-      withOfferAdminActionRedisLock(req.body.adminId),
-      Effect.zipLeft(reportOfferModified())
-    ),
-    UpdateOfferErrors
-  )
+      withOfferAdminActionRedisLock(req.payload.adminId),
+      Effect.zipLeft(reportOfferModified()),
+      makeEndpointEffect
+    )
 )

@@ -3,7 +3,6 @@ import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
@@ -11,6 +10,7 @@ import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotifica
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
 describe('delete user', () => {
   it('Should delete user and its contacts from the db', async () => {
@@ -27,40 +27,29 @@ describe('delete user', () => {
             publicKey: keys.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders))
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
-                  'someToken'
-                ),
-              },
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              }),
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
         )
 
         yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
+              replace: true,
             },
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          })
         )
 
-        yield* _(app.deleteUser({}, HttpClientRequest.setHeaders(authHeaders)))
+        yield* _(app.User.deleteUser({}))
         const sql = yield* _(SqlClient.SqlClient)
         const dataFromUsers = yield* _(sql`
           SELECT
@@ -101,10 +90,8 @@ describe('delete user', () => {
           })
         )
 
-        const result = yield* _(
-          app.deleteUser({}, HttpClientRequest.setHeaders(authHeaders)),
-          Effect.either
-        )
+        yield* _(setAuthHeaders(authHeaders))
+        const result = yield* _(app.User.deleteUser({}), Effect.either)
         expect(result).toHaveProperty('_tag', 'Right')
       })
     )

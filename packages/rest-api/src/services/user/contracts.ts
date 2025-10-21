@@ -73,6 +73,13 @@ export const VerificationId = Schema.Number.pipe(
 )
 export type VerificationId = Schema.Schema.Type<typeof VerificationId>
 
+export class InvalidVerificationIdError extends Schema.TaggedError<InvalidVerificationIdError>(
+  'InvalidVerificationIdError'
+)('InvalidVerificationIdError', {
+  status: Schema.Literal(400),
+  reason: Schema.Literal('Expired', 'InvalidFormat', 'InvalidCypher'),
+}) {}
+
 export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCodeNotExpiredError>(
   'PreviousCodeNotExpiredError'
 )('PreviousCodeNotExpiredError', {
@@ -220,6 +227,7 @@ export const InitVerificationErrors = Schema.Union(
 export const VerifyCodeErrors = Schema.Union(
   UnableToGenerateChallengeError,
   VerificationNotFoundError,
+  InvalidVerificationIdError,
   UnableToVerifySmsCodeError,
   InvalidVerificationError
 )
@@ -289,13 +297,6 @@ export const InitEraseUserResponse = Schema.Struct({
   verificationId: EraseUserVerificationId,
 })
 export type InitEraseUserResponse = typeof InitEraseUserResponse.Type
-
-export class InvalidVerificationIdError extends Schema.TaggedError<InvalidVerificationIdError>(
-  'InvalidVerificationIdError'
-)('InvalidVerificationIdError', {
-  status: Schema.Literal(400),
-  reason: Schema.Literal('Expired', 'InvalidFormat', 'InvalidCypher'),
-}) {}
 
 export const VerifyAndEraseUserErrors = Schema.Union(
   InvalidVerificationIdError,

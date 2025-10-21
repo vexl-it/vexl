@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {UserIsNotModeratorError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -9,6 +10,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Order, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -42,13 +44,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -82,16 +85,16 @@ describe('List club links', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const link1 = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               clubUuid: club.uuid,
             },
           })
         )
         const link2 = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               clubUuid: club.uuid,
             },
@@ -99,8 +102,8 @@ describe('List club links', () => {
         )
 
         const linksListResponse = yield* _(
-          app.listClubLinks({
-            body: {
+          app.ClubsModerator.listClubLinks({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               clubUuid: club.uuid,
             },
@@ -148,8 +151,8 @@ describe('List club links', () => {
         )
 
         const errorResponse = yield* _(
-          app.listClubLinks({
-            body: {
+          app.ClubsModerator.listClubLinks({
+            payload: {
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
               clubUuid: club.uuid,
             },
@@ -170,8 +173,8 @@ describe('List club links', () => {
         const nonModeratorMember = generatePrivateKey()
 
         const errorResponse = yield* _(
-          app.listClubLinks({
-            body: {
+          app.ClubsModerator.listClubLinks({
+            payload: {
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
               clubUuid: club.uuid,
             },
@@ -179,7 +182,7 @@ describe('List club links', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -190,8 +193,8 @@ describe('List club links', () => {
         const app = yield* _(NodeTestingApp)
 
         const errorResponse = yield* _(
-          app.listClubLinks({
-            body: {
+          app.ClubsModerator.listClubLinks({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               clubUuid: generateClubUuid(),
             },
@@ -199,7 +202,7 @@ describe('List club links', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -212,8 +215,8 @@ describe('List club links', () => {
         const challenge = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.listClubLinks({
-            body: {
+          app.ClubsModerator.listClubLinks({
+            payload: {
               ...challenge,
               signedChallenge: {
                 challenge: challenge.signedChallenge.challenge,
@@ -245,30 +248,31 @@ describe('List club links', () => {
           validUntil: new Date(),
           reportLimit: 10,
         }
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         yield* _(
-          app.createClub({
-            body: {
-              club: club2,
-            },
-            query: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              club: club2,
             },
           })
         )
         const adminInviteCodeForClub2 = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
-              clubUuid: club2.uuid,
-            },
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              clubUuid: club2.uuid,
             },
           })
         )
 
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: adminInviteCodeForClub2.link.code,
               ...(yield* _(generateAndSignChallenge(user2))),
               contactsImported: false,
@@ -278,8 +282,8 @@ describe('List club links', () => {
         )
 
         const errorResponse = yield* _(
-          app.listClubLinks({
-            body: {
+          app.ClubsModerator.listClubLinks({
+            payload: {
               ...(yield* _(generateAndSignChallenge(user2))),
               clubUuid: club.uuid,
             },
@@ -287,7 +291,7 @@ describe('List club links', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })

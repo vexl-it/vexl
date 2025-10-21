@@ -78,8 +78,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
     }
   }).pipe(
     Effect.catchAll((e) => {
-      if (e._tag !== 'NetworkError')
-        reportError('error', new Error('Error fetching offers'), {e})
+      reportError('error', new Error('Error fetching offers'), {e})
       set(loadingStateAtom, {state: 'error', error: e})
 
       return Effect.void

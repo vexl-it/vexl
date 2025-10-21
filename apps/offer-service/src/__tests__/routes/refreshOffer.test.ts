@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -15,6 +14,7 @@ import {
   type CreateNewOfferResponse,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -41,7 +41,6 @@ beforeAll(async () => {
             payloadPrivate: 'offer1payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.publicKeyPemBase64,
           },
-
           {
             payloadPrivate:
               'offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
@@ -53,20 +52,22 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
+      yield* _(
+        setAuthHeaders(
+          yield* _(
+            createDummyAuthHeadersForUser({
+              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              publicKey: me.publicKeyPemBase64,
+            })
+          )
+        )
+      )
+
       offer1 = {
         ...(yield* _(
-          client.createNewOffer(
-            {body: request1},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
-          )
+          client.createNewOffer({
+            payload: request1,
+          })
         )),
         adminId: request1.adminId,
       }
@@ -88,23 +89,25 @@ describe('Refresh offer', () => {
         `)
 
         const client = yield* _(NodeTestingApp)
+
         yield* _(
-          client.refreshOffer(
-            {
-              body: {
-                adminIds: [offer1.adminId],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
           )
+        )
+
+        yield* _(
+          client.refreshOffer({
+            payload: {
+              adminIds: [offer1.adminId],
+            },
+          })
         )
 
         const refreshsedOffers = yield* _(sql`
@@ -125,23 +128,25 @@ describe('Refresh offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const result = yield* _(
-          client.refreshOffer(
-            {
-              body: {
-                adminIds: [generateAdminId(), generateAdminId()],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
           )
+        )
+
+        const result = yield* _(
+          client.refreshOffer({
+            payload: {
+              adminIds: [generateAdminId(), generateAdminId()],
+            },
+          })
         )
 
         expect(result).toEqual([])

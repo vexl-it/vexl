@@ -1,32 +1,34 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type ClubLinkInfo} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  ListClubLinksErrors,
   type ListClubLinksResponse,
   UserIsNotModeratorError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {ListClubLinksEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {createFullLink} from '../utils/createFullLink'
 
-export const listClubLinks = Handler.make(ListClubLinksEndpoint, (req) =>
-  makeEndpointEffect(
+export const listClubLinks = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsModerator',
+  'listClubLinks',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const membersDb = yield* _(ClubMembersDbService)
       const clubsDb = yield* _(ClubsDbService)
       const linksDb = yield* _(ClubInvitationLinkDbService)
 
       const moderatorMember = yield* _(
-        membersDb.findClubMemberByPublicKey({publicKey: req.body.publicKey}),
+        membersDb.findClubMemberByPublicKey({publicKey: req.payload.publicKey}),
         Effect.flatten,
         Effect.catchTag(
           'NoSuchElementException',
@@ -39,7 +41,7 @@ export const listClubLinks = Handler.make(ListClubLinksEndpoint, (req) =>
       )
 
       const club = yield* _(
-        clubsDb.findClubByUuid({uuid: req.body.clubUuid}),
+        clubsDb.findClubByUuid({uuid: req.payload.clubUuid}),
         Effect.flatten,
         Effect.catchTag(
           'NoSuchElementException',
@@ -72,7 +74,5 @@ export const listClubLinks = Handler.make(ListClubLinksEndpoint, (req) =>
         clubUuid: club.uuid,
         links,
       } satisfies ListClubLinksResponse
-    }).pipe(withDbTransaction),
-    ListClubLinksErrors
-  )
+    }).pipe(withDbTransaction, makeEndpointEffect)
 )

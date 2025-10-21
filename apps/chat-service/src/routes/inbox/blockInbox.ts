@@ -1,23 +1,25 @@
-import {BlockInboxErrors} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {BlockInboxEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
-export const blockInbox = Handler.make(BlockInboxEndpoint, (req) =>
-  makeEndpointEffect(
+export const blockInbox = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Inboxes',
+  'blockInbox',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const {receiverInbox: blockerInbox, senderInbox: toBlockInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
-          receiver: req.body.publicKey,
-          sender: req.body.publicKeyToBlock,
+          receiver: req.payload.publicKey,
+          sender: req.payload.publicKeyToBlock,
         })
       )
 
@@ -37,8 +39,10 @@ export const blockInbox = Handler.make(BlockInboxEndpoint, (req) =>
         })
       )
 
-      return null
-    }).pipe(withInboxActionRedisLock(req.body.publicKey), withDbTransaction),
-    BlockInboxErrors
-  )
+      return {}
+    }).pipe(
+      withInboxActionRedisLock(req.payload.publicKey),
+      withDbTransaction,
+      makeEndpointEffect
+    )
 )

@@ -1,24 +1,27 @@
-import {NodeContext} from '@effect/platform-node'
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
 import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
-import {Config, Effect, Layer, Option} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
+import {Config, Layer, Option} from 'effect'
 import {
   cryptoConfig,
   dashboardContactsImportedHookConfig,
   healthServerPortConfig,
-  portConfig,
   redisUrl,
 } from './configs'
 import {ClubInvitationLinkDbService} from './db/ClubInvitationLinkDbService'
@@ -28,8 +31,9 @@ import {ContactDbService} from './db/ContactDbService'
 import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
+
 import {reportGaguesLayer} from './metrics'
-import {sendBulkNotification} from './routes/admin/sendBulkMessages'
+import {sendBulkNotificationHandler} from './routes/admin/sendBulkMessages'
 import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
@@ -60,75 +64,128 @@ import {NewClubUserNotificationsService} from './utils/NewClubUserNotificationSe
 import {ExpoNotificationsService} from './utils/expoNotifications/ExpoNotificationsService'
 import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
-export const app = RouterBuilder.make(ContactApiSpecification)
-  .pipe(
-    RouterBuilder.handle(createChallenge),
-    RouterBuilder.handle(createChallenges),
-    RouterBuilder.handle(checkUserExists),
-    RouterBuilder.handle(createUser),
-    RouterBuilder.handle(refreshUser),
-    RouterBuilder.handle(updateFirebaseToken),
-    RouterBuilder.handle(deleteUser),
-    RouterBuilder.handle(importContacts),
-    RouterBuilder.handle(fetchMyContacts),
-    RouterBuilder.handle(fetchCommonConnections),
-    RouterBuilder.handle(updateBadOwnerHash)
-  )
-  .pipe(
-    RouterBuilder.handle(createClub),
-    RouterBuilder.handle(generateClubInviteLink),
-    RouterBuilder.handle(listClubs),
-    RouterBuilder.handle(modifyClub),
-    RouterBuilder.handle(updateNotificationToken),
-    RouterBuilder.handle(getClubInfo),
-    RouterBuilder.handle(joinClub),
-    RouterBuilder.handle(leaveClub),
-    RouterBuilder.handle(reportClub),
-    RouterBuilder.handle(addUserToTheClub)
-  )
-  .pipe(
-    RouterBuilder.handle(getClubContacts),
-    RouterBuilder.handle(deactivateClubJoinLink),
-    RouterBuilder.handle(generateClubJoinLink),
-    RouterBuilder.handle(listClubLinks),
-    RouterBuilder.handle(getClubInfoByAccessCode),
-    RouterBuilder.handle(sendBulkNotification),
-    RouterBuilder.handle(eraseUserFromNetwork),
-    RouterBuilder.build,
-    setupLoggingMiddlewares
-  )
+const UserApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'User',
+  (h) =>
+    h
+      .handle('checkUserExists', checkUserExists)
+      .handle('createUser', createUser)
+      .handle('refreshUser', refreshUser)
+      .handle('updateFirebaseToken', updateFirebaseToken)
+      .handle('deleteUser', deleteUser)
+      .handle('eraseUserFromNetwork', eraseUserFromNetwork)
+      .handle('updateBadOwnerHash', updateBadOwnerHash)
+      .handle('updateNotificationToken', updateNotificationToken)
+)
 
-const MainLive = Layer.mergeAll(
+const ContactApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'Contact',
+  (h) =>
+    h
+      .handle('importContacts', importContacts)
+      .handle('fetchMyContacts', fetchMyContacts)
+      .handle('fetchCommonConnections', fetchCommonConnections)
+)
+
+const ClubsAdminApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'ClubsAdmin',
+  (h) =>
+    h
+      .handle('createClub', createClub)
+      .handle('modifyClub', modifyClub)
+      .handle('generateClubInviteLinkForAdmin', generateClubInviteLink)
+      .handle('listClubs', listClubs)
+)
+
+const ClubsMemberApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'ClubsMember',
+  (h) =>
+    h
+      .handle('getClubInfo', getClubInfo)
+      .handle('joinClub', joinClub)
+      .handle('leaveClub', leaveClub)
+      .handle('getClubContacts', getClubContacts)
+      .handle('getClubInfoByAccessCode', getClubInfoByAccessCode)
+      .handle('reportClub', reportClub)
+)
+
+const ClubsModeratorApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'ClubsModerator',
+  (h) =>
+    h
+      .handle('generateClubJoinLink', generateClubJoinLink)
+      .handle('deactivateClubJoinLink', deactivateClubJoinLink)
+      .handle('addUserToTheClub', addUserToTheClub)
+      .handle('listClubLinks', listClubLinks)
+)
+
+const AdminApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'Admin',
+  (h) => h.handle('sendBulkNotification', sendBulkNotificationHandler)
+)
+
+const ChallengeApiGroupLive = HttpApiBuilder.group(
+  ContactApiSpecification,
+  'Challenges',
+  (h) =>
+    h
+      .handle('createChallenge', createChallenge)
+      .handle('createChallengeBatch', createChallenges)
+)
+
+export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
+  Layer.provide(UserApiGroupLive),
+  Layer.provide(ContactApiGroupLive),
+  Layer.provide(ClubsAdminApiGroupLive),
+  Layer.provide(ClubsMemberApiGroupLive),
+  Layer.provide(ClubsModeratorApiGroupLive),
+  Layer.provide(AdminApiGroupLive),
+  Layer.provide(ChallengeApiGroupLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
+
+export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(ContactApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+const DbsLive = Layer.mergeAll(
+  ContactDbService.Live,
+  UserDbService.Live,
+  ClubsDbService.Live,
+  ChallengeDbService.Live,
+  ClubMembersDbService.Live,
+  ClubInvitationLinkDbService.Live
+).pipe(Layer.provideMerge(DbLayer))
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
   reportGaguesLayer,
   internalServerLive,
-  ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
-  Layer.provideMerge(FirebaseMessagingService.Live),
-  Layer.provideMerge(ExpoNotificationsService.Live),
-  Layer.provideMerge(ContactDbService.Live),
-  Layer.provideMerge(ImportContactsQuotaService.Live),
-  Layer.provideMerge(NewClubUserNotificationsService.Live),
-  Layer.provideMerge(UserDbService.Live),
-  Layer.provideMerge(ClubsDbService.Live),
-  Layer.provideMerge(ChallengeService.Live),
-  Layer.provideMerge(ChallengeDbService.Live),
-  Layer.provideMerge(ClubMembersDbService.Live),
-  Layer.provideMerge(ClubInvitationLinkDbService.Live),
-  Layer.provideMerge(DbLayer),
-  Layer.provideMerge(RedisService.Live),
-  Layer.provideMerge(MetricsClientService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provideMerge(NodeContext.layer),
-  Layer.provideMerge(
+  Layer.provide(FirebaseMessagingService.Live),
+  Layer.provide(ExpoNotificationsService.Live),
+  Layer.provide(ImportContactsQuotaService.Live),
+  Layer.provide(NewClubUserNotificationsService.Live),
+  Layer.provide(ChallengeService.Live),
+  Layer.provide(DbsLive),
+  Layer.provide(RedisService.Live),
+  Layer.provide(MetricsClientService.Live),
+  Layer.provide(RedisConnectionService.layer(redisUrl)),
+  Layer.provide(ServerCrypto.layer(cryptoConfig)),
+  Layer.provide(
     DashboardReportsService.make({
       contactsImportedHookConfig: dashboardContactsImportedHookConfig,
       newUserHookOption: Config.succeed(Option.none()),
     })
   )
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
 )

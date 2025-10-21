@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {UserIsNotModeratorError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -9,6 +10,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -44,13 +46,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -82,10 +85,9 @@ describe('Generate club join link', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const joinLinkResponse = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               clubUuid: club.uuid,
-
               ...(yield* _(generateAndSignChallenge(userKey))),
             },
           })
@@ -98,8 +100,8 @@ describe('Generate club join link', () => {
         ).toBeTruthy()
 
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code: joinLinkResponse.codeInfo.code,
               ...(yield* _(generateAndSignChallenge(user1))),
               contactsImported: false,
@@ -129,10 +131,9 @@ describe('Generate club join link', () => {
         )
 
         const errorResponse = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               clubUuid: club.uuid,
-
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
             },
           }),
@@ -152,17 +153,16 @@ describe('Generate club join link', () => {
         const nonModeratorMember = generatePrivateKey()
 
         const errorResponse = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               clubUuid: club.uuid,
-
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
             },
           }),
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -173,17 +173,16 @@ describe('Generate club join link', () => {
         const app = yield* _(NodeTestingApp)
 
         const errorResponse = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               clubUuid: generateClubUuid(),
-
               ...(yield* _(generateAndSignChallenge(userKey))),
             },
           }),
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -196,10 +195,9 @@ describe('Generate club join link', () => {
         const challenge = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.generateClubJoinLink({
-            body: {
+          app.ClubsModerator.generateClubJoinLink({
+            payload: {
               clubUuid: club.uuid,
-
               ...challenge,
               signedChallenge: {
                 challenge: challenge.signedChallenge.challenge,
@@ -207,7 +205,6 @@ describe('Generate club join link', () => {
               },
             },
           }),
-
           Effect.either
         )
 

@@ -15,7 +15,8 @@ import {
 } from '@vexl-next/rest-api'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
-import {Schema} from 'effect'
+import {FetchHttpClient} from '@effect/platform/index'
+import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
@@ -64,132 +65,154 @@ const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {
   return session.session.sessionCredentials
 })
 
-export const apiAtom = atom((get) => {
-  function getUserSessionCredentials(): UserSessionCredentials {
-    const session = get(sessionCredentialsAtom)
-    return session
-  }
+export const apiAtom = atom((get) =>
+  Effect.gen(function* (_) {
+    function getUserSessionCredentials(): UserSessionCredentials {
+      const session = get(sessionCredentialsAtom)
+      return session
+    }
 
-  const {t} = get(translationAtom)
-  const language = t('localeName')
-  const isDeveloper = get(isDeveloperAtom)
+    const {t} = get(translationAtom)
+    const language = t('localeName')
+    const isDeveloper = get(isDeveloperAtom)
 
-  return {
-    contact: contact.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      url: apiEnv.contactMs,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-    offer: offer.api({
-      language,
-      appSource,
-      platform,
-      clientSemver: version,
-      clientVersion: versionCode,
-      url: apiEnv.offerMs,
-      isDeveloper,
-      deviceModel,
-      osVersion,
-      getUserSessionCredentials,
-    }),
-    chat: chat.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      url: apiEnv.chatMs,
-      deviceModel,
-      osVersion,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-    user: user.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      deviceModel,
-      osVersion,
-      url: apiEnv.userMs,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-    location: location.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      deviceModel,
-      osVersion,
-      url: apiEnv.locationMs,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-    notification: notification.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      isDeveloper,
-      deviceModel,
-      osVersion,
-      url: apiEnv.notificationMs,
-      getUserSessionCredentials,
-    }),
-    btcExchangeRate: btcExchangeRate.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      url: apiEnv.btcExchangeRateMs,
-      isDeveloper,
-      deviceModel,
-      osVersion,
-      getUserSessionCredentials,
-    }),
-    feedback: feedback.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      url: apiEnv.feedbackMs,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-    content: content.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      deviceModel,
-      osVersion,
-      url: apiEnv.contentMs,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-    metrics: metrics.api({
-      language,
-      appSource,
-      platform,
-      clientVersion: versionCode,
-      clientSemver: version,
-      deviceModel,
-      osVersion,
-      url: apiEnv.metrics,
-      isDeveloper,
-      getUserSessionCredentials,
-    }),
-  }
-})
+    return {
+      contact: yield* _(
+        contact.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          url: apiEnv.contactMs,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+      offer: yield* _(
+        offer.api({
+          language,
+          appSource,
+          platform,
+          clientSemver: version,
+          clientVersion: versionCode,
+          url: apiEnv.offerMs,
+          isDeveloper,
+          deviceModel,
+          osVersion,
+          getUserSessionCredentials,
+        })
+      ),
+      chat: yield* _(
+        chat.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          url: apiEnv.chatMs,
+          deviceModel,
+          osVersion,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+      user: yield* _(
+        user.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          deviceModel,
+          osVersion,
+          url: apiEnv.userMs,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+      location: yield* _(
+        location.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          deviceModel,
+          osVersion,
+          url: apiEnv.locationMs,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+      notification: yield* _(
+        notification.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          isDeveloper,
+          deviceModel,
+          osVersion,
+          url: apiEnv.notificationMs,
+          getUserSessionCredentials,
+        })
+      ),
+      btcExchangeRate: yield* _(
+        btcExchangeRate.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          url: apiEnv.btcExchangeRateMs,
+          isDeveloper,
+          deviceModel,
+          osVersion,
+          getUserSessionCredentials,
+        })
+      ),
+      feedback: yield* _(
+        feedback.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          url: apiEnv.feedbackMs,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+      content: yield* _(
+        content.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          deviceModel,
+          osVersion,
+          url: apiEnv.contentMs,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+      metrics: yield* _(
+        metrics.api({
+          language,
+          appSource,
+          platform,
+          clientVersion: versionCode,
+          clientSemver: version,
+          deviceModel,
+          osVersion,
+          url: apiEnv.metrics,
+          isDeveloper,
+          getUserSessionCredentials,
+        })
+      ),
+    }
+  }).pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync)
+)

@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {
   generatePrivateKey,
   type PublicKeyPemBase64,
@@ -13,7 +12,10 @@ import {
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+import {NumberDoesNotMatchOldHashError} from '@vexl-next/rest-api/src/services/user/contracts'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {cryptoConfig, oldHmacKeyUsedForHashingNumbersConfig} from '../configs'
 import {NodeTestingApp} from './utils/NodeTestingApp'
@@ -62,30 +64,26 @@ describe('Regenerate session credentials', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+
+        yield* _(
+          setAuthHeaders({
+            'public-key': publicKey,
+            hash,
+            signature,
+          })
+        )
+
         const response = yield* _(
-          client.regenerateSessionCredentials(
-            {
-              body: {
-                myPhoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420777777778'),
-              },
+          client.regenerateSessionCredentials({
+            payload: {
+              myPhoneNumber:
+                Schema.decodeSync(E164PhoneNumberE)('+420777777778'),
             },
-            HttpClientRequest.setHeaders({
-              'public-key': publicKey,
-              hash,
-              signature,
-            })
-          ),
+          }),
           Effect.either
         )
 
-        expect(response._tag).toBe('Left')
-        if (response._tag !== 'Left') return
-
-        expect(response.left.error).toHaveProperty(
-          '_tag',
-          'NumberDoesNotMatchOldHashError'
-        )
+        expectErrorResponse(NumberDoesNotMatchOldHashError)(response)
       })
     )
   })
@@ -95,19 +93,21 @@ describe('Regenerate session credentials', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420777777777')
+
+        yield* _(
+          setAuthHeaders({
+            'public-key': publicKey,
+            hash,
+            signature,
+          })
+        )
+
         const response = yield* _(
-          client.regenerateSessionCredentials(
-            {
-              body: {
-                myPhoneNumber: phoneNumber,
-              },
+          client.regenerateSessionCredentials({
+            payload: {
+              myPhoneNumber: phoneNumber,
             },
-            HttpClientRequest.setHeaders({
-              'public-key': publicKey,
-              hash,
-              signature,
-            })
-          )
+          })
         )
 
         const properKey = yield* _(cryptoConfig.hmacKey)

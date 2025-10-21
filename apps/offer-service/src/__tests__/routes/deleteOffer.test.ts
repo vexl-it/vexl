@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -12,6 +11,7 @@ import {
 import {type SecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {type CreateNewOfferRequest} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -34,7 +34,6 @@ const createOffer = (authHeaders: SecurityHeaders) =>
           payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
           userPublicKey: user2.publicKeyPemBase64,
         },
-
         {
           payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
           userPublicKey: authHeaders['public-key'],
@@ -47,11 +46,12 @@ const createOffer = (authHeaders: SecurityHeaders) =>
 
     const client = yield* _(NodeTestingApp)
 
+    yield* _(setAuthHeaders(authHeaders))
+
     return yield* _(
-      client.createNewOffer(
-        {body: request},
-        HttpClientRequest.setHeaders(authHeaders)
-      )
+      client.createNewOffer({
+        payload: request,
+      })
     )
   })
 
@@ -95,11 +95,13 @@ describe('Delete offer', () => {
         expect(createdPrivate.length).toBeGreaterThan(0)
 
         const api = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(authHeaders))
+
         yield* _(
-          api.deleteOffer(
-            {query: {adminIds: [offer1.adminId, offer2.adminId]}},
-            HttpClientRequest.setHeaders(authHeaders)
-          )
+          api.deleteOffer({
+            urlParams: {adminIds: [offer1.adminId, offer2.adminId]},
+          })
         )
 
         const removedPublic = yield* _(sql`
@@ -146,6 +148,7 @@ describe('Delete offer', () => {
       })
     )
   })
+
   it('Does not fail when deleting offers using empty adminIds', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -158,15 +161,18 @@ describe('Delete offer', () => {
         )
 
         const api = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(authHeaders))
+
         yield* _(
-          api.deleteOffer(
-            {query: {adminIds: []}},
-            HttpClientRequest.setHeaders(authHeaders)
-          )
+          api.deleteOffer({
+            urlParams: {adminIds: []},
+          })
         )
       })
     )
   })
+
   it('Does not fail when deleting non existing offers', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -204,15 +210,15 @@ describe('Delete offer', () => {
         expect(createdPrivate.length).toBeGreaterThan(0)
 
         const api = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(authHeaders))
+
         yield* _(
-          api.deleteOffer(
-            {
-              query: {
-                adminIds: [offer1.adminId, offer2.adminId, generateAdminId()],
-              },
+          api.deleteOffer({
+            urlParams: {
+              adminIds: [offer1.adminId, offer2.adminId, generateAdminId()],
             },
-            HttpClientRequest.setHeaders(authHeaders)
-          )
+          })
         )
 
         const removedPublic = yield* _(sql`

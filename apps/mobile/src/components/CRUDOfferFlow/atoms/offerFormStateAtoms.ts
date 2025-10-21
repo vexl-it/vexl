@@ -789,8 +789,7 @@ export const offerFormMolecule = molecule(() => {
             )
           }
 
-          if (e._tag !== 'NetworkError')
-            reportError('error', new Error('Error while creating offer'), {e})
+          reportError('error', new Error('Error while creating offer'), {e})
 
           return Effect.zipRight(
             showErrorAlertE({

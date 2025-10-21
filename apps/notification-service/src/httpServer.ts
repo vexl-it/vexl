@@ -1,45 +1,59 @@
-import {NodeContext} from '@effect/platform-node'
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {
   cryptoConfig,
   healthServerPortConfig,
-  portConfig,
   redisUrl,
 } from '@vexl-next/server-utils/src/commonConfigs'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
+import {Layer} from 'effect'
 import {ExpoClientService} from './ExpoMessagingLayer'
 import {FirebaseMessagingLayer} from './FirebaseMessagingLayer'
 import {IssueNotifcationHandler} from './routes/IssueNotificationRouteLive'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {reportNotificationProcessedHandler} from './routes/reportNotificationProcessed'
 
-export const app = RouterBuilder.make(NotificationApiSpecification).pipe(
-  RouterBuilder.handle(IssueNotifcationHandler),
-  RouterBuilder.handle(getCypherPublicKeyHandler),
-  RouterBuilder.handle(reportNotificationProcessedHandler),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const RootGroupLive = HttpApiBuilder.group(
+  NotificationApiSpecification,
+  'root',
+  (h) =>
+    h
+      .handle('issueNotification', IssueNotifcationHandler)
+      .handle('getNotificationPublicKey', getCypherPublicKeyHandler)
+      .handle('reportNotificationProcessed', reportNotificationProcessedHandler)
 )
 
-const MainLive = Layer.mergeAll(
-  ServerCrypto.layer(cryptoConfig),
+const NotificationApiLive = HttpApiBuilder.api(
+  NotificationApiSpecification
+).pipe(
+  Layer.provide(RootGroupLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
+
+export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(NotificationApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(FirebaseMessagingLayer.Live),
   Layer.provideMerge(ExpoClientService.Live),
   Layer.provideMerge(MetricsClientService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provideMerge(NodeContext.layer)
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl))
 )

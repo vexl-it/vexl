@@ -5,7 +5,8 @@ import {
   UnableToVerifySmsCodeError,
   VerifyCodeErrors,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Either, Schema} from 'effect'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {generateAndSignChallenge} from '../utils/loginChalenge'
 import {
@@ -31,11 +32,11 @@ beforeEach(() => {
 const initVerification = Effect.gen(function* (_) {
   const client = yield* _(NodeTestingApp)
   return yield* _(
-    client.initVerification({
+    client.Login.initVerification({
       headers: Schema.decodeSync(CommonHeaders)({
         'user-agent': 'Vexl/2 (1.0.0) IOS',
       }),
-      body: {
+      payload: {
         challenge: yield* _(generateAndSignChallenge),
         phoneNumber: phoneNumberToTest,
       },
@@ -56,8 +57,8 @@ describe('Verify code', () => {
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
         const checkResponse = yield* _(
-          client.verifyCode({
-            body: {
+          client.Login.verifyCode({
+            payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               id: initResponse.verificationId,
               code: '123456',
@@ -90,8 +91,8 @@ describe('Verify code', () => {
         )
         const keypair = generatePrivateKey()
         const checkResponse = yield* _(
-          client.verifyCode({
-            body: {
+          client.Login.verifyCode({
+            payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               id: initResponse.verificationId,
               code: '123456',
@@ -100,18 +101,7 @@ describe('Verify code', () => {
           Effect.either
         )
 
-        if (Either.isRight(checkResponse)) {
-          expect(checkResponse._tag).toBe('Right')
-          return
-        }
-        const error = yield* _(
-          checkResponse.left.error,
-          Schema.decodeUnknown(VerifyCodeErrors)
-        )
-        expect(error._tag).toBe('UnableToVerifySmsCodeError')
-        if (error._tag === 'UnableToVerifySmsCodeError') {
-          expect(error.reason).toBe('BadCode')
-        }
+        expectErrorResponse(VerifyCodeErrors)(checkResponse)
       })
     )
   })

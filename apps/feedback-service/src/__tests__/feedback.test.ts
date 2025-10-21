@@ -1,12 +1,13 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
+import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
 } from '@vexl-next/rest-api/src/services/feedback/contracts'
-import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either, Schema} from 'effect'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from './utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from './utils/runPromiseInMockedEnvironment'
 
@@ -25,12 +26,8 @@ describe('Feedback service test', () => {
           textComment: 'testTextComment',
         } as const
 
-        yield* _(
-          client.submitFeedback(
-            {body},
-            HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
-          )
-        )
+        yield* _(setDummyAuthHeaders)
+        yield* _(client.submitFeedback({payload: body}))
 
         const sql = yield* _(SqlClient.SqlClient)
         const insertedFeedbackInDb = yield* _(sql`
@@ -62,12 +59,11 @@ describe('Feedback service test', () => {
           textComment: 'testTextComment',
         } as const
 
-        const resp = yield* _(client.submitFeedback({body}), Effect.either)
-
-        expect(Either.isLeft(resp)).toBe(true)
-        if (resp._tag === 'Left') {
-          expect(resp.left._tag).toEqual('ClientError')
-        }
+        const response = yield* _(
+          client.submitFeedback({payload: body}),
+          Effect.either
+        )
+        expectErrorResponse(UnauthorizedError)(response)
       })
     )
   })

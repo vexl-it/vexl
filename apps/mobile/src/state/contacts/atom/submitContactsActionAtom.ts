@@ -250,10 +250,7 @@ export const submitContactsActionAtom = atom(
           Alert.alert(t('contacts.importContactsQuotaReachedError'))
           return Effect.void
         }
-        if (
-          e._tag !== 'NetworkError' &&
-          e._tag !== 'ContactsPermissionsNotGrantedError'
-        ) {
+        if (e._tag !== 'ContactsPermissionsNotGrantedError') {
           reportError('error', new Error('error while submitting contacts'), {
             e,
           })

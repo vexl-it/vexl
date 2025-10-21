@@ -1,9 +1,10 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -50,33 +51,34 @@ describe('Modify club', () => {
         yield* _(sql`DELETE FROM club`)
 
         const app = yield* _(NodeTestingApp)
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
+            },
+            payload: {
               club: clubsToSave[0],
             },
-            query: {
-              adminToken: ADMIN_TOKEN,
-            },
           })
         )
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
+            },
+            payload: {
               club: clubsToSave[1],
             },
-            query: {
-              adminToken: ADMIN_TOKEN,
-            },
           })
         )
         yield* _(
-          app.createClub({
-            body: {
-              club: clubsToSave[2],
-            },
-            query: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              club: clubsToSave[2],
             },
           })
         )
@@ -99,11 +101,11 @@ describe('Modify club', () => {
           reportLimit: 10,
         }
         const errorResponse = yield* _(
-          app.modifyClub({
-            query: {
+          app.ClubsAdmin.modifyClub({
+            urlParams: {
               adminToken: 'aha',
             },
-            body: {
+            payload: {
               clubInfo: clubData,
             },
           }),
@@ -130,31 +132,26 @@ describe('Modify club', () => {
           reportLimit: 10,
         }
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const modifiedClub = yield* _(
-          app.modifyClub(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
-              body: {
-                clubInfo: clubData,
-              },
+          app.ClubsAdmin.modifyClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          )
+            payload: {
+              clubInfo: clubData,
+            },
+          })
         )
 
         expect(modifiedClub.clubInfo).toMatchObject(clubData)
 
         const clubsInDb = yield* _(
-          app.listClubs(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
+          app.ClubsAdmin.listClubs({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          )
+          })
         )
 
         expect(clubsInDb.clubs).toHaveLength(3)
@@ -180,25 +177,20 @@ describe('Modify club', () => {
           reportLimit: 10,
         }
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const errorResponse = yield* _(
-          app.modifyClub(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
-              body: {
-                clubInfo: clubData,
-              },
+          app.ClubsAdmin.modifyClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          ),
+            payload: {
+              clubInfo: clubData,
+            },
+          }),
           Effect.either
         )
 
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })

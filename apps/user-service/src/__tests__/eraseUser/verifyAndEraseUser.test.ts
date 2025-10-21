@@ -4,7 +4,8 @@ import {
   UnableToVerifySmsCodeError,
   VerifyCodeErrors,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Either, Schema} from 'effect'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   checkVerificationMock,
@@ -29,11 +30,11 @@ beforeEach(() => {
 const initVerification = Effect.gen(function* (_) {
   const client = yield* _(NodeTestingApp)
   return yield* _(
-    client.initEraseUser({
+    client.EraseUser.initEraseUser({
       headers: Schema.decodeSync(CommonHeaders)({
         'user-agent': 'Vexl/2 (1.0.0) IOS',
       }),
-      body: {
+      payload: {
         phoneNumber: phoneNumberToTest,
       },
     })
@@ -52,8 +53,8 @@ describe('Verify and erase user', () => {
 
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const checkResponse = yield* _(
-          client.verifyAndEraseuser({
-            body: {
+          client.EraseUser.verifyAndEraseuser({
+            payload: {
               verificationId: initResponse.verificationId,
               code: '123456',
             },
@@ -85,8 +86,8 @@ describe('Verify and erase user', () => {
           )
         )
         const checkResponse = yield* _(
-          client.verifyAndEraseuser({
-            body: {
+          client.EraseUser.verifyAndEraseuser({
+            payload: {
               verificationId: initResponse.verificationId,
               code: '123456',
             },
@@ -94,18 +95,7 @@ describe('Verify and erase user', () => {
           Effect.either
         )
 
-        if (Either.isRight(checkResponse)) {
-          expect(checkResponse._tag).toBe('Right')
-          return
-        }
-        const error = yield* _(
-          checkResponse.left.error,
-          Schema.decodeUnknown(VerifyCodeErrors)
-        )
-        expect(error._tag).toBe('UnableToVerifySmsCodeError')
-        if (error._tag === 'UnableToVerifySmsCodeError') {
-          expect(error.reason).toBe('BadCode')
-        }
+        expectErrorResponse(VerifyCodeErrors)(checkResponse)
       })
     )
   })

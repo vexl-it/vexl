@@ -1,3 +1,4 @@
+import { FetchHttpClient } from "@effect/platform";
 import { ecdsa } from "@vexl-next/cryptography";
 import {
   PrivateKeyHolder,
@@ -123,24 +124,28 @@ export function parseFormData<T extends Schema.Schema<any>>(
 }
 
 export function createUserPublicApi(): userApi.UserApi {
-  return userApi.api({
-    url: getEnvPreset().userMs,
-    ...apiMeta,
-    deviceModel: "web",
-    osVersion: "web",
-  });
+  return userApi
+    .api({
+      url: getEnvPreset().userMs,
+      ...apiMeta,
+      deviceModel: "web",
+      osVersion: "web",
+    })
+    .pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync);
 }
 
 export function createContactsPublicApi(): contactsApi.ContactApi {
-  return contactsApi.api({
-    url: getEnvPreset().contactMs,
-    ...apiMeta,
-    deviceModel: "web",
-    osVersion: "web",
-    getUserSessionCredentials: () => ({
-      signature: "dumy",
-      publicKey: "dummy" as PublicKeyPemBase64,
-      hash: "dummy",
-    }),
-  });
+  return contactsApi
+    .api({
+      url: getEnvPreset().contactMs,
+      ...apiMeta,
+      deviceModel: "web",
+      osVersion: "web",
+      getUserSessionCredentials: () => ({
+        signature: "dumy",
+        publicKey: "dummy" as PublicKeyPemBase64,
+        hash: "dummy",
+      }),
+    })
+    .pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync);
 }

@@ -1,110 +1,106 @@
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
-import {Api, ApiGroup} from 'effect-http'
 import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
 import {CommonHeaders} from '../../commonHeaders'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   BlogsArticlesResponse,
   ClearEventsCacheRequest,
+  CreateInvoiceErrors,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
   EventsResponse,
+  GetInvoiceErrors,
   GetInvoiceRequest,
   GetInvoiceResponse,
+  GetInvoiceStatusTypeErrors,
   GetInvoiceStatusTypeRequest,
   GetInvoiceStatusTypeResponse,
+  InvalidTokenError,
   NewsAndAnnouncementsResponse,
+  UpdateInvoiceStatusWebhookErrors,
 } from './contracts'
 
-export const GetEventsEndpoint = Api.get('getEvents', '/content/events').pipe(
-  Api.setResponseBody(EventsResponse),
-  Api.setResponseStatus(200 as const)
-)
+export const GetEventsEndpoint = HttpApiEndpoint.get(
+  'getEvents',
+  '/content/events'
+).addSuccess(EventsResponse)
 
-export const ClearEventsCacheEndpoint = Api.post(
+export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
   'clearCache',
   '/content/clear-cache'
-).pipe(
-  Api.setRequestQuery(ClearEventsCacheRequest),
-  Api.setResponseBody(NoContentResponse),
-  Api.setResponseStatus(200 as const)
 )
+  .setUrlParams(ClearEventsCacheRequest)
+  .addError(InvalidTokenError)
+  .addSuccess(NoContentResponse)
 
-export const GetBlogArticlesEndpoint = Api.get(
+export const GetBlogArticlesEndpoint = HttpApiEndpoint.get(
   'getBlogArticles',
   '/content/blogs'
-).pipe(
-  Api.setResponseBody(BlogsArticlesResponse),
-  Api.setResponseStatus(200 as const)
-)
+).addSuccess(BlogsArticlesResponse)
 
-export const CmsContentApiGroup = ApiGroup.make('Cms content').pipe(
-  ApiGroup.addEndpoint(GetEventsEndpoint),
-  ApiGroup.addEndpoint(ClearEventsCacheEndpoint),
-  ApiGroup.addEndpoint(GetBlogArticlesEndpoint)
-)
+const CmsContentApiGroup = HttpApiGroup.make('Cms')
+  .add(GetEventsEndpoint)
+  .add(ClearEventsCacheEndpoint)
+  .add(GetBlogArticlesEndpoint)
 
-export const NewsAndAnonouncementsEndpoint = Api.get(
+export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
   'getNewsAndAnnouncements',
   '/content/news-and-announcements'
-).pipe(
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setResponseBody(NewsAndAnnouncementsResponse),
-  Api.setResponseStatus(200 as const)
 )
-export const NewsAndAnnouncementsApiGroup = ApiGroup.make(
-  'News and Announcements'
-).pipe(ApiGroup.addEndpoint(NewsAndAnonouncementsEndpoint))
+  .setHeaders(CommonHeaders)
+  .addSuccess(NewsAndAnnouncementsResponse)
 
-export const CreateInvoiceEndpoint = Api.post(
+const NewsAndAnnouncementsApiGroup = HttpApiGroup.make(
+  'NewsAndAnnouncements'
+).add(NewsAndAnonouncementsEndpoint)
+
+export const CreateInvoiceEndpoint = HttpApiEndpoint.post(
   'createInvoice',
   '/content/createInvoice'
-).pipe(
-  Api.setRequestBody(CreateInvoiceRequest),
-  Api.setResponseBody(CreateInvoiceResponse),
-  Api.setResponseStatus(200 as const)
 )
+  .setPayload(CreateInvoiceRequest)
+  .addSuccess(CreateInvoiceResponse)
+  .addError(CreateInvoiceErrors)
 
-export const GetInvoiceEndpoint = Api.get(
+export const GetInvoiceEndpoint = HttpApiEndpoint.get(
   'getInvoice',
   '/content/getInvoice'
-).pipe(
-  Api.setRequestQuery(GetInvoiceRequest),
-  Api.setResponseBody(GetInvoiceResponse),
-  Api.setResponseStatus(200 as const)
 )
+  .setUrlParams(GetInvoiceRequest)
+  .addSuccess(GetInvoiceResponse)
+  .addError(GetInvoiceErrors)
 
-export const GetInvoiceStatusTypeEndpoint = Api.get(
+export const GetInvoiceStatusTypeEndpoint = HttpApiEndpoint.get(
   'getInvoiceStatusType',
   '/content/getInvoiceStatusType'
-).pipe(
-  Api.setRequestQuery(GetInvoiceStatusTypeRequest),
-  Api.setResponseBody(GetInvoiceStatusTypeResponse),
-  Api.setResponseStatus(200 as const)
 )
+  .setUrlParams(GetInvoiceStatusTypeRequest)
+  .addSuccess(GetInvoiceStatusTypeResponse)
+  .addError(GetInvoiceStatusTypeErrors)
 
-export const UpdateInvoiceStateWebhookEndpoint = Api.post(
+export const UpdateInvoiceStateWebhookEndpoint = HttpApiEndpoint.post(
   'updateInvoiceStateWebhook',
   '/content/invoice/btcpay-webhook'
-).pipe(
-  Api.setRequestHeaders(BtcPayServerWebhookHeader),
-  // need to be unknown as we need whole raw body to verify sha256 signature
-  Api.setRequestBody(Schema.Unknown),
-  Api.setResponseBody(NoContentResponse),
-  Api.setResponseStatus(200 as const)
 )
+  .setHeaders(BtcPayServerWebhookHeader)
+  .setPayload(Schema.Unknown)
+  .addSuccess(NoContentResponse)
+  .addError(UpdateInvoiceStatusWebhookErrors)
 
-export const DonationsApiGroup = ApiGroup.make('Donations').pipe(
-  ApiGroup.addEndpoint(CreateInvoiceEndpoint),
-  ApiGroup.addEndpoint(GetInvoiceEndpoint),
-  ApiGroup.addEndpoint(UpdateInvoiceStateWebhookEndpoint),
-  ApiGroup.addEndpoint(GetInvoiceStatusTypeEndpoint)
-)
+const DonationsApiGroup = HttpApiGroup.make('Donations')
+  .add(CreateInvoiceEndpoint)
+  .add(GetInvoiceEndpoint)
+  .add(UpdateInvoiceStateWebhookEndpoint)
+  .add(GetInvoiceStatusTypeEndpoint)
 
-export const ContentApiSpecification = Api.make({
-  title: 'Content service',
-}).pipe(
-  Api.addGroup(CmsContentApiGroup),
-  Api.addGroup(NewsAndAnnouncementsApiGroup),
-  Api.addGroup(DonationsApiGroup)
-)
+export const ContentApiSpecification = HttpApi.make('Content API')
+  .add(CmsContentApiGroup)
+  .add(NewsAndAnnouncementsApiGroup)
+  .add(DonationsApiGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

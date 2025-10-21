@@ -1,13 +1,13 @@
+import {
+  NotFoundError,
+  UnauthorizedError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
-import {
-  NotFoundError,
-  UnauthorizedError,
-  UnknownServerError,
-} from '../../Errors'
 
 export const Speaker = Schema.Struct({
   name: Schema.String,
@@ -307,7 +307,7 @@ export type UpdateInvoiceStatusWebhookRequest =
 export const UpdateInvoiceStatusWebhookErrors = Schema.Union(
   UnauthorizedError,
   UpdateInvoiceWebhookError,
-  UnknownServerError
+  UnexpectedServerError
 )
 export type UpdateInvoiceStatusWebhookErrors =
   typeof UpdateInvoiceStatusWebhookErrors.Type
@@ -327,7 +327,7 @@ export type GetInvoiceStatusTypeResponse =
   typeof GetInvoiceStatusTypeResponse.Type
 
 export const GetInvoiceStatusTypeErrors = Schema.Union(
-  UnknownServerError,
+  UnexpectedServerError,
   NotFoundError
 )
 export type GetInvoiceStatusTypeErrors = typeof GetInvoiceStatusTypeErrors.Type

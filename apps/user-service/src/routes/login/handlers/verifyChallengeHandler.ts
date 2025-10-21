@@ -1,3 +1,4 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
@@ -8,16 +9,14 @@ import {
 import {
   InvalidSignatureError,
   UnableToGenerateSignatureError,
-  VerifyChallengeErrors,
   VerifyChallengeResponse,
   type VerificationChallenge,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {VerifyChallengeEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
+import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {LoggedInUsersDbService} from '../../../db/loggedInUsersDb'
 import {reportUserLoggedIn} from '../../../metrics'
 import {VerificationStateDbService} from '../db/verificationStateDb'
@@ -50,53 +49,50 @@ const verifySignature = (
     )
   )
 
-export const verifyChallengeHandler = Handler.make(
-  VerifyChallengeEndpoint,
+export const verifyChallengeHandler = HttpApiBuilder.handler(
+  UserApiSpecification,
+  'Login',
+  'verifyChallenge',
   (req) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        const loginDb = yield* _(VerificationStateDbService)
-        const verificationState = yield* _(
-          loginDb.retrieveChallengeVerificationState(req.body.userPublicKey)
-        )
+    Effect.gen(function* (_) {
+      const loginDb = yield* _(VerificationStateDbService)
+      const verificationState = yield* _(
+        loginDb.retrieveChallengeVerificationState(req.payload.userPublicKey)
+      )
 
-        const {signature, userPublicKey} = req.body
-        yield* _(
-          verifySignature(signature, userPublicKey, verificationState.challenge)
-        )
+      const {signature, userPublicKey} = req.payload
+      yield* _(
+        verifySignature(signature, userPublicKey, verificationState.challenge)
+      )
 
-        const authData = yield* _(
-          generateUserAuthData({
-            phoneNumberHashed: verificationState.phoneNumber,
-            publicKey: userPublicKey,
-          }),
-          Effect.catchTag('CryptoError', () =>
-            Effect.fail(
-              new UnableToGenerateSignatureError({code: '100105', status: 400})
-            )
+      const authData = yield* _(
+        generateUserAuthData({
+          phoneNumberHashed: verificationState.phoneNumber,
+          publicKey: userPublicKey,
+        }),
+        Effect.catchTag('CryptoError', () =>
+          Effect.fail(
+            new UnableToGenerateSignatureError({code: '100105', status: 400})
           )
         )
+      )
 
-        yield* _(
-          insertUserIntoDb(userPublicKey, verificationState.countryPrefix)
+      yield* _(insertUserIntoDb(userPublicKey, verificationState.countryPrefix))
+      yield* _(
+        DashboardReportsService,
+        Effect.flatMap((dashboardReportsService) =>
+          dashboardReportsService.reportNewUserCreated()
         )
-        yield* _(
-          DashboardReportsService,
-          Effect.flatMap((dashboardReportsService) =>
-            dashboardReportsService.reportNewUserCreated()
-          )
-        )
-        yield* _(
-          loginDb.deleteChallengeVerificationState(req.body.userPublicKey)
-        )
+      )
+      yield* _(
+        loginDb.deleteChallengeVerificationState(req.payload.userPublicKey)
+      )
 
-        yield* _(reportUserLoggedIn(verificationState.countryPrefix))
+      yield* _(reportUserLoggedIn(verificationState.countryPrefix))
 
-        return new VerifyChallengeResponse({
-          ...authData,
-          challengeVerified: true,
-        })
-      }).pipe(Effect.withSpan('verifyChallengeHandler', {attributes: {req}})),
-      VerifyChallengeErrors
-    )
+      return new VerifyChallengeResponse({
+        ...authData,
+        challengeVerified: true,
+      })
+    }).pipe(Effect.withSpan('verifyChallengeHandler'), makeEndpointEffect)
 )

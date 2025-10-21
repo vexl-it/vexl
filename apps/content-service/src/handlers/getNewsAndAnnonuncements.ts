@@ -1,9 +1,9 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
-import {NewsAndAnonouncementsEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
-import {Handler} from 'effect-http'
 import {forceUpdateForVersionAndLowerConfig} from '../configs'
 
 // const data = {
@@ -70,103 +70,102 @@ import {forceUpdateForVersionAndLowerConfig} from '../configs'
 //   } satisfies FullScreenWarning),
 // } satisfies NewsAndAnnouncementsResponse
 
-export const newsAndAnonouncementsHandler = Handler.make(
-  NewsAndAnonouncementsEndpoint,
+export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
+  ContentApiSpecification,
+  'NewsAndAnnouncements',
+  'getNewsAndAnnouncements',
   ({headers}) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        // const vexlBotNewsForBlog1: VexlBotNews = {
-        //   id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
-        //   type: 'info',
-        //   content:
-        //     'Borders are drawn with numbers now.\nThis week, we dive into how control is coded into your currency. ➡️',
-        //   action: Option.some({
-        //     text: 'Read now',
-        //     url: Schema.decodeSync(HttpsUrlString)(
-        //       'https://vexl.it/post/economic-sanctions-and-collateral-damage'
-        //     ),
-        //   }),
-        //   cancelForever: true,
-        //   bubbleOrigin: Option.none(),
-        //   cancelable: true,
-        // }
+    Effect.gen(function* (_) {
+      // const vexlBotNewsForBlog1: VexlBotNews = {
+      //   id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
+      //   type: 'info',
+      //   content:
+      //     'Borders are drawn with numbers now.\nThis week, we dive into how control is coded into your currency. ➡️',
+      //   action: Option.some({
+      //     text: 'Read now',
+      //     url: Schema.decodeSync(HttpsUrlString)(
+      //       'https://vexl.it/post/economic-sanctions-and-collateral-damage'
+      //     ),
+      //   }),
+      //   cancelForever: true,
+      //   bubbleOrigin: Option.none(),
+      //   cancelable: true,
+      // }
 
-        // const vexlBotNewsForBlog1: VexlBotNews = {
-        //   id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
-        //   type: 'info',
-        //   content:
-        //     'This week, we dive into how due process was quietly deleted from the financial system. ➡️',
-        //   action: Option.some({
-        //     text: 'Read now',
-        //     url: Schema.decodeSync(HttpsUrlString)(
-        //       'https://vexl.it/post/the-lack-of-due-process'
-        //     ),
-        //   }),
-        //   cancelForever: true,
-        //   bubbleOrigin: Option.none(),
-        //   cancelable: true,
-        // }
+      // const vexlBotNewsForBlog1: VexlBotNews = {
+      //   id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
+      //   type: 'info',
+      //   content:
+      //     'This week, we dive into how due process was quietly deleted from the financial system. ➡️',
+      //   action: Option.some({
+      //     text: 'Read now',
+      //     url: Schema.decodeSync(HttpsUrlString)(
+      //       'https://vexl.it/post/the-lack-of-due-process'
+      //     ),
+      //   }),
+      //   cancelForever: true,
+      //   bubbleOrigin: Option.none(),
+      //   cancelable: true,
+      // }
 
-        // const vexlBotNewsForBlog2: VexlBotNews = {
-        //   id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
-        //   type: 'info',
-        //   content:
-        //     'This week, we dive into how money became a tool to silence dissent.\nCensorship doesn’t need a courtroom—just a bank account. ➡️',
-        //   action: Option.some({
-        //     text: 'Read now',
-        //     url: Schema.decodeSync(HttpsUrlString)(
-        //       'https://vexl.it/post/money-as-a-tool-for-political-censorship'
-        //     ),
-        //   }),
-        //   cancelForever: true,
-        //   bubbleOrigin: Option.none(),
-        //   cancelable: true,
-        // }
+      // const vexlBotNewsForBlog2: VexlBotNews = {
+      //   id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
+      //   type: 'info',
+      //   content:
+      //     'This week, we dive into how money became a tool to silence dissent.\nCensorship doesn’t need a courtroom—just a bank account. ➡️',
+      //   action: Option.some({
+      //     text: 'Read now',
+      //     url: Schema.decodeSync(HttpsUrlString)(
+      //       'https://vexl.it/post/money-as-a-tool-for-political-censorship'
+      //     ),
+      //   }),
+      //   cancelForever: true,
+      //   bubbleOrigin: Option.none(),
+      //   cancelable: true,
+      // }
 
-        // const vexlBotNewsForBlog3: VexlBotNews = {
-        //   id: Schema.decodeSync(UuidE)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
-        //   type: 'info',
-        //   content:
-        //     'From permissionless to permissioned. This week we dive into how fast “your money” becomes theirs. ➡️',
-        //   action: Option.some({
-        //     text: 'Read now',
-        //     url: Schema.decodeSync(HttpsUrlString)(
-        //       'https://vexl.it/post/digital-money-vs-digital-cash'
-        //     ),
-        //   }),
-        //   cancelForever: true,
-        //   bubbleOrigin: Option.none(),
-        //   cancelable: true,
-        // }
+      // const vexlBotNewsForBlog3: VexlBotNews = {
+      //   id: Schema.decodeSync(UuidE)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
+      //   type: 'info',
+      //   content:
+      //     'From permissionless to permissioned. This week we dive into how fast “your money” becomes theirs. ➡️',
+      //   action: Option.some({
+      //     text: 'Read now',
+      //     url: Schema.decodeSync(HttpsUrlString)(
+      //       'https://vexl.it/post/digital-money-vs-digital-cash'
+      //     ),
+      //   }),
+      //   cancelForever: true,
+      //   bubbleOrigin: Option.none(),
+      //   cancelable: true,
+      // }
 
-        const forceUpdateForVersionAndLower = yield* _(
-          forceUpdateForVersionAndLowerConfig
-        )
-        if (
-          !Option.isSome(headers.clientVersionOrNone) ||
-          headers.clientVersionOrNone.value <= forceUpdateForVersionAndLower
-        ) {
-          return {
-            fullScreenWarning: Option.some({
-              action: Option.none(),
-              cancelable: false,
-              cancelForever: false,
-              id: Schema.decodeSync(UuidE)(
-                '61362ca8-6ee2-4044-996f-cff885f8ae19'
-              ),
-              type: 'RED',
-              title: 'Update Required',
-              description:
-                'For your security and the best app experience, please update Vexl to the latest version (1.35.0 or higher). This update is required to continue using the app.',
-            }),
-            vexlBotNews: [],
-          } satisfies NewsAndAnnouncementsResponse
-        }
+      const forceUpdateForVersionAndLower = yield* _(
+        forceUpdateForVersionAndLowerConfig
+      )
+      if (
+        !Option.isSome(headers.clientVersionOrNone) ||
+        headers.clientVersionOrNone.value <= forceUpdateForVersionAndLower
+      ) {
         return {
-          fullScreenWarning: Option.none(),
+          fullScreenWarning: Option.some({
+            action: Option.none(),
+            cancelable: false,
+            cancelForever: false,
+            id: Schema.decodeSync(UuidE)(
+              '61362ca8-6ee2-4044-996f-cff885f8ae19'
+            ),
+            type: 'RED',
+            title: 'Update Required',
+            description:
+              'For your security and the best app experience, please update Vexl to the latest version (1.35.0 or higher). This update is required to continue using the app.',
+          }),
           vexlBotNews: [],
         } satisfies NewsAndAnnouncementsResponse
-      }),
-      Schema.Void
-    )
+      }
+      return {
+        fullScreenWarning: Option.none(),
+        vexlBotNews: [],
+      } satisfies NewsAndAnnouncementsResponse
+    }).pipe(makeEndpointEffect)
 )

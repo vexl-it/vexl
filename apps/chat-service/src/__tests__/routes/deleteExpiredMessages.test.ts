@@ -1,7 +1,7 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {clearExpiredMessages} from '../../internalServer/routes/clearExpiredMessages'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -18,31 +18,27 @@ beforeAll(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       const sql = yield* _(SqlClient.SqlClient)
@@ -73,22 +69,17 @@ describe('clear expired messages', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
         )
 
         yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend2,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.sendMessage({
+            payload: messageToSend2,
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -102,16 +93,14 @@ describe('clear expired messages', () => {
 
         yield* _(clearExpiredMessages)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const messagesReceived = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox1.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messagesReceived.messages.length).toBe(1)
@@ -120,15 +109,12 @@ describe('clear expired messages', () => {
         )
 
         const messagesReceived2 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox2.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox2.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messagesReceived2.messages.length).toBe(0)

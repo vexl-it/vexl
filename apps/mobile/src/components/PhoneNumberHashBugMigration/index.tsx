@@ -1,3 +1,4 @@
+import {FetchHttpClient} from '@effect/platform/index'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {contact} from '@vexl-next/rest-api'
@@ -77,18 +78,20 @@ export default function PhoneNumberHashBugMigration({
 
         console.log('🫣 PhoneHashBugCheck', 'Got new credentials.')
 
-        const contactApi = contact.api({
-          platform,
-          clientSemver: version,
-          clientVersion: versionCode,
-          url: apiEnv.contactMs,
-          getUserSessionCredentials: () => newCredentials,
-          isDeveloper: store.get(isDeveloperAtom),
-          language: store.get(translationAtom).t('localeName'),
-          appSource,
-          deviceModel,
-          osVersion,
-        })
+        const contactApi = yield* _(
+          contact.api({
+            platform,
+            clientSemver: version,
+            clientVersion: versionCode,
+            url: apiEnv.contactMs,
+            getUserSessionCredentials: () => newCredentials,
+            isDeveloper: store.get(isDeveloperAtom),
+            language: store.get(translationAtom).t('localeName'),
+            appSource,
+            deviceModel,
+            osVersion,
+          })
+        )
 
         yield* _(
           contactApi.updateBadOwnerHash({
@@ -120,6 +123,7 @@ export default function PhoneNumberHashBugMigration({
         store.set(sessionAtom, some(newSession))
         console.log('🫣 PhoneHashBugCheck', 'Updated session.')
       }).pipe(
+        Effect.provide(FetchHttpClient.layer),
         Effect.catchAllDefect((e) => {
           // TODO log error
           console.warn(

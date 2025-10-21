@@ -1,11 +1,12 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {Effect} from 'effect/index'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {handleCommonErrorsEffect, type LoggingFunction} from '../../utils'
+import {type LoggingFunction} from '../../utils'
 import {type SubmitFeedbackInput} from './contracts'
 import {FeedbackApiSpecification} from './specification'
 
@@ -35,25 +36,29 @@ export function api({
   deviceModel?: string
   osVersion?: string
 }) {
-  const client = createClientInstanceWithAuth({
-    api: FeedbackApiSpecification,
-    platform,
-    clientVersion,
-    clientSemver,
-    language,
-    isDeveloper,
-    appSource,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: FeedbackApiSpecification,
+        platform,
+        clientVersion,
+        clientSemver,
+        language,
+        isDeveloper,
+        appSource,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  return {
-    submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
-      handleCommonErrorsEffect(client.submitFeedback(submitFeedbackInput)),
-  }
+    return {
+      submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
+        client.submitFeedback({payload: submitFeedbackInput.body}),
+    }
+  })
 }
 
-export type FeedbackApi = ReturnType<typeof api>
+export type FeedbackApi = Effect.Effect.Success<ReturnType<typeof api>>

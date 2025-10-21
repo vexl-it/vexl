@@ -1,19 +1,18 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {
   UnableToVerifySignatureError,
-  UpdateBadOwnerHashErrors,
   type UpdateBadOwnerHashRequest,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {UpdateBadOwnerHashEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
-import {Handler} from 'effect-http'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 
@@ -53,77 +52,77 @@ const validateThatBodyInclidesValidSignatures = (
     )
   })
 
-export const updateBadOwnerHash = Handler.make(
-  UpdateBadOwnerHashEndpoint,
-  (req, security) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        if (!(yield* _(validateThatBodyInclidesValidSignatures(req.body)))) {
-          return yield* _(Effect.fail(new UnableToVerifySignatureError()))
-        }
+export const updateBadOwnerHash = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'User',
+  'updateBadOwnerHash',
+  (req) =>
+    Effect.gen(function* (_) {
+      if (!(yield* _(validateThatBodyInclidesValidSignatures(req.payload)))) {
+        return yield* _(Effect.fail(new UnableToVerifySignatureError()))
+      }
 
-        if (req.body.newData.hash === req.body.oldData.hash) {
-          return {updated: false}
-        }
+      if (req.payload.newData.hash === req.payload.oldData.hash) {
+        return {updated: false}
+      }
 
-        const userDb = yield* _(UserDbService)
-        const contactDb = yield* _(ContactDbService)
+      const userDb = yield* _(UserDbService)
+      const contactDb = yield* _(ContactDbService)
 
-        const existingUserWithNewHash = yield* _(
-          userDb.findUserByHash(req.body.newData.hash)
-        )
+      const existingUserWithNewHash = yield* _(
+        userDb.findUserByHash(req.payload.newData.hash)
+      )
 
-        // If user exists remove it or respond with indication that there is another account.
-        if (Option.isSome(existingUserWithNewHash)) {
-          if (!req.body.removePreviousUser)
-            return {updated: false, willDeleteExistingUserIfRan: true as const}
+      // If user exists remove it or respond with indication that there is another account.
+      if (Option.isSome(existingUserWithNewHash)) {
+        if (!req.payload.removePreviousUser)
+          return {updated: false, willDeleteExistingUserIfRan: true as const}
 
-          yield* _(contactDb.deleteContactsByHashFrom(req.body.newData.hash))
-          yield* _(
-            userDb.deleteUserByPublicKeyAndHash({
-              hash: req.body.newData.hash,
-              publicKey: req.body.publicKey,
-            })
-          )
-        }
-
-        // Update hash at user record
+        yield* _(contactDb.deleteContactsByHashFrom(req.payload.newData.hash))
         yield* _(
-          userDb.updateUserHash({
-            oldHash: req.body.oldData.hash,
-            newHash: req.body.newData.hash,
+          userDb.deleteUserByPublicKeyAndHash({
+            hash: req.payload.newData.hash,
+            publicKey: req.payload.publicKey,
           })
         )
+      }
 
-        yield* _(
-          contactDb.updateContactHashFrom({
-            currentHashFrom: req.body.oldData.hash,
-            newHashFrom: req.body.newData.hash,
-          })
-        )
+      // Update hash at user record
+      yield* _(
+        userDb.updateUserHash({
+          oldHash: req.payload.oldData.hash,
+          newHash: req.payload.newData.hash,
+        })
+      )
 
-        yield* _(
-          contactDb.deleteContactsByHashFromAndHashTo({
-            hashFrom: req.body.newData.hash,
-            hashTo: req.body.newData.hash,
-          })
-        )
+      yield* _(
+        contactDb.updateContactHashFrom({
+          currentHashFrom: req.payload.oldData.hash,
+          newHashFrom: req.payload.newData.hash,
+        })
+      )
 
-        return {
-          updated: true,
-        }
-      }).pipe(
-        withDbTransaction,
-        // Make sure to lock on both hashes to prevent dangling records
-        // when there are multiple parallel requests.
-        withRedisLock(
-          [
-            `userAction:${req.body.newData.hash}`,
-            `userAction:${req.body.oldData.hash}`,
-          ],
-          500
-        )
+      yield* _(
+        contactDb.deleteContactsByHashFromAndHashTo({
+          hashFrom: req.payload.newData.hash,
+          hashTo: req.payload.newData.hash,
+        })
+      )
+
+      return {
+        updated: true,
+      }
+    }).pipe(
+      withDbTransaction,
+      // Make sure to lock on both hashes to prevent dangling records
+      // when there are multiple parallel requests.
+      withRedisLock(
+        [
+          `userAction:${req.payload.newData.hash}`,
+          `userAction:${req.payload.oldData.hash}`,
+        ],
+        500
       ),
-      UpdateBadOwnerHashErrors
+      makeEndpointEffect
     )
 )

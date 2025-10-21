@@ -26,7 +26,7 @@ export const hashPublicKey = (
         new UnexpectedServerError({
           status: 500,
           cause: e,
-          detail: 'Error while hashing public key',
+          message: 'Error while hashing public key',
         })
     )
   )

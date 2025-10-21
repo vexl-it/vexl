@@ -1,7 +1,6 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {NotFoundError as NotFoundErrorApi} from '@vexl-next/rest-api/src/Errors'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Effect, HashSet, Schema, type Option} from 'effect'
 import reportError from '../../utils/reportError'
@@ -10,7 +9,7 @@ import {type ClubWithMembers} from './domain'
 export class ClubNotFoundError extends Schema.TaggedError<ClubNotFoundError>(
   'ClubNotFoundError'
 )('ClubNotFoundError', {
-  cause: Schema.Union(NotFoundError, NotFoundErrorApi),
+  cause: Schema.Union(NotFoundError),
 }) {}
 
 export class FetchingClubError extends Schema.TaggedError<FetchingClubError>(

@@ -1,13 +1,13 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  SendMessageErrors,
   SenderInboxDoesNotExistError,
   type MessageInBatch,
   type ReceiverInboxDoesNotExistError,
   type SendMessageResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {SendMessagesEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {
   ForbiddenMessageTypeError,
   type NotPermittedToSendMessageToTargetInboxError,
@@ -17,12 +17,11 @@ import {
   type RedisService,
 } from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, pipe, type ConfigError} from 'effect'
-import {Handler} from 'effect-http'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {type WhitelistDbService} from '../../db/WhiteListDbService'
@@ -88,10 +87,13 @@ const sendMessage = (
     Effect.zipLeft(reportMessageSent(1))
   ) // TODO lock two inboxes
 
-export const sendMessages = Handler.make(SendMessagesEndpoint, (req) =>
-  makeEndpointEffect(
+export const sendMessages = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Messages',
+  'sendMessages',
+  (req) =>
     pipe(
-      req.body.data,
+      req.payload.data,
       Array.map((oneMessage) =>
         Effect.gen(function* (_) {
           yield* _(
@@ -125,8 +127,8 @@ export const sendMessages = Handler.make(SendMessagesEndpoint, (req) =>
         })
       ),
       Effect.all,
-      Effect.map(Array.flatten)
-    ),
-    SendMessageErrors
-  ).pipe(withDbTransaction)
+      Effect.map(Array.flatten),
+      withDbTransaction,
+      makeEndpointEffect
+    )
 )

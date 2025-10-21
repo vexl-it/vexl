@@ -7,6 +7,7 @@ const config: JestConfigWithTsJest = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFiles: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.afterenv.ts'],
 
   testTimeout: 60_000,
   testMatch: ['**/*.test.ts'], // This line ensures only files with .test.ts suffix are run

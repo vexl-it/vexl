@@ -1,29 +1,43 @@
-import {NodeContext} from '@effect/platform-node'
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {FeedbackApiSpecification} from '@vexl-next/rest-api/src/services/feedback/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
-import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig} from './configs'
 import DbLayer from './db/layer'
 import {submitFeedbackHandler} from './routes/submitFeedback'
 import {FeedbackDbService} from './routes/submitFeedback/db'
 
-export const app = RouterBuilder.make(FeedbackApiSpecification).pipe(
-  RouterBuilder.handle(submitFeedbackHandler),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const FeedbackLive = HttpApiBuilder.group(
+  FeedbackApiSpecification,
+  'root',
+  (h) => h.handle('submitFeedback', submitFeedbackHandler)
 )
 
-const MainLive = Layer.mergeAll(
-  FeedbackDbService.Live,
-  ServerCrypto.layer(cryptoConfig),
-  healthServerLayer({port: healthServerPortConfig})
-).pipe(Layer.provideMerge(DbLayer), Layer.provideMerge(NodeContext.layer))
+export const ApiLive = HttpApiBuilder.api(FeedbackApiSpecification).pipe(
+  Layer.provide(FeedbackLive),
+  Layer.provide(FeedbackDbService.Live),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
 
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(ApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
+  healthServerLayer({port: healthServerPortConfig})
+).pipe(
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(DbLayer)
 )

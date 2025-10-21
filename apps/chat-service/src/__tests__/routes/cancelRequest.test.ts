@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -10,6 +9,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
@@ -30,16 +30,14 @@ beforeEach(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
       yield* _(sql`DELETE FROM message`)
@@ -53,28 +51,24 @@ describe('Cancel request', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.cancelRequestApproval(
-            {
-              body: {
-                message: 'cancelMessage',
-                publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              },
+          client.Inboxes.cancelRequestApproval({
+            payload: {
+              message: 'cancelMessage',
+              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const messages = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox1.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messages.messages[0]?.message).toBe('cancelMessage')
@@ -88,16 +82,14 @@ describe('Cancel request', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
-            client.cancelRequestApproval(
-              {
-                body: {
-                  message: 'cancelMessage',
-                  publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                },
+            client.Inboxes.cancelRequestApproval({
+              payload: {
+                message: 'cancelMessage',
+                publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
               },
-              HttpClientRequest.setHeaders(user1.authHeaders)
-            ),
+            }),
             Effect.either
           )
 
@@ -111,31 +103,27 @@ describe('Cancel request', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user2.authHeaders))
           yield* _(
-            client.approveRequest(
-              {
-                body: yield* _(
-                  user2.inbox1.addChallenge({
-                    publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                    approve: true,
-                    message: 'approve',
-                  })
-                ),
-              },
-              HttpClientRequest.setHeaders(user2.authHeaders)
-            )
+            client.Inboxes.approveRequest({
+              payload: yield* _(
+                user2.inbox1.addChallenge({
+                  publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+                  approve: true,
+                  message: 'approve',
+                })
+              ),
+            })
           )
 
+          yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
-            client.cancelRequestApproval(
-              {
-                body: {
-                  message: 'cancelMessage',
-                  publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                },
+            client.Inboxes.cancelRequestApproval({
+              payload: {
+                message: 'cancelMessage',
+                publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
               },
-              HttpClientRequest.setHeaders(user1.authHeaders)
-            ),
+            }),
             Effect.either
           )
 
@@ -149,31 +137,27 @@ describe('Cancel request', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user2.authHeaders))
           yield* _(
-            client.approveRequest(
-              {
-                body: yield* _(
-                  user2.inbox1.addChallenge({
-                    publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                    approve: false,
-                    message: 'approve',
-                  })
-                ),
-              },
-              HttpClientRequest.setHeaders(user2.authHeaders)
-            )
+            client.Inboxes.approveRequest({
+              payload: yield* _(
+                user2.inbox1.addChallenge({
+                  publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+                  approve: false,
+                  message: 'approve',
+                })
+              ),
+            })
           )
 
+          yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
-            client.cancelRequestApproval(
-              {
-                body: {
-                  message: 'cancelMessage',
-                  publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                },
+            client.Inboxes.cancelRequestApproval({
+              payload: {
+                message: 'cancelMessage',
+                publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
               },
-              HttpClientRequest.setHeaders(user1.authHeaders)
-            ),
+            }),
             Effect.either
           )
 
@@ -194,16 +178,14 @@ describe('Cancel request', () => {
             })
           )
 
+          yield* _(setAuthHeaders(dummyAuthHeaders))
           const failedReqResponse = yield* _(
-            client.cancelRequestApproval(
-              {
-                body: {
-                  message: 'cancelMessage',
-                  publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                },
+            client.Inboxes.cancelRequestApproval({
+              payload: {
+                message: 'cancelMessage',
+                publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
               },
-              HttpClientRequest.setHeaders(dummyAuthHeaders)
-            ),
+            }),
             Effect.either
           )
           expectErrorResponse(SenderInboxDoesNotExistError)(failedReqResponse)
@@ -216,16 +198,14 @@ describe('Cancel request', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
-            client.cancelRequestApproval(
-              {
-                body: {
-                  message: 'cancelMessage',
-                  publicKey: generatePrivateKey().publicKeyPemBase64,
-                },
+            client.Inboxes.cancelRequestApproval({
+              payload: {
+                message: 'cancelMessage',
+                publicKey: generatePrivateKey().publicKeyPemBase64,
               },
-              HttpClientRequest.setHeaders(user1.authHeaders)
-            ),
+            }),
             Effect.either
           )
           expectErrorResponse(ReceiverInboxDoesNotExistError)(failedReqResponse)

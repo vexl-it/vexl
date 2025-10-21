@@ -1,6 +1,11 @@
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
+import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
-import {Api, ApiGroup} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
@@ -9,7 +14,7 @@ import {
   AddUserToTheClubResponse,
   AdminTokenParams,
   CheckUserExistsRequest,
-  CreateClubErrors,
+  ClubAlreadyExistsError,
   CreateClubRequest,
   CreateClubResponse,
   CreateUserRequest,
@@ -41,6 +46,7 @@ import {
   ImportContactsErrors,
   ImportContactsRequest,
   ImportContactsResponse,
+  InvalidAdminTokenError,
   JoinClubErrors,
   JoinClubRequest,
   JoinClubResponse,
@@ -55,7 +61,7 @@ import {
   ModifyClubRequest,
   ModifyClubResponse,
   RefreshUserRequest,
-  ReportClubErrors,
+  ReportClubLimitReachedError,
   ReportClubRequest,
   ReportClubResponse,
   SendBulkNotificationRequest,
@@ -70,379 +76,276 @@ import {
   UserNotFoundError,
 } from './contracts'
 
-export const CheckUserExistsEndpoint = Api.post(
+export const CheckUserExistsEndpoint = HttpApiEndpoint.post(
   'checkUserExists',
   '/api/v1/users/check-exists'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(CheckUserExistsRequest),
-  Api.setResponseBody(UserExistsResponse)
 )
+  .middleware(ServerSecurityMiddleware)
+  .setUrlParams(CheckUserExistsRequest)
+  .addSuccess(UserExistsResponse)
 
-export const CreateUserEndpoint = Api.post('createUser', '/api/v1/users').pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(CreateUserRequest),
-  Api.setResponse({
-    status: 201,
-    body: NoContentResponse,
-  })
+export const CreateUserEndpoint = HttpApiEndpoint.post(
+  'createUser',
+  '/api/v1/users'
 )
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setPayload(CreateUserRequest)
+  .addSuccess(NoContentResponse, {status: 201})
 
-export const RefreshUserEndpoint = Api.post(
+export const RefreshUserEndpoint = HttpApiEndpoint.post(
   'refreshUser',
   '/api/v1/users/refresh'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setResponseBody(NoContentResponse),
-  Api.setRequestBody(RefreshUserRequest),
-  Api.addResponse({
-    status: 404,
-    body: UserNotFoundError,
-  })
 )
-export const UpdateFirebaseTokenEndpoint = Api.put(
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setPayload(RefreshUserRequest)
+  .addSuccess(NoContentResponse)
+  .addError(UserNotFoundError)
+
+export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
   'updateFirebaseToken',
   '/api/v1/users'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(UpdateFirebaseTokenRequest),
-  Api.setResponse({
-    status: 200,
-    body: NoContentResponse,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setPayload(UpdateFirebaseTokenRequest)
+  .addError(UserNotFoundError)
+  .addSuccess(NoContentResponse)
 
-export const UpdateNotificationTokenEndpoint = Api.put(
+export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   'updateNotificationToken',
   '/api/v1/users/notification-token'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(UpdateNotificationTokenRequest),
-  Api.setResponse({
-    status: 200,
-    body: NoContentResponse,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setPayload(UpdateNotificationTokenRequest)
+  .addSuccess(NoContentResponse)
+  .addError(UserNotFoundError)
 
-export const DeleteUserEndpoint = Api.delete(
+export const DeleteUserEndpoint = HttpApiEndpoint.del(
   'deleteUser',
   '/api/v1/users/me'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponse({
-    status: 200,
-    body: NoContentResponse,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .addSuccess(NoContentResponse)
 
-export const EraseUserFromNetworkEndpoint = Api.delete(
+export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
   'eraseUserFromNetwork',
   '/api/v1/users/erase'
-).pipe(
-  Api.setRequestBody(EraseUserFromNetworkRequest),
-  Api.setResponseBody(EraseUserFromNetworkResponse),
-  Api.addResponse({
-    status: 400,
-    body: EraseUserFromNetworkErrors,
-  })
 )
+  .setPayload(EraseUserFromNetworkRequest)
+  .addSuccess(EraseUserFromNetworkResponse)
+  .addError(EraseUserFromNetworkErrors)
 
-export const ImportContactsEndpoint = Api.post(
+export const ImportContactsEndpoint = HttpApiEndpoint.post(
   'importContacts',
   '/api/v1/contacts/import/replace'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(ImportContactsRequest),
-  Api.setResponse({
-    status: 200,
-    body: ImportContactsResponse,
-  }),
-  Api.addResponse({
-    status: 400,
-    body: ImportContactsErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(ImportContactsRequest)
+  .addSuccess(ImportContactsResponse)
+  .addError(ImportContactsErrors)
 
-export const FetchMyContactsEndpoint = Api.get(
+export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
   'fetchMyContacts',
   '/api/v1/contacts/me'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestQuery(FetchMyContactsRequest),
-  Api.setResponseBody(FetchMyContactsResponseE)
 )
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setUrlParams(FetchMyContactsRequest)
+  .addSuccess(FetchMyContactsResponseE)
 
-export const FetchCommonConnectionsEndpoint = Api.post(
+export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnections',
   '/api/v1/contacts/common'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(FetchCommonConnectionsRequest),
-  Api.setResponseBody(FetchCommonConnectionsResponseE)
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(FetchCommonConnectionsRequest)
+  .addSuccess(FetchCommonConnectionsResponseE)
 
-export const UpdateBadOwnerHashEndpoint = Api.post(
+export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
   'updateBadOwnerHash',
   '/api/v1/update-bad-owner-hash'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(UpdateBadOwnerHashRequest),
-  Api.setResponseBody(UpdateBadOwnerHashResponse),
-  Api.addResponse({
-    status: 400,
-    body: UpdateBadOwnerHashErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(UpdateBadOwnerHashRequest)
+  .addSuccess(UpdateBadOwnerHashResponse)
+  .addError(UpdateBadOwnerHashErrors)
 
-export const CreateClubEndpoint = Api.post(
+export const CreateClubEndpoint = HttpApiEndpoint.post(
   'createClub',
   '/api/v1/clubs/admin'
-).pipe(
-  Api.setRequestQuery(AdminTokenParams),
-  Api.setRequestBody(CreateClubRequest),
-  Api.setResponseBody(CreateClubResponse),
-  Api.addResponse({
-    status: 400,
-    body: CreateClubErrors,
-  })
 )
+  .setUrlParams(AdminTokenParams)
+  .setPayload(CreateClubRequest)
+  .addSuccess(CreateClubResponse)
+  .addError(ClubAlreadyExistsError)
+  .addError(InvalidAdminTokenError)
 
-export const ModfiyClubEndpoint = Api.put(
+export const ModfiyClubEndpoint = HttpApiEndpoint.put(
   'modifyClub',
   '/api/v1/clubs/admin'
-).pipe(
-  Api.setRequestQuery(AdminTokenParams),
-  Api.setRequestBody(ModifyClubRequest),
-  Api.setResponseBody(ModifyClubResponse),
-  Api.addResponse({
-    status: 400,
-    body: ModifyClubErrors,
-  })
 )
+  .setUrlParams(AdminTokenParams)
+  .setPayload(ModifyClubRequest)
+  .addSuccess(ModifyClubResponse)
+  .addError(ModifyClubErrors)
 
-export const GenerateClubInviteLinkForAdminEndpoint = Api.put(
+export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
   'generateClubInviteLinkForAdmin',
   '/api/v1/clubs/admin/generate-admin-link'
-).pipe(
-  Api.setRequestQuery(AdminTokenParams),
-  Api.setRequestBody(GenerateInviteLinkForAdminRequest),
-  Api.setResponseBody(GenerateInviteLinkForAdminResponse),
-  Api.addResponse({
-    status: 400,
-    body: GenerateInviteLinkForAdminErrors,
-  })
 )
+  .setUrlParams(AdminTokenParams)
+  .setPayload(GenerateInviteLinkForAdminRequest)
+  .addSuccess(GenerateInviteLinkForAdminResponse)
+  .addError(GenerateInviteLinkForAdminErrors)
 
-export const ListClubsEndpoint = Api.get(
+export const ListClubsEndpoint = HttpApiEndpoint.get(
   'listClubs',
   '/api/v1/clubs/admin'
-).pipe(
-  Api.setRequestQuery(AdminTokenParams),
-  Api.setResponseBody(ListClubsResponse),
-  Api.addResponse({
-    status: 400,
-    body: ListClubsErrors,
-  })
 )
+  .setUrlParams(AdminTokenParams)
+  .addSuccess(ListClubsResponse)
+  .addError(ListClubsErrors)
 
-export const GetClubInfoEndpoint = Api.post(
+export const GetClubInfoEndpoint = HttpApiEndpoint.post(
   'getClubInfo',
   '/api/v1/clubs/member/get-info'
-).pipe(
-  Api.setRequestBody(GetClubInfoRequest),
-  Api.setResponseBody(GetClubInfoResponse),
-  Api.addResponse({
-    status: 400,
-    body: GetClubInfoErrors,
-  })
 )
+  .setPayload(GetClubInfoRequest)
+  .addSuccess(GetClubInfoResponse)
+  .addError(GetClubInfoErrors)
 
-export const JoinClubEndpoint = Api.post(
+export const JoinClubEndpoint = HttpApiEndpoint.post(
   'joinClub',
   '/api/v1/clubs/member/join-club'
-).pipe(
-  Api.setRequestBody(JoinClubRequest),
-  Api.setResponseBody(JoinClubResponse),
-  Api.addResponse({
-    status: 400,
-    body: JoinClubErrors,
-  })
 )
+  .setPayload(JoinClubRequest)
+  .addSuccess(JoinClubResponse)
+  .addError(JoinClubErrors)
 
-export const LeaveClubEndpoint = Api.post(
+export const LeaveClubEndpoint = HttpApiEndpoint.post(
   'leaveClub',
   '/api/v1/clubs/member/leave-club'
-).pipe(
-  Api.setRequestBody(LeaveClubRequest),
-  Api.setResponseBody(NoContentResponse),
-  Api.addResponse({
-    status: 400,
-    body: LeaveClubErrors,
-  })
 )
+  .setPayload(LeaveClubRequest)
+  .addSuccess(NoContentResponse)
+  .addError(LeaveClubErrors)
 
-export const GenerateClubJoinLinkEndpoint = Api.post(
+export const GenerateClubJoinLinkEndpoint = HttpApiEndpoint.post(
   'generateClubJoinLink',
   '/api/v1/clubs/moderator/generate-join-link'
-).pipe(
-  Api.setRequestBody(GenerateClubJoinLinkRequest),
-  Api.setResponseBody(GenerateClubJoinLinkResponse),
-  Api.addResponse({
-    status: 400,
-    body: GenerateClubJoinLinkErrors,
-  })
 )
+  .setPayload(GenerateClubJoinLinkRequest)
+  .addSuccess(GenerateClubJoinLinkResponse)
+  .addError(GenerateClubJoinLinkErrors)
 
-export const DeactivateClubJoinLinkEndpoint = Api.delete(
+export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.del(
   'deactivateClubJoinLink',
   '/api/v1/clubs/moderator/deactivate-join-link'
-).pipe(
-  Api.setRequestBody(DeactivateClubJoinLinkRequest),
-  Api.setResponseBody(DeactivateClubJoinLinkResponse),
-  Api.addResponse({
-    status: 400,
-    body: DeactivateClubJoinLinkErrors,
-  })
 )
+  .setPayload(DeactivateClubJoinLinkRequest)
+  .addSuccess(DeactivateClubJoinLinkResponse)
+  .addError(DeactivateClubJoinLinkErrors)
 
-export const AddUserToTheClubEndpint = Api.post(
+export const AddUserToTheClubEndpint = HttpApiEndpoint.post(
   'addUserToTheClub',
   '/api/v1/clubs/moderator/add-user-to-club'
-).pipe(
-  Api.setRequestBody(AddUserToTheClubRequest),
-  Api.setResponseBody(AddUserToTheClubResponse),
-  Api.addResponse({
-    status: 400,
-    body: AddUserToTheClubErrors,
-  })
 )
+  .setPayload(AddUserToTheClubRequest)
+  .addSuccess(AddUserToTheClubResponse)
+  .addError(AddUserToTheClubErrors)
 
-export const ListClubLinksEndpoint = Api.post(
+export const ListClubLinksEndpoint = HttpApiEndpoint.post(
   'listClubLinks',
   '/api/v1/clubs/moderator/list-links'
-).pipe(
-  Api.setRequestBody(ListClubLinksRequest),
-  Api.setResponseBody(ListClubLinksResponse),
-  Api.addResponse({
-    status: 400,
-    body: ListClubLinksErrors,
-  })
 )
+  .setPayload(ListClubLinksRequest)
+  .addSuccess(ListClubLinksResponse)
+  .addError(ListClubLinksErrors)
 
-export const GetClubContactsEndpoint = Api.post(
+export const GetClubContactsEndpoint = HttpApiEndpoint.post(
   'getClubContacts',
   '/api/v1/clubs/member/get-contacts'
-).pipe(
-  Api.setRequestBody(GetClubContactsRequest),
-  Api.setResponseBody(GetClubContactsResponse),
-  Api.addResponse({
-    status: 400,
-    body: GetClubContactsErrors,
-  })
 )
+  .setPayload(GetClubContactsRequest)
+  .addSuccess(GetClubContactsResponse)
+  .addError(GetClubContactsErrors)
 
-export const GetClubInfoByAccessCodeEndpoint = Api.post(
+export const GetClubInfoByAccessCodeEndpoint = HttpApiEndpoint.post(
   'getClubInfoByAccessCode',
   '/api/v1/clubs/member/get-info-by-access-code'
-).pipe(
-  Api.setRequestBody(GetClubInfoByAccessCodeRequest),
-  Api.setResponseBody(GetClubInfoByAccessCodeResponse),
-  Api.addResponse({
-    status: 400,
-    body: GetClubInfoByAccessCodeErrors,
-  })
 )
+  .setPayload(GetClubInfoByAccessCodeRequest)
+  .addSuccess(GetClubInfoByAccessCodeResponse)
+  .addError(GetClubInfoByAccessCodeErrors)
 
-export const ReportClubEndpoint = Api.post(
+export const ReportClubEndpoint = HttpApiEndpoint.post(
   'reportClub',
   '/api/v1/clubs/member/report-club'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(ReportClubRequest),
-  Api.setResponseBody(ReportClubResponse),
-  Api.addResponse({
-    status: 400,
-    body: ReportClubErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(ReportClubRequest)
+  .addSuccess(ReportClubResponse)
+  .addError(InvalidChallengeError)
+  .addError(ReportClubLimitReachedError)
 
-export const SendBulkNotificationEndpoint = Api.post(
+export const SendBulkNotificationEndpoint = HttpApiEndpoint.post(
   'sendBulkNotification',
   '/api/v1/notifications/bulk'
-).pipe(
-  Api.setRequestQuery(AdminTokenParams),
-  Api.setRequestBody(SendBulkNotificationRequest),
-  Api.setResponseBody(SendBulkNotificationResponse),
-  Api.addResponse({
-    status: 500,
-    body: SendBulkNotificationsErrors,
-  })
+)
+  .setUrlParams(AdminTokenParams)
+  .setPayload(SendBulkNotificationRequest)
+  .addSuccess(SendBulkNotificationResponse)
+  .addError(SendBulkNotificationsErrors)
+
+const UserApiGroup = HttpApiGroup.make('User')
+  .add(CheckUserExistsEndpoint)
+  .add(CreateUserEndpoint)
+  .add(RefreshUserEndpoint)
+  .add(UpdateFirebaseTokenEndpoint)
+  .add(UpdateNotificationTokenEndpoint)
+  .add(DeleteUserEndpoint)
+  .add(UpdateBadOwnerHashEndpoint)
+  .add(EraseUserFromNetworkEndpoint)
+
+const ContactApiGroup = HttpApiGroup.make('Contact')
+  .add(ImportContactsEndpoint)
+  .add(FetchMyContactsEndpoint)
+  .add(FetchCommonConnectionsEndpoint)
+
+const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
+  .add(CreateClubEndpoint)
+  .add(ModfiyClubEndpoint)
+  .add(GenerateClubInviteLinkForAdminEndpoint)
+  .add(ListClubsEndpoint)
+
+const ClubsMemberApiGroup = HttpApiGroup.make('ClubsMember')
+  .add(GetClubInfoEndpoint)
+  .add(JoinClubEndpoint)
+  .add(LeaveClubEndpoint)
+  .add(GetClubContactsEndpoint)
+  .add(GetClubInfoByAccessCodeEndpoint)
+  .add(ReportClubEndpoint)
+
+const ClubsModeratorApiGroup = HttpApiGroup.make('ClubsModerator')
+  .add(GenerateClubJoinLinkEndpoint)
+  .add(DeactivateClubJoinLinkEndpoint)
+  .add(AddUserToTheClubEndpint)
+  .add(ListClubLinksEndpoint)
+
+const AdminApiGroup = HttpApiGroup.make('Admin').add(
+  SendBulkNotificationEndpoint
 )
 
-const UserApiGroup = ApiGroup.make('User').pipe(
-  ApiGroup.addEndpoint(CheckUserExistsEndpoint),
-  ApiGroup.addEndpoint(CreateUserEndpoint),
-  ApiGroup.addEndpoint(RefreshUserEndpoint),
-  ApiGroup.addEndpoint(UpdateFirebaseTokenEndpoint),
-  ApiGroup.addEndpoint(UpdateNotificationTokenEndpoint),
-  ApiGroup.addEndpoint(DeleteUserEndpoint),
-  ApiGroup.addEndpoint(UpdateBadOwnerHashEndpoint),
-  ApiGroup.addEndpoint(EraseUserFromNetworkEndpoint)
-)
-
-const ContactApiGroup = ApiGroup.make('Contact').pipe(
-  ApiGroup.addEndpoint(ImportContactsEndpoint),
-  ApiGroup.addEndpoint(FetchMyContactsEndpoint),
-  ApiGroup.addEndpoint(FetchCommonConnectionsEndpoint)
-)
-
-const ClubsAdminApiGroup = ApiGroup.make('ClubsAdmin', {
-  description: 'Clubs managment for admins',
-}).pipe(
-  ApiGroup.addEndpoint(CreateClubEndpoint),
-  ApiGroup.addEndpoint(ModfiyClubEndpoint),
-  ApiGroup.addEndpoint(GenerateClubInviteLinkForAdminEndpoint),
-  ApiGroup.addEndpoint(ListClubsEndpoint)
-)
-
-const ClubsMemberApiGroup = ApiGroup.make('ClubsMember', {
-  description: 'Clubs managment for members',
-}).pipe(
-  ApiGroup.addEndpoint(GetClubInfoEndpoint),
-  ApiGroup.addEndpoint(JoinClubEndpoint),
-  ApiGroup.addEndpoint(LeaveClubEndpoint),
-  ApiGroup.addEndpoint(GetClubContactsEndpoint),
-  ApiGroup.addEndpoint(GetClubInfoByAccessCodeEndpoint),
-  ApiGroup.addEndpoint(ReportClubEndpoint)
-)
-
-const ClubsModeratorApiGroup = ApiGroup.make('ClubsModerator', {
-  description: 'Clubs managment for moderators',
-}).pipe(
-  ApiGroup.addEndpoint(GenerateClubJoinLinkEndpoint),
-  ApiGroup.addEndpoint(DeactivateClubJoinLinkEndpoint),
-  ApiGroup.addEndpoint(AddUserToTheClubEndpint),
-  ApiGroup.addEndpoint(ListClubLinksEndpoint)
-)
-
-const AdminApi = ApiGroup.make('Admin').pipe(
-  ApiGroup.addEndpoint(SendBulkNotificationEndpoint)
-)
-
-export const ContactApiSpecification = Api.make({
-  title: 'Contact service',
-  version: '1.0.0',
-}).pipe(
-  Api.addGroup(UserApiGroup),
-  Api.addGroup(ContactApiGroup),
-  Api.addGroup(ClubsAdminApiGroup),
-  Api.addGroup(ClubsMemberApiGroup),
-  Api.addGroup(ChallengeApiGroup),
-  Api.addGroup(ClubsModeratorApiGroup),
-  Api.addGroup(AdminApi)
-)
+export const ContactApiSpecification = HttpApi.make('Contact API')
+  .add(UserApiGroup)
+  .add(ContactApiGroup)
+  .add(ClubsAdminApiGroup)
+  .add(ClubsMemberApiGroup)
+  .add(ClubsModeratorApiGroup)
+  .add(AdminApiGroup)
+  .add(ChallengeApiGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

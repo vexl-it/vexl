@@ -1,4 +1,6 @@
-import {NodeContext} from '@effect/platform-node'
+import {NodeContext, NodeHttpServer} from '@effect/platform-node'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -8,6 +10,7 @@ import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   disposeTestDatabase,
   setupTestDatabase,
@@ -18,11 +21,10 @@ import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import DbLayer from '../../db/layer'
-import {NodeTestingApp} from './NodeTestingApp'
+import {ChatApiLive} from '../../httpServer'
 
 export type MockedContexts =
   | RedisService
-  | NodeTestingApp
   | ServerCrypto
   | SqlClient
   | ChallengeDbService
@@ -30,13 +32,20 @@ export type MockedContexts =
   | MessagesDbService
   | WhitelistDbService
   | MetricsClientService
+  | HttpClient
+  | TestRequestHeaders
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
   ServerCrypto.layer(cryptoConfig)
 )
-
-const context = NodeTestingApp.Live.pipe(
+const TestServerLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(ChatApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
+const context = Layer.empty.pipe(
+  Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(ChallengeService.Live),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(

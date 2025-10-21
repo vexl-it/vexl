@@ -1,12 +1,15 @@
 import {Effect, Schema} from 'effect'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
-import {HttpClientRequest} from '@effect/platform'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {
+  clearTestAuthHeaders,
+  setAuthHeaders,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -21,32 +24,30 @@ beforeAll(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
+
+      yield* _(clearTestAuthHeaders)
     })
   )
 })
@@ -57,16 +58,14 @@ describe('Delete pulled messages', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const messagesForUser1Before = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
         expect(messagesForUser1Before.messages).not.toHaveLength(0)
 
@@ -78,50 +77,41 @@ describe('Delete pulled messages', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.deletePulledMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Inboxes.deletePulledMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+          })
         )
 
         const messagesForUser1 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
         expect(messagesForUser1.messages).toHaveLength(1)
         expect(messagesForUser1.messages[0].message).toBe(
           'Message sent after pull'
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const messagesForUser2 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox1.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
         // only request message
         expect(messagesForUser2.messages).toHaveLength(1)
@@ -133,15 +123,14 @@ describe('Delete pulled messages', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(user1.authHeaders))
+
         const errorResponse = yield* _(
-          client.deletePulledMessages(
-            {
-              body: yield* _(
-                addChallengeForKey(generatePrivateKey(), user1.authHeaders)({})
-              ),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          client.Inboxes.deletePulledMessages({
+            payload: yield* _(
+              addChallengeForKey(generatePrivateKey(), user1.authHeaders)({})
+            ),
+          }),
           Effect.either
         )
 

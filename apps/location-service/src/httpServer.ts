@@ -1,32 +1,49 @@
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {LocationApiSpecification} from '@vexl-next/rest-api/src/services/location/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
-import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig} from './configs'
 import {
-  getExchangeRateHandler,
-  getGeocodedCoordinatesRequest,
+  getGeocodedCoordinatesHandler,
   getLocationSuggestionHandler,
 } from './handlers'
 import {GoogleMapsService} from './utils/googleMapsApi'
 
-export const app = RouterBuilder.make(LocationApiSpecification).pipe(
-  RouterBuilder.handle(getExchangeRateHandler),
-  RouterBuilder.handle(getGeocodedCoordinatesRequest),
-  RouterBuilder.handle(getLocationSuggestionHandler),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const RootApiGroupLive = HttpApiBuilder.group(
+  LocationApiSpecification,
+  'root',
+  (h) =>
+    h
+      .handle('getGeocodedCoordinates', getGeocodedCoordinatesHandler)
+      .handle('getLocationSuggestion', getLocationSuggestionHandler)
 )
 
-const MainLive = Layer.mergeAll(
-  ServerCrypto.layer(cryptoConfig),
-  GoogleMapsService.Live,
-  healthServerLayer({port: healthServerPortConfig})
+export const LocationApiLive = HttpApiBuilder.api(
+  LocationApiSpecification
+).pipe(
+  Layer.provide(RootApiGroupLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
 )
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+
+const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(LocationApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
+  healthServerLayer({port: healthServerPortConfig})
+).pipe(
+  Layer.provide(ServerCrypto.layer(cryptoConfig)),
+  Layer.provide(GoogleMapsService.Live)
 )

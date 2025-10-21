@@ -115,14 +115,6 @@ const showDonationPromptActionAtom = atom(null, (get, set) => {
   }).pipe(
     Effect.catchAll((e) => {
       if (e._tag === 'UserDeclinedError') return Effect.succeed(Effect.void)
-      if (e._tag === 'NetworkError') {
-        return Effect.zipRight(
-          showErrorAlertE({
-            title: t('common.NetworkError'),
-          }),
-          Effect.succeed(Effect.void)
-        )
-      }
 
       return Effect.zipRight(
         showErrorAlertE({

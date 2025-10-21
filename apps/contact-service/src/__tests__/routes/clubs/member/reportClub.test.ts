@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
@@ -9,9 +8,12 @@ import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   type MockedUser,
   createMockedUser,
@@ -54,13 +56,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club_offer_reported_info`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -102,17 +105,15 @@ describe('Report club', () => {
         const app = yield* _(NodeTestingApp)
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
+        yield* _(addTestHeaders(user.authHeaders))
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challenge,
-                offerId,
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challenge,
+              offerId,
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          )
+          })
         )
 
         const offerIdHashed = yield* _(hashSha256(offerId))
@@ -154,30 +155,26 @@ describe('Report club', () => {
           generateAndSignChallenge(clubKeypairForUser2)
         )
 
+        yield* _(addTestHeaders(user.authHeaders))
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challengeForUser,
-                offerId,
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challengeForUser,
+              offerId,
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          )
+          })
         )
 
+        yield* _(addTestHeaders(user2.authHeaders))
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challengeForUser2,
-                offerId: newOfferId(),
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challengeForUser2,
+              offerId: newOfferId(),
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -203,17 +200,15 @@ describe('Report club', () => {
         const app = yield* _(NodeTestingApp)
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
+        yield* _(addTestHeaders(user.authHeaders))
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challenge,
-                offerId,
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challenge,
+              offerId,
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          )
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -245,16 +240,13 @@ describe('Report club', () => {
         )
 
         const response = yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...secondChallenge,
-                offerId,
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...secondChallenge,
+              offerId,
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -291,34 +283,30 @@ describe('Report club', () => {
             UUID = ${club.uuid}
         `)
 
+        yield* _(addTestHeaders(user.authHeaders))
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challenge,
-                offerId,
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challenge,
+              offerId,
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          )
+          })
         )
 
         const secondChallenge = yield* _(
           generateAndSignChallenge(clubKeypairForUser)
         )
 
+        yield* _(addTestHeaders(user.authHeaders))
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...secondChallenge,
-                offerId: newOfferId(),
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...secondChallenge,
+              offerId: newOfferId(),
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          )
+          })
         )
 
         const thirdChallenge = yield* _(
@@ -326,33 +314,28 @@ describe('Report club', () => {
         )
 
         yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...thirdChallenge,
-                offerId: newOfferId(),
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...thirdChallenge,
+              offerId: newOfferId(),
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          )
+          })
         )
 
         const fourthChallenge = yield* _(
           generateAndSignChallenge(clubKeypairForUser)
         )
 
+        yield* _(addTestHeaders(user.authHeaders))
         const errorResponse = yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...fourthChallenge,
-                offerId: newOfferId(),
-                clubUuid: club.uuid,
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...fourthChallenge,
+              offerId: newOfferId(),
+              clubUuid: club.uuid,
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -368,24 +351,20 @@ describe('Report club', () => {
 
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
+        yield* _(addTestHeaders(user.authHeaders))
         const errorResponse = yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challenge,
-                offerId,
-                clubUuid: generateClubUuid(),
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challenge,
+              offerId,
+              clubUuid: generateClubUuid(),
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          ),
+            withResponse: true,
+          }),
           Effect.either
         )
 
-        expect(errorResponse._tag).toBe('Left')
-        if (errorResponse._tag === 'Left') {
-          expect(errorResponse.left).toHaveProperty('status', 404)
-        }
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -397,25 +376,20 @@ describe('Report club', () => {
 
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
+        yield* _(addTestHeaders(user.authHeaders))
         const errorResponse = yield* _(
-          app.reportClub(
-            {
-              body: {
-                ...challenge,
-                publicKey: generatePrivateKey().publicKeyPemBase64,
-                offerId,
-                clubUuid: generateClubUuid(),
-              },
+          app.ClubsMember.reportClub({
+            payload: {
+              ...challenge,
+              publicKey: generatePrivateKey().publicKeyPemBase64,
+              offerId,
+              clubUuid: generateClubUuid(),
             },
-            HttpClientRequest.setHeaders(user.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
-        expect(errorResponse._tag).toBe('Left')
-        if (errorResponse._tag === 'Left') {
-          expect(errorResponse.left).toHaveProperty('status', 400)
-        }
+        expectErrorResponse(InvalidChallengeError)(errorResponse)
       })
     )
   })

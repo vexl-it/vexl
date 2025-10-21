@@ -1,19 +1,18 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {
-  AddUserToTheClubErrors,
   type AddUserToTheClubResponse,
   MemberAlreadyInClubError,
   UserIsNotModeratorError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {AddUserToTheClubEndpint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
-import {Handler} from 'effect-http'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {issueClubAdmissionNotification} from '../../../utils/issueClubAdmissionNotification'
@@ -21,16 +20,19 @@ import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotific
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
-export const addUserToTheClub = Handler.make(AddUserToTheClubEndpint, (req) =>
-  makeEndpointEffect(
+export const addUserToTheClub = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsModerator',
+  'addUserToTheClub',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
 
       const moderatorMember = yield* _(
-        membersDb.findClubMemberByPublicKey({publicKey: req.body.publicKey}),
+        membersDb.findClubMemberByPublicKey({publicKey: req.payload.publicKey}),
         Effect.flatten,
         Effect.catchTag(
           'NoSuchElementException',
@@ -50,18 +52,18 @@ export const addUserToTheClub = Handler.make(AddUserToTheClubEndpint, (req) =>
           () =>
             new UnexpectedServerError({
               status: 500,
-              detail: 'Club not found. This should not happen',
+              message: 'Club not found. This should not happen',
             })
         ),
         Effect.filterOrFail(
-          (club) => club.uuid === req.body.clubUuid,
+          (club) => club.uuid === req.payload.clubUuid,
           () => new NotFoundError({message: 'Club not found'})
         )
       )
 
       yield* _(
         membersDb.findClubMemberByPublicKey({
-          publicKey: req.body.adminitionRequest.publicKey,
+          publicKey: req.payload.adminitionRequest.publicKey,
         }),
         Effect.filterOrFail(Option.isNone, () => new MemberAlreadyInClubError())
       )
@@ -71,21 +73,21 @@ export const addUserToTheClub = Handler.make(AddUserToTheClubEndpint, (req) =>
       yield* _(
         membersDb.insertClubMember({
           clubId: club.id,
-          publicKey: req.body.adminitionRequest.publicKey,
+          publicKey: req.payload.adminitionRequest.publicKey,
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: Option.getOrNull(
-            req.body.adminitionRequest.notificationToken
+            req.payload.adminitionRequest.notificationToken
           ),
         })
       )
 
-      if (Option.isSome(req.body.adminitionRequest.notificationToken)) {
+      if (Option.isSome(req.payload.adminitionRequest.notificationToken)) {
         yield* _(
           issueClubAdmissionNotification({
-            admittedMemberPublickey: req.body.adminitionRequest.publicKey,
+            admittedMemberPublickey: req.payload.adminitionRequest.publicKey,
             notificationToken:
-              req.body.adminitionRequest.notificationToken.value,
+              req.payload.adminitionRequest.notificationToken.value,
           })
         )
       }
@@ -95,7 +97,7 @@ export const addUserToTheClub = Handler.make(AddUserToTheClubEndpint, (req) =>
         Effect.flatMap((s) =>
           s.registerNewClubNotification({
             clubUuid: club.uuid,
-            triggeringUser: req.body.publicKey,
+            triggeringUser: req.payload.publicKey,
           })
         )
       )
@@ -105,8 +107,7 @@ export const addUserToTheClub = Handler.make(AddUserToTheClubEndpint, (req) =>
       } satisfies AddUserToTheClubResponse
     }).pipe(
       withDbTransaction,
-      withClubJoiningActionRedisLock(req.body.clubUuid)
-    ),
-    AddUserToTheClubErrors
-  )
+      withClubJoiningActionRedisLock(req.payload.clubUuid),
+      makeEndpointEffect
+    )
 )

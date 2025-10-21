@@ -1,19 +1,22 @@
-import {DeleteOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect, Schema} from 'effect'
-import {Handler} from 'effect-http'
+import {Effect} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
 import {reportOfferPublicPartDeleted} from '../metrics'
 import {hashAdminId} from '../utils/hashAdminId'
 import {withOfferAdminActionRedisLock} from '../utils/withOfferAdminRedisLock'
 
-export const deleteOffer = Handler.make(DeleteOfferEndpoint, (req, security) =>
-  makeEndpointEffect(
+export const deleteOffer = HttpApiBuilder.handler(
+  OfferApiSpecification,
+  'root',
+  'deleteOffer',
+  (req) =>
     Effect.gen(function* (_) {
       const dbService = yield* _(OfferDbService)
       const hashedAdminId = yield* _(
-        Effect.forEach(req.query.adminIds, hashAdminId)
+        Effect.forEach(req.urlParams.adminIds, hashAdminId)
       )
 
       yield* _(
@@ -33,11 +36,10 @@ export const deleteOffer = Handler.make(DeleteOfferEndpoint, (req, security) =>
 
       yield* _(reportOfferPublicPartDeleted())
 
-      return null
+      return {}
     }).pipe(
       withDbTransaction,
-      withOfferAdminActionRedisLock([...req.query.adminIds])
-    ),
-    Schema.Void
-  )
+      withOfferAdminActionRedisLock([...req.urlParams.adminIds]),
+      makeEndpointEffect
+    )
 )

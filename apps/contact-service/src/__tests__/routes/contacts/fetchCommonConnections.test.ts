@@ -1,4 +1,4 @@
-import {HttpClientRequest} from '@effect/platform'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Order, pipe} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -61,18 +61,17 @@ describe('Common connections', () => {
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
 
+        yield* _(setAuthHeaders(networkOne[0].authHeaders))
+
         const connections = yield* _(
-          app.fetchCommonConnections(
-            {
-              body: {
-                publicKeys: Array.map(
-                  userContacts,
-                  (one) => one.keys.publicKeyPemBase64
-                ),
-              },
+          app.Contact.fetchCommonConnections({
+            payload: {
+              publicKeys: Array.map(
+                userContacts,
+                (one) => one.keys.publicKeyPemBase64
+              ),
             },
-            HttpClientRequest.setHeaders(networkOne[0].authHeaders)
-          )
+          })
         )
 
         const resultKeys = pipe(

@@ -3,12 +3,12 @@ import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {sendNotificationsMock} from '../../utils/mockedExpoNotificationService'
 
 const keys = generatePrivateKey()
@@ -25,23 +25,19 @@ beforeAll(async () => {
           publicKey: keys.publicKeyPemBase64,
         })
       )
+      yield* _(setAuthHeaders(authHeaders))
       yield* _(
-        app.createUser(
-          {
-            body: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
-                'notificationToken'
-              ),
-            },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+        app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
+              'notificationToken'
+            ),
           },
-          HttpClientRequest.setHeaders({
-            ...authHeaders,
-          })
-        )
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          }),
+        })
       )
     })
   )
@@ -61,13 +57,11 @@ describe('Check user exists', () => {
           })
         )
 
+        yield* _(setAuthHeaders(authHeaders))
         const result = yield* _(
-          app.checkUserExists(
-            {query: {notifyExistingUserAboutLogin: false}},
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: false},
+          })
         )
 
         expect(result.exists).toBe(false)
@@ -84,13 +78,11 @@ describe('Check user exists', () => {
             publicKey: keys.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders))
         const result = yield* _(
-          app.checkUserExists(
-            {query: {notifyExistingUserAboutLogin: false}},
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: false},
+          })
         )
         expect(result.exists).toBe(true)
       })
@@ -112,13 +104,11 @@ describe('Check user exist notification', () => {
             publicKey: keys.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders))
         const result = yield* _(
-          app.checkUserExists(
-            {query: {notifyExistingUserAboutLogin: true}},
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+          })
         )
         expect(result.exists).toBe(true)
 
@@ -141,13 +131,11 @@ describe('Check user exist notification', () => {
             publicKey: keys.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders))
         yield* _(
-          app.checkUserExists(
-            {query: {notifyExistingUserAboutLogin: true}},
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+          })
         )
 
         yield* _(Effect.sleep(100))
@@ -175,13 +163,11 @@ describe('Check user exist notification', () => {
             public_key = ${keys.publicKeyPemBase64}
         `)
 
+        yield* _(setAuthHeaders(authHeaders))
         const result = yield* _(
-          app.checkUserExists(
-            {query: {notifyExistingUserAboutLogin: true}},
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: true},
+          })
         )
 
         yield* _(sql`
@@ -210,13 +196,11 @@ describe('Check user exist notification', () => {
           })
         )
 
+        yield* _(setAuthHeaders(authHeaders))
         const result = yield* _(
-          app.checkUserExists(
-            {query: {notifyExistingUserAboutLogin: false}},
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          app.User.checkUserExists({
+            urlParams: {notifyExistingUserAboutLogin: false},
+          })
         )
 
         expect(result.exists).toBe(true)

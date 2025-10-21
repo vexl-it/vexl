@@ -1,24 +1,23 @@
-import {NodeContext} from '@effect/platform-node'
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
 import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
-import {
-  cryptoConfig,
-  healthServerPortConfig,
-  portConfig,
-  redisUrl,
-} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import {OfferDbService} from './db/OfferDbService'
 import DbLayer from './db/layer'
 import {InternalServerLive} from './internalServer'
@@ -38,30 +37,54 @@ import {reportClubOffer} from './routes/reportClubOffer'
 import {reportOffer} from './routes/reportOffer'
 import {updateOffer} from './routes/updateOffer'
 
-export const app = RouterBuilder.make(OfferApiSpecification).pipe(
-  // challenges
-  RouterBuilder.handle(createChallenge),
-  RouterBuilder.handle(createChallenges),
-  // offers
-  RouterBuilder.handle(getOffersByIds),
-  RouterBuilder.handle(getClubOffersByIds),
-  RouterBuilder.handle(getOffersForMeModifiedOrCreatedAfter),
-  RouterBuilder.handle(getClubOffersForMeModifiedOrCreatedAfter),
-  RouterBuilder.handle(getRemovedOffers),
-  RouterBuilder.handle(getRemovedClubOffers),
-  RouterBuilder.handle(reportOffer),
-  RouterBuilder.handle(reportClubOffer),
-  RouterBuilder.handle(createNewOffer),
-  RouterBuilder.handle(refreshOffer),
-  RouterBuilder.handle(deleteOffer),
-  RouterBuilder.handle(createPrivatePart),
-  RouterBuilder.handle(updateOffer),
-  RouterBuilder.handle(deletePrivatePart),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const RootGroupLive = HttpApiBuilder.group(OfferApiSpecification, 'root', (h) =>
+  h
+    .handle('createNewOffer', createNewOffer)
+    .handle('createPrivatePart', createPrivatePart)
+    .handle('deleteOffer', deleteOffer)
+    .handle('deletePrivatePart', deletePrivatePart)
+    .handle('getClubOffersByIds', getClubOffersByIds)
+    .handle(
+      'getClubOffersForMeModifiedOrCreatedAfter',
+      getClubOffersForMeModifiedOrCreatedAfter
+    )
+    .handle('getOffersByIds', getOffersByIds)
+    .handle(
+      'getOffersForMeModifiedOrCreatedAfter',
+      getOffersForMeModifiedOrCreatedAfter
+    )
+    .handle('getRemovedClubOffers', getRemovedClubOffers)
+    .handle('getRemovedOffers', getRemovedOffers)
+    .handle('reportClubOffer', reportClubOffer)
+    .handle('reportOffer', reportOffer)
+    .handle('refreshOffer', refreshOffer)
+    .handle('updateOffer', updateOffer)
 )
 
-const MainLive = Layer.empty.pipe(
+const ChallengeApiGroupLive = HttpApiBuilder.group(
+  OfferApiSpecification,
+  'Challenges',
+  (h) =>
+    h
+      .handle('createChallenge', createChallenge)
+      .handle('createChallengeBatch', createChallenges)
+)
+
+export const OfferApiLive = HttpApiBuilder.api(OfferApiSpecification).pipe(
+  Layer.provide(RootGroupLive),
+  Layer.provide(ChallengeApiGroupLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
+
+export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(OfferApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.empty.pipe(
+  Layer.provideMerge(ApiServerLive),
   Layer.provideMerge(reportMetricsLayer),
   Layer.provideMerge(InternalServerLive),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
@@ -72,11 +95,5 @@ const MainLive = Layer.empty.pipe(
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(MetricsClientService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provideMerge(NodeContext.layer)
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl))
 )

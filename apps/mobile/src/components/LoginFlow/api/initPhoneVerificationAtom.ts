@@ -62,37 +62,16 @@ export const initPhoneVerificationAtom = atom(
     })
       .pipe(
         Effect.catchAll((e) => {
-          if (
-            e._tag === 'CryptoError' ||
-            e._tag === 'UnknownClientError' ||
-            e._tag === 'UnexpectedApiResponseError' ||
-            e._tag === 'UnknownServerError'
-          ) {
-            reportError(
-              'error',
-              new Error(
-                'Unexpected error while initializing phone verification'
-              ),
-              {e}
-            )
-          }
+          reportError(
+            'error',
+            new Error('Unexpected error while initializing phone verification'),
+            {e}
+          )
 
-          if (
-            e._tag === 'NetworkError' ||
-            e._tag === 'UnauthorizedError' ||
-            e._tag === 'NotFoundError' ||
-            e._tag === 'UnknownClientError' ||
-            e._tag === 'UnknownServerError' ||
-            e._tag === 'UnexpectedApiResponseError' ||
-            e._tag === 'CryptoError' ||
-            e._tag === 'ParseError' ||
-            e._tag === 'InvalidLoginSignatureError'
-          ) {
-            showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-              error: e,
-            })
-          }
+          showErrorAlert({
+            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            error: e,
+          })
 
           return Effect.fail(e)
         }),

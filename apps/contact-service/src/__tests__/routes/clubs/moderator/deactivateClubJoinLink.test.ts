@@ -4,6 +4,7 @@ import {
   type ClubCode,
   generateClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -15,6 +16,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -52,13 +54,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -82,8 +85,8 @@ beforeEach(async () => {
       )
 
       const link = yield* _(
-        app.generateClubJoinLink({
-          body: {
+        app.ClubsModerator.generateClubJoinLink({
+          payload: {
             clubUuid: club.uuid,
             ...(yield* _(generateAndSignChallenge(userKey))),
           },
@@ -100,8 +103,8 @@ describe('Deactivate link', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const deactivateLinkResponse = yield* _(
-          app.deactivateClubJoinLink({
-            body: {
+          app.ClubsModerator.deactivateClubJoinLink({
+            payload: {
               code,
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -115,8 +118,8 @@ describe('Deactivate link', () => {
         })
 
         const errorResponse = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               code,
               notificationToken: Option.none(),
               contactsImported: false,
@@ -125,7 +128,7 @@ describe('Deactivate link', () => {
           }),
           Effect.either
         )
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -135,8 +138,8 @@ describe('Deactivate link', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const failedResponse = yield* _(
-          app.deactivateClubJoinLink({
-            body: {
+          app.ClubsModerator.deactivateClubJoinLink({
+            payload: {
               code: '112345' as ClubCode,
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -168,8 +171,8 @@ describe('Deactivate link', () => {
         )
 
         const errorResponse = yield* _(
-          app.deactivateClubJoinLink({
-            body: {
+          app.ClubsModerator.deactivateClubJoinLink({
+            payload: {
               code,
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
@@ -191,8 +194,8 @@ describe('Deactivate link', () => {
         const nonModeratorMember = generatePrivateKey()
 
         const errorResponse = yield* _(
-          app.deactivateClubJoinLink({
-            body: {
+          app.ClubsModerator.deactivateClubJoinLink({
+            payload: {
               code,
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
@@ -201,7 +204,7 @@ describe('Deactivate link', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -212,8 +215,8 @@ describe('Deactivate link', () => {
         const app = yield* _(NodeTestingApp)
 
         const errorResponse = yield* _(
-          app.deactivateClubJoinLink({
-            body: {
+          app.ClubsModerator.deactivateClubJoinLink({
+            payload: {
               code,
               clubUuid: generateClubUuid(),
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -222,7 +225,7 @@ describe('Deactivate link', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -235,8 +238,8 @@ describe('Deactivate link', () => {
         const challenge = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.deactivateClubJoinLink({
-            body: {
+          app.ClubsModerator.deactivateClubJoinLink({
+            payload: {
               code,
               clubUuid: club.uuid,
               ...challenge,

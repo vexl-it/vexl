@@ -1,3 +1,4 @@
+import {type HttpClient} from '@effect/platform/index'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -7,9 +8,15 @@ import {
   ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Effect} from 'effect'
-import {type ClientError} from 'effect-http'
+import {type TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'
+
+class ErrorGeneratingChallenge extends Schema.TaggedError<ErrorGeneratingChallenge>(
+  'ErrorGeneratingChallenge'
+)('ErrorGeneratingChallenge', {
+  cause: Schema.Unknown,
+}) {}
 
 export const generateAndSignChallenge = (
   key: PrivateKeyHolder
@@ -18,13 +25,16 @@ export const generateAndSignChallenge = (
     signedChallenge: SignedChallenge
     publicKey: PublicKeyPemBase64
   },
-  CryptoError | ClientError.ClientError,
-  NodeTestingApp
+  CryptoError | ErrorGeneratingChallenge,
+  HttpClient.HttpClient | TestRequestHeaders
 > =>
   Effect.gen(function* (_) {
     const app = yield* _(NodeTestingApp)
     const challenge = yield* _(
-      app.createChallenge({body: {publicKey: key.publicKeyPemBase64}})
+      app.Challenges.createChallenge({
+        payload: {publicKey: key.publicKeyPemBase64},
+      }),
+      Effect.mapError((cause) => new ErrorGeneratingChallenge({cause}))
     )
     const signature = yield* _(
       ecdsaSignE(key.privateKeyPemBase64)(challenge.challenge)

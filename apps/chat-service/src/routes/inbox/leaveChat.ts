@@ -1,13 +1,10 @@
-import {
-  LeaveChatErrors,
-  type CancelApprovalResponse,
-} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {LeaveChatEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {type CancelApprovalResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
@@ -16,26 +13,29 @@ import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureRece
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
-export const leaveChat = Handler.make(LeaveChatEndpoint, (req) =>
-  makeEndpointEffect(
+export const leaveChat = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Inboxes',
+  'leaveChat',
+  (req) =>
     Effect.gen(function* (_) {
       yield* _(
         validateChallengeInBody({
-          signedChallenge: req.body.signedChallenge,
-          publicKey: req.body.senderPublicKey,
+          signedChallenge: req.payload.signedChallenge,
+          publicKey: req.payload.senderPublicKey,
         })
       )
 
       const {receiverInbox, senderInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
-          sender: req.body.senderPublicKey,
-          receiver: req.body.receiverPublicKey,
+          sender: req.payload.senderPublicKey,
+          receiver: req.payload.receiverPublicKey,
         })
       )
 
       yield* _(
         ensureSenderInReceiverWhitelist({
-          sender: req.body.senderPublicKey,
+          sender: req.payload.senderPublicKey,
           receiver: receiverInbox.id,
         })
       )
@@ -58,12 +58,12 @@ export const leaveChat = Handler.make(LeaveChatEndpoint, (req) =>
 
       // send message about leaving
       const senderKeyEncrypted = yield* _(
-        encryptPublicKey(req.body.senderPublicKey)
+        encryptPublicKey(req.payload.senderPublicKey)
       )
       const messagesDb = yield* _(MessagesDbService)
       const sentMessage = yield* _(
         messagesDb.insertMessageForInbox({
-          message: req.body.message,
+          message: req.payload.message,
           inboxId: receiverInbox.id,
           senderPublicKey: senderKeyEncrypted,
           type: 'DELETE_CHAT',
@@ -75,16 +75,15 @@ export const leaveChat = Handler.make(LeaveChatEndpoint, (req) =>
       return {
         id: Number(sentMessage.id),
         message: sentMessage.message,
-        senderPublicKey: req.body.senderPublicKey,
+        senderPublicKey: req.payload.senderPublicKey,
         notificationHandled: false,
       } satisfies CancelApprovalResponse
     }).pipe(
       withInboxActionRedisLock(
-        req.body.senderPublicKey,
-        req.body.receiverPublicKey
+        req.payload.senderPublicKey,
+        req.payload.receiverPublicKey
       ),
-      withDbTransaction
-    ),
-    LeaveChatErrors
-  )
+      withDbTransaction,
+      makeEndpointEffect
+    )
 )

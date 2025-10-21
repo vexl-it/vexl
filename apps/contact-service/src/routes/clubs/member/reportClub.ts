@@ -1,28 +1,30 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
 import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {
-  ReportClubErrors,
-  ReportClubLimitReachedError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {ReportClubEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Effect, Option, Schema} from 'effect'
-import {Handler} from 'effect-http'
 import {clubReportLimistCount} from '../../../configs'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {deactivateAndClearClubs} from '../../../internalServer/routes/deactivateAndClearClubs'
 import {reportClubDeactivated, reportClubReported} from '../../../metrics'
 
-export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
-  makeEndpointEffect(
+export const reportClub = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsMember',
+  'reportClub',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
+      const security = yield* _(CurrentSecurity)
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
@@ -30,7 +32,7 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
 
       const member = yield* _(
         membersDb.findClubMemberByPublicKey({
-          publicKey: req.body.publicKey,
+          publicKey: req.payload.publicKey,
         }),
         Effect.flatten,
         Effect.catchTag(
@@ -41,7 +43,7 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
 
       const club = yield* _(
         clubsDb.findClubByUuid({
-          uuid: req.body.clubUuid,
+          uuid: req.payload.clubUuid,
         }),
         Effect.flatten,
         Effect.catchTag(
@@ -66,14 +68,14 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
       }
 
       const offerIdHashed = yield* _(
-        hashSha256(req.body.offerId),
+        hashSha256(req.payload.offerId),
         Effect.flatMap(Schema.decode(OfferIdHashed)),
         Effect.catchAll(
           (e) =>
             new UnexpectedServerError({
               status: 500,
               cause: e,
-              detail: 'Error while hashing offerId for club report',
+              message: 'Error while hashing offerId for club report',
             })
         )
       )
@@ -120,7 +122,5 @@ export const reportClub = Handler.make(ReportClubEndpoint, (req, security) =>
       }
 
       return {}
-    }),
-    ReportClubErrors
-  )
+    }).pipe(makeEndpointEffect)
 )

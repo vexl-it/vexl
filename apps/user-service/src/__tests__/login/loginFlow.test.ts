@@ -38,11 +38,11 @@ describe('loginFlow', () => {
         )
         const client = yield* _(NodeTestingApp)
         const initResponse = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge: yield* _(generateAndSignChallenge),
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
@@ -55,8 +55,8 @@ describe('loginFlow', () => {
         checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
         const keypair = generatePrivateKey()
         const checkResponse = yield* _(
-          client.verifyCode({
-            body: {
+          client.Login.verifyCode({
+            payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               id: initResponse.verificationId,
               code: '123456',
@@ -75,8 +75,8 @@ describe('loginFlow', () => {
         )
 
         const verifyChallenge = yield* _(
-          client.verifyChallenge({
-            body: {
+          client.Login.verifyChallenge({
+            payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               signature: signedChallenge,
             },

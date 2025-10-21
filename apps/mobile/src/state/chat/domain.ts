@@ -18,17 +18,13 @@ import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import {
-  type NetworkError,
-  type UnexpectedApiResponseError,
-} from '@vexl-next/rest-api/src/Errors'
 import {type SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {
   type ForbiddenMessageTypeError,
   type InboxDoesNotExistError,
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {
   type ErrorSigningChallenge,
   type InvalidChallengeError,
@@ -56,8 +52,6 @@ export const ChatMessageWithState = z
       message: ChatMessage,
       error: z.custom<
         | ErrorEncryptingMessage
-        | UnexpectedApiResponseError
-        | NetworkError
         | ErrorGeneratingChallenge
         | ErrorSigningChallenge
         | InvalidChallengeError
@@ -69,6 +63,7 @@ export const ChatMessageWithState = z
         | SenderInboxDoesNotExistError
         | ForbiddenMessageTypeError
         | CryptoError
+        | {_tag: string}
       >((one) => !!one._tag),
     }),
     z.object({state: z.literal('sent'), message: ChatMessage}),

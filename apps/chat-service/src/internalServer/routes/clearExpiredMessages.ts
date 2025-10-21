@@ -10,7 +10,7 @@ export const clearExpiredMessages = Effect.gen(function* (_) {
   yield* _(Effect.log(`Deleted ${deletedCount} expired messages`))
   yield* _(reportMessageExpired(deletedCount))
 
-  return HttpServerResponse.text('ok', {status: 200})
+  return HttpServerResponse.text('ok')
 }).pipe(
   // No redis lock. What if it gets called twice? No biggie
   Effect.withSpan('Clean expired messages')

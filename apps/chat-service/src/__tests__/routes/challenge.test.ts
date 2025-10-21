@@ -1,5 +1,5 @@
-import {HttpClientRequest} from '@effect/platform'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -15,31 +15,27 @@ beforeAll(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
     })
   )
@@ -50,31 +46,26 @@ it('Create challenge works', async () => {
     Effect.gen(function* (_) {
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.createChallenge(
-          {
-            body: {
-              publicKey: generatePrivateKey().publicKeyPemBase64,
-            },
+        client.Challenges.createChallenge({
+          payload: {
+            publicKey: generatePrivateKey().publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
       const keysForBatch = [generatePrivateKey(), generatePrivateKey()] as const
 
       const batch = yield* _(
-        client.createChallengeBatch(
-          {
-            body: {
-              publicKeys: [
-                keysForBatch[0].publicKeyPemBase64,
-                keysForBatch[1].publicKeyPemBase64,
-              ],
-            },
+        client.Challenges.createChallengeBatch({
+          payload: {
+            publicKeys: [
+              keysForBatch[0].publicKeyPemBase64,
+              keysForBatch[1].publicKeyPemBase64,
+            ],
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
       expect(batch.challenges.map((c) => c.publicKey)).toEqual([

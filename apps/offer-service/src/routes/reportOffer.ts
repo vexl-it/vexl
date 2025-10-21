@@ -1,27 +1,29 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {
-  ReportOfferEndpointErrors,
-  ReportOfferLimitReachedError,
-} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {ReportOfferEndpoint} from '@vexl-next/rest-api/src/services/offer/specification'
-import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+import {ReportOfferLimitReachedError} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
+import {withRedisLockFromEffect} from '@vexl-next/server-utils/src/RedisService'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
-import {Handler} from 'effect-http'
 import {reportLimitCountConfig} from '../configs'
 import {OfferDbService} from '../db/OfferDbService'
 import {reportOfferReported} from '../metrics'
 
-export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
-  makeEndpointEffect(
+export const reportOffer = HttpApiBuilder.handler(
+  OfferApiSpecification,
+  'root',
+  'reportOffer',
+  (req) =>
     Effect.gen(function* (_) {
+      const security = yield* _(CurrentSecurity)
       const offerDbService = yield* _(OfferDbService)
       const reportLimitCount = yield* _(reportLimitCountConfig)
 
       const offerForMe = yield* _(
         offerDbService.queryOfferByPublicKeyAndOfferId({
           userPublicKey: security['public-key'],
-          id: req.body.offerId,
+          id: req.payload.offerId,
         })
       )
 
@@ -40,7 +42,7 @@ export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
       yield* _(
         offerDbService.updateReportOffer({
           userPublicKey: security['public-key'],
-          offerId: req.body.offerId,
+          offerId: req.payload.offerId,
         })
       )
 
@@ -51,11 +53,14 @@ export const reportOffer = Handler.make(ReportOfferEndpoint, (req, security) =>
         })
       )
 
-      return null
+      return {}
     }).pipe(
-      withRedisLock(`reportOffer:${security['public-key']}`),
-      Effect.zipLeft(reportOfferReported(req.body.offerId))
-    ),
-    ReportOfferEndpointErrors
-  )
+      withRedisLockFromEffect(
+        CurrentSecurity.pipe(
+          Effect.map((security) => `reportOffer:${security['public-key']}`)
+        )
+      ),
+      Effect.zipLeft(reportOfferReported(req.payload.offerId)),
+      makeEndpointEffect
+    )
 )

@@ -1,6 +1,10 @@
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
-import {Api} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {
   GetExchangeRateError,
   GetExchangeRateRequest,
@@ -8,20 +12,22 @@ import {
 } from './contracts'
 
 export const getExchangeRateErrors = Schema.Union(GetExchangeRateError)
-export const GetExchangeRateEndpoint = Api.get(
+export const GetExchangeRateEndpoint = HttpApiEndpoint.get(
   'getExchangeRate',
   '/btc-rate'
-).pipe(
-  Api.setRequestQuery(GetExchangeRateRequest),
-  Api.setResponseBody(GetExchangeRateResponse),
-  Api.setSecurity(ServerSecurity),
-  Api.addResponse({
-    status: 400 as const,
-    body: GetExchangeRateError,
-  })
+)
+  .setUrlParams(GetExchangeRateRequest)
+  .addSuccess(GetExchangeRateResponse)
+  .middleware(ServerSecurityMiddleware)
+  .addError(GetExchangeRateError)
+
+const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
+  GetExchangeRateEndpoint
 )
 
-export const BtcExchangeRateApiSpecification = Api.make({
-  title: 'Btc exchange rate service',
-  version: '1.0.0',
-}).pipe(Api.addEndpoint(GetExchangeRateEndpoint))
+export const BtcExchangeRateApiSpecification = HttpApi.make(
+  'Btc exchange rate service'
+)
+  .add(RootGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

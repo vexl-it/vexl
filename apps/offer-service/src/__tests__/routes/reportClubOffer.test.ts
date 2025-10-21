@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -14,6 +13,7 @@ import {
   type CreateNewOfferResponse,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
@@ -70,12 +70,13 @@ beforeEach(async () => {
         offerId: newOfferId(),
       }
 
+      yield* _(setAuthHeaders(user2.authHeaders))
+
       offer1 = {
         ...(yield* _(
-          client.createNewOffer(
-            {body: request1},
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.createNewOffer({
+            payload: request1,
+          })
         )),
         adminId: request1.adminId,
       }
@@ -100,10 +101,9 @@ beforeEach(async () => {
 
       offer2 = {
         ...(yield* _(
-          client.createNewOffer(
-            {body: request2},
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.createNewOffer({
+            payload: request2,
+          })
         )),
         adminId: request2.adminId,
       }
@@ -128,10 +128,9 @@ beforeEach(async () => {
 
       offer3 = {
         ...(yield* _(
-          client.createNewOffer(
-            {body: request3},
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.createNewOffer({
+            payload: request3,
+          })
         )),
         adminId: request3.adminId,
       }
@@ -149,17 +148,16 @@ describe('Report club offer', () => {
           addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
         )
 
+        yield* _(setAuthHeaders(me.authHeaders))
+
         yield* _(
-          client.reportClubOffer(
-            {
-              body: {
-                offerId: offer1.offerId,
-                publicKey: requestWithChallenge.publicKey,
-                signedChallenge: requestWithChallenge.signedChallenge,
-              },
+          client.reportClubOffer({
+            payload: {
+              offerId: offer1.offerId,
+              publicKey: requestWithChallenge.publicKey,
+              signedChallenge: requestWithChallenge.signedChallenge,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -185,17 +183,16 @@ describe('Report club offer', () => {
           addChallengeForKey(clubKeypairForUser1, user1.authHeaders)({})
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
+
         yield* _(
-          client.reportClubOffer(
-            {
-              body: {
-                offerId: offer1.offerId,
-                publicKey: requestWithChallenge.publicKey,
-                signedChallenge: requestWithChallenge.signedChallenge,
-              },
+          client.reportClubOffer({
+            payload: {
+              offerId: offer1.offerId,
+              publicKey: requestWithChallenge.publicKey,
+              signedChallenge: requestWithChallenge.signedChallenge,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         const secondRequestWithChallenge = yield* _(
@@ -203,16 +200,13 @@ describe('Report club offer', () => {
         )
 
         yield* _(
-          client.reportClubOffer(
-            {
-              body: {
-                offerId: offer2.offerId,
-                publicKey: secondRequestWithChallenge.publicKey,
-                signedChallenge: secondRequestWithChallenge.signedChallenge,
-              },
+          client.reportClubOffer({
+            payload: {
+              offerId: offer2.offerId,
+              publicKey: secondRequestWithChallenge.publicKey,
+              signedChallenge: secondRequestWithChallenge.signedChallenge,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          })
         )
 
         const thirdRequestWithChallenge = yield* _(
@@ -220,16 +214,13 @@ describe('Report club offer', () => {
         )
 
         const errorResponse = yield* _(
-          client.reportClubOffer(
-            {
-              body: {
-                offerId: offer3.offerId,
-                publicKey: thirdRequestWithChallenge.publicKey,
-                signedChallenge: thirdRequestWithChallenge.signedChallenge,
-              },
+          client.reportClubOffer({
+            payload: {
+              offerId: offer3.offerId,
+              publicKey: thirdRequestWithChallenge.publicKey,
+              signedChallenge: thirdRequestWithChallenge.signedChallenge,
             },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -247,17 +238,16 @@ describe('Report club offer', () => {
           addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
         )
 
+        yield* _(setAuthHeaders(me.authHeaders))
+
         const response = yield* _(
-          client.reportClubOffer(
-            {
-              body: {
-                offerId: offer2.offerId,
-                publicKey: requestWithChallenge.publicKey,
-                signedChallenge: requestWithChallenge.signedChallenge,
-              },
+          client.reportClubOffer({
+            payload: {
+              offerId: offer2.offerId,
+              publicKey: requestWithChallenge.publicKey,
+              signedChallenge: requestWithChallenge.signedChallenge,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -288,17 +278,16 @@ describe('Report club offer', () => {
           addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
         )
 
+        yield* _(setAuthHeaders(me.authHeaders))
+
         const response = yield* _(
-          client.reportClubOffer(
-            {
-              body: {
-                offerId: newOfferId(),
-                publicKey: requestWithChallenge.publicKey,
-                signedChallenge: requestWithChallenge.signedChallenge,
-              },
+          client.reportClubOffer({
+            payload: {
+              offerId: newOfferId(),
+              publicKey: requestWithChallenge.publicKey,
+              signedChallenge: requestWithChallenge.signedChallenge,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 

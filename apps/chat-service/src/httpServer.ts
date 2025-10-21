@@ -1,24 +1,23 @@
-import {NodeContext} from '@effect/platform-node'
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
 import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
-import {
-  cryptoConfig,
-  healthServerPortConfig,
-  portConfig,
-  redisUrl,
-} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import {InboxDbService} from './db/InboxDbService'
 import {MessagesDbService} from './db/MessagesDbService'
 import {WhitelistDbService} from './db/WhiteListDbService'
@@ -39,37 +38,64 @@ import {retrieveMessages} from './routes/messages/retrieveMessages'
 import {sendMessage} from './routes/messages/sendMessage'
 import {sendMessages} from './routes/messages/sendMessages'
 
-export const app = RouterBuilder.make(ChatApiSpecification).pipe(
-  // challenges
-  RouterBuilder.handle(createChallenge),
-  RouterBuilder.handle(createChallenges),
-  // inbox
-  RouterBuilder.handle(approveRequest),
-  RouterBuilder.handle(blockInbox),
-  RouterBuilder.handle(cancelRequest),
-  RouterBuilder.handle(createInbox),
-  RouterBuilder.handle(deleteInbox),
-  RouterBuilder.handle(deleteInboxes),
-  RouterBuilder.handle(updateInbox),
-  RouterBuilder.handle(requestApproval),
-  RouterBuilder.handle(leaveChat),
-  RouterBuilder.handle(deletePulledMessages),
-  // messages
-  RouterBuilder.handle(retrieveMessages),
-  RouterBuilder.handle(sendMessage),
-  RouterBuilder.handle(sendMessages),
-
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const ChallengeApiGroupLive = HttpApiBuilder.group(
+  ChatApiSpecification,
+  'Challenges',
+  (h) =>
+    h
+      .handle('createChallenge', createChallenge)
+      .handle('createChallengeBatch', createChallenges)
 )
 
-const MainLive = Layer.mergeAll(
+const InboxesApiGroupLive = HttpApiBuilder.group(
+  ChatApiSpecification,
+  'Inboxes',
+  (h) =>
+    h
+      .handle('updateInbox', updateInbox)
+      .handle('createInbox', createInbox)
+      .handle('deleteInbox', deleteInbox)
+      .handle('blockInbox', blockInbox)
+      .handle('requestApproval', requestApproval)
+      .handle('cancelRequestApproval', cancelRequest)
+      .handle('approveRequest', approveRequest)
+      .handle('deleteInboxes', deleteInboxes)
+      .handle('leaveChat', leaveChat)
+      .handle('deletePulledMessages', deletePulledMessages)
+)
+
+const MessagesApiGroupLive = HttpApiBuilder.group(
+  ChatApiSpecification,
+  'Messages',
+  (h) =>
+    h
+      .handle('retrieveMessages', retrieveMessages)
+      .handle('sendMessage', sendMessage)
+      .handle('sendMessages', sendMessages)
+)
+
+export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(
+  Layer.provide(ChallengeApiGroupLive),
+  Layer.provide(InboxesApiGroupLive),
+  Layer.provide(MessagesApiGroupLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
+
+export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(ChatApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
   InternalServerLive,
   reportMetricsLayer,
-  ServerCrypto.layer(cryptoConfig),
-  healthServerLayer({port: healthServerPortConfig}),
-  ChallengeService.Live
+  healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provide(ChallengeService.Live),
+  Layer.provide(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(
     Layer.mergeAll(
       ChallengeDbService.Live,
@@ -81,11 +107,5 @@ const MainLive = Layer.mergeAll(
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(MetricsClientService.Live),
   Layer.provideMerge(RedisService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provideMerge(NodeContext.layer)
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl))
 )

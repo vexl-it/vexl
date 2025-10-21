@@ -1,8 +1,11 @@
-import {NodeContext} from '@effect/platform-node'
+import {NodeContext, NodeHttpServer} from '@effect/platform-node'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   disposeTestDatabase,
   setupTestDatabase,
@@ -10,17 +13,25 @@ import {
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import DbLayer from '../../db/layer'
+import {ApiLive} from '../../httpServer'
 import {FeedbackDbService} from '../../routes/submitFeedback/db'
-import {NodeTestingApp} from './NodeTestingApp'
 
 export type MockedContexts =
   | ServerCrypto
-  | NodeTestingApp
   | SqlClient
   | FeedbackDbService
   | MetricsClientService
+  | HttpClient
+  | TestRequestHeaders
 
-const context = NodeTestingApp.Live.pipe(
+const TestServerLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(ApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
+
+const context = Layer.empty.pipe(
+  Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(FeedbackDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(mockedMetricsClientService),

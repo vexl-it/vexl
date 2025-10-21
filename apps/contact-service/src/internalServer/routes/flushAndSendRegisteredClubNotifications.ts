@@ -22,7 +22,7 @@ export const flushAndSendRegisteredClubNotifications = Effect.gen(
       new UnexpectedServerError({
         status: 500,
         cause: e,
-        detail:
+        message:
           'Error while processing new content notification - RedisLockError',
       }),
   })

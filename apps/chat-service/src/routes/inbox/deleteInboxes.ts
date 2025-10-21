@@ -1,21 +1,23 @@
-import {DeleteInboxErrors} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {DeleteInboxesEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {hashPublicKey} from '../../db/domain'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
-export const deleteInboxes = Handler.make(DeleteInboxesEndpoint, (req) =>
-  makeEndpointEffect(
+export const deleteInboxes = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Inboxes',
+  'deleteInboxes',
+  (req) =>
     Effect.all(
-      Array.map(req.body.dataForRemoval, (inboxToDelete) =>
+      Array.map(req.payload.dataForRemoval, (inboxToDelete) =>
         Effect.gen(function* (_) {
           yield* _(validateChallengeInBody(inboxToDelete))
           const hashedPublicKey = yield* _(
@@ -49,7 +51,5 @@ export const deleteInboxes = Handler.make(DeleteInboxesEndpoint, (req) =>
           Effect.flatMap(() => Effect.succeed({}))
         )
       )
-    ),
-    DeleteInboxErrors
-  ).pipe(withDbTransaction)
+    ).pipe(withDbTransaction, makeEndpointEffect)
 )

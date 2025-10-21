@@ -1,23 +1,25 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {GetClubContactsErrors} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {GetClubContactsEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 
-export const getClubContacts = Handler.make(GetClubContactsEndpoint, (req, _) =>
-  makeEndpointEffect(
+export const getClubContacts = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsMember',
+  'getClubContacts',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const clubsDb = yield* _(ClubsDbService)
       const clubMembersDb = yield* _(ClubMembersDbService)
 
       const club = yield* _(
-        clubsDb.findClubByUuid({uuid: req.body.clubUuid}),
+        clubsDb.findClubByUuid({uuid: req.payload.clubUuid}),
         Effect.flatten,
         Effect.catchTag(
           'NoSuchElementException',
@@ -27,7 +29,7 @@ export const getClubContacts = Handler.make(GetClubContactsEndpoint, (req, _) =>
 
       yield* _(
         clubMembersDb.findClubMemberByPublicKey({
-          publicKey: req.body.publicKey,
+          publicKey: req.payload.publicKey,
         }),
         Effect.flatten,
         Effect.filterOrFail(
@@ -47,14 +49,13 @@ export const getClubContacts = Handler.make(GetClubContactsEndpoint, (req, _) =>
       const pubKeys = clubContacts.map((contact) => contact.publicKey)
 
       return {
-        clubUuid: req.body.clubUuid,
+        clubUuid: req.payload.clubUuid,
         items: pubKeys,
       }
     }).pipe(
       Effect.withSpan('Fetch club contacts', {
-        attributes: {clubId: req.body.clubUuid},
-      })
-    ),
-    GetClubContactsErrors
-  )
+        attributes: {clubId: req.payload.clubUuid},
+      }),
+      makeEndpointEffect
+    )
 )

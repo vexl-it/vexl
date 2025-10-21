@@ -1,7 +1,7 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql/SqlClient'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {MAX_PAGE_SIZE} from '@vexl-next/rest-api/src/Pagination.brand'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Order, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
@@ -66,18 +66,16 @@ describe('Fetch my contacts', () => {
           (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
         )
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(networkOne[0].authHeaders))
         const {items} = yield* _(
-          app.fetchMyContacts(
-            {
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-                'vexl-app-meta':
-                  '{"appSource":"Some test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-              }),
-              query: {level: 'FIRST' as const, page: 0, limit: MAX_PAGE_SIZE},
-            },
-            HttpClientRequest.setHeaders(networkOne[0].authHeaders)
-          )
+          app.Contact.fetchMyContacts({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+              'vexl-app-meta':
+                '{"appSource":"Some test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+            }),
+            urlParams: {level: 'FIRST' as const, page: 0, limit: MAX_PAGE_SIZE},
+          })
         )
 
         const sql = yield* _(SqlClient)
@@ -111,6 +109,7 @@ describe('Fetch my contacts', () => {
       })
     )
   })
+
   it('Propely fetches second level contacts', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -121,18 +120,20 @@ describe('Fetch my contacts', () => {
         )
 
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(me.authHeaders))
         const {items} = yield* _(
-          app.fetchMyContacts(
-            {
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-                'vexl-app-meta':
-                  '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-              }),
-              query: {level: 'SECOND' as const, page: 0, limit: MAX_PAGE_SIZE},
+          app.Contact.fetchMyContacts({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+              'vexl-app-meta':
+                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+            }),
+            urlParams: {
+              level: 'SECOND' as const,
+              page: 0,
+              limit: MAX_PAGE_SIZE,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         console.log('me', me.keys.publicKeyPemBase64)
@@ -155,6 +156,7 @@ describe('Fetch my contacts', () => {
       })
     )
   })
+
   it('Properly fetches all level contacts', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -165,18 +167,16 @@ describe('Fetch my contacts', () => {
         )
 
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(me.authHeaders))
         const {items} = yield* _(
-          app.fetchMyContacts(
-            {
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-                'vexl-app-meta':
-                  '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-              }),
-              query: {level: 'ALL' as const, page: 0, limit: MAX_PAGE_SIZE},
-            },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          app.Contact.fetchMyContacts({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+              'vexl-app-meta':
+                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+            }),
+            urlParams: {level: 'ALL' as const, page: 0, limit: MAX_PAGE_SIZE},
+          })
         )
 
         console.log('me', me.keys.publicKeyPemBase64)

@@ -1,10 +1,10 @@
-import {HttpClientRequest} from '@effect/platform'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 
@@ -46,32 +46,29 @@ export const createAndImportUsersFromNetwork = (
 ) =>
   Effect.gen(function* (_) {
     const app = yield* _(NodeTestingApp)
-    yield* _(
-      app.createUser(
-        {
-          body: {
-            expoToken: user.notificationToken,
-            firebaseToken: null,
-          },
-          headers: commonHeaders,
-        },
-        HttpClientRequest.setHeaders(user.authHeaders)
-      )
-    )
+    yield* _(addTestHeaders(user.authHeaders))
 
     yield* _(
-      app.importContacts(
-        {
-          body: {
-            contacts: pipe(
-              users,
-              Array.map((u) => u.hashedNumber),
-              Array.filter((h) => h !== user.hashedNumber)
-            ),
-            replace: true,
-          },
+      app.User.createUser({
+        payload: {
+          expoToken: user.notificationToken,
+          firebaseToken: null,
         },
-        HttpClientRequest.setHeaders(user.authHeaders)
-      )
+        headers: commonHeaders,
+      })
+    )
+
+    yield* _(addTestHeaders(user.authHeaders))
+    yield* _(
+      app.Contact.importContacts({
+        payload: {
+          contacts: pipe(
+            users,
+            Array.map((u) => u.hashedNumber),
+            Array.filter((h) => h !== user.hashedNumber)
+          ),
+          replace: true,
+        },
+      })
     )
   })

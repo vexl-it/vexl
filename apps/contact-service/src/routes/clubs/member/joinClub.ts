@@ -1,17 +1,14 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {
-  JoinClubErrors,
-  MemberAlreadyInClubError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {JoinClubEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
-import {Handler} from 'effect-http'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
@@ -20,10 +17,13 @@ import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotific
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
-export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
-  makeEndpointEffect(
+export const joinClub = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsMember',
+  'joinClub',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
@@ -31,7 +31,7 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
 
       const inviteLink = yield* _(
         linksDb.findInvitationLinkByCode({
-          code: req.body.code,
+          code: req.payload.code,
         }),
         Effect.flatten,
         Effect.catchTag(
@@ -53,8 +53,9 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
           () =>
             new UnexpectedServerError({
               status: 500,
-              detail:
-                'Club not found by id from invitation link. This should not happen',
+              cause: new Error(
+                'Club not found by id from invitation link. This should not happen'
+              ),
             })
         )
       )
@@ -64,7 +65,7 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
           yield* _(clubHasCapacityForAnotherUser(club))
           yield* _(
             membersDb.findClubMemberByPublicKey({
-              publicKey: req.body.publicKey,
+              publicKey: req.payload.publicKey,
             }),
             Effect.filterOrFail(
               Option.isNone,
@@ -75,10 +76,12 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
           const member = yield* _(
             membersDb.insertClubMember({
               clubId: club.id,
-              publicKey: req.body.publicKey,
+              publicKey: req.payload.publicKey,
               isModerator: inviteLink.forAdmin,
               lastRefreshedAt: new Date(),
-              notificationToken: Option.getOrNull(req.body.notificationToken),
+              notificationToken: Option.getOrNull(
+                req.payload.notificationToken
+              ),
             })
           )
 
@@ -96,7 +99,7 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
             Effect.flatMap((s) =>
               s.registerNewClubNotification({
                 clubUuid: club.uuid,
-                triggeringUser: req.body.publicKey,
+                triggeringUser: req.payload.publicKey,
               })
             )
           )
@@ -104,7 +107,7 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
           yield* _(
             reportUserJoinedClubAndImportedContacts({
               clubUUid: club.uuid,
-              contactsImported: req.body.contactsImported,
+              contactsImported: req.payload.contactsImported,
               value: 1,
             })
           )
@@ -118,7 +121,5 @@ export const joinClub = Handler.make(JoinClubEndpoint, (req) =>
         }),
         withClubJoiningActionRedisLock(club.uuid)
       )
-    }),
-    JoinClubErrors
-  ).pipe(withDbTransaction)
+    }).pipe(withDbTransaction, makeEndpointEffect)
 )

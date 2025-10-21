@@ -6026,13 +6026,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scarf/scarf@npm:=1.4.0":
-  version: 1.4.0
-  resolution: "@scarf/scarf@npm:1.4.0"
-  checksum: def62aa403f7e63165ccb219efd2c420fc0b7357b0ba43397f635e4aa813ace1cdf3855a93fc559b4619bcc0469ae4767b8cb72af30ea5c0522bf4a2ecb18198
-  languageName: node
-  linkType: hard
-
 "@sentry-internal/browser-utils@npm:10.12.0":
   version: 10.12.0
   resolution: "@sentry-internal/browser-utils@npm:10.12.0"
@@ -9225,8 +9218,6 @@ __metadata:
     axios: ^1.8.2
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -9273,8 +9264,6 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -9323,8 +9312,6 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     expo-server-sdk: ^3.14.0
@@ -9373,8 +9360,6 @@ __metadata:
     axios: ^1.8.2
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -9570,8 +9555,6 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -9696,8 +9679,6 @@ __metadata:
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -9740,8 +9721,6 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -9772,6 +9751,7 @@ __metadata:
     "@babel/plugin-proposal-optional-chaining": ^7.21.0
     "@babel/preset-react": ^7.18.6
     "@bam.tech/react-native-image-resizer": ^3.0.5
+    "@effect/platform": ^0.92.1
     "@likashefqet/react-native-image-zoom": ^4.3.0
     "@miblanchard/react-native-slider": ^2.3.1
     "@notifee/react-native": ^9.1.8
@@ -9946,8 +9926,6 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     expo-server-sdk: ^3.14.0
@@ -9985,8 +9963,6 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -10052,6 +10028,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/resources-utils@workspace:packages/resources-utils"
   dependencies:
+    "@effect/platform": ^0.92.1
     "@vexl-next/cryptography": 0.0.0
     "@vexl-next/domain": 0.0.0
     "@vexl-next/eslint-config": 0.0.0
@@ -10091,7 +10068,6 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     effect: ^3.18.4
-    effect-http: ^0.87.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -10132,8 +10108,6 @@ __metadata:
     awesome-phonenumber: ^7.4.0
     bullmq: ^5.52.1
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
     ioredis: ^5.4.1
@@ -10180,8 +10154,6 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
     effect: ^3.18.4
-    effect-http: ^0.87.0
-    effect-http-node: ^0.27.0
     esbuild: ^0.25.0
     eslint: ^8.57.1
     fast-check: ^3.20.0
@@ -10306,6 +10278,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "account-deletion-website2@workspace:apps/account-deletion-website"
   dependencies:
+    "@effect/platform": ^0.92.1
     "@remix-run/dev": ^2.16.8
     "@remix-run/node": ^2.16.8
     "@remix-run/react": ^2.16.8
@@ -13855,30 +13828,6 @@ __metadata:
   version: 1.1.1
   resolution: "ee-first@npm:1.1.1"
   checksum: 1b4cac778d64ce3b582a7e26b218afe07e207a0f9bfe13cc7395a6d307849cfe361e65033c3251e00c27dd060cab43014c2d6b2647676135e18b77d2d05b3f4f
-  languageName: node
-  linkType: hard
-
-"effect-http-node@npm:^0.27.0":
-  version: 0.27.0
-  resolution: "effect-http-node@npm:0.27.0"
-  dependencies:
-    swagger-ui-dist: ^5.20.1
-  peerDependencies:
-    "@effect/platform": ^0.80.0
-    "@effect/platform-node": ^0.76.0
-    effect: ^3.14.0
-    effect-http: ^0.87.0
-  checksum: 74e8647e7c952d0466fb3ed093034dba1270eb51adb1d97028520776fcf61f5ad4871fed985353764ecb0ac6f88d989ff92f5005d113cf32424e3f5b55f9a190
-  languageName: node
-  linkType: hard
-
-"effect-http@npm:^0.87.0":
-  version: 0.87.0
-  resolution: "effect-http@npm:0.87.0"
-  peerDependencies:
-    "@effect/platform": ^0.80.0
-    effect: ^3.14.0
-  checksum: 01f3297b18cb370f299e7b2e89639861d1563687e33b885f22cd502b3013626e7a6df6b04e766900c2d5475e7e282d8758c54a0130c4d89508857aa61645ce77
   languageName: node
   linkType: hard
 
@@ -27269,15 +27218,6 @@ __metadata:
   version: 1.0.0
   resolution: "supports-preserve-symlinks-flag@npm:1.0.0"
   checksum: 53b1e247e68e05db7b3808b99b892bd36fb096e6fba213a06da7fab22045e97597db425c724f2bbd6c99a3c295e1e73f3e4de78592289f38431049e1277ca0ae
-  languageName: node
-  linkType: hard
-
-"swagger-ui-dist@npm:^5.20.1":
-  version: 5.29.1
-  resolution: "swagger-ui-dist@npm:5.29.1"
-  dependencies:
-    "@scarf/scarf": =1.4.0
-  checksum: 4f864a736d5391666746ef82793bea277afb744b0804382c0fdbde01a573422705c7fe80bfc839960e53b620eedc8f9a9bb847999d866035d1133c3ab12e0d2e
   languageName: node
   linkType: hard
 

@@ -50,7 +50,7 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
               (e) =>
                 new UnexpectedServerError({
                   status: 500,
-                  detail: 'Error saving invoice state to redis',
+                  message: 'Error saving invoice state to redis',
                   cause: e,
                 })
             )
@@ -90,7 +90,8 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
                   Effect.fail(
                     new UnexpectedServerError({
                       status: 500,
-                      detail: 'Redis error when reading value of invoice state',
+                      message:
+                        'Redis error when reading value of invoice state',
                       cause: e,
                     })
                   ),

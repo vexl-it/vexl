@@ -1,28 +1,30 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
   UnableToVerifySmsCodeError,
-  VerifyCodeErrors,
   VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {VerifyCodeEndpoint} from '@vexl-next/rest-api/src/services/user/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {checkVerification} from '../../../utils/smsVerificationUtils'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 import {type ChallengeVerificationState} from '../domain'
 import {generateVerificationChallenge} from '../utils/generateVerificationChallenge'
 
-export const verifyCodeHandler = Handler.make(VerifyCodeEndpoint, (req) =>
-  makeEndpointEffect(
+export const verifyCodeHandler = HttpApiBuilder.handler(
+  UserApiSpecification,
+  'Login',
+  'verifyCode',
+  (req) =>
     Effect.gen(function* (_) {
       const loginDb = yield* _(VerificationStateDbService)
       const loginData = yield* _(
-        loginDb.retrievePhoneVerificationState(req.body.id)
+        loginDb.retrievePhoneVerificationState(req.payload.id)
       )
 
       if (
         loginData.type === 'staticCodeVerification' &&
-        loginData.code !== req.body.code
+        loginData.code !== req.payload.code
       ) {
         return yield* _(
           Effect.fail(
@@ -34,11 +36,13 @@ export const verifyCodeHandler = Handler.make(VerifyCodeEndpoint, (req) =>
           )
         )
       } else if (loginData.type === 'twilioSmsVerification') {
-        yield* _(checkVerification({sid: loginData.sid, code: req.body.code}))
+        yield* _(
+          checkVerification({sid: loginData.sid, code: req.payload.code})
+        )
       }
 
       const verificationState = {
-        publicKey: req.body.userPublicKey,
+        publicKey: req.payload.userPublicKey,
         phoneNumber: loginData.phoneNumber,
         expiresAt: loginData.expiresAt,
         countryPrefix: loginData.countryPrefix,
@@ -51,7 +55,5 @@ export const verifyCodeHandler = Handler.make(VerifyCodeEndpoint, (req) =>
         challenge: verificationState.challenge,
         phoneVerified: true,
       })
-    }).pipe(Effect.withSpan('verifyCodeHandler', {attributes: {req}})),
-    VerifyCodeErrors
-  )
+    }).pipe(Effect.withSpan('verifyCodeHandler'), makeEndpointEffect)
 )

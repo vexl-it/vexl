@@ -9,14 +9,14 @@ describe('Get invoice status type', () => {
         const app = yield* _(NodeTestingApp)
 
         const createInvoiceResp = yield* _(
-          app.createInvoice({
-            body: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
+          app.Donations.createInvoice({
+            payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
           })
         )
 
         const resp = yield* _(
-          app.getInvoiceStatusType({
-            query: {
+          app.Donations.getInvoiceStatusType({
+            urlParams: {
               invoiceId: createInvoiceResp.invoiceId,
               storeId: createInvoiceResp.storeId,
             },

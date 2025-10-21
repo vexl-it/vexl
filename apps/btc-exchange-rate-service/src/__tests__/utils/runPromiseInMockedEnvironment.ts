@@ -1,15 +1,29 @@
+import {NodeHttpServer} from '@effect/platform-node/index'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {ApiLive} from '../../httpServer'
 import {type YadioService} from '../../utils/yadio'
-import {NodeTestingApp} from './NodeTestingApp'
 import {mockedYadioLayer} from './mockedYadioLayer'
 
-export type MockedContexts = NodeTestingApp | ServerCrypto | YadioService
+export type MockedContexts =
+  | ServerCrypto
+  | YadioService
+  | HttpClient
+  | TestRequestHeaders
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
-const context = NodeTestingApp.layer.pipe(
+const TestServerLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(ApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
+const context = Layer.empty.pipe(
+  Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedYadioLayer),
   Layer.provideMerge(universalContext)
 )

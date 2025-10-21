@@ -42,13 +42,11 @@ export const getOrFetchNotificationServerPublicKeyActionAtom = atom(
       TE.matchE(
         (e) => {
           // Do not report network errors
-          if (e._tag !== 'NetworkError') {
-            reportError(
-              'warn',
-              new Error('Erro while refreshing notification server key'),
-              {e}
-            )
-          }
+          reportError(
+            'warn',
+            new Error('Erro while refreshing notification server key'),
+            {e}
+          )
           return TO.fromNullable(publicKey)
         },
         ({publicKey}) => {

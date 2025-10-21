@@ -431,14 +431,6 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
                     ),
                     {e}
                   )
-                } else if (e._tag === 'NetworkError') {
-                  reportError(
-                    'info',
-                    new Error(
-                      'Unable to update offer connections due to network error'
-                    ),
-                    {e}
-                  )
                 } else {
                   reportError(
                     'warn',

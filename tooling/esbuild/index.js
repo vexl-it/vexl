@@ -14,7 +14,6 @@ export default async function build() {
       sourcemap: true,
       outExtension: {'.js': '.cjs'},
       plugins: [],
-      external: ['effect-http-node', 'effect-http'],
     })
     .catch((e) => {
       console.error('Error while building with eslint', JSON.stringify(e))

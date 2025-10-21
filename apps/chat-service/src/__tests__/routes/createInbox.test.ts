@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {
   generatePrivateKey,
@@ -11,6 +10,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {hashPublicKey} from '../../db/domain'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
@@ -59,16 +59,14 @@ describe('Create inbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1authHeaders))
         const createResponse = yield* _(
-          client.createInbox(
-            {
-              body: yield* _(addChallengeForUser1({}, true)),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1authHeaders)
-          ),
+          client.Inboxes.createInbox({
+            payload: yield* _(addChallengeForUser1({}, true)),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          }),
           Effect.either
         )
         expectErrorResponse(InvalidChallengeError)(createResponse)
@@ -81,16 +79,14 @@ describe('Create inbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1authHeaders))
         const createResponse = yield* _(
-          client.createInbox(
-            {
-              body: yield* _(addChallengeForUser1({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1authHeaders)
-          ),
+          client.Inboxes.createInbox({
+            payload: yield* _(addChallengeForUser1({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          }),
           Effect.either
         )
 
@@ -122,30 +118,25 @@ describe('Create inbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user1authHeaders))
         const createResponse = yield* _(
-          client.createInbox(
-            {
-              body: yield* _(addChallengeForUser1({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1authHeaders)
-          ),
+          client.Inboxes.createInbox({
+            payload: yield* _(addChallengeForUser1({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          }),
           Effect.either
         )
         expect(createResponse._tag).toBe('Right')
 
         const createResponse2 = yield* _(
-          client.createInbox(
-            {
-              body: yield* _(addChallengeForUser1({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1authHeaders)
-          ),
+          client.Inboxes.createInbox({
+            payload: yield* _(addChallengeForUser1({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          }),
           Effect.either
         )
         expect(createResponse2._tag).toBe('Right')

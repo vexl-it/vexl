@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {
@@ -8,6 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {NotPermittedToSendMessageToTargetInboxError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
@@ -29,31 +29,27 @@ beforeEach(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       yield* _(sql`DELETE FROM message`)
@@ -67,32 +63,28 @@ describe('Block inbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.blockInbox(
-            {
-              body: yield* _(
-                user2.inbox1.addChallenge({
-                  publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.blockInbox({
+            payload: yield* _(
+              user2.inbox1.addChallenge({
+                publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
+              })
+            ),
+          })
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const shouldBeRejectedResponse = yield* _(
-          client.sendMessage(
-            {
-              body: (yield* _(
-                user1.addChallengeForMainInbox({
-                  message: 'someMessage',
-                  messageType: 'MESSAGE' as const,
-                  receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                })
-              )) satisfies SendMessageRequest,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: (yield* _(
+              user1.addChallengeForMainInbox({
+                message: 'someMessage',
+                messageType: 'MESSAGE' as const,
+                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+              })
+            )) satisfies SendMessageRequest,
+          }),
           Effect.either
         )
 
@@ -108,20 +100,18 @@ describe('Block inbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const shouldBeRejectedResponse = yield* _(
-          client.blockInbox(
-            {
-              body: yield* _(
-                addChallengeForKey(
-                  generatePrivateKey(),
-                  user2.authHeaders
-                )({
-                  publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Inboxes.blockInbox({
+            payload: yield* _(
+              addChallengeForKey(
+                generatePrivateKey(),
+                user2.authHeaders
+              )({
+                publicKeyToBlock: user1.mainKeyPair.publicKeyPemBase64,
+              })
+            ),
+          }),
           Effect.either
         )
 
@@ -137,17 +127,15 @@ describe('Block inbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const shouldBeRejectedResponse = yield* _(
-          client.blockInbox(
-            {
-              body: yield* _(
-                user2.inbox1.addChallenge({
-                  publicKeyToBlock: generatePrivateKey().publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Inboxes.blockInbox({
+            payload: yield* _(
+              user2.inbox1.addChallenge({
+                publicKeyToBlock: generatePrivateKey().publicKeyPemBase64,
+              })
+            ),
+          }),
           Effect.either
         )
 

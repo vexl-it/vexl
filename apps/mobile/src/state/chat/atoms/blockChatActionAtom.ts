@@ -1,19 +1,38 @@
+import {type HttpApiDecodeError} from '@effect/platform/HttpApiError'
+import {
+  type RequestError,
+  type ResponseError,
+} from '@effect/platform/HttpClientError'
+import {
+  type NotFoundError,
+  type UnauthorizedError,
+  type UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {
   generateChatMessageId,
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import sendMessage, {
-  type SendMessageApiErrors,
-} from '@vexl-next/resources-utils/src/chat/sendMessage'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import {type Effect} from 'effect'
+import {
+  type ReceiverInboxDoesNotExistError,
+  type SenderInboxDoesNotExistError,
+} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
+import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/server-utils/src/services/challenge/contracts'
+import {type ParseResult} from 'effect/index'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -31,17 +50,20 @@ export default function blockChatActionAtom(
   [{text: string}],
   TE.TaskEither<
     | ErrorEncryptingMessage
-    | Effect.Effect.Error<
-        Exclude<
-          SendMessageApiErrors,
-          {
-            _tag:
-              | 'ReceiverInboxDoesNotExistError'
-              | 'SenderInboxDoesNotExistError'
-              | 'NotPermittedToSendMessageToTargetInboxError'
-          }
-        >
-      >
+    | HttpApiDecodeError
+    | UnauthorizedError
+    | InvalidChallengeError
+    | ForbiddenMessageTypeError
+    | NotFoundError
+    | UnexpectedServerError
+    | ParseResult.ParseError
+    | ErrorGeneratingChallenge
+    | SenderInboxDoesNotExistError
+    | ReceiverInboxDoesNotExistError
+    | ErrorSigningChallenge
+    | CryptoError
+    | RequestError
+    | ResponseError
     | ZodParseError<ChatMessagePayload>
     | JsonStringifyError,
     ChatMessageWithState

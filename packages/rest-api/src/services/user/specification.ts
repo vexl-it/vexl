@@ -1,8 +1,16 @@
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  OpenApi,
+} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
-import {Api, ApiGroup} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
-import {SubmitFeedbackRequest} from '../feedback/contracts'
 import {
   GenerateLoginChallengeResponse,
   GetVersionServiceInfoResponse,
@@ -25,148 +33,100 @@ import {
   VerifyPhoneNumberResponse,
 } from './contracts'
 
-export const InitVerificationEndpoint = Api.post(
+export const InitVerificationEndpoint = HttpApiEndpoint.post(
   'initVerification',
-  '/api/v1/user/confirmation/phone',
-  {description: 'Initiate phone verification'}
-).pipe(
-  Api.setRequestBody(InitPhoneVerificationRequest),
-  Api.setResponseBody(InitPhoneVerificationResponse),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.addResponse({
-    status: 400 as const,
-    body: InitVerificationErrors,
-  })
+  '/api/v1/user/confirmation/phone'
 )
+  .annotate(OpenApi.Description, 'Initiate phone verification')
+  .setHeaders(CommonHeaders)
+  .setPayload(InitPhoneVerificationRequest)
+  .addSuccess(InitPhoneVerificationResponse)
+  .addError(InitVerificationErrors)
 
-export const VerifyCodeEndpoint = Api.post(
+export const VerifyCodeEndpoint = HttpApiEndpoint.post(
   'verifyCode',
   '/api/v1/user/confirmation/code'
-).pipe(
-  Api.setRequestBody(VerifyPhoneNumberRequest),
-  Api.setResponseBody(VerifyPhoneNumberResponse),
-  Api.setResponseStatus(200 as const),
-  Api.addResponse({
-    status: 400 as const,
-    body: VerifyCodeErrors,
-  })
 )
+  .setPayload(VerifyPhoneNumberRequest)
+  .addSuccess(VerifyPhoneNumberResponse)
+  .addError(VerifyCodeErrors)
 
-export const VerifyChallengeEndpoint = Api.post(
+export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
   'verifyChallenge',
   '/api/v1/user/confirmation/challenge'
-).pipe(
-  Api.setRequestBody(VerifyChallengeRequest),
-  Api.setResponseBody(VerifyChallengeResponse),
-  Api.setResponseStatus(200 as const),
-  Api.addResponse({
-    status: 400 as const,
-    body: VerifyChallengeErrors,
-  })
 )
+  .setPayload(VerifyChallengeRequest)
+  .addSuccess(VerifyChallengeResponse)
+  .addError(VerifyChallengeErrors)
 
-export const LogoutUserEndpoint = Api.delete(
+export const LogoutUserEndpoint = HttpApiEndpoint.del(
   'logoutUser',
   '/api/v1/user/me'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseBody(Schema.String),
-  Api.setResponseStatus(299 as const)
 )
+  .middleware(ServerSecurityMiddleware)
+  .addSuccess(Schema.String)
 
-export const LoginGroup = ApiGroup.make('Login').pipe(
-  ApiGroup.addEndpoint(InitVerificationEndpoint),
-  ApiGroup.addEndpoint(VerifyCodeEndpoint),
-  ApiGroup.addEndpoint(VerifyChallengeEndpoint)
-)
+const LoginGroup = HttpApiGroup.make('Login')
+  .add(InitVerificationEndpoint)
+  .add(VerifyCodeEndpoint)
+  .add(VerifyChallengeEndpoint)
 
-export const InitEraseUserEndpoint = Api.post(
+export const InitEraseUserEndpoint = HttpApiEndpoint.post(
   'initEraseUser',
   '/api/v1/user/erase/init'
-).pipe(
-  Api.setRequestBody(InitEraseUserRequest),
-  Api.setResponseBody(InitEraseUserResponse),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setResponseStatus(200 as const),
-  Api.addResponse({
-    status: 400 as const,
-    body: InitVerificationErrors,
-  })
 )
+  .setHeaders(CommonHeaders)
+  .setPayload(InitEraseUserRequest)
+  .addSuccess(InitEraseUserResponse)
+  .addError(InitVerificationErrors)
 
-export const VerifyAndEraseUserEndpoint = Api.delete(
+export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
   'verifyAndEraseuser',
   '/api/v1/user/erase/verify'
-).pipe(
-  Api.setRequestBody(VerifyAndEraseUserRequest),
-  Api.setResponseBody(VerifyAndEraseUserResponse),
-  Api.setResponseStatus(200 as const),
-  Api.addResponse({
-    status: 400 as const,
-    body: VerifyCodeErrors,
-  })
 )
+  .setPayload(VerifyAndEraseUserRequest)
+  .addSuccess(VerifyAndEraseUserResponse)
+  .addError(VerifyCodeErrors)
 
-export const EraseUserGroup = ApiGroup.make('EraseUser').pipe(
-  ApiGroup.addEndpoint(InitEraseUserEndpoint),
-  ApiGroup.addEndpoint(VerifyAndEraseUserEndpoint)
-)
-
-export const SubmitFeedbackEndpoint = Api.post(
-  'submitFeedback',
-  '/api/v1/feedback/submit',
-  {
-    description: 'Moved to separate service',
-  }
-).pipe(
-  Api.setRequestBody(SubmitFeedbackRequest),
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseHeaders(Schema.Struct({Location: Schema.String})),
-  Api.setResponseStatus(308 as const)
-)
+const EraseUserGroup = HttpApiGroup.make('EraseUser')
+  .add(InitEraseUserEndpoint)
+  .add(VerifyAndEraseUserEndpoint)
 
 export const RegenerateSessionCredentialsErrors = Schema.Union(
   NumberDoesNotMatchOldHashError,
   UnableToGenerateSignatureError
 )
 
-export const RegenerateSessionCredentialsEndpoint = Api.post(
+export const RegenerateSessionCredentialsEndpoint = HttpApiEndpoint.post(
   'regenerateSessionCredentials',
   '/api/v1/regenerate-session-credentials'
-).pipe(
-  Api.setRequestBody(RegenerateSessionCredentialsRequest),
-  Api.setResponseBody(RegenerateSessionCredentialsResponse),
-  Api.setResponseStatus(200 as const),
-  Api.setSecurity(ServerSecurity),
-  Api.addResponse({
-    status: 400 as const,
-    body: RegenerateSessionCredentialsErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RegenerateSessionCredentialsRequest)
+  .addSuccess(RegenerateSessionCredentialsResponse)
+  .addError(RegenerateSessionCredentialsErrors)
 
-export const GetVersionServiceInfoEndpoint = Api.get(
+export const GetVersionServiceInfoEndpoint = HttpApiEndpoint.get(
   'getVersionServiceInfo',
   '/api/v1/version-service-info'
-).pipe(
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setResponseBody(GetVersionServiceInfoResponse),
-  Api.setResponseStatus(200 as const)
 )
+  .setHeaders(CommonHeaders)
+  .addSuccess(GetVersionServiceInfoResponse)
 
-export const GenerateLoginChallenge = Api.get(
+export const GenerateLoginChallenge = HttpApiEndpoint.get(
   'generateLoginChallenge',
   '/api/v1/generate-login-challenge'
-).pipe(
-  Api.setResponseBody(GenerateLoginChallengeResponse),
-  Api.setResponseStatus(200 as const)
-)
+).addSuccess(GenerateLoginChallengeResponse)
 
-export const UserApiSpecification = Api.make({title: 'User service'}).pipe(
-  Api.addGroup(LoginGroup),
-  Api.addGroup(EraseUserGroup),
-  Api.addEndpoint(LogoutUserEndpoint),
-  Api.addEndpoint(SubmitFeedbackEndpoint),
-  Api.addEndpoint(RegenerateSessionCredentialsEndpoint),
-  Api.addEndpoint(GetVersionServiceInfoEndpoint),
-  Api.addEndpoint(GenerateLoginChallenge)
-)
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(LogoutUserEndpoint)
+  .add(RegenerateSessionCredentialsEndpoint)
+  .add(GetVersionServiceInfoEndpoint)
+  .add(GenerateLoginChallenge)
+
+export const UserApiSpecification = HttpApi.make('User API')
+  .add(LoginGroup)
+  .add(EraseUserGroup)
+  .add(RootGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

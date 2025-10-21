@@ -12,7 +12,6 @@ import {
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {Effect, Schema} from 'effect'
-import {type ClientError} from 'effect-http'
 
 export interface MockedUser {
   mainKeyPair: PrivateKeyHolder
@@ -25,11 +24,7 @@ export interface MockedUser {
 
 export const createMockedUser = (
   numberRaw: string
-): Effect.Effect<
-  MockedUser,
-  CryptoError | ClientError.ClientError,
-  ServerCrypto
-> =>
+): Effect.Effect<MockedUser, CryptoError, ServerCrypto> =>
   Effect.gen(function* (_) {
     const mainKeyPair = generatePrivateKey()
     const phoneNumber = Schema.decodeSync(E164PhoneNumberE)(numberRaw)

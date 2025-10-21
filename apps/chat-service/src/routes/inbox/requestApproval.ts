@@ -1,15 +1,15 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {
-  RequestApprovalErrors,
   RequestMessagingNotAllowedError,
   type RequestApprovalResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {RequestApprovalEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import dayjs from 'dayjs'
 import {Effect, Option, type ConfigError} from 'effect'
-import {Handler} from 'effect-http'
 import {requestTimeoutDaysConfig} from '../../configs'
 import {type InboxRecord} from '../../db/InboxDbService/domain'
 import {MessagesDbService} from '../../db/MessagesDbService'
@@ -17,7 +17,7 @@ import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
 import {reportMessageSent, reportRequestSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
-import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
+import {withInboxActionFromSecurityRedisLock} from '../../utils/withInboxActionRedisLock'
 
 const canSendRequest = ({
   receiverInbox,
@@ -62,63 +62,67 @@ const canSendRequest = ({
     return false
   })
 
-export const requestApproval = Handler.make(
-  RequestApprovalEndpoint,
-  (req, sec) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        const {receiverInbox, senderInbox} = yield* _(
-          findAndEnsureReceiverAndSenderInbox({
-            receiver: req.body.publicKey,
-            sender: sec['public-key'],
-          })
-        )
+export const requestApproval = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Inboxes',
+  'requestApproval',
+  (req) =>
+    Effect.gen(function* (_) {
+      const security = yield* _(CurrentSecurity)
 
-        if (!(yield* _(canSendRequest({receiverInbox, senderInbox})))) {
-          return yield* _(Effect.fail(new RequestMessagingNotAllowedError()))
-        }
+      const {receiverInbox, senderInbox} = yield* _(
+        findAndEnsureReceiverAndSenderInbox({
+          receiver: req.payload.publicKey,
+          sender: security['public-key'],
+        })
+      )
 
-        const whitelistDb = yield* _(WhitelistDbService)
-        // first delete the existing record if it exists
-        yield* _(
-          whitelistDb.deleteWhitelistRecordBySenderAndReceiver({
-            receiver: receiverInbox.id,
-            sender: senderInbox.publicKey,
-          })
-        )
+      if (!(yield* _(canSendRequest({receiverInbox, senderInbox})))) {
+        return yield* _(Effect.fail(new RequestMessagingNotAllowedError()))
+      }
 
-        yield* _(
-          whitelistDb.insertWhitelistRecord({
-            sender: senderInbox.publicKey,
-            receiver: receiverInbox.id,
-            state: 'WAITING',
-          })
-        )
+      const whitelistDb = yield* _(WhitelistDbService)
+      // first delete the existing record if it exists
+      yield* _(
+        whitelistDb.deleteWhitelistRecordBySenderAndReceiver({
+          receiver: receiverInbox.id,
+          sender: senderInbox.publicKey,
+        })
+      )
 
-        const encryptedSenderKey = yield* _(encryptPublicKey(sec['public-key']))
-        const messagesDb = yield* _(MessagesDbService)
-        const insertedMessage = yield* _(
-          messagesDb.insertMessageForInbox({
-            inboxId: receiverInbox.id,
-            message: req.body.message,
-            senderPublicKey: encryptedSenderKey,
-            type: 'REQUEST_MESSAGING',
-          })
-        )
+      yield* _(
+        whitelistDb.insertWhitelistRecord({
+          sender: senderInbox.publicKey,
+          receiver: receiverInbox.id,
+          state: 'WAITING',
+        })
+      )
 
-        yield* _(reportMessageSent(1))
-        yield* _(reportRequestSent(1))
+      const encryptedSenderKey = yield* _(
+        encryptPublicKey(security['public-key'])
+      )
+      const messagesDb = yield* _(MessagesDbService)
+      const insertedMessage = yield* _(
+        messagesDb.insertMessageForInbox({
+          inboxId: receiverInbox.id,
+          message: req.payload.message,
+          senderPublicKey: encryptedSenderKey,
+          type: 'REQUEST_MESSAGING',
+        })
+      )
 
-        return {
-          id: Number(insertedMessage.id),
-          message: insertedMessage.message,
-          senderPublicKey: sec['public-key'],
-          notificationHandled: false,
-        } satisfies RequestApprovalResponse
-      }).pipe(
-        withInboxActionRedisLock(sec['public-key'], req.body.publicKey),
-        withDbTransaction
-      ),
-      RequestApprovalErrors
+      yield* _(reportMessageSent(1))
+      yield* _(reportRequestSent(1))
+
+      return {
+        id: Number(insertedMessage.id),
+        message: insertedMessage.message,
+        senderPublicKey: security['public-key'],
+        notificationHandled: false,
+      } satisfies RequestApprovalResponse
+    }).pipe(
+      withInboxActionFromSecurityRedisLock(),
+      withDbTransaction,
+      makeEndpointEffect
     )
 )

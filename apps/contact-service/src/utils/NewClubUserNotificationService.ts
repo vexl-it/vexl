@@ -116,7 +116,7 @@ export class NewClubUserNotificationsService extends Context.Tag(
                 (e) =>
                   new UnexpectedServerError({
                     status: 500,
-                    detail: 'Club not found',
+                    message: 'Club not found',
                     cause: e,
                   })
               )
@@ -142,7 +142,7 @@ export class NewClubUserNotificationsService extends Context.Tag(
                 (e) =>
                   new UnexpectedServerError({
                     status: 500,
-                    detail: 'Error saving club notifications to redis',
+                    message: 'Error saving club notifications to redis',
                     cause: e,
                   })
               )
@@ -162,7 +162,7 @@ export class NewClubUserNotificationsService extends Context.Tag(
                 (e) =>
                   new UnexpectedServerError({
                     status: 500,
-                    detail:
+                    message:
                       'Error reading and deleting club notifications from redis',
                     cause: e,
                   })
@@ -188,7 +188,7 @@ export class NewClubUserNotificationsService extends Context.Tag(
                 (a) =>
                   new UnexpectedServerError({
                     status: 500,
-                    detail: 'Error sending notifications',
+                    message: 'Error sending notifications',
                     cause: a,
                   })
               )

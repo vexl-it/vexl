@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -8,6 +9,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -39,13 +41,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -77,8 +80,8 @@ describe('Get club info', () => {
         const app = yield* _(NodeTestingApp)
 
         const result = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -101,8 +104,8 @@ describe('Get club info', () => {
         const app = yield* _(NodeTestingApp)
 
         yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
@@ -144,8 +147,8 @@ describe('Get club info', () => {
         `)
 
         const errorResponse = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -155,10 +158,7 @@ describe('Get club info', () => {
           Effect.either
         )
 
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -169,8 +169,8 @@ describe('Get club info', () => {
         const app = yield* _(NodeTestingApp)
 
         const errorResponse = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
@@ -179,11 +179,7 @@ describe('Get club info', () => {
           }),
           Effect.either
         )
-
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -202,8 +198,8 @@ describe('Get club info', () => {
         const app = yield* _(NodeTestingApp)
 
         const result = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -227,8 +223,8 @@ describe('Get club info', () => {
 
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
         const errorResponse = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               publicKey: signedChallenge.publicKey,
               signedChallenge: {
                 ...signedChallenge.signedChallenge,

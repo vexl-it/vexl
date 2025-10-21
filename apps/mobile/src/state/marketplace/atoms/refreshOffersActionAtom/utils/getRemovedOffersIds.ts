@@ -65,10 +65,9 @@ export const getRemovedOffersIds = ({
             .pipe(Effect.map((one) => one.offerIds))
         : Effect.succeed([] as readonly OfferId[]),
       Effect.catchAll((e) => {
-        if (e._tag !== 'NetworkError')
-          reportError('error', new Error('Error fetching removed offers'), {
-            e,
-          })
+        reportError('error', new Error('Error fetching removed offers'), {
+          e,
+        })
 
         return Effect.succeed([] as readonly OfferId[])
       })

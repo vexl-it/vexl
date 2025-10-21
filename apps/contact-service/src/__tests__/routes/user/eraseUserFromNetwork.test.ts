@@ -75,8 +75,8 @@ describe('Erase user from network', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.eraseUserFromNetwork({
-            body: {
+          app.User.eraseUserFromNetwork({
+            payload: {
               token,
             },
           })
@@ -112,8 +112,8 @@ describe('Erase user from network', () => {
         const token = yield* _(createShortLivedTokenForErasingUser(hash))
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.eraseUserFromNetwork({
-            body: {
+          app.User.eraseUserFromNetwork({
+            payload: {
               token,
             },
           })
@@ -128,8 +128,8 @@ describe('Erase user from network', () => {
         const app = yield* _(NodeTestingApp)
 
         const errorResponse = yield* _(
-          app.eraseUserFromNetwork({
-            body: {
+          app.User.eraseUserFromNetwork({
+            payload: {
               token: 'invalid' as ShortLivedTokenForErasingUserOnContactService,
             },
           }),

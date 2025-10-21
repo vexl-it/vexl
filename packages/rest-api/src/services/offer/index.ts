@@ -6,23 +6,13 @@ import {type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {
-  handleCommonAndExpectedErrorsEffect,
-  handleCommonErrorsEffect,
-  type LoggingFunction,
-} from '../../utils'
+import {type LoggingFunction} from '../../utils'
 import {type CreateChallengeRequest} from '../chat/contracts'
 import {
-  addChallengeToRequest,
+  addChallengeToRequest2,
   type RequestWithGeneratableChallenge,
-} from '../utils/addChallengeToRequest'
+} from '../utils/addChallengeToRequest2'
 import {
-  CreateNewOfferErrors,
-  CreatePrivatePartErrors,
-  DeletePrivatePartErrors,
-  ReportClubOfferEndpointErrors,
-  ReportOfferEndpointErrors,
-  UpdateOfferErrors,
   type CreateNewOfferInput,
   type CreatePrivatePartInput,
   type DeleteOfferInput,
@@ -66,113 +56,89 @@ export function api({
   deviceModel?: string
   osVersion?: string
 }) {
-  const client = createClientInstanceWithAuth({
-    api: OfferApiSpecification,
-    platform,
-    clientVersion,
-    clientSemver,
-    language,
-    isDeveloper,
-    appSource,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: OfferApiSpecification,
+        platform,
+        clientVersion,
+        clientSemver,
+        language,
+        isDeveloper,
+        appSource,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  const addChallenge = addChallengeToRequest(client)
+    const addChallenge = addChallengeToRequest2(
+      client.Challenges.createChallenge
+    )
 
-  return {
-    getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
-      handleCommonErrorsEffect(client.getOffersByIds(getOffersByIdsInput)),
+    return {
+      getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
+        client.getOffersByIds({urlParams: getOffersByIdsInput.query}),
 
-    getClubOffersByIds: (
-      getClubOffersByIdsInput: RequestWithGeneratableChallenge<GetClubOffersByIdsRequest>
-    ) =>
-      addChallenge(getClubOffersByIdsInput).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(client.getClubOffersByIds({body}))
-        )
-      ),
-    getOffersForMeModifiedOrCreatedAfter: (
-      getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput
-    ) =>
-      handleCommonErrorsEffect(
-        client.getOffersForMeModifiedOrCreatedAfter(
-          getOffersForMeModifiedOrCreatedAfterInput
-        )
-      ),
-    getClubOffersForMeModifiedOrCreatedAfter: (
-      body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>
-    ) =>
-      addChallenge(body).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(
+      getClubOffersByIds: (
+        getClubOffersByIdsInput: RequestWithGeneratableChallenge<GetClubOffersByIdsRequest>
+      ) =>
+        addChallenge(getClubOffersByIdsInput).pipe(
+          Effect.flatMap((body) => client.getClubOffersByIds({payload: body}))
+        ),
+      getOffersForMeModifiedOrCreatedAfter: (
+        getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput
+      ) =>
+        client.getOffersForMeModifiedOrCreatedAfter({
+          urlParams: getOffersForMeModifiedOrCreatedAfterInput.query,
+        }),
+      getClubOffersForMeModifiedOrCreatedAfter: (
+        body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>
+      ) =>
+        addChallenge(body).pipe(
+          Effect.flatMap((body) =>
             client.getClubOffersForMeModifiedOrCreatedAfter({
-              body,
+              payload: body,
             })
           )
-        )
-      ),
-    createNewOffer: (createNewOfferInput: CreateNewOfferInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.createNewOffer(createNewOfferInput),
-        CreateNewOfferErrors
-      ),
-    refreshOffer: (refreshOfferInput: RefreshOfferInput) =>
-      handleCommonErrorsEffect(client.refreshOffer(refreshOfferInput)),
-    deleteOffer: (deleteOfferInput: DeleteOfferInput) =>
-      handleCommonErrorsEffect(client.deleteOffer(deleteOfferInput)),
-    updateOffer: (updateOfferInpu: UpdateOfferInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.updateOffer(updateOfferInpu),
-        UpdateOfferErrors
-      ),
-    createPrivatePart: (createPrivatePartInput: CreatePrivatePartInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.createPrivatePart(createPrivatePartInput),
-        CreatePrivatePartErrors
-      ),
-    deletePrivatePart: (deletePrivatePartInput: DeletePrivatePartInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.deletePrivatePart(deletePrivatePartInput),
-        DeletePrivatePartErrors
-      ),
-    getRemovedOffers: (getRemovedOffersInput: GetRemovedOffersInput) =>
-      handleCommonErrorsEffect(client.getRemovedOffers(getRemovedOffersInput)),
-    getRemovedClubOffers: (
-      getRemovedClubOffersInput: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
-    ) =>
-      addChallenge(getRemovedClubOffersInput).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(client.getRemovedClubOffers({body}))
-        )
-      ),
-    reportOffer: (reportOfferInput: ReportOfferInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.reportOffer(reportOfferInput),
-        ReportOfferEndpointErrors
-      ),
-    reportClubOffer: (
-      reportClubOfferRequest: RequestWithGeneratableChallenge<ReportClubOfferRequest>
-    ) =>
-      addChallenge(reportClubOfferRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.reportClubOffer({body}),
-            ReportClubOfferEndpointErrors
-          )
-        )
-      ),
-    // ----------------------
-    // 👇 Challenge
-    // ----------------------
-    createChallenge: (createChallengeRequest: CreateChallengeRequest) =>
-      handleCommonErrorsEffect(
-        client.createChallenge({body: createChallengeRequest})
-      ),
-  }
+        ),
+      createNewOffer: (createNewOfferInput: CreateNewOfferInput) =>
+        client.createNewOffer({payload: createNewOfferInput.body}),
+      refreshOffer: (refreshOfferInput: RefreshOfferInput) =>
+        client.refreshOffer({payload: refreshOfferInput.body}),
+      deleteOffer: (deleteOfferInput: DeleteOfferInput) =>
+        client.deleteOffer({urlParams: deleteOfferInput.query}),
+      updateOffer: (updateOfferInpu: UpdateOfferInput) =>
+        client.updateOffer({payload: updateOfferInpu.body}),
+      createPrivatePart: (createPrivatePartInput: CreatePrivatePartInput) =>
+        client.createPrivatePart({payload: createPrivatePartInput.body}),
+      deletePrivatePart: (deletePrivatePartInput: DeletePrivatePartInput) =>
+        client.deletePrivatePart({payload: deletePrivatePartInput.body}),
+      getRemovedOffers: (getRemovedOffersInput: GetRemovedOffersInput) =>
+        client.getRemovedOffers({payload: getRemovedOffersInput.body}),
+      getRemovedClubOffers: (
+        getRemovedClubOffersInput: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
+      ) =>
+        addChallenge(getRemovedClubOffersInput).pipe(
+          Effect.flatMap((body) => client.getRemovedClubOffers({payload: body}))
+        ),
+      reportOffer: (reportOfferInput: ReportOfferInput) =>
+        client.reportOffer({payload: reportOfferInput.body}),
+      reportClubOffer: (
+        reportClubOfferRequest: RequestWithGeneratableChallenge<ReportClubOfferRequest>
+      ) =>
+        addChallenge(reportClubOfferRequest).pipe(
+          Effect.flatMap((body) => client.reportClubOffer({payload: body}))
+        ),
+      // ----------------------
+      // 👇 Challenge
+      // ----------------------
+      createChallenge: (createChallengeRequest: CreateChallengeRequest) =>
+        client.Challenges.createChallenge({payload: createChallengeRequest}),
+    }
+  })
 }
 
-export type OfferApi = ReturnType<typeof api>
+export type OfferApi = Effect.Effect.Success<ReturnType<typeof api>>

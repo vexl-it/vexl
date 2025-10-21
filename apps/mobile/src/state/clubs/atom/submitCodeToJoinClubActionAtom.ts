@@ -188,10 +188,11 @@ export const submitCodeToJoinClubActionAtom = atom(
         }
 
         if (
-          e._tag === 'UnauthorizedError' ||
-          e._tag === 'UnexpectedApiResponseError' ||
-          e._tag === 'UnknownClientError' ||
-          e._tag === 'UnknownServerError' ||
+          e._tag === 'InvalidChallengeError' ||
+          e._tag === 'HttpApiDecodeError' ||
+          e._tag === 'ResponseError' ||
+          e._tag === 'RequestError' ||
+          e._tag === 'UnexpectedServerError' ||
           e._tag === 'CryptoError'
         ) {
           reportError('error', new Error('Join club error'), {e})

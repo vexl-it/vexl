@@ -1,3 +1,4 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   HashedPhoneNumberE,
@@ -5,21 +6,18 @@ import {
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {hmacSignE} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {
   NumberDoesNotMatchOldHashError,
   UnableToGenerateSignatureError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {
-  RegenerateSessionCredentialsEndpoint,
-  RegenerateSessionCredentialsErrors,
-} from '@vexl-next/rest-api/src/services/user/specification'
+import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {
   generateUserAuthData,
   hashPhoneNumber,
 } from '@vexl-next/server-utils/src/generateUserAuthData'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Schema} from 'effect'
-import {Handler} from 'effect-http'
 import {oldHmacKeyUsedForHashingNumbersConfig} from '../configs'
 
 const checkPhoneNumberAgainstOldHash = ({
@@ -37,23 +35,26 @@ const checkPhoneNumberAgainstOldHash = ({
         new UnexpectedServerError({
           status: 500,
           cause: e,
-          detail: 'Error while decoding the old hash',
+          message: 'Error while decoding the old hash',
         })
       )
     ),
     Effect.map((newHash) => newHash === oldHash)
   )
 
-export const regenerateCredentialsHandler = Handler.make(
-  RegenerateSessionCredentialsEndpoint,
-  (req, security) =>
+export const regenerateCredentialsHandler = HttpApiBuilder.handler(
+  UserApiSpecification,
+  'root',
+  'regenerateSessionCredentials',
+  (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
+        const security = yield* _(CurrentSecurity)
         if (
           !(yield* _(
             checkPhoneNumberAgainstOldHash({
               oldHash: security.hash,
-              phoneNumber: req.body.myPhoneNumber,
+              phoneNumber: req.payload.myPhoneNumber,
             })
           ))
         ) {
@@ -62,12 +63,12 @@ export const regenerateCredentialsHandler = Handler.make(
 
         // 2. regenerate session credentials
         const newHash = yield* _(
-          hashPhoneNumber(req.body.myPhoneNumber),
+          hashPhoneNumber(req.payload.myPhoneNumber),
           Effect.catchTag('CryptoError', (e) =>
             Effect.fail(
               new UnexpectedServerError({
                 cause: e,
-                detail: 'Error while generating session credentials',
+                message: 'Error while generating session credentials',
                 status: 500,
               })
             )
@@ -90,7 +91,6 @@ export const regenerateCredentialsHandler = Handler.make(
           hash: authData.hash,
           signature: authData.signature,
         }
-      }),
-      RegenerateSessionCredentialsErrors
+      })
     )
 )

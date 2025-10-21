@@ -1,13 +1,4 @@
 import {LocationApiSpecification} from '@vexl-next/rest-api/src/services/location/specification'
-import {Context, Layer, type Effect} from 'effect'
-import {NodeTesting} from 'effect-http-node'
-import {app} from '../../httpServer'
+import {createNodeTestingApp} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
-const nodeTestingAppEffect = NodeTesting.make(app, LocationApiSpecification)
-
-export class NodeTestingApp extends Context.Tag('NodeTestingApp')<
-  NodeTestingApp,
-  Effect.Effect.Success<typeof nodeTestingAppEffect>
->() {
-  static readonly layer = Layer.scoped(NodeTestingApp, nodeTestingAppEffect)
-}
+export const NodeTestingApp = createNodeTestingApp(LocationApiSpecification)

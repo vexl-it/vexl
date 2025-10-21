@@ -9,7 +9,6 @@ import {
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
-import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
 import * as BackgroundTask from 'expo-background-task'
@@ -42,6 +41,7 @@ import {StoredContactE} from '../../state/contacts/domain'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
+  DEFAULT_PRIVATE_PART_ID,
   lastUpdatedAtAtom,
   offersAtom,
   offersStateAtom,
@@ -51,6 +51,7 @@ import {
   reportOffersWithoutLocationActionAtom,
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
+import {getNewContactNetworkOffersAndDecryptPaginatedActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom/utils/getNewOffersAndDecrypt'
 import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
@@ -113,6 +114,9 @@ function DebugScreen(): React.ReactElement {
   const deleteAllInboxes = useSetAtom(deleteAllInboxesActionAtom)
   const isDeveloper = useAtomValue(isDeveloperAtom)
   const showTextDebugButton = useSetAtom(showTextDebugButtonAtom)
+  const getNewContactNetworkOffersAndDecryptPaginated = useSetAtom(
+    getNewContactNetworkOffersAndDecryptPaginatedActionAtom
+  )
 
   if (!isDeveloper) {
     const buttonText = !isDeveloper
@@ -230,6 +234,12 @@ function DebugScreen(): React.ReactElement {
                 store.set(offersStateAtom, {
                   lastUpdatedAt1: MINIMAL_DATE,
                   offers: [],
+                  lastPrivatePartContactOfferIdBase64: encodeURIComponent(
+                    DEFAULT_PRIVATE_PART_ID
+                  ),
+                  lastPrivatePartClubOfferIdBase64: encodeURIComponent(
+                    DEFAULT_PRIVATE_PART_ID
+                  ),
                 })
                 Alert.alert('Done')
               }}
@@ -237,14 +247,17 @@ function DebugScreen(): React.ReactElement {
             <Button
               variant="primary"
               size="small"
-              text="Test get all offers and alert number"
+              text="Test get first page of offers and alert number"
               onPress={() => {
                 void pipe(
                   effectToTaskEither(
-                    getNewContactNetworkOffersAndDecrypt({
+                    getNewContactNetworkOffersAndDecryptPaginated({
                       keyPair: session.privateKey,
                       modifiedAt: MINIMAL_DATE,
                       offersApi: store.get(apiAtom).offer,
+                      lastPrivatePartIdBase64: encodeURIComponent(
+                        DEFAULT_PRIVATE_PART_ID
+                      ),
                     })
                   ),
                   TE.matchW(

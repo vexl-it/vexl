@@ -1,5 +1,5 @@
 import {NodeSdk} from '@effect/opentelemetry'
-import {NodeRuntime} from '@effect/platform-node'
+import {NodeContext, NodeRuntime} from '@effect/platform-node'
 import {type Teardown} from '@effect/platform/Runtime'
 import {PrometheusExporter} from '@opentelemetry/exporter-prometheus'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
@@ -126,20 +126,26 @@ const NodeSdkLive = Effect.gen(function* (_) {
 }).pipe(Layer.unwrapEffect)
 
 export const runMainInNode = <A, E>(
-  effect: Effect.Effect<A, E>,
+  effectOrLayer:
+    | Effect.Effect<A, E, NodeContext.NodeContext>
+    | Layer.Layer<A, E, NodeContext.NodeContext>,
   options?: {
     readonly disableErrorReporting?: boolean | undefined
     readonly teardown?: Teardown | undefined
   }
 ): void => {
   NodeRuntime.runMain(
-    effect.pipe(
+    (Effect.isEffect(effectOrLayer)
+      ? effectOrLayer
+      : Layer.launch(effectOrLayer)
+    ).pipe(
       Effect.catchAll((error) => Effect.logFatal('Error', error)),
       Effect.catchAllDefect((error) => Effect.logFatal('Defect', error)),
       Effect.provide(memoryDebugLayer),
       Effect.provide(NodeSdkLive),
       Effect.provide(devToolsLayer(nodeEnvConfig)),
-      Effect.provide(logger)
+      Effect.provide(logger),
+      Effect.provide(NodeContext.layer)
     ),
     {disablePrettyLogger: true}
   )

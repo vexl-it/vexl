@@ -1,5 +1,9 @@
-import {Api} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   GetPublicKeyResponse,
@@ -9,37 +13,34 @@ import {
   ReportNotificationProcessedRequest,
 } from './contract'
 
-export const IssueNotificationEndpoint = Api.post(
+export const IssueNotificationEndpoint = HttpApiEndpoint.post(
   'issueNotification',
   '/issue-notification'
-).pipe(
-  Api.setRequestBody(IssueNotificationRequest),
-  Api.setResponseBody(IssueNotificationResponse),
-  Api.setSecurity(ServerSecurity),
-  Api.addResponse({
-    status: 400,
-    body: IssueNotificationErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(IssueNotificationRequest)
+  .addSuccess(IssueNotificationResponse)
+  .addError(IssueNotificationErrors)
 
-export const ReportNotificationProcessedEndpoint = Api.post(
+export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
   'reportNotificationProcessed',
   '/report-notification'
-).pipe(
-  Api.setRequestBody(ReportNotificationProcessedRequest),
-  Api.setResponseBody(NoContentResponse),
-  Api.setSecurity(ServerSecurity)
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(ReportNotificationProcessedRequest)
+  .addSuccess(NoContentResponse)
 
-export const GetNotificationPublicKeyEndpoint = Api.get(
+export const GetNotificationPublicKeyEndpoint = HttpApiEndpoint.get(
   'getNotificationPublicKey',
   '/cypher-public-key'
-).pipe(Api.setResponseBody(GetPublicKeyResponse))
+).addSuccess(GetPublicKeyResponse)
 
-export const NotificationApiSpecification = Api.make({
-  title: 'Notification service',
-}).pipe(
-  Api.addEndpoint(IssueNotificationEndpoint),
-  Api.addEndpoint(ReportNotificationProcessedEndpoint),
-  Api.addEndpoint(GetNotificationPublicKeyEndpoint)
-)
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(IssueNotificationEndpoint)
+  .add(ReportNotificationProcessedEndpoint)
+  .add(GetNotificationPublicKeyEndpoint)
+
+export const NotificationApiSpecification = HttpApi.make('Notification API')
+  .add(RootGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

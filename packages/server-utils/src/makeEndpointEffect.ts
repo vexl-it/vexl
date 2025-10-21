@@ -1,109 +1,93 @@
 import {
-  type NotFoundError,
-  type UnexpectedServerError,
+  NotFoundError,
+  UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {Effect, Schema, type ConfigError} from 'effect'
-import {HttpError} from 'effect-http'
-import {isTagged} from 'effect/Predicate'
-import {type ExpectedErrorHttpCode} from './HttpCodes'
-import {type RedisLockError} from './RedisService'
-import {isRunningInTestConfig} from './commonConfigs'
-import {type TransactionError} from './withDbTransaction'
+import {ConfigError, Effect, Schema} from 'effect/index'
+import {RedisLockError} from './RedisService'
+import {TransactionError} from './withDbTransaction'
 
-type ErrorBodyContent =
-  | (any & {
-      _tag: string
-      status: Schema.Schema.Type<typeof ExpectedErrorHttpCode>
-    })
-  | Schema.Schema.Type<typeof Schema.Void>
+const UnexpectedServerErrors = Schema.Union(RedisLockError, TransactionError)
 
-type HandlableErrors =
-  | ConfigError.ConfigError
+function isRExcludingHandledErrors<R>(
+  e: R
+): e is Exclude<
+  R,
+  ConfigError.ConfigError | typeof UnexpectedServerErrors.Type
+> {
+  return (
+    Schema.is(NotFoundError)(e) ||
+    (!ConfigError.isConfigError(e) && !Schema.is(UnexpectedServerErrors)(e))
+  )
+}
+
+export const makeEndpointEffect = <A, R, I>(
+  e: Effect.Effect<
+    A,
+    | R
+    | UnexpectedServerError
+    | ConfigError.ConfigError
+    | NotFoundError
+    | typeof UnexpectedServerErrors.Type,
+    I
+  >
+): Effect.Effect<
+  A,
+  | Exclude<R, ConfigError.ConfigError | typeof UnexpectedServerErrors.Type>
   | UnexpectedServerError
-  | NotFoundError
-  | HttpError.HttpError
-  | RedisLockError
-  | TransactionError
-
-const makeEndpointEffect = <R, B, R2, C = never>(
-  effect: Effect.Effect<
-    R,
-    | Schema.Schema.Type<Schema.Schema<B, ErrorBodyContent, R2>>
-    | HandlableErrors,
-    C
-  >,
-  expectedErrors: Schema.Schema<B, ErrorBodyContent, R2>
-): Effect.Effect<R, HttpError.HttpError, C | R2> =>
-  effect.pipe(
-    Effect.catchAllDefect((e) => {
-      return Effect.zipRight(
-        Effect.logFatal('Critical error on endpoint', e),
-        Effect.fail(HttpError.make(500, 'Internal server error'))
-      )
-    }),
-    Effect.catchAll((error) =>
-      Effect.gen(function* (_) {
-        const isInTest = yield* _(isRunningInTestConfig)
-
-        if (isTagged(error, 'ConfigError')) {
-          if (!isInTest)
-            yield* _(Effect.logError('Got config error in route', error))
-          return yield* _(
-            Effect.fail(HttpError.make(500, 'Internal server error'))
-          )
-        }
-
-        if (isTagged(error, 'NotFoundError')) {
-          return yield* _(Effect.fail(HttpError.make(404, 'Not found')))
-        }
-
-        if (isTagged(error, 'RedisLockError')) {
-          return yield* _(Effect.fail(HttpError.make(404, 'Not found')))
-        }
-
-        if (isTagged(error, 'UnexpectedServerError')) {
-          if (!isInTest)
-            yield* _(Effect.logError('Got unexpected error in route', error))
-          return yield* _(
-            Effect.fail(HttpError.make(500, 'Internal server error'))
-          )
-        }
-
-        if (HttpError.isHttpError(error)) {
-          if (!isInTest) yield* _(Effect.log('Returning http error', error))
-          return yield* _(Effect.fail(error))
-        }
-
-        if (!expectedErrors) {
-          yield* _(
-            Effect.logFatal(
-              'Got error from endpoint that is really not expected',
-              error
-            )
-          )
-          return yield* _(
-            Effect.fail(HttpError.make(500, 'Internal Server Error'))
-          )
-        }
-
-        const encoded = yield* _(Schema.encodeUnknown(expectedErrors)(error))
-        if (!isInTest)
-          yield* _(Effect.log('Returning encoded expected error', encoded))
-        return yield* _(Effect.fail(HttpError.make(encoded.status, encoded)))
-      })
-    ),
-    Effect.catchTag('ConfigError', () =>
-      Effect.fail(HttpError.make(500, 'Internal Server Error'))
-    ),
-    Effect.catchTag('ParseError', (e) =>
+  | NotFoundError,
+  I
+> =>
+  e.pipe(
+    Effect.catchAllDefect((e) =>
       Effect.zipRight(
-        Effect.logFatal(
-          'Got error from endpoint that is really not expected',
-          e
-        ),
-        Effect.fail(HttpError.make(500, 'Internal Server Error'))
+        Effect.logFatal('Critical error on endpoint', e),
+        Effect.fail(UnexpectedServerError.blindError())
       )
+    ),
+    Effect.catchAll(
+      (
+        e
+      ): Effect.Effect<
+        A,
+        | Exclude<
+            R,
+            ConfigError.ConfigError | typeof UnexpectedServerErrors.Type
+          >
+        | UnexpectedServerError
+        | NotFoundError,
+        I
+      > => {
+        if (
+          Schema.is(UnexpectedServerErrors)(e) ||
+          ConfigError.isConfigError(e) ||
+          // If the error is already an unexpected server error,
+          // we still want to blind it to avoid leaking sensitive information
+          Schema.is(UnexpectedServerError)(e)
+        ) {
+          return Effect.zipRight(
+            Effect.logError('Unexpected server error in endpoint', e),
+            Effect.fail(UnexpectedServerError.blindError())
+          )
+        }
+
+        if (isRExcludingHandledErrors(e))
+          return Effect.fail(e) satisfies Effect.Effect<
+            any,
+            | Exclude<
+                R,
+                ConfigError.ConfigError | typeof UnexpectedServerErrors.Type
+              >
+            | NotFoundError
+          >
+
+        return Effect.zipRight(
+          Effect.logError('How can this happen? Unhandled error'),
+          new UnexpectedServerError({
+            status: 500,
+            message: 'An unexpected error occurred',
+            cause: new Error('Error'),
+          })
+        )
+      }
     )
   )
-
-export default makeEndpointEffect

@@ -1,8 +1,8 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {hashPublicKey} from '../../db/domain'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
@@ -25,32 +25,28 @@ beforeEach(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
       // will send message user1 -> user2
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       // Will send message user2 -> user1
@@ -63,16 +59,14 @@ beforeEach(async () => {
       )) satisfies SendMessageRequest
 
       yield* _(
-        client.sendMessage(
-          {
-            body: messageToSend,
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Messages.sendMessage({
+          payload: messageToSend,
+        })
       )
     })
   )
 })
+
 describe('deleteInbox', () => {
   it('deletes existing inbox and removes all messages and connections receiving by thtat inbox', async () => {
     await runPromiseInMockedEnvironment(
@@ -91,11 +85,11 @@ describe('deleteInbox', () => {
           )}
         `)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.deleteInbox(
-            {body: yield* _(user2.inbox1.addChallenge({}))},
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.deleteInbox({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+          })
         )
 
         expect(id).not.toBeUndefined()
@@ -143,17 +137,17 @@ describe('deleteInbox', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.deleteInbox(
-            {body: yield* _(user2.inbox1.addChallenge({}))},
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.deleteInbox({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+          })
         )
+
         const failResponse = yield* _(
-          client.deleteInbox(
-            {body: yield* _(user2.inbox1.addChallenge({}))},
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Inboxes.deleteInbox({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+          }),
           Effect.either
         )
 

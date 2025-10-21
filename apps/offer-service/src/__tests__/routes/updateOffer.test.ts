@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -19,6 +18,11 @@ import {
   type CreateNewOfferResponse,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {
+  setAuthHeaders,
+  setDummyAuthHeadersForUser,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
@@ -57,20 +61,22 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
+      yield* _(
+        setAuthHeaders(
+          yield* _(
+            createDummyAuthHeadersForUser({
+              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              publicKey: me.publicKeyPemBase64,
+            })
+          )
+        )
+      )
+
       offer1 = {
         ...(yield* _(
-          client.createNewOffer(
-            {body: request1},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
-          )
+          client.createNewOffer({
+            payload: request1,
+          })
         )),
         adminId: request1.adminId,
       }
@@ -83,27 +89,29 @@ describe('Update offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+
         yield* _(
-          client.updateOffer(
-            {
-              body: {
-                adminId: offer1.adminId,
-                payloadPublic: Schema.decodeUnknownSync(
-                  PublicPayloadEncryptedE
-                )('newPayloadPublic'),
-                offerPrivateList: [],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
           )
+        )
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+                'newPayloadPublic'
+              ),
+              offerPrivateList: [],
+            },
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -126,40 +134,42 @@ describe('Update offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+
         yield* _(
-          client.updateOffer(
-            {
-              body: {
-                adminId: offer1.adminId,
-                payloadPublic: Schema.decodeUnknownSync(
-                  PublicPayloadEncryptedE
-                )('newPayloadPublic2'),
-                offerPrivateList: [
-                  {
-                    userPublicKey: user1.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                  {
-                    userPublicKey: me.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2ForMe'),
-                  },
-                ],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
           )
+        )
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+                'newPayloadPublic2'
+              ),
+              offerPrivateList: [
+                {
+                  userPublicKey: user1.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+                {
+                  userPublicKey: me.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2ForMe'),
+                },
+              ],
+            },
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -197,45 +207,40 @@ describe('Update offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const response = yield* _(
-          client.updateOffer(
-            {
-              body: {
-                adminId: offer1.adminId,
-                payloadPublic: Schema.decodeUnknownSync(
-                  PublicPayloadEncryptedE
-                )('newPayloadPublic2'),
-                offerPrivateList: [
-                  {
-                    userPublicKey: user1.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                ],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
-          ),
+          )
+        )
+
+        const response = yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+                'newPayloadPublic2'
+              ),
+              offerPrivateList: [
+                {
+                  userPublicKey: user1.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+              ],
+            },
+          }),
           Effect.either
         )
 
-        expect(response._tag).toBe('Left')
-        if (response._tag === 'Left') {
-          expect(
-            Schema.decodeUnknownEither(MissingOwnerPrivatePartError)(
-              response.left.error
-            )
-          ).toHaveProperty('_tag', 'Right')
-        }
+        expectErrorResponse(MissingOwnerPrivatePartError)(response)
       })
     )
   })
@@ -243,57 +248,52 @@ describe('Update offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const response = yield* _(
-          client.updateOffer(
-            {
-              body: {
-                adminId: offer1.adminId,
-                payloadPublic: Schema.decodeUnknownSync(
-                  PublicPayloadEncryptedE
-                )('newPayloadPublic2'),
-                offerPrivateList: [
-                  {
-                    userPublicKey: user1.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                  {
-                    userPublicKey: user1.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                  {
-                    userPublicKey: me.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                ],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
-          ),
+          )
+        )
+
+        const response = yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+                'newPayloadPublic2'
+              ),
+              offerPrivateList: [
+                {
+                  userPublicKey: user1.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+                {
+                  userPublicKey: user1.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+                {
+                  userPublicKey: me.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+              ],
+            },
+          }),
           Effect.either
         )
 
-        expect(response._tag).toBe('Left')
-        if (response._tag === 'Left') {
-          expect(
-            Schema.decodeUnknownEither(DuplicatedPublicKeyError)(
-              response.left.error
-            )
-          ).toHaveProperty('_tag', 'Right')
-        }
+        expectErrorResponse(DuplicatedPublicKeyError)(response)
       })
     )
   })
@@ -301,40 +301,42 @@ describe('Update offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const data = yield* _(
-          client.updateOffer(
-            {
-              body: {
-                adminId: generateAdminId(),
-                payloadPublic: Schema.decodeUnknownSync(
-                  PublicPayloadEncryptedE
-                )('newPayloadPublic2'),
-                offerPrivateList: [
-                  {
-                    userPublicKey: user1.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                  {
-                    userPublicKey: me.publicKeyPemBase64,
-                    payloadPrivate: Schema.decodeUnknownSync(
-                      PrivatePayloadEncryptedE
-                    )('newPayloadPrivate2'),
-                  },
-                ],
-              },
-            },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
-          ),
+          )
+        )
+
+        const data = yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: generateAdminId(),
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+                'newPayloadPublic2'
+              ),
+              offerPrivateList: [
+                {
+                  userPublicKey: user1.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+                {
+                  userPublicKey: me.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncryptedE
+                  )('newPayloadPrivate2'),
+                },
+              ],
+            },
+          }),
           Effect.either
         )
 
@@ -361,27 +363,23 @@ describe('Update offer', () => {
             offer_id = ${offer1.offerId}
         `)
 
+        yield* _(
+          setDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
+        )
+
         const result = yield* _(
-          client.updateOffer(
-            {
-              body: {
-                adminId: offer1.adminId,
-                payloadPublic: Schema.decodeUnknownSync(
-                  PublicPayloadEncryptedE
-                )('newPayloadPublic'),
-                offerPrivateList: [],
-              },
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+                'newPayloadPublic'
+              ),
+              offerPrivateList: [],
             },
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
-            )
-          ),
+          }),
           Effect.either
         )
 

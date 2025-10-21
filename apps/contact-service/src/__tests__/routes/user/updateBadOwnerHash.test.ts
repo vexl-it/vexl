@@ -6,7 +6,6 @@ import {Array, Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
@@ -19,11 +18,14 @@ import {
   hmacSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
+import {UnableToVerifySignatureError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {cryptoConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {
   generateUserAuthData,
   hashPhoneNumber,
 } from '@vexl-next/server-utils/src/generateUserAuthData'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
@@ -100,14 +102,14 @@ beforeEach(async () => {
     Effect.gen(function* (_) {
       const app = yield* _(NodeTestingApp)
 
-      if (authHeadersNew)
-        yield* _(
-          app.deleteUser({}, HttpClientRequest.setHeaders(authHeadersNew))
-        )
-      if (authHeadersOld)
-        yield* _(
-          app.deleteUser({}, HttpClientRequest.setHeaders(authHeadersOld))
-        )
+      if (authHeadersNew) {
+        yield* _(setAuthHeaders(authHeadersNew))
+        yield* _(app.User.deleteUser({}))
+      }
+      if (authHeadersOld) {
+        yield* _(setAuthHeaders(authHeadersOld))
+        yield* _(app.User.deleteUser({}))
+      }
 
       oldHash = yield* _(
         hmacSignE('vexlOldHmacKeyWhatever')(phoneNumber),
@@ -140,38 +142,30 @@ beforeEach(async () => {
         )),
       }
 
+      yield* _(setAuthHeaders(authHeadersOld))
       yield* _(
-        app.createUser(
-          {
-            body: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
-            },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+        app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          HttpClientRequest.setHeaders({
-            ...authHeadersOld,
-          })
-        )
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          }),
+        })
       )
 
+      yield* _(setAuthHeaders(authHeadersNew))
       yield* _(
-        app.createUser(
-          {
-            body: {
-              firebaseToken: null,
-              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
-            },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+        app.User.createUser({
+          payload: {
+            firebaseToken: null,
+            expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          HttpClientRequest.setHeaders({
-            ...authHeadersNew,
-          })
-        )
+          headers: Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          }),
+        })
       )
 
       hashesToImport = yield* _(
@@ -188,28 +182,24 @@ beforeEach(async () => {
         Effect.all
       )
 
+      yield* _(setAuthHeaders(authHeadersOld))
       yield* _(
-        app.importContacts(
-          {
-            body: {
-              contacts: hashesToImport,
-              replace: true,
-            },
+        app.Contact.importContacts({
+          payload: {
+            contacts: hashesToImport,
+            replace: true,
           },
-          HttpClientRequest.setHeaders(authHeadersOld)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(authHeadersNew))
       yield* _(
-        app.importContacts(
-          {
-            body: {
-              contacts: hashesToImport,
-              replace: true,
-            },
+        app.Contact.importContacts({
+          payload: {
+            contacts: hashesToImport,
+            replace: true,
           },
-          HttpClientRequest.setHeaders(authHeadersNew)
-        )
+        })
       )
     })
   )
@@ -221,24 +211,22 @@ describe('updateBadOwnerHash', () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const app = yield* _(NodeTestingApp)
+          yield* _(setAuthHeaders(authHeadersOld))
           const result = yield* _(
-            app.updateBadOwnerHash(
-              {
-                body: {
-                  newData: {
-                    hash: newHash,
-                    signature: authHeadersNew.signature,
-                  },
-                  oldData: {
-                    hash: oldHash,
-                    signature: authHeadersOld.signature,
-                  },
-                  publicKey: keys.publicKeyPemBase64,
-                  removePreviousUser: false,
+            app.User.updateBadOwnerHash({
+              payload: {
+                newData: {
+                  hash: newHash,
+                  signature: authHeadersNew.signature,
                 },
+                oldData: {
+                  hash: oldHash,
+                  signature: authHeadersOld.signature,
+                },
+                publicKey: keys.publicKeyPemBase64,
+                removePreviousUser: false,
               },
-              HttpClientRequest.setHeaders(authHeadersOld)
-            )
+            })
           )
 
           expect(result.updated).toEqual(false)
@@ -256,24 +244,22 @@ describe('updateBadOwnerHash', () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const app = yield* _(NodeTestingApp)
+          yield* _(setAuthHeaders(authHeadersOld))
           const result = yield* _(
-            app.updateBadOwnerHash(
-              {
-                body: {
-                  newData: {
-                    hash: newHash,
-                    signature: authHeadersNew.signature,
-                  },
-                  oldData: {
-                    hash: oldHash,
-                    signature: authHeadersOld.signature,
-                  },
-                  publicKey: keys.publicKeyPemBase64,
-                  removePreviousUser: true,
+            app.User.updateBadOwnerHash({
+              payload: {
+                newData: {
+                  hash: newHash,
+                  signature: authHeadersNew.signature,
                 },
+                oldData: {
+                  hash: oldHash,
+                  signature: authHeadersOld.signature,
+                },
+                publicKey: keys.publicKeyPemBase64,
+                removePreviousUser: true,
               },
-              HttpClientRequest.setHeaders(authHeadersOld)
-            )
+            })
           )
 
           expect(result.updated).toEqual(true)
@@ -299,62 +285,46 @@ describe('updateBadOwnerHash', () => {
         const someBadSignature =
           Schema.decodeSync(EcdsaSignature)('badSignature')
 
+        yield* _(setAuthHeaders(authHeadersOld))
         const result1 = yield* _(
-          app.updateBadOwnerHash(
-            {
-              body: {
-                newData: {
-                  hash: newHash,
-                  signature: someBadSignature,
-                },
-                oldData: {
-                  hash: oldHash,
-                  signature: authHeadersOld.signature,
-                },
-                publicKey: keys.publicKeyPemBase64,
-                removePreviousUser: true,
+          app.User.updateBadOwnerHash({
+            payload: {
+              newData: {
+                hash: newHash,
+                signature: someBadSignature,
               },
+              oldData: {
+                hash: oldHash,
+                signature: authHeadersOld.signature,
+              },
+              publicKey: keys.publicKeyPemBase64,
+              removePreviousUser: true,
             },
-            HttpClientRequest.setHeaders(authHeadersOld)
-          ),
+          }),
           Effect.either
         )
 
-        expect(result1).toHaveProperty('_tag', 'Left')
-        if (result1._tag !== 'Left') return
-        expect(result1.left.error).toHaveProperty(
-          '_tag',
-          'UnableToVerifySignatureError'
-        )
+        expectErrorResponse(UnableToVerifySignatureError)(result1)
 
         const result2 = yield* _(
-          app.updateBadOwnerHash(
-            {
-              body: {
-                newData: {
-                  hash: newHash,
-                  signature: authHeadersNew.signature,
-                },
-                oldData: {
-                  hash: oldHash,
-                  signature: someBadSignature,
-                },
-                publicKey: keys.publicKeyPemBase64,
-                removePreviousUser: true,
+          app.User.updateBadOwnerHash({
+            payload: {
+              newData: {
+                hash: newHash,
+                signature: authHeadersNew.signature,
               },
+              oldData: {
+                hash: oldHash,
+                signature: someBadSignature,
+              },
+              publicKey: keys.publicKeyPemBase64,
+              removePreviousUser: true,
             },
-            HttpClientRequest.setHeaders(authHeadersOld)
-          ),
+          }),
           Effect.either
         )
 
-        expect(result2).toHaveProperty('_tag', 'Left')
-        if (result2._tag !== 'Left') return
-
-        expect(result2.left.error).toHaveProperty(
-          '_tag',
-          'UnableToVerifySignatureError'
-        )
+        expectErrorResponse(UnableToVerifySignatureError)(result2)
       })
     )
   })
@@ -364,28 +334,25 @@ describe('updateBadOwnerHash', () => {
         const app = yield* _(NodeTestingApp)
 
         // let's suppose There is only old user in the datase
-        yield* _(
-          app.deleteUser({}, HttpClientRequest.setHeaders(authHeadersNew))
-        )
+        yield* _(setAuthHeaders(authHeadersNew))
+        yield* _(app.User.deleteUser({}))
 
+        yield* _(setAuthHeaders(authHeadersOld))
         const result = yield* _(
-          app.updateBadOwnerHash(
-            {
-              body: {
-                newData: {
-                  hash: newHash,
-                  signature: authHeadersNew.signature,
-                },
-                oldData: {
-                  hash: oldHash,
-                  signature: authHeadersOld.signature,
-                },
-                publicKey: keys.publicKeyPemBase64,
-                removePreviousUser: false,
+          app.User.updateBadOwnerHash({
+            payload: {
+              newData: {
+                hash: newHash,
+                signature: authHeadersNew.signature,
               },
+              oldData: {
+                hash: oldHash,
+                signature: authHeadersOld.signature,
+              },
+              publicKey: keys.publicKeyPemBase64,
+              removePreviousUser: false,
             },
-            HttpClientRequest.setHeaders(authHeadersOld)
-          )
+          })
         )
 
         expect(result.updated).toEqual(true)

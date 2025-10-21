@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -12,6 +11,7 @@ import {
   NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import dayjs from 'dayjs'
 import {Effect, Schema} from 'effect'
 import {
@@ -33,31 +33,27 @@ beforeAll(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       const sql = yield* _(SqlClient.SqlClient)
@@ -80,40 +76,33 @@ describe('Send message', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const messagesReceived = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox1.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox1.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messagesReceived.messages.length).toBe(1)
         expect(messagesReceived.messages[0].message).toBe('someMessage')
 
         const messagesReceived2 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user2.inbox2.addChallenge({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user2.inbox2.addChallenge({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messagesReceived2.messages.length).toBe(0)
@@ -134,13 +123,11 @@ describe('Send message', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -177,13 +164,11 @@ describe('Send message', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const response = yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          }),
           Effect.either
         )
 
@@ -208,13 +193,11 @@ describe('Send message', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const response = yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          }),
           Effect.either
         )
 
@@ -236,13 +219,11 @@ describe('Send message', () => {
           })
         )) satisfies SendMessageRequest
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const response = yield* _(
-          client.sendMessage(
-            {
-              body: messageToSend,
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          }),
           Effect.either
         )
 
@@ -265,49 +246,41 @@ describe('Send message', () => {
           })
         )
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const response = yield* _(
-          client.sendMessage(
-            {
-              body: {...messageToSend, messageType: 'REQUEST_MESSAGING'},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: {...messageToSend, messageType: 'REQUEST_MESSAGING'},
+          }),
           Effect.either
         )
 
         expectErrorResponse(ForbiddenMessageTypeError)(response)
 
         const response2 = yield* _(
-          client.sendMessage(
-            {
-              body: {...messageToSend, messageType: 'APPROVE_MESSAGING'},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: {...messageToSend, messageType: 'APPROVE_MESSAGING'},
+          }),
           Effect.either
         )
 
         expectErrorResponse(ForbiddenMessageTypeError)(response2)
 
         const response3 = yield* _(
-          client.sendMessage(
-            {
-              body: {...messageToSend, messageType: 'DISAPPROVE_MESSAGING'},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Messages.sendMessage({
+            payload: {...messageToSend, messageType: 'DISAPPROVE_MESSAGING'},
+          }),
           Effect.either
         )
 
         expectErrorResponse(ForbiddenMessageTypeError)(response3)
 
         const response4 = yield* _(
-          client.sendMessage(
-            {
-              body: {...messageToSend, messageType: 'CANCEL_REQUEST_MESSAGING'},
+          client.Messages.sendMessage({
+            payload: {
+              ...messageToSend,
+              messageType: 'CANCEL_REQUEST_MESSAGING',
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          }),
           Effect.either
         )
 

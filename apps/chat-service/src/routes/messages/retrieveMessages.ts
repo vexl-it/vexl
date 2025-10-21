@@ -1,21 +1,23 @@
-import {RetrieveMessagesErrors} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {RetrieveMessagesEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option, pipe} from 'effect'
-import {Handler} from 'effect-http'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {decryptPublicKey} from '../../db/domain'
 import {ensureInboxExists} from '../../utils/ensureInboxExists'
 
-export const retrieveMessages = Handler.make(RetrieveMessagesEndpoint, (req) =>
-  makeEndpointEffect(
+export const retrieveMessages = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Messages',
+  'retrieveMessages',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
-      const inbox = yield* _(ensureInboxExists(req.body.publicKey))
+      const inbox = yield* _(ensureInboxExists(req.payload.publicKey))
       const inboxDb = yield* _(InboxDbService)
       yield* _(
         inboxDb.updateInboxMetadata({
@@ -70,7 +72,5 @@ export const retrieveMessages = Handler.make(RetrieveMessagesEndpoint, (req) =>
           id: Number(one.id),
         })),
       }
-    }),
-    RetrieveMessagesErrors
-  ).pipe(withDbTransaction)
+    }).pipe(withDbTransaction, makeEndpointEffect)
 )

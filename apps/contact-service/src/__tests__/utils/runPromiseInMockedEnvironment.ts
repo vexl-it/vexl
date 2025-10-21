@@ -1,4 +1,6 @@
-import {NodeContext} from '@effect/platform-node'
+import {NodeContext, NodeHttpServer} from '@effect/platform-node'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
 import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
@@ -9,6 +11,7 @@ import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   disposeTestDatabase,
   setupTestDatabase,
@@ -21,17 +24,16 @@ import {ClubsDbService} from '../../db/ClubsDbService'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import DbLayer from '../../db/layer'
+import {ContactApiLive} from '../../httpServer'
 import {ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
 import {NewClubUserNotificationsService} from '../../utils/NewClubUserNotificationService'
 import {type ExpoNotificationsService} from '../../utils/expoNotifications/ExpoNotificationsService'
 import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
-import {NodeTestingApp} from './NodeTestingApp'
 import {mockedExpoNotificationlayer} from './mockedExpoNotificationService'
 import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
 
 export type MockedContexts =
   | RedisService
-  | NodeTestingApp
   | ServerCrypto
   | SqlClient
   | UserDbService
@@ -49,10 +51,19 @@ export type MockedContexts =
   | ChallengeService
   | ChallengeDbService
   | NewClubUserNotificationsService
+  | HttpClient
+  | TestRequestHeaders
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
-const context = NodeTestingApp.Live.pipe(
+const TestServerLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(ContactApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
+
+const context = Layer.empty.pipe(
+  Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(NewClubUserNotificationsService.Live),

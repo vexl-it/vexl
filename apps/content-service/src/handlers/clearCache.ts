@@ -1,13 +1,10 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {
-  ClearEventsCacheErrors,
-  InvalidTokenError,
-} from '@vexl-next/rest-api/src/services/content/contracts'
-import {ClearEventsCacheEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {InvalidTokenError} from '@vexl-next/rest-api/src/services/content/contracts'
+import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, flow} from 'effect'
-import {Handler} from 'effect-http'
 import {clearCacheTokenHashConfig} from '../configs'
 import {CacheService} from '../utils/cache'
 
@@ -22,24 +19,25 @@ const validateAdminToken = flow(
   Effect.map(([a]) => a)
 )
 
-export const clearCacheHandler = Handler.make(ClearEventsCacheEndpoint, (req) =>
-  makeEndpointEffect(
+export const clearCacheHandler = HttpApiBuilder.handler(
+  ContentApiSpecification,
+  'Cms',
+  'clearCache',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.query.token))
+      yield* _(validateAdminToken(req.urlParams.token))
 
       yield* _(
         CacheService,
         Effect.flatMap((c) => c.clearCache)
       )
-
-      return null
+      return {}
     }).pipe(
       Effect.mapError((e) => {
         if (e._tag === 'InvalidTokenError') return e
         return new UnexpectedServerError({cause: e, status: 500})
       }),
-      Effect.withSpan('clearCache')
-    ),
-    ClearEventsCacheErrors
-  )
+      Effect.withSpan('clearCache'),
+      makeEndpointEffect
+    )
 )

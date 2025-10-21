@@ -23,6 +23,7 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
+    "@effect/platform": "^0.92.1",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",

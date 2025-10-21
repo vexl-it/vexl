@@ -1,75 +1,104 @@
-import {NodeContext} from '@effect/platform-node'
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
-import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
-import {Config, Effect, Layer, Option} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
+import {Config, Layer, Option} from 'effect'
 import {
   cryptoConfig,
   dashboardNewUserHookConfig,
   healthServerPortConfig,
-  portConfig,
   redisUrl,
 } from './configs'
 import DbLayer from './db/layer'
-import {LoggedInUsersDbService} from './db/loggedInUsersDb'
 import {reportMetricsLayer} from './metrics'
 import {initEraseUserEndpoint} from './routes/eraseUser/handlers/initEraseUser'
 import {verifyAndEraseUser} from './routes/eraseUser/handlers/verifyAndEraseUser'
 import {generateLoginChallengeHandler} from './routes/generateLoginChallenge'
 import {getVersionServiceInfoHandler} from './routes/getVersionServiceInfo'
-import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {initVerificationHandler} from './routes/login/handlers/initVerificationHandler'
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
 import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
 import {logoutUserHandler} from './routes/logoutUser'
 import {regenerateCredentialsHandler} from './routes/regenerateSessionCredentials'
-import {submitFeedbackHandler} from './routes/submitFeedback'
+
+import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
+import {LoggedInUsersDbService} from './db/loggedInUsersDb'
+import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {PreludeService} from './utils/prelude'
 import {TwilioVerificationClient} from './utils/twilio'
 
-export const app = RouterBuilder.make(UserApiSpecification).pipe(
-  RouterBuilder.handle(initVerificationHandler),
-  RouterBuilder.handle(verifyCodeHandler),
-  RouterBuilder.handle(verifyChallengeHandler),
-  RouterBuilder.handle(logoutUserHandler),
-  RouterBuilder.handle(submitFeedbackHandler),
-  RouterBuilder.handle(regenerateCredentialsHandler),
-  RouterBuilder.handle(getVersionServiceInfoHandler),
-  RouterBuilder.handle(initEraseUserEndpoint),
-  RouterBuilder.handle(verifyAndEraseUser),
-  RouterBuilder.handle(generateLoginChallengeHandler),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const LoginApiGroupLive = HttpApiBuilder.group(
+  UserApiSpecification,
+  'Login',
+  (h) =>
+    h
+      .handle('initVerification', initVerificationHandler)
+      .handle('verifyCode', verifyCodeHandler)
+      .handle('verifyChallenge', verifyChallengeHandler)
 )
 
-const MainLive = Layer.mergeAll(
-  TwilioVerificationClient.Live,
-  PreludeService.Live,
-  VerificationStateDbService.Live,
-  LoggedInUsersDbService.Live,
-  DashboardReportsService.make({
-    newUserHookOption: dashboardNewUserHookConfig,
-    contactsImportedHookConfig: Config.succeed(Option.none()),
-  }),
+const EraseUserApiGroupLive = HttpApiBuilder.group(
+  UserApiSpecification,
+  'EraseUser',
+  (h) =>
+    h
+      .handle('initEraseUser', initEraseUserEndpoint)
+      .handle('verifyAndEraseuser', verifyAndEraseUser)
+)
+
+const RootApiGroupLive = HttpApiBuilder.group(
+  UserApiSpecification,
+  'root',
+  (h) =>
+    h
+      .handle('logoutUser', logoutUserHandler)
+      .handle('regenerateSessionCredentials', regenerateCredentialsHandler)
+      .handle('getVersionServiceInfo', getVersionServiceInfoHandler)
+      .handle('generateLoginChallenge', generateLoginChallengeHandler)
+)
+
+export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
+  Layer.provide(LoginApiGroupLive),
+  Layer.provide(EraseUserApiGroupLive),
+  Layer.provide(RootApiGroupLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
+
+export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(UserApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
   reportMetricsLayer,
-  ServerCrypto.layer(cryptoConfig),
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
-  Layer.provideMerge(DbLayer),
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(TwilioVerificationClient.Live),
+  Layer.provideMerge(PreludeService.Live),
   Layer.provideMerge(MetricsClientService.Live),
+  Layer.provideMerge(
+    DashboardReportsService.make({
+      newUserHookOption: dashboardNewUserHookConfig,
+      contactsImportedHookConfig: Config.succeed(Option.none()),
+    })
+  ),
+  Layer.provideMerge(VerificationStateDbService.Live),
+  Layer.provideMerge(LoggedInUsersDbService.Live),
+  Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provideMerge(NodeContext.layer)
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl))
 )

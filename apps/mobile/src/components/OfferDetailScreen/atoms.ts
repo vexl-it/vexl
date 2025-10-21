@@ -135,10 +135,7 @@ export const reportOfferActionAtom = atom(
           Effect.map(
             Array.map(
               Either.mapLeft((left) => {
-                if (
-                  left._tag !== 'ReportClubLimitReachedError' &&
-                  left._tag !== 'NetworkError'
-                ) {
+                if (left._tag !== 'ReportClubLimitReachedError') {
                   reportError(
                     'error',
                     new Error('Error while reporting club'),
@@ -177,9 +174,10 @@ export const reportOfferActionAtom = atom(
         if (
           e._tag === 'NotFoundError' ||
           e._tag === 'UnauthorizedError' ||
-          e._tag === 'UnexpectedApiResponseError' ||
-          e._tag === 'UnknownClientError' ||
-          e._tag === 'UnknownServerError'
+          e._tag === 'HttpApiDecodeError' ||
+          e._tag === 'RequestError' ||
+          e._tag === 'ResponseError' ||
+          e._tag === 'UnexpectedServerError'
         ) {
           reportError('error', new Error('Error while reporting offer'), {
             e,

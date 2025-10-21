@@ -1,13 +1,13 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   type Event,
   EventId,
   type EventsResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {GetEventsEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
-import {Handler} from 'effect-http'
 import {CacheService} from '../utils/cache'
 import {WebflowCmsService} from '../utils/webflowCms'
 import {
@@ -52,8 +52,11 @@ const webflowEventsToResponse = ({
   )
 }
 
-export const getEventsHandler = Handler.make(GetEventsEndpoint, () =>
-  makeEndpointEffect(
+export const getEventsHandler = HttpApiBuilder.handler(
+  ContentApiSpecification,
+  'Cms',
+  'getEvents',
+  () =>
     Effect.gen(function* (_) {
       const cache = yield* _(CacheService)
 
@@ -92,8 +95,7 @@ export const getEventsHandler = Handler.make(GetEventsEndpoint, () =>
           Effect.flatMap((cache) => cache.saveEventsToCacheForked(data))
         )
       ),
-      Effect.withSpan('getEvents')
-    ),
-    Schema.Void
-  )
+      Effect.withSpan('getEvents'),
+      makeEndpointEffect
+    )
 )

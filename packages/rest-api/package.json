@@ -30,7 +30,6 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
     "effect": "^3.18.4",
-    "effect-http": "^0.87.0",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "url-join": "^5.0.0",

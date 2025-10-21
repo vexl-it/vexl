@@ -26,7 +26,7 @@ export const verifyPhoneNumberAtom = atom(
             t('loginFlow.verificationCode.errors.challengeCouldNotBeGenerated')
           )
 
-        if (e._tag === 'UnexpectedApiResponseError') {
+        if (e._tag === 'HttpApiDecodeError') {
           reportError(
             'error',
             new Error('Unexpected api response while verifying phone number'),

@@ -9,8 +9,8 @@ describe('Create invoice', () => {
         const app = yield* _(NodeTestingApp)
 
         const resp = yield* _(
-          app.createInvoice({
-            body: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
+          app.Donations.createInvoice({
+            payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
           }),
           Effect.either
         )

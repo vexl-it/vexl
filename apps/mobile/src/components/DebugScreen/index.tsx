@@ -3,12 +3,14 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {
   effectToTaskEither,
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import getNewContactNetworkOffersAndDecrypt from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
+import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
 import * as BackgroundTask from 'expo-background-task'
 import {getInstallationSource} from 'expo-installation-source'
@@ -678,6 +680,30 @@ function DebugScreen(): React.ReactElement {
                         .get(myOffersAtom)
                         .map((one) => one.ownershipInfo?.adminId)
                         .filter((one): one is NonNullable<typeof one> => !!one),
+                    },
+                  })
+                )()
+                  .then(() => {
+                    Alert.alert('done')
+                  })
+                  .catch((error) => {
+                    Alert.alert('Error', error.message)
+                  })
+              }}
+            />
+
+            <Button
+              variant="primary"
+              size="small"
+              text="Test dummy feedback request"
+              onPress={() => {
+                void effectToTaskEither(
+                  store.get(apiAtom).feedback.submitFeedback({
+                    body: {
+                      formId: Schema.decodeSync(FeedbackFormId)(generateUuid()),
+                      type: 'create',
+                      stars: 5,
+                      textComment: 'from test',
                     },
                   })
                 )()

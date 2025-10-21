@@ -1,16 +1,15 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
-  ApproveRequestErrors,
   RequestCancelledError,
   RequestNotFoundError,
   RequestNotPendingError,
   type ApproveRequestResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {ApproveRequestEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
@@ -22,16 +21,19 @@ import {
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
-export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
-  makeEndpointEffect(
+export const approveRequest = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Inboxes',
+  'approveRequest',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       // from the point of view of the one that sent the request
       const {receiverInbox, senderInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
-          receiver: req.body.publicKey,
-          sender: req.body.publicKeyToConfirm,
+          receiver: req.payload.publicKey,
+          sender: req.payload.publicKeyToConfirm,
         })
       )
 
@@ -56,7 +58,7 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
       )
 
       const messagesDb = yield* _(MessagesDbService)
-      if (req.body.approve) {
+      if (req.payload.approve) {
         yield* _(
           whitelistDb.updateWhitelistRecordState({
             id: whitelistRecord.id,
@@ -93,29 +95,33 @@ export const approveRequest = Handler.make(ApproveRequestEndpoint, (req) =>
       }
 
       const encryptedSenderPublicKey = yield* _(
-        encryptPublicKey(req.body.publicKey)
+        encryptPublicKey(req.payload.publicKey)
       )
 
       const sentMessage = yield* _(
         messagesDb.insertMessageForInbox({
           inboxId: senderInbox.id,
           senderPublicKey: encryptedSenderPublicKey,
-          message: req.body.message,
-          type: req.body.approve ? 'APPROVE_MESSAGING' : 'DISAPPROVE_MESSAGING',
+          message: req.payload.message,
+          type: req.payload.approve
+            ? 'APPROVE_MESSAGING'
+            : 'DISAPPROVE_MESSAGING',
         })
       )
 
       return {
         id: Number(sentMessage.id),
-        message: req.body.message,
+        message: req.payload.message,
         notificationHandled: false,
-        senderPublicKey: req.body.publicKey,
+        senderPublicKey: req.payload.publicKey,
       } satisfies ApproveRequestResponse
     }).pipe(
-      withInboxActionRedisLock(req.body.publicKey, req.body.publicKeyToConfirm),
+      withInboxActionRedisLock(
+        req.payload.publicKey,
+        req.payload.publicKeyToConfirm
+      ),
       withDbTransaction,
-      Effect.zipLeft(reportMessageSent(1))
-    ),
-    ApproveRequestErrors
-  )
+      Effect.zipLeft(reportMessageSent(1)),
+      makeEndpointEffect
+    )
 )

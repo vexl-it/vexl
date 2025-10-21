@@ -1,41 +1,31 @@
-import {GetGeocodedCoordinatesErrors} from '@vexl-next/rest-api/src/services/location/contracts'
-import {
-  GetExchangeRateEndpoint,
-  GetGeocodedCoordinatesEndpoint,
-  GetLocationSuggestionEndpoint,
-} from '@vexl-next/rest-api/src/services/location/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {makeRedirectHandler} from '@vexl-next/server-utils/src/makeRedirectHandler'
-import {Effect, Schema} from 'effect'
-import {Handler} from 'effect-http'
-import {btcExchangeRateUrlToRedirectToConfig} from '../configs'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {LocationApiSpecification} from '@vexl-next/rest-api/src/services/location/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {Effect} from 'effect'
 import {GoogleMapsService} from '../utils/googleMapsApi'
 
-export const getExchangeRateHandler = makeRedirectHandler(
-  GetExchangeRateEndpoint,
-  btcExchangeRateUrlToRedirectToConfig
-)
-
-export const getGeocodedCoordinatesRequest = Handler.make(
-  GetGeocodedCoordinatesEndpoint,
+export const getGeocodedCoordinatesHandler = HttpApiBuilder.handler(
+  LocationApiSpecification,
+  'root',
+  'getGeocodedCoordinates',
   (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const maps = yield* _(GoogleMapsService)
-        return yield* _(maps.queryGeocode(req.query))
-      }),
-      GetGeocodedCoordinatesErrors
+        return yield* _(maps.queryGeocode(req.urlParams))
+      })
     )
 )
 
-export const getLocationSuggestionHandler = Handler.make(
-  GetLocationSuggestionEndpoint,
+export const getLocationSuggestionHandler = HttpApiBuilder.handler(
+  LocationApiSpecification,
+  'root',
+  'getLocationSuggestion',
   (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
         const maps = yield* _(GoogleMapsService)
-        return yield* _(maps.querySuggest(req.query))
-      }),
-      Schema.Void
+        return yield* _(maps.querySuggest(req.urlParams))
+      })
     )
 )

@@ -1,5 +1,5 @@
+import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {BtcPayWebhookShaSignature} from '@vexl-next/rest-api/src/btcPayServerWebhookHeader'
-import {UnauthorizedError} from '@vexl-next/rest-api/src/Errors'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Option, Schema} from 'effect'
 import * as crypto from 'node:crypto'
@@ -17,8 +17,8 @@ describe('Update invoice status type webhook', () => {
         )
 
         const createInvoiceResp = yield* _(
-          app.createInvoice({
-            body: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
+          app.Donations.createInvoice({
+            payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
           })
         )
 
@@ -47,7 +47,7 @@ describe('Update invoice status type webhook', () => {
             .digest('hex')
 
         yield* _(
-          app.updateInvoiceStateWebhook({
+          app.Donations.updateInvoiceStateWebhook({
             headers: {
               btcPayWebhookSignatureOrNone: Option.some(
                 Schema.decodeSync(BtcPayWebhookShaSignature)(
@@ -58,13 +58,13 @@ describe('Update invoice status type webhook', () => {
                 btcPayServerSignature
               ),
             },
-            body,
+            payload: body,
           })
         )
 
         const resp = yield* _(
-          app.getInvoiceStatusType({
-            query: {
+          app.Donations.getInvoiceStatusType({
+            urlParams: {
               invoiceId: createInvoiceResp.invoiceId,
               storeId: createInvoiceResp.storeId,
             },
@@ -86,8 +86,8 @@ describe('Update invoice status type webhook', () => {
         )
 
         const createInvoiceResp = yield* _(
-          app.createInvoice({
-            body: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
+          app.Donations.createInvoice({
+            payload: {amount: 1, currency: 'EUR', paymentMethod: 'BTC-LN'},
           })
         )
 
@@ -116,7 +116,7 @@ describe('Update invoice status type webhook', () => {
             .digest('hex')
 
         const resp = yield* _(
-          app.updateInvoiceStateWebhook({
+          app.Donations.updateInvoiceStateWebhook({
             headers: {
               btcPayWebhookSignatureOrNone: Option.some(
                 Schema.decodeSync(BtcPayWebhookShaSignature)(
@@ -127,7 +127,7 @@ describe('Update invoice status type webhook', () => {
                 btcPayServerSignature
               ),
             },
-            body,
+            payload: body,
           }),
           Effect.either
         )

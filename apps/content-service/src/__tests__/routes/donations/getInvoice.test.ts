@@ -15,7 +15,7 @@ describe('Get invoice', () => {
         const storeId = 'store_id' as StoreId
 
         const resp = yield* _(
-          app.getInvoice({query: {invoiceId, storeId}}),
+          app.Donations.getInvoice({urlParams: {invoiceId, storeId}}),
           Effect.either
         )
 

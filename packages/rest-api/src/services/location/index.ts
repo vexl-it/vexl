@@ -1,17 +1,13 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {Effect} from 'effect/index'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {type LoggingFunction} from '../../utils'
 import {
-  handleCommonAndExpectedErrorsEffect,
-  handleCommonErrorsEffect,
-  type LoggingFunction,
-} from '../../utils'
-import {
-  GetGeocodedCoordinatesErrors,
   type GetGeocodedCoordinatesInput,
   type GetLocationSuggestionsInput,
 } from './contracts'
@@ -45,36 +41,39 @@ export function api({
   signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
 }) {
-  const client = createClientInstanceWithAuth({
-    api: LocationApiSpecification,
-    platform,
-    clientVersion,
-    language,
-    isDeveloper,
-    appSource,
-    clientSemver,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: LocationApiSpecification,
+        platform,
+        clientVersion,
+        language,
+        isDeveloper,
+        appSource,
+        clientSemver,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  return {
-    getLocationSuggestions: (
-      getLocationSuggestionsInput: GetLocationSuggestionsInput
-    ) =>
-      handleCommonErrorsEffect(
-        client.getLocationSuggestion(getLocationSuggestionsInput)
-      ),
-    getGeocodedCoordinates: (
-      getGeocodedCoordinatesInput: GetGeocodedCoordinatesInput
-    ) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.getGeocodedCoordinates(getGeocodedCoordinatesInput),
-        GetGeocodedCoordinatesErrors
-      ),
-  }
+    return {
+      getLocationSuggestions: (
+        getLocationSuggestionsInput: GetLocationSuggestionsInput
+      ) =>
+        client.getLocationSuggestion({
+          urlParams: getLocationSuggestionsInput.query,
+        }),
+      getGeocodedCoordinates: (
+        getGeocodedCoordinatesInput: GetGeocodedCoordinatesInput
+      ) =>
+        client.getGeocodedCoordinates({
+          urlParams: getGeocodedCoordinatesInput.query,
+        }),
+    }
+  })
 }
 
-export type LocationApi = ReturnType<typeof api>
+export type LocationApi = Effect.Effect.Success<ReturnType<typeof api>>

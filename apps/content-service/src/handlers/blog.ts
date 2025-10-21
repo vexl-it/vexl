@@ -1,12 +1,12 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   type BlogArticlePreview,
   type BlogsArticlesResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {GetBlogArticlesEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, Option, Schema, String} from 'effect'
-import {Handler} from 'effect-http'
+import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {Array, Effect, Option, String} from 'effect'
 import {vexlBlogUrlTemplateConfig} from '../configs'
 import {CacheService} from '../utils/cache'
 import {WebflowCmsService} from '../utils/webflowCms'
@@ -33,8 +33,11 @@ const webflowBlogToBlogArticlesResponse = (
       }) satisfies BlogArticlePreview
   )
 
-export const getBlogsHandler = Handler.make(GetBlogArticlesEndpoint, () =>
-  makeEndpointEffect(
+export const getBlogsHandler = HttpApiBuilder.handler(
+  ContentApiSpecification,
+  'Cms',
+  'getBlogArticles',
+  () =>
     Effect.gen(function* (_) {
       const cache = yield* _(CacheService)
 
@@ -72,8 +75,7 @@ export const getBlogsHandler = Handler.make(GetBlogArticlesEndpoint, () =>
           Effect.flatMap((cache) => cache.saveBlogsToCacheForked(data))
         )
       ),
-      Effect.withSpan('getBlogs')
-    ),
-    Schema.Void
-  )
+      Effect.withSpan('getBlogs'),
+      makeEndpointEffect
+    )
 )

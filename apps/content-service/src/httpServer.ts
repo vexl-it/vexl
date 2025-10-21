@@ -1,14 +1,18 @@
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
-import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig} from './configs'
 import {getBlogsHandler} from './handlers/blog'
 import {clearCacheHandler} from './handlers/clearCache'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
@@ -22,32 +26,55 @@ import {CacheService} from './utils/cache'
 import {BtcPayServerService} from './utils/donations'
 import {WebflowCmsService} from './utils/webflowCms'
 
-export const app = RouterBuilder.make(ContentApiSpecification).pipe(
-  RouterBuilder.handle(getEventsHandler),
-  RouterBuilder.handle(clearCacheHandler),
-  RouterBuilder.handle(getBlogsHandler),
-  RouterBuilder.handle(newsAndAnonouncementsHandler),
-  RouterBuilder.handle(createInvoiceHandler),
-  RouterBuilder.handle(getInvoiceHandler),
-  RouterBuilder.handle(updateInvoiceStateWebhook),
-  RouterBuilder.handle(getInvoiceStatusTypeHandler),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const CmsApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'Cms',
+  (h) =>
+    h
+      .handle('getEvents', getEventsHandler)
+      .handle('clearCache', clearCacheHandler)
+      .handle('getBlogArticles', getBlogsHandler)
 )
 
-const MainLive = Layer.mergeAll(
-  ServerCrypto.layer(cryptoConfig),
-  WebflowCmsService.Live,
-  CacheService.Live,
+const NewsAndAnnouncementsApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'NewsAndAnnouncements',
+  (h) => h.handle('getNewsAndAnnouncements', newsAndAnonouncementsHandler)
+)
+
+const DonationsApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'Donations',
+  (h) =>
+    h
+      .handle('createInvoice', createInvoiceHandler)
+      .handle('getInvoice', getInvoiceHandler)
+      .handle('updateInvoiceStateWebhook', updateInvoiceStateWebhook)
+      .handle('getInvoiceStatusType', getInvoiceStatusTypeHandler)
+)
+
+export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
+  Layer.provide(CmsApiGroupLive),
+  Layer.provide(NewsAndAnnouncementsApiGroupLive),
+  Layer.provide(DonationsApiGroupLive)
+)
+
+export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(ContentApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const HttpServerLive = Layer.mergeAll(
+  ApiServerLive,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(WebflowCmsService.Live),
+  Layer.provideMerge(CacheService.Live),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
   Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(BtcPayServerService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl))
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
 )

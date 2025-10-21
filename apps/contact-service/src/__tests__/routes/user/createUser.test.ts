@@ -3,7 +3,6 @@ import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
@@ -11,6 +10,7 @@ import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotifica
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
 describe('create user', () => {
   it('Should create a user in db', async () => {
@@ -27,25 +27,19 @@ describe('create user', () => {
             publicKey: keys.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders))
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
-                  'someToken'
-                ),
-              },
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-                'vexl-app-meta':
-                  '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-              }),
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+              'vexl-app-meta':
+                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+            }),
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -85,37 +79,26 @@ describe('create user', () => {
             publicKey: keys.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders))
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
-                  'someToken'
-                ),
-              },
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              }),
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
         )
 
         yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
+              replace: true,
             },
-            HttpClientRequest.setHeaders({
-              ...authHeaders,
-            })
-          )
+          })
         )
 
         const inDb = yield* _(sql`
@@ -137,23 +120,17 @@ describe('create user', () => {
             publicKey: keys2.publicKeyPemBase64,
           })
         )
+        yield* _(setAuthHeaders(authHeaders2))
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
-                  'someToken'
-                ),
-              },
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              }),
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            HttpClientRequest.setHeaders({
-              ...authHeaders2,
-            })
-          )
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
         )
 
         const result = yield* _(sql`

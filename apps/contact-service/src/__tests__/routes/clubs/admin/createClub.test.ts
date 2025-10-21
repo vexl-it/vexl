@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -7,6 +6,7 @@ import {
   InvalidAdminTokenError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -41,11 +41,11 @@ describe('Create club', () => {
           reportLimit: 10,
         }
         const errorResponse = yield* _(
-          app.createClub({
-            query: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
               adminToken: 'aha',
             },
-            body: {
+            payload: {
               club: clubData,
             },
           }),
@@ -72,31 +72,27 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const createdClub = yield* _(
-          app.createClub(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
-              body: {
-                club: clubData,
-              },
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          )
+            payload: {
+              club: clubData,
+            },
+          })
         )
 
         expect(createdClub.clubInfo).toMatchObject(clubData)
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const clubsInDb = yield* _(
-          app.listClubs(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
+          app.ClubsAdmin.listClubs({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          )
+          })
         )
 
         expect(clubsInDb.clubs).toHaveLength(1)
@@ -120,32 +116,27 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         yield* _(
-          app.createClub(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
-              body: {
-                club: clubData,
-              },
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          )
+            payload: {
+              club: clubData,
+            },
+          })
         )
 
         const errorResponse = yield* _(
-          app.createClub(
-            {
-              query: {
-                adminToken: ADMIN_TOKEN,
-              },
-              body: {
-                club: clubData,
-              },
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
             },
-            HttpClientRequest.setHeaders({adminToken: ADMIN_TOKEN})
-          ),
+            payload: {
+              club: clubData,
+            },
+          }),
           Effect.either
         )
 

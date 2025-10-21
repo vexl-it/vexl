@@ -1,14 +1,11 @@
-import {
-  SendMessageErrors,
-  type SendMessageResponse,
-} from '@vexl-next/rest-api/src/services/chat/contracts'
-import {SendMessageEndpoint} from '@vexl-next/rest-api/src/services/chat/specification'
+import {HttpApiBuilder} from '@effect/platform/index'
+import {type SendMessageResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
-import {Handler} from 'effect-http'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {encryptPublicKey} from '../../db/domain'
 import {reportMessageSent} from '../../metrics'
@@ -17,55 +14,59 @@ import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
-export const sendMessage = Handler.make(SendMessageEndpoint, (req) =>
-  makeEndpointEffect(
+export const sendMessage = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Messages',
+  'sendMessage',
+  (req) =>
     Effect.gen(function* (_) {
       yield* _(
         validateChallengeInBody({
-          publicKey: req.body.senderPublicKey,
-          signedChallenge: req.body.signedChallenge,
+          publicKey: req.payload.senderPublicKey,
+          signedChallenge: req.payload.signedChallenge,
         })
       )
 
-      if (forbiddenMessageTypes.includes(req.body.messageType)) {
+      if (forbiddenMessageTypes.includes(req.payload.messageType)) {
         return yield* _(Effect.fail(new ForbiddenMessageTypeError()))
       }
 
       const {receiverInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
-          sender: req.body.senderPublicKey,
-          receiver: req.body.receiverPublicKey,
+          sender: req.payload.senderPublicKey,
+          receiver: req.payload.receiverPublicKey,
         })
       )
 
       yield* _(
         ensureSenderInReceiverWhitelist({
           receiver: receiverInbox.id,
-          sender: req.body.senderPublicKey,
+          sender: req.payload.senderPublicKey,
         })
       )
 
       const messagesDb = yield* _(MessagesDbService)
       const messageRecord = yield* _(
         messagesDb.insertMessageForInbox({
-          message: req.body.message,
-          senderPublicKey: yield* _(encryptPublicKey(req.body.senderPublicKey)),
+          message: req.payload.message,
+          senderPublicKey: yield* _(
+            encryptPublicKey(req.payload.senderPublicKey)
+          ),
           inboxId: receiverInbox.id,
-          type: req.body.messageType,
+          type: req.payload.messageType,
         })
       )
 
       return {
         id: Number(messageRecord.id),
-        message: req.body.message,
-        senderPublicKey: req.body.senderPublicKey,
+        message: req.payload.message,
+        senderPublicKey: req.payload.senderPublicKey,
         notificationHandled: false,
       } satisfies SendMessageResponse
-    }),
-    SendMessageErrors
-  ).pipe(
-    withInboxActionRedisLock(req.body.receiverPublicKey),
-    withDbTransaction,
-    Effect.zipLeft(reportMessageSent(1))
-  )
+    }).pipe(
+      withInboxActionRedisLock(req.payload.receiverPublicKey),
+      withDbTransaction,
+      Effect.zipLeft(reportMessageSent(1)),
+      makeEndpointEffect
+    )
 )

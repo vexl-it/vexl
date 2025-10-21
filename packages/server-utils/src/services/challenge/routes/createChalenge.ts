@@ -1,16 +1,19 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Schema} from 'effect'
-import {Handler} from 'effect-http'
+import {Effect} from 'effect'
+import {makeEndpointEffect} from '../../../makeEndpointEffect'
 import {ChallengeService} from '../ChallengeService'
 import {challengeExpirationMinutesConfig} from '../db/ChallegeDbService/configs'
-import {CreateChallengeEndpoint} from '../specification'
+import {ChallengeApiSpecification} from '../specification'
 
-export const createChallenge = Handler.make(CreateChallengeEndpoint, (req) =>
-  makeEndpointEffect(
+export const createChallenge = HttpApiBuilder.handler(
+  ChallengeApiSpecification,
+  'Challenges',
+  'createChallenge',
+  ({payload}) =>
     Effect.gen(function* (_) {
       const challengeService = yield* _(ChallengeService)
-      const publicKey = req.body.publicKey
+      const publicKey = payload.publicKey
       const expirationMinutes = yield* _(challengeExpirationMinutesConfig)
 
       const challenge = yield* _(challengeService.createChallenge(publicKey))
@@ -19,7 +22,5 @@ export const createChallenge = Handler.make(CreateChallengeEndpoint, (req) =>
         challenge,
         expiration: unixMillisecondsFromNow(expirationMinutes * 60 * 1000),
       }
-    }),
-    Schema.Void
-  )
+    }).pipe(makeEndpointEffect)
 )

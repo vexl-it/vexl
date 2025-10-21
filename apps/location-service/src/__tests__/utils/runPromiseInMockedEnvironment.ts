@@ -1,14 +1,24 @@
+import {NodeHttpServer} from '@effect/platform-node/index'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
-import {NodeTestingApp} from './NodeTestingApp'
+import {LocationApiLive} from '../../httpServer'
 import {mockedGoogleMapLayer} from './mockedGoogleMapLayer'
 
-export type MockedContexts = NodeTestingApp | ServerCrypto
+export type MockedContexts = ServerCrypto | HttpClient | TestRequestHeaders
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
-const context = NodeTestingApp.layer.pipe(
+const TestServerLive = HttpApiBuilder.serve().pipe(
+  Layer.provide(LocationApiLive),
+  Layer.provideMerge(NodeHttpServer.layerTest)
+)
+const context = Layer.empty.pipe(
+  Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedGoogleMapLayer),
   Layer.provideMerge(universalContext)
 )

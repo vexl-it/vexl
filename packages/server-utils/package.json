@@ -41,8 +41,6 @@
     "awesome-phonenumber": "^7.4.0",
     "bullmq": "^5.52.1",
     "effect": "^3.18.4",
-    "effect-http": "^0.87.0",
-    "effect-http-node": "^0.27.0",
     "fast-check": "^3.20.0",
     "ioredis": "^5.4.1",
     "luxon": "^3.3.0",

@@ -1,3 +1,4 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
   type NotificationCypher,
@@ -9,15 +10,13 @@ import * as translations from '@vexl-next/localization/src/translations'
 import {decryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {
   InvalidFcmCypherError,
-  IssueNotificationErrors,
   IssueNotificationResponse,
   SendingNotificationError,
 } from '@vexl-next/rest-api/src/services/notification/contract'
-import {IssueNotificationEndpoint} from '@vexl-next/rest-api/src/services/notification/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {type ConfigError, Effect, Option, Schema} from 'effect'
-import {Handler} from 'effect-http'
 import {fcmTokenPrivateKeyConfig} from '../../configs'
 import {ExpoClientService} from '../../ExpoMessagingLayer'
 import {
@@ -166,32 +165,29 @@ const processNotificationCypher = (
     )
   )
 
-export const IssueNotifcationHandler = Handler.make(
-  IssueNotificationEndpoint,
+export const IssueNotifcationHandler = HttpApiBuilder.handler(
+  NotificationApiSpecification,
+  'root',
+  'issueNotification',
   (req) =>
-    makeEndpointEffect(
-      Effect.gen(function* (_) {
-        const {fcmCypher, notificationCypher} = req.body
-        const cypherToUse = Schema.decodeUnknownOption(NotificationCypherE)(
-          notificationCypher ?? fcmCypher
-        )
+    Effect.gen(function* (_) {
+      const {fcmCypher, notificationCypher} = req.payload
+      const cypherToUse = Schema.decodeUnknownOption(NotificationCypherE)(
+        notificationCypher ?? fcmCypher
+      )
 
-        if (Option.isNone(cypherToUse)) {
-          yield* _(Effect.log('No fcmCypher or notificationCypher provided'))
-          return yield* _(Effect.fail(new InvalidFcmCypherError({status: 400})))
-        }
+      if (Option.isNone(cypherToUse)) {
+        yield* _(Effect.log('No fcmCypher or notificationCypher provided'))
+        return yield* _(Effect.fail(new InvalidFcmCypherError({status: 400})))
+      }
 
-        yield* _(
-          Effect.log('Processing notification cypher', cypherToUse.value)
-        )
+      yield* _(Effect.log('Processing notification cypher', cypherToUse.value))
 
-        return yield* _(
-          processNotificationCypher(
-            cypherToUse.value,
-            req.body.sendNewChatMessageNotification
-          )
+      return yield* _(
+        processNotificationCypher(
+          cypherToUse.value,
+          req.payload.sendNewChatMessageNotification
         )
-      }),
-      IssueNotificationErrors
-    )
+      )
+    }).pipe(makeEndpointEffect)
 )

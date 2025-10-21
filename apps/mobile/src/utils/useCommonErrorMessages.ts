@@ -16,6 +16,7 @@ export default function useCommonErrorMessages(
   return toCommonErrorMessage(error, t)
 }
 
+// TODO extend to include HttpClientErrors
 export function toCommonErrorMessage(
   error: SomeError | undefined,
   t: TFunction
@@ -28,7 +29,7 @@ export function toCommonErrorMessage(
     error._tag === 'UnauthorizedError' ||
     error._tag === 'UnexpectedApiResponseError' ||
     error._tag === 'UnknownClientError' ||
-    error._tag === 'UnknownServerError' ||
+    error._tag === 'UnexpectedServerError' ||
     error._tag === InvalidDeepLinkError._tag ||
     error._tag === ImagePickerError._tag
   ) {

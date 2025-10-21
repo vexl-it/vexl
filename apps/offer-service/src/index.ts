@@ -1,4 +1,4 @@
 import {runMainInNode} from '@vexl-next/server-utils/src/runMainInNode'
-import {httpServer} from './httpServer'
+import {HttpServerLive} from './httpServer'
 
-runMainInNode(httpServer)
+runMainInNode(HttpServerLive)

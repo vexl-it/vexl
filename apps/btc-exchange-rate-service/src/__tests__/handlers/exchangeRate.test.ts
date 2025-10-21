@@ -1,8 +1,9 @@
-import {HttpClientRequest} from '@effect/platform'
+import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {GetExchangeRateError} from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
-import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either, Option} from 'effect'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Effect, Option} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {getExhangeRatePriceMocked} from '../utils/mockedYadioLayer'
 import {
@@ -21,15 +22,11 @@ describe('exchange rate', () => {
         const client = yield* _(NodeTestingApp)
         const response = yield* _(
           client.getExchangeRate({
-            query: {currency: 'USD'},
+            urlParams: {currency: 'USD'},
           }),
           Effect.either
         )
-
-        expect(Either.isLeft(response)).toBe(true)
-        if (Either.isLeft(response)) {
-          expect(response.left._tag).toEqual('ClientError')
-        }
+        expectErrorResponse(UnauthorizedError)(response)
       })
     )
   })
@@ -45,13 +42,11 @@ describe('exchange rate', () => {
           })
         )
 
+        yield* _(setDummyAuthHeaders)
         const response = yield* _(
-          client.getExchangeRate(
-            {
-              query: {currency: 'USD'},
-            },
-            HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
-          )
+          client.getExchangeRate({
+            urlParams: {currency: 'USD'},
+          })
         )
 
         expect(response).toEqual({
@@ -72,22 +67,16 @@ describe('exchange rate', () => {
           )
         )
 
+        yield* _(setDummyAuthHeaders)
+
         const response = yield* _(
-          client.getExchangeRate(
-            {
-              query: {currency: 'USD'},
-            },
-            HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
-          ),
+          client.getExchangeRate({
+            urlParams: {currency: 'USD'},
+          }),
           Effect.either
         )
-        expect(Either.isLeft(response)).toBe(true)
-        if (Either.isLeft(response)) {
-          expect(response.left._tag).toEqual('ClientError')
-          expect((response.left.error as any)._tag).toEqual(
-            'GetExchangeRateError'
-          )
-        }
+
+        expectErrorResponse(GetExchangeRateError)(response)
       })
     )
   })

@@ -1,23 +1,24 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {ReportNotificationProcessedEndpoint} from '@vexl-next/rest-api/src/services/notification/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Schema} from 'effect'
-import {Handler} from 'effect-http'
+import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {Effect} from 'effect'
 import {reportNotificationProcessed} from '../metrics'
 
-export const reportNotificationProcessedHandler = Handler.make(
-  ReportNotificationProcessedEndpoint,
+export const reportNotificationProcessedHandler = HttpApiBuilder.handler(
+  NotificationApiSpecification,
+  'root',
+  'reportNotificationProcessed',
   (req) =>
     makeEndpointEffect(
       Effect.gen(function* (_) {
         yield* _(
           reportNotificationProcessed({
-            id: req.body.trackingId,
+            id: req.payload.trackingId,
             processedAt: unixMillisecondsNow(),
           })
         )
         return {}
-      }),
-      Schema.Void
+      })
     )
 )

@@ -65,7 +65,7 @@ export const generateAndSignLoginChallenge = (
         new UnexpectedServerError({
           cause: e,
           status: 500,
-          detail: 'Error while generating and signing login challenge',
+          message: 'Error while generating and signing login challenge',
         })
     )
   )

@@ -3,6 +3,7 @@ import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Schema, String} from 'effect'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -50,33 +51,34 @@ describe('List clubs', () => {
         yield* _(sql`DELETE FROM club`)
 
         const app = yield* _(NodeTestingApp)
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
+            },
+            payload: {
               club: clubsToSave[0],
             },
-            query: {
-              adminToken: ADMIN_TOKEN,
-            },
           })
         )
         yield* _(
-          app.createClub({
-            body: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
+            },
+            payload: {
               club: clubsToSave[1],
             },
-            query: {
-              adminToken: ADMIN_TOKEN,
-            },
           })
         )
         yield* _(
-          app.createClub({
-            body: {
-              club: clubsToSave[2],
-            },
-            query: {
+          app.ClubsAdmin.createClub({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              club: clubsToSave[2],
             },
           })
         )
@@ -89,8 +91,8 @@ describe('List clubs', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
-          app.listClubs({
-            query: {
+          app.ClubsAdmin.listClubs({
+            urlParams: {
               adminToken: 'aha',
             },
           }),
@@ -106,8 +108,9 @@ describe('List clubs', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const clubs = yield* _(
-          app.listClubs({query: {adminToken: ADMIN_TOKEN}}),
+          app.ClubsAdmin.listClubs({urlParams: {adminToken: ADMIN_TOKEN}}),
           Effect.map((o) => o.clubs),
           Effect.map(
             Array.sortBy((a, b) => String.localeCompare(a.uuid)(b.uuid))

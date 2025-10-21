@@ -4,12 +4,14 @@ import {
   type ClubCode,
   generateClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   InvalidChallengeError,
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -44,13 +46,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -85,8 +88,8 @@ describe('Get club info by access code', () => {
         )
 
         const clubInfo = yield* _(
-          app.getClubInfoByAccessCode({
-            body: {
+          app.ClubsMember.getClubInfoByAccessCode({
+            payload: {
               publicKey: userKey.publicKeyPemBase64,
               signedChallenge: challengeForUser.signedChallenge,
               code: inviteLink.code,
@@ -106,20 +109,21 @@ describe('Get club info by access code', () => {
 
         const challengeForUser = yield* _(generateAndSignChallenge(userKey))
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
-              clubUuid: forClubUuid,
-            },
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              clubUuid: forClubUuid,
             },
           })
         )
 
         const clubInfo = yield* _(
-          app.getClubInfoByAccessCode({
-            body: {
+          app.ClubsMember.getClubInfoByAccessCode({
+            payload: {
               publicKey: userKey.publicKeyPemBase64,
               signedChallenge: challengeForUser.signedChallenge,
               code: inviteLink.link.code,
@@ -140,8 +144,8 @@ describe('Get club info by access code', () => {
         const challengeForUser = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.getClubInfoByAccessCode({
-            body: {
+          app.ClubsMember.getClubInfoByAccessCode({
+            payload: {
               publicKey: userKey.publicKeyPemBase64,
               signedChallenge: challengeForUser.signedChallenge,
               code: 'badCode' as ClubCode,
@@ -150,7 +154,7 @@ describe('Get club info by access code', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -162,20 +166,21 @@ describe('Get club info by access code', () => {
 
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            body: {
-              clubUuid: forClubUuid,
-            },
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              clubUuid: forClubUuid,
             },
           })
         )
 
         const errorResponse = yield* _(
-          app.getClubInfoByAccessCode({
-            body: {
+          app.ClubsMember.getClubInfoByAccessCode({
+            payload: {
               publicKey: signedChallenge.publicKey,
               signedChallenge: {
                 ...signedChallenge.signedChallenge,

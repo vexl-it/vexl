@@ -1,7 +1,16 @@
-import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  OpenApi,
+} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
+import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
-import {Api} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {
   CanNotDeletePrivatePartOfAuthor,
   CreateNewOfferErrors,
@@ -36,203 +45,171 @@ import {
   UpdateOfferResponse,
 } from './contracts'
 
-export const GetOffersByIdsEndpint = Api.get(
+export const GetOffersByIdsEndpoint = HttpApiEndpoint.get(
   'getOffersByIds',
-  '/api/v2/offers',
-  {summary: 'Get offers by ids'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(GetOffersByIdsRequest),
-  Api.setResponseBody(GetOfferByIdsResponse)
+  '/api/v2/offers'
 )
+  .annotate(OpenApi.Summary, 'Get offers by ids')
+  .middleware(ServerSecurityMiddleware)
+  .setUrlParams(GetOffersByIdsRequest)
+  .addSuccess(GetOfferByIdsResponse)
 
-export const GetClubOffersByIdsEndpint = Api.post(
+export const GetClubOffersByIdsEndpoint = HttpApiEndpoint.post(
   'getClubOffersByIds',
-  '/api/v2/clubOffers',
-  {summary: 'Get club offers by ids'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(GetClubOffersByIdsRequest),
-  Api.setResponseBody(GetOfferByIdsResponse)
+  '/api/v2/clubOffers'
 )
+  .annotate(OpenApi.Summary, 'Get club offers by ids')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(GetClubOffersByIdsRequest)
+  .addSuccess(GetOfferByIdsResponse)
+  .addError(InvalidChallengeError)
 
-export const GetOffersForMeModifiedOrCreatedAfterEndpoint = Api.get(
+export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
   'getOffersForMeModifiedOrCreatedAfter',
-  '/api/v2/offers/me/modified',
-  {summary: 'Get offers for me modified or created after'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(GetOffersForMeCreatedOrModifiedAfterRequest),
-  Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponse)
+  '/api/v2/offers/me/modified'
 )
+  .annotate(OpenApi.Summary, 'Get offers for me modified or created after')
+  .middleware(ServerSecurityMiddleware)
+  .setUrlParams(GetOffersForMeCreatedOrModifiedAfterRequest)
+  .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
 
-export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint = Api.post(
-  'getClubOffersForMeModifiedOrCreatedAfter',
-  '/api/v2/clubOffers/me/modified',
-  {summary: 'Get club offers for me modified or created after'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(GetClubOffersForMeCreatedOrModifiedAfterRequest),
-  Api.setResponseBody(GetOffersForMeCreatedOrModifiedAfterResponse)
-)
+export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
+  HttpApiEndpoint.post(
+    'getClubOffersForMeModifiedOrCreatedAfter',
+    '/api/v2/clubOffers/me/modified'
+  )
+    .annotate(
+      OpenApi.Summary,
+      'Get club offers for me modified or created after'
+    )
+    .middleware(ServerSecurityMiddleware)
+    .setPayload(GetClubOffersForMeCreatedOrModifiedAfterRequest)
+    .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
+    .addError(InvalidChallengeError)
 
-export const CreateNewOfferEndpoint = Api.post(
+export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
   'createNewOffer',
-  '/api/v2/offers',
-  {summary: 'Create offer'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(CreateNewOfferRequest),
-  Api.setResponseBody(CreateNewOfferResponse),
-  Api.addResponse({
-    status: 400 as const,
-    body: CreateNewOfferErrors,
-  })
+  '/api/v2/offers'
 )
+  .annotate(OpenApi.Summary, 'Create offer')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(CreateNewOfferRequest)
+  .addSuccess(CreateNewOfferResponse)
+  .addError(CreateNewOfferErrors)
 
-export const RefreshOfferEndpoint = Api.post(
+export const RefreshOfferEndpoint = HttpApiEndpoint.post(
   'refreshOffer',
-  '/api/v2/offers/refresh',
-  {summary: 'Refresh offer'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(RefreshOfferRequest),
-  Api.setResponseBody(RefreshOfferResponse),
-  Api.addResponse({
-    status: 404 as const,
-    body: NotFoundError,
-  })
+  '/api/v2/offers/refresh'
 )
+  .annotate(OpenApi.Summary, 'Refresh offer')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RefreshOfferRequest)
+  .addSuccess(RefreshOfferResponse)
+  .addError(NotFoundError)
 
-export const DeleteOfferEndpoint = Api.delete('deleteOffer', '/api/v1/offers', {
-  summary: 'Delete offer',
-}).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestQuery(DeleteOfferRequest),
-  Api.setResponseBody(DeleteOfferResponse)
+export const DeleteOfferEndpoint = HttpApiEndpoint.del(
+  'deleteOffer',
+  '/api/v1/offers'
 )
+  .annotate(OpenApi.Summary, 'Delete offer')
+  .middleware(ServerSecurityMiddleware)
+  .setUrlParams(DeleteOfferRequest)
+  .addSuccess(DeleteOfferResponse)
 
-export const UpdateOfferEndpoint = Api.put('updateOffer', '/api/v2/offers', {
-  summary: 'Update offer',
-}).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(UpdateOfferRequest),
-  Api.setResponseBody(UpdateOfferResponse),
-  Api.addResponse({
-    status: 400 as const,
-    body: UpdateOfferErrors,
-  }),
-  Api.addResponse({
-    status: 404 as const,
-    body: NotFoundError,
-  })
+export const UpdateOfferEndpoint = HttpApiEndpoint.put(
+  'updateOffer',
+  '/api/v2/offers'
 )
+  .annotate(OpenApi.Summary, 'Update offer')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(UpdateOfferRequest)
+  .addSuccess(UpdateOfferResponse)
+  .addError(UpdateOfferErrors)
+  .addError(NotFoundError)
 
-export const CreatePrivatePartEndpoint = Api.post(
+export const CreatePrivatePartEndpoint = HttpApiEndpoint.post(
   'createPrivatePart',
-  '/api/v2/offers/private-part',
-  {summary: 'Create private part'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(CreatePrivatePartRequest),
-  Api.setResponseBody(CreatePrivatePartResponse),
-  Api.addResponse({
-    status: 400 as const,
-    body: DuplicatedPublicKeyError,
-  })
+  '/api/v2/offers/private-part'
 )
+  .annotate(OpenApi.Summary, 'Create private part')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(CreatePrivatePartRequest)
+  .addSuccess(CreatePrivatePartResponse)
+  .addError(DuplicatedPublicKeyError)
 
-export const DeletePrivatePartEndpoint = Api.delete(
+export const DeletePrivatePartEndpoint = HttpApiEndpoint.del(
   'deletePrivatePart',
-  '/api/v1/offers/private-part',
-  {
-    summary: 'Delete private part',
-    description:
-      'When offer for one of adminIds is not found, no error is returned',
-  }
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(DeletePrivatePartRequest),
-  Api.setResponseBody(DeletePrivatePartResponse),
-  Api.addResponse({
-    status: 400 as const,
-    body: CanNotDeletePrivatePartOfAuthor,
-  })
+  '/api/v1/offers/private-part'
 )
+  .annotate(OpenApi.Summary, 'Delete private part')
+  .annotate(
+    OpenApi.Description,
+    'When offer for one of adminIds is not found, no error is returned'
+  )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(DeletePrivatePartRequest)
+  .addSuccess(DeletePrivatePartResponse)
+  .addError(CanNotDeletePrivatePartOfAuthor)
 
-export const GetRemovedOffersEndpoint = Api.post(
+export const GetRemovedOffersEndpoint = HttpApiEndpoint.post(
   'getRemovedOffers',
-  '/api/v1/offers/not-exist',
-  {summary: 'Get removed offers'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(RemovedOfferIdsRequest),
-  Api.setResponseBody(RemovedOfferIdsResponse)
+  '/api/v1/offers/not-exist'
 )
+  .annotate(OpenApi.Summary, 'Get removed offers')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RemovedOfferIdsRequest)
+  .addSuccess(RemovedOfferIdsResponse)
 
-export const GetRemovedClubOffersEndpoint = Api.post(
+export const GetRemovedClubOffersEndpoint = HttpApiEndpoint.post(
   'getRemovedClubOffers',
-  '/api/v1/clubOffers/not-exist',
-  {summary: 'Get removed club offers'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(RemovedClubOfferIdsRequest),
-  Api.setResponseBody(RemovedOfferIdsResponse)
+  '/api/v1/clubOffers/not-exist'
 )
+  .annotate(OpenApi.Summary, 'Get removed club offers')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RemovedClubOfferIdsRequest)
+  .addSuccess(RemovedOfferIdsResponse)
+  .addError(InvalidChallengeError)
 
-export const ReportOfferEndpoint = Api.post(
+export const ReportOfferEndpoint = HttpApiEndpoint.post(
   'reportOffer',
-  '/api/v1/offers/report',
-  {summary: 'Report offer'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(ReportOfferRequest),
-  Api.setResponseBody(ReportOfferResponse),
-  Api.addResponse({
-    status: 400 as const,
-    body: ReportOfferEndpointErrors,
-  }),
-  Api.addResponse({
-    status: 404 as const,
-    body: NotFoundError,
-  })
+  '/api/v1/offers/report'
 )
+  .annotate(OpenApi.Summary, 'Report offer')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(ReportOfferRequest)
+  .addSuccess(ReportOfferResponse)
+  .addError(ReportOfferEndpointErrors)
+  .addError(NotFoundError)
 
-export const ReportClubOfferEndpoint = Api.post(
+export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   'reportClubOffer',
-  '/api/v1/clubOffers/report',
-  {summary: 'Report club offer'}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setRequestBody(ReportClubOfferRequest),
-  Api.setResponseBody(ReportClubOfferResponse),
-  Api.addResponse({
-    status: 400 as const,
-    body: ReportClubOfferEndpointErrors,
-  }),
-  Api.addResponse({
-    status: 404 as const,
-    body: NotFoundError,
-  })
+  '/api/v1/clubOffers/report'
 )
+  .annotate(OpenApi.Summary, 'Report club offer')
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(ReportClubOfferRequest)
+  .addSuccess(ReportClubOfferResponse)
+  .addError(ReportClubOfferEndpointErrors)
+  .addError(NotFoundError)
 
-export const OfferApiSpecification = Api.make({
-  title: 'Offer service',
-  version: '1.0.0',
-}).pipe(
-  Api.addEndpoint(GetOffersByIdsEndpint),
-  Api.addEndpoint(GetClubOffersByIdsEndpint),
-  Api.addEndpoint(GetOffersForMeModifiedOrCreatedAfterEndpoint),
-  Api.addEndpoint(GetClubOffersForMeModifiedOrCreatedAfterEndpoint),
-  Api.addEndpoint(CreateNewOfferEndpoint),
-  Api.addEndpoint(RefreshOfferEndpoint),
-  Api.addEndpoint(DeleteOfferEndpoint),
-  Api.addEndpoint(UpdateOfferEndpoint),
-  Api.addEndpoint(CreatePrivatePartEndpoint),
-  Api.addEndpoint(DeletePrivatePartEndpoint),
-  Api.addEndpoint(GetRemovedOffersEndpoint),
-  Api.addEndpoint(GetRemovedClubOffersEndpoint),
-  Api.addEndpoint(ReportOfferEndpoint),
-  Api.addEndpoint(ReportClubOfferEndpoint),
-  Api.addGroup(ChallengeApiGroup)
-)
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(GetOffersByIdsEndpoint)
+  .add(GetClubOffersByIdsEndpoint)
+  .add(GetOffersForMeModifiedOrCreatedAfterEndpoint)
+  .add(GetClubOffersForMeModifiedOrCreatedAfterEndpoint)
+  .add(CreateNewOfferEndpoint)
+  .add(RefreshOfferEndpoint)
+  .add(DeleteOfferEndpoint)
+  .add(UpdateOfferEndpoint)
+  .add(CreatePrivatePartEndpoint)
+  .add(DeletePrivatePartEndpoint)
+  .add(GetRemovedOffersEndpoint)
+  .add(GetRemovedClubOffersEndpoint)
+  .add(ReportOfferEndpoint)
+  .add(ReportClubOfferEndpoint)
+
+export const OfferApiSpecification = HttpApi.make('Offer API')
+  .add(RootGroup)
+  .add(ChallengeApiGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

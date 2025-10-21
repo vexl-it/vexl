@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -6,11 +5,9 @@ import {
   ReceiverInboxDoesNotExistError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {
-  ForbiddenMessageTypeError,
-  NotPermittedToSendMessageToTargetInboxError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
@@ -36,115 +33,99 @@ beforeEach(async () => {
       const client = yield* _(NodeTestingApp)
 
       // user1 -> user2.inbox1
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       // user1 -> user2.inbox2
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox2.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox2.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       // user3 -> user2.inbox1
+      yield* _(setAuthHeaders(user3.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user3.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       // user3 -> user2.inbox2
+      yield* _(setAuthHeaders(user3.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user3.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox2.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox2.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
       yield* _(sql`DELETE FROM message`)
     })
@@ -194,40 +175,34 @@ describe('Send messages', () => {
           ),
         ]
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.sendMessages(
-            {
-              body: {data: messagesToSend},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Messages.sendMessages({
+            payload: {data: messagesToSend},
+          })
         )
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const messagesReceivedByUser1 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
         expect(
           messagesReceivedByUser1.messages.map((one) => one.message)
         ).toEqual(['1fromUser2inbox1', '3fromUser2inbox2'])
 
+        yield* _(setAuthHeaders(user3.authHeaders))
         const messagesReceivedByUser3 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user3.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user3.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user3.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(
@@ -279,43 +254,37 @@ describe('Send messages', () => {
           ),
         ]
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const errorResponse = yield* _(
-          client.sendMessages(
-            {
-              body: {data: messagesToSend},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Messages.sendMessages({
+            payload: {data: messagesToSend},
+          }),
           Effect.either
         )
 
         expectErrorResponse(ReceiverInboxDoesNotExistError)(errorResponse)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const messagesReceivedByUser1 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
         expect(
           messagesReceivedByUser1.messages.map((one) => one.message)
         ).toEqual([])
 
+        yield* _(setAuthHeaders(user3.authHeaders))
         const messagesReceivedByUser3 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user3.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user3.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user3.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(
@@ -388,133 +357,38 @@ describe('Send messages', () => {
           ),
         ]
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const errorResponse = yield* _(
-          client.sendMessages(
-            {
-              body: {data: messagesToSend},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          client.Messages.sendMessages({
+            payload: {data: messagesToSend},
+          }),
           Effect.either
         )
 
         expectErrorResponse(SenderInboxDoesNotExistError)(errorResponse)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const messagesReceivedByUser1 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
         expect(
           messagesReceivedByUser1.messages.map((one) => one.message)
         ).toEqual([])
 
-        const messagesReceivedByUser3 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user3.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user3.authHeaders)
-          )
-        )
-
-        expect(
-          messagesReceivedByUser3.messages.map((one) => one.message)
-        ).toEqual([])
-      })
-    )
-  })
-
-  it('Throws correct error when not permitted to send message to target inbox', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        const messagesToSend = [
-          yield* _(
-            user2.inbox1.addChallenge({
-              senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1',
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1',
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
-          yield* _(
-            user2.inbox2.addChallenge({
-              senderPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-              messages: [
-                {
-                  receiverPublicKey: user3.inbox1.keyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2',
-                  messageType: 'MESSAGE' as const,
-                },
-                {
-                  receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2',
-                  messageType: 'MESSAGE' as const,
-                },
-              ],
-            })
-          ),
-        ]
-
-        const errorResponse = yield* _(
-          client.sendMessages(
-            {
-              body: {data: messagesToSend},
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
-          Effect.either
-        )
-
-        expectErrorResponse(NotPermittedToSendMessageToTargetInboxError)(
-          errorResponse
-        )
-
-        const messagesReceivedByUser1 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
-        )
-        expect(
-          messagesReceivedByUser1.messages.map((one) => one.message)
-        ).toEqual([])
+        yield* _(setAuthHeaders(user3.authHeaders))
 
         const messagesReceivedByUser3 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user3.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user3.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user3.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(
@@ -529,110 +403,95 @@ describe('Send messages', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const errorResponse1 = yield* _(
-          client.sendMessages(
-            {
-              body: {
-                data: [
-                  yield* _(
-                    user2.inbox1.addChallenge({
-                      senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                      messages: [
-                        {
-                          receiverPublicKey:
-                            user1.mainKeyPair.publicKeyPemBase64,
-                          message: '1fromUser2inbox1',
-                          messageType: 'REQUEST_MESSAGING' as const,
-                        },
-                      ],
-                    })
-                  ),
-                ],
-              },
+          client.Messages.sendMessages({
+            payload: {
+              data: [
+                yield* _(
+                  user2.inbox1.addChallenge({
+                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                    messages: [
+                      {
+                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                        message: '1fromUser2inbox1',
+                        messageType: 'REQUEST_MESSAGING' as const,
+                      },
+                    ],
+                  })
+                ),
+              ],
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(ForbiddenMessageTypeError)(errorResponse1)
 
         const errorResponse2 = yield* _(
-          client.sendMessages(
-            {
-              body: {
-                data: [
-                  yield* _(
-                    user2.inbox1.addChallenge({
-                      senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                      messages: [
-                        {
-                          receiverPublicKey:
-                            user1.mainKeyPair.publicKeyPemBase64,
-                          message: '1fromUser2inbox1',
-                          messageType: 'APPROVE_MESSAGING' as const,
-                        },
-                      ],
-                    })
-                  ),
-                ],
-              },
+          client.Messages.sendMessages({
+            payload: {
+              data: [
+                yield* _(
+                  user2.inbox1.addChallenge({
+                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                    messages: [
+                      {
+                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                        message: '1fromUser2inbox1',
+                        messageType: 'APPROVE_MESSAGING' as const,
+                      },
+                    ],
+                  })
+                ),
+              ],
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(ForbiddenMessageTypeError)(errorResponse2)
 
         const errorResponse3 = yield* _(
-          client.sendMessages(
-            {
-              body: {
-                data: [
-                  yield* _(
-                    user2.inbox1.addChallenge({
-                      senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                      messages: [
-                        {
-                          receiverPublicKey:
-                            user1.mainKeyPair.publicKeyPemBase64,
-                          message: '1fromUser2inbox1',
-                          messageType: 'DISAPPROVE_MESSAGING' as const,
-                        },
-                      ],
-                    })
-                  ),
-                ],
-              },
+          client.Messages.sendMessages({
+            payload: {
+              data: [
+                yield* _(
+                  user2.inbox1.addChallenge({
+                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                    messages: [
+                      {
+                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                        message: '1fromUser2inbox1',
+                        messageType: 'DISAPPROVE_MESSAGING' as const,
+                      },
+                    ],
+                  })
+                ),
+              ],
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(ForbiddenMessageTypeError)(errorResponse3)
 
         const errorResponse4 = yield* _(
-          client.sendMessages(
-            {
-              body: {
-                data: [
-                  yield* _(
-                    user2.inbox1.addChallenge({
-                      senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                      messages: [
-                        {
-                          receiverPublicKey:
-                            user1.mainKeyPair.publicKeyPemBase64,
-                          message: '1fromUser2inbox1',
-                          messageType: 'CANCEL_REQUEST_MESSAGING' as const,
-                        },
-                      ],
-                    })
-                  ),
-                ],
-              },
+          client.Messages.sendMessages({
+            payload: {
+              data: [
+                yield* _(
+                  user2.inbox1.addChallenge({
+                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                    messages: [
+                      {
+                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                        message: '1fromUser2inbox1',
+                        messageType: 'CANCEL_REQUEST_MESSAGING' as const,
+                      },
+                    ],
+                  })
+                ),
+              ],
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          }),
           Effect.either
         )
         expectErrorResponse(ForbiddenMessageTypeError)(errorResponse4)

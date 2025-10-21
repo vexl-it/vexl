@@ -1,8 +1,8 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient, type SqlError} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {hashPublicKey} from '../../db/domain'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -29,59 +29,51 @@ beforeEach(async () => {
       const client = yield* _(NodeTestingApp)
 
       // user1 -> user2.inbox1
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       // user3 -> user2.inbox2
+      yield* _(setAuthHeaders(user3.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user3.authHeaders)
-        )
+        })
       )
 
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox2.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox2.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
     })
   )
@@ -139,18 +131,16 @@ describe('Delete inboxes', () => {
           ])}
         `)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.deleteInboxes(
-            {
-              body: {
-                dataForRemoval: [
-                  yield* _(user2.inbox1.addChallenge({})),
-                  yield* _(user2.inbox2.addChallenge({})),
-                ],
-              },
+          client.Inboxes.deleteInboxes({
+            payload: {
+              dataForRemoval: [
+                yield* _(user2.inbox1.addChallenge({})),
+                yield* _(user2.inbox2.addChallenge({})),
+              ],
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          })
         )
         yield* _(expectInboxDeletedFully(String(id1)))
         yield* _(expectInboxDeletedFully(String(id2)))
@@ -164,24 +154,22 @@ describe('Delete inboxes', () => {
         const client = yield* _(NodeTestingApp)
         const sql = yield* _(SqlClient.SqlClient)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         const error = yield* _(
-          client.deleteInboxes(
-            {
-              body: {
-                dataForRemoval: [
-                  yield* _(user2.inbox1.addChallenge({})),
-                  yield* _(user2.inbox2.addChallenge({})),
-                  yield* _(
-                    addChallengeForKey(
-                      generatePrivateKey(),
-                      user2.authHeaders
-                    )({})
-                  ),
-                ],
-              },
+          client.Inboxes.deleteInboxes({
+            payload: {
+              dataForRemoval: [
+                yield* _(user2.inbox1.addChallenge({})),
+                yield* _(user2.inbox2.addChallenge({})),
+                yield* _(
+                  addChallengeForKey(
+                    generatePrivateKey(),
+                    user2.authHeaders
+                  )({})
+                ),
+              ],
             },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          ),
+          }),
           Effect.either
         )
 

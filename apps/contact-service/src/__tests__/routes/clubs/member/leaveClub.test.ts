@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -8,6 +9,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -39,13 +41,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -76,8 +79,8 @@ describe('Leave club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.leaveClub({
-            body: {
+          app.ClubsMember.leaveClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               clubUuid: club.uuid,
             },
@@ -85,8 +88,8 @@ describe('Leave club', () => {
         )
 
         const errorResponse = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -96,10 +99,7 @@ describe('Leave club', () => {
           Effect.either
         )
 
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -111,8 +111,8 @@ describe('Leave club', () => {
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.leaveClub({
-            body: {
+          app.ClubsMember.leaveClub({
+            payload: {
               publicKey: signedChallenge.publicKey,
               signedChallenge: {
                 ...signedChallenge.signedChallenge,
@@ -132,19 +132,15 @@ describe('Leave club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
-          app.leaveClub({
-            body: {
+          app.ClubsMember.leaveClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               clubUuid: generateClubUuid(),
             },
           }),
           Effect.either
         )
-
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -153,19 +149,15 @@ describe('Leave club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
-          app.leaveClub({
-            body: {
+          app.ClubsMember.leaveClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
               clubUuid: club.uuid,
             },
           }),
           Effect.either
         )
-
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })

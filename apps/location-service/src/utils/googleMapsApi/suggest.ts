@@ -60,7 +60,7 @@ export const querySuggest =
             Effect.logError('Error while requesting geocode', e),
             new UnexpectedServerError({
               status: 500 as const,
-              detail: 'ExternalApi' as const,
+              message: 'ExternalApi' as const,
             })
           )
         })
@@ -102,7 +102,7 @@ export const querySuggest =
           Effect.logError('Unexpected response from google api', e),
           new UnexpectedServerError({
             status: 500 as const,
-            detail: 'ExternalApi' as const,
+            message: 'ExternalApi' as const,
           })
         )
       ),
@@ -111,7 +111,7 @@ export const querySuggest =
           Effect.logError('Error defect while getting geocode', defect),
           new UnexpectedServerError({
             status: 500 as const,
-            detail: 'ExternalApi' as const,
+            message: 'ExternalApi' as const,
           })
         )
       })

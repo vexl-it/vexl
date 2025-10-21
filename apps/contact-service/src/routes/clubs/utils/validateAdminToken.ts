@@ -24,7 +24,7 @@ export const validateAdminToken = (
       (e) =>
         new UnexpectedServerError({
           status: 500,
-          detail: 'Error in hashSha256',
+          message: 'Error in hashSha256',
           cause: e,
         })
     )

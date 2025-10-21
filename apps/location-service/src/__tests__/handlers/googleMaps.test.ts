@@ -1,11 +1,12 @@
-import {HttpClientRequest} from '@effect/platform'
+import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   LatitudeE,
   LongitudeE,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {LocationNotFoundError} from '@vexl-next/rest-api/src/services/location/contracts'
-import {createDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either, Schema} from 'effect'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {queryGeocodeMock} from '../utils/mockedGoogleMapLayer'
 import {
@@ -24,7 +25,7 @@ describe('geocode', () => {
         const client = yield* _(NodeTestingApp)
         const response = yield* _(
           client.getGeocodedCoordinates({
-            query: {
+            urlParams: {
               lang: 'EN',
               latitude: Schema.decodeSync(LatitudeE)(20),
               longitude: Schema.decodeSync(LongitudeE)(10),
@@ -33,10 +34,7 @@ describe('geocode', () => {
           Effect.either
         )
 
-        expect(Either.isLeft(response)).toBe(true)
-        if (Either.isLeft(response)) {
-          expect(response.left._tag).toEqual('ClientError')
-        }
+        expectErrorResponse(UnauthorizedError)(response)
       })
     )
   })
@@ -45,17 +43,16 @@ describe('geocode', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+        yield* _(setDummyAuthHeaders)
+
         const response = yield* _(
-          client.getGeocodedCoordinates(
-            {
-              query: {
-                lang: 'EN',
-                latitude: Schema.decodeSync(LatitudeE)(20),
-                longitude: Schema.decodeSync(LongitudeE)(10),
-              },
+          client.getGeocodedCoordinates({
+            urlParams: {
+              lang: 'EN',
+              latitude: Schema.decodeSync(LatitudeE)(20),
+              longitude: Schema.decodeSync(LongitudeE)(10),
             },
-            HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
-          )
+          })
         )
 
         expect(response).toBeDefined()
@@ -72,26 +69,19 @@ describe('geocode', () => {
           Effect.fail(new LocationNotFoundError({status: 404}))
         )
 
+        yield* _(setDummyAuthHeaders)
         const response = yield* _(
-          client.getGeocodedCoordinates(
-            {
-              query: {
-                lang: 'EN',
-                latitude: Schema.decodeSync(LatitudeE)(20),
-                longitude: Schema.decodeSync(LongitudeE)(10),
-              },
+          client.getGeocodedCoordinates({
+            urlParams: {
+              lang: 'EN',
+              latitude: Schema.decodeSync(LatitudeE)(20),
+              longitude: Schema.decodeSync(LongitudeE)(10),
             },
-            HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
-          ),
+          }),
           Effect.either
         )
 
-        expect(Either.isLeft(response)).toBe(true)
-        if (Either.isLeft(response)) {
-          expect((response.left.error as any)._tag).toEqual(
-            'LocationNotFoundError'
-          )
-        }
+        expectErrorResponse(LocationNotFoundError)(response)
       })
     )
   })
@@ -104,7 +94,7 @@ describe('Suggest', () => {
         const client = yield* _(NodeTestingApp)
         const response = yield* _(
           client.getLocationSuggestion({
-            query: {
+            urlParams: {
               lang: 'EN',
               phrase: 'something',
             },
@@ -112,10 +102,7 @@ describe('Suggest', () => {
           Effect.either
         )
 
-        expect(Either.isLeft(response)).toBe(true)
-        if (Either.isLeft(response)) {
-          expect(response.left._tag).toEqual('ClientError')
-        }
+        expectErrorResponse(UnauthorizedError)(response)
       })
     )
   })
@@ -124,16 +111,14 @@ describe('Suggest', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
+        yield* _(setDummyAuthHeaders)
         const response = yield* _(
-          client.getLocationSuggestion(
-            {
-              query: {
-                lang: 'EN',
-                phrase: 'something',
-              },
+          client.getLocationSuggestion({
+            urlParams: {
+              lang: 'EN',
+              phrase: 'something',
             },
-            HttpClientRequest.setHeaders(yield* _(createDummyAuthHeaders))
-          )
+          })
         )
 
         expect(response).toBeDefined()

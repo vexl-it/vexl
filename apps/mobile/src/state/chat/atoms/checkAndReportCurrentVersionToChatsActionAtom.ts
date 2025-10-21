@@ -81,10 +81,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
         return true
       }),
       TE.getOrElse((error) => {
-        if (
-          error._tag === 'NetworkError' ||
-          error._tag === 'ReceiverInboxDoesNotExistError'
-        ) {
+        if (error._tag === 'ReceiverInboxDoesNotExistError') {
           return T.of(false)
         }
 

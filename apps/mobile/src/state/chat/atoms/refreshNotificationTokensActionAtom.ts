@@ -113,13 +113,11 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         }),
         TE.matchW(
           (e) => {
-            if (e._tag !== 'NetworkError') {
-              reportError(
-                'error',
-                new Error('Error while refreshing fcm cypher'),
-                {e}
-              )
-            }
+            reportError(
+              'error',
+              new Error('Error while refreshing fcm cypher'),
+              {e}
+            )
             console.warn(
               `🔥 Refresh notifications tokens',  'Refreshing chat with Id ${chatWithMessages.chat.id}`,
               `Error refreshing ${e._tag}`

@@ -51,14 +51,14 @@ export const processNewContentNotifications = Effect.gen(function* (_) {
       new UnexpectedServerError({
         status: 500,
         cause: e,
-        detail:
+        message:
           'Config error while processing new content notification. Make sure newContentNotificationAfterConfig is set in the config',
       }),
     'RedisLockError': (e) =>
       new UnexpectedServerError({
         status: 500,
         cause: e,
-        detail:
+        message:
           'Error while acquiring / releasing redis lock for processing new content notification',
       }),
   }),

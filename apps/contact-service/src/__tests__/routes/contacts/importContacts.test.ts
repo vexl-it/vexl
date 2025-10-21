@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
@@ -6,17 +5,10 @@ import {
   InitialImportContactsQuotaReachedError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
-import {
-  Array,
-  Effect,
-  Either,
-  LogLevel,
-  Logger,
-  Order,
-  Schema,
-  pipe,
-} from 'effect'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Array, Effect, LogLevel, Logger, Order, Schema, pipe} from 'effect'
 import {isArray} from 'effect/Array'
 import {
   ImportContactsQuotaRecord,
@@ -103,16 +95,14 @@ describe('Import contacts', () => {
         expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
 
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(me.authHeaders))
         yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         const myContactsFromDb = yield* _(sql`
@@ -150,16 +140,14 @@ describe('Import contacts', () => {
         expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
 
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(me.authHeaders))
         yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
-                replace: false,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+              replace: false,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         const myContactsFromDb = yield* _(sql`
@@ -193,16 +181,14 @@ describe('Import contacts', () => {
         const sql = yield* _(SqlClient.SqlClient)
 
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(me.authHeaders))
         yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         const myContactsFromDb = yield* _(sql`
@@ -225,14 +211,11 @@ describe('Import contacts', () => {
         const me = networkOne[0]
 
         const app = yield* _(NodeTestingApp)
-        // first reset user
+        yield* _(setAuthHeaders(me.authHeaders))
         yield* _(
-          app.importContacts(
-            {
-              body: {contacts: [], replace: true},
-            },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          app.Contact.importContacts({
+            payload: {contacts: [], replace: true},
+          })
         )
       })
     )
@@ -279,29 +262,25 @@ describe('Import contacts', () => {
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
         })
 
+        yield* _(setAuthHeaders(me.authHeaders))
+
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: me.notificationToken,
-              },
-              headers: commonHeaders,
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: me.notificationToken,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+            headers: commonHeaders,
+          })
         )
 
         const response = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImport.map((c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImport.map((c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -353,39 +332,29 @@ describe('Import contacts', () => {
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
         })
 
+        yield* _(setAuthHeaders(me.authHeaders))
+
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: me.notificationToken,
-              },
-              headers: commonHeaders,
+          app.User.createUser({
+            headers: commonHeaders,
+            payload: {
+              firebaseToken: null,
+              expoToken: me.notificationToken,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         const response = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImport.map((c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImport.map((c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
-        expect(response._tag).toEqual('Left')
-        if (!Either.isLeft(response)) return
-        expect(
-          Schema.decodeUnknownEither(InitialImportContactsQuotaReachedError)(
-            response.left.error
-          )._tag
-        ).toEqual('Right')
+        expectErrorResponse(InitialImportContactsQuotaReachedError)(response)
       })
     )
   })
@@ -432,17 +401,16 @@ describe('Import contacts', () => {
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
         })
 
+        yield* _(setAuthHeaders(me.authHeaders))
+
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: me.notificationToken,
-              },
-              headers: commonHeaders,
+          app.User.createUser({
+            headers: commonHeaders,
+            payload: {
+              firebaseToken: null,
+              expoToken: me.notificationToken,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         const initialImportDoneDefaultValue = yield* _(sql`
@@ -460,15 +428,12 @@ describe('Import contacts', () => {
         )
 
         const response = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImport.map((c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImport.map((c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -504,17 +469,14 @@ describe('Import contacts', () => {
         )
 
         const successResponse = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImportAfterInitialImport.map(
-                  (c) => c.hashedNumber
-                ),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImportAfterInitialImport.map(
+                (c) => c.hashedNumber
+              ),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -532,27 +494,18 @@ describe('Import contacts', () => {
         )
 
         const failedResponse = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: moreContactsToImportThatExceedQuota.map(
-                  (c) => c.hashedNumber
-                ),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: moreContactsToImportThatExceedQuota.map(
+                (c) => c.hashedNumber
+              ),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
-        expect(failedResponse._tag).toEqual('Left')
-        if (!Either.isLeft(failedResponse)) return
-        expect(
-          Schema.decodeUnknownEither(ImportContactsQuotaReachedError)(
-            failedResponse.left.error
-          )._tag
-        ).toEqual('Right')
+        expectErrorResponse(ImportContactsQuotaReachedError)(failedResponse)
       })
     )
   })
@@ -575,29 +528,24 @@ describe('Import contacts', () => {
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
         })
 
+        yield* _(setAuthHeaders(me.authHeaders))
         yield* _(
-          app.createUser(
-            {
-              body: {
-                firebaseToken: null,
-                expoToken: me.notificationToken,
-              },
-              headers: commonHeaders,
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: me.notificationToken,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+            headers: commonHeaders,
+          })
         )
 
         const response = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImport.map((c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImport.map((c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -619,34 +567,28 @@ describe('Import contacts', () => {
         )
 
         const successResponse = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImportAfterInitialImport.map(
-                  (c) => c.hashedNumber
-                ),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImportAfterInitialImport.map(
+                (c) => c.hashedNumber
+              ),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
         expect(successResponse._tag).toEqual('Right')
 
         const secondSuccessResponse = yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: contactsToImportAfterInitialImport.map(
-                  (c) => c.hashedNumber
-                ),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImportAfterInitialImport.map(
+                (c) => c.hashedNumber
+              ),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          ),
+          }),
           Effect.either
         )
 
@@ -672,14 +614,12 @@ describe('Notification', () => {
         const me = networkOne[0]
 
         const app = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(me.authHeaders))
 
         yield* _(
-          app.importContacts(
-            {
-              body: {contacts: [], replace: true},
-            },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          app.Contact.importContacts({
+            payload: {contacts: [], replace: true},
+          })
         )
 
         yield* _(Effect.sleep(200))
@@ -693,15 +633,12 @@ describe('Notification', () => {
         )
 
         yield* _(
-          app.importContacts(
-            {
-              body: {
-                contacts: Array.map(contactsToImport, (c) => c.hashedNumber),
-                replace: true,
-              },
+          app.Contact.importContacts({
+            payload: {
+              contacts: Array.map(contactsToImport, (c) => c.hashedNumber),
+              replace: true,
             },
-            HttpClientRequest.setHeaders(me.authHeaders)
-          )
+          })
         )
 
         yield* _(Effect.sleep(200))

@@ -1,20 +1,14 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Option} from 'effect/index'
+import {Effect, Option} from 'effect/index'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstanceWithAuth} from '../../client'
 import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
+import {type LoggingFunction} from '../../utils'
 import {
-  handleCommonAndExpectedErrorsEffect,
-  handleCommonErrorsEffect,
-  type LoggingFunction,
-} from '../../utils'
-import {
-  CreateInvoiceError,
   type CreateInvoiceRequest,
-  GetInvoiceErrors,
   type GetInvoiceRequest,
   type GetInvoiceStatusTypeRequest,
 } from './contracts'
@@ -46,62 +40,56 @@ export function api({
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
 }) {
-  const client = createClientInstanceWithAuth({
-    api: ContentApiSpecification,
-    platform,
-    clientVersion,
-    clientSemver,
-    language,
-    appSource,
-    isDeveloper,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: ContentApiSpecification,
+        platform,
+        clientVersion,
+        clientSemver,
+        language,
+        appSource,
+        isDeveloper,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  const commonHeaders = makeCommonHeaders({
-    appSource,
-    versionCode: clientVersion,
-    semver: clientSemver,
-    platform,
-    isDeveloper,
-    language,
-    deviceModel: Option.fromNullable(deviceModel),
-    osVersion: Option.fromNullable(osVersion),
-  })
+    const commonHeaders = makeCommonHeaders({
+      appSource,
+      versionCode: clientVersion,
+      semver: clientSemver,
+      platform,
+      isDeveloper,
+      language,
+      deviceModel: Option.fromNullable(deviceModel),
+      osVersion: Option.fromNullable(osVersion),
+    })
 
-  return {
-    getEvents: () => handleCommonErrorsEffect(client.getEvents({})),
-    getBlogArticles: () => handleCommonErrorsEffect(client.getBlogArticles({})),
-    getNewsAndAnnoucements: () =>
-      handleCommonErrorsEffect(
-        client.getNewsAndAnnouncements({
+    return {
+      getEvents: () => client.Cms.getEvents({}),
+      getBlogArticles: () => client.Cms.getBlogArticles({}),
+      getNewsAndAnnoucements: () =>
+        client.NewsAndAnnouncements.getNewsAndAnnouncements({
           headers: commonHeaders,
-        })
-      ),
-    createInvoice: (createInvoiceRequest: CreateInvoiceRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.createInvoice({
-          body: createInvoiceRequest,
         }),
-        CreateInvoiceError
-      ),
-    getInvoice: (getInvoiceRequest: GetInvoiceRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.getInvoice({
-          query: getInvoiceRequest,
+      createInvoice: (createInvoiceRequest: CreateInvoiceRequest) =>
+        client.Donations.createInvoice({
+          payload: createInvoiceRequest,
         }),
-        GetInvoiceErrors
-      ),
-    getInvoiceStatusType: (query: GetInvoiceStatusTypeRequest) =>
-      handleCommonErrorsEffect(
-        client.getInvoiceStatusType({
-          query,
-        })
-      ),
-  }
+      getInvoice: (getInvoiceRequest: GetInvoiceRequest) =>
+        client.Donations.getInvoice({
+          urlParams: getInvoiceRequest,
+        }),
+      getInvoiceStatusType: (query: GetInvoiceStatusTypeRequest) =>
+        client.Donations.getInvoiceStatusType({
+          urlParams: query,
+        }),
+    }
+  })
 }
 
-export type ContentApi = ReturnType<typeof api>
+export type ContentApi = Effect.Effect.Success<ReturnType<typeof api>>

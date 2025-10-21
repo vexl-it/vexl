@@ -1,20 +1,22 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
   CreateInvoiceError,
-  CreateInvoiceErrors,
   InvoiceId,
   PaymentLink,
   StoreId,
   type CreateInvoiceResponse,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {CreateInvoiceEndpoint} from '@vexl-next/rest-api/src/services/content/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, Option, Schema} from 'effect'
-import {Handler} from 'effect-http'
 import {BtcPayServerService} from '../../utils/donations'
 import {UpdateInvoiceStateWebhookService} from './UpdateInvoiceStateWebhookService'
 
-export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
-  makeEndpointEffect(
+export const createInvoiceHandler = HttpApiBuilder.handler(
+  ContentApiSpecification,
+  'Donations',
+  'createInvoice',
+  (req) =>
     Effect.gen(function* (_) {
       const btcPayServerService = yield* _(BtcPayServerService)
       const updateInvoiceStateWebhookService = yield* _(
@@ -23,9 +25,9 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
 
       const createInvoiceResponse = yield* _(
         btcPayServerService.createInvoice({
-          amount: req.body.amount,
-          currency: req.body.currency,
-          paymentMethod: req.body.paymentMethod,
+          amount: req.payload.amount,
+          currency: req.payload.currency,
+          paymentMethod: req.payload.paymentMethod,
         })
       )
 
@@ -38,7 +40,7 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
 
       const paymentMethod = Array.findFirst(
         paymentMethods,
-        (method) => method.paymentMethodId === req.body.paymentMethod
+        (method) => method.paymentMethodId === req.payload.paymentMethod
       )
 
       if (Option.isNone(paymentMethod))
@@ -46,9 +48,9 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
           Effect.fail(
             new CreateInvoiceError({
               cause: new Error(
-                `No ${req.body.paymentMethod} payment method found`
+                `No ${req.payload.paymentMethod} payment method found`
               ),
-              message: `No ${req.body.paymentMethod} payment method found`,
+              message: `No ${req.payload.paymentMethod} payment method found`,
             })
           )
         )
@@ -77,7 +79,5 @@ export const createInvoiceHandler = Handler.make(CreateInvoiceEndpoint, (req) =>
       } satisfies CreateInvoiceResponse
 
       return toReturn
-    }).pipe(Effect.withSpan('createInvoiceHandler')),
-    CreateInvoiceErrors
-  )
+    }).pipe(Effect.withSpan('createInvoiceHandler'), makeEndpointEffect)
 )

@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
@@ -15,7 +14,9 @@ import {
   type CreateNewOfferRequest,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
-import {Effect, Either, Schema} from 'effect'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -52,19 +53,22 @@ describe('createOffer', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        const response = yield* _(
-          client.createNewOffer(
-            {body: request},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
           )
+        )
+
+        const response = yield* _(
+          client.createNewOffer({
+            payload: request,
+          })
         )
 
         expect(response.adminId).toEqual(request.adminId)
@@ -124,29 +128,26 @@ describe('createOffer', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        const response = yield* _(
-          client.createNewOffer(
-            {body: request},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
-          ),
+          )
+        )
+
+        const response = yield* _(
+          client.createNewOffer({
+            payload: request,
+          }),
           Effect.either
         )
 
-        expect(response._tag).toEqual('Left')
-        if (!Either.isLeft(response)) return
-        expect(
-          Schema.decodeUnknownEither(MissingOwnerPrivatePartError)(
-            response.left.error
-          )._tag
-        ).toEqual('Right')
+        expectErrorResponse(MissingOwnerPrivatePartError)(response)
       })
     )
   })
@@ -188,28 +189,26 @@ describe('createOffer', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        const response = yield* _(
-          client.createNewOffer(
-            {body: request},
-            HttpClientRequest.setHeaders(
-              yield* _(
-                createDummyAuthHeadersForUser({
-                  phoneNumber:
-                    Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                  publicKey: me.publicKeyPemBase64,
-                })
-              )
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
             )
-          ),
+          )
+        )
+
+        const response = yield* _(
+          client.createNewOffer({
+            payload: request,
+          }),
           Effect.either
         )
-        expect(response._tag).toEqual('Left')
-        if (!Either.isLeft(response)) return
-        expect(
-          Schema.decodeUnknownEither(DuplicatedPublicKeyError)(
-            response.left.error
-          )._tag
-        ).toEqual('Right')
+
+        expectErrorResponse(DuplicatedPublicKeyError)(response)
       })
     )
   })

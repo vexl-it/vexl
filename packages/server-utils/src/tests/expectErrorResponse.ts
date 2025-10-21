@@ -1,20 +1,19 @@
-import {Either, Number, Schema} from 'effect'
+import {Either, Schema} from 'effect'
 
 export const expectErrorResponse =
-  (response: Schema.Schema<any> | number) =>
-  (failedResponse: Either.Either<any, any>) => {
+  <A, I, R>(response: Schema.Schema<A, I, R>) =>
+  (failedResponse: Either.Either<any, A & any>) => {
     expect(failedResponse._tag).toEqual('Left')
     if (!Either.isLeft(failedResponse)) return
 
-    if (Number.isNumber(response)) {
-      if (failedResponse._tag !== 'Left') {
-        throw new Error('Expected error response')
-      }
-      expect(failedResponse.left.status).toEqual(response)
-      return
-    }
+    // if (Number.isNumber(response)) {
+    //   if (failedResponse._tag !== 'Left') {
+    //     throw new Error('Expected error response')
+    //   }
+    //   expect(failedResponse.left.status).toEqual(response)
+    //   return
+    // }
 
-    expect(
-      Schema.decodeUnknownEither(response)(failedResponse.left.error)._tag
-    ).toEqual('Right')
+    console.log('Failed response left:', failedResponse.left, new Error().stack)
+    expect(Schema.is(response)(failedResponse.left)).toBe(true)
   }

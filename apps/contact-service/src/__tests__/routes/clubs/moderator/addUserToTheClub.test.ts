@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {AdmitedToClubNetworkNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -15,6 +16,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
@@ -57,13 +59,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -95,8 +98,8 @@ describe('Add user to the club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const addResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -111,8 +114,8 @@ describe('Add user to the club', () => {
         expect(addResponse.newCount).toEqual(2)
 
         const clubInfo = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
               notificationToken: Option.none(),
             },
@@ -131,8 +134,8 @@ describe('Add user to the club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -145,8 +148,8 @@ describe('Add user to the club', () => {
         )
 
         yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -159,8 +162,8 @@ describe('Add user to the club', () => {
         )
 
         const failedResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -183,8 +186,8 @@ describe('Add user to the club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -197,8 +200,8 @@ describe('Add user to the club', () => {
         )
 
         const failedResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -234,8 +237,8 @@ describe('Add user to the club', () => {
         )
 
         const errorResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -261,8 +264,8 @@ describe('Add user to the club', () => {
         const nonModeratorMember = generatePrivateKey()
 
         const errorResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -275,7 +278,7 @@ describe('Add user to the club', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -286,8 +289,8 @@ describe('Add user to the club', () => {
         const app = yield* _(NodeTestingApp)
 
         const errorResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -300,7 +303,7 @@ describe('Add user to the club', () => {
           Effect.either
         )
 
-        expectErrorResponse(404)(errorResponse)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -313,8 +316,8 @@ describe('Add user to the club', () => {
         const challenge = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -387,8 +390,8 @@ describe('Add user to the club', () => {
         const user4 = generatePrivateKey()
 
         yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
@@ -421,8 +424,8 @@ describe('Add user to the club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.addUserToTheClub({
-            body: {
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.some(

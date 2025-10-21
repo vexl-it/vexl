@@ -1,16 +1,6 @@
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
-import {Context, Layer, type Effect} from 'effect'
-import {NodeTesting} from 'effect-http-node'
-import {app} from '../../httpServer'
+import {createNodeTestingApp} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
-const nodeTestingAppEffect = NodeTesting.make(
-  app,
+export const NodeTestingApp = createNodeTestingApp(
   BtcExchangeRateApiSpecification
 )
-
-export class NodeTestingApp extends Context.Tag('NodeTestingApp')<
-  NodeTestingApp,
-  Effect.Effect.Success<typeof nodeTestingAppEffect>
->() {
-  static readonly layer = Layer.scoped(NodeTestingApp, nodeTestingAppEffect)
-}

@@ -3,6 +3,7 @@ import {AesGtmCypher} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UnableToSendVerificationSmsError} from '@vexl-next/rest-api/src/services/user/contracts'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
 import {VerificationIdPayload} from '../../routes/eraseUser/utils'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
@@ -30,11 +31,11 @@ describe('Initialize erase user', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const data = yield* _(
-          client.initEraseUser({
+          client.EraseUser.initEraseUser({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
           })
@@ -72,26 +73,18 @@ describe('Initialize erase user', () => {
         )
 
         const result = yield* _(
-          client.initEraseUser({
+          client.EraseUser.initEraseUser({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
           }),
           Effect.either
         )
-        if (result._tag === 'Right') {
-          expect('Expected error').toBe('Got success')
-          return
-        }
-        const receivedError = yield* _(
-          Schema.decodeUnknown(UnableToSendVerificationSmsError)(
-            result.left.error
-          )
-        )
-        expect(receivedError.reason).toEqual('InvalidPhoneNumber')
+
+        expectErrorResponse(UnableToSendVerificationSmsError)(result)
       })
     )
   })

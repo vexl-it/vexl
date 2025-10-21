@@ -562,10 +562,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
               return false
             }
-            if (e._tag !== 'NetworkError')
-              reportError('error', new Error('Error sending identityReveal'), {
-                e,
-              })
+            reportError('error', new Error('Error sending identityReveal'), {
+              e,
+            })
             showErrorAlert({
               title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
               error: e,
@@ -644,10 +643,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               })
               return false
             }
-            if (e._tag !== 'NetworkError')
-              reportError('error', new Error('Error sending contact reveal'), {
-                e,
-              })
+            reportError('error', new Error('Error sending contact reveal'), {
+              e,
+            })
             showErrorAlert({
               title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
               error: e,

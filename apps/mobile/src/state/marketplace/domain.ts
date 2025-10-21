@@ -20,6 +20,7 @@ import {
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {type ApiErrorFetchingClubsOffers} from '@vexl-next/resources-utils/src/offers/getNewClubsOffersAndDecrypt'
 import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
 import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Schema} from 'effect'
@@ -58,7 +59,11 @@ export interface SuccessLoadingState {
 
 export interface ErrorLoadingState {
   state: 'error'
-  error: ApiErrorFetchingOffers | CryptoError | ErrorSigningChallenge
+  error:
+    | ApiErrorFetchingOffers
+    | ApiErrorFetchingClubsOffers
+    | CryptoError
+    | ErrorSigningChallenge
 }
 
 export interface InProgressLoadingState {

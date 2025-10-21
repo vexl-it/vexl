@@ -2,7 +2,6 @@ import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseco
 import {
   Array,
   Context,
-  Data,
   Duration,
   Effect,
   Layer,
@@ -15,18 +14,22 @@ import {catchAllDefect} from 'effect/Effect'
 import Redlock, {type Lock} from 'redlock'
 import {RedisConnectionService} from './RedisConnection'
 
-export class RedisError extends Data.TaggedError('RedisError')<{
-  originalError: unknown
-}> {}
-
-export class RedisLockError extends Data.TaggedError('RedisLockError')<{
-  originalError: unknown
-}> {}
-
-export class RecordDoesNotExistsReddisError extends Data.TaggedError(
-  'RecordDoesNotExistsReddisError'
+export class RedisError extends Schema.TaggedError<RedisError>('RedisError')(
+  'RedisError',
+  {
+    cause: Schema.Unknown,
+  }
 ) {}
 
+export class RedisLockError extends Schema.TaggedError<RedisLockError>(
+  'RedisLockError'
+)('RedisLockError', {
+  cause: Schema.Unknown,
+}) {}
+
+export class RecordDoesNotExistsReddisError extends Schema.TaggedError<RecordDoesNotExistsReddisError>(
+  'RecordDoesNotExistsReddisError'
+)('RecordDoesNotExistsReddisError', {}) {}
 export interface RedisOperations {
   get: <A, I, R>(
     schema: Schema.Schema<A, I, R>
@@ -109,7 +112,7 @@ export class RedisService extends Context.Tag('RedisService')<
                 duration
               ),
               new RedisLockError({
-                originalError: e,
+                cause: e,
               })
             )
           )
@@ -157,7 +160,7 @@ export class RedisService extends Context.Tag('RedisService')<
         Effect.async<string, RedisError | RecordDoesNotExistsReddisError>(
           (cb) => {
             void redisClient.get(key, (err, res) => {
-              if (err) cb(Effect.fail(new RedisError({originalError: err})))
+              if (err) cb(Effect.fail(new RedisError({cause: err})))
               else if (!res)
                 cb(Effect.fail(new RecordDoesNotExistsReddisError()))
               else cb(Effect.succeed(res))
@@ -167,7 +170,7 @@ export class RedisService extends Context.Tag('RedisService')<
           Effect.catchAllDefect((e) =>
             Effect.zipRight(
               Effect.logError('Error while reading reddis', e, key),
-              Effect.fail(new RedisError({originalError: e}))
+              Effect.fail(new RedisError({cause: e}))
             )
           ),
           Effect.withSpan('Redis get', {attributes: {key}})
@@ -181,14 +184,14 @@ export class RedisService extends Context.Tag('RedisService')<
         // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
         return Effect.async<void, RedisError>((cb) => {
           void redisClient.set(key, value, 'PXAT', expiresAt ?? -1, (err) => {
-            if (err) cb(Effect.fail(new RedisError({originalError: err})))
+            if (err) cb(Effect.fail(new RedisError({cause: err})))
             else cb(Effect.succeed(Effect.void))
           })
         }).pipe(
           Effect.catchAllDefect((e) =>
             Effect.zipRight(
               Effect.logError('Error while writing to reddis', e, key),
-              Effect.fail(new RedisError({originalError: e}))
+              Effect.fail(new RedisError({cause: e}))
             )
           ),
           Effect.withSpan('Redis set', {attributes: {key, value, expiresAt}})
@@ -200,7 +203,7 @@ export class RedisService extends Context.Tag('RedisService')<
         Effect.async<void, RedisError>((cb) => {
           void redisClient.del(key, (err) => {
             if (err) {
-              cb(Effect.fail(new RedisError({originalError: err})))
+              cb(Effect.fail(new RedisError({cause: err})))
             } else cb(Effect.succeed(Effect.void))
           })
         }).pipe(Effect.withSpan('Redis delete', {attributes: {key}}))
@@ -213,7 +216,7 @@ export class RedisService extends Context.Tag('RedisService')<
         Effect.async<void, RedisError>((cb) => {
           void redisClient.sadd(key, ...value, (err) => {
             if (err) {
-              cb(Effect.fail(new RedisError({originalError: err})))
+              cb(Effect.fail(new RedisError({cause: err})))
             } else {
               cb(Effect.succeed(Effect.void))
             }
@@ -236,11 +239,7 @@ export class RedisService extends Context.Tag('RedisService')<
               const listResult = res?.[0]
 
               if (!listResult) {
-                cb(
-                  Effect.fail(
-                    new RedisError({originalError: new Error('No result')})
-                  )
-                )
+                cb(Effect.fail(new RedisError({cause: new Error('No result')})))
                 return
               }
 
@@ -248,14 +247,12 @@ export class RedisService extends Context.Tag('RedisService')<
               const listData = decodeListResult(listDataUnknown)
 
               if (err ?? listError) {
-                cb(
-                  Effect.fail(new RedisError({originalError: err ?? listError}))
-                )
+                cb(Effect.fail(new RedisError({cause: err ?? listError})))
               } else if (Option.isNone(listData)) {
                 cb(
                   Effect.fail(
                     new RedisError({
-                      originalError: new Error('Unable to decode list data'),
+                      cause: new Error('Unable to decode list data'),
                     })
                   )
                 )
@@ -325,3 +322,18 @@ export const withRedisLock: <A, E, R>(
     RedisService.pipe(
       Effect.flatMap((rs) => rs.withLock(program)(resources, duration))
     )
+
+export const withRedisLockFromEffect: <A, E, R, R2>(
+  resources: Effect.Effect<string[] | string, never, R2>,
+  duration?: Duration.DurationInput
+) => (
+  program: Effect.Effect<A, E, R>
+) => Effect.Effect<A, E | RedisLockError, R | RedisService | R2> =
+  (resources, duration) => (program) =>
+    Effect.gen(function* (_) {
+      const redisService = yield* _(RedisService)
+      const resolvedResources = yield* _(resources)
+      return yield* _(
+        redisService.withLock(program)(resolvedResources, duration)
+      )
+    })

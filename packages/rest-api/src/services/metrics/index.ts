@@ -1,12 +1,12 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Option} from 'effect/index'
+import {Effect, Option} from 'effect/index'
 import {createClientInstanceWithAuth} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {handleCommonErrorsEffect, type LoggingFunction} from '../../utils'
+import {type LoggingFunction} from '../../utils'
 import {type ReportNotificationInteractionRequest} from './contracts'
 import {MetricsServiceSpecification} from './specification'
 
@@ -38,43 +38,45 @@ export function api({
   signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
 }) {
-  const client = createClientInstanceWithAuth({
-    api: MetricsServiceSpecification,
-    platform,
-    clientVersion,
-    language,
-    isDeveloper,
-    appSource,
-    clientSemver,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: MetricsServiceSpecification,
+        platform,
+        clientVersion,
+        language,
+        isDeveloper,
+        appSource,
+        clientSemver,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  const commonHeaders = makeCommonHeaders({
-    appSource,
-    versionCode: clientVersion,
-    semver: clientSemver,
-    platform,
-    isDeveloper,
-    language,
-    deviceModel: Option.fromNullable(deviceModel),
-    osVersion: Option.fromNullable(osVersion),
-  })
+    const commonHeaders = makeCommonHeaders({
+      appSource,
+      versionCode: clientVersion,
+      semver: clientSemver,
+      platform,
+      isDeveloper,
+      language,
+      deviceModel: Option.fromNullable(deviceModel),
+      osVersion: Option.fromNullable(osVersion),
+    })
 
-  return {
-    reportNotificationInteraction: (
-      request: ReportNotificationInteractionRequest
-    ) =>
-      handleCommonErrorsEffect(
+    return {
+      reportNotificationInteraction: (
+        request: ReportNotificationInteractionRequest
+      ) =>
         client.reportNotificationInteraction({
-          query: request,
+          urlParams: request,
           headers: commonHeaders,
-        })
-      ),
-  }
+        }),
+    }
+  })
 }
 
-export type MetricsApi = ReturnType<typeof api>
+export type MetricsApi = Effect.Effect.Success<ReturnType<typeof api>>

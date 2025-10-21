@@ -6,48 +6,31 @@ import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
+import {type LoggingFunction} from '../../utils'
 import {
-  handleCommonAndExpectedErrorsEffect,
-  handleCommonErrorsEffect,
-  type LoggingFunction,
-} from '../../utils'
-import {
-  addChallengeToRequest,
+  addChallengeToRequest2,
   type RequestWithGeneratableChallenge,
-} from '../utils/addChallengeToRequest'
+} from '../utils/addChallengeToRequest2'
 import {
-  AddUserToTheClubErrors,
   type AddUserToTheClubRequest,
   type CheckUserExistsInput,
   type CreateUserInput,
-  DeactivateClubJoinLinkErrors,
   type DeactivateClubJoinLinkRequest,
   type EraseUserFromNetworkRequest,
   type FetchCommonConnectionsInput,
   type FetchMyContactsInput,
-  GenerateClubJoinLinkErrors,
   type GenerateClubJoinLinkRequest,
-  GetClubContactsErrors,
   type GetClubContactsRequest,
-  GetClubInfoByAccessCodeErrors,
   type GetClubInfoByAccessCodeRequest,
-  GetClubInfoErrors,
   type GetClubInfoRequest,
-  ImportContactsErrors,
   type ImportContactsInput,
-  JoinClubErrors,
   type JoinClubRequest,
-  LeaveClubErrors,
   type LeaveClubRequest,
-  ListClubLinksErrors,
   type ListClubLinksRequest,
   type RefreshUserInput,
-  ReportClubErrors,
   type ReportClubRequest,
-  UpdateBadOwnerHashErrors,
   type UpdateBadOwnerHashRequest,
   type UpdateNotificationTokenRequest,
-  UserNotFoundError,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
 
@@ -77,202 +60,166 @@ export function api({
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
 }) {
-  const client = createClientInstanceWithAuth({
-    api: ContactApiSpecification,
-    platform,
-    clientVersion,
-    language,
-    appSource,
-    clientSemver,
-    isDeveloper,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: ContactApiSpecification,
+        platform,
+        clientVersion,
+        language,
+        appSource,
+        clientSemver,
+        isDeveloper,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  const addChallenge = addChallengeToRequest(client)
+    const addChallenge = addChallengeToRequest2(
+      client.Challenges.createChallenge
+    )
 
-  const commonHeaders = makeCommonHeaders({
-    appSource,
-    versionCode: clientVersion,
-    semver: clientSemver,
-    platform,
-    isDeveloper,
-    language,
-    deviceModel: Option.fromNullable(deviceModel),
-    osVersion: Option.fromNullable(osVersion),
-  })
+    const commonHeaders = makeCommonHeaders({
+      appSource,
+      versionCode: clientVersion,
+      semver: clientSemver,
+      platform,
+      isDeveloper,
+      language,
+      deviceModel: Option.fromNullable(deviceModel),
+      osVersion: Option.fromNullable(osVersion),
+    })
 
-  return {
-    checkUserExists: (checkUserExistsInput: CheckUserExistsInput) =>
-      handleCommonErrorsEffect(client.checkUserExists(checkUserExistsInput)),
-    createUser: (createUserInput: CreateUserInput) =>
-      handleCommonErrorsEffect(
-        client.createUser({
-          body: createUserInput.body,
-          headers: commonHeaders,
-        })
-      ),
-    refreshUser: (refreshUserInput: RefreshUserInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.refreshUser({
-          body: refreshUserInput.body,
+    return {
+      checkUserExists: (checkUserExistsInput: CheckUserExistsInput) =>
+        client.User.checkUserExists({urlParams: checkUserExistsInput.query}),
+      createUser: (createUserInput: CreateUserInput) =>
+        client.User.createUser({
+          payload: createUserInput.body,
           headers: commonHeaders,
         }),
-        UserNotFoundError
-      ),
-    updateNotificationToken: ({body}: {body: UpdateNotificationTokenRequest}) =>
-      handleCommonErrorsEffect(
-        client.updateNotificationToken({
-          body,
+      refreshUser: (refreshUserInput: RefreshUserInput) =>
+        client.User.refreshUser({
+          payload: refreshUserInput.body,
           headers: commonHeaders,
-        })
-      ),
-    deleteUser: () => handleCommonErrorsEffect(client.deleteUser({})),
-    importContacts: (importContactsInput: ImportContactsInput) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.importContacts(importContactsInput),
-        ImportContactsErrors
-      ),
-    fetchMyContacts: (fetchMyContactsInput: FetchMyContactsInput) =>
-      handleCommonErrorsEffect(
-        client.fetchMyContacts({
+        }),
+      updateNotificationToken: ({
+        body,
+      }: {
+        body: UpdateNotificationTokenRequest
+      }) =>
+        client.User.updateNotificationToken({
+          payload: body,
           headers: commonHeaders,
-          query: fetchMyContactsInput.query,
-        })
-      ),
-    fetchCommonConnections: (
-      fetchCommonConnectionsInput: FetchCommonConnectionsInput
-    ) =>
-      handleCommonErrorsEffect(
-        client.fetchCommonConnections(fetchCommonConnectionsInput)
-      ),
-    updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.updateBadOwnerHash({body: args}),
-        UpdateBadOwnerHashErrors
-      ),
-    getClubContacts: (
-      getClubContactsRequest: RequestWithGeneratableChallenge<GetClubContactsRequest>
-    ) =>
-      addChallenge(getClubContactsRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.getClubContacts({body}),
-            GetClubContactsErrors
+        }),
+      deleteUser: () => client.User.deleteUser({}),
+      importContacts: (importContactsInput: ImportContactsInput) =>
+        client.Contact.importContacts({payload: importContactsInput.body}),
+
+      fetchMyContacts: (fetchMyContactsInput: FetchMyContactsInput) =>
+        client.Contact.fetchMyContacts({
+          headers: commonHeaders,
+          urlParams: fetchMyContactsInput.query,
+        }),
+      fetchCommonConnections: (
+        fetchCommonConnectionsInput: FetchCommonConnectionsInput
+      ) =>
+        client.Contact.fetchCommonConnections({
+          payload: fetchCommonConnectionsInput.body,
+        }),
+      updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>
+        client.User.updateBadOwnerHash({payload: args}),
+      getClubContacts: (
+        getClubContactsRequest: RequestWithGeneratableChallenge<GetClubContactsRequest>
+      ) =>
+        addChallenge(getClubContactsRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.getClubContacts({payload: body})
           )
-        )
-      ),
-    joinClub: (
-      joinClubRequest: RequestWithGeneratableChallenge<JoinClubRequest>
-    ) =>
-      addChallenge(joinClubRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.joinClub({
-              body,
-            }),
-            JoinClubErrors
+        ),
+      joinClub: (
+        joinClubRequest: RequestWithGeneratableChallenge<JoinClubRequest>
+      ) =>
+        addChallenge(joinClubRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.joinClub({
+              payload: body,
+            })
           )
-        )
-      ),
-    getClubInfo: (
-      getClubInfoRequest: RequestWithGeneratableChallenge<GetClubInfoRequest>
-    ) =>
-      addChallenge(getClubInfoRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.getClubInfo({body}),
-            GetClubInfoErrors
+        ),
+      getClubInfo: (
+        getClubInfoRequest: RequestWithGeneratableChallenge<GetClubInfoRequest>
+      ) =>
+        addChallenge(getClubInfoRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.getClubInfo({payload: body})
           )
-        )
-      ),
-    leaveClub: (
-      leaveClubRequest: RequestWithGeneratableChallenge<LeaveClubRequest>
-    ) =>
-      addChallenge(leaveClubRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.leaveClub({body}),
-            LeaveClubErrors
+        ),
+      leaveClub: (
+        leaveClubRequest: RequestWithGeneratableChallenge<LeaveClubRequest>
+      ) =>
+        addChallenge(leaveClubRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.leaveClub({payload: body})
           )
-        )
-      ),
-    getClubInfoByAccessCode: (
-      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<GetClubInfoByAccessCodeRequest>
-    ) =>
-      addChallenge(getClubInfoByAccessCodeRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.getClubInfoByAccessCode({body}),
-            GetClubInfoByAccessCodeErrors
+        ),
+      getClubInfoByAccessCode: (
+        getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<GetClubInfoByAccessCodeRequest>
+      ) =>
+        addChallenge(getClubInfoByAccessCodeRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.getClubInfoByAccessCode({payload: body})
           )
-        )
-      ),
-    generateClubJoinLink: (
-      generateClubJoinLinkRequest: RequestWithGeneratableChallenge<GenerateClubJoinLinkRequest>
-    ) =>
-      addChallenge(generateClubJoinLinkRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.generateClubJoinLink({body}),
-            GenerateClubJoinLinkErrors
+        ),
+      generateClubJoinLink: (
+        generateClubJoinLinkRequest: RequestWithGeneratableChallenge<GenerateClubJoinLinkRequest>
+      ) =>
+        addChallenge(generateClubJoinLinkRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsModerator.generateClubJoinLink({payload: body})
           )
-        )
-      ),
-    deactivateClubJoinLink: (
-      deactivateClubJoinLinkRequest: RequestWithGeneratableChallenge<DeactivateClubJoinLinkRequest>
-    ) =>
-      addChallenge(deactivateClubJoinLinkRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.deactivateClubJoinLink({body}),
-            DeactivateClubJoinLinkErrors
+        ),
+      deactivateClubJoinLink: (
+        deactivateClubJoinLinkRequest: RequestWithGeneratableChallenge<DeactivateClubJoinLinkRequest>
+      ) =>
+        addChallenge(deactivateClubJoinLinkRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsModerator.deactivateClubJoinLink({payload: body})
           )
-        )
-      ),
-    addUserToTheClub: (
-      addUserToTheClubRequest: RequestWithGeneratableChallenge<AddUserToTheClubRequest>
-    ) =>
-      addChallenge(addUserToTheClubRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.addUserToTheClub({body}),
-            AddUserToTheClubErrors
+        ),
+      addUserToTheClub: (
+        addUserToTheClubRequest: RequestWithGeneratableChallenge<AddUserToTheClubRequest>
+      ) =>
+        addChallenge(addUserToTheClubRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsModerator.addUserToTheClub({payload: body})
           )
-        )
-      ),
-    listClubLinks: (
-      getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<ListClubLinksRequest>
-    ) =>
-      addChallenge(getClubInfoByAccessCodeRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.listClubLinks({body}),
-            ListClubLinksErrors
+        ),
+      listClubLinks: (
+        getClubInfoByAccessCodeRequest: RequestWithGeneratableChallenge<ListClubLinksRequest>
+      ) =>
+        addChallenge(getClubInfoByAccessCodeRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsModerator.listClubLinks({payload: body})
           )
-        )
-      ),
-    reportClub: (
-      reportClubRequest: RequestWithGeneratableChallenge<ReportClubRequest>
-    ) =>
-      addChallenge(reportClubRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.reportClub({body}),
-            ReportClubErrors
+        ),
+      reportClub: (
+        reportClubRequest: RequestWithGeneratableChallenge<ReportClubRequest>
+      ) =>
+        addChallenge(reportClubRequest).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.reportClub({payload: body})
           )
-        )
-      ),
-    eraseUserFromNetwork: (request: EraseUserFromNetworkRequest) =>
-      handleCommonErrorsEffect(
-        client.eraseUserFromNetwork({
-          body: request,
-        })
-      ),
-  }
+        ),
+      eraseUserFromNetwork: (request: EraseUserFromNetworkRequest) =>
+        client.User.eraseUserFromNetwork({
+          payload: request,
+        }),
+    }
+  })
 }
 
-export type ContactApi = ReturnType<typeof api>
+export type ContactApi = Effect.Effect.Success<ReturnType<typeof api>>

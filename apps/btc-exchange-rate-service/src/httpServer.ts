@@ -1,27 +1,41 @@
+import {
+  HttpApiBuilder,
+  HttpApiSwagger,
+  HttpMiddleware,
+  HttpServer,
+} from '@effect/platform/index'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
+import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
-import {setupLoggingMiddlewares} from '@vexl-next/server-utils/src/loggingMiddlewares'
-import {Effect, Layer} from 'effect'
-import {RouterBuilder} from 'effect-http'
-import {NodeServer} from 'effect-http-node'
-import {cryptoConfig, healthServerPortConfig, portConfig} from './configs'
+import {Layer} from 'effect'
+import {cryptoConfig, healthServerPortConfig} from './configs'
 import {getExchangeRateHandler} from './handlers'
 import {YadioService} from './utils/yadio'
 
-export const app = RouterBuilder.make(BtcExchangeRateApiSpecification).pipe(
-  RouterBuilder.handle(getExchangeRateHandler),
-  RouterBuilder.build,
-  setupLoggingMiddlewares
+const RootLive = HttpApiBuilder.group(
+  BtcExchangeRateApiSpecification,
+  'root',
+  (h) => h.handle('getExchangeRate', getExchangeRateHandler)
 )
 
-const MainLive = Layer.mergeAll(
-  ServerCrypto.layer(cryptoConfig),
-  YadioService.Live,
+export const ApiLive = HttpApiBuilder.api(BtcExchangeRateApiSpecification).pipe(
+  Layer.provide(RootLive),
+  Layer.provide(ServerSecurityMiddlewareLive)
+)
+
+const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
+  Layer.provide(HttpApiSwagger.layer()),
+  Layer.provide(ApiLive),
+  HttpServer.withLogAddress,
+  Layer.provide(NodeHttpServerLiveWithPortFromEnv)
+)
+
+export const MainLive = Layer.mergeAll(
+  ApiServerLive,
   healthServerLayer({port: healthServerPortConfig})
-)
-
-export const httpServer = portConfig.pipe(
-  Effect.flatMap((port) => NodeServer.listen({port})(app)),
-  Effect.provide(MainLive)
+).pipe(
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(YadioService.Live)
 )

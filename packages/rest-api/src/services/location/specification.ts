@@ -1,8 +1,10 @@
-import {Schema} from 'effect'
-import {Api} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
 import {
-  GetExchangeRateRequest,
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {
   GetGeocodedCoordinatesRequest,
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsRequest,
@@ -10,46 +12,29 @@ import {
   LocationNotFoundError,
 } from './contracts'
 
-export const GetLocationSuggestionEndpoint = Api.get(
+export const GetLocationSuggestionEndpoint = HttpApiEndpoint.get(
   'getLocationSuggestion',
   '/suggest'
-).pipe(
-  Api.setRequestQuery(GetLocationSuggestionsRequest),
-  Api.setResponseBody(GetLocationSuggestionsResponse),
-  Api.setSecurity(ServerSecurity),
-  Api.addResponse({
-    status: 404 as const,
-    body: LocationNotFoundError,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setUrlParams(GetLocationSuggestionsRequest)
+  .addSuccess(GetLocationSuggestionsResponse)
+  .addError(LocationNotFoundError)
 
-export const GetGeocodedCoordinatesEndpoint = Api.get(
+export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
   'getGeocodedCoordinates',
   '/geocode'
-).pipe(
-  Api.setRequestQuery(GetGeocodedCoordinatesRequest),
-  Api.setResponseBody(GetGeocodedCoordinatesResponse),
-  Api.setSecurity(ServerSecurity),
-  Api.addResponse({
-    status: 404 as const,
-    body: LocationNotFoundError,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setUrlParams(GetGeocodedCoordinatesRequest)
+  .addSuccess(GetGeocodedCoordinatesResponse)
+  .addError(LocationNotFoundError)
 
-export const GetExchangeRateEndpoint = Api.get('getExchangeRate', '/btc-rate', {
-  description: 'Moved to separate service',
-}).pipe(
-  Api.setRequestQuery(GetExchangeRateRequest),
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseHeaders(Schema.Struct({Location: Schema.String})),
-  Api.setResponseStatus(301 as const)
-)
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(GetLocationSuggestionEndpoint)
+  .add(GetGeocodedCoordinatesEndpoint)
 
-export const LocationApiSpecification = Api.make({
-  title: 'Location service',
-  version: '1.0.0',
-}).pipe(
-  Api.addEndpoint(GetLocationSuggestionEndpoint),
-  Api.addEndpoint(GetGeocodedCoordinatesEndpoint),
-  Api.addEndpoint(GetExchangeRateEndpoint)
-)
+export const LocationApiSpecification = HttpApi.make('Location Service')
+  .add(RootGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

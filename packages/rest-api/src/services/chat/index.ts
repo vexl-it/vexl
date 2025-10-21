@@ -6,22 +6,12 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {createClientInstanceWithAuth} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
+import {type LoggingFunction} from '../../utils'
 import {
-  handleCommonAndExpectedErrorsEffect,
-  handleCommonErrorsEffect,
-  type LoggingFunction,
-} from '../../utils'
-import {
-  addChallengeToRequest,
+  addChallengeToRequest2,
   type RequestWithGeneratableChallenge,
-} from '../utils/addChallengeToRequest'
+} from '../utils/addChallengeToRequest2'
 import {
-  ApproveRequestErrors,
-  CancelRequestApprovalErrors,
-  LeaveChatErrors,
-  RequestApprovalErrors,
-  RetrieveMessagesErrors,
-  SendMessageErrors,
   type ApproveRequestRequest,
   type BlockInboxRequest,
   type CancelApprovalRequest,
@@ -66,166 +56,139 @@ export function api({
   getUserSessionCredentials: GetUserSessionCredentials
   loggingFunction?: LoggingFunction | null
 }) {
-  const client = createClientInstanceWithAuth({
-    api: ChatApiSpecification,
-    platform,
-    clientVersion,
-    clientSemver,
-    language,
-    isDeveloper,
-    appSource,
-    getUserSessionCredentials,
-    url,
-    loggingFunction,
-    deviceModel,
-    osVersion,
-  })
+  return Effect.gen(function* (_) {
+    const client = yield* _(
+      createClientInstanceWithAuth({
+        api: ChatApiSpecification,
+        platform,
+        clientVersion,
+        clientSemver,
+        language,
+        isDeveloper,
+        appSource,
+        getUserSessionCredentials,
+        url,
+        loggingFunction,
+        deviceModel,
+        osVersion,
+      })
+    )
 
-  const commonHeaders = makeCommonHeaders({
-    appSource,
-    versionCode: clientVersion,
-    semver: clientSemver,
-    platform,
-    isDeveloper,
-    language,
-    deviceModel: Option.fromNullable(deviceModel),
-    osVersion: Option.fromNullable(osVersion),
-  })
+    const commonHeaders = makeCommonHeaders({
+      appSource,
+      versionCode: clientVersion,
+      semver: clientSemver,
+      platform,
+      isDeveloper,
+      language,
+      deviceModel: Option.fromNullable(deviceModel),
+      osVersion: Option.fromNullable(osVersion),
+    })
 
-  const addChallenge = addChallengeToRequest(client)
+    const addChallenge = addChallengeToRequest2(
+      client.Challenges.createChallenge
+    )
 
-  return {
-    // ----------------------
-    // 👇 Inbox
-    // ----------------------
-    updateInbox: (
-      updateInboxRequest: RequestWithGeneratableChallenge<UpdateInboxRequest>
-    ) =>
-      addChallenge(updateInboxRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(client.updateInbox({body}))
-        )
-      ),
-    createInbox: (
-      createInboxRequest: RequestWithGeneratableChallenge<CreateInboxRequest>
-    ) =>
-      addChallenge(createInboxRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(
-            client.createInbox({
-              body,
+    return {
+      // ----------------------
+      // 👇 Inbox
+      // ----------------------
+      updateInbox: (
+        updateInboxRequest: RequestWithGeneratableChallenge<UpdateInboxRequest>
+      ) =>
+        addChallenge(updateInboxRequest).pipe(
+          Effect.flatMap((body) => client.Inboxes.updateInbox({payload: body}))
+        ),
+      createInbox: (
+        createInboxRequest: RequestWithGeneratableChallenge<CreateInboxRequest>
+      ) =>
+        addChallenge(createInboxRequest).pipe(
+          Effect.flatMap((body) =>
+            client.Inboxes.createInbox({
+              payload: body,
               headers: commonHeaders,
             })
           )
-        )
-      ),
-    deleteInbox: (
-      deleteInboxRequest: RequestWithGeneratableChallenge<DeleteInboxRequest>
-    ) =>
-      addChallenge(deleteInboxRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(client.deleteInbox({body}))
-        )
-      ),
-    deletePulledMessages: (
-      deletePulledMessagesRequest: RequestWithGeneratableChallenge<DeletePulledMessagesRequest>
-    ) =>
-      addChallenge(deletePulledMessagesRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(client.deletePulledMessages({body}))
-        )
-      ),
-    blockInbox: (
-      blockInboxRequest: RequestWithGeneratableChallenge<BlockInboxRequest>
-    ) =>
-      addChallenge(blockInboxRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonErrorsEffect(client.blockInbox({body}))
-        )
-      ),
-    requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.requestApproval({body: requestApprovalRequest}),
-        RequestApprovalErrors
-      ),
-    cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.cancelRequestApproval({body: cancelApprovalRequest}),
-        CancelRequestApprovalErrors
-      ),
-    approveRequest: (
-      approveRequestRequest: RequestWithGeneratableChallenge<ApproveRequestRequest>
-    ) =>
-      addChallenge(approveRequestRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.approveRequest({body}),
-            ApproveRequestErrors
+        ),
+      deleteInbox: (
+        deleteInboxRequest: RequestWithGeneratableChallenge<DeleteInboxRequest>
+      ) =>
+        addChallenge(deleteInboxRequest).pipe(
+          Effect.flatMap((body) => client.Inboxes.deleteInbox({payload: body}))
+        ),
+      deletePulledMessages: (
+        deletePulledMessagesRequest: RequestWithGeneratableChallenge<DeletePulledMessagesRequest>
+      ) =>
+        addChallenge(deletePulledMessagesRequest).pipe(
+          Effect.flatMap((body) =>
+            client.Inboxes.deletePulledMessages({payload: body})
           )
-        )
-      ),
-    deleteInboxes: (deleteInboxesRequest: DeleteInboxesRequest) =>
-      handleCommonErrorsEffect(
-        client.deleteInboxes({body: deleteInboxesRequest})
-      ),
-    leaveChat: (
-      leaveChatRequest: RequestWithGeneratableChallenge<LeaveChatRequest>
-    ) =>
-      addChallenge(leaveChatRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.leaveChat({body}),
-            LeaveChatErrors
+        ),
+      blockInbox: (
+        blockInboxRequest: RequestWithGeneratableChallenge<BlockInboxRequest>
+      ) =>
+        addChallenge(blockInboxRequest).pipe(
+          Effect.flatMap((body) => client.Inboxes.blockInbox({payload: body}))
+        ),
+      requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
+        client.Inboxes.requestApproval({payload: requestApprovalRequest}),
+      cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
+        client.Inboxes.cancelRequestApproval({payload: cancelApprovalRequest}),
+      approveRequest: (
+        approveRequestRequest: RequestWithGeneratableChallenge<ApproveRequestRequest>
+      ) =>
+        addChallenge(approveRequestRequest).pipe(
+          Effect.flatMap((body) =>
+            client.Inboxes.approveRequest({payload: body})
           )
-        )
-      ),
-    // ----------------------
-    // 👇 Message
-    // ----------------------
-    retrieveMessages: (
-      retrieveMessagesRequest: RequestWithGeneratableChallenge<RetrieveMessagesRequest>
-    ) =>
-      addChallenge(retrieveMessagesRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.retrieveMessages({
-              body,
+        ),
+      deleteInboxes: (deleteInboxesRequest: DeleteInboxesRequest) =>
+        client.Inboxes.deleteInboxes({payload: deleteInboxesRequest}),
+      leaveChat: (
+        leaveChatRequest: RequestWithGeneratableChallenge<LeaveChatRequest>
+      ) =>
+        addChallenge(leaveChatRequest).pipe(
+          Effect.flatMap((body) => client.Inboxes.leaveChat({payload: body}))
+        ),
+      // ----------------------
+      // 👇 Message
+      // ----------------------
+      retrieveMessages: (
+        retrieveMessagesRequest: RequestWithGeneratableChallenge<RetrieveMessagesRequest>
+      ) =>
+        addChallenge(retrieveMessagesRequest).pipe(
+          Effect.flatMap((body) =>
+            client.Messages.retrieveMessages({
+              payload: body,
               headers: commonHeaders,
-            }),
-            RetrieveMessagesErrors
+            })
           )
-        )
-      ),
-    sendMessage: (
-      sendMessageRequest: RequestWithGeneratableChallenge<SendMessageRequest>
-    ) =>
-      addChallenge(sendMessageRequest).pipe(
-        Effect.flatMap((body) =>
-          handleCommonAndExpectedErrorsEffect(
-            client.sendMessage({
-              body,
-            }),
-            SendMessageErrors
+        ),
+      sendMessage: (
+        sendMessageRequest: RequestWithGeneratableChallenge<SendMessageRequest>
+      ) =>
+        addChallenge(sendMessageRequest).pipe(
+          Effect.flatMap((body) =>
+            client.Messages.sendMessage({
+              payload: body,
+            })
           )
-        )
-      ),
-    sendMessages: (sendMessagesRequest: SendMessagesRequest) =>
-      handleCommonAndExpectedErrorsEffect(
-        client.sendMessages({body: sendMessagesRequest}),
-        SendMessageErrors
-      ),
-    // ----------------------
-    // 👇 Challenge
-    // ----------------------
-    createChallenge: (createChallengeRequest: CreateChallengeRequest) =>
-      handleCommonErrorsEffect(
-        client.createChallenge({body: createChallengeRequest})
-      ),
-    createChallengeBatch: (createChallengesRequest: CreateChallengesRequest) =>
-      handleCommonErrorsEffect(
-        client.createChallengeBatch({body: createChallengesRequest})
-      ),
-  }
+        ),
+      sendMessages: (sendMessagesRequest: SendMessagesRequest) =>
+        client.Messages.sendMessages({payload: sendMessagesRequest}),
+      // ----------------------
+      // 👇 Challenge
+      // ----------------------
+      createChallenge: (createChallengeRequest: CreateChallengeRequest) =>
+        client.Challenges.createChallenge({payload: createChallengeRequest}),
+      createChallengeBatch: (
+        createChallengesRequest: CreateChallengesRequest
+      ) =>
+        client.Challenges.createChallengeBatch({
+          payload: createChallengesRequest,
+        }),
+    }
+  })
 }
 
-export type ChatApi = ReturnType<typeof api>
+export type ChatApi = Effect.Effect.Success<ReturnType<typeof api>>

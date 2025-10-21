@@ -171,7 +171,7 @@ export const googleGeocode =
           return Effect.zipRight(
             Effect.logError('Error while requesting geocode', e),
             new UnexpectedServerError({
-              detail: 'ExternalApi' as const,
+              message: 'ExternalApi' as const,
               status: 500,
             })
           )
@@ -210,7 +210,7 @@ export const googleGeocode =
           Effect.logError('Unexpected response from google api', e),
           new UnexpectedServerError({
             status: 500,
-            detail: 'ExternalApi' as const,
+            message: 'ExternalApi' as const,
           })
         )
       ),
@@ -218,7 +218,7 @@ export const googleGeocode =
         return Effect.zipRight(
           Effect.logError('Error defect while getting geocode', defect),
           new UnexpectedServerError({
-            detail: 'ExternalApi' as const,
+            message: 'ExternalApi' as const,
             status: 500,
           })
         )

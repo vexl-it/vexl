@@ -1,4 +1,3 @@
-import {HttpClientRequest} from '@effect/platform'
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
@@ -9,6 +8,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {NotPermittedToSendMessageToTargetInboxError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
@@ -31,32 +31,28 @@ beforeEach(async () => {
       user2 = yield* _(createMockedUser('+420733333331'))
       const client = yield* _(NodeTestingApp)
 
+      yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
-        client.requestApproval(
-          {
-            body: {
-              message: 'someMessage',
-              publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-            },
+        client.Inboxes.requestApproval({
+          payload: {
+            message: 'someMessage',
+            publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
-          HttpClientRequest.setHeaders(user1.authHeaders)
-        )
+        })
       )
 
       // will send message user1 -> user2
+      yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
-        client.approveRequest(
-          {
-            body: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'someMessage2',
-                publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
-                approve: true,
-              })
-            ),
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Inboxes.approveRequest({
+          payload: yield* _(
+            user2.inbox1.addChallenge({
+              message: 'someMessage2',
+              publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
+              approve: true,
+            })
+          ),
+        })
       )
 
       // Will send message user2 -> user1
@@ -69,12 +65,9 @@ beforeEach(async () => {
       )) satisfies SendMessageRequest
 
       yield* _(
-        client.sendMessage(
-          {
-            body: messageToSend,
-          },
-          HttpClientRequest.setHeaders(user2.authHeaders)
-        )
+        client.Messages.sendMessage({
+          payload: messageToSend,
+        })
       )
 
       yield* _(sql`DELETE FROM message`)
@@ -88,18 +81,16 @@ describe('Leave chat', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
+        yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
-          client.leaveChat(
-            {
-              body: yield* _(
-                user2.inbox1.addChallenge({
-                  message: 'leaveMessage',
-                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                })
-              ),
-            },
-            HttpClientRequest.setHeaders(user2.authHeaders)
-          )
+          client.Inboxes.leaveChat({
+            payload: yield* _(
+              user2.inbox1.addChallenge({
+                message: 'leaveMessage',
+                receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+              })
+            ),
+          })
         )
 
         const sql = yield* _(SqlClient.SqlClient)
@@ -111,16 +102,14 @@ describe('Leave chat', () => {
         `)
         expect(whitelistRecords).toHaveLength(0)
 
+        yield* _(setAuthHeaders(user1.authHeaders))
         const messagesForUser1 = yield* _(
-          client.retrieveMessages(
-            {
-              body: yield* _(user1.addChallengeForMainInbox({})),
-              headers: Schema.decodeSync(CommonHeaders)({
-                'user-agent': 'Vexl/2 (1.0.0) IOS',
-              }),
-            },
-            HttpClientRequest.setHeaders(user1.authHeaders)
-          )
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
+          })
         )
 
         expect(messagesForUser1.messages[0].message).toEqual('leaveMessage')
@@ -134,18 +123,16 @@ describe('Leave chat', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user2.authHeaders))
           const failedResponse = yield* _(
-            client.leaveChat(
-              {
-                body: yield* _(
-                  user2.inbox1.addChallenge({
-                    message: 'leaveMessage',
-                    receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
-                  })
-                ),
-              },
-              HttpClientRequest.setHeaders(user2.authHeaders)
-            ),
+            client.Inboxes.leaveChat({
+              payload: yield* _(
+                user2.inbox1.addChallenge({
+                  message: 'leaveMessage',
+                  receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
+                })
+              ),
+            }),
             Effect.either
           )
 
@@ -159,21 +146,19 @@ describe('Leave chat', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user2.authHeaders))
           const failedResponse = yield* _(
-            client.leaveChat(
-              {
-                body: yield* _(
-                  addChallengeForKey(
-                    generatePrivateKey(),
-                    user2.authHeaders
-                  )({
-                    message: 'leaveMessage',
-                    receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  })
-                ),
-              },
-              HttpClientRequest.setHeaders(user2.authHeaders)
-            ),
+            client.Inboxes.leaveChat({
+              payload: yield* _(
+                addChallengeForKey(
+                  generatePrivateKey(),
+                  user2.authHeaders
+                )({
+                  message: 'leaveMessage',
+                  receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                })
+              ),
+            }),
             Effect.either
           )
 
@@ -187,18 +172,16 @@ describe('Leave chat', () => {
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
 
+          yield* _(setAuthHeaders(user2.authHeaders))
           const failedResponse = yield* _(
-            client.leaveChat(
-              {
-                body: yield* _(
-                  user2.inbox1.addChallenge({
-                    message: 'leaveMessage',
-                    receiverPublicKey: user1.inbox1.keyPair.publicKeyPemBase64,
-                  })
-                ),
-              },
-              HttpClientRequest.setHeaders(user2.authHeaders)
-            ),
+            client.Inboxes.leaveChat({
+              payload: yield* _(
+                user2.inbox1.addChallenge({
+                  message: 'leaveMessage',
+                  receiverPublicKey: user1.inbox1.keyPair.publicKeyPemBase64,
+                })
+              ),
+            }),
             Effect.either
           )
 

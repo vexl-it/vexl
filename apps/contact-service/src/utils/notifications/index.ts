@@ -65,7 +65,7 @@ export const sendFcmNotificationToAllHandleNonExistingTokens = ({
           new UnexpectedServerError({
             cause: e,
             status: 500,
-            detail: e.message,
+            message: e.message,
           })
         )
       )

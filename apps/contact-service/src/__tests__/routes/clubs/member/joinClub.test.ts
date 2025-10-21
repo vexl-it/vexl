@@ -4,6 +4,7 @@ import {
   type ClubCode,
   generateClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
+import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -16,6 +17,7 @@ import {
   type SignedChallenge,
 } from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
@@ -59,13 +61,14 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
+      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
       yield* _(
-        app.createClub({
-          body: {
-            club,
-          },
-          query: {
+        app.ClubsAdmin.createClub({
+          urlParams: {
             adminToken: ADMIN_TOKEN,
+          },
+          payload: {
+            club,
           },
         })
       )
@@ -97,8 +100,8 @@ describe('Join club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const joinedClub = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
               notificationToken: Option.some(
@@ -110,8 +113,8 @@ describe('Join club', () => {
         )
 
         const joinedClub2 = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -133,20 +136,21 @@ describe('Join club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
 
+        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
-            body: {
+            payload: {
               clubUuid: club.uuid,
             },
           })
         )
 
         const joinedClub = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: inviteLink.link.code,
               notificationToken: Option.some(
@@ -158,8 +162,8 @@ describe('Join club', () => {
         )
 
         const joinedClub2 = yield* _(
-          app.getClubInfo({
-            body: {
+          app.ClubsMember.getClubInfo({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -183,19 +187,19 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
 
         const inviteLink = yield* _(
-          app.generateClubInviteLinkForAdmin({
-            query: {
+          app.ClubsAdmin.generateClubInviteLinkForAdmin({
+            urlParams: {
               adminToken: ADMIN_TOKEN,
             },
-            body: {
+            payload: {
               clubUuid: club.uuid,
             },
           })
         )
 
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: inviteLink.link.code,
               notificationToken: Option.some(
@@ -207,8 +211,8 @@ describe('Join club', () => {
         )
 
         const errorResponse = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
               code: inviteLink.link.code,
               notificationToken: Option.some(
@@ -220,10 +224,7 @@ describe('Join club', () => {
           Effect.either
         )
 
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -233,8 +234,8 @@ describe('Join club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
               code: INVITATION_CODE,
               notificationToken: Option.some(
@@ -246,8 +247,8 @@ describe('Join club', () => {
         )
 
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(user2))),
               code: INVITATION_CODE,
               notificationToken: Option.some(
@@ -259,8 +260,8 @@ describe('Join club', () => {
         )
 
         const failedResponse = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(user3))),
               code: INVITATION_CODE,
               notificationToken: Option.some(
@@ -284,8 +285,8 @@ describe('Join club', () => {
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
 
         const errorResponse = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               signedChallenge: {
                 ...signedChallenge.signedChallenge,
                 challenge: 'badChallenge' as SignedChallenge['challenge'],
@@ -309,8 +310,8 @@ describe('Join club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
               notificationToken: Option.some(
@@ -322,8 +323,8 @@ describe('Join club', () => {
         )
 
         const errorResponse = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
               notificationToken: Option.some(
@@ -343,8 +344,8 @@ describe('Join club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: '123445' as ClubCode,
               notificationToken: Option.some(
@@ -355,10 +356,7 @@ describe('Join club', () => {
           }),
           Effect.either
         )
-        if (errorResponse._tag !== 'Left') {
-          throw new Error('Expected error response')
-        }
-        expect((errorResponse.left as any).status).toEqual(404)
+        expectErrorResponse(NotFoundError)(errorResponse)
       })
     )
   })
@@ -421,8 +419,8 @@ describe('Join club', () => {
         )
 
         yield* _(
-          app.joinClub({
-            body: {
+          app.ClubsMember.joinClub({
+            payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
               notificationToken: Option.some(

@@ -42,11 +42,11 @@ describe('Initialize verification', () => {
         const challenge = yield* _(generateAndSignChallenge)
 
         const data = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge,
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
@@ -72,11 +72,11 @@ describe('Initialize verification', () => {
         const challenge = yield* _(generateAndSignChallenge)
 
         const data = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/1 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge,
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
@@ -97,11 +97,11 @@ describe('Initialize verification', () => {
         const challenge = yield* _(generateAndSignChallenge)
 
         const data = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge: {
                 ...challenge,
                 clientSignature: 'bad' as LoginChallengeClientSignature,
@@ -125,11 +125,11 @@ describe('Initialize verification', () => {
         const challenge = yield* _(generateAndSignChallenge)
 
         const data = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge: {
                 ...challenge,
                 serverSignature: 'bad' as LoginChallengeServerSignature,
@@ -156,11 +156,11 @@ describe('Initialize verification', () => {
         )
 
         const data = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge: {
                 challenge: challenge.encodedChallenge,
                 clientSignature,
@@ -184,11 +184,11 @@ describe('Initialize verification', () => {
         const challenge = yield* _(generateAndSignChallenge)
 
         const data = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge,
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333331'),
             },
@@ -218,27 +218,19 @@ describe('Initialize verification', () => {
         )
 
         const result = yield* _(
-          client.initVerification({
+          client.Login.initVerification({
             headers: Schema.decodeSync(CommonHeaders)({
               'user-agent': 'Vexl/2 (1.0.0) IOS',
             }),
-            body: {
+            payload: {
               challenge,
               phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             },
           }),
           Effect.either
         )
-        if (result._tag === 'Right') {
-          expect('Expected error').toBe('Got success')
-          return
-        }
-        const receivedError = yield* _(
-          Schema.decodeUnknown(UnableToSendVerificationSmsError)(
-            result.left.error
-          )
-        )
-        expect(receivedError.reason).toEqual('InvalidPhoneNumber')
+
+        expectErrorResponse(UnableToSendVerificationSmsError)(result)
       })
     )
   })

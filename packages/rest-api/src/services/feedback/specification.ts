@@ -1,16 +1,21 @@
-import {Api} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {SubmitFeedbackRequest} from './contracts'
 
-export const SubmitFeedbackEndpoint = Api.post(
+export const SubmitFeedbackEndpoint = HttpApiEndpoint.post(
   'submitFeedback',
   '/api/v1/feedback/submit'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(SubmitFeedbackRequest)
-)
+).setPayload(SubmitFeedbackRequest)
 
-export const FeedbackApiSpecification = Api.make({
-  title: 'Feedback service',
-}).pipe(Api.addEndpoint(SubmitFeedbackEndpoint))
+export const FeedbackApiSpecification = HttpApi.make('Feedback service')
+  .add(
+    HttpApiGroup.make('root', {topLevel: true})
+      .add(SubmitFeedbackEndpoint)
+      .middleware(ServerSecurityMiddleware)
+  )
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

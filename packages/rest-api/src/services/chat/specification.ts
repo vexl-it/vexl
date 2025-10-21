@@ -1,6 +1,16 @@
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  OpenApi,
+} from '@effect/platform/index'
+import {
+  NotFoundError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
+import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
-import {Api, ApiGroup} from 'effect-http'
-import {ServerSecurity} from '../../apiSecurity'
+import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {
   ApproveRequestErrors,
@@ -40,208 +50,151 @@ import {
   UpdateInboxResponse,
 } from './contracts'
 
-export const UpdateInboxEndpoint = Api.put('updateInbox', '/api/v1/inboxes', {
-  deprecated: true,
-  description:
-    'Not needed anymore since chat service does not sent fcm messages and does not collect fcm tokens anymore',
-}).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(UpdateInboxRequest),
-  Api.setResponseBody(UpdateInboxResponse)
+export const UpdateInboxEndpoint = HttpApiEndpoint.put(
+  'updateInbox',
+  '/api/v1/inboxes'
 )
+  .annotate(OpenApi.Deprecated, true)
+  .annotate(
+    OpenApi.Description,
+    'Not needed anymore since chat service does not sent fcm messages and does not collect fcm tokens anymore'
+  )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(UpdateInboxRequest)
+  .addSuccess(UpdateInboxResponse)
 
-export const CreateInboxEndpoint = Api.post(
+export const CreateInboxEndpoint = HttpApiEndpoint.post(
   'createInbox',
   '/api/v1/inboxes'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CreateInboxRequest),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setResponseBody(CreateInboxResponse)
 )
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setPayload(CreateInboxRequest)
+  .addSuccess(CreateInboxResponse)
+  .addError(InvalidChallengeError)
 
-export const DeleteInboxEndpoint = Api.delete(
+export const DeleteInboxEndpoint = HttpApiEndpoint.del(
   'deleteInbox',
   '/api/v1/inboxes'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeleteInboxRequest),
-  Api.setResponseBody(DeleteInboxResponse),
-  Api.addResponse({
-    status: 400,
-    body: DeleteInboxErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(DeleteInboxRequest)
+  .addSuccess(DeleteInboxResponse)
+  .addError(DeleteInboxErrors)
 
-export const DeletePulledMessagesEndpoint = Api.delete(
+export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
   'deletePulledMessages',
   '/api/v1/inboxes/messages'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeletePulledMessagesRequest),
-  Api.setResponseBody(DeletePulledMessagesResponse),
-  Api.addResponse({
-    status: 400,
-    body: DeletePulledMessagesErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(DeletePulledMessagesRequest)
+  .addSuccess(DeletePulledMessagesResponse)
+  .addError(DeletePulledMessagesErrors)
 
-export const BlockInboxEndpoint = Api.put(
+export const BlockInboxEndpoint = HttpApiEndpoint.put(
   'blockInbox',
   '/api/v1/inboxes/block'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(BlockInboxRequest),
-  Api.setResponseBody(BlockInboxResponse),
-  Api.addResponse({
-    status: 400,
-    body: BlockInboxErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(BlockInboxRequest)
+  .addSuccess(BlockInboxResponse)
+  .addError(BlockInboxErrors)
 
-export const RequestApprovalEndpoint = Api.post(
+export const RequestApprovalEndpoint = HttpApiEndpoint.post(
   'requestApproval',
   '/api/v1/inboxes/approval/request'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(RequestApprovalRequest),
-  Api.setResponseBody(RequestApprovalResponse),
-  Api.addResponse({
-    status: 400,
-    body: RequestApprovalErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RequestApprovalRequest)
+  .addSuccess(RequestApprovalResponse)
+  .addError(RequestApprovalErrors)
 
-export const CancelRequestApprovalEndpoint = Api.post(
+export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
   'cancelRequestApproval',
   '/api/v1/inboxes/approval/cancel'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(CancelApprovalRequest),
-  Api.setResponseBody(CancelApprovalResponse),
-  Api.addResponse({
-    status: 400,
-    body: CancelRequestApprovalErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(CancelApprovalRequest)
+  .addSuccess(CancelApprovalResponse)
+  .addError(CancelRequestApprovalErrors)
 
-export const ApproveRequestEndpoint = Api.post(
+export const ApproveRequestEndpoint = HttpApiEndpoint.post(
   'approveRequest',
   '/api/v1/inboxes/approval/confirm'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(ApproveRequestRequest),
-  Api.setResponseBody(ApproveRequestResponse),
-  Api.addResponse({
-    status: 400,
-    body: ApproveRequestErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(ApproveRequestRequest)
+  .addSuccess(ApproveRequestResponse)
+  .addError(ApproveRequestErrors)
 
-export const DeleteInboxesEndpoint = Api.delete(
+export const DeleteInboxesEndpoint = HttpApiEndpoint.del(
   'deleteInboxes',
-  '/api/v1/inboxes/batch',
-  {deprecated: true}
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(DeleteInboxesRequest),
-  Api.setResponseBody(DeleteInboxesResponse)
+  '/api/v1/inboxes/batch'
 )
+  .annotate(OpenApi.Deprecated, true)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(DeleteInboxesRequest)
+  .addSuccess(DeleteInboxesResponse)
+  .addError(DeleteInboxErrors)
 
-export const LeaveChatEndpoint = Api.post(
+export const LeaveChatEndpoint = HttpApiEndpoint.post(
   'leaveChat',
   '/api/v1/inboxes/leave-chat'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-
-  Api.setRequestBody(LeaveChatRequest),
-  Api.setResponseBody(LeaveChatResponse),
-  Api.addResponse({
-    status: 400,
-    body: LeaveChatErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(LeaveChatRequest)
+  .addSuccess(LeaveChatResponse)
+  .addError(LeaveChatErrors)
 
-export const RetrieveMessagesEndpoint = Api.put(
+export const RetrieveMessagesEndpoint = HttpApiEndpoint.put(
   'retrieveMessages',
   '/api/v1/inboxes/messages'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestHeaders(CommonHeaders),
-  Api.setRequestBody(RetrieveMessagesRequest),
-  Api.setResponseBody(RetrieveMessagesResponse),
-  Api.addResponse({
-    status: 400,
-    body: RetrieveMessagesErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setPayload(RetrieveMessagesRequest)
+  .addSuccess(RetrieveMessagesResponse)
+  .addError(RetrieveMessagesErrors)
 
-export const SendMessageEndpoint = Api.post(
+export const SendMessageEndpoint = HttpApiEndpoint.post(
   'sendMessage',
   '/api/v1/inboxes/messages'
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(SendMessageRequest),
-  Api.setResponseBody(SendMessageResponse),
-  Api.addResponse({
-    status: 400,
-    body: SendMessageErrors,
-  })
 )
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(SendMessageRequest)
+  .addSuccess(SendMessageResponse)
+  .addError(SendMessageErrors)
 
-export const SendMessagesEndpoint = Api.post(
+export const SendMessagesEndpoint = HttpApiEndpoint.post(
   'sendMessages',
-  '/api/v1/inboxes/messages/batch',
-  {
-    deprecated: true,
-  }
-).pipe(
-  Api.setSecurity(ServerSecurity),
-  Api.setResponseStatus(200 as const),
-  Api.setRequestBody(SendMessagesRequest),
-  Api.setResponseBody(SendMessagesResponse),
-  Api.addResponse({
-    status: 400,
-    body: SendMessageErrors,
-  })
+  '/api/v1/inboxes/messages/batch'
 )
+  .annotate(OpenApi.Deprecated, true)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(SendMessagesRequest)
+  .addSuccess(SendMessagesResponse)
+  .addError(SendMessageErrors)
 
-const InboxesApiGroup = ApiGroup.make('Inboxes').pipe(
-  ApiGroup.addEndpoint(UpdateInboxEndpoint),
-  ApiGroup.addEndpoint(CreateInboxEndpoint),
-  ApiGroup.addEndpoint(DeleteInboxEndpoint),
-  ApiGroup.addEndpoint(BlockInboxEndpoint),
-  ApiGroup.addEndpoint(RequestApprovalEndpoint),
-  ApiGroup.addEndpoint(CancelRequestApprovalEndpoint),
-  ApiGroup.addEndpoint(ApproveRequestEndpoint),
-  ApiGroup.addEndpoint(DeleteInboxesEndpoint),
-  ApiGroup.addEndpoint(LeaveChatEndpoint),
-  ApiGroup.addEndpoint(DeletePulledMessagesEndpoint)
-)
+const InboxesApiGroup = HttpApiGroup.make('Inboxes')
+  .add(UpdateInboxEndpoint)
+  .add(CreateInboxEndpoint)
+  .add(DeleteInboxEndpoint)
+  .add(BlockInboxEndpoint)
+  .add(RequestApprovalEndpoint)
+  .add(CancelRequestApprovalEndpoint)
+  .add(ApproveRequestEndpoint)
+  .add(DeleteInboxesEndpoint)
+  .add(LeaveChatEndpoint)
+  .add(DeletePulledMessagesEndpoint)
 
-const MessagesApiGroup = ApiGroup.make('Messages').pipe(
-  ApiGroup.addEndpoint(RetrieveMessagesEndpoint),
-  ApiGroup.addEndpoint(SendMessageEndpoint),
-  ApiGroup.addEndpoint(SendMessagesEndpoint)
-)
+const MessagesApiGroup = HttpApiGroup.make('Messages')
+  .add(RetrieveMessagesEndpoint)
+  .add(SendMessageEndpoint)
+  .add(SendMessagesEndpoint)
 
-export const ChatApiSpecification = Api.make({
-  title: 'Chat service',
-  version: '1.0.0',
-}).pipe(
-  Api.addGroup(InboxesApiGroup),
-  Api.addGroup(MessagesApiGroup),
-  Api.addGroup(ChallengeApiGroup)
-)
+export const ChatApiSpecification = HttpApi.make('Chat API')
+  .add(InboxesApiGroup)
+  .add(MessagesApiGroup)
+  .add(ChallengeApiGroup)
+  .addError(NotFoundError)
+  .addError(UnexpectedServerError)

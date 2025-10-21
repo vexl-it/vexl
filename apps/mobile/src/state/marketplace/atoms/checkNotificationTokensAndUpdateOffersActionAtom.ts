@@ -145,15 +145,13 @@ const checkNotificationTokensAndUpdateOffersActionAtom = atom(
               effectToTaskEither,
               TE.match(
                 (e) => {
-                  if (e._tag !== 'NetworkError') {
-                    reportError(
-                      'error',
-                      new Error(
-                        'Error while updating offer with new notification token'
-                      ),
-                      {e}
-                    )
-                  }
+                  reportError(
+                    'error',
+                    new Error(
+                      'Error while updating offer with new notification token'
+                    ),
+                    {e}
+                  )
                   return false
                 },
                 () => {

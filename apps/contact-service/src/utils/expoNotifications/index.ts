@@ -111,7 +111,7 @@ export const sendExpoNotificationToAllHandleNonExistingTokens = ({
           new UnexpectedServerError({
             cause: e,
             status: 500,
-            detail: e.message,
+            message: e.message,
           })
         )
       )

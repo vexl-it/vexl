@@ -1,27 +1,29 @@
+import {HttpApiBuilder} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {GetClubInfoErrors} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {GetClubInfoEndpoint} from '@vexl-next/rest-api/src/services/contact/specification'
-import makeEndpointEffect from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
+import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {DateTime, Effect, Option} from 'effect'
-import {Handler} from 'effect-http'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 
-export const getClubInfo = Handler.make(GetClubInfoEndpoint, (req) =>
-  makeEndpointEffect(
+export const getClubInfo = HttpApiBuilder.handler(
+  ContactApiSpecification,
+  'ClubsMember',
+  'getClubInfo',
+  (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateChallengeInBody(req.body))
+      yield* _(validateChallengeInBody(req.payload))
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
 
       const member = yield* _(
         membersDb.findClubMemberByPublicKey({
-          publicKey: req.body.publicKey,
+          publicKey: req.payload.publicKey,
         }),
         Effect.flatten,
         Effect.catchTag(
@@ -34,7 +36,7 @@ export const getClubInfo = Handler.make(GetClubInfoEndpoint, (req) =>
         membersDb.updateNotificationToken({
           id: member.clubId,
           publicKey: member.publicKey,
-          notificationToken: Option.getOrNull(req.body.notificationToken),
+          notificationToken: Option.getOrNull(req.payload.notificationToken),
         })
       )
 
@@ -57,7 +59,7 @@ export const getClubInfo = Handler.make(GetClubInfoEndpoint, (req) =>
           () =>
             new UnexpectedServerError({
               status: 500,
-              detail: 'Club not found. This should not happen',
+              message: 'Club not found. This should not happen',
             })
         )
       )
@@ -67,7 +69,5 @@ export const getClubInfo = Handler.make(GetClubInfoEndpoint, (req) =>
           isModerator: member.isModerator,
         },
       }
-    }),
-    GetClubInfoErrors
-  )
+    }).pipe(makeEndpointEffect)
 )

@@ -11555,7 +11555,7 @@ __metadata:
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
     typescript: ~5.9.2
-    vite: ^6.1.6
+    vite: ^6.4.1
     ws: ^8.18.3
   languageName: unknown
   linkType: soft
@@ -12445,7 +12445,7 @@ __metadata:
     react-dom: 19.1.2
     tailwindcss: ^4.1.12
     typescript: ~5.9.2
-    vite: ^6.1.6
+    vite: ^6.4.1
     vite-tsconfig-paths: ^4.2.1
     zod: ^3.22.3
   languageName: unknown
@@ -19307,23 +19307,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^11.1.0":
-  version: 11.1.0
-  resolution: "glob@npm:11.1.0"
-  dependencies:
-    foreground-child: ^3.3.1
-    jackspeak: ^4.1.1
-    minimatch: ^10.1.1
-    minipass: ^7.1.2
-    package-json-from-dist: ^1.0.0
-    path-scurry: ^2.0.0
-  bin:
-    glob: dist/esm/bin.mjs
-  checksum: 1cfbdc743db77688727411f00233404eb9c67d7c89a4ff1f8b8e60031382d4f695ecf60f279d0d45e5ba2377610572d013a858a433b45a133cf20aba6e3206e0
-  languageName: node
-  linkType: hard
-
-"glob@npm:^11.0.3":
+"glob@npm:^11.0.3, glob@npm:^11.1.0":
   version: 11.1.0
   resolution: "glob@npm:11.1.0"
   dependencies:
@@ -23892,15 +23876,6 @@ __metadata:
   dependencies:
     brace-expansion: ^2.0.1
   checksum: 253487976bf485b612f16bf57463520a14f512662e592e95c571afdab1442a6a6864b6c88f248ce6fc4ff0b6de04ac7aa6c8bb51e868e99d1d65eb0658a708b5
-  languageName: node
-  linkType: hard
-
-"minimatch@npm:^10.1.1":
-  version: 10.1.1
-  resolution: "minimatch@npm:10.1.1"
-  dependencies:
-    "@isaacs/brace-expansion": ^5.0.0
-  checksum: 8820c0be92994f57281f0a7a2cc4268dcc4b610f9a1ab666685716b4efe4b5898b43c835a8f22298875b31c7a278a5e3b7e253eee7c886546bb0b61fb94bca6b
   languageName: node
   linkType: hard
 
@@ -31734,9 +31709,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^6.1.6":
-  version: 6.3.6
-  resolution: "vite@npm:6.3.6"
+"vite@npm:^6.4.1":
+  version: 6.4.1
+  resolution: "vite@npm:6.4.1"
   dependencies:
     esbuild: ^0.25.0
     fdir: ^6.4.4
@@ -31785,7 +31760,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: bf1e90cb31ea0bb8b13dd046fe9584cb6108dac59332cf56e3ea7a4a77fd4e795c0486957d3cc56a6179608d990110ec9569ed973d53f7adff1590401ebb8f55
+  checksum: 7a939dbd6569ba829a7c21a18f8eca395a3a13cb93ce0fec02e8aa462e127a8daac81d00f684086648d905786056bba1ad931f51d88f06835d3b972bc9fbddda
   languageName: node
   linkType: hard
 

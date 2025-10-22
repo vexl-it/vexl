@@ -1,6 +1,6 @@
 // import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 
-const VERSION_CODE = 600
+const VERSION_CODE = 601
 const VERSION = '1.37.0'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
@@ -26,6 +26,7 @@ const presets = {
       'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
     commitHash: COMMIT_HASH,
     appSource: APP_SOURCE,
+    iconV2: './assets/icon-stage.icon',
   },
   prod: {
     enableHiddenFeatures: false,
@@ -43,6 +44,7 @@ const presets = {
       'rv5AKXDcED4txmI5Nltz9eZFAHOI1VrLT3JWOpEZefE5uGInq53rfHkQLUIjaMUHv3hicbk/wtSKOfsNZ3aNNw==',
     commitHash: COMMIT_HASH,
     appSource: APP_SOURCE,
+    iconV2: './assets/icon-prod.icon',
   },
 }
 
@@ -67,10 +69,7 @@ export default {
   'assetBundlePatterns': ['**/*'],
   'ios': {
     buildNumber: String(VERSION_CODE),
-    'icon':
-      extra.apiPreset === 'prodEnv'
-        ? './assets/icon.icon'
-        : './assets/icon-stage.icon',
+    'icon': extra.iconV2,
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,
     'config': {

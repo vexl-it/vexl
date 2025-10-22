@@ -69,7 +69,7 @@ export default {
   'assetBundlePatterns': ['**/*'],
   'ios': {
     buildNumber: String(VERSION_CODE),
-    'icon': extra.iconV2,
+    // 'icon': extra.iconV2, // Does not work due to this: https://github.com/expo/expo/issues/39782
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,
     'config': {

@@ -26,6 +26,7 @@ const presets = {
       'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
     commitHash: COMMIT_HASH,
     appSource: APP_SOURCE,
+    iconV2: './assets/icon-stage.icon',
   },
   prod: {
     enableHiddenFeatures: false,
@@ -43,6 +44,7 @@ const presets = {
       'rv5AKXDcED4txmI5Nltz9eZFAHOI1VrLT3JWOpEZefE5uGInq53rfHkQLUIjaMUHv3hicbk/wtSKOfsNZ3aNNw==',
     commitHash: COMMIT_HASH,
     appSource: APP_SOURCE,
+    iconV2: './assets/icon.icon',
   },
 }
 
@@ -67,10 +69,7 @@ export default {
   'assetBundlePatterns': ['**/*'],
   'ios': {
     buildNumber: String(VERSION_CODE),
-    'icon':
-      extra.apiPreset === 'prodEnv'
-        ? './assets/icon.icon'
-        : './assets/icon-stage.icon',
+    // 'icon': extra.iconV2, // Does not work due to this: https://github.com/expo/expo/issues/39782
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,
     'config': {

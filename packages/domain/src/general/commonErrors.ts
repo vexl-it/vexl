@@ -42,3 +42,11 @@ export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>(
     default: () => 'Unauthorized error',
   }),
 }) {}
+
+export class InvalidNextPageTokenError extends Schema.TaggedError<InvalidNextPageTokenError>(
+  'InvalidNextPageTokenError'
+)('InvalidNextPageTokenError', {
+  cause: Schema.Unknown,
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  message: Schema.optional(Schema.String),
+}) {}

@@ -5,27 +5,33 @@ import {
   FriendLevelE,
   ListingTypeE,
   LocationStateE,
+  OfferInfoE,
   OfferLocationE,
   OfferTypeE,
   OneOfferInState,
   OneOfferInStateE,
   PaymentMethodE,
+  PrivatePartRecordId,
   SortE,
   SpokenLanguageE,
 } from '@vexl-next/domain/src/general/offers'
+import {Base64StringE} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {
   IsoDatetimeString,
   IsoDatetimeStringE,
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type ApiErrorFetchingClubsOffers} from '@vexl-next/resources-utils/src/offers/getNewClubsOffersAndDecrypt'
-import {type ApiErrorFetchingOffers} from '@vexl-next/resources-utils/src/offers/getNewOffersAndDecrypt'
-import {type ErrorSigningChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Schema} from 'effect'
+import {objectToBase64UrlEncoded} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
+import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
+import {GetOffersForMeNextPageToken} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {Effect, Schema} from 'effect'
 import {z} from 'zod'
 import {fastDeepEqualRemoveUndefineds} from '../../utils/fastDeepEqualRemoveUndefineds'
+
+export type ApiErrorFetchingOffers = Effect.Effect.Error<
+  ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfter']>
+>
 
 export type ApiErrorFetchingRemovedOffers =
   BasicError<'ApiErrorFetchingRemovedOffers'>
@@ -33,10 +39,29 @@ export type ApiErrorFetchingRemovedOffers =
 export type ApiErrorReportingOffer = BasicError<'ApiErrorReportingOffer'>
 export type ApiErrorDeletingOffer = BasicError<'ApiErrorDeletingOffer'>
 
+export class NotOfferFromContactNetworkError extends Schema.TaggedError<NotOfferFromContactNetworkError>(
+  'NotOfferFromContactNetworkError'
+)('NotOfferFromContactNetworkError', {
+  offerInfo: OfferInfoE,
+}) {}
+
+export const DEFAULT_PRIVATE_PART_ID_BASE64 = objectToBase64UrlEncoded({
+  object: {lastPrivatePartId: Schema.decodeSync(PrivatePartRecordId)('0')},
+  schema: GetOffersForMeNextPageToken,
+}).pipe(Effect.runSync)
+
 export const OffersState = z
   .object({
     // changedName to force clients to refetch all offers after update of the offers location shape
     lastUpdatedAt1: IsoDatetimeString.catch(() => MINIMAL_DATE),
+    contactOffersNextPageParam: z
+      .string()
+      .default(DEFAULT_PRIVATE_PART_ID_BASE64)
+      .optional(),
+    clubOffersNextPageParam: z
+      .string()
+      .default(DEFAULT_PRIVATE_PART_ID_BASE64)
+      .optional(),
     offers: z.array(OneOfferInState),
   })
   .readonly()
@@ -45,6 +70,12 @@ export const OffersStateE = Schema.Struct({
   lastUpdatedAt1: IsoDatetimeStringE.pipe(
     Schema.optionalWith({default: () => MINIMAL_DATE})
   ),
+  lastPrivatePartContactOfferIdBase64: Schema.optionalWith(Base64StringE, {
+    default: () => DEFAULT_PRIVATE_PART_ID_BASE64,
+  }),
+  lastPrivatePartClubOfferIdBase64: Schema.optionalWith(Base64StringE, {
+    default: () => DEFAULT_PRIVATE_PART_ID_BASE64,
+  }),
   offers: Schema.Array(OneOfferInStateE),
 })
 export type OffersState = typeof OffersStateE.Type
@@ -59,11 +90,10 @@ export interface SuccessLoadingState {
 
 export interface ErrorLoadingState {
   state: 'error'
-  error:
-    | ApiErrorFetchingOffers
-    | ApiErrorFetchingClubsOffers
-    | CryptoError
-    | ErrorSigningChallenge
+  error: Effect.Effect.Error<
+    | ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfterPaginated']>
+    | ReturnType<OfferApi['getClubOffersForMeModifiedOrCreatedAfterPaginated']>
+  >
 }
 
 export interface InProgressLoadingState {

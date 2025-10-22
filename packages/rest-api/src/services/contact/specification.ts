@@ -27,7 +27,7 @@ import {
   FetchCommonConnectionsRequest,
   FetchCommonConnectionsResponseE,
   FetchMyContactsRequest,
-  FetchMyContactsResponseE,
+  FetchMyContactsResponse,
   GenerateClubJoinLinkErrors,
   GenerateClubJoinLinkRequest,
   GenerateClubJoinLinkResponse,
@@ -154,7 +154,7 @@ export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
   .middleware(ServerSecurityMiddleware)
   .setHeaders(CommonHeaders)
   .setUrlParams(FetchMyContactsRequest)
-  .addSuccess(FetchMyContactsResponseE)
+  .addSuccess(FetchMyContactsResponse)
 
 export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnections',

@@ -10,7 +10,7 @@ import {
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
-import {type Atom, atom, type WritableAtom} from 'jotai'
+import {atom, type Atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -18,9 +18,13 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 import {OffersState} from '../domain'
 import {offerWithoutSourceOrNone} from '../utils/offerWithoutSourceOrNone'
 
+export const DEFAULT_PRIVATE_PART_ID = '0'
+
 export const offersStateAtom = atomWithParsedMmkvStorage(
   'offers',
   {
+    contactOffersNextPageParam: undefined,
+    clubOffersNextPageParam: undefined,
     lastUpdatedAt1: MINIMAL_DATE,
     offers: [],
   },
@@ -36,6 +40,15 @@ export const offersIdsAtom = focusAtom(offersAtom, (optic) =>
 
 export const lastUpdatedAtAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('lastUpdatedAt1')
+)
+
+export const contactOffersNextPageParamAtom = focusAtom(
+  offersStateAtom,
+  (optic) => optic.prop('contactOffersNextPageParam')
+)
+
+export const clubOffersNextPageParamAtom = focusAtom(offersStateAtom, (optic) =>
+  optic.prop('clubOffersNextPageParam')
 )
 
 export function singleOfferAtom(

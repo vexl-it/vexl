@@ -46,6 +46,7 @@
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/fix-brorand-for-expo": "0.0.0",
+    "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/localization": "0.0.0",
     "@vexl-next/react-native-ecdh-platform-native-utils": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",

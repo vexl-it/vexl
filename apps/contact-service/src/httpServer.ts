@@ -4,7 +4,6 @@ import {
   HttpMiddleware,
   HttpServer,
 } from '@effect/platform/index'
-import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
@@ -13,6 +12,7 @@ import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnectio
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
 import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'

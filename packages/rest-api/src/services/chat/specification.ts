@@ -8,9 +8,9 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {InvalidChallengeError} from '../../challenges/contracts'
+import {ChallengeApiGroup} from '../../challenges/specification'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {

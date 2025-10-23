@@ -6,13 +6,13 @@ import {
 import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {Schema} from 'effect'
 import {
   Challenge,
   InvalidChallengeError,
   RequestBaseWithChallenge,
   SignedChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Schema} from 'effect'
+} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   ForbiddenMessageTypeError,

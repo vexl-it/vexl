@@ -6,15 +6,15 @@ import {AdmitedToClubNetworkNotificationData} from '@vexl-next/domain/src/genera
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
+  InvalidChallengeError,
+  type SignedChallenge,
+} from '@vexl-next/rest-api/src/challenges/contracts'
+import {
   ClubUserLimitExceededError,
   MemberAlreadyInClubError,
   UserIsNotModeratorError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
-import {
-  InvalidChallengeError,
-  type SignedChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'

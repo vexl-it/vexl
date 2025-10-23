@@ -18,6 +18,10 @@ import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
+import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {
   type ForbiddenMessageTypeError,
@@ -25,10 +29,6 @@ import {
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {z} from 'zod'
 import {
   createEmptyTradeChecklistInState,

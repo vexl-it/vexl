@@ -1,8 +1,8 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {Challenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {Effect, flow} from 'effect'
-import {Challenge} from '../../../contracts'
 
 export const createDeleteChallenge = Effect.gen(function* (_) {
   const sql = yield* _(PgClient.PgClient)

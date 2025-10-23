@@ -11,9 +11,10 @@ import {
   hmacSignE,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
+// import {verifyUserSecurity} from '@vexl-next/server-utils/src/serverSecurity'
 import {NumberDoesNotMatchOldHashError} from '@vexl-next/rest-api/src/services/user/contracts'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
+import {verifyUserSecurity} from '@vexl-next/server-utils/src/serverSecurity'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'

@@ -10,8 +10,8 @@ import {ClubsDbService} from '../../../../db/ClubsDbService'
 
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {

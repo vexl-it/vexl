@@ -7,7 +7,7 @@ import {
   type CryptoError,
   ecdsaSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
+import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'

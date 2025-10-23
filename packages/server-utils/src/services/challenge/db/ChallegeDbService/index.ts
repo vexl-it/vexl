@@ -1,6 +1,6 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type Challenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {Context, Effect, Layer, type Option} from 'effect'
-import {type Challenge} from '../../contracts'
 import {type ChallengeRecord} from './domain'
 import {createDeleteChallenge} from './queries/createDeleteChallenge'
 import {createDeleteInvalidAndExpiredChallenges} from './queries/createDeleteInvalidAndExpiredChallenges'

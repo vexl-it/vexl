@@ -5,12 +5,15 @@ import {
   generateChallenge,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
+  Challenge,
+  type SignedChallenge,
+} from '@vexl-next/rest-api/src/challenges/contracts'
+import {Context, Effect, Layer, Option, Schema} from 'effect'
+import {
   withRedisLock,
   type RedisLockError,
   type RedisService,
-} from '@vexl-next/server-utils/src/RedisService'
-import {Context, Effect, Layer, Option, Schema} from 'effect'
-import {Challenge, type SignedChallenge} from './contracts'
+} from '../../RedisService'
 import {ChallengeDbService} from './db/ChallegeDbService'
 
 export const generateRandomChallenge = generateChallenge().pipe(

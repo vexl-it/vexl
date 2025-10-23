@@ -1,14 +1,12 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  type RedisLockError,
-  type RedisService,
-} from '@vexl-next/server-utils/src/RedisService'
-import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
-import {
   InvalidChallengeError,
   type RequestBaseWithChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
+} from '@vexl-next/rest-api/src/challenges/contracts'
+
 import {Effect} from 'effect'
+import {type RedisLockError, type RedisService} from '../../../RedisService'
+import {ChallengeService} from '../ChallengeService'
 
 export const validateChallengeInBody = (
   body: RequestBaseWithChallenge

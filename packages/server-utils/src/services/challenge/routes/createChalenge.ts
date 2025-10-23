@@ -1,10 +1,10 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {ChallengeApiSpecification} from '@vexl-next/rest-api/src/challenges/specification'
 import {Effect} from 'effect'
 import {makeEndpointEffect} from '../../../makeEndpointEffect'
 import {ChallengeService} from '../ChallengeService'
 import {challengeExpirationMinutesConfig} from '../db/ChallegeDbService/configs'
-import {ChallengeApiSpecification} from '../specification'
 
 export const createChallenge = HttpApiBuilder.handler(
   ChallengeApiSpecification,

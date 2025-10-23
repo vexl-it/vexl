@@ -13,12 +13,12 @@ import {
   ecdsaSignE,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {Effect, Schema} from 'effect'
+import {type ParseError} from 'effect/ParseResult'
 import {
   type ErrorSigningChallenge,
   type SignedChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Effect, Schema} from 'effect'
-import {type ParseError} from 'effect/ParseResult'
+} from '../../challenges/contracts'
 import {
   type CreateChallengeRequest,
   type CreateChallengeResponse,

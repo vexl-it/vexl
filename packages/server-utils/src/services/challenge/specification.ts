@@ -10,12 +10,15 @@ import {
   CreateChallengesResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 
+import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
+
 export const CreateChallengeEndpoint = HttpApiEndpoint.post(
   'createChallenge',
   '/api/v1/challenges'
 )
   .setPayload(CreateChallengeRequest)
   .addSuccess(CreateChallengeResponse)
+  .annotate(MaxExpectedDailyCall, 5000)
 
 export const CreateChallengeBatchEndpoint = HttpApiEndpoint.post(
   'createChallengeBatch',
@@ -23,6 +26,7 @@ export const CreateChallengeBatchEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(CreateChallengesRequest)
   .addSuccess(CreateChallengesResponse)
+  .annotate(MaxExpectedDailyCall, 5000)
 
 export const ChallengeApiGroup = HttpApiGroup.make('Challenges')
   .add(CreateChallengeEndpoint)

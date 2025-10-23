@@ -1,0 +1,44 @@
+name: "[Generate] Generate daily limits"
+run-name: "Run on commit ${{github.sha}}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Output format"
+        required: true
+        type: choice
+        options:
+          - json
+          - csv
+
+
+jobs:
+  build:
+    name: Generate daily limits
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn workspaces focus @vexl-next/generate-api-call-limits
+
+      - name: Run export
+        run: yarn workspace @vexl-next/generate-api-call-limits print-api-call-limits --output=${{ github.event.inputs.env }} > daily-limits.${{ github.event.inputs.env }}
+
+      - name: Upload daily limits file
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-limits-${{ github.event.inputs.env }}
+          path: daily-limits.${{ github.event.inputs.env }}
+          retention-days: 30

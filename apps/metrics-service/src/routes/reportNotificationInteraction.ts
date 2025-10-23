@@ -1,11 +1,11 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {MetricsServiceSpecification} from '@vexl-next/rest-api/src/services/metrics/specification'
+import {MetricsApiSpecification} from '@vexl-next/rest-api/src/services/metrics/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect/index'
 import {MetricsDbService} from '../db/MetricsDbService'
 
 export const reportNotificationInteraction = HttpApiBuilder.handler(
-  MetricsServiceSpecification,
+  MetricsApiSpecification,
   'root',
   'reportNotificationInteraction',
   ({headers, urlParams: query}) =>

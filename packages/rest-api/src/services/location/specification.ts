@@ -4,6 +4,7 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
   GetGeocodedCoordinatesRequest,
   GetGeocodedCoordinatesResponse,
@@ -20,6 +21,7 @@ export const GetLocationSuggestionEndpoint = HttpApiEndpoint.get(
   .setUrlParams(GetLocationSuggestionsRequest)
   .addSuccess(GetLocationSuggestionsResponse)
   .addError(LocationNotFoundError)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
   'getGeocodedCoordinates',
@@ -29,6 +31,7 @@ export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
   .setUrlParams(GetGeocodedCoordinatesRequest)
   .addSuccess(GetGeocodedCoordinatesResponse)
   .addError(LocationNotFoundError)
+  .annotate(MaxExpectedDailyCall, 50)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GetLocationSuggestionEndpoint)

@@ -5,6 +5,7 @@ import {
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
   GetExchangeRateError,
   GetExchangeRateRequest,
@@ -20,6 +21,7 @@ export const GetExchangeRateEndpoint = HttpApiEndpoint.get(
   .addSuccess(GetExchangeRateResponse)
   .middleware(ServerSecurityMiddleware)
   .addError(GetExchangeRateError)
+  .annotate(MaxExpectedDailyCall, 500)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
   GetExchangeRateEndpoint

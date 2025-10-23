@@ -1,0 +1,36 @@
+{
+  "name": "@vexl-next/generate-api-call-limits",
+  "main": "dist/server/index.cjs",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "start": "npx tsx src/index.ts",
+    "check-for-missing-annotations": "npx tsx src/checkForMissingAnnotations.ts",
+    "print-api-call-limits": "npx tsx src/printApiCallLimits.ts"
+  },
+  "dependencies": {
+    "@effect/platform": "^0.92.1",
+    "@effect/platform-node": "^0.98.3",
+    "@vexl-next/rest-api": "0.0.0",
+    "dotenv": "^16.4.5",
+    "dynamic-import-polyfill": "^0.1.1",
+    "effect": "^3.18.4"
+  },
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "esbuild": "^0.25.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.2",
+    "rimraf": "^4.4.0",
+    "ts-node": "^10.9.1",
+    "typescript": "~5.9.2"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

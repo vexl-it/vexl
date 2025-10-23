@@ -1,4 +1,9 @@
-import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
+import {
+  HttpApi,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  OpenApi,
+} from '@effect/platform/index'
 import {
   NotFoundError,
   UnexpectedServerError,
@@ -7,6 +12,7 @@ import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challe
 import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   AddUserToTheClubErrors,
@@ -83,6 +89,7 @@ export const CheckUserExistsEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(CheckUserExistsRequest)
   .addSuccess(UserExistsResponse)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const CreateUserEndpoint = HttpApiEndpoint.post(
   'createUser',
@@ -92,6 +99,7 @@ export const CreateUserEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonHeaders)
   .setPayload(CreateUserRequest)
   .addSuccess(NoContentResponse, {status: 201})
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const RefreshUserEndpoint = HttpApiEndpoint.post(
   'refreshUser',
@@ -102,6 +110,7 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .setPayload(RefreshUserRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
   'updateFirebaseToken',
@@ -112,6 +121,8 @@ export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
   .setPayload(UpdateFirebaseTokenRequest)
   .addError(UserNotFoundError)
   .addSuccess(NoContentResponse)
+  .annotate(OpenApi.Deprecated, true)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   'updateNotificationToken',
@@ -122,6 +133,7 @@ export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   .setPayload(UpdateNotificationTokenRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const DeleteUserEndpoint = HttpApiEndpoint.del(
   'deleteUser',
@@ -129,6 +141,7 @@ export const DeleteUserEndpoint = HttpApiEndpoint.del(
 )
   .middleware(ServerSecurityMiddleware)
   .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
   'eraseUserFromNetwork',
@@ -137,6 +150,7 @@ export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
   .setPayload(EraseUserFromNetworkRequest)
   .addSuccess(EraseUserFromNetworkResponse)
   .addError(EraseUserFromNetworkErrors)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const ImportContactsEndpoint = HttpApiEndpoint.post(
   'importContacts',
@@ -146,6 +160,7 @@ export const ImportContactsEndpoint = HttpApiEndpoint.post(
   .setPayload(ImportContactsRequest)
   .addSuccess(ImportContactsResponse)
   .addError(ImportContactsErrors)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
   'fetchMyContacts',
@@ -155,6 +170,7 @@ export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
   .setHeaders(CommonHeaders)
   .setUrlParams(FetchMyContactsRequest)
   .addSuccess(FetchMyContactsResponseE)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnections',
@@ -163,6 +179,7 @@ export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(FetchCommonConnectionsRequest)
   .addSuccess(FetchCommonConnectionsResponseE)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
   'updateBadOwnerHash',
@@ -172,6 +189,7 @@ export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
   .setPayload(UpdateBadOwnerHashRequest)
   .addSuccess(UpdateBadOwnerHashResponse)
   .addError(UpdateBadOwnerHashErrors)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const CreateClubEndpoint = HttpApiEndpoint.post(
   'createClub',
@@ -182,6 +200,7 @@ export const CreateClubEndpoint = HttpApiEndpoint.post(
   .addSuccess(CreateClubResponse)
   .addError(ClubAlreadyExistsError)
   .addError(InvalidAdminTokenError)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const ModfiyClubEndpoint = HttpApiEndpoint.put(
   'modifyClub',
@@ -191,6 +210,7 @@ export const ModfiyClubEndpoint = HttpApiEndpoint.put(
   .setPayload(ModifyClubRequest)
   .addSuccess(ModifyClubResponse)
   .addError(ModifyClubErrors)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
   'generateClubInviteLinkForAdmin',
@@ -200,6 +220,7 @@ export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
   .setPayload(GenerateInviteLinkForAdminRequest)
   .addSuccess(GenerateInviteLinkForAdminResponse)
   .addError(GenerateInviteLinkForAdminErrors)
+  .annotate(MaxExpectedDailyCall, 10000)
 
 export const ListClubsEndpoint = HttpApiEndpoint.get(
   'listClubs',
@@ -208,6 +229,7 @@ export const ListClubsEndpoint = HttpApiEndpoint.get(
   .setUrlParams(AdminTokenParams)
   .addSuccess(ListClubsResponse)
   .addError(ListClubsErrors)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GetClubInfoEndpoint = HttpApiEndpoint.post(
   'getClubInfo',
@@ -216,6 +238,7 @@ export const GetClubInfoEndpoint = HttpApiEndpoint.post(
   .setPayload(GetClubInfoRequest)
   .addSuccess(GetClubInfoResponse)
   .addError(GetClubInfoErrors)
+  .annotate(MaxExpectedDailyCall, 500)
 
 export const JoinClubEndpoint = HttpApiEndpoint.post(
   'joinClub',
@@ -224,6 +247,7 @@ export const JoinClubEndpoint = HttpApiEndpoint.post(
   .setPayload(JoinClubRequest)
   .addSuccess(JoinClubResponse)
   .addError(JoinClubErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const LeaveClubEndpoint = HttpApiEndpoint.post(
   'leaveClub',
@@ -232,6 +256,7 @@ export const LeaveClubEndpoint = HttpApiEndpoint.post(
   .setPayload(LeaveClubRequest)
   .addSuccess(NoContentResponse)
   .addError(LeaveClubErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const GenerateClubJoinLinkEndpoint = HttpApiEndpoint.post(
   'generateClubJoinLink',
@@ -240,6 +265,7 @@ export const GenerateClubJoinLinkEndpoint = HttpApiEndpoint.post(
   .setPayload(GenerateClubJoinLinkRequest)
   .addSuccess(GenerateClubJoinLinkResponse)
   .addError(GenerateClubJoinLinkErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.del(
   'deactivateClubJoinLink',
@@ -248,6 +274,7 @@ export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.del(
   .setPayload(DeactivateClubJoinLinkRequest)
   .addSuccess(DeactivateClubJoinLinkResponse)
   .addError(DeactivateClubJoinLinkErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const AddUserToTheClubEndpint = HttpApiEndpoint.post(
   'addUserToTheClub',
@@ -256,6 +283,7 @@ export const AddUserToTheClubEndpint = HttpApiEndpoint.post(
   .setPayload(AddUserToTheClubRequest)
   .addSuccess(AddUserToTheClubResponse)
   .addError(AddUserToTheClubErrors)
+  .annotate(MaxExpectedDailyCall, 1000)
 
 export const ListClubLinksEndpoint = HttpApiEndpoint.post(
   'listClubLinks',
@@ -264,6 +292,7 @@ export const ListClubLinksEndpoint = HttpApiEndpoint.post(
   .setPayload(ListClubLinksRequest)
   .addSuccess(ListClubLinksResponse)
   .addError(ListClubLinksErrors)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GetClubContactsEndpoint = HttpApiEndpoint.post(
   'getClubContacts',
@@ -272,6 +301,7 @@ export const GetClubContactsEndpoint = HttpApiEndpoint.post(
   .setPayload(GetClubContactsRequest)
   .addSuccess(GetClubContactsResponse)
   .addError(GetClubContactsErrors)
+  .annotate(MaxExpectedDailyCall, 500)
 
 export const GetClubInfoByAccessCodeEndpoint = HttpApiEndpoint.post(
   'getClubInfoByAccessCode',
@@ -280,6 +310,7 @@ export const GetClubInfoByAccessCodeEndpoint = HttpApiEndpoint.post(
   .setPayload(GetClubInfoByAccessCodeRequest)
   .addSuccess(GetClubInfoByAccessCodeResponse)
   .addError(GetClubInfoByAccessCodeErrors)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const ReportClubEndpoint = HttpApiEndpoint.post(
   'reportClub',
@@ -290,6 +321,7 @@ export const ReportClubEndpoint = HttpApiEndpoint.post(
   .addSuccess(ReportClubResponse)
   .addError(InvalidChallengeError)
   .addError(ReportClubLimitReachedError)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const SendBulkNotificationEndpoint = HttpApiEndpoint.post(
   'sendBulkNotification',
@@ -299,6 +331,7 @@ export const SendBulkNotificationEndpoint = HttpApiEndpoint.post(
   .setPayload(SendBulkNotificationRequest)
   .addSuccess(SendBulkNotificationResponse)
   .addError(SendBulkNotificationsErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)

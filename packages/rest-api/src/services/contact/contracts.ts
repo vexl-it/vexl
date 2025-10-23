@@ -25,12 +25,13 @@ import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotifica
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+
+import {Schema} from 'effect'
+import {z} from 'zod'
 import {
   InvalidChallengeError,
   RequestBaseWithChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Schema} from 'effect'
-import {z} from 'zod'
+} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {PageRequest, PageResponse} from '../../Pagination.brand'
 import {PlatformName} from '../../PlatformName'

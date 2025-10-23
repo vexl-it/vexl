@@ -10,11 +10,11 @@ import {
 import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Array, Schema} from 'effect'
 import {
   InvalidChallengeError,
   RequestBaseWithChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
-import {Array, Schema} from 'effect'
+} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(

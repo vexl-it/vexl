@@ -23,15 +23,15 @@ import {
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
 import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/rest-api/src/challenges/contracts'
+import {
   type ReceiverInboxDoesNotExistError,
   type SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {type ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {type ParseResult} from 'effect/index'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'

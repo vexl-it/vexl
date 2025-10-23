@@ -7,7 +7,7 @@ import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   InvalidChallengeError,
   type SignedChallenge,
-} from '@vexl-next/server-utils/src/services/challenge/contracts'
+} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'

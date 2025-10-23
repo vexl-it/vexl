@@ -10088,7 +10088,6 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/generic-utils": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
-    "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     effect: ^3.18.4
     eslint: ^8.57.1
@@ -10127,6 +10126,7 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/generic-utils": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
+    "@vexl-next/rest-api": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
     bullmq: ^5.52.1

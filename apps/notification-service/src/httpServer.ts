@@ -4,7 +4,6 @@ import {
   HttpMiddleware,
   HttpServer,
 } from '@effect/platform/index'
-import {ServerSecurityMiddlewareLive} from '@vexl-next/rest-api/src/apiSecurity'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
@@ -16,6 +15,7 @@ import {
   redisUrl,
 } from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
 import {ExpoClientService} from './ExpoMessagingLayer'
 import {FirebaseMessagingLayer} from './FirebaseMessagingLayer'

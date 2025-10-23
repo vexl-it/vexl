@@ -7,13 +7,13 @@ import {
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {
   type InboxInBatch,
   type MessageInBatch,
   type ServerMessageWithId,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {Array, Effect, pipe} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'

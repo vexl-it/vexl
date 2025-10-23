@@ -2,7 +2,6 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {verifyUserSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {
   UnableToVerifySignatureError,
   type UpdateBadOwnerHashRequest,
@@ -11,6 +10,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {verifyUserSecurity} from '@vexl-next/server-utils/src/serverSecurity'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'

@@ -8,7 +8,7 @@ import {
   ecdsaSignE,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type SignedChallenge} from '@vexl-next/server-utils/src/services/challenge/contracts'
+import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {
   setAuthHeaders,
   TestRequestHeaders,

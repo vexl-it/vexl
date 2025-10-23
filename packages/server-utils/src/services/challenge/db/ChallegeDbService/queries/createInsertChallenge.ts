@@ -2,8 +2,8 @@ import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {Challenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {Effect, flow, Schema} from 'effect'
-import {Challenge} from '../../../contracts'
 
 const InsertChallengeParams = Schema.Struct({
   challenge: Challenge,

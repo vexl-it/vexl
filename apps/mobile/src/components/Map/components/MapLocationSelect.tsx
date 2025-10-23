@@ -1,6 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Effect, Either, Exit, Fiber} from 'effect'
+import {Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
@@ -13,10 +12,7 @@ import MapView, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text} from 'tamagui'
 import {apiAtom} from '../../../api'
-import {
-  loadableEffectEither,
-  type UnknownLoadingError,
-} from '../../../utils/atomUtils/loadableEither'
+import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
   getCurrentLocale,
   useTranslation,
@@ -49,83 +45,51 @@ function useAtoms({
   onPick: (place: MapValue | null) => void
   initialRegion: Region
 }) {
-  const api = useAtomValue(apiAtom)
-
   return useMemo(() => {
-    const selectedRegionAtom = atom<Region>(initialRegion)
+    const {
+      effectiveInputAtom: selectedRegionAtom,
+      resultAtom: getGeocodedRegionAtom,
+    } = createEffectAtomWithProgress({
+      inputAtom: atom<Region>(initialRegion),
+      effectToRun: (region, get) =>
+        get(apiAtom)
+          .location.getGeocodedCoordinates({
+            query: {
+              lang: getCurrentLocale(),
+              latitude: Latitude.parse(region.latitude),
+              longitude: Longitude.parse(region.longitude),
+            },
+          })
+          .pipe(
+            Effect.tap((data) =>
+              Effect.sync(() => {
+                onPick(data)
+              })
+            )
+          ),
+    })
 
     return {
       selectedRegionAtom,
-      getGeocodedRegion: loadableEffectEither(
-        atom(
-          async (
-            get,
-            {signal}
-          ): Promise<
-            Either.Either<
-              GetGeocodedCoordinatesResponse,
-              | Effect.Effect.Error<
-                  ReturnType<typeof api.location.getGeocodedCoordinates>
-                >
-              | UnknownLoadingError
-            >
-          > => {
-            const region = get(selectedRegionAtom)
-
-            onPick(null) // loading
-            const fiber = Effect.runFork(
-              api.location
-                .getGeocodedCoordinates({
-                  query: {
-                    lang: getCurrentLocale(),
-                    latitude: Latitude.parse(region.latitude),
-                    longitude: Longitude.parse(region.longitude),
-                  },
-                })
-                .pipe(
-                  Effect.map((data) => {
-                    onPick(data)
-                    return data
-                  }),
-                  Effect.either
-                )
-            )
-
-            signal.onabort = () => {
-              Effect.runFork(Fiber.interruptFork(fiber))
-            }
-
-            const exit = await Effect.runPromise(Fiber.await(fiber))
-
-            if (Exit.isSuccess(exit)) {
-              return exit.value
-            }
-
-            return Either.left({
-              _tag: 'UnknownLoadingError',
-              error: exit.cause,
-            } as UnknownLoadingError)
-          }
-        )
-      ),
+      getGeocodedRegionAtom,
     }
-  }, [api, initialRegion, onPick])
+  }, [initialRegion, onPick])
 }
 
 function PickedLocationText({
   atom,
 }: {
-  atom: ReturnType<typeof useAtoms>['getGeocodedRegion']
+  atom: ReturnType<typeof useAtoms>['getGeocodedRegionAtom']
 }): React.ReactElement {
   const geocodingState = useAtomValue(atom)
   const {t} = useTranslation()
 
-  if (geocodingState.state === 'loading')
+  if (geocodingState.state !== 'done')
     return <Text>{t('common.loading')}...</Text>
 
-  const color = E.isLeft(geocodingState.either) ? '$red' : '$white'
+  const color = E.isLeft(geocodingState.result) ? '$red' : '$white'
   const text = pipe(
-    geocodingState.either,
+    geocodingState.result,
     E.match(
       (l) => toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
       (data) => data?.address ?? t('map.locationSelect.hint')
@@ -204,7 +168,7 @@ export default function MapLocationSelect({
             alignSelf="center"
             backgroundColor="rgba(0, 0, 0,0.8)"
           >
-            <PickedLocationText atom={atoms.getGeocodedRegion} />
+            <PickedLocationText atom={atoms.getGeocodedRegionAtom} />
           </Stack>
         </Stack>
       </Stack>

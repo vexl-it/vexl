@@ -8,7 +8,7 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
 import {type ReportNotificationInteractionRequest} from './contracts'
-import {MetricsServiceSpecification} from './specification'
+import {MetricsApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function api({
@@ -41,7 +41,7 @@ export function api({
   return Effect.gen(function* (_) {
     const client = yield* _(
       createClientInstanceWithAuth({
-        api: MetricsServiceSpecification,
+        api: MetricsApiSpecification,
         platform,
         clientVersion,
         language,

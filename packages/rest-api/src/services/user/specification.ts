@@ -11,6 +11,7 @@ import {
 import {Schema} from 'effect'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
   GenerateLoginChallengeResponse,
   GetVersionServiceInfoResponse,
@@ -42,6 +43,7 @@ export const InitVerificationEndpoint = HttpApiEndpoint.post(
   .setPayload(InitPhoneVerificationRequest)
   .addSuccess(InitPhoneVerificationResponse)
   .addError(InitVerificationErrors)
+  .annotate(MaxExpectedDailyCall, 5)
 
 export const VerifyCodeEndpoint = HttpApiEndpoint.post(
   'verifyCode',
@@ -50,6 +52,7 @@ export const VerifyCodeEndpoint = HttpApiEndpoint.post(
   .setPayload(VerifyPhoneNumberRequest)
   .addSuccess(VerifyPhoneNumberResponse)
   .addError(VerifyCodeErrors)
+  .annotate(MaxExpectedDailyCall, 5)
 
 export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
   'verifyChallenge',
@@ -58,6 +61,7 @@ export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
   .setPayload(VerifyChallengeRequest)
   .addSuccess(VerifyChallengeResponse)
   .addError(VerifyChallengeErrors)
+  .annotate(MaxExpectedDailyCall, 5)
 
 export const LogoutUserEndpoint = HttpApiEndpoint.del(
   'logoutUser',
@@ -65,6 +69,7 @@ export const LogoutUserEndpoint = HttpApiEndpoint.del(
 )
   .middleware(ServerSecurityMiddleware)
   .addSuccess(Schema.String)
+  .annotate(MaxExpectedDailyCall, 5)
 
 const LoginGroup = HttpApiGroup.make('Login')
   .add(InitVerificationEndpoint)
@@ -79,6 +84,7 @@ export const InitEraseUserEndpoint = HttpApiEndpoint.post(
   .setPayload(InitEraseUserRequest)
   .addSuccess(InitEraseUserResponse)
   .addError(InitVerificationErrors)
+  .annotate(MaxExpectedDailyCall, 5)
 
 export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
   'verifyAndEraseuser',
@@ -87,6 +93,7 @@ export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
   .setPayload(VerifyAndEraseUserRequest)
   .addSuccess(VerifyAndEraseUserResponse)
   .addError(VerifyCodeErrors)
+  .annotate(MaxExpectedDailyCall, 5)
 
 const EraseUserGroup = HttpApiGroup.make('EraseUser')
   .add(InitEraseUserEndpoint)
@@ -105,6 +112,7 @@ export const RegenerateSessionCredentialsEndpoint = HttpApiEndpoint.post(
   .setPayload(RegenerateSessionCredentialsRequest)
   .addSuccess(RegenerateSessionCredentialsResponse)
   .addError(RegenerateSessionCredentialsErrors)
+  .annotate(MaxExpectedDailyCall, 1)
 
 export const GetVersionServiceInfoEndpoint = HttpApiEndpoint.get(
   'getVersionServiceInfo',
@@ -112,11 +120,14 @@ export const GetVersionServiceInfoEndpoint = HttpApiEndpoint.get(
 )
   .setHeaders(CommonHeaders)
   .addSuccess(GetVersionServiceInfoResponse)
+  .annotate(MaxExpectedDailyCall, 5000)
 
 export const GenerateLoginChallenge = HttpApiEndpoint.get(
   'generateLoginChallenge',
   '/api/v1/generate-login-challenge'
-).addSuccess(GenerateLoginChallengeResponse)
+)
+  .addSuccess(GenerateLoginChallengeResponse)
+  .annotate(MaxExpectedDailyCall, 5)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(LogoutUserEndpoint)

@@ -12,6 +12,7 @@ import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challe
 import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
   ApproveRequestErrors,
   ApproveRequestRequest,
@@ -62,6 +63,7 @@ export const UpdateInboxEndpoint = HttpApiEndpoint.put(
   .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateInboxRequest)
   .addSuccess(UpdateInboxResponse)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const CreateInboxEndpoint = HttpApiEndpoint.post(
   'createInbox',
@@ -72,6 +74,7 @@ export const CreateInboxEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateInboxRequest)
   .addSuccess(CreateInboxResponse)
   .addError(InvalidChallengeError)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteInboxEndpoint = HttpApiEndpoint.del(
   'deleteInbox',
@@ -81,6 +84,7 @@ export const DeleteInboxEndpoint = HttpApiEndpoint.del(
   .setPayload(DeleteInboxRequest)
   .addSuccess(DeleteInboxResponse)
   .addError(DeleteInboxErrors)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
   'deletePulledMessages',
@@ -90,6 +94,7 @@ export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
   .setPayload(DeletePulledMessagesRequest)
   .addSuccess(DeletePulledMessagesResponse)
   .addError(DeletePulledMessagesErrors)
+  .annotate(MaxExpectedDailyCall, 5000)
 
 export const BlockInboxEndpoint = HttpApiEndpoint.put(
   'blockInbox',
@@ -99,6 +104,7 @@ export const BlockInboxEndpoint = HttpApiEndpoint.put(
   .setPayload(BlockInboxRequest)
   .addSuccess(BlockInboxResponse)
   .addError(BlockInboxErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const RequestApprovalEndpoint = HttpApiEndpoint.post(
   'requestApproval',
@@ -108,6 +114,7 @@ export const RequestApprovalEndpoint = HttpApiEndpoint.post(
   .setPayload(RequestApprovalRequest)
   .addSuccess(RequestApprovalResponse)
   .addError(RequestApprovalErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
   'cancelRequestApproval',
@@ -117,6 +124,7 @@ export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
   .setPayload(CancelApprovalRequest)
   .addSuccess(CancelApprovalResponse)
   .addError(CancelRequestApprovalErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const ApproveRequestEndpoint = HttpApiEndpoint.post(
   'approveRequest',
@@ -126,6 +134,7 @@ export const ApproveRequestEndpoint = HttpApiEndpoint.post(
   .setPayload(ApproveRequestRequest)
   .addSuccess(ApproveRequestResponse)
   .addError(ApproveRequestErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const DeleteInboxesEndpoint = HttpApiEndpoint.del(
   'deleteInboxes',
@@ -136,6 +145,7 @@ export const DeleteInboxesEndpoint = HttpApiEndpoint.del(
   .setPayload(DeleteInboxesRequest)
   .addSuccess(DeleteInboxesResponse)
   .addError(DeleteInboxErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const LeaveChatEndpoint = HttpApiEndpoint.post(
   'leaveChat',
@@ -145,6 +155,7 @@ export const LeaveChatEndpoint = HttpApiEndpoint.post(
   .setPayload(LeaveChatRequest)
   .addSuccess(LeaveChatResponse)
   .addError(LeaveChatErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const RetrieveMessagesEndpoint = HttpApiEndpoint.put(
   'retrieveMessages',
@@ -155,6 +166,7 @@ export const RetrieveMessagesEndpoint = HttpApiEndpoint.put(
   .setPayload(RetrieveMessagesRequest)
   .addSuccess(RetrieveMessagesResponse)
   .addError(RetrieveMessagesErrors)
+  .annotate(MaxExpectedDailyCall, 5000)
 
 export const SendMessageEndpoint = HttpApiEndpoint.post(
   'sendMessage',
@@ -164,6 +176,7 @@ export const SendMessageEndpoint = HttpApiEndpoint.post(
   .setPayload(SendMessageRequest)
   .addSuccess(SendMessageResponse)
   .addError(SendMessageErrors)
+  .annotate(MaxExpectedDailyCall, 5000)
 
 export const SendMessagesEndpoint = HttpApiEndpoint.post(
   'sendMessages',
@@ -174,6 +187,7 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   .setPayload(SendMessagesRequest)
   .addSuccess(SendMessagesResponse)
   .addError(SendMessageErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(UpdateInboxEndpoint)

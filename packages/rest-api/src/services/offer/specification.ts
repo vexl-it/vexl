@@ -11,6 +11,7 @@ import {
 import {InvalidChallengeError} from '@vexl-next/server-utils/src/services/challenge/contracts'
 import {ChallengeApiGroup} from '@vexl-next/server-utils/src/services/challenge/specification'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
   CanNotDeletePrivatePartOfAuthor,
   CreateNewOfferErrors,
@@ -53,6 +54,7 @@ export const GetOffersByIdsEndpoint = HttpApiEndpoint.get(
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(GetOffersByIdsRequest)
   .addSuccess(GetOfferByIdsResponse)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GetClubOffersByIdsEndpoint = HttpApiEndpoint.post(
   'getClubOffersByIds',
@@ -63,6 +65,7 @@ export const GetClubOffersByIdsEndpoint = HttpApiEndpoint.post(
   .setPayload(GetClubOffersByIdsRequest)
   .addSuccess(GetOfferByIdsResponse)
   .addError(InvalidChallengeError)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
   'getOffersForMeModifiedOrCreatedAfter',
@@ -72,6 +75,7 @@ export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(GetOffersForMeCreatedOrModifiedAfterRequest)
   .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
+  .annotate(MaxExpectedDailyCall, 200)
 
 export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
   HttpApiEndpoint.post(
@@ -86,6 +90,7 @@ export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
     .setPayload(GetClubOffersForMeCreatedOrModifiedAfterRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
     .addError(InvalidChallengeError)
+    .annotate(MaxExpectedDailyCall, 200)
 
 export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
   'createNewOffer',
@@ -96,6 +101,7 @@ export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateNewOfferRequest)
   .addSuccess(CreateNewOfferResponse)
   .addError(CreateNewOfferErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const RefreshOfferEndpoint = HttpApiEndpoint.post(
   'refreshOffer',
@@ -106,6 +112,7 @@ export const RefreshOfferEndpoint = HttpApiEndpoint.post(
   .setPayload(RefreshOfferRequest)
   .addSuccess(RefreshOfferResponse)
   .addError(NotFoundError)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteOfferEndpoint = HttpApiEndpoint.del(
   'deleteOffer',
@@ -115,6 +122,7 @@ export const DeleteOfferEndpoint = HttpApiEndpoint.del(
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(DeleteOfferRequest)
   .addSuccess(DeleteOfferResponse)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const UpdateOfferEndpoint = HttpApiEndpoint.put(
   'updateOffer',
@@ -126,6 +134,7 @@ export const UpdateOfferEndpoint = HttpApiEndpoint.put(
   .addSuccess(UpdateOfferResponse)
   .addError(UpdateOfferErrors)
   .addError(NotFoundError)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const CreatePrivatePartEndpoint = HttpApiEndpoint.post(
   'createPrivatePart',
@@ -136,6 +145,7 @@ export const CreatePrivatePartEndpoint = HttpApiEndpoint.post(
   .setPayload(CreatePrivatePartRequest)
   .addSuccess(CreatePrivatePartResponse)
   .addError(DuplicatedPublicKeyError)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const DeletePrivatePartEndpoint = HttpApiEndpoint.del(
   'deletePrivatePart',
@@ -150,6 +160,7 @@ export const DeletePrivatePartEndpoint = HttpApiEndpoint.del(
   .setPayload(DeletePrivatePartRequest)
   .addSuccess(DeletePrivatePartResponse)
   .addError(CanNotDeletePrivatePartOfAuthor)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GetRemovedOffersEndpoint = HttpApiEndpoint.post(
   'getRemovedOffers',
@@ -159,6 +170,7 @@ export const GetRemovedOffersEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(RemovedOfferIdsRequest)
   .addSuccess(RemovedOfferIdsResponse)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const GetRemovedClubOffersEndpoint = HttpApiEndpoint.post(
   'getRemovedClubOffers',
@@ -169,6 +181,7 @@ export const GetRemovedClubOffersEndpoint = HttpApiEndpoint.post(
   .setPayload(RemovedClubOfferIdsRequest)
   .addSuccess(RemovedOfferIdsResponse)
   .addError(InvalidChallengeError)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const ReportOfferEndpoint = HttpApiEndpoint.post(
   'reportOffer',
@@ -180,6 +193,7 @@ export const ReportOfferEndpoint = HttpApiEndpoint.post(
   .addSuccess(ReportOfferResponse)
   .addError(ReportOfferEndpointErrors)
   .addError(NotFoundError)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   'reportClubOffer',
@@ -191,6 +205,7 @@ export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   .addSuccess(ReportClubOfferResponse)
   .addError(ReportClubOfferEndpointErrors)
   .addError(NotFoundError)
+  .annotate(MaxExpectedDailyCall, 10)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GetOffersByIdsEndpoint)

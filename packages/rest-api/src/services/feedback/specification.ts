@@ -4,12 +4,15 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {SubmitFeedbackRequest} from './contracts'
 
 export const SubmitFeedbackEndpoint = HttpApiEndpoint.post(
   'submitFeedback',
   '/api/v1/feedback/submit'
-).setPayload(SubmitFeedbackRequest)
+)
+  .setPayload(SubmitFeedbackRequest)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const FeedbackApiSpecification = HttpApi.make('Feedback service')
   .add(

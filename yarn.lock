@@ -9580,6 +9580,29 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@vexl-next/generate-api-call-limits@workspace:tooling/generate-api-call-limits":
+  version: 0.0.0-use.local
+  resolution: "@vexl-next/generate-api-call-limits@workspace:tooling/generate-api-call-limits"
+  dependencies:
+    "@effect/platform": ^0.92.1
+    "@effect/platform-node": ^0.98.3
+    "@vexl-next/eslint-config": 0.0.0
+    "@vexl-next/prettier-config": 0.0.0
+    "@vexl-next/rest-api": 0.0.0
+    "@vexl-next/tsconfig": 0.0.0
+    "@vitejs/plugin-react": ^4.3.0
+    dotenv: ^16.4.5
+    dynamic-import-polyfill: ^0.1.1
+    effect: ^3.18.4
+    esbuild: ^0.25.0
+    eslint: ^8.57.1
+    prettier: ^3.3.2
+    rimraf: ^4.4.0
+    ts-node: ^10.9.1
+    typescript: ~5.9.2
+  languageName: unknown
+  linkType: soft
+
 "@vexl-next/generic-utils@0.0.0, @vexl-next/generic-utils@workspace:packages/generic-utils":
   version: 0.0.0-use.local
   resolution: "@vexl-next/generic-utils@workspace:packages/generic-utils"

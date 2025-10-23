@@ -6,6 +6,7 @@ import {
 import {Schema} from 'effect'
 import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
 import {CommonHeaders} from '../../commonHeaders'
+import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   BlogsArticlesResponse,
@@ -28,7 +29,9 @@ import {
 export const GetEventsEndpoint = HttpApiEndpoint.get(
   'getEvents',
   '/content/events'
-).addSuccess(EventsResponse)
+)
+  .addSuccess(EventsResponse)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
   'clearCache',
@@ -37,11 +40,14 @@ export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
   .setUrlParams(ClearEventsCacheRequest)
   .addError(InvalidTokenError)
   .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const GetBlogArticlesEndpoint = HttpApiEndpoint.get(
   'getBlogArticles',
   '/content/blogs'
-).addSuccess(BlogsArticlesResponse)
+)
+  .addSuccess(BlogsArticlesResponse)
+  .annotate(MaxExpectedDailyCall, 100)
 
 const CmsContentApiGroup = HttpApiGroup.make('Cms')
   .add(GetEventsEndpoint)
@@ -54,6 +60,7 @@ export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
 )
   .setHeaders(CommonHeaders)
   .addSuccess(NewsAndAnnouncementsResponse)
+  .annotate(MaxExpectedDailyCall, 500)
 
 const NewsAndAnnouncementsApiGroup = HttpApiGroup.make(
   'NewsAndAnnouncements'
@@ -66,6 +73,7 @@ export const CreateInvoiceEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateInvoiceRequest)
   .addSuccess(CreateInvoiceResponse)
   .addError(CreateInvoiceErrors)
+  .annotate(MaxExpectedDailyCall, 10)
 
 export const GetInvoiceEndpoint = HttpApiEndpoint.get(
   'getInvoice',
@@ -74,6 +82,7 @@ export const GetInvoiceEndpoint = HttpApiEndpoint.get(
   .setUrlParams(GetInvoiceRequest)
   .addSuccess(GetInvoiceResponse)
   .addError(GetInvoiceErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const GetInvoiceStatusTypeEndpoint = HttpApiEndpoint.get(
   'getInvoiceStatusType',
@@ -82,6 +91,7 @@ export const GetInvoiceStatusTypeEndpoint = HttpApiEndpoint.get(
   .setUrlParams(GetInvoiceStatusTypeRequest)
   .addSuccess(GetInvoiceStatusTypeResponse)
   .addError(GetInvoiceStatusTypeErrors)
+  .annotate(MaxExpectedDailyCall, 50)
 
 export const UpdateInvoiceStateWebhookEndpoint = HttpApiEndpoint.post(
   'updateInvoiceStateWebhook',
@@ -91,6 +101,7 @@ export const UpdateInvoiceStateWebhookEndpoint = HttpApiEndpoint.post(
   .setPayload(Schema.Unknown)
   .addSuccess(NoContentResponse)
   .addError(UpdateInvoiceStatusWebhookErrors)
+  .annotate(MaxExpectedDailyCall, 1000)
 
 const DonationsApiGroup = HttpApiGroup.make('Donations')
   .add(CreateInvoiceEndpoint)

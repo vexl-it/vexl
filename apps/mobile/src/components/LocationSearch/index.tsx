@@ -18,7 +18,7 @@ interface Props {
 
 function LocationSearch({onPress, sessionId}: Props): React.ReactElement {
   return (
-    <ScopeProvider scope={LocationSearchScope} value={{sessionId}}>
+    <ScopeProvider scope={LocationSearchScope} value={sessionId}>
       <LocationSearchInput />
       <LocationsList onPress={onPress} />
     </ScopeProvider>

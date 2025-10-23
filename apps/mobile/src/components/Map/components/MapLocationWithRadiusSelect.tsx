@@ -4,8 +4,7 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Effect, Either, Exit, Fiber} from 'effect'
+import {Effect} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
@@ -15,10 +14,7 @@ import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, getTokens} from 'tamagui'
 import {apiAtom} from '../../../api'
-import {
-  loadableEffectEither,
-  type UnknownLoadingError,
-} from '../../../utils/atomUtils/loadableEither'
+import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
   getCurrentLocale,
   useTranslation,
@@ -62,10 +58,39 @@ function useAtoms({
   onPick: (place: MapValueWithRadius | null) => void
   initialRegion: Region
 }) {
-  const api = useAtomValue(apiAtom)
-
   return useMemo(() => {
-    const selectedRegionAtom = atom<Region>(initialRegion)
+    const {
+      effectiveInputAtom: selectedRegionAtom,
+      resultAtom: getGeocodedRegionAtom,
+    } = createEffectAtomWithProgress({
+      inputAtom: atom(initialRegion),
+      effectToRun: (region, get) =>
+        get(apiAtom)
+          .location.getGeocodedCoordinates({
+            query: {
+              lang: getCurrentLocale(),
+              latitude: Latitude.parse(region.latitude),
+              longitude: Longitude.parse(region.longitude),
+            },
+          })
+          .pipe(
+            Effect.tap((data) => {
+              const {width} = Dimensions.get('window')
+              const usedWidthWithoutPadding = (width - circleMargin * 2) / width
+
+              onPick({
+                ...data,
+                latitude: Latitude.parse(region.latitude),
+                longitude: Longitude.parse(region.longitude),
+                radius: Radius.parse(
+                  (Math.abs(region.longitudeDelta) * usedWidthWithoutPadding) /
+                    2
+                ),
+              })
+              return data
+            })
+          ),
+    })
 
     return {
       selectedRegionAtom,
@@ -85,80 +110,16 @@ function useAtoms({
           ) / 10
         )
       }),
-      getGeocodedRegion: loadableEffectEither(
-        atom(
-          async (
-            get,
-            {signal}
-          ): Promise<
-            Either.Either<
-              GetGeocodedCoordinatesResponse,
-              | Effect.Effect.Error<
-                  ReturnType<typeof api.location.getGeocodedCoordinates>
-                >
-              | UnknownLoadingError
-            >
-          > => {
-            const region = get(selectedRegionAtom)
-
-            onPick(null) // loading
-            const fiber = Effect.runFork(
-              api.location
-                .getGeocodedCoordinates({
-                  query: {
-                    lang: getCurrentLocale(),
-                    latitude: Latitude.parse(region.latitude),
-                    longitude: Longitude.parse(region.longitude),
-                  },
-                })
-                .pipe(
-                  Effect.map((data) => {
-                    const {width} = Dimensions.get('window')
-                    const usedWidthWithoutPadding =
-                      (width - circleMargin * 2) / width
-
-                    onPick({
-                      ...data,
-                      latitude: Latitude.parse(region.latitude),
-                      longitude: Longitude.parse(region.longitude),
-                      radius: Radius.parse(
-                        (Math.abs(region.longitudeDelta) *
-                          usedWidthWithoutPadding) /
-                          2
-                      ),
-                    })
-                    return data
-                  }),
-                  Effect.either
-                )
-            )
-
-            signal.onabort = () => {
-              Effect.runFork(Fiber.interruptFork(fiber))
-            }
-
-            const exit = await Effect.runPromise(Fiber.await(fiber))
-
-            if (Exit.isSuccess(exit)) {
-              return exit.value
-            }
-
-            return Either.left({
-              _tag: 'UnknownLoadingError',
-              error: exit.cause,
-            } as UnknownLoadingError)
-          }
-        )
-      ),
+      getGeocodedRegionAtom,
     }
-  }, [api, initialRegion, onPick])
+  }, [initialRegion, onPick])
 }
 
 function PickedLocationText({
   selectedRegionRadiusAtom,
   geocodedRegionAtom,
 }: {
-  geocodedRegionAtom: ReturnType<typeof useAtoms>['getGeocodedRegion']
+  geocodedRegionAtom: ReturnType<typeof useAtoms>['getGeocodedRegionAtom']
   selectedRegionRadiusAtom: ReturnType<
     typeof useAtoms
   >['selectedRegionRadiusAtom']
@@ -167,16 +128,16 @@ function PickedLocationText({
   const {t} = useTranslation()
   const radius = useAtomValue(selectedRegionRadiusAtom)
 
-  return geocodingState.state === 'loading' ? (
+  return geocodingState.state !== 'done' ? (
     <Text>{t('common.loading')}...</Text>
   ) : (
     <React.Fragment>
       <Text
         ta="center"
-        color={E.isLeft(geocodingState.either) ? '$red' : '$white'}
+        color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
       >
         {pipe(
-          geocodingState.either,
+          geocodingState.result,
           E.match(
             (l) =>
               toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
@@ -186,7 +147,7 @@ function PickedLocationText({
       </Text>
       <Text
         ta="center"
-        color={E.isLeft(geocodingState.either) ? '$red' : '$white'}
+        color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
       >
         {t('map.locationSelect.radius', {
           radius,
@@ -312,7 +273,7 @@ export default function MapLocationWithRadiusSelect({
             backgroundColor="rgba(0, 0, 0,0.8)"
           >
             <PickedLocationText
-              geocodedRegionAtom={atoms.getGeocodedRegion}
+              geocodedRegionAtom={atoms.getGeocodedRegionAtom}
               selectedRegionRadiusAtom={atoms.selectedRegionRadiusAtom}
             />
           </Stack>

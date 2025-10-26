@@ -30,10 +30,8 @@ const deletePrivatePartsForOffers = (
     Array.flatten
   )
   return offerApi.deletePrivatePart({
-    body: {
-      adminIds: adminIdsCombined,
-      publicKeys: connectionsCombined,
-    },
+    adminIds: adminIdsCombined,
+    publicKeys: connectionsCombined,
   })
 }
 

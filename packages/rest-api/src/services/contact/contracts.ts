@@ -176,6 +176,7 @@ export type FetchCommonConnectionsResponse =
 export const CheckUserExistsRequest = Schema.Struct({
   notifyExistingUserAboutLogin: BooleanFromString,
 })
+export type CheckUserExistsRequest = typeof CheckUserExistsRequest.Type
 
 export const UserExistsResponse = Schema.Struct({
   exists: Schema.Boolean,
@@ -187,41 +188,6 @@ export const ImportContactsErrors = Schema.Union(
   ImportContactsQuotaReachedError
 )
 
-export const CheckUserExistsInput = Schema.Struct({
-  query: CheckUserExistsRequest,
-})
-export type CheckUserExistsInput = typeof CheckUserExistsInput.Type
-
-export const CreateUserInput = Schema.Struct({
-  body: CreateUserRequest,
-})
-export type CreateUserInput = Schema.Schema.Type<typeof CreateUserInput>
-
-export const RefreshUserInput = Schema.Struct({
-  body: RefreshUserRequest,
-})
-export type RefreshUserInput = Schema.Schema.Type<typeof RefreshUserInput>
-
-export const UpdateFirebaseTokenInput = Schema.Struct({
-  body: UpdateFirebaseTokenRequest,
-})
-export type UpdateFirebaseTokenInput = typeof UpdateFirebaseTokenInput.Type
-
-export const ImportContactsInput = Schema.Struct({
-  body: ImportContactsRequest,
-})
-export type ImportContactsInput = Schema.Schema.Type<typeof ImportContactsInput>
-
-export const FetchMyContactsInput = Schema.Struct({
-  query: FetchMyContactsRequest,
-})
-export type FetchMyContactsInput = typeof FetchMyContactsInput.Type
-
-export const FetchCommonConnectionsInput = Schema.Struct({
-  body: FetchCommonConnectionsRequest,
-})
-export type FetchCommonConnectionsInput =
-  typeof FetchCommonConnectionsInput.Type
 export const HashDataWithValidation = Schema.Struct({})
 
 export const HashWithSignature = Schema.Struct({

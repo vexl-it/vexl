@@ -8,8 +8,8 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
 import {
-  type GetGeocodedCoordinatesInput,
-  type GetLocationSuggestionsInput,
+  type GetGeocodedCoordinatesRequest,
+  type GetLocationSuggestionsRequest,
 } from './contracts'
 import {LocationApiSpecification} from './specification'
 
@@ -60,17 +60,13 @@ export function api({
     )
 
     return {
-      getLocationSuggestions: (
-        getLocationSuggestionsInput: GetLocationSuggestionsInput
-      ) =>
+      getLocationSuggestions: (query: GetLocationSuggestionsRequest) =>
         client.getLocationSuggestion({
-          urlParams: getLocationSuggestionsInput.query,
+          urlParams: query,
         }),
-      getGeocodedCoordinates: (
-        getGeocodedCoordinatesInput: GetGeocodedCoordinatesInput
-      ) =>
+      getGeocodedCoordinates: (query: GetGeocodedCoordinatesRequest) =>
         client.getGeocodedCoordinates({
-          urlParams: getGeocodedCoordinatesInput.query,
+          urlParams: query,
         }),
     }
   })

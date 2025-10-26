@@ -9,7 +9,7 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import {type LoggingFunction} from '../../utils'
 import {
   IssueNotificationErrors,
-  type IssueNotificationInput,
+  type IssueNotificationRequest,
   type ReportNotificationProcessedRequest,
 } from './contract'
 import {NotificationApiSpecification} from './specification'
@@ -59,8 +59,8 @@ export function api({
     )
     return {
       getNotificationPublicKey: () => client.getNotificationPublicKey({}),
-      issueNotification: (issueNotificationInput: IssueNotificationInput) =>
-        client.issueNotification({payload: issueNotificationInput.body}),
+      issueNotification: (payload: IssueNotificationRequest) =>
+        client.issueNotification({payload}),
       IssueNotificationErrors,
       reportNotificationProcessed: (
         request: ReportNotificationProcessedRequest

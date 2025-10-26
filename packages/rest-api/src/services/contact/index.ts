@@ -13,21 +13,21 @@ import {
 } from '../utils/addChallengeToRequest2'
 import {
   type AddUserToTheClubRequest,
-  type CheckUserExistsInput,
-  type CreateUserInput,
+  type CheckUserExistsRequest,
+  type CreateUserRequest,
   type DeactivateClubJoinLinkRequest,
   type EraseUserFromNetworkRequest,
-  type FetchCommonConnectionsInput,
-  type FetchMyContactsInput,
+  type FetchCommonConnectionsRequest,
+  type FetchMyContactsRequest,
   type GenerateClubJoinLinkRequest,
   type GetClubContactsRequest,
   type GetClubInfoByAccessCodeRequest,
   type GetClubInfoRequest,
-  type ImportContactsInput,
+  type ImportContactsRequest,
   type JoinClubRequest,
   type LeaveClubRequest,
   type ListClubLinksRequest,
-  type RefreshUserInput,
+  type RefreshUserRequest,
   type ReportClubRequest,
   type UpdateBadOwnerHashRequest,
   type UpdateNotificationTokenRequest,
@@ -94,16 +94,16 @@ export function api({
     })
 
     return {
-      checkUserExists: (checkUserExistsInput: CheckUserExistsInput) =>
-        client.User.checkUserExists({urlParams: checkUserExistsInput.query}),
-      createUser: (createUserInput: CreateUserInput) =>
+      checkUserExists: (query: CheckUserExistsRequest) =>
+        client.User.checkUserExists({urlParams: query}),
+      createUser: (body: CreateUserRequest) =>
         client.User.createUser({
-          payload: createUserInput.body,
+          payload: body,
           headers: commonHeaders,
         }),
-      refreshUser: (refreshUserInput: RefreshUserInput) =>
+      refreshUser: (body: RefreshUserRequest) =>
         client.User.refreshUser({
-          payload: refreshUserInput.body,
+          payload: body,
           headers: commonHeaders,
         }),
       updateNotificationToken: ({
@@ -116,19 +116,17 @@ export function api({
           headers: commonHeaders,
         }),
       deleteUser: () => client.User.deleteUser({}),
-      importContacts: (importContactsInput: ImportContactsInput) =>
-        client.Contact.importContacts({payload: importContactsInput.body}),
+      importContacts: (body: ImportContactsRequest) =>
+        client.Contact.importContacts({payload: body}),
 
-      fetchMyContacts: (fetchMyContactsInput: FetchMyContactsInput) =>
+      fetchMyContacts: (query: FetchMyContactsRequest) =>
         client.Contact.fetchMyContacts({
           headers: commonHeaders,
-          urlParams: fetchMyContactsInput.query,
+          urlParams: query,
         }),
-      fetchCommonConnections: (
-        fetchCommonConnectionsInput: FetchCommonConnectionsInput
-      ) =>
+      fetchCommonConnections: (body: FetchCommonConnectionsRequest) =>
         client.Contact.fetchCommonConnections({
-          payload: fetchCommonConnectionsInput.body,
+          payload: body,
         }),
       updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>
         client.User.updateBadOwnerHash({payload: args}),

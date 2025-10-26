@@ -108,9 +108,7 @@ export const reportOfferActionAtom = atom(
       } else {
         yield* _(
           api.offer.reportOffer({
-            body: {
-              offerId: offer.offerInfo.offerId,
-            },
+            offerId: offer.offerInfo.offerId,
           })
         )
       }

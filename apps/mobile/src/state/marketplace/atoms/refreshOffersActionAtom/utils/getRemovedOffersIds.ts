@@ -59,9 +59,7 @@ export const getRemovedOffersIds = ({
     removedContactOfferIds: pipe(
       savedContactOffersIds.length > 0
         ? offersApi
-            .getRemovedOffers({
-              body: {offerIds: savedContactOffersIds},
-            })
+            .getRemovedOffers({offerIds: savedContactOffersIds})
             .pipe(Effect.map((one) => one.offerIds))
         : Effect.succeed([] as readonly OfferId[]),
       Effect.catchAll((e) => {

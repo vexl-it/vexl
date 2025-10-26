@@ -31,11 +31,9 @@ export default function fetchContactsForOffer({
   return Effect.gen(function* (_) {
     const firstDegreeConnections = yield* _(
       contactApi.fetchMyContacts({
-        query: {
-          level: 'FIRST',
-          page: 0,
-          limit: 1000000,
-        },
+        level: 'FIRST',
+        page: 0,
+        limit: 1000000,
       }),
       Effect.map(({items}) => items),
       Effect.map(Array.map((connection) => connection.publicKey))
@@ -46,11 +44,9 @@ export default function fetchContactsForOffer({
         ? []
         : yield* _(
             contactApi.fetchMyContacts({
-              query: {
-                level: 'SECOND',
-                page: 0,
-                limit: 1000000,
-              },
+              level: 'SECOND',
+              page: 0,
+              limit: 1000000,
             }),
             Effect.map(({items}) => items),
             Effect.map(Array.map((connection) => connection.publicKey))
@@ -58,14 +54,12 @@ export default function fetchContactsForOffer({
 
     const commonFriends = yield* _(
       contactApi.fetchCommonConnections({
-        body: {
-          publicKeys: Array.fromIterable(
-            new Set<PublicKeyPemBase64>([
-              ...firstDegreeConnections,
-              ...secondDegreeConnections,
-            ])
-          ),
-        },
+        publicKeys: Array.fromIterable(
+          new Set<PublicKeyPemBase64>([
+            ...firstDegreeConnections,
+            ...secondDegreeConnections,
+          ])
+        ),
       })
     )
 

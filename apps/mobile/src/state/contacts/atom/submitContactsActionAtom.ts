@@ -90,10 +90,8 @@ export const submitContactsActionAtom = atom(
       if (newContactsToImport.length === 0 && !doIncrementalUpdate) {
         yield* _(
           contactApi.importContacts({
-            body: {
-              contacts: [],
-              replace: true,
-            },
+            contacts: [],
+            replace: true,
           })
         )
       }
@@ -106,10 +104,8 @@ export const submitContactsActionAtom = atom(
             const replace = i === 0 && !doIncrementalUpdate
             return contactApi
               .importContacts({
-                body: {
-                  contacts: chunkToImport.map((one) => one.computedValues.hash),
-                  replace,
-                },
+                contacts: chunkToImport.map((one) => one.computedValues.hash),
+                replace,
               })
               .pipe(
                 Effect.zipLeft(

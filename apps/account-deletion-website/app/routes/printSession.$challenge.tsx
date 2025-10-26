@@ -97,10 +97,8 @@ export const action: ActionFunction = async ({ request }) => {
     TE.bindW("verificationResult", ({ pubKey, signature }) =>
       effectToTaskEither(
         createUserPublicApi().verifyChallenge({
-          body: {
-            signature,
-            userPublicKey: pubKey,
-          },
+          signature,
+          userPublicKey: pubKey,
         }),
       ),
     ),

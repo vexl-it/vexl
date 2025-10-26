@@ -149,10 +149,8 @@ const importContactActionAtom = atom(
 
       yield* _(
         contactApi.importContacts({
-          body: {
-            contacts: [newContact.computedValues.hash],
-            replace: false,
-          },
+          contacts: [newContact.computedValues.hash],
+          replace: false,
         })
       )
 

@@ -45,10 +45,8 @@ export default function updateOwnerPrivatePayload({
     encryptPrivatePart(privatePayload),
     Effect.flatMap((payload) =>
       api.createPrivatePart({
-        body: {
-          adminId,
-          offerPrivateList: [payload],
-        },
+        adminId,
+        offerPrivateList: [payload],
       })
     ),
     Effect.zipRight(Effect.succeed(privatePayload))

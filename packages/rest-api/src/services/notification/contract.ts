@@ -66,8 +66,3 @@ export const IssueNotificationErrors = Schema.Union(
   SendingNotificationError,
   InvalidNotificationCypherError
 )
-
-export const IssueNotificationInput = Schema.Struct({
-  body: IssueNotificationRequest,
-})
-export type IssueNotificationInput = typeof IssueNotificationInput.Type

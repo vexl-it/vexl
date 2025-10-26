@@ -103,11 +103,9 @@ function VerificationCodeScreen({
             TE.bind('verifyPhoneNumberResponse', ({privateKey}) =>
               effectToTaskEither(
                 verifyPhoneNumber({
-                  body: {
-                    code: userCode,
-                    id: initPhoneVerificationResponse.verificationId,
-                    userPublicKey: privateKey.publicKeyPemBase64,
-                  },
+                  code: userCode,
+                  id: initPhoneVerificationResponse.verificationId,
+                  userPublicKey: privateKey.publicKeyPemBase64,
                 })
               )
             ),

@@ -1,8 +1,5 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {
-  E164PhoneNumberE,
-  type E164PhoneNumber,
-} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   InvalidLoginSignatureError,
@@ -50,10 +47,6 @@ export interface PublicKeyOrHashInvalid {
 
 export interface RequestCouldNotBeProcessedError {
   _tag: 'RequestCouldNotBeProcessedError'
-}
-
-export interface InitPhoneNumberVerificationRequest {
-  readonly phoneNumber: E164PhoneNumber
 }
 
 export const GenerateLoginChallengeResponse = Schema.Struct({

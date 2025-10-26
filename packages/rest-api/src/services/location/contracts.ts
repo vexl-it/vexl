@@ -94,17 +94,3 @@ export class GetExchangeRateResponse extends Schema.Class<GetExchangeRateRespons
   status: Schema.Literal(301),
   headers: Schema.Struct({Location: Schema.String}),
 }) {}
-
-export const GetLocationSuggestionsInput = Schema.Struct({
-  query: GetLocationSuggestionsRequest,
-})
-
-export type GetLocationSuggestionsInput =
-  typeof GetLocationSuggestionsInput.Type
-
-export const GetGeocodedCoordinatesInput = Schema.Struct({
-  query: GetGeocodedCoordinatesRequest,
-})
-
-export type GetGeocodedCoordinatesInput =
-  typeof GetGeocodedCoordinatesInput.Type

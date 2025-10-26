@@ -681,12 +681,10 @@ function DebugScreen(): React.ReactElement {
               onPress={() => {
                 void effectToTaskEither(
                   store.get(apiAtom).offer.deleteOffer({
-                    query: {
-                      adminIds: store
-                        .get(myOffersAtom)
-                        .map((one) => one.ownershipInfo?.adminId)
-                        .filter((one): one is NonNullable<typeof one> => !!one),
-                    },
+                    adminIds: store
+                      .get(myOffersAtom)
+                      .map((one) => one.ownershipInfo?.adminId)
+                      .filter((one): one is NonNullable<typeof one> => !!one),
                   })
                 )()
                   .then(() => {
@@ -705,12 +703,10 @@ function DebugScreen(): React.ReactElement {
               onPress={() => {
                 void effectToTaskEither(
                   store.get(apiAtom).feedback.submitFeedback({
-                    body: {
-                      formId: Schema.decodeSync(FeedbackFormId)(generateUuid()),
-                      type: 'create',
-                      stars: 5,
-                      textComment: 'from test',
-                    },
+                    formId: Schema.decodeSync(FeedbackFormId)(generateUuid()),
+                    type: 'create',
+                    stars: 5,
+                    textComment: 'from test',
                   })
                 )()
                   .then(() => {

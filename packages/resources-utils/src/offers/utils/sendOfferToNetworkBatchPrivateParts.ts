@@ -36,14 +36,12 @@ export const sendOfferToNetworkBatchPrivateParts = ({
 
     const createRequest = yield* _(
       offerApi.createNewOffer({
-        body: {
-          offerPrivateList: [offerData.ownerPrivatePayload, ...firstBatch],
-          countryPrefix: offerData.countryPrefix,
-          payloadPublic: offerData.payloadPublic,
-          offerType: offerData.offerType,
-          adminId: offerData.adminId,
-          offerId: offerData.offerId,
-        },
+        offerPrivateList: [offerData.ownerPrivatePayload, ...firstBatch],
+        countryPrefix: offerData.countryPrefix,
+        payloadPublic: offerData.payloadPublic,
+        offerType: offerData.offerType,
+        adminId: offerData.adminId,
+        offerId: offerData.offerId,
       })
     )
 
@@ -52,16 +50,14 @@ export const sendOfferToNetworkBatchPrivateParts = ({
         restOfBatches ?? [],
         Array.map((privateParts) =>
           offerApi.createPrivatePart({
-            body: {
-              offerPrivateList: privateParts,
-              adminId: offerData.adminId,
-            },
+            offerPrivateList: privateParts,
+            adminId: offerData.adminId,
           })
         ),
         Effect.all,
         Effect.tapError(() =>
           offerApi
-            .deleteOffer({query: {adminIds: [offerData.adminId]}})
+            .deleteOffer({adminIds: [offerData.adminId]})
             .pipe(
               Effect.ignore,
               Effect.zipLeft(

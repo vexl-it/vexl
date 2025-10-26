@@ -13,21 +13,20 @@ import {
   type RequestWithGeneratableChallenge,
 } from '../utils/addChallengeToRequest2'
 import {
-  type CreateNewOfferInput,
-  type CreatePrivatePartInput,
-  type DeleteOfferInput,
-  type DeletePrivatePartInput,
+  type CreateNewOfferRequest,
+  type CreatePrivatePartRequest,
+  type DeleteOfferRequest,
+  type DeletePrivatePartRequest,
   type GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest,
   type GetClubOffersForMeCreatedOrModifiedAfterRequest,
-  type GetOffersByIdsInput,
   type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
-  type GetOffersForMeModifiedOrCreatedAfterInput,
-  type GetRemovedOffersInput,
-  type RefreshOfferInput,
+  type GetOffersForMeCreatedOrModifiedAfterRequest,
+  type RefreshOfferRequest,
   type RemovedClubOfferIdsRequest,
+  type RemovedOfferIdsRequest,
   type ReportClubOfferRequest,
-  type ReportOfferInput,
-  type UpdateOfferInput,
+  type ReportOfferRequest,
+  type UpdateOfferRequest,
 } from './contracts'
 import {OfferApiSpecification} from './specification'
 
@@ -80,13 +79,11 @@ export function api({
     )
 
     return {
-      getOffersByIds: (getOffersByIdsInput: GetOffersByIdsInput) =>
-        client.getOffersByIds({urlParams: getOffersByIdsInput.query}),
       getOffersForMeModifiedOrCreatedAfter: (
-        getOffersForMeModifiedOrCreatedAfterInput: GetOffersForMeModifiedOrCreatedAfterInput
+        req: GetOffersForMeCreatedOrModifiedAfterRequest
       ) =>
         client.getOffersForMeModifiedOrCreatedAfter({
-          urlParams: getOffersForMeModifiedOrCreatedAfterInput.query,
+          urlParams: req,
         }),
       getOffersForMeModifiedOrCreatedAfterPaginated: (
         req: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
@@ -114,32 +111,32 @@ export function api({
             })
           )
         ),
-      createNewOffer: (createNewOfferInput: CreateNewOfferInput) =>
-        client.createNewOffer({payload: createNewOfferInput.body}),
-      refreshOffer: (refreshOfferInput: RefreshOfferInput) =>
-        client.refreshOffer({payload: refreshOfferInput.body}),
-      deleteOffer: (deleteOfferInput: DeleteOfferInput) =>
-        client.deleteOffer({urlParams: deleteOfferInput.query}),
-      updateOffer: (updateOfferInpu: UpdateOfferInput) =>
-        client.updateOffer({payload: updateOfferInpu.body}),
-      createPrivatePart: (createPrivatePartInput: CreatePrivatePartInput) =>
-        client.createPrivatePart({payload: createPrivatePartInput.body}),
-      deletePrivatePart: (deletePrivatePartInput: DeletePrivatePartInput) =>
-        client.deletePrivatePart({payload: deletePrivatePartInput.body}),
-      getRemovedOffers: (getRemovedOffersInput: GetRemovedOffersInput) =>
-        client.getRemovedOffers({payload: getRemovedOffersInput.body}),
+      createNewOffer: (body: CreateNewOfferRequest) =>
+        client.createNewOffer({payload: body}),
+      refreshOffer: (body: RefreshOfferRequest) =>
+        client.refreshOffer({payload: body}),
+      deleteOffer: (req: DeleteOfferRequest) =>
+        client.deleteOffer({urlParams: req}),
+      updateOffer: (body: UpdateOfferRequest) =>
+        client.updateOffer({payload: body}),
+      createPrivatePart: (body: CreatePrivatePartRequest) =>
+        client.createPrivatePart({payload: body}),
+      deletePrivatePart: (req: DeletePrivatePartRequest) =>
+        client.deletePrivatePart({payload: req}),
+      getRemovedOffers: (body: RemovedOfferIdsRequest) =>
+        client.getRemovedOffers({payload: body}),
       getRemovedClubOffers: (
-        getRemovedClubOffersInput: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
+        body: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
       ) =>
-        addChallenge(getRemovedClubOffersInput).pipe(
+        addChallenge(body).pipe(
           Effect.flatMap((body) => client.getRemovedClubOffers({payload: body}))
         ),
-      reportOffer: (reportOfferInput: ReportOfferInput) =>
-        client.reportOffer({payload: reportOfferInput.body}),
+      reportOffer: (body: ReportOfferRequest) =>
+        client.reportOffer({payload: body}),
       reportClubOffer: (
-        reportClubOfferRequest: RequestWithGeneratableChallenge<ReportClubOfferRequest>
+        body: RequestWithGeneratableChallenge<ReportClubOfferRequest>
       ) =>
-        addChallenge(reportClubOfferRequest).pipe(
+        addChallenge(body).pipe(
           Effect.flatMap((body) => client.reportClubOffer({payload: body}))
         ),
       // ----------------------

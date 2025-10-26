@@ -10,11 +10,11 @@ import {createClientInstanceWithAuth} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {
   type InitEraseUserRequest,
-  type InitVerificationInput,
+  type InitPhoneVerificationRequest,
   type RegenerateSessionCredentialsRequest,
   type VerifyAndEraseUserRequest,
-  type VerifyChallengeInput,
-  type VerifyPhoneNumberInput,
+  type VerifyChallengeRequest,
+  type VerifyPhoneNumberRequest,
 } from './contracts'
 import {UserApiSpecification} from './specification'
 
@@ -77,19 +77,19 @@ export function api({
 
     return {
       generateLoginChallenge: () => client.generateLoginChallenge({}),
-      initPhoneVerification: (initVerificationInput: InitVerificationInput) =>
+      initPhoneVerification: (body: InitPhoneVerificationRequest) =>
         client.Login.initVerification({
-          payload: initVerificationInput.body,
+          payload: body,
           headers: commonHeaders,
         }),
-      verifyPhoneNumber: (verifyPhoneNumberInput: VerifyPhoneNumberInput) =>
-        client.Login.verifyCode({payload: verifyPhoneNumberInput.body}),
-      verifyChallenge: (verifyChallengeInput: VerifyChallengeInput) =>
-        client.Login.verifyChallenge({payload: verifyChallengeInput.body}),
+      verifyPhoneNumber: (body: VerifyPhoneNumberRequest) =>
+        client.Login.verifyCode({payload: body}),
+      verifyChallenge: (body: VerifyChallengeRequest) =>
+        client.Login.verifyChallenge({payload: body}),
       deleteUser: () => client.logoutUser({}),
       regenerateSessionCredentials: (
-        args: RegenerateSessionCredentialsRequest
-      ) => client.regenerateSessionCredentials({payload: args}),
+        body: RegenerateSessionCredentialsRequest
+      ) => client.regenerateSessionCredentials({payload: body}),
       getVersionServiceInfo: () =>
         client.getVersionServiceInfo({
           headers: commonHeaders,

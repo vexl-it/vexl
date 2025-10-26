@@ -131,10 +131,8 @@ function uploadPrivatePartsBatch({
     Array.map((oneChunk) =>
       offerApi
         .createPrivatePart({
-          body: {
-            adminId,
-            offerPrivateList: oneChunk,
-          },
+          adminId,
+          offerPrivateList: oneChunk,
         })
         .pipe(
           Effect.either,
@@ -377,10 +375,8 @@ export default function updatePrivateParts({
     if (removedConnections.length > 0) {
       yield* _(
         api.deletePrivatePart({
-          body: {
-            adminIds: [adminId],
-            publicKeys: removedConnections,
-          },
+          adminIds: [adminId],
+          publicKeys: removedConnections,
         })
       )
     }

@@ -7,7 +7,7 @@ import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
-import {type SubmitFeedbackInput} from './contracts'
+import {type SubmitFeedbackRequest} from './contracts'
 import {FeedbackApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -55,8 +55,8 @@ export function api({
     )
 
     return {
-      submitFeedback: (submitFeedbackInput: SubmitFeedbackInput) =>
-        client.submitFeedback({payload: submitFeedbackInput.body}),
+      submitFeedback: (body: SubmitFeedbackRequest) =>
+        client.submitFeedback({payload: body}),
     }
   })
 }

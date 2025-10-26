@@ -21,9 +21,3 @@ export class SubmitFeedbackRequest extends Schema.Class<SubmitFeedbackRequest>(
   textComment: Schema.optional(Schema.String),
   countryCode: Schema.optional(RegionCodeE),
 }) {}
-
-export const SubmitFeedbackInput = Schema.Struct({
-  body: SubmitFeedbackRequest,
-})
-
-export type SubmitFeedbackInput = Schema.Schema.Type<typeof SubmitFeedbackInput>

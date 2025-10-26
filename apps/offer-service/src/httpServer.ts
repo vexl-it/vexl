@@ -28,7 +28,6 @@ import {deleteOffer} from './routes/deleteOffer'
 import {deletePrivatePart} from './routes/deletePrivatePart'
 import {getClubOffersForMeModifiedOrCreatedAfter} from './routes/getClubOffersForMeModifiedOrCreatedAfter'
 import {getClubOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getClubOffersForMeModifiedOrCreatedAfterPaginated'
-import {getOffersByIds} from './routes/getOffersByIds'
 import {getOffersForMeModifiedOrCreatedAfter} from './routes/getOffersForMeModifiedOrCreatedAfter'
 import {getOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getOffersForMeModifiedOrCreatedAfterPaginated'
 import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
@@ -48,7 +47,6 @@ const RootGroupLive = HttpApiBuilder.group(OfferApiSpecification, 'root', (h) =>
       'getClubOffersForMeModifiedOrCreatedAfter',
       getClubOffersForMeModifiedOrCreatedAfter
     )
-    .handle('getOffersByIds', getOffersByIds)
     .handle(
       'getOffersForMeModifiedOrCreatedAfter',
       getOffersForMeModifiedOrCreatedAfter

@@ -47,14 +47,12 @@ export const initPhoneVerificationAtom = atom(
 
       const toReturn = yield* _(
         api.user.initPhoneVerification({
-          body: {
-            challenge: {
-              challenge: loginChallenge.challenge,
-              clientSignature: signedChallenge,
-              serverSignature: loginChallenge.serverSignature,
-            },
-            phoneNumber,
+          challenge: {
+            challenge: loginChallenge.challenge,
+            clientSignature: signedChallenge,
+            serverSignature: loginChallenge.serverSignature,
           },
+          phoneNumber,
         })
       )
 

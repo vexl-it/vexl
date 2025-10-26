@@ -102,18 +102,16 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
 
       return api.feedback
         .submitFeedback({
-          body: {
-            formId: Schema.decodeSync(FeedbackFormId)(formId),
-            countryCode: regionCode,
-            type: type === 'CHAT_RATING' ? 'trade' : 'create',
-            ...(stars !== 0 && {stars}),
-            ...(!isOfferCreationFeedback &&
-              objections.length !== 0 && {
-                objections: objections?.join(','),
-              }),
-            ...(!isOfferCreationFeedback &&
-              textComment.trim() !== '' && {textComment}),
-          },
+          formId: Schema.decodeSync(FeedbackFormId)(formId),
+          countryCode: regionCode,
+          type: type === 'CHAT_RATING' ? 'trade' : 'create',
+          ...(stars !== 0 && {stars}),
+          ...(!isOfferCreationFeedback &&
+            objections.length !== 0 && {
+              objections: objections?.join(','),
+            }),
+          ...(!isOfferCreationFeedback &&
+            textComment.trim() !== '' && {textComment}),
         })
         .pipe(
           Effect.catchAll((e) =>

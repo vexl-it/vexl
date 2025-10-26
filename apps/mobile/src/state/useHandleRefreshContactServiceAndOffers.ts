@@ -44,10 +44,8 @@ export function useRefreshUserOnContactService(): void {
 
           yield* _(
             store.get(apiAtom).contact.refreshUser({
-              body: {
-                offersAlive: true,
-                countryPrefix,
-              },
+              offersAlive: true,
+              countryPrefix,
             })
           )
         }).pipe(
@@ -156,9 +154,7 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
       return yield* _(Effect.fail({_tag: 'noOffersToRefresh'}))
     }
 
-    const offerIdsOnServer = yield* _(
-      api.offer.refreshOffer({body: {adminIds}})
-    )
+    const offerIdsOnServer = yield* _(api.offer.refreshOffer({adminIds}))
 
     const offerIdsOnDevice = myOffers.map((one) => one.offerInfo.offerId)
     const offerIdsNotOnServer = offerIdsOnDevice.filter(

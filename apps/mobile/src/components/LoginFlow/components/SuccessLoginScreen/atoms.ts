@@ -63,7 +63,7 @@ const handleUserCreationActionAtom = atom(
       })
       .pipe(
         Effect.flatMap((contactApi) =>
-          contactApi.createUser({body: {firebaseToken: null, expoToken: null}})
+          contactApi.createUser({firebaseToken: null, expoToken: null})
         ),
         Effect.tapError((e) => {
           reportError('error', new Error('Error creating user at contact MS'), {
@@ -144,10 +144,8 @@ export const finishLoginActionAtom = atom(
 
       const verifiedChallengeResponse = yield* _(
         publicUser.verifyChallenge({
-          body: {
-            userPublicKey: privateKey.publicKeyPemBase64,
-            signature: Schema.decodeSync(EcdsaSignature)(signature),
-          },
+          userPublicKey: privateKey.publicKeyPemBase64,
+          signature: Schema.decodeSync(EcdsaSignature)(signature),
         })
       )
 
@@ -179,7 +177,7 @@ export const finishLoginActionAtom = atom(
 
       const userExists = yield* _(
         contactApi.checkUserExists({
-          query: {notifyExistingUserAboutLogin: true},
+          notifyExistingUserAboutLogin: true,
         })
       )
 

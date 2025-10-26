@@ -47,14 +47,6 @@ export const ServerOffer = Schema.Struct({
 })
 export type ServerOffer = Schema.Schema.Type<typeof ServerOffer>
 
-export const GetOffersByIdsRequest = Schema.Struct({
-  ids: Schema.compose(Schema.split(','), Schema.Array(OfferIdE)),
-})
-export type GetOffersByIdsRequest = typeof GetOffersByIdsRequest.Type
-
-export const GetOfferByIdsResponse = Schema.Array(ServerOffer)
-export type GetOfferByIdsResponse = typeof GetOfferByIdsResponse.Type
-
 export const GetClubOffersForMeRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
 })
@@ -257,72 +249,3 @@ export const ReportClubOfferEndpointErrors = Schema.Union(
   ReportOfferLimitReachedError,
   InvalidChallengeError
 )
-
-export const GetOffersByIdsInput = Schema.Struct({
-  query: GetOffersByIdsRequest,
-})
-export type GetOffersByIdsInput = Schema.Schema.Type<typeof GetOffersByIdsInput>
-
-export const GetClubOffersForMeInput = Schema.Struct({
-  body: GetClubOffersForMeRequest,
-})
-export type GetClubOffersForMeInput = Schema.Schema.Type<
-  typeof GetClubOffersForMeInput
->
-
-export const GetOffersForMeModifiedOrCreatedAfterInput = Schema.Struct({
-  query: GetOffersForMeCreatedOrModifiedAfterRequest,
-})
-export type GetOffersForMeModifiedOrCreatedAfterInput =
-  typeof GetOffersForMeModifiedOrCreatedAfterInput.Type
-
-export const GetClubOffersForMeModifiedOrCreatedAfterInput = Schema.Struct({
-  body: GetClubOffersForMeCreatedOrModifiedAfterRequest,
-})
-export type GetClubOffersForMeModifiedOrCreatedAfterInput =
-  typeof GetClubOffersForMeModifiedOrCreatedAfterInput.Type
-
-export const CreateNewOfferInput = Schema.Struct({
-  body: CreateNewOfferRequest,
-})
-export type CreateNewOfferInput = Schema.Schema.Type<typeof CreateNewOfferInput>
-
-export const RefreshOfferInput = Schema.Struct({
-  body: RefreshOfferRequest,
-})
-export type RefreshOfferInput = Schema.Schema.Type<typeof RefreshOfferInput>
-
-export const DeleteOfferInput = Schema.Struct({
-  query: DeleteOfferRequest,
-})
-export type DeleteOfferInput = Schema.Schema.Type<typeof DeleteOfferInput>
-
-export const UpdateOfferInput = Schema.Struct({
-  body: UpdateOfferRequest,
-})
-export type UpdateOfferInput = Schema.Schema.Type<typeof UpdateOfferInput>
-
-export const CreatePrivatePartInput = Schema.Struct({
-  body: CreatePrivatePartRequest,
-})
-export type CreatePrivatePartInput = typeof CreatePrivatePartInput.Type
-
-export const DeletePrivatePartInput = Schema.Struct({
-  body: DeletePrivatePartRequest,
-})
-export type DeletePrivatePartInput = typeof DeletePrivatePartInput.Type
-
-export const GetRemovedOffersInput = Schema.Struct({
-  body: RemovedOfferIdsRequest,
-})
-export type GetRemovedOffersInput = typeof GetRemovedOffersInput.Type
-
-export const GetRemovedClubOffersInput = Schema.Struct({
-  body: RemovedClubOfferIdsRequest,
-})
-export type GetRemovedClubOffersInput = typeof GetRemovedClubOffersInput.Type
-
-export const ReportOfferInput = Schema.Struct({
-  body: ReportOfferRequest,
-})
-export type ReportOfferInput = Schema.Schema.Type<typeof ReportOfferInput>

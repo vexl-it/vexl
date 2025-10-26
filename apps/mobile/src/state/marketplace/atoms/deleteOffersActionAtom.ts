@@ -17,7 +17,7 @@ export const deleteOffersActionAtom = atom<
   const offers = get(offersAtom)
 
   return Effect.gen(function* (_) {
-    yield* _(api.offer.deleteOffer({query: {adminIds: adminIdsToDelete}}))
+    yield* _(api.offer.deleteOffer({adminIds: adminIdsToDelete}))
 
     // Delete offer to connections
     set(offerToConnectionsAtom, (prev) => ({

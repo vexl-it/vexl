@@ -34,12 +34,10 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
         Effect.flatMap((encryptedPayload) =>
           pipe(
             offer.updateOffer({
-              body: {
-                adminId:
-                  one.offerInfo.privatePart.adminId ?? ('' as OfferAdminId),
-                payloadPublic: encryptedPayload,
-                offerPrivateList: [],
-              },
+              adminId:
+                one.offerInfo.privatePart.adminId ?? ('' as OfferAdminId),
+              payloadPublic: encryptedPayload,
+              offerPrivateList: [],
             }),
             Effect.flatMap((encryptedPayload) =>
               decryptOffer(session.privateKey)(encryptedPayload)

@@ -67,11 +67,9 @@ function useAtoms({
       effectToRun: (region, get) =>
         get(apiAtom)
           .location.getGeocodedCoordinates({
-            query: {
-              lang: getCurrentLocale(),
-              latitude: Latitude.parse(region.latitude),
-              longitude: Longitude.parse(region.longitude),
-            },
+            lang: getCurrentLocale(),
+            latitude: Latitude.parse(region.latitude),
+            longitude: Longitude.parse(region.longitude),
           })
           .pipe(
             Effect.tap((data) => {

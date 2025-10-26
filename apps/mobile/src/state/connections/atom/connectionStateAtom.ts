@@ -47,11 +47,9 @@ function fetchContacts(
 > {
   return pipe(
     api.fetchMyContacts({
-      query: {
-        level,
-        page: 0,
-        limit: MAX_PAGE_SIZE,
-      },
+      level,
+      page: 0,
+      limit: MAX_PAGE_SIZE,
     }),
     Effect.map((one) => one.items.map((oneItem) => oneItem.publicKey))
   )
@@ -136,9 +134,7 @@ export const syncConnectionsActionAtom = atom(
 
       const commonFriends = yield* _(
         api.contact.fetchCommonConnections({
-          body: {
-            publicKeys: deduplicate([...firstLevel, ...secondLevel]),
-          },
+          publicKeys: deduplicate([...firstLevel, ...secondLevel]),
         })
       )
       const lastUpdate = updateStarted

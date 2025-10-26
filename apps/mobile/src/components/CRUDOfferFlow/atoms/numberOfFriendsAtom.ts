@@ -31,20 +31,16 @@ const numberOfFriendsAtom = atom(
       sequenceS(TE.ApplicativeSeq)({
         firstLevel: effectToTaskEither(
           api.contact.fetchMyContacts({
-            query: {
-              page: 0,
-              limit: MAX_PAGE_SIZE,
-              level: 'FIRST',
-            },
+            page: 0,
+            limit: MAX_PAGE_SIZE,
+            level: 'FIRST',
           })
         ),
         secondLevel: effectToTaskEither(
           api.contact.fetchMyContacts({
-            query: {
-              page: 0,
-              limit: MAX_PAGE_SIZE,
-              level: 'ALL',
-            },
+            page: 0,
+            limit: MAX_PAGE_SIZE,
+            level: 'ALL',
           })
         ),
       }),

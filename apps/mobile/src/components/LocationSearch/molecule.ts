@@ -37,10 +37,8 @@ export const LocationSearchMolecule = molecule(() => {
     inputAtom: searchQueryInnerAtom,
     effectToRun: (query, get) =>
       get(apiAtom).location.getLocationSuggestions({
-        query: {
-          phrase: query,
-          lang: getCurrentLocale(),
-        },
+        phrase: query,
+        lang: getCurrentLocale(),
       }),
   })
 

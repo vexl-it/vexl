@@ -50,10 +50,8 @@ export function callWithNotificationService<
 
       yield* _(
         notificationApi.issueNotification({
-          body: {
-            notificationCypher,
-            sendNewChatMessageNotification: sendSystemNotification,
-          },
+          notificationCypher,
+          sendNewChatMessageNotification: sendSystemNotification,
         })
       ).pipe(
         Effect.catchAll((e) => {

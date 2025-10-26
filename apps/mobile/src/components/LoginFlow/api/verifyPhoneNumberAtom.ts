@@ -1,4 +1,4 @@
-import {type VerifyPhoneNumberInput} from '@vexl-next/rest-api/src/services/user/contracts'
+import {type VerifyPhoneNumberRequest} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -7,7 +7,7 @@ import reportError from '../../../utils/reportError'
 
 export const verifyPhoneNumberAtom = atom(
   null,
-  (get, _, inputRequest: VerifyPhoneNumberInput) => {
+  (get, _, inputRequest: VerifyPhoneNumberRequest) => {
     const userApi = get(apiAtom).user
     const {t} = get(translationAtom)
 

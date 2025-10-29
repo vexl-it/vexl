@@ -17,7 +17,9 @@ import {
   type CreateUserRequest,
   type DeactivateClubJoinLinkRequest,
   type EraseUserFromNetworkRequest,
+  type FetchCommonConnectionsPaginatedRequest,
   type FetchCommonConnectionsRequest,
+  type FetchMyContactsPaginatedRequest,
   type FetchMyContactsRequest,
   type GenerateClubJoinLinkRequest,
   type GetClubContactsRequest,
@@ -124,8 +126,19 @@ export function api({
           headers: commonHeaders,
           urlParams: query,
         }),
+      fetchMyContactsPaginated: (query: FetchMyContactsPaginatedRequest) =>
+        client.Contact.fetchMyContactsPaginated({
+          headers: commonHeaders,
+          urlParams: query,
+        }),
       fetchCommonConnections: (body: FetchCommonConnectionsRequest) =>
         client.Contact.fetchCommonConnections({
+          payload: body,
+        }),
+      fetchCommonConnectionsPaginated: (
+        body: FetchCommonConnectionsPaginatedRequest
+      ) =>
+        client.Contact.fetchCommonConnectionsPaginated({
           payload: body,
         }),
       updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>

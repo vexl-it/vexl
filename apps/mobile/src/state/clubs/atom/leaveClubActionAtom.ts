@@ -3,6 +3,7 @@ import {Effect, Option, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {ignoreReportErrors} from '../../../utils/reportError'
+import {removeClubOffersNextPageParamFromStateActionAtom} from '../../marketplace/atoms/offersState'
 import {
   clubsToKeyHolderAtom,
   removeClubFromKeyHolderStateActionAtom,
@@ -42,6 +43,7 @@ export const leaveClubActionAtom = atom(
       )
       set(removeClubFromKeyHolderStateActionAtom, clubUuid)
       set(removeClubWithMembersFromStateActionAtom, clubUuid)
+      set(removeClubOffersNextPageParamFromStateActionAtom, clubUuid)
     })
   }
 )

@@ -48,7 +48,7 @@ export const PageResponseMeta = Schema.Struct({
   limit: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
 })
 
-export const createPageResponse = <A extends Schema.Struct<any>>(
+export const createPageResponse = <A extends Schema.Schema<any>>(
   s: A
 ): Schema.Struct<
   typeof PageResponseMeta.fields & {items: Schema.Array$<A>}

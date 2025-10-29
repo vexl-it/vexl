@@ -3,8 +3,8 @@ import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {OfferInfoE} from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
+import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Array, Effect, flow, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {clubOffersNextPageParamAtom} from '../../offersState'
@@ -38,50 +38,6 @@ const validateOfferIsForClub =
     )
   }
 
-const fetchAllClubOffersForMeActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    {
-      offersApi,
-      keyPair,
-      lastPrivatePartIdBase64,
-      clubUuid,
-    }: {
-      offersApi: OfferApi
-      keyPair: PrivateKeyHolderE
-      clubUuid: ClubUuid
-      lastPrivatePartIdBase64?: Base64String
-    }
-  ) => {
-    return Effect.gen(function* (_) {
-      const allOffers: ServerOffer[] = []
-      let nextPageToken = lastPrivatePartIdBase64
-      let hasMore = true
-
-      while (hasMore) {
-        const response = yield* _(
-          offersApi.getClubOffersForMeModifiedOrCreatedAfterPaginated({
-            nextPageToken,
-            limit: OFFERS_PAGE_LIMIT,
-            keyPair,
-          })
-        )
-
-        allOffers.push(...response.items)
-
-        hasMore = response.hasNext
-        if (response.nextPageToken) nextPageToken = response.nextPageToken
-      }
-
-      set(clubOffersNextPageParamAtom, Record.set(clubUuid, nextPageToken))
-
-      return allOffers
-    })
-  }
-)
-
 export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
   null,
   (
@@ -101,11 +57,19 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
   ) => {
     return Effect.gen(function* (_) {
       const allClubOffersForMe = yield* _(
-        set(fetchAllClubOffersForMeActionAtom, {
-          offersApi,
-          lastPrivatePartIdBase64,
-          keyPair,
-          clubUuid,
+        fetchAllPaginatedData({
+          fetchEffectToRun: (nextPageToken) =>
+            offersApi.getClubOffersForMeModifiedOrCreatedAfterPaginated({
+              nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
+              limit: OFFERS_PAGE_LIMIT,
+              keyPair,
+            }),
+          storeNextPageToken: (nextPageToken) => {
+            set(
+              clubOffersNextPageParamAtom,
+              Record.set(clubUuid, nextPageToken)
+            )
+          },
         })
       )
 

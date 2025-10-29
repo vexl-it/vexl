@@ -1,59 +1,75 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type Effect} from 'effect'
-import {sequenceS} from 'fp-ts/Apply'
-import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
+import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
+import {Array, Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 
-const MAX_PAGE_SIZE = 2147483647
+const NumberOfFriendsAtomState = Schema.Union(
+  Schema.Struct({
+    state: Schema.Literal('loading'),
+  }),
+  Schema.Struct({
+    state: Schema.Literal('success'),
+    firstLevelFriendsCount: Schema.Int,
+    firstAndSecondLevelFriendsCount: Schema.Int,
+  }),
+  Schema.Struct({
+    state: Schema.Literal('error'),
+    error: Schema.Unknown,
+  })
+)
 
-const numberOfFriendsStorageAtom = atom<
-  E.Either<
-    | {_tag: 'friendsNotLoaded'}
-    | Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>,
-    {
-      firstLevelFriendsCount: number
-      secondLevelFriendsCount: number
-    }
-  >
->(E.left({_tag: 'friendsNotLoaded'} as const))
+export type NumberOfFriendsAtomState = typeof NumberOfFriendsAtomState.Type
+
+const numberOfFriendsStorageAtom = atom<NumberOfFriendsAtomState>({
+  state: 'loading',
+})
 
 const numberOfFriendsAtom = atom(
   (get) => get(numberOfFriendsStorageAtom),
   (get, set) => {
     const api = get(apiAtom)
 
-    void pipe(
-      sequenceS(TE.ApplicativeSeq)({
-        firstLevel: effectToTaskEither(
-          api.contact.fetchMyContacts({
-            page: 0,
-            limit: MAX_PAGE_SIZE,
-            level: 'FIRST',
-          })
-        ),
-        secondLevel: effectToTaskEither(
-          api.contact.fetchMyContacts({
-            page: 0,
-            limit: MAX_PAGE_SIZE,
-            level: 'ALL',
-          })
-        ),
-      }),
-      TE.map((result) => {
-        return {
-          firstLevelFriendsCount: result.firstLevel.itemsCountTotal,
-          secondLevelFriendsCount: result.secondLevel.itemsCountTotal,
-        }
-      }),
-      T.map((result) => {
-        set(numberOfFriendsStorageAtom, result)
+    return Effect.gen(function* (_) {
+      const firstLevelConnections = yield* _(
+        fetchAllPaginatedData({
+          fetchEffectToRun: (nextPageToken) =>
+            api.contact.fetchMyContactsPaginated({
+              level: 'FIRST',
+              limit: FETCH_CONNECTIONS_PAGE_SIZE,
+              nextPageToken,
+            }),
+        })
+      )
+
+      const secondLevelConnections = yield* _(
+        fetchAllPaginatedData({
+          fetchEffectToRun: (nextPageToken) =>
+            api.contact.fetchMyContactsPaginated({
+              level: 'SECOND',
+              limit: FETCH_CONNECTIONS_PAGE_SIZE,
+              nextPageToken,
+            }),
+        })
+      )
+
+      const firstAndSecondLevelFriendsDeduped = Array.dedupe([
+        ...firstLevelConnections,
+        ...secondLevelConnections,
+      ])
+
+      set(numberOfFriendsStorageAtom, {
+        state: 'success',
+        firstLevelFriendsCount: firstLevelConnections.length,
+        firstAndSecondLevelFriendsCount:
+          firstAndSecondLevelFriendsDeduped.length,
       })
-    )()
+    }).pipe(
+      Effect.catchAll((error) => {
+        set(numberOfFriendsStorageAtom, {state: 'error', error})
+        return Effect.void
+      })
+    )
   }
 )
 

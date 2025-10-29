@@ -72,3 +72,45 @@ export const createAndImportUsersFromNetwork = (
       })
     )
   })
+
+export const createUserOnNetwork = (
+  user: DummyUser
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+) =>
+  Effect.gen(function* (_) {
+    const app = yield* _(NodeTestingApp)
+    yield* _(addTestHeaders(user.authHeaders))
+
+    yield* _(
+      app.User.createUser({
+        payload: {
+          expoToken: user.notificationToken,
+          firebaseToken: null,
+        },
+        headers: commonHeaders,
+      })
+    )
+  })
+
+export const importUsersFromNetwork = (
+  user: DummyUser,
+  users: DummyUser[]
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+) =>
+  Effect.gen(function* (_) {
+    const app = yield* _(NodeTestingApp)
+
+    yield* _(addTestHeaders(user.authHeaders))
+    yield* _(
+      app.Contact.importContacts({
+        payload: {
+          contacts: pipe(
+            users,
+            Array.map((u) => u.hashedNumber),
+            Array.filter((h) => h !== user.hashedNumber)
+          ),
+          replace: true,
+        },
+      })
+    )
+  })

@@ -13,14 +13,29 @@ import {
   type FindCommonFriendsParams,
   type FindCommonFriendsResult,
 } from './queries/createFindCommonFriendsByOwnerHashAndPublicKeys'
+import {
+  createFindCommonFriendsByOwnerHashAndPublicKeysPaginated,
+  type FindCommonFriendsPaginatedParams,
+  type FindCommonFriendsPaginatedResult,
+} from './queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {createFindContactsByHashFrom} from './queries/createFindContactsByHashFrom'
 import {createFindFirstLevelContactsPublicKeysByHashFrom} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
+import {
+  createFindFirstLevelContactsPublicKeysByHashFromPaginated,
+  type FindFirstLevelContactsPublicKeysByHashFromPaginatedParams,
+  type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult,
+} from './queries/createFindFirstLevelContactsPublicKeysByHashFromPaginated'
 import {
   createFindNotificationTokensByFilter,
   type FindNotificationTokensByFiltersArgs,
   type FindNotificationTokensByFiltersResult,
 } from './queries/createFindNotificationTokensByFilter'
 import {createFindSecondLevelContactsPublicKeysByHashFrom} from './queries/createFindSecondLevelContactsPublicKeysByHashFrom'
+import {
+  createFindSecondLevelContactsPublicKeysByHashFromPaginated,
+  type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams,
+  type FindSecondLevelContactsPublicKeysByHashFromPaginatedResult,
+} from './queries/createFindSecondLevelContactsPublicKeysByHashFromPaginated'
 import {
   createInsertContact,
   type InsertContactParams,
@@ -51,13 +66,34 @@ export interface ContactDbOperations {
     hash: HashedPhoneNumber
   ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
 
+  findFirstLevelContactsPublicKeysByHashFromPaginated: (
+    args: FindFirstLevelContactsPublicKeysByHashFromPaginatedParams
+  ) => Effect.Effect<
+    readonly FindFirstLevelContactsPublicKeysByHashFromPaginatedResult[],
+    UnexpectedServerError
+  >
+
   findSecondLevelContactsPublicKeysByHashFrom: (
     hash: HashedPhoneNumber
   ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
 
+  findSecondLevelContactsPublicKeysByHashFromPaginated: (
+    args: FindSecondLevelContactsPublicKeysByHashFromPaginatedParams
+  ) => Effect.Effect<
+    readonly FindSecondLevelContactsPublicKeysByHashFromPaginatedResult[],
+    UnexpectedServerError
+  >
+
   findCommonFriends: (
     args: FindCommonFriendsParams
   ) => Effect.Effect<readonly FindCommonFriendsResult[], UnexpectedServerError>
+
+  findCommonFriendsPaginated: (
+    args: FindCommonFriendsPaginatedParams
+  ) => Effect.Effect<
+    readonly FindCommonFriendsPaginatedResult[],
+    UnexpectedServerError
+  >
 
   findNotificationTokensByFilter: (
     args: FindNotificationTokensByFiltersArgs
@@ -87,11 +123,20 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
       const findFirstLevelContactsPublicKeysByHashFrom = yield* _(
         createFindFirstLevelContactsPublicKeysByHashFrom
       )
+      const findFirstLevelContactsPublicKeysByHashFromPaginated = yield* _(
+        createFindFirstLevelContactsPublicKeysByHashFromPaginated
+      )
       const findSecondLevelContactsPublicKeysByHashFrom = yield* _(
         createFindSecondLevelContactsPublicKeysByHashFrom
       )
+      const findSecondLevelContactsPublicKeysByHashFromPaginated = yield* _(
+        createFindSecondLevelContactsPublicKeysByHashFromPaginated
+      )
       const findCommonFriends = yield* _(
         createFindCommonFriendsByOwnerHashAndPublicKeys
+      )
+      const findCommonFriendsPaginated = yield* _(
+        createFindCommonFriendsByOwnerHashAndPublicKeysPaginated
       )
       const findNotificationTokensByFilter = yield* _(
         createFindNotificationTokensByFilter
@@ -105,9 +150,12 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
         findContactsByHashFrom,
         insertContact,
         findFirstLevelContactsPublicKeysByHashFrom,
+        findFirstLevelContactsPublicKeysByHashFromPaginated,
         findSecondLevelContactsPublicKeysByHashFrom,
+        findSecondLevelContactsPublicKeysByHashFromPaginated,
         findNotificationTokensByFilter,
         findCommonFriends,
+        findCommonFriendsPaginated,
         updateContactHashFrom,
       }
     })

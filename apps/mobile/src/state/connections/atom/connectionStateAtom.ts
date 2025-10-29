@@ -1,12 +1,13 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
-import {type ConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
+import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Array, Effect, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
@@ -24,8 +25,6 @@ import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ConnectionsState} from '../domain'
 
-const MAX_PAGE_SIZE = 2147483647
-
 const connectionStateAtom = atomWithParsedMmkvStorageE(
   'connectionsState',
   {
@@ -40,20 +39,20 @@ const connectionStateAtom = atomWithParsedMmkvStorageE(
 export default connectionStateAtom
 
 function fetchContacts(
-  level: ConnectionLevel,
+  level: 'FIRST' | 'SECOND',
   api: ContactApi
 ): Effect.Effect<
   PublicKeyPemBase64[],
-  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContacts']>>
+  Effect.Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
 > {
-  return pipe(
-    api.fetchMyContacts({
-      level,
-      page: 0,
-      limit: MAX_PAGE_SIZE,
-    }),
-    Effect.map((one) => one.items.map((oneItem) => oneItem.publicKey))
-  )
+  return fetchAllPaginatedData({
+    fetchEffectToRun: (nextPageToken) =>
+      api.fetchMyContactsPaginated({
+        level,
+        limit: FETCH_CONNECTIONS_PAGE_SIZE,
+        nextPageToken,
+      }),
+  })
 }
 
 export const syncConnectionsActionAtom = atom(
@@ -134,8 +133,13 @@ export const syncConnectionsActionAtom = atom(
       }
 
       const commonFriends = yield* _(
-        api.contact.fetchCommonConnections({
-          publicKeys: deduplicate([...firstLevel, ...secondLevel]),
+        fetchAllPaginatedData({
+          fetchEffectToRun: (nextPageToken) =>
+            api.contact.fetchCommonConnectionsPaginated({
+              publicKeys: deduplicate([...firstLevel, ...secondLevel]),
+              limit: FETCH_CONNECTIONS_PAGE_SIZE,
+              nextPageToken,
+            }),
         })
       )
       const lastUpdate = updateStarted
@@ -149,7 +153,9 @@ export const syncConnectionsActionAtom = atom(
       set(connectionStateAtom, {
         firstLevel,
         secondLevel,
-        commonFriends,
+        commonFriends: {
+          commonContacts: commonFriends,
+        },
         lastUpdate,
       })
     }).pipe(

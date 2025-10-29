@@ -5,6 +5,7 @@ import {
   OpenApi,
 } from '@effect/platform/index'
 import {
+  InvalidNextPageTokenError,
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
@@ -31,8 +32,12 @@ import {
   EraseUserFromNetworkErrors,
   EraseUserFromNetworkRequest,
   EraseUserFromNetworkResponse,
+  FetchCommonConnectionsPaginatedRequest,
+  FetchCommonConnectionsPaginatedResponse,
   FetchCommonConnectionsRequest,
-  FetchCommonConnectionsResponseE,
+  FetchCommonConnectionsResponse,
+  FetchMyContactsPaginatedRequest,
+  FetchMyContactsPaginatedResponse,
   FetchMyContactsRequest,
   FetchMyContactsResponse,
   GenerateClubJoinLinkErrors,
@@ -173,14 +178,35 @@ export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
   .addSuccess(FetchMyContactsResponse)
   .annotate(MaxExpectedDailyCall, 100)
 
+export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
+  'fetchMyContactsPaginated',
+  '/api/v1/contacts/me/paginated'
+)
+  .middleware(ServerSecurityMiddleware)
+  .setHeaders(CommonHeaders)
+  .setUrlParams(FetchMyContactsPaginatedRequest)
+  .addSuccess(FetchMyContactsPaginatedResponse)
+  .addError(InvalidNextPageTokenError)
+  .annotate(MaxExpectedDailyCall, 500)
+
 export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnections',
   '/api/v1/contacts/common'
 )
   .middleware(ServerSecurityMiddleware)
   .setPayload(FetchCommonConnectionsRequest)
-  .addSuccess(FetchCommonConnectionsResponseE)
+  .addSuccess(FetchCommonConnectionsResponse)
   .annotate(MaxExpectedDailyCall, 100)
+
+export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
+  'fetchCommonConnectionsPaginated',
+  '/api/v1/contacts/common/paginated'
+)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(FetchCommonConnectionsPaginatedRequest)
+  .addSuccess(FetchCommonConnectionsPaginatedResponse)
+  .addError(InvalidNextPageTokenError)
+  .annotate(MaxExpectedDailyCall, 500)
 
 export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
   'updateBadOwnerHash',
@@ -347,7 +373,9 @@ const UserApiGroup = HttpApiGroup.make('User')
 const ContactApiGroup = HttpApiGroup.make('Contact')
   .add(ImportContactsEndpoint)
   .add(FetchMyContactsEndpoint)
+  .add(FetchMyContactsPaginatedEndpoint)
   .add(FetchCommonConnectionsEndpoint)
+  .add(FetchCommonConnectionsPaginatedEndpoint)
 
 const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
   .add(CreateClubEndpoint)

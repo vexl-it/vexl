@@ -7,7 +7,7 @@ import {
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {Array} from 'effect'
+import {Array, Record} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, type Atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -124,3 +124,10 @@ export function createOfferCountForClub(clubUuid: ClubUuid): Atom<number> {
     )
   })
 }
+
+export const removeClubOffersNextPageParamFromStateActionAtom = atom(
+  null,
+  (get, set, clubUuid: ClubUuid) => {
+    set(clubOffersNextPageParamAtom, Record.remove(clubUuid))
+  }
+)

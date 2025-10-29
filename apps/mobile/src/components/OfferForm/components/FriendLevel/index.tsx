@@ -1,6 +1,4 @@
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
 import {atom, useAtom, useAtomValue, type Atom} from 'jotai'
 import React from 'react'
 import {XStack} from 'tamagui'
@@ -9,7 +7,6 @@ import {
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
 import showErrorAlert from '../../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import numberOfFriendsAtom from '../../../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
 import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
@@ -18,33 +15,34 @@ import FriendLevelCell from './components/FriendLevelCell'
 const friendLevelSubtitleAtom = atom((get) => {
   const {t} = get(translationAtom)
   const numberOfFriends = get(numberOfFriendsAtom)
-  return pipe(
-    numberOfFriends,
-    E.match(
-      (e) => {
-        if (e._tag !== 'friendsNotLoaded') {
-          showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-            error: e,
-          })
-        }
-        return {
-          firstFriendLevelText: t('offerForm.friendLevel.noVexlers'),
-          secondFriendLevelText: t('offerForm.friendLevel.noVexlers'),
-        }
-      },
-      (r) => {
-        return {
-          firstFriendLevelText: t('offerForm.friendLevel.reachVexlers', {
-            count: r.firstLevelFriendsCount,
-          }),
-          secondFriendLevelText: t('offerForm.friendLevel.reachVexlers', {
-            count: r.secondLevelFriendsCount,
-          }),
-        }
-      }
-    )
-  )
+
+  if (numberOfFriends.state === 'loading')
+    return {
+      firstFriendLevelText: t('common.loading'),
+      secondFriendLevelText: t('common.loading'),
+    }
+
+  if (numberOfFriends.state === 'error') {
+    const e = numberOfFriends.error
+    showErrorAlert({
+      title: t('common.unknownError'),
+      error: e,
+    })
+
+    return {
+      firstFriendLevelText: t('offerForm.friendLevel.noVexlers'),
+      secondFriendLevelText: t('offerForm.friendLevel.noVexlers'),
+    }
+  }
+
+  return {
+    firstFriendLevelText: t('offerForm.friendLevel.reachVexlers', {
+      count: numberOfFriends.firstLevelFriendsCount,
+    }),
+    secondFriendLevelText: t('offerForm.friendLevel.reachVexlers', {
+      count: numberOfFriends.firstAndSecondLevelFriendsCount,
+    }),
+  }
 })
 
 interface Props {
@@ -61,10 +59,12 @@ function FriendLevel({
     intendedConnectionLevelAtom
   )
   const subtitle = useAtomValue(friendLevelSubtitleAtom)
+  const numberOfFriends = useAtomValue(numberOfFriendsAtom)
 
   return (
     <XStack jc="space-evenly">
       <FriendLevelCell
+        loading={numberOfFriends.state === 'loading'}
         image={firstDegreeFriendsSvg}
         selected={intendedConnectionLevel === 'FIRST'}
         type="FIRST"
@@ -73,6 +73,7 @@ function FriendLevel({
         subtitle={!hideSubtitle ? subtitle.firstFriendLevelText : undefined}
       />
       <FriendLevelCell
+        loading={numberOfFriends.state === 'loading'}
         image={secondDegreeFriendsSvg}
         selected={intendedConnectionLevel === 'ALL'}
         type="ALL"

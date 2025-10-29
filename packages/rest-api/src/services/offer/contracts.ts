@@ -85,9 +85,7 @@ export type GetOffersForMeCreatedOrModifiedAfterResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterResponse.Type
 
 export const GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
-  Schema.Struct({
-    ...createPageResponse(ServerOffer).fields,
-  })
+  createPageResponse(ServerOffer)
 
 export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type

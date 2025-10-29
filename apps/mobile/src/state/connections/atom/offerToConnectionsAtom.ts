@@ -295,7 +295,7 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
           },
           adminId: oneOfferConnections.adminId,
           symmetricKey: oneOfferConnections.symmetricKey,
-          commonFriends: connectionState.commonFriends,
+          commonFriends: connectionState.commonFriends.commonContacts,
           stopProcessingAfter,
           onProgress,
           api: offerApi,

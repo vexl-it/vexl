@@ -5,8 +5,8 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
+import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Array, Effect, flow} from 'effect'
 import {atom} from 'jotai'
 import {NotOfferFromContactNetworkError} from '../../../domain'
@@ -27,47 +27,6 @@ const validateOfferIsFromContactNetwork = (offerInfo: OfferInfoE): boolean => {
     Array.isEmptyReadonlyArray(clubIds)
   )
 }
-
-const fetchAllOffersForMeActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    {
-      offersApi,
-      lastPrivatePartIdBase64,
-    }: {
-      offersApi: OfferApi
-      lastPrivatePartIdBase64?: Base64String
-    }
-  ) => {
-    return Effect.gen(function* (_) {
-      const allOffers: ServerOffer[] = []
-      let nextPageToken = lastPrivatePartIdBase64
-      let hasMore = true
-
-      while (hasMore) {
-        const response = yield* _(
-          offersApi.getOffersForMeModifiedOrCreatedAfterPaginated({
-            nextPageToken,
-            limit: OFFERS_PAGE_LIMIT,
-          })
-        )
-
-        allOffers.push(...response.items)
-
-        hasMore = response.hasNext
-        if (response.nextPageToken) {
-          nextPageToken = response.nextPageToken
-        }
-      }
-
-      set(contactOffersNextPageParamAtom, nextPageToken)
-
-      return allOffers
-    })
-  }
-)
 
 export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
   null,
@@ -95,9 +54,15 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
   ) => {
     return Effect.gen(function* (_) {
       const allOffers = yield* _(
-        set(fetchAllOffersForMeActionAtom, {
-          offersApi,
-          lastPrivatePartIdBase64,
+        fetchAllPaginatedData({
+          fetchEffectToRun: (nextPageToken) =>
+            offersApi.getOffersForMeModifiedOrCreatedAfterPaginated({
+              nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
+              limit: OFFERS_PAGE_LIMIT,
+            }),
+          storeNextPageToken: (nextPageToken) => {
+            set(contactOffersNextPageParamAtom, nextPageToken)
+          },
         })
       )
 

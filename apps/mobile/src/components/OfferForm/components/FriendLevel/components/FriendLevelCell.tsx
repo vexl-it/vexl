@@ -3,13 +3,15 @@ import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text} from 'tamagui'
+import {Stack, Text, XStack} from 'tamagui'
 import {userDataRealOrAnonymizedAtom} from '../../../../../state/session/userDataAtoms'
 import SvgImage from '../../../../Image'
-import UserAvatar from '../../../../UserAvatar'
 import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
+import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
+import UserAvatar from '../../../../UserAvatar'
 
 interface FriendLevelCellContentProps {
+  loading?: boolean
   image: SvgString
   title: string
   subtitle?: string
@@ -22,6 +24,7 @@ interface Props extends FriendLevelCellContentProps {
 }
 
 function FriendLevelCell({
+  loading,
   image,
   onPress,
   selected,
@@ -71,14 +74,17 @@ function FriendLevelCell({
           >
             {title}
           </Text>
-          <Text
-            textAlign="center"
-            col={selected ? '$main' : '$greyOnBlack'}
-            ff="$body500"
-            fos={14}
-          >
-            {subtitle}
-          </Text>
+          <XStack ai="center" gap="$2">
+            {!!loading && <VexlActivityIndicator size="small" />}
+            <Text
+              textAlign="center"
+              col={selected ? '$main' : '$greyOnBlack'}
+              ff="$body500"
+              fos={14}
+            >
+              {subtitle}
+            </Text>
+          </XStack>
         </Stack>
       </TouchableOpacity>
     </Stack>

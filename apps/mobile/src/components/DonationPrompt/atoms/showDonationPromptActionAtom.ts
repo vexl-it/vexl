@@ -5,7 +5,6 @@ import {DateTime} from 'luxon'
 import {apiAtom} from '../../../api'
 import {myDonationsAtom} from '../../../state/donations/atom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {navigationRef} from '../../../utils/navigation'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 import {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
@@ -84,8 +83,6 @@ const showDonationPromptActionAtom = atom(null, (get, set) => {
       Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
     )
 
-    const currentRoute = navigationRef.getCurrentRoute()
-
     yield* _(
       set(askAreYouSureActionAtom, {
         variant: 'info',
@@ -96,22 +93,11 @@ const showDonationPromptActionAtom = atom(null, (get, set) => {
               DonationQrCodeOrStatus({
                 invoiceId: resp.invoiceId,
               }),
-            negativeButtonText:
-              currentRoute?.name === 'MyDonations'
-                ? undefined
-                : t('common.close'),
-            positiveButtonText:
-              currentRoute?.name === 'MyDonations'
-                ? t('common.close')
-                : t('donationPrompt.seeMyDonations'),
+            positiveButtonText: t('common.close'),
           },
         ],
       })
     )
-
-    if (navigationRef.isReady() && currentRoute?.name !== 'MyDonations') {
-      navigationRef.navigate('MyDonations')
-    }
   }).pipe(
     Effect.catchAll((e) => {
       if (e._tag === 'UserDeclinedError') return Effect.succeed(Effect.void)

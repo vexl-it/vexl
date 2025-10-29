@@ -9,6 +9,9 @@ import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {apiAtom} from '../../../api'
+import showDonationPromptGiveLoveActionAtom, {
+  DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT,
+} from '../../../components/DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
@@ -36,7 +39,8 @@ export default function sendMessageActionAtom(
     )
 
     const chatWithMessages = get(chatWithMessagesAtom)
-    const {chat} = chatWithMessages
+    const {chat, messages} = chatWithMessages
+    const numberOfMessagesInChat = messages.length
 
     return InteractionManager.runAfterInteractions(() => {
       return Effect.gen(function* (_) {
@@ -55,6 +59,13 @@ export default function sendMessageActionAtom(
             otherSideVersion: chat.otherSideVersion,
           })
         )
+
+        if (
+          numberOfMessagesInChat > DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT
+        )
+          yield* _(
+            set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: false})
+          )
       }).pipe(
         Effect.match({
           onFailure(e) {

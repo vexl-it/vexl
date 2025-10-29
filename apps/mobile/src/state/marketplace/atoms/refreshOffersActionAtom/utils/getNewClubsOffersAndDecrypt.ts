@@ -5,7 +5,7 @@ import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.bran
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, Effect, flow, Schema} from 'effect'
+import {Array, Effect, flow, Record, Schema} from 'effect'
 import {atom} from 'jotai'
 import {clubOffersNextPageParamAtom} from '../../offersState'
 
@@ -47,9 +47,11 @@ const fetchAllClubOffersForMeActionAtom = atom(
       offersApi,
       keyPair,
       lastPrivatePartIdBase64,
+      clubUuid,
     }: {
       offersApi: OfferApi
       keyPair: PrivateKeyHolderE
+      clubUuid: ClubUuid
       lastPrivatePartIdBase64?: Base64String
     }
   ) => {
@@ -73,7 +75,7 @@ const fetchAllClubOffersForMeActionAtom = atom(
         if (response.nextPageToken) nextPageToken = response.nextPageToken
       }
 
-      set(clubOffersNextPageParamAtom, nextPageToken)
+      set(clubOffersNextPageParamAtom, Record.set(clubUuid, nextPageToken))
 
       return allOffers
     })
@@ -103,6 +105,7 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
           offersApi,
           lastPrivatePartIdBase64,
           keyPair,
+          clubUuid,
         })
       )
 

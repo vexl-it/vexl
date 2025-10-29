@@ -1,4 +1,4 @@
-import {ClubUuidE} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid, ClubUuidE} from '@vexl-next/domain/src/general/clubs'
 import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
 import {
   BtcNetworkE,
@@ -45,7 +45,7 @@ export const OffersState = z
   .object({
     // changedName to force clients to refetch all offers after update of the offers location shape
     contactOffersNextPageParam: z.string().optional(),
-    clubOffersNextPageParam: z.string().optional(),
+    clubOffersNextPageParam: z.record(ClubUuid, z.string()).default({}),
     offers: z.array(OneOfferInState),
   })
   .readonly()
@@ -54,8 +54,11 @@ export const OffersStateE = Schema.Struct({
   lastUpdatedAt1: IsoDatetimeStringE.pipe(
     Schema.optionalWith({default: () => MINIMAL_DATE})
   ),
-  lastPrivatePartContactOfferIdBase64: Schema.optional(Base64StringE),
-  lastPrivatePartClubOfferIdBase64: Schema.optional(Base64StringE),
+  contactOffersNextPageParam: Schema.optional(Base64StringE),
+  clubOffersNextPageParam: Schema.optionalWith(
+    Schema.Record({key: ClubUuidE, value: Schema.String}),
+    {default: () => ({})}
+  ),
   offers: Schema.Array(OneOfferInStateE),
 })
 export type OffersState = typeof OffersStateE.Type

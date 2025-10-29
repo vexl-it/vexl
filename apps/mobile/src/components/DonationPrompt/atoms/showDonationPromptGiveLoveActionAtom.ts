@@ -9,38 +9,44 @@ import DonationPrompt from '../components/DonationPrompt'
 import showDonationPromptActionAtom from './showDonationPromptActionAtom'
 import {shouldShowDonationPromptAtom} from './stateAtoms'
 
-const showDonationPromptGiveLoveActionAtom = atom(null, (get, set) => {
-  const {t} = get(translationAtom)
-  const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
+export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
 
-  if (!shouldShowDonationPrompt) return Effect.succeed(Effect.void)
+const showDonationPromptGiveLoveActionAtom = atom(
+  null,
+  (get, set, {skipTimeCheck}: {skipTimeCheck: boolean}) => {
+    const {t} = get(translationAtom)
+    const shouldShowDonationPrompt = get(shouldShowDonationPromptAtom)
 
-  return Effect.gen(function* (_) {
-    yield* _(
-      set(askAreYouSureActionAtom, {
-        variant: 'info',
-        steps: [
-          {
-            type: 'StepWithChildren',
-            MainSectionComponent: DonationPrompt,
-            positiveButtonText: t('donationPrompt.donate'),
-            negativeButtonText: t('common.back'),
-          },
-        ],
-      })
-    )
+    if (!skipTimeCheck && !shouldShowDonationPrompt)
+      return Effect.succeed(Effect.void)
 
-    yield* _(set(showDonationPromptActionAtom))
-  }).pipe(
-    Effect.catchTag('UserDeclinedError', () => {
-      set(
-        lastDisplayOfDonationPromptTimestampAtom,
-        Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+    return Effect.gen(function* (_) {
+      yield* _(
+        set(askAreYouSureActionAtom, {
+          variant: 'info',
+          steps: [
+            {
+              type: 'StepWithChildren',
+              MainSectionComponent: DonationPrompt,
+              positiveButtonText: t('donationPrompt.donate'),
+              negativeButtonText: t('common.close'),
+            },
+          ],
+        })
       )
 
-      return Effect.succeed(Effect.void)
-    })
-  )
-})
+      yield* _(set(showDonationPromptActionAtom))
+    }).pipe(
+      Effect.catchTag('UserDeclinedError', () => {
+        set(
+          lastDisplayOfDonationPromptTimestampAtom,
+          Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+        )
+
+        return Effect.succeed(Effect.void)
+      })
+    )
+  }
+)
 
 export default showDonationPromptGiveLoveActionAtom

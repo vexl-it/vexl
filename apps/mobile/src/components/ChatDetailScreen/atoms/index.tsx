@@ -77,7 +77,6 @@ import showErrorAlert, {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
-import {shouldShowDonationPromptAtom} from '../../DonationPrompt/atoms/stateAtoms'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
@@ -343,8 +342,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
       return Effect.gen(function* (_) {
         const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
-        const shouldShowDonationPrompt =
-          get(shouldShowDonationPromptAtom) && !skipDonation
         const feedbackFinished = get(chatFeedbackAtom).finished
 
         if (!skipAsk)
@@ -380,11 +377,17 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
         if (deniedMessaging) return true
 
-        if (shouldShowDonationPrompt)
-          void Effect.runPromise(set(showDonationPromptGiveLoveActionAtom))
-
-        if (!feedbackFinished && !skipFeedback && !shouldShowDonationPrompt)
-          void Effect.runPromise(set(giveFeedbackForDeletedChatAtom))
+        if (skipDonation) {
+          if (!feedbackFinished && !skipFeedback)
+            void Effect.runFork(set(giveFeedbackForDeletedChatAtom))
+        } else {
+          void Effect.runPromise(
+            set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: true})
+          ).then(() => {
+            if (!feedbackFinished && !skipFeedback)
+              void Effect.runFork(set(giveFeedbackForDeletedChatAtom))
+          })
+        }
 
         return true
       }).pipe(

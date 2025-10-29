@@ -104,7 +104,10 @@ export const fetchOffersReportErrorsActionAtom = atom(
             offersApi,
             keyPair,
             clubUuid,
-            lastPrivatePartIdBase64: clubOffersNextPageParam,
+            lastPrivatePartIdBase64: pipe(
+              Record.get(clubOffersNextPageParam, clubUuid),
+              Option.getOrUndefined
+            ),
           }).pipe(
             Effect.catchTag('NotFoundError', () => {
               // Club not found, ignore

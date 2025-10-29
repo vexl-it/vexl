@@ -12,7 +12,7 @@ import {atom} from 'jotai'
 import {NotOfferFromContactNetworkError} from '../../../domain'
 import {contactOffersNextPageParamAtom} from '../../offersState'
 
-const OFFERS_PAGE_LIMIT = 3
+const OFFERS_PAGE_LIMIT = 30
 
 const validateOfferIsFromContactNetwork = (offerInfo: OfferInfoE): boolean => {
   if (offerInfo.privatePart.adminId) return true

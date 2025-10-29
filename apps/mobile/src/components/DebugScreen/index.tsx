@@ -235,7 +235,7 @@ function DebugScreen(): React.ReactElement {
                   lastUpdatedAt1: MINIMAL_DATE,
                   offers: [],
                   contactOffersNextPageParam: undefined,
-                  clubOffersNextPageParam: undefined,
+                  clubOffersNextPageParam: {},
                 })
                 Alert.alert('Done')
               }}
@@ -375,8 +375,8 @@ function DebugScreen(): React.ReactElement {
               onPress={() => {
                 Alert.alert(
                   'Last updated at',
-                  `inState: ${store.get(
-                    clubOffersNextPageParamAtom
+                  `inState: ${JSON.stringify(
+                    store.get(clubOffersNextPageParamAtom)
                   )}, minimalDate: ${MINIMAL_DATE}`
                 )
               }}

@@ -6,6 +6,7 @@ import {apiAtom} from '../../../api'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
+import {removeClubOffersNextPageParamFromStateActionAtom} from '../../marketplace/atoms/offersState'
 import {fetchClubWithMembersReportApiErrors} from '../utils'
 import {
   clubsToKeyHolderAtom,
@@ -35,6 +36,7 @@ const processClubDeletedActionAtom = atom(
 
     set(removeClubFromKeyHolderStateActionAtom, clubUuid)
     set(removeClubWithMembersFromStateActionAtom, clubUuid)
+    set(removeClubOffersNextPageParamFromStateActionAtom, clubUuid)
   }
 )
 

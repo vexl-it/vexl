@@ -52,7 +52,9 @@ import {deactivateClubJoinLink} from './routes/clubs/moderator/deactivateClubJoi
 import {generateClubJoinLink} from './routes/clubs/moderator/generateClubJoinLink'
 import {listClubLinks} from './routes/clubs/moderator/listClubLinks'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
+import {fetchCommonConnectionsPaginated} from './routes/contacts/fetchCommonConnectionsPaginated'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
+import {fetchMyContactsPaginated} from './routes/contacts/fetchMyContactsPaginated'
 import {importContacts} from './routes/contacts/importContacts'
 import {ImportContactsQuotaService} from './routes/contacts/importContactsQuotaService'
 import {checkUserExists} from './routes/user/checkUserExists'
@@ -89,7 +91,12 @@ const ContactApiGroupLive = HttpApiBuilder.group(
     h
       .handle('importContacts', importContacts)
       .handle('fetchMyContacts', fetchMyContacts)
+      .handle('fetchMyContactsPaginated', fetchMyContactsPaginated)
       .handle('fetchCommonConnections', fetchCommonConnections)
+      .handle(
+        'fetchCommonConnectionsPaginated',
+        fetchCommonConnectionsPaginated
+      )
 )
 
 const ClubsAdminApiGroupLive = HttpApiBuilder.group(

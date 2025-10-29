@@ -3,20 +3,23 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type CommonConnectionsForUser} from '@vexl-next/domain/src/general/contacts'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
+import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Array, Effect, pipe, Record} from 'effect'
+
+export const FETCH_CONNECTIONS_PAGE_SIZE = 500
 
 export interface ConnectionsInfoForOffer {
   firstDegreeConnections: PublicKeyPemBase64[]
   secondDegreeConnections: PublicKeyPemBase64[]
-  commonFriends: FetchCommonConnectionsResponse
+  commonFriends: readonly CommonConnectionsForUser[]
   clubsConnections: Record<ClubUuid, readonly PublicKeyPemBase64[]>
 }
 
 export type ApiErrorFetchingContactsForOffer = Effect.Effect.Error<
-  ReturnType<ContactApi['fetchMyContacts' | 'fetchCommonConnections']>
+  ReturnType<ContactApi['fetchMyContacts' | 'fetchCommonConnectionsPaginated']>
 >
 
 export default function fetchContactsForOffer({
@@ -30,36 +33,43 @@ export default function fetchContactsForOffer({
 }): Effect.Effect<ConnectionsInfoForOffer, ApiErrorFetchingContactsForOffer> {
   return Effect.gen(function* (_) {
     const firstDegreeConnections = yield* _(
-      contactApi.fetchMyContacts({
-        level: 'FIRST',
-        page: 0,
-        limit: 1000000,
-      }),
-      Effect.map(({items}) => items),
-      Effect.map(Array.map((connection) => connection.publicKey))
+      fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          contactApi.fetchMyContactsPaginated({
+            level: 'FIRST',
+            limit: FETCH_CONNECTIONS_PAGE_SIZE,
+            nextPageToken,
+          }),
+      })
     )
 
     const secondDegreeConnections =
       intendedConnectionLevel === 'FIRST'
         ? []
         : yield* _(
-            contactApi.fetchMyContacts({
-              level: 'SECOND',
-              page: 0,
-              limit: 1000000,
-            }),
-            Effect.map(({items}) => items),
-            Effect.map(Array.map((connection) => connection.publicKey))
+            fetchAllPaginatedData({
+              fetchEffectToRun: (nextPageToken) =>
+                contactApi.fetchMyContactsPaginated({
+                  level: 'SECOND',
+                  limit: FETCH_CONNECTIONS_PAGE_SIZE,
+                  nextPageToken,
+                }),
+            })
           )
 
     const commonFriends = yield* _(
-      contactApi.fetchCommonConnections({
-        publicKeys: Array.fromIterable(
-          new Set<PublicKeyPemBase64>([
-            ...firstDegreeConnections,
-            ...secondDegreeConnections,
-          ])
-        ),
+      fetchAllPaginatedData({
+        fetchEffectToRun: (nextPageToken) =>
+          contactApi.fetchCommonConnectionsPaginated({
+            publicKeys: Array.fromIterable(
+              new Set<PublicKeyPemBase64>([
+                ...firstDegreeConnections,
+                ...secondDegreeConnections,
+              ])
+            ),
+            nextPageToken,
+            limit: FETCH_CONNECTIONS_PAGE_SIZE,
+          }),
       })
     )
 

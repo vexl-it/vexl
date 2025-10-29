@@ -111,7 +111,7 @@ describe('Fetch my contacts', () => {
     )
   })
 
-  it('Propely fetches second level contacts', async () => {
+  it('Properly fetches second level contacts', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const me = networkOne[0]
@@ -138,6 +138,23 @@ describe('Fetch my contacts', () => {
         )
 
         console.log('me', me.keys.publicKeyPemBase64)
+
+        console.log(
+          `Items: ${JSON.stringify(
+            items.map((o) => o.publicKey),
+            null,
+            2
+          )}`
+        )
+        console.log(
+          `Should return: ${JSON.stringify(
+            [...networkTwo, ...userContacts].map(
+              (o) => o.keys.publicKeyPemBase64
+            ),
+            null,
+            2
+          )}`
+        )
 
         expect(
           pipe(

@@ -3,12 +3,12 @@ import {
   PublicKeyPemBase64E,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type CommonConnectionsForUser} from '@vexl-next/domain/src/general/contacts'
 import {
   type OfferAdminId,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type FetchCommonConnectionsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Array, Effect, Either, pipe, Record, Schema} from 'effect'
@@ -198,7 +198,7 @@ export default function updatePrivateParts({
     readonly secondLevel: readonly PublicKeyPemBase64[]
     readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
   }
-  commonFriends: FetchCommonConnectionsResponse
+  commonFriends: readonly CommonConnectionsForUser[]
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds

@@ -7,6 +7,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type NotFoundError,
+  type RateLimitedError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {
@@ -43,6 +44,7 @@ type CreateChallengeCall = (request: {
   CreateChallengeResponse,
   | HttpApiDecodeError
   | ParseError
+  | RateLimitedError
   | NotFoundError
   | UnexpectedServerError
   | HttpClientError.HttpClientError,

@@ -324,7 +324,11 @@ export const finishLoginActionAtom = atom(
           Match.orElse(
             (e): Effect.Effect<void> =>
               Effect.sync(() => {
-                reportError('error', new Error(e), {e})
+                reportError(
+                  'error',
+                  new Error('Unknown client error', {cause: e}),
+                  {e}
+                )
                 showErrorAlert({
                   title: t(`common.UnknownClientError`),
                   error: e,

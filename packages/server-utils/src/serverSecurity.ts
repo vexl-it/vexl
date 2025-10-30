@@ -6,6 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/apiSecurity'
 import {Effect, Layer} from 'effect/index'
 import {ServerCrypto} from './ServerCrypto'
+import {makeMiddlewareEffect} from './makeMiddlewareEffect'
 
 export const verifyUserSecurity = (
   securityHeaders: SecurityHeaders
@@ -91,6 +92,6 @@ export const ServerSecurityMiddlewareLive = Layer.effect(
       }
 
       return securityHeaders
-    })
+    }).pipe(makeMiddlewareEffect(UnauthorizedError))
   })
 )

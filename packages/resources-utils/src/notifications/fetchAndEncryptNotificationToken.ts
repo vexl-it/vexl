@@ -2,6 +2,7 @@ import {type HttpApiDecodeError} from '@effect/platform/HttpApiError'
 import {type HttpClientError} from '@effect/platform/index'
 import {
   type NotFoundError,
+  type RateLimitedError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
@@ -31,6 +32,7 @@ export function fetchAndEncryptNotificationToken({
   | HttpApiDecodeError
   | NotFoundError
   | UnexpectedServerError
+  | RateLimitedError
   | HttpClientError.HttpClientError
   | ParseError
   | CryptoError,

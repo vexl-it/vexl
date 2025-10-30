@@ -1,4 +1,5 @@
 import {Schema} from 'effect'
+import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
 
 export class NotFoundError extends Schema.TaggedError<NotFoundError>(
   'NotFoundError'
@@ -41,6 +42,14 @@ export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>(
   message: Schema.optionalWith(Schema.String, {
     default: () => 'Unauthorized error',
   }),
+}) {}
+
+export class RateLimitedError extends Schema.TaggedError<RateLimitedError>(
+  'RateLimitedError'
+)('RateLimitedError', {
+  retryAfterMs: Schema.Number,
+  rateLimitResetAtMs: UnixMillisecondsE,
+  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 
 export class InvalidNextPageTokenError extends Schema.TaggedError<InvalidNextPageTokenError>(

@@ -13,6 +13,7 @@ import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {InvalidChallengeError} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   CanNotDeletePrivatePartOfAuthor,
   CreateNewOfferErrors,
@@ -235,6 +236,7 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(ReportClubOfferEndpoint)
 
 export const OfferApiSpecification = HttpApi.make('Offer API')
+  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .add(ChallengeApiGroup)
   .addError(NotFoundError)

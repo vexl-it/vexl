@@ -7,6 +7,9 @@ import {
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
+
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {
@@ -37,6 +40,7 @@ const NotificationApiLive = HttpApiBuilder.api(
   NotificationApiSpecification
 ).pipe(
   Layer.provide(RootGroupLive),
+  Layer.provide(rateLimitingMiddlewareLayer(NotificationApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
@@ -51,6 +55,7 @@ export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(FirebaseMessagingLayer.Live),
   Layer.provideMerge(ExpoClientService.Live),

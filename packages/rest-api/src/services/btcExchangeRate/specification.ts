@@ -6,6 +6,7 @@ import {
 import {Schema} from 'effect'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GetExchangeRateError,
   GetExchangeRateRequest,
@@ -30,6 +31,7 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
 export const BtcExchangeRateApiSpecification = HttpApi.make(
   'Btc exchange rate service'
 )
+  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .addError(NotFoundError)
   .addError(UnexpectedServerError)

@@ -3,6 +3,7 @@ import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
 import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
+import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
@@ -10,6 +11,7 @@ import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/C
 import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
+import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
@@ -53,6 +55,7 @@ export type MockedContexts =
   | NewClubUserNotificationsService
   | HttpClient
   | TestRequestHeaders
+  | RateLimitingService
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
@@ -63,6 +66,7 @@ const TestServerLive = HttpApiBuilder.serve().pipe(
 
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(ImportContactsQuotaService.Live),

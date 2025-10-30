@@ -12,6 +12,7 @@ import {Schema} from 'effect'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GenerateLoginChallengeResponse,
   GetVersionServiceInfoResponse,
@@ -136,6 +137,7 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GenerateLoginChallenge)
 
 export const UserApiSpecification = HttpApi.make('User API')
+  .middleware(RateLimitingMiddleware)
   .add(LoginGroup)
   .add(EraseUserGroup)
   .add(RootGroup)

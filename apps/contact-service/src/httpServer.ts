@@ -8,7 +8,10 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
+
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
@@ -147,6 +150,7 @@ export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
   Layer.provide(ClubsModeratorApiGroupLive),
   Layer.provide(AdminApiGroupLive),
   Layer.provide(ChallengeApiGroupLive),
+  Layer.provide(rateLimitingMiddlewareLayer(ContactApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
@@ -172,6 +176,7 @@ export const HttpServerLive = Layer.mergeAll(
   internalServerLive,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provide(RateLimitingService.Live),
   Layer.provide(FirebaseMessagingService.Live),
   Layer.provide(ExpoNotificationsService.Live),
   Layer.provide(ImportContactsQuotaService.Live),

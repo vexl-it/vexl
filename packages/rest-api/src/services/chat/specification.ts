@@ -13,6 +13,7 @@ import {InvalidChallengeError} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   ApproveRequestErrors,
   ApproveRequestRequest,
@@ -207,6 +208,7 @@ const MessagesApiGroup = HttpApiGroup.make('Messages')
   .add(SendMessagesEndpoint)
 
 export const ChatApiSpecification = HttpApi.make('Chat API')
+  .middleware(RateLimitingMiddleware)
   .add(InboxesApiGroup)
   .add(MessagesApiGroup)
   .add(ChallengeApiGroup)

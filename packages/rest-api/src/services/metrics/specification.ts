@@ -6,6 +6,7 @@ import {
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {ReportNotificationInteractionRequest} from './contracts'
 
 export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
@@ -22,6 +23,7 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
 )
 
 export const MetricsApiSpecification = HttpApi.make('Metrics Service')
+  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .addError(NotFoundError)
   .addError(UnexpectedServerError)

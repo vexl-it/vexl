@@ -6,6 +6,7 @@ import {
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GetPublicKeyResponse,
   IssueNotificationErrors,
@@ -46,6 +47,7 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GetNotificationPublicKeyEndpoint)
 
 export const NotificationApiSpecification = HttpApi.make('Notification API')
+  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .addError(NotFoundError)
   .addError(UnexpectedServerError)

@@ -7,6 +7,9 @@ import {
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
+
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -78,6 +81,7 @@ export const ChatApiLive = HttpApiBuilder.api(ChatApiSpecification).pipe(
   Layer.provide(ChallengeApiGroupLive),
   Layer.provide(InboxesApiGroupLive),
   Layer.provide(MessagesApiGroupLive),
+  Layer.provide(rateLimitingMiddlewareLayer(ChatApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
@@ -95,6 +99,7 @@ export const HttpServerLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provide(ChallengeService.Live),
+  Layer.provideMerge(RateLimitingService.Live),
   Layer.provide(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(
     Layer.mergeAll(

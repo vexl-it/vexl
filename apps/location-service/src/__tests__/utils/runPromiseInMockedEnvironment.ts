@@ -1,14 +1,20 @@
 import {NodeHttpServer} from '@effect/platform-node/index'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {LocationApiLive} from '../../httpServer'
 import {mockedGoogleMapLayer} from './mockedGoogleMapLayer'
 
-export type MockedContexts = ServerCrypto | HttpClient | TestRequestHeaders
+export type MockedContexts =
+  | ServerCrypto
+  | HttpClient
+  | TestRequestHeaders
+  | RateLimitingService
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
@@ -20,6 +26,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedGoogleMapLayer),
+  Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(universalContext)
 )
 

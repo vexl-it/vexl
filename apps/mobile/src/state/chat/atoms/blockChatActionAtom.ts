@@ -5,6 +5,7 @@ import {
 } from '@effect/platform/HttpClientError'
 import {
   type NotFoundError,
+  type RateLimitedError,
   type UnauthorizedError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
@@ -61,6 +62,7 @@ export default function blockChatActionAtom(
     | SenderInboxDoesNotExistError
     | ReceiverInboxDoesNotExistError
     | ErrorSigningChallenge
+    | RateLimitedError
     | CryptoError
     | RequestError
     | ResponseError

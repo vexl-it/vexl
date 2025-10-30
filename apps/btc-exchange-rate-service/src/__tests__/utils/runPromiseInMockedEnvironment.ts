@@ -1,7 +1,9 @@
 import {NodeHttpServer} from '@effect/platform-node/index'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
@@ -14,6 +16,7 @@ export type MockedContexts =
   | YadioService
   | HttpClient
   | TestRequestHeaders
+  | RateLimitingService
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
@@ -25,7 +28,8 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedYadioLayer),
-  Layer.provideMerge(universalContext)
+  Layer.provideMerge(universalContext),
+  Layer.provideMerge(mockedRateLimitingLayer)
 )
 
 const runtime = ManagedRuntime.make(context)

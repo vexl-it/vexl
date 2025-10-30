@@ -5,8 +5,12 @@ import {
   HttpServer,
 } from '@effect/platform/index'
 import {BtcExchangeRateApiSpecification} from '@vexl-next/rest-api/src/services/btcExchangeRate/specification'
+import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
+import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
@@ -22,6 +26,7 @@ const RootLive = HttpApiBuilder.group(
 
 export const ApiLive = HttpApiBuilder.api(BtcExchangeRateApiSpecification).pipe(
   Layer.provide(RootLive),
+  Layer.provide(rateLimitingMiddlewareLayer(BtcExchangeRateApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
@@ -37,5 +42,7 @@ export const MainLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(RateLimitingService.Live),
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
   Layer.provideMerge(YadioService.Live)
 )

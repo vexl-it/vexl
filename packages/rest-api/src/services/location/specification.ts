@@ -5,6 +5,7 @@ import {
 } from '@vexl-next/domain/src/general/commonErrors'
 import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GetGeocodedCoordinatesRequest,
   GetGeocodedCoordinatesResponse,
@@ -38,6 +39,7 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(GetGeocodedCoordinatesEndpoint)
 
 export const LocationApiSpecification = HttpApi.make('Location Service')
+  .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .addError(NotFoundError)
   .addError(UnexpectedServerError)

@@ -241,3 +241,7 @@ export const makeCommonHeaders = (
     [HEADER_PLATFORM]: Option.some(VexlAppMetaHeader.platform),
   })
 }
+
+export const ConnectingIpHeader = Schema.Struct({
+  'cf-connecting-ip': Schema.String,
+})

@@ -1,22 +1,22 @@
+import {NodeHttpServer} from '@effect/platform-node/index'
+import {type HttpClient} from '@effect/platform/HttpClient'
+import {HttpApiBuilder} from '@effect/platform/index'
 import {type DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
+import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
+import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
-
+import {UserApiLive} from '../../httpServer'
 import {VerificationStateDbService} from '../../routes/login/db/verificationStateDb'
 import {type TwilioVerificationClient} from '../../utils/twilio'
-
-import {NodeHttpServer} from '@effect/platform-node/index'
-import {type HttpClient} from '@effect/platform/HttpClient'
-import {HttpApiBuilder} from '@effect/platform/index'
-import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
-import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {UserApiLive} from '../../httpServer'
 import {mockedPreludeClient} from './mockedPreludeClient'
 import {mockedTwilioLayer} from './mockedTwilioClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
@@ -30,6 +30,7 @@ export type MockedContexts =
   | MetricsClientService
   | HttpClient
   | TestRequestHeaders
+  | RateLimitingService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -44,6 +45,7 @@ const TestServerLive = HttpApiBuilder.serve().pipe(
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
+  Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(mockedTwilioLayer),
   Layer.provideMerge(mockedUsersDbService),
   Layer.provideMerge(mockedMetricsClientService),

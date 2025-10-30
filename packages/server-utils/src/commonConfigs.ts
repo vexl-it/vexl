@@ -116,3 +116,11 @@ export const shouldDisableMetrics = Effect.gen(function* (_) {
   if (disable) yield* _(Effect.log('Disabling metrics in development mode'))
   return disable
 })
+
+export const enableRateLimitingInDevelopmentConfig = Config.boolean(
+  'ENABLE_RATE_LIMITING_IN_DEVELOPMENT'
+).pipe(Config.withDefault(false))
+
+export const rateLimitPerIpMultiplierConfig = Config.number(
+  'RATE_LIMIT_PER_IP_MULTIPLIER'
+).pipe(Config.withDefault(100))

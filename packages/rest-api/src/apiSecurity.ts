@@ -1,6 +1,9 @@
 import {HttpApiMiddleware} from '@effect/platform'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
+import {
+  UnauthorizedError,
+  UnexpectedServerError,
+} from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Context, Schema} from 'effect'
@@ -22,6 +25,6 @@ export class ServerSecurityMiddleware extends HttpApiMiddleware.Tag<ServerSecuri
   {
     optional: false,
     provides: CurrentSecurity,
-    failure: UnauthorizedError,
+    failure: Schema.Union(UnauthorizedError, UnexpectedServerError),
   }
 ) {}

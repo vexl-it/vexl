@@ -7,6 +7,8 @@ import {
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -79,6 +81,7 @@ const ChallengeApiGroupLive = HttpApiBuilder.group(
 export const OfferApiLive = HttpApiBuilder.api(OfferApiSpecification).pipe(
   Layer.provide(RootGroupLive),
   Layer.provide(ChallengeApiGroupLive),
+  Layer.provide(rateLimitingMiddlewareLayer(OfferApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
@@ -92,6 +95,7 @@ export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 export const HttpServerLive = Layer.empty.pipe(
   Layer.provideMerge(ApiServerLive),
   Layer.provideMerge(reportMetricsLayer),
+  Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(InternalServerLive),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(ChallengeService.Live),

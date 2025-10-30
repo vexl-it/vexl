@@ -32,6 +32,8 @@ import {logoutUserHandler} from './routes/logoutUser'
 import {regenerateCredentialsHandler} from './routes/regenerateSessionCredentials'
 
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {PreludeService} from './utils/prelude'
@@ -71,6 +73,7 @@ export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
   Layer.provide(LoginApiGroupLive),
   Layer.provide(EraseUserApiGroupLive),
   Layer.provide(RootApiGroupLive),
+  Layer.provide(rateLimitingMiddlewareLayer(UserApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
 
@@ -86,6 +89,7 @@ export const HttpServerLive = Layer.mergeAll(
   reportMetricsLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
+  Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(TwilioVerificationClient.Live),
   Layer.provideMerge(PreludeService.Live),

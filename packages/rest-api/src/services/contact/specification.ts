@@ -14,6 +14,7 @@ import {ChallengeApiGroup} from '../../challenges/specification'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   AddUserToTheClubErrors,
   AddUserToTheClubRequest,
@@ -373,6 +374,7 @@ const AdminApiGroup = HttpApiGroup.make('Admin').add(
 )
 
 export const ContactApiSpecification = HttpApi.make('Contact API')
+  .middleware(RateLimitingMiddleware)
   .add(UserApiGroup)
   .add(ContactApiGroup)
   .add(ClubsAdminApiGroup)

@@ -2,9 +2,11 @@ import {NodeContext, NodeHttpServer} from '@effect/platform-node'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
+import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   disposeTestDatabase,
@@ -23,6 +25,7 @@ export type MockedContexts =
   | MetricsClientService
   | HttpClient
   | TestRequestHeaders
+  | RateLimitingService
 
 const TestServerLive = HttpApiBuilder.serve().pipe(
   Layer.provide(ApiLive),
@@ -31,6 +34,7 @@ const TestServerLive = HttpApiBuilder.serve().pipe(
 
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
+  Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(FeedbackDbService.Live),
   Layer.provideMerge(DbLayer),

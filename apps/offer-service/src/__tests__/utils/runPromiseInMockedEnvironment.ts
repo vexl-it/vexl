@@ -2,12 +2,14 @@ import {NodeContext, NodeHttpServer} from '@effect/platform-node'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
 import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
+import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
@@ -29,6 +31,7 @@ export type MockedContexts =
   | ChallengeDbService
   | HttpClient
   | TestRequestHeaders
+  | RateLimitingService
 
 const universalContext = Layer.mergeAll(
   mockedRedisLayer,
@@ -45,6 +48,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(universalContext),
   Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(ChallengeDbService.Live),
+  Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(NodeContext.layer)

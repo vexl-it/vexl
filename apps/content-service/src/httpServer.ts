@@ -8,6 +8,8 @@ import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
+import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
+import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -17,6 +19,7 @@ import {getBlogsHandler} from './handlers/blog'
 import {clearCacheHandler} from './handlers/clearCache'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
 import {getInvoiceHandler} from './handlers/donations/getInvoice'
+
 import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatusType'
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
 import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
@@ -56,7 +59,8 @@ const DonationsApiGroupLive = HttpApiBuilder.group(
 export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(NewsAndAnnouncementsApiGroupLive),
-  Layer.provide(DonationsApiGroupLive)
+  Layer.provide(DonationsApiGroupLive),
+  Layer.provide(rateLimitingMiddlewareLayer(ContentApiSpecification))
 )
 
 export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
@@ -71,6 +75,7 @@ export const HttpServerLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
+  Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(WebflowCmsService.Live),
   Layer.provideMerge(CacheService.Live),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),

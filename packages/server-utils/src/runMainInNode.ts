@@ -140,7 +140,10 @@ export const runMainInNode = <A, E>(
       : Layer.launch(effectOrLayer)
     ).pipe(
       Effect.catchAll((error) => Effect.logFatal('Error', error)),
-      Effect.catchAllDefect((error) => Effect.logFatal('Defect', error)),
+      Effect.catchAllDefect((error) => {
+        console.error(error)
+        return Effect.logError('Defect', error)
+      }),
       Effect.provide(memoryDebugLayer),
       Effect.provide(NodeSdkLive),
       Effect.provide(devToolsLayer(nodeEnvConfig)),

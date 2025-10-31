@@ -1,0 +1,80 @@
+name: "[Build] backend stack"
+run-name: "Build backend stack on commit ${{ github.sha }} for environment ${{ inputs.env }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: "Environment to build (prod|stage|dev)"
+        required: true
+        type: choice
+        options:
+          - prod
+          - stage
+          - dev
+
+permissions:
+  packages: write
+  contents: write
+  id-token: write
+
+jobs:
+  btc-exchange-rate-service:
+    uses: ./.github/workflows/build-btc-exchange-rate-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  user-service:
+    uses: ./.github/workflows/build-user-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  offer-service:
+    uses: ./.github/workflows/build-offer-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  notification-service:
+    uses: ./.github/workflows/build-notification-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  metrics-service:
+    uses: ./.github/workflows/build-metrics-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  location-service:
+    uses: ./.github/workflows/build-location-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  chat-service:
+    uses: ./.github/workflows/build-chat-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  feedback-service:
+    uses: ./.github/workflows/build-feedback-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  content-service:
+    uses: ./.github/workflows/build-content-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  contact-service:
+    uses: ./.github/workflows/build-contact-service.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}

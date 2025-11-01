@@ -48,7 +48,7 @@ export const createQueryOffersForUserPaginated = Effect.gen(function* (_) {
       ORDER BY
         offer_private.id ASC
       LIMIT
-        ${params.limit ?? 20}
+        ${params.limit}
     `,
   })
 

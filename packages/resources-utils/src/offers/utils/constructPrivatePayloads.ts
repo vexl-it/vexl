@@ -112,9 +112,8 @@ export default function constructPrivatePayloads({
             commonFriends:
               // This is optimization. Club key does not have common friends
               !isFromClub
-                ? (commonFriends.commonContacts.find(
-                    (one) => one.publicKey === key
-                  )?.common?.hashes ?? [])
+                ? (commonFriends.find((one) => one.publicKey === key)?.common
+                    ?.hashes ?? [])
                 : [],
             friendLevel: Array.fromIterable(friendLevelValue) ?? [],
             symmetricKey,

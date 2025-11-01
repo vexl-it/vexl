@@ -646,7 +646,7 @@ export const offerFormMolecule = molecule(() => {
         const {goldenAvatarType} = get(preferencesAtom)
         const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
-        const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
+        const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
         yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
 
@@ -868,47 +868,33 @@ export const offerFormMolecule = molecule(() => {
       Array.length
     )
 
-    return pipe(
-      numberOfFriends,
-      eitherToEffect,
-      Effect.match({
-        onFailure(e) {
-          if (e._tag !== 'friendsNotLoaded') {
-            showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-              error: e,
-            })
-          }
+    if (
+      numberOfFriends.state === 'error' ||
+      numberOfFriends.state === 'loading'
+    ) {
+      return {
+        loadingText: t('offerForm.noVexlersFoundForYourOffer'),
+        doneText: t('offerForm.noVexlersFoundForYourOffer'),
+      }
+    }
 
-          return {
-            loadingText: t('offerForm.noVexlersFoundForYourOffer'),
-            doneText: t('offerForm.noVexlersFoundForYourOffer'),
-          }
-        },
-        onSuccess(r) {
-          const friendsCount =
-            intendedConnectionLevel === 'FIRST'
-              ? !offerEncryptedAlsoForClubs
-                ? r.firstLevelFriendsCount
-                : r.firstLevelFriendsCount + clubsMembersCount
-              : !offerEncryptedAlsoForClubs
-                ? r.secondLevelFriendsCount
-                : r.secondLevelFriendsCount + clubsMembersCount
+    const friendsCount =
+      intendedConnectionLevel === 'FIRST'
+        ? !offerEncryptedAlsoForClubs
+          ? numberOfFriends.firstLevelFriendsCount
+          : numberOfFriends.firstLevelFriendsCount + clubsMembersCount
+        : !offerEncryptedAlsoForClubs
+          ? numberOfFriends.firstAndSecondLevelFriendsCount
+          : numberOfFriends.firstAndSecondLevelFriendsCount + clubsMembersCount
 
-          return {
-            loadingText: t('offerForm.offerEncryption.forVexlers', {
-              count: friendsCount,
-            }),
-            doneText: t(
-              'offerForm.offerEncryption.anonymouslyDeliveredToVexlers',
-              {
-                count: friendsCount,
-              }
-            ),
-          }
-        },
-      })
-    )
+    return {
+      loadingText: t('offerForm.offerEncryption.forVexlers', {
+        count: friendsCount,
+      }),
+      doneText: t('offerForm.offerEncryption.anonymouslyDeliveredToVexlers', {
+        count: friendsCount,
+      }),
+    }
   })
 
   const toggleOfferActiveAtom = atom(null, (get, set) => {
@@ -922,7 +908,7 @@ export const offerFormMolecule = molecule(() => {
 
       if (!offer.ownershipInfo) return
 
-      const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
+      const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
       set(progressModal.show, {
         title: t('editOffer.editingYourOffer'),
@@ -1027,7 +1013,7 @@ export const offerFormMolecule = molecule(() => {
           offer.ownershipInfo?.intendedClubs ?? []
         ).length > 0
 
-      const belowProgressLeft = yield* _(get(modifyOfferLoaderTitleAtom))
+      const belowProgressLeft = get(modifyOfferLoaderTitleAtom)
 
       set(progressModal.show, {
         title: t('editOffer.editingYourOffer'),

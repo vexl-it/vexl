@@ -89,6 +89,7 @@ export function loadSession(
       logLoadSessionProgress(
         `Skippingn loadSession. Result: ${sessionState === 'loggedIn'}`
       )
+
       return store.get(sessionHolderAtom).state === 'loggedIn'
     }
 
@@ -153,6 +154,10 @@ export function loadSession(
       state: 'loggedIn',
       session,
     })
+    console.log(
+      `Session state: ${JSON.stringify(getDefaultStore().get(sessionHolderAtom), null, 2)}`
+    )
+
     resolveSessionLoaded()
 
     return true

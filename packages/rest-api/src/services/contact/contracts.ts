@@ -1,7 +1,4 @@
-import {
-  PublicKeyPemBase64,
-  PublicKeyPemBase64E,
-} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   ClubAdmitionRequest,
   ClubCode,
@@ -11,11 +8,9 @@ import {
   ClubUuidE,
 } from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {CommonConnectionsForUser} from '@vexl-next/domain/src/general/contacts'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {
-  HashedPhoneNumber,
-  HashedPhoneNumberE,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
 import {
   BadShortLivedTokenForErasingUserOnContactServiceError,
@@ -25,15 +20,18 @@ import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotifica
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-
 import {Schema} from 'effect'
-import {z} from 'zod'
 import {
   InvalidChallengeError,
   RequestBaseWithChallenge,
 } from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
-import {PageRequest, PageResponse} from '../../Pagination.brand'
+import {
+  createPageResponse,
+  PageRequest,
+  PageRequestMeta,
+  PageResponse,
+} from '../../Pagination.brand'
 import {PlatformName} from '../../PlatformName'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
@@ -137,41 +135,43 @@ export const FetchMyContactsResponse = Schema.Struct({
 })
 export type FetchMyContactsResponse = typeof FetchMyContactsResponse.Type
 
+export const FetchMyContactsPaginatedRequest = Schema.Struct({
+  ...PageRequestMeta.fields,
+  level: ConnectionLevelE.pipe(Schema.pickLiteral('FIRST', 'SECOND')),
+})
+
+export type FetchMyContactsPaginatedRequest =
+  typeof FetchMyContactsPaginatedRequest.Type
+
+export const FetchMyContactsPaginatedResponse =
+  createPageResponse(PublicKeyPemBase64E)
+export type FetchMyContactsPaginatedResponse =
+  typeof FetchMyContactsPaginatedResponse.Type
+
 export const FetchCommonConnectionsRequest = Schema.Struct({
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
 export type FetchCommonConnectionsRequest =
   typeof FetchCommonConnectionsRequest.Type
 
-export const FetchCommonConnectionsResponse = z
-  .object({
-    commonContacts: z
-      .array(
-        z
-          .object({
-            publicKey: PublicKeyPemBase64,
-            common: z
-              .object({hashes: z.array(HashedPhoneNumber).readonly()})
-              .readonly(),
-          })
-          .readonly()
-      )
-      .readonly(),
-  })
-  .readonly()
-
-export const FetchCommonConnectionsResponseE = Schema.Struct({
-  commonContacts: Schema.Array(
-    Schema.Struct({
-      publicKey: PublicKeyPemBase64E,
-      common: Schema.Struct({
-        hashes: Schema.Array(HashedPhoneNumberE),
-      }),
-    })
-  ),
+export const FetchCommonConnectionsResponse = Schema.Struct({
+  commonContacts: Schema.Array(CommonConnectionsForUser),
 })
 export type FetchCommonConnectionsResponse =
-  typeof FetchCommonConnectionsResponseE.Type
+  typeof FetchCommonConnectionsResponse.Type
+
+export const FetchCommonConnectionsPaginatedRequest = Schema.Struct({
+  ...PageRequestMeta.fields,
+  publicKeys: Schema.Array(PublicKeyPemBase64E),
+})
+export type FetchCommonConnectionsPaginatedRequest =
+  typeof FetchCommonConnectionsPaginatedRequest.Type
+
+export const FetchCommonConnectionsPaginatedResponse = createPageResponse(
+  CommonConnectionsForUser
+)
+export type FetchCommonConnectionsPaginatedResponse =
+  typeof FetchCommonConnectionsPaginatedResponse.Type
 
 export const CheckUserExistsRequest = Schema.Struct({
   notifyExistingUserAboutLogin: BooleanFromString,

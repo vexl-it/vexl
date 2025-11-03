@@ -11,6 +11,7 @@ import {focusAtom} from 'jotai-optics'
 import {useEffect} from 'react'
 import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
+import {startBenchmark} from '../../ActionBenchmarks'
 import {ClubStats} from '../domain'
 
 const COMPLETELY_REMOVE_CLUB_AFTER_DAYS = 30
@@ -110,7 +111,9 @@ export const cleanupRemovedClubsActionAtom = atom(null, (_, set) => {
 export function useCleanupRemovedClubsOnMount(): void {
   const cleanupRemovedClubs = useSetAtom(cleanupRemovedClubsActionAtom)
   useEffect(() => {
+    const endBenchmark = startBenchmark('Cleanup removed clubs on mount')
     cleanupRemovedClubs()
+    endBenchmark()
   }, [cleanupRemovedClubs])
 }
 

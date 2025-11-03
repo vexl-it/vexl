@@ -25,6 +25,7 @@ import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {useAppState} from '../../../utils/useAppState'
+import {startBenchmark} from '../../ActionBenchmarks'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
 import allChatsAtom from './allChatsAtom'
@@ -167,6 +168,7 @@ function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
 }
 
 const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
+  const endBenchmark = startBenchmark('Refresh notification tokens')
   console.info(
     '🔥 Refresh notifications tokens',
     'Checking if notification cyphers needs to be updated'
@@ -227,6 +229,10 @@ const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
         ),
         T.sequenceSeqArray
       )
+    }),
+    T.map((a) => {
+      endBenchmark()
+      return a
     })
   )()
 })

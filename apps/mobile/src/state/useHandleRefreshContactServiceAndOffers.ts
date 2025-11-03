@@ -14,6 +14,7 @@ import {apiAtom} from '../api'
 import notEmpty from '../utils/notEmpty'
 import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
+import {effectWithEnsuredBenchmark} from './ActionBenchmarks'
 import {inboxesAtom} from './chat/atoms/messagingStateAtom'
 import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
 import {createInboxAtom} from './chat/hooks/useCreateInbox'
@@ -127,6 +128,7 @@ export function useRefreshUserOnContactService(): void {
               return Effect.void
             },
           }),
+          effectWithEnsuredBenchmark('Refresh user on contact'),
           Effect.runFork
         )
       },
@@ -174,7 +176,8 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
       }
 
       return Effect.fail(e)
-    })
+    }),
+    effectWithEnsuredBenchmark('Refresh offers')
   )
 })
 
@@ -265,7 +268,7 @@ const checkOfferInboxesActionAtom = atom(null, (get, set) => {
     )
 
     return true
-  })
+  }).pipe(effectWithEnsuredBenchmark('Check offer inboxes'))
 })
 
 export default function useHandleRefreshContactServiceAndOffers(): void {

@@ -1,6 +1,7 @@
 import {Array, Effect, HashMap, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {type ContactInfo, type StoredContact} from '../domain'
 import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
@@ -79,7 +80,8 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
       }
 
       return Effect.fail(e)
-    })
+    }),
+    effectWithEnsuredBenchmark('Load contacts from device')
   )
 })
 

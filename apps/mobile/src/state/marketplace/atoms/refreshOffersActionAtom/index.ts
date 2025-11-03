@@ -5,6 +5,7 @@ import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
+import {startBenchmark} from '../../../ActionBenchmarks'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderAtom'
 import {updateOffersIdsForClubStatActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
@@ -21,6 +22,8 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
     const myStoredClubs = get(clubsToKeyHolderAtom)
+
+    const endBenchmark = startBenchmark('Refresh offers')
 
     const updateStartedAt = isoNow()
     const storedOffers = get(offersAtom)
@@ -75,6 +78,10 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
     if (AppState.currentState === 'active') {
       set(refreshLastSeenOffersActionAtom)
     }
+
+    endBenchmark(
+      `Incoming offers: ${incomingOffers.length}. Removed offers: ${removedClubsOfferIdsToClubUuid.length + removedContactOfferIds.length}`
+    )
   }).pipe(
     Effect.catchAll((e) => {
       reportError('error', new Error('Error fetching offers'), {e})

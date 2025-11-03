@@ -5,6 +5,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {fetchClubWithMembersReportApiErrors} from '../utils'
 import {
   clubsToKeyHolderAtom,
@@ -192,5 +193,5 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
       set(clubsWithMembersLoadingStateAtom, {state: 'success'})
 
       return fetchedClubs
-    })
+    }).pipe(effectWithEnsuredBenchmark('Sync all clubs'))
 )

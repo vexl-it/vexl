@@ -1,15 +1,14 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {pipe} from 'fp-ts/function'
-import * as TE from 'fp-ts/lib/TaskEither'
 import {useSetAtom, useStore} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../../api'
 import checkNotificationTokensAndRefreshOffersActionAtom from '../../state/marketplace/atoms/checkNotificationTokensAndUpdateOffersActionAtom'
 import {storage} from '../mmkv/fpMmkv'
-import reportError from '../reportError'
+import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
 
-import {getNotificationToken} from './index'
+import {Effect} from 'effect/index'
+import {effectWithEnsuredBenchmark} from '../../state/ActionBenchmarks'
+import {getNotificationTokenE} from './index'
 
 const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
 
@@ -19,60 +18,54 @@ export function useRefreshNotificationTokenOnResumeAssumeLoggedIn(): void {
     checkNotificationTokensAndRefreshOffersActionAtom
   )
 
-  const refreshToken = useCallback(() => {
-    void (async () => {
-      const oldToken = storage._storage.getString(NOTIFICATION_TOKEN_CACHE_KEY)
-      const newToken = await getNotificationToken()()
-      if (oldToken === newToken) {
-        console.info(
-          `📳 Notification token has not changed since the last refresh: ${newToken}`
+  const refreshToken = useCallback(
+    () =>
+      Effect.gen(function* (_) {
+        const oldToken = storage._storage.getString(
+          NOTIFICATION_TOKEN_CACHE_KEY
         )
-        return
-      }
+        const newToken = yield* _(getNotificationTokenE())
+        if (oldToken === newToken) {
+          console.info(
+            `📳 Notification token has not changed since the last refresh: ${newToken}`
+          )
+          return
+        }
 
-      console.info('📳 Refreshing notification token')
-      if (newToken) storage._storage.set(NOTIFICATION_TOKEN_CACHE_KEY, newToken)
-      else storage._storage.delete(NOTIFICATION_TOKEN_CACHE_KEY)
+        console.info('📳 Refreshing notification token')
+        if (newToken)
+          storage._storage.set(NOTIFICATION_TOKEN_CACHE_KEY, newToken)
+        else storage._storage.delete(NOTIFICATION_TOKEN_CACHE_KEY)
 
-      void pipe(
-        effectToTaskEither(
+        yield* _(
           store
             .get(apiAtom)
-            .contact.updateNotificationToken({body: {expoToken: newToken}})
-        ),
-        TE.match(
-          (e) => {
-            reportError(
+            .contact.updateNotificationToken({body: {expoToken: newToken}}),
+          Effect.tapError((e) =>
+            reportErrorE(
               'error',
               new Error(
                 'Error while refreshing notification token at contact service'
               ),
               {e}
             )
-          },
-          () => {
-            console.info('📳 Refreshed notification token on contact service')
-          }
+          ),
+          Effect.zipRight(
+            Effect.log('📳 Refreshed notification token on contact service')
+          ),
+          Effect.ignore
         )
-      )()
-    })()
-
-    checkNotificationTokensAndRefreshOffers()
-  }, [checkNotificationTokensAndRefreshOffers, store])
-
-  // NOT needed with expo notifications
-  // useEffect(() => {
-  //   const sub = Notifications.addPushTokenListener((token) => {
-  //     console.info(
-  //       `📳 Received notification token event ${JSON.stringify(token, null, 2)}`
-  //     )
-  //     console.info('📳 Received notification token refresh event')
-  //     refreshToken()
-  //   })
-  // return () => {
-  //   Notifications.removePushTokenSubscription(sub)
-  // }
-  // }, [refreshToken])
+      }).pipe(
+        effectWithEnsuredBenchmark(
+          'Refresh notification token on contact service'
+        ),
+        Effect.andThen(() => {
+          checkNotificationTokensAndRefreshOffers()
+        }),
+        Effect.runFork
+      ),
+    [checkNotificationTokensAndRefreshOffers, store]
+  )
 
   useAppState(
     useCallback(

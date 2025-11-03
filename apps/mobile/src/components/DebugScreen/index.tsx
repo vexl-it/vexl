@@ -80,6 +80,7 @@ import Button from '../Button'
 import Screen from '../Screen'
 import WhiteContainer from '../WhiteContainer'
 import deleteInboxAtom from './atoms/deleteInboxAtom'
+import {ActionBenchmarks} from './components/ActionBenchmarks'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
@@ -168,6 +169,8 @@ function DebugScreen(): React.ReactElement {
             <Text color="$black">
               apiEnv: {JSON.stringify(apiEnv, null, 2)}
             </Text>
+            <Spacer />
+            <ActionBenchmarks />
             <Spacer />
             <LanguagePicker />
             <Spacer />
@@ -797,9 +800,7 @@ function DebugScreen(): React.ReactElement {
                   )
 
                   const time = measureDecodingContacts()
-                  Alert.alert(
-                    `BBBIn ${time}s decoded ${result.length} contacts`
-                  )
+                  Alert.alert(`In ${time}s decoded ${result.length} contacts`)
                 }).pipe(
                   Effect.tapError((e) =>
                     Effect.sync(() => {

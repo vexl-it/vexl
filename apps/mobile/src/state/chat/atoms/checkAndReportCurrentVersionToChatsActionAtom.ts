@@ -18,6 +18,7 @@ import {apiAtom} from '../../../api'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
+import {startBenchmark} from '../../ActionBenchmarks'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import isChatOpen from '../utils/isChatOpen'
@@ -99,6 +100,9 @@ export const sendUpdateNoticeMessageActionAtom = atom(
 )
 
 const checkAndReportCurrentVersionToChatsActionAtom = atom(null, (get, set) => {
+  const endBenchmark = startBenchmark(
+    'Check and report current version to chats'
+  )
   const chatsToSendUpdateInto = get(allChatsAtom)
     .flat()
     .filter(isChatOpen)
@@ -124,7 +128,11 @@ const checkAndReportCurrentVersionToChatsActionAtom = atom(null, (get, set) => {
         (v) => set(sendUpdateNoticeMessageActionAtom, v)
       )
     ),
-    T.sequenceArray
+    T.sequenceArray,
+    T.tap(() => {
+      endBenchmark()
+      return T.of(null)
+    })
   )()
 })
 

@@ -20,18 +20,26 @@ export const normalizePath = (path: string): string => {
   return clean
 }
 
+type RouteToKeyResult =
+  | {
+      _tag: 'hasLimit'
+      limit: number
+    }
+  | {_tag: 'noRouteFound'}
+  | {_tag: 'noLimitSpecified'}
+
 export const buildRateLimitingLimitsForEndpoints = (
   spec: HttpApi.HttpApi<any, any, any, any>,
   rateLimitPerIpMultiplier: number
 ): {
-  getEndpointLimit: (method: string, url: string) => Option.Option<number>
+  getEndpointLimit: (method: string, url: string) => RouteToKeyResult
 } => {
   const routeToKey = (method: string, url: string): string =>
     `${method.toUpperCase()} ${normalizePath(url)}`
 
   const routeToMaxSpecifiedDailyCount: MutableHashMap.MutableHashMap<
     string,
-    number
+    RouteToKeyResult
   > = MutableHashMap.empty()
 
   // fill the routeToMaxSpecifiedDailyCount from the api specification
@@ -41,23 +49,34 @@ export const buildRateLimitingLimitsForEndpoints = (
     onEndpoint: ({endpoint}) => {
       const url = endpoint.path
       const method = endpoint.method
+      const key = routeToKey(method, url)
       Context.getOption(endpoint.annotations, MaxExpectedDailyCall).pipe(
-        Option.andThen((MaxExpectedDailyCall) =>
-          MutableHashMap.set(
-            routeToMaxSpecifiedDailyCount,
-            routeToKey(method, url),
-            MaxExpectedDailyCall * rateLimitPerIpMultiplier
-          )
-        )
+        Option.match({
+          onNone: () => {
+            MutableHashMap.set(routeToMaxSpecifiedDailyCount, key, {
+              _tag: 'noLimitSpecified',
+            })
+          },
+          onSome: (MaxExpectedDailyCall) => {
+            MutableHashMap.set(routeToMaxSpecifiedDailyCount, key, {
+              _tag: 'hasLimit',
+              limit: MaxExpectedDailyCall * rateLimitPerIpMultiplier,
+            })
+          },
+        })
       )
     },
   })
 
   return {
-    getEndpointLimit: (method: string, url: string): Option.Option<number> =>
+    getEndpointLimit: (method: string, url: string): RouteToKeyResult =>
       MutableHashMap.get(
         routeToMaxSpecifiedDailyCount,
         routeToKey(method, url)
+      ).pipe(
+        Option.getOrElse(() => {
+          return {_tag: 'noRouteFound' as const}
+        })
       ),
   }
 }

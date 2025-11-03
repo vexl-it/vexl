@@ -67,22 +67,39 @@ export const rateLimitingMiddlewareLayer = (
         }
 
         const request = yield* _(HttpServerRequest.HttpServerRequest)
-        const endpointLimit = yield* _(
-          getEndpointLimit(request.method, request.url),
-          Effect.mapError(
-            () =>
+        const endpointLimit = getEndpointLimit(request.method, request.url)
+
+        // This means that the endpoint is not defined in the API spec. Let it pass to return 404 (or docs)
+        if (endpointLimit._tag === 'noRouteFound') {
+          yield* _(
+            Effect.logInfo('No rate limiting route found for endpoint', {
+              route: request.url,
+              method: request.method,
+            })
+          )
+          return
+        }
+
+        // If the limit is defined in API spec as "no limit specified", we treat it as an error.
+        if (endpointLimit._tag === 'noLimitSpecified') {
+          yield* _(
+            Effect.fail(
               new UnexpectedServerError({
                 message: `Could not determine rate limit for endpoint ${request.method} ${request.url}`,
               })
+            )
           )
-        )
+          return
+        }
+
+        const limit = endpointLimit.limit
 
         yield* _(
           Effect.log('Rate limiting check', {
             ip: connectingIp,
             route: request.url,
             method: request.method,
-            limit: endpointLimit,
+            limit,
           })
         )
 
@@ -91,7 +108,7 @@ export const rateLimitingMiddlewareLayer = (
             ip: connectingIp,
             route: request.url,
             method: request.method,
-            limit: endpointLimit,
+            limit,
           })
         )
 
@@ -100,7 +117,7 @@ export const rateLimitingMiddlewareLayer = (
             allowed: rateLimitResult.allowed,
             method: request.method,
             route: request.url,
-            limit: endpointLimit,
+            limit,
           })
         )
 

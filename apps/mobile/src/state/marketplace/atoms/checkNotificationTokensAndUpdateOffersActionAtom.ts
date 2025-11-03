@@ -13,6 +13,7 @@ import {version, versionCode} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
+import {startBenchmark} from '../../ActionBenchmarks'
 import {inboxesAtom} from '../../chat/atoms/messagingStateAtom'
 import {getKeyHolderForNotificationCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
 import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
@@ -65,6 +66,8 @@ const doesOfferNeedUpdateActionAtom = atom(
 const checkNotificationTokensAndUpdateOffersActionAtom = atom(
   null,
   (get, set) => {
+    const endBenchmark = startBenchmark('Notification tokens')
+
     console.info(
       '🦋 Notification tokens',
       'Checking notification tokens and refreshing offers'
@@ -164,6 +167,9 @@ const checkNotificationTokensAndUpdateOffersActionAtom = atom(
           T.map((a) => {
             const successCount = a.filter(Boolean).length
             const failedCount = a.length - successCount
+            endBenchmark(
+              `Refreshed successfully: ${successCount}, failed: ${failedCount}`
+            )
             console.info(
               '🦋 Notification tokens',
               `Finished refreshing offers. Sucessfully refreshed: ${successCount}, failed: ${failedCount}`

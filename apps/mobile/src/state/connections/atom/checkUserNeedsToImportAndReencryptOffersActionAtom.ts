@@ -2,6 +2,7 @@ import {Effect} from 'effect/index'
 import {atom} from 'jotai'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {submitContactsActionAtom} from '../../contacts/atom/submitContactsActionAtom'
 import {fistAndSecondLevelConnectionsReachAtom} from './connectionStateAtom'
 import {persistentDataAboutReachAndImportedContactsAtom} from './reachNumberWithoutClubsConnectionsMmkvAtom'
@@ -16,21 +17,20 @@ const THRESHOLD_REACH_NUMBER = 50
 export const checkUserNeedsToImportContactsAndReencryptOffersActionAtom = atom(
   null,
   (get, set) => {
-    const {t} = get(translationAtom)
-    const firstAndSecondLevelConnectionsReach = get(
-      fistAndSecondLevelConnectionsReachAtom
-    )
-    const persistentDataAboutReachAndImportedContacts = get(
-      persistentDataAboutReachAndImportedContactsAtom
-    )
-
-    if (
-      firstAndSecondLevelConnectionsReach === 0 &&
-      persistentDataAboutReachAndImportedContacts.reach >
-        THRESHOLD_REACH_NUMBER &&
-      persistentDataAboutReachAndImportedContacts.numberOfImportedContacts > 0
-    ) {
-      return Effect.gen(function* (_) {
+    return Effect.gen(function* (_) {
+      const {t} = get(translationAtom)
+      const firstAndSecondLevelConnectionsReach = get(
+        fistAndSecondLevelConnectionsReachAtom
+      )
+      const persistentDataAboutReachAndImportedContacts = get(
+        persistentDataAboutReachAndImportedContactsAtom
+      )
+      if (
+        firstAndSecondLevelConnectionsReach === 0 &&
+        persistentDataAboutReachAndImportedContacts.reach >
+          THRESHOLD_REACH_NUMBER &&
+        persistentDataAboutReachAndImportedContacts.numberOfImportedContacts > 0
+      ) {
         yield* _(
           set(askAreYouSureActionAtom, {
             steps: [
@@ -51,9 +51,11 @@ export const checkUserNeedsToImportContactsAndReencryptOffersActionAtom = atom(
             showOfferReencryptionDialog: true,
           })
         )
-      })
-    }
-
-    return Effect.void
+      }
+    }).pipe(
+      effectWithEnsuredBenchmark(
+        'check if user needs to import contacts and reencrypt offers'
+      )
+    )
   }
 )

@@ -5,6 +5,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {showInternalNotificationForClubAdmission} from '../../../utils/notifications/clubNotifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {type ClubWithMembers} from '../domain'
 import {fetchClubWithMembersReportApiErrors} from '../utils'
 import {
@@ -90,7 +91,8 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
           Effect.ignore
         )
       ),
-      Effect.all
+      Effect.all,
+      effectWithEnsuredBenchmark('Check for clubs admission')
     )
   })
 })

@@ -20,6 +20,7 @@ import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {
   offersStateAtom,
@@ -465,7 +466,8 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
               }. Took: ${timePretty} sec`,
             })
           })
-        )
+        ),
+        effectWithEnsuredBenchmark('Update and reencrypt all offers')
       )
     })
 )

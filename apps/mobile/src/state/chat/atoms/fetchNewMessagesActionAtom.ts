@@ -41,6 +41,7 @@ import {cancelNewChatNotifications} from '../../../utils/notifications/cancelNew
 import {showChatNotification} from '../../../utils/notifications/chatNotifications'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
   focusOfferByPublicKeyAtom,
@@ -563,7 +564,8 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
           key: inbox.inbox.privateKey.publicKeyPemBase64,
         }).pipe(Effect.either)
       ),
-      Effect.allWith({concurrency: 'unbounded'})
+      Effect.allWith({concurrency: 'unbounded'}),
+      effectWithEnsuredBenchmark('Fetch all inboxes')
     )
 
     measure()

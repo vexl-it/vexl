@@ -20,6 +20,7 @@ import {
 } from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError, {reportErrorE} from '../../../utils/reportError'
+import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ConnectionsState} from '../domain'
 
@@ -170,7 +171,8 @@ export const syncConnectionsActionAtom = atom(
         onFailure: () => false,
         onSuccess: () => true,
       }),
-      Effect.merge
+      Effect.merge,
+      effectWithEnsuredBenchmark('Sync connections')
     )
   }
 )

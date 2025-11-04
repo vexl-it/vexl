@@ -56,6 +56,9 @@ export const Preferences = z
     showTosSummaryForAlreadyLoggedInUser: z.boolean().default(true),
     showCheckUpdatedPrivacyPolicySuggestion: z.boolean().default(true),
     defaultCurrency: CurrencyCode.optional().default(currencies.USD.code),
+    disableConnectionSync: z.boolean().default(false),
+    disableRefreshNotificationTokenChat: z.boolean().default(false),
+    disableRefreshNotificationTokenMarketplace: z.boolean().default(false),
   })
   .readonly()
 

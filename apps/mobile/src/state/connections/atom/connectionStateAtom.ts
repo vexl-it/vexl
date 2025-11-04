@@ -19,6 +19,7 @@ import {
   getNotificationTokenE,
 } from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
+import {preferencesAtom} from '../../../utils/preferences'
 import reportError, {reportErrorE} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
@@ -64,6 +65,7 @@ export const syncConnectionsActionAtom = atom(
     notificationTrackingId?: NotificationTrackingId
   ): Effect.Effect<boolean> => {
     return Effect.gen(function* (_) {
+      if (get(preferencesAtom).disableConnectionSync) return true
       const api = get(apiAtom)
 
       console.log('🦋 Refreshing connections state')

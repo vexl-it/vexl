@@ -17,12 +17,13 @@ import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {atom, useSetAtom} from 'jotai'
+import {atom, getDefaultStore, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../../../api'
 import {version, versionCode} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
+import {preferencesAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {useAppState} from '../../../utils/useAppState'
 import {startBenchmark} from '../../ActionBenchmarks'
@@ -247,6 +248,11 @@ export function useRefreshNotificationTokensForActiveChatsAssumeLogin(): void {
     useCallback(
       (appState) => {
         if (appState !== 'active') return
+        if (
+          getDefaultStore().get(preferencesAtom)
+            .disableRefreshNotificationTokenChat
+        )
+          return
         refreshNotificationTokens()
       },
       [refreshNotificationTokens]

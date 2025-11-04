@@ -13,6 +13,9 @@ const preferencesToEdit = [
   'showTextDebugButton',
   'isDeveloper',
   'showOfferDetail',
+  'disableConnectionSync',
+  'disableRefreshNotificationTokenChat',
+  'disableRefreshNotificationTokenMarketplace',
 ] as const
 
 function Preferences(): React.ReactElement {

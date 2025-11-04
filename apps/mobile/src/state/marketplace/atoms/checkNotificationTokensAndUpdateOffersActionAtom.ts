@@ -12,6 +12,7 @@ import {atom} from 'jotai'
 import {version, versionCode} from '../../../utils/environment'
 import {getNotificationToken} from '../../../utils/notifications'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
+import {preferencesAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {startBenchmark} from '../../ActionBenchmarks'
 import {inboxesAtom} from '../../chat/atoms/messagingStateAtom'
@@ -66,6 +67,7 @@ const doesOfferNeedUpdateActionAtom = atom(
 const checkNotificationTokensAndUpdateOffersActionAtom = atom(
   null,
   (get, set) => {
+    if (get(preferencesAtom).disableRefreshNotificationTokenMarketplace) return
     const endBenchmark = startBenchmark('Notification tokens')
 
     console.info(

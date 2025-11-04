@@ -31,7 +31,7 @@ import {
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
 } from '../../../TradeCalculator/atoms'
-import {convertFiatValueToNumber} from '../../../TradeCalculator/utils'
+import {removeThousandsSeparatorAndConvertToNumber} from '../../../TradeCalculator/utils'
 import updatesToBeSentAtom, {
   addAmountActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
@@ -39,12 +39,14 @@ import updatesToBeSentAtom, {
 export const applyFeeOnFeeChangeActionAtom = atom(
   null,
   (get, set, newFee: number) => {
-    const fiatInutValue = convertFiatValueToNumber(get(fiatInputValueAtom))
+    const fiatInputValue = removeThousandsSeparatorAndConvertToNumber(
+      get(fiatInputValueAtom)
+    )
     const previousAppliedFee = get(feeAmountAtom)
 
     if (get(fiatInputValueAtom)) {
       const fiatValueWithoutPreviousFee = cancelFeeOnNumberValue(
-        fiatInutValue,
+        fiatInputValue,
         previousAppliedFee
       )
       const fiatValueWithNewFeeApplied = applyFeeOnNumberValue(
@@ -144,7 +146,9 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
       btcOrSat === 'SAT'
         ? Number(formatBtcPrice(btcInputValue / SATOSHIS_IN_BTC))
         : btcInputValue
-    const fiatAmount = convertFiatValueToNumber(get(fiatInputValueAtom))
+    const fiatAmount = removeThousandsSeparatorAndConvertToNumber(
+      get(fiatInputValueAtom)
+    )
     const feeAmount = get(feeAmountAtom)
     const btcPrice = get(tradeBtcPriceAtom)
     const currency = get(selectedCurrencyCodeAtom)

@@ -43,7 +43,9 @@ export function removeThousandsSeparatorSpacesFromNumberInput(
   }
 }
 
-export function convertFiatValueToNumber(fiatValue: string): number {
+export function removeThousandsSeparatorAndConvertToNumber(
+  fiatValue: string
+): number {
   try {
     return Number(removeThousandsSeparatorSpacesFromNumberInput(fiatValue))
   } catch (e) {

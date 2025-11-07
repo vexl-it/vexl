@@ -6,7 +6,6 @@ import React, {useMemo} from 'react'
 import Animated, {
   Extrapolation,
   interpolate,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated'
@@ -78,9 +77,6 @@ function OffersListStateDisplayerContent(): React.ReactElement {
   const baseFilter = useAtomValue(baseFilterAtom)
 
   const scrollY = useSharedValue(0)
-  const handleScroll = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y
-  })
 
   const opacityAnim = useAnimatedStyle(() => {
     return {
@@ -187,7 +183,6 @@ function OffersListStateDisplayerContent(): React.ReactElement {
             Effect.runFork(refreshOffers())
           }}
           refreshing={loading}
-          onScroll={handleScroll}
         />
       </Stack>
     </ContainerWithTopBorderRadius>

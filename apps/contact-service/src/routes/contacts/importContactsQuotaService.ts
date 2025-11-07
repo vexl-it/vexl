@@ -1,4 +1,3 @@
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {getNextMidnightOnSelectedDate} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
@@ -14,18 +13,19 @@ import {
   initialImportContactsCountQuotaConfig,
 } from '../../configs'
 import {UserDbService} from '../../db/UserDbService'
+import {type ServerHashedNumber} from '../../utils/serverHashContact'
 
 export const ImportContactsQuotaRecord = Schema.Int.pipe(
   Schema.greaterThanOrEqualTo(0)
 )
 
 export const createQuotaRecordKey = (
-  hashedPhoneNumber: HashedPhoneNumber
+  hashedPhoneNumber: ServerHashedNumber
 ): string => `importContactsQuota:${hashedPhoneNumber}`
 
 export interface ImportContactsQuotaOperations {
   checkAndIncrementImportContactsQuota: (
-    hashedPhoneNumber: HashedPhoneNumber
+    hashedPhoneNumber: ServerHashedNumber
   ) => (
     numberOfNewImportedContacts: number
   ) => Effect.Effect<

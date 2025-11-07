@@ -1,5 +1,7 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {
   type ClubKeyNotFoundInInnerStateError,
   type ClubUuid,
@@ -11,7 +13,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, Effect, Either, Record} from 'effect'
+import {Array, Effect, Either, type HashMap, Record} from 'effect'
 import {type NonEmptyArray} from 'effect/Array'
 import {pipe} from 'fp-ts/function'
 import {type OfferEncryptionProgress} from '../OfferEncryptionProgress'
@@ -35,6 +37,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   adminId,
   ownerCredentials,
   intendedClubs,
+  serverToClientHashesToHashedPhoneNumbersMap,
   onProgress,
 }: {
   contactApi: ContactApi
@@ -42,6 +45,10 @@ export function fetchInfoAndGeneratePrivatePayloads({
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
   adminId: OfferAdminId
+  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+    ServerToClientHashedNumber,
+    HashedPhoneNumber
+  >
   intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: ((state: OfferEncryptionProgress) => void) | undefined
 }): Effect.Effect<
@@ -60,6 +67,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
 
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
+        serverToClientHashesToHashedPhoneNumbersMap,
         contactApi,
         intendedConnectionLevel,
         intendedClubs,

@@ -5,6 +5,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
 export const updateFirebaseToken = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -12,11 +13,14 @@ export const updateFirebaseToken = HttpApiBuilder.handler(
   'updateFirebaseToken',
   (req) =>
     Effect.gen(function* (_) {
-      const security = yield* _(CurrentSecurity)
+      const security = yield* _(
+        CurrentSecurity,
+        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+      )
       const userDb = yield* _(UserDbService)
       yield* _(
         userDb.findUserByPublicKeyAndHash({
-          hash: security.hash,
+          hash: security.serverHash,
           publicKey: security['public-key'],
         }),
         Effect.flatten,
@@ -28,7 +32,7 @@ export const updateFirebaseToken = HttpApiBuilder.handler(
       yield* _(
         userDb.updateFirebaseToken({
           publicKey: security['public-key'],
-          hash: security.hash,
+          hash: security.serverHash,
           firebaseToken: Option.fromNullable(req.payload.firebaseToken),
         })
       )

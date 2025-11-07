@@ -1,7 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer} from 'effect'
+import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type ContactRecord} from './domain'
 import {createDeleteContactsByHashFrom} from './queries/createDeleteContactsByHashFrom'
 import {
@@ -47,7 +47,7 @@ import {
 
 export interface ContactDbOperations {
   deleteContactsByHashFrom: (
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
   ) => Effect.Effect<void, UnexpectedServerError>
 
   deleteContactsByHashFromAndHashTo: (
@@ -55,7 +55,7 @@ export interface ContactDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 
   findContactsByHashFrom: (
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
   ) => Effect.Effect<readonly ContactRecord[], UnexpectedServerError>
 
   insertContact: (
@@ -63,7 +63,7 @@ export interface ContactDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
 
   findFirstLevelContactsPublicKeysByHashFrom: (
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
   ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
 
   findFirstLevelContactsPublicKeysByHashFromPaginated: (
@@ -74,7 +74,7 @@ export interface ContactDbOperations {
   >
 
   findSecondLevelContactsPublicKeysByHashFrom: (
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
   ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
 
   findSecondLevelContactsPublicKeysByHashFromPaginated: (

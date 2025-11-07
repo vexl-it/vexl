@@ -1,4 +1,3 @@
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {NewSocialNetworkConnectionNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -11,6 +10,7 @@ import {reportNewAppUser} from '../../../metrics'
 import {type ExpoNotificationsService} from '../../../utils/expoNotifications/ExpoNotificationsService'
 import {issueNotificationsToTokens} from '../../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../../utils/notifications/FirebaseMessagingService'
+import {type ServerHashedNumber} from '../../../utils/serverHashContact'
 
 const FIRST_VERSION_THAT_SUPPORTS_ANALYTICS = 564
 
@@ -18,8 +18,8 @@ export const notifyOthersAboutNewUserForked = ({
   importedHashes,
   ownerHash,
 }: {
-  importedHashes: readonly HashedPhoneNumber[]
-  ownerHash: HashedPhoneNumber
+  importedHashes: readonly ServerHashedNumber[]
+  ownerHash: ServerHashedNumber
 }): Effect.Effect<
   void,
   never,

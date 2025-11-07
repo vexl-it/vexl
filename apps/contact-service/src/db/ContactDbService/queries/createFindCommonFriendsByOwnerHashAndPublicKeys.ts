@@ -2,18 +2,18 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const FindCommonFriendsParams = Schema.Struct({
-  ownerHash: HashedPhoneNumberE,
+  ownerHash: ServerHashedNumber,
   publicKeys: Schema.Array(PublicKeyPemBase64E),
 })
 export type FindCommonFriendsParams = typeof FindCommonFriendsParams.Type
 
 export const FindCommonFriendsResult = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
-  commonFriends: Schema.Array(HashedPhoneNumberE),
+  commonFriends: Schema.Array(ServerHashedNumber),
 })
 export type FindCommonFriendsResult = typeof FindCommonFriendsResult.Type
 

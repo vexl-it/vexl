@@ -1,9 +1,9 @@
 import {
-  type PublicKeyPemBase64,
   PublicKeyPemBase64E,
+  type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type CommonConnectionsForUser} from '@vexl-next/domain/src/general/contacts'
+import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {
   type OfferAdminId,
   type SymmetricKey,
@@ -198,7 +198,7 @@ export default function updatePrivateParts({
     readonly secondLevel: readonly PublicKeyPemBase64[]
     readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
   }
-  commonFriends: readonly CommonConnectionsForUser[]
+  commonFriends: CommonConnectionsForUsers
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds

@@ -2,13 +2,13 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const UpdateExpoTokenParams = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
-  hash: HashedPhoneNumberE,
+  hash: ServerHashedNumber,
   expoToken: Schema.optionalWith(ExpoNotificationTokenE, {as: 'Option'}),
 })
 export type UpdateExpoTokenParams = typeof UpdateExpoTokenParams.Type

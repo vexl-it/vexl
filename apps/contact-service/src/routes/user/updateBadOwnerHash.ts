@@ -15,6 +15,7 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
 const validateHashAndSignature = ({
   hash,
@@ -68,9 +69,15 @@ export const updateBadOwnerHash = HttpApiBuilder.handler(
 
       const userDb = yield* _(UserDbService)
       const contactDb = yield* _(ContactDbService)
+      const newUserServerHash = yield* _(
+        serverHashPhoneNumber(req.payload.newData.hash)
+      )
+      const oldUserServerHash = yield* _(
+        serverHashPhoneNumber(req.payload.oldData.hash)
+      )
 
       const existingUserWithNewHash = yield* _(
-        userDb.findUserByHash(req.payload.newData.hash)
+        userDb.findUserByHash(newUserServerHash)
       )
 
       // If user exists remove it or respond with indication that there is another account.
@@ -78,10 +85,10 @@ export const updateBadOwnerHash = HttpApiBuilder.handler(
         if (!req.payload.removePreviousUser)
           return {updated: false, willDeleteExistingUserIfRan: true as const}
 
-        yield* _(contactDb.deleteContactsByHashFrom(req.payload.newData.hash))
+        yield* _(contactDb.deleteContactsByHashFrom(newUserServerHash))
         yield* _(
           userDb.deleteUserByPublicKeyAndHash({
-            hash: req.payload.newData.hash,
+            hash: newUserServerHash,
             publicKey: req.payload.publicKey,
           })
         )
@@ -90,22 +97,22 @@ export const updateBadOwnerHash = HttpApiBuilder.handler(
       // Update hash at user record
       yield* _(
         userDb.updateUserHash({
-          oldHash: req.payload.oldData.hash,
-          newHash: req.payload.newData.hash,
+          oldHash: oldUserServerHash,
+          newHash: newUserServerHash,
         })
       )
 
       yield* _(
         contactDb.updateContactHashFrom({
-          currentHashFrom: req.payload.oldData.hash,
-          newHashFrom: req.payload.newData.hash,
+          currentHashFrom: oldUserServerHash,
+          newHashFrom: newUserServerHash,
         })
       )
 
       yield* _(
         contactDb.deleteContactsByHashFromAndHashTo({
-          hashFrom: req.payload.newData.hash,
-          hashTo: req.payload.newData.hash,
+          hashFrom: newUserServerHash,
+          hashTo: newUserServerHash,
         })
       )
 

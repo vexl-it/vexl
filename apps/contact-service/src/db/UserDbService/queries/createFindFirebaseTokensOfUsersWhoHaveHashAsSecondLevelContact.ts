@@ -1,15 +1,15 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {NotificationTokens} from '../domain'
 
 export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   Schema.Struct({
-    importedHashes: Schema.Array(HashedPhoneNumberE),
-    ownerHash: HashedPhoneNumberE,
+    importedHashes: Schema.Array(ServerHashedNumber),
+    ownerHash: ServerHashedNumber,
   })
 export type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   typeof createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams.Type

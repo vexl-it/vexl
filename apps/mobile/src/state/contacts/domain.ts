@@ -4,6 +4,7 @@ import {
   E164PhoneNumberUnsafe,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Schema} from 'effect'
 
@@ -42,6 +43,9 @@ export type ContactFlags = typeof ContactFlagsE.Type
 export const StoredContactE = Schema.Struct({
   info: ContactInfoE,
   computedValues: Schema.optionalWith(ContactComputedValuesE, {as: 'Option'}),
+  serverHashToClient: Schema.optionalWith(ServerToClientHashedNumber, {
+    as: 'Option',
+  }),
   flags: Schema.optionalWith(ContactFlagsE, {
     default: () => ({
       seen: false,
@@ -56,6 +60,9 @@ export type StoredContact = typeof StoredContactE.Type
 export const StoredContactWithComputedValuesE = Schema.Struct({
   info: ContactInfoE,
   computedValues: ContactComputedValuesE,
+  serverHashToClient: Schema.optionalWith(ServerToClientHashedNumber, {
+    as: 'Option',
+  }),
   flags: Schema.optionalWith(ContactFlagsE, {
     default: () => ({
       seen: false,

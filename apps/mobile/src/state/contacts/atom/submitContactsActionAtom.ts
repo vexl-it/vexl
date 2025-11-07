@@ -1,6 +1,8 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array, Effect, HashSet, Option, Ref, pipe} from 'effect'
+import {Array, Effect, HashMap, HashSet, Option, Ref, pipe} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -87,6 +89,10 @@ export const submitContactsActionAtom = atom(
         Ref.make(HashSet.empty<E164PhoneNumber>())
       )
 
+      const hashedPhoneNumberToServerToClientHashRef = yield* _(
+        Ref.make(HashMap.empty<HashedPhoneNumber, ServerToClientHashedNumber>())
+      )
+
       if (newContactsToImport.length === 0 && !doIncrementalUpdate) {
         yield* _(
           contactApi.importContacts({
@@ -108,6 +114,23 @@ export const submitContactsActionAtom = atom(
                 replace,
               })
               .pipe(
+                Effect.tap((response) =>
+                  Ref.update(hashedPhoneNumberToServerToClientHashRef, (ref) =>
+                    pipe(
+                      response.phoneNumberHashesToServerToClientHash,
+                      Array.map(
+                        ({hashedNumber, serverToClientHash}) =>
+                          [hashedNumber, serverToClientHash] as const
+                      ),
+                      (pairs) =>
+                        HashMap.fromIterable<
+                          HashedPhoneNumber,
+                          ServerToClientHashedNumber
+                        >(pairs),
+                      (addition) => HashMap.union(addition, ref)
+                    )
+                  )
+                ),
                 Effect.zipLeft(
                   Ref.update(
                     importedNumbersSoFarRef,
@@ -122,107 +145,120 @@ export const submitContactsActionAtom = atom(
           }),
           Effect.all,
           Effect.ensuring(
-            Ref.get(importedNumbersSoFarRef).pipe(
-              Effect.flatMap((importedNumbers) =>
-                Effect.gen(function* (_) {
-                  set(storedContactsAtom, (storedContacts) =>
-                    storedContacts.map((oneContact) => {
-                      if (!oneContact.computedValues)
+            Effect.all({
+              importedNumbers: Ref.get(importedNumbersSoFarRef),
+              hashedNumbersToServerClientHash: Ref.get(
+                hashedPhoneNumberToServerToClientHashRef
+              ),
+            }).pipe(
+              Effect.flatMap(
+                ({importedNumbers, hashedNumbersToServerClientHash}) =>
+                  Effect.gen(function* (_) {
+                    set(storedContactsAtom, (storedContacts) =>
+                      storedContacts.map((oneContact) => {
+                        if (!oneContact.computedValues)
+                          return {
+                            ...oneContact,
+                            flags: {...oneContact.flags, imported: false},
+                          }
+
+                        if (
+                          Option.isSome(oneContact.computedValues) &&
+                          HashSet.has(
+                            importedNumbers,
+                            oneContact.computedValues.value.normalizedNumber
+                          )
+                        )
+                          return {
+                            ...oneContact,
+                            serverHashToClient: HashMap.get(
+                              hashedNumbersToServerClientHash,
+                              oneContact.computedValues.value.hash
+                            ),
+                            flags: {...oneContact.flags, imported: true},
+                          }
+
                         return {
                           ...oneContact,
-                          flags: {...oneContact.flags, imported: false},
+                          flags: {
+                            ...oneContact.flags,
+                            // If we were doing imcremental update,
+                            // Make sure to perserve the imported flag
+                            // otherwise we will erase all already imported contacts
+                            imported: doIncrementalUpdate
+                              ? oneContact.flags.imported
+                              : false,
+                          },
                         }
+                      })
+                    )
+                    if (params.showOfferReencryptionDialog) {
+                      set(loadingOverlayDisplayedAtom, false)
+                      set(offerProgressModalActionAtoms.show, {
+                        title: t('contacts.refreshingOffers.title'),
+                        bottomText: t(
+                          'offerForm.offerEncryption.dontShutDownTheApp'
+                        ),
+                        indicateProgress: {type: 'intermediate'},
+                      })
 
-                      if (
-                        Option.isSome(oneContact.computedValues) &&
-                        HashSet.has(
-                          importedNumbers,
-                          oneContact.computedValues.value.normalizedNumber
+                      yield* _(
+                        set(syncConnectionsActionAtom),
+                        Effect.zip(
+                          set(
+                            updateAndReencryptAllOffersConnectionsActionAtom,
+                            {
+                              onProgres: ({offerI, totalOffers, progress}) => {
+                                set(offerProgressModalActionAtoms.showStep, {
+                                  progress,
+                                  textData: {
+                                    title: t('contacts.refreshingOffers.title'),
+                                    belowProgressLeft: t(
+                                      'contacts.refreshingOffers.belowProgressLeft',
+                                      {
+                                        i: offerI + 1,
+                                        total: totalOffers,
+                                      }
+                                    ),
+                                    bottomText: t(
+                                      'offerForm.offerEncryption.dontShutDownTheApp'
+                                    ),
+                                  },
+                                })
+                              },
+                              isInBackground: false,
+                            }
+                          )
                         )
                       )
-                        return {
-                          ...oneContact,
-                          flags: {...oneContact.flags, imported: true},
-                        }
 
-                      return {
-                        ...oneContact,
-                        flags: {
-                          ...oneContact.flags,
-                          // If we were doing imcremental update,
-                          // Make sure to perserve the imported flag
-                          // otherwise we will erase all already imported contacts
-                          imported: doIncrementalUpdate
-                            ? oneContact.flags.imported
-                            : false,
-                        },
-                      }
-                    })
-                  )
-                  if (params.showOfferReencryptionDialog) {
-                    set(loadingOverlayDisplayedAtom, false)
-                    set(offerProgressModalActionAtoms.show, {
-                      title: t('contacts.refreshingOffers.title'),
-                      bottomText: t(
-                        'offerForm.offerEncryption.dontShutDownTheApp'
-                      ),
-                      indicateProgress: {type: 'intermediate'},
-                    })
-
-                    yield* _(
-                      set(syncConnectionsActionAtom),
-                      Effect.zip(
-                        set(updateAndReencryptAllOffersConnectionsActionAtom, {
-                          onProgres: ({offerI, totalOffers, progress}) => {
-                            set(offerProgressModalActionAtoms.showStep, {
-                              progress,
-                              textData: {
-                                title: t('contacts.refreshingOffers.title'),
-                                belowProgressLeft: t(
-                                  'contacts.refreshingOffers.belowProgressLeft',
-                                  {
-                                    i: offerI + 1,
-                                    total: totalOffers,
-                                  }
-                                ),
-                                bottomText: t(
-                                  'offerForm.offerEncryption.dontShutDownTheApp'
-                                ),
-                              },
-                            })
+                      yield* _(
+                        set(offerProgressModalActionAtoms.hideDeffered, {
+                          data: {
+                            title: t('contacts.refreshingOffers.titleDone'),
+                            bottomText: t(
+                              'contacts.refreshingOffers.bottomTextDone'
+                            ),
+                            belowProgressLeft: t(
+                              'contacts.refreshingOffers.belowProgressLeftDone'
+                            ),
+                            belowProgressRight: t('progressBar.DONE'),
+                            indicateProgress: {
+                              type: 'done',
+                            },
                           },
+                          delayMs: 3000,
+                        })
+                      )
+                    } else {
+                      yield* _(set(syncConnectionsActionAtom))
+                      yield* _(
+                        set(updateAndReencryptAllOffersConnectionsActionAtom, {
                           isInBackground: false,
                         })
                       )
-                    )
-
-                    yield* _(
-                      set(offerProgressModalActionAtoms.hideDeffered, {
-                        data: {
-                          title: t('contacts.refreshingOffers.titleDone'),
-                          bottomText: t(
-                            'contacts.refreshingOffers.bottomTextDone'
-                          ),
-                          belowProgressLeft: t(
-                            'contacts.refreshingOffers.belowProgressLeftDone'
-                          ),
-                          belowProgressRight: t('progressBar.DONE'),
-                          indicateProgress: {
-                            type: 'done',
-                          },
-                        },
-                        delayMs: 3000,
-                      })
-                    )
-                  } else {
-                    yield* _(set(syncConnectionsActionAtom))
-                    yield* _(
-                      set(updateAndReencryptAllOffersConnectionsActionAtom, {
-                        isInBackground: false,
-                      })
-                    )
-                  }
-                })
+                    }
+                  })
               )
             )
           )

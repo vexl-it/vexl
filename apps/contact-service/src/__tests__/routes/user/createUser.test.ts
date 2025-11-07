@@ -11,6 +11,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
 
 describe('create user', () => {
   it('Should create a user in db', async () => {
@@ -55,7 +56,10 @@ describe('create user', () => {
         expect(result[0]).toHaveProperty('publicKey', keys.publicKeyPemBase64)
         expect(result[0]).toHaveProperty(
           'hash',
-          yield* _(hashPhoneNumber(phoneNumber))
+          yield* _(
+            hashPhoneNumber(phoneNumber),
+            Effect.flatMap(serverHashPhoneNumber)
+          )
         )
         expect(result[0]).toHaveProperty('expoToken', 'someToken')
         expect(result[0]).toHaveProperty('clientVersion', 1)
@@ -71,6 +75,9 @@ describe('create user', () => {
         const keys = generatePrivateKey()
         const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
         const phoneNumberHash = yield* _(hashPhoneNumber(phoneNumber))
+        const serverHashedNumber = yield* _(
+          serverHashPhoneNumber(phoneNumberHash)
+        )
         const sql = yield* _(SqlClient.SqlClient)
 
         const authHeaders = yield* _(
@@ -107,10 +114,20 @@ describe('create user', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${phoneNumberHash}
+            hash_from = ${serverHashedNumber}
         `)
-        expect(inDb[0]).toHaveProperty('hashFrom', phoneNumberHash)
-        expect(inDb[0]).toHaveProperty('hashTo', 'someHash')
+        expect(inDb[0]).toHaveProperty(
+          'hashFrom',
+          yield* _(serverHashPhoneNumber(phoneNumberHash))
+        )
+        expect(inDb[0]).toHaveProperty(
+          'hashTo',
+          yield* _(
+            serverHashPhoneNumber(
+              Schema.decodeSync(HashedPhoneNumberE)('someHash')
+            )
+          )
+        )
 
         const keys2 = generatePrivateKey()
 
@@ -139,7 +156,7 @@ describe('create user', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${phoneNumberHash}
+            hash_from = ${serverHashedNumber}
         `)
         expect(result).toHaveLength(0)
       })

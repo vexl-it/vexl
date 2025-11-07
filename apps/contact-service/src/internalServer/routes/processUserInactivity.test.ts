@@ -39,7 +39,10 @@ describe('Process user inactivity', () => {
           SET
             refreshed_at = now() - interval '3 days'
           WHERE
-            ${sql.in('hash', [user1.hashedNumber, user2.hashedNumber])}
+            ${sql.in('hash', [
+            user1.serverHashedNumber,
+            user2.serverHashedNumber,
+          ])}
         `)
 
         yield* _(sql`
@@ -47,7 +50,7 @@ describe('Process user inactivity', () => {
           SET
             refreshed_at = now() - interval '2 days'
           WHERE
-            hash = ${user3.hashedNumber}
+            hash = ${user3.serverHashedNumber}
         `)
 
         yield* _(processUserInactivity)
@@ -58,7 +61,10 @@ describe('Process user inactivity', () => {
           FROM
             users
           WHERE
-            ${sql.in('hash', [user1.hashedNumber, user2.hashedNumber])}
+            ${sql.in('hash', [
+            user1.serverHashedNumber,
+            user2.serverHashedNumber,
+          ])}
         `)
 
         expect(
@@ -93,7 +99,7 @@ describe('Process user inactivity', () => {
           FROM
             users
           WHERE
-            hash = ${user3.hashedNumber}
+            hash = ${user3.serverHashedNumber}
         `)
         expect(userThatWasNotChanged).toHaveLength(1)
         expect(userThatWasNotChanged[0]).toHaveProperty('refreshedAt')

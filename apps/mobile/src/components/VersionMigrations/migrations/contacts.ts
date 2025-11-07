@@ -75,6 +75,7 @@ function oldToNewContactManuallyImported(
       rawNumber: oldContact.numberToDisplay,
       nonUniqueContactId: Option.none(),
     },
+    serverHashToClient: Option.none(),
     computedValues: {
       normalizedNumber: oldContact.normalizedNumber,
       hash: oldContact.hash,

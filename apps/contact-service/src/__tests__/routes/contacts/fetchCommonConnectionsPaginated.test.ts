@@ -82,7 +82,7 @@ describe('Common connections paginated', () => {
           const otherFriendsHashes = pipe(
             userContacts,
             Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
-            Array.map((o) => o.hashedNumber),
+            Array.map((o) => o.serverHashedNumberForClient),
             Array.sort(Order.string),
             Array.join(',')
           )
@@ -211,7 +211,7 @@ describe('Common connections paginated', () => {
             const otherFriendsHashes = pipe(
               userContacts,
               Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
-              Array.map((o) => o.hashedNumber),
+              Array.map((o) => o.serverHashedNumberForClient),
               Array.sort(Order.string),
               Array.join(',')
             )

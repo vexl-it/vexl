@@ -62,3 +62,7 @@ export const clubReportLimitIntervalDaysConfig = Config.number(
 )
 
 export const clubReportLimistCount = Config.number('CLUB_REPORT_LIMIT_COUNT')
+
+export const secretSaltForServerContact = Config.string(
+  'SECRET_SALT_FOR_SERVER_CONTACTS'
+)

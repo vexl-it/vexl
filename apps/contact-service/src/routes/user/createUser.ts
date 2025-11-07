@@ -1,5 +1,4 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
@@ -8,10 +7,14 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
+import {
+  serverHashPhoneNumber,
+  type ServerHashedNumber,
+} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 
 const deleteIfExists = (
-  hash: HashedPhoneNumber
+  hash: ServerHashedNumber
 ): Effect.Effect<
   void,
   UnexpectedServerError,
@@ -44,16 +47,16 @@ export const createUser = HttpApiBuilder.handler(
   'createUser',
   (req) =>
     CurrentSecurity.pipe(
+      Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
-          const security = yield* _(CurrentSecurity)
           const userDb = yield* _(UserDbService)
-          yield* _(deleteIfExists(security.hash))
+          yield* _(deleteIfExists(security.serverHash))
 
           yield* _(
             userDb.insertUser({
               publicKey: security['public-key'],
-              hash: security.hash,
+              hash: security.serverHash,
               expoToken: Option.fromNullable(req.payload.expoToken),
               firebaseToken: Option.fromNullable(req.payload.firebaseToken),
               clientVersion: req.headers.clientVersionOrNone,

@@ -2,12 +2,12 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Array, Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
   Schema.Struct({
-    hashFrom: HashedPhoneNumberE,
+    hashFrom: ServerHashedNumber,
     userId: Schema.Int,
     limit: Schema.Int,
   })

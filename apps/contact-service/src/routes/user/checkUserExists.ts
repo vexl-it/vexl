@@ -8,6 +8,7 @@ import {type NotificationTokens} from '../../db/UserDbService/domain'
 import {type ExpoNotificationsService} from '../../utils/expoNotifications/ExpoNotificationsService'
 import {issueNotificationsToTokens} from '../../utils/issueNotificationsToTokens'
 import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
 const sendNotificationToExistingUserFork = (
   token: NotificationTokens
@@ -31,9 +32,12 @@ export const checkUserExists = HttpApiBuilder.handler(
   'checkUserExists',
   (req) =>
     Effect.gen(function* (_) {
-      const security = yield* _(CurrentSecurity)
+      const security = yield* _(
+        CurrentSecurity,
+        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+      )
       const userDb = yield* _(UserDbService)
-      const existingUser = yield* _(userDb.findUserByHash(security.hash))
+      const existingUser = yield* _(userDb.findUserByHash(security.serverHash))
 
       if (
         req.urlParams.notifyExistingUserAboutLogin &&

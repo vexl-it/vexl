@@ -48,6 +48,7 @@ import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeCalculatorRouter from '../TradeCalculatorRouter'
 import TradeChecklistFlow from '../TradeChecklistFlow'
+import TradePriceTypeDialog from '../TradePriceTypeDialogScreen'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
@@ -131,6 +132,14 @@ function RootNavigation(): React.ReactElement {
                 presentation: 'containedTransparentModal',
               }}
               component={TradeCalculatorRouter}
+            />
+            <Stack.Screen
+              name="TradePriceType"
+              options={{
+                presentation: 'transparentModal',
+                animation: 'slide_from_bottom',
+              }}
+              component={TradePriceTypeDialog}
             />
             <Stack.Screen
               name="ChangeProfilePicture"

@@ -39,6 +39,7 @@ function CurrentBtcPrice({
   postRefreshActions,
   ...props
 }: Props): React.ReactElement {
+  const {t} = useTranslation()
   const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
   const customBtcPrice = useAtomValue(customBtcPriceAtom ?? emptyAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
@@ -78,7 +79,6 @@ function CurrentBtcPrice({
     postRefreshActions,
     refreshBtcPrice,
   ])
-  const {t} = useTranslation()
 
   return (
     <TouchableOpacity

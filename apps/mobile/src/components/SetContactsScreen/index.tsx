@@ -18,29 +18,27 @@ function SetContactsScreen({route: {params}}: Props): React.ReactElement {
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
 
   return (
-    <>
-      <Screen testID="@setContactsScreen">
-        <KeyboardAvoidingView>
-          <ScreenTitle
-            p="$2"
-            text={t('loginFlow.importContacts.action')}
-            withBackButton
-          />
-          <Stack f={1} mx="$2">
-            {loadingContactsFromDevice ? (
-              <Stack f={1} ai="center" jc="center">
-                <VexlActivityIndicator
-                  size="large"
-                  bc={getTokens().color.main.val}
-                />
-              </Stack>
-            ) : (
-              <ContactsListSelect filter={params?.filter} />
-            )}
-          </Stack>
-        </KeyboardAvoidingView>
-      </Screen>
-    </>
+    <Screen testID="@setContactsScreen">
+      <KeyboardAvoidingView>
+        <ScreenTitle
+          p="$2"
+          text={t('loginFlow.importContacts.action')}
+          withBackButton
+        />
+        <Stack f={1} mx="$2">
+          {loadingContactsFromDevice ? (
+            <Stack f={1} ai="center" jc="center">
+              <VexlActivityIndicator
+                size="large"
+                bc={getTokens().color.main.val}
+              />
+            </Stack>
+          ) : (
+            <ContactsListSelect filter={params?.filter} />
+          )}
+        </Stack>
+      </KeyboardAvoidingView>
+    </Screen>
   )
 }
 

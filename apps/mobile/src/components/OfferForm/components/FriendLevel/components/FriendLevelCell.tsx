@@ -6,8 +6,8 @@ import {TouchableOpacity} from 'react-native'
 import {Stack, Text} from 'tamagui'
 import {userDataRealOrAnonymizedAtom} from '../../../../../state/session/userDataAtoms'
 import SvgImage from '../../../../Image'
-import UserAvatar from '../../../../UserAvatar'
 import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
+import UserAvatar from '../../../../UserAvatar'
 
 interface FriendLevelCellContentProps {
   image: SvgString

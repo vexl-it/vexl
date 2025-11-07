@@ -1,8 +1,10 @@
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs'
 import React from 'react'
-import {type EventsAndClubsParamsList} from '../../navigationTypes'
+import {
+  type EventsAndClubsParamsList,
+  type RootStackScreenProps,
+} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../utils/useSafeGoBack'
 import IconButton from '../IconButton'
 import closeSvg from '../images/closeSvg'
 import Screen from '../Screen'
@@ -11,11 +13,14 @@ import ClubsScreen from './components/ClubsScreen'
 import EventsScreen from './components/EventsScreen'
 import TabBar from './components/TabBar'
 
+type Props = RootStackScreenProps<'EventsAndClubs'>
+
 const Tab = createMaterialTopTabNavigator<EventsAndClubsParamsList>()
 
-export default function EventsAndClubsScreen(): React.ReactElement {
+export default function EventsAndClubsScreen({
+  navigation,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const safeGoBack = useSafeGoBack()
 
   return (
     <Screen>
@@ -29,7 +34,11 @@ export default function EventsAndClubsScreen(): React.ReactElement {
           iconStroke="white"
           variant="dark"
           icon={closeSvg}
-          onPress={safeGoBack}
+          onPress={() => {
+            navigation.navigate('InsideTabs', {
+              screen: 'Settings',
+            })
+          }}
         />
       </ScreenTitle>
       <Tab.Navigator

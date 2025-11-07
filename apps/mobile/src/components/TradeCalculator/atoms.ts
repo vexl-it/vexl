@@ -28,7 +28,6 @@ import {
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
 export const tradeBtcPriceAtom = atom<number>(0)
-export const tradePriceTypeDialogVisibleAtom = atom<boolean>(false)
 export const tradePriceTypeAtom = atom<TradePriceType | undefined>(undefined)
 export const btcOrSatAtom = atom<BtcOrSat>('BTC')
 export const selectedCurrencyCodeAtom = atom<CurrencyCode | undefined>(

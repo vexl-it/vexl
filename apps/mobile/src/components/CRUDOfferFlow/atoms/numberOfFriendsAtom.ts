@@ -61,7 +61,7 @@ const numberOfFriendsAtom = atom(
 )
 
 numberOfFriendsAtom.onMount = (setAtom) => {
-  setAtom()
+  Effect.runFork(setAtom())
 }
 
 export default numberOfFriendsAtom

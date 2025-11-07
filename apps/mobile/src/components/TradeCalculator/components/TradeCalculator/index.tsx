@@ -1,6 +1,8 @@
+import {useNavigation} from '@react-navigation/native'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Stack, XStack} from 'tamagui'
+import {type TradeCalculatorStackScreenProps} from '../../../../navigationTypes'
 import CurrentBtcPrice from '../../../CurrentBtcPrice'
 import {
   btcInputValueAtom,
@@ -10,7 +12,6 @@ import {
   fiatInputValueAtom,
   tradeBtcPriceAtom,
   tradePriceTypeAtom,
-  tradePriceTypeDialogVisibleAtom,
 } from '../../atoms'
 import BtcAmountInput from './components/BtcAmountInput'
 import FiatAmountInput from './components/FiatAmountInput'
@@ -26,10 +27,11 @@ function TradeCalculator({
   children,
   onPremiumOrDiscountPress,
 }: Props): React.ReactElement {
+  const navigation =
+    useNavigation<
+      TradeCalculatorStackScreenProps<'TradeCalculator'>['navigation']
+    >()
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
-  const setTradePriceTypeDialogVisible = useSetAtom(
-    tradePriceTypeDialogVisibleAtom
-  )
   const calculateFiatValueAfterBtcPriceRefresh = useSetAtom(
     calculateFiatValueAfterBtcPriceRefreshActionAtom
   )
@@ -39,7 +41,7 @@ function TradeCalculator({
       <XStack ai="center" jc="space-between">
         <SwitchTradePriceTypeButton
           onPress={() => {
-            setTradePriceTypeDialogVisible(true)
+            navigation.navigate('TradePriceType')
           }}
         />
         <CurrentBtcPrice

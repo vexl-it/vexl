@@ -8,6 +8,10 @@ import {Keyboard, TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, YStack} from 'tamagui'
 import {type JoinClubFlowStackScreenProps} from '../../../../navigationTypes'
 import {submitCodeToJoinClubActionAtom} from '../../../../state/clubs/atom/submitCodeToJoinClubActionAtom'
+import {
+  finishPostLoginFlowActionAtom,
+  postLoginFinishedAtom,
+} from '../../../../state/postLoginOnboarding'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useIsKeyboardShown from '../../../../utils/useIsKeyboardShown'
 import Button from '../../../Button'
@@ -27,7 +31,9 @@ function FillClubAccessCodeScreen({navigation}: Props): React.ReactElement {
     useMolecule(accessCodeMolecule)
   const isCodeInvalid = useAtomValue(isCodeInvalidAtom)
   const isCodeFilled = useAtomValue(isCodeFilledAtom)
+  const postLoginFinished = useAtomValue(postLoginFinishedAtom)
   const handleCodeSubmit = useSetAtom(submitCodeToJoinClubActionAtom)
+  const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
   const isKeyboardShown = useIsKeyboardShown()
   const store = useStore()
   const loadingOverlay = useShowLoadingOverlay()
@@ -66,6 +72,11 @@ function FillClubAccessCodeScreen({navigation}: Props): React.ReactElement {
                 Schema.decode(ClubCode)(store.get(accessCodeAtom).join('')),
                 Effect.flatMap(handleCodeSubmit),
                 Effect.andThen(() => {
+                  if (postLoginFinished) {
+                    navigation.navigate('EventsAndClubs', {screen: 'Clubs'})
+                  } else {
+                    Effect.runFork(finishPostLoginFlow())
+                  }
                   loadingOverlay.hide()
                 })
               )

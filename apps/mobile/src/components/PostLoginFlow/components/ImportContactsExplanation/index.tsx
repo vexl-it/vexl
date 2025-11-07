@@ -82,8 +82,6 @@ export default function ImportContactsExplanationScreen({
                 navigation.navigate('FindOffersInVexlClubsScreen')
 
               if (result === 'success') Effect.runFork(finishPostLoginFlow())
-
-              // if (success) navigation.push('AllowNotificationsExplanation')
             })
           }}
           disabled={contactsLoading}

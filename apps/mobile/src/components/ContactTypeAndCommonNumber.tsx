@@ -28,7 +28,7 @@ function ContactTypeAndCommonNumber({
   const {t} = useTranslation()
   const navigation = useNavigation()
   const clubsNamesForOffer = useGetAllClubsNamesForIds(clubsIds ?? [])
-  const numberOfCommonFriendLocalized = useSetAtom(
+  const numberOfCommonFriendsLocalized = useSetAtom(
     localizedDecimalNumberActionAtom
   )({number: numberOfCommonFriends})
 
@@ -68,7 +68,7 @@ function ContactTypeAndCommonNumber({
           >
             <Text col="$greyOnBlack">
               {t('offer.numberOfCommon', {
-                number: numberOfCommonFriendLocalized,
+                number: numberOfCommonFriendsLocalized,
               })}
             </Text>
           </TouchableWithoutFeedback>

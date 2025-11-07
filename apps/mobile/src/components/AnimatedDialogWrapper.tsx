@@ -1,12 +1,7 @@
 import {useFocusEffect} from '@react-navigation/native'
 import React from 'react'
 import {BackHandler, StyleSheet} from 'react-native'
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInDown,
-  SlideOutDown,
-} from 'react-native-reanimated'
+import Animated, {FadeIn, SlideInDown} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, YStack} from 'tamagui'
 import KeyboardAvoidingView from './KeyboardAvoidingView'
@@ -48,13 +43,17 @@ function AnimatedDialogWrapper({
       <KeyboardAvoidingView>
         <Animated.View
           entering={FadeIn}
-          exiting={FadeOut}
+          // TODO: check this with future versions of react-native-reanimated as there are multiple issues reported
+          // that cause crashing on new arch with entering/exiting animations on Android edge-to-edge devices and iOS also
+          // https://github.com/wix/react-native-navigation/issues/8096
+          // https://github.com/software-mansion/react-native-reanimated/issues/7493
+          // exiting={FadeOut}
           style={styles.backdrop}
         />
         <Animated.View
           style={styles.bounce}
           entering={SlideInDown}
-          exiting={SlideOutDown}
+          // exiting={SlideOutDown}
         >
           <YStack
             pt={insets.top}

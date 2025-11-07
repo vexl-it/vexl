@@ -21,6 +21,7 @@ import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import VersionMigrations from './components/VersionMigrations'
 import ThemeProvider from './utils/ThemeProvider'
+import appConfig from './utils/ThemeProvider/tamagui.config'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
 import {useAppState} from './utils/useAppState'
@@ -46,6 +47,24 @@ function App(): React.ReactElement {
               primary: theme.background?.val,
               background: 'transparent',
               text: theme.color?.val,
+            },
+            fonts: {
+              regular: {
+                fontFamily: appConfig.fonts.body400.family,
+                fontWeight: '400',
+              },
+              medium: {
+                fontFamily: appConfig.fonts.body500.family,
+                fontWeight: '500',
+              },
+              bold: {
+                fontFamily: appConfig.fonts.body600.family,
+                fontWeight: '600',
+              },
+              heavy: {
+                fontFamily: appConfig.fonts.body700.family,
+                fontWeight: '700',
+              },
             },
           }}
         >

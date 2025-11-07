@@ -65,33 +65,22 @@ function TradeChecklistReminder(): React.ReactElement | null {
       )}
     >
       <Stack gap="$4">
-        {offerIsInPerson ? (
-          <Button
-            onPress={() => {
-              navigation.navigate('TradeChecklistFlow', {
-                screen: 'AgreeOnTradeDetails',
-                chatId,
-                inboxKey,
-              })
-            }}
-            variant="secondary"
-            size="medium"
-            text={t('vexlbot.openTradeChecklist')}
-          />
-        ) : (
-          <Button
-            onPress={() => {
-              navigation.navigate('TradeChecklistFlow', {
-                screen: 'AgreeOnTradeDetails',
-                chatId,
-                inboxKey,
-              })
-            }}
-            variant="secondary"
-            size="medium"
-            text={t('vexlbot.openTradeChecklistOnline')}
-          />
-        )}
+        <Button
+          onPress={() => {
+            navigation.navigate('TradeChecklistFlow', {
+              screen: 'AgreeOnTradeDetails',
+              chatId,
+              inboxKey,
+            })
+          }}
+          variant="secondary"
+          size="medium"
+          text={
+            offerIsInPerson
+              ? t('vexlbot.openTradeChecklist')
+              : t('vexlbot.openTradeChecklistOnline')
+          }
+        />
         <TouchableOpacity
           onPress={() => {
             setDontShowSwitchValue(!dontShowSwitchValue)

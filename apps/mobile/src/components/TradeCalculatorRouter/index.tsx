@@ -7,7 +7,6 @@ import {type TradeCalculatorStackParamsList} from '../../navigationTypes'
 import {backdropStyles} from '../../utils/backdropStyles'
 import GoBackOnSwipeDown from '../GoBackOnSwipeDown'
 import PageWithNavigationHeader from '../PageWithNavigationHeader'
-import TradePriceTypeDialog from '../TradeCalculator/components/TradePriceTypeDialog'
 import {resetTradeCalculatorStateActionAtom} from './atoms'
 import PremiumOrDiscountScreen from './components/PremiumOrDiscountScreen'
 import SetYourOwnPriceScreen from './components/SetYourOwnPriceScreen'
@@ -26,8 +25,8 @@ export default function TradeCalculatorFlow(): React.ReactElement {
   }, [resetTradeCalculatorState])
 
   return (
-    <>
-      <>
+    <Stack f={1}>
+      <Stack>
         <Animated.View
           entering={FadeIn.delay(200)}
           style={backdropStyles.backdrop}
@@ -38,7 +37,7 @@ export default function TradeCalculatorFlow(): React.ReactElement {
             <Stack width={36} h={5} als="center" bc="$greyAccent1" br="$5" />
           </Stack>
         </GoBackOnSwipeDown>
-      </>
+      </Stack>
       <PageWithNavigationHeader>
         <StackNavigator.Navigator
           screenOptions={{headerShown: false}}
@@ -58,7 +57,6 @@ export default function TradeCalculatorFlow(): React.ReactElement {
           />
         </StackNavigator.Navigator>
       </PageWithNavigationHeader>
-      <TradePriceTypeDialog />
-    </>
+    </Stack>
   )
 }

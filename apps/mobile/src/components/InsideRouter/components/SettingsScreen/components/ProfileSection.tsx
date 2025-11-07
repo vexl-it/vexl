@@ -1,10 +1,11 @@
-import {useNavigation} from '@react-navigation/native'
+import {type NavigationProp, useNavigation} from '@react-navigation/native'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, styled} from 'tamagui'
+import {type RootStackParamsList} from '../../../../../navigationTypes'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {
   userDataRealOrAnonymizedAtom,
@@ -34,7 +35,7 @@ const GrayBackContainer = styled(XStack, {
 
 function ProfileSection(): React.ReactElement {
   const {t} = useTranslation()
-  const navigation = useNavigation()
+  const navigation = useNavigation<NavigationProp<RootStackParamsList>>()
   const reachNumber = useSetAtom(localizedDecimalNumberActionAtom)({
     number: useAtomValue(reachNumberAtom),
   })
@@ -58,7 +59,7 @@ function ProfileSection(): React.ReactElement {
             onPress={() => {
               void Effect.runPromise(
                 andThenExpectBooleanNoErrors((success) => {
-                  if (success) navigation.navigate('SetContacts', {})
+                  if (success) navigation.navigate('SetContacts')
                 })(showReachNumberDetails())
               )
             }}

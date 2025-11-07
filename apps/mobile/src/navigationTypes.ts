@@ -75,6 +75,8 @@ export type RootStackParamsList = {
 
   TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
 
+  TradePriceType: undefined
+
   SetContacts: {filter?: ContactsFilter | undefined} | undefined
 
   CommonFriends: {

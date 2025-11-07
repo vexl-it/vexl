@@ -1,5 +1,4 @@
 import notifee from '@notifee/react-native'
-import {useNavigation} from '@react-navigation/native'
 import {
   AdmitedToClubNetworkNotificationData,
   ClubDeactivatedNotificationData,
@@ -35,7 +34,6 @@ import processChatNotificationActionAtom from './notifications/processChatNotifi
 import {reportNewConnectionNotificationForked} from './notifications/reportNewConnectionNotification'
 
 export function useHandleReceivedNotifications(): void {
-  const navigation = useNavigation()
   const store = useStore()
   const updateOffersConnections = useSetAtom(
     updateAndReencryptAllOffersConnectionsActionAtom
@@ -243,7 +241,6 @@ export function useHandleReceivedNotifications(): void {
     }
   }, [
     checkForClubAdmission,
-    navigation,
     store,
     syncConnections,
     updateOffersConnections,

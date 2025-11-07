@@ -4,7 +4,7 @@ import {
   Gesture,
   GestureDetector,
 } from 'react-native-gesture-handler'
-import {runOnJS} from 'react-native-reanimated'
+import {scheduleOnRN} from 'react-native-worklets'
 import useSafeGoBack from '../utils/useSafeGoBack'
 
 function GoBackOnSwipeDown({
@@ -19,7 +19,7 @@ function GoBackOnSwipeDown({
       gesture={Gesture.Fling()
         .direction(Directions.DOWN)
         .onEnd(() => {
-          runOnJS(goBack)()
+          scheduleOnRN(goBack)
         })}
     >
       {children}

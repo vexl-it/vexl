@@ -75,7 +75,12 @@ function FriendLevelCell({
             {title}
           </Text>
           <XStack ai="center" gap="$2">
-            {!!loading && <VexlActivityIndicator size="small" />}
+            {!!loading && (
+              <VexlActivityIndicator
+                size="xsmall"
+                bc={selected ? '$main' : '$greyOnBlack'}
+              />
+            )}
             <Text
               textAlign="center"
               col={selected ? '$main' : '$greyOnBlack'}

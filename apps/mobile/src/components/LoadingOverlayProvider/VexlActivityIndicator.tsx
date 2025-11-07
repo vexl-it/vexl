@@ -9,13 +9,15 @@ import Animated, {
 import {Stack, type StackProps, Text, XStack, YStack} from 'tamagui'
 
 interface Props extends StackProps {
-  size: 'small' | 'medium' | 'large'
+  size: 'xsmall' | 'small' | 'medium' | 'large'
   description?: string
 }
 
 function DotObject({size, ...props}: Props): React.ReactElement {
   const dimensions = useMemo(() => {
     switch (size) {
+      case 'xsmall':
+        return 4
       case 'small':
         return 6
       case 'medium':

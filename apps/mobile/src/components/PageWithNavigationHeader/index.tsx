@@ -1,7 +1,7 @@
-import {useNavigation} from '@react-navigation/native'
 import React, {type ReactNode} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import FooterButtons from './components/FooterButtons'
 import Header from './components/Header'
@@ -45,7 +45,7 @@ function PageWithNavigationHeader({
 export default PageWithNavigationHeader
 
 export function HeaderProxy(props: Omit<HeaderState, 'goBack'>): null {
-  const {goBack} = useNavigation()
+  const goBack = useSafeGoBack()
 
   useSetHeaderState({
     ...props,

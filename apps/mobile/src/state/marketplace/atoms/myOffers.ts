@@ -21,6 +21,11 @@ export const myOffersAtom = focusAtom(offersAtom, (optic) =>
   )
 )
 
+export const areThereAnyMyOffersAtom = atom((get) => {
+  const myOffers = get(myOffersAtom)
+  return myOffers.length > 0
+})
+
 export const myOffersSortedAtom = atom((get) => {
   const sortingOptions = get(selectedMyOffersSortingOptionAtom)
   const myOffers = get(myOffersAtom)

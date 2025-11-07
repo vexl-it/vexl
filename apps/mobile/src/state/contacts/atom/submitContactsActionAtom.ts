@@ -18,6 +18,7 @@ import {
   updatePersistentDataAboutNumberOfImportedContactsActionAtom,
   updatePersistentDataAboutReachActionAtom,
 } from '../../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
+import {areThereAnyMyOffersAtom} from '../../marketplace/atoms/myOffers'
 import {type StoredContactWithComputedValues} from '../domain'
 import {
   lastImportOfContactsAtom,
@@ -49,6 +50,8 @@ export const submitContactsActionAtom = atom(
     set(loadingOverlayDisplayedAtom, true)
 
     return Effect.gen(function* (_) {
+      const areThereAnyMyOffers = get(areThereAnyMyOffersAtom)
+
       if (params.normalizeAndImportAll) {
         yield* _(set(loadContactsFromDeviceActionAtom))
         yield* _(set(normalizeStoredContactsActionAtom))
@@ -192,7 +195,10 @@ export const submitContactsActionAtom = atom(
                         }
                       })
                     )
-                    if (params.showOfferReencryptionDialog) {
+                    if (
+                      areThereAnyMyOffers &&
+                      params.showOfferReencryptionDialog
+                    ) {
                       set(loadingOverlayDisplayedAtom, false)
                       set(offerProgressModalActionAtoms.show, {
                         title: t('contacts.refreshingOffers.title'),

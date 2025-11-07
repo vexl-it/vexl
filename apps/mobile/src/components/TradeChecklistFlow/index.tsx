@@ -6,7 +6,6 @@ import {
   type TradeChecklistStackParamsList,
 } from '../../navigationTypes'
 import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
-import TradePriceTypeDialog from '../TradeCalculator/components/TradePriceTypeDialog'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
@@ -97,7 +96,6 @@ export default function TradeChecklistFlow({
           />
         </StackNavigator.Navigator>
       </TradeChecklistFlowPageContainer>
-      <TradePriceTypeDialog />
     </>
   )
 }

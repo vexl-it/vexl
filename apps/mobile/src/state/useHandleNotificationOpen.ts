@@ -1,5 +1,4 @@
 import notifee, {EventType, type Notification} from '@notifee/react-native'
-import {useNavigation} from '@react-navigation/native'
 import {
   ChatNotificationData,
   NewChatMessageNoticeNotificationData,
@@ -9,7 +8,11 @@ import {Either, Option, Schema} from 'effect'
 import {atom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Linking} from 'react-native'
-import {isOnMessagesList, isOnSpecificChat} from '../utils/navigation'
+import {
+  isOnMessagesList,
+  isOnSpecificChat,
+  navigationRef,
+} from '../utils/navigation'
 import {ClubAdmissionInternalNotificationData} from '../utils/notifications/clubNotifications'
 import {
   NEW_CONTACTS_TO_SYNC,
@@ -22,7 +25,6 @@ const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
 
 function useReactOnNotificationOpen(): (notification: Notification) => void {
   const store = useStore()
-  const navigation = useNavigation()
 
   return useCallback(
     (notification) => {
@@ -45,15 +47,16 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
         Option.isSome(knownNotificationDataO) &&
         Schema.is(ClubAdmissionInternalNotificationData)(
           knownNotificationDataO.value
-        )
+        ) &&
+        navigationRef.isReady()
       ) {
-        navigation.navigate('ClubDetail', {
+        navigationRef.navigate('ClubDetail', {
           clubUuid: knownNotificationDataO.value.clubUuid,
         })
       } else if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
-        navigation.navigate('InsideTabs', {screen: 'Marketplace'})
+        navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
-        navigation.navigate('SetContacts', {})
+        navigationRef.navigate('SetContacts', {})
       } else if (notification.data?.inbox && notification.data?.sender) {
         Schema.decodeUnknownEither(ChatNotificationData)(
           notification.data
@@ -67,8 +70,8 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
               )
 
               // as fallback navigate to messages list.
-              if (!isOnMessagesList(navigation.getState())) {
-                navigation.navigate('InsideTabs', {screen: 'Messages'})
+              if (!isOnMessagesList(navigationRef.getState())) {
+                navigationRef.navigate('InsideTabs', {screen: 'Messages'})
               }
             },
             onRight: (payload) => {
@@ -81,7 +84,7 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
                 // no need to navigate. We are already on the chat.
                 return 'ok'
 
-              navigation.navigate('ChatDetail', keys)
+              navigationRef.navigate('ChatDetail', keys)
               return 'ok'
             },
           })
@@ -91,12 +94,15 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
       const newChatMessageNoticeNotificationO = Schema.decodeUnknownOption(
         NewChatMessageNoticeNotificationData
       )(notification.data)
-      if (Option.isSome(newChatMessageNoticeNotificationO)) {
-        if (!isOnMessagesList(navigation.getState()))
-          navigation.navigate('InsideTabs', {screen: 'Messages'})
+      if (
+        Option.isSome(newChatMessageNoticeNotificationO) &&
+        navigationRef.isReady()
+      ) {
+        if (!isOnMessagesList(navigationRef.getState()))
+          navigationRef.navigate('InsideTabs', {screen: 'Messages'})
       }
     },
-    [navigation, store]
+    [store]
   )
 }
 

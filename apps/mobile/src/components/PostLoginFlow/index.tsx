@@ -24,10 +24,6 @@ export default function PostLoginFlow(): React.ReactElement {
           name="FindOffersInVexlClubsScreen"
           component={FindOffersInVexlClubsScreen}
         />
-        {/* <Stack.Screen
-          name="AllowNotificationsExplanation"
-          component={AllowNotificationsExplanationScreen}
-        /> */}
       </Stack.Navigator>
     </PageWithButtonAndProgressHeader>
   )

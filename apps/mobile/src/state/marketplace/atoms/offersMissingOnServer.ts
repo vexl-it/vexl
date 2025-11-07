@@ -21,6 +21,7 @@ import {
   deleteOfferToConnectionsAtom,
   upsertOfferToConnectionsActionAtom,
 } from '../../connections/atom/offerToConnectionsAtom'
+import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {myOffersAtom} from './myOffers'
 import {singleOfferAtom, singleOfferByAdminIdAtom} from './offersState'
@@ -80,78 +81,85 @@ const reencryptOneOfferActionAtom = atom(
       onProgress: (p: OfferEncryptionProgress) => void
     }
   ) => {
-    const api = get(apiAtom)
-    const session = get(sessionDataOrDummyAtom)
-    const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
-    const clubsUuids =
-      intendedClubs ?? get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
-    const clubsInfo = get(clubsToKeyHolderAtom)
+    return Effect.gen(function* (_) {
+      const api = get(apiAtom)
+      const session = get(sessionDataOrDummyAtom)
+      const offerAtom = singleOfferAtom(offer.offerInfo.offerId)
+      const clubsUuids =
+        intendedClubs ?? get(offerAtom)?.ownershipInfo?.intendedClubs ?? []
+      const clubsInfo = get(clubsToKeyHolderAtom)
 
-    const intendedClubsRecord = pipe(
-      clubsUuids,
-      Array.filterMap((clubUuid) =>
-        pipe(
-          Record.get(clubsInfo, clubUuid),
-          Option.map((club) => [clubUuid, club] as const)
-        )
-      ),
-      Record.fromEntries
-    )
+      const intendedClubsRecord = pipe(
+        clubsUuids,
+        Array.filterMap((clubUuid) =>
+          pipe(
+            Record.get(clubsInfo, clubUuid),
+            Option.map((club) => [clubUuid, club] as const)
+          )
+        ),
+        Record.fromEntries
+      )
 
-    return pipe(
-      createNewOfferForMyContacts({
-        offerApi: api.offer,
-        contactApi: api.contact,
-        publicPart: offer.offerInfo.publicPart,
-        countryPrefix: getCountryPrefix(session.phoneNumber),
-        intendedConnectionLevel:
-          intendedConnectionLevel ??
-          offer.ownershipInfo.intendedConnectionLevel,
-        ownerKeyPair: session.privateKey,
-        onProgress,
-        intendedClubs: intendedClubsRecord,
-        offerId: offer.offerInfo.offerId,
-        adminId,
-      }),
-      Effect.map((r) => {
-        if (r.encryptionErrors.length > 0) {
-          reportError('error', new Error('Error while encrypting offer'), {
-            excryptionErrors: r.encryptionErrors,
-          })
-        }
+      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+        set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+      )
 
-        const recreatedOffer: MyOfferInState = {
-          ownershipInfo: {
+      return yield* _(
+        createNewOfferForMyContacts({
+          offerApi: api.offer,
+          contactApi: api.contact,
+          publicPart: offer.offerInfo.publicPart,
+          countryPrefix: getCountryPrefix(session.phoneNumber),
+          serverToClientHashesToHashedPhoneNumbersMap,
+          intendedConnectionLevel:
+            intendedConnectionLevel ??
+            offer.ownershipInfo.intendedConnectionLevel,
+          ownerKeyPair: session.privateKey,
+          onProgress,
+          intendedClubs: intendedClubsRecord,
+          offerId: offer.offerInfo.offerId,
+          adminId,
+        }),
+        Effect.map((r) => {
+          if (r.encryptionErrors.length > 0) {
+            reportError('error', new Error('Error while encrypting offer'), {
+              excryptionErrors: r.encryptionErrors,
+            })
+          }
+
+          const recreatedOffer: MyOfferInState = {
+            ownershipInfo: {
+              adminId: r.adminId,
+              intendedConnectionLevel:
+                offer.ownershipInfo.intendedConnectionLevel,
+              intendedClubs: Record.keys(intendedClubsRecord),
+            },
+            flags: {
+              reported: false,
+            },
+            offerInfo: r.offerInfo,
+          }
+
+          set(offerAtom, recreatedOffer)
+          set(deleteOfferToConnectionsAtom, offer.ownershipInfo.adminId)
+          set(upsertOfferToConnectionsActionAtom, {
+            connections: {
+              firstLevel: r.encryptedFor.firstDegreeConnections,
+              secondLevel:
+                offer.ownershipInfo.intendedConnectionLevel === 'ALL'
+                  ? r.encryptedFor.secondDegreeConnections
+                  : [],
+              clubs: r.encryptedFor.clubsConnections,
+            },
             adminId: r.adminId,
-            intendedConnectionLevel:
-              offer.ownershipInfo.intendedConnectionLevel,
-            intendedClubs: Record.keys(intendedClubsRecord),
-          },
-          flags: {
-            reported: false,
-          },
-          offerInfo: r.offerInfo,
-        }
+            symmetricKey: r.symmetricKey,
+          })
+          set(unmarkOfferAsMissingActionAtom, offer.offerInfo.offerId)
 
-        set(offerAtom, recreatedOffer)
-        set(deleteOfferToConnectionsAtom, offer.ownershipInfo.adminId)
-        set(upsertOfferToConnectionsActionAtom, {
-          connections: {
-            firstLevel: r.encryptedFor.firstDegreeConnections,
-            secondLevel:
-              offer.ownershipInfo.intendedConnectionLevel === 'ALL'
-                ? r.encryptedFor.secondDegreeConnections
-                : [],
-            clubs: r.encryptedFor.clubsConnections,
-          },
-          adminId: r.adminId,
-          symmetricKey: r.symmetricKey,
+          return recreatedOffer
         })
-        set(unmarkOfferAsMissingActionAtom, offer.offerInfo.offerId)
-
-        return recreatedOffer
-      })
-    )
+      )
+    })
   }
 )
 

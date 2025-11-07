@@ -1,14 +1,14 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {NotificationTokens} from '../domain'
 
 export const FindTokensOfUsersWhoDirectlyImportedHashParams = Schema.Struct({
-  userHash: HashedPhoneNumberE,
-  importedHashes: Schema.Array(HashedPhoneNumberE),
+  userHash: ServerHashedNumber,
+  importedHashes: Schema.Array(ServerHashedNumber),
 })
 export type FindTokensOfUsersWhoDirectlyImportedHashParams =
   typeof FindTokensOfUsersWhoDirectlyImportedHashParams.Type

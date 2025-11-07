@@ -6,6 +6,10 @@ import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, pipe, Schema} from 'effect'
+import {
+  hashForClient,
+  serverHashPhoneNumber,
+} from '../../../utils/serverHashContact'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 
 const commonHeaders = Schema.decodeSync(CommonHeaders)({
@@ -24,6 +28,11 @@ export const generateKeysAndHasheForNumber = (numberRaw: string) =>
       })
     )
 
+    const serverHashedNumber = yield* _(serverHashPhoneNumber(hashedNumber))
+    const serverHashedNumberForClient = yield* _(
+      hashForClient(serverHashedNumber)
+    )
+
     return {
       phoneNumber: number,
       hashedNumber,
@@ -32,6 +41,8 @@ export const generateKeysAndHasheForNumber = (numberRaw: string) =>
       notificationToken: Schema.decodeSync(ExpoNotificationTokenE)(
         `token:${number}`
       ),
+      serverHashedNumber,
+      serverHashedNumberForClient,
     }
   })
 

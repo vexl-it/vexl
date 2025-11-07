@@ -1,12 +1,12 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 const UpdateContactsHashFromQuery = Schema.Struct({
-  currentHashFrom: HashedPhoneNumberE,
-  newHashFrom: HashedPhoneNumberE,
+  currentHashFrom: ServerHashedNumber,
+  newHashFrom: ServerHashedNumber,
 })
 
 export type UpdateContactsHashFromQuery =

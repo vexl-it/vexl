@@ -30,6 +30,7 @@ import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
+import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import addNotificationCypherToPublicPayloadActionAtom from '../../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {offersAtom} from './offersState'
@@ -86,11 +87,16 @@ export const createOfferActionAtom = atom<
       )
     )
 
+    const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+      set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+    )
+
     const createOfferResult = yield* _(
       createNewOfferForMyContacts({
         offerApi: api.offer,
         publicPart: publicPayloadWithNotificationToken.publicPart,
         countryPrefix: getCountryPrefix(session.phoneNumber),
+        serverToClientHashesToHashedPhoneNumbersMap,
         contactApi: api.contact,
         intendedConnectionLevel,
         ownerKeyPair: session.privateKey,

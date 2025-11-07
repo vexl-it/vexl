@@ -4,6 +4,10 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
+import {
+  hashForClientBatch,
+  serverHashPhoneNumber,
+} from '../../utils/serverHashContact'
 
 export const fetchCommonConnections = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -12,6 +16,8 @@ export const fetchCommonConnections = HttpApiBuilder.handler(
   (req) =>
     Effect.gen(function* (_) {
       const security = yield* _(CurrentSecurity)
+      const userServerHash = yield* _(serverHashPhoneNumber(security.hash))
+
       const pubKeysToLookFor = pipe(
         req.payload.publicKeys,
         Array.dedupe,
@@ -21,16 +27,27 @@ export const fetchCommonConnections = HttpApiBuilder.handler(
       const contactDb = yield* _(ContactDbService)
       const commonFriends = yield* _(
         contactDb.findCommonFriends({
-          ownerHash: security.hash,
+          ownerHash: userServerHash,
           publicKeys: pubKeysToLookFor,
         })
       )
 
+      const commonFriendsWithClientHash = yield* _(
+        commonFriends,
+        Array.map((oneContact) =>
+          pipe(
+            hashForClientBatch(oneContact.commonFriends),
+            Effect.map((hashes) => ({
+              publicKey: oneContact.publicKey,
+              common: {hashes},
+            }))
+          )
+        ),
+        Effect.allWith({concurrency: 'unbounded'})
+      )
+
       return {
-        commonContacts: Array.map(commonFriends, (oneContact) => ({
-          publicKey: oneContact.publicKey,
-          common: {hashes: oneContact.commonFriends},
-        })),
+        commonContacts: commonFriendsWithClientHash,
       }
     }).pipe(makeEndpointEffect)
 )

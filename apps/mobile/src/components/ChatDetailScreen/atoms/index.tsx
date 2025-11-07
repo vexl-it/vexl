@@ -7,7 +7,7 @@ import {
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Array, Effect, Either, pipe} from 'effect'
+import {Array, Effect, Either, HashMap, Option, pipe} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -316,9 +316,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const connectionState = get(connectionStateAtom)
 
     return offer?.ownershipInfo
-      ? (connectionState.commonFriends.commonContacts.find(
-          (contact) => contact.publicKey === chat.otherSide.publicKey
-        )?.common.hashes ?? [])
+      ? HashMap.get(
+          connectionState.commonFriends,
+          chat.otherSide.publicKey
+        ).pipe(Option.getOrElse(() => []))
       : (offer?.offerInfo.privatePart.commonFriends ?? [])
   })
 

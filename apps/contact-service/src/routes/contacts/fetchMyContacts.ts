@@ -5,6 +5,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Array, Effect, pipe} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
 export const fetchMyContacts = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -14,6 +15,7 @@ export const fetchMyContacts = HttpApiBuilder.handler(
     Effect.gen(function* (_) {
       const security = yield* _(CurrentSecurity)
       const contactDb = yield* _(ContactDbService)
+      const userServerHash = yield* _(serverHashPhoneNumber(security.hash))
 
       yield* _(
         UserDbService,
@@ -21,7 +23,7 @@ export const fetchMyContacts = HttpApiBuilder.handler(
           userDb.updateAppSourceForUser({
             appSource: req.headers.appSourceOrNone,
             publicKey: security['public-key'],
-            hash: security.hash,
+            hash: userServerHash,
           })
         )
       )
@@ -30,7 +32,7 @@ export const fetchMyContacts = HttpApiBuilder.handler(
         req.urlParams.level === 'ALL' || req.urlParams.level === 'FIRST'
           ? yield* _(
               contactDb.findFirstLevelContactsPublicKeysByHashFrom(
-                security.hash
+                userServerHash
               ),
               Effect.withSpan('Fetch first level contacts')
             )
@@ -40,7 +42,7 @@ export const fetchMyContacts = HttpApiBuilder.handler(
         req.urlParams.level === 'ALL' || req.urlParams.level === 'SECOND'
           ? yield* _(
               contactDb.findSecondLevelContactsPublicKeysByHashFrom(
-                security.hash
+                userServerHash
               ),
               Effect.withSpan('Fetch second level contacts')
             )

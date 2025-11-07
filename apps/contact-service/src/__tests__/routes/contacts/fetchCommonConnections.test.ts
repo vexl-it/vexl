@@ -80,7 +80,7 @@ describe('Common connections', () => {
           Array.sort(Order.string),
           Array.join(', ')
         )
-        // Result keys equals to requestzdcgtrfdcdfgtzrcfedxs
+        // Result keys equals to request
         expect(resultKeys).toBe(
           pipe(
             userContacts,
@@ -95,7 +95,7 @@ describe('Common connections', () => {
           const otherFriendsHashes = pipe(
             userContacts,
             Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
-            Array.map((o) => o.hashedNumber),
+            Array.map((o) => o.serverHashedNumberForClient),
             Array.sort(Order.string),
             Array.join(',')
           )

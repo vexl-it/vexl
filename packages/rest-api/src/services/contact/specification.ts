@@ -23,6 +23,8 @@ import {
   AdminTokenParams,
   CheckUserExistsRequest,
   ClubAlreadyExistsError,
+  ConvertPhoneNumberHashesToServerHashesRequest,
+  ConvertPhoneNumberHashesToServerHashesResponse,
   CreateClubRequest,
   CreateClubResponse,
   CreateUserRequest,
@@ -208,6 +210,16 @@ export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
   .addError(InvalidNextPageTokenError)
   .annotate(MaxExpectedDailyCall, 500)
 
+export const ConvertPhoneNumberHashesToServerHashesEndpoint =
+  HttpApiEndpoint.post(
+    'convertPhoneNumberHashesToServerHashes',
+    '/api/v1/contacts/convert-to-server-hashes'
+  )
+    .middleware(ServerSecurityMiddleware)
+    .setPayload(ConvertPhoneNumberHashesToServerHashesRequest)
+    .addSuccess(ConvertPhoneNumberHashesToServerHashesResponse)
+    .annotate(MaxExpectedDailyCall, 100)
+
 export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
   'updateBadOwnerHash',
   '/api/v1/update-bad-owner-hash'
@@ -372,6 +384,7 @@ const UserApiGroup = HttpApiGroup.make('User')
 
 const ContactApiGroup = HttpApiGroup.make('Contact')
   .add(ImportContactsEndpoint)
+  .add(ConvertPhoneNumberHashesToServerHashesEndpoint)
   .add(FetchMyContactsEndpoint)
   .add(FetchMyContactsPaginatedEndpoint)
   .add(FetchCommonConnectionsEndpoint)

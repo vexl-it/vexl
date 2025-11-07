@@ -14,6 +14,7 @@ import {
 import {
   type AddUserToTheClubRequest,
   type CheckUserExistsRequest,
+  type ConvertPhoneNumberHashesToServerHashesRequest,
   type CreateUserRequest,
   type DeactivateClubJoinLinkRequest,
   type EraseUserFromNetworkRequest,
@@ -139,6 +140,12 @@ export function api({
         body: FetchCommonConnectionsPaginatedRequest
       ) =>
         client.Contact.fetchCommonConnectionsPaginated({
+          payload: body,
+        }),
+      convertPhoneNumberHashesToServerHashes: (
+        body: ConvertPhoneNumberHashesToServerHashesRequest
+      ) =>
+        client.Contact.convertPhoneNumberHashesToServerHashes({
           payload: body,
         }),
       updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>

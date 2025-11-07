@@ -8,10 +8,10 @@ import {
   ClubUuidE,
 } from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {CommonConnectionsForUser} from '@vexl-next/domain/src/general/contacts'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
+import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {
   BadShortLivedTokenForErasingUserOnContactServiceError,
   ShortLivedTokenForErasingUserOnContactService,
@@ -70,6 +70,13 @@ export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportCo
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
+const CommonConnectionsForUserFromApi = Schema.Struct({
+  publicKey: PublicKeyPemBase64E,
+  common: Schema.Struct({
+    hashes: Schema.Array(ServerToClientHashedNumber),
+  }),
+})
+
 export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
   'UserNotFoundError'
 )('UserNotFoundError', {
@@ -114,6 +121,12 @@ export type ImportContactsRequest = typeof ImportContactsRequest.Type
 
 export const ImportContactsResponse = Schema.Struct({
   imported: Schema.Boolean,
+  phoneNumberHashesToServerToClientHash: Schema.Array(
+    Schema.Struct({
+      hashedNumber: HashedPhoneNumberE,
+      serverToClientHash: ServerToClientHashedNumber,
+    })
+  ),
   message: Schema.optional(Schema.String),
 })
 
@@ -155,7 +168,7 @@ export type FetchCommonConnectionsRequest =
   typeof FetchCommonConnectionsRequest.Type
 
 export const FetchCommonConnectionsResponse = Schema.Struct({
-  commonContacts: Schema.Array(CommonConnectionsForUser),
+  commonContacts: Schema.Array(CommonConnectionsForUserFromApi),
 })
 export type FetchCommonConnectionsResponse =
   typeof FetchCommonConnectionsResponse.Type
@@ -168,7 +181,7 @@ export type FetchCommonConnectionsPaginatedRequest =
   typeof FetchCommonConnectionsPaginatedRequest.Type
 
 export const FetchCommonConnectionsPaginatedResponse = createPageResponse(
-  CommonConnectionsForUser
+  CommonConnectionsForUserFromApi
 )
 export type FetchCommonConnectionsPaginatedResponse =
   typeof FetchCommonConnectionsPaginatedResponse.Type
@@ -589,3 +602,20 @@ export const EraseUserFromNetworkErrors = Schema.Union(
   BadShortLivedTokenForErasingUserOnContactServiceError
 )
 export type EraseUserFromNetworkErrors = typeof EraseUserFromNetworkErrors.Type
+
+export const ConvertPhoneNumberHashesToServerHashesRequest = Schema.Struct({
+  hashedPhoneNumbers: Schema.Array(HashedPhoneNumberE),
+})
+export type ConvertPhoneNumberHashesToServerHashesRequest =
+  typeof ConvertPhoneNumberHashesToServerHashesRequest.Type
+
+export const ConvertPhoneNumberHashesToServerHashesResponse = Schema.Struct({
+  result: Schema.Array(
+    Schema.Struct({
+      hashedNumber: HashedPhoneNumberE,
+      serverToClientHash: ServerToClientHashedNumber,
+    })
+  ),
+})
+export type ConvertPhoneNumberHashesToServerHashesResponse =
+  typeof ConvertPhoneNumberHashesToServerHashesResponse.Type

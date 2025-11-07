@@ -19,6 +19,7 @@ import {
   eciesGTMEncrypt,
 } from '@vexl-next/cryptography/src/operations/ecies'
 import * as hmac from '@vexl-next/cryptography/src/operations/hmac'
+import pbkdf2Promise from '@vexl-next/cryptography/src/operations/pbkdf2Promise'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {Effect, Schema} from 'effect'
 
@@ -263,3 +264,41 @@ export const hashSha256 = (data: string): Effect.Effect<string, CryptoError> =>
         })
     )
   )
+
+export const pbkdf2 = (
+  {
+    password,
+    salt,
+    iterations,
+  }: {
+    password: string
+    salt: string
+    iterations: number
+  },
+  {
+    keylen = 32,
+    digest = 'sha512',
+    outputEncoding = 'base64',
+  }: {keylen: number; digest: string; outputEncoding: BufferEncoding} = {
+    keylen: 32,
+    digest: 'sha512',
+    outputEncoding: 'base64',
+  }
+): Effect.Effect<string, CryptoError> =>
+  Effect.tryPromise({
+    try: async () => {
+      const resultBuffer = await pbkdf2Promise(
+        password,
+        salt,
+        iterations,
+        keylen,
+        digest
+      )
+      return resultBuffer.toString(outputEncoding)
+    },
+    catch: (e) =>
+      new CryptoError({
+        message: 'Error while performing pbkdf2',
+        error: e,
+      }),
+  })

@@ -9,7 +9,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, Option} from 'effect'
+import {Array, Effect, flow, HashMap, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -23,15 +23,16 @@ import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showD
 import reportError, {reportErrorE} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
+import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {ConnectionsState} from '../domain'
 
 const connectionStateAtom = atomWithParsedMmkvStorageE(
-  'connectionsState',
+  'connectionsStateV2',
   {
     lastUpdate: UnixMilliseconds0,
     firstLevel: [],
     secondLevel: [],
-    commonFriends: {commonContacts: []},
+    commonFriends: HashMap.empty(),
   },
   ConnectionsState
 )
@@ -132,6 +133,10 @@ export const syncConnectionsActionAtom = atom(
         }
       }
 
+      const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
+        set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
+      )
+
       const commonFriends = yield* _(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
@@ -140,7 +145,25 @@ export const syncConnectionsActionAtom = atom(
               limit: FETCH_CONNECTIONS_PAGE_SIZE,
               nextPageToken,
             }),
-        })
+        }),
+        // Transform serverToClientHashes to hashedPhoneNumbers
+        Effect.map(
+          flow(
+            Array.map(
+              (one) =>
+                [
+                  one.publicKey,
+                  Array.filterMap(one.common.hashes, (hash) =>
+                    HashMap.get(
+                      serverToClientHashesToHashedPhoneNumbersMap,
+                      hash
+                    )
+                  ),
+                ] as const
+            ),
+            HashMap.fromIterable
+          )
+        )
       )
       const lastUpdate = updateStarted
 
@@ -153,9 +176,7 @@ export const syncConnectionsActionAtom = atom(
       set(connectionStateAtom, {
         firstLevel,
         secondLevel,
-        commonFriends: {
-          commonContacts: commonFriends,
-        },
+        commonFriends,
         lastUpdate,
       })
     }).pipe(

@@ -62,6 +62,7 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
               importedManually: false,
               invalidNumber: 'notTriedYet',
             },
+            serverHashToClient: Option.none(),
             computedValues: Option.none(),
           }) satisfies StoredContact
       )

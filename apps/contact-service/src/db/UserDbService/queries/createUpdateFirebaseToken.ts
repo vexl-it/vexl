@@ -2,13 +2,13 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const UpdateFirebaseTokenParams = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
-  hash: HashedPhoneNumberE,
+  hash: ServerHashedNumber,
   firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option'}),
 })
 export type UpdateFirebaseTokenParams = typeof UpdateFirebaseTokenParams.Type

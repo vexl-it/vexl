@@ -5,7 +5,16 @@ import {
   OfferPrivatePartE,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {Array, Effect, HashSet, Option, pipe, Record, Schema} from 'effect'
+import {
+  Array,
+  Effect,
+  HashMap,
+  HashSet,
+  Option,
+  pipe,
+  Record,
+  Schema,
+} from 'effect'
 import {z} from 'zod'
 import {keys} from '../../utils/keys'
 import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
@@ -90,8 +99,8 @@ export default function constructPrivatePayloads({
         addOrCreate(friendLevel, clubFriendPublicKey, 'CLUB')
       }
 
-      return keys(friendLevel).map((key) => {
-        const friendLevelValue = friendLevel[key] ?? HashSet.make()
+      return keys(friendLevel).map((toPublicKey) => {
+        const friendLevelValue = friendLevel[toPublicKey] ?? HashSet.make()
 
         const isFromClub = HashSet.has(friendLevelValue, 'CLUB')
 
@@ -99,22 +108,26 @@ export default function constructPrivatePayloads({
           ? pipe(
               Record.toEntries(clubsConnections),
               Array.findFirst(([_, publicKeys]) =>
-                Array.contains(publicKeys, key)
+                Array.contains(publicKeys, toPublicKey)
               ),
               Option.map(([clubUuid]) => [clubUuid]),
               Option.getOrElse(() => [])
             )
           : []
 
+        const commonFriendsToPayload = (() => {
+          // This is optimization. Club key does not have common friends
+          if (isFromClub) return []
+          return Option.getOrElse(
+            HashMap.get(commonFriends, toPublicKey),
+            () => []
+          )
+        })()
+
         return {
-          toPublicKey: key,
+          toPublicKey,
           payloadPrivate: {
-            commonFriends:
-              // This is optimization. Club key does not have common friends
-              !isFromClub
-                ? (commonFriends.find((one) => one.publicKey === key)?.common
-                    ?.hashes ?? [])
-                : [],
+            commonFriends: commonFriendsToPayload,
             friendLevel: Array.fromIterable(friendLevelValue) ?? [],
             symmetricKey,
             clubIds: clubIdForKey,

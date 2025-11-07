@@ -1,15 +1,21 @@
-import {HttpRouter, HttpServerResponse} from '@effect/platform'
+import {
+  HttpRouter,
+  HttpServerRequest,
+  HttpServerResponse,
+} from '@effect/platform'
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {clubReportLimitIntervalDaysConfig} from '../configs'
 import {ClubMembersDbService} from '../db/ClubMemberDbService'
 import {checkForInactiveUsers} from './routes/checkForInactiveUsers'
 import {deactivateAndClearClubs} from './routes/deactivateAndClearClubs'
 import {flushAndSendRegisteredClubNotifications} from './routes/flushAndSendRegisteredClubNotifications'
+import {migratePhoneNumberHashes} from './routes/migratePhoneNumberHashes'
 import {processNewContentNotifications} from './routes/processNewContentNotifications'
 import {processUserInactivity} from './routes/processUserInactivity'
 import {sendCreateOfferPromptToGeneralTopic} from './routes/sendCreateOfferPromptToGeneralTopic'
+import {testHasingSpeed} from './routes/testHashingSpeed'
 
 export const internalServerLive = makeInternalServer(
   HttpRouter.empty.pipe(
@@ -87,6 +93,32 @@ export const internalServerLive = makeInternalServer(
         )
 
         return HttpServerResponse.text('ok', {status: 200})
+      })
+    ),
+    HttpRouter.post(
+      '/migrate-phone-number-hashes',
+      Effect.gen(function* (_) {
+        yield* _(migratePhoneNumberHashes, Effect.forkDaemon)
+
+        return HttpServerResponse.text('ok', {status: 200})
+      })
+    ),
+    HttpRouter.post(
+      '/test-hashing-speed',
+      Effect.gen(function* (_) {
+        const body = yield* _(
+          HttpServerRequest.schemaBodyJson(
+            Schema.Struct({
+              iterations: Schema.Number,
+              numberOfElements: Schema.Number,
+            })
+          )
+        )
+        const durationMs = yield* _(
+          testHasingSpeed(body.iterations, body.numberOfElements)
+        )
+
+        return yield* _(HttpServerResponse.json({durationMs}, {status: 200}))
       })
     )
   ),

@@ -7,6 +7,7 @@ import {Array, Effect, pipe, Schema} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult} from '../../db/ContactDbService/queries/createFindFirstLevelContactsPublicKeysByHashFromPaginated'
 import {UserDbService} from '../../db/UserDbService'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
 const DEFAULT_LAST_USER_ID = 0
 
@@ -21,7 +22,10 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
   'fetchMyContactsPaginated',
   (req) =>
     Effect.gen(function* (_) {
-      const security = yield* _(CurrentSecurity)
+      const security = yield* _(
+        CurrentSecurity,
+        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+      )
       const contactDb = yield* _(ContactDbService)
 
       yield* _(
@@ -30,7 +34,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
           userDb.updateAppSourceForUser({
             appSource: req.headers.appSourceOrNone,
             publicKey: security['public-key'],
-            hash: security.hash,
+            hash: security.serverHash,
           })
         )
       )
@@ -51,12 +55,12 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
           dbEffectToRun: ({limit, decodedNextPageToken}) =>
             req.urlParams.level === 'FIRST'
               ? contactDb.findFirstLevelContactsPublicKeysByHashFromPaginated({
-                  hashFrom: security.hash,
+                  hashFrom: security.serverHash,
                   limit,
                   userId: decodedNextPageToken?.userId,
                 })
               : contactDb.findSecondLevelContactsPublicKeysByHashFromPaginated({
-                  hashFrom: security.hash,
+                  hashFrom: security.serverHash,
                   limit,
                   userId: decodedNextPageToken?.userId,
                 }),

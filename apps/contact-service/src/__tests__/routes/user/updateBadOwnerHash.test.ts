@@ -26,12 +26,18 @@ import {
 } from '@vexl-next/server-utils/src/generateUserAuthData'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  serverHashPhoneNumber,
+  type ServerHashedNumber,
+} from '../../../utils/serverHashContact'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
 
 let oldHash: HashedPhoneNumber
+let oldServerHash: ServerHashedNumber
 let newHash: HashedPhoneNumber
+let newServerHash: ServerHashedNumber
 let authHeadersOld: {
   'public-key': PublicKeyPemBase64
   signature: EcdsaSignature
@@ -53,7 +59,7 @@ const queryContactsOldHash = SqlClient.SqlClient.pipe(
       FROM
         user_contact
       WHERE
-        hash_from = ${oldHash}
+        hash_from = ${oldServerHash}
     `
   )
 )
@@ -66,7 +72,7 @@ const queryContactsNewHash = SqlClient.SqlClient.pipe(
       FROM
         user_contact
       WHERE
-        hash_from = ${newHash}
+        hash_from = ${newServerHash}
     `
   )
 )
@@ -79,7 +85,7 @@ const queryOldUser = SqlClient.SqlClient.pipe(
       FROM
         users
       WHERE
-        hash = ${oldHash}
+        hash = ${oldServerHash}
     `
   )
 )
@@ -92,7 +98,7 @@ const queryNewUser = SqlClient.SqlClient.pipe(
       FROM
         users
       WHERE
-        hash = ${newHash}
+        hash = ${newServerHash}
     `
   )
 )
@@ -116,11 +122,15 @@ beforeEach(async () => {
         Effect.flatMap(Schema.decode(HashedPhoneNumberE))
       )
 
+      oldServerHash = yield* _(serverHashPhoneNumber(oldHash))
+
       newHash = yield* _(
         cryptoConfig.hmacKey,
         Effect.flatMap((hash) => hmacSignE(hash)(phoneNumber)),
         Effect.flatMap(Schema.decode(HashedPhoneNumberE))
       )
+
+      newServerHash = yield* _(serverHashPhoneNumber(newHash))
 
       authHeadersOld = {
         'public-key': keys.publicKeyPemBase64,

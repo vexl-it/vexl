@@ -1,0 +1,297 @@
+import {SqlSchema} from '@effect/sql/index'
+import {SqlClient} from '@effect/sql/SqlClient'
+import {type SqlError} from '@effect/sql/SqlError'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {
+  type HashedPhoneNumber,
+  HashedPhoneNumberE,
+} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
+import {type ConfigError} from 'effect/ConfigError'
+import {Array, Effect, Option, pipe, Schema} from 'effect/index'
+import {type ParseError} from 'effect/ParseResult'
+import {ContactRecordId} from '../../db/ContactDbService/domain'
+import {UserRecordId} from '../../db/UserDbService/domain'
+import {
+  ServerHashedNumber,
+  serverHashPhoneNumber,
+} from '../../utils/serverHashContact'
+
+const transformUsersChunk = (
+  chunk: ReadonlyArray<{id: UserRecordId; hash: HashedPhoneNumber}>
+): Effect.Effect<
+  ReadonlyArray<{
+    id: UserRecordId
+    oldHash: HashedPhoneNumber
+    newHash: ServerHashedNumber
+  }>,
+  CryptoError | ConfigError | UnexpectedServerError
+> =>
+  pipe(
+    chunk,
+    Array.map((originalRecord) =>
+      pipe(
+        serverHashPhoneNumber(originalRecord.hash),
+        Effect.map((serverHash) => ({
+          id: originalRecord.id,
+          newHash: serverHash,
+          oldHash: originalRecord.hash,
+        }))
+      )
+    ),
+    Effect.allWith({concurrency: 'unbounded'}),
+    Effect.withSpan('transformUsersChunk')
+  )
+
+const replaceUserHashesInDb =
+  (sql: SqlClient) =>
+  (
+    chunk: ReadonlyArray<{
+      oldHash: HashedPhoneNumber
+      newHash: ServerHashedNumber
+    }>
+  ): Effect.Effect<void, SqlError> =>
+    pipe(
+      chunk,
+      Array.map((one) =>
+        Effect.zip(
+          sql`
+            UPDATE users
+            SET
+              hash = ${one.newHash}
+            WHERE
+              hash = ${one.oldHash}
+          `,
+          sql`
+            UPDATE user_contact
+            SET
+              hash_from = ${one.newHash}
+            WHERE
+              hash_from = ${one.oldHash}
+          `
+        )
+      ),
+      Effect.allWith({concurrency: 'unbounded'}),
+      Effect.zipLeft(Effect.void),
+      Effect.withSpan('replaceUserHashesInDb')
+    )
+
+const migrateUsers = (
+  sql: SqlClient
+): Effect.Effect<
+  void,
+  CryptoError | ConfigError | UnexpectedServerError | SqlError | ParseError
+> => {
+  const getAllContacts = SqlSchema.findAll({
+    execute: (req) => sql`
+      SELECT
+        id,
+        hash
+      FROM
+        users
+      WHERE
+        id > ${req.lastFetchedId ?? 0}
+      ORDER BY
+        id ASC
+      LIMIT
+        ${req.limit}
+    `,
+    Request: Schema.Struct({
+      lastFetchedId: Schema.optionalWith(UserRecordId, {
+        as: 'Option',
+      }),
+      limit: Schema.Number,
+    }),
+    Result: Schema.Struct({
+      id: UserRecordId,
+      hash: HashedPhoneNumberE,
+    }),
+  })
+
+  return Effect.gen(function* (_) {
+    let lastFetchedId: Option.Option<UserRecordId> = Option.none()
+    while (true) {
+      yield* _(Effect.logInfo('Fetching next chunk'))
+      const chunk = yield* _(
+        getAllContacts({
+          lastFetchedId,
+          limit: 1000,
+        })
+      )
+
+      yield* _(
+        Effect.logInfo(
+          `Fetched ${chunk.length} records. Running transformation and updating Db`
+        )
+      )
+      yield* _(
+        transformUsersChunk(chunk),
+        Effect.flatMap(replaceUserHashesInDb(sql))
+      )
+
+      lastFetchedId = pipe(
+        Array.last(chunk),
+        Option.map((c) => c.id)
+      )
+      Effect.log('Done processing chunk')
+      if (Option.isNone(lastFetchedId)) break
+    }
+  }).pipe(Effect.withSpan('migrateUsers'))
+}
+
+const transformContactsChunks = (
+  chunk: ReadonlyArray<{
+    id: ContactRecordId
+    hashFrom: ServerHashedNumber
+    hashTo: HashedPhoneNumber
+  }>
+): Effect.Effect<
+  ReadonlyArray<{
+    id: ContactRecordId
+    hashFrom: ServerHashedNumber
+    hashToOld: HashedPhoneNumber
+    hashToNew: ServerHashedNumber
+  }>,
+  CryptoError | ConfigError | UnexpectedServerError
+> =>
+  pipe(
+    chunk,
+    Array.map((originalRecord) =>
+      pipe(
+        serverHashPhoneNumber(originalRecord.hashTo),
+        Effect.map((hashToNew) => ({
+          id: originalRecord.id,
+          hashFrom: originalRecord.hashFrom,
+          hashToOld: originalRecord.hashTo,
+          hashToNew,
+        }))
+      )
+    ),
+    Effect.allWith({concurrency: 'unbounded'}),
+    Effect.withSpan('transformContactsChunk')
+  )
+
+const replaceContactHashesInDb =
+  (sql: SqlClient) =>
+  (
+    chunk: ReadonlyArray<{
+      id: ContactRecordId
+      hashToOld: HashedPhoneNumber
+      hashToNew: ServerHashedNumber
+    }>
+  ): Effect.Effect<void, SqlError> =>
+    pipe(
+      chunk,
+      Array.map(
+        (one) => sql`
+          UPDATE user_contact
+          SET
+            hash_to = ${one.hashToNew}
+          WHERE
+            id = ${one.id}
+            -- For safety, ensure we only update if the old hash matches
+            AND hash_to = ${one.hashToOld}
+        `
+      ),
+      Effect.allWith({concurrency: 'unbounded'}),
+      Effect.withSpan('replaceContactHashesInDb')
+    )
+
+const migrateUserContacts = (
+  sql: SqlClient
+): Effect.Effect<
+  void,
+  ConfigError | UnexpectedServerError | SqlError | CryptoError | ParseError
+> => {
+  const fetchUserContactsChunk = SqlSchema.findAll({
+    execute: (req) => sql`
+      SELECT
+        hash_from,
+        hash_to,
+        id
+      FROM
+        user_contact
+      WHERE
+        id > ${req.lastFetchedId ?? 0}
+      ORDER BY
+        id ASC
+      LIMIT
+        ${req.limit}
+    `,
+    Request: Schema.Struct({
+      lastFetchedId: Schema.optionalWith(ContactRecordId, {as: 'Option'}),
+      limit: Schema.Number,
+    }),
+    Result: Schema.Struct({
+      id: ContactRecordId,
+      hashFrom: ServerHashedNumber,
+      hashTo: HashedPhoneNumberE,
+    }),
+  })
+  return Effect.gen(function* (_) {
+    let lastFetchedId: Option.Option<ContactRecordId> = Option.none()
+    while (true) {
+      yield* _(Effect.logInfo('Fetching next chunk'))
+      const chunk = yield* _(
+        fetchUserContactsChunk({
+          lastFetchedId,
+          limit: 1000,
+        })
+      )
+
+      yield* _(
+        Effect.logInfo(
+          `Fetched ${chunk.length} user contacts. Running transformation and updating Db`
+        )
+      )
+      yield* _(
+        transformContactsChunks(chunk),
+        Effect.flatMap(replaceContactHashesInDb(sql))
+      )
+
+      lastFetchedId = pipe(
+        Array.last(chunk),
+        Option.map((c) => c.id)
+      )
+      Effect.log('Done processing user contacts chunk')
+      if (Option.isNone(lastFetchedId)) {
+        break
+      }
+    }
+  }).pipe(Effect.withSpan('migrateContacts'))
+}
+
+export const migratePhoneNumberHashes = Effect.flatMap(SqlClient, (sql) =>
+  Effect.gen(function* (_) {
+    yield* _(Effect.logInfo('Starting contact DB migration...'))
+
+    // two tables: users(id, hash) and contact
+    yield* _(
+      Effect.logInfo(
+        'First modifying users table and user_contact(hash_from) records!'
+      )
+    )
+    yield* _(migrateUsers(sql))
+    yield* _(
+      Effect.logInfo(
+        'First step done! Now updating user_contact(hash_to) records!'
+      )
+    )
+    yield* _(Effect.logInfo('Modifying user_contact(hash_to) records'))
+    yield* _(migrateUserContacts(sql))
+
+    yield* _(Effect.logInfo('Contact DB migration completed'))
+  }).pipe(
+    sql.withTransaction,
+    withRedisLock('migratePhoneNumberHashes', '30 minutes'),
+    Effect.mapError(
+      (e) =>
+        new UnexpectedServerError({
+          cause: e,
+          message: 'Error during contact DB migration',
+        })
+    ),
+    Effect.withSpan('migratePhoneNumberHashes')
+  )
+)

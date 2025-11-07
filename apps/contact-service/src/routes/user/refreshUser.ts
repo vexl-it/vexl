@@ -6,6 +6,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserRefresh} from '../../metrics'
+import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
 export const refreshUser = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -14,11 +15,14 @@ export const refreshUser = HttpApiBuilder.handler(
   (req) =>
     Effect.gen(function* (_) {
       yield* _(reportUserRefresh())
-      const security = yield* _(CurrentSecurity)
+      const security = yield* _(
+        CurrentSecurity,
+        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+      )
       const userDb = yield* _(UserDbService)
       yield* _(
         userDb.findUserByPublicKeyAndHash({
-          hash: security.hash,
+          hash: security.serverHash,
           publicKey: security['public-key'],
         }),
         Effect.flatten,
@@ -30,7 +34,7 @@ export const refreshUser = HttpApiBuilder.handler(
       yield* _(
         userDb.updateRefreshUser({
           publicKey: security['public-key'],
-          hash: security.hash,
+          hash: security.serverHash,
           clientVersion: req.headers.clientVersionOrNone,
           countryPrefix: req.payload.countryPrefix,
           appSource: req.headers.appSourceOrNone,

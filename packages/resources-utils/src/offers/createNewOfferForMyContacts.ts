@@ -5,6 +5,7 @@ import {
   type ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
 import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   generateAdminId,
   type IntendedConnectionLevel,
@@ -14,9 +15,10 @@ import {
   type OfferPublicPart,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
+import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect} from 'effect'
+import {Effect, type HashMap} from 'effect'
 import decryptOffer, {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -59,6 +61,7 @@ export default function createNewOfferForMyContacts({
   onProgress,
   intendedClubs,
   offerId,
+  serverToClientHashesToHashedPhoneNumbersMap,
   adminId: existingAdminId,
 }: {
   offerApi: OfferApi
@@ -70,6 +73,10 @@ export default function createNewOfferForMyContacts({
   intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: (status: OfferEncryptionProgress) => void
   offerId?: OfferId
+  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+    ServerToClientHashedNumber,
+    HashedPhoneNumber
+  >
   adminId?: OfferAdminId
 }): Effect.Effect<
   CreateOfferResult,
@@ -102,6 +109,7 @@ export default function createNewOfferForMyContacts({
         contactApi,
         ownerCredentials: ownerKeyPair,
         intendedClubs,
+        serverToClientHashesToHashedPhoneNumbersMap,
         onProgress,
         adminId,
       })

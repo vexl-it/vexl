@@ -1,5 +1,6 @@
 import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Array, HashMap, Option} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -30,11 +31,13 @@ const commonConnectionsCountAtom = atom((get) => {
   const connectionState = get(connectionStateAtom)
 
   if (chat.chat.origin.type === 'myOffer')
-    return (
-      connectionState.commonFriends.commonContacts.find(
-        (contact) => contact.publicKey === chat.chat.otherSide.publicKey
-      )?.common.hashes ?? []
-    ).length
+    return HashMap.get(
+      connectionState.commonFriends,
+      chat.chat.otherSide.publicKey
+    ).pipe(
+      Option.getOrElse(() => []),
+      Array.length
+    )
 
   if (chat.chat.origin.type === 'theirOffer')
     return (chat.chat.origin?.offer?.offerInfo.privatePart.commonFriends ?? [])

@@ -3,18 +3,20 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type CommonConnectionsForUser} from '@vexl-next/domain/src/general/contacts'
+import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
+import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, pipe, Record} from 'effect'
+import {Array, Effect, flow, HashMap, pipe, Record} from 'effect'
 
 export const FETCH_CONNECTIONS_PAGE_SIZE = 500
 
 export interface ConnectionsInfoForOffer {
   firstDegreeConnections: PublicKeyPemBase64[]
   secondDegreeConnections: PublicKeyPemBase64[]
-  commonFriends: readonly CommonConnectionsForUser[]
+  commonFriends: CommonConnectionsForUsers
   clubsConnections: Record<ClubUuid, readonly PublicKeyPemBase64[]>
 }
 
@@ -26,9 +28,14 @@ export default function fetchContactsForOffer({
   contactApi,
   intendedConnectionLevel,
   intendedClubs,
+  serverToClientHashesToHashedPhoneNumbersMap,
 }: {
   contactApi: ContactApi
   intendedConnectionLevel: IntendedConnectionLevel
+  serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
+    ServerToClientHashedNumber,
+    HashedPhoneNumber
+  >
   intendedClubs: Record<ClubUuid, PrivateKeyHolder>
 }): Effect.Effect<ConnectionsInfoForOffer, ApiErrorFetchingContactsForOffer> {
   return Effect.gen(function* (_) {
@@ -70,7 +77,21 @@ export default function fetchContactsForOffer({
             nextPageToken,
             limit: FETCH_CONNECTIONS_PAGE_SIZE,
           }),
-      })
+      }),
+      Effect.map(
+        flow(
+          Array.map(
+            (one) =>
+              [
+                one.publicKey,
+                Array.filterMap(one.common.hashes, (hash) =>
+                  HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+                ),
+              ] as const
+          ),
+          HashMap.fromIterable
+        )
+      )
     )
 
     const clubsConnections = yield* _(

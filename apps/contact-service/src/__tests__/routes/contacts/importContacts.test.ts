@@ -89,7 +89,7 @@ describe('Import contacts', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${me.hashedNumber}
+            hash_from = ${me.serverHashedNumber}
         `)
 
         expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
@@ -111,7 +111,7 @@ describe('Import contacts', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${me.hashedNumber}
+            hash_from = ${me.serverHashedNumber}
         `)
 
         expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
@@ -134,7 +134,7 @@ describe('Import contacts', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${me.hashedNumber}
+            hash_from = ${me.serverHashedNumber}
         `)
 
         expect(myOldContactsFromDb).toHaveLength(networkOne.length - 1)
@@ -156,7 +156,7 @@ describe('Import contacts', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${me.hashedNumber}
+            hash_from = ${me.serverHashedNumber}
         `)
 
         expect(mockedReportContactsImported).toHaveBeenCalledTimes(1)
@@ -197,7 +197,7 @@ describe('Import contacts', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${me.hashedNumber}
+            hash_from = ${me.serverHashedNumber}
         `)
 
         expect(myContactsFromDb).toHaveLength(2)
@@ -226,7 +226,7 @@ describe('Import contacts', () => {
       Effect.gen(function* (_) {
         const redis = yield* _(RedisService)
         const me = yield* _(generateKeysAndHasheForNumber('+420733222222'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
         yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
 
@@ -294,7 +294,7 @@ describe('Import contacts', () => {
       Effect.gen(function* (_) {
         const redis = yield* _(RedisService)
         const me = yield* _(generateKeysAndHasheForNumber('+420733111111'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
         yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
 
@@ -364,7 +364,7 @@ describe('Import contacts', () => {
       Effect.gen(function* (_) {
         const redis = yield* _(RedisService)
         const me = yield* _(generateKeysAndHasheForNumber('+420733333333'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
         const sql = yield* _(SqlClient.SqlClient)
 
         yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
@@ -515,7 +515,7 @@ describe('Import contacts', () => {
       Effect.gen(function* (_) {
         const redis = yield* _(RedisService)
         const me = yield* _(generateKeysAndHasheForNumber('+420733444444'))
-        const quotaRecordKey = createQuotaRecordKey(me.hashedNumber)
+        const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
 
         yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
 
@@ -593,6 +593,73 @@ describe('Import contacts', () => {
         )
 
         expect(secondSuccessResponse._tag).toEqual('Right')
+      })
+    )
+  })
+
+  it('Should return proper phoneNumberHashesToServerClientHash lookup table', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const redis = yield* _(RedisService)
+        const me = yield* _(generateKeysAndHasheForNumber('+420733111111'))
+        const quotaRecordKey = createQuotaRecordKey(me.serverHashedNumber)
+
+        yield* _(redis.set(ImportContactsQuotaRecord)(quotaRecordKey, 0))
+
+        const contactsToImport = yield* _(
+          Effect.all([
+            generateKeysAndHasheForNumber('+420733333006'),
+            generateKeysAndHasheForNumber('+420733333007'),
+            generateKeysAndHasheForNumber('+420733333008'),
+            generateKeysAndHasheForNumber('+420733333009'),
+            generateKeysAndHasheForNumber('+420733333010'),
+            generateKeysAndHasheForNumber('+420733333011'),
+            generateKeysAndHasheForNumber('+420733333012'),
+            generateKeysAndHasheForNumber('+420733333013'),
+            generateKeysAndHasheForNumber('+420733333014'),
+            generateKeysAndHasheForNumber('+420733333015'),
+            generateKeysAndHasheForNumber('+420733333016'),
+            generateKeysAndHasheForNumber('+420733333017'),
+          ])
+        )
+        const app = yield* _(NodeTestingApp)
+
+        const commonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+        })
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(
+          app.User.createUser({
+            headers: commonHeaders,
+            payload: {
+              firebaseToken: null,
+              expoToken: me.notificationToken,
+            },
+          })
+        )
+
+        const response = yield* _(
+          app.Contact.importContacts({
+            payload: {
+              contacts: contactsToImport.map((c) => c.hashedNumber),
+              replace: true,
+            },
+          })
+        )
+
+        const expectedLookupTable = pipe(
+          contactsToImport,
+          Array.map((c) => ({
+            hashedNumber: c.hashedNumber,
+            serverToClientHash: c.serverHashedNumberForClient,
+          }))
+        )
+
+        expect(response.phoneNumberHashesToServerToClientHash).toEqual(
+          expectedLookupTable
+        )
       })
     )
   })

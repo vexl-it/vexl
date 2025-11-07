@@ -6,6 +6,10 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Array, Effect, pipe, Schema} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindCommonFriendsPaginatedResult} from '../../db/ContactDbService/queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
+import {
+  hashForClientBatch,
+  serverHashPhoneNumber,
+} from '../../utils/serverHashContact'
 
 const DEFAULT_LAST_USER_CONTACT_ID = 0
 
@@ -19,7 +23,10 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
   'fetchCommonConnectionsPaginated',
   (req) =>
     Effect.gen(function* (_) {
-      const security = yield* _(CurrentSecurity)
+      const security = yield* _(
+        CurrentSecurity,
+        Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
+      )
       const contactDb = yield* _(ContactDbService)
       const pubKeysToLookFor = pipe(
         req.payload.publicKeys,
@@ -42,7 +49,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
           }),
           dbEffectToRun: ({limit, decodedNextPageToken}) =>
             contactDb.findCommonFriendsPaginated({
-              ownerHash: security.hash,
+              ownerHash: security.serverHash,
               publicKeys: pubKeysToLookFor,
               limit,
               userContactId: decodedNextPageToken?.lastUserContactId,
@@ -50,12 +57,23 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
         })
       )
 
+      const commonFriendsWithClientHash = yield* _(
+        toReturn.items,
+        Array.map((oneContact) =>
+          pipe(
+            hashForClientBatch(oneContact.commonFriends),
+            Effect.map((hashes) => ({
+              publicKey: oneContact.publicKey,
+              common: {hashes},
+            }))
+          )
+        ),
+        Effect.allWith({concurrency: 'unbounded'})
+      )
+
       return {
         ...toReturn,
-        items: Array.map(toReturn.items, (oneContact: any) => ({
-          publicKey: oneContact.publicKey,
-          common: {hashes: oneContact.commonFriends},
-        })),
+        items: commonFriendsWithClientHash,
       }
     }).pipe(makeEndpointEffect)
 )

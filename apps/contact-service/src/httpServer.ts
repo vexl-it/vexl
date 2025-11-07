@@ -51,6 +51,7 @@ import {addUserToTheClub} from './routes/clubs/moderator/addUserToTheClub'
 import {deactivateClubJoinLink} from './routes/clubs/moderator/deactivateClubJoinLink'
 import {generateClubJoinLink} from './routes/clubs/moderator/generateClubJoinLink'
 import {listClubLinks} from './routes/clubs/moderator/listClubLinks'
+import {convertPhoneNumberHashesToServerHashes} from './routes/contacts/convertPhoneNumberHashesToServerHashes'
 import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchCommonConnectionsPaginated} from './routes/contacts/fetchCommonConnectionsPaginated'
 import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
@@ -96,6 +97,10 @@ const ContactApiGroupLive = HttpApiBuilder.group(
       .handle(
         'fetchCommonConnectionsPaginated',
         fetchCommonConnectionsPaginated
+      )
+      .handle(
+        'convertPhoneNumberHashesToServerHashes',
+        convertPhoneNumberHashesToServerHashes
       )
 )
 

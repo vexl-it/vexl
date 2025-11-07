@@ -147,11 +147,15 @@ const importContactActionAtom = atom(
 
       set(loadingOverlayDisplayedAtom, true)
 
-      yield* _(
+      const response = yield* _(
         contactApi.importContacts({
           contacts: [newContact.computedValues.hash],
           replace: false,
         })
+      )
+      const contactServerHash = Array.findFirst(
+        response.phoneNumberHashesToServerToClientHash,
+        (one) => one.hashedNumber === newContact.computedValues.hash
       )
 
       set(storedContactsAtom, (prev) => [
@@ -164,6 +168,7 @@ const importContactActionAtom = atom(
         ),
         {
           ...newContact,
+          contactServerHash,
           computedValues: Option.some(newContact.computedValues),
           flags: {...newContact.flags, imported: true},
         },
@@ -300,6 +305,7 @@ export const addContactWithUiFeedbackActionAtom = atom(
         })
       : set(createContactWithUiFeedbackActionAtom, {
           ...newContact,
+          serverHashToClient: Option.none(),
           flags: {
             seen: true,
             imported: false,

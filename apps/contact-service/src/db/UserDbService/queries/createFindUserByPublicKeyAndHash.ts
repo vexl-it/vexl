@@ -2,8 +2,8 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Effect, flow, Schema} from 'effect'
+import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {UserRecord} from '../domain'
 
 export const createFindUserbyPublicKeyAndHash = Effect.gen(function* (_) {
@@ -11,7 +11,7 @@ export const createFindUserbyPublicKeyAndHash = Effect.gen(function* (_) {
 
   const query = SqlSchema.findOne({
     Request: Schema.Struct({
-      hash: HashedPhoneNumberE,
+      hash: ServerHashedNumber,
       publicKey: PublicKeyPemBase64E,
     }),
     Result: UserRecord,

@@ -1,9 +1,9 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Context, Effect, Layer, type Option} from 'effect'
+import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type NotificationTokens, type UserRecord} from './domain'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
 import {createFindFirebaseTokensOfInactiveUsers} from './queries/createFindFirebaseTokensOfInactiveUsers'
@@ -61,11 +61,11 @@ export interface UserDbOperations {
   ) => Effect.Effect<UserRecord, UnexpectedServerError>
 
   findUserByHash: (
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
   ) => Effect.Effect<Option.Option<UserRecord>, UnexpectedServerError>
 
   findUserByPublicKeyAndHash: (args: {
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
     publicKey: PublicKeyPemBase64
   }) => Effect.Effect<Option.Option<UserRecord>, UnexpectedServerError>
 
@@ -93,7 +93,7 @@ export interface UserDbOperations {
 
   deleteUserByPublicKeyAndHash: (args: {
     publicKey: PublicKeyPemBase64
-    hash: HashedPhoneNumber
+    hash: ServerHashedNumber
   }) => Effect.Effect<void, UnexpectedServerError>
 
   updateRefreshUser: (

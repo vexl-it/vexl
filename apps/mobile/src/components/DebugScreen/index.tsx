@@ -10,7 +10,14 @@ import {
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
-import {Array, Effect, pipe as effectPipe, Either, Schema} from 'effect'
+import {
+  Array,
+  Effect,
+  pipe as effectPipe,
+  Either,
+  HashMap,
+  Schema,
+} from 'effect'
 import * as BackgroundTask from 'expo-background-task'
 import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
@@ -742,7 +749,7 @@ function DebugScreen(): React.ReactElement {
                   ),
                   firstLevel: [],
                   secondLevel: [],
-                  commonFriends: {commonContacts: []},
+                  commonFriends: HashMap.empty(),
                 })
                 Alert.alert('Done')
               }}

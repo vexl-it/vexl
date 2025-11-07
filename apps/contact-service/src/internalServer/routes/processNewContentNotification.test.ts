@@ -41,7 +41,10 @@ describe('process new content notification', () => {
             refreshed_at = now() - interval '4 days',
             last_new_content_notification_sent_at = now() - interval '4 days'
           WHERE
-            ${sql.in('hash', [user1.hashedNumber, user2.hashedNumber])}
+            ${sql.in('hash', [
+            user1.serverHashedNumber,
+            user2.serverHashedNumber,
+          ])}
         `)
 
         yield* _(sql`
@@ -50,7 +53,7 @@ describe('process new content notification', () => {
             refreshed_at = now() - interval '3 days',
             last_new_content_notification_sent_at = now() - interval '3 days'
           WHERE
-            hash = ${user3.hashedNumber}
+            hash = ${user3.serverHashedNumber}
         `)
 
         yield* _(processNewContentNotifications)

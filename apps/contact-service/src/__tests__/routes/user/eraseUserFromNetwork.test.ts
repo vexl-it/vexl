@@ -64,11 +64,9 @@ describe('Erase user from network', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${networkOne[0].hashedNumber}
+            hash_from = ${networkOne[0].serverHashedNumber}
         `)
         expect(Number(fr.count)).toBeGreaterThan(0)
-
-        console.log('AHAHAHA', networkOne[0].hashedNumber)
 
         const token = yield* _(
           createShortLivedTokenForErasingUser(networkOne[0].hashedNumber)
@@ -88,7 +86,7 @@ describe('Erase user from network', () => {
           FROM
             user_contact
           WHERE
-            hash_from = ${networkOne[0].hashedNumber}
+            hash_from = ${networkOne[0].serverHashedNumber}
         `)
         expect(Number(fr2.count)).toEqual(0)
 

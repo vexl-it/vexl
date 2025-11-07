@@ -47,7 +47,6 @@ import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
 import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
-import {reachNumberAtom} from '../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../state/contacts/atom/contactsStore'
 import {
   createBtcPriceForCurrencyAtom,
@@ -627,7 +626,6 @@ export const offerFormMolecule = molecule(() => {
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
       const importedContactsCount = get(importedContactsCountAtom)
-      const reachNumber = get(reachNumberAtom)
       const singlePriceActive = get(singlePriceActiveAtom)
 
       if (
@@ -739,10 +737,7 @@ export const offerFormMolecule = molecule(() => {
             )
           }
 
-          if (
-            e._tag === 'PrivatePayloadsConstructionError' &&
-            reachNumber === 0
-          ) {
+          if (e._tag === 'PrivatePayloadsConstructionError') {
             return Effect.zipRight(
               set(askAreYouSureActionAtom, {
                 variant: 'danger',
@@ -754,7 +749,9 @@ export const offerFormMolecule = molecule(() => {
                       image: require('../../../components/images/block.png'),
                     },
                     title: t('offerForm.errorCreatingOffer'),
-                    description: t('offerForm.youCurrentlyHaveNoConnections'),
+                    description: t(
+                      'offerForm.youCurrentlyHaveNoConnectionsForSelectedFriendLevel'
+                    ),
                     positiveButtonText: t('postLoginFlow.importContactsButton'),
                     negativeButtonText: t('clubs.joinNewClub'),
                   },

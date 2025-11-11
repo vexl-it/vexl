@@ -1,5 +1,8 @@
 import {type ContactReveal} from '@vexl-next/domain/src/general/tradeChecklist'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTask,
+  effectToTaskEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -89,7 +92,7 @@ export const revealContactFromQuickActionBannerAtom = atom(
           return T.of(false)
         },
         (r) => {
-          return set(submitTradeChecklistUpdatesActionAtom)()
+          return effectToTask(set(submitTradeChecklistUpdatesActionAtom))
         }
       )
     )()

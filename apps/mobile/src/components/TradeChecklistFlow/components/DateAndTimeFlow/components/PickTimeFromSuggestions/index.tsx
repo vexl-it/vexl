@@ -1,4 +1,5 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Effect} from 'effect/index'
 import {useSetAtom, useStore} from 'jotai'
 import {type DateTime} from 'luxon'
 import React, {useCallback} from 'react'
@@ -64,7 +65,7 @@ function PickTimeFromSuggestions({
     saveDateTimePick({
       dateTime: UnixMilliseconds.parse(selectedItem.data.toMillis()),
     })
-    void submitTradeChecklistUpdates()()
+    void Effect.runPromise(submitTradeChecklistUpdates())
       .then((success) => {
         if (!success) return
         navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))

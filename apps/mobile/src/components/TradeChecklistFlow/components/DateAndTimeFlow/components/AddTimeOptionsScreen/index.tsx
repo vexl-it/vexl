@@ -1,4 +1,7 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTask,
+  effectToTaskEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
@@ -91,7 +94,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
               T.map(() => {
                 showLoadingOverlay(true)
               }),
-              T.chain(submitTradeChecklistUpdates),
+              T.chain(() => effectToTask(submitTradeChecklistUpdates())),
               T.map((val) => {
                 showLoadingOverlay(false)
                 return val

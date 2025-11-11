@@ -717,10 +717,6 @@ export const offerFormMolecule = molecule(() => {
                 steps: [
                   {
                     type: 'StepWithText',
-                    imageSource: {
-                      type: 'requiredImage',
-                      image: require('../../../components/images/block.png'),
-                    },
                     title: t('offerForm.errorCreatingOffer'),
                     description: t('offerForm.seemsYouHaveReachNoVexlers'),
                     positiveButtonText: t('common.close'),
@@ -738,10 +734,6 @@ export const offerFormMolecule = molecule(() => {
                 steps: [
                   {
                     type: 'StepWithText',
-                    imageSource: {
-                      type: 'requiredImage',
-                      image: require('../../../components/images/block.png'),
-                    },
                     title: t('offerForm.errorCreatingOffer'),
                     description: t(
                       'offerForm.youCurrentlyHaveNoConnectionsForSelectedFriendLevel'
@@ -754,7 +746,14 @@ export const offerFormMolecule = molecule(() => {
                 Effect.match({
                   onSuccess() {
                     if (navigationRef.isReady()) {
-                      navigationRef.navigate('SetContacts')
+                      navigationRef.reset({
+                        index: 0,
+                        routes: [
+                          {
+                            name: 'SetContacts',
+                          },
+                        ],
+                      })
                     }
                   },
                   onFailure(error) {

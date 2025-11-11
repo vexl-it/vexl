@@ -1,4 +1,5 @@
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
+import {Effect} from 'effect/index'
 import {useSetAtom, useStore} from 'jotai'
 import React, {useMemo, useState} from 'react'
 import {YStack} from 'tamagui'
@@ -64,7 +65,7 @@ export default function LocationMapSelect({
       navigation.navigate('AgreeOnTradeDetails')
     } else {
       showLoadingOverlay(true)
-      void submitTradeChecklistUpdates()()
+      void Effect.runPromise(submitTradeChecklistUpdates())
         .then((success) => {
           if (!success) return
           navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))

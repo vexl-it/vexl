@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {Stack} from 'tamagui'
@@ -50,7 +51,7 @@ function NetworkScreen({
     saveLocalNetworkStateToMainState()
     if (shouldNavigateBackToChatOnSave) {
       showLoadingOverlay(true)
-      void submitTradeChecklistUpdates()()
+      void Effect.runPromise(submitTradeChecklistUpdates())
         .then((success) => {
           if (!success) return
           navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))

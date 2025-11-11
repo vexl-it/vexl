@@ -152,10 +152,6 @@ export const submitCodeToJoinClubActionAtom = atom(
               steps: [
                 {
                   type: 'StepWithText',
-                  imageSource: {
-                    type: 'requiredImage',
-                    image: require('../../../components/images/block.png'),
-                  },
                   title: t('clubs.joiningUnsucessful'),
                   description,
                   positiveButtonText: t('common.close'),

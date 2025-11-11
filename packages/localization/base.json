@@ -100,6 +100,7 @@
   "common.share": "Share",
   "common.marketingEmailAddress": "marketing@vexl.it",
   "common.somethingWentWrong": "Something went wrong",
+  "common.somethingWentWrongDescription": "We encountered an unexpected error. Please copy the error details and contact our support team for assistance.",
   "common.openSettings": "Open settings",
   "common.createOffer": "Create offer",
   "currency.AED": "United Arab Emirates Dirham",

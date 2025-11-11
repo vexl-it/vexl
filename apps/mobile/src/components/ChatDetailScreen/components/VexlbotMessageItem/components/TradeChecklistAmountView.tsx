@@ -1,13 +1,14 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
+import {andThenExpectBooleanNoErrors} from '../../../../../utils/andThenExpectNoErrors'
 import {
   getCurrentLocale,
   useTranslation,
@@ -108,9 +109,11 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     if (amountData.received) {
       showLoadingOverlay(true)
       addAmount(amountData?.received)
-      void submitTradeChecklistUpdates()().finally(() => {
-        showLoadingOverlay(false)
-      })
+      void Effect.runPromise(
+        andThenExpectBooleanNoErrors((success) => {
+          showLoadingOverlay(false)
+        })(submitTradeChecklistUpdates())
+      )
     }
   }, [
     addAmount,

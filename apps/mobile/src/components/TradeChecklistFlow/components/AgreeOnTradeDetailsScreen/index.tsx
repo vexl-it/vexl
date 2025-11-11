@@ -1,9 +1,11 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
   PrimaryFooterButtonProxy,
@@ -76,14 +78,16 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
             : t('tradeChecklist.acknowledgeAndContinue')
         }
         onPress={() => {
-          void submitChangesAndSendMessage()().then((success) => {
-            if (success) {
-              navigation.navigate(
-                'ChatDetail',
-                store.get(fromChatAtoms.chatWithMessagesKeys)
-              )
-            }
-          })
+          void Effect.runPromise(
+            andThenExpectBooleanNoErrors((success) => {
+              if (success) {
+                navigation.navigate(
+                  'ChatDetail',
+                  store.get(fromChatAtoms.chatWithMessagesKeys)
+                )
+              }
+            })(submitChangesAndSendMessage())
+          )
         }}
       />
     </Stack>

@@ -1,3 +1,4 @@
+import Clipboard from '@react-native-clipboard/clipboard'
 import {
   type AmountData,
   type ContactReveal,
@@ -9,7 +10,7 @@ import {
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {pipe} from 'effect'
+import {Effect, pipe} from 'effect'
 import {deepEqual} from 'fast-equals'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -25,8 +26,6 @@ import {
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
-import showErrorAlert from '../../../utils/showErrorAlert'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {availableDateTimesAtom} from '../components/DateAndTimeFlow/atoms'
@@ -193,10 +192,9 @@ export const addMeetingLocationActionAtom = atom(
   }
 )
 
-export const submitTradeChecklistUpdatesActionAtom = atom(
-  null,
-  (get, set): T.Task<boolean> => {
-    const {t} = get(translationAtom)
+export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
+  const {t} = get(translationAtom)
+  return Effect.gen(function* (_) {
     const submitTradeChecklistUpdateAtom =
       createSubmitChecklistUpdateActionAtom(chatWithMessagesAtom)
 
@@ -209,42 +207,47 @@ export const submitTradeChecklistUpdatesActionAtom = atom(
         t('tradeChecklist.cannotSendMessages'),
         t('tradeChecklist.cannotSendMessagesDescription')
       )
-      return T.of(false)
+      return false
     }
 
-    if (Object.keys(get(updatesToBeSentAtom)).length === 0) return T.of(true) // No updates to be sent
+    if (Object.keys(get(updatesToBeSentAtom)).length === 0) return true // No updates to be sent
 
     set(loadingOverlayDisplayedAtom, true)
 
-    return pipe(
-      set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
-      effectToTaskEither,
-      TE.match(
-        (e) => {
-          showErrorAlert({
-            title:
-              toCommonErrorMessage(e, get(translationAtom).t) ??
-              t('common.unknownError'),
-            error: e,
-          })
+    yield* _(set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)))
 
-          reportError(
-            'error',
-            new Error('Error submitting trade checklist update'),
-            {e}
-          )
-          return false
-        },
-        () => {
-          set(clearUpdatesToBeSentActionAtom)
+    set(clearUpdatesToBeSentActionAtom)
+    set(loadingOverlayDisplayedAtom, false)
 
-          return true
-        }
-      ),
-      T.map((r) => {
-        set(loadingOverlayDisplayedAtom, false)
-        return r
-      })
-    )
-  }
-)
+    return true
+  }).pipe(
+    Effect.catchAll((e) => {
+      reportError(
+        'error',
+        new Error('Error submitting trade checklist update'),
+        {e}
+      )
+
+      return Effect.zipRight(
+        set(askAreYouSureActionAtom, {
+          variant: 'danger',
+          steps: [
+            {
+              type: 'StepWithText',
+              title: t('common.somethingWentWrong'),
+              description: t('common.somethingWentWrongDescription'),
+              positiveButtonText: t('common.copyErrorToClipboard'),
+              negativeButtonText: t('common.close'),
+            },
+          ],
+        }).pipe(
+          Effect.tap(() => {
+            Clipboard.setString(JSON.stringify(e, null, 2))
+          }),
+          Effect.ignore
+        ),
+        Effect.succeed(false)
+      )
+    })
+  )
+})

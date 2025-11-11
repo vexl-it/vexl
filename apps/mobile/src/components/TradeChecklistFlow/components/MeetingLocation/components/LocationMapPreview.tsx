@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {useSetAtom, useStore} from 'jotai'
 import React from 'react'
 import {XStack, YStack} from 'tamagui'
@@ -46,7 +47,7 @@ export default function LocationMapPreview({
       navigation.navigate('AgreeOnTradeDetails')
     } else {
       showLoadingOverlay(true)
-      void submitTradeChecklistUpdates()()
+      void Effect.runPromise(submitTradeChecklistUpdates())
         .then((success) => {
           if (!success) return
           navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))

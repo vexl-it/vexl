@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
@@ -76,9 +77,11 @@ function CalculateAmountScreen({
         if (success) {
           if (shouldNavigateBackToChatOnSave) {
             showLoadingOverlay(true)
-            void submitTradeChecklistUpdates()().finally(() => {
-              showLoadingOverlay(false)
-            })
+            void Effect.runPromise(submitTradeChecklistUpdates()).finally(
+              () => {
+                showLoadingOverlay(false)
+              }
+            )
             navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
           } else {
             navigation.navigate('AgreeOnTradeDetails')

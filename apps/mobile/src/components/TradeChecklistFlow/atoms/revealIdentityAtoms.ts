@@ -1,5 +1,6 @@
 import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, HashMap, Option} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -92,7 +93,7 @@ export const revealIdentityFromQuickActionBannerAtom = atom(
           return T.of(false)
         },
         (r) => {
-          return set(submitTradeChecklistUpdatesActionAtom)()
+          return effectToTask(set(submitTradeChecklistUpdatesActionAtom))
         }
       )
     )()

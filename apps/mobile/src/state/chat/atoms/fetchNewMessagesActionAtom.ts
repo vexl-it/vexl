@@ -23,7 +23,7 @@ import {
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Effect} from 'effect/index'
+import {Array, Effect, Record} from 'effect/index'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -107,24 +107,30 @@ const handleOtherSideReportedFcmCypher = atom(
       inbox,
     }: {newMessages: readonly ChatMessageWithState[]; inbox: InboxInState}
   ) => {
-    const messagesToReportNewCypherTo = newMessages.filter((one) => {
-      if (
-        one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
-        // We also want to check if other side has the correct cypher when they accept messaging request
-        // since there might have been a delay between sending request and approving and the token might
-        // be outdated - update messages are not sent until the chat is approved by both sides
-        one.message.messageType !== 'APPROVE_MESSAGING'
-      )
-        return false
+    const messagesToReportNewCypherTo = pipe(
+      newMessages,
+      Array.filter((one) => {
+        if (
+          one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
+          // We also want to check if other side has the correct cypher when they accept messaging request
+          // since there might have been a delay between sending request and approving and the token might
+          // be outdated - update messages are not sent until the chat is approved by both sides
+          one.message.messageType !== 'APPROVE_MESSAGING'
+        )
+          return false
 
-      const chatForMessage = findChatForMessage(one.message, inbox)
-      if (!chatForMessage) return false
-      // only chats that have a different cypher than the one reported
-      return (
-        chatForMessage.lastReportedFcmToken?.cypher !==
-        one.message.lastReceivedFcmCypher
-      )
-    })
+        const chatForMessage = findChatForMessage(one.message, inbox)
+        if (!chatForMessage) return false
+        // only chats that have a different cypher than the one reported
+        return (
+          chatForMessage.lastReportedFcmToken?.cypher !==
+          one.message.lastReceivedFcmCypher
+        )
+      }),
+      Array.groupBy((one) => one.message.senderPublicKey),
+      Record.values,
+      Array.filterMap(Array.last)
+    )
 
     messagesToReportNewCypherTo.forEach(
       (oneMessageToRespondWithCurrentVersion) => {

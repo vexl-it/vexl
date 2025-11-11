@@ -52,7 +52,7 @@ function PickTimeFromSuggestions({
         selectItem(item)
       } else {
         saveDateTimePick({dateTime: UnixMilliseconds.parse(item.toMillis())})
-        navigation.navigate('AgreeOnTradeDetails')
+        navigation.popTo('AgreeOnTradeDetails')
       }
     },
     [navigation, saveDateTimePick, selectItem, shouldSendOnSubmit]
@@ -68,7 +68,7 @@ function PickTimeFromSuggestions({
     void Effect.runPromise(submitTradeChecklistUpdates())
       .then((success) => {
         if (!success) return
-        navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+        navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
       })
       .finally(() => {
         showLoadingOverlay(false)

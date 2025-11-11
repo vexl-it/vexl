@@ -9,6 +9,7 @@ import {
   type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, pipe} from 'effect'
 import {deepEqual} from 'fast-equals'
@@ -27,7 +28,7 @@ import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
-import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
+import {withLoadingOverlayAtom} from '../../LoadingOverlayProvider'
 import {availableDateTimesAtom} from '../components/DateAndTimeFlow/atoms'
 
 const UPDATES_TO_BE_SENT_INITIAL_STATE = {}
@@ -212,12 +213,12 @@ export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
 
     if (Object.keys(get(updatesToBeSentAtom)).length === 0) return true // No updates to be sent
 
-    set(loadingOverlayDisplayedAtom, true)
-
-    yield* _(set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)))
+    yield* _(
+      set(submitTradeChecklistUpdateAtom, get(updatesToBeSentAtom)),
+      set(withLoadingOverlayAtom)
+    )
 
     set(clearUpdatesToBeSentActionAtom)
-    set(loadingOverlayDisplayedAtom, false)
 
     return true
   }).pipe(
@@ -241,10 +242,10 @@ export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
             },
           ],
         }).pipe(
-          Effect.tap(() => {
-            Clipboard.setString(JSON.stringify(e, null, 2))
-          }),
-          Effect.ignore
+          mergeToBoolean,
+          Effect.tap((shouldCopyError) => {
+            if (shouldCopyError) Clipboard.setString(JSON.stringify(e, null, 2))
+          })
         ),
         Effect.succeed(false)
       )

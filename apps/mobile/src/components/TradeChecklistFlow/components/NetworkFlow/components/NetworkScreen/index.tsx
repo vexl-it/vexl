@@ -54,13 +54,13 @@ function NetworkScreen({
       void Effect.runPromise(submitTradeChecklistUpdates())
         .then((success) => {
           if (!success) return
-          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+          navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
         })
         .finally(() => {
           showLoadingOverlay(false)
         })
     } else {
-      navigation.navigate('AgreeOnTradeDetails')
+      navigation.popTo('AgreeOnTradeDetails')
     }
   }, [
     saveLocalNetworkStateToMainState,

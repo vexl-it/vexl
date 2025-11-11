@@ -85,7 +85,7 @@ export default function PickDateFromSuggestionsScreen({
       <HeaderProxy
         title={t('tradeChecklist.dateAndTime.screenTitle')}
         onClose={() => {
-          navigation.navigate('AgreeOnTradeDetails')
+          navigation.popTo('AgreeOnTradeDetails')
         }}
       />
       <Content>

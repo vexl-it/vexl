@@ -104,9 +104,9 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
         T.map((success) => {
           if (!success) return
           if (shouldSendOnSubmit) {
-            navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+            navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
           } else {
-            navigation.navigate('AgreeOnTradeDetails')
+            navigation.popTo('AgreeOnTradeDetails')
           }
         })
       )()

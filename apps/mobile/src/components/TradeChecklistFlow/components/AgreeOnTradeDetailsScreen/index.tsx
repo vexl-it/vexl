@@ -56,7 +56,7 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
         onPress={() => {
           void askAreYouSureAndClearUpdatesToBeSent()().then((success) => {
             if (success) {
-              navigation.navigate(
+              navigation.popTo(
                 'ChatDetail',
                 store.get(fromChatAtoms.chatWithMessagesKeys)
               )
@@ -81,7 +81,7 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
           void Effect.runPromise(
             andThenExpectBooleanNoErrors((success) => {
               if (success) {
-                navigation.navigate(
+                navigation.popTo(
                   'ChatDetail',
                   store.get(fromChatAtoms.chatWithMessagesKeys)
                 )

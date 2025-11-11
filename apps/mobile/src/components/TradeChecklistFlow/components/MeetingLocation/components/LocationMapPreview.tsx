@@ -44,13 +44,13 @@ export default function LocationMapPreview({
   function submit(): void {
     stageLocation(selectedLocation)
     if (!submitUpdateOnPick) {
-      navigation.navigate('AgreeOnTradeDetails')
+      navigation.popTo('AgreeOnTradeDetails')
     } else {
       showLoadingOverlay(true)
       void Effect.runPromise(submitTradeChecklistUpdates())
         .then((success) => {
           if (!success) return
-          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+          navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
         })
         .finally(() => {
           showLoadingOverlay(false)

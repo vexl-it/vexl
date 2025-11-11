@@ -82,9 +82,9 @@ function CalculateAmountScreen({
                 showLoadingOverlay(false)
               }
             )
-            navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+            navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
           } else {
-            navigation.navigate('AgreeOnTradeDetails')
+            navigation.popTo('AgreeOnTradeDetails')
           }
         }
       })

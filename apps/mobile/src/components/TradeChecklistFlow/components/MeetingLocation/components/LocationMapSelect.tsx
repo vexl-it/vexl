@@ -62,13 +62,13 @@ export default function LocationMapSelect({
     stageMeetingLocation(toSubmit)
 
     if (!shouldSubmitUpdateOnPick) {
-      navigation.navigate('AgreeOnTradeDetails')
+      navigation.popTo('AgreeOnTradeDetails')
     } else {
       showLoadingOverlay(true)
       void Effect.runPromise(submitTradeChecklistUpdates())
         .then((success) => {
           if (!success) return
-          navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
+          navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
         })
         .finally(() => {
           showLoadingOverlay(false)

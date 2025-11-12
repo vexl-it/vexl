@@ -13,12 +13,12 @@ import {dummyChatWithMessages} from '../../../../state/chat/domain'
 import valueOrDefaultAtom from '../../../../utils/atomUtils/valueOrDefaultAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import reportError from '../../../../utils/reportError'
-import showErrorAlert from '../../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {
   askAreYouSureActionAtom,
   type AreYouSureDialogAtomStepResult,
 } from '../../../AreYouSureDialog'
+import {showErrorAlert} from '../../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../../LoadingOverlayProvider'
 
 export const deleteChatFromListActionAtom = atom(
@@ -78,7 +78,10 @@ export const deleteChatFromListActionAtom = atom(
             })
 
             showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
               error: e,
             })
           }

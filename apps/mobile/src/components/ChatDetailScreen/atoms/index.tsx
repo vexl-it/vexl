@@ -73,10 +73,10 @@ import {
   safeNavigateBackOutsideReact,
 } from '../../../utils/navigation'
 import reportError from '../../../utils/reportError'
-import showErrorAlert, {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
+import {showErrorAlert} from '../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
@@ -397,7 +397,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
           if (e._tag !== 'UserDeclinedError')
             showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
               error: e,
             })
 
@@ -468,7 +471,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           }
 
           showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
             error: e,
           })
           return false
@@ -570,7 +576,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               e,
             })
             showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
               error: e,
             })
             return false
@@ -651,7 +660,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               e,
             })
             showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
               error: e,
             })
             return false
@@ -1075,7 +1087,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               })
 
               showErrorAlert({
-                title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+                title: t('common.somethingWentWrong'),
+                description:
+                  toCommonErrorMessage(e, t) ??
+                  t('common.somethingWentWrongDescription'),
                 error: e,
               })
             }
@@ -1186,14 +1201,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           } else if (result.left._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('offer.otherSideAccountDeleted'))
           } else {
-            yield* _(
-              showErrorAlertE({
-                title:
-                  toCommonErrorMessage(result.left, t) ??
-                  t('common.unknownError'),
-                error: result.left,
-              })
-            )
+            showErrorAlert({
+              title:
+                toCommonErrorMessage(result.left, t) ??
+                t('common.somethingWentWrong'),
+              description: t('common.somethingWentWrongDescription'),
+              error: result.left,
+            })
           }
 
           return false

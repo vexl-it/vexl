@@ -9,6 +9,7 @@ import AnimatedSplashScreen from './AnimatedSplashScreen'
 import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
+import ErrorAlert from './components/ErrorAlert'
 import {
   OverlayInfoScreen,
   useLoadNewsAndAnnouncements,
@@ -81,6 +82,7 @@ function App(): React.ReactElement {
             <UploadingOfferProgressModal />
           </LoadingOverlayProvider>
           <AreYouSureDialog />
+          <ErrorAlert />
           <ToastNotification />
         </NavigationContainer>
       </KeyboardProvider>

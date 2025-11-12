@@ -4,6 +4,7 @@ import encryptOfferPublicPayload from '@vexl-next/resources-utils/src/offers/uti
 import {Array, Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../api'
+import {showErrorAlert} from '../../components/ErrorAlert'
 import {showGoldenAvatarAnimationAtom} from '../../components/GoldenAvatar'
 import {loadingOverlayDisplayedAtom} from '../../components/LoadingOverlayProvider'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
@@ -11,7 +12,6 @@ import {sessionDataOrDummyAtom} from '../../state/session'
 import {translationAtom} from '../localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../preferences'
 import reportError from '../reportError'
-import {showErrorAlertE} from '../showErrorAlert'
 
 export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
@@ -51,12 +51,14 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
       )
     ),
     Effect.all,
-    Effect.tapError((e) =>
-      showErrorAlertE({
+    Effect.tapError((e) => {
+      showErrorAlert({
         title: t('goldenGlasses.errorSettingRewardForParticipationOnMeetup'),
         error: e,
       })
-    ),
+
+      return Effect.void
+    }),
     Effect.match({
       onSuccess(updatedOffers) {
         set(myOffersAtom, updatedOffers)

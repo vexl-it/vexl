@@ -8,9 +8,9 @@ import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {createOfferCountForClub} from '../../../state/marketplace/atoms/offersState'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
-import showErrorAlert from '../../../utils/showErrorAlert'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import Button from '../../Button'
+import {showErrorAlert} from '../../ErrorAlert'
 import SvgImage from '../../Image'
 import arrowsSvg from '../../images/arrowsSvg'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
@@ -117,7 +117,8 @@ export function ClubDetail({
                   onFailure: (e) => {
                     if (e._tag !== 'UserDeclinedError')
                       showErrorAlert({
-                        title: t('common.unknownError'),
+                        title: t('common.somethingWentWrong'),
+                        description: t('common.somethingWentWrongDescription'),
                         error: e,
                       })
                     loadingOverlay.hide()

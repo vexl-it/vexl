@@ -307,7 +307,7 @@ function TextMessage({
                 }
               >
                 {toCommonErrorMessage(message.error, t) ??
-                  t('common.unknownError')}{' '}
+                  t('common.somethingWentWrong')}{' '}
                 {t('messages.tapToResent')}
               </Text>
             </Pressable>

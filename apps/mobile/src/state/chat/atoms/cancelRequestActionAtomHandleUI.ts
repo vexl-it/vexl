@@ -26,10 +26,10 @@ import {
   askAreYouSureActionAtom,
   type UserDeclinedError,
 } from '../../../components/AreYouSureDialog'
+import {showErrorAlert} from '../../../components/ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {sessionDataOrDummyAtom} from '../../session'
 import {type ChatMessageWithState} from '../domain'
@@ -141,7 +141,10 @@ const cancelRequestActionAtomHandleUI = atom(
         }
 
         showErrorAlert({
-          title: toCommonErrorMessage(error, t) ?? t('common.unknownError'),
+          title: t('common.somethingWentWrong'),
+          description:
+            toCommonErrorMessage(error, t) ??
+            t('common.somethingWentWrongDescription'),
           error,
         })
         return error

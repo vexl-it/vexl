@@ -73,7 +73,7 @@ export function BlogArticlesListScreen(): React.ReactElement {
             Option.isSome(error) && (
               <YStack gap="$4" alignContent="center" alignItems="center">
                 <Text fontSize={20} textAlign="center">
-                  {t('common.unknownError')}
+                  {t('common.somethingWentWrong')}
                 </Text>
                 <Button
                   variant="secondary"

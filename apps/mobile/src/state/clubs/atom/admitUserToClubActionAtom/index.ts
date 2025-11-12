@@ -3,10 +3,10 @@ import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../../api'
 import {askAreYouSureActionAtom} from '../../../../components/AreYouSureDialog'
+import {showErrorAlert} from '../../../../components/ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../../../components/LoadingOverlayProvider'
 import {type DeepLinkRequestClubAdmition} from '../../../../utils/deepLinks/parseDeepLink'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {showErrorAlertE} from '../../../../utils/showErrorAlert'
 import {clubsToKeyHolderAtom} from '../clubsToKeyHolderAtom'
 import {clubsWithMembersAtom} from '../clubsWithMembersAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from '../refreshClubsActionAtom'
@@ -131,21 +131,24 @@ export const admitUserToClubActionAtom = atom(
       Effect.tapError((e) => {
         const {t} = get(translationAtom)
         if (e._tag === 'ClubUserLimitExceededError') {
-          return showErrorAlertE({
+          showErrorAlert({
             title: t('clubs.admition.limitExceeded'),
           })
         } else if (e._tag === 'MemberAlreadyInClubError') {
-          return showErrorAlertE({
+          showErrorAlert({
             title: t('clubs.admition.alreadyMember'),
           })
         } else if (e._tag === 'UserDeclinedError') {
           return Effect.void
         } else {
-          return showErrorAlertE({
-            title: t('common.unknownError'),
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description: t('common.somethingWentWrongDescription'),
             error: e,
           })
         }
+
+        return Effect.void
       })
     )
 )

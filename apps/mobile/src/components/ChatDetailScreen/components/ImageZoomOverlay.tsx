@@ -9,7 +9,7 @@ import {type GestureHandlerRootViewProps} from 'react-native-gesture-handler/lib
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, XStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import showErrorAlert from '../../../utils/showErrorAlert'
+import {showErrorAlert} from '../../ErrorAlert'
 import IconButton from '../../IconButton'
 import closeSvg from '../../images/closeSvg'
 import {chatMolecule} from '../atoms'

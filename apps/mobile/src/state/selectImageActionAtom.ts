@@ -6,6 +6,7 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {Alert} from 'react-native'
+import {showErrorAlert} from '../components/ErrorAlert'
 import {
   getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory,
   getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory,
@@ -14,7 +15,6 @@ import {
 import {type FileSystemError} from '../utils/internalStorage'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import reportError from '../utils/reportError'
-import showErrorAlert from '../utils/showErrorAlert'
 
 const reportAndTranslateErrorsAtom = atom<
   null,
@@ -35,7 +35,7 @@ const reportAndTranslateErrorsAtom = atom<
   reportError('error', new Error('Unexpected error while picking image'), {
     error,
   })
-  return t('common.unknownError') // how is it that linter needs this line
+  return t('common.somethingWentWrong') // how is it that linter needs this line
 })
 
 export const selectImageActionAtom = atom(

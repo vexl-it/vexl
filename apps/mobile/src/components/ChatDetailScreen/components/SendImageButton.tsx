@@ -8,7 +8,7 @@ import {Alert} from 'react-native'
 import {getTokens} from 'tamagui'
 import {getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import showErrorAlert from '../../../utils/showErrorAlert'
+import {showErrorAlert} from '../../ErrorAlert'
 import IconButton from '../../IconButton'
 import {chatMolecule} from '../atoms'
 import cameraSvg from '../images/cameraSvg'
@@ -38,7 +38,7 @@ function SendImageButton(): React.ReactElement {
           } else {
             showErrorAlert({
               title: t('messages.unableToSelectImageToSend.title'),
-              subtitle: t('common.unknownError'),
+              description: t('common.somethingWentWrongDescription'),
               error: e,
             })
           }

@@ -23,9 +23,9 @@ import {
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {showErrorAlertE} from '../../../../utils/showErrorAlert'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
+import {showErrorAlert} from '../../../ErrorAlert'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
 import checkIconSvg from '../../../images/checkIconSvg'
 import userSvg from '../../../images/userSvg'
@@ -351,15 +351,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
                 number: contact.computedValues.normalizedNumber,
               }),
               Effect.catchTag('UserDeclinedError', () => Effect.succeed(false)),
-              Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) =>
-                Effect.zipRight(
-                  showErrorAlertE({
-                    title: t('contacts.errorAddingContactToYourPhoneContacts'),
-                    error: e,
-                  }),
-                  Effect.succeed(false)
-                )
-              )
+              Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
+                showErrorAlert({
+                  title: t('contacts.errorAddingContactToYourPhoneContacts'),
+                  error: e,
+                })
+
+                return Effect.succeed(false)
+              })
             )
           : false
 

@@ -25,8 +25,8 @@ import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
 import {isDeveloperAtom} from '../../../../utils/preferences'
 import reportError from '../../../../utils/reportError'
-import showErrorAlert from '../../../../utils/showErrorAlert'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
+import {showErrorAlert} from '../../../ErrorAlert'
 import {contactsMigratedAtom} from '../../../VersionMigrations/atoms'
 
 const TARGET_TIME_MILLISECONDS = 3000

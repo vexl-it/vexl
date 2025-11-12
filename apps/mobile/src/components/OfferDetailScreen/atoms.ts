@@ -10,9 +10,9 @@ import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderAtom'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/offersState'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
-import showErrorAlert from '../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
+import {showErrorAlert} from '../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 
 export const showCommonFriendsExplanationActionAtom = atom(
@@ -186,7 +186,10 @@ export const reportOfferActionAtom = atom(
           Alert.alert(t('offer.report.reportLimitReached'))
         } else if (e._tag !== 'UserDeclinedError') {
           showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
             error: e,
           })
         }

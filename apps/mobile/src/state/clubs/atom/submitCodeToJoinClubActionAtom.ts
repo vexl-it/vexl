@@ -6,12 +6,12 @@ import {Effect, Option, Struct} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
+import {showErrorAlert} from '../../../components/ErrorAlert'
 import clubImagePlaceholderSvg from '../../../components/JoinClubFlow/images/clubImagePlaceholderSvg'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
-import {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
@@ -143,7 +143,7 @@ export const submitCodeToJoinClubActionAtom = atom(
               return t('clubs.youAreAlreadyMemberOfThisClubDescription')
             if (e._tag === 'NotFoundError')
               return t('clubs.accessDeniedCodeIsInvalid')
-            return t('common.unknownError')
+            return t('common.somethingWentWrong')
           })()
 
           return Effect.zipRight(
@@ -173,13 +173,15 @@ export const submitCodeToJoinClubActionAtom = atom(
           reportError('error', new Error('Join club error'), {e})
         }
 
-        return Effect.zipRight(
-          showErrorAlertE({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-            error: e,
-          }),
-          Effect.succeed(false)
-        )
+        showErrorAlert({
+          title: t('common.somethingWentWrong'),
+          description:
+            toCommonErrorMessage(e, t) ??
+            t('common.somethingWentWrongDescription'),
+          error: e,
+        })
+
+        return Effect.succeed(false)
       })
     )
   }

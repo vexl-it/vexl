@@ -5,6 +5,7 @@ import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
+import {showErrorAlert} from '../../../components/ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import userSvg from '../../../components/images/userSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -12,7 +13,6 @@ import {
   getActiveRouteNameOutsideOfReact,
   safeNavigateBackOutsideReact,
 } from '../../../utils/navigation'
-import {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {
   type ContactComputedValues,
@@ -217,15 +217,14 @@ const createContactWithUiFeedbackActionAtom = atom(
               number: importedContact.computedValues.normalizedNumber,
             }),
             Effect.catchTag('UserDeclinedError', () => Effect.succeed(false)),
-            Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) =>
-              Effect.zipRight(
-                showErrorAlertE({
-                  title: t('contacts.errorAddingContactToYourPhoneContacts'),
-                  error: e,
-                }),
-                Effect.succeed(false)
-              )
-            )
+            Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
+              showErrorAlert({
+                title: t('contacts.errorAddingContactToYourPhoneContacts'),
+                error: e,
+              })
+
+              return Effect.succeed(false)
+            })
           )
         : false
 
@@ -263,15 +262,15 @@ const createContactWithUiFeedbackActionAtom = atom(
             return Effect.succeed(Effect.void)
           }
 
-          return Effect.zipRight(
-            showErrorAlertE({
-              title:
-                toCommonErrorMessage(e, get(translationAtom).t) ??
-                t('common.unknownError'),
-              error: e,
-            }),
-            Effect.succeed(Effect.void)
-          )
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, get(translationAtom).t) ??
+              t('common.somethingWentWrongDescription'),
+            error: e,
+          })
+
+          return Effect.void
         },
       })
     )

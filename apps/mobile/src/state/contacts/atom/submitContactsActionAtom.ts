@@ -295,7 +295,9 @@ export const submitContactsActionAtom = atom(
         }
 
         if (e._tag !== 'ContactsPermissionsNotGrantedError')
-          Alert.alert(toCommonErrorMessage(e, t) ?? t('common.unknownError'))
+          Alert.alert(
+            toCommonErrorMessage(e, t) ?? t('common.somethingWentWrong')
+          )
 
         return Effect.void
       }),

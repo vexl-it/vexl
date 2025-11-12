@@ -14,8 +14,8 @@ import {
 import isString from '../../../utils/isString'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
-import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {showErrorAlert} from '../../ErrorAlert'
 import {reportIssueDialogAtom} from '../../ReportIssue'
 
 export const initPhoneVerificationAtom = atom(
@@ -67,7 +67,10 @@ export const initPhoneVerificationAtom = atom(
           )
 
           showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
             error: e,
           })
 
@@ -115,7 +118,7 @@ export const initPhoneVerificationAtom = atom(
               Effect.fail(e)
             )
 
-          return Effect.fail(t('common.unknownError'))
+          return Effect.fail(t('common.somethingWentWrong'))
         })
       )
       .pipe(Effect.option)

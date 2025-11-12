@@ -8,8 +8,8 @@ import {handleDeepLinkActionAtom} from '../../utils/deepLinks'
 import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../utils/imagePickers'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
-import showErrorAlert, {showErrorAlertE} from '../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
+import {showErrorAlert} from '../ErrorAlert'
 
 export class ScanningQrCodeFromLibraryError extends Schema.TaggedError<ScanningQrCodeFromLibraryError>(
   'ScanningQrCodeFromLibraryError'
@@ -79,22 +79,24 @@ export const accessCodeMolecule = molecule((_, getScope) => {
                 e,
               }
             )
-            return Effect.zipRight(
-              showErrorAlertE({
-                title: t('common.errorWhileReadingQrCode'),
-                error: e,
-              }),
-              Effect.succeed(false)
-            )
+
+            showErrorAlert({
+              title: t('common.errorWhileReadingQrCode'),
+              error: e,
+            })
+
+            return Effect.succeed(false)
           }
 
-          return Effect.zipRight(
-            showErrorAlertE({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-              error: e,
-            }),
-            Effect.succeed(false)
-          )
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
+            error: e,
+          })
+
+          return Effect.succeed(false)
         })
       )
     }
@@ -149,7 +151,10 @@ export const accessCodeMolecule = molecule((_, getScope) => {
             (e._tag === 'ImagePickerError' && e.reason !== 'NothingSelected')
           )
             showErrorAlert({
-              title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
               error: e,
             })
 

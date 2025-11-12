@@ -3,8 +3,8 @@ import React, {useCallback, useState} from 'react'
 import {Alert} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import showErrorAlert from '../../utils/showErrorAlert'
 import Button from '../Button'
+import {showErrorAlert} from '../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
@@ -38,6 +38,7 @@ function AppLogsScreen(): React.ReactElement {
               .catch((e) => {
                 showErrorAlert({
                   title: t('AppLogs.errorExporting'),
+                  description: t('common.somethingWentWrongDescription'),
                   error: e,
                 })
               })
@@ -54,6 +55,7 @@ function AppLogsScreen(): React.ReactElement {
               .catch((e) => {
                 showErrorAlert({
                   title: t('AppLogs.errorExporting'),
+                  description: t('common.somethingWentWrongDescription'),
                   error: e,
                 })
               })

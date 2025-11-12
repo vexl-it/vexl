@@ -6,8 +6,8 @@ import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
-import showErrorAlert from '../../../../utils/showErrorAlert'
 import numberOfFriendsAtom from '../../../CRUDOfferFlow/atoms/numberOfFriendsAtom'
+import {showErrorAlert} from '../../../ErrorAlert'
 import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
 import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
 import FriendLevelCell from './components/FriendLevelCell'
@@ -25,7 +25,8 @@ const friendLevelSubtitleAtom = atom((get) => {
   if (numberOfFriends.state === 'error') {
     const e = numberOfFriends.error
     showErrorAlert({
-      title: t('common.unknownError'),
+      title: t('common.somethingWentWrong'),
+      description: t('common.somethingWentWrongDescription'),
       error: e,
     })
 

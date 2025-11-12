@@ -68,12 +68,12 @@ import notEmpty from '../../../utils/notEmpty'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {preferencesAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
-import showErrorAlert, {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {
   toCommonErrorMessage,
   type SomeError,
 } from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {showErrorAlert} from '../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
 import {
@@ -781,14 +781,13 @@ export const offerFormMolecule = molecule(() => {
 
           reportError('error', new Error('Error while creating offer'), {e})
 
-          return Effect.zipRight(
-            showErrorAlertE({
-              title:
-                toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
-              error: e,
-            }),
-            Effect.succeed(false)
-          )
+          showErrorAlert({
+            title:
+              toCommonErrorMessage(e, t) ?? t('offerForm.errorCreatingOffer'),
+            error: e,
+          })
+
+          return Effect.succeed(false)
         })
       )
     }

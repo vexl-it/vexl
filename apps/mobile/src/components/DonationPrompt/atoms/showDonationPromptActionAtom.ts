@@ -6,8 +6,8 @@ import {apiAtom} from '../../../api'
 import {myDonationsAtom} from '../../../state/donations/atom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
-import {showErrorAlertE} from '../../../utils/showErrorAlert'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {showErrorAlert} from '../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import DonationAmount from '../components/DonationAmount'
 import DonationQrCodeOrStatus from '../components/DonationQrCodeOrStatus'
@@ -102,13 +102,12 @@ const showDonationPromptActionAtom = atom(null, (get, set) => {
     Effect.catchAll((e) => {
       if (e._tag === 'UserDeclinedError') return Effect.succeed(Effect.void)
 
-      return Effect.zipRight(
-        showErrorAlertE({
-          title: t('donationPrompt.errorCreatingInvoice'),
-          error: e,
-        }),
-        Effect.succeed(Effect.void)
-      )
+      showErrorAlert({
+        title: t('donationPrompt.errorCreatingInvoice'),
+        error: e,
+      })
+
+      return Effect.void
     })
   )
 })

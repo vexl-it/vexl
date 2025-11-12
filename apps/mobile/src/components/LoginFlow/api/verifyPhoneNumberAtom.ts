@@ -40,7 +40,7 @@ export const verifyPhoneNumberAtom = atom(
           new Error('Unexpected error while verifying phone number'),
           {e}
         )
-        return Effect.fail(t('common.unknownError'))
+        return Effect.fail(t('common.somethingWentWrong'))
       })
     )
   }

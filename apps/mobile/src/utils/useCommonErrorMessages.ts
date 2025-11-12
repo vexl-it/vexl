@@ -36,5 +36,5 @@ export function toCommonErrorMessage(
     return t(`common.${error._tag}`)
   }
 
-  return t('common.unknownError')
+  return t('common.somethingWentWrongDescription')
 }

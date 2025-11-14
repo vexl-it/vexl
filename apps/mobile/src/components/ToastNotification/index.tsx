@@ -27,7 +27,7 @@ function ToastNotification(): React.ReactElement {
       right={0}
       {...(state?.position === 'top' ? {top: -10} : {bottom: -10})}
     >
-      {state.visible ? <ToastNotificationContent {...state} /> : <></>}
+      <ToastNotificationContent {...state} />
     </Stack>
   )
 }

@@ -9922,7 +9922,7 @@ __metadata:
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.2.2
     react-native-quick-crypto: ^0.7.17
-    react-native-reanimated: ~4.1.1
+    react-native-reanimated: 4.1.1
     react-native-safe-area-context: ~5.6.0
     react-native-screens: ~4.16.0
     react-native-sound: ^0.11.2
@@ -24707,9 +24707,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:~4.1.1":
-  version: 4.1.3
-  resolution: "react-native-reanimated@npm:4.1.3"
+"react-native-reanimated@npm:4.1.1":
+  version: 4.1.1
+  resolution: "react-native-reanimated@npm:4.1.1"
   dependencies:
     react-native-is-edge-to-edge: ^1.2.1
     semver: 7.7.2
@@ -24718,7 +24718,7 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-worklets: ">=0.5.0"
-  checksum: 5f3b7298dd721b5da7f8bab64c557624d08b8715502f4ba2ff9118f31d852e3d9734ffbfaacd1302468ba68d4790689eead39605645a80f737802c8de0008064
+  checksum: 83c0f7aa5682788086d9990d9713241403b33cbae671e6f121e337ef976bf07becf051f987f4f856612871e824cf8f506ddafe485cdc54c1ed40a65ba4e6a1f2
   languageName: node
   linkType: hard
 

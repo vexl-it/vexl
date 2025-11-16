@@ -11,7 +11,6 @@ import {
   Inbox,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {
@@ -29,15 +28,23 @@ import {
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
+import {Schema} from 'effect/index'
 import {z} from 'zod'
 import {
   createEmptyTradeChecklistInState,
   TradeChecklistInState,
 } from '../tradeChecklist/domain'
 import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
-
-export type ApiErrorCreatingInbox = BasicError<'ApiErrorCreatingInbox'>
-export type ErrorInboxAlreadyExists = BasicError<'ErrorInboxAlreadyExists'>
+export class ApiErrorCreatingInbox extends Schema.TaggedError<ApiErrorCreatingInbox>(
+  'ApiErrorCreatingInbox'
+)('ApiErrorCreatingInbox', {
+  cause: Schema.Unknown,
+}) {}
+export class ErrorInboxAlreadyExists extends Schema.TaggedError<ErrorInboxAlreadyExists>(
+  'ErrorInboxAlreadyExists'
+)('ErrorInboxAlreadyExists', {
+  cause: Schema.Unknown,
+}) {}
 
 export const ChatMessageWithState = z
   .discriminatedUnion('state', [

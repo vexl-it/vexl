@@ -23,6 +23,7 @@ import {
   BlockInboxResponse,
   CancelApprovalRequest,
   CancelApprovalResponse,
+  CancelApprovalV2Request,
   CancelRequestApprovalErrors,
   CreateInboxRequest,
   CreateInboxResponse,
@@ -40,6 +41,8 @@ import {
   RequestApprovalErrors,
   RequestApprovalRequest,
   RequestApprovalResponse,
+  RequestApprovalV2Errors,
+  RequestApprovalV2Request,
   RetrieveMessagesErrors,
   RetrieveMessagesRequest,
   RetrieveMessagesResponse,
@@ -117,12 +120,32 @@ export const RequestApprovalEndpoint = HttpApiEndpoint.post(
   .addError(RequestApprovalErrors)
   .annotate(MaxExpectedDailyCall, 50)
 
+export const RequestApprovalV2Endpoint = HttpApiEndpoint.post(
+  'requestApprovalV2',
+  '/api/v2/inboxes/approval/request'
+)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(RequestApprovalV2Request)
+  .addSuccess(RequestApprovalResponse)
+  .addError(RequestApprovalV2Errors)
+  .annotate(MaxExpectedDailyCall, 50)
+
 export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
   'cancelRequestApproval',
   '/api/v1/inboxes/approval/cancel'
 )
   .middleware(ServerSecurityMiddleware)
   .setPayload(CancelApprovalRequest)
+  .addSuccess(CancelApprovalResponse)
+  .addError(CancelRequestApprovalErrors)
+  .annotate(MaxExpectedDailyCall, 50)
+
+export const CancelRequestApprovalV2Endpoint = HttpApiEndpoint.post(
+  'cancelRequestApprovalV2',
+  '/api/v2/inboxes/approval/cancel'
+)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(CancelApprovalV2Request)
   .addSuccess(CancelApprovalResponse)
   .addError(CancelRequestApprovalErrors)
   .annotate(MaxExpectedDailyCall, 50)
@@ -196,7 +219,9 @@ const InboxesApiGroup = HttpApiGroup.make('Inboxes')
   .add(DeleteInboxEndpoint)
   .add(BlockInboxEndpoint)
   .add(RequestApprovalEndpoint)
+  .add(RequestApprovalV2Endpoint)
   .add(CancelRequestApprovalEndpoint)
+  .add(CancelRequestApprovalV2Endpoint)
   .add(ApproveRequestEndpoint)
   .add(DeleteInboxesEndpoint)
   .add(LeaveChatEndpoint)

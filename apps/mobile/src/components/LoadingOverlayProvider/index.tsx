@@ -1,3 +1,4 @@
+import {Effect} from 'effect/index'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, type ReactNode} from 'react'
 import {Stack, styled} from 'tamagui'
@@ -33,6 +34,24 @@ function LoadingOverlayProvider({children}: Props): React.ReactElement {
     </>
   )
 }
+
+export const withLoadingOverlayAtom = atom(
+  null,
+  (get, set) =>
+    <A, E, R>(effect: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> =>
+      Effect.zipRight(
+        Effect.sync(() => {
+          set(loadingOverlayDisplayedAtom, true)
+        }),
+        effect
+      ).pipe(
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(loadingOverlayDisplayedAtom, false)
+          })
+        )
+      )
+)
 
 export default LoadingOverlayProvider
 

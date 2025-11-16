@@ -29,13 +29,16 @@ import {InternalServerLive} from './internalServer'
 import {reportMetricsLayer} from './metrics'
 import {approveRequest} from './routes/inbox/approveReqest'
 import {blockInbox} from './routes/inbox/blockInbox'
-import {cancelRequest} from './routes/inbox/cancelRequest'
+import {cancelRequest, cancelRequestV2} from './routes/inbox/cancelRequest'
 import {createInbox} from './routes/inbox/createInbox'
 import {deleteInbox} from './routes/inbox/deleteInbox'
 import {deleteInboxes} from './routes/inbox/deleteInboxes'
 import {deletePulledMessages} from './routes/inbox/deletePulledMessages'
 import {leaveChat} from './routes/inbox/leaveChat'
-import {requestApproval} from './routes/inbox/requestApproval'
+import {
+  requestApproval,
+  requestApprovalV2,
+} from './routes/inbox/requestApproval'
 import {updateInbox} from './routes/inbox/updateInbox'
 import {retrieveMessages} from './routes/messages/retrieveMessages'
 import {sendMessage} from './routes/messages/sendMessage'
@@ -60,7 +63,9 @@ const InboxesApiGroupLive = HttpApiBuilder.group(
       .handle('deleteInbox', deleteInbox)
       .handle('blockInbox', blockInbox)
       .handle('requestApproval', requestApproval)
+      .handle('requestApprovalV2', requestApprovalV2)
       .handle('cancelRequestApproval', cancelRequest)
+      .handle('cancelRequestApprovalV2', cancelRequestV2)
       .handle('approveRequest', approveRequest)
       .handle('deleteInboxes', deleteInboxes)
       .handle('leaveChat', leaveChat)

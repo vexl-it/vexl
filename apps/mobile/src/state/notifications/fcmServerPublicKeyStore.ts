@@ -4,10 +4,9 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as TE from 'fp-ts/TaskEither'
-import * as TO from 'fp-ts/TaskOption'
-import {pipe} from 'fp-ts/lib/function'
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Effect, Option} from 'effect/index'
+import type * as TO from 'fp-ts/TaskOption'
 import {atom} from 'jotai'
 import {z} from 'zod'
 import {apiAtom} from '../../api'
@@ -30,33 +29,43 @@ export const notificationServerKeyStorageAtom = atomWithParsedMmkvStorage(
     .readonly()
 )
 
+export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
+  null,
+  (get, set): Effect.Effect<Option.Option<PublicKeyPemBase64>> =>
+    Effect.gen(function* (_) {
+      const {publicKey, lastRefresh} = get(notificationServerKeyStorageAtom)
+      // If cache is valid return it
+      if (publicKey && lastRefresh + FCM_TOKEN_CACHE_MILIS > Date.now()) {
+        return Option.some(publicKey)
+      }
+
+      // Otherwise fetch a new one
+      return yield* _(
+        get(apiAtom).notification.getNotificationPublicKey(),
+        Effect.match({
+          // On failure just return the last one (if any) without updating the cache
+          onFailure: (e) => {
+            reportError(
+              'warn',
+              new Error('Erro while refreshing notification server key'),
+              {e}
+            )
+            return Option.fromNullable(publicKey)
+          },
+          onSuccess: ({publicKey}) => {
+            set(notificationServerKeyStorageAtom, {
+              publicKey,
+              lastRefresh: unixMillisecondsNow(),
+            })
+            return Option.some(publicKey)
+          },
+        })
+      )
+    })
+)
+
 export const getOrFetchNotificationServerPublicKeyActionAtom = atom(
   null,
-  (get, set): TO.TaskOption<PublicKeyPemBase64> => {
-    const {publicKey, lastRefresh} = get(notificationServerKeyStorageAtom)
-    if (publicKey && lastRefresh + FCM_TOKEN_CACHE_MILIS > Date.now()) {
-      return TO.fromNullable(publicKey)
-    }
-    return pipe(
-      effectToTaskEither(get(apiAtom).notification.getNotificationPublicKey()),
-      TE.matchE(
-        (e) => {
-          // Do not report network errors
-          reportError(
-            'warn',
-            new Error('Erro while refreshing notification server key'),
-            {e}
-          )
-          return TO.fromNullable(publicKey)
-        },
-        ({publicKey}) => {
-          set(notificationServerKeyStorageAtom, {
-            publicKey,
-            lastRefresh: unixMillisecondsNow(),
-          })
-          return TO.of(publicKey)
-        }
-      )
-    )
-  }
+  (_, set): TO.TaskOption<PublicKeyPemBase64> =>
+    effectToTask(set(getOrFetchNotificationServerPublicKeyActionAtomE))
 )

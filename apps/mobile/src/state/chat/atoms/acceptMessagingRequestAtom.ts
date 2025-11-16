@@ -6,7 +6,10 @@ import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
 } from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTask,
+  effectToTaskEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -21,7 +24,8 @@ import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import {resetTradeChecklist} from '../utils/resetData'
-import generateMyNotificationTokenInfoActionAtom, {
+import {
+  generateMyNotificationTokenInfoActionAtom,
   updateMyNotificationTokenInfoInChat,
 } from './generateMyNotificationTokenInfoActionAtom'
 
@@ -52,10 +56,12 @@ const acceptMessagingRequestAtom = atom(
     return pipe(
       TE.Do,
       TE.chainTaskK(() =>
-        set(
-          generateMyNotificationTokenInfoActionAtom,
-          undefined,
-          chat.inbox.privateKey
+        effectToTask(
+          set(
+            generateMyNotificationTokenInfoActionAtom,
+            undefined,
+            chat.inbox.privateKey
+          )
         )
       ),
       TE.bindTo('myFcmCypher'),

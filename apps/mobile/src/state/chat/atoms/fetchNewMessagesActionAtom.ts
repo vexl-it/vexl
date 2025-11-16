@@ -361,7 +361,8 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
   if (!inbox) {
     reportError(
       'warn',
-      new Error('Trying to refresh an inbox but inbox does not exist')
+      new Error('Trying to refresh an inbox but inbox does not exist'),
+      {key}
     )
     return T.of(undefined)
   }

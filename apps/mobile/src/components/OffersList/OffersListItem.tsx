@@ -40,7 +40,9 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
 
   // TODO make this more performant
   const chatForOffer = useChatWithMessagesForOffer({
-    offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
+    offerId: offer.offerInfo.offerId,
+    isMyOffer: !!offer.ownershipInfo,
+    otherSidePublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
 
   const canBeRequested = useMemo(() => {

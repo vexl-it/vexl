@@ -9,7 +9,10 @@ import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNoti
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTask,
+  effectToTaskEither,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {Option} from 'effect'
 import * as A from 'fp-ts/Array'
@@ -30,7 +33,8 @@ import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notificatio
 import {type ChatWithMessages} from '../domain'
 import allChatsAtom from './allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
-import generateMyNotificationTokenInfoActionAtom, {
+import {
+  generateMyNotificationTokenInfoActionAtom,
   updateMyNotificationTokenInfoInChat,
 } from './generateMyNotificationTokenInfoActionAtom'
 
@@ -71,10 +75,12 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
           return o
         }),
         T.bind('notificationTokenInfo', () =>
-          set(
-            generateMyNotificationTokenInfoActionAtom,
-            notificationToken,
-            chatWithMessages.chat.inbox.privateKey
+          effectToTask(
+            set(
+              generateMyNotificationTokenInfoActionAtom,
+              notificationToken,
+              chatWithMessages.chat.inbox.privateKey
+            )
           )
         ),
         T.bind('messageToSend', ({notificationTokenInfo}) =>

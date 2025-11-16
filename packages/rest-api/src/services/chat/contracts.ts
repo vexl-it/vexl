@@ -166,6 +166,19 @@ export const RequestApprovalResponse = Schema.Struct({
 })
 export type RequestApprovalResponse = typeof RequestApprovalResponse.Type
 
+export const RequestApprovalV2Request = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  receiverPublicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+})
+export type RequestApprovalV2Request = typeof RequestApprovalV2Request.Type
+
+export const RequestApprovalV2Errors = Schema.Union(
+  RequestApprovalErrors,
+  InvalidChallengeError
+)
+export type RequestApprovalV2Errors = typeof RequestApprovalV2Errors.Type
+
 export const CancelRequestApprovalErrors = Schema.Union(
   RequestNotPendingError,
   ReceiverInboxDoesNotExistError,
@@ -186,6 +199,13 @@ export const CancelApprovalResponse = Schema.Struct({
   notificationHandled: Schema.Boolean,
 })
 export type CancelApprovalResponse = typeof CancelApprovalResponse.Type
+
+export const CancelApprovalV2Request = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  receiverPublicKey: PublicKeyPemBase64E,
+  message: Schema.String,
+})
+export type CancelApprovalV2Request = typeof CancelApprovalV2Request.Type
 
 export const ApproveRequestErrors = Schema.Union(
   InvalidChallengeError,

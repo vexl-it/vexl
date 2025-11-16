@@ -10,8 +10,14 @@ import {
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Effect} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
@@ -67,6 +73,10 @@ export function sendCancelMessagingRequest({
   | JsonStringifyError
   | ZodParseError<ChatMessagePayload>
   | ErrorEncryptingMessage
+  | InvalidChallengeError
+  | ErrorGeneratingChallenge
+  | ErrorSigningChallenge
+  | CryptoError
 > {
   return Effect.gen(function* (_) {
     const cancelRequestMessage = createCancelRequestChatMessage({
@@ -80,9 +90,10 @@ export function sendCancelMessagingRequest({
     )
 
     yield* _(
-      callWithNotificationService(api.cancelRequestApproval, {
+      callWithNotificationService(api.cancelRequestApprovalV2, {
         message,
-        publicKey: toPublicKey,
+        receiverPublicKey: toPublicKey,
+        keyPair: fromKeypair,
       })({
         otherSideVersion,
         notificationCypher: theirNotificationCypher,

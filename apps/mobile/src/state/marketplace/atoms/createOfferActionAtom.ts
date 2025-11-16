@@ -6,6 +6,7 @@ import {
 import {
   type IntendedConnectionLevel,
   type MyOfferInState,
+  type OfferId,
   type OfferPublicPart,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
@@ -44,6 +45,7 @@ export const createOfferActionAtom = atom<
       intendedClubs: ClubUuid[]
       onProgress?: (status: OfferEncryptionProgress) => void
       offerKey: PrivateKeyHolder
+      offerId: OfferId
     },
   ],
   Effect.Effect<
@@ -94,6 +96,7 @@ export const createOfferActionAtom = atom<
     const createOfferResult = yield* _(
       createNewOfferForMyContacts({
         offerApi: api.offer,
+        offerId: params.offerId,
         publicPart: publicPayloadWithNotificationToken.publicPart,
         countryPrefix: getCountryPrefix(session.phoneNumber),
         serverToClientHashesToHashedPhoneNumbersMap,

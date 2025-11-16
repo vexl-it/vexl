@@ -248,11 +248,15 @@ export const Inbox = z
   .object({
     privateKey: KeyHolder.PrivateKeyHolder,
     offerId: OfferId.optional(),
+    requestOfferId: OfferId.optional(),
   })
   .readonly()
 export const InboxE = Schema.Struct({
   privateKey: PrivateKeyHolderE,
+  // if the user is author of the offer
   offerId: Schema.optional(OfferIdE),
+  // If the user has requested the offer
+  requestOfferId: Schema.optional(OfferIdE),
 })
 export type Inbox = Schema.Schema.Type<typeof InboxE>
 

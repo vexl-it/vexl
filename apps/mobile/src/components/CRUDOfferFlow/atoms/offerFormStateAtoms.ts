@@ -1,4 +1,5 @@
 import {
+  newOfferId,
   OfferAdminId,
   OfferId,
   SymmetricKey,
@@ -32,11 +33,6 @@ import {
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {
-  eitherToEffect,
-  taskEitherToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import {focusAtom} from 'jotai-optics'
@@ -44,7 +40,7 @@ import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
 import {symmetricDifference} from 'set-operations'
 import {type CRUDOfferStackParamsList} from '../../../navigationTypes'
-import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
+import {upsertInboxOnBeAndLocallyActionAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {importedContactsCountAtom} from '../../../state/contacts/atom/contactsStore'
@@ -655,16 +651,24 @@ export const offerFormMolecule = molecule(() => {
           indicateProgress: {type: 'intermediate'},
         })
 
-        const key = yield* _(eitherToEffect(generateKeyPair()))
+        const offerId = newOfferId()
+        const {inbox} = yield* _(
+          set(upsertInboxOnBeAndLocallyActionAtom, {
+            for: 'myOffer',
+            offerId,
+          })
+        )
 
-        const createdOffer = yield* _(
+        yield* _(
           set(createOfferFromCompleteDataActionAtom, {
+            offerId,
             payloadPublic: {
               ...payloadPublic,
               authorClientVersion: version,
-              offerPublicKey: key.publicKeyPemBase64,
+              offerPublicKey: inbox.privateKey.publicKeyPemBase64,
               goldenAvatarType,
             },
+
             intendedConnectionLevel: intendedConnectionLevel ?? 'FIRST',
             intendedClubs: [...intendedClubs],
             onProgress: (progress) => {
@@ -677,18 +681,8 @@ export const offerFormMolecule = molecule(() => {
                 },
               })
             },
-            offerKey: key,
+            offerKey: inbox.privateKey,
           })
-        )
-
-        yield* _(
-          set(createInboxAtom, {
-            inbox: {
-              privateKey: key,
-              offerId: createdOffer.offerInfo.offerId,
-            },
-          }),
-          taskEitherToEffect
         )
 
         yield* _(

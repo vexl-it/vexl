@@ -3,12 +3,14 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
-import {useAtomValue} from 'jotai'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {Array, Option, pipe} from 'effect/index'
+import {atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {selectAtom} from 'jotai/utils'
 import {useMemo} from 'react'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
-import {useSessionAssumeLoggedIn} from '../../session'
+import {sessionDataOrDummyAtom, useSessionAssumeLoggedIn} from '../../session'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../domain'
 
@@ -50,26 +52,73 @@ export function useChatForOffer({
 }
 
 export function useChatWithMessagesForOffer({
-  offerPublicKey,
+  offerId,
+  otherSidePublicKey,
+  isMyOffer,
 }: {
-  offerPublicKey: PublicKeyPemBase64
+  offerId: OfferId
+  otherSidePublicKey: PublicKeyPemBase64
+  isMyOffer: boolean
 }): ChatWithMessages | undefined {
-  const session = useSessionAssumeLoggedIn()
-
   return useAtomValue(
     useMemo(() => {
-      const inboxPrivateKey = session.privateKey.privateKeyPemBase64
+      return atom((get) => {
+        const messagingState = get(messagingStateAtom)
 
-      return focusAtom(messagingStateAtom, (optic) =>
-        optic
-          .find(
-            (one) =>
-              one.inbox.privateKey.privateKeyPemBase64 === inboxPrivateKey
+        if (isMyOffer) {
+          // My offer always have property offerId
+          return pipe(
+            messagingState,
+            Array.findFirst((inbox) => inbox.inbox.offerId === offerId),
+            Option.flatMap((inbox) =>
+              Array.findFirst(
+                inbox.chats,
+                (chat) => chat.chat.otherSide.publicKey === otherSidePublicKey
+              )
+            ),
+            Option.getOrUndefined
           )
-          .prop('chats')
-          .find((one) => one.chat.otherSide.publicKey === offerPublicKey)
-      )
-    }, [session, offerPublicKey])
+        }
+
+        const session = get(sessionDataOrDummyAtom)
+        // Old state opened chat from offer id
+        const getChatForTheirOfferOldState =
+          (): Option.Option<ChatWithMessages> =>
+            pipe(
+              messagingState,
+              Array.findFirst(
+                (inbox) =>
+                  inbox.inbox.privateKey.publicKeyPemBase64 ===
+                  session.privateKey.publicKeyPemBase64
+              ),
+              Option.flatMap((inbox) =>
+                Array.findFirst(
+                  inbox.chats,
+                  (chat) => chat.chat.otherSide.publicKey === otherSidePublicKey
+                )
+              )
+            )
+
+        // New state opened chat from new inbox and marked it with requestOfferId
+        const getChatForTheirOffer = (): Option.Option<ChatWithMessages> =>
+          pipe(
+            messagingState,
+            Array.findFirst((inbox) => inbox.inbox.requestOfferId === offerId),
+            Option.flatMap((inbox) =>
+              Array.findFirst(
+                inbox.chats,
+                (chat) => chat.chat.otherSide.publicKey === otherSidePublicKey
+              )
+            )
+          )
+
+        return pipe(
+          getChatForTheirOffer(),
+          Option.orElse(getChatForTheirOfferOldState),
+          Option.getOrUndefined
+        )
+      })
+    }, [offerId, otherSidePublicKey, isMyOffer])
   )
 }
 

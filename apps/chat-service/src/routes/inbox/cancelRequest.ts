@@ -6,6 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {MessagesDbService} from '../../db/MessagesDbService'
@@ -84,6 +85,74 @@ export const cancelRequest = HttpApiBuilder.handler(
         }),
         req.payload.publicKey
       ),
+      withDbTransaction,
+      makeEndpointEffect
+    )
+)
+
+export const cancelRequestV2 = HttpApiBuilder.handler(
+  ChatApiSpecification,
+  'Inboxes',
+  'cancelRequestApprovalV2',
+  (req) =>
+    Effect.gen(function* (_) {
+      yield* _(validateChallengeInBody(req.payload))
+
+      const {receiverInbox, senderInbox} = yield* _(
+        findAndEnsureReceiverAndSenderInbox({
+          receiver: req.payload.receiverPublicKey,
+          sender: req.payload.publicKey,
+        })
+      )
+
+      const whitelistDb = yield* _(WhitelistDbService)
+
+      const whitelistRecord = yield* _(
+        whitelistDb.findWhitelistRecordBySenderAndReceiver({
+          receiver: receiverInbox.id,
+          sender: senderInbox.publicKey,
+        }),
+        Effect.flatten,
+        Effect.catchTag(
+          'NoSuchElementException',
+          () => new RequestNotPendingError()
+        )
+      )
+
+      if (whitelistRecord.state !== 'WAITING') {
+        return yield* _(Effect.fail(new RequestNotPendingError()))
+      }
+
+      yield* _(
+        whitelistDb.updateWhitelistRecordState({
+          id: whitelistRecord.id,
+          state: 'CANCELED',
+        })
+      )
+
+      const senderPublicKey = yield* _(encryptPublicKey(req.payload.publicKey))
+
+      const messagesDb = yield* _(MessagesDbService)
+      const sentMessage = yield* _(
+        messagesDb.insertMessageForInbox({
+          message: req.payload.message,
+          inboxId: receiverInbox.id,
+          senderPublicKey,
+          type: 'CANCEL_REQUEST_MESSAGING',
+        })
+      )
+
+      yield* _(reportMessageSent(1))
+      yield* _(reportRequestCanceled(1))
+
+      return {
+        id: Number(sentMessage.id),
+        message: sentMessage.message,
+        senderPublicKey: req.payload.publicKey,
+        notificationHandled: false,
+      } satisfies CancelApprovalResponse
+    }).pipe(
+      withInboxActionRedisLock(req.payload.publicKey),
       withDbTransaction,
       makeEndpointEffect
     )

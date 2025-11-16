@@ -112,4 +112,9 @@ function createEffectMmkv(storage: MMKV): EffectMmkv {
   }
 }
 
-export const storage = createEffectMmkv(new MMKV())
+const mmkv = new MMKV()
+if (__DEV__) {
+  // @ts-expect-error for debugging purposes
+  window.__mmkv = mmkv
+}
+export const storage = createEffectMmkv(mmkv)

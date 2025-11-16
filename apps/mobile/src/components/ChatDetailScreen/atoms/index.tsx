@@ -831,15 +831,15 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       const offer = get(offerForChatAtom)
       if (!offer) {
         set(showOfferDeletedWithOptionToDeleteActionAtom)
-        return T.of(false)
+        return Effect.succeed(false)
       }
 
       return pipe(
         set(sendRequestHandleUIActionAtom, {text, originOffer: offer}),
-        TE.match(
-          () => false,
-          () => true
-        )
+        Effect.mapBoth({
+          onFailure: () => false,
+          onSuccess: () => true,
+        })
       )
     }
   )

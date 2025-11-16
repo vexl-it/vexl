@@ -1,6 +1,7 @@
 import {type ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
@@ -8,7 +9,12 @@ import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
+import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {type Effect} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -48,7 +54,11 @@ const cancelRequestActionAtomHandleUI = atom(
     | UserDeclinedError
     | JsonStringifyError
     | ZodParseError<ChatMessagePayload>
-    | ErrorEncryptingMessage,
+    | ErrorEncryptingMessage
+    | InvalidChallengeError
+    | ErrorGeneratingChallenge
+    | ErrorSigningChallenge
+    | CryptoError,
     ChatMessageWithState
   > => {
     const session = get(sessionDataOrDummyAtom)

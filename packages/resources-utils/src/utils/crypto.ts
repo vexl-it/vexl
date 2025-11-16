@@ -172,6 +172,15 @@ export function generateKeyPair(): E.Either<CryptoError, PrivateKeyHolder> {
     toError('CryptoError', 'Error while generating new key pair')
   )
 }
+export function generateKeyPairE(): Effect.Effect<
+  PrivateKeyHolder,
+  CryptoError
+> {
+  return Effect.try({
+    try: () => crypto.KeyHolder.generatePrivateKey(),
+    catch: toError('CryptoError', 'Error while generating new key pair'),
+  })
+}
 
 export function hashMD5(payload: string): E.Either<CryptoError, string> {
   return E.tryCatch(

@@ -12,8 +12,14 @@ import {type NotificationCypher} from '@vexl-next/domain/src/general/notificatio
 import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {
+  type ErrorSigningChallenge,
+  type InvalidChallengeError,
+} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
+import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Effect} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
@@ -85,6 +91,10 @@ export function sendMessagingRequest({
 }): Effect.Effect<
   ChatMessage,
   | ApiErrorRequestMessaging
+  | InvalidChallengeError
+  | ErrorGeneratingChallenge
+  | ErrorSigningChallenge
+  | CryptoError
   | JsonStringifyError
   | ZodParseError<ChatMessagePayload>
   | ErrorEncryptingMessage
@@ -105,9 +115,10 @@ export function sendMessagingRequest({
     )
 
     yield* _(
-      callWithNotificationService(api.requestApproval, {
+      callWithNotificationService(api.requestApprovalV2, {
         message,
-        publicKey: toPublicKey,
+        receiverPublicKey: toPublicKey,
+        keyPair: fromKeypair,
       })({
         notificationCypher: theirNotificationCypher,
         otherSideVersion,

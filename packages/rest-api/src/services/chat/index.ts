@@ -15,6 +15,7 @@ import {
   type ApproveRequestRequest,
   type BlockInboxRequest,
   type CancelApprovalRequest,
+  type CancelApprovalV2Request,
   type CreateChallengeRequest,
   type CreateChallengesRequest,
   type CreateInboxRequest,
@@ -23,6 +24,7 @@ import {
   type DeletePulledMessagesRequest,
   type LeaveChatRequest,
   type RequestApprovalRequest,
+  type RequestApprovalV2Request,
   type RetrieveMessagesRequest,
   type SendMessageRequest,
   type SendMessagesRequest,
@@ -130,10 +132,28 @@ export function api({
         addChallenge(blockInboxRequest).pipe(
           Effect.flatMap((body) => client.Inboxes.blockInbox({payload: body}))
         ),
+      /** @deprecated use `requestApprovalV2` */
       requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
         client.Inboxes.requestApproval({payload: requestApprovalRequest}),
+      requestApprovalV2: (
+        requestApprovalV2Request: RequestWithGeneratableChallenge<RequestApprovalV2Request>
+      ) =>
+        addChallenge(requestApprovalV2Request).pipe(
+          Effect.flatMap((body) =>
+            client.Inboxes.requestApprovalV2({payload: body})
+          )
+        ),
+      /** @deprecated use `cancelRequestApprovalV2` */
       cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
         client.Inboxes.cancelRequestApproval({payload: cancelApprovalRequest}),
+      cancelRequestApprovalV2: (
+        cancelApprovalV2Request: RequestWithGeneratableChallenge<CancelApprovalV2Request>
+      ) =>
+        addChallenge(cancelApprovalV2Request).pipe(
+          Effect.flatMap((body) =>
+            client.Inboxes.cancelRequestApprovalV2({payload: body})
+          )
+        ),
       approveRequest: (
         approveRequestRequest: RequestWithGeneratableChallenge<ApproveRequestRequest>
       ) =>

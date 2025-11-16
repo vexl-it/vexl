@@ -137,7 +137,7 @@ const processChatNotificationActionAtom = atom(
     notification: NewChatMessageNoticeNotificationData
   ): Effect.Effect<boolean> => {
     return Effect.gen(function* (_) {
-      console.info('📩 Refreshing inbox')
+      console.info(`📩 Refreshing inbox`)
       const sessionLoaded = yield* _(loadSession())
 
       if (!sessionLoaded) {

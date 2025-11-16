@@ -1,79 +1,62 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MyNotificationTokenInfo} from '@vexl-next/domain/src/general/messaging'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {ecnryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import * as TO from 'fp-ts/TaskOption'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, Option} from 'effect/index'
 import {atom} from 'jotai'
 import {platform, versionCode} from '../../../utils/environment'
 import {i18nAtom} from '../../../utils/localization/I18nProvider'
-import {getNotificationToken} from '../../../utils/notifications'
-import reportError from '../../../utils/reportError'
+import {getNotificationTokenE} from '../../../utils/notifications'
+import {reportErrorE} from '../../../utils/reportError'
 import {registerNotificationCypherActionAtom} from '../../notifications/fcmCypherToKeyHolderAtom'
-import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
+import {getOrFetchNotificationServerPublicKeyActionAtomE} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
 
-const generateMyNotificationTokenInfoActionAtom = atom(
+export const generateMyNotificationTokenInfoActionAtom = atom(
   null,
   (
     get,
     set,
-    token: ExpoNotificationToken | undefined,
+    tokenIfProvided: ExpoNotificationToken | undefined,
     keyHolder: PrivateKeyHolder
-  ): TO.TaskOption<MyNotificationTokenInfo> => {
-    return pipe(
-      token ? T.of(token) : getNotificationToken(),
-      T.bindTo('notificationToken'),
-      T.bind('serverPublicKey', () =>
-        set(getOrFetchNotificationServerPublicKeyActionAtom)
-      ),
-      T.chain(({notificationToken, serverPublicKey}) => {
-        if (!notificationToken || serverPublicKey._tag === 'None') {
-          return TO.none
-        }
-
-        return pipe(
-          effectToTaskEither(
-            ecnryptNotificationToken({
-              serverPublicKey: serverPublicKey.value,
-              clientPlatform: platform,
-              clientVersion: versionCode,
-              notificationToken,
-              locale: get(i18nAtom).t('localeName'),
-            })
+  ): Effect.Effect<Option.Option<MyNotificationTokenInfo>> =>
+    Effect.gen(function* (_) {
+      const {notificationToken, serverPublicKey} = yield* _(
+        Option.all({
+          notificationToken: Option.fromNullable(
+            tokenIfProvided ?? (yield* _(getNotificationTokenE()))
           ),
-          TE.matchE(
-            (l) => {
-              reportError(
-                'warn',
-                new Error('Error while encrypting fcmToken'),
-                {
-                  l,
-                }
-              )
-              return TO.none
-            },
-            (notificationCypher) => {
-              set(registerNotificationCypherActionAtom, {
-                notificationCypher,
-                keyHolder,
-              })
-              return TO.some({
-                cypher: notificationCypher,
-                token: notificationToken,
-              } satisfies MyNotificationTokenInfo)
-            }
-          )
-        )
-      })
-    )
-  }
-)
+          serverPublicKey: yield* _(
+            set(getOrFetchNotificationServerPublicKeyActionAtomE)
+          ),
+        })
+      )
 
-export default generateMyNotificationTokenInfoActionAtom
+      const encryptedNotificationToken = yield* _(
+        ecnryptNotificationToken({
+          serverPublicKey,
+          clientPlatform: platform,
+          clientVersion: versionCode,
+          notificationToken,
+          locale: get(i18nAtom).t('localeName'),
+        }),
+        Effect.tapError((e) =>
+          reportErrorE('warn', new Error('Error while encrypting fcmToken'), {
+            e,
+          })
+        )
+      )
+
+      set(registerNotificationCypherActionAtom, {
+        notificationCypher: encryptedNotificationToken,
+        keyHolder,
+      })
+      return {
+        cypher: encryptedNotificationToken,
+        token: notificationToken,
+      } satisfies MyNotificationTokenInfo
+    }).pipe(Effect.option)
+)
 
 export function updateMyNotificationTokenInfoInChat(
   myNotificationTokenInfo?: MyNotificationTokenInfo

@@ -1,4 +1,3 @@
-import {taskEitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
@@ -9,7 +8,7 @@ import {translationAtom} from '../utils/localization/I18nProvider'
 import {showCheckUpdatedPrivacyPolicySuggestionAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
 import showErrorAlert from '../utils/showErrorAlert'
-import {createInboxAtom} from './chat/hooks/useCreateInbox'
+import {upsertInboxOnBeAndLocallyActionAtom} from './chat/hooks/useCreateInbox'
 import {sessionDataOrDummyAtom} from './session'
 
 export const postLoginFinishedStorageAtom = atomWithParsedMmkvStorage(
@@ -26,16 +25,12 @@ export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
   return pipe(
-    set(createInboxAtom, {
-      inbox: {privateKey: get(sessionDataOrDummyAtom).privateKey},
+    set(upsertInboxOnBeAndLocallyActionAtom, {
+      for: 'userSesssion',
+      key: get(sessionDataOrDummyAtom).privateKey,
     }),
-    taskEitherToEffect,
     Effect.match({
       onFailure(e) {
-        if (e._tag === 'ErrorInboxAlreadyExists') {
-          set(postLoginFinishedAtom, true)
-          return
-        }
         reportError('error', new Error('Error creating inbox'), {e})
         showErrorAlert({
           title: t('common.errorCreatingInbox'),

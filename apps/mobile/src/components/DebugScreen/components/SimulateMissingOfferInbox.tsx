@@ -1,7 +1,9 @@
 import {Picker} from '@react-native-picker/picker'
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {
+  newOfferId,
+  type OneOfferInState,
+} from '@vexl-next/domain/src/general/offers'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Array, Effect} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -12,7 +14,7 @@ import {Alert} from 'react-native'
 import {Text, YStack} from 'tamagui'
 import {apiAtom} from '../../../api'
 import messagingStateAtom from '../../../state/chat/atoms/messagingStateAtom'
-import {createInboxAtom} from '../../../state/chat/hooks/useCreateInbox'
+import {upsertInboxOnBeAndLocallyActionAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {createOfferActionAtom} from '../../../state/marketplace/atoms/createOfferActionAtom'
 import {myOffersAtom} from '../../../state/marketplace/atoms/myOffers'
 import {packageName, version} from '../../../utils/environment'
@@ -47,19 +49,23 @@ function SimulateMissingOfferInbox(): React.ReactElement {
       Array.range(0, 9),
       Array.map((i) =>
         pipe(
-          generateKeyPair(),
-          TE.fromEither,
-          TE.bindTo('key'),
-          TE.bindW('createdOffer', ({key}) =>
+          store.set(upsertInboxOnBeAndLocallyActionAtom, {
+            for: 'myOffer',
+            offerId: newOfferId(),
+          }),
+          effectToTaskEither,
+          TE.bindTo('inbox'),
+          TE.bindW('createdOffer', ({inbox}) =>
             effectToTaskEither(
               store.set(createOfferActionAtom, {
+                offerId: newOfferId(),
                 payloadPublic: {
                   ...offer.offerInfo.publicPart,
-                  offerPublicKey: key.publicKeyPemBase64,
+                  offerPublicKey: inbox.inbox.privateKey.publicKeyPemBase64,
                   offerDescription: `#${i} ${offer.offerInfo.publicPart.offerDescription}`,
                   authorClientVersion: version,
                 },
-                offerKey: key,
+                offerKey: inbox.inbox.privateKey,
                 intendedClubs: [],
                 intendedConnectionLevel:
                   offer.ownershipInfo?.intendedConnectionLevel ?? 'FIRST',
@@ -72,14 +78,6 @@ function SimulateMissingOfferInbox(): React.ReactElement {
                 },
               })
             )
-          ),
-          TE.chainFirstW(({key, createdOffer}) =>
-            store.set(createInboxAtom, {
-              inbox: {
-                privateKey: key,
-                offerId: createdOffer.offerInfo.offerId,
-              },
-            })
           ),
           TE.matchW(
             (l) => {

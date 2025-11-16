@@ -1,6 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Array, Effect} from 'effect'
-import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
@@ -73,12 +72,15 @@ function RequestScreen(): React.ReactElement {
 
     void pipe(
       rerequestOffer({text}),
-      T.map((success) => {
-        if (success) {
-          setText('')
-        }
-      })
-    )()
+      Effect.tap((success) => {
+        Effect.sync(() => {
+          if (success) {
+            setText('')
+          }
+        })
+      }),
+      Effect.runFork
+    )
   }, [canBeRerequested, text, rerequestOffer])
 
   const onHistoryPress = useCallback(() => {

@@ -23,7 +23,7 @@ export const sendOfferToNetworkBatchPrivateParts = ({
     offerPrivateList: NonEmptyArray<ServerPrivatePart>
     countryPrefix: CountryPrefix
     adminId: OfferAdminId
-    offerId?: OfferId
+    offerId: OfferId
   }
 }): ReturnType<OfferApi['createNewOffer']> =>
   Effect.gen(function* (_) {

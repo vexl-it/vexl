@@ -4,7 +4,6 @@ import {
   effectToTaskEither,
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Array, Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -17,7 +16,7 @@ import {useAppState} from '../utils/useAppState'
 import {effectWithEnsuredBenchmark} from './ActionBenchmarks'
 import {inboxesAtom} from './chat/atoms/messagingStateAtom'
 import {useRefreshNotificationTokensForActiveChatsAssumeLogin} from './chat/atoms/refreshNotificationTokensActionAtom'
-import {createInboxAtom} from './chat/hooks/useCreateInbox'
+import {upsertInboxOnBeAndLocallyActionAtom} from './chat/hooks/useCreateInbox'
 import checkNotificationTokensAndUpdateOffersActionAtom from './marketplace/atoms/checkNotificationTokensAndUpdateOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {offersMissingOnServerAtom} from './marketplace/atoms/offersMissingOnServer'
@@ -205,29 +204,25 @@ const recreateInboxAndUpdateOfferAtom = atom(
     }
 
     return pipe(
-      generateKeyPair(),
-      TE.fromEither,
-      TE.chainFirstW((keyPair) =>
-        set(createInboxAtom, {
-          inbox: {
-            privateKey: keyPair,
-            offerId: offerWithoutInbox.offerInfo.offerId,
-          },
+      effectToTaskEither(
+        set(upsertInboxOnBeAndLocallyActionAtom, {
+          for: 'myOffer',
+          offerId: offerWithoutInbox.offerInfo.offerId,
         })
       ),
-      TE.chainW((keyHolder) =>
+      TE.chainW(({inbox}) =>
         effectToTaskEither(
           set(updateOfferActionAtom, {
             intendedClubs: offerWithoutInbox.ownershipInfo?.intendedClubs ?? [],
             payloadPublic: {
               ...offerWithoutInbox.offerInfo.publicPart,
-              offerPublicKey: keyHolder.publicKeyPemBase64,
+              offerPublicKey: inbox.privateKey.publicKeyPemBase64,
             },
             symmetricKey,
             adminId,
             intendedConnectionLevel,
             updateFcmCypher: true,
-            offerKey: keyHolder,
+            offerKey: inbox.privateKey,
             updatePrivateParts: false,
           })
         )

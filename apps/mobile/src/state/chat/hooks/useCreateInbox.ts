@@ -1,79 +1,71 @@
-import {type PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {type Inbox} from '@vexl-next/domain/src/general/messaging'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {atom, useSetAtom} from 'jotai'
-import * as O from 'optics-ts'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {generateKeyPairE} from '@vexl-next/resources-utils/src/utils/crypto'
+import {Array, Effect, Option} from 'effect/index'
+import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {getNotificationToken} from '../../../utils/notifications'
+import {getNotificationTokenE} from '../../../utils/notifications'
 import messagingStateAtom from '../atoms/messagingStateAtom'
-import {
-  type ApiErrorCreatingInbox,
-  type ErrorInboxAlreadyExists,
-  type InboxInState,
-  type MessagingState,
-} from '../domain'
+import {ApiErrorCreatingInbox, type InboxInState} from '../domain'
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function focusAddInbox(optic: O.OpticFor<MessagingState>) {
-  return optic.appendTo()
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function focusOneInbox(privateKey: PrivateKeyPemBase64) {
-  return (optic: O.OpticFor<MessagingState>) =>
-    optic.find((one) => one.inbox.privateKey.privateKeyPemBase64 === privateKey)
-}
-
-export const createInboxAtom = atom<
+export const upsertInboxOnBeAndLocallyActionAtom = atom(
   null,
-  [{inbox: Inbox}],
-  TE.TaskEither<ApiErrorCreatingInbox | ErrorInboxAlreadyExists, InboxInState>
->(null, (get, set, params) => {
-  const api = get(apiAtom)
-  const {inbox} = params
-  const messagingStateOptic = O.optic<MessagingState>()
-  const oneInboxPrism = focusOneInbox(inbox.privateKey.privateKeyPemBase64)(
-    messagingStateOptic
-  )
+  (
+    get,
+    set,
+    request:
+      | {for: 'myOffer' | 'offerRequest'; offerId: OfferId}
+      | {for: 'userSesssion'; key: PrivateKeyHolder}
+  ) =>
+    Effect.gen(function* (_) {
+      const api = get(apiAtom)
 
-  if (O.preview(oneInboxPrism)(get(messagingStateAtom)))
-    return TE.left(
-      toBasicError('ErrorInboxAlreadyExists')(new Error('Inbox already exists'))
-    )
-
-  return pipe(
-    TE.Do,
-    TE.chainTaskK(getNotificationToken),
-    TE.chainW((token) =>
-      pipe(
-        effectToTaskEither(
+      const messagingState = get(messagingStateAtom)
+      const existingInbox = Array.findFirst(messagingState, (one) => {
+        if (request.for === 'myOffer')
+          return one.inbox.offerId === request.offerId
+        if (request.for === 'offerRequest')
+          return one.inbox.requestOfferId === request.offerId
+        if (request.for === 'userSesssion')
+          return (
+            one.inbox.privateKey.publicKeyPemBase64 ===
+            request.key.publicKeyPemBase64
+          )
+        return false
+      })
+      // inbox already exists
+      if (Option.isSome(existingInbox)) {
+        // Always hit create inbox. The backend wont fail if the inbox exists
+        yield* _(
           api.chat.createInbox({
-            token: token ?? undefined,
-            keyPair: inbox.privateKey,
+            token: (yield* _(getNotificationTokenE())) ?? undefined,
+            keyPair: existingInbox.value.inbox.privateKey,
           })
-        ),
-        TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
-      )
-    ),
-    TE.map(() => {
-      const newInbox: InboxInState = {inbox, chats: []}
-      set(
-        messagingStateAtom,
-        O.set(focusAddInbox(messagingStateOptic))(newInbox)
-      )
-      return newInbox
-    })
-  )
-})
+        )
+        return existingInbox.value
+      }
 
-export default function useCreateInbox(): (a: {
-  inbox: Inbox
-}) => TE.TaskEither<
-  ApiErrorCreatingInbox | ErrorInboxAlreadyExists,
-  InboxInState
-> {
-  return useSetAtom(createInboxAtom)
-}
+      const inboxKeypair = yield* _(generateKeyPairE())
+      const notificationToken = yield* _(getNotificationTokenE())
+      yield* _(
+        api.chat.createInbox({
+          token: notificationToken ?? undefined,
+          keyPair: inboxKeypair,
+        }),
+        Effect.mapError((e) => new ApiErrorCreatingInbox({cause: e}))
+      )
+
+      const newInboxInState: InboxInState = {
+        inbox: {
+          privateKey: inboxKeypair,
+          offerId: request.for === 'myOffer' ? request.offerId : undefined,
+          requestOfferId:
+            request.for === 'offerRequest' ? request.offerId : undefined,
+        },
+        chats: [],
+      }
+      set(messagingStateAtom, (s) => [...s, newInboxInState])
+
+      return newInboxInState
+    })
+)

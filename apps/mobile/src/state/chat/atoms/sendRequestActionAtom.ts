@@ -1,26 +1,21 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Record} from 'effect'
+import {Array, Effect, Record} from 'effect'
 import * as O from 'fp-ts/Option'
-import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
+import {withLoadingOverlayAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {getNotificationToken} from '../../../utils/notifications'
-import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
+import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import showErrorAlert from '../../../utils/showErrorAlert'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
-import {sessionDataOrDummyAtom} from '../../session'
+import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
 import {version} from './../../../utils/environment'
-import {createUserInboxIfItDoesNotExistAtom} from './createUserInboxIfItDoesNotExistAtom'
-import generateMyNotificationTokenInfoActionAtom from './generateMyNotificationTokenInfoActionAtom'
+import {generateMyNotificationTokenInfoActionAtom} from './generateMyNotificationTokenInfoActionAtom'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 
 const sendRequestActionAtom = atom(
@@ -29,56 +24,58 @@ const sendRequestActionAtom = atom(
     get,
     set,
     {text, originOffer}: {text: string; originOffer: OneOfferInState}
-  ) => {
-    const api = get(apiAtom)
-    const session = get(sessionDataOrDummyAtom)
-    const goldenAvatarType = get(goldenAvatarTypeAtom)
-    const clubsToKeyHolder = get(clubsToKeyHolderAtom)
-    const forClubsUuids = pipe(
-      Record.keys(clubsToKeyHolder),
-      Array.filter((clubUuid) =>
-        Array.contains(clubUuid)(originOffer.offerInfo.privatePart.clubIds)
-      )
-    )
-
-    return pipe(
-      set(
-        generateMyNotificationTokenInfoActionAtom,
-        undefined,
-        session.privateKey
-      ),
-      TE.fromTask,
-      TE.bindTo('encryptedToken'),
-      TE.bind('message', ({encryptedToken}) =>
-        effectToTaskEither(
-          sendMessagingRequest({
-            text,
-            notificationApi: api.notification,
-            theirNotificationCypher: originOffer.offerInfo.publicPart.fcmCypher,
-            api: api.chat,
-            fromKeypair: session.privateKey,
-            myVersion: version,
-            toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
-            otherSideVersion:
-              originOffer.offerInfo.publicPart.authorClientVersion,
-            myNotificationCypher: O.toUndefined(encryptedToken)?.cypher,
-            lastReceivedNotificationCypher:
-              originOffer.offerInfo.publicPart.fcmCypher,
-            goldenAvatarType,
-            forClubsUuids,
-          })
+  ) =>
+    Effect.gen(function* (_) {
+      const api = get(apiAtom)
+      const goldenAvatarType = get(goldenAvatarTypeAtom)
+      const clubsToKeyHolder = get(clubsToKeyHolderAtom)
+      const forClubsUuids = pipe(
+        Record.keys(clubsToKeyHolder),
+        Array.filter((clubUuid) =>
+          Array.contains(clubUuid)(originOffer.offerInfo.privatePart.clubIds)
         )
-      ),
-      TE.map(({message, encryptedToken}) =>
-        set(upsertChatForTheirOfferActionAtom, {
-          inbox: {privateKey: session.privateKey},
-          initialMessage: {state: 'sent', message},
-          sentFcmTokenInfo: O.toUndefined(encryptedToken),
-          offer: originOffer,
+      )
+
+      const {inbox} = yield* _(
+        set(upsertInboxOnBeAndLocallyActionAtom, {
+          for: 'offerRequest',
+          offerId: originOffer.offerInfo.offerId,
         })
       )
-    )
-  }
+      const encryptedToken = yield* _(
+        set(
+          generateMyNotificationTokenInfoActionAtom,
+          undefined,
+          inbox.privateKey
+        )
+      )
+
+      const message = yield* _(
+        sendMessagingRequest({
+          text,
+          notificationApi: api.notification,
+          theirNotificationCypher: originOffer.offerInfo.publicPart.fcmCypher,
+          api: api.chat,
+          fromKeypair: inbox.privateKey,
+          myVersion: version,
+          toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
+          otherSideVersion:
+            originOffer.offerInfo.publicPart.authorClientVersion,
+          myNotificationCypher: O.toUndefined(encryptedToken)?.cypher,
+          lastReceivedNotificationCypher:
+            originOffer.offerInfo.publicPart.fcmCypher,
+          goldenAvatarType,
+          forClubsUuids,
+        })
+      )
+
+      return set(upsertChatForTheirOfferActionAtom, {
+        inbox: {privateKey: inbox.privateKey},
+        initialMessage: {state: 'sent', message},
+        sentFcmTokenInfo: O.toUndefined(encryptedToken),
+        offer: originOffer,
+      })
+    })
 )
 
 export const sendRequestHandleUIActionAtom = atom(
@@ -87,84 +84,33 @@ export const sendRequestHandleUIActionAtom = atom(
     get,
     set,
     {text, originOffer}: {text: string; originOffer: OneOfferInState}
-  ) => {
-    const {t} = get(translationAtom)
-    const api = get(apiAtom)
-    const session = get(sessionDataOrDummyAtom)
+  ) =>
+    Effect.gen(function* (_) {
+      const {t} = get(translationAtom)
+      yield* _(set(checkNotificationPermissionsAndAskIfPossibleActionAtom))
 
-    const sendRequestHandleInboxMissing = pipe(
-      set(sendRequestActionAtom, {text, originOffer}),
-      TE.matchE(
-        (e) => {
-          if (e._tag === 'SenderInboxDoesNotExistError') {
-            reportError('warn', new Error('Sender user inbox does not exist'), {
-              e,
-            })
+      return yield* _(
+        set(sendRequestActionAtom, {text, originOffer}),
+        // TODO handle errors
+        Effect.tapError((e) =>
+          Effect.sync(() => {
+            if (e._tag === 'ApiErrorCreatingInbox') {
+              reportError(
+                'error',
+                new Error('Error recreating user inbox after it was deleted'),
+                {e}
+              )
 
-            return pipe(
-              TE.Do,
-              TE.chainTaskK(getNotificationToken),
-              TE.chainW((token) =>
-                pipe(
-                  effectToTaskEither(
-                    api.chat.createInbox({
-                      token: token ?? undefined,
-                      keyPair: session.privateKey,
-                    })
-                  ),
-                  TE.mapLeft(toBasicError('ApiErrorCreatingInbox'))
-                )
-              ),
-              TE.chainW(() => set(sendRequestActionAtom, {text, originOffer}))
-            )
-          }
-
-          return TE.left(e)
-        },
-        (a) => {
-          return TE.right(a)
-        }
-      )
-    )
-
-    const sendRequestWithLoadingOverlay = pipe(
-      TE.Do,
-      TE.map(() => {
-        set(loadingOverlayDisplayedAtom, true)
-        set(createUserInboxIfItDoesNotExistAtom, session.privateKey)
-      }),
-      TE.chainW(() => sendRequestHandleInboxMissing),
-      TE.mapLeft((e) => {
-        if (e._tag === 'ApiErrorCreatingInbox') {
-          reportError(
-            'error',
-            new Error('Error recreating user inbox after it was deleted'),
-            {e}
-          )
-
-          showErrorAlert({
-            title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
-            error: e,
+              showErrorAlert({
+                title: toCommonErrorMessage(e, t) ?? t('common.unknownError'),
+                error: e,
+              })
+            }
           })
-        }
-        // TODO handle request sent
-        set(loadingOverlayDisplayedAtom, false)
-        return e
-      }),
-      TE.map((chat) => {
-        set(loadingOverlayDisplayedAtom, false)
-        return chat
-      })
-    )
-
-    return pipe(
-      TE.Do,
-      TE.chainW(() =>
-        set(checkNotificationPermissionsAndAskIfPossibleTEActionAtom)
-      ),
-      TE.chainW(() => sendRequestWithLoadingOverlay)
-    )
-  }
+        ),
+        set(withLoadingOverlayAtom)
+      )
+    })
 )
 
 export default sendRequestActionAtom

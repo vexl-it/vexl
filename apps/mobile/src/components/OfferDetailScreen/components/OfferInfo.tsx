@@ -1,5 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -67,7 +68,9 @@ function OfferInfo({
   const [text, setText] = useState('')
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const chatForOffer = useChatWithMessagesForOffer({
-    offerPublicKey: offer.offerInfo.publicPart.offerPublicKey,
+    offerId: offer.offerInfo.offerId,
+    isMyOffer: !!offer.ownershipInfo,
+    otherSidePublicKey: offer.offerInfo.publicPart.offerPublicKey,
   })
   const preferences = useAtomValue(preferencesAtom)
 
@@ -93,7 +96,7 @@ function OfferInfo({
   const onRequestPressed = useCallback(() => {
     if (!text.trim()) return
     void pipe(
-      submitRequest({text, originOffer: offer}),
+      effectToTaskEither(submitRequest({text, originOffer: offer})),
       TE.match(
         (e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {

@@ -72,7 +72,7 @@ export default function createNewOfferForMyContacts({
   intendedConnectionLevel: IntendedConnectionLevel
   intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
   onProgress?: (status: OfferEncryptionProgress) => void
-  offerId?: OfferId
+  offerId: OfferId
   serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
     ServerToClientHashedNumber,
     HashedPhoneNumber

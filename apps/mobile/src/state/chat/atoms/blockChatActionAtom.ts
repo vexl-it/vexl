@@ -6,7 +6,6 @@ import {
 import {
   type NotFoundError,
   type RateLimitedError,
-  type UnauthorizedError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {
@@ -52,7 +51,6 @@ export default function blockChatActionAtom(
   TE.TaskEither<
     | ErrorEncryptingMessage
     | HttpApiDecodeError
-    | UnauthorizedError
     | InvalidChallengeError
     | ForbiddenMessageTypeError
     | NotFoundError

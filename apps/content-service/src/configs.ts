@@ -35,3 +35,7 @@ export const btcPayServerWebhookSecretConfig = Config.string(
 export const forceUpdateForVersionAndLowerConfig = Config.number(
   'FORCE_UPDATE_FOR_VERSION_AND_LOWER'
 ).pipe(Config.withDefault(0))
+
+export const appInMaintenanceModeConfig = Config.boolean(
+  'APP_IN_MAINTENANCE_MODE'
+).pipe(Config.withDefault(false))

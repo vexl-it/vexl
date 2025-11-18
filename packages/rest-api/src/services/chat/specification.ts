@@ -64,7 +64,6 @@ export const UpdateInboxEndpoint = HttpApiEndpoint.put(
     OpenApi.Description,
     'Not needed anymore since chat service does not sent fcm messages and does not collect fcm tokens anymore'
   )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateInboxRequest)
   .addSuccess(UpdateInboxResponse)
   .annotate(MaxExpectedDailyCall, 10)
@@ -73,7 +72,6 @@ export const CreateInboxEndpoint = HttpApiEndpoint.post(
   'createInbox',
   '/api/v1/inboxes'
 )
-  .middleware(ServerSecurityMiddleware)
   .setHeaders(CommonHeaders)
   .setPayload(CreateInboxRequest)
   .addSuccess(CreateInboxResponse)
@@ -84,7 +82,6 @@ export const DeleteInboxEndpoint = HttpApiEndpoint.del(
   'deleteInbox',
   '/api/v1/inboxes'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(DeleteInboxRequest)
   .addSuccess(DeleteInboxResponse)
   .addError(DeleteInboxErrors)
@@ -94,7 +91,6 @@ export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
   'deletePulledMessages',
   '/api/v1/inboxes/messages'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(DeletePulledMessagesRequest)
   .addSuccess(DeletePulledMessagesResponse)
   .addError(DeletePulledMessagesErrors)
@@ -104,7 +100,6 @@ export const BlockInboxEndpoint = HttpApiEndpoint.put(
   'blockInbox',
   '/api/v1/inboxes/block'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(BlockInboxRequest)
   .addSuccess(BlockInboxResponse)
   .addError(BlockInboxErrors)
@@ -124,7 +119,6 @@ export const RequestApprovalV2Endpoint = HttpApiEndpoint.post(
   'requestApprovalV2',
   '/api/v2/inboxes/approval/request'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(RequestApprovalV2Request)
   .addSuccess(RequestApprovalResponse)
   .addError(RequestApprovalV2Errors)
@@ -144,7 +138,6 @@ export const CancelRequestApprovalV2Endpoint = HttpApiEndpoint.post(
   'cancelRequestApprovalV2',
   '/api/v2/inboxes/approval/cancel'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(CancelApprovalV2Request)
   .addSuccess(CancelApprovalResponse)
   .addError(CancelRequestApprovalErrors)
@@ -154,7 +147,6 @@ export const ApproveRequestEndpoint = HttpApiEndpoint.post(
   'approveRequest',
   '/api/v1/inboxes/approval/confirm'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(ApproveRequestRequest)
   .addSuccess(ApproveRequestResponse)
   .addError(ApproveRequestErrors)
@@ -165,7 +157,6 @@ export const DeleteInboxesEndpoint = HttpApiEndpoint.del(
   '/api/v1/inboxes/batch'
 )
   .annotate(OpenApi.Deprecated, true)
-  .middleware(ServerSecurityMiddleware)
   .setPayload(DeleteInboxesRequest)
   .addSuccess(DeleteInboxesResponse)
   .addError(DeleteInboxErrors)
@@ -175,7 +166,6 @@ export const LeaveChatEndpoint = HttpApiEndpoint.post(
   'leaveChat',
   '/api/v1/inboxes/leave-chat'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(LeaveChatRequest)
   .addSuccess(LeaveChatResponse)
   .addError(LeaveChatErrors)
@@ -185,7 +175,6 @@ export const RetrieveMessagesEndpoint = HttpApiEndpoint.put(
   'retrieveMessages',
   '/api/v1/inboxes/messages'
 )
-  .middleware(ServerSecurityMiddleware)
   .setHeaders(CommonHeaders)
   .setPayload(RetrieveMessagesRequest)
   .addSuccess(RetrieveMessagesResponse)
@@ -196,7 +185,6 @@ export const SendMessageEndpoint = HttpApiEndpoint.post(
   'sendMessage',
   '/api/v1/inboxes/messages'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(SendMessageRequest)
   .addSuccess(SendMessageResponse)
   .addError(SendMessageErrors)
@@ -207,7 +195,6 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   '/api/v1/inboxes/messages/batch'
 )
   .annotate(OpenApi.Deprecated, true)
-  .middleware(ServerSecurityMiddleware)
   .setPayload(SendMessagesRequest)
   .addSuccess(SendMessagesResponse)
   .addError(SendMessageErrors)

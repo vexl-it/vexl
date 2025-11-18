@@ -3,7 +3,6 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
@@ -18,7 +17,6 @@ export const GetLocationSuggestionEndpoint = HttpApiEndpoint.get(
   'getLocationSuggestion',
   '/suggest'
 )
-  .middleware(ServerSecurityMiddleware)
   .setUrlParams(GetLocationSuggestionsRequest)
   .addSuccess(GetLocationSuggestionsResponse)
   .addError(LocationNotFoundError)
@@ -28,7 +26,6 @@ export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
   'getGeocodedCoordinates',
   '/geocode'
 )
-  .middleware(ServerSecurityMiddleware)
   .setUrlParams(GetGeocodedCoordinatesRequest)
   .addSuccess(GetGeocodedCoordinatesResponse)
   .addError(LocationNotFoundError)

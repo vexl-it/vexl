@@ -82,7 +82,6 @@ export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
       OpenApi.Summary,
       'Get club offers for me modified or created after'
     )
-    .middleware(ServerSecurityMiddleware)
     .setPayload(GetClubOffersForMeCreatedOrModifiedAfterRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
     .addError(InvalidChallengeError)
@@ -97,7 +96,6 @@ export const GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
       OpenApi.Summary,
       'Get club offers for me modified or created after (paginated)'
     )
-    .middleware(ServerSecurityMiddleware)
     .setPayload(GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
     .addError(InvalidChallengeError)
@@ -120,7 +118,6 @@ export const RefreshOfferEndpoint = HttpApiEndpoint.post(
   '/api/v2/offers/refresh'
 )
   .annotate(OpenApi.Summary, 'Refresh offer')
-  .middleware(ServerSecurityMiddleware)
   .setPayload(RefreshOfferRequest)
   .addSuccess(RefreshOfferResponse)
   .addError(NotFoundError)
@@ -131,7 +128,6 @@ export const DeleteOfferEndpoint = HttpApiEndpoint.del(
   '/api/v1/offers'
 )
   .annotate(OpenApi.Summary, 'Delete offer')
-  .middleware(ServerSecurityMiddleware)
   .setUrlParams(DeleteOfferRequest)
   .addSuccess(DeleteOfferResponse)
   .annotate(MaxExpectedDailyCall, 50)
@@ -153,7 +149,6 @@ export const CreatePrivatePartEndpoint = HttpApiEndpoint.post(
   '/api/v2/offers/private-part'
 )
   .annotate(OpenApi.Summary, 'Create private part')
-  .middleware(ServerSecurityMiddleware)
   .setPayload(CreatePrivatePartRequest)
   .addSuccess(CreatePrivatePartResponse)
   .addError(DuplicatedPublicKeyError)
@@ -189,7 +184,6 @@ export const GetRemovedClubOffersEndpoint = HttpApiEndpoint.post(
   '/api/v1/clubOffers/not-exist'
 )
   .annotate(OpenApi.Summary, 'Get removed club offers')
-  .middleware(ServerSecurityMiddleware)
   .setPayload(RemovedClubOfferIdsRequest)
   .addSuccess(RemovedOfferIdsResponse)
   .addError(InvalidChallengeError)

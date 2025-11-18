@@ -1,4 +1,3 @@
-import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {GetExchangeRateError} from '@vexl-next/rest-api/src/services/btcExchangeRate/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -16,21 +15,6 @@ beforeAll(startRuntime)
 afterAll(disposeRuntime)
 
 describe('exchange rate', () => {
-  it('Fails without auth headers', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const response = yield* _(
-          client.getExchangeRate({
-            urlParams: {currency: 'USD'},
-          }),
-          Effect.either
-        )
-        expectErrorResponse(UnauthorizedError)(response)
-      })
-    )
-  })
-
   it('Returns proper exchange rate', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

@@ -124,3 +124,17 @@ export const enableRateLimitingInDevelopmentConfig = Config.boolean(
 export const rateLimitPerIpMultiplierConfig = Config.number(
   'RATE_LIMIT_PER_IP_MULTIPLIER'
 ).pipe(Config.withDefault(100))
+
+export const keepAliveTimeoutMsConfig = Config.number(
+  'KEEP_ALIVE_TIMEOUT_MS'
+).pipe(
+  Config.withDefault(20000) // 20 seconds
+)
+
+export const headersTimeoutMsConfig = Config.number('HEADERS_TIMEOUT_MS').pipe(
+  Config.withDefault(25000) // 25 seconds
+)
+
+export const requestTimeoutMsConfig = Config.number('REQUEST_TIMEOUT_MS').pipe(
+  Config.withDefault(40000) // 40 seconds
+)

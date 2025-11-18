@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "esbuild": "^0.25.0",
-    "glob": "^11.0.0"
+    "glob": "^11.1.0"
   },
   "files": [
     "index.js"

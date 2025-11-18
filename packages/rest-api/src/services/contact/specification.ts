@@ -218,7 +218,6 @@ export const ConvertPhoneNumberHashesToServerHashesEndpoint =
     'convertPhoneNumberHashesToServerHashes',
     '/api/v1/contacts/convert-to-server-hashes'
   )
-    .middleware(ServerSecurityMiddleware)
     .setPayload(ConvertPhoneNumberHashesToServerHashesRequest)
     .addSuccess(ConvertPhoneNumberHashesToServerHashesResponse)
     .annotate(MaxExpectedDailyCall, 100)
@@ -227,7 +226,6 @@ export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
   'updateBadOwnerHash',
   '/api/v1/update-bad-owner-hash'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateBadOwnerHashRequest)
   .addSuccess(UpdateBadOwnerHashResponse)
   .addError(UpdateBadOwnerHashErrors)

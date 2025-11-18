@@ -3,7 +3,6 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
@@ -19,7 +18,6 @@ export const IssueNotificationEndpoint = HttpApiEndpoint.post(
   'issueNotification',
   '/issue-notification'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(IssueNotificationRequest)
   .addSuccess(IssueNotificationResponse)
   .addError(IssueNotificationErrors)
@@ -29,7 +27,6 @@ export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
   'reportNotificationProcessed',
   '/report-notification'
 )
-  .middleware(ServerSecurityMiddleware)
   .setPayload(ReportNotificationProcessedRequest)
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 5000)

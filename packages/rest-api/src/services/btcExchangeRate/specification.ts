@@ -4,7 +4,6 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
@@ -20,7 +19,6 @@ export const GetExchangeRateEndpoint = HttpApiEndpoint.get(
 )
   .setUrlParams(GetExchangeRateRequest)
   .addSuccess(GetExchangeRateResponse)
-  .middleware(ServerSecurityMiddleware)
   .addError(GetExchangeRateError)
   .annotate(MaxExpectedDailyCall, 500)
 

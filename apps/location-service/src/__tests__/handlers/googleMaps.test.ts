@@ -1,4 +1,3 @@
-import {UnauthorizedError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   LatitudeE,
   LongitudeE,
@@ -19,26 +18,6 @@ beforeAll(startRuntime)
 afterAll(disposeRuntime)
 
 describe('geocode', () => {
-  it('Fails without auth headers', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const response = yield* _(
-          client.getGeocodedCoordinates({
-            urlParams: {
-              lang: 'EN',
-              latitude: Schema.decodeSync(LatitudeE)(20),
-              longitude: Schema.decodeSync(LongitudeE)(10),
-            },
-          }),
-          Effect.either
-        )
-
-        expectErrorResponse(UnauthorizedError)(response)
-      })
-    )
-  })
-
   it('Returns proper coordinates', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
@@ -88,25 +67,6 @@ describe('geocode', () => {
 })
 
 describe('Suggest', () => {
-  it('Fails without auth headers', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const response = yield* _(
-          client.getLocationSuggestion({
-            urlParams: {
-              lang: 'EN',
-              phrase: 'something',
-            },
-          }),
-          Effect.either
-        )
-
-        expectErrorResponse(UnauthorizedError)(response)
-      })
-    )
-  })
-
   it('Returns proper suggestions', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

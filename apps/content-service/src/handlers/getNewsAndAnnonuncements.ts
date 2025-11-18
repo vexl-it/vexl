@@ -4,7 +4,10 @@ import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/service
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
-import {forceUpdateForVersionAndLowerConfig} from '../configs'
+import {
+  appInMaintenanceModeConfig,
+  forceUpdateForVersionAndLowerConfig,
+} from '../configs'
 
 // const data = {
 //   vexlBotNews: [
@@ -139,6 +142,25 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
       //   bubbleOrigin: Option.none(),
       //   cancelable: true,
       // }
+
+      const appInMaintenanceMode = yield* _(appInMaintenanceModeConfig)
+      if (appInMaintenanceMode) {
+        return {
+          fullScreenWarning: Option.some({
+            action: Option.none(),
+            cancelable: false,
+            cancelForever: false,
+            id: Schema.decodeSync(UuidE)(
+              'e2334f43-b925-40ec-9a17-bf5302f0fd0d'
+            ),
+            type: 'YELLOW',
+            title: 'Maintenance Mode',
+            description:
+              'The app is currently undergoing maintenance. Please try again later.',
+          }),
+          vexlBotNews: [],
+        } satisfies NewsAndAnnouncementsResponse
+      }
 
       const forceUpdateForVersionAndLower = yield* _(
         forceUpdateForVersionAndLowerConfig

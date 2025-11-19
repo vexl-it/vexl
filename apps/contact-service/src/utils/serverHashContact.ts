@@ -8,7 +8,7 @@ import {pbkdf2} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type ConfigError, Effect, pipe, Schema, String} from 'effect/index'
 import {secretSaltForServerContact} from '../configs'
 
-const SERVER_HASH_PREFIX = 'ServerHash:'
+export const SERVER_HASH_PREFIX = 'ServerHash:'
 
 export const ServerHashedNumber = Schema.String.pipe(
   Schema.filter(String.startsWith(SERVER_HASH_PREFIX)),

@@ -14,6 +14,7 @@ import {type ParseError} from 'effect/ParseResult'
 import {ContactRecordId} from '../../db/ContactDbService/domain'
 import {UserRecordId} from '../../db/UserDbService/domain'
 import {
+  SERVER_HASH_PREFIX,
   ServerHashedNumber,
   serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
@@ -92,6 +93,7 @@ const migrateUsers = (
         users
       WHERE
         id > ${req.lastFetchedId ?? 0}
+        AND hash NOT LIKE '${SERVER_HASH_PREFIX}%'
       ORDER BY
         id ASC
       LIMIT
@@ -116,7 +118,7 @@ const migrateUsers = (
       const chunk = yield* _(
         getAllContacts({
           lastFetchedId,
-          limit: 1000,
+          limit: 10_000,
         })
       )
 
@@ -214,6 +216,7 @@ const migrateUserContacts = (
         user_contact
       WHERE
         id > ${req.lastFetchedId ?? 0}
+        AND hash_to NOT LIKE '${SERVER_HASH_PREFIX}%'
       ORDER BY
         id ASC
       LIMIT
@@ -236,7 +239,7 @@ const migrateUserContacts = (
       const chunk = yield* _(
         fetchUserContactsChunk({
           lastFetchedId,
-          limit: 1000,
+          limit: 10_000,
         })
       )
 
@@ -283,8 +286,11 @@ export const migratePhoneNumberHashes = Effect.flatMap(SqlClient, (sql) =>
 
     yield* _(Effect.logInfo('Contact DB migration completed'))
   }).pipe(
-    sql.withTransaction,
     withRedisLock('migratePhoneNumberHashes', '30 minutes'),
+    Effect.tapError((e) => {
+      console.error(e)
+      return Effect.logError(`Error during contact DB migration: ${e.message}`)
+    }),
     Effect.mapError(
       (e) =>
         new UnexpectedServerError({

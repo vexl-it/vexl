@@ -81,7 +81,9 @@ import {
   otherOfferScreens,
   productOfferScreens,
 } from '../domain'
-import numberOfFriendsAtom from './numberOfFriendsAtom'
+import numberOfFriendsAtom, {
+  numberOfFriendsLoadedEffect,
+} from './numberOfFriendsAtom'
 
 function getAtomWithNullableValueHandling<T, S>(
   nullableAtom: PrimitiveAtom<T | undefined>,
@@ -659,6 +661,8 @@ export const offerFormMolecule = molecule(() => {
           })
         )
 
+        yield* _(numberOfFriendsLoadedEffect)
+
         yield* _(
           set(createOfferFromCompleteDataActionAtom, {
             offerId,
@@ -857,13 +861,17 @@ export const offerFormMolecule = molecule(() => {
       Array.length
     )
 
-    if (
-      numberOfFriends.state === 'error' ||
-      numberOfFriends.state === 'loading'
-    ) {
+    if (numberOfFriends.state === 'error') {
       return {
         loadingText: t('offerForm.noVexlersFoundForYourOffer'),
         doneText: t('offerForm.noVexlersFoundForYourOffer'),
+      }
+    }
+
+    if (numberOfFriends.state === 'loading') {
+      return {
+        loadingText: t('offerForm.loadingNumberOfVexlaks'),
+        doneText: t('offerForm.loadingVexlaksDone'),
       }
     }
 
@@ -1011,6 +1019,7 @@ export const offerFormMolecule = molecule(() => {
         indicateProgress: {type: 'intermediate'},
       })
 
+      yield* _(numberOfFriendsLoadedEffect)
       const payloadPublic = formatOfferPublicPart(get(offerFormAtom))
 
       yield* _(

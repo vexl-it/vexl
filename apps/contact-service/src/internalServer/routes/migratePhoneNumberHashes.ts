@@ -9,7 +9,7 @@ import {
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import {type ConfigError} from 'effect/ConfigError'
-import {Array, Effect, Option, pipe, Schema} from 'effect/index'
+import {Array, Config, Effect, Option, pipe, Schema} from 'effect/index'
 import {type ParseError} from 'effect/ParseResult'
 import {ContactRecordId} from '../../db/ContactDbService/domain'
 import {UserRecordId} from '../../db/UserDbService/domain'
@@ -278,39 +278,57 @@ const migrateUserContacts = (
   }).pipe(Effect.withSpan('migrateContacts'))
 }
 
-export const migratePhoneNumberHashes = Effect.flatMap(SqlClient, (sql) =>
-  Effect.gen(function* (_) {
-    yield* _(Effect.logInfo('Starting contact DB migration...'))
-
-    // two tables: users(id, hash) and contact
-    yield* _(
-      Effect.logInfo(
-        'First modifying users table and user_contact(hash_from) records!'
-      )
-    )
-    yield* _(migrateUsers(sql))
-    yield* _(
-      Effect.logInfo(
-        'First step done! Now updating user_contact(hash_to) records!'
-      )
-    )
-    yield* _(Effect.logInfo('Modifying user_contact(hash_to) records'))
-    yield* _(migrateUserContacts(sql))
-
-    yield* _(Effect.logInfo('Contact DB migration completed'))
-  }).pipe(
-    withRedisLock('migratePhoneNumberHashes', '120 minutes'),
-    Effect.tapError((e) => {
-      console.error(e)
-      return Effect.logError(`Error during contact DB migration: ${e.message}`)
-    }),
-    Effect.mapError(
-      (e) =>
-        new UnexpectedServerError({
-          cause: e,
-          message: 'Error during contact DB migration',
-        })
-    ),
-    Effect.withSpan('migratePhoneNumberHashes')
-  )
+const migrateLogKeyConfig = Config.string('MIGRATE_LOCK').pipe(
+  Config.withDefault('migratePhoneNumberHashes')
 )
+const enableMigrationConfig = Config.boolean(
+  'ENABLE_PHONE_NUMBER_HASH_MIGRATION'
+).pipe(Config.withDefault(false))
+
+export const migratePhoneNumberHashes = Effect.gen(function* (_) {
+  const sql = yield* _(SqlClient)
+  const enableMigration = yield* _(enableMigrationConfig)
+  const migrateLockKey = yield* _(migrateLogKeyConfig)
+
+  if (!enableMigration)
+    return Effect.log('Migration is disabled via config, skipping.')
+
+  yield* _(
+    Effect.gen(function* (_) {
+      yield* _(Effect.logInfo('Starting contact DB migration...'))
+
+      // two tables: users(id, hash) and contact
+      yield* _(
+        Effect.logInfo(
+          'First modifying users table and user_contact(hash_from) records!'
+        )
+      )
+      yield* _(migrateUsers(sql))
+      yield* _(
+        Effect.logInfo(
+          'First step done! Now updating user_contact(hash_to) records!'
+        )
+      )
+      yield* _(Effect.logInfo('Modifying user_contact(hash_to) records'))
+      yield* _(migrateUserContacts(sql))
+
+      yield* _(Effect.logInfo('Contact DB migration completed'))
+    }).pipe(
+      withRedisLock(migrateLockKey, '120 minutes'),
+      Effect.tapError((e) => {
+        console.error(e)
+        return Effect.logError(
+          `Error during contact DB migration: ${e.message}`
+        )
+      }),
+      Effect.mapError(
+        (e) =>
+          new UnexpectedServerError({
+            cause: e,
+            message: 'Error during contact DB migration',
+          })
+      ),
+      Effect.withSpan('migratePhoneNumberHashes')
+    )
+  )
+})

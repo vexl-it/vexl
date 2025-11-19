@@ -19,18 +19,23 @@ export const checkAndDeleteEmptyInboxesWithoutOfferAtom = atom(
     set(
       messagingStateAtom,
       Array.filter((one) => {
-        const inboxIsValid =
-          // is my inbox
-          one.inbox.privateKey.publicKeyPemBase64 ===
-            session.privateKey.publicKeyPemBase64 ||
-          (one.inbox.offerId
-            ? // offer exists for that inbox
-              myOffersIds.includes(one.inbox.offerId) ||
-              // offer does not exist but there are non deleted chats
-              (!myOffersIds.includes(one.inbox.offerId) && one.chats.length > 0)
-            : false)
+        const isInboxValid = (() => {
+          // Is inbox for my session pub key
+          if (
+            one.inbox.privateKey.publicKeyPemBase64 ===
+            session.privateKey.publicKeyPemBase64
+          )
+            return true
 
-        if (!inboxIsValid) {
+          // Inbox is for my offer that exists
+          if (one.inbox.offerId && myOffersIds.includes(one.inbox.offerId))
+            return true
+
+          // In all other cases, inbox is valid only if there are open chats
+          return one.chats.length > 0
+        })()
+
+        if (!isInboxValid) {
           pipe(
             api.chat.deleteInbox({
               keyPair: one.inbox.privateKey,
@@ -50,7 +55,7 @@ export const checkAndDeleteEmptyInboxesWithoutOfferAtom = atom(
           )
         }
 
-        return inboxIsValid
+        return isInboxValid
       })
     )
   }

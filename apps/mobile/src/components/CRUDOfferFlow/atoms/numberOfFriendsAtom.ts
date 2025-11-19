@@ -25,6 +25,14 @@ const numberOfFriendsStorageAtom = atom<NumberOfFriendsAtomState>({
   state: 'loading',
 })
 
+let resolveNumberOfFriends: (value: boolean) => void = () => {}
+const resolveNumberOfFriendsPromise = new Promise<boolean>(
+  (resolve) => (resolveNumberOfFriends = resolve)
+)
+export const numberOfFriendsLoadedEffect = Effect.promise<boolean>(
+  async () => await resolveNumberOfFriendsPromise
+)
+
 const numberOfFriendsAtom = atom(
   (get) => get(numberOfFriendsStorageAtom),
   (get, set) => {
@@ -64,12 +72,18 @@ const numberOfFriendsAtom = atom(
         firstAndSecondLevelFriendsCount:
           firstAndSecondLevelFriendsDeduped.length,
       })
-    }).pipe(
-      Effect.catchAll((error) => {
-        set(numberOfFriendsStorageAtom, {state: 'error', error})
-        return Effect.void
-      })
-    )
+    })
+      .pipe(
+        Effect.catchAll((error) => {
+          set(numberOfFriendsStorageAtom, {state: 'error', error})
+          return Effect.void
+        })
+      )
+      .pipe(
+        Effect.tap(() => {
+          resolveNumberOfFriends?.(true)
+        })
+      )
   }
 )
 

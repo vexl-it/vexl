@@ -11,7 +11,6 @@ import {ClubMembersDbService} from '../db/ClubMemberDbService'
 import {checkForInactiveUsers} from './routes/checkForInactiveUsers'
 import {deactivateAndClearClubs} from './routes/deactivateAndClearClubs'
 import {flushAndSendRegisteredClubNotifications} from './routes/flushAndSendRegisteredClubNotifications'
-import {migratePhoneNumberHashes} from './routes/migratePhoneNumberHashes'
 import {processNewContentNotifications} from './routes/processNewContentNotifications'
 import {processUserInactivity} from './routes/processUserInactivity'
 import {sendCreateOfferPromptToGeneralTopic} from './routes/sendCreateOfferPromptToGeneralTopic'
@@ -91,14 +90,6 @@ export const internalServerLive = makeInternalServer(
             clubReportLimitIntervalDays
           )
         )
-
-        return HttpServerResponse.text('ok', {status: 200})
-      })
-    ),
-    HttpRouter.post(
-      '/migrate-phone-number-hashes',
-      Effect.gen(function* (_) {
-        yield* _(migratePhoneNumberHashes, Effect.forkDaemon)
 
         return HttpServerResponse.text('ok', {status: 200})
       })

@@ -35,6 +35,7 @@ import {UserDbService} from './db/UserDbService'
 import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 
+import {migratePhoneNumberHashes} from './internalServer/routes/migratePhoneNumberHashes'
 import {reportGaguesLayer} from './metrics'
 import {sendBulkNotificationHandler} from './routes/admin/sendBulkMessages'
 import {createClub} from './routes/clubs/admin/createClub'
@@ -183,6 +184,7 @@ const DbsLive = Layer.mergeAll(
 ).pipe(Layer.provideMerge(DbLayer))
 
 export const HttpServerLive = Layer.mergeAll(
+  Layer.effectDiscard(migratePhoneNumberHashes),
   ApiServerLive,
   reportGaguesLayer,
   internalServerLive,

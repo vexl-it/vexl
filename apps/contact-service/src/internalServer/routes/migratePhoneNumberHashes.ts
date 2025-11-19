@@ -299,7 +299,7 @@ export const migratePhoneNumberHashes = Effect.flatMap(SqlClient, (sql) =>
 
     yield* _(Effect.logInfo('Contact DB migration completed'))
   }).pipe(
-    withRedisLock('migratePhoneNumberHashes', '30 minutes'),
+    withRedisLock('migratePhoneNumberHashes', '120 minutes'),
     Effect.tapError((e) => {
       console.error(e)
       return Effect.logError(`Error during contact DB migration: ${e.message}`)

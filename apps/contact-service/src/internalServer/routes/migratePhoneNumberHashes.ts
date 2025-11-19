@@ -14,7 +14,6 @@ import {type ParseError} from 'effect/ParseResult'
 import {ContactRecordId} from '../../db/ContactDbService/domain'
 import {UserRecordId} from '../../db/UserDbService/domain'
 import {
-  SERVER_HASH_PREFIX,
   ServerHashedNumber,
   serverHashPhoneNumber,
 } from '../../utils/serverHashContact'
@@ -93,7 +92,7 @@ const migrateUsers = (
         users
       WHERE
         id > ${req.lastFetchedId ?? 0}
-        AND hash NOT LIKE '${SERVER_HASH_PREFIX}%'
+        AND hash NOT LIKE 'ServerHash:%'
       ORDER BY
         id ASC
       LIMIT
@@ -221,7 +220,7 @@ const migrateUserContacts = (
         user_contact
       WHERE
         id > ${req.lastFetchedId ?? 0}
-        AND hash_to NOT LIKE '${SERVER_HASH_PREFIX}%'
+        AND hash_to NOT LIKE 'ServerHash:%'
       ORDER BY
         id ASC
       LIMIT

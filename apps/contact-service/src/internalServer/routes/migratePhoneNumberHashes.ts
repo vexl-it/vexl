@@ -51,31 +51,41 @@ const replaceUserHashesInDb =
       oldHash: HashedPhoneNumber
       newHash: ServerHashedNumber
     }>
-  ): Effect.Effect<void, SqlError> =>
-    pipe(
-      chunk,
-      Array.map((one) =>
-        Effect.zip(
-          sql`
-            UPDATE users
-            SET
-              hash = ${one.newHash}
-            WHERE
-              hash = ${one.oldHash}
-          `,
-          sql`
-            UPDATE user_contact
-            SET
-              hash_from = ${one.newHash}
-            WHERE
-              hash_from = ${one.oldHash}
-          `
-        )
-      ),
+  ): Effect.Effect<void, SqlError> => {
+    if (chunk.length === 0) return Effect.void
+    const updateUserHash = sql`
+      UPDATE users AS inDb
+      SET
+        hash = incoming.new_hash
+      FROM
+        ${sql.updateValues(
+        chunk.map((one) => ({old_hash: one.oldHash, new_hash: one.newHash})),
+        'incoming'
+      )}
+      WHERE
+        inDb.hash = incoming.old_hash
+    `
+
+    const updateHashFrom = sql`
+      UPDATE user_contact AS inDb
+      SET
+        hash_from = incoming.new_hash
+      FROM
+        ${sql.updateValues(
+        chunk.map((one) => ({old_hash: one.oldHash, new_hash: one.newHash})),
+        'incoming'
+      )}
+      WHERE
+        inDb.hash_from = incoming.old_hash
+    `
+
+    return pipe(
+      [updateUserHash, updateHashFrom],
       Effect.allWith({concurrency: 'unbounded'}),
-      Effect.zipLeft(Effect.void),
+      sql.withTransaction,
       Effect.withSpan('replaceUserHashesInDb')
     )
+  }
 
 const migrateUsers = (
   sql: SqlClient
@@ -186,23 +196,30 @@ const replaceContactHashesInDb =
       hashToOld: HashedPhoneNumber
       hashToNew: ServerHashedNumber
     }>
-  ): Effect.Effect<void, SqlError> =>
-    pipe(
-      chunk,
-      Array.map(
-        (one) => sql`
-          UPDATE user_contact
-          SET
-            hash_to = ${one.hashToNew}
-          WHERE
-            id = ${one.id}
-            -- For safety, ensure we only update if the old hash matches
-            AND hash_to = ${one.hashToOld}
-        `
-      ),
-      Effect.allWith({concurrency: 'unbounded'}),
+  ): Effect.Effect<void, SqlError> => {
+    if (chunk.length === 0) return Effect.void
+
+    return pipe(
+      sql`
+        UPDATE user_contact AS inDb
+        SET
+          hash_to = incoming.hash_to_new
+        FROM
+          ${sql.updateValues(
+          chunk.map((one) => ({
+            id: one.id,
+            hash_to_old: one.hashToOld,
+            hash_to_new: one.hashToNew,
+          })),
+          'incoming'
+        )}
+        WHERE
+          inDb.id = incoming.id
+          AND inDb.hash_to = incoming.hash_to_old
+      `,
       Effect.withSpan('replaceContactHashesInDb')
     )
+  }
 
 const migrateUserContacts = (
   sql: SqlClient

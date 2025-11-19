@@ -122,6 +122,8 @@ const migrateUsers = (
         })
       )
 
+      Effect.log(`Got chunk`, Array.take(chunk, 20))
+
       yield* _(
         Effect.logInfo(
           `Fetched ${chunk.length} records. Running transformation and updating Db`
@@ -129,6 +131,9 @@ const migrateUsers = (
       )
       yield* _(
         transformUsersChunk(chunk),
+        Effect.tap((t) => {
+          return Effect.log(`Transformed chunk`, Array.take(t, 20))
+        }),
         Effect.flatMap(replaceUserHashesInDb(sql))
       )
 
@@ -243,6 +248,8 @@ const migrateUserContacts = (
         })
       )
 
+      Effect.log(`Got chunk`, Array.take(chunk, 20))
+
       yield* _(
         Effect.logInfo(
           `Fetched ${chunk.length} user contacts. Running transformation and updating Db`
@@ -250,6 +257,12 @@ const migrateUserContacts = (
       )
       yield* _(
         transformContactsChunks(chunk),
+        Effect.tap((t) => {
+          return Effect.log(
+            `Transformed user contacts chunk`,
+            Array.take(t, 20)
+          )
+        }),
         Effect.flatMap(replaceContactHashesInDb(sql))
       )
 

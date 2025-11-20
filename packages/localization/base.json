@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Your request was denied.",
   "notifications.DELETE_CHAT.title": "Chat deleted",
   "notifications.DELETE_CHAT.body": "One of your chats has been deleted.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Chat deleted",
   "notifications.INBOX_DELETED.body": "One of your chats has been deleted.",
   "notifications.BLOCK_CHAT.title": "You've been blocked",

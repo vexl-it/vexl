@@ -7,7 +7,6 @@ Stack: TypeScript utilities and resource files under `src/`; integrates with sha
 Commands (root):
 
 - `yarn workspace @vexl-next/localization lint|typecheck|format:fix`.
-- Sync scripts live at repo root (`yarn utils:sync-translations`, `utils:add-translation`).
 
 Conventions:
 

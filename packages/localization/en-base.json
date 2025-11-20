@@ -648,6 +648,8 @@
   "notifications.INBOX_DELETED.body": "One of your chats has been deleted.",
   "notifications.BLOCK_CHAT.title": "You've been blocked",
   "notifications.BLOCK_CHAT.body": "Someone has just blocked you.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}} reminder",
+  "notifications.TRADE_REMINDER.body": "Your trade with {{userName}} is scheduled for {{time}}",
   "notifications.INACTIVITY_REMINDER.title": "Long time no see!",
   "notifications.preferences.marketing.title": "Marketing notifications",
   "notifications.INACTIVITY_REMINDER.body": "It's been a while since you've opened the app. Open the app now to keep your offers active.",

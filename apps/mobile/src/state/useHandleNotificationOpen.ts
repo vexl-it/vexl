@@ -18,6 +18,7 @@ import {
   NEW_CONTACTS_TO_SYNC,
   NEW_OFFERS_IN_MARKETPLACE,
 } from '../utils/notifications/notificationTypes'
+import {TradeReminderNotificationData} from '../utils/notifications/tradeReminderNotificationData'
 import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
 
@@ -33,7 +34,8 @@ const reactOnNotificationOpenAtom = atom(
       const knownNotificationDataO = Schema.decodeUnknownOption(
         Schema.Union(
           OpenBrowserLinkNotificationData,
-          ClubAdmissionInternalNotificationData
+          ClubAdmissionInternalNotificationData,
+          TradeReminderNotificationData
         )
       )(notification.data)
 
@@ -52,6 +54,33 @@ const reactOnNotificationOpenAtom = atom(
         navigationRef.navigate('ClubDetail', {
           clubUuid: knownNotificationDataO.value.clubUuid,
         })
+      } else if (
+        Option.isSome(knownNotificationDataO) &&
+        Schema.is(TradeReminderNotificationData)(
+          knownNotificationDataO.value
+        ) &&
+        navigationRef.isReady()
+      ) {
+        const tradeReminderData = knownNotificationDataO.value
+
+        console.log('[TradeReminder] Notification pressed, opening chat', {
+          inbox: tradeReminderData.inbox,
+          sender: tradeReminderData.sender,
+        })
+
+        const keys = {
+          otherSideKey: tradeReminderData.sender,
+          inboxKey: tradeReminderData.inbox,
+        }
+
+        if (isOnSpecificChat(keys)) {
+          console.log(
+            '[TradeReminder] Already on this chat, no navigation needed'
+          )
+        } else {
+          console.log('[TradeReminder] Navigating to ChatDetail', keys)
+          navigationRef.navigate('ChatDetail', keys)
+        }
       } else if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
         navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {

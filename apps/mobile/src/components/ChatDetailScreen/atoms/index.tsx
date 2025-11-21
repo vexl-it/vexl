@@ -547,6 +547,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           revealIdentityImageUriAtom,
           imageSavedForFutureUseAtom,
           commonConnectionsCountAtom,
+          friendLevelInfoAtom,
         }),
         TE.chainW(({type, username, imageUri}) =>
           set(revealIdentityAtom, {type, username, imageUri})
@@ -721,15 +722,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       return 'notStarted'
     }
   )
-
-  const identityRevealTriggeredFromTradeChecklistAtom = atom((get) => {
-    const chatWithMessages = get(chatWithMessagesAtom)
-
-    return (
-      chatWithMessages.tradeChecklist.identity.received?.status ===
-      'REQUEST_REVEAL'
-    )
-  })
 
   const contactRevealTriggeredFromTradeChecklistAtom = atom((get) => {
     const chatWithMessages = get(chatWithMessagesAtom)
@@ -1278,7 +1270,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     offerCurrencyAtom,
     tradeChecklistIdentityRevealAtom,
     tradeChecklistContactRevealAtom,
-    identityRevealTriggeredFromTradeChecklistAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
     tradeChecklistMeetingLocationAtom,
     shouldHideNetworkCellForTradeChecklistAtom,

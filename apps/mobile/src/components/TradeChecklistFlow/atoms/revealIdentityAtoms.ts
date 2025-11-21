@@ -1,26 +1,20 @@
-import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, HashMap, Option} from 'effect/index'
-import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {type ChatIds} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
-import connectionStateAtom from '../../../state/connections/atom/connectionStateAtom'
+import connectionStateAtom, {
+  createFriendLevelInfoAtom,
+} from '../../../state/connections/atom/connectionStateAtom'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {anonymizedUserDataAtom} from '../../../state/session/userDataAtoms'
 import {
   chatWithMessagesAtom,
-  setParentChatActionAtom,
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
-import {
-  revealIdentityActionAtom,
-  submitTradeChecklistUpdatesActionAtom,
-} from './updatesToBeSentAtom'
+import {revealIdentityActionAtom} from './updatesToBeSentAtom'
 
 const revealIdentityUsernameAtom = atom<string>('')
 const usernameSavedForFutureUseAtom = atom<boolean>(false)
@@ -47,6 +41,11 @@ const commonConnectionsCountAtom = atom((get) => {
   return 0
 })
 
+const friendLevelInfoAtom = atom((get) => {
+  const chat = get(chatWithMessagesAtom)
+  return get(createFriendLevelInfoAtom(chat.chat.otherSide))
+})
+
 export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
   const {phoneNumber} = get(sessionDataOrDummyAtom)
   const anonymizedUserData = get(anonymizedUserDataAtom)
@@ -65,37 +64,24 @@ export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
       revealIdentityImageUriAtom,
       imageSavedForFutureUseAtom,
       commonConnectionsCountAtom,
+      friendLevelInfoAtom,
     }),
     TE.map(({type, username, imageUri}) => {
-      const identityData = {
-        status: type,
-        deanonymizedUser: {
-          name: username ?? anonymizedUserData.userName,
-          partialPhoneNumber: anonymizedPhoneNumber,
-        },
-        image: imageUri,
-      } satisfies IdentityReveal
+      const identityData =
+        type === 'DISAPPROVE_REVEAL'
+          ? {
+              status: type,
+            }
+          : {
+              status: type,
+              deanonymizedUser: {
+                name: username ?? anonymizedUserData.userName,
+                partialPhoneNumber: anonymizedPhoneNumber,
+              },
+              image: imageUri,
+            }
 
       set(revealIdentityActionAtom, identityData)
     })
   )
 })
-
-export const revealIdentityFromQuickActionBannerAtom = atom(
-  null,
-  async (get, set, chatIds: ChatIds) => {
-    set(setParentChatActionAtom, chatIds)
-
-    return await pipe(
-      set(revealIdentityWithUiFeedbackAtom),
-      TE.matchW(
-        (l) => {
-          return T.of(false)
-        },
-        (r) => {
-          return effectToTask(set(submitTradeChecklistUpdatesActionAtom))
-        }
-      )
-    )()
-  }
-)

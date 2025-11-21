@@ -1,3 +1,4 @@
+import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -30,6 +31,7 @@ interface RevealIdentityActionParams {
   revealIdentityImageUriAtom: PrimitiveAtom<UriString | undefined>
   imageSavedForFutureUseAtom: PrimitiveAtom<boolean>
   commonConnectionsCountAtom: Atom<number>
+  friendLevelInfoAtom: Atom<readonly FriendLevel[]>
 }
 
 export const revealIdentityDialogUIAtom = atom(
@@ -43,10 +45,12 @@ export const revealIdentityDialogUIAtom = atom(
       revealIdentityImageUriAtom,
       imageSavedForFutureUseAtom,
       commonConnectionsCountAtom,
+      friendLevelInfoAtom,
     } = params
 
     const thereAreOnlyClubConnectionsWithOtherSide =
-      get(commonConnectionsCountAtom) === 0
+      get(commonConnectionsCountAtom) === 0 &&
+      !get(friendLevelInfoAtom).includes('FIRST_DEGREE')
 
     const modalContentForFirstAndSecondDegreeConnections = (() => {
       if (type === 'REQUEST_REVEAL') {

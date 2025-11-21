@@ -12,7 +12,6 @@ import resolveLocalUri from '../../../utils/resolveLocalUri'
 import avatarsGoldenGlassesAndBackgroundSvg from '../../AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
 import avatarsSvg from '../../AnonymousAvatar/images/avatarsSvg'
 import SvgImage from '../../Image'
-import {revealIdentityFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import BigIconMessage from './BigIconMessage'
@@ -27,28 +26,17 @@ function IdentityRevealMessageItem({
   const {t} = useTranslation()
   const {
     chatAtom,
-    identityRevealTriggeredFromTradeChecklistAtom,
     identityRevealStatusAtom,
     otherSideDataAtom,
     revealIdentityWithUiFeedbackAtom,
-    publicKeyPemBase64Atom,
-    chatIdAtom,
     offerForChatAtom,
     openedImageUriAtom,
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
   const chat = useAtomValue(chatAtom)
-  const chatId = useAtomValue(chatIdAtom)
   const offer = useAtomValue(offerForChatAtom)
-  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
-  const identityRevealTriggeredFromTradeChecklist = useAtomValue(
-    identityRevealTriggeredFromTradeChecklistAtom
-  )
-  const revealIdentityFromQuickActionBanner = useSetAtom(
-    revealIdentityFromQuickActionBannerAtom
-  )
   const setOpenedImageUri = useSetAtom(openedImageUriAtom)
 
   const anonymousAvatars =
@@ -97,11 +85,7 @@ function IdentityRevealMessageItem({
         onButtonPress={
           identityRevealStatus === 'theyAsked'
             ? () => {
-                if (identityRevealTriggeredFromTradeChecklist) {
-                  void revealIdentityFromQuickActionBanner({chatId, inboxKey})
-                } else {
-                  void revealIdentity('RESPOND_REVEAL')
-                }
+                void revealIdentity('RESPOND_REVEAL')
               }
             : undefined
         }
@@ -110,6 +94,7 @@ function IdentityRevealMessageItem({
   }
 
   if (
+    identityRevealStatus === 'shared' &&
     (message.state === 'received' || message.state === 'sent') &&
     (message.message.messageType === 'APPROVE_REVEAL' ||
       message.message.tradeChecklistUpdate?.identity?.status ===
@@ -144,10 +129,11 @@ function IdentityRevealMessageItem({
   }
 
   if (
-    message.message.messageType === 'DISAPPROVE_REVEAL' ||
-    ((message.state === 'sent' || message.state === 'received') &&
-      message.message.tradeChecklistUpdate?.identity?.status ===
-        'DISAPPROVE_REVEAL')
+    identityRevealStatus === 'denied' &&
+    (message.message.messageType === 'DISAPPROVE_REVEAL' ||
+      ((message.state === 'sent' || message.state === 'received') &&
+        message.message.tradeChecklistUpdate?.identity?.status ===
+          'DISAPPROVE_REVEAL'))
   ) {
     return (
       <BigIconMessage

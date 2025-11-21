@@ -14,7 +14,6 @@ import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigati
 import Button from '../../Button'
 import IconButton from '../../IconButton'
 import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
-import {revealIdentityFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
@@ -98,7 +97,6 @@ function QuickActionBanner(): React.ReactElement | null {
     revealContactWithUiFeedbackAtom,
     requestStateAtom,
     forceShowHistoryAtom,
-    identityRevealTriggeredFromTradeChecklistAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
@@ -116,9 +114,6 @@ function QuickActionBanner(): React.ReactElement | null {
   const otherSideData = useAtomValue(otherSideDataAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
-  const identityRevealTriggeredFromTradeChecklist = useAtomValue(
-    identityRevealTriggeredFromTradeChecklistAtom
-  )
   const contactRevealTriggeredFromTradeChecklist = useAtomValue(
     contactRevealTriggeredFromTradeChecklistAtom
   )
@@ -130,9 +125,6 @@ function QuickActionBanner(): React.ReactElement | null {
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackActionAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const revealIdentityFromQuickActionBanner = useSetAtom(
-    revealIdentityFromQuickActionBannerAtom
-  )
   const revealContactFromQuickActionBanner = useSetAtom(
     revealContactFromQuickActionBannerAtom
   )
@@ -307,11 +299,7 @@ function QuickActionBanner(): React.ReactElement | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          if (identityRevealTriggeredFromTradeChecklist) {
-            void revealIdentityFromQuickActionBanner({chatId, inboxKey})
-          } else {
-            void revealIdentity('RESPOND_REVEAL')
-          }
+          void revealIdentity('RESPOND_REVEAL')
         }}
       />
     )

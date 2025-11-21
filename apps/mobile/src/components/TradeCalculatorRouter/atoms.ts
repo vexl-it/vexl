@@ -37,7 +37,7 @@ export const resetTradeCalculatorStateActionAtom = atom(null, (get, set) => {
       )
       set(btcInputValueAtom, '')
       set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-        btcAmount: 0,
+        btcAmount: '0',
       })
 
       set(premiumOrDiscountEnabledAtom, false)

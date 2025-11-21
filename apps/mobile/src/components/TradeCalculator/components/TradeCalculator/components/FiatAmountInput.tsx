@@ -16,7 +16,6 @@ import {
 } from '../../../atoms'
 import {
   addThousandsSeparatorSpacesToNumberInput,
-  removeThousandsSeparatorAndConvertToNumber,
   removeThousandsSeparatorSpacesFromNumberInput,
   replaceNonDecimalCharsInInput,
 } from '../../../utils'
@@ -86,9 +85,7 @@ function FiatAmountInput({
       onChangeText={(input) => {
         calculateBtcValueOnFiatAmountChange({
           automaticCalculationDisabled,
-          fiatAmount: removeThousandsSeparatorAndConvertToNumber(
-            replaceNonDecimalCharsInInput(input)
-          ),
+          fiatAmount: replaceNonDecimalCharsInInput(input),
         })
       }}
     >

@@ -104,7 +104,7 @@ export const saveYourPriceActionAtom = atom(null, (get, set) => {
     set(tradeBtcPriceAtom, Number(ownPrice))
   }
   set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-    btcAmount: get(btcValueNumberAtom),
+    btcAmount: String(get(btcValueNumberAtom)),
   })
 })
 
@@ -168,7 +168,7 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
       btcAmount,
     }: {
       automaticCalculationDisabled?: boolean
-      btcAmount: number
+      btcAmount: string
     }
   ) => {
     const tradeBtcPrice = get(tradeBtcPriceAtom)
@@ -184,7 +184,7 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
       btcPriceForSelectedOwnCurrencyWithStateAtom
     )
 
-    set(btcInputValueAtom, String(btcAmount))
+    set(btcInputValueAtom, btcAmount)
 
     if (automaticCalculationDisabled) {
       return
@@ -195,6 +195,8 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
       return
     }
 
+    const btcNumberValue = removeThousandsSeparatorAndConvertToNumber(btcAmount)
+
     if (tradeBtcPrice) {
       if (
         tradePriceType === 'your' &&
@@ -203,7 +205,7 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
         btcPriceForOfferWithState?.btcPrice
       ) {
         const numberValue =
-          btcOrSat === 'BTC' ? btcAmount : btcAmount / SATOSHIS_IN_BTC
+          btcOrSat === 'BTC' ? btcNumberValue : btcNumberValue / SATOSHIS_IN_BTC
 
         const fiatAmountForOwnPriceCurrency = numberValue * tradeBtcPrice
         const btcAmountForOwnPriceCurrencyCode =
@@ -225,7 +227,7 @@ export const calculateFiatValueOnBtcAmountChangeActionAtom = atom(
         )
       } else {
         const numberValue =
-          btcOrSat === 'BTC' ? btcAmount : btcAmount / SATOSHIS_IN_BTC
+          btcOrSat === 'BTC' ? btcNumberValue : btcNumberValue / SATOSHIS_IN_BTC
 
         set(
           fiatInputValueAtom,
@@ -254,7 +256,7 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
       fiatAmount,
     }: {
       automaticCalculationDisabled?: boolean
-      fiatAmount: number
+      fiatAmount: string
     }
   ) => {
     const tradeBtcPrice = get(tradeBtcPriceAtom)
@@ -270,7 +272,7 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
       btcPriceForSelectedOwnCurrencyWithStateAtom
     )
 
-    set(fiatInputValueAtom, String(fiatAmount))
+    set(fiatInputValueAtom, fiatAmount)
 
     if (automaticCalculationDisabled) {
       return
@@ -281,6 +283,9 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
       return
     }
 
+    const fiatNumberValue =
+      removeThousandsSeparatorAndConvertToNumber(fiatAmount)
+
     if (tradeBtcPrice) {
       if (
         tradePriceType === 'your' &&
@@ -289,7 +294,7 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
         btcPriceForOfferWithState?.btcPrice
       ) {
         const adjustedFiatAmount = cancelFeeOnNumberValue(
-          Number(fiatAmount),
+          fiatNumberValue,
           feeAmount
         )
         const btcAmountForSelectedCurrencyCode =
@@ -310,7 +315,7 @@ export const calculateBtcValueOnFiatAmountChangeActionAtom = atom(
         )
       } else {
         const adjustedFiatAmount = cancelFeeOnNumberValue(
-          Number(fiatAmount),
+          fiatNumberValue,
           feeAmount
         )
         const btcAmount = adjustedFiatAmount / tradeBtcPrice
@@ -344,7 +349,7 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
         )
       // we need to recalculate fiat amount based on new btc price
       set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-        btcAmount: get(btcValueNumberAtom),
+        btcAmount: String(get(btcValueNumberAtom)),
       })
     })
   )

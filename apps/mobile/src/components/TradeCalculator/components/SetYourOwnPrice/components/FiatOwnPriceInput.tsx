@@ -11,7 +11,11 @@ import {
   currencySelectVisibleAtom,
   ownPriceAtom,
 } from '../../../atoms'
-import {replaceNonDecimalCharsInInput} from '../../../utils'
+import {
+  addThousandsSeparatorSpacesToNumberInput,
+  removeThousandsSeparatorSpacesFromNumberInput,
+  replaceNonDecimalCharsInInput,
+} from '../../../utils'
 import AmountInput from '../../TradeCalculator/components/AmountInput'
 
 function FiatOwnPriceInput(): React.ReactElement {
@@ -37,9 +41,13 @@ function FiatOwnPriceInput(): React.ReactElement {
       isFocused={isFocused}
       onBlur={() => {
         setIsFocused(false)
+        setOwnPrice(addThousandsSeparatorSpacesToNumberInput(ownPrice ?? '0'))
       }}
       onFocus={() => {
         setIsFocused(true)
+        setOwnPrice(
+          removeThousandsSeparatorSpacesFromNumberInput(ownPrice ?? '0')
+        )
       }}
       onWrapperPress={() => {
         ref.current?.focus()

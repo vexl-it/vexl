@@ -24,4 +24,6 @@ Agent playbook:
 - For client code (dashboard/mobile/remix), keep hooks/components typed, prefer shared domain/rest-api utilities, and align with Prettier/ESLint rules.
 - Update the relevant workspace AGENTS.md if you change conventions or commands.
 - Automatically use context7 for code generation and library documentation.
-- When using effect use llmstxt/effect_website_llms_txt documentation from context7
+- When using effect use effect-ts/effect documentation from context7
+- When accepting data outside of application doamin, always validate via effect/schema. Never use `as` keyword in typescript use Schema.decodeUnknown instead
+- After doing changes in any of the subpackage run typecheck to check if your code is valid. After impementing and finishing with your chagnes, run typecheck, format and lint. Check output of each command and fix errors (if format script fails run format:fix first)

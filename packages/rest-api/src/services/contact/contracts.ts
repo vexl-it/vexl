@@ -327,6 +327,37 @@ export const ListClubsResponse = Schema.Struct({
 
 export type ListClubsResponse = typeof ListClubsResponse.Type
 
+export class S3ServiceError extends Schema.TaggedError<S3ServiceError>(
+  'S3ServiceError'
+)('S3ServiceError', {
+  status: Schema.optionalWith(Schema.Literal(500), {default: () => 500}),
+  message: Schema.optional(Schema.String),
+}) {}
+
+export const ImageExtension = Schema.Literal('png', 'jpg', 'jpeg')
+export type ImageExtension = Schema.Schema.Type<typeof ImageExtension>
+
+export const RequestClubImageUploadRequest = Schema.Struct({
+  fileExtension: ImageExtension,
+})
+export type RequestClubImageUploadRequest =
+  typeof RequestClubImageUploadRequest.Type
+
+export const RequestClubImageUploadResponse = Schema.Struct({
+  presignedUrl: Schema.String,
+  s3Key: Schema.String,
+  expiresIn: Schema.Number,
+})
+export type RequestClubImageUploadResponse =
+  typeof RequestClubImageUploadResponse.Type
+
+export const RequestClubImageUploadErrors = Schema.Union(
+  InvalidAdminTokenError,
+  S3ServiceError
+)
+export type RequestClubImageUploadErrors =
+  typeof RequestClubImageUploadErrors.Type
+
 export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyInClubError>(
   'MemberAlreadyInClubError'
 )('MemberAlreadyInClubError', {

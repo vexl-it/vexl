@@ -19,6 +19,7 @@ const presets = {
     googleServicesInfoPlistFile: './creds/GoogleService-stage-info.plist',
     foregroundImage: './assets/android-front.png',
     backgroundImage: './assets/android-back-stage.png',
+    monochromeImage: './assets/android-front.png',
     icon: './assets/icon-stage.png',
     hmacPassword:
       'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
@@ -37,6 +38,7 @@ const presets = {
     googleServicesInfoPlistFile: './creds/GoogleService-Info.plist',
     foregroundImage: './assets/android-front.png',
     backgroundImage: './assets/android-back.png',
+    monochromeImage: './assets/android-front.png',
     icon: './assets/icon.png',
     hmacPassword:
       'rv5AKXDcED4txmI5Nltz9eZFAHOI1VrLT3JWOpEZefE5uGInq53rfHkQLUIjaMUHv3hicbk/wtSKOfsNZ3aNNw==',
@@ -110,6 +112,7 @@ export default {
     'adaptiveIcon': {
       'foregroundImage': extra.foregroundImage,
       'backgroundImage': extra.backgroundImage,
+      'monochromeImage': extra.monochromeImage,
     },
     'package': extra.packageName,
     'googleServicesFile': './creds/google-services.json',

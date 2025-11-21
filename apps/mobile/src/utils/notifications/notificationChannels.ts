@@ -15,3 +15,11 @@ export async function getDefaultChannel(): Promise<string> {
     importance: AndroidImportance.DEFAULT,
   })
 }
+
+export async function getChannelForTradeReminders(): Promise<string> {
+  return await notifee.createChannel({
+    id: 'TradeReminders',
+    name: 'Trade reminders.',
+    importance: AndroidImportance.DEFAULT,
+  })
+}

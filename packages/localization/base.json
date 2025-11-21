@@ -624,6 +624,8 @@
   "notifications.MESSAGE.body": "You have received a new message.",
   "notifications.REQUEST_REVEAL.title": "Identity request received",
   "notifications.REQUEST_REVEAL.body": "You have been requested to reveal your identity.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}} reminder",
+  "notifications.TRADE_REMINDER.body": "Your trade with {{userName}} is scheduled for {{time}}",
   "notifications.APPROVE_REVEAL.title": "Identity revealed!",
   "notifications.APPROVE_REVEAL.body": "Your request to reveal identities was approved.",
   "notifications.DISAPPROVE_REVEAL.title": "Identity request denied",

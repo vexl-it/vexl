@@ -60,6 +60,8 @@ import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
+import {cancelTradeReminderActionAtom} from '../../../state/tradeReminders/atoms/cancelTradeReminderActionAtom'
+import {scheduleTradeReminderActionAtom} from '../../../state/tradeReminders/atoms/scheduleTradeReminderActionAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {
@@ -961,6 +963,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('dateAndTime')
   )
 
+  const tradeChecklistPickAtom = atom((get) => {
+    const dateAndTimeData = get(tradeChecklistDateAndTimeAtom)
+
+    return dateAndTime.getPick(dateAndTimeData)
+  })
+
   const tradeChecklistNetworkAtom = focusAtom(tradeChecklistAtom, (o) =>
     o.prop('network')
   )
@@ -1015,6 +1023,38 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
     return !!pick
   })
+
+  const syncTradeReminderActionAtom = atom(
+    null,
+    async (
+      get,
+      set,
+      pick: ReturnType<typeof dateAndTime.getPick>
+    ): Promise<void> => {
+      const chat = get(chatAtom)
+      const otherSideData = get(otherSideDataAtom)
+
+      if (!pick) {
+        await set(cancelTradeReminderActionAtom, chat.id)
+        set(chatAtom, (prev) => ({
+          ...prev,
+          tradeReminderNotificationId: undefined,
+        }))
+        return
+      }
+
+      const notificationId = await set(scheduleTradeReminderActionAtom, {
+        chatId: chat.id,
+        meetingTime: pick.pick.dateTime,
+        userName: otherSideData.userName,
+      })
+
+      set(chatAtom, (prev) => ({
+        ...prev,
+        tradeReminderNotificationId: notificationId ?? undefined,
+      }))
+    }
+  )
 
   const addEventToCalendarActionAtom = atom(
     null,
@@ -1273,6 +1313,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     chatIdAtom,
     tradeChecklistAtom,
     tradeChecklistDateAndTimeAtom,
+    tradeChecklistPickAtom,
     tradeChecklistNetworkAtom,
     tradeChecklistAmountAtom,
     offerCurrencyAtom,
@@ -1287,6 +1328,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     calendarEventIdAtom,
     isDateAndTimePickedAtom,
     addEventToCalendarActionAtom,
+    syncTradeReminderActionAtom,
     listingTypeIsOtherAtom,
     revealIdentityRequestReceivedMessageIndexAtom,
     revealIdentityRequestSentMessageIndexAtom,

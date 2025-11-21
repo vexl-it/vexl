@@ -1,7 +1,7 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {useAppState} from '../../../utils/useAppState'
 import KeyboardAvoidingView from '../../KeyboardAvoidingView'
@@ -20,6 +20,10 @@ export default function MessagesListOrApprovalPreview(): React.ReactElement {
     fetchAndStoreMessagesForInboxHandleNotificationsActionAtom
   )
   const publicKeyPemBase64 = useAtomValue(publicKeyPemBase64Atom)
+  const {tradeChecklistPickAtom, syncTradeReminderActionAtom} =
+    useMolecule(chatMolecule)
+  const tradeChecklistPick = useAtomValue(tradeChecklistPickAtom)
+  const syncTradeReminder = useSetAtom(syncTradeReminderActionAtom)
 
   useAppState(
     useCallback(() => {
@@ -28,6 +32,10 @@ export default function MessagesListOrApprovalPreview(): React.ReactElement {
       }).pipe(Effect.runFork)
     }, [fetchAndStoreMessagesForInbox, publicKeyPemBase64])
   )
+
+  useEffect(() => {
+    void syncTradeReminder(tradeChecklistPick)
+  }, [syncTradeReminder, tradeChecklistPick])
 
   const toRender =
     chatUiMode === 'approval' ? (

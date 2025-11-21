@@ -3,6 +3,7 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
 import removeFile from '../../../utils/removeFile'
+import {cleanupOldTradeRemindersActionAtom} from '../../tradeReminders/atoms/cleanupOldTradeRemindersActionAtom'
 import chatShouldBeVisible from '../utils/isChatActive'
 import messagingStateAtom from './messagingStateAtom'
 
@@ -10,7 +11,7 @@ const ONE_MONTH_IN_MS = 1000 * 60 * 60 * 24 * 30
 
 export const checkAndDeleteOldChatsAndDataActionAtom = atom(
   null,
-  (_, set, {key}: {key: PublicKeyPemBase64}) => {
+  (get, set, {key}: {key: PublicKeyPemBase64}) => {
     const inbox = focusAtom(messagingStateAtom, (optic) =>
       optic.find((one) => one.inbox.privateKey.publicKeyPemBase64 === key)
     )
@@ -35,5 +36,8 @@ export const checkAndDeleteOldChatsAndDataActionAtom = atom(
         return !isChatDeletedAndExpired
       }),
     }))
+
+    // Cleanup old trade reminders for deleted or past trades
+    void set(cleanupOldTradeRemindersActionAtom)
   }
 )

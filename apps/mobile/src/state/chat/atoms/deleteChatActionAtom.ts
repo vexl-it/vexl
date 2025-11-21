@@ -21,6 +21,7 @@ import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import {removeFeedbackRecordActionAtom} from '../../feedback/atoms'
+import {cancelTradeReminderActionAtom} from '../../tradeReminders/atoms/cancelTradeReminderActionAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {resetTradeChecklist} from '../utils/resetData'
 import shouldSendTerminationMessageToChat from '../utils/shouldSendTerminationMessageToChat'
@@ -112,6 +113,7 @@ export default function deleteChatActionAtom(
           )
 
         set(removeFeedbackRecordActionAtom, chatWithMessages.chat.id)
+        void set(cancelTradeReminderActionAtom, chatWithMessages.chat.id)
 
         set(
           chatWithMessagesAtom,

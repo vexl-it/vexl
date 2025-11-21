@@ -12,6 +12,7 @@ import areMessagesEqual from './areMessagesEqual'
 import compareMessages from './compareMessages'
 import processContactRevealMessageIfAny from './processContactRevealMessageIfAny'
 import processIdentityRevealMessageIfAny from './processIdentityRevealMessageIfAny'
+import {scheduleTradeReminderIfNeeded} from './scheduleTradeReminderIfNeeded'
 
 export default function addMessagesToChats(
   chats: ChatWithMessages[]
@@ -130,7 +131,8 @@ export default function addMessagesToChats(
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
           addIdentityRealLifeInfoToChat(tradeChecklistIdentityRevealMessage),
-          addContactRealLifeInfoToChat(tradeChecklistContactRevealMessage)
+          addContactRealLifeInfoToChat(tradeChecklistContactRevealMessage),
+          scheduleTradeReminderIfNeeded(tradeChecklistUpdates)
         )
       })
     )

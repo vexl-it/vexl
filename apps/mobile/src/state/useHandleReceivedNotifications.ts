@@ -6,6 +6,7 @@ import {
   NewClubConnectionNotificationData,
   NewSocialNetworkConnectionNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Effect, Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
@@ -30,6 +31,7 @@ import {
 } from './clubs/atom/removedClubsAtom'
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
+import {reportProcessingNotificationsStartActionAtom} from './notifications/NotificationProcessingReports'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
 import {reportNewConnectionNotificationForked} from './notifications/reportNewConnectionNotification'
 
@@ -47,188 +49,199 @@ export function useHandleReceivedNotifications(): void {
     const processNotification = async (
       remoteMessage: Notifications.Notification
     ): Promise<void> => {
-      const notificationPayloadO = extractDataPayloadFromNotification({
-        source: 'hook',
-        data: remoteMessage,
-      })
-
-      if (Option.isNone(notificationPayloadO)) {
-        console.info(
-          ` 🔔 ‼️ Hook notification and unable to parse ${JSON.stringify(
-            remoteMessage,
-            null,
-            2
-          )}`
+      const processUuid = generateUuid()
+      try {
+        store.set(
+          reportProcessingNotificationsStartActionAtom,
+          processUuid,
+          'hook'
         )
-        void showDebugNotificationIfEnabled({
-          title: `Unable to parse notification`,
-          subtitle: 'notifInHook',
-          body: JSON.stringify(
-            {
-              data: remoteMessage.request.content,
-            },
-            null,
-            2
-          ),
-        })
-        return
-      }
-
-      const {payload, isHeadless} = notificationPayloadO.value
-
-      console.info(
-        `🔔 Received notification in hook. Is headless: ${isHeadless}`,
-        JSON.stringify(payload, null, 2)
-      )
-
-      if (Platform.OS === 'android' && AppState.currentState !== 'active') {
-        console.info(
-          '🔔 Received notification in not active state. Should be handled by background task'
-        )
-        void showDebugNotificationIfEnabled({
-          title: 'Received notification in not active state',
-          body: `Should be handled by background task`,
-          subtitle: 'notifInHook',
-        })
-        return
-      }
-
-      const newChatMessageNoticeNotificationDataOption =
-        NewChatMessageNoticeNotificationData.parseUnkownOption(payload)
-
-      if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
-        console.info('🔔 Received notification about new chat message')
-        await store
-          .set(
-            processChatNotificationActionAtom,
-            newChatMessageNoticeNotificationDataOption.value
-          )
-          .pipe(Effect.runPromise)
-        return
-      }
-
-      const handled = await showUINotificationFromRemoteMessage(payload)
-      if (handled) {
-        console.info('🔔 Handled notification in UI')
-        return
-      }
-      const newSocialNetworkConnectionNotificationO =
-        Schema.decodeUnknownOption(NewSocialNetworkConnectionNotificationData)(
-          payload
-        )
-
-      if (Option.isSome(newSocialNetworkConnectionNotificationO)) {
-        console.info(
-          '🔔 Received notification about new user. Checking and updating offers accordingly.'
-        )
-        await Effect.runPromise(
-          reportNewConnectionNotificationForked(
-            store.get(apiAtom).metrics,
-            newSocialNetworkConnectionNotificationO.value.trackingId
-          )
-        )
-        await Effect.runPromise(syncConnections())
-        await Effect.runPromise(
-          updateOffersConnections({isInBackground: false})
-        )
-        return
-      }
-
-      const newClubConnectionNotificationO = Schema.decodeUnknownOption(
-        NewClubConnectionNotificationData
-      )(payload)
-      if (Option.isSome(newClubConnectionNotificationO)) {
-        console.info(
-          `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
-        )
-        await Effect.runPromise(
-          updateClubs({
-            updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
-          })
-        )
-        await Effect.runPromise(
-          updateOffersConnections({isInBackground: false})
-        )
-        return
-      }
-
-      const admitedToClubNetworkNotificationDataO = Schema.decodeUnknownOption(
-        AdmitedToClubNetworkNotificationData
-      )(payload)
-      if (Option.isSome(admitedToClubNetworkNotificationDataO)) {
-        console.info(
-          `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
-        )
-        await Effect.runPromise(checkForClubAdmission())
-        return
-      }
-
-      const ClubDeactivatedNotificationDataO = Schema.decodeUnknownOption(
-        ClubDeactivatedNotificationData
-      )(payload)
-      if (Option.isSome(ClubDeactivatedNotificationDataO)) {
-        const {t} = store.get(translationAtom)
-        await Effect.runPromise(
-          store
-            .set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
-              clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
-            })
-            .pipe(
-              Effect.catchAll((e) => {
-                if (
-                  e._tag === 'ClubNotFoundError' ||
-                  e._tag === 'FetchingClubError' ||
-                  e._tag === 'NoSuchElementException'
-                )
-                  return Effect.succeed(Effect.void)
-
-                return Effect.fail(e)
-              })
-            )
-        )
-
-        store.set(addReasonToRemovedClubActionAtom, {
-          clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
-          reason: ClubDeactivatedNotificationDataO.value.reason,
+        const notificationPayloadO = extractDataPayloadFromNotification({
+          source: 'hook',
+          data: remoteMessage,
         })
 
-        console.info(
-          `📳 Received notification about club deactivation ${ClubDeactivatedNotificationDataO.value.clubUuid}`
-        )
-        const clubInfo = store.get(
-          createSingleRemovedClubAtom(
-            ClubDeactivatedNotificationDataO.value.clubUuid
+        if (Option.isNone(notificationPayloadO)) {
+          console.info(
+            ` 🔔 ‼️ Hook notification and unable to parse ${JSON.stringify(
+              remoteMessage,
+              null,
+              2
+            )}`
           )
-        )
-        if (clubInfo) {
-          await notifee.displayNotification({
-            title: t(
-              `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
-            ),
-            body: t(
-              `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
-              {name: clubInfo.clubInfo.name}
-            ),
-            android: {
-              smallIcon: 'notification_icon',
-              channelId: await getDefaultChannel(),
-              pressAction: {
-                id: 'default',
+          void showDebugNotificationIfEnabled({
+            title: `Unable to parse notification`,
+            subtitle: 'notifInHook',
+            body: JSON.stringify(
+              {
+                data: remoteMessage.request.content,
               },
-            },
+              null,
+              2
+            ),
           })
-
-          store.set(markRemovedClubAsNotifiedActionAtom, {
-            clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
-          })
+          return
         }
 
-        return
-      }
+        const {payload, isHeadless} = notificationPayloadO.value
 
-      reportError('warn', new Error('Unknown notification type'), {
-        type: payload.type,
-      })
+        console.info(
+          `🔔 Received notification in hook. Is headless: ${isHeadless}`,
+          JSON.stringify(payload, null, 2)
+        )
+
+        if (Platform.OS === 'android' && AppState.currentState !== 'active') {
+          console.info(
+            '🔔 Received notification in not active state. Should be handled by background task'
+          )
+          void showDebugNotificationIfEnabled({
+            title: 'Received notification in not active state',
+            body: `Should be handled by background task`,
+            subtitle: 'notifInHook',
+          })
+          return
+        }
+
+        const newChatMessageNoticeNotificationDataOption =
+          NewChatMessageNoticeNotificationData.parseUnkownOption(payload)
+
+        if (Option.isSome(newChatMessageNoticeNotificationDataOption)) {
+          console.info('🔔 Received notification about new chat message')
+          await store
+            .set(
+              processChatNotificationActionAtom,
+              newChatMessageNoticeNotificationDataOption.value
+            )
+            .pipe(Effect.runPromise)
+          return
+        }
+
+        const handled = await showUINotificationFromRemoteMessage(payload)
+        if (handled) {
+          console.info('🔔 Handled notification in UI')
+          return
+        }
+        const newSocialNetworkConnectionNotificationO =
+          Schema.decodeUnknownOption(
+            NewSocialNetworkConnectionNotificationData
+          )(payload)
+
+        if (Option.isSome(newSocialNetworkConnectionNotificationO)) {
+          console.info(
+            '🔔 Received notification about new user. Checking and updating offers accordingly.'
+          )
+          await Effect.runPromise(
+            reportNewConnectionNotificationForked(
+              store.get(apiAtom).metrics,
+              newSocialNetworkConnectionNotificationO.value.trackingId
+            )
+          )
+          await Effect.runPromise(syncConnections())
+          await Effect.runPromise(
+            updateOffersConnections({isInBackground: false})
+          )
+          return
+        }
+
+        const newClubConnectionNotificationO = Schema.decodeUnknownOption(
+          NewClubConnectionNotificationData
+        )(payload)
+        if (Option.isSome(newClubConnectionNotificationO)) {
+          console.info(
+            `🔔 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
+          )
+          await Effect.runPromise(
+            updateClubs({
+              updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
+            })
+          )
+          await Effect.runPromise(
+            updateOffersConnections({isInBackground: false})
+          )
+          return
+        }
+
+        const admitedToClubNetworkNotificationDataO =
+          Schema.decodeUnknownOption(AdmitedToClubNetworkNotificationData)(
+            payload
+          )
+        if (Option.isSome(admitedToClubNetworkNotificationDataO)) {
+          console.info(
+            `🔔 Received notification about new user in club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
+          )
+          await Effect.runPromise(checkForClubAdmission())
+          return
+        }
+
+        const ClubDeactivatedNotificationDataO = Schema.decodeUnknownOption(
+          ClubDeactivatedNotificationData
+        )(payload)
+        if (Option.isSome(ClubDeactivatedNotificationDataO)) {
+          const {t} = store.get(translationAtom)
+          await Effect.runPromise(
+            store
+              .set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+                clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+              })
+              .pipe(
+                Effect.catchAll((e) => {
+                  if (
+                    e._tag === 'ClubNotFoundError' ||
+                    e._tag === 'FetchingClubError' ||
+                    e._tag === 'NoSuchElementException'
+                  )
+                    return Effect.succeed(Effect.void)
+
+                  return Effect.fail(e)
+                })
+              )
+          )
+
+          store.set(addReasonToRemovedClubActionAtom, {
+            clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+            reason: ClubDeactivatedNotificationDataO.value.reason,
+          })
+
+          console.info(
+            `📳 Received notification about club deactivation ${ClubDeactivatedNotificationDataO.value.clubUuid}`
+          )
+          const clubInfo = store.get(
+            createSingleRemovedClubAtom(
+              ClubDeactivatedNotificationDataO.value.clubUuid
+            )
+          )
+          if (clubInfo) {
+            await notifee.displayNotification({
+              title: t(
+                `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
+              ),
+              body: t(
+                `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
+                {name: clubInfo.clubInfo.name}
+              ),
+              android: {
+                smallIcon: 'notification_icon',
+                channelId: await getDefaultChannel(),
+                pressAction: {
+                  id: 'default',
+                },
+              },
+            })
+
+            store.set(markRemovedClubAsNotifiedActionAtom, {
+              clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+            })
+          }
+
+          return
+        }
+
+        reportError('warn', new Error('Unknown notification type'), {
+          type: payload.type,
+        })
+      } finally {
+        store.set(reportEndActionAtom, processUuid)
+      }
     }
 
     const subscription = Notifications.addNotificationReceivedListener(

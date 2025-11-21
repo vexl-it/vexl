@@ -78,6 +78,9 @@ import {
   ReportClubLimitReachedError,
   ReportClubRequest,
   ReportClubResponse,
+  RequestClubImageUploadErrors,
+  RequestClubImageUploadRequest,
+  RequestClubImageUploadResponse,
   SendBulkNotificationRequest,
   SendBulkNotificationResponse,
   SendBulkNotificationsErrors,
@@ -270,6 +273,16 @@ export const ListClubsEndpoint = HttpApiEndpoint.get(
   .addError(ListClubsErrors)
   .annotate(MaxExpectedDailyCall, 100)
 
+export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
+  'requestClubImageUpload',
+  '/api/v1/clubs/admin/request-image-upload'
+)
+  .setUrlParams(AdminTokenParams)
+  .setPayload(RequestClubImageUploadRequest)
+  .addSuccess(RequestClubImageUploadResponse)
+  .addError(RequestClubImageUploadErrors)
+  .annotate(MaxExpectedDailyCall, 1000)
+
 export const GetClubInfoEndpoint = HttpApiEndpoint.post(
   'getClubInfo',
   '/api/v1/clubs/member/get-info'
@@ -395,6 +408,7 @@ const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
   .add(ModfiyClubEndpoint)
   .add(GenerateClubInviteLinkForAdminEndpoint)
   .add(ListClubsEndpoint)
+  .add(RequestClubImageUploadEndpoint)
 
 const ClubsMemberApiGroup = HttpApiGroup.make('ClubsMember')
   .add(GetClubInfoEndpoint)

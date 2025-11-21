@@ -41,6 +41,7 @@ import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
+import {requestClubImageUpload} from './routes/clubs/admin/requestClubImageUpload'
 import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
 import {getClubInfoByAccessCode} from './routes/clubs/member/getClubInfoByAccessCode'
@@ -67,6 +68,7 @@ import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
 import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
 import {NewClubUserNotificationsService} from './utils/NewClubUserNotificationService'
+import {S3Service} from './utils/S3Service'
 import {ExpoNotificationsService} from './utils/expoNotifications/ExpoNotificationsService'
 import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
@@ -113,6 +115,7 @@ const ClubsAdminApiGroupLive = HttpApiBuilder.group(
       .handle('modifyClub', modifyClub)
       .handle('generateClubInviteLinkForAdmin', generateClubInviteLink)
       .handle('listClubs', listClubs)
+      .handle('requestClubImageUpload', requestClubImageUpload)
 )
 
 const ClubsMemberApiGroupLive = HttpApiBuilder.group(
@@ -196,6 +199,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provide(ChallengeService.Live),
   Layer.provide(DbsLive),
   Layer.provide(RedisService.Live),
+  Layer.provide(S3Service.Live),
   Layer.provide(MetricsClientService.Live),
   Layer.provide(RedisConnectionService.layer(redisUrl)),
   Layer.provide(ServerCrypto.layer(cryptoConfig)),

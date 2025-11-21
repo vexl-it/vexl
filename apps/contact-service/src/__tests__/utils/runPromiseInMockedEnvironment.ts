@@ -29,13 +29,16 @@ import DbLayer from '../../db/layer'
 import {ContactApiLive} from '../../httpServer'
 import {ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
 import {NewClubUserNotificationsService} from '../../utils/NewClubUserNotificationService'
+import {type S3Service} from '../../utils/S3Service'
 import {type ExpoNotificationsService} from '../../utils/expoNotifications/ExpoNotificationsService'
 import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
 import {mockedExpoNotificationlayer} from './mockedExpoNotificationService'
 import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
+import {mockedS3ServiceLayer} from './mockedS3Service'
 
 export type MockedContexts =
   | RedisService
+  | S3Service
   | ServerCrypto
   | SqlClient
   | UserDbService
@@ -64,26 +67,34 @@ const TestServerLive = HttpApiBuilder.serve().pipe(
   Layer.provideMerge(NodeHttpServer.layerTest)
 )
 
+const mockServiceLayers = Layer.mergeAll(
+  mockedRateLimitingLayer,
+  mockedRedisLayer,
+  mockedS3ServiceLayer,
+  mockedDashboardReportsService,
+  mockedMetricsClientService,
+  mockedFirebaseMessagingServiceLayer,
+  mockedExpoNotificationlayer
+)
+
+const dbServiceLayers = Layer.mergeAll(
+  UserDbService.Live,
+  ContactDbService.Live,
+  ClubsDbService.Live,
+  ClubMembersDbService.Live,
+  ClubInvitationLinkDbService.Live,
+  ChallengeDbService.Live
+).pipe(Layer.provideMerge(DbLayer))
+
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
-  Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(ImportContactsQuotaService.Live),
   Layer.provideMerge(NewClubUserNotificationsService.Live),
-  Layer.provideMerge(mockedRedisLayer),
-  Layer.provideMerge(mockedDashboardReportsService),
-  Layer.provideMerge(UserDbService.Live),
-  Layer.provideMerge(mockedMetricsClientService),
-  Layer.provideMerge(ContactDbService.Live),
-  Layer.provideMerge(ClubsDbService.Live),
-  Layer.provideMerge(ClubMembersDbService.Live),
-  Layer.provideMerge(ClubInvitationLinkDbService.Live),
   Layer.provideMerge(ChallengeService.Live),
-  Layer.provideMerge(ChallengeDbService.Live),
-  Layer.provideMerge(mockedFirebaseMessagingServiceLayer),
-  Layer.provideMerge(mockedExpoNotificationlayer),
-  Layer.provideMerge(DbLayer),
+  Layer.provideMerge(mockServiceLayers),
+  Layer.provideMerge(dbServiceLayers),
   Layer.provideMerge(NodeContext.layer)
 )
 

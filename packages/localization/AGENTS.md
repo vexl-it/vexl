@@ -18,3 +18,4 @@ Notes for agents:
 
 - Coordinate locale additions with mobile/dashboard to avoid missing keys.
 - Respect Prettier config (tight braces, no semicolons) to keep diffs clean.
+- When adding new translation, update only base.json, translations into other languages will be translated via crowdin and you don't have to worry about that while developing

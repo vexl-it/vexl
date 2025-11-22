@@ -13,25 +13,15 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
-import {Option} from 'effect'
-import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
-import {atom, useSetAtom} from 'jotai'
-import {useCallback} from 'react'
+import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {version, versionCode} from '../../../utils/environment'
-import {getNotificationToken} from '../../../utils/notifications'
-import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
+import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
-import {useAppState} from '../../../utils/useAppState'
-import {startBenchmark} from '../../ActionBenchmarks'
-import {getOrFetchNotificationServerPublicKeyActionAtom} from '../../notifications/fcmServerPublicKeyStore'
 import {type ChatWithMessages} from '../domain'
-import allChatsAtom from './allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {
   generateMyNotificationTokenInfoActionAtom,
@@ -143,119 +133,3 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
     }
   }
 )
-
-function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-  notificationToken: ExpoNotificationToken | null,
-  publicKeyFromServer: PublicKeyPemBase64
-): (chat: ChatWithMessages) => boolean {
-  return (chatWithMessages) => {
-    if (!notificationToken) return !!chatWithMessages.chat.lastReportedFcmToken
-
-    // Notify if we have notification token but we did not report it yet
-    if (!chatWithMessages.chat.lastReportedFcmToken) return true
-
-    const partsOfTheCypher = extractPartsOfNotificationCypher({
-      notificationCypher: chatWithMessages.chat.lastReportedFcmToken.cypher,
-    })
-
-    return (
-      // Cyher is not valid. Update it!
-      Option.isNone(partsOfTheCypher) ||
-      // we want to update token if expoV2 cypher is not used yet
-      partsOfTheCypher.value.type !== 'expoV2' ||
-      // The server public key has changed, update the token!
-      partsOfTheCypher.value.data.serverPublicKey !== publicKeyFromServer ||
-      // If the client version has changed, update the token!
-      partsOfTheCypher.value.data.clientVersion !== versionCode ||
-      // If the last reported token is not the same as the current token, update it!
-      chatWithMessages.chat.lastReportedFcmToken?.token !== notificationToken
-    )
-  }
-}
-
-const refreshNotificationTokensActionAtom = atom(null, (get, set) => {
-  const endBenchmark = startBenchmark('Refresh notification tokens')
-  console.info(
-    '🔥 Refresh notifications tokens',
-    'Checking if notification cyphers needs to be updated'
-  )
-
-  void showDebugNotificationIfEnabled({
-    title: 'refreshing notification tokens',
-    subtitle: 'refreshNotificationTokensActionAtom',
-    body: 'Checking if notification cyphers needs to be updated',
-  })
-
-  void pipe(
-    T.Do,
-    T.bind('notificationToken', getNotificationToken),
-    T.bind('publicKeyFromServer', () =>
-      set(getOrFetchNotificationServerPublicKeyActionAtom)
-    ),
-    T.chain(({notificationToken, publicKeyFromServer}) => {
-      if (O.isNone(publicKeyFromServer)) {
-        console.info(
-          '🔥 Refresh notifications tokens',
-          'No public key from server'
-        )
-        void showDebugNotificationIfEnabled({
-          title: 'chat refreshing notTokens',
-          subtitle: 'refreshNotificationTokensActionAtom',
-          body: 'No public key from server',
-        })
-        return T.of(undefined)
-      }
-
-      return pipe(
-        get(allChatsAtom),
-        A.flatten,
-        A.filter(
-          doesOtherSideNeedsToBeNotifiedAboutTokenChange(
-            notificationToken,
-            publicKeyFromServer.value
-          )
-        ),
-        (array) => {
-          console.info(
-            '🔥 Refresh notifications tokens',
-            `Refreshing tokens in ${array.length} chats`
-          )
-          void showDebugNotificationIfEnabled({
-            title: 'chat refreshing notTokens',
-            subtitle: 'refreshNotificationTokensActionAtom',
-            body: `Refreshing tokens in ${array.length} chats`,
-          })
-          return array
-        },
-        A.map(
-          set(
-            sendFcmCypherUpdateMessageActionAtom,
-            notificationToken ?? undefined
-          )
-        ),
-        T.sequenceSeqArray
-      )
-    }),
-    T.map((a) => {
-      endBenchmark()
-      return a
-    })
-  )()
-})
-
-export default refreshNotificationTokensActionAtom
-
-export function useRefreshNotificationTokensForActiveChatsAssumeLogin(): void {
-  const refreshNotificationTokens = useSetAtom(
-    refreshNotificationTokensActionAtom
-  )
-  useAppState(
-    useCallback(
-      (appState) => {
-        if (appState !== 'active') return
-        refreshNotificationTokens()
-      },
-      [refreshNotificationTokens]
-    )
-  )
-}

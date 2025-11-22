@@ -2,21 +2,12 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
-import {useCheckAndReportCurrrentVersionToChatsActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
-import {useDecodePreviouslyUncompatibleMessagesOnMount} from '../../state/chat/atoms/decodePreviouslyUncompatibleMessagesActionAtom'
-import {useCleanupRemovedClubsOnMount} from '../../state/clubs/atom/removedClubsAtom'
-import {useSyncConnections} from '../../state/connections'
-import {useRefreshContactsFromDeviceOnResume} from '../../state/contacts'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
-import useHandleRefreshContactServiceAndOffers from '../../state/useHandleRefreshContactServiceAndOffers'
-import {useSetAppLanguageFromStore} from '../../state/useSetAppLanguageFromStore'
-import {useSetRelativeDateFormatting} from '../../state/useSetRelativeDateFormatting'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
-import {useRefreshNotificationTokenOnResumeAssumeLoggedIn} from '../../utils/notifications/useRefreshNotificationTokenOnResumeAssumeLoggedIn'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AppLogsScreen from '../AppLogsScreen'
 import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
@@ -44,6 +35,7 @@ import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
 import SetContactsScreen from '../SetContactsScreen'
+import TaskRegistryOverviewScreen from '../TaskRegistryOverviewScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeCalculatorRouter from '../TradeCalculatorRouter'
@@ -54,25 +46,15 @@ import {useHandlePostLoginFlowRedirect} from './utils'
 const Stack = createNativeStackNavigator<RootStackParamsList>()
 
 function LoggedInHookGroup(): null {
-  useRefreshNotificationTokenOnResumeAssumeLoggedIn()
+  // Notifications
   useHandleReceivedNotifications()
   useHandleNotificationOpen()
-
-  // useHandleNotificationsPermissionsRedirect()
-  useHandlePostLoginFlowRedirect()
-  useHandleRefreshContactServiceAndOffers()
-  useSyncConnections()
-  useHandleUniversalAndAppLinks()
-  useCheckAndReportCurrrentVersionToChatsActionAtom()
-
   useHideInnactivityReminderNotificationsOnResume()
-  useRefreshContactsFromDeviceOnResume()
-  useDecodePreviouslyUncompatibleMessagesOnMount()
-  useSetAppLanguageFromStore()
-  useSetRelativeDateFormatting()
-  useCleanupRemovedClubsOnMount()
-
   useSetupBackgroundTask()
+
+  // navigation
+  useHandlePostLoginFlowRedirect()
+  useHandleUniversalAndAppLinks()
 
   return null
 }
@@ -167,6 +149,10 @@ function RootNavigation(): React.ReactElement {
         <Stack.Screen name="TermsAndConditions" component={TosScreen} />
         <Stack.Screen name="Faqs" component={FaqsScreen} />
         <Stack.Screen name="DebugScreen" component={DebugScreen} />
+        <Stack.Screen
+          name="TaskRegistryOverview"
+          component={TaskRegistryOverviewScreen}
+        />
       </Stack.Navigator>
       {!!showTextDebugButton && <DevTranslationFloatingButton />}
       {!!isLoggedIn && <LoggedInHookGroupMemoized />}

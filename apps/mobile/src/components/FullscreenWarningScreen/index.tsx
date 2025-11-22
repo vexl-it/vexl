@@ -1,29 +1,12 @@
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
-import {useAppState} from '../../utils/useAppState'
+import React from 'react'
 import {FullscreenWarningComponent} from './components/FullscreenWarning'
 import {
   fullScreenWarningDataAtom,
   isWarningClosedAtom,
-  loadNewsAndAnnouncementsActionAtom,
   setCancelledIdActionAtom,
 } from './state'
-
-export function useLoadNewsAndAnnouncements(): void {
-  const loadNewsAndAnnouncements = useSetAtom(
-    loadNewsAndAnnouncementsActionAtom
-  )
-  useAppState(
-    useCallback(
-      (state) => {
-        if (state !== 'active') return
-        void loadNewsAndAnnouncements()
-      },
-      [loadNewsAndAnnouncements]
-    )
-  )
-}
 
 export function OverlayInfoScreen({
   children,

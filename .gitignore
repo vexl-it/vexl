@@ -26,5 +26,5 @@ node_modules
 .env
 
 #Claude code
-.claude/**
+
 CLAUDE.md

@@ -40,44 +40,35 @@ const cancelledIdsMmkv = atomWithParsedMmkvStorageE(
   })
 )
 
-export const loadNewsAndAnnouncementsActionAtom = atom(
-  null,
-  async (get, set) => {
-    const contentApi = get(apiAtom).content
-    await Effect.runPromise(
-      pipe(
-        contentApi.getNewsAndAnnoucements(),
-        Effect.tap((response) =>
-          Effect.sync(() => {
-            set(newsAndAnnouncementsAtom, response)
-          })
-        ),
-        Effect.tap((response) =>
-          Effect.sync(() => {
-            // remove cancelled ids from mmkv if they are no longer in the state
-            const warningId = Option.getOrNull(response.fullScreenWarning)?.id
-            const newsIds = response.vexlBotNews.map((item) => item.id)
-            const idsFromResponse = [
-              ...(warningId ? [warningId] : []),
-              ...newsIds,
-            ]
-            set(cancelledIdsMmkv, (prev) => ({
-              ids: Array.intersection(idsFromResponse, prev.ids),
-            }))
-          })
-        ),
-        Effect.tapError((e) =>
-          Effect.sync(() => {
-            console.log('Error while loading news and annonucements')
-            console.log('Error while loading news and annonucements', e)
-            set(newsAndAnnouncementsAtom, null)
-          })
-        ),
-        ignoreReportErrors('warn', 'Error loading news and annonuncements')
-      )
-    )
-  }
-)
+export const loadNewsAndAnnouncementsActionAtom = atom(null, (get, set) => {
+  const contentApi = get(apiAtom).content
+
+  return pipe(
+    contentApi.getNewsAndAnnoucements(),
+    Effect.tap((response) =>
+      Effect.sync(() => {
+        set(newsAndAnnouncementsAtom, response)
+      })
+    ),
+    Effect.tap((response) =>
+      Effect.sync(() => {
+        // remove cancelled ids from mmkv if they are no longer in the state
+        const warningId = Option.getOrNull(response.fullScreenWarning)?.id
+        const newsIds = response.vexlBotNews.map((item) => item.id)
+        const idsFromResponse = [...(warningId ? [warningId] : []), ...newsIds]
+        set(cancelledIdsMmkv, (prev) => ({
+          ids: Array.intersection(idsFromResponse, prev.ids),
+        }))
+      })
+    ),
+    Effect.tapError((e) =>
+      Effect.sync(() => {
+        set(newsAndAnnouncementsAtom, null)
+      })
+    ),
+    ignoreReportErrors('warn', 'Error loading news and announcements')
+  )
+})
 
 const temporaryCancelledIdsAtom = atom<Uuid[]>([])
 

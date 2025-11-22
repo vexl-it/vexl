@@ -31,6 +31,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showTosSummaryForAlreadyLoggedInUser: true,
     showCheckUpdatedPrivacyPolicySuggestion: true,
     defaultCurrency: currencies.USD.code,
+    runTasksInParallel: true,
   },
   Preferences
 )

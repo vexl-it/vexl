@@ -10,10 +10,8 @@ import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
-import {
-  OverlayInfoScreen,
-  useLoadNewsAndAnnouncements,
-} from './components/FullscreenWarningScreen'
+import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
+import InAppLoadingTasksIndicator from './components/InAppLoadingTasksIndicator'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import PhoneNumberHashBugMigration from './components/PhoneNumberHashBugMigration'
 import PreventScreenshots from './components/PreventScreenshots'
@@ -21,8 +19,11 @@ import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import VersionMigrations from './components/VersionMigrations'
+import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
+import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
 import appConfig from './utils/ThemeProvider/tamagui.config'
+import {useInAppLoadingTasks} from './utils/inAppLoadingTasks/useInAppLoadingTasks'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
 import {useAppState} from './utils/useAppState'
@@ -31,7 +32,10 @@ function App(): React.ReactElement {
   const theme = useTheme()
 
   useAppState(setLastTimeAppWasRunningToNow, true)
-  useLoadNewsAndAnnouncements()
+
+  useSetAppLanguageFromStore()
+  useSetRelativeDateFormatting()
+  useInAppLoadingTasks()
 
   return (
     <SafeAreaProvider>
@@ -75,6 +79,7 @@ function App(): React.ReactElement {
                 <OverlayInfoScreen>
                   <GestureHandlerRootView style={{flex: 1}}>
                     <RootNavigation />
+                    <InAppLoadingTasksIndicator />
                   </GestureHandlerRootView>
                 </OverlayInfoScreen>
               </PhoneNumberHashBugMigration>

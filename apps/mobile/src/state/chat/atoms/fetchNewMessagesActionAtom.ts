@@ -82,7 +82,7 @@ const handleOtherSideUpdatedActionAtom = atom(
           senderKey:
             oneMessageToRespondWithCurrentVersion.message.senderPublicKey,
         })
-        void set(sendUpdateNoticeMessageActionAtom, chatAtom)()
+        Effect.runFork(set(sendUpdateNoticeMessageActionAtom, chatAtom))
       }
     )
   }

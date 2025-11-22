@@ -90,6 +90,8 @@ export type RootStackParamsList = {
 
   DebugScreen: undefined
 
+  TaskRegistryOverview: undefined
+
   EventsAndClubs: NavigatorScreenParams<EventsAndClubsParamsList>
 
   MyDonations: undefined

@@ -27,3 +27,6 @@ Agent playbook:
 - When using effect use effect-ts/effect documentation from context7
 - When accepting data outside of application doamin, always validate via effect/schema. Never use `as` keyword in typescript use Schema.decodeUnknown instead
 - After doing changes in any of the subpackage run typecheck to check if your code is valid. After impementing and finishing with your chagnes, run typecheck, format and lint. Check output of each command and fix errors (if format script fails run format:fix first)
+- when possible, don't use function on array (such as, filter, map, ...) but use Effect Array helpers with Effect's pipe function.
+- When checking if array is empty or not empty use Effect.isNotEmptyArray this ensure proper typechecking and makes the code readable
+- When migrating fp-ts to effect use fp-to-effect-migrator agent

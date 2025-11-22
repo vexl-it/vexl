@@ -1,14 +1,6 @@
-import {Effect} from 'effect'
-import {atom, useStore} from 'jotai'
+import {atom} from 'jotai'
 import {DateTime} from 'luxon'
-import {useCallback} from 'react'
-import {contactsMigratedAtom} from '../../components/VersionMigrations/atoms'
-import {useAppState} from '../../utils/useAppState'
-import {postLoginFinishedAtom} from '../postLoginOnboarding'
 import {lastImportOfContactsAtom} from './atom/contactsStore'
-import loadContactsFromDeviceActionAtom, {
-  loadingContactsFromDeviceAtom,
-} from './atom/loadContactsFromDeviceActionAtom'
 
 const TIME_SINCE_CONTACTS_IMPORT_THRESHOLD = 60
 
@@ -40,39 +32,3 @@ export const initializeMinutesTillOffersDisplayedActionAtom = atom(
     )
   }
 )
-
-const loadContactsFromDeviceAndSetLoadingStateActionAtom = atom(
-  null,
-  (get, set) => {
-    return Effect.gen(function* (_) {
-      set(loadingContactsFromDeviceAtom, true)
-
-      yield* _(set(loadContactsFromDeviceActionAtom)).pipe(
-        Effect.catchAll(() => Effect.succeed('success' as const))
-      )
-
-      set(loadingContactsFromDeviceAtom, false)
-    })
-  }
-)
-
-export function useRefreshContactsFromDeviceOnResume(): void {
-  const store = useStore()
-
-  useAppState(
-    useCallback(
-      (state) => {
-        if (
-          store.get(postLoginFinishedAtom) &&
-          store.get(contactsMigratedAtom) &&
-          state === 'active'
-        ) {
-          Effect.runFork(
-            store.set(loadContactsFromDeviceAndSetLoadingStateActionAtom)
-          )
-        }
-      },
-      [store]
-    )
-  )
-}

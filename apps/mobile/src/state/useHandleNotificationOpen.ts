@@ -4,8 +4,8 @@ import {
   NewChatMessageNoticeNotificationData,
   OpenBrowserLinkNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
-import {Either, Option, Schema} from 'effect'
-import {atom, useStore} from 'jotai'
+import {Effect, Either, Option, Schema} from 'effect'
+import {atom, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Linking} from 'react-native'
 import {
@@ -23,13 +23,12 @@ import {useAppState} from '../utils/useAppState'
 
 const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
 
-function useReactOnNotificationOpen(): (notification: Notification) => void {
-  const store = useStore()
-
-  return useCallback(
-    (notification) => {
-      if (store.get(lastNotificationIdHandledAtom) === notification.id) return
-      store.set(lastNotificationIdHandledAtom, notification.id)
+const reactOnNotificationOpenAtom = atom(
+  null,
+  (get, set, notification: Notification) =>
+    Effect.gen(function* (_) {
+      if (get(lastNotificationIdHandledAtom) === notification.id) return
+      set(lastNotificationIdHandledAtom, notification.id)
 
       const knownNotificationDataO = Schema.decodeUnknownOption(
         Schema.Union(
@@ -101,13 +100,11 @@ function useReactOnNotificationOpen(): (notification: Notification) => void {
         if (!isOnMessagesList(navigationRef.getState()))
           navigationRef.navigate('InsideTabs', {screen: 'Messages'})
       }
-    },
-    [store]
-  )
-}
+    })
+)
 
 export default function useHandleNotificationOpen(): void {
-  const reactOnNotificationOpen = useReactOnNotificationOpen()
+  const reactOnNotificationOpen = useSetAtom(reactOnNotificationOpenAtom)
 
   useAppState(
     useCallback(
@@ -116,7 +113,9 @@ export default function useHandleNotificationOpen(): void {
         void (async () => {
           const initialNotification = await notifee.getInitialNotification()
           if (initialNotification)
-            reactOnNotificationOpen(initialNotification.notification)
+            await Effect.runPromise(
+              reactOnNotificationOpen(initialNotification.notification)
+            )
         })()
       },
       [reactOnNotificationOpen]
@@ -125,7 +124,7 @@ export default function useHandleNotificationOpen(): void {
   useEffect(() => {
     return notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS && detail.notification)
-        reactOnNotificationOpen(detail.notification)
+        Effect.runFork(reactOnNotificationOpen(detail.notification))
     })
   }, [reactOnNotificationOpen])
 }

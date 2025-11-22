@@ -6,6 +6,7 @@ import {
   NewClubConnectionNotificationData,
   NewSocialNetworkConnectionNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Effect, Option, Schema} from 'effect'
 import {BackgroundTaskResult} from 'expo-background-task'
 import * as Notifications from 'expo-notifications'
@@ -24,6 +25,10 @@ import {
 } from '../../state/clubs/atom/removedClubsAtom'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
+import {
+  reportProcessingNotificationEndActionAtom,
+  reportProcessingNotificationsStartActionAtom,
+} from '../../state/notifications/NotificationProcessingReports'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
 import {translationAtom} from '../localization/I18nProvider'
@@ -36,6 +41,8 @@ import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemot
 export async function processBackgroundMessage(
   data: Notifications.NotificationTaskPayload
 ): Promise<void> {
+  const processUuid = generateUuid()
+
   try {
     const notificationPayloadO = extractDataPayloadFromNotification({
       source: 'background',
@@ -72,6 +79,11 @@ export async function processBackgroundMessage(
       })
       return
     }
+    getDefaultStore().set(
+      reportProcessingNotificationsStartActionAtom,
+      processUuid,
+      'handler'
+    )
 
     void showDebugNotificationIfEnabled({
       title: `Background notification received `,
@@ -222,6 +234,11 @@ export async function processBackgroundMessage(
       {
         error,
       }
+    )
+  } finally {
+    getDefaultStore().set(
+      reportProcessingNotificationEndActionAtom,
+      processUuid
     )
   }
 }

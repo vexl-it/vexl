@@ -13,6 +13,7 @@ const preferencesToEdit = [
   'showTextDebugButton',
   'isDeveloper',
   'showOfferDetail',
+  'runTasksInParallel',
 ] as const
 
 function Preferences(): React.ReactElement {

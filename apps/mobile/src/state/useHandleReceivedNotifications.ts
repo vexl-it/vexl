@@ -31,7 +31,10 @@ import {
 } from './clubs/atom/removedClubsAtom'
 import {syncConnectionsActionAtom} from './connections/atom/connectionStateAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from './connections/atom/offerToConnectionsAtom'
-import {reportProcessingNotificationsStartActionAtom} from './notifications/NotificationProcessingReports'
+import {
+  reportProcessingNotificationEndActionAtom,
+  reportProcessingNotificationsStartActionAtom,
+} from './notifications/NotificationProcessingReports'
 import processChatNotificationActionAtom from './notifications/processChatNotification'
 import {reportNewConnectionNotificationForked} from './notifications/reportNewConnectionNotification'
 
@@ -240,7 +243,7 @@ export function useHandleReceivedNotifications(): void {
           type: payload.type,
         })
       } finally {
-        store.set(reportEndActionAtom, processUuid)
+        store.set(reportProcessingNotificationEndActionAtom, processUuid)
       }
     }
 

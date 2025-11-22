@@ -7,6 +7,7 @@ import {
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -17,6 +18,25 @@ import {
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'
 import {addChallengeForKey} from './addChallengeForKey'
+
+export const commonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
+
+export const makeTestCommonAndSecurityHeaders = (authHeaders: {
+  'public-key': PublicKeyPemBase64
+  signature: EcdsaSignature
+  hash: HashedPhoneNumber
+}): ReturnType<typeof makeCommonAndSecurityHeaders> => {
+  return makeCommonAndSecurityHeaders(
+    () => ({
+      publicKey: authHeaders['public-key'],
+      hash: authHeaders.hash,
+      signature: authHeaders.signature,
+    }),
+    commonHeaders
+  )
+}
 
 interface MockedInbox {
   keyPair: PrivateKeyHolder
@@ -60,12 +80,14 @@ export const createMockedInbox = (authHeaders: {
     const client = yield* _(NodeTestingApp)
     const previousAuthHeaders = yield* _(TestRequestHeaders.getHeaders)
     yield* _(setAuthHeaders(authHeaders))
+
+    const commonAndSecurityHeaders =
+      makeTestCommonAndSecurityHeaders(authHeaders)
+
     yield* _(
       client.Inboxes.createInbox({
         payload,
-        headers: Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        }),
+        headers: commonAndSecurityHeaders,
       })
     )
 
@@ -109,12 +131,14 @@ export const createMockedUser = (
 
     const challengeForInbox = yield* _(addChallengeForMainInbox({}))
     yield* _(setAuthHeaders(authHeaders))
+
+    const commonAndSecurityHeaders =
+      makeTestCommonAndSecurityHeaders(authHeaders)
+
     yield* _(
       client.Inboxes.createInbox({
         payload: challengeForInbox,
-        headers: Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        }),
+        headers: commonAndSecurityHeaders,
       })
     )
 

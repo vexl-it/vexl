@@ -16,7 +16,11 @@ import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectError
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -29,6 +33,9 @@ const clubKeypairForMe = generatePrivateKey()
 let offer1: CreateNewOfferResponse
 let offer2: CreateNewOfferResponse
 let offer3: CreateNewOfferResponse
+let commonAndSecurityHeadersForUser2: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
@@ -72,10 +79,15 @@ beforeEach(async () => {
 
       yield* _(setAuthHeaders(user2.authHeaders))
 
+      commonAndSecurityHeadersForUser2 = makeTestCommonAndSecurityHeaders(
+        user2.authHeaders
+      )
+
       offer1 = {
         ...(yield* _(
           client.createNewOffer({
             payload: request1,
+            headers: commonAndSecurityHeadersForUser2,
           })
         )),
         adminId: request1.adminId,
@@ -103,6 +115,7 @@ beforeEach(async () => {
         ...(yield* _(
           client.createNewOffer({
             payload: request2,
+            headers: commonAndSecurityHeadersForUser2,
           })
         )),
         adminId: request2.adminId,
@@ -130,6 +143,7 @@ beforeEach(async () => {
         ...(yield* _(
           client.createNewOffer({
             payload: request3,
+            headers: commonAndSecurityHeadersForUser2,
           })
         )),
         adminId: request3.adminId,
@@ -150,6 +164,10 @@ describe('Report club offer', () => {
 
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
         yield* _(
           client.reportClubOffer({
             payload: {
@@ -157,6 +175,7 @@ describe('Report club offer', () => {
               publicKey: requestWithChallenge.publicKey,
               signedChallenge: requestWithChallenge.signedChallenge,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -185,6 +204,10 @@ describe('Report club offer', () => {
 
         yield* _(setAuthHeaders(user1.authHeaders))
 
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.reportClubOffer({
             payload: {
@@ -192,6 +215,7 @@ describe('Report club offer', () => {
               publicKey: requestWithChallenge.publicKey,
               signedChallenge: requestWithChallenge.signedChallenge,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -206,6 +230,7 @@ describe('Report club offer', () => {
               publicKey: secondRequestWithChallenge.publicKey,
               signedChallenge: secondRequestWithChallenge.signedChallenge,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -220,6 +245,7 @@ describe('Report club offer', () => {
               publicKey: thirdRequestWithChallenge.publicKey,
               signedChallenge: thirdRequestWithChallenge.signedChallenge,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -240,6 +266,10 @@ describe('Report club offer', () => {
 
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
         const response = yield* _(
           client.reportClubOffer({
             payload: {
@@ -247,6 +277,7 @@ describe('Report club offer', () => {
               publicKey: requestWithChallenge.publicKey,
               signedChallenge: requestWithChallenge.signedChallenge,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -280,6 +311,10 @@ describe('Report club offer', () => {
 
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
         const response = yield* _(
           client.reportClubOffer({
             payload: {
@@ -287,6 +322,7 @@ describe('Report club offer', () => {
               publicKey: requestWithChallenge.publicKey,
               signedChallenge: requestWithChallenge.signedChallenge,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

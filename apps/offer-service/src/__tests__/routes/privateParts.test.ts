@@ -20,6 +20,7 @@ import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/c
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -27,6 +28,9 @@ const user1 = generatePrivateKey()
 const user2 = generatePrivateKey()
 const me = generatePrivateKey()
 let offer1: CreateNewOfferResponse
+let commonAndSecurityHeaders: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -56,21 +60,22 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
-      yield* _(
-        setAuthHeaders(
-          yield* _(
-            createDummyAuthHeadersForUser({
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-              publicKey: me.publicKeyPemBase64,
-            })
-          )
-        )
+      const authHeaders = yield* _(
+        createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
       )
+
+      yield* _(setAuthHeaders(authHeaders))
+
+      commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(authHeaders)
 
       offer1 = {
         ...(yield* _(
           client.createNewOffer({
             payload: request1,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request1.adminId,
@@ -294,6 +299,7 @@ describe('Delete private part', () => {
               adminIds: [offer1.adminId],
               publicKeys: [user1.publicKeyPemBase64],
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -317,17 +323,17 @@ describe('Delete private part', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.deletePrivatePart({
@@ -335,6 +341,7 @@ describe('Delete private part', () => {
               adminIds: [offer1.adminId],
               publicKeys: [me.publicKeyPemBase64],
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

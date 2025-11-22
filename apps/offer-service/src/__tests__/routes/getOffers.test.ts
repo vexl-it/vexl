@@ -17,7 +17,11 @@ import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectError
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import dayjs from 'dayjs'
 import {Effect, Schema} from 'effect'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -28,6 +32,9 @@ let me: MockedUser
 let offer1: CreateNewOfferResponse
 let offer2: CreateNewOfferResponse
 let offer3: CreateNewOfferResponse
+let commonAndSecurityHeaders: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -64,10 +71,15 @@ beforeAll(async () => {
 
       yield* _(setAuthHeaders(me.authHeaders))
 
+      commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+        me.authHeaders
+      )
+
       offer1 = {
         ...(yield* _(
           client.createNewOffer({
             payload: request1,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request1.adminId,
@@ -100,6 +112,7 @@ beforeAll(async () => {
         ...(yield* _(
           client.createNewOffer({
             payload: request2,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request2.adminId,
@@ -132,6 +145,7 @@ beforeAll(async () => {
         ...(yield* _(
           client.createNewOffer({
             payload: request3,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request3.adminId,
@@ -185,6 +199,7 @@ describe('Get offers for me modified or expired after', () => {
             urlParams: {
               modifiedAt,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -256,6 +271,7 @@ describe('Get offers for me modified or expired after', () => {
             urlParams: {
               modifiedAt,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -315,6 +331,7 @@ describe('Get offers for me modified or expired after', () => {
             urlParams: {
               modifiedAt,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -371,6 +388,7 @@ describe('Get offers for me modified or expired after', () => {
             urlParams: {
               modifiedAt,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -430,6 +448,7 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -443,6 +462,7 @@ describe('Get offers for me modified or created after paginated', () => {
               limit,
               nextPageToken: response1.nextPageToken!,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -490,6 +510,7 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -523,11 +544,16 @@ describe('Get offers for me modified or created after paginated', () => {
         const client = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const testCommonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
         // Test with limit larger than available data
         const limit = 100
         const response = yield* _(
           client.getOffersForMeModifiedOrCreatedAfterPaginated({
             urlParams: {limit},
+            headers: testCommonAndSecurityHeaders,
           })
         )
 
@@ -574,6 +600,7 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -619,6 +646,7 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -676,6 +704,7 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -711,6 +740,7 @@ describe('Get offers for me modified or created after paginated', () => {
               limit,
               nextPageToken: 'invalid',
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -752,18 +782,24 @@ describe('Get removed offers', () => {
 
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const meHeaders = makeTestCommonAndSecurityHeaders(me.authHeaders)
+
         const newOffer = yield* _(
           client.createNewOffer({
             payload: request,
+            headers: meHeaders,
           })
         )
         const offerIds = [newOffer.offerId, offer1.offerId]
 
         yield* _(setAuthHeaders(user1.authHeaders))
 
+        const user1Headers = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
         const removedOffers = yield* _(
           client.getRemovedOffers({
             payload: {offerIds},
+            headers: user1Headers,
           })
         )
         expect(removedOffers.offerIds).toEqual([])
@@ -781,6 +817,7 @@ describe('Get removed offers', () => {
         const removedOffers2 = yield* _(
           client.getRemovedOffers({
             payload: {offerIds},
+            headers: user1Headers,
           })
         )
         expect(removedOffers2.offerIds.join()).toEqual(
@@ -807,9 +844,12 @@ describe('Get removed offers', () => {
 
         yield* _(setAuthHeaders(user1.authHeaders))
 
+        const testHeaders = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
         const offers = yield* _(
           client.getRemovedOffers({
             payload: {offerIds},
+            headers: testHeaders,
           })
         )
 
@@ -843,9 +883,12 @@ describe('Get removed offers', () => {
 
         yield* _(setAuthHeaders(user1.authHeaders))
 
+        const testHeaders = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
         const offers = yield* _(
           client.getRemovedOffers({
             payload: {offerIds},
+            headers: testHeaders,
           })
         )
 

@@ -1,5 +1,4 @@
 import {SqlClient} from '@effect/sql'
-import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ImportContactsQuotaReachedError,
   InitialImportContactsQuotaReachedError,
@@ -8,7 +7,7 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, LogLevel, Logger, Order, Schema, pipe} from 'effect'
+import {Array, Effect, LogLevel, Logger, Order, pipe} from 'effect'
 import {isArray} from 'effect/Array'
 import {
   ImportContactsQuotaRecord,
@@ -20,6 +19,7 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
+  makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './utils'
 
@@ -96,12 +96,16 @@ describe('Import contacts', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
         yield* _(
           app.Contact.importContacts({
             payload: {
               contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -141,12 +145,16 @@ describe('Import contacts', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
         yield* _(
           app.Contact.importContacts({
             payload: {
               contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
               replace: false,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -182,12 +190,16 @@ describe('Import contacts', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
         yield* _(
           app.Contact.importContacts({
             payload: {
               contacts: Array.map(myNewContacts, (c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -212,9 +224,13 @@ describe('Import contacts', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
         yield* _(
           app.Contact.importContacts({
             payload: {contacts: [], replace: true},
+            headers: commonAndSecurityHeaders,
           })
         )
       })
@@ -258,11 +274,11 @@ describe('Import contacts', () => {
         )
         const app = yield* _(NodeTestingApp)
 
-        const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
-
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         yield* _(
           app.User.createUser({
@@ -270,7 +286,7 @@ describe('Import contacts', () => {
               firebaseToken: null,
               expoToken: me.notificationToken,
             },
-            headers: commonHeaders,
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -280,6 +296,7 @@ describe('Import contacts', () => {
               contacts: contactsToImport.map((c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -328,15 +345,15 @@ describe('Import contacts', () => {
         )
         const app = yield* _(NodeTestingApp)
 
-        const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
-
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         yield* _(
           app.User.createUser({
-            headers: commonHeaders,
+            headers: commonAndSecurityHeaders,
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
@@ -350,6 +367,7 @@ describe('Import contacts', () => {
               contacts: contactsToImport.map((c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -397,15 +415,15 @@ describe('Import contacts', () => {
         )
         const app = yield* _(NodeTestingApp)
 
-        const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
-
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         yield* _(
           app.User.createUser({
-            headers: commonHeaders,
+            headers: commonAndSecurityHeaders,
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
@@ -433,6 +451,7 @@ describe('Import contacts', () => {
               contacts: contactsToImport.map((c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -476,6 +495,7 @@ describe('Import contacts', () => {
               ),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -501,6 +521,7 @@ describe('Import contacts', () => {
               ),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -524,18 +545,19 @@ describe('Import contacts', () => {
         )
         const app = yield* _(NodeTestingApp)
 
-        const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
-
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
         yield* _(
           app.User.createUser({
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
             },
-            headers: commonHeaders,
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -545,6 +567,7 @@ describe('Import contacts', () => {
               contacts: contactsToImport.map((c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -574,6 +597,7 @@ describe('Import contacts', () => {
               ),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -588,6 +612,7 @@ describe('Import contacts', () => {
               ),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -624,15 +649,15 @@ describe('Import contacts', () => {
         )
         const app = yield* _(NodeTestingApp)
 
-        const commonHeaders = Schema.decodeSync(CommonHeaders)({
-          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-        })
-
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         yield* _(
           app.User.createUser({
-            headers: commonHeaders,
+            headers: commonAndSecurityHeaders,
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
@@ -646,6 +671,7 @@ describe('Import contacts', () => {
               contacts: contactsToImport.map((c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -682,10 +708,14 @@ describe('Notification', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         yield* _(
           app.Contact.importContacts({
             payload: {contacts: [], replace: true},
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -705,6 +735,7 @@ describe('Notification', () => {
               contacts: Array.map(contactsToImport, (c) => c.hashedNumber),
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 

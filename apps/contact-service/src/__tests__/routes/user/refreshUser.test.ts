@@ -7,6 +7,7 @@ import {SqlClient} from '@effect/sql'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -15,6 +16,10 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
+
+const commonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -28,15 +33,23 @@ beforeAll(async () => {
         })
       )
       yield* _(setAuthHeaders(authHeaders))
+
+      const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+        () => ({
+          publicKey: authHeaders['public-key'],
+          hash: authHeaders.hash,
+          signature: authHeaders.signature,
+        }),
+        commonHeaders
+      )
+
       yield* _(
         app.User.createUser({
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          headers: Schema.decodeSync(CommonHeaders)({
-            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-          }),
+          headers: commonAndSecurityHeaders,
         })
       )
     })
@@ -64,6 +77,22 @@ describe('Refresh user', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(authHeaders))
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: authHeaders['public-key'],
+            hash: authHeaders.hash,
+            signature: authHeaders.signature,
+          }),
+          testCommonHeaders
+        )
+
         yield* _(
           app.User.refreshUser({
             payload: {
@@ -72,11 +101,7 @@ describe('Refresh user', () => {
                 Schema.decodeSync(CountryPrefixE)(420)
               ),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -106,15 +131,27 @@ describe('Refresh user', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(authHeaders))
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+        })
+
+        const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: authHeaders['public-key'],
+            hash: authHeaders.hash,
+            signature: authHeaders.signature,
+          }),
+          testCommonHeaders
+        )
+
         const result = yield* _(
           app.User.refreshUser({
             payload: {
               offersAlive: true,
               countryPrefix: Option.none(),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) ANDROID',
-            }),
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

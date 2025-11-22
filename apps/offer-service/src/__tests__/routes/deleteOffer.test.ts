@@ -13,6 +13,7 @@ import {type CreateNewOfferRequest} from '@vexl-next/rest-api/src/services/offer
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -48,9 +49,13 @@ const createOffer = (authHeaders: SecurityHeaders) =>
 
     yield* _(setAuthHeaders(authHeaders))
 
+    const commonAndSecurityHeaders =
+      makeTestCommonAndSecurityHeaders(authHeaders)
+
     return yield* _(
       client.createNewOffer({
         payload: request,
+        headers: commonAndSecurityHeaders,
       })
     )
   })

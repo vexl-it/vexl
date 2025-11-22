@@ -9,10 +9,12 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {
+  CommonAndSecurityHeaders,
+  ServerSecurityMiddleware,
+} from '../../apiSecurity'
 import {InvalidChallengeError} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
-import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
@@ -97,6 +99,7 @@ export const CheckUserExistsEndpoint = HttpApiEndpoint.post(
   'checkUserExists',
   '/api/v1/users/check-exists'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(CheckUserExistsRequest)
   .addSuccess(UserExistsResponse)
@@ -106,8 +109,8 @@ export const CreateUserEndpoint = HttpApiEndpoint.post(
   'createUser',
   '/api/v1/users'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setHeaders(CommonHeaders)
   .setPayload(CreateUserRequest)
   .addSuccess(NoContentResponse, {status: 201})
   .annotate(MaxExpectedDailyCall, 1)
@@ -116,8 +119,8 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   'refreshUser',
   '/api/v1/users/refresh'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setHeaders(CommonHeaders)
   .setPayload(RefreshUserRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError)
@@ -127,8 +130,8 @@ export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
   'updateFirebaseToken',
   '/api/v1/users'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setHeaders(CommonHeaders)
   .setPayload(UpdateFirebaseTokenRequest)
   .addError(UserNotFoundError)
   .addSuccess(NoContentResponse)
@@ -139,8 +142,8 @@ export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   'updateNotificationToken',
   '/api/v1/users/notification-token'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setHeaders(CommonHeaders)
   .setPayload(UpdateNotificationTokenRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError)
@@ -150,6 +153,7 @@ export const DeleteUserEndpoint = HttpApiEndpoint.del(
   'deleteUser',
   '/api/v1/users/me'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 1)
@@ -167,6 +171,7 @@ export const ImportContactsEndpoint = HttpApiEndpoint.post(
   'importContacts',
   '/api/v1/contacts/import/replace'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(ImportContactsRequest)
   .addSuccess(ImportContactsResponse)
@@ -177,8 +182,8 @@ export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
   'fetchMyContacts',
   '/api/v1/contacts/me'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setHeaders(CommonHeaders)
   .setUrlParams(FetchMyContactsRequest)
   .addSuccess(FetchMyContactsResponse)
   .annotate(MaxExpectedDailyCall, 100)
@@ -187,8 +192,8 @@ export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   'fetchMyContactsPaginated',
   '/api/v1/contacts/me/paginated'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
-  .setHeaders(CommonHeaders)
   .setUrlParams(FetchMyContactsPaginatedRequest)
   .addSuccess(FetchMyContactsPaginatedResponse)
   .addError(InvalidNextPageTokenError)
@@ -198,6 +203,7 @@ export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnections',
   '/api/v1/contacts/common'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(FetchCommonConnectionsRequest)
   .addSuccess(FetchCommonConnectionsResponse)
@@ -207,6 +213,7 @@ export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnectionsPaginated',
   '/api/v1/contacts/common/paginated'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(FetchCommonConnectionsPaginatedRequest)
   .addSuccess(FetchCommonConnectionsPaginatedResponse)
@@ -366,6 +373,7 @@ export const ReportClubEndpoint = HttpApiEndpoint.post(
   'reportClub',
   '/api/v1/clubs/member/report-club'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(ReportClubRequest)
   .addSuccess(ReportClubResponse)

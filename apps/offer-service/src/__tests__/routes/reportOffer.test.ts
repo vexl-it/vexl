@@ -16,11 +16,9 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {
-  setAuthHeaders,
-  setDummyAuthHeadersForUser,
-} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -30,6 +28,12 @@ const me = generatePrivateKey()
 let offer1: CreateNewOfferResponse
 let offer2: CreateNewOfferResponse
 let offer3: CreateNewOfferResponse
+let commonAndSecurityHeadersForMe: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
+let commonAndSecurityHeadersForUser2: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
 
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
@@ -59,21 +63,23 @@ beforeEach(async () => {
         offerId: newOfferId(),
       }
 
-      yield* _(
-        setAuthHeaders(
-          yield* _(
-            createDummyAuthHeadersForUser({
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-              publicKey: me.publicKeyPemBase64,
-            })
-          )
-        )
+      const authHeadersForMe = yield* _(
+        createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
       )
+
+      yield* _(setAuthHeaders(authHeadersForMe))
+
+      commonAndSecurityHeadersForMe =
+        makeTestCommonAndSecurityHeaders(authHeadersForMe)
 
       offer1 = {
         ...(yield* _(
           client.createNewOffer({
             payload: request1,
+            headers: commonAndSecurityHeadersForMe,
           })
         )),
         adminId: request1.adminId,
@@ -97,15 +103,25 @@ beforeEach(async () => {
         offerId: newOfferId(),
       }
 
-      yield* _(
-        setDummyAuthHeadersForUser({
+      const authHeadersForUser2 = yield* _(
+        createDummyAuthHeadersForUser({
           phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333332'),
           publicKey: user2.publicKeyPemBase64,
         })
       )
 
+      yield* _(setAuthHeaders(authHeadersForUser2))
+
+      commonAndSecurityHeadersForUser2 =
+        makeTestCommonAndSecurityHeaders(authHeadersForUser2)
+
       offer2 = {
-        ...(yield* _(client.createNewOffer({payload: request2}))),
+        ...(yield* _(
+          client.createNewOffer({
+            payload: request2,
+            headers: commonAndSecurityHeadersForUser2,
+          })
+        )),
         adminId: request2.adminId,
       }
 
@@ -127,14 +143,15 @@ beforeEach(async () => {
         offerId: newOfferId(),
       }
 
-      yield* _(
-        setDummyAuthHeadersForUser({
-          phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333332'),
-          publicKey: user2.publicKeyPemBase64,
-        })
-      )
+      yield* _(setAuthHeaders(authHeadersForUser2))
+
       offer3 = {
-        ...(yield* _(client.createNewOffer({payload: request3}))),
+        ...(yield* _(
+          client.createNewOffer({
+            payload: request3,
+            headers: commonAndSecurityHeadersForUser2,
+          })
+        )),
         adminId: request2.adminId,
       }
     })
@@ -147,23 +164,24 @@ describe('Report offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         yield* _(
           client.reportOffer({
             payload: {
               offerId: offer1.offerId,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -186,23 +204,24 @@ describe('Report offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: user1.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: user1.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         yield* _(
           client.reportOffer({
             payload: {
               offerId: offer1.offerId,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -211,6 +230,7 @@ describe('Report offer', () => {
             payload: {
               offerId: offer2.offerId,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -219,6 +239,7 @@ describe('Report offer', () => {
             payload: {
               offerId: offer3.offerId,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -233,18 +254,24 @@ describe('Report offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setDummyAuthHeadersForUser({
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
             phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.reportOffer({
             payload: {
               offerId: offer2.offerId,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -272,17 +299,25 @@ describe('Report offer', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        yield* _(
-          setDummyAuthHeadersForUser({
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
             phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         const response = yield* _(
           client.reportOffer({
             payload: {
               offerId: newOfferId(),
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

@@ -11,6 +11,7 @@ import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contra
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
@@ -27,15 +28,17 @@ beforeAll(async () => {
         })
       )
       yield* _(setAuthHeaders(authHeaders))
+
+      const commonAndSecurityHeaders =
+        makeTestCommonAndSecurityHeaders(authHeaders)
+
       yield* _(
         app.User.createUser({
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          headers: Schema.decodeSync(CommonHeaders)({
-            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-          }),
+          headers: commonAndSecurityHeaders,
         })
       )
     })
@@ -62,14 +65,18 @@ describe('updateExpoToken', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          authHeaders,
+          Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+          })
+        )
         yield* _(
           app.User.updateNotificationToken({
             payload: {
               expoToken: Schema.decodeSync(ExpoNotificationTokenE)('newToken'),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) ANDROID',
-            }),
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -96,14 +103,18 @@ describe('updateExpoToken', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          authHeaders,
+          Schema.decodeSync(CommonHeaders)({
+            'user-agent': 'Vexl/2 (1.0.0) ANDROID',
+          })
+        )
         const result = yield* _(
           app.User.updateNotificationToken({
             payload: {
               expoToken: Schema.decodeSync(ExpoNotificationTokenE)('newToken'),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) ANDROID',
-            }),
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

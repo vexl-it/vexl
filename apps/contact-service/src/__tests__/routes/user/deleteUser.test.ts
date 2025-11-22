@@ -7,10 +7,10 @@ import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 describe('delete user', () => {
   it('Should delete user and its contacts from the db', async () => {
@@ -28,15 +28,17 @@ describe('delete user', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         yield* _(
           app.User.createUser({
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -46,10 +48,11 @@ describe('delete user', () => {
               contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
-        yield* _(app.User.deleteUser({}))
+        yield* _(app.User.deleteUser({headers: commonAndSecurityHeaders}))
         const sql = yield* _(SqlClient.SqlClient)
         const dataFromUsers = yield* _(sql`
           SELECT
@@ -91,7 +94,12 @@ describe('delete user', () => {
         )
 
         yield* _(setAuthHeaders(authHeaders))
-        const result = yield* _(app.User.deleteUser({}), Effect.either)
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+        const result = yield* _(
+          app.User.deleteUser({headers: commonAndSecurityHeaders}),
+          Effect.either
+        )
         expect(result).toHaveProperty('_tag', 'Right')
       })
     )

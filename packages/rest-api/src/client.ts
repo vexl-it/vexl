@@ -14,7 +14,6 @@ import {Effect, Option, Schema} from 'effect'
 import {type Simplify} from 'effect/Types'
 import {type PlatformName} from './PlatformName'
 import {type ServiceUrl} from './ServiceUrl.brand'
-import {type GetUserSessionCredentials} from './UserSessionCredentials.brand'
 import {
   CommonHeaders,
   makeCommonHeaders,
@@ -54,7 +53,6 @@ export interface ClientProps<
   appSource: AppSource
   isDeveloper: boolean
   language: string
-  getUserSessionCredentials?: GetUserSessionCredentials
   url: ServiceUrl
   loggingFunction?: LoggingFunction | null
   deviceModel?: string
@@ -65,11 +63,9 @@ const makeClient =
   ({
     loggingFunction,
     vexlAppMetaHeader,
-    getUserSessionCredentials,
   }: {
     loggingFunction?: LoggingFunction | null
     vexlAppMetaHeader: VexlAppMetaHeader
-    getUserSessionCredentials?: GetUserSessionCredentials
   }) =>
   (client: HttpClient.HttpClient): HttpClient.HttpClient =>
     client.pipe(
@@ -96,11 +92,6 @@ const makeClient =
             ...Schema.encodeSync(CommonHeaders)(
               makeCommonHeaders(vexlAppMetaHeader)
             ),
-            ...(getUserSessionCredentials && {
-              [HEADER_PUBLIC_KEY]: getUserSessionCredentials().publicKey,
-              [HEADER_SIGNATURE]: getUserSessionCredentials().signature,
-              [HEADER_HASH]: getUserSessionCredentials().hash,
-            }),
           })
         )
       }),
@@ -212,7 +203,7 @@ const makeClient =
       )
     )
 
-export function createClientInstanceWithAuth<
+export function createClientInstance<
   ApiId extends string,
   Groups extends HttpApiGroup.HttpApiGroup.Any,
   ApiError,
@@ -225,7 +216,6 @@ export function createClientInstanceWithAuth<
   isDeveloper,
   appSource,
   language,
-  getUserSessionCredentials,
   url,
   loggingFunction,
   deviceModel,
@@ -254,7 +244,6 @@ export function createClientInstanceWithAuth<
     transformClient: makeClient({
       loggingFunction,
       vexlAppMetaHeader,
-      getUserSessionCredentials,
     }),
   })
 }

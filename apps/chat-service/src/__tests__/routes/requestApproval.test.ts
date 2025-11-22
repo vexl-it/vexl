@@ -12,7 +12,11 @@ import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectError
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
@@ -40,12 +44,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -74,12 +84,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -89,6 +105,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -103,12 +120,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -125,6 +148,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -136,6 +160,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -150,12 +175,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -179,6 +210,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -193,12 +225,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -222,6 +260,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -236,12 +275,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -263,6 +308,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -277,12 +323,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -292,6 +344,7 @@ describe('Request approval', () => {
               message: 'cancel message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -301,6 +354,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -315,12 +369,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -330,6 +390,7 @@ describe('Request approval', () => {
               message: 'cancel message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -346,6 +407,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -358,6 +420,7 @@ describe('Request approval', () => {
               message: 'request',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -372,12 +435,18 @@ describe('Request approval', () => {
         const client = yield* _(NodeTestingApp)
 
         yield* _(setAuthHeaders(user1.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user1.authHeaders
+        )
+
         const failedResponse = yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: generatePrivateKey().publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -400,12 +469,17 @@ describe('Request approval', () => {
         )
 
         yield* _(setAuthHeaders(dummyAuthHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(dummyAuthHeaders)
+
         const failedResponse = yield* _(
           client.Inboxes.requestApproval({
             payload: {
               message: 'request message',
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

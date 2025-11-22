@@ -12,7 +12,11 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
@@ -31,12 +35,18 @@ beforeEach(async () => {
       const client = yield* _(NodeTestingApp)
 
       yield* _(setAuthHeaders(user1.authHeaders))
+
+      const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+        user1.authHeaders
+      )
+
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
             message: 'someMessage',
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
+          headers: commonAndSecurityHeaders,
         })
       )
     })
@@ -198,12 +208,18 @@ describe('Approve request', () => {
           const client = yield* _(NodeTestingApp)
 
           yield* _(setAuthHeaders(user1.authHeaders))
+
+          const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+            user1.authHeaders
+          )
+
           yield* _(
             client.Inboxes.cancelRequestApproval({
               payload: {
                 message: 'someMessage2',
                 publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               },
+              headers: commonAndSecurityHeaders,
             })
           )
 

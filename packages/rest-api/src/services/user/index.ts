@@ -6,7 +6,8 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import {type LoggingFunction} from '../../utils'
 
 import {Effect, Option} from 'effect/index'
-import {createClientInstanceWithAuth} from '../../client'
+import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {
   type InitEraseUserRequest,
@@ -29,7 +30,7 @@ export interface UserApiProps {
   loggingFunction?: LoggingFunction | null
   deviceModel?: string
   osVersion?: string
-  getUserSessionCredentials?: GetUserSessionCredentials
+  getUserSessionCredentials: GetUserSessionCredentials
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -48,12 +49,11 @@ export function api({
 }: UserApiProps) {
   return Effect.gen(function* (_) {
     const client = yield* _(
-      createClientInstanceWithAuth({
+      createClientInstance({
         api: UserApiSpecification,
         platform,
         clientVersion,
         clientSemver,
-        getUserSessionCredentials,
         url,
         isDeveloper,
         language,
@@ -75,6 +75,11 @@ export function api({
       osVersion: Option.fromNullable(osVersion),
     })
 
+    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
+    )
+
     return {
       generateLoginChallenge: () => client.generateLoginChallenge({}),
       initPhoneVerification: (body: InitPhoneVerificationRequest) =>
@@ -86,10 +91,14 @@ export function api({
         client.Login.verifyCode({payload: body}),
       verifyChallenge: (body: VerifyChallengeRequest) =>
         client.Login.verifyChallenge({payload: body}),
-      deleteUser: () => client.logoutUser({}),
+      deleteUser: () => client.logoutUser({headers: commonAndSecurityHeaders}),
       regenerateSessionCredentials: (
         body: RegenerateSessionCredentialsRequest
-      ) => client.regenerateSessionCredentials({payload: body}),
+      ) =>
+        client.regenerateSessionCredentials({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
       getVersionServiceInfo: () =>
         client.getVersionServiceInfo({
           headers: commonHeaders,

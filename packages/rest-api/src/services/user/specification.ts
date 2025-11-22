@@ -9,7 +9,10 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {
+  CommonAndSecurityHeaders,
+  ServerSecurityMiddleware,
+} from '../../apiSecurity'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
@@ -68,6 +71,7 @@ export const LogoutUserEndpoint = HttpApiEndpoint.del(
   'logoutUser',
   '/api/v1/user/me'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .addSuccess(Schema.String)
   .annotate(MaxExpectedDailyCall, 5)
@@ -109,6 +113,7 @@ export const RegenerateSessionCredentialsEndpoint = HttpApiEndpoint.post(
   'regenerateSessionCredentials',
   '/api/v1/regenerate-session-credentials'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(RegenerateSessionCredentialsRequest)
   .addSuccess(RegenerateSessionCredentialsResponse)

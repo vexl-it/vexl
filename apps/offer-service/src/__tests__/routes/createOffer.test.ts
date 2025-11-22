@@ -17,6 +17,7 @@ import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/c
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -53,21 +54,22 @@ describe('createOffer', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.createNewOffer({
             payload: request,
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -128,21 +130,22 @@ describe('createOffer', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.createNewOffer({
             payload: request,
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -189,21 +192,22 @@ describe('createOffer', () => {
 
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.createNewOffer({
             payload: request,
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

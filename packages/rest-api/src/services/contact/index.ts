@@ -1,7 +1,8 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
-import {createClientInstanceWithAuth} from '../../client'
+import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {createClientInstance} from '../../client'
 import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -65,7 +66,7 @@ export function api({
 }) {
   return Effect.gen(function* (_) {
     const client = yield* _(
-      createClientInstanceWithAuth({
+      createClientInstance({
         api: ContactApiSpecification,
         platform,
         clientVersion,
@@ -73,7 +74,6 @@ export function api({
         appSource,
         clientSemver,
         isDeveloper,
-        getUserSessionCredentials,
         url,
         loggingFunction,
         deviceModel,
@@ -96,18 +96,26 @@ export function api({
       osVersion: Option.fromNullable(osVersion),
     })
 
+    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
+    )
+
     return {
       checkUserExists: (query: CheckUserExistsRequest) =>
-        client.User.checkUserExists({urlParams: query}),
+        client.User.checkUserExists({
+          urlParams: query,
+          headers: commonAndSecurityHeaders,
+        }),
       createUser: (body: CreateUserRequest) =>
         client.User.createUser({
           payload: body,
-          headers: commonHeaders,
+          headers: commonAndSecurityHeaders,
         }),
       refreshUser: (body: RefreshUserRequest) =>
         client.User.refreshUser({
           payload: body,
-          headers: commonHeaders,
+          headers: commonAndSecurityHeaders,
         }),
       updateNotificationToken: ({
         body,
@@ -116,31 +124,37 @@ export function api({
       }) =>
         client.User.updateNotificationToken({
           payload: body,
-          headers: commonHeaders,
+          headers: commonAndSecurityHeaders,
         }),
-      deleteUser: () => client.User.deleteUser({}),
+      deleteUser: () =>
+        client.User.deleteUser({headers: commonAndSecurityHeaders}),
       importContacts: (body: ImportContactsRequest) =>
-        client.Contact.importContacts({payload: body}),
+        client.Contact.importContacts({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
 
       fetchMyContacts: (query: FetchMyContactsRequest) =>
         client.Contact.fetchMyContacts({
-          headers: commonHeaders,
+          headers: commonAndSecurityHeaders,
           urlParams: query,
         }),
       fetchMyContactsPaginated: (query: FetchMyContactsPaginatedRequest) =>
         client.Contact.fetchMyContactsPaginated({
-          headers: commonHeaders,
+          headers: commonAndSecurityHeaders,
           urlParams: query,
         }),
       fetchCommonConnections: (body: FetchCommonConnectionsRequest) =>
         client.Contact.fetchCommonConnections({
           payload: body,
+          headers: commonAndSecurityHeaders,
         }),
       fetchCommonConnectionsPaginated: (
         body: FetchCommonConnectionsPaginatedRequest
       ) =>
         client.Contact.fetchCommonConnectionsPaginated({
           payload: body,
+          headers: commonAndSecurityHeaders,
         }),
       convertPhoneNumberHashesToServerHashes: (
         body: ConvertPhoneNumberHashesToServerHashesRequest
@@ -229,7 +243,10 @@ export function api({
       ) =>
         addChallenge(reportClubRequest).pipe(
           Effect.flatMap((body) =>
-            client.ClubsMember.reportClub({payload: body})
+            client.ClubsMember.reportClub({
+              payload: body,
+              headers: commonAndSecurityHeaders,
+            })
           )
         ),
       eraseUserFromNetwork: (request: EraseUserFromNetworkRequest) =>

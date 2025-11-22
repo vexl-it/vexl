@@ -7,6 +7,7 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
+  makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './utils'
 
@@ -68,13 +69,21 @@ describe('Fetch my contacts', () => {
         )
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(networkOne[0].authHeaders))
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"Some test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          networkOne[0].authHeaders,
+          testCommonHeaders
+        )
+
         const {items} = yield* _(
           app.Contact.fetchMyContacts({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"Some test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {level: 'FIRST' as const, page: 0, limit: MAX_PAGE_SIZE},
           })
         )
@@ -122,13 +131,21 @@ describe('Fetch my contacts', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
         const {items} = yield* _(
           app.Contact.fetchMyContacts({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {
               level: 'SECOND' as const,
               page: 0,
@@ -186,13 +203,21 @@ describe('Fetch my contacts', () => {
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
         const {items} = yield* _(
           app.Contact.fetchMyContacts({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {level: 'ALL' as const, page: 0, limit: MAX_PAGE_SIZE},
           })
         )

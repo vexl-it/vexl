@@ -5,6 +5,7 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
+  makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './utils'
 
@@ -62,6 +63,9 @@ describe('Common connections', () => {
         )
 
         yield* _(setAuthHeaders(networkOne[0].authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          networkOne[0].authHeaders
+        )
 
         const connections = yield* _(
           app.Contact.fetchCommonConnections({
@@ -71,6 +75,7 @@ describe('Common connections', () => {
                 (one) => one.keys.publicKeyPemBase64
               ),
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 

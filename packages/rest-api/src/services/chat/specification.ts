@@ -8,7 +8,10 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {
+  CommonAndSecurityHeaders,
+  ServerSecurityMiddleware,
+} from '../../apiSecurity'
 import {InvalidChallengeError} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
 import {CommonHeaders} from '../../commonHeaders'
@@ -109,6 +112,7 @@ export const RequestApprovalEndpoint = HttpApiEndpoint.post(
   'requestApproval',
   '/api/v1/inboxes/approval/request'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(RequestApprovalRequest)
   .addSuccess(RequestApprovalResponse)
@@ -128,6 +132,7 @@ export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
   'cancelRequestApproval',
   '/api/v1/inboxes/approval/cancel'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(CancelApprovalRequest)
   .addSuccess(CancelApprovalResponse)

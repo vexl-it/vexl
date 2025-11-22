@@ -12,6 +12,7 @@ import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
+import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 describe('create user', () => {
   it('Should create a user in db', async () => {
@@ -29,17 +30,25 @@ describe('create user', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders))
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          authHeaders,
+          testCommonHeaders
+        )
+
         yield* _(
           app.User.createUser({
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -87,15 +96,17 @@ describe('create user', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         yield* _(
           app.User.createUser({
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -105,6 +116,7 @@ describe('create user', () => {
               contacts: [Schema.decodeSync(HashedPhoneNumberE)('someHash')],
               replace: true,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -138,15 +150,17 @@ describe('create user', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders2))
+
+        const commonAndSecurityHeaders2 =
+          makeTestCommonAndSecurityHeaders(authHeaders2)
+
         yield* _(
           app.User.createUser({
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
             },
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-            }),
+            headers: commonAndSecurityHeaders2,
           })
         )
 

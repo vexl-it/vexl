@@ -19,7 +19,11 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import dayjs from 'dayjs'
 import {Effect, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -35,6 +39,9 @@ const clubKeypairForMe = generatePrivateKey()
 let offer1: CreateNewOfferResponse
 let offer2: CreateNewOfferResponse
 let offer3: CreateNewOfferResponse
+let commonAndSecurityHeaders: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -74,10 +81,15 @@ beforeAll(async () => {
 
       yield* _(setAuthHeaders(user1.authHeaders))
 
+      commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+        user1.authHeaders
+      )
+
       offer1 = {
         ...(yield* _(
           client.createNewOffer({
             payload: request1,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request1.adminId,
@@ -115,6 +127,7 @@ beforeAll(async () => {
         ...(yield* _(
           client.createNewOffer({
             payload: request2,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request2.adminId,
@@ -152,6 +165,7 @@ beforeAll(async () => {
         ...(yield* _(
           client.createNewOffer({
             payload: request3,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request3.adminId,
@@ -849,10 +863,10 @@ describe('Get removed club offers', () => {
 
         yield* _(setAuthHeaders(user1.authHeaders))
 
+        const testHeaders = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
         const newOffer = yield* _(
-          client.createNewOffer({
-            payload: request,
-          })
+          client.createNewOffer({payload: request, headers: testHeaders})
         )
 
         const offerIds = [newOffer.offerId, offer1.offerId]

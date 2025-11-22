@@ -9,7 +9,10 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {ServerSecurityMiddleware} from '../../apiSecurity'
+import {
+  CommonAndSecurityHeaders,
+  ServerSecurityMiddleware,
+} from '../../apiSecurity'
 import {InvalidChallengeError} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
@@ -52,6 +55,7 @@ export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
   'getOffersForMeModifiedOrCreatedAfter',
   '/api/v2/offers/me/modified'
 )
+  .setHeaders(CommonAndSecurityHeaders)
   .annotate(OpenApi.Summary, 'Get offers for me modified or created after')
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(GetOffersForMeCreatedOrModifiedAfterRequest)
@@ -67,6 +71,7 @@ export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
       OpenApi.Summary,
       'Get offers for me modified or created after (paginated)'
     )
+    .setHeaders(CommonAndSecurityHeaders)
     .middleware(ServerSecurityMiddleware)
     .setUrlParams(GetOffersForMeCreatedOrModifiedAfterPaginatedRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
@@ -107,6 +112,7 @@ export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
   '/api/v2/offers'
 )
   .annotate(OpenApi.Summary, 'Create offer')
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(CreateNewOfferRequest)
   .addSuccess(CreateNewOfferResponse)
@@ -137,6 +143,7 @@ export const UpdateOfferEndpoint = HttpApiEndpoint.put(
   '/api/v2/offers'
 )
   .annotate(OpenApi.Summary, 'Update offer')
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateOfferRequest)
   .addSuccess(UpdateOfferResponse)
@@ -163,6 +170,7 @@ export const DeletePrivatePartEndpoint = HttpApiEndpoint.del(
     OpenApi.Description,
     'When offer for one of adminIds is not found, no error is returned'
   )
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(DeletePrivatePartRequest)
   .addSuccess(DeletePrivatePartResponse)
@@ -174,6 +182,7 @@ export const GetRemovedOffersEndpoint = HttpApiEndpoint.post(
   '/api/v1/offers/not-exist'
 )
   .annotate(OpenApi.Summary, 'Get removed offers')
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(RemovedOfferIdsRequest)
   .addSuccess(RemovedOfferIdsResponse)
@@ -194,6 +203,7 @@ export const ReportOfferEndpoint = HttpApiEndpoint.post(
   '/api/v1/offers/report'
 )
   .annotate(OpenApi.Summary, 'Report offer')
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(ReportOfferRequest)
   .addSuccess(ReportOfferResponse)
@@ -206,6 +216,7 @@ export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   '/api/v1/clubOffers/report'
 )
   .annotate(OpenApi.Summary, 'Report club offer')
+  .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(ReportClubOfferRequest)
   .addSuccess(ReportClubOfferResponse)

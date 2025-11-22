@@ -14,6 +14,7 @@ import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contract
 import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {makeTestCommonAndSecurityHeaders} from '../../../routes/contacts/utils'
 import {
   type MockedUser,
   createMockedUser,
@@ -106,6 +107,9 @@ describe('Report club', () => {
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
         yield* _(addTestHeaders(user.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user.authHeaders
+        )
         yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -113,6 +117,7 @@ describe('Report club', () => {
               offerId,
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -156,6 +161,9 @@ describe('Report club', () => {
         )
 
         yield* _(addTestHeaders(user.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user.authHeaders
+        )
         yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -163,10 +171,14 @@ describe('Report club', () => {
               offerId,
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
         yield* _(addTestHeaders(user2.authHeaders))
+        const commonAndSecurityHeaders2 = makeTestCommonAndSecurityHeaders(
+          user2.authHeaders
+        )
         yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -174,6 +186,7 @@ describe('Report club', () => {
               offerId: newOfferId(),
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders2,
           })
         )
 
@@ -201,6 +214,9 @@ describe('Report club', () => {
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
         yield* _(addTestHeaders(user.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user.authHeaders
+        )
         yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -208,6 +224,7 @@ describe('Report club', () => {
               offerId,
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -246,6 +263,7 @@ describe('Report club', () => {
               offerId,
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -284,6 +302,9 @@ describe('Report club', () => {
         `)
 
         yield* _(addTestHeaders(user.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user.authHeaders
+        )
         yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -291,6 +312,7 @@ describe('Report club', () => {
               offerId,
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -306,6 +328,7 @@ describe('Report club', () => {
               offerId: newOfferId(),
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -320,6 +343,7 @@ describe('Report club', () => {
               offerId: newOfferId(),
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -335,6 +359,7 @@ describe('Report club', () => {
               offerId: newOfferId(),
               clubUuid: club.uuid,
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -352,6 +377,9 @@ describe('Report club', () => {
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
         yield* _(addTestHeaders(user.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user.authHeaders
+        )
         const errorResponse = yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -359,6 +387,7 @@ describe('Report club', () => {
               offerId,
               clubUuid: generateClubUuid(),
             },
+            headers: commonAndSecurityHeaders,
             withResponse: true,
           }),
           Effect.either
@@ -377,6 +406,9 @@ describe('Report club', () => {
         const challenge = yield* _(generateAndSignChallenge(clubKeypairForUser))
 
         yield* _(addTestHeaders(user.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          user.authHeaders
+        )
         const errorResponse = yield* _(
           app.ClubsMember.reportClub({
             payload: {
@@ -385,6 +417,7 @@ describe('Report club', () => {
               offerId,
               clubUuid: generateClubUuid(),
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

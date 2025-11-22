@@ -1,8 +1,9 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Effect} from 'effect'
-import {createClientInstanceWithAuth} from '../../client'
-import {type AppSource} from '../../commonHeaders'
+import {Effect, Option} from 'effect'
+import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {createClientInstance} from '../../client'
+import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
@@ -58,7 +59,7 @@ export function api({
 }) {
   return Effect.gen(function* (_) {
     const client = yield* _(
-      createClientInstanceWithAuth({
+      createClientInstance({
         api: OfferApiSpecification,
         platform,
         clientVersion,
@@ -66,12 +67,27 @@ export function api({
         language,
         isDeveloper,
         appSource,
-        getUserSessionCredentials,
         url,
         loggingFunction,
         deviceModel,
         osVersion,
       })
+    )
+
+    const commonHeaders = makeCommonHeaders({
+      appSource,
+      versionCode: clientVersion,
+      semver: clientSemver,
+      platform,
+      isDeveloper,
+      language,
+      deviceModel: Option.fromNullable(deviceModel),
+      osVersion: Option.fromNullable(osVersion),
+    })
+
+    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
     )
 
     const addChallenge = addChallengeToRequest2(
@@ -84,12 +100,14 @@ export function api({
       ) =>
         client.getOffersForMeModifiedOrCreatedAfter({
           urlParams: req,
+          headers: commonAndSecurityHeaders,
         }),
       getOffersForMeModifiedOrCreatedAfterPaginated: (
         req: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
       ) =>
         client.getOffersForMeModifiedOrCreatedAfterPaginated({
           urlParams: req,
+          headers: commonAndSecurityHeaders,
         }),
       getClubOffersForMeModifiedOrCreatedAfter: (
         body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>
@@ -112,19 +130,28 @@ export function api({
           )
         ),
       createNewOffer: (body: CreateNewOfferRequest) =>
-        client.createNewOffer({payload: body}),
+        client.createNewOffer({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
       refreshOffer: (body: RefreshOfferRequest) =>
         client.refreshOffer({payload: body}),
       deleteOffer: (req: DeleteOfferRequest) =>
         client.deleteOffer({urlParams: req}),
       updateOffer: (body: UpdateOfferRequest) =>
-        client.updateOffer({payload: body}),
+        client.updateOffer({payload: body, headers: commonAndSecurityHeaders}),
       createPrivatePart: (body: CreatePrivatePartRequest) =>
         client.createPrivatePart({payload: body}),
       deletePrivatePart: (req: DeletePrivatePartRequest) =>
-        client.deletePrivatePart({payload: req}),
+        client.deletePrivatePart({
+          payload: req,
+          headers: commonAndSecurityHeaders,
+        }),
       getRemovedOffers: (body: RemovedOfferIdsRequest) =>
-        client.getRemovedOffers({payload: body}),
+        client.getRemovedOffers({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
       getRemovedClubOffers: (
         body: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
       ) =>
@@ -132,12 +159,17 @@ export function api({
           Effect.flatMap((body) => client.getRemovedClubOffers({payload: body}))
         ),
       reportOffer: (body: ReportOfferRequest) =>
-        client.reportOffer({payload: body}),
+        client.reportOffer({payload: body, headers: commonAndSecurityHeaders}),
       reportClubOffer: (
         body: RequestWithGeneratableChallenge<ReportClubOfferRequest>
       ) =>
         addChallenge(body).pipe(
-          Effect.flatMap((body) => client.reportClubOffer({payload: body}))
+          Effect.flatMap((body) =>
+            client.reportClubOffer({
+              payload: body,
+              headers: commonAndSecurityHeaders,
+            })
+          )
         ),
       // ----------------------
       // 👇 Challenge

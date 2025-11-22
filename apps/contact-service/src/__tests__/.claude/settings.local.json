@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn workspace @vexl-next/contact-service test:*)",
+      "Bash(yarn workspace @vexl-next/contact-service typecheck:*)",
+      "Bash(yarn workspace @vexl-next/contact-service lint:*)",
+      "Bash(yarn workspace:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

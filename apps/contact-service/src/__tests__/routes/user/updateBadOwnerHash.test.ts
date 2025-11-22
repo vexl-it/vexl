@@ -17,7 +17,6 @@ import {
   EcdsaSignature,
   hmacSignE,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UnableToVerifySignatureError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {cryptoConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {
@@ -30,6 +29,7 @@ import {
   serverHashPhoneNumber,
   type ServerHashedNumber,
 } from '../../../utils/serverHashContact'
+import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
@@ -110,11 +110,19 @@ beforeEach(async () => {
 
       if (authHeadersNew) {
         yield* _(setAuthHeaders(authHeadersNew))
-        yield* _(app.User.deleteUser({}))
+        yield* _(
+          app.User.deleteUser({
+            headers: makeTestCommonAndSecurityHeaders(authHeadersNew),
+          })
+        )
       }
       if (authHeadersOld) {
         yield* _(setAuthHeaders(authHeadersOld))
-        yield* _(app.User.deleteUser({}))
+        yield* _(
+          app.User.deleteUser({
+            headers: makeTestCommonAndSecurityHeaders(authHeadersOld),
+          })
+        )
       }
 
       oldHash = yield* _(
@@ -153,28 +161,32 @@ beforeEach(async () => {
       }
 
       yield* _(setAuthHeaders(authHeadersOld))
+
+      const commonAndSecurityHeadersOld =
+        makeTestCommonAndSecurityHeaders(authHeadersOld)
+
       yield* _(
         app.User.createUser({
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          headers: Schema.decodeSync(CommonHeaders)({
-            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-          }),
+          headers: commonAndSecurityHeadersOld,
         })
       )
 
       yield* _(setAuthHeaders(authHeadersNew))
+
+      const commonAndSecurityHeadersNew =
+        makeTestCommonAndSecurityHeaders(authHeadersNew)
+
       yield* _(
         app.User.createUser({
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
           },
-          headers: Schema.decodeSync(CommonHeaders)({
-            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-          }),
+          headers: commonAndSecurityHeadersNew,
         })
       )
 
@@ -199,6 +211,7 @@ beforeEach(async () => {
             contacts: hashesToImport,
             replace: true,
           },
+          headers: commonAndSecurityHeadersOld,
         })
       )
 
@@ -209,6 +222,7 @@ beforeEach(async () => {
             contacts: hashesToImport,
             replace: true,
           },
+          headers: commonAndSecurityHeadersNew,
         })
       )
     })
@@ -345,7 +359,11 @@ describe('updateBadOwnerHash', () => {
 
         // let's suppose There is only old user in the datase
         yield* _(setAuthHeaders(authHeadersNew))
-        yield* _(app.User.deleteUser({}))
+        yield* _(
+          app.User.deleteUser({
+            headers: makeTestCommonAndSecurityHeaders(authHeadersNew),
+          })
+        )
 
         yield* _(setAuthHeaders(authHeadersOld))
         const result = yield* _(

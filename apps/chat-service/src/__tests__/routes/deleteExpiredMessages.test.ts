@@ -5,7 +5,11 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {clearExpiredMessages} from '../../internalServer/routes/clearExpiredMessages'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
@@ -19,12 +23,18 @@ beforeAll(async () => {
       const client = yield* _(NodeTestingApp)
 
       yield* _(setAuthHeaders(user1.authHeaders))
+
+      const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+        user1.authHeaders
+      )
+
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
             message: 'someMessage',
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
+          headers: commonAndSecurityHeaders,
         })
       )
 

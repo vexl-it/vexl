@@ -8,6 +8,7 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
+  makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './utils'
 
@@ -48,6 +49,9 @@ describe('Common connections paginated', () => {
         )
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const connections = yield* _(
           app.Contact.fetchCommonConnectionsPaginated({
@@ -58,6 +62,7 @@ describe('Common connections paginated', () => {
               ),
               limit: 20,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -106,6 +111,9 @@ describe('Common connections paginated', () => {
         )
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const connections = yield* _(
           app.Contact.fetchCommonConnectionsPaginated({
@@ -116,6 +124,7 @@ describe('Common connections paginated', () => {
               ),
               limit: 2,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -144,6 +153,9 @@ describe('Common connections paginated', () => {
         )
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const LIMIT_PER_PAGE = 2
 
@@ -156,6 +168,7 @@ describe('Common connections paginated', () => {
               ),
               limit: LIMIT_PER_PAGE,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -170,6 +183,7 @@ describe('Common connections paginated', () => {
                 limit: LIMIT_PER_PAGE,
                 nextPageToken: firstPage.nextPageToken,
               },
+              headers: commonAndSecurityHeaders,
             })
           )
 
@@ -232,6 +246,9 @@ describe('Common connections paginated', () => {
         const me = networkOne[0]
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const connections = yield* _(
           app.Contact.fetchCommonConnectionsPaginated({
@@ -239,6 +256,7 @@ describe('Common connections paginated', () => {
               publicKeys: [generatePrivateKey().publicKeyPemBase64],
               limit: 20,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -261,6 +279,9 @@ describe('Common connections paginated', () => {
         )
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const response = yield* _(
           app.Contact.fetchCommonConnectionsPaginated({
@@ -272,6 +293,7 @@ describe('Common connections paginated', () => {
               limit: 20,
               nextPageToken: 'invalid',
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -292,6 +314,9 @@ describe('Common connections paginated', () => {
         )
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const payload = {
           publicKeys: Array.map(
@@ -303,8 +328,14 @@ describe('Common connections paginated', () => {
 
         const [firstCall, secondCall] = yield* _(
           Effect.all([
-            app.Contact.fetchCommonConnectionsPaginated({payload}),
-            app.Contact.fetchCommonConnectionsPaginated({payload}),
+            app.Contact.fetchCommonConnectionsPaginated({
+              payload,
+              headers: commonAndSecurityHeaders,
+            }),
+            app.Contact.fetchCommonConnectionsPaginated({
+              payload,
+              headers: commonAndSecurityHeaders,
+            }),
           ])
         )
 
@@ -326,6 +357,9 @@ describe('Common connections paginated', () => {
         )
 
         yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
 
         const connections = yield* _(
           app.Contact.fetchCommonConnectionsPaginated({
@@ -336,6 +370,7 @@ describe('Common connections paginated', () => {
               ),
               limit: 0,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 

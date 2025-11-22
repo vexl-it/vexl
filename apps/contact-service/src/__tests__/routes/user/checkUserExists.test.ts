@@ -6,10 +6,10 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {sendNotificationsMock} from '../../utils/mockedExpoNotificationService'
+import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
@@ -26,6 +26,10 @@ beforeAll(async () => {
         })
       )
       yield* _(setAuthHeaders(authHeaders))
+
+      const commonAndSecurityHeaders =
+        makeTestCommonAndSecurityHeaders(authHeaders)
+
       yield* _(
         app.User.createUser({
           payload: {
@@ -34,9 +38,7 @@ beforeAll(async () => {
               'notificationToken'
             ),
           },
-          headers: Schema.decodeSync(CommonHeaders)({
-            'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-          }),
+          headers: commonAndSecurityHeaders,
         })
       )
     })
@@ -58,9 +60,14 @@ describe('Check user exists', () => {
         )
 
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         const result = yield* _(
           app.User.checkUserExists({
             urlParams: {notifyExistingUserAboutLogin: false},
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -79,9 +86,14 @@ describe('Check user exists', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         const result = yield* _(
           app.User.checkUserExists({
             urlParams: {notifyExistingUserAboutLogin: false},
+            headers: commonAndSecurityHeaders,
           })
         )
         expect(result.exists).toBe(true)
@@ -105,9 +117,14 @@ describe('Check user exist notification', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         const result = yield* _(
           app.User.checkUserExists({
             urlParams: {notifyExistingUserAboutLogin: true},
+            headers: commonAndSecurityHeaders,
           })
         )
         expect(result.exists).toBe(true)
@@ -132,9 +149,14 @@ describe('Check user exist notification', () => {
           })
         )
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         yield* _(
           app.User.checkUserExists({
             urlParams: {notifyExistingUserAboutLogin: true},
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -164,9 +186,14 @@ describe('Check user exist notification', () => {
         `)
 
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         const result = yield* _(
           app.User.checkUserExists({
             urlParams: {notifyExistingUserAboutLogin: true},
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -197,9 +224,14 @@ describe('Check user exist notification', () => {
         )
 
         yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
         const result = yield* _(
           app.User.checkUserExists({
             urlParams: {notifyExistingUserAboutLogin: false},
+            headers: commonAndSecurityHeaders,
           })
         )
 

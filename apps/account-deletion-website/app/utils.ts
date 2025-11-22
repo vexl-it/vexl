@@ -53,11 +53,11 @@ export function getKeypair(): E.Either<
   return pipe(
     E.tryCatch(
       () => sessionStorage.getItem(STORAGE_KEYPAIR_KEY),
-      () => ({ _tag: "ErrorGettingKeypair" }) as const
+      () => ({ _tag: "ErrorGettingKeypair" }) as const,
     ),
     E.chainW(E.fromNullable({ _tag: "NoKeypairStored" } as const)),
     E.chainW(parseJson),
-    E.chainW(safeParse(PrivateKeyHolder))
+    E.chainW(safeParse(PrivateKeyHolder)),
   );
 }
 
@@ -65,7 +65,7 @@ interface ErrorSavingKeypair {
   _tag: "ErrorSavingKeypair";
 }
 export function saveKeyPair(
-  keypair: PrivateKeyHolder
+  keypair: PrivateKeyHolder,
 ): E.Either<ErrorSavingKeypair | JsonStringifyError, void> {
   return pipe(
     stringifyToJson(keypair),
@@ -74,9 +74,9 @@ export function saveKeyPair(
         () => {
           sessionStorage.setItem(STORAGE_KEYPAIR_KEY, JSON.stringify(keypair));
         },
-        () => ({ _tag: "ErrorSavingKeypair" }) as const
-      )
-    )
+        () => ({ _tag: "ErrorSavingKeypair" }) as const,
+      ),
+    ),
   );
 }
 
@@ -84,7 +84,7 @@ interface ErrorSigning {
   _tag: "ErrorSigning";
 }
 export function ecdsaSign(
-  keypair: PrivateKeyHolder
+  keypair: PrivateKeyHolder,
 ): (challenge: string) => E.Either<ErrorSigning, string> {
   return (challenge: string) =>
     E.tryCatch(
@@ -93,7 +93,7 @@ export function ecdsaSign(
           privateKey: keypair.privateKeyPemBase64,
           challenge,
         }),
-      () => ({ _tag: "ErrorSigning" }) as const
+      () => ({ _tag: "ErrorSigning" }) as const,
     );
 }
 
@@ -108,9 +108,9 @@ interface ErrorParsingFormData {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseFormData<T extends Schema.Schema<any>>(
-  schemaType: T
+  schemaType: T,
 ): (
-  request: Request
+  request: Request,
 ) => Effect.Effect<Schema.Schema.Type<T>, ErrorParsingFormData, never> {
   return (request: Request) =>
     Effect.tryPromise({
@@ -130,6 +130,11 @@ export function createUserPublicApi(): userApi.UserApi {
       ...apiMeta,
       deviceModel: "web",
       osVersion: "web",
+      getUserSessionCredentials: () => ({
+        signature: "dumy",
+        publicKey: "dummy" as PublicKeyPemBase64,
+        hash: "dummy",
+      }),
     })
     .pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync);
 }

@@ -4,7 +4,7 @@ import {Effect, Option} from 'effect/index'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {createClientInstanceWithAuth} from '../../client'
+import {createClientInstance} from '../../client'
 import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type LoggingFunction} from '../../utils'
 import {
@@ -42,7 +42,7 @@ export function api({
 }) {
   return Effect.gen(function* (_) {
     const client = yield* _(
-      createClientInstanceWithAuth({
+      createClientInstance({
         api: ContentApiSpecification,
         platform,
         clientVersion,
@@ -50,7 +50,6 @@ export function api({
         language,
         appSource,
         isDeveloper,
-        getUserSessionCredentials,
         url,
         loggingFunction,
         deviceModel,

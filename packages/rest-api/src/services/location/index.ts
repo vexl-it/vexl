@@ -1,7 +1,7 @@
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect} from 'effect/index'
-import {createClientInstanceWithAuth} from '../../client'
+import {createClientInstance} from '../../client'
 import {type AppSource} from '../../commonHeaders'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -43,7 +43,7 @@ export function api({
 }) {
   return Effect.gen(function* (_) {
     const client = yield* _(
-      createClientInstanceWithAuth({
+      createClientInstance({
         api: LocationApiSpecification,
         platform,
         clientVersion,
@@ -51,7 +51,6 @@ export function api({
         isDeveloper,
         appSource,
         clientSemver,
-        getUserSessionCredentials,
         url,
         loggingFunction,
         deviceModel,

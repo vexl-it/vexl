@@ -19,11 +19,9 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {
-  setAuthHeaders,
-  setDummyAuthHeadersForUser,
-} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -31,6 +29,9 @@ const user1 = generatePrivateKey()
 const user2 = generatePrivateKey()
 const me = generatePrivateKey()
 let offer1: CreateNewOfferResponse
+let commonAndSecurityHeaders: ReturnType<
+  typeof makeTestCommonAndSecurityHeaders
+>
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -61,21 +62,22 @@ beforeAll(async () => {
         offerId: newOfferId(),
       }
 
-      yield* _(
-        setAuthHeaders(
-          yield* _(
-            createDummyAuthHeadersForUser({
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-              publicKey: me.publicKeyPemBase64,
-            })
-          )
-        )
+      const authHeaders = yield* _(
+        createDummyAuthHeadersForUser({
+          phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+          publicKey: me.publicKeyPemBase64,
+        })
       )
+
+      yield* _(setAuthHeaders(authHeaders))
+
+      commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(authHeaders)
 
       offer1 = {
         ...(yield* _(
           client.createNewOffer({
             payload: request1,
+            headers: commonAndSecurityHeaders,
           })
         )),
         adminId: request1.adminId,
@@ -90,17 +92,17 @@ describe('Update offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         yield* _(
           client.updateOffer({
@@ -111,6 +113,7 @@ describe('Update offer', () => {
               ),
               offerPrivateList: [],
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -135,17 +138,17 @@ describe('Update offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         yield* _(
           client.updateOffer({
@@ -169,6 +172,7 @@ describe('Update offer', () => {
                 },
               ],
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 
@@ -208,17 +212,17 @@ describe('Update offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.updateOffer({
@@ -236,6 +240,7 @@ describe('Update offer', () => {
                 },
               ],
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -249,17 +254,17 @@ describe('Update offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.updateOffer({
@@ -289,6 +294,7 @@ describe('Update offer', () => {
                 },
               ],
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -302,17 +308,17 @@ describe('Update offer', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders(
-            yield* _(
-              createDummyAuthHeadersForUser({
-                phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
-                publicKey: me.publicKeyPemBase64,
-              })
-            )
-          )
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const data = yield* _(
           client.updateOffer({
@@ -336,6 +342,7 @@ describe('Update offer', () => {
                 },
               ],
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -363,12 +370,17 @@ describe('Update offer', () => {
             offer_id = ${offer1.offerId}
         `)
 
-        yield* _(
-          setDummyAuthHeadersForUser({
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
             phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const result = yield* _(
           client.updateOffer({
@@ -379,6 +391,7 @@ describe('Update offer', () => {
               ),
               offerPrivateList: [],
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )

@@ -7,7 +7,11 @@ import {Effect} from 'effect'
 import {hashPublicKey} from '../../db/domain'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  createMockedUser,
+  makeTestCommonAndSecurityHeaders,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
@@ -30,12 +34,18 @@ beforeEach(async () => {
 
       // user1 -> user2.inbox1
       yield* _(setAuthHeaders(user1.authHeaders))
+
+      const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+        user1.authHeaders
+      )
+
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
             message: 'someMessage',
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
+          headers: commonAndSecurityHeaders,
         })
       )
 
@@ -54,12 +64,18 @@ beforeEach(async () => {
 
       // user3 -> user2.inbox2
       yield* _(setAuthHeaders(user3.authHeaders))
+
+      const commonAndSecurityHeaders3 = makeTestCommonAndSecurityHeaders(
+        user3.authHeaders
+      )
+
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
             message: 'someMessage',
             publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
+          headers: commonAndSecurityHeaders3,
         })
       )
 

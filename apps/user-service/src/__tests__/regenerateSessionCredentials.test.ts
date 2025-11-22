@@ -20,6 +20,7 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {cryptoConfig, oldHmacKeyUsedForHashingNumbersConfig} from '../configs'
 import {NodeTestingApp} from './utils/NodeTestingApp'
+import {makeTestCommonAndSecurityHeaders} from './utils/createTestCommonAndSecurityHeaders'
 import {
   disposeRuntime,
   runPromiseInMockedEnvironment,
@@ -66,13 +67,16 @@ describe('Regenerate session credentials', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
 
-        yield* _(
-          setAuthHeaders({
-            'public-key': publicKey,
-            hash,
-            signature,
-          })
-        )
+        const authHeaders = {
+          'public-key': publicKey,
+          hash,
+          signature,
+        }
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.regenerateSessionCredentials({
@@ -80,6 +84,7 @@ describe('Regenerate session credentials', () => {
               myPhoneNumber:
                 Schema.decodeSync(E164PhoneNumberE)('+420777777778'),
             },
+            headers: commonAndSecurityHeaders,
           }),
           Effect.either
         )
@@ -95,19 +100,23 @@ describe('Regenerate session credentials', () => {
         const client = yield* _(NodeTestingApp)
         const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420777777777')
 
-        yield* _(
-          setAuthHeaders({
-            'public-key': publicKey,
-            hash,
-            signature,
-          })
-        )
+        const authHeaders = {
+          'public-key': publicKey,
+          hash,
+          signature,
+        }
+
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
 
         const response = yield* _(
           client.regenerateSessionCredentials({
             payload: {
               myPhoneNumber: phoneNumber,
             },
+            headers: commonAndSecurityHeaders,
           })
         )
 

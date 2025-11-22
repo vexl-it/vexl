@@ -11,6 +11,7 @@ import {
   createUserOnNetwork,
   generateKeysAndHasheForNumber,
   importUsersFromNetwork,
+  makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './utils'
 
@@ -75,14 +76,21 @@ describe('Fetch my contacts paginated', () => {
 
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"Some test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
         const PAGE_SIZE = 4
         const {items} = yield* _(
           app.Contact.fetchMyContactsPaginated({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"Some test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {level: 'FIRST' as const, limit: PAGE_SIZE},
           })
         )
@@ -125,14 +133,21 @@ describe('Fetch my contacts paginated', () => {
 
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
         const PAGE_SIZE = 20
         const response = yield* _(
           app.Contact.fetchMyContactsPaginated({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {
               level: 'SECOND' as const,
               limit: PAGE_SIZE,
@@ -162,11 +177,7 @@ describe('Fetch my contacts paginated', () => {
 
         const secondPageResponse = yield* _(
           app.Contact.fetchMyContactsPaginated({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"googlePlay", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {
               level: 'SECOND' as const,
               limit: PAGE_SIZE,
@@ -204,14 +215,21 @@ describe('Fetch my contacts paginated', () => {
         )
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
         const limit = 20
         const result = yield* _(
           app.Contact.fetchMyContactsPaginated({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {level: 'FIRST' as const, limit},
           })
         )
@@ -235,11 +253,16 @@ describe('Fetch my contacts paginated', () => {
         )
         yield* _(setAuthHeaders(me.authHeaders))
 
-        const headers = Schema.decodeSync(CommonHeaders)({
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
           'vexl-app-meta':
             '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
         })
+
+        const headers = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
 
         const limit = userContacts.length > 2 ? 2 : userContacts.length
         const firstPage = yield* _(
@@ -274,13 +297,20 @@ describe('Fetch my contacts paginated', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
 
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
         const response = yield* _(
           app.Contact.fetchMyContactsPaginated({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
-              'vexl-app-meta':
-                '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
-            }),
+            headers: commonAndSecurityHeaders,
             urlParams: {
               level: 'FIRST' as const,
               limit: 10,
@@ -302,11 +332,16 @@ describe('Fetch my contacts paginated', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
 
-        const headers = Schema.decodeSync(CommonHeaders)({
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
           'vexl-app-meta':
             '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
         })
+
+        const headers = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
 
         const firstResult = yield* _(
           app.Contact.fetchMyContactsPaginated({
@@ -343,11 +378,16 @@ describe('Fetch my contacts paginated', () => {
         yield* _(setAuthHeaders(me.authHeaders))
 
         const urlParams = {level: 'FIRST' as const, limit: 10}
-        const headers = Schema.decodeSync(CommonHeaders)({
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
           'vexl-app-meta':
             '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
         })
+
+        const headers = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
 
         const [firstCall, secondCall] = yield* _(
           Effect.all([
@@ -371,11 +411,16 @@ describe('Fetch my contacts paginated', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
 
-        const headers = Schema.decodeSync(CommonHeaders)({
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/1 (1.0.0) ANDROID',
           'vexl-app-meta':
             '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
         })
+
+        const headers = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
 
         const levels: Array<'FIRST' | 'SECOND'> = ['FIRST', 'SECOND']
 

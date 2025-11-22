@@ -4,7 +4,8 @@ import {Effect, Option} from 'effect'
 import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {createClientInstanceWithAuth} from '../../client'
+import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type LoggingFunction} from '../../utils'
 import {
@@ -60,7 +61,7 @@ export function api({
 }) {
   return Effect.gen(function* (_) {
     const client = yield* _(
-      createClientInstanceWithAuth({
+      createClientInstance({
         api: ChatApiSpecification,
         platform,
         clientVersion,
@@ -68,7 +69,6 @@ export function api({
         language,
         isDeveloper,
         appSource,
-        getUserSessionCredentials,
         url,
         loggingFunction,
         deviceModel,
@@ -86,6 +86,11 @@ export function api({
       deviceModel: Option.fromNullable(deviceModel),
       osVersion: Option.fromNullable(osVersion),
     })
+
+    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
+    )
 
     const addChallenge = addChallengeToRequest2(
       client.Challenges.createChallenge
@@ -134,7 +139,10 @@ export function api({
         ),
       /** @deprecated use `requestApprovalV2` */
       requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
-        client.Inboxes.requestApproval({payload: requestApprovalRequest}),
+        client.Inboxes.requestApproval({
+          payload: requestApprovalRequest,
+          headers: commonAndSecurityHeaders,
+        }),
       requestApprovalV2: (
         requestApprovalV2Request: RequestWithGeneratableChallenge<RequestApprovalV2Request>
       ) =>
@@ -145,7 +153,10 @@ export function api({
         ),
       /** @deprecated use `cancelRequestApprovalV2` */
       cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
-        client.Inboxes.cancelRequestApproval({payload: cancelApprovalRequest}),
+        client.Inboxes.cancelRequestApproval({
+          payload: cancelApprovalRequest,
+          headers: commonAndSecurityHeaders,
+        }),
       cancelRequestApprovalV2: (
         cancelApprovalV2Request: RequestWithGeneratableChallenge<CancelApprovalV2Request>
       ) =>

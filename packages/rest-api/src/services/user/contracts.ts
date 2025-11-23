@@ -11,7 +11,7 @@ import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/s
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'

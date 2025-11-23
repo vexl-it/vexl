@@ -22,6 +22,7 @@ import * as hmac from '@vexl-next/cryptography/src/operations/hmac'
 import pbkdf2Promise from '@vexl-next/cryptography/src/operations/pbkdf2Promise'
 import {sha256} from '@vexl-next/cryptography/src/operations/sha'
 import {Effect, Schema} from 'effect'
+import * as EcdaBrands from './EcdsaSignature.brand'
 
 export const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
 const AES_GCM_CYPHER_PREFIX = 'AesGCm-' as const
@@ -85,15 +86,15 @@ export const eciesGTMDecryptE =
       )
     )
 
-export const EcdsaSignature = Schema.String.pipe(Schema.brand('EcdsaSignature'))
-export type EcdsaSignature = Schema.Schema.Type<typeof EcdsaSignature>
-
 export const generateChallenge = (length: number = 32): Effect.Effect<string> =>
   Effect.sync(() =>
     getCrypto()
       .randomBytes(length) // TODO might not work on FE
       .toString('base64')
   )
+
+export const EcdsaSignature = EcdaBrands.EcdsaSignature
+export type EcdsaSignature = EcdaBrands.EcdsaSignature
 
 export const ecdsaSignE =
   (privateKey: PrivateKeyPemBase64) =>

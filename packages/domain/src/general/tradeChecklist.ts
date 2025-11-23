@@ -255,9 +255,7 @@ export type ContactRevealChatMessage = typeof ContactRevealChatMessageE.Type
 
 export const MeetingLocationData = z
   .object({
-    placeId: LocationPlaceId.catch((e) =>
-      LocationPlaceId.parse(generateUuid())
-    ),
+    placeId: LocationPlaceId.catch(() => LocationPlaceId.parse(generateUuid())),
     address: z.string(),
     latitude: Latitude,
     longitude: Longitude,

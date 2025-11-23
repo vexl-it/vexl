@@ -1,5 +1,5 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect/index'
 
 export const Challenge = Schema.String.pipe(Schema.brand('Challenge'))

@@ -1,6 +1,6 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {contact} from '@vexl-next/rest-api'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'

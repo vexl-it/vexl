@@ -1,0 +1,40 @@
+{
+  "name": "@vexl-next/backoffice-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
+  },
+  "dependencies": {
+    "@effect/platform": "^0.92.1",
+    "@vexl-next/domain": "0.0.0",
+    "@vexl-next/rest-api": "0.0.0",
+    "effect": "^3.18.4",
+    "next": "^15.1.8",
+    "qrcode.react": "^4.2.0",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.5",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.1.8",
+    "postcss": "^8.4.49",
+    "prettier": "^3.3.2",
+    "tailwindcss": "^4.1.12",
+    "typescript": "~5.9.2"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

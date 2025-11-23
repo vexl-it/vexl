@@ -5,7 +5,7 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Context, Schema} from 'effect'
 
 export const SecurityHeaders = Schema.Struct({

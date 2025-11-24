@@ -41,7 +41,7 @@ export class S3Service extends Context.Tag('S3Service')<
             profile?: string
           } = {region}
 
-          // Priority: explicit credentials > profile > default provider chain (IAM roles)
+          // Priority: explicit credentials > profile > default provider chain (IAM roles, OIDC, etc.)
           if (accessKeyId._tag === 'Some' && secretAccessKey._tag === 'Some') {
             clientConfig.credentials = {
               accessKeyId: accessKeyId.value,
@@ -50,7 +50,10 @@ export class S3Service extends Context.Tag('S3Service')<
           } else if (profile._tag === 'Some') {
             clientConfig.profile = profile.value
           }
-          // Otherwise, use default credential provider chain (IAM roles, etc.)
+          // Otherwise, use default credential provider chain
+          // In EKS: automatically uses OIDC via service account
+          // In EC2: automatically uses instance IAM role
+          // Local dev: uses explicit credentials above or AWS profile
 
           return new S3Client(clientConfig)
         })

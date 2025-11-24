@@ -82,7 +82,8 @@ export async function processBackgroundMessage(
     getDefaultStore().set(
       reportProcessingNotificationsStartActionAtom,
       processUuid,
-      'handler'
+      'handler',
+      data
     )
 
     void showDebugNotificationIfEnabled({

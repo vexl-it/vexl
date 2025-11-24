@@ -12,15 +12,22 @@ export const processingNotificationsAtom = atom<
     start: UnixMilliseconds
     end: Option.Option<UnixMilliseconds>
     type: 'hook' | 'handler'
+    notificationData?: unknown
   }>
 >([])
 
 export const reportProcessingNotificationsStartActionAtom = atom(
   null,
-  (get, set, id: Uuid, type: 'hook' | 'handler') => {
+  (get, set, id: Uuid, type: 'hook' | 'handler', notificationData: unknown) => {
     set(processingNotificationsAtom, (prev) => [
       ...prev,
-      {id, start: unixMillisecondsNow(), end: Option.none(), type},
+      {
+        id,
+        start: unixMillisecondsNow(),
+        end: Option.none(),
+        type,
+        notificationData,
+      },
     ])
   }
 )

@@ -53,11 +53,25 @@ export function useHandleReceivedNotifications(): void {
       remoteMessage: Notifications.Notification
     ): Promise<void> => {
       const processUuid = generateUuid()
+
       try {
+        if (Platform.OS === 'android' && AppState.currentState !== 'active') {
+          console.info(
+            '🔔 Received notification in not active state. Should be handled by background task'
+          )
+          void showDebugNotificationIfEnabled({
+            title: 'Received notification in not active state',
+            body: `Should be handled by background task`,
+            subtitle: 'notifInHook',
+          })
+          return
+        }
+
         store.set(
           reportProcessingNotificationsStartActionAtom,
           processUuid,
-          'hook'
+          'hook',
+          remoteMessage
         )
         const notificationPayloadO = extractDataPayloadFromNotification({
           source: 'hook',
@@ -92,18 +106,6 @@ export function useHandleReceivedNotifications(): void {
           `🔔 Received notification in hook. Is headless: ${isHeadless}`,
           JSON.stringify(payload, null, 2)
         )
-
-        if (Platform.OS === 'android' && AppState.currentState !== 'active') {
-          console.info(
-            '🔔 Received notification in not active state. Should be handled by background task'
-          )
-          void showDebugNotificationIfEnabled({
-            title: 'Received notification in not active state',
-            body: `Should be handled by background task`,
-            subtitle: 'notifInHook',
-          })
-          return
-        }
 
         const newChatMessageNoticeNotificationDataOption =
           NewChatMessageNoticeNotificationData.parseUnkownOption(payload)

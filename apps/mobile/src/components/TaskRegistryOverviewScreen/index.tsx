@@ -1,8 +1,8 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useStore} from 'jotai'
-import React from 'react'
-import {ScrollView} from 'react-native'
+import React, {useState} from 'react'
+import {ScrollView, TouchableOpacity} from 'react-native'
 import {Spacer, Text, XStack, YStack} from 'tamagui'
 import {processingNotificationsAtom} from '../../state/notifications/NotificationProcessingReports'
 import {taskRegistryAtom} from '../../utils/inAppLoadingTasks/atoms'
@@ -92,6 +92,7 @@ interface NotificationCardProps {
   type: 'hook' | 'handler'
   start: number
   end: Option.Option<number>
+  notificationData?: unknown
 }
 
 function NotificationCard({
@@ -99,7 +100,9 @@ function NotificationCard({
   type,
   start,
   end,
+  notificationData,
 }: NotificationCardProps): React.ReactElement {
+  const [isExpanded, setIsExpanded] = useState(false)
   const isInProgress = Option.isNone(end)
   const duration = isInProgress ? Date.now() - start : end.value - start
   const durationColor = isInProgress
@@ -109,25 +112,48 @@ function NotificationCard({
       : '$green'
 
   return (
-    <YStack
-      paddingVertical="$2"
-      paddingHorizontal="$3"
-      bc="$white"
-      borderRadius="$2"
-      borderWidth={1}
-      borderColor="$greyAccent2"
-      gap="$1"
+    <TouchableOpacity
+      onPress={() => {
+        setIsExpanded(!isExpanded)
+      }}
     >
-      <XStack justifyContent="space-between">
-        <Text color={durationColor} fontWeight="bold">
-          {type}
+      <YStack
+        paddingVertical="$2"
+        paddingHorizontal="$3"
+        bc="$white"
+        borderRadius="$2"
+        borderWidth={1}
+        borderColor="$greyAccent2"
+        gap="$1"
+      >
+        <XStack justifyContent="space-between">
+          <Text color={durationColor} fontWeight="bold">
+            {type}
+          </Text>
+          <XStack gap="$2" alignItems="center">
+            <Text color={durationColor}>{formatDuration(duration)}</Text>
+            <Text color="$grey" fontSize={12}>
+              {isExpanded ? '▼' : '▶'}
+            </Text>
+          </XStack>
+        </XStack>
+        <Text color="$grey" fontSize={12}>
+          ID: {id}
         </Text>
-        <Text color={durationColor}>{formatDuration(duration)}</Text>
-      </XStack>
-      <Text color="$grey" fontSize={12}>
-        ID: {id}
-      </Text>
-    </YStack>
+        {!!isExpanded && notificationData !== undefined && (
+          <YStack
+            paddingVertical="$2"
+            paddingHorizontal="$2"
+            borderRadius="$1"
+            marginTop="$1"
+          >
+            <Text color="$grey" fontSize={11}>
+              {JSON.stringify(notificationData, null, 2)}
+            </Text>
+          </YStack>
+        )}
+      </YStack>
+    </TouchableOpacity>
   )
 }
 
@@ -223,6 +249,7 @@ function NotificationProcessingSection(): React.ReactElement {
               type={notification.type}
               start={notification.start}
               end={notification.end}
+              notificationData={notification.notificationData}
             />
           ))}
         </YStack>
@@ -240,6 +267,7 @@ function NotificationProcessingSection(): React.ReactElement {
               type={notification.type}
               start={notification.start}
               end={notification.end}
+              notificationData={notification.notificationData}
             />
           ))}
         </YStack>

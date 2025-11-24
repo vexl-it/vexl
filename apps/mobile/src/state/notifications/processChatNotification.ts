@@ -163,7 +163,8 @@ const processChatNotificationActionAtom = atom(
           )
         )
 
-      if (notification.includesSystemNotification) return false
+      // Disable for now
+      // if (notification.includesSystemNotification) return false
 
       const inboxForCypher = set(
         getKeyHolderForNotificationCypherActionAtom,

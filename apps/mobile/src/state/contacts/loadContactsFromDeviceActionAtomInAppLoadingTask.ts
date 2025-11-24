@@ -15,7 +15,8 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
       Effect.gen(function* (_) {
         store.set(loadingContactsFromDeviceAtom, true)
 
-        yield* _(store.set(loadContactsFromDeviceActionAtom)).pipe(
+        yield* _(
+          store.set(loadContactsFromDeviceActionAtom),
           Effect.catchAll(() => Effect.succeed('success' as const))
         )
 

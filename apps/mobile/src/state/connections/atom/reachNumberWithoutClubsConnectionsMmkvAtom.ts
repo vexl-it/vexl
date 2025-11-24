@@ -67,3 +67,13 @@ export const fixReachAndReencryptOffersIfNeededActionAtom = atom(
       )
   }
 )
+
+export const clearPersistentDataAboutReachAndImportedContactsActionAtom = atom(
+  null,
+  (get, set): void => {
+    set(persistentDataAboutReachAndImportedContactsAtom, {
+      reach: 0,
+      numberOfImportedContacts: 0,
+    })
+  }
+)

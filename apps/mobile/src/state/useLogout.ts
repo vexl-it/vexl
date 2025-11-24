@@ -15,6 +15,7 @@ import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
 import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderAtom'
 import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
+import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from './connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
 import {sessionAtom} from './session'
@@ -41,6 +42,10 @@ export const logoutActionAtom = atom(null, async (get, set) => {
   })
 
   set(loadingOverlayDisplayedAtom, true)
+
+  // Clear connections reach and imported contacts count from persistent storage
+  set(clearPersistentDataAboutReachAndImportedContactsActionAtom)
+
   try {
     // offer service
     await failSilently(

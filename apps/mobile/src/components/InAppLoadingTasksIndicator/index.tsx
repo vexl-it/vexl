@@ -23,6 +23,9 @@ function InAppLoadingTasksIndicator(): React.ReactElement | null {
   const activeNotifications = useAtomValue(activeNotificationsAtom)
   const notificationCount = activeNotifications.length
 
+  // Not shown to non developers
+  if (!isDeveloper) return null
+
   if (!isDeveloper && count === 0 && notificationCount === 0) return null
 
   return (

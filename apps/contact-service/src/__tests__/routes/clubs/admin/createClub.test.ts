@@ -47,6 +47,7 @@ describe('Create club', () => {
             },
             payload: {
               club: clubData,
+              adminNote: Option.none(),
             },
           }),
           Effect.either
@@ -80,6 +81,7 @@ describe('Create club', () => {
             },
             payload: {
               club: clubData,
+              adminNote: Option.none(),
             },
           })
         )
@@ -124,6 +126,7 @@ describe('Create club', () => {
             },
             payload: {
               club: clubData,
+              adminNote: Option.none(),
             },
           })
         )
@@ -135,6 +138,7 @@ describe('Create club', () => {
             },
             payload: {
               club: clubData,
+              adminNote: Option.none(),
             },
           }),
           Effect.either

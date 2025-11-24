@@ -28,6 +28,7 @@ export const createClub = HttpApiBuilder.handler(
           ...req.payload.club,
           madeInactiveAt: Option.none(),
           report: 0,
+          adminNote: req.payload.adminNote,
         })
       )
       return {

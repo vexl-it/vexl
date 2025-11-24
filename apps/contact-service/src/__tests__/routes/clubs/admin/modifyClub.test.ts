@@ -59,6 +59,7 @@ describe('Modify club', () => {
             },
             payload: {
               club: clubsToSave[0],
+              adminNote: Option.none(),
             },
           })
         )
@@ -69,6 +70,7 @@ describe('Modify club', () => {
             },
             payload: {
               club: clubsToSave[1],
+              adminNote: Option.none(),
             },
           })
         )
@@ -79,6 +81,7 @@ describe('Modify club', () => {
             },
             payload: {
               club: clubsToSave[2],
+              adminNote: Option.none(),
             },
           })
         )
@@ -107,6 +110,7 @@ describe('Modify club', () => {
             },
             payload: {
               clubInfo: clubData,
+              adminNote: Option.none(),
             },
           }),
           Effect.either
@@ -140,6 +144,7 @@ describe('Modify club', () => {
             },
             payload: {
               clubInfo: clubData,
+              adminNote: Option.none(),
             },
           })
         )
@@ -185,6 +190,7 @@ describe('Modify club', () => {
             },
             payload: {
               clubInfo: clubData,
+              adminNote: Option.none(),
             },
           }),
           Effect.either

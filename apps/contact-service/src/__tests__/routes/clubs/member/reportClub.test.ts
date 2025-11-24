@@ -39,6 +39,9 @@ const club = {
   uuid: generateClubUuid(),
   validUntil: new Date(),
   reportLimit: 2,
+  madeInactiveAt: Option.none(),
+  report: 0,
+  adminNote: Option.none(),
 }
 
 const offerId = newOfferId()
@@ -64,6 +67,7 @@ beforeEach(async () => {
           },
           payload: {
             club,
+            adminNote: Option.none(),
           },
         })
       )

@@ -46,6 +46,9 @@ const club = {
   uuid: generateClubUuid(),
   validUntil: new Date(),
   reportLimit: 10,
+  madeInactiveAt: Option.none(),
+  report: 0,
+  adminNote: Option.none(),
 }
 
 const user1 = generatePrivateKey()
@@ -69,6 +72,7 @@ beforeEach(async () => {
           },
           payload: {
             club,
+            adminNote: Option.none(),
           },
         })
       )
@@ -381,9 +385,10 @@ describe('Join club', () => {
             data: {
               ...club,
               madeInactiveAt: Option.none(),
-              membersCountLimit: 100,
               report: 0,
+              membersCountLimit: 100,
               reportLimit: 10,
+              adminNote: Option.none(),
             },
           })
         )

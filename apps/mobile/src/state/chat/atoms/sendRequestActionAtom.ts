@@ -1,8 +1,6 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
-import {Array, Effect, Record} from 'effect'
-import * as O from 'fp-ts/Option'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
@@ -61,7 +59,7 @@ const sendRequestActionAtom = atom(
           toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
           otherSideVersion:
             originOffer.offerInfo.publicPart.authorClientVersion,
-          myNotificationCypher: O.toUndefined(encryptedToken)?.cypher,
+          myNotificationCypher: Option.getOrUndefined(encryptedToken)?.cypher,
           lastReceivedNotificationCypher:
             originOffer.offerInfo.publicPart.fcmCypher,
           goldenAvatarType,
@@ -72,7 +70,7 @@ const sendRequestActionAtom = atom(
       return set(upsertChatForTheirOfferActionAtom, {
         inbox: {privateKey: inbox.privateKey},
         initialMessage: {state: 'sent', message},
-        sentFcmTokenInfo: O.toUndefined(encryptedToken),
+        sentFcmTokenInfo: Option.getOrUndefined(encryptedToken),
         offer: originOffer,
       })
     })

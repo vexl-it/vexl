@@ -10,7 +10,6 @@ import {
   type OfferPublicPart,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
@@ -27,7 +26,7 @@ import {Array, Effect, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import getCountryPrefix from '../../../utils/getCountryCode'
-import {getNotificationToken} from '../../../utils/notifications'
+import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
@@ -77,16 +76,14 @@ export const createOfferActionAtom = atom<
       Record.fromEntries
     )
 
-    const notificationToken = yield* _(taskToEffect(getNotificationToken()))
+    const notificationToken = yield* _(getNotificationTokenE())
 
     const publicPayloadWithNotificationToken = yield* _(
-      taskToEffect(
-        set(addNotificationCypherToPublicPayloadActionAtom, {
-          publicPart: payloadPublic,
-          notificationToken: Option.fromNullable(notificationToken),
-          keyHolder: params.offerKey,
-        })
-      )
+      set(addNotificationCypherToPublicPayloadActionAtom, {
+        publicPart: payloadPublic,
+        notificationToken: Option.fromNullable(notificationToken),
+        keyHolder: params.offerKey,
+      })
     )
 
     const serverToClientHashesToHashedPhoneNumbersMap = yield* _(

@@ -1,5 +1,4 @@
-import {Array, Effect} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, pipe} from 'effect'
 import {apiAtom} from '../../api'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import reportError from '../../utils/reportError'

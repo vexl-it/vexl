@@ -9,13 +9,11 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -41,14 +39,14 @@ export default function revealContactActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
 ): ActionAtomType<
   [{type: RevealContactMessageType}],
-  TE.TaskEither<
+  Effect.Effect<
+    ChatMessageWithState,
     | SendMessageApiErrors
     | ErrorEncryptingMessage
     | ReadingFileError
     | JsonStringifyError
     | ZodParseError<ChatMessagePayload>
-    | ContactRevealRequestAlreadySentError,
-    ChatMessageWithState
+    | ContactRevealRequestAlreadySentError
   >
 > {
   return atom(
@@ -57,14 +55,14 @@ export default function revealContactActionAtom(
       get,
       set,
       {type}
-    ): TE.TaskEither<
+    ): Effect.Effect<
+      ChatMessageWithState,
       | SendMessageApiErrors
       | ErrorEncryptingMessage
       | ReadingFileError
       | JsonStringifyError
       | ZodParseError<ChatMessagePayload>
-      | ContactRevealRequestAlreadySentError,
-      ChatMessageWithState
+      | ContactRevealRequestAlreadySentError
     > => {
       const {chat, messages} = get(chatWithMessagesAtom)
 
@@ -74,7 +72,7 @@ export default function revealContactActionAtom(
           (one) => one.message.messageType === 'REQUEST_CONTACT_REVEAL'
         )
       ) {
-        return TE.left({
+        return Effect.fail({
           _tag: 'ContactRevealRequestAlreadySentError',
           error: new Error('Contact reveal already sent'),
         } as const)
@@ -113,19 +111,16 @@ export default function revealContactActionAtom(
         senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
       }
 
-      return pipe(
-        effectToTaskEither(
-          sendMessage({
-            api: api.chat,
-            senderKeypair: chat.inbox.privateKey,
-            receiverPublicKey: chat.otherSide.publicKey,
-            message,
-            notificationApi: api.notification,
-            theirNotificationCypher: chat.otherSideFcmCypher,
-            otherSideVersion: chat.otherSideVersion,
-          })
-        ),
-        TE.map(() => {
+      return sendMessage({
+        api: api.chat,
+        senderKeypair: chat.inbox.privateKey,
+        receiverPublicKey: chat.otherSide.publicKey,
+        message,
+        notificationApi: api.notification,
+        theirNotificationCypher: chat.otherSideFcmCypher,
+        otherSideVersion: chat.otherSideVersion,
+      }).pipe(
+        Effect.map(() => {
           const successMessage: ChatMessageWithState = {
             message,
             state: 'sent',

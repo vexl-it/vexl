@@ -1,12 +1,5 @@
 import {type ContactReveal} from '@vexl-next/domain/src/general/tradeChecklist'
-import {
-  effectToTask,
-  effectToTaskEither,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {type RevealMessageType} from '../../../state/chat/atoms/revealIdentityActionAtom'
 import {type ChatIds} from '../../../state/chat/domain'
@@ -46,36 +39,36 @@ export const revealContactWithUiFeedbackAtom = atom(null, (get, set) => {
     }
   })()
 
-  return pipe(
-    set(askAreYouSureActionAtom, {
-      steps: [{...modalContent, type: 'StepWithText'}],
-      variant: 'info',
-    }),
-    effectToTaskEither,
-    TE.map((val) => {
-      return val
-    }),
-    TE.match(
-      (e) => {
+  return set(askAreYouSureActionAtom, {
+    steps: [{...modalContent, type: 'StepWithText'}],
+    variant: 'info',
+  }).pipe(
+    Effect.matchEffect({
+      onFailure: (e) => {
+        // If user declined on respond reveal, that means they want to disapprove
         if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
-          return E.right('DISAPPROVE_REVEAL' as RevealMessageType)
+          const contactData = {
+            status: 'DISAPPROVE_REVEAL' as RevealMessageType,
+            fullPhoneNumber: phoneNumber,
+          } satisfies ContactReveal
+          set(revealContactActionAtom, contactData)
+          return Effect.void
         }
-        return E.left(e)
+        // Otherwise propagate the error
+        return Effect.fail(e)
       },
-      () =>
-        E.right(
+      onSuccess: () => {
+        const revealType =
           type === 'RESPOND_REVEAL'
             ? ('APPROVE_REVEAL' as RevealMessageType)
             : ('REQUEST_REVEAL' as RevealMessageType)
-        )
-    ),
-    TE.map((type) => {
-      const contactData = {
-        status: type,
-        fullPhoneNumber: phoneNumber,
-      } satisfies ContactReveal
-
-      set(revealContactActionAtom, contactData)
+        const contactData = {
+          status: revealType,
+          fullPhoneNumber: phoneNumber,
+        } satisfies ContactReveal
+        set(revealContactActionAtom, contactData)
+        return Effect.void
+      },
     })
   )
 })
@@ -85,16 +78,12 @@ export const revealContactFromQuickActionBannerAtom = atom(
   async (get, set, chatIds: ChatIds) => {
     set(fromChatAtoms.setParentChatActionAtom, chatIds)
 
-    return await pipe(
-      set(revealContactWithUiFeedbackAtom),
-      TE.matchW(
-        (l) => {
-          return T.of(false)
-        },
-        (r) => {
-          return effectToTask(set(submitTradeChecklistUpdatesActionAtom))
-        }
-      )
-    )()
+    return await set(revealContactWithUiFeedbackAtom).pipe(
+      Effect.matchEffect({
+        onFailure: () => Effect.succeed(false),
+        onSuccess: () => set(submitTradeChecklistUpdatesActionAtom),
+      }),
+      Effect.runPromise
+    )
   }
 )

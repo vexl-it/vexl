@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
@@ -61,7 +61,7 @@ export default function TradeChecklistDateAndTimeView({
           >
             <Button
               onPress={() => {
-                void addEventToCalendar()()
+                void Effect.runPromise(addEventToCalendar())
               }}
               beforeIcon={termsIconSvg}
               size="small"

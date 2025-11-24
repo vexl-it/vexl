@@ -5,17 +5,12 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   hashMD5,
   type CryptoError,
 } from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect, Schema, type Either} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {Directory, File, Paths} from 'expo-file-system'
-import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {safeParse} from '../../../utils/fpUtils'
 import {IMAGES_DIRECTORY} from '../../../utils/fsDirectories'
 import reportError from '../../../utils/reportError'
@@ -31,37 +26,39 @@ export class WritingFileErrorE extends Schema.TaggedError<WritingFileErrorE>(
 type NoDocumentDirectoryError = BasicError<'NoDocumentDirectoryError'>
 type CreatingDirectoryError = BasicError<'CreatingDirectoryError'>
 type ProcessingBase64Error = BasicError<'ProcessingBase64Error'>
-type WritingFileError = BasicError<'WritingFileError'>
 type BadFileName = BasicError<'BadFileName'>
 
-function base64StringToContentAndMimeType(base64: UriString): E.Either<
-  ProcessingBase64Error,
+function base64StringToContentAndMimeType(base64: UriString): Either.Either<
   {
     content: string
     suffix: string
-  }
+  },
+  ProcessingBase64Error
 > {
-  return E.tryCatch(() => {
-    const [prefix, base64Content] = base64.split(',')
-    const suffix = prefix?.match(/:image\/(.+?);/)?.at(1)
+  return Either.try({
+    try: () => {
+      const [prefix, base64Content] = base64.split(',')
+      const suffix = prefix?.match(/:image\/(.+?);/)?.at(1)
 
-    if (!suffix || !base64Content) throw Error('Not valid base64')
+      if (!suffix || !base64Content) throw Error('Not valid base64')
 
-    return {content: base64Content, suffix}
-  }, toBasicError('ProcessingBase64Error'))
+      return {content: base64Content, suffix}
+    },
+    catch: toBasicError('ProcessingBase64Error'),
+  })
 }
 
-function documentDirectoryOrLeft(): E.Either<
-  NoDocumentDirectoryError,
-  UriString
+function documentDirectoryOrLeft(): Either.Either<
+  UriString,
+  NoDocumentDirectoryError
 > {
   const parseResult = UriString.safeParse(Paths.document.uri)
 
   if (parseResult.success) {
-    return E.right(parseResult.data)
+    return Either.right(parseResult.data)
   }
 
-  return E.left({
+  return Either.left({
     _tag: 'NoDocumentDirectoryError',
     error: new Error(
       'Could not get document directory. FileSystem.documentDirectory is not a valid UriString'
@@ -71,16 +68,19 @@ function documentDirectoryOrLeft(): E.Either<
 
 function createDirectoryIfItDoesNotExist(
   dir: string
-): TE.TaskEither<CreatingDirectoryError, true> {
-  return TE.tryCatch(async () => {
-    const directory = new Directory(dir)
+): Effect.Effect<true, CreatingDirectoryError> {
+  return Effect.tryPromise({
+    try: async () => {
+      const directory = new Directory(dir)
 
-    if (!directory.exists) {
-      directory.create({intermediates: true})
-    }
+      if (!directory.exists) {
+        directory.create({intermediates: true})
+      }
 
-    return true as const
-  }, toBasicError('CreatingDirectoryError'))
+      return true as const
+    },
+    catch: toBasicError('CreatingDirectoryError'),
+  })
 }
 
 function writeAsStringE({
@@ -89,7 +89,7 @@ function writeAsStringE({
 }: {
   content: string
   path: string
-}): Effect.Effect<Either.Either<true, WritingFileErrorE>> {
+}): Effect.Effect<true, WritingFileErrorE> {
   return Effect.try({
     try: () => {
       const fileToWrite = new File(path)
@@ -103,7 +103,7 @@ function writeAsStringE({
         cause: e,
         message: 'Error while writing to file',
       }),
-  }).pipe(Effect.either)
+  })
 }
 
 export type GettingImageSizeError = BasicError<'GettingImageSizeError'>
@@ -112,44 +112,58 @@ function saveBase64ImageToStorage(
   base64: UriString,
   myPublicKey: PublicKeyPemBase64,
   otherSidePublicKey: PublicKeyPemBase64
-): TE.TaskEither<
+): Effect.Effect<
+  UriString,
   | NoDocumentDirectoryError
   | ProcessingBase64Error
   | BadFileName
-  | WritingFileError
+  | WritingFileErrorE
   | CreatingDirectoryError
-  | CryptoError,
-  UriString
+  | CryptoError
 > {
-  return pipe(
-    E.Do,
-    E.bindW('documentDir', documentDirectoryOrLeft),
-    E.bindW('content', () => base64StringToContentAndMimeType(base64)),
-    E.bindW('fileName', ({content: {suffix}}) =>
-      E.right(`${generateUuid()}.${suffix}`)
-    ),
-    E.bindW('chatPath', () => hashMD5(`${myPublicKey}${otherSidePublicKey}`)),
-    E.bindW('directoryPath', ({documentDir, chatPath}) =>
-      E.right(Paths.join(documentDir, IMAGES_DIRECTORY, chatPath))
-    ),
-    E.bindW('filePath', ({directoryPath, fileName}) => {
-      return pipe(
-        E.right(Paths.join(directoryPath, fileName)),
-        E.chainW(safeParse(UriString)),
-        E.mapLeft(toBasicError('BadFileName'))
+  return Effect.gen(function* (_) {
+    const documentDirEither = documentDirectoryOrLeft()
+    if (Either.isLeft(documentDirEither)) {
+      return yield* _(Effect.fail(documentDirEither.left))
+    }
+    const documentDir = documentDirEither.right
+
+    const contentEither = base64StringToContentAndMimeType(base64)
+    if (Either.isLeft(contentEither)) {
+      return yield* _(Effect.fail(contentEither.left))
+    }
+    const content = contentEither.right
+
+    const fileName = `${generateUuid()}.${content.suffix}`
+    const chatPathFpTsEither = hashMD5(`${myPublicKey}${otherSidePublicKey}`)
+
+    // Convert fp-ts Either to Effect Either
+    const chatPath = yield* _(
+      Effect.gen(function* (_) {
+        if (chatPathFpTsEither._tag === 'Left') {
+          return yield* _(Effect.fail(chatPathFpTsEither.left))
+        }
+        return chatPathFpTsEither.right
+      })
+    )
+    const directoryPath = Paths.join(documentDir, IMAGES_DIRECTORY, chatPath)
+
+    const filePathEither = safeParse(UriString)(
+      Paths.join(directoryPath, fileName)
+    )
+    if (Either.isLeft(filePathEither)) {
+      return yield* _(
+        Effect.fail(toBasicError('BadFileName')(filePathEither.left))
       )
-    }),
-    TE.fromEither,
-    TE.chainFirstW(({directoryPath}) =>
-      createDirectoryIfItDoesNotExist(directoryPath)
-    ),
-    TE.chainFirstW(({content, filePath}) =>
-      effectToTaskEither(
-        writeAsStringE({content: content.content, path: filePath})
-      )
-    ),
-    TE.map((one) => one.filePath)
-  )
+    }
+    const filePath = filePathEither.right
+
+    yield* _(createDirectoryIfItDoesNotExist(directoryPath))
+
+    yield* _(writeAsStringE({content: content.content, path: filePath}))
+
+    return filePath
+  })
 }
 
 function replaceImages(
@@ -195,22 +209,25 @@ export default function replaceBase64UriWithImageFileUri(
   message: ChatMessageWithState,
   inboxPublicKey: PublicKeyPemBase64,
   otherSidePublicKey: PublicKeyPemBase64
-): T.Task<ChatMessageWithState> {
-  if (message.state === 'receivedButRequiresNewerVersion') return T.of(message)
+): Effect.Effect<ChatMessageWithState> {
+  if (message.state === 'receivedButRequiresNewerVersion')
+    return Effect.succeed(message)
 
   const image = message.message.image
   const replyToImage = message.message?.repliedTo?.image
   const tradeChecklistIdentityImage =
     message.message.tradeChecklistUpdate?.identity?.image
 
-  return pipe(
-    T.Do,
-    T.bind('image', () =>
+  return Effect.gen(function* (_) {
+    const imageResult = yield* _(
       image
-        ? pipe(
-            saveBase64ImageToStorage(image, inboxPublicKey, otherSidePublicKey),
-            TE.match(
-              (e) => {
+        ? saveBase64ImageToStorage(
+            image,
+            inboxPublicKey,
+            otherSidePublicKey
+          ).pipe(
+            Effect.match({
+              onFailure: (e) => {
                 reportError(
                   'error',
                   new Error('Error while processing message image'),
@@ -220,21 +237,21 @@ export default function replaceBase64UriWithImageFileUri(
                 )
                 return undefined
               },
-              (one) => one
-            )
+              onSuccess: (one) => one,
+            })
           )
-        : T.of(undefined)
-    ),
-    T.bind('replyToImage', () =>
+        : Effect.succeed(undefined)
+    )
+
+    const replyToImageResult = yield* _(
       replyToImage
-        ? pipe(
-            saveBase64ImageToStorage(
-              replyToImage,
-              inboxPublicKey,
-              otherSidePublicKey
-            ),
-            TE.match(
-              (e) => {
+        ? saveBase64ImageToStorage(
+            replyToImage,
+            inboxPublicKey,
+            otherSidePublicKey
+          ).pipe(
+            Effect.match({
+              onFailure: (e) => {
                 reportError(
                   'error',
                   new Error('Error while processing message replyToImage'),
@@ -242,21 +259,21 @@ export default function replaceBase64UriWithImageFileUri(
                 )
                 return undefined
               },
-              (one) => one
-            )
+              onSuccess: (one) => one,
+            })
           )
-        : T.of(undefined)
-    ),
-    T.bind('tradeChecklistIdentityImage', () =>
+        : Effect.succeed(undefined)
+    )
+
+    const tradeChecklistIdentityImageResult = yield* _(
       tradeChecklistIdentityImage
-        ? pipe(
-            saveBase64ImageToStorage(
-              tradeChecklistIdentityImage,
-              inboxPublicKey,
-              otherSidePublicKey
-            ),
-            TE.match(
-              (e) => {
+        ? saveBase64ImageToStorage(
+            tradeChecklistIdentityImage,
+            inboxPublicKey,
+            otherSidePublicKey
+          ).pipe(
+            Effect.match({
+              onFailure: (e) => {
                 reportError(
                   'error',
                   new Error('Error while processing message image'),
@@ -266,11 +283,16 @@ export default function replaceBase64UriWithImageFileUri(
                 )
                 return undefined
               },
-              (one) => one
-            )
+              onSuccess: (one) => one,
+            })
           )
-        : T.of(undefined)
-    ),
-    T.map(replaceImages(message))
-  )
+        : Effect.succeed(undefined)
+    )
+
+    return replaceImages(message)({
+      image: imageResult,
+      replyToImage: replyToImageResult,
+      tradeChecklistIdentityImage: tradeChecklistIdentityImageResult,
+    })
+  })
 }

@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Effect} from 'effect'
-import {isNone} from 'fp-ts/Option'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import Animated, {
@@ -107,7 +106,7 @@ function OffersListStateDisplayerContent(): React.ReactElement {
   )
 
   const ListHeaderComponent = useMemo(() => {
-    if (isNone(error))
+    if (Option.isNone(error))
       return (
         <Stack>
           <Animated.View style={[opacityAnim, scaleAnim]}>

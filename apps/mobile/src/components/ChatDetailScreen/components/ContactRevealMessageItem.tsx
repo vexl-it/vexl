@@ -4,9 +4,7 @@ import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {effectToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
+import {Either, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
@@ -80,40 +78,51 @@ function RevealedContactMessageItem({
       onButtonPress={
         !isContactAlreadyInContactsList
           ? () => {
-              pipe(
-                fullPhoneNumber,
-                safeParse(E164PhoneNumber),
-                E.bindTo('normalizedNumber'),
-                E.bindW('hash', ({normalizedNumber}) =>
-                  hashPhoneNumber(normalizedNumber)
-                ),
-                E.map(({normalizedNumber, hash}) => {
-                  void addRevealedContact({
-                    info: {
-                      name: fullPhoneNumber ?? '',
-                      numberToDisplay: fullPhoneNumber ?? '',
-                      rawNumber: fullPhoneNumber ?? '',
-                      label: Option.none(),
-                      nonUniqueContactId: Option.none(),
-                    },
-                    computedValues: {
-                      hash,
-                      normalizedNumber,
-                    },
-                  }).pipe(effectToEither)
-                }),
-                E.mapLeft((l) => {
+              const normalizedNumberEither =
+                safeParse(E164PhoneNumber)(fullPhoneNumber)
+              if (Either.isLeft(normalizedNumberEither)) {
+                reportError(
+                  'warn',
+                  new Error(
+                    'Error while parsing phone number in reveledContact from chat message'
+                  ),
+                  {
+                    error: normalizedNumberEither.left,
+                  }
+                )
+                return
+              }
+              const normalizedNumber = normalizedNumberEither.right
+
+              void (async () => {
+                const hashEither = await hashPhoneNumber(normalizedNumber)
+                if (hashEither._tag === 'Left') {
                   reportError(
                     'warn',
                     new Error(
-                      'Error while adding reveledContact from chat message'
+                      'Error while hashing phone number in reveledContact from chat message'
                     ),
                     {
-                      l,
+                      error: hashEither.left,
                     }
                   )
-                })
-              )
+                  return
+                }
+                const hash = hashEither.right
+                void addRevealedContact({
+                  info: {
+                    name: fullPhoneNumber ?? '',
+                    numberToDisplay: fullPhoneNumber ?? '',
+                    rawNumber: fullPhoneNumber ?? '',
+                    label: Option.none(),
+                    nonUniqueContactId: Option.none(),
+                  },
+                  computedValues: {
+                    hash,
+                    normalizedNumber,
+                  },
+                }).pipe(effectToEither)
+              })()
             }
           : undefined
       }

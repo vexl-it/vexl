@@ -1,6 +1,5 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import React, {useEffect, useState} from 'react'
 import {Image as TmImage} from 'tamagui'
 import {getImageSize} from '../utils/fpUtils'
@@ -15,14 +14,10 @@ function UriImageWithSizeLimits({uri, limits}: Props): React.ReactElement {
   const [dimensions, setDimensions] = useState({width: 0, height: 0})
 
   useEffect(() => {
-    void pipe(
-      getImageSize(uri),
-      TE.map((originalDimensions) => {
-        setDimensions(
-          getImageDimensionsWithinLimits(originalDimensions, limits)
-        )
-      })
-    )()
+    void Effect.gen(function* (_) {
+      const originalDimensions = yield* _(getImageSize(uri))
+      setDimensions(getImageDimensionsWithinLimits(originalDimensions, limits))
+    }).pipe(Effect.runPromise)
   }, [uri, setDimensions, limits])
 
   return (

@@ -8,7 +8,6 @@ import {
   type OneOfferInState,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -23,7 +22,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Effect, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {getNotificationToken} from '../../../utils/notifications'
+import {getNotificationTokenE} from '../../../utils/notifications'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {updateAndReencryptSingleOfferConnectionActionAtom} from '../../connections/atom/offerToConnectionsAtom'
@@ -76,7 +75,7 @@ export const updateOfferActionAtom = atom<
       intendedConnectionLevel,
     } = params
 
-    const notificationToken = yield* _(taskToEffect(getNotificationToken()))
+    const notificationToken = yield* _(getNotificationTokenE())
 
     if (params.onProgress)
       params.onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
@@ -87,13 +86,11 @@ export const updateOfferActionAtom = atom<
           tokenSuccessfullyAdded: false,
         }
       : yield* _(
-          taskToEffect(
-            set(addNotificationCypherToPublicPayloadActionAtom, {
-              publicPart: payloadPublic,
-              notificationToken: Option.fromNullable(notificationToken),
-              keyHolder: params.offerKey,
-            })
-          )
+          set(addNotificationCypherToPublicPayloadActionAtom, {
+            publicPart: payloadPublic,
+            notificationToken: Option.fromNullable(notificationToken),
+            keyHolder: params.offerKey,
+          })
         )
 
     const offerInfo = yield* _(

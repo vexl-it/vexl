@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {
@@ -39,7 +40,7 @@ function RevealPhoneNumberCell(): React.ReactElement {
       hidden={!identityRevealed || contactRevealTriggeredFromChat}
       item="REVEAL_PHONE_NUMBER"
       onPress={() => {
-        void revealContact()()
+        void Effect.runPromise(revealContact())
       }}
     />
   )

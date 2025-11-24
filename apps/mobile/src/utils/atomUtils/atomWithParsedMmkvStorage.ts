@@ -1,5 +1,4 @@
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
+import {Either, pipe} from 'effect'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {type z} from 'zod'
@@ -30,14 +29,19 @@ function toShadowStorageAtom<Value extends z.ZodObject<any>>(
 
         void InteractionManager.runAfterInteractions(() => {
           pipe(
-            {...newValue, [AUTHOR_ID_KEY]: baseAtom.toString()},
-            storage.setJSON(key),
-            E.getOrElseW((l) => {
-              reportError(
-                'warn',
-                new Error(`Error while saving value to storage. Key: ${key}`),
-                {l}
-              )
+            storage.setJSON(key)({
+              ...newValue,
+              [AUTHOR_ID_KEY]: baseAtom.toString(),
+            }),
+            Either.match({
+              onLeft: (l) => {
+                reportError(
+                  'warn',
+                  new Error(`Error while saving value to storage. Key: ${key}`),
+                  {l}
+                )
+              },
+              onRight: () => {},
             })
           )
         })
@@ -56,17 +60,20 @@ function getInitialValue<Value extends z.ZodReadonly<z.ZodObject<any>>>({
 }): z.TypeOf<Value> {
   return pipe(
     storage.getVerified<Value>(key, zodType),
-    E.getOrElse((l) => {
-      if (l._tag !== 'ValueNotSet') {
-        reportError(
-          'warn',
-          new Error(
-            `Error while parsing stored value. Using provided default. Key: ${key}`
-          ),
-          {l}
-        )
-      }
-      return defaultValue
+    Either.match({
+      onLeft: (l) => {
+        if (l._tag !== 'ValueNotSet') {
+          reportError(
+            'warn',
+            new Error(
+              `Error while parsing stored value. Using provided default. Key: ${key}`
+            ),
+            {l}
+          )
+        }
+        return defaultValue
+      },
+      onRight: (value) => value,
     })
   )
 }
@@ -109,34 +116,37 @@ export function atomWithParsedMmkvStorage<
         void InteractionManager.runAfterInteractions(() => {
           pipe(
             storage.getJSON(key),
-            E.filterOrElseW(
+            Either.filterOrLeft(
               (value) => value[AUTHOR_ID_KEY] !== coreAtom.toString(),
               () =>
                 ({
                   _tag: 'authoredByThisAtom',
                 }) as const
             ),
-            E.map(({[AUTHOR_ID_KEY]: _, ...rest}) => rest),
-            E.chainW(safeParse(zodType)),
-            E.match((e) => {
-              if (e._tag === 'authoredByThisAtom') {
-                return
-              }
-              if (e._tag === 'ValueNotSet') {
-                console.info(
-                  `MMKV value for key '${key}' was deleted. Setting atom to default value`
+            Either.map(({[AUTHOR_ID_KEY]: _, ...rest}) => rest),
+            Either.flatMap(safeParse(zodType)),
+            Either.match({
+              onLeft: (e) => {
+                if (e._tag === 'authoredByThisAtom') {
+                  return
+                }
+                if (e._tag === 'ValueNotSet') {
+                  console.info(
+                    `MMKV value for key '${key}' was deleted. Setting atom to default value`
+                  )
+                  setAtom(defaultValue)
+                  return
+                }
+                reportError(
+                  'warn',
+                  new Error(
+                    `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
+                  ),
+                  {e}
                 )
-                setAtom(defaultValue)
-                return
-              }
-              reportError(
-                'warn',
-                new Error(
-                  `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
-                ),
-                {e}
-              )
-            }, setAtom)
+              },
+              onRight: setAtom,
+            })
           )
         })
       }

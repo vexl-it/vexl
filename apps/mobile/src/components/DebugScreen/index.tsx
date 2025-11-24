@@ -7,22 +7,12 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
-import {
-  Array,
-  Effect,
-  pipe as effectPipe,
-  Either,
-  HashMap,
-  Schema,
-} from 'effect'
+import {Array, Effect, Either, HashMap, pipe, Schema} from 'effect'
 import * as BackgroundTask from 'expo-background-task'
 import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {isTestFlight} from 'expo-testflight'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
@@ -252,56 +242,60 @@ function DebugScreen(): React.ReactElement {
               size="small"
               text="Test get first page of offers and alert number"
               onPress={() => {
-                void pipe(
-                  effectToTaskEither(
-                    getNewContactNetworkOffersAndDecryptPaginated({
-                      keyPair: session.privateKey,
-                      offersApi: store.get(apiAtom).offer,
-                      lastPrivatePartIdBase64: undefined,
-                    })
-                  ),
-                  TE.matchW(
-                    (error) => {
-                      Alert.alert('error', JSON.stringify(error, null, 2), [
-                        {text: 'ok'},
-                        {
-                          text: 'copy to clipboard',
-                          onPress: () => {
-                            Clipboard.setString(JSON.stringify(error, null, 2))
-                          },
-                        },
-                      ])
-                    },
-                    (result) => {
-                      const errors = effectPipe(
-                        Array.filterMap(result, Either.getLeft)
-                      )
-                      const success = effectPipe(
-                        Array.filterMap(result, Either.getRight)
-                      )
-
-                      Alert.alert(
-                        'success',
-                        `done got: ${success.length} success and ${errors.length} errors`,
-                        [
+                getNewContactNetworkOffersAndDecryptPaginated({
+                  keyPair: session.privateKey,
+                  offersApi: store.get(apiAtom).offer,
+                  lastPrivatePartIdBase64: undefined,
+                }).pipe(
+                  Effect.matchEffect({
+                    onFailure: (error) =>
+                      Effect.sync(() => {
+                        Alert.alert('error', JSON.stringify(error, null, 2), [
+                          {text: 'ok'},
                           {
-                            text: 'ok',
-                          },
-                          {
-                            text: 'Check and copy to clipboard',
+                            text: 'copy to clipboard',
                             onPress: () => {
-                              alertAndReportOnlineOffersWithoutLocation(
-                                success,
-                                true,
-                                true
+                              Clipboard.setString(
+                                JSON.stringify(error, null, 2)
                               )
                             },
                           },
-                        ]
-                      )
-                    }
-                  )
-                )()
+                        ])
+                      }),
+                    onSuccess: (result) =>
+                      Effect.sync(() => {
+                        const errors = pipe(
+                          result,
+                          Array.filterMap(Either.getLeft)
+                        )
+                        const success = pipe(
+                          result,
+                          Array.filterMap(Either.getRight)
+                        )
+
+                        Alert.alert(
+                          'success',
+                          `done got: ${success.length} success and ${errors.length} errors`,
+                          [
+                            {
+                              text: 'ok',
+                            },
+                            {
+                              text: 'Check and copy to clipboard',
+                              onPress: () => {
+                                alertAndReportOnlineOffersWithoutLocation(
+                                  success,
+                                  true,
+                                  true
+                                )
+                              },
+                            },
+                          ]
+                        )
+                      }),
+                  }),
+                  Effect.runFork
+                )
               }}
             />
             <Button
@@ -528,16 +522,13 @@ function DebugScreen(): React.ReactElement {
               size="small"
               text="Delete all inboxes"
               onPress={() => {
-                void pipe(
-                  deleteAllInboxes(),
-                  T.map((result) => {
-                    if (result) {
-                      Alert.alert('done')
-                    } else {
-                      Alert.alert('error')
-                    }
-                  })
-                )()
+                void deleteAllInboxes()().then((result) => {
+                  if (result._tag === 'Right') {
+                    Alert.alert('done')
+                  } else {
+                    Alert.alert('error')
+                  }
+                })
               }}
             />
 

@@ -1,6 +1,5 @@
 import {useMolecule} from 'bunshi/dist/react'
-import {Array, Effect} from 'effect'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Platform} from 'react-native'
@@ -70,15 +69,14 @@ function RequestScreen(): React.ReactElement {
   const onRerequestPressed = useCallback(() => {
     if (!canBeRerequested || !text.trim()) return
 
-    void pipe(
-      rerequestOffer({text}),
-      Effect.tap((success) => {
+    rerequestOffer({text}).pipe(
+      Effect.tap((success) =>
         Effect.sync(() => {
           if (success) {
             setText('')
           }
         })
-      }),
+      ),
       Effect.runFork
     )
   }, [canBeRerequested, text, rerequestOffer])

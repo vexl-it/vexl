@@ -1,5 +1,4 @@
-import {Array, Order, pipe} from 'effect'
-import {flow} from 'fp-ts/lib/function'
+import {Array, flow, Order, pipe} from 'effect'
 import addToSortedArray from '../../../utils/addToSortedArray'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import areMessagesEqual from './areMessagesEqual'

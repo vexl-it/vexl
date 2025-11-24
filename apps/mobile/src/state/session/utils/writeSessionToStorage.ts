@@ -1,10 +1,9 @@
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect, Either} from 'effect'
 import {type Session} from '../../../brands/Session.brand'
 import {
   aesEncrypt,
-  saveItemToAsyncStorageFp,
-  saveItemToSecretStorageFp,
+  saveItemToAsyncStorage,
+  saveItemToSecretStorage,
   stringifyToJson,
   type CryptoError,
   type ErrorWritingToStore,
@@ -18,24 +17,24 @@ export default function writeSessionToStorage(
     asyncStorageKey,
     secretStorageKey,
   }: {asyncStorageKey: string; secretStorageKey: string}
-): TE.TaskEither<ErrorWritingToStore | JsonStringifyError | CryptoError, void> {
-  return pipe(
-    TE.right(session),
-    TE.bindTo('session'),
-    TE.chainW(({session}) =>
-      pipe(
-        TE.right(session),
-        TE.chainEitherKW(stringifyToJson),
-        TE.chainW(aesEncrypt(session.privateKey.privateKeyPemBase64)),
-        TE.chainFirstW(saveItemToAsyncStorageFp(asyncStorageKey)),
-        TE.chainFirstW(() =>
-          saveItemToSecretStorageFp(secretStorageKey)(
-            session.privateKey.privateKeyPemBase64
-          )
-        )
-      )
-    ),
+): Effect.Effect<void, ErrorWritingToStore | JsonStringifyError | CryptoError> {
+  return Effect.gen(function* (_) {
+    const stringified = Either.match(stringifyToJson(session), {
+      onLeft: (error) => {
+        throw error
+      },
+      onRight: (value) => value,
+    })
 
-    TE.map(() => undefined)
-  )
+    const encrypted = yield* _(
+      aesEncrypt(session.privateKey.privateKeyPemBase64)(stringified)
+    )
+
+    yield* _(saveItemToAsyncStorage(asyncStorageKey)(encrypted))
+    yield* _(
+      saveItemToSecretStorage(secretStorageKey)(
+        session.privateKey.privateKeyPemBase64
+      )
+    )
+  })
 }

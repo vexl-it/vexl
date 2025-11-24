@@ -2,8 +2,7 @@ import {
   UnixMillisecondsE,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Effect, Option, Record, Schema} from 'effect/index'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, Option, Record, Schema, pipe} from 'effect'
 import {atom, getDefaultStore} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorageE} from '../utils/atomUtils/atomWithParsedMmkvStorageE'

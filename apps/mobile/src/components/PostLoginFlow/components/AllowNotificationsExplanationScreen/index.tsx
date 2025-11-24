@@ -1,6 +1,4 @@
 import {Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {Stack, Text} from 'tamagui'
@@ -29,19 +27,20 @@ function AllowNotificationsExplanationScreen({
 
   function requestPermissions(): void {
     loadingOverlay.show()
-    void pipe(
-      requestNotificationPermissions,
-      TE.match(
-        () => {
-          loadingOverlay.hide()
-          finishPostLoginFlow()
-        },
-        () => {
-          loadingOverlay.hide()
-          finishPostLoginFlow()
-        }
+    void Effect.runFork(
+      requestNotificationPermissions.pipe(
+        Effect.match({
+          onFailure: () => {
+            loadingOverlay.hide()
+            finishPostLoginFlow()
+          },
+          onSuccess: () => {
+            loadingOverlay.hide()
+            finishPostLoginFlow()
+          },
+        })
       )
-    )()
+    )
   }
 
   return (

@@ -1,7 +1,4 @@
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {pipe} from 'fp-ts/lib/function'
-import * as TE from 'fp-ts/TaskEither'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {Platform} from 'react-native'
 import {
@@ -66,23 +63,16 @@ export const emailBodyAtom = atom<string>((get) => {
 export const qrScannerDialogAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return pipe(
-    set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          type: 'StepWithChildren',
-          MainSectionComponent: QrScanner,
-          positiveButtonText: t('common.close'),
-        },
-      ],
-    }),
-    effectToTaskEither,
-    TE.match(
-      () => {},
-      () => {}
-    )
-  )()
+  return set(askAreYouSureActionAtom, {
+    variant: 'info',
+    steps: [
+      {
+        type: 'StepWithChildren',
+        MainSectionComponent: QrScanner,
+        positiveButtonText: t('common.close'),
+      },
+    ],
+  })
 })
 
 export const showReachNumberDetailsActionAtom = atom(null, (get, set) => {
@@ -96,22 +86,19 @@ export const showReachNumberDetailsActionAtom = atom(null, (get, set) => {
     {number: get(fistAndSecondLevelConnectionsReachAtom)}
   )
 
-  return pipe(
-    set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          type: 'StepWithText',
-          title: t('settings.whatDoesYourReachMean'),
-          description: t('settings.yourReachConsistsOf', {
-            firstAndSecondLevelConnections: fistAndSecondLevelConnectionsReach,
-            clubConnections: clubsConnectionsReach,
-          }),
-          positiveButtonText: t('postLoginFlow.importContactsButton'),
-          negativeButtonText: t('common.goBack'),
-        },
-      ],
-    }),
-    mergeToBoolean
-  )
+  return set(askAreYouSureActionAtom, {
+    variant: 'info',
+    steps: [
+      {
+        type: 'StepWithText',
+        title: t('settings.whatDoesYourReachMean'),
+        description: t('settings.yourReachConsistsOf', {
+          firstAndSecondLevelConnections: fistAndSecondLevelConnectionsReach,
+          clubConnections: clubsConnectionsReach,
+        }),
+        positiveButtonText: t('postLoginFlow.importContactsButton'),
+        negativeButtonText: t('common.goBack'),
+      },
+    ],
+  }).pipe(mergeToBoolean)
 })

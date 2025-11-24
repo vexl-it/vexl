@@ -1,8 +1,6 @@
 import notifee from '@notifee/react-native'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import * as Notifications from 'expo-notifications'
-import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../api'
@@ -74,16 +72,16 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(set(deleteAllInboxesActionAtom)())
 
     // contact service
-    await failSilently(effectToTaskEither(get(apiAtom).contact.deleteUser())())
+    await failSilently(Effect.runPromise(get(apiAtom).contact.deleteUser()))
 
     // User service
-    await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())
+    await failSilently(Effect.runPromise(get(apiAtom).user.deleteUser()))
 
     // Notification badge
     await failSilently(notifee.setBadgeCount(0))
 
     // session
-    set(sessionAtom, O.none)
+    set(sessionAtom, Option.none())
 
     // Local storage
     clearMmkvStorageAndEmptyAtoms()
@@ -96,7 +94,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
   } catch (e) {
     reportError('error', new Error('Critical error while logging out'), {e})
 
-    set(sessionAtom, O.none)
+    set(sessionAtom, Option.none())
     clearMmkvStorageAndEmptyAtoms()
     await failSilently(Notifications.unregisterForNotificationsAsync())
   } finally {

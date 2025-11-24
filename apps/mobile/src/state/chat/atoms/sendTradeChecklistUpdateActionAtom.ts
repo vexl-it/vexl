@@ -11,13 +11,11 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import {Array, Effect} from 'effect/index'
-import {flow, pipe} from 'fp-ts/function'
+import {Array, Effect, flow, pipe} from 'effect/index'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -57,7 +55,7 @@ export default function createSubmitChecklistUpdateActionAtom(
       >
 
       const identityRevealChatMessageOrUndefined = yield* _(
-        taskToEffect(replaceIdentityImageFileUriWithBase64(update.identity))
+        replaceIdentityImageFileUriWithBase64(update.identity)
       )
 
       const toSend = updateKeys.map(
@@ -118,7 +116,9 @@ export default function createSubmitChecklistUpdateActionAtom(
         update.identity?.status === 'DISAPPROVE_REVEAL' &&
         tradeChecklistData.identity.received?.image
       ) {
-        void removeFile(tradeChecklistData.identity.received.image)()
+        void Effect.runPromise(
+          removeFile(tradeChecklistData.identity.received.image)
+        )
       }
 
       const realLifeInfo = (

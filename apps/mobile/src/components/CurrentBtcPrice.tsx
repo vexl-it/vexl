@@ -1,5 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {Option} from 'effect/index'
+import {Effect, Option} from 'effect'
 import {
   atom,
   useAtomValue,
@@ -70,7 +70,7 @@ function CurrentBtcPrice({
 
   useEffect(() => {
     if (!customBtcPrice && !btcPriceWithState) {
-      void refreshBtcPrice(currency)().then(postRefreshActions)
+      void Effect.runPromise(refreshBtcPrice(currency)).then(postRefreshActions)
     }
   }, [
     btcPriceWithState,
@@ -84,7 +84,9 @@ function CurrentBtcPrice({
     <TouchableOpacity
       disabled={disabled}
       onPress={() => {
-        void refreshBtcPrice(currency)().then(postRefreshActions)
+        void Effect.runPromise(refreshBtcPrice(currency)).then(
+          postRefreshActions
+        )
       }}
     >
       <XStack ai="center">

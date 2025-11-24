@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import React from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import NotificationsSvg from '../../images/notificationsSvg'
@@ -42,7 +43,7 @@ export function NotificationPermissionsScreen(): React.ReactElement {
         <Button
           fullSize
           onPress={() => {
-            void requestNotificationPermissions()
+            void Effect.runPromise(requestNotificationPermissions)
           }}
           variant="secondary"
           text={t('common.allow')}

@@ -1,7 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {getTokens, Stack} from 'tamagui'
@@ -137,7 +137,7 @@ export default function TradeChecklistMeetingLocationView({
               {!!isDateAndTimePicked && (
                 <Button
                   onPress={() => {
-                    void addEventToCalendar()()
+                    void Effect.runPromise(addEventToCalendar())
                   }}
                   beforeIcon={termsIconSvg}
                   size="small"

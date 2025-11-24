@@ -18,17 +18,8 @@ import retrieveMessages, {
   type ApiErrorRetrievingMessages,
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
-import {
-  effectToTaskEither,
-  taskToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Effect, Record} from 'effect/index'
-import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {flow, pipe} from 'fp-ts/function'
+import {Array, Effect, Either, pipe, Record} from 'effect/index'
 import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -36,7 +27,7 @@ import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
 import {isOnSpecificChat} from '../../../utils/navigation'
-import {getNotificationToken} from '../../../utils/notifications'
+import {getNotificationTokenE} from '../../../utils/notifications'
 import {cancelNewChatNotifications} from '../../../utils/notifications/cancelNewChatNotifications'
 import {showChatNotification} from '../../../utils/notifications/chatNotifications'
 import reportError from '../../../utils/reportError'
@@ -143,15 +134,17 @@ const handleOtherSideReportedFcmCypher = atom(
         )
         if (!chat) return
 
-        void pipe(
-          getNotificationToken(),
-          T.chain((notificationToken) =>
-            set(
-              sendFcmCypherUpdateMessageActionAtom,
-              notificationToken ?? undefined
-            )(chat)
-          )
-        )()
+        void Effect.runPromise(
+          Effect.gen(function* (_) {
+            const notificationToken = yield* _(getNotificationTokenE())
+            yield* _(
+              set(
+                sendFcmCypherUpdateMessageActionAtom,
+                notificationToken ?? undefined
+              )(chat)
+            )
+          })
+        )
       }
     )
   }
@@ -221,108 +214,103 @@ function refreshInboxActionAtom(
   inboxOffer?: OneOfferInState
 ) => ActionAtomType<
   [],
-  TE.TaskEither<
-    ApiErrorRetrievingMessages | NoMessagesLeft,
-    {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+  Effect.Effect<
+    {updatedInbox: InboxInState; newMessages: ChatMessageWithState[]},
+    ApiErrorRetrievingMessages | NoMessagesLeft
   >
 > {
   return (getInbox, inboxOffer) =>
     atom(null, (get, set) =>
-      pipe(
-        effectToTaskEither(
+      Effect.gen(function* (_) {
+        const retrieveResult = yield* _(
           retrieveMessages({
             api,
             currentAppVersion: version,
             inboxKeypair: getInbox().inbox.privateKey,
           })
-        ),
-        TE.map((one) => {
-          const incompatibleMessagesError = one.errors.filter(
+        )
+
+        const incompatibleMessagesError = pipe(
+          retrieveResult.errors,
+          Array.filter(
             (
               one
             ): one is typeof one & {
               _tag: 'ErrorChatMessageRequiresNewerVersion'
             } => one._tag === 'ErrorChatMessageRequiresNewerVersion'
           )
-          const otherErrors = one.errors.filter(
+        )
+
+        const otherErrors = pipe(
+          retrieveResult.errors,
+          Array.filter(
             (one) => one._tag !== 'ErrorChatMessageRequiresNewerVersion'
           )
-
-          if (otherErrors.length > 0) {
-            reportError('error', new Error('Error decrypting messages'), {
-              otherErrors,
-            })
-          }
-
-          return [
-            ...incompatibleMessagesError.map(
-              incompatibleErrorToChatMessageWithState
-            ),
-            ...one.messages.map(messageToChatMessageWithState),
-          ]
-        }),
-        TE.filterOrElseW(
-          (messages) => messages.length > 0,
-          () => 'noMessages' as const
-        ),
-        TE.chainW(
-          flow(
-            A.map((oneMessage): T.Task<ChatMessageWithState> => {
-              if (
-                oneMessage.state !== 'receivedButRequiresNewerVersion' &&
-                !oneMessage.message.image &&
-                !oneMessage.message.tradeChecklistUpdate?.identity?.image
-              )
-                return T.of(oneMessage)
-              return replaceBase64UriWithImageFileUri(
-                oneMessage,
-                getInbox().inbox.privateKey.publicKeyPemBase64,
-                oneMessage.message.senderPublicKey
-              )
-            }),
-            T.sequenceArray,
-            TE.fromTask
-          )
-        ),
-        TE.bindTo('newMessages'),
-        TE.bindW('updatedInbox', ({newMessages}) =>
-          pipe(
-            TE.right(newMessages),
-            TE.map((newMessages) =>
-              splitMessagesArrayToNewChatsAndExistingChats({
-                inbox: getInbox(),
-                messages: newMessages,
-              })
-            ),
-            TE.map(({messagesInNewChat, messagesInExistingChat}) => {
-              const inbox = getInbox()
-              return {
-                ...getInbox(),
-                chats: [
-                  ...set(
-                    createNewChatsFromMessagesActionAtom({
-                      inbox: inbox.inbox,
-                      inboxOffer,
-                    })(messagesInNewChat ?? [])
-                  ),
-                  ...addMessagesToChats(inbox.chats)(
-                    messagesInExistingChat ?? []
-                  ),
-                ],
-              }
-            })
-          )
-        ),
-        TE.match(
-          (e) => {
-            if (e === 'noMessages') {
-              return E.left({_tag: 'noMessages'} as const)
-            }
-            return E.left(e)
-          },
-          (right) => E.right(right)
         )
-      )
+
+        if (Array.isNonEmptyArray(otherErrors)) {
+          reportError('error', new Error('Error decrypting messages'), {
+            otherErrors,
+          })
+        }
+
+        const allMessages: ChatMessageWithState[] = [
+          ...Array.map(
+            incompatibleMessagesError,
+            incompatibleErrorToChatMessageWithState
+          ),
+          ...Array.map(retrieveResult.messages, messageToChatMessageWithState),
+        ]
+
+        if (allMessages.length === 0) {
+          return yield* _(Effect.fail({_tag: 'noMessages'} as const))
+        }
+
+        const newMessages: ChatMessageWithState[] = yield* _(
+          Array.map(allMessages, (oneMessage) => {
+            if (
+              oneMessage.state !== 'receivedButRequiresNewerVersion' &&
+              !oneMessage.message.image &&
+              !oneMessage.message.tradeChecklistUpdate?.identity?.image
+            ) {
+              return Effect.succeed(oneMessage)
+            }
+            return replaceBase64UriWithImageFileUri(
+              oneMessage,
+              getInbox().inbox.privateKey.publicKeyPemBase64,
+              oneMessage.message.senderPublicKey
+            ).pipe(
+              Effect.catchAll((error) => {
+                console.error('Error processing message image:', error)
+                return Effect.succeed(oneMessage)
+              })
+            )
+          }),
+          Effect.allWith({concurrency: 'unbounded'})
+        )
+
+        const {messagesInNewChat, messagesInExistingChat} =
+          splitMessagesArrayToNewChatsAndExistingChats({
+            inbox: getInbox(),
+            messages: newMessages,
+          })
+
+        const inbox = getInbox()
+        const updatedInbox: InboxInState = {
+          ...inbox,
+          chats: [
+            ...set(
+              createNewChatsFromMessagesActionAtom({
+                inbox: inbox.inbox,
+                inboxOffer,
+              })(messagesInNewChat ?? [])
+            ),
+            ...addMessagesToChats(inbox.chats)(messagesInExistingChat ?? []),
+          ],
+        }
+
+        return {updatedInbox, newMessages}
+      })
     )
 }
 
@@ -332,25 +320,24 @@ function deletePulledMessagesReportLeft({
 }: {
   api: ChatApi
   keyPair: PrivateKeyHolder
-}): T.Task<void> {
-  return pipe(
-    effectToTaskEither(api.deletePulledMessages({keyPair})),
-    TE.match(
-      (error) => {
+}): Effect.Effect<void> {
+  return api.deletePulledMessages({keyPair}).pipe(
+    Effect.match({
+      onFailure: (error) => {
         reportError('error', new Error('Error deleting pulled messages'), {
           error,
         })
       },
-      () => {}
-    )
+      onSuccess: () => {},
+    })
   )
 }
 
 export const fetchAndStoreMessagesForInboxAtom = atom<
   null,
   [{key: PublicKeyPemBase64}],
-  T.Task<
-    | {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+  Effect.Effect<
+    | {updatedInbox: InboxInState; newMessages: ChatMessageWithState[]}
     | undefined
   >
 >(null, (get, set, params) => {
@@ -364,34 +351,92 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       new Error('Trying to refresh an inbox but inbox does not exist'),
       {key}
     )
-    return T.of(undefined)
+    return Effect.succeed(undefined)
   }
 
-  return pipe(
-    set(
-      refreshInboxActionAtom(api.chat)(
-        () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
-        get(singleOfferAtom(inbox.inbox.offerId))
-      )
-    ),
-    TE.chainFirstW(({newMessages}) => {
-      const visibleMessagesToReport = newMessages.filter(
+  return Effect.gen(function* (_) {
+    const result = yield* _(
+      set(
+        refreshInboxActionAtom(api.chat)(
+          () => get(focusInboxInMessagingStateAtom(key)) ?? inbox,
+          get(singleOfferAtom(inbox.inbox.offerId))
+        )
+      ),
+      Effect.either
+    )
+
+    if (Either.isLeft(result)) {
+      const error = result.left
+
+      if (error._tag === 'noMessages') {
+        console.info('No new messages in inbox')
+        return {updatedInbox: inbox, newMessages: []}
+      }
+
+      if (error._tag === 'InboxDoesNotExist') {
+        reportError(
+          'warn',
+          new Error(
+            'Api Error fetching messages for inbox. Trying to create the inbox again.'
+          ),
+          {error}
+        )
+
+        const token = yield* _(getNotificationTokenE())
+        const createResult = yield* _(
+          api.chat
+            .createInbox({
+              token: token ?? undefined,
+              keyPair: inbox.inbox.privateKey,
+            })
+            .pipe(Effect.either)
+        )
+
+        if (Either.isLeft(createResult)) {
+          reportError('error', new Error('Error recreating inbox on server'), {
+            e: createResult.left,
+          })
+        } else {
+          console.info(
+            `✅ Inbox ${inbox.inbox.privateKey.publicKeyPemBase64} successfully recreated`
+          )
+        }
+
+        return {updatedInbox: inbox, newMessages: []}
+      }
+
+      return {
+        updatedInbox: inbox,
+        newMessages: [] satisfies ChatMessageWithState[],
+      }
+    }
+
+    const {newMessages, updatedInbox} = result.right
+
+    const visibleMessagesToReport = pipe(
+      newMessages,
+      Array.filter(
         (one) =>
           one.state === 'received' &&
           !['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
             one.message.messageType
           )
       )
+    )
 
-      const nonVisibleMessagesToReport = newMessages.filter(
+    const nonVisibleMessagesToReport = pipe(
+      newMessages,
+      Array.filter(
         (one) =>
           one.state === 'received' &&
           ['FCM_CYPHER_UPDATE', 'VERSION_UPDATE'].includes(
             one.message.messageType
           )
       )
+    )
 
-      return Effect.all([
+    yield* _(
+      Effect.all([
         set(
           reportMessagesReceivedActionAtom,
           Array.map(visibleMessagesToReport, (o) => o.message.uuid),
@@ -402,104 +447,46 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
           Array.map(nonVisibleMessagesToReport, (o) => o.message.uuid),
           false
         ),
-      ]).pipe(Effect.ignore, effectToTaskEither)
-    }),
-    TE.matchEW(
-      (
-        error
-      ): T.Task<{
-        updatedInbox: InboxInState
-        newMessages: readonly ChatMessageWithState[]
-      }> => {
-        if (error._tag === 'noMessages') {
-          console.info('No new messages in inbox')
-          return T.of({updatedInbox: inbox, newMessages: []})
-        }
-
-        if (error._tag === 'InboxDoesNotExist') {
-          reportError(
-            'warn',
-            new Error(
-              'Api Error fetching messages for inbox. Trying to create the inbox again.'
-            ),
-            {error}
-          )
-          return pipe(
-            getNotificationToken(),
-            TE.fromTask,
-            TE.chainW((token) =>
-              effectToTaskEither(
-                api.chat.createInbox({
-                  token: token ?? undefined,
-                  keyPair: inbox.inbox.privateKey,
-                })
-              )
-            ),
-            TE.match(
-              (e) => {
-                reportError(
-                  'error',
-                  new Error('Error recreating inbox on server'),
-                  {e}
-                )
-                return false
-              },
-              () => {
-                console.info(
-                  `✅ Inbox ${inbox.inbox.privateKey.publicKeyPemBase64} successfully recreated`
-                )
-                return true
-              }
-            ),
-            T.map(() => ({updatedInbox: inbox, newMessages: []}))
-          )
-        }
-        return T.of({
-          updatedInbox: inbox,
-          newMessages: [] satisfies ChatMessageWithState[],
-        })
-      },
-      ({newMessages, updatedInbox}) => {
-        set(
-          focusInboxInMessagingStateAtom(
-            inbox.inbox.privateKey.publicKeyPemBase64
-          ),
-          updatedInbox
-        )
-
-        newMessages
-          .filter((one) => one.message.messageType === 'BLOCK_CHAT')
-          .map((oneBlockMessage) => {
-            set(
-              createSingleOfferReportedFlagFromAtomAtom(
-                focusOfferByPublicKeyAtom(
-                  oneBlockMessage.message.senderPublicKey
-                )
-              ),
-              true
-            )
-          })
-
-        set(handleOtherSideUpdatedActionAtom, {
-          newMessages,
-          inbox: updatedInbox,
-        })
-
-        set(handleOtherSideReportedFcmCypher, {
-          newMessages,
-          inbox: updatedInbox,
-        })
-
-        return pipe(
-          deletePulledMessagesReportLeft({
-            api: api.chat,
-            keyPair: updatedInbox.inbox.privateKey,
-          }),
-          T.map(() => ({updatedInbox, newMessages}))
-        )
-      }
+      ]).pipe(Effect.ignore)
     )
-  )
+
+    set(
+      focusInboxInMessagingStateAtom(inbox.inbox.privateKey.publicKeyPemBase64),
+      updatedInbox
+    )
+
+    pipe(
+      newMessages,
+      Array.filter((one) => one.message.messageType === 'BLOCK_CHAT'),
+      Array.map((oneBlockMessage) => {
+        set(
+          createSingleOfferReportedFlagFromAtomAtom(
+            focusOfferByPublicKeyAtom(oneBlockMessage.message.senderPublicKey)
+          ),
+          true
+        )
+      })
+    )
+
+    set(handleOtherSideUpdatedActionAtom, {
+      newMessages,
+      inbox: updatedInbox,
+    })
+
+    set(handleOtherSideReportedFcmCypher, {
+      newMessages,
+      inbox: updatedInbox,
+    })
+
+    yield* _(
+      deletePulledMessagesReportLeft({
+        api: api.chat,
+        keyPair: updatedInbox.inbox.privateKey,
+      })
+    )
+
+    return {updatedInbox, newMessages}
+  })
 })
 
 export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
@@ -511,7 +498,7 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
     },
   ],
   Effect.Effect<
-    | {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
+    | {updatedInbox: InboxInState; newMessages: ChatMessageWithState[]}
     | undefined
   >
 >(null, (get, set, {key}) =>
@@ -519,16 +506,15 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
     const updates = yield* _(
       set(fetchAndStoreMessagesForInboxAtom, {
         key,
-      }),
-      taskToEffect
+      })
     )
 
     if (!updates) return undefined
 
     const {newMessages, updatedInbox: inbox} = updates
-    if (newMessages.length === 0) return undefined
+    if (!Array.isNonEmptyArray(newMessages)) return undefined
 
-    newMessages.forEach((newMessage) => {
+    Array.forEach(newMessages, (newMessage) => {
       if (
         isOnSpecificChat({
           otherSideKey: newMessage.message.senderPublicKey,

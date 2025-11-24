@@ -1,8 +1,6 @@
 import * as crypto from '@vexl-next/cryptography'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useState} from 'react'
@@ -96,34 +94,35 @@ function VerificationCodeScreen({
       <NextButtonProxy
         onPress={() => {
           loadingOverlay.show()
-          void pipe(
-            crypto.KeyHolder.generatePrivateKey(),
-            TE.right,
-            TE.bindTo('privateKey'),
-            TE.bind('verifyPhoneNumberResponse', ({privateKey}) =>
-              effectToTaskEither(
+          void Effect.runFork(
+            Effect.gen(function* (_) {
+              const privateKey = crypto.KeyHolder.generatePrivateKey()
+              const verifyPhoneNumberResponse = yield* _(
                 verifyPhoneNumber({
                   code: userCode,
                   id: initPhoneVerificationResponse.verificationId,
                   userPublicKey: privateKey.publicKeyPemBase64,
                 })
               )
-            ),
-            TE.match(
-              (t) => {
-                loadingOverlay.hide()
-                Alert.alert(t)
-              },
-              ({privateKey, verifyPhoneNumberResponse}) => {
-                loadingOverlay.hide()
-                navigation.navigate('SuccessLogin', {
-                  verifyPhoneNumberResponse,
-                  privateKey,
-                  phoneNumber,
-                })
-              }
+
+              return {privateKey, verifyPhoneNumberResponse}
+            }).pipe(
+              Effect.match({
+                onFailure: (t) => {
+                  loadingOverlay.hide()
+                  Alert.alert(t)
+                },
+                onSuccess: ({privateKey, verifyPhoneNumberResponse}) => {
+                  loadingOverlay.hide()
+                  navigation.navigate('SuccessLogin', {
+                    verifyPhoneNumberResponse,
+                    privateKey,
+                    phoneNumber,
+                  })
+                },
+              })
             )
-          )()
+          )
         }}
         text={t('common.continue')}
         disabled={userCode.length !== 6}

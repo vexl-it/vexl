@@ -3,11 +3,7 @@ import {
   newOfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect} from 'effect'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, Either} from 'effect'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useState} from 'react'
 import {Alert} from 'react-native'
@@ -40,23 +36,41 @@ function SimulateMissingOfferInbox(): React.ReactElement {
     )
   }
 
-  function cloneOffer10x(offer: OneOfferInState): T.Task<null> {
+  function cloneOffer10x(
+    offer: OneOfferInState
+  ): Effect.Effect<null, never, never> {
     if (packageName === 'it.vexl.next') {
       Alert.alert('Not available in production')
-      return T.of(null)
+      return Effect.succeed(null)
     }
-    return pipe(
-      Array.range(0, 9),
-      Array.map((i) =>
-        pipe(
-          store.set(upsertInboxOnBeAndLocallyActionAtom, {
-            for: 'myOffer',
-            offerId: newOfferId(),
-          }),
-          effectToTaskEither,
-          TE.bindTo('inbox'),
-          TE.bindW('createdOffer', ({inbox}) =>
-            effectToTaskEither(
+    return Effect.gen(function* (_) {
+      yield* _(
+        Array.map(Array.range(0, 9), (i) =>
+          Effect.gen(function* (_) {
+            const result = yield* _(
+              Effect.all(
+                [
+                  store.set(upsertInboxOnBeAndLocallyActionAtom, {
+                    for: 'myOffer',
+                    offerId: newOfferId(),
+                  }),
+                ] as const,
+                {concurrency: 1}
+              ),
+              Effect.either
+            )
+
+            if (Either.isLeft(result)) {
+              console.error(
+                `Creating offer ${
+                  i + 1
+                }/ 10, Error creating inbox: ${JSON.stringify(result.left)}`
+              )
+              return
+            }
+
+            const inbox = result.right[0]
+            const createResult = yield* _(
               store.set(createOfferActionAtom, {
                 offerId: newOfferId(),
                 payloadPublic: {
@@ -76,26 +90,28 @@ function SimulateMissingOfferInbox(): React.ReactElement {
                     )}`
                   )
                 },
-              })
+              }),
+              Effect.either
             )
-          ),
-          TE.matchW(
-            (l) => {
+
+            if (Either.isLeft(createResult)) {
               console.error(
                 `Creating offer ${
                   i + 1
-                }/ 10, Error creating offer: ${JSON.stringify(l)}`
+                }/ 10, Error creating offer: ${JSON.stringify(
+                  createResult.left
+                )}`
               )
-            },
-            () => {
+            } else {
               console.log(`created offer ${i + 1}/ 10`)
             }
-          )
-        )
-      ),
-      T.sequenceSeqArray,
-      T.map(() => null)
-    )
+          })
+        ),
+        Effect.allWith({concurrency: 1})
+      )
+
+      return null
+    })
   }
 
   function removeInboxFromState(forOffer: OneOfferInState): void {
@@ -149,7 +165,7 @@ function SimulateMissingOfferInbox(): React.ReactElement {
         disabled={!selectedOffer}
         onPress={() => {
           if (!selectedOffer) return
-          void cloneOffer10x(selectedOffer)().then(() => {
+          void Effect.runPromise(cloneOffer10x(selectedOffer)).then(() => {
             Alert.alert('Done')
           })
         }}

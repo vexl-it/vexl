@@ -4,7 +4,6 @@ import {type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
@@ -15,10 +14,7 @@ import {
 } from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
-import {type Effect} from 'effect'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -48,7 +44,8 @@ const cancelRequestActionAtomHandleUI = atom(
     get,
     set,
     {text, originOffer}: {text: string; originOffer: OfferInfo}
-  ): TE.TaskEither<
+  ): Effect.Effect<
+    ChatMessageWithState,
     | ChatNotFoundError
     | CancelRequestApprovalErrors
     | UserDeclinedError
@@ -58,8 +55,7 @@ const cancelRequestActionAtomHandleUI = atom(
     | InvalidChallengeError
     | ErrorGeneratingChallenge
     | ErrorSigningChallenge
-    | CryptoError,
-    ChatMessageWithState
+    | CryptoError
   > => {
     const session = get(sessionDataOrDummyAtom)
     const chatAtom = focusChatByInboxKeyAndSenderKey({
@@ -69,10 +65,10 @@ const cancelRequestActionAtomHandleUI = atom(
 
     const chatWithMessages = get(chatAtom)
     if (!chatWithMessages)
-      return TE.left({
+      return Effect.fail({
         _tag: 'ChatNotFoundError',
         error: new Error('Chat not found'),
-      })
+      } as ChatNotFoundError)
 
     const {chat} = chatWithMessages
     const offer =
@@ -82,9 +78,8 @@ const cancelRequestActionAtomHandleUI = atom(
     const api = get(apiAtom)
     const {t} = get(translationAtom)
 
-    return pipe(
-      TE.Do,
-      TE.chainW(() =>
+    return Effect.gen(function* (_) {
+      yield* _(
         set(askAreYouSureActionAtom, {
           steps: [
             {
@@ -96,64 +91,60 @@ const cancelRequestActionAtomHandleUI = atom(
             },
           ],
           variant: 'danger',
-        }).pipe(effectToTaskEither)
-      ),
-      TE.chainW(() => {
-        set(loadingOverlayDisplayedAtom, true)
+        })
+      )
 
-        return effectToTaskEither(
-          sendCancelMessagingRequest({
-            api: api.chat,
-            text,
-            fromKeypair: chat.inbox.privateKey,
-            toPublicKey: chat.otherSide.publicKey,
-            myVersion: version,
-            theirNotificationCypher: offer?.fcmCypher,
-            notificationApi: api.notification,
-            otherSideVersion: offer?.authorClientVersion,
+      set(loadingOverlayDisplayedAtom, true)
+
+      const sentMessage = yield* _(
+        sendCancelMessagingRequest({
+          api: api.chat,
+          text,
+          fromKeypair: chat.inbox.privateKey,
+          toPublicKey: chat.otherSide.publicKey,
+          myVersion: version,
+          theirNotificationCypher: offer?.fcmCypher,
+          notificationApi: api.notification,
+          otherSideVersion: offer?.authorClientVersion,
+        }),
+        Effect.tapError((error) => {
+          if (error._tag === 'ReceiverInboxDoesNotExistError') {
+            set(
+              chatAtom,
+              addMessageToChat(
+                createAccountDeletedMessage({
+                  senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
+                })
+              )
+            )
+            Alert.alert(t('offer.otherSideAccountDeleted'))
+            return Effect.void
+          }
+
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(error, t) ??
+              t('common.somethingWentWrongDescription'),
+            error,
+          })
+          return Effect.void
+        }),
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(loadingOverlayDisplayedAtom, false)
           })
         )
-      }),
-      TE.map((sentMessage): ChatMessageWithState => {
-        const successMessage = {
-          message: sentMessage,
-          state: 'sent',
-        } as const
-        set(chatAtom, addMessageToChat(successMessage))
-        return successMessage
-      }),
-      TE.mapLeft((error) => {
-        if (error._tag === 'UserDeclinedError') {
-          return error
-        }
-        if (error._tag === 'ReceiverInboxDoesNotExistError') {
-          set(
-            chatAtom,
-            addMessageToChat(
-              createAccountDeletedMessage({
-                senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
-              })
-            )
-          )
-          Alert.alert(t('offer.otherSideAccountDeleted'))
+      )
 
-          return error
-        }
+      const successMessage = {
+        message: sentMessage,
+        state: 'sent',
+      } as const
 
-        showErrorAlert({
-          title: t('common.somethingWentWrong'),
-          description:
-            toCommonErrorMessage(error, t) ??
-            t('common.somethingWentWrongDescription'),
-          error,
-        })
-        return error
-      }),
-      T.map((result) => {
-        set(loadingOverlayDisplayedAtom, false)
-        return result
-      })
-    )
+      set(chatAtom, addMessageToChat(successMessage))
+      return successMessage
+    })
   }
 )
 export default cancelRequestActionAtomHandleUI

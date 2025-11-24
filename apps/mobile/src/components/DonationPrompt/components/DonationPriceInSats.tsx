@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {Text, XStack} from 'tamagui'
@@ -53,7 +54,7 @@ function DonationPriceInSats(): React.ReactElement {
   })
 
   useEffect(() => {
-    void refreshBtcPrice('EUR')()
+    void Effect.runPromise(refreshBtcPrice('EUR'))
   }, [refreshBtcPrice])
 
   return (

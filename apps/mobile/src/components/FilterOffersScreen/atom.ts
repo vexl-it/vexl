@@ -13,7 +13,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Array} from 'effect'
+import {Array, Effect} from 'effect'
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
@@ -139,7 +139,7 @@ export const updateCurrencyLimitsAtom = atom<
   const {currency} = params
 
   if (currency) {
-    void set(refreshBtcPriceActionAtom, currency)()
+    void Effect.runPromise(set(refreshBtcPriceActionAtom, currency))
   }
 
   set(currencyAtom, currency)
@@ -153,7 +153,7 @@ export const changePriceCurrencyActionAtom = atom(
   null,
   (get, set, currencyCode: CurrencyCode) => {
     set(singlePriceCurrencyAtom, currencyCode)
-    void set(refreshBtcPriceActionAtom, currencyCode)()
+    void Effect.runPromise(set(refreshBtcPriceActionAtom, currencyCode))
   }
 )
 

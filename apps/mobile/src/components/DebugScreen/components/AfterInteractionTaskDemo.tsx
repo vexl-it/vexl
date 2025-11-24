@@ -1,6 +1,5 @@
 import {hmac} from '@vexl-next/cryptography'
-import type * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/function'
+import {Effect, pipe} from 'effect'
 import React, {useCallback, useState} from 'react'
 import {Text, YStack} from 'tamagui'
 import formatNumber from '../../../utils/formatNumber'
@@ -17,20 +16,20 @@ function sleepPromise(ms: number): Promise<void> {
   })
 }
 
-function createIntensiveTasks(
+function createIntensiveEffects(
   onProgress: (progress: number) => void = () => {}
-): Array<T.Task<string>> {
+): Array<Effect.Effect<string, never, never>> {
   return Array(10000)
     .fill('ahojTotojetest')
     .map((input, i, array) => {
-      return async () => {
+      return Effect.promise(async () => {
         const result = hmac.hmacSign({
           data: input,
           password: 'ahoj',
         })
         onProgress((i + 1) / array.length)
         return result
-      }
+      })
     })
 }
 
@@ -44,12 +43,14 @@ export default function AfterInteractionTaskDemo(): React.ReactElement {
       setResult(undefined)
       await sleepPromise(1000)
       const startAt = Date.now()
-      const result = await pipe(
-        createIntensiveTasks(),
-        sequenceTasksWithAnimationFrames(500, (progress) => {
-          setProgress(progress)
-        })
-      )()
+      const result = await Effect.runPromise(
+        pipe(
+          createIntensiveEffects(),
+          sequenceTasksWithAnimationFrames(500, (progress) => {
+            setProgress(progress)
+          })
+        )
+      )
       setResult(
         `Done. Got ${result.length} items. Took ${formatNumber(
           Date.now() - startAt

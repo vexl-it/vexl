@@ -7,8 +7,7 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {contact, user} from '@vexl-next/rest-api/src'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Match, Schema} from 'effect'
-import * as O from 'fp-ts/Option'
+import {Effect, Match, Option, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
 import {SessionE, type Session} from '../../../../brands/Session.brand'
@@ -78,9 +77,9 @@ const handleUserCreationActionAtom = atom(
           const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
           if (leftToWait > 0)
             setTimeout(() => {
-              set(sessionAtom, O.some(session))
+              set(sessionAtom, Option.some(session))
             }, leftToWait)
-          else set(sessionAtom, O.some(session))
+          else set(sessionAtom, Option.some(session))
         })
       )
   }

@@ -1,9 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import React, {Fragment, useCallback, useMemo} from 'react'
 import {
@@ -132,29 +129,33 @@ function ButtonsSection(): React.ReactElement {
   }
 
   const deleteAccountWithAreYouSure = useCallback(async () => {
-    return await pipe(
-      showAreYouSure({
-        variant: 'danger',
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('settings.logoutDialog.title'),
-            description: t('settings.logoutDialog.description'),
-            positiveButtonText: t('common.yesDelete'),
-            negativeButtonText: t('common.nope'),
-          },
-          {
-            type: 'StepWithText',
-            title: t('settings.logoutDialog.title2'),
-            description: t('settings.logoutDialog.description'),
-            positiveButtonText: t('common.yesDelete'),
-            negativeButtonText: t('common.nope'),
-          },
-        ],
-      }),
-      effectToTaskEither,
-      TE.map(logout)
-    )()
+    return await Effect.runPromise(
+      Effect.gen(function* (_) {
+        yield* _(
+          showAreYouSure({
+            variant: 'danger',
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('settings.logoutDialog.title'),
+                description: t('settings.logoutDialog.description'),
+                positiveButtonText: t('common.yesDelete'),
+                negativeButtonText: t('common.nope'),
+              },
+              {
+                type: 'StepWithText',
+                title: t('settings.logoutDialog.title2'),
+                description: t('settings.logoutDialog.description'),
+                positiveButtonText: t('common.yesDelete'),
+                negativeButtonText: t('common.nope'),
+              },
+            ],
+          })
+        )
+
+        void logout()
+      }).pipe(Effect.option)
+    )
   }, [showAreYouSure, t, logout])
 
   const data: Array<Array<ItemProps | null>> = useMemo(

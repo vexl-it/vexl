@@ -1,9 +1,5 @@
-import {
-  effectToTask,
-  effectToTaskEither,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, pipe} from 'effect'
-import * as T from 'fp-ts/Task'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
@@ -87,29 +83,22 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
     } else {
       addDateAndTimeSuggestions()
 
-      void pipe(
-        shouldSendOnSubmit
-          ? pipe(
-              T.Do,
-              T.map(() => {
-                showLoadingOverlay(true)
-              }),
-              T.chain(() => effectToTask(submitTradeChecklistUpdates())),
-              T.map((val) => {
-                showLoadingOverlay(false)
-                return val
-              })
-            )
-          : T.of(true),
-        T.map((success) => {
-          if (!success) return
-          if (shouldSendOnSubmit) {
-            navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
-          } else {
-            navigation.popTo('AgreeOnTradeDetails')
-          }
-        })
-      )()
+      void Effect.gen(function* (_) {
+        let success = true
+        if (shouldSendOnSubmit) {
+          showLoadingOverlay(true)
+          success = yield* _(submitTradeChecklistUpdates())
+          showLoadingOverlay(false)
+        }
+
+        if (!success) return
+
+        if (shouldSendOnSubmit) {
+          navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
+        } else {
+          navigation.popTo('AgreeOnTradeDetails')
+        }
+      }).pipe(Effect.runPromise)
     }
   }, [
     addDateAndTimeSuggestions,

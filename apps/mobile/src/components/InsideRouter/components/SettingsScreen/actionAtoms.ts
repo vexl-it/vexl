@@ -1,7 +1,4 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {Linking} from 'react-native'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
@@ -14,26 +11,28 @@ import NitroPhoneCooperation from './components/NitroPhoneCooperation'
 export const changeLanguageActionAtom = atom(null, async (get, set) => {
   const {t} = get(translationAtom)
 
-  await pipe(
-    set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          type: 'StepWithChildren',
-          MainSectionComponent: LanguageSelect,
-          positiveButtonText: t('common.change'),
-          negativeButtonText: t('common.close'),
-        },
-      ],
-    }),
-    effectToTaskEither,
-    TE.match(
-      () => {},
-      () => {
+  await Effect.runPromise(
+    Effect.gen(function* (_) {
+      const confirmed = yield* _(
+        set(askAreYouSureActionAtom, {
+          variant: 'info',
+          steps: [
+            {
+              type: 'StepWithChildren',
+              MainSectionComponent: LanguageSelect,
+              positiveButtonText: t('common.change'),
+              negativeButtonText: t('common.close'),
+            },
+          ],
+        }),
+        Effect.option
+      )
+
+      if (confirmed._tag === 'Some') {
         set(currentAppLanguageAtom, get(selectedLanguageAtom))
       }
-    )
-  )()
+    })
+  )
 })
 
 export const showVexlNitroPhoneCooperationBannerActionAtom = atom(

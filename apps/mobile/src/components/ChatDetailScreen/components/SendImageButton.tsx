@@ -1,7 +1,5 @@
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {useMolecule} from 'bunshi/dist/react'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Alert} from 'react-native'
@@ -20,29 +18,31 @@ function SendImageButton(): React.ReactElement {
 
   const selectImage = useCallback(
     () =>
-      pipe(
-        getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory({
-          saveTo: 'cache',
-          aspect: undefined,
-        }),
-        effectToTaskEither,
-        TE.map((uri) => {
-          setSelectedImage(uri)
-        }),
-        TE.mapLeft((e) => {
-          if (e.reason === 'PermissionsNotGranted') {
-            Alert.alert(
-              t('messages.unableToSelectImageToSend.title'),
-              t('messages.unableToSelectImageToSend.missingPermissions')
-            )
-          } else {
-            showErrorAlert({
-              title: t('messages.unableToSelectImageToSend.title'),
-              description: t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-          }
-        })
+      getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory({
+        saveTo: 'cache',
+        aspect: undefined,
+      }).pipe(
+        Effect.tap((uri) =>
+          Effect.sync(() => {
+            setSelectedImage(uri)
+          })
+        ),
+        Effect.tapError((e) =>
+          Effect.sync(() => {
+            if (e.reason === 'PermissionsNotGranted') {
+              Alert.alert(
+                t('messages.unableToSelectImageToSend.title'),
+                t('messages.unableToSelectImageToSend.missingPermissions')
+              )
+            } else {
+              showErrorAlert({
+                title: t('messages.unableToSelectImageToSend.title'),
+                description: t('common.somethingWentWrongDescription'),
+                error: e,
+              })
+            }
+          })
+        )
       ),
     [setSelectedImage, t]
   )
@@ -55,7 +55,7 @@ function SendImageButton(): React.ReactElement {
       oval={true}
       icon={cameraSvg}
       onPress={() => {
-        void selectImage()()
+        selectImage().pipe(Effect.runFork)
       }}
     />
   )

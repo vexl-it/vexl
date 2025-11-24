@@ -1,11 +1,10 @@
-import {type Uuid, UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {UuidE, type Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {
   type FullScreenWarning,
   type NewsAndAnnouncementsResponse,
   type VexlBotNews,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {Array, Effect, Option, Schema} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, Option, Schema, pipe} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorageE} from '../../utils/atomUtils/atomWithParsedMmkvStorageE'

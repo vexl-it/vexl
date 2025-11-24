@@ -3,13 +3,9 @@ import {
   ExpoNotificationTokenE,
   type ExpoNotificationToken,
 } from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, Schema} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
 import * as Notifications from 'expo-notifications'
-import * as E from 'fp-ts/Either'
-import type * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
 import {getDefaultStore} from 'jotai'
 import {useEffect, useState} from 'react'
 import {Alert} from 'react-native'
@@ -24,14 +20,19 @@ export class UnknownErrorNotifications extends Schema.TaggedError<UnknownErrorNo
   cause: Schema.Unknown,
 }) {}
 
-export function useRequestNotificationPermissions(): TE.TaskEither<
-  UnknownErrorNotifications,
-  'granted' | 'deniedWithoutAction' | 'deniedOpenedSettings'
+export function useRequestNotificationPermissions(): Effect.Effect<
+  'granted' | 'deniedWithoutAction' | 'deniedOpenedSettings',
+  UnknownErrorNotifications
 > {
   const {t} = useTranslation()
 
-  return async () =>
-    await new Promise((resolve) => {
+  return Effect.promise(async () => {
+    return await new Promise<
+      Either.Either<
+        'granted' | 'deniedWithoutAction' | 'deniedOpenedSettings',
+        UnknownErrorNotifications
+      >
+    >((resolve) => {
       notifee
         .requestPermission()
         .then((result) => {
@@ -40,7 +41,7 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
             result.authorizationStatus === AuthorizationStatus.AUTHORIZED
           )
           if (result.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
-            resolve(E.right('granted' as const))
+            resolve(Either.right('granted' as const))
             return
           }
 
@@ -51,7 +52,7 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
               {
                 text: t('common.cancel'),
                 onPress: () => {
-                  resolve(E.right('deniedWithoutAction' as const))
+                  resolve(Either.right('deniedWithoutAction' as const))
                 },
               },
               {
@@ -59,7 +60,7 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
                 style: 'cancel',
                 onPress: () => {
                   NotificationSetting.open()
-                  resolve(E.right('deniedOpenedSettings' as const))
+                  resolve(Either.right('deniedOpenedSettings' as const))
                 },
               },
             ]
@@ -67,7 +68,7 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
         })
         .catch((e) => {
           resolve(
-            E.left(
+            Either.left(
               new UnknownErrorNotifications({
                 cause: new Error('Error requesting permissions', {cause: e}),
               })
@@ -75,6 +76,14 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
           )
         })
     })
+  }).pipe(
+    Effect.flatMap((either) =>
+      Either.match(either, {
+        onLeft: (error) => Effect.fail(error),
+        onRight: (value) => Effect.succeed(value),
+      })
+    )
+  )
 }
 
 export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | null> {
@@ -108,8 +117,9 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
   })
 }
 
-export function getNotificationToken(): T.Task<ExpoNotificationToken | null> {
-  return effectToTask(getNotificationTokenE())
+// Old fp-ts version for backwards compatibility - deprecated, use getNotificationTokenE
+export function getNotificationToken(): Promise<ExpoNotificationToken | null> {
+  return Effect.runPromise(getNotificationTokenE())
 }
 
 export interface NotificationsEnabledSettings {
@@ -117,12 +127,12 @@ export interface NotificationsEnabledSettings {
   readonly backgroundTasks: boolean
 }
 
-export function areNotificationsEnabled(): TE.TaskEither<
-  UnknownErrorNotifications,
-  NotificationsEnabledSettings
+export function areNotificationsEnabled(): Effect.Effect<
+  NotificationsEnabledSettings,
+  UnknownErrorNotifications
 > {
-  return TE.tryCatch(
-    async () => {
+  return Effect.tryPromise({
+    try: async () => {
       const settings = await notifee.getNotificationSettings()
       const backgroundFetchStatus = await getStatusAsync()
 
@@ -133,11 +143,11 @@ export function areNotificationsEnabled(): TE.TaskEither<
           backgroundFetchStatus === BackgroundTaskStatus.Available,
       }
     },
-    (e) =>
+    catch: (e) =>
       new UnknownErrorNotifications({
         cause: e,
-      })
-  )
+      }),
+  })
 }
 
 export function areNotificationsEnabledE(): Effect.Effect<

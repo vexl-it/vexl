@@ -1,11 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {
-  effectToTaskEither,
-  taskToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, Option, pipe} from 'effect'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import {apiAtom} from '../api'
 import {
@@ -68,65 +62,68 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
 const recreateInboxAndUpdateOfferAtom = atom(
   null,
   (get, set, offerWithoutInbox: OneOfferInState) => {
-    reportError(
-      'warn',
-      new Error(
-        'Found offer without corresponding inbox. Trying to recreate the inbox and updating offer.'
-      ),
-      {}
-    )
-    const adminId = offerWithoutInbox.ownershipInfo?.adminId
-    const intendedConnectionLevel =
-      offerWithoutInbox.ownershipInfo?.intendedConnectionLevel
-    const symmetricKey = offerWithoutInbox.offerInfo.privatePart.symmetricKey
-    if (!adminId || !symmetricKey || !intendedConnectionLevel) {
+    return Effect.gen(function* (_) {
       reportError(
-        'error',
-        new Error('Missing data to update offer after recreating inbox'),
+        'warn',
+        new Error(
+          'Found offer without corresponding inbox. Trying to recreate the inbox and updating offer.'
+        ),
         {}
       )
-      return T.of(false)
-    }
+      const adminId = offerWithoutInbox.ownershipInfo?.adminId
+      const intendedConnectionLevel =
+        offerWithoutInbox.ownershipInfo?.intendedConnectionLevel
+      const symmetricKey = offerWithoutInbox.offerInfo.privatePart.symmetricKey
+      if (!adminId || !symmetricKey || !intendedConnectionLevel) {
+        reportError(
+          'error',
+          new Error('Missing data to update offer after recreating inbox'),
+          {}
+        )
+        return false
+      }
 
-    return pipe(
-      effectToTaskEither(
-        set(upsertInboxOnBeAndLocallyActionAtom, {
-          for: 'myOffer',
-          offerId: offerWithoutInbox.offerInfo.offerId,
-        })
-      ),
-      TE.chainW(({inbox}) =>
-        effectToTaskEither(
-          set(updateOfferActionAtom, {
-            intendedClubs: offerWithoutInbox.ownershipInfo?.intendedClubs ?? [],
-            payloadPublic: {
-              ...offerWithoutInbox.offerInfo.publicPart,
-              offerPublicKey: inbox.privateKey.publicKeyPemBase64,
+      const result = yield* _(
+        pipe(
+          set(upsertInboxOnBeAndLocallyActionAtom, {
+            for: 'myOffer',
+            offerId: offerWithoutInbox.offerInfo.offerId,
+          }),
+          Effect.flatMap(({inbox}) =>
+            set(updateOfferActionAtom, {
+              intendedClubs:
+                offerWithoutInbox.ownershipInfo?.intendedClubs ?? [],
+              payloadPublic: {
+                ...offerWithoutInbox.offerInfo.publicPart,
+                offerPublicKey: inbox.privateKey.publicKeyPemBase64,
+              },
+              symmetricKey,
+              adminId,
+              intendedConnectionLevel,
+              updateFcmCypher: true,
+              offerKey: inbox.privateKey,
+              updatePrivateParts: false,
+            })
+          ),
+          Effect.match({
+            onFailure: (e) => {
+              reportError(
+                'error',
+                new Error('Error while recreating inbox and updating offer'),
+                {e}
+              )
+              return false
             },
-            symmetricKey,
-            adminId,
-            intendedConnectionLevel,
-            updateFcmCypher: true,
-            offerKey: inbox.privateKey,
-            updatePrivateParts: false,
+            onSuccess: () => {
+              console.info('✅ Inbox recreated and offer updated')
+              return true
+            },
           })
         )
-      ),
-      TE.match(
-        (e) => {
-          reportError(
-            'error',
-            new Error('Error while recreating inbox and updating offer'),
-            {e}
-          )
-          return false
-        },
-        () => {
-          console.info('✅ Inbox recreated and offer updated')
-          return true
-        }
       )
-    )
+
+      return result
+    })
   }
 )
 const checkOfferInboxesExistAndRecreateIfNotActionAtom = atom(
@@ -137,15 +134,17 @@ const checkOfferInboxesExistAndRecreateIfNotActionAtom = atom(
       const publicKeys = inboxes.map((one) => one.privateKey.publicKeyPemBase64)
 
       yield* _(
-        get(myOffersAtom),
-        Array.filter((offer) => {
-          const offerPublicKey = offer.offerInfo.publicPart.offerPublicKey
-          return !publicKeys.includes(offerPublicKey)
-        }),
-        Array.map((offerWithoutInbox) =>
-          taskToEffect(set(recreateInboxAndUpdateOfferAtom, offerWithoutInbox))
-        ),
-        Effect.all
+        pipe(
+          get(myOffersAtom),
+          Array.filter((offer) => {
+            const offerPublicKey = offer.offerInfo.publicPart.offerPublicKey
+            return !publicKeys.includes(offerPublicKey)
+          }),
+          Array.map((offerWithoutInbox) =>
+            set(recreateInboxAndUpdateOfferAtom, offerWithoutInbox)
+          ),
+          Effect.all
+        )
       )
 
       return true

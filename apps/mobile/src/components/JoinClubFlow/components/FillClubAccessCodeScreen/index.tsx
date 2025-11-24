@@ -1,7 +1,6 @@
 import {ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect, Schema} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, Schema, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React from 'react'
 import {Keyboard, TouchableWithoutFeedback} from 'react-native'

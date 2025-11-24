@@ -404,31 +404,35 @@ function QuickActionBanner(): React.ReactElement | null {
             const fullPhoneNumber = otherSideData.fullPhoneNumber
 
             if (fullPhoneNumber) {
-              const numberHash = hashPhoneNumber(fullPhoneNumber)
-              if (numberHash._tag === 'Left') {
-                reportError(
-                  'warn',
-                  new Error('hashPhoneNumber failed in QuickActionBanner.tsx'),
-                  {error: numberHash.left}
-                )
-                return
-              }
+              void (async () => {
+                const numberHash = await hashPhoneNumber(fullPhoneNumber)
+                if (numberHash._tag === 'Left') {
+                  reportError(
+                    'warn',
+                    new Error(
+                      'hashPhoneNumber failed in QuickActionBanner.tsx'
+                    ),
+                    {error: numberHash.left}
+                  )
+                  return
+                }
 
-              Effect.runFork(
-                addRevealedContact({
-                  info: {
-                    name: otherSideData.userName,
-                    numberToDisplay: fullPhoneNumber,
-                    rawNumber: fullPhoneNumber,
-                    label: Option.none(),
-                    nonUniqueContactId: Option.none(),
-                  },
-                  computedValues: {
-                    normalizedNumber: fullPhoneNumber,
-                    hash: numberHash.right,
-                  },
-                })
-              )
+                Effect.runFork(
+                  addRevealedContact({
+                    info: {
+                      name: otherSideData.userName,
+                      numberToDisplay: fullPhoneNumber,
+                      rawNumber: fullPhoneNumber,
+                      label: Option.none(),
+                      nonUniqueContactId: Option.none(),
+                    },
+                    computedValues: {
+                      normalizedNumber: fullPhoneNumber,
+                      hash: numberHash.right,
+                    },
+                  })
+                )
+              })()
             }
           } finally {
             setContactRevealApprovedBannerHidden()

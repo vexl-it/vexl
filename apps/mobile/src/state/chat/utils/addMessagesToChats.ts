@@ -1,5 +1,4 @@
-import * as A from 'fp-ts/Array'
-import {pipe} from 'fp-ts/function'
+import {Array, flow, pipe} from 'effect'
 import addToSortedArray from '../../../utils/addToSortedArray'
 import notEmpty from '../../../utils/notEmpty'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
@@ -19,7 +18,7 @@ export default function addMessagesToChats(
   return (toAdd) =>
     pipe(
       chats,
-      A.map((oneChat) => {
+      Array.map((oneChat) => {
         const messagesToAddToThisChat = toAdd.filter(
           (oneMessage) =>
             oneMessage.message.senderPublicKey ===
@@ -89,49 +88,48 @@ export default function addMessagesToChats(
             one.message.messageType === 'FCM_CYPHER_UPDATE'
         )
 
-        return pipe(
-          {
-            ...oneChat,
-            // Do not show metadata updates in chat
-            messages: messages.filter(
-              (one) =>
-                (one.message.messageType !== 'VERSION_UPDATE' &&
-                  one.message.messageType !== 'FCM_CYPHER_UPDATE') ||
-                // Show messages with forceShow flag
-                (one.state !== 'receivedButRequiresNewerVersion' &&
-                  one.message.forceShow)
-            ),
-            tradeChecklist: tradeChecklistUpdates.reduce(
-              (acc, update) =>
-                updateTradeChecklistState(acc)({update, direction: 'received'}),
-              oneChat.tradeChecklist
-            ),
-            chat: {
-              ...oneChat.chat,
-              isUnread: isOnlyMetadataUpdate ? oneChat.chat.isUnread : true,
-              // This is trash I know. Ideall fix would be to set myFcmCypher to Option<FcmCypher> | undefined but then
-              // there would be problem in handling older versions. So let's do it this way
-              otherSideFcmCypher: (() => {
-                // if we have received fcm cypher update message from the other side. And it includes null myFcmCypher
-                // it means the other side has deleted their notification token
-                if (fcmCypherUpdateFromOtherSide)
-                  return fcmCypherUpdateFromOtherSide.message.myFcmCypher
-
-                // In all other cases let's preserve the last received fcm cypher
-                return lastReceivedMessage?.message?.myFcmCypher
-                  ? lastReceivedMessage?.message?.myFcmCypher
-                  : oneChat.chat.otherSideFcmCypher
-              })(),
-              otherSideVersion:
-                lastReceivedMessage?.message.myVersion ??
-                oneChat.chat.otherSideVersion,
-            },
-          },
+        return flow(
           processIdentityRevealMessageIfAny(identityRevealMessage),
           processContactRevealMessageIfAny(contactRevealMessage),
           addIdentityRealLifeInfoToChat(tradeChecklistIdentityRevealMessage),
           addContactRealLifeInfoToChat(tradeChecklistContactRevealMessage)
-        )
+        )({
+          ...oneChat,
+          // Do not show metadata updates in chat
+          messages: messages.filter(
+            (one) =>
+              (one.message.messageType !== 'VERSION_UPDATE' &&
+                one.message.messageType !== 'FCM_CYPHER_UPDATE') ||
+              // Show messages with forceShow flag
+              (one.state !== 'receivedButRequiresNewerVersion' &&
+                one.message.forceShow)
+          ),
+          tradeChecklist: tradeChecklistUpdates.reduce(
+            (acc, update) =>
+              updateTradeChecklistState(acc)({update, direction: 'received'}),
+            oneChat.tradeChecklist
+          ),
+          chat: {
+            ...oneChat.chat,
+            isUnread: isOnlyMetadataUpdate ? oneChat.chat.isUnread : true,
+            // This is trash I know. Ideall fix would be to set myFcmCypher to Option<FcmCypher> | undefined but then
+            // there would be problem in handling older versions. So let's do it this way
+            otherSideFcmCypher: (() => {
+              // if we have received fcm cypher update message from the other side. And it includes null myFcmCypher
+              // it means the other side has deleted their notification token
+              if (fcmCypherUpdateFromOtherSide)
+                return fcmCypherUpdateFromOtherSide.message.myFcmCypher
+
+              // In all other cases let's preserve the last received fcm cypher
+              return lastReceivedMessage?.message?.myFcmCypher
+                ? lastReceivedMessage?.message?.myFcmCypher
+                : oneChat.chat.otherSideFcmCypher
+            })(),
+            otherSideVersion:
+              lastReceivedMessage?.message.myVersion ??
+              oneChat.chat.otherSideVersion,
+          },
+        })
       })
     )
 }

@@ -1,4 +1,4 @@
-import {isSome} from 'fp-ts/Option'
+import {Option} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {KeyboardAwareScrollView} from 'react-native-keyboard-controller'
@@ -37,7 +37,7 @@ function OfferDetailScreen({
     }
   }, [offerId, setFocusedOffer])
 
-  if (!isSome(offer))
+  if (Option.isNone(offer))
     return (
       <YStack
         f={1}

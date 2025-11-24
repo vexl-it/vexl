@@ -1,8 +1,5 @@
 import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {SATOSHIS_IN_BTC} from '../../../../state/currentBtcPriceAtoms'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -111,27 +108,26 @@ export const syncDataWithChatStateActionAtom = atom(
     const updatesToBeSent = get(updatesToBeSentAtom)
     const initialDataToSet = updatesToBeSent.amount ?? data
 
-    return pipe(
-      set(refreshCurrentBtcPriceActionAtom),
-      T.map(() => {
-        set(feeAmountAtom, initialDataToSet?.feeAmount ?? 0)
-        set(tradePriceTypeAtom, initialDataToSet?.tradePriceType ?? 'live')
-        set(
-          selectedCurrencyCodeAtom,
-          initialDataToSet?.currency ?? tradeOrOriginOfferCurrency
-        )
-        set(tradeBtcPriceAtom, (prev) =>
-          initialDataToSet?.tradePriceType !== 'live'
-            ? (initialDataToSet?.btcPrice ?? prev)
-            : (get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev)
-        )
-        set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? ''))
+    return Effect.gen(function* (_) {
+      yield* _(set(refreshCurrentBtcPriceActionAtom))
 
-        set(calculateFiatValueAfterBtcPriceRefreshActionAtom)
+      set(feeAmountAtom, initialDataToSet?.feeAmount ?? 0)
+      set(tradePriceTypeAtom, initialDataToSet?.tradePriceType ?? 'live')
+      set(
+        selectedCurrencyCodeAtom,
+        initialDataToSet?.currency ?? tradeOrOriginOfferCurrency
+      )
+      set(tradeBtcPriceAtom, (prev) =>
+        initialDataToSet?.tradePriceType !== 'live'
+          ? (initialDataToSet?.btcPrice ?? prev)
+          : (get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev)
+      )
+      set(btcInputValueAtom, String(initialDataToSet?.btcAmount ?? ''))
 
-        set(premiumOrDiscountEnabledAtom, initialDataToSet?.feeAmount !== 0)
-      })
-    )()
+      set(calculateFiatValueAfterBtcPriceRefreshActionAtom)
+
+      set(premiumOrDiscountEnabledAtom, initialDataToSet?.feeAmount !== 0)
+    })
   }
 )
 
@@ -158,9 +154,8 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
     )
 
     if (currency && fiatAmount > currencies[currency].maxAmount) {
-      return pipe(
-        TE.Do,
-        TE.chainW(() =>
+      return Effect.gen(function* (_) {
+        yield* _(
           set(askAreYouSureActionAtom, {
             steps: [
               {
@@ -176,17 +171,11 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
               },
             ],
             variant: 'info',
-          }).pipe(effectToTaskEither)
-        ),
-        TE.match(
-          () => {
-            return false
-          },
-          () => {
-            return false
-          }
+          })
         )
-      )
+
+        return false
+      }).pipe(Effect.catchAll(() => Effect.succeed(false)))
     } else {
       set(addAmountActionAtom, {
         tradePriceType: tradePriceType === 'custom' ? 'your' : tradePriceType,
@@ -197,7 +186,7 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
         currency,
       })
 
-      return T.of(true)
+      return Effect.succeed(true)
     }
   }
 )

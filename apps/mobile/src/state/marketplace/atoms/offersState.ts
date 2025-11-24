@@ -7,8 +7,7 @@ import {
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {Array, Record} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, pipe, Record} from 'effect'
 import {atom, type Atom, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'

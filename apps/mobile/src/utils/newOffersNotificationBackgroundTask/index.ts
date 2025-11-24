@@ -1,6 +1,5 @@
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Effect} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, pipe} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {AppState} from 'react-native'
 import {filteredOffersIncludingLocationFilterAtom} from '../../state/marketplace/atoms/filteredOffers'
@@ -45,7 +44,7 @@ export const newOffersNotificationBackgroundTask = async (): Promise<void> => {
     currentOfferIds,
     newOfferNotificationsPreferences.lastSeenOffers
   )
-  if (newOfferIds.length === 0) {
+  if (!Array.isNonEmptyArray(newOfferIds)) {
     console.log('No new offers to notify about')
     return
   }

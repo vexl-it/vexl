@@ -4,9 +4,7 @@ import {
   UnixMilliseconds0,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, Option} from 'effect/index'
-import type * as TO from 'fp-ts/TaskOption'
 import {atom} from 'jotai'
 import {z} from 'zod'
 import {apiAtom} from '../../api'
@@ -62,10 +60,4 @@ export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
         })
       )
     })
-)
-
-export const getOrFetchNotificationServerPublicKeyActionAtom = atom(
-  null,
-  (_, set): TO.TaskOption<PublicKeyPemBase64> =>
-    effectToTask(set(getOrFetchNotificationServerPublicKeyActionAtomE))
 )

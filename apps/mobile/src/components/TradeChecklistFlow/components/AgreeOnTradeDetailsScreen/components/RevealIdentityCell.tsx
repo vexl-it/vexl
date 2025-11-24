@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {
@@ -44,7 +45,7 @@ function RevealIdentityCell(): React.ReactElement {
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
       item="REVEAL_IDENTITY"
       onPress={() => {
-        void revealIdentity()()
+        void Effect.runPromise(revealIdentity())
       }}
     />
   )

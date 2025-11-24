@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {Alert} from 'react-native'
@@ -34,7 +35,7 @@ function AppLogsScreen(): React.ReactElement {
           text: t('common.no'),
           onPress: () => {
             setLoading(true)
-            saveLogsToDirectoryAndShare(false)()
+            Effect.runPromise(saveLogsToDirectoryAndShare(false))
               .catch((e) => {
                 showErrorAlert({
                   title: t('AppLogs.errorExporting'),
@@ -51,7 +52,7 @@ function AppLogsScreen(): React.ReactElement {
           text: t('common.yes'),
           onPress: () => {
             setLoading(true)
-            saveLogsToDirectoryAndShare(true)()
+            Effect.runPromise(saveLogsToDirectoryAndShare(true))
               .catch((e) => {
                 showErrorAlert({
                   title: t('AppLogs.errorExporting'),

@@ -4,9 +4,7 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Effect} from 'effect'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, Either, pipe} from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, useRef} from 'react'
 import {Dimensions} from 'react-native'
@@ -132,20 +130,20 @@ function PickedLocationText({
     <React.Fragment>
       <Text
         ta="center"
-        color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
+        color={Either.isLeft(geocodingState.result) ? '$red' : '$white'}
       >
         {pipe(
           geocodingState.result,
-          E.match(
-            (l) =>
+          Either.match({
+            onLeft: (l) =>
               toCommonErrorMessage(l, t) ?? t('map.location.errors.notFound'),
-            (data) => data?.address ?? t('map.locationSelect.hint')
-          )
+            onRight: (data) => data?.address ?? t('map.locationSelect.hint'),
+          })
         )}
       </Text>
       <Text
         ta="center"
-        color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
+        color={Either.isLeft(geocodingState.result) ? '$red' : '$white'}
       >
         {t('map.locationSelect.radius', {
           radius,

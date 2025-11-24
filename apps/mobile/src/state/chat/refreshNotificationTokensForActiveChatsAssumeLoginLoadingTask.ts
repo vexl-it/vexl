@@ -1,8 +1,7 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {extractPartsOfNotificationCypher} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
-import {Array, Effect, flow, Option, pipe} from 'effect/index'
+import {Array, Effect, Option, pipe} from 'effect/index'
 import {versionCode} from '../../utils/environment'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import {getNotificationTokenE} from '../../utils/notifications'
@@ -103,15 +102,11 @@ export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
         }
 
         yield* _(
-          Array.map(
-            chatsToUpdate,
-            flow(
-              store.set(
-                sendFcmCypherUpdateMessageActionAtom,
-                notificationToken ?? undefined
-              ),
-              taskToEffect
-            )
+          Array.map(chatsToUpdate, (chat) =>
+            store.set(
+              sendFcmCypherUpdateMessageActionAtom,
+              notificationToken ?? undefined
+            )(chat)
           ),
           Effect.allWith({concurrency: 'unbounded'})
         )

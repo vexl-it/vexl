@@ -1,12 +1,11 @@
 import {type CalendarEventId} from '@vexl-next/domain/src/general/messaging'
+import {Effect} from 'effect'
 import * as Calendar from 'expo-calendar'
 import {
   CalendarAccessLevel,
   type Calendar as ExpoCalendar,
   type Source,
 } from 'expo-calendar'
-import * as E from 'fp-ts/Either'
-import type * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {getTokens} from 'tamagui'
@@ -40,18 +39,18 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
     (
       get,
       set
-    ): TE.TaskEither<PermissionsNotGrantedError | UnknownError, string> => {
+    ): Effect.Effect<string, PermissionsNotGrantedError | UnknownError> => {
       const vexlCalendarId = get(vexlCalendarIdAtom)
 
-      return async () => {
-        try {
+      return Effect.tryPromise({
+        try: async () => {
           const permissions = await Calendar.requestCalendarPermissionsAsync()
 
           if (permissions.status !== 'granted') {
-            return E.left({
+            throw {
               _tag: 'permissionsNotGranted',
               reason: 'PermissionsNotGranted',
-            })
+            }
           }
 
           const defaultCalendarSource =
@@ -79,7 +78,7 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
             const calendarId = await Calendar.createCalendarAsync(vexlCalendar)
             set(vexlCalendarIdAtom, calendarId)
 
-            return E.right(calendarId)
+            return calendarId
           }
 
           const calendars = await Calendar.getCalendarsAsync()
@@ -91,18 +90,28 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
             const calendarId = await Calendar.createCalendarAsync(vexlCalendar)
             set(vexlCalendarIdAtom, calendarId)
 
-            return E.right(calendarId)
+            return calendarId
           }
 
-          return E.right(calendar.id)
-        } catch (error) {
-          return E.left({
+          return calendar.id
+        },
+        catch: (error) => {
+          if (
+            typeof error === 'object' &&
+            error !== null &&
+            '_tag' in error &&
+            error._tag === 'permissionsNotGranted'
+          ) {
+            return error as PermissionsNotGrantedError
+          }
+
+          return {
             _tag: 'unknown',
             reason: 'Unknown',
             error,
-          })
-        }
-      }
+          } as UnknownError
+        },
+      })
     }
   )
 
@@ -114,32 +123,31 @@ export function createCalendarEvent({
   calendarEventId: CalendarEventId | undefined
   calendarId: string
   event: TradeChecklistCalendarEvent
-}): TE.TaskEither<
-  UnknownError,
-  {calendarEventId: CalendarEventId; action: 'created' | 'updated'}
+}): Effect.Effect<
+  {calendarEventId: CalendarEventId; action: 'created' | 'updated'},
+  UnknownError
 > {
-  return async () => {
-    try {
+  return Effect.tryPromise({
+    try: async () => {
       if (calendarEventId) {
         const existingEvent = await Calendar.getEventAsync(
           calendarEventId
         ).catch(() => undefined)
         if (existingEvent) {
           await Calendar.updateEventAsync(existingEvent.id, event)
-          return E.right({
+          return {
             calendarEventId: existingEvent.id as CalendarEventId,
-            action: 'updated',
-          })
+            action: 'updated' as const,
+          }
         }
       }
 
       const eventId = await Calendar.createEventAsync(calendarId, event)
-      return E.right({
+      return {
         calendarEventId: eventId as CalendarEventId,
-        action: 'created',
-      })
-    } catch (error) {
-      return E.left({_tag: 'unknown', reason: 'Unknown', error})
-    }
-  }
+        action: 'created' as const,
+      }
+    },
+    catch: (error) => ({_tag: 'unknown', reason: 'Unknown', error}) as const,
+  })
 }

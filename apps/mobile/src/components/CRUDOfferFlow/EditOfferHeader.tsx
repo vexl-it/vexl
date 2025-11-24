@@ -1,8 +1,7 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
-import {isSome} from 'fp-ts/Option'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
@@ -53,7 +52,7 @@ function EditOfferHeader({offerId}: Props): React.ReactElement {
       >
         <Stack>
           <XStack gap="$2" mb="$4">
-            {isSome(offer) && (
+            {Option.isSome(offer) && (
               <XStack ai="center" gap="$2">
                 {isOfferExpired(
                   offer.value.offerInfo?.publicPart?.expirationDate
@@ -86,7 +85,7 @@ function EditOfferHeader({offerId}: Props): React.ReactElement {
               </XStack>
             )}
           </XStack>
-          {!!offer && (
+          {Option.isSome(offer) && (
             <XStack gap="$2" ai="center" jc="flex-end" als="flex-end">
               <Stack
                 h={12}

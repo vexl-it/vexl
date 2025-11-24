@@ -1,11 +1,7 @@
 import {PathString} from '@vexl-next/domain/src/utility/PathString.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect'
+import {Effect, Either, pipe} from 'effect'
 import * as FileSystem from 'expo-file-system'
-import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
 import {safeParse} from './fpUtils'
 
@@ -13,12 +9,12 @@ export interface FileSystemError {
   _tag: 'fileSystemError'
   error: unknown
 }
-function documentDirectoryOrLeft(): E.Either<FileSystemError, string> {
+function documentDirectoryOrLeft(): Either.Either<string, FileSystemError> {
   const parseResult = UriString.safeParse(FileSystem.Paths.document.uri)
   if (parseResult.success) {
-    return E.right(parseResult.data)
+    return Either.right(parseResult.data)
   }
-  return E.left({
+  return Either.left({
     _tag: 'fileSystemError',
     error: new Error(
       'Could not get document directory. FileSystem.documentDirectory is not a valid UriString'
@@ -49,13 +45,13 @@ function copyFileE({
 
 function filenameOrLeft(
   path: PathString | UriString
-): E.Either<FileSystemError, PathString> {
+): Either.Either<PathString, FileSystemError> {
   const splitPath = path.split('/')
   return pipe(
     splitPath.at(-1),
-    E.right,
-    E.chainW(safeParse(PathString)),
-    E.mapLeft((e) => ({_tag: 'fileSystemError', error: e}))
+    Either.right,
+    Either.flatMap(safeParse(PathString)),
+    Either.mapLeft((e) => ({_tag: 'fileSystemError', error: e}))
   )
 }
 
@@ -65,27 +61,29 @@ export function copyFileToNewPath({
 }: {
   localDirectoryFilePath: PathString
   sourceUri: UriString
-}): TE.TaskEither<FileSystemError, UriString> {
-  return pipe(
+}): Effect.Effect<UriString, FileSystemError> {
+  const eitherResult = pipe(
     documentDirectoryOrLeft(),
-    E.map((documentDirectory) =>
+    Either.map((documentDirectory) =>
       FileSystem.Paths.join(documentDirectory, localDirectoryFilePath)
     ),
-    E.chainW(safeParse(UriString)),
-    TE.fromEither,
-    TE.chainW((fullPathToNewFile) =>
-      effectToTaskEither(copyFileE({from: sourceUri, to: fullPathToNewFile}))
-    ),
-    TE.mapLeft((e) => {
+    Either.flatMap(safeParse(UriString)),
+    Either.mapLeft((e) => {
       if (e._tag === 'ParseError') {
         return {
           _tag: 'fileSystemError',
           error: e.error,
-        }
+        } as FileSystemError
       }
       return e
     })
   )
+
+  return Either.match(eitherResult, {
+    onLeft: (error) => Effect.fail(error),
+    onRight: (fullPathToNewFile) =>
+      copyFileE({from: sourceUri, to: fullPathToNewFile}),
+  })
 }
 
 export function copyFileLocalDirectoryAndKeepName({
@@ -94,23 +92,25 @@ export function copyFileLocalDirectoryAndKeepName({
 }: {
   sourceUri: UriString
   targetFolder: PathString
-}): TE.TaskEither<FileSystemError, UriString> {
-  return pipe(
+}): Effect.Effect<UriString, FileSystemError> {
+  const eitherResult = pipe(
     filenameOrLeft(sourceUri),
-    E.map((fileName) => urlJoin(targetFolder, fileName)),
-    E.chainW(safeParse(PathString)),
-    TE.fromEither,
-    TE.chainW((fullPathToNewFile) =>
-      copyFileToNewPath({sourceUri, localDirectoryFilePath: fullPathToNewFile})
-    ),
-    TE.mapLeft((e) => {
+    Either.map((fileName) => urlJoin(targetFolder, fileName)),
+    Either.flatMap(safeParse(PathString)),
+    Either.mapLeft((e) => {
       if (e._tag === 'ParseError') {
         return {
           _tag: 'fileSystemError',
           error: e.error,
-        }
+        } as FileSystemError
       }
       return e
     })
   )
+
+  return Either.match(eitherResult, {
+    onLeft: (error) => Effect.fail(error),
+    onRight: (fullPathToNewFile) =>
+      copyFileToNewPath({sourceUri, localDirectoryFilePath: fullPathToNewFile}),
+  })
 }

@@ -1,8 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import deleteChatActionAtom from '../../../../state/chat/atoms/deleteChatActionAtom'
 import {
@@ -13,11 +10,11 @@ import {dummyChatWithMessages} from '../../../../state/chat/domain'
 import valueOrDefaultAtom from '../../../../utils/atomUtils/valueOrDefaultAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import reportError from '../../../../utils/reportError'
-import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
 import {
-  askAreYouSureActionAtom,
-  type AreYouSureDialogAtomStepResult,
-} from '../../../AreYouSureDialog'
+  toCommonErrorMessage,
+  type SomeError,
+} from '../../../../utils/useCommonErrorMessages'
+import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../../LoadingOverlayProvider'
 
@@ -35,7 +32,7 @@ export const deleteChatFromListActionAtom = atom(
       inboxKey: PublicKeyPemBase64
       skipAsk: boolean
     }
-  ) => {
+  ): Promise<boolean> => {
     const {t} = get(translationAtom)
     const chatWithMessagesAtom: ChatWithMessagesAtom =
       focusChatWithMessagesByKeysAtom({
@@ -50,10 +47,10 @@ export const deleteChatFromListActionAtom = atom(
 
     const deleteChatAtom = deleteChatActionAtom(nonNullChatWithMessagesAtom)
 
-    return pipe(
-      skipAsk
-        ? TE.right([{type: 'noResult'}] as AreYouSureDialogAtomStepResult[])
-        : set(askAreYouSureActionAtom, {
+    const effect = Effect.gen(function* (_) {
+      if (!skipAsk) {
+        const askResult = yield* _(
+          set(askAreYouSureActionAtom, {
             variant: 'danger',
             steps: [
               {
@@ -64,36 +61,44 @@ export const deleteChatFromListActionAtom = atom(
                 negativeButtonText: t('common.cancel'),
               },
             ],
-          }).pipe(effectToTaskEither),
-      TE.map((val) => {
-        set(loadingOverlayDisplayedAtom, true)
-        return val
-      }),
-      TE.chainW(() => set(deleteChatAtom, {text: 'deleting chat'})),
-      TE.match(
-        (e) => {
-          if (e._tag !== 'UserDeclinedError') {
-            reportError('error', new Error('Error deleting chat'), {
-              e,
-            })
+          }),
+          Effect.either
+        )
 
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-          }
+        if (askResult._tag === 'Left') {
+          set(loadingOverlayDisplayedAtom, false)
           return false
-        },
-        () => {
-          return true
         }
-      ),
-      T.map(() => {
-        set(loadingOverlayDisplayedAtom, false)
-      })
-    )()
+      }
+
+      set(loadingOverlayDisplayedAtom, true)
+
+      const deleteResult = yield* _(
+        set(deleteChatAtom, {text: 'deleting chat'}),
+        Effect.either
+      )
+
+      set(loadingOverlayDisplayedAtom, false)
+
+      if (deleteResult._tag === 'Left') {
+        const e = deleteResult.left as SomeError
+        reportError('error', new Error('Error deleting chat'), {
+          e,
+        })
+
+        showErrorAlert({
+          title: t('common.somethingWentWrong'),
+          description:
+            toCommonErrorMessage(e, t) ??
+            t('common.somethingWentWrongDescription'),
+          error: e,
+        })
+        return false
+      }
+
+      return true
+    }) as Effect.Effect<boolean, never, never>
+
+    return effect.pipe(Effect.runPromise)
   }
 )

@@ -1,10 +1,6 @@
 import {type IdentityReveal} from '@vexl-next/domain/src/general/tradeChecklist'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, HashMap, Option} from 'effect/index'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect, HashMap, Option} from 'effect'
 import {atom} from 'jotai'
 import {type ChatIds} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
@@ -57,28 +53,29 @@ export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
       ? 'RESPOND_REVEAL'
       : 'REQUEST_REVEAL'
 
-  return pipe(
-    set(revealIdentityDialogUIAtom, {
-      type,
-      revealIdentityUsernameAtom,
-      usernameSavedForFutureUseAtom,
-      revealIdentityImageUriAtom,
-      imageSavedForFutureUseAtom,
-      commonConnectionsCountAtom,
-    }),
-    TE.map(({type, username, imageUri}) => {
-      const identityData = {
-        status: type,
-        deanonymizedUser: {
-          name: username ?? anonymizedUserData.userName,
-          partialPhoneNumber: anonymizedPhoneNumber,
-        },
-        image: imageUri,
-      } satisfies IdentityReveal
+  return Effect.gen(function* (_) {
+    const result = yield* _(
+      set(revealIdentityDialogUIAtom, {
+        type,
+        revealIdentityUsernameAtom,
+        usernameSavedForFutureUseAtom,
+        revealIdentityImageUriAtom,
+        imageSavedForFutureUseAtom,
+        commonConnectionsCountAtom,
+      })
+    )
 
-      set(revealIdentityActionAtom, identityData)
-    })
-  )
+    const identityData = {
+      status: result.type,
+      deanonymizedUser: {
+        name: result.username ?? anonymizedUserData.userName,
+        partialPhoneNumber: anonymizedPhoneNumber,
+      },
+      image: result.imageUri,
+    } satisfies IdentityReveal
+
+    set(revealIdentityActionAtom, identityData)
+  })
 })
 
 export const revealIdentityFromQuickActionBannerAtom = atom(
@@ -86,16 +83,19 @@ export const revealIdentityFromQuickActionBannerAtom = atom(
   async (get, set, chatIds: ChatIds) => {
     set(setParentChatActionAtom, chatIds)
 
-    return await pipe(
-      set(revealIdentityWithUiFeedbackAtom),
-      TE.matchW(
-        (l) => {
-          return T.of(false)
-        },
-        (r) => {
-          return effectToTask(set(submitTradeChecklistUpdatesActionAtom))
+    return await Effect.runPromise(
+      Effect.gen(function* (_) {
+        const result = yield* _(
+          set(revealIdentityWithUiFeedbackAtom),
+          Effect.either
+        )
+
+        if (result._tag === 'Left') {
+          return false
         }
-      )
-    )()
+
+        return yield* _(set(submitTradeChecklistUpdatesActionAtom))
+      })
+    )
   }
 )

@@ -5,8 +5,7 @@ import {
   type MyNotificationTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Array, pipe} from 'effect'
-import {flow} from 'fp-ts/lib/function'
+import {Array, flow, pipe} from 'effect'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
 import {

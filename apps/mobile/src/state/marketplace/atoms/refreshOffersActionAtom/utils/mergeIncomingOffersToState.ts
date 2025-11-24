@@ -5,8 +5,7 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/extractOwnerInfoFromOwnerPrivatePayload'
-import {Array, Option} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Option, pipe} from 'effect'
 import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
 
 export const mergeIncomingOffersToState = ({

@@ -11,8 +11,7 @@ import {
   UriString,
   UriStringE,
 } from '@vexl-next/domain/src/utility/UriString.brand'
-import {Array, Effect, Option, Schema} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Effect, Option, Schema, pipe} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {z} from 'zod'
 import {

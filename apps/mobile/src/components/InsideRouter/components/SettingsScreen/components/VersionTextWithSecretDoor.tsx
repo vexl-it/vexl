@@ -1,7 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {Linking, type StyleProp, type ViewStyle} from 'react-native'
@@ -33,27 +31,29 @@ function VersionTextWithSecretDoor({
       </Text>
       <TouchableWithoutFeedback
         onPress={() => {
-          void pipe(
-            askAreYouSureAction({
-              variant: 'info',
-              steps: [
-                {
-                  type: 'StepWithText',
-                  title: t('btcPricePopup.titleRate'),
-                  description: t('btcPricePopup.description'),
-                  positiveButtonText: t('common.learnMore'),
-                  negativeButtonText: t('common.close'),
-                },
-              ],
-            }),
-            effectToTaskEither,
-            TE.match(
-              () => {},
-              () => {
+          void Effect.runPromise(
+            Effect.gen(function* (_) {
+              const confirmed = yield* _(
+                askAreYouSureAction({
+                  variant: 'info',
+                  steps: [
+                    {
+                      type: 'StepWithText',
+                      title: t('btcPricePopup.titleRate'),
+                      description: t('btcPricePopup.description'),
+                      positiveButtonText: t('common.learnMore'),
+                      negativeButtonText: t('common.close'),
+                    },
+                  ],
+                }),
+                Effect.option
+              )
+
+              if (confirmed._tag === 'Some') {
                 void Linking.openURL(t('btcPricePopup.url'))
               }
-            )
-          )()
+            })
+          )
         }}
       >
         <Text ta="center" fos={12} col="$greyAccent2">

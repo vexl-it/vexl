@@ -1,8 +1,8 @@
 import {
-  toE164PhoneNumber,
+  toE164PhoneNumberE,
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import type * as O from 'fp-ts/Option'
+import {Option} from 'effect'
 import React, {useCallback, useState} from 'react'
 import PhoneInput, {
   type ICountry,
@@ -11,7 +11,7 @@ import {XStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 interface Props {
-  onChange: (e164: O.Option<E164PhoneNumber>) => void
+  onChange: (e164: Option.Option<E164PhoneNumber>) => void
 }
 
 export default function PhoneNumberInput({
@@ -24,15 +24,15 @@ export default function PhoneNumberInput({
   const handlePhoneChange = useCallback(
     (value: string) => {
       // to avoid calling onChange too often, we call it only when the phone number becomes valid/invalid
-      const previousPhoneNumberValid =
-        toE164PhoneNumber(String(`${selectedCountry?.idd.root}${phoneNumber}`))
-          ._tag === 'Some'
+      const previousPhoneNumberValid = Option.isSome(
+        toE164PhoneNumberE(String(`${selectedCountry?.idd.root}${phoneNumber}`))
+      )
       const completePhoneNumber = String(`${selectedCountry?.idd.root}${value}`)
-      const phoneNumberAsOption = toE164PhoneNumber(completePhoneNumber)
+      const phoneNumberAsOption = toE164PhoneNumberE(completePhoneNumber)
 
       setPhoneNumber(value)
 
-      if (phoneNumberAsOption._tag === 'Some' || previousPhoneNumberValid) {
+      if (Option.isSome(phoneNumberAsOption) || previousPhoneNumberValid) {
         onChange(phoneNumberAsOption)
       }
     },

@@ -1,21 +1,15 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
-  HashedPhoneNumber,
+  type HashedPhoneNumber,
   HashedPhoneNumberE,
 } from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   hmacSignE,
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {
-  hmacSign,
-  type CryptoError as CryptoErrorOld,
-} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Array, Effect, Option, Schema} from 'effect'
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/lib/function'
 import {hmacPassword} from '../../utils/environment'
 import notEmpty from '../../utils/notEmpty'
 import {startMeasure} from '../../utils/reportTime'
@@ -32,21 +26,27 @@ export class UnknownContactsError extends Schema.TaggedError<UnknownContactsErro
   cause: Schema.Unknown,
 }) {}
 
-export function hashPhoneNumber(
-  normalizedPhoneNumber: E164PhoneNumber
-): E.Either<CryptoErrorOld, HashedPhoneNumber> {
-  return pipe(
-    normalizedPhoneNumber,
-    hmacSign(hmacPassword),
-    E.map(HashedPhoneNumber.parse)
-  )
-}
-
 export function hashPhoneNumberE(
   normalizedPhoneNumber: E164PhoneNumber
 ): Effect.Effect<HashedPhoneNumber, CryptoError> {
   return hmacSignE(hmacPassword)(normalizedPhoneNumber).pipe(
     Effect.map(Schema.decodeSync(HashedPhoneNumberE))
+  )
+}
+
+// Old fp-ts version for backwards compatibility - deprecated, use hashPhoneNumberE
+export function hashPhoneNumber(
+  normalizedPhoneNumber: E164PhoneNumber
+): Promise<
+  {_tag: 'Left'; left: CryptoError} | {_tag: 'Right'; right: HashedPhoneNumber}
+> {
+  return Effect.runPromise(
+    hashPhoneNumberE(normalizedPhoneNumber).pipe(
+      Effect.map((value) => ({_tag: 'Right' as const, right: value})),
+      Effect.catchAll((error) =>
+        Effect.succeed({_tag: 'Left' as const, left: error})
+      )
+    )
   )
 }
 

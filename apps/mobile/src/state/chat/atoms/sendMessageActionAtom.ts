@@ -4,7 +4,6 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {InteractionManager} from 'react-native'
@@ -44,9 +43,7 @@ export default function sendMessageActionAtom(
 
     return InteractionManager.runAfterInteractions(() => {
       return Effect.gen(function* (_) {
-        const m = yield* _(
-          taskToEffect(replaceImageFileUrisWithBase64(message))
-        )
+        const m = yield* _(replaceImageFileUrisWithBase64(message))
 
         yield* _(
           sendMessage({

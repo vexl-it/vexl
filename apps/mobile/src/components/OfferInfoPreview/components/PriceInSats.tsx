@@ -1,4 +1,5 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
@@ -33,7 +34,7 @@ function PriceInSats({offer}: Props): React.ReactElement {
   )
 
   useEffect(() => {
-    void refreshBtcPrice(offer.publicPart.currency)()
+    void Effect.runPromise(refreshBtcPrice(offer.publicPart.currency))
   }, [offer.publicPart.currency, refreshBtcPrice])
 
   return (

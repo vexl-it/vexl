@@ -73,7 +73,9 @@ function CalculateAmountScreen({
 
   const onFooterButtonPress = useCallback(() => {
     void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
-      void saveLocalCalculatedAmountDataStateToMainState()().then((success) => {
+      void Effect.runPromise(
+        saveLocalCalculatedAmountDataStateToMainState()
+      ).then((success) => {
         if (success) {
           if (shouldNavigateBackToChatOnSave) {
             showLoadingOverlay(true)

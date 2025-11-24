@@ -1,6 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Effect, Option} from 'effect'
-import * as O from 'fp-ts/Option'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {Stack, Text} from 'tamagui'
@@ -20,9 +19,9 @@ type Props = LoginStackScreenProps<'PhoneNumber'>
 
 function PhoneNumberScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const [phoneNumber, setPhoneNumber] = useState<O.Option<E164PhoneNumber>>(
-    O.none
-  )
+  const [phoneNumber, setPhoneNumber] = useState<
+    Option.Option<E164PhoneNumber>
+  >(Option.none())
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
 
@@ -50,10 +49,10 @@ function PhoneNumberScreen({navigation}: Props): React.ReactElement {
         <AnonymizationCaption />
       </WhiteContainerWithScroll>
       <NextButtonProxy
-        disabled={phoneNumber._tag === 'None'}
+        disabled={Option.isNone(phoneNumber)}
         text={t('common.continue')}
         onPress={() => {
-          if (phoneNumber._tag !== 'Some') return
+          if (Option.isNone(phoneNumber)) return
 
           loadingOverlay.show()
           void Effect.runPromise(initPhoneVerification(phoneNumber.value))

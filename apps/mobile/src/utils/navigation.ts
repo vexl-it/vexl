@@ -1,8 +1,7 @@
 import {createNavigationContainerRef} from '@react-navigation/native'
 import {ChatId} from '@vexl-next/domain/src/general/messaging'
+import {Either, Option, pipe} from 'effect'
 import {deepEqual} from 'fast-equals'
-import * as O from 'fp-ts/Option'
-import {pipe} from 'fp-ts/function'
 import {AppState} from 'react-native'
 import {type NavigationState} from 'react-native-tab-view'
 import {type RootStackParamsList} from '../navigationTypes'
@@ -91,12 +90,18 @@ export function isOnSpecificChat(
 
 export function getChatIdOfChatOnCurrentScreenIfAny(
   state: NavigationState<any>
-): O.Option<ChatId> {
+): Option.Option<ChatId> {
   return pipe(
-    O.tryCatch(() => {
+    Option.liftThrowable(() => {
       return getActiveRoute(state).params?.chatId
-    }),
-    O.chainEitherK(safeParse(ChatId))
+    })(),
+    Option.flatMap((chatId) => {
+      const parseResult = safeParse(ChatId)(chatId)
+      return Either.match(parseResult, {
+        onLeft: () => Option.none(),
+        onRight: (value) => Option.some(value),
+      })
+    })
   )
 }
 

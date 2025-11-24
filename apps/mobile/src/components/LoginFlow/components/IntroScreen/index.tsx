@@ -1,5 +1,4 @@
-import {Effect} from 'effect/index'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect, pipe} from 'effect'
 import {useStore} from 'jotai'
 import React, {useState} from 'react'
 import {Image} from 'react-native'

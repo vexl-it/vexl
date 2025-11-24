@@ -1,9 +1,5 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {pipe} from 'fp-ts/function'
-import * as O from 'fp-ts/Option'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
+import {Effect, Option, pipe} from 'effect'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {Alert} from 'react-native'
 import {showErrorAlert} from '../components/ErrorAlert'
@@ -47,86 +43,86 @@ export const selectImageActionAtom = atom(
       {
         text: t('loginFlow.photo.gallery'),
         onPress: () => {
-          void pipe(
+          void Effect.runPromise(
             getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory({
               saveTo: 'documents',
               aspect: [1, 1],
-            }),
-            effectToTaskEither,
-            TE.match(
-              (e) => {
-                if (
-                  e._tag === 'ImagePickerError' &&
-                  e.reason === 'NothingSelected'
-                ) {
-                  return O.none
-                }
-
-                showErrorAlert({
-                  title: set(reportAndTranslateErrorsAtom, {error: e}),
-                  error: e,
-                })
-                return O.none
-              },
-              (r) => {
-                return O.some(r.uri)
-              }
-            ),
-            T.map((uri) => {
-              pipe(
-                uri,
-                O.match(
-                  () => {
-                    return false
-                  },
-                  (uri) => {
-                    set(atomToSetOnSuccess, uri)
-                    return true
+            }).pipe(
+              Effect.match({
+                onFailure: (e) => {
+                  if (
+                    e._tag === 'ImagePickerError' &&
+                    e.reason === 'NothingSelected'
+                  ) {
+                    return Option.none<UriString>()
                   }
+
+                  showErrorAlert({
+                    title: set(reportAndTranslateErrorsAtom, {error: e}),
+                    error: e,
+                  })
+                  return Option.none<UriString>()
+                },
+                onSuccess: (r) => {
+                  return Option.some(r.uri)
+                },
+              }),
+              Effect.map((uri) => {
+                pipe(
+                  uri,
+                  Option.match({
+                    onNone: () => {
+                      return false
+                    },
+                    onSome: (uri) => {
+                      set(atomToSetOnSuccess, uri)
+                      return true
+                    },
+                  })
                 )
-              )
-            })
-          )()
+              })
+            )
+          )
         },
       },
       {
         text: t('loginFlow.photo.camera'),
         onPress: () => {
-          void pipe(
+          void Effect.runPromise(
             getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory({
               saveTo: 'documents',
               aspect: [1, 1],
-            }),
-            effectToTaskEither,
-            TE.match(
-              (e) => {
-                showErrorAlert({
-                  title: set(reportAndTranslateErrorsAtom, {error: e}),
-                  error: e,
-                })
+            }).pipe(
+              Effect.match({
+                onFailure: (e) => {
+                  showErrorAlert({
+                    title: set(reportAndTranslateErrorsAtom, {error: e}),
+                    error: e,
+                  })
 
-                return O.none
-              },
-              (r) => {
-                return O.some(r.uri)
-                // set(didImageUriChangeAtom, true)
-              }
-            ),
-            T.map((uri) => {
-              pipe(
-                uri,
-                O.match(
-                  () => {
-                    return false
-                  },
-                  (uri) => {
-                    set(atomToSetOnSuccess, uri)
-                    return true
-                  }
+                  return Option.none<UriString>()
+                },
+                onSuccess: (r) => {
+                  return Option.some(r.uri)
+                  // set(didImageUriChangeAtom, true)
+                },
+              }),
+              Effect.map((uri) => {
+                pipe(
+                  uri,
+                  Option.match({
+                    onNone: () => {
+                      return false
+                    },
+                    onSome: (uri) => {
+                      set(atomToSetOnSuccess, uri)
+                      return true
+                    },
+                  })
                 )
-              )
-            })
-          )()
+              })
+            )
+          )
         },
       },
       {
@@ -135,6 +131,6 @@ export const selectImageActionAtom = atom(
       },
     ])
 
-    return O.none
+    return Option.none()
   }
 )

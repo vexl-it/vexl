@@ -4,11 +4,7 @@ import {
   CurrencyCodeE,
 } from '@vexl-next/domain/src/general/currency.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Schema} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
+import {Effect, Schema} from 'effect'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../api'
@@ -84,7 +80,7 @@ export const refreshBtcPriceActionAtom = atom(
       fetchInfo?.state === 'success' &&
       fetchInfo.lastRefreshAt + FETCH_LIMIT > unixMillisecondsNow()
     ) {
-      return T.of(true)
+      return Effect.succeed(true)
     }
 
     set(btcPriceDataAtom, (prevState) => ({
@@ -95,12 +91,9 @@ export const refreshBtcPriceActionAtom = atom(
       } satisfies BtcPriceDataWithState,
     }))
 
-    return pipe(
-      effectToTaskEither(
-        api.btcExchangeRate.getExchangeRate({query: {currency}})
-      ),
-      TE.matchW(
-        (l) => {
+    return api.btcExchangeRate.getExchangeRate({query: {currency}}).pipe(
+      Effect.match({
+        onFailure: (l) => {
           reportError('warn', new Error('Error while fetching btc price'), {
             l,
           })
@@ -116,7 +109,7 @@ export const refreshBtcPriceActionAtom = atom(
 
           return false
         },
-        (btcPrice) => {
+        onSuccess: (btcPrice) => {
           set(btcPriceDataAtom, (prevState) => ({
             ...prevState,
             [currency]: {
@@ -127,8 +120,8 @@ export const refreshBtcPriceActionAtom = atom(
           }))
 
           return true
-        }
-      )
+        },
+      })
     )
   }
 )

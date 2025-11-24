@@ -1,6 +1,5 @@
 import notifee, {AndroidImportance} from '@notifee/react-native'
-import {getOrElse} from 'fp-ts/Either'
-import {pipe} from 'fp-ts/lib/function'
+import {Either, pipe} from 'effect'
 import {storage} from '../mmkv/fpMmkv'
 
 const DEBUG_NOTIFICATIONS_ENABLED_KEY = 'debugNotificationsEnabled'
@@ -13,7 +12,7 @@ export function getShowDebugNotifications(): boolean {
   return (
     pipe(
       storage.get(DEBUG_NOTIFICATIONS_ENABLED_KEY),
-      getOrElse(() => 'false')
+      Either.getOrElse(() => 'false')
     ) === 'true'
   )
 }

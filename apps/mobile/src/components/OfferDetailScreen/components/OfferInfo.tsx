@@ -1,9 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Alert} from 'react-native'
@@ -95,30 +92,31 @@ function OfferInfo({
 
   const onRequestPressed = useCallback(() => {
     if (!text.trim()) return
-    void pipe(
-      effectToTaskEither(submitRequest({text, originOffer: offer})),
-      TE.match(
-        (e) => {
-          if (e._tag === 'ReceiverInboxDoesNotExistError') {
-            Alert.alert(t('common.error'), t('offer.offerNotFound'), [
-              {
-                text: t('common.close'),
-                onPress: () => {
-                  flagOffer(true)
-                  goBack()
+    void Effect.runFork(
+      submitRequest({text, originOffer: offer}).pipe(
+        Effect.match({
+          onFailure: (e) => {
+            if (e._tag === 'ReceiverInboxDoesNotExistError') {
+              Alert.alert(t('common.error'), t('offer.offerNotFound'), [
+                {
+                  text: t('common.close'),
+                  onPress: () => {
+                    flagOffer(true)
+                    goBack()
+                  },
                 },
-              },
-            ])
-          }
-        },
-        (chat) => {
-          navigation.replace('ChatDetail', {
-            otherSideKey: chat.otherSide.publicKey,
-            inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-          })
-        }
+              ])
+            }
+          },
+          onSuccess: (chat) => {
+            navigation.replace('ChatDetail', {
+              otherSideKey: chat.otherSide.publicKey,
+              inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+            })
+          },
+        })
       )
-    )()
+    )
   }, [flagOffer, goBack, navigation, offer, submitRequest, t, text])
 
   const showRequestButton =

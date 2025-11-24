@@ -10,11 +10,8 @@ import {
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, pipe} from 'effect'
+import {Effect} from 'effect'
 import {deepEqual} from 'fast-equals'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {Alert} from 'react-native'
@@ -53,31 +50,29 @@ export const askAreYouSureAndClearUpdatesToBeSentActionAtom = atom(
     const {t} = get(translationAtom)
     const areThereUpdatesToBeSent = get(areThereUpdatesToBeSentAtom)
 
-    if (!areThereUpdatesToBeSent) return T.of(true)
+    if (!areThereUpdatesToBeSent) return Effect.succeed(true)
 
-    return pipe(
-      set(askAreYouSureActionAtom, {
-        variant: 'danger',
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('tradeChecklist.discardChanges'),
-            description: t('tradeChecklist.allChangesWillBeLost'),
-            positiveButtonText: t('common.discard'),
-            negativeButtonText: t('common.back'),
-          },
-        ],
-      }),
-      effectToTaskEither,
-      TE.match(
-        () => {
+    return set(askAreYouSureActionAtom, {
+      variant: 'danger',
+      steps: [
+        {
+          type: 'StepWithText',
+          title: t('tradeChecklist.discardChanges'),
+          description: t('tradeChecklist.allChangesWillBeLost'),
+          positiveButtonText: t('common.discard'),
+          negativeButtonText: t('common.back'),
+        },
+      ],
+    }).pipe(
+      Effect.match({
+        onFailure: () => {
           return false
         },
-        () => {
+        onSuccess: () => {
           set(clearUpdatesToBeSentActionAtom)
           return true
-        }
-      )
+        },
+      })
     )
   }
 )

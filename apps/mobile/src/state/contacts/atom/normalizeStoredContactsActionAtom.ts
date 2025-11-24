@@ -1,8 +1,4 @@
-import {
-  effectToTask,
-  taskToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Array, Effect, flow, Option, pipe} from 'effect'
+import {Array, Effect, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
@@ -29,7 +25,7 @@ function normalizeContact(
       }
     }
 
-    const hash = hashPhoneNumber(E164PhoneNumber.value)
+    const hash = await hashPhoneNumber(E164PhoneNumber.value)
     if (hash._tag === 'Left') {
       reportError('warn', new Error('Error while hashing phone number'), {
         left: hash.left,
@@ -83,11 +79,10 @@ const normalizeStoredContactsActionAtom = atom(
     return pipe(
       toNormalize,
       Array.filter((c) => Option.isNone(c.computedValues)),
-      Array.map(flow(normalizeContact, effectToTask)),
+      Array.map(normalizeContact),
       sequenceTasksWithAnimationFrames(100, (percentage) => {
         onProgress({total: storedContacts.length, percentDone: percentage})
       }),
-      taskToEffect,
       Effect.map((contacts) => {
         onProgress({total: storedContacts.length, percentDone: 1})
 

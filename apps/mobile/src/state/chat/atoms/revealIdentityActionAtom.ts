@@ -11,13 +11,11 @@ import sendMessage, {
   type SendMessageApiErrors,
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type JsonStringifyError,
   type ZodParseError,
 } from '@vexl-next/resources-utils/src/utils/parsing'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
@@ -52,14 +50,14 @@ export default function revealIdentityActionAtom(
       imageUri?: UriString
     },
   ],
-  TE.TaskEither<
+  Effect.Effect<
+    ChatMessageWithState,
     | SendMessageApiErrors
     | JsonStringifyError
     | ZodParseError<ChatMessagePayload>
     | ErrorEncryptingMessage
     | ReadingFileError
-    | IdentityRequestAlreadySentError,
-    ChatMessageWithState
+    | IdentityRequestAlreadySentError
   >
 > {
   return atom(
@@ -68,14 +66,14 @@ export default function revealIdentityActionAtom(
       get,
       set,
       {type, username, imageUri}
-    ): TE.TaskEither<
+    ): Effect.Effect<
+      ChatMessageWithState,
       | SendMessageApiErrors
       | JsonStringifyError
       | ZodParseError<ChatMessagePayload>
       | ErrorEncryptingMessage
       | ReadingFileError
-      | IdentityRequestAlreadySentError,
-      ChatMessageWithState
+      | IdentityRequestAlreadySentError
     > => {
       const {chat, messages} = get(chatWithMessagesAtom)
 
@@ -83,7 +81,7 @@ export default function revealIdentityActionAtom(
         type === 'REQUEST_REVEAL' &&
         messages.some((one) => one.message.messageType === 'REQUEST_REVEAL')
       ) {
-        return TE.left({
+        return Effect.fail({
           _tag: 'IdentityRequestAlreadySentError',
           error: new Error('Reveal already sent'),
         } as const)
@@ -119,54 +117,51 @@ export default function revealIdentityActionAtom(
               senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
             }
 
-      return pipe(
-        replaceImageFileUrisWithBase64(messageWithFileUri),
-        TE.fromTask,
-        TE.chainFirstW((message) =>
-          effectToTaskEither(
-            sendMessage({
-              api: api.chat,
-              senderKeypair: chat.inbox.privateKey,
-              receiverPublicKey: chat.otherSide.publicKey,
-              message,
-              notificationApi: api.notification,
-              theirNotificationCypher: chat.otherSideFcmCypher,
-              otherSideVersion: chat.otherSideVersion,
-            })
-          )
-        ),
-        TE.map((message): ChatMessageWithState => {
-          if (
-            ['APPROVE_REVEAL', 'DISAPPROVE_REVEAL'].includes(
-              message.messageType
-            )
-          ) {
-            const identityRevealMessage = get(
-              chatWithMessagesAtom
-            ).messages.find(
-              (one) => one.message.messageType === 'REQUEST_REVEAL'
-            )
-            if (message.messageType === 'APPROVE_REVEAL')
-              set(
-                chatWithMessagesAtom,
-                processIdentityRevealMessageIfAny(identityRevealMessage)
-              )
-            else if (
-              message.messageType === 'DISAPPROVE_REVEAL' &&
-              identityRevealMessage?.message.image
-            ) {
-              void removeFile(identityRevealMessage.message.image)()
-            }
-          }
+      return Effect.gen(function* (_) {
+        const message = yield* _(
+          replaceImageFileUrisWithBase64(messageWithFileUri)
+        )
 
-          const successMessage: ChatMessageWithState = {
-            message: messageWithFileUri,
-            state: 'sent',
+        yield* _(
+          sendMessage({
+            api: api.chat,
+            senderKeypair: chat.inbox.privateKey,
+            receiverPublicKey: chat.otherSide.publicKey,
+            message,
+            notificationApi: api.notification,
+            theirNotificationCypher: chat.otherSideFcmCypher,
+            otherSideVersion: chat.otherSideVersion,
+          })
+        )
+
+        if (
+          ['APPROVE_REVEAL', 'DISAPPROVE_REVEAL'].includes(message.messageType)
+        ) {
+          const identityRevealMessage = get(chatWithMessagesAtom).messages.find(
+            (one) => one.message.messageType === 'REQUEST_REVEAL'
+          )
+          if (message.messageType === 'APPROVE_REVEAL')
+            set(
+              chatWithMessagesAtom,
+              processIdentityRevealMessageIfAny(identityRevealMessage)
+            )
+          else if (
+            message.messageType === 'DISAPPROVE_REVEAL' &&
+            identityRevealMessage?.message.image
+          ) {
+            void Effect.runPromise(
+              removeFile(identityRevealMessage.message.image)
+            )
           }
-          set(chatWithMessagesAtom, addMessageToChat(successMessage))
-          return successMessage
-        })
-      )
+        }
+
+        const successMessage: ChatMessageWithState = {
+          message: messageWithFileUri,
+          state: 'sent',
+        }
+        set(chatWithMessagesAtom, addMessageToChat(successMessage))
+        return successMessage
+      })
     }
   )
 }

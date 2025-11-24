@@ -2,15 +2,8 @@ import {type ViewToken} from '@shopify/flash-list'
 import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  effectToTaskEither,
-  taskEitherToEffect,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
 import {Array, Effect, Either, HashMap, Option, pipe} from 'effect'
-import * as E from 'fp-ts/Either'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
 import {
   atom,
   type Atom,
@@ -73,7 +66,10 @@ import {
   safeNavigateBackOutsideReact,
 } from '../../../utils/navigation'
 import reportError from '../../../utils/reportError'
-import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {
+  toCommonErrorMessage,
+  type SomeError,
+} from '../../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {showErrorAlert} from '../../ErrorAlert'
@@ -338,10 +334,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         skipDonation,
         skipFeedback,
       }: {skipAsk: boolean; skipDonation?: boolean; skipFeedback?: boolean}
-    ) => {
+    ): Effect.Effect<boolean, never, never> => {
       const {t} = get(translationAtom)
 
-      return Effect.gen(function* (_) {
+      const effect = Effect.gen(function* (_) {
         const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
         const feedbackFinished = get(chatFeedbackAtom).finished
 
@@ -370,9 +366,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
         set(loadingOverlayDisplayedAtom, true)
 
-        yield* _(
-          taskEitherToEffect(set(deleteChatAtom, {text: 'deleting chat'}))
-        )
+        yield* _(set(deleteChatAtom, {text: 'deleting chat'}))
 
         set(loadingOverlayDisplayedAtom, false)
 
@@ -391,8 +385,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         }
 
         return true
-      }).pipe(
-        Effect.catchAll((e) => {
+      }) as Effect.Effect<boolean, SomeError, never>
+
+      return effect.pipe(
+        Effect.catchAll((e: SomeError) => {
           set(loadingOverlayDisplayedAtom, false)
 
           if (e._tag !== 'UserDeclinedError')
@@ -434,40 +430,47 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   })
 
   const blockChatAtom = blockChatActionAtom(chatWithMessagesAtom)
-  const blockChatWithUiFeedbackAtom = atom(null, async (get, set) => {
-    const {t} = get(translationAtom)
+  const blockChatWithUiFeedbackAtom = atom(
+    null,
+    async (get, set): Promise<boolean> => {
+      const {t} = get(translationAtom)
 
-    return await pipe(
-      set(askAreYouSureActionAtom, {
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('messages.blockForewerQuestion'),
-            description: t('messages.blockChatExplanation1'),
-            negativeButtonText: t('common.nope'),
-            positiveButtonText: t('messages.yesBlock'),
-          },
-          {
-            type: 'StepWithText',
-            title: t('common.youSure'),
-            description: t('messages.blockChatExplanation2'),
-            negativeButtonText: t('common.nope'),
-            positiveButtonText: t('messages.yesBlock'),
-          },
-        ],
-        variant: 'danger',
-      }),
-      effectToTaskEither,
-      TE.map((val) => {
+      const effect = Effect.gen(function* (_) {
+        yield* _(
+          set(askAreYouSureActionAtom, {
+            steps: [
+              {
+                type: 'StepWithText',
+                title: t('messages.blockForewerQuestion'),
+                description: t('messages.blockChatExplanation1'),
+                negativeButtonText: t('common.nope'),
+                positiveButtonText: t('messages.yesBlock'),
+              },
+              {
+                type: 'StepWithText',
+                title: t('common.youSure'),
+                description: t('messages.blockChatExplanation2'),
+                negativeButtonText: t('common.nope'),
+                positiveButtonText: t('messages.yesBlock'),
+              },
+            ],
+            variant: 'danger',
+          })
+        )
+
         set(loadingOverlayDisplayedAtom, true)
-        return val
-      }),
-      TE.chainW(() => set(blockChatAtom, {text: 'Blocking chat'})),
-      TE.match(
-        (e) => {
+
+        yield* _(set(blockChatAtom, {text: 'Blocking chat'}))
+
+        set(loadingOverlayDisplayedAtom, false)
+        return true
+      }) as Effect.Effect<boolean, SomeError, never>
+
+      return await effect.pipe(
+        Effect.catchAll((e: SomeError) => {
           set(loadingOverlayDisplayedAtom, false)
           if (e._tag === 'UserDeclinedError') {
-            return false
+            return Effect.succeed(false)
           }
 
           showErrorAlert({
@@ -477,15 +480,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
               t('common.somethingWentWrongDescription'),
             error: e,
           })
-          return false
-        },
-        () => {
-          set(loadingOverlayDisplayedAtom, false)
-          return true
-        }
+          return Effect.succeed(false)
+        }),
+        Effect.runPromise
       )
-    )()
-  })
+    }
+  )
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
   const lastTradeChecklistMessageAtom = selectAtom(
     messagesAtom,
@@ -548,11 +548,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           imageSavedForFutureUseAtom,
           commonConnectionsCountAtom,
         }),
-        TE.chainW(({type, username, imageUri}) =>
+        Effect.flatMap(({type, username, imageUri}) =>
           set(revealIdentityAtom, {type, username, imageUri})
         ),
-        TE.match(
-          (e) => {
+        Effect.match({
+          onFailure: (e) => {
             set(loadingOverlayDisplayedAtom, false)
             if (e._tag === 'UserDeclinedError') {
               return false
@@ -584,12 +584,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             })
             return false
           },
-          () => {
+          onSuccess: () => {
             set(loadingOverlayDisplayedAtom, false)
             return true
-          }
-        )
-      )()
+          },
+        }),
+        Effect.runPromise
+      )
     }
   )
 
@@ -615,65 +616,71 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         }
       })()
 
-      return await pipe(
-        set(askAreYouSureActionAtom, {
-          steps: [{...modalContent, type: 'StepWithText'}],
-          variant: 'info',
-        }),
-        effectToTaskEither,
-        TE.map((val) => {
-          set(loadingOverlayDisplayedAtom, true)
-          return val
-        }),
-        TE.match(
-          (e) => {
-            if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
-              return E.right(
-                'DISAPPROVE_CONTACT_REVEAL' as RevealContactMessageType
-              )
-            }
-            return E.left(e)
-          },
-          () =>
-            E.right(
-              type === 'RESPOND_REVEAL'
-                ? ('APPROVE_CONTACT_REVEAL' as RevealContactMessageType)
-                : ('REQUEST_CONTACT_REVEAL' as RevealContactMessageType)
-            )
-        ),
-        TE.chainW((type) => set(revealContactAtom, {type})),
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
+      return await Effect.gen(function* (_) {
+        const result = yield* _(
+          set(askAreYouSureActionAtom, {
+            steps: [{...modalContent, type: 'StepWithText'}],
+            variant: 'info',
+          }),
+          Effect.either
+        )
 
-            if (e._tag === 'UserDeclinedError') {
-              return false
-            }
-            if (e._tag === 'ContactRevealRequestAlreadySentError') {
-              showErrorAlert({
-                title: t('messages.contactAlreadyRequested'),
-                error: e,
-              })
-              return false
-            }
-            reportError('error', new Error('Error sending contact reveal'), {
-              e,
-            })
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-            return false
-          },
-          () => {
+        if (Either.isLeft(result)) {
+          if (
+            result.left._tag === 'UserDeclinedError' &&
+            type === 'RESPOND_REVEAL'
+          ) {
+            set(loadingOverlayDisplayedAtom, true)
+
+            yield* _(
+              set(revealContactAtom, {type: 'DISAPPROVE_CONTACT_REVEAL'})
+            )
+
             set(loadingOverlayDisplayedAtom, false)
             return true
           }
-        )
-      )()
+          return yield* _(Effect.fail(result.left))
+        }
+
+        set(loadingOverlayDisplayedAtom, true)
+
+        const messageType: RevealContactMessageType =
+          type === 'RESPOND_REVEAL'
+            ? 'APPROVE_CONTACT_REVEAL'
+            : 'REQUEST_CONTACT_REVEAL'
+
+        yield* _(set(revealContactAtom, {type: messageType}))
+
+        set(loadingOverlayDisplayedAtom, false)
+        return true
+      }).pipe(
+        Effect.catchAll((e) => {
+          set(loadingOverlayDisplayedAtom, false)
+
+          if (e._tag === 'UserDeclinedError') {
+            return Effect.succeed(false)
+          }
+          if (e._tag === 'ContactRevealRequestAlreadySentError') {
+            showErrorAlert({
+              title: t('messages.contactAlreadyRequested'),
+              error: e,
+            })
+            return Effect.succeed(false)
+          }
+          reportError('error', new Error('Error sending contact reveal'), {
+            e,
+          })
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
+            error: e,
+          })
+          return Effect.succeed(false)
+        }),
+        Effect.runPromise
+      )
     }
   )
 
@@ -885,16 +892,18 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       return
     }
 
-    return pipe(
-      set(cancelRequestActionAtomHandleUI, {
-        text: '',
-        originOffer: offerInfo,
-      }),
-      TE.match(
-        () => false,
-        () => true
+    return Effect.gen(function* (_) {
+      yield* _(
+        set(cancelRequestActionAtomHandleUI, {
+          text: '',
+          originOffer: offerInfo,
+        })
       )
-    )()
+      return true
+    }).pipe(
+      Effect.catchAll(() => Effect.succeed(false)),
+      Effect.runPromise
+    )
   })
 
   const selectedExtraToSendAtom = atom<ExtraToSend | undefined>(undefined)
@@ -1018,7 +1027,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const addEventToCalendarActionAtom = atom(
     null,
-    (get, set): T.Task<boolean> => {
+    (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
       const calendarEventId = get(calendarEventIdAtom)
       const agreedData = MeetingLocation.getLatestMeetingLocationDataMessage(
@@ -1027,7 +1036,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       const dateAndTimeData = get(tradeChecklistDateAndTimeAtom)
       const pick = dateAndTime.getPick(dateAndTimeData)
 
-      if (!pick) return T.of(false)
+      if (!pick) return Effect.succeed(false)
 
       const event = {
         startDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
@@ -1041,68 +1050,67 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
       set(loadingOverlayDisplayedAtom, true)
 
-      return pipe(
-        TE.Do,
-        TE.bindW('calendarId', () =>
+      return Effect.gen(function* (_) {
+        const calendarId = yield* _(
           set(
             createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom
           )
-        ),
-        TE.bindW('createEventActionResult', ({calendarId}) =>
+        )
+
+        const createEventActionResult = yield* _(
           createCalendarEvent({
             calendarEventId,
             calendarId,
             event,
           })
-        ),
-        TE.chainFirstW(({createEventActionResult: {action}}) =>
+        )
+
+        yield* _(
           set(askAreYouSureActionAtom, {
             steps: [
               {
                 type: 'StepWithText',
                 title:
-                  action === 'created'
+                  createEventActionResult.action === 'created'
                     ? t('tradeChecklist.eventAddedSuccess')
                     : t('tradeChecklist.eventEditSuccess'),
                 description:
-                  action === 'created'
+                  createEventActionResult.action === 'created'
                     ? t('tradeChecklist.eventAddedSuccessDescription')
                     : t('tradeChecklist.eventEditSuccessDescription'),
                 positiveButtonText: t('common.close'),
               },
             ],
             variant: 'info',
-          }).pipe(effectToTaskEither)
-        ),
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
-            if (e._tag === 'permissionsNotGranted') {
-              Alert.alert(t('tradeChecklist.calendarPermissionsNotGranted'))
-            }
-
-            if (e._tag === 'unknown') {
-              reportError('error', new Error('Error creating calendar event'), {
-                e,
-              })
-
-              showErrorAlert({
-                title: t('common.somethingWentWrong'),
-                description:
-                  toCommonErrorMessage(e, t) ??
-                  t('common.somethingWentWrongDescription'),
-                error: e,
-              })
-            }
-
-            return false
-          },
-          ({createEventActionResult: {calendarEventId}}) => {
-            set(loadingOverlayDisplayedAtom, false)
-            set(calendarEventIdAtom, calendarEventId)
-            return true
-          }
+          })
         )
+
+        set(loadingOverlayDisplayedAtom, false)
+        set(calendarEventIdAtom, createEventActionResult.calendarEventId)
+        return true
+      }).pipe(
+        Effect.catchAll((e) => {
+          set(loadingOverlayDisplayedAtom, false)
+          if (e._tag === 'permissionsNotGranted') {
+            Alert.alert(t('tradeChecklist.calendarPermissionsNotGranted'))
+          }
+
+          if (e._tag === 'unknown') {
+            reportError('error', new Error('Error creating calendar event'), {
+              e,
+            })
+
+            showErrorAlert({
+              title: t('common.somethingWentWrong'),
+              description:
+                toCommonErrorMessage(e, t) ??
+                t('common.somethingWentWrongDescription'),
+              error: e,
+            })
+          }
+
+          return Effect.succeed(false)
+        })
       )
     }
   )
@@ -1127,25 +1135,27 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const approveChatRequestActionAtom = atom(
     null,
-    (get, set, {approve, message}: {approve: boolean; message: string}) => {
+    (
+      get,
+      set,
+      {approve, message}: {approve: boolean; message: string}
+    ): Effect.Effect<boolean, never, never> => {
       const {t} = get(translationAtom)
 
       return Effect.gen(function* (_) {
         set(loadingOverlayDisplayedAtom, true)
 
         const result = yield* _(
-          taskEitherToEffect(
-            set(acceptMessagingRequestAtom, {
-              approve,
-              chatAtom: chatWithMessagesAtom,
-              text:
-                message !== ''
-                  ? message
-                  : approve
-                    ? ApprovalStatusMessage.approved
-                    : ApprovalStatusMessage.disapproved,
-            })
-          ),
+          set(acceptMessagingRequestAtom, {
+            approve,
+            chatAtom: chatWithMessagesAtom,
+            text:
+              message !== ''
+                ? message
+                : approve
+                  ? ApprovalStatusMessage.approved
+                  : ApprovalStatusMessage.disapproved,
+          }),
           Effect.either
         )
 

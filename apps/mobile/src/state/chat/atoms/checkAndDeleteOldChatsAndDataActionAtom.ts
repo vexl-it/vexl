@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
@@ -29,7 +30,9 @@ export const checkAndDeleteOldChatsAndDataActionAtom = atom(
           isChatDeletedAndExpired &&
           oneChat.chat.otherSide.realLifeInfo?.image.type === 'imageUri'
         ) {
-          void removeFile(oneChat.chat.otherSide.realLifeInfo.image.imageUri)()
+          void Effect.runPromise(
+            removeFile(oneChat.chat.otherSide.realLifeInfo.image.imageUri)
+          )
         }
 
         return !isChatDeletedAndExpired

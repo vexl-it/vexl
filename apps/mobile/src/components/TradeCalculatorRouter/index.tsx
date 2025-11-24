@@ -1,4 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import Animated, {FadeIn} from 'react-native-reanimated'
@@ -21,7 +22,7 @@ export default function TradeCalculatorFlow(): React.ReactElement {
   )
 
   useEffect(() => {
-    void resetTradeCalculatorState()()
+    void Effect.runPromise(resetTradeCalculatorState())
   }, [resetTradeCalculatorState])
 
   return (

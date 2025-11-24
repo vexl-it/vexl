@@ -1,5 +1,4 @@
 import {Effect} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {z} from 'zod'
@@ -24,11 +23,10 @@ export const postLoginFinishedAtom = focusAtom(
 export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return pipe(
-    set(upsertInboxOnBeAndLocallyActionAtom, {
-      for: 'userSesssion',
-      key: get(sessionDataOrDummyAtom).privateKey,
-    }),
+  return set(upsertInboxOnBeAndLocallyActionAtom, {
+    for: 'userSesssion',
+    key: get(sessionDataOrDummyAtom).privateKey,
+  }).pipe(
     Effect.match({
       onFailure(e) {
         reportError('error', new Error('Error creating inbox'), {e})

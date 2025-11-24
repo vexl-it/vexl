@@ -1,14 +1,12 @@
-import * as A from 'fp-ts/Array'
-import * as RA from 'fp-ts/ReadonlyArray'
-import * as T from 'fp-ts/Task'
-import {pipe} from 'fp-ts/function'
+import {Array, Effect} from 'effect'
 
-const requestAnimationFrameTask: T.Task<void> = () =>
-  new Promise<void>((resolve) =>
+const requestAnimationFrameEffect: Effect.Effect<void, never, never> =
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  Effect.async<void>((resume) => {
     requestAnimationFrame(() => {
-      resolve()
+      resume(Effect.void)
     })
-  )
+  })
 
 /**
  * A method that sequences tasks and calls requestAnimationFrame between items. Make sure to tweak numberToProcessBetweenAnimations
@@ -21,33 +19,31 @@ const requestAnimationFrameTask: T.Task<void> = () =>
 export default function sequenceTasksWithAnimationFrames<Result>(
   numberToProcessBetweenAnimations: number,
   onProgress: (progress: number) => void = () => {}
-): (tasks: Array<T.Task<Result>>) => T.Task<readonly Result[]> {
-  return (tasks) => {
+): (
+  effects: Array<Effect.Effect<Result, never, never>>
+) => Effect.Effect<readonly Result[], never, never> {
+  return (effects) => {
     // I would rather get this in a map function, but there is not A.map function that also provides the source array
     // We can use bind but this seems to be more readable
     const numberOfChunks = Math.ceil(
-      tasks.length / numberToProcessBetweenAnimations
+      effects.length / numberToProcessBetweenAnimations
     )
 
-    return pipe(
-      tasks,
-      A.chunksOf(numberToProcessBetweenAnimations),
-      A.mapWithIndex((i, chunks) =>
-        pipe(
-          requestAnimationFrameTask,
-          T.chain(() => {
-            return pipe(
-              T.sequenceSeqArray(chunks),
-              T.map((one) => {
-                onProgress((i + 1) / numberOfChunks)
-                return one
-              })
-            )
-          })
-        )
-      ),
-      T.sequenceSeqArray,
-      T.map((a) => RA.flatten(a))
-    )
+    return Effect.gen(function* (_) {
+      const chunks = Array.chunksOf(effects, numberToProcessBetweenAnimations)
+      const results: Result[][] = []
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i]
+        if (!chunk) continue
+
+        yield* _(requestAnimationFrameEffect)
+        const chunkResults = yield* _(Effect.all(chunk, {concurrency: 1}))
+        onProgress((i + 1) / numberOfChunks)
+        results.push(chunkResults as Result[])
+      }
+
+      return Array.flatten(results) as readonly Result[]
+    })
   }
 }

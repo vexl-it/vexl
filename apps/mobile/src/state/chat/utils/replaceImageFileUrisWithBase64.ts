@@ -6,10 +6,8 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
+import {Effect} from 'effect'
 import * as FileSystem from 'expo-file-system'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {Platform} from 'react-native'
 import joinUrl from 'url-join'
 import reportError from '../../../utils/reportError'
@@ -23,41 +21,44 @@ function readAsBase64({
 }: {
   imageWidthOrHeightLimit: number
   path: UriString
-}): TE.TaskEither<ReadingFileError, UriString> {
-  return TE.tryCatch(async () => {
-    const cacheDir = FileSystem.Paths.cache
-    if (!cacheDir) throw new Error('No cacheDir')
+}): Effect.Effect<UriString, ReadingFileError> {
+  return Effect.tryPromise({
+    try: async () => {
+      const cacheDir = FileSystem.Paths.cache
+      if (!cacheDir) throw new Error('No cacheDir')
 
-    const fromPath = (() => {
-      if (Platform.OS === 'ios') return resolveLocalUri(path)
-      else return path.replace('file://', '')
-    })()
+      const fromPath = (() => {
+        if (Platform.OS === 'ios') return resolveLocalUri(path)
+        else return path.replace('file://', '')
+      })()
 
-    const toPath = (() => {
-      if (Platform.OS === 'ios') return joinUrl(cacheDir.uri)
-      else return joinUrl(cacheDir.uri).replace('file://', '')
-    })()
+      const toPath = (() => {
+        if (Platform.OS === 'ios') return joinUrl(cacheDir.uri)
+        else return joinUrl(cacheDir.uri).replace('file://', '')
+      })()
 
-    const resizeResponse = await ImageResizer.createResizedImage(
-      fromPath,
-      imageWidthOrHeightLimit,
-      imageWidthOrHeightLimit,
-      'JPEG',
-      85,
-      0,
-      toPath,
-      false,
-      {
-        onlyScaleDown: true,
-        mode: 'contain',
-      }
-    )
+      const resizeResponse = await ImageResizer.createResizedImage(
+        fromPath,
+        imageWidthOrHeightLimit,
+        imageWidthOrHeightLimit,
+        'JPEG',
+        85,
+        0,
+        toPath,
+        false,
+        {
+          onlyScaleDown: true,
+          mode: 'contain',
+        }
+      )
 
-    const bytes = new FileSystem.File(
-      `file://${resizeResponse.path}`
-    ).base64Sync()
-    return UriString.parse(`data:image/jpeg;base64,${bytes}`)
-  }, toBasicError('ReadingFileError'))
+      const bytes = new FileSystem.File(
+        `file://${resizeResponse.path}`
+      ).base64Sync()
+      return UriString.parse(`data:image/jpeg;base64,${bytes}`)
+    },
+    catch: toBasicError('ReadingFileError'),
+  })
 }
 
 function setImage(
@@ -80,63 +81,66 @@ function setImage(
 
 export default function replaceImageFileUrisWithBase64(
   message: ChatMessage
-): T.Task<ChatMessage> {
+): Effect.Effect<ChatMessage> {
   const image = message.image
   const replyImage = message.repliedTo?.image
 
-  return pipe(
-    T.Do,
-    T.bind('image', () => {
-      if (!image) return T.of(undefined)
+  return Effect.gen(function* (_) {
+    const imageResult = yield* _(
+      image
+        ? readAsBase64({path: image, imageWidthOrHeightLimit: 512}).pipe(
+            Effect.match({
+              onFailure: (e) => {
+                reportError(
+                  'error',
+                  new Error('Error while reading image as file as base64'),
+                  {e}
+                )
+                return undefined
+              },
+              onSuccess: (v) => v,
+            })
+          )
+        : Effect.succeed(undefined)
+    )
 
-      return pipe(
-        readAsBase64({path: image, imageWidthOrHeightLimit: 512}),
-        TE.match(
-          (e) => {
-            reportError(
-              'error',
-              new Error('Error while reading image as file as base64'),
-              {e}
-            )
-            return undefined
-          },
-          (v) => v
-        )
-      )
-    }),
-    T.bind('replyToImage', () => {
-      if (!replyImage) return T.of(undefined)
+    const replyToImageResult = yield* _(
+      replyImage
+        ? readAsBase64({path: replyImage, imageWidthOrHeightLimit: 256}).pipe(
+            Effect.match({
+              onFailure: (e) => {
+                reportError(
+                  'error',
+                  new Error(
+                    'Error while reading replyToImage as file as base64'
+                  ),
+                  {e}
+                )
+                return undefined
+              },
+              onSuccess: (v) => v,
+            })
+          )
+        : Effect.succeed(undefined)
+    )
 
-      return pipe(
-        readAsBase64({path: replyImage, imageWidthOrHeightLimit: 256}),
-        TE.match(
-          (e) => {
-            reportError(
-              'error',
-              new Error('Error while reading replyToImage as file as base64'),
-              {e}
-            )
-            return undefined
-          },
-          (v) => v
-        )
-      )
-    }),
-    T.map(setImage(message))
-  )
+    return setImage(message)({
+      image: imageResult,
+      replyToImage: replyToImageResult,
+    })
+  })
 }
 
 export function replaceIdentityImageFileUriWithBase64(
   identityRevealChatMessage: IdentityRevealChatMessage | undefined
-): T.Task<IdentityRevealChatMessage | undefined> {
+): Effect.Effect<IdentityRevealChatMessage | undefined> {
   const image = identityRevealChatMessage?.image
 
-  if (!image) return T.of(identityRevealChatMessage)
+  if (!image) return Effect.succeed(identityRevealChatMessage)
 
-  return pipe(
-    readAsBase64({path: image, imageWidthOrHeightLimit: 512}),
-    TE.match(
-      (e) => {
+  return readAsBase64({path: image, imageWidthOrHeightLimit: 512}).pipe(
+    Effect.match({
+      onFailure: (e) => {
         reportError(
           'error',
           new Error('Error while reading image as file as base64'),
@@ -144,10 +148,10 @@ export function replaceIdentityImageFileUriWithBase64(
         )
         return identityRevealChatMessage
       },
-      (image) => ({
+      onSuccess: (image) => ({
         ...identityRevealChatMessage,
         image,
-      })
-    )
+      }),
+    })
   )
 }

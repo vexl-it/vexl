@@ -3,10 +3,7 @@ import {
   type BtcOrSat,
   type TradePriceType,
 } from '@vexl-next/domain/src/general/tradeChecklist'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {
   SATOSHIS_IN_BTC,
@@ -61,7 +58,7 @@ export const btcPriceCurrencyAtom = atom(
     'USD',
   (get, set, currency: CurrencyCode) => {
     set(selectedCurrencyCodeAtom, CurrencyCode.parse(currency))
-    void set(refreshCurrentBtcPriceActionAtom)()
+    void Effect.runPromise(set(refreshCurrentBtcPriceActionAtom))
   }
 )
 
@@ -129,7 +126,7 @@ export const setFormDataBasedOnBtcPriceTypeActionAtom = atom(
   (get, set, tradePriceType: TradePriceType) => {
     set(tradePriceTypeAtom, tradePriceType)
 
-    void set(refreshCurrentBtcPriceActionAtom)()
+    void Effect.runPromise(set(refreshCurrentBtcPriceActionAtom))
   }
 )
 
@@ -334,19 +331,20 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
   const tradePriceType = get(tradePriceTypeAtom)
   const btcPriceCurrency = get(btcPriceCurrencyAtom)
 
-  return pipe(
-    set(refreshBtcPriceActionAtom, btcPriceCurrency),
-    T.map(() => {
-      if (tradePriceType !== 'your')
-        set(
-          tradeBtcPriceAtom,
-          (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev
-        )
-      // we need to recalculate fiat amount based on new btc price
-      set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-        btcAmount: get(btcValueNumberAtom),
+  return set(refreshBtcPriceActionAtom, btcPriceCurrency).pipe(
+    Effect.tap(() =>
+      Effect.sync(() => {
+        if (tradePriceType !== 'your')
+          set(
+            tradeBtcPriceAtom,
+            (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev
+          )
+        // we need to recalculate fiat amount based on new btc price
+        set(calculateFiatValueOnBtcAmountChangeActionAtom, {
+          btcAmount: get(btcValueNumberAtom),
+        })
       })
-    })
+    )
   )
 })
 
@@ -372,16 +370,19 @@ export const updateFiatCurrencyActionAtom = atom(
     const tradePriceType = get(tradePriceTypeAtom)
 
     if (tradePriceType === 'your') {
-      void pipe(
-        set(refreshBtcPriceActionAtom, currency),
-        T.map(() => {
-          set(selectedCurrencyCodeForOwnPriceAtom, currency)
-          void set(refreshCurrentBtcPriceActionAtom)()
-        })
-      )()
+      void Effect.runPromise(
+        set(refreshBtcPriceActionAtom, currency).pipe(
+          Effect.tap(() =>
+            Effect.sync(() => {
+              set(selectedCurrencyCodeForOwnPriceAtom, currency)
+              void Effect.runPromise(set(refreshCurrentBtcPriceActionAtom))
+            })
+          )
+        )
+      )
     } else {
       set(selectedCurrencyCodeAtom, currency)
-      void set(refreshCurrentBtcPriceActionAtom)()
+      void Effect.runPromise(set(refreshCurrentBtcPriceActionAtom))
     }
   }
 )
@@ -389,22 +390,15 @@ export const updateFiatCurrencyActionAtom = atom(
 export const liveTradePriceExplanationAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return pipe(
-    set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          type: 'StepWithText',
-          title: t('tradeCalculator.whatDoesLivePriceMean'),
-          description: t('tradeCalculator.yadioLivePriceExplanation'),
-          positiveButtonText: t('common.gotIt'),
-        },
-      ],
-    }),
-    effectToTaskEither,
-    TE.match(
-      () => {},
-      () => {}
-    )
-  )()
+  return set(askAreYouSureActionAtom, {
+    variant: 'info',
+    steps: [
+      {
+        type: 'StepWithText',
+        title: t('tradeCalculator.whatDoesLivePriceMean'),
+        description: t('tradeCalculator.yadioLivePriceExplanation'),
+        positiveButtonText: t('common.gotIt'),
+      },
+    ],
+  })
 })

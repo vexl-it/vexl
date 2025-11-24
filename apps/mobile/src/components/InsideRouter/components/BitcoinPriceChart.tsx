@@ -1,7 +1,5 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/lib/function'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Linking, TouchableOpacity} from 'react-native'
@@ -51,7 +49,7 @@ function BitcoinPriceChart(): React.ReactElement {
 
   useFocusEffect(
     useCallback(() => {
-      void refreshBtcPrice(defaultCurrency)()
+      void Effect.runPromise(refreshBtcPrice(defaultCurrency))
     }, [refreshBtcPrice, defaultCurrency])
   )
 
@@ -60,8 +58,8 @@ function BitcoinPriceChart(): React.ReactElement {
       <XStack jc="space-between" alignItems="center">
         <TouchableOpacity
           onPress={() => {
-            void refreshBtcPrice(defaultCurrency)()
-            void pipe(
+            void Effect.runPromise(refreshBtcPrice(defaultCurrency))
+            void Effect.runPromise(
               askAreYouSureAction({
                 variant: 'info',
                 steps: [
@@ -73,15 +71,15 @@ function BitcoinPriceChart(): React.ReactElement {
                     negativeButtonText: t('common.close'),
                   },
                 ],
-              }),
-              effectToTaskEither,
-              TE.match(
-                () => {},
-                () => {
-                  void Linking.openURL(t('btcPricePopup.url'))
-                }
+              }).pipe(
+                Effect.match({
+                  onFailure: () => {},
+                  onSuccess: () => {
+                    void Linking.openURL(t('btcPricePopup.url'))
+                  },
+                })
               )
-            )()
+            )
           }}
         >
           <XStack>

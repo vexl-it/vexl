@@ -54,14 +54,16 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
         }
         text={t('common.cancel')}
         onPress={() => {
-          void askAreYouSureAndClearUpdatesToBeSent()().then((success) => {
-            if (success) {
-              navigation.popTo(
-                'ChatDetail',
-                store.get(fromChatAtoms.chatWithMessagesKeys)
-              )
+          void Effect.runPromise(askAreYouSureAndClearUpdatesToBeSent()).then(
+            (success: boolean) => {
+              if (success) {
+                navigation.popTo(
+                  'ChatDetail',
+                  store.get(fromChatAtoms.chatWithMessagesKeys)
+                )
+              }
             }
-          })
+          )
         }}
       />
       <SecondaryFooterButtonProxy

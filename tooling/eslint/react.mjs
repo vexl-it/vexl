@@ -1,14 +1,20 @@
-// @ts-check
 import love from 'eslint-config-love'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import {defineConfig} from 'eslint/config'
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
+export default defineConfig([
   {
     ...love,
-    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.ts', '**/*.tsx', '**/*.jsx'],
+    files: [
+      '**/*.js',
+      '**/*.mjs',
+      '**/*.cjs',
+      '**/*.ts',
+      '**/*.tsx',
+      '**/*.jsx',
+    ],
   },
   eslintConfigPrettier,
   {
@@ -23,7 +29,7 @@ export default [
       'react-hooks': reactHooksPlugin,
     },
     settings: {
-      react: { version: 'detect' },
+      react: {version: 'detect'},
     },
     rules: {
       ...reactPlugin.configs.recommended.rules,
@@ -34,7 +40,7 @@ export default [
       'react/jsx-curly-brace-presence': 'error',
       'react/jsx-no-leaked-render': [
         'error',
-        { validStrategies: ['coerce', 'ternary'] },
+        {validStrategies: ['coerce', 'ternary']},
       ],
     },
   },
@@ -42,7 +48,7 @@ export default [
     rules: {
       'no-restricted-exports': [
         'error',
-        { restrictDefaultExports: { namespaceFrom: true, namedFrom: true } },
+        {restrictDefaultExports: {namespaceFrom: true, namedFrom: true}},
       ],
       // https://github.com/typescript-eslint/typescript-eslint/issues/2585
       '@typescript-eslint/no-redeclare': 'off',
@@ -113,4 +119,4 @@ export default [
       'node_modules/**',
     ],
   },
-]
+])

@@ -11029,7 +11029,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:8.48.0, @typescript-eslint/utils@npm:^8.15.0":
+"@typescript-eslint/utils@npm:8.48.0, @typescript-eslint/utils@npm:^8.41.0":
   version: 8.48.0
   resolution: "@typescript-eslint/utils@npm:8.48.0"
   dependencies:
@@ -11640,7 +11640,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     eslint: ^9.27.0
-    eslint-config-love: ^113.0.0
+    eslint-config-love: ^134.0.0
     eslint-config-prettier: ^10.1.5
     eslint-plugin-react: ^7.37.5
     eslint-plugin-react-hooks: ^5.2.0
@@ -16881,20 +16881,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-love@npm:^113.0.0":
-  version: 113.0.0
-  resolution: "eslint-config-love@npm:113.0.0"
+"eslint-config-love@npm:^134.0.0":
+  version: 134.0.0
+  resolution: "eslint-config-love@npm:134.0.0"
   dependencies:
-    "@typescript-eslint/utils": ^8.15.0
+    "@typescript-eslint/utils": ^8.41.0
     eslint-plugin-eslint-comments: ^3.2.0
-    eslint-plugin-import: ^2.31.0
+    eslint-plugin-import: ^2.32.0
     eslint-plugin-n: ^17.0.0
     eslint-plugin-promise: ^7.0.0
-    typescript-eslint: ^8.15.0
+    typescript-eslint: ^8.41.0
   peerDependencies:
-    eslint: ^9.12.0
+    eslint: ^9.35.0
     typescript: "*"
-  checksum: c1a574ba11fc0df42a5f8cfe77520f1a44792e1c3441489587f5f7d5f8662190ea2f53890d3be371570142f6f7561716b332e425be4aed5a82fe654fa5933900
+  checksum: 82f94b3d18b43d4c80ea5fcf054d15421bbec9abb85995e3398fe6925794ea49ae639e6f5da667081f264ca0403f2eb59f95c9c309bae324f9901b42cabdedf5
   languageName: node
   linkType: hard
 
@@ -17005,7 +17005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-import@npm:^2.31.0":
+"eslint-plugin-import@npm:^2.31.0, eslint-plugin-import@npm:^2.32.0":
   version: 2.32.0
   resolution: "eslint-plugin-import@npm:2.32.0"
   dependencies:
@@ -30578,7 +30578,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.15.0, typescript-eslint@npm:^8.32.1":
+"typescript-eslint@npm:^8.32.1, typescript-eslint@npm:^8.41.0":
   version: 8.48.0
   resolution: "typescript-eslint@npm:8.48.0"
   dependencies:

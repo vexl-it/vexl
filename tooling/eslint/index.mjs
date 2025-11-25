@@ -2,8 +2,8 @@
 import love from 'eslint-config-love'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
+/** @type {any[]} */
+const config = [
   {
     ...love,
     files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.ts', '**/*.tsx'],
@@ -18,7 +18,7 @@ export default [
     rules: {
       'no-restricted-exports': [
         'error',
-        { restrictDefaultExports: { namespaceFrom: true, namedFrom: true } },
+        {restrictDefaultExports: {namespaceFrom: true, namedFrom: true}},
       ],
       // https://github.com/typescript-eslint/typescript-eslint/issues/2585
       '@typescript-eslint/no-redeclare': 'off',
@@ -88,3 +88,6 @@ export default [
     ],
   },
 ]
+
+/** @type {import('eslint').Linter.Config[]} */
+export default config

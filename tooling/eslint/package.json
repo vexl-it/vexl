@@ -14,7 +14,7 @@
     "./react": "./react.mjs"
   },
   "dependencies": {
-    "eslint-config-love": "^113.0.0",
+    "eslint-config-love": "^134.0.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",

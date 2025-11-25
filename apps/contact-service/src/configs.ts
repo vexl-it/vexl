@@ -68,9 +68,6 @@ export const secretSaltForServerContact = Config.string(
 )
 
 export const s3Config = Config.all({
-  accessKeyId: Config.string('AWS_ACCESS_KEY_ID').pipe(Config.option),
-  secretAccessKey: Config.string('AWS_SECRET_ACCESS_KEY').pipe(Config.option),
   region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),
   bucketName: Config.string('S3_BUCKET_NAME'),
-  profile: Config.string('AWS_PROFILE').pipe(Config.option),
 })

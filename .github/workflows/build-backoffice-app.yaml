@@ -1,10 +1,11 @@
 name: "[Build] backoffice-app docker image"
+run-name: "Commit ${{github.sha}} for ${{inputs.env}}"
 
 on:
   workflow_dispatch:
     inputs:
       env:
-        description: "Environment to deploy to"
+        description: "Environment to build"
         required: true
         type: choice
         options:

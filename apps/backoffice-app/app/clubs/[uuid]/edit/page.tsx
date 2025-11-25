@@ -6,6 +6,7 @@ import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
 import type {ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Option} from 'effect'
+import Image from 'next/image'
 import {useParams, useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
@@ -248,6 +249,7 @@ export default function EditClubPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
                 </label>
+                {/* eslint-disable-next-line @next/next/no-img-element -- blob URLs not supported by next/image */}
                 <img
                   src={previewUrl}
                   alt="Preview"
@@ -299,10 +301,13 @@ export default function EditClubPage() {
                 <p className="text-sm font-medium text-green-900 mb-2">
                   Image uploaded successfully!
                 </p>
-                <img
+                <Image
                   src={uploadedImageUrl}
                   alt="Uploaded"
-                  className="max-w-xs rounded-lg shadow-md mb-2"
+                  width={320}
+                  height={240}
+                  className="max-w-xs rounded-lg shadow-md mb-2 object-cover"
+                  unoptimized
                 />
                 <button
                   type="button"
@@ -347,10 +352,13 @@ export default function EditClubPage() {
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Current Image:
                 </p>
-                <img
+                <Image
                   src={formData.clubImageUrl}
                   alt="Club"
+                  width={80}
+                  height={80}
                   className="h-20 w-20 rounded-full object-cover"
+                  unoptimized
                 />
               </div>
             )}

@@ -1,6 +1,7 @@
 {
   "name": "@vexl-next/eslint-config",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
@@ -8,33 +9,28 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
+  "exports": {
+    ".": "./index.mjs",
+    "./react": "./react.mjs"
+  },
   "dependencies": {
-    "@types/eslint": "^8.44.6",
-    "@typescript-eslint/eslint-plugin": "^6.7.3",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard-with-typescript": "^39.1.0",
-    "eslint-plugin-import": "^2.28.1",
-    "eslint-plugin-n": "^16.1.0",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0"
+    "eslint-config-love": "^113.0.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.1.0",
+    "typescript-eslint": "^8.32.1"
   },
   "files": [
-    "index.js",
-    "react.js"
+    "index.mjs",
+    "react.mjs"
   ],
   "devDependencies": {
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.27.0",
     "prettier": "^3.3.2",
     "typescript": "~5.9.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "./index.js"
-    ]
   },
   "prettier": "@vexl-next/prettier-config"
 }

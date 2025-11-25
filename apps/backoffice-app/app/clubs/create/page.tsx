@@ -202,6 +202,7 @@ export default function CreateClubPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
                 </label>
+                {/* eslint-disable-next-line -- blob URLs not supported by next/image */}
                 <img
                   src={previewUrl}
                   alt="Preview"
@@ -256,7 +257,7 @@ export default function CreateClubPage() {
                 <img
                   src={uploadedImageUrl}
                   alt="Uploaded"
-                  className="max-w-xs rounded-lg shadow-md mb-2"
+                  className="max-w-xs rounded-lg shadow-md mb-2 object-cover"
                 />
                 <button
                   type="button"

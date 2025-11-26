@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "您的请求已被拒绝。",
   "notifications.DELETE_CHAT.title": "聊天记录已被删除",
   "notifications.DELETE_CHAT.body": "您的一条聊天记录已被删除。",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "聊天记录已被删除",
   "notifications.INBOX_DELETED.body": "您的一条聊天记录已被删除。",
   "notifications.BLOCK_CHAT.title": "您已被拉黑",

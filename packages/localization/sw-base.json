@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Ombi lako limekataliwa.",
   "notifications.DELETE_CHAT.title": "Gumzo limefutwa",
   "notifications.DELETE_CHAT.body": "Moja ya gumzo zako limefutwa.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Gumzo limefutwa",
   "notifications.INBOX_DELETED.body": "Moja ya gumzo zako limefutwa.",
   "notifications.BLOCK_CHAT.title": "Umezuiwa",

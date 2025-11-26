@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Tvoja žiadosť bola zamietnutá.",
   "notifications.DELETE_CHAT.title": "Chat bol zmazaný",
   "notifications.DELETE_CHAT.body": "Jeden z tvojich chatov bol vymazaný.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Chat bol zmazaný",
   "notifications.INBOX_DELETED.body": "Jeden z tvojich chatov bol vymazaný.",
   "notifications.BLOCK_CHAT.title": "Bol si zablokovaný!",

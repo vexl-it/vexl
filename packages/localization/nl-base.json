@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Uw aanvraag is geweigerd",
   "notifications.DELETE_CHAT.title": "Chat is verwijderd",
   "notifications.DELETE_CHAT.body": "Een van uw chats is verwijderd.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Chat is verwijderd",
   "notifications.INBOX_DELETED.body": "Een van uw chats is verwijderd.",
   "notifications.BLOCK_CHAT.title": "U bent geblokkeerd",

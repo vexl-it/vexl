@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Dein Antrag war abgelehnt",
   "notifications.DELETE_CHAT.title": "Chat gelöscht",
   "notifications.DELETE_CHAT.body": "Einer deiner Chats wurde gelöscht.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Chat gelöscht",
   "notifications.INBOX_DELETED.body": "Einer deiner Chats wurde gelöscht.",
   "notifications.BLOCK_CHAT.title": "Du bist blockiert worden",

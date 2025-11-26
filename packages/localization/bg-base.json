@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Вашето искане беше отказано.",
   "notifications.DELETE_CHAT.title": "Разговорът е изтрит",
   "notifications.DELETE_CHAT.body": "Един от вашите разговори е изтрит.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Разговорът е изтрит",
   "notifications.INBOX_DELETED.body": "Един от вашите разговори е изтрит.",
   "notifications.BLOCK_CHAT.title": "Блокирани сте",

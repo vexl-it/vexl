@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Twoja prośba została odrzucona.",
   "notifications.DELETE_CHAT.title": "Czat usunięty",
   "notifications.DELETE_CHAT.body": "Jeden z Twoich czatów został usunięty.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Czat usunięty",
   "notifications.INBOX_DELETED.body": "Jeden z Twoich czatów został usunięty.",
   "notifications.BLOCK_CHAT.title": "Zostałeś zablokowany",

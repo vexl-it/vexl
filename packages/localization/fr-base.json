@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "Votre demande a été refusée.",
   "notifications.DELETE_CHAT.title": "Discussion supprimée",
   "notifications.DELETE_CHAT.body": "L'une de vos discussions a été supprimée.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Discussion supprimée",
   "notifications.INBOX_DELETED.body": "L'une de vos discussions a été supprimée.",
   "notifications.BLOCK_CHAT.title": "Vous avez été bloqué",

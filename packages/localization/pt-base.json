@@ -644,6 +644,8 @@
   "notifications.DISAPPROVE_MESSAGING.body": "A sua requisição foi rejeitada.",
   "notifications.DELETE_CHAT.title": "Chat apagado",
   "notifications.DELETE_CHAT.body": "Um dos seus chats foi apagado.",
+  "notifications.TRADE_REMINDER.title": "Trade with {{userName}}",
+  "notifications.TRADE_REMINDER.body": "You have a trade scheduled with {{userName}} at {{time}}",
   "notifications.INBOX_DELETED.title": "Chat apagado",
   "notifications.INBOX_DELETED.body": "Um dos seus chats foi apagado.",
   "notifications.BLOCK_CHAT.title": "Você foi bloqueado",

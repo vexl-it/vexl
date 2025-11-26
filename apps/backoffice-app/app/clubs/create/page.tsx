@@ -5,6 +5,7 @@ import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
 import {Option} from 'effect'
+import Image from 'next/image'
 import {useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
@@ -202,6 +203,7 @@ export default function CreateClubPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
                 </label>
+                {/* eslint-disable-next-line @next/next/no-img-element -- blob URLs not supported by next/image */}
                 <img
                   src={previewUrl}
                   alt="Preview"
@@ -253,10 +255,13 @@ export default function CreateClubPage() {
                 <p className="text-sm font-medium text-green-900 mb-2">
                   Image uploaded successfully!
                 </p>
-                <img
+                <Image
                   src={uploadedImageUrl}
                   alt="Uploaded"
-                  className="max-w-xs rounded-lg shadow-md mb-2"
+                  width={320}
+                  height={240}
+                  className="max-w-xs rounded-lg shadow-md mb-2 object-cover"
+                  unoptimized
                 />
                 <button
                   type="button"

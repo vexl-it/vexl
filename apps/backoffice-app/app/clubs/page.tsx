@@ -5,6 +5,7 @@ import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
 import type {ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Option} from 'effect'
+import Image from 'next/image'
 import {useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
@@ -148,10 +149,13 @@ export default function ClubsListPage() {
                       <td className="whitespace-nowrap px-3 py-4 text-sm">
                         <div className="flex items-center">
                           {club.clubImageUrl && (
-                            <img
+                            <Image
                               src={club.clubImageUrl}
                               alt={club.name}
+                              width={40}
+                              height={40}
                               className="h-10 w-10 rounded-full mr-3 object-cover"
+                              unoptimized
                             />
                           )}
                           <div>

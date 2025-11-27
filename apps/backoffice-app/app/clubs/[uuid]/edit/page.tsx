@@ -13,6 +13,7 @@ export default function EditClubPage() {
   const params = useParams()
   const clubUuid = params.uuid as string
   const [formData, setFormData] = useState<ClubInfo | null>(null)
+  const [adminNote, setAdminNote] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -64,6 +65,10 @@ export default function EditClubPage() {
         }
 
         setFormData(club as any)
+        // Load admin note from club data
+        if (club.adminNote && club.adminNote._tag === 'Some') {
+          setAdminNote(club.adminNote.value)
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load club')
       } finally {
@@ -92,7 +97,10 @@ export default function EditClubPage() {
       await runEffect(
         client.modifyClub({
           urlParams: {adminToken},
-          payload: {clubInfo: formData as any},
+          payload: {
+            clubInfo: formData as any,
+            adminNote: adminNote ? Option.some(adminNote) : Option.none(),
+          },
         })
       )
       router.push('/clubs')
@@ -402,6 +410,29 @@ export default function EditClubPage() {
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
               min="0"
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="adminNote"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Admin Note
+            </label>
+            <textarea
+              id="adminNote"
+              value={adminNote}
+              onChange={(e) => {
+                setAdminNote(e.target.value)
+              }}
+              maxLength={500}
+              rows={4}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
+              placeholder="Internal admin notes about this club (not visible to users)"
+            />
+            <p className="mt-1 text-sm text-gray-500">
+              {adminNote.length}/500 characters
+            </p>
           </div>
 
           {error && formData && (

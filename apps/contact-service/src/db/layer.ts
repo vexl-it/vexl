@@ -19,6 +19,7 @@ import add_club_column_report_limit from './migrations/0014_add_club_column_repo
 import add_table_club_reported_record from './migrations/0015_add_table_club_reported_record'
 import remove_unused_tables from './migrations/0016_remove_unused_tables'
 import add_app_source from './migrations/0017_add_app_source'
+import add_admin_note_to_clubs from './migrations/0018_add_admin_note_to_clubs'
 
 const migrations = [
   {
@@ -105,6 +106,11 @@ const migrations = [
     id: 17,
     name: 'add_app_source',
     migrationEffect: add_app_source,
+  },
+  {
+    id: 18,
+    name: 'add_admin_note_to_clubs',
+    migrationEffect: add_admin_note_to_clubs,
   },
 ] as const
 

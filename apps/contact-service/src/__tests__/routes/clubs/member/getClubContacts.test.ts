@@ -63,6 +63,7 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
+              adminNote: Option.none(),
             },
           })
         )
@@ -171,6 +172,7 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
+              adminNote: Option.none(),
             },
             urlParams: {
               adminToken: ADMIN_TOKEN,
@@ -249,6 +251,7 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
+              adminNote: Option.none(),
             },
             urlParams: {
               adminToken: ADMIN_TOKEN,
@@ -298,6 +301,7 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
+              adminNote: Option.none(),
             },
             urlParams: {
               adminToken: ADMIN_TOKEN,
@@ -373,6 +377,7 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
+              adminNote: Option.none(),
             },
             urlParams: {
               adminToken: ADMIN_TOKEN,
@@ -448,6 +453,7 @@ describe('Get club contacts', () => {
                 validUntil: CLUB_VALID_UNTIL,
                 reportLimit: 10,
               },
+              adminNote: Option.none(),
             },
             urlParams: {
               adminToken: ADMIN_TOKEN,

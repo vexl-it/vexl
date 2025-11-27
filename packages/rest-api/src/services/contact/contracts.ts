@@ -267,6 +267,21 @@ export const AdminTokenParams = Schema.Struct({
   adminToken: Schema.String,
 })
 
+// Admin-specific club info that includes admin-only fields
+export const ClubInfoAdmin = ClubInfo.pipe(
+  Schema.extend(
+    Schema.Struct({
+      adminNote: Schema.optionalWith(
+        Schema.String.pipe(Schema.maxLength(500)),
+        {
+          as: 'Option',
+        }
+      ),
+    })
+  )
+)
+export type ClubInfoAdmin = typeof ClubInfoAdmin.Type
+
 export const CreateClubErrors = Schema.Union(
   ClubAlreadyExistsError,
   InvalidAdminTokenError
@@ -275,6 +290,9 @@ export type CreateClubErrors = typeof CreateClubErrors.Type
 
 export const CreateClubRequest = Schema.Struct({
   club: ClubInfo,
+  adminNote: Schema.optionalWith(Schema.String.pipe(Schema.maxLength(500)), {
+    as: 'Option',
+  }),
 })
 export type CreateClubRequest = typeof CreateClubRequest.Type
 
@@ -311,6 +329,9 @@ export type ModifyClubErrors = typeof ModifyClubErrors.Type
 
 export const ModifyClubRequest = Schema.Struct({
   clubInfo: ClubInfo,
+  adminNote: Schema.optionalWith(Schema.String.pipe(Schema.maxLength(500)), {
+    as: 'Option',
+  }),
 })
 export type ModifyClubRequest = typeof ModifyClubRequest.Type
 
@@ -322,7 +343,7 @@ export type ModifyClubResponse = typeof ModifyClubResponse.Type
 export const ListClubsErrors = Schema.Union(InvalidAdminTokenError)
 
 export const ListClubsResponse = Schema.Struct({
-  clubs: Schema.Array(ClubInfo),
+  clubs: Schema.Array(ClubInfoAdmin),
 })
 
 export type ListClubsResponse = typeof ListClubsResponse.Type

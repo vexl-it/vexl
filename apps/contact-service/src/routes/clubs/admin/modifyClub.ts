@@ -19,7 +19,7 @@ export const modifyClub = HttpApiBuilder.handler(
       const existingClub = yield* _(
         clubsDb.findClubByUuid({uuid: req.payload.clubInfo.uuid}),
         Effect.flatten,
-        Effect.catchTag('NoSuchElementException', (e) => new NotFoundError())
+        Effect.catchTag('NoSuchElementException', () => new NotFoundError())
       )
 
       const modifiedClub = yield* _(
@@ -29,6 +29,7 @@ export const modifyClub = HttpApiBuilder.handler(
             ...req.payload.clubInfo,
             madeInactiveAt: existingClub.madeInactiveAt,
             report: existingClub.report,
+            adminNote: req.payload.adminNote,
           },
         })
       )

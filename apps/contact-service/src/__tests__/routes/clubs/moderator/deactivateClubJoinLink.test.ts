@@ -40,6 +40,9 @@ const club = {
   uuid: generateClubUuid(),
   validUntil: new Date(),
   reportLimit: 10,
+  madeInactiveAt: Option.none(),
+  report: 0,
+  adminNote: Option.none(),
 }
 let clubId: ClubRecordId
 
@@ -62,6 +65,7 @@ beforeEach(async () => {
           },
           payload: {
             club,
+            adminNote: Option.none(),
           },
         })
       )

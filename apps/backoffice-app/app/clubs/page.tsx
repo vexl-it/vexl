@@ -3,13 +3,13 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
-import type {ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import type {ClubInfoAdmin} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Option} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
 export default function ClubsListPage() {
-  const [clubs, setClubs] = useState<readonly ClubInfo[]>([])
+  const [clubs, setClubs] = useState<readonly ClubInfoAdmin[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [hoveredDescription, setHoveredDescription] = useState<string | null>(
@@ -137,6 +137,9 @@ export default function ClubsListPage() {
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Report Limit
                     </th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Admin Note
+                    </th>
                     <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span className="sr-only">Actions</span>
                     </th>
@@ -189,6 +192,15 @@ export default function ClubsListPage() {
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {club.reportLimit}
+                      </td>
+                      <td className="px-3 py-4 text-sm text-gray-500 max-w-xs">
+                        {club.adminNote && club.adminNote._tag === 'Some' ? (
+                          <div className="text-gray-700 italic">
+                            {club.adminNote.value}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <button

@@ -25,7 +25,8 @@ export const createUpdateClub = Effect.gen(function* (_) {
         members_count_limit = ${params.data.membersCountLimit},
         club_image_url = ${params.data.clubImageUrl},
         valid_until = ${params.data.validUntil},
-        report_limit = ${params.data.reportLimit}
+        report_limit = ${params.data.reportLimit},
+        admin_note = ${params.data.adminNote ?? null}
       WHERE
         id = ${params.id}
       RETURNING

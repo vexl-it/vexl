@@ -59,6 +59,7 @@ describe('List clubs', () => {
             },
             payload: {
               club: clubsToSave[0],
+              adminNote: Option.none(),
             },
           })
         )
@@ -69,6 +70,7 @@ describe('List clubs', () => {
             },
             payload: {
               club: clubsToSave[1],
+              adminNote: Option.none(),
             },
           })
         )
@@ -79,6 +81,7 @@ describe('List clubs', () => {
             },
             payload: {
               club: clubsToSave[2],
+              adminNote: Option.none(),
             },
           })
         )

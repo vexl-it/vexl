@@ -23,6 +23,10 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   }),
   report: Schema.Int,
   reportLimit: Schema.Int,
+  adminNote: Schema.optionalWith(Schema.String.pipe(Schema.maxLength(500)), {
+    as: 'Option',
+    nullable: true,
+  }),
 }) {}
 
 // Club offer reported info table schema

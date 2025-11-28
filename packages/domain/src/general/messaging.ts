@@ -217,7 +217,7 @@ export const ChatMessage = z
   })
   .readonly()
 
-const ChatMessageE = Schema.Struct({
+export const ChatMessageE = Schema.Struct({
   uuid: ChatMessageIdE,
   text: Schema.String,
   minimalRequiredVersion: Schema.optional(SemverStringE),

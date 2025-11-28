@@ -21,7 +21,7 @@ export type ChatDataForTradeChecklist = z.TypeOf<
   typeof ChatDataForTradeChecklist
 >
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 function catchFormatError<T>(err: T): {} {
   reportError(
     'error',

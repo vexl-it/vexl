@@ -1,0 +1,93 @@
+// @ts-check
+import love from 'eslint-config-love'
+import eslintConfigPrettier from 'eslint-config-prettier'
+
+/** @type {any[]} */
+const config = [
+  {
+    ...love,
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.ts', '**/*.tsx'],
+  },
+  eslintConfigPrettier,
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: 'off',
+    },
+  },
+  {
+    rules: {
+      'no-restricted-exports': [
+        'error',
+        {restrictDefaultExports: {namespaceFrom: true, namedFrom: true}},
+      ],
+      // https://github.com/typescript-eslint/typescript-eslint/issues/2585
+      '@typescript-eslint/no-redeclare': 'off',
+      '@typescript-eslint/consistent-type-assertions': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
+      // Disabled to match previous eslint-config-standard-with-typescript behavior
+      '@typescript-eslint/no-magic-numbers': 'off',
+      '@typescript-eslint/no-import-type-side-effects': 'off',
+      '@typescript-eslint/no-deprecated': 'off',
+      'arrow-body-style': 'off',
+      'complexity': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/prefer-destructuring': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      'eslint-comments/require-description': 'off',
+      '@typescript-eslint/use-unknown-in-catch-callback-variable': 'off',
+      '@typescript-eslint/no-inferrable-types': 'off',
+      '@typescript-eslint/no-unsafe-type-assertion': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unnecessary-template-expression': 'off',
+      '@typescript-eslint/max-params': 'off',
+      'promise/avoid-new': 'off',
+      'eslint-comments/no-unlimited-disable': 'off',
+      '@typescript-eslint/no-unnecessary-type-arguments': 'off',
+      '@typescript-eslint/no-loop-func': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/init-declarations': 'off',
+      '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-duplicate-type-constituents': 'off',
+      '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+      '@typescript-eslint/switch-exhaustiveness-check': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      'max-lines': 'off',
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off',
+      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/class-methods-use-this': 'off',
+      '@typescript-eslint/consistent-return': 'off',
+      '@typescript-eslint/only-throw-error': 'off',
+      '@typescript-eslint/prefer-promise-reject-errors': 'off',
+      '@typescript-eslint/no-confusing-void-expression': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-useless-constructor': 'off',
+      'no-constant-binary-expression': 'off',
+      'prefer-regex-literals': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/prefer-optional-chain': 'off',
+    },
+  },
+  {
+    ignores: [
+      '**/*.config.js',
+      '**/*.config.cjs',
+      '**/*.config.mjs',
+      '.next/**',
+      'dist/**',
+      'node_modules/**',
+    ],
+  },
+]
+
+/** @type {import('eslint').Linter.Config[]} */
+export default config

@@ -13,12 +13,6 @@
     "dev": "npx tsx -r dotenv/config src/index.ts",
     "start": "node dist/index.js"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@vexl-next/eslint-config/index"
-    ]
-  },
   "dependencies": {
     "@effect/experimental": "^0.56.0",
     "@effect/platform": "^0.92.1",
@@ -51,7 +45,7 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "esbuild": "^0.25.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.27.0",
     "glob": "^11.0.0",
     "jest": "^29.7.0",
     "nodemon": "^2.0.21",

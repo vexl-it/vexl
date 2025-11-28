@@ -14,7 +14,7 @@
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.27.0",
     "jest": "^29.7.0",
     "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
@@ -37,12 +37,6 @@
     "luxon": "^3.3.0",
     "match-sorter": "^6.3.4",
     "zod": "^3.22.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@vexl-next/eslint-config/index"
-    ]
   },
   "prettier": "@vexl-next/prettier-config"
 }

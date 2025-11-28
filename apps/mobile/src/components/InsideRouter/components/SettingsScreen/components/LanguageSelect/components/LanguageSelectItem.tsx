@@ -10,9 +10,9 @@ import {
 import RadioButton from '../../../../../../RadioButton'
 import {createIsLanguageSelectedAtom} from '../../../atoms'
 
-const translations = keys(supportedTranslations)
+export const supportedLanguages = keys(supportedTranslations)
 interface LanguageSelectItemProps {
-  language: (typeof translations)[number]
+  language: (typeof supportedLanguages)[number]
 }
 
 function LanguageSelectItem({

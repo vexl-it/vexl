@@ -8,10 +8,12 @@ import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GetPublicKeyResponse,
-  IssueNotificationErrors,
+  InvalidFcmCypherError,
+  InvalidNotificationCypherError,
   IssueNotificationRequest,
   IssueNotificationResponse,
   ReportNotificationProcessedRequest,
+  SendingNotificationError,
 } from './contract'
 
 export const IssueNotificationEndpoint = HttpApiEndpoint.post(
@@ -20,7 +22,9 @@ export const IssueNotificationEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(IssueNotificationRequest)
   .addSuccess(IssueNotificationResponse)
-  .addError(IssueNotificationErrors)
+  .addError(InvalidFcmCypherError, {status: 400})
+  .addError(SendingNotificationError, {status: 400})
+  .addError(InvalidNotificationCypherError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5000)
 
 export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
@@ -46,5 +50,5 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
 export const NotificationApiSpecification = HttpApi.make('Notification API')
   .middleware(RateLimitingMiddleware)
   .add(RootGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

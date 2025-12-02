@@ -19,7 +19,7 @@ export class GetExchangeRateError extends Schema.TaggedError<GetExchangeRateErro
   'GetExchangeRateError'
 )('GetExchangeRateError', {
   reason: Schema.Literal('YadioError'),
-  status: Schema.Literal(400),
+  status: Schema.Literal(502),
 }) {}
 
 export const GetExchangeRateInput = Schema.Struct({

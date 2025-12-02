@@ -8,7 +8,6 @@ import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
 import {
-  IssueNotificationErrors,
   type IssueNotificationRequest,
   type ReportNotificationProcessedRequest,
 } from './contract'
@@ -60,7 +59,6 @@ export function api({
       getNotificationPublicKey: () => client.getNotificationPublicKey({}),
       issueNotification: (payload: IssueNotificationRequest) =>
         client.issueNotification({payload}),
-      IssueNotificationErrors,
       reportNotificationProcessed: (
         request: ReportNotificationProcessedRequest
       ) => client.reportNotificationProcessed({payload: request}),

@@ -1,9 +1,7 @@
 import {
   CreateInvoiceError,
   type CreateInvoiceRequest,
-  type GetInvoiceErrors,
   GetInvoiceGeneralError,
-  type GetInvoicePaymentMethodsErrors,
   GetInvoicePaymentMethodsGeneralError,
   InvoiceNotFoundError,
   type InvoicePaymentMethod,
@@ -47,12 +45,15 @@ export interface BtcPayServerOperations {
   ) => Effect.Effect<InvoiceResponseInternal, CreateInvoiceError>
   getInvoice: (
     params: GetInvoiceRequest
-  ) => Effect.Effect<InvoiceResponseInternal, GetInvoiceErrors>
+  ) => Effect.Effect<
+    InvoiceResponseInternal,
+    GetInvoiceGeneralError | InvoiceNotFoundError
+  >
   getInvoicePaymentMethods: (
     params: GetInvoicePaymentMethodsRequest
   ) => Effect.Effect<
     InvoicePaymentMethodsResponseInternal,
-    GetInvoicePaymentMethodsErrors
+    InvoiceNotFoundError | GetInvoicePaymentMethodsGeneralError
   >
 }
 
@@ -145,7 +146,10 @@ function getInvoiceInternal({
   apiKey: string
   storeId: string
   invoiceId: string
-}): Effect.Effect<InvoiceResponseInternal, GetInvoiceErrors> {
+}): Effect.Effect<
+  InvoiceResponseInternal,
+  GetInvoiceGeneralError | InvoiceNotFoundError
+> {
   const url = urlJoin(
     btcPayServerUrl,
     URL_API,
@@ -173,14 +177,14 @@ function getInvoiceInternal({
         return new InvoiceNotFoundError({
           cause: e.stack,
           message: 'Invoice not found',
-          status: 404,
+          status: 400,
         })
       }
 
       return new GetInvoiceGeneralError({
         cause: e.stack,
         message: e.message,
-        status: 500,
+        status: 502,
       })
     },
   }).pipe(
@@ -205,7 +209,7 @@ function getInvoicePaymentMethodsInternal({
   invoiceId: string
 }): Effect.Effect<
   InvoicePaymentMethodsResponseInternal,
-  GetInvoicePaymentMethodsErrors
+  InvoiceNotFoundError | GetInvoicePaymentMethodsGeneralError
 > {
   const url = urlJoin(
     btcPayServerUrl,
@@ -235,14 +239,14 @@ function getInvoicePaymentMethodsInternal({
         return new InvoiceNotFoundError({
           cause: e.stack,
           message: 'Invoice not found',
-          status: 404,
+          status: 400,
         })
       }
 
       return new GetInvoicePaymentMethodsGeneralError({
         cause: e.stack,
         message: e.message,
-        status: 500,
+        status: 502,
       })
     },
   }).pipe(

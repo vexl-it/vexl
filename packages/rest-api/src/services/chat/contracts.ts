@@ -9,16 +9,10 @@ import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/Boo
 import {Schema} from 'effect'
 import {
   Challenge,
-  InvalidChallengeError,
   RequestBaseWithChallenge,
   SignedChallenge,
 } from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
-import {
-  ForbiddenMessageTypeError,
-  InboxDoesNotExistError,
-  NotPermittedToSendMessageToTargetInboxError,
-} from '../contact/contracts'
 
 export const NotificationServiceReadyQueryParams = Schema.Struct({
   notificationServiceReady: BooleanFromString,
@@ -36,7 +30,7 @@ export class RequestCancelledError extends Schema.TaggedError<RequestCancelledEr
 export class RequestNotFoundError extends Schema.TaggedError<RequestNotFoundError>(
   'RequestNotFoundError'
 )('RequestNotFoundError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
   code: Schema.optionalWith(Schema.Literal('100104'), {
     default: () => '100104',
   }),
@@ -54,7 +48,7 @@ export class RequestNotPendingError extends Schema.TaggedError<RequestNotPending
 export class ReceiverInboxDoesNotExistError extends Schema.TaggedError<ReceiverInboxDoesNotExistError>(
   'ReceiverInboxDoesNotExistError'
 )('ReceiverInboxDoesNotExistError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
   code: Schema.optionalWith(Schema.Literal('100101'), {
     default: () => '100101',
   }),
@@ -63,7 +57,7 @@ export class ReceiverInboxDoesNotExistError extends Schema.TaggedError<ReceiverI
 export class SenderInboxDoesNotExistError extends Schema.TaggedError<SenderInboxDoesNotExistError>(
   'SenderInboxDoesNotExistError'
 )('SenderInboxDoesNotExistError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(404), {default: () => 404}),
   code: Schema.optionalWith(Schema.Literal('100107'), {
     default: () => '100107',
   }),
@@ -72,7 +66,7 @@ export class SenderInboxDoesNotExistError extends Schema.TaggedError<SenderInbox
 export class RequestMessagingNotAllowedError extends Schema.TaggedError<RequestMessagingNotAllowedError>(
   'RequestMessagingNotAllowedError'
 )('RequestMessagingNotAllowedError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
 }) {}
 
 export const ServerMessageWithId = Schema.Struct({
@@ -101,12 +95,6 @@ export type CreateInboxRequest = Schema.Schema.Type<typeof CreateInboxRequest>
 export const CreateInboxResponse = NoContentResponse
 export type CreateInboxResponse = Schema.Schema.Type<typeof CreateInboxResponse>
 
-export const DeleteInboxErrors = Schema.Union(
-  InvalidChallengeError,
-  InboxDoesNotExistError
-)
-export type DeleteInboxErrors = Schema.Schema.Type<typeof DeleteInboxErrors>
-
 export const DeleteInboxRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
 })
@@ -114,12 +102,6 @@ export type DeleteInboxRequest = Schema.Schema.Type<typeof DeleteInboxRequest>
 
 export const DeleteInboxResponse = NoContentResponse
 export type DeleteInboxResponse = Schema.Schema.Type<typeof DeleteInboxResponse>
-
-export const DeletePulledMessagesErrors = Schema.Union(
-  InboxDoesNotExistError,
-  InvalidChallengeError
-)
-export type DeletePulledMessagesErrors = typeof DeletePulledMessagesErrors.Type
 
 export const DeletePulledMessagesRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -131,13 +113,6 @@ export const DeletePulledMessagesResponse = NoContentResponse
 export type DeletePulledMessagesResponse =
   typeof DeletePulledMessagesResponse.Type
 
-export const BlockInboxErrors = Schema.Union(
-  ReceiverInboxDoesNotExistError,
-  SenderInboxDoesNotExistError,
-  InvalidChallengeError
-)
-export type BlockInboxErrors = Schema.Schema.Type<typeof BlockInboxErrors>
-
 export const BlockInboxRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   publicKeyToBlock: PublicKeyPemBase64E,
@@ -147,12 +122,6 @@ export type BlockInboxRequest = Schema.Schema.Type<typeof BlockInboxRequest>
 
 export const BlockInboxResponse = NoContentResponse
 export type BlockInboxResponse = Schema.Schema.Type<typeof BlockInboxResponse>
-
-export const RequestApprovalErrors = Schema.Union(
-  ReceiverInboxDoesNotExistError,
-  SenderInboxDoesNotExistError,
-  RequestMessagingNotAllowedError
-)
 
 export const RequestApprovalRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
@@ -173,21 +142,6 @@ export const RequestApprovalV2Request = Schema.Struct({
 })
 export type RequestApprovalV2Request = typeof RequestApprovalV2Request.Type
 
-export const RequestApprovalV2Errors = Schema.Union(
-  RequestApprovalErrors,
-  InvalidChallengeError
-)
-export type RequestApprovalV2Errors = typeof RequestApprovalV2Errors.Type
-
-export const CancelRequestApprovalErrors = Schema.Union(
-  RequestNotPendingError,
-  ReceiverInboxDoesNotExistError,
-  SenderInboxDoesNotExistError,
-  InvalidChallengeError
-)
-export type CancelRequestApprovalErrors =
-  typeof CancelRequestApprovalErrors.Type
-
 export const CancelApprovalRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
   message: Schema.String,
@@ -206,16 +160,6 @@ export const CancelApprovalV2Request = Schema.Struct({
   message: Schema.String,
 })
 export type CancelApprovalV2Request = typeof CancelApprovalV2Request.Type
-
-export const ApproveRequestErrors = Schema.Union(
-  InvalidChallengeError,
-  RequestCancelledError,
-  RequestNotFoundError,
-  RequestNotPendingError,
-  ReceiverInboxDoesNotExistError,
-  SenderInboxDoesNotExistError
-)
-export type ApproveRequestErrors = typeof ApproveRequestErrors.Type
 
 export const ApproveRequestRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -244,11 +188,6 @@ export type DeleteInboxesRequest = typeof DeleteInboxesRequest.Type
 export const DeleteInboxesResponse = NoContentResponse
 export type DeleteInboxesResponse = typeof DeleteInboxesResponse.Type
 
-export const RetrieveMessagesErrors = Schema.Union(
-  InboxDoesNotExistError,
-  InvalidChallengeError
-)
-
 export const RetrieveMessagesRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
 })
@@ -274,13 +213,6 @@ export const SendMessageResponse = Schema.Struct({
   notificationHandled: Schema.Boolean,
 })
 export type SendMessageResponse = Schema.Schema.Type<typeof SendMessageResponse>
-
-export const LeaveChatErrors = Schema.Union(
-  InvalidChallengeError,
-  ReceiverInboxDoesNotExistError,
-  SenderInboxDoesNotExistError,
-  NotPermittedToSendMessageToTargetInboxError
-)
 
 export const LeaveChatRequest = Schema.Struct({
   senderPublicKey: PublicKeyPemBase64E,
@@ -310,14 +242,6 @@ export const InboxInBatch = Schema.Struct({
   signedChallenge: SignedChallenge,
 })
 export type InboxInBatch = Schema.Schema.Type<typeof InboxInBatch>
-
-export const SendMessageErrors = Schema.Union(
-  ReceiverInboxDoesNotExistError,
-  SenderInboxDoesNotExistError,
-  NotPermittedToSendMessageToTargetInboxError,
-  ForbiddenMessageTypeError,
-  InvalidChallengeError
-)
 
 export const SendMessagesRequest = Schema.Struct({
   data: Schema.Array(InboxInBatch),

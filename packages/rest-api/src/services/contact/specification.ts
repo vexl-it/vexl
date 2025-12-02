@@ -9,6 +9,7 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
+import {BadShortLivedTokenForErasingUserOnContactServiceError} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {
   CommonAndSecurityHeaders,
   ServerSecurityMiddleware,
@@ -19,21 +20,19 @@ import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
-  AddUserToTheClubErrors,
   AddUserToTheClubRequest,
   AddUserToTheClubResponse,
   AdminTokenParams,
   CheckUserExistsRequest,
   ClubAlreadyExistsError,
+  ClubUserLimitExceededError,
   ConvertPhoneNumberHashesToServerHashesRequest,
   ConvertPhoneNumberHashesToServerHashesResponse,
   CreateClubRequest,
   CreateClubResponse,
   CreateUserRequest,
-  DeactivateClubJoinLinkErrors,
   DeactivateClubJoinLinkRequest,
   DeactivateClubJoinLinkResponse,
-  EraseUserFromNetworkErrors,
   EraseUserFromNetworkRequest,
   EraseUserFromNetworkResponse,
   FetchCommonConnectionsPaginatedRequest,
@@ -44,54 +43,48 @@ import {
   FetchMyContactsPaginatedResponse,
   FetchMyContactsRequest,
   FetchMyContactsResponse,
-  GenerateClubJoinLinkErrors,
   GenerateClubJoinLinkRequest,
   GenerateClubJoinLinkResponse,
-  GenerateInviteLinkForAdminErrors,
   GenerateInviteLinkForAdminRequest,
   GenerateInviteLinkForAdminResponse,
-  GetClubContactsErrors,
   GetClubContactsRequest,
   GetClubContactsResponse,
-  GetClubInfoByAccessCodeErrors,
   GetClubInfoByAccessCodeRequest,
   GetClubInfoByAccessCodeResponse,
-  GetClubInfoErrors,
   GetClubInfoRequest,
   GetClubInfoResponse,
-  ImportContactsErrors,
+  ImportContactsQuotaReachedError,
   ImportContactsRequest,
   ImportContactsResponse,
+  InitialImportContactsQuotaReachedError,
   InvalidAdminTokenError,
-  JoinClubErrors,
+  InviteCodeNotFoundError,
   JoinClubRequest,
   JoinClubResponse,
-  LeaveClubErrors,
   LeaveClubRequest,
-  ListClubLinksErrors,
   ListClubLinksRequest,
   ListClubLinksResponse,
-  ListClubsErrors,
   ListClubsResponse,
-  ModifyClubErrors,
+  MemberAlreadyInClubError,
   ModifyClubRequest,
   ModifyClubResponse,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
   ReportClubResponse,
-  RequestClubImageUploadErrors,
   RequestClubImageUploadRequest,
   RequestClubImageUploadResponse,
+  S3ServiceError,
+  SendBulkNotificationError,
   SendBulkNotificationRequest,
   SendBulkNotificationResponse,
-  SendBulkNotificationsErrors,
-  UpdateBadOwnerHashErrors,
+  UnableToVerifySignatureError,
   UpdateBadOwnerHashRequest,
   UpdateBadOwnerHashResponse,
   UpdateFirebaseTokenRequest,
   UpdateNotificationTokenRequest,
   UserExistsResponse,
+  UserIsNotModeratorError,
   UserNotFoundError,
 } from './contracts'
 
@@ -123,7 +116,7 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(RefreshUserRequest)
   .addSuccess(NoContentResponse)
-  .addError(UserNotFoundError)
+  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
@@ -133,7 +126,7 @@ export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
   .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateFirebaseTokenRequest)
-  .addError(UserNotFoundError)
+  .addError(UserNotFoundError, {status: 404})
   .addSuccess(NoContentResponse)
   .annotate(OpenApi.Deprecated, true)
   .annotate(MaxExpectedDailyCall, 1)
@@ -146,7 +139,7 @@ export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
   .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateNotificationTokenRequest)
   .addSuccess(NoContentResponse)
-  .addError(UserNotFoundError)
+  .addError(UserNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const DeleteUserEndpoint = HttpApiEndpoint.del(
@@ -164,7 +157,9 @@ export const EraseUserFromNetworkEndpoint = HttpApiEndpoint.del(
 )
   .setPayload(EraseUserFromNetworkRequest)
   .addSuccess(EraseUserFromNetworkResponse)
-  .addError(EraseUserFromNetworkErrors)
+  .addError(BadShortLivedTokenForErasingUserOnContactServiceError, {
+    status: 400,
+  })
   .annotate(MaxExpectedDailyCall, 1)
 
 export const ImportContactsEndpoint = HttpApiEndpoint.post(
@@ -175,7 +170,8 @@ export const ImportContactsEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(ImportContactsRequest)
   .addSuccess(ImportContactsResponse)
-  .addError(ImportContactsErrors)
+  .addError(InitialImportContactsQuotaReachedError, {status: 429})
+  .addError(ImportContactsQuotaReachedError, {status: 429})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
@@ -196,7 +192,7 @@ export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   .middleware(ServerSecurityMiddleware)
   .setUrlParams(FetchMyContactsPaginatedRequest)
   .addSuccess(FetchMyContactsPaginatedResponse)
-  .addError(InvalidNextPageTokenError)
+  .addError(InvalidNextPageTokenError, {status: 400})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
@@ -217,7 +213,7 @@ export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(FetchCommonConnectionsPaginatedRequest)
   .addSuccess(FetchCommonConnectionsPaginatedResponse)
-  .addError(InvalidNextPageTokenError)
+  .addError(InvalidNextPageTokenError, {status: 400})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const ConvertPhoneNumberHashesToServerHashesEndpoint =
@@ -235,7 +231,7 @@ export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(UpdateBadOwnerHashRequest)
   .addSuccess(UpdateBadOwnerHashResponse)
-  .addError(UpdateBadOwnerHashErrors)
+  .addError(UnableToVerifySignatureError, {status: 400})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const CreateClubEndpoint = HttpApiEndpoint.post(
@@ -245,8 +241,8 @@ export const CreateClubEndpoint = HttpApiEndpoint.post(
   .setUrlParams(AdminTokenParams)
   .setPayload(CreateClubRequest)
   .addSuccess(CreateClubResponse)
-  .addError(ClubAlreadyExistsError)
-  .addError(InvalidAdminTokenError)
+  .addError(ClubAlreadyExistsError, {status: 400})
+  .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const ModfiyClubEndpoint = HttpApiEndpoint.put(
@@ -256,7 +252,7 @@ export const ModfiyClubEndpoint = HttpApiEndpoint.put(
   .setUrlParams(AdminTokenParams)
   .setPayload(ModifyClubRequest)
   .addSuccess(ModifyClubResponse)
-  .addError(ModifyClubErrors)
+  .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
@@ -266,7 +262,7 @@ export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
   .setUrlParams(AdminTokenParams)
   .setPayload(GenerateInviteLinkForAdminRequest)
   .addSuccess(GenerateInviteLinkForAdminResponse)
-  .addError(GenerateInviteLinkForAdminErrors)
+  .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10000)
 
 export const ListClubsEndpoint = HttpApiEndpoint.get(
@@ -275,7 +271,7 @@ export const ListClubsEndpoint = HttpApiEndpoint.get(
 )
   .setUrlParams(AdminTokenParams)
   .addSuccess(ListClubsResponse)
-  .addError(ListClubsErrors)
+  .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
@@ -285,7 +281,8 @@ export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
   .setUrlParams(AdminTokenParams)
   .setPayload(RequestClubImageUploadRequest)
   .addSuccess(RequestClubImageUploadResponse)
-  .addError(RequestClubImageUploadErrors)
+  .addError(InvalidAdminTokenError, {status: 401})
+  .addError(S3ServiceError, {status: 502})
   .annotate(MaxExpectedDailyCall, 1000)
 
 export const GetClubInfoEndpoint = HttpApiEndpoint.post(
@@ -294,7 +291,7 @@ export const GetClubInfoEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(GetClubInfoRequest)
   .addSuccess(GetClubInfoResponse)
-  .addError(GetClubInfoErrors)
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const JoinClubEndpoint = HttpApiEndpoint.post(
@@ -303,7 +300,9 @@ export const JoinClubEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(JoinClubRequest)
   .addSuccess(JoinClubResponse)
-  .addError(JoinClubErrors)
+  .addError(MemberAlreadyInClubError, {status: 400})
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(ClubUserLimitExceededError, {status: 429})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const LeaveClubEndpoint = HttpApiEndpoint.post(
@@ -312,7 +311,7 @@ export const LeaveClubEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(LeaveClubRequest)
   .addSuccess(NoContentResponse)
-  .addError(LeaveClubErrors)
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const GenerateClubJoinLinkEndpoint = HttpApiEndpoint.post(
@@ -321,7 +320,8 @@ export const GenerateClubJoinLinkEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(GenerateClubJoinLinkRequest)
   .addSuccess(GenerateClubJoinLinkResponse)
-  .addError(GenerateClubJoinLinkErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(UserIsNotModeratorError, {status: 403})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.del(
@@ -330,7 +330,9 @@ export const DeactivateClubJoinLinkEndpoint = HttpApiEndpoint.del(
 )
   .setPayload(DeactivateClubJoinLinkRequest)
   .addSuccess(DeactivateClubJoinLinkResponse)
-  .addError(DeactivateClubJoinLinkErrors)
+  .addError(InviteCodeNotFoundError, {status: 400})
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(UserIsNotModeratorError, {status: 403})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const AddUserToTheClubEndpint = HttpApiEndpoint.post(
@@ -339,7 +341,10 @@ export const AddUserToTheClubEndpint = HttpApiEndpoint.post(
 )
   .setPayload(AddUserToTheClubRequest)
   .addSuccess(AddUserToTheClubResponse)
-  .addError(AddUserToTheClubErrors)
+  .addError(MemberAlreadyInClubError, {status: 400})
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(UserIsNotModeratorError, {status: 403})
+  .addError(ClubUserLimitExceededError, {status: 429})
   .annotate(MaxExpectedDailyCall, 1000)
 
 export const ListClubLinksEndpoint = HttpApiEndpoint.post(
@@ -348,7 +353,8 @@ export const ListClubLinksEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(ListClubLinksRequest)
   .addSuccess(ListClubLinksResponse)
-  .addError(ListClubLinksErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(UserIsNotModeratorError, {status: 403})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const GetClubContactsEndpoint = HttpApiEndpoint.post(
@@ -357,7 +363,7 @@ export const GetClubContactsEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(GetClubContactsRequest)
   .addSuccess(GetClubContactsResponse)
-  .addError(GetClubContactsErrors)
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 500)
 
 export const GetClubInfoByAccessCodeEndpoint = HttpApiEndpoint.post(
@@ -366,7 +372,7 @@ export const GetClubInfoByAccessCodeEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(GetClubInfoByAccessCodeRequest)
   .addSuccess(GetClubInfoByAccessCodeResponse)
-  .addError(GetClubInfoByAccessCodeErrors)
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const ReportClubEndpoint = HttpApiEndpoint.post(
@@ -377,8 +383,8 @@ export const ReportClubEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(ReportClubRequest)
   .addSuccess(ReportClubResponse)
-  .addError(InvalidChallengeError)
-  .addError(ReportClubLimitReachedError)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(ReportClubLimitReachedError, {status: 429})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const SendBulkNotificationEndpoint = HttpApiEndpoint.post(
@@ -388,7 +394,8 @@ export const SendBulkNotificationEndpoint = HttpApiEndpoint.post(
   .setUrlParams(AdminTokenParams)
   .setPayload(SendBulkNotificationRequest)
   .addSuccess(SendBulkNotificationResponse)
-  .addError(SendBulkNotificationsErrors)
+  .addError(SendBulkNotificationError, {status: 400})
+  .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10)
 
 const UserApiGroup = HttpApiGroup.make('User')
@@ -443,5 +450,5 @@ export const ContactApiSpecification = HttpApi.make('Contact API')
   .add(ClubsModeratorApiGroup)
   .add(AdminApiGroup)
   .add(ChallengeApiGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

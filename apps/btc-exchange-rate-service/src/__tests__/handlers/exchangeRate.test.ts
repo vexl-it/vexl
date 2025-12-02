@@ -47,7 +47,7 @@ describe('exchange rate', () => {
         const client = yield* _(NodeTestingApp)
         getExhangeRatePriceMocked.mockReturnValueOnce(
           Effect.fail(
-            new GetExchangeRateError({status: 400, reason: 'YadioError'})
+            new GetExchangeRateError({status: 502, reason: 'YadioError'})
           )
         )
 

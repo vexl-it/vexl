@@ -2,7 +2,6 @@ import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
-  InvalidLoginSignatureError,
   LoginChallengeClientSignature,
   LoginChallengeRequestEncoded,
   LoginChallengeServerSignature,
@@ -210,28 +209,6 @@ export class VerifyChallengeResponse extends Schema.Class<VerifyChallengeRespons
   challengeVerified: Schema.Literal(true),
 }) {}
 
-export const InitVerificationErrors = Schema.Union(
-  UnableToSendVerificationSmsError,
-  PreviousCodeNotExpiredError,
-  UnsupportedVersionToLoginError,
-  InvalidLoginSignatureError
-)
-
-export const VerifyCodeErrors = Schema.Union(
-  UnableToGenerateChallengeError,
-  VerificationNotFoundError,
-  InvalidVerificationIdError,
-  UnableToVerifySmsCodeError,
-  InvalidVerificationError
-)
-
-export const VerifyChallengeErrors = Schema.Union(
-  InvalidSignatureError,
-  UnableToGenerateSignatureError,
-  VerificationNotFoundError,
-  InvalidVerificationError
-)
-
 export const InitVerificationInput = Schema.Struct({
   body: InitPhoneVerificationRequest,
 })
@@ -290,12 +267,6 @@ export const InitEraseUserResponse = Schema.Struct({
   verificationId: EraseUserVerificationId,
 })
 export type InitEraseUserResponse = typeof InitEraseUserResponse.Type
-
-export const VerifyAndEraseUserErrors = Schema.Union(
-  InvalidVerificationIdError,
-  VerificationNotFoundError,
-  UnableToVerifySmsCodeError
-)
 
 export const VerifyAndEraseUserRequest = Schema.Struct({
   verificationId: EraseUserVerificationId,

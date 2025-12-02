@@ -20,7 +20,7 @@ const fetchExchangePrice = (
       return (await axios.get(`https://api.yadio.io/exrates/${currency}`)).data
     },
     catch: () => {
-      return new GetExchangeRateError({reason: 'YadioError', status: 400})
+      return new GetExchangeRateError({reason: 'YadioError', status: 502})
     },
   }).pipe(
     Effect.flatMap(Schema.decodeUnknown(YadioResponse)),
@@ -30,7 +30,7 @@ const fetchExchangePrice = (
     })),
     Effect.catchTag('ParseError', (e) =>
       Effect.zipLeft(
-        new GetExchangeRateError({reason: 'YadioError', status: 400}),
+        new GetExchangeRateError({reason: 'YadioError', status: 502}),
         Effect.logError('Error while parsing response from Yadio', e)
       )
     ),

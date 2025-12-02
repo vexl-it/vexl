@@ -19,7 +19,6 @@ import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   CanNotDeletePrivatePartOfAuthor,
-  CreateNewOfferErrors,
   CreateNewOfferRequest,
   CreateNewOfferResponse,
   CreatePrivatePartRequest,
@@ -35,18 +34,17 @@ import {
   GetOffersForMeCreatedOrModifiedAfterPaginatedResponse,
   GetOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterResponse,
+  MissingOwnerPrivatePartError,
   RefreshOfferRequest,
   RefreshOfferResponse,
   RemovedClubOfferIdsRequest,
   RemovedOfferIdsRequest,
   RemovedOfferIdsResponse,
-  ReportClubOfferEndpointErrors,
   ReportClubOfferRequest,
   ReportClubOfferResponse,
-  ReportOfferEndpointErrors,
+  ReportOfferLimitReachedError,
   ReportOfferRequest,
   ReportOfferResponse,
-  UpdateOfferErrors,
   UpdateOfferRequest,
   UpdateOfferResponse,
 } from './contracts'
@@ -75,7 +73,7 @@ export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
     .middleware(ServerSecurityMiddleware)
     .setUrlParams(GetOffersForMeCreatedOrModifiedAfterPaginatedRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
-    .addError(InvalidNextPageTokenError)
+    .addError(InvalidNextPageTokenError, {status: 400})
     .annotate(MaxExpectedDailyCall, 600)
 
 export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
@@ -89,7 +87,7 @@ export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
     )
     .setPayload(GetClubOffersForMeCreatedOrModifiedAfterRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
-    .addError(InvalidChallengeError)
+    .addError(InvalidChallengeError, {status: 401})
     .annotate(MaxExpectedDailyCall, 200)
 
 export const GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
@@ -103,8 +101,8 @@ export const GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
     )
     .setPayload(GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest)
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
-    .addError(InvalidChallengeError)
-    .addError(InvalidNextPageTokenError)
+    .addError(InvalidChallengeError, {status: 401})
+    .addError(InvalidNextPageTokenError, {status: 400})
     .annotate(MaxExpectedDailyCall, 600)
 
 export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
@@ -116,7 +114,8 @@ export const CreateNewOfferEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(CreateNewOfferRequest)
   .addSuccess(CreateNewOfferResponse)
-  .addError(CreateNewOfferErrors)
+  .addError(MissingOwnerPrivatePartError, {status: 400})
+  .addError(DuplicatedPublicKeyError, {status: 400})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const RefreshOfferEndpoint = HttpApiEndpoint.post(
@@ -126,7 +125,7 @@ export const RefreshOfferEndpoint = HttpApiEndpoint.post(
   .annotate(OpenApi.Summary, 'Refresh offer')
   .setPayload(RefreshOfferRequest)
   .addSuccess(RefreshOfferResponse)
-  .addError(NotFoundError)
+  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteOfferEndpoint = HttpApiEndpoint.del(
@@ -147,8 +146,9 @@ export const UpdateOfferEndpoint = HttpApiEndpoint.put(
   .middleware(ServerSecurityMiddleware)
   .setPayload(UpdateOfferRequest)
   .addSuccess(UpdateOfferResponse)
-  .addError(UpdateOfferErrors)
-  .addError(NotFoundError)
+  .addError(MissingOwnerPrivatePartError, {status: 400})
+  .addError(DuplicatedPublicKeyError, {status: 400})
+  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const CreatePrivatePartEndpoint = HttpApiEndpoint.post(
@@ -158,7 +158,7 @@ export const CreatePrivatePartEndpoint = HttpApiEndpoint.post(
   .annotate(OpenApi.Summary, 'Create private part')
   .setPayload(CreatePrivatePartRequest)
   .addSuccess(CreatePrivatePartResponse)
-  .addError(DuplicatedPublicKeyError)
+  .addError(DuplicatedPublicKeyError, {status: 400})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeletePrivatePartEndpoint = HttpApiEndpoint.del(
@@ -174,7 +174,7 @@ export const DeletePrivatePartEndpoint = HttpApiEndpoint.del(
   .middleware(ServerSecurityMiddleware)
   .setPayload(DeletePrivatePartRequest)
   .addSuccess(DeletePrivatePartResponse)
-  .addError(CanNotDeletePrivatePartOfAuthor)
+  .addError(CanNotDeletePrivatePartOfAuthor, {status: 400})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const GetRemovedOffersEndpoint = HttpApiEndpoint.post(
@@ -195,7 +195,7 @@ export const GetRemovedClubOffersEndpoint = HttpApiEndpoint.post(
   .annotate(OpenApi.Summary, 'Get removed club offers')
   .setPayload(RemovedClubOfferIdsRequest)
   .addSuccess(RemovedOfferIdsResponse)
-  .addError(InvalidChallengeError)
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const ReportOfferEndpoint = HttpApiEndpoint.post(
@@ -207,8 +207,8 @@ export const ReportOfferEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(ReportOfferRequest)
   .addSuccess(ReportOfferResponse)
-  .addError(ReportOfferEndpointErrors)
-  .addError(NotFoundError)
+  .addError(ReportOfferLimitReachedError, {status: 429})
+  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
@@ -220,8 +220,9 @@ export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(ReportClubOfferRequest)
   .addSuccess(ReportClubOfferResponse)
-  .addError(ReportClubOfferEndpointErrors)
-  .addError(NotFoundError)
+  .addError(ReportOfferLimitReachedError, {status: 429})
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 10)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
@@ -244,5 +245,5 @@ export const OfferApiSpecification = HttpApi.make('Offer API')
   .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .add(ChallengeApiGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

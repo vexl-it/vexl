@@ -25,5 +25,5 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
 export const MetricsApiSpecification = HttpApi.make('Metrics Service')
   .middleware(RateLimitingMiddleware)
   .add(RootGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

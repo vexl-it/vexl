@@ -1,5 +1,4 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   statusToStatusTypeMap,
   type GetInvoiceStatusTypeResponse,
@@ -46,20 +45,5 @@ export const getInvoiceStatusTypeHandler = HttpApiBuilder.handler(
         invoiceId: req.urlParams.invoiceId,
         statusType: statusToStatusTypeMap[invoice.status],
       } satisfies GetInvoiceStatusTypeResponse
-    }).pipe(
-      Effect.catchTags({
-        GetInvoiceGeneralError: () =>
-          new NotFoundError({
-            message: 'Invoice not found on BTC pay server',
-            status: 404,
-          }),
-        InvoiceNotFoundError: () =>
-          new NotFoundError({
-            message: 'Invoice not found on BTC pay server',
-            status: 404,
-          }),
-      }),
-      Effect.withSpan('getInvoiceStatusTypeHandler'),
-      makeEndpointEffect
-    )
+    }).pipe(Effect.withSpan('getInvoiceStatusTypeHandler'), makeEndpointEffect)
 )

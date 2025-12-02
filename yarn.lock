@@ -11717,7 +11717,7 @@ __metadata:
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
     typescript: ~5.9.2
-    vite: ^6.1.6
+    vite: ^6.4.1
     ws: ^8.17.1
   languageName: unknown
   linkType: soft
@@ -12598,7 +12598,7 @@ __metadata:
     react-dom: 19.1.0
     tailwindcss: ^4.1.12
     typescript: ~5.9.2
-    vite: ^6.1.6
+    vite: ^6.4.1
     vite-tsconfig-paths: ^4.2.1
     zod: ^3.22.3
   languageName: unknown
@@ -31894,9 +31894,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^6.1.6":
-  version: 6.3.6
-  resolution: "vite@npm:6.3.6"
+"vite@npm:^6.4.1":
+  version: 6.4.1
+  resolution: "vite@npm:6.4.1"
   dependencies:
     esbuild: ^0.25.0
     fdir: ^6.4.4
@@ -31945,7 +31945,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: bf1e90cb31ea0bb8b13dd046fe9584cb6108dac59332cf56e3ea7a4a77fd4e795c0486957d3cc56a6179608d990110ec9569ed973d53f7adff1590401ebb8f55
+  checksum: 7a939dbd6569ba829a7c21a18f8eca395a3a13cb93ce0fec02e8aa462e127a8daac81d00f684086648d905786056bba1ad931f51d88f06835d3b972bc9fbddda
   languageName: node
   linkType: hard
 

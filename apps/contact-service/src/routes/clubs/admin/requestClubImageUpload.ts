@@ -48,7 +48,7 @@ export const requestClubImageUpload = HttpApiBuilder.handler(
         Effect.catchTag('S3Error', (error) =>
           Effect.fail(
             new S3ServiceError({
-              status: 500,
+              status: 502,
               message: error.message ?? 'Failed to generate presigned URL',
             })
           )

@@ -1,6 +1,7 @@
 import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
 import {
   NotFoundError,
+  UnauthorizedError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
@@ -11,19 +12,20 @@ import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   BlogsArticlesResponse,
   ClearEventsCacheRequest,
-  CreateInvoiceErrors,
+  CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
   EventsResponse,
-  GetInvoiceErrors,
+  GetInvoiceGeneralError,
+  GetInvoicePaymentMethodsGeneralError,
   GetInvoiceRequest,
   GetInvoiceResponse,
-  GetInvoiceStatusTypeErrors,
   GetInvoiceStatusTypeRequest,
   GetInvoiceStatusTypeResponse,
   InvalidTokenError,
+  InvoiceNotFoundError,
   NewsAndAnnouncementsResponse,
-  UpdateInvoiceStatusWebhookErrors,
+  UpdateInvoiceWebhookError,
 } from './contracts'
 
 export const GetEventsEndpoint = HttpApiEndpoint.get(
@@ -72,7 +74,9 @@ export const CreateInvoiceEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(CreateInvoiceRequest)
   .addSuccess(CreateInvoiceResponse)
-  .addError(CreateInvoiceErrors)
+  .addError(CreateInvoiceError, {status: 400})
+  .addError(InvoiceNotFoundError, {status: 400})
+  .addError(GetInvoicePaymentMethodsGeneralError, {status: 502})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const GetInvoiceEndpoint = HttpApiEndpoint.get(
@@ -81,7 +85,8 @@ export const GetInvoiceEndpoint = HttpApiEndpoint.get(
 )
   .setUrlParams(GetInvoiceRequest)
   .addSuccess(GetInvoiceResponse)
-  .addError(GetInvoiceErrors)
+  .addError(InvoiceNotFoundError, {status: 400})
+  .addError(GetInvoiceGeneralError, {status: 502})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const GetInvoiceStatusTypeEndpoint = HttpApiEndpoint.get(
@@ -90,7 +95,8 @@ export const GetInvoiceStatusTypeEndpoint = HttpApiEndpoint.get(
 )
   .setUrlParams(GetInvoiceStatusTypeRequest)
   .addSuccess(GetInvoiceStatusTypeResponse)
-  .addError(GetInvoiceStatusTypeErrors)
+  .addError(InvoiceNotFoundError, {status: 400})
+  .addError(GetInvoiceGeneralError, {status: 502})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const UpdateInvoiceStateWebhookEndpoint = HttpApiEndpoint.post(
@@ -100,7 +106,8 @@ export const UpdateInvoiceStateWebhookEndpoint = HttpApiEndpoint.post(
   .setHeaders(BtcPayServerWebhookHeader)
   .setPayload(Schema.Unknown)
   .addSuccess(NoContentResponse)
-  .addError(UpdateInvoiceStatusWebhookErrors)
+  .addError(UnauthorizedError, {status: 401})
+  .addError(UpdateInvoiceWebhookError, {status: 400})
   .annotate(MaxExpectedDailyCall, 1000)
 
 const DonationsApiGroup = HttpApiGroup.make('Donations')
@@ -113,5 +120,5 @@ export const ContentApiSpecification = HttpApi.make('Content API')
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
   .add(DonationsApiGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

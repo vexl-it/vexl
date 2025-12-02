@@ -34,5 +34,5 @@ export const ChallengeApiGroup = HttpApiGroup.make('Challenges')
 
 export const ChallengeApiSpecification = HttpApi.make('Challenge API')
   .add(ChallengeApiGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

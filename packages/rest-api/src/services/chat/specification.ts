@@ -18,42 +18,43 @@ import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
-  ApproveRequestErrors,
+  ForbiddenMessageTypeError,
+  InboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError,
+} from '../contact/contracts'
+import {
   ApproveRequestRequest,
   ApproveRequestResponse,
-  BlockInboxErrors,
   BlockInboxRequest,
   BlockInboxResponse,
   CancelApprovalRequest,
   CancelApprovalResponse,
   CancelApprovalV2Request,
-  CancelRequestApprovalErrors,
   CreateInboxRequest,
   CreateInboxResponse,
-  DeleteInboxErrors,
   DeleteInboxRequest,
   DeleteInboxResponse,
   DeleteInboxesRequest,
   DeleteInboxesResponse,
-  DeletePulledMessagesErrors,
   DeletePulledMessagesRequest,
   DeletePulledMessagesResponse,
-  LeaveChatErrors,
   LeaveChatRequest,
   LeaveChatResponse,
-  RequestApprovalErrors,
+  ReceiverInboxDoesNotExistError,
   RequestApprovalRequest,
   RequestApprovalResponse,
-  RequestApprovalV2Errors,
   RequestApprovalV2Request,
-  RetrieveMessagesErrors,
+  RequestCancelledError,
+  RequestMessagingNotAllowedError,
+  RequestNotFoundError,
+  RequestNotPendingError,
   RetrieveMessagesRequest,
   RetrieveMessagesResponse,
-  SendMessageErrors,
   SendMessageRequest,
   SendMessageResponse,
   SendMessagesRequest,
   SendMessagesResponse,
+  SenderInboxDoesNotExistError,
   UpdateInboxRequest,
   UpdateInboxResponse,
 } from './contracts'
@@ -78,7 +79,7 @@ export const CreateInboxEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonHeaders)
   .setPayload(CreateInboxRequest)
   .addSuccess(CreateInboxResponse)
-  .addError(InvalidChallengeError)
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteInboxEndpoint = HttpApiEndpoint.del(
@@ -87,7 +88,8 @@ export const DeleteInboxEndpoint = HttpApiEndpoint.del(
 )
   .setPayload(DeleteInboxRequest)
   .addSuccess(DeleteInboxResponse)
-  .addError(DeleteInboxErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(InboxDoesNotExistError, {status: 404})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
@@ -96,7 +98,8 @@ export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
 )
   .setPayload(DeletePulledMessagesRequest)
   .addSuccess(DeletePulledMessagesResponse)
-  .addError(DeletePulledMessagesErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(InboxDoesNotExistError, {status: 404})
   .annotate(MaxExpectedDailyCall, 5000)
 
 export const BlockInboxEndpoint = HttpApiEndpoint.put(
@@ -105,7 +108,9 @@ export const BlockInboxEndpoint = HttpApiEndpoint.put(
 )
   .setPayload(BlockInboxRequest)
   .addSuccess(BlockInboxResponse)
-  .addError(BlockInboxErrors)
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const RequestApprovalEndpoint = HttpApiEndpoint.post(
@@ -116,7 +121,9 @@ export const RequestApprovalEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(RequestApprovalRequest)
   .addSuccess(RequestApprovalResponse)
-  .addError(RequestApprovalErrors)
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(RequestMessagingNotAllowedError, {status: 403})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const RequestApprovalV2Endpoint = HttpApiEndpoint.post(
@@ -125,7 +132,10 @@ export const RequestApprovalV2Endpoint = HttpApiEndpoint.post(
 )
   .setPayload(RequestApprovalV2Request)
   .addSuccess(RequestApprovalResponse)
-  .addError(RequestApprovalV2Errors)
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(RequestMessagingNotAllowedError, {status: 403})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
@@ -136,7 +146,10 @@ export const CancelRequestApprovalEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(CancelApprovalRequest)
   .addSuccess(CancelApprovalResponse)
-  .addError(CancelRequestApprovalErrors)
+  .addError(RequestNotPendingError, {status: 400})
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const CancelRequestApprovalV2Endpoint = HttpApiEndpoint.post(
@@ -145,7 +158,10 @@ export const CancelRequestApprovalV2Endpoint = HttpApiEndpoint.post(
 )
   .setPayload(CancelApprovalV2Request)
   .addSuccess(CancelApprovalResponse)
-  .addError(CancelRequestApprovalErrors)
+  .addError(RequestNotPendingError, {status: 400})
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const ApproveRequestEndpoint = HttpApiEndpoint.post(
@@ -154,7 +170,12 @@ export const ApproveRequestEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(ApproveRequestRequest)
   .addSuccess(ApproveRequestResponse)
-  .addError(ApproveRequestErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(RequestCancelledError, {status: 400})
+  .addError(RequestNotFoundError, {status: 404})
+  .addError(RequestNotPendingError, {status: 400})
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const DeleteInboxesEndpoint = HttpApiEndpoint.del(
@@ -164,7 +185,8 @@ export const DeleteInboxesEndpoint = HttpApiEndpoint.del(
   .annotate(OpenApi.Deprecated, true)
   .setPayload(DeleteInboxesRequest)
   .addSuccess(DeleteInboxesResponse)
-  .addError(DeleteInboxErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(InboxDoesNotExistError, {status: 404})
   .annotate(MaxExpectedDailyCall, 10)
 
 export const LeaveChatEndpoint = HttpApiEndpoint.post(
@@ -173,7 +195,10 @@ export const LeaveChatEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(LeaveChatRequest)
   .addSuccess(LeaveChatResponse)
-  .addError(LeaveChatErrors)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(NotPermittedToSendMessageToTargetInboxError, {status: 400})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const RetrieveMessagesEndpoint = HttpApiEndpoint.put(
@@ -183,7 +208,8 @@ export const RetrieveMessagesEndpoint = HttpApiEndpoint.put(
   .setHeaders(CommonHeaders)
   .setPayload(RetrieveMessagesRequest)
   .addSuccess(RetrieveMessagesResponse)
-  .addError(RetrieveMessagesErrors)
+  .addError(InboxDoesNotExistError, {status: 404})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 5000)
 
 export const SendMessageEndpoint = HttpApiEndpoint.post(
@@ -192,7 +218,11 @@ export const SendMessageEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(SendMessageRequest)
   .addSuccess(SendMessageResponse)
-  .addError(SendMessageErrors)
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(NotPermittedToSendMessageToTargetInboxError, {status: 400})
+  .addError(ForbiddenMessageTypeError, {status: 400})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 5000)
 
 export const SendMessagesEndpoint = HttpApiEndpoint.post(
@@ -202,7 +232,11 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   .annotate(OpenApi.Deprecated, true)
   .setPayload(SendMessagesRequest)
   .addSuccess(SendMessagesResponse)
-  .addError(SendMessageErrors)
+  .addError(ReceiverInboxDoesNotExistError, {status: 404})
+  .addError(SenderInboxDoesNotExistError, {status: 404})
+  .addError(NotPermittedToSendMessageToTargetInboxError, {status: 400})
+  .addError(ForbiddenMessageTypeError, {status: 400})
+  .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10)
 
 const InboxesApiGroup = HttpApiGroup.make('Inboxes')
@@ -229,5 +263,5 @@ export const ChatApiSpecification = HttpApi.make('Chat API')
   .add(InboxesApiGroup)
   .add(MessagesApiGroup)
   .add(ChallengeApiGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

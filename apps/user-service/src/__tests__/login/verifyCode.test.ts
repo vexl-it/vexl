@@ -2,8 +2,11 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
+  InvalidVerificationError,
+  InvalidVerificationIdError,
+  UnableToGenerateChallengeError,
   UnableToVerifySmsCodeError,
-  VerifyCodeErrors,
+  VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {Effect, Schema} from 'effect'
@@ -99,6 +102,14 @@ describe('Verify code', () => {
             },
           }),
           Effect.either
+        )
+
+        const VerifyCodeErrors = Schema.Union(
+          UnableToGenerateChallengeError,
+          VerificationNotFoundError,
+          InvalidVerificationError,
+          InvalidVerificationIdError,
+          UnableToVerifySmsCodeError
         )
 
         expectErrorResponse(VerifyCodeErrors)(checkResponse)

@@ -19,7 +19,7 @@ export const GetLocationSuggestionEndpoint = HttpApiEndpoint.get(
 )
   .setUrlParams(GetLocationSuggestionsRequest)
   .addSuccess(GetLocationSuggestionsResponse)
-  .addError(LocationNotFoundError)
+  .addError(LocationNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 50)
 
 export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
@@ -28,7 +28,7 @@ export const GetGeocodedCoordinatesEndpoint = HttpApiEndpoint.get(
 )
   .setUrlParams(GetGeocodedCoordinatesRequest)
   .addSuccess(GetGeocodedCoordinatesResponse)
-  .addError(LocationNotFoundError)
+  .addError(LocationNotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 50)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
@@ -38,5 +38,5 @@ const RootGroup = HttpApiGroup.make('root', {topLevel: true})
 export const LocationApiSpecification = HttpApi.make('Location Service')
   .middleware(RateLimitingMiddleware)
   .add(RootGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

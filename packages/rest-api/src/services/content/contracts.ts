@@ -1,8 +1,3 @@
-import {
-  NotFoundError,
-  UnauthorizedError,
-  UnexpectedServerError,
-} from '@vexl-next/domain/src/general/commonErrors'
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -64,8 +59,6 @@ export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
   status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
 }) {}
 
-export const ClearEventsCacheErrors = Schema.Union(InvalidTokenError)
-
 export const ClearEventsCacheRequest = Schema.Struct({
   token: Schema.String,
 })
@@ -116,8 +109,8 @@ export class CreateInvoiceError extends Schema.TaggedError<CreateInvoiceError>(
 )('CreateInvoiceError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  status: Schema.optionalWith(Schema.Literal(500), {
-    default: () => 500,
+  status: Schema.optionalWith(Schema.Literal(400), {
+    default: () => 400,
   }),
 }) {}
 
@@ -126,7 +119,7 @@ export class InvoiceNotFoundError extends Schema.TaggedError<InvoiceNotFoundErro
 )('InvoiceNotFoundError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  status: Schema.Literal(404),
+  status: Schema.Literal(400),
 }) {}
 
 export class GetInvoiceGeneralError extends Schema.TaggedError<GetInvoiceGeneralError>(
@@ -134,7 +127,7 @@ export class GetInvoiceGeneralError extends Schema.TaggedError<GetInvoiceGeneral
 )('GetInvoiceGeneralError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  status: Schema.Literal(500),
+  status: Schema.Literal(502),
 }) {}
 
 export class UpdateInvoiceWebhookError extends Schema.TaggedError<UpdateInvoiceWebhookError>(
@@ -150,14 +143,8 @@ export class GetInvoicePaymentMethodsGeneralError extends Schema.TaggedError<Get
 )('GetInvoicePaymentMethodsGeneralError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  status: Schema.Literal(500),
+  status: Schema.Literal(502),
 }) {}
-
-export const CreateInvoiceErrors = Schema.Union(
-  CreateInvoiceError,
-  InvoiceNotFoundError,
-  GetInvoicePaymentMethodsGeneralError
-)
 
 export const InvoicePaymentMethod = Schema.Literal(
   'BTC-CHAIN',
@@ -220,19 +207,6 @@ export const GetInvoiceResponse = Schema.Struct({
   status: InvoiceStatus,
 })
 export type GetInvoiceResponse = typeof GetInvoiceResponse.Type
-
-export const GetInvoiceErrors = Schema.Union(
-  InvoiceNotFoundError,
-  GetInvoiceGeneralError
-)
-export type GetInvoiceErrors = typeof GetInvoiceErrors.Type
-
-export const GetInvoicePaymentMethodsErrors = Schema.Union(
-  InvoiceNotFoundError,
-  GetInvoicePaymentMethodsGeneralError
-)
-export type GetInvoicePaymentMethodsErrors =
-  typeof GetInvoicePaymentMethodsErrors.Type
 
 export const InvoiceStatusType = Schema.Literal(
   'InvoiceCreated',
@@ -304,14 +278,6 @@ export const UpdateInvoiceStatusWebhookRequest = Schema.Struct({
 export type UpdateInvoiceStatusWebhookRequest =
   typeof UpdateInvoiceStatusWebhookRequest.Type
 
-export const UpdateInvoiceStatusWebhookErrors = Schema.Union(
-  UnauthorizedError,
-  UpdateInvoiceWebhookError,
-  UnexpectedServerError
-)
-export type UpdateInvoiceStatusWebhookErrors =
-  typeof UpdateInvoiceStatusWebhookErrors.Type
-
 export const GetInvoiceStatusTypeRequest = Schema.Struct({
   invoiceId: InvoiceId,
   storeId: StoreId,
@@ -325,9 +291,3 @@ export const GetInvoiceStatusTypeResponse = Schema.Struct({
 })
 export type GetInvoiceStatusTypeResponse =
   typeof GetInvoiceStatusTypeResponse.Type
-
-export const GetInvoiceStatusTypeErrors = Schema.Union(
-  UnexpectedServerError,
-  NotFoundError
-)
-export type GetInvoiceStatusTypeErrors = typeof GetInvoiceStatusTypeErrors.Type

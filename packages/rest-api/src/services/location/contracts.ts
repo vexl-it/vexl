@@ -1,4 +1,3 @@
-import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
 import {LocationPlaceIdE} from '@vexl-next/domain/src/general/offers'
 import {
   LatitudeE,
@@ -79,18 +78,4 @@ export class LocationNotFoundError extends Schema.TaggedError<LocationNotFoundEr
   'LocationNotFoundError'
 )('LocationNotFoundError', {
   status: Schema.Literal(404),
-}) {}
-
-export const GetGeocodedCoordinatesErrors = Schema.Union(LocationNotFoundError)
-
-export class GetExchangeRateRequest extends Schema.Class<GetExchangeRateRequest>(
-  'GetExchangeRateRequest'
-)({
-  currency: Schema.Uppercase.pipe((a) => Schema.compose(a, CurrencyCodeE)),
-}) {}
-export class GetExchangeRateResponse extends Schema.Class<GetExchangeRateResponse>(
-  'GetExchangeRateResponse'
-)({
-  status: Schema.Literal(301),
-  headers: Schema.Struct({Location: Schema.String}),
 }) {}

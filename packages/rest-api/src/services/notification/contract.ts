@@ -60,9 +60,3 @@ export class SendingNotificationError extends Schema.TaggedError<SendingNotifica
     }),
   }
 ) {}
-
-export const IssueNotificationErrors = Schema.Union(
-  InvalidFcmCypherError,
-  SendingNotificationError,
-  InvalidNotificationCypherError
-)

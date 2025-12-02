@@ -11,17 +11,14 @@ import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Schema} from 'effect'
-import {
-  InvalidChallengeError,
-  RequestBaseWithChallenge,
-} from '../../challenges/contracts'
+import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {createPageResponse, PageRequestMeta} from '../../Pagination.brand'
 
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(
   'ReportOfferLimitReachedError'
 )('ReportOfferLimitReachedError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 
 export class MissingOwnerPrivatePartError extends Schema.TaggedError<MissingOwnerPrivatePartError>(
@@ -222,28 +219,3 @@ export type ReportClubOfferResponse = Schema.Schema.Type<
 
 export const DeleteUserResponse = NoContentResponse
 export type DeleteUserResponse = Schema.Schema.Type<typeof DeleteUserResponse>
-
-export const CreateNewOfferErrors = Schema.Union(
-  MissingOwnerPrivatePartError,
-  DuplicatedPublicKeyError
-)
-
-export const UpdateOfferErrors = Schema.Union(
-  MissingOwnerPrivatePartError,
-  DuplicatedPublicKeyError
-)
-
-export const CreatePrivatePartErrors = Schema.Union(DuplicatedPublicKeyError)
-
-export const DeletePrivatePartErrors = Schema.Union(
-  CanNotDeletePrivatePartOfAuthor
-)
-
-export const ReportOfferEndpointErrors = Schema.Union(
-  ReportOfferLimitReachedError
-)
-
-export const ReportClubOfferEndpointErrors = Schema.Union(
-  ReportOfferLimitReachedError,
-  InvalidChallengeError
-)

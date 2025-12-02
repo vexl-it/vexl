@@ -7,24 +7,17 @@ import {
   ClubLinkInfo,
   ClubUuidE,
 } from '@vexl-next/domain/src/general/clubs'
-import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
-import {
-  BadShortLivedTokenForErasingUserOnContactServiceError,
-  ShortLivedTokenForErasingUserOnContactService,
-} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
+import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
-import {
-  InvalidChallengeError,
-  RequestBaseWithChallenge,
-} from '../../challenges/contracts'
+import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   createPageResponse,
@@ -61,13 +54,13 @@ export class ForbiddenMessageTypeError extends Schema.TaggedError<ForbiddenMessa
 export class InitialImportContactsQuotaReachedError extends Schema.TaggedError<InitialImportContactsQuotaReachedError>(
   'InitialImportContactsQuotaReachedError'
 )('InitialImportContactsQuotaReachedError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 
 export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportContactsQuotaReachedError>(
   'ImportContactsQuotaReachedError'
 )('ImportContactsQuotaReachedError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 
 const CommonConnectionsForUserFromApi = Schema.Struct({
@@ -196,11 +189,6 @@ export const UserExistsResponse = Schema.Struct({
 })
 export type UserExistsResponse = Schema.Schema.Type<typeof UserExistsResponse>
 
-export const ImportContactsErrors = Schema.Union(
-  InitialImportContactsQuotaReachedError,
-  ImportContactsQuotaReachedError
-)
-
 export const HashDataWithValidation = Schema.Struct({})
 
 export const HashWithSignature = Schema.Struct({
@@ -220,10 +208,6 @@ export class UnableToVerifySignatureError extends Schema.TaggedError<UnableToVer
       'Is thrown when updateBadOwnerHashRequest includes data that can not be verified against the signature...',
   }
 ) {}
-
-export const UpdateBadOwnerHashErrors = Schema.Union(
-  UnableToVerifySignatureError
-)
 
 export const UpdateBadOwnerHashRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
@@ -254,24 +238,18 @@ export class ClubAlreadyExistsError extends Schema.TaggedError<ClubAlreadyExists
 export class InvalidAdminTokenError extends Schema.TaggedError<InvalidAdminTokenError>(
   'InvalidAdminToken'
 )('InvalidAdminToken', {
-  status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
+  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
 }) {}
 
 export class ClubUserLimitExceededError extends Schema.TaggedError<ClubUserLimitExceededError>(
   'ClubUserLimitExceededError'
 )('ClubUserLimitExceededError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 
 export const AdminTokenParams = Schema.Struct({
   adminToken: Schema.String,
 })
-
-export const CreateClubErrors = Schema.Union(
-  ClubAlreadyExistsError,
-  InvalidAdminTokenError
-)
-export type CreateClubErrors = typeof CreateClubErrors.Type
 
 export const CreateClubRequest = Schema.Struct({
   club: ClubInfo,
@@ -282,13 +260,6 @@ export const CreateClubResponse = Schema.Struct({
   clubInfo: ClubInfo,
 })
 export type CreateClubResponse = Schema.Schema.Type<typeof CreateClubResponse>
-
-export const GenerateInviteLinkForAdminErrors = Schema.Union(
-  NotFoundError,
-  InvalidAdminTokenError
-)
-export type GenerateInviteLinkForAdminErrors =
-  typeof GenerateInviteLinkForAdminErrors.Type
 
 export const GenerateInviteLinkForAdminRequest = Schema.Struct({
   clubUuid: ClubUuidE,
@@ -303,12 +274,6 @@ export const GenerateInviteLinkForAdminResponse = Schema.Struct({
 export type GenerateInviteLinkForAdminResponse =
   typeof GenerateInviteLinkForAdminResponse.Type
 
-export const ModifyClubErrors = Schema.Union(
-  NotFoundError,
-  InvalidAdminTokenError
-)
-export type ModifyClubErrors = typeof ModifyClubErrors.Type
-
 export const ModifyClubRequest = Schema.Struct({
   clubInfo: ClubInfo,
 })
@@ -319,8 +284,6 @@ export const ModifyClubResponse = Schema.Struct({
 })
 export type ModifyClubResponse = typeof ModifyClubResponse.Type
 
-export const ListClubsErrors = Schema.Union(InvalidAdminTokenError)
-
 export const ListClubsResponse = Schema.Struct({
   clubs: Schema.Array(ClubInfo),
 })
@@ -330,7 +293,7 @@ export type ListClubsResponse = typeof ListClubsResponse.Type
 export class S3ServiceError extends Schema.TaggedError<S3ServiceError>(
   'S3ServiceError'
 )('S3ServiceError', {
-  status: Schema.optionalWith(Schema.Literal(500), {default: () => 500}),
+  status: Schema.optionalWith(Schema.Literal(502), {default: () => 502}),
   message: Schema.optional(Schema.String),
 }) {}
 
@@ -351,13 +314,6 @@ export const RequestClubImageUploadResponse = Schema.Struct({
 export type RequestClubImageUploadResponse =
   typeof RequestClubImageUploadResponse.Type
 
-export const RequestClubImageUploadErrors = Schema.Union(
-  InvalidAdminTokenError,
-  S3ServiceError
-)
-export type RequestClubImageUploadErrors =
-  typeof RequestClubImageUploadErrors.Type
-
 export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyInClubError>(
   'MemberAlreadyInClubError'
 )('MemberAlreadyInClubError', {
@@ -377,11 +333,6 @@ export const GetClubInfoResponse = Schema.Struct({
   clubInfoForUser: ClubInfoForUser,
 })
 
-export const GetClubInfoErrors = Schema.Union(
-  InvalidChallengeError,
-  NotFoundError
-)
-
 export const JoinClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   code: ClubCode,
@@ -397,35 +348,17 @@ export const JoinClubResponse = Schema.Struct({
 })
 export type JoinClubResponse = typeof JoinClubResponse.Type
 
-export const JoinClubErrors = Schema.Union(
-  MemberAlreadyInClubError,
-  NotFoundError,
-  InvalidChallengeError,
-  ClubUserLimitExceededError
-)
-
 export const LeaveClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   clubUuid: ClubUuidE,
 })
 export type LeaveClubRequest = typeof LeaveClubRequest.Type
 
-export const LeaveClubErrors = Schema.Union(
-  NotFoundError,
-  InvalidChallengeError
-)
-
 export class UserIsNotModeratorError extends Schema.TaggedError<UserIsNotModeratorError>(
   'UserIsNotModeratorError'
 )('UserIsNotModeratorError', {
   status: Schema.optionalWith(Schema.Literal(403), {default: () => 403}),
 }) {}
-
-export const GenerateClubJoinLinkErrors = Schema.Union(
-  NotFoundError,
-  InvalidChallengeError,
-  UserIsNotModeratorError
-)
 
 export const GenerateClubJoinLinkRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -448,13 +381,6 @@ export class InviteCodeNotFoundError extends Schema.TaggedError<InviteCodeNotFou
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
-export const DeactivateClubJoinLinkErrors = Schema.Union(
-  NotFoundError,
-  InvalidChallengeError,
-  UserIsNotModeratorError,
-  InviteCodeNotFoundError
-)
-
 export const DeactivateClubJoinLinkRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   clubUuid: ClubUuidE,
@@ -471,14 +397,6 @@ export type DeactivateClubJoinLinkResponse =
 export type DeactivateClubJoinLinkRequest =
   typeof DeactivateClubJoinLinkRequest.Type
 
-export const AddUserToTheClubErrors = Schema.Union(
-  NotFoundError,
-  InvalidChallengeError,
-  UserIsNotModeratorError,
-  ClubUserLimitExceededError,
-  MemberAlreadyInClubError
-)
-
 export const AddUserToTheClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   clubUuid: ClubUuidE,
@@ -490,13 +408,6 @@ export const AddUserToTheClubResponse = Schema.Struct({
   newCount: Schema.Number,
 })
 export type AddUserToTheClubResponse = typeof AddUserToTheClubResponse.Type
-
-export const ListClubLinksErrors = Schema.Union(
-  NotFoundError,
-  InvalidChallengeError,
-  UserIsNotModeratorError
-)
-export type ListClubLinksErrors = typeof ListClubLinksErrors.Type
 
 export const ListClubLinksRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
@@ -523,11 +434,6 @@ export const GetClubContactsResponse = Schema.Struct({
 
 export type GetClubContactsResponse = typeof GetClubContactsResponse.Type
 
-export const GetClubContactsErrors = Schema.Union(
-  NotFoundError,
-  InvalidChallengeError
-)
-
 export const GetClubInfoByAccessCodeRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   code: ClubCode,
@@ -540,11 +446,6 @@ export const GetClubInfoByAccessCodeResponse = Schema.Struct({
   club: ClubInfo,
   isModerator: Schema.Boolean,
 })
-
-export const GetClubInfoByAccessCodeErrors = Schema.Union(
-  InvalidChallengeError,
-  NotFoundError
-)
 
 export class ReportClubLimitReachedError extends Schema.TaggedError<ReportClubLimitReachedError>(
   'ReportClubLimitReachedError'
@@ -561,21 +462,12 @@ export type ReportClubRequest = Schema.Schema.Type<typeof ReportClubRequest>
 
 export const ReportClubResponse = NoContentResponse
 
-export const ReportClubErrors = Schema.Union(
-  InvalidChallengeError,
-  ReportClubLimitReachedError
-)
-
 export class SendBulkNotificationError extends Schema.TaggedError<SendBulkNotificationError>(
   'SendBulkNotificationError'
 )('SendBulkNotificationError', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
   description: Schema.String,
 }) {}
-export const SendBulkNotificationsErrors = Schema.Union(
-  SendBulkNotificationError,
-  InvalidAdminTokenError
-)
 
 export const SendBulkNotificationRequest = Schema.Struct({
   dryRun: Schema.Boolean,
@@ -628,11 +520,6 @@ export const EraseUserFromNetworkResponse = Schema.Struct({
 })
 export type EraseUserFromNetworkResponse =
   typeof EraseUserFromNetworkResponse.Type
-
-export const EraseUserFromNetworkErrors = Schema.Union(
-  BadShortLivedTokenForErasingUserOnContactServiceError
-)
-export type EraseUserFromNetworkErrors = typeof EraseUserFromNetworkErrors.Type
 
 export const ConvertPhoneNumberHashesToServerHashesRequest = Schema.Struct({
   hashedPhoneNumbers: Schema.Array(HashedPhoneNumberE),

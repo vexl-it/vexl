@@ -8,6 +8,7 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
+import {InvalidLoginSignatureError} from '@vexl-next/domain/src/general/loginChallenge'
 import {Schema} from 'effect'
 import {
   CommonAndSecurityHeaders,
@@ -23,17 +24,23 @@ import {
   InitEraseUserResponse,
   InitPhoneVerificationRequest,
   InitPhoneVerificationResponse,
-  InitVerificationErrors,
+  InvalidSignatureError,
+  InvalidVerificationError,
+  InvalidVerificationIdError,
   NumberDoesNotMatchOldHashError,
+  PreviousCodeNotExpiredError,
   RegenerateSessionCredentialsRequest,
   RegenerateSessionCredentialsResponse,
+  UnableToGenerateChallengeError,
   UnableToGenerateSignatureError,
+  UnableToSendVerificationSmsError,
+  UnableToVerifySmsCodeError,
+  UnsupportedVersionToLoginError,
+  VerificationNotFoundError,
   VerifyAndEraseUserRequest,
   VerifyAndEraseUserResponse,
-  VerifyChallengeErrors,
   VerifyChallengeRequest,
   VerifyChallengeResponse,
-  VerifyCodeErrors,
   VerifyPhoneNumberRequest,
   VerifyPhoneNumberResponse,
 } from './contracts'
@@ -46,7 +53,10 @@ export const InitVerificationEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonHeaders)
   .setPayload(InitPhoneVerificationRequest)
   .addSuccess(InitPhoneVerificationResponse)
-  .addError(InitVerificationErrors)
+  .addError(UnableToSendVerificationSmsError, {status: 400})
+  .addError(PreviousCodeNotExpiredError, {status: 400})
+  .addError(UnsupportedVersionToLoginError, {status: 400})
+  .addError(InvalidLoginSignatureError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5)
 
 export const VerifyCodeEndpoint = HttpApiEndpoint.post(
@@ -55,7 +65,11 @@ export const VerifyCodeEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(VerifyPhoneNumberRequest)
   .addSuccess(VerifyPhoneNumberResponse)
-  .addError(VerifyCodeErrors)
+  .addError(UnableToGenerateChallengeError, {status: 400})
+  .addError(VerificationNotFoundError, {status: 400})
+  .addError(InvalidVerificationIdError, {status: 400})
+  .addError(UnableToVerifySmsCodeError, {status: 400})
+  .addError(InvalidVerificationError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5)
 
 export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
@@ -64,7 +78,10 @@ export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
 )
   .setPayload(VerifyChallengeRequest)
   .addSuccess(VerifyChallengeResponse)
-  .addError(VerifyChallengeErrors)
+  .addError(InvalidSignatureError, {status: 400})
+  .addError(UnableToGenerateSignatureError, {status: 400})
+  .addError(VerificationNotFoundError, {status: 400})
+  .addError(InvalidVerificationError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5)
 
 export const LogoutUserEndpoint = HttpApiEndpoint.del(
@@ -88,7 +105,10 @@ export const InitEraseUserEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonHeaders)
   .setPayload(InitEraseUserRequest)
   .addSuccess(InitEraseUserResponse)
-  .addError(InitVerificationErrors)
+  .addError(UnableToSendVerificationSmsError, {status: 400})
+  .addError(PreviousCodeNotExpiredError, {status: 400})
+  .addError(UnsupportedVersionToLoginError, {status: 400})
+  .addError(InvalidLoginSignatureError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5)
 
 export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
@@ -97,17 +117,15 @@ export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
 )
   .setPayload(VerifyAndEraseUserRequest)
   .addSuccess(VerifyAndEraseUserResponse)
-  .addError(VerifyCodeErrors)
+  .addError(InvalidVerificationIdError, {status: 400})
+  .addError(VerificationNotFoundError, {status: 400})
+  .addError(UnableToVerifySmsCodeError, {status: 400})
+  .addError(InvalidVerificationError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5)
 
 const EraseUserGroup = HttpApiGroup.make('EraseUser')
   .add(InitEraseUserEndpoint)
   .add(VerifyAndEraseUserEndpoint)
-
-export const RegenerateSessionCredentialsErrors = Schema.Union(
-  NumberDoesNotMatchOldHashError,
-  UnableToGenerateSignatureError
-)
 
 export const RegenerateSessionCredentialsEndpoint = HttpApiEndpoint.post(
   'regenerateSessionCredentials',
@@ -117,7 +135,8 @@ export const RegenerateSessionCredentialsEndpoint = HttpApiEndpoint.post(
   .middleware(ServerSecurityMiddleware)
   .setPayload(RegenerateSessionCredentialsRequest)
   .addSuccess(RegenerateSessionCredentialsResponse)
-  .addError(RegenerateSessionCredentialsErrors)
+  .addError(NumberDoesNotMatchOldHashError, {status: 400})
+  .addError(UnableToGenerateSignatureError, {status: 400})
   .annotate(MaxExpectedDailyCall, 1)
 
 export const GetVersionServiceInfoEndpoint = HttpApiEndpoint.get(
@@ -146,5 +165,5 @@ export const UserApiSpecification = HttpApi.make('User API')
   .add(LoginGroup)
   .add(EraseUserGroup)
   .add(RootGroup)
-  .addError(NotFoundError)
-  .addError(UnexpectedServerError)
+  .addError(NotFoundError, {status: 404})
+  .addError(UnexpectedServerError, {status: 500})

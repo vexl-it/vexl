@@ -3,13 +3,17 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   generateChatMessageId,
   type ChatMessage,
   type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
+import {
+  type FriendLevel,
+  type GoldenAvatarType,
+} from '@vexl-next/domain/src/general/offers'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -35,6 +39,8 @@ function createRequestChatMessage({
   myVersion,
   goldenAvatarType,
   senderClubsUuids,
+  commonFriends,
+  friendLevel,
 }: {
   text: string
   myNotificationCypher?: NotificationCypher
@@ -43,6 +49,8 @@ function createRequestChatMessage({
   myVersion: SemverString
   goldenAvatarType?: GoldenAvatarType
   senderClubsUuids: readonly ClubUuid[]
+  commonFriends?: readonly HashedPhoneNumber[]
+  friendLevel?: readonly FriendLevel[]
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -55,6 +63,8 @@ function createRequestChatMessage({
     senderPublicKey,
     goldenAvatarType,
     senderClubsUuids,
+    commonFriends,
+    friendLevel,
   }
 }
 
@@ -75,6 +85,8 @@ export function sendMessagingRequest({
   otherSideVersion,
   goldenAvatarType,
   forClubsUuids,
+  commonFriends,
+  friendLevel,
 }: {
   text: string
   fromKeypair: PrivateKeyHolder
@@ -88,6 +100,8 @@ export function sendMessagingRequest({
   otherSideVersion?: SemverString | undefined
   goldenAvatarType?: GoldenAvatarType
   forClubsUuids: readonly ClubUuid[]
+  commonFriends?: readonly HashedPhoneNumber[]
+  friendLevel?: readonly FriendLevel[]
 }): Effect.Effect<
   ChatMessage,
   | ApiErrorRequestMessaging
@@ -108,6 +122,8 @@ export function sendMessagingRequest({
       lastReceivedNotificationCypher,
       goldenAvatarType,
       senderClubsUuids: forClubsUuids,
+      commonFriends,
+      friendLevel,
     })
 
     const message = yield* _(

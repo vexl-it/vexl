@@ -66,6 +66,8 @@ const sendRequestActionAtom = atom(
             originOffer.offerInfo.publicPart.fcmCypher,
           goldenAvatarType,
           forClubsUuids,
+          commonFriends: originOffer.offerInfo.privatePart.commonFriends,
+          friendLevel: originOffer.offerInfo.privatePart.friendLevel,
         })
       )
 

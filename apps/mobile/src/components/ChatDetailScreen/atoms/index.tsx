@@ -7,7 +7,7 @@ import {
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Array, Effect, Either, HashMap, Option, pipe} from 'effect'
+import {Array, Effect, Either, Option, pipe} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -48,9 +48,6 @@ import {
   type ChatMessageWithState,
   type ChatWithMessages,
 } from '../../../state/chat/domain'
-import connectionStateAtom, {
-  createFriendLevelInfoAtom,
-} from '../../../state/connections/atom/connectionStateAtom'
 import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
@@ -310,16 +307,36 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('inbox').prop('privateKey').prop('publicKeyPemBase64')
   )
 
+  const requestMessageAtom = atom((get) =>
+    pipe(
+      get(messagesAtom),
+      Array.findFirst(
+        (message) =>
+          message.state === 'received' &&
+          message.message.messageType === 'REQUEST_MESSAGING'
+      )
+    )
+  )
+
+  const friendLevelForMyOfferAtom = atom(
+    (get) =>
+      pipe(
+        get(requestMessageAtom),
+        Option.map((message) => message.message.friendLevel),
+        Option.getOrElse(() => [] as const)
+      ) ?? []
+  )
+
   const commonConnectionsHashesAtom = atom((get) => {
     const offer = get(offerForChatAtom)
-    const chat = get(chatAtom)
-    const connectionState = get(connectionStateAtom)
+    const commonFriendsForMyOffer = pipe(
+      get(requestMessageAtom),
+      Option.map((message) => message.message.commonFriends),
+      Option.getOrElse(() => [] as const)
+    )
 
     return offer?.ownershipInfo
-      ? HashMap.get(
-          connectionState.commonFriends,
-          chat.otherSide.publicKey
-        ).pipe(Option.getOrElse(() => []))
+      ? (commonFriendsForMyOffer ?? [])
       : (offer?.offerInfo.privatePart.commonFriends ?? [])
   })
 
@@ -777,18 +794,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const friendLevelOfOtherSidePublicKeyAtom = atom((get) => {
-    return get(createFriendLevelInfoAtom(get(chatAtom).otherSide))
-  })
-
   const friendLevelInfoAtom = atom<readonly FriendLevel[]>((get) => {
     const originOffer = get(offerForChatAtom)
 
     if (originOffer?.ownershipInfo?.adminId) {
-      // if this is my offer, we can look up user from connection state. The public
-      // key of the user is public key to his contact
-      return get(friendLevelOfOtherSidePublicKeyAtom)
+      return get(friendLevelForMyOfferAtom)
     }
+
     return originOffer?.offerInfo.privatePart?.friendLevel ?? []
   })
 

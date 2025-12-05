@@ -63,6 +63,8 @@ export default function serializeChatMessage(
       myFcmCypher: message.myFcmCypher,
       lastReceivedFcmCypher: message.lastReceivedFcmCypher,
       senderClubsUuids: message.senderClubsUuids,
+      commonFriends: message.commonFriends,
+      friendLevel: message.friendLevel,
     } satisfies ChatMessagePayload,
     safeParse(ChatMessagePayload),
     E.chainW(stringifyToJson)

@@ -20,6 +20,7 @@ import {UriString, UriStringE} from '../utility/UriString.brand'
 import {Uuid, generateUuid} from '../utility/Uuid.brand'
 import {DeanonymizedUser, DeanonymizedUserE} from './DeanonymizedUser'
 import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
+import {HashedPhoneNumber, HashedPhoneNumberE} from './HashedPhoneNumber.brand'
 import {UserName, UserNameE} from './UserName.brand'
 import {RealLifeInfo, RealLifeInfoE} from './UserNameAndAvatar.brand'
 import {ClubUuid, ClubUuidE} from './clubs'
@@ -28,6 +29,8 @@ import {
   NotificationCypherE,
 } from './notifications/NotificationCypher.brand'
 import {
+  FriendLevel,
+  FriendLevelE,
   GoldenAvatarType,
   GoldenAvatarTypeE,
   OfferId,
@@ -156,6 +159,8 @@ export const ChatMessagePayload = z
     myFcmCypher: NotificationCypher.optional(),
     lastReceivedFcmCypher: NotificationCypher.optional(),
     senderClubsUuids: z.array(ClubUuid).optional().readonly(),
+    commonFriends: z.array(HashedPhoneNumber).optional().readonly(),
+    friendLevel: z.array(FriendLevel).optional().readonly(),
   })
   .readonly()
 
@@ -182,6 +187,8 @@ export const ChatMessagePayloadE = Schema.Struct({
   myFcmCypher: Schema.optional(NotificationCypherE),
   lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumberE)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
 })
 export type ChatMessagePayload = Schema.Schema.Type<typeof ChatMessagePayloadE>
 
@@ -214,6 +221,8 @@ export const ChatMessage = z
     myFcmCypher: NotificationCypher.optional(),
     lastReceivedFcmCypher: NotificationCypher.optional(),
     senderClubsUuids: z.array(ClubUuid).optional().readonly(),
+    commonFriends: z.array(HashedPhoneNumber).optional().readonly(),
+    friendLevel: z.array(FriendLevel).optional().readonly(),
   })
   .readonly()
 
@@ -240,6 +249,8 @@ const ChatMessageE = Schema.Struct({
   myFcmCypher: Schema.optional(NotificationCypherE),
   lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumberE)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
 })
 
 export type ChatMessage = typeof ChatMessageE.Type
@@ -392,6 +403,8 @@ export const ChatMessageRequiringNewerVersion = z.object({
   image: z.undefined(),
   myFcmCypher: NotificationCypher.optional(),
   lastReceivedFcmCypher: NotificationCypher.optional(),
+  commonFriends: z.array(HashedPhoneNumber).optional().readonly(),
+  friendLevel: z.array(FriendLevel).optional().readonly(),
 })
 
 export const ChatMessageRequiringNewerVersionE = Schema.Struct({
@@ -408,6 +421,8 @@ export const ChatMessageRequiringNewerVersionE = Schema.Struct({
   image: Schema.optional(Schema.Undefined),
   myFcmCypher: Schema.optional(NotificationCypherE),
   lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumberE)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
 })
 
 export type ChatMessageRequiringNewerVersion =

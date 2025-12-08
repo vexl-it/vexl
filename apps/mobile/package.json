@@ -102,7 +102,7 @@
     "just-truncate": "^2.2.0",
     "luxon": "^3.3.0",
     "optics-ts": "^2.4.0",
-    "react": "19.1.0",
+    "react": "19.1.2",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
     "react-native-autolink": "^4.2.0",

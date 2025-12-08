@@ -5,6 +5,7 @@
   "type": "module",
   "devDependencies": {
     "@types/text-encoding": "^0",
+    "@types/ws": "^8",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
@@ -31,19 +32,22 @@
   },
   "prettier": "@vexl-next/prettier-config",
   "dependencies": {
-    "@effect/experimental": "^0.56.0",
-    "@effect/platform": "^0.92.1",
-    "@effect/platform-node": "^0.98.3",
+    "@effect/experimental": "^0.57.11",
+    "@effect/platform": "^0.93.6",
+    "@effect/platform-node": "^0.103.0",
+    "@effect/rpc": "^0.72.2",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/esbuild": "0.0.0",
     "@vexl-next/localization": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "@vexl-next/server-utils": "0.0.0",
+    "bullmq": "^5.52.1",
     "dotenv": "^16.4.5",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "expo-server-sdk": "^3.14.0",
     "fast-check": "^3.20.0",
-    "firebase-admin": "^12.3.1"
+    "firebase-admin": "^12.3.1",
+    "ioredis": "^5.4.1"
   }
 }

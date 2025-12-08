@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -46,7 +47,7 @@ beforeAll(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -58,7 +59,7 @@ beforeAll(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -80,7 +81,7 @@ describe('Send message', () => {
 
         const messageToSend = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessage',
+            message: 'someMessage' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           })
@@ -127,7 +128,7 @@ describe('Send message', () => {
 
         const messageToSend = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessageABC',
+            message: 'someMessageABC' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           })
@@ -168,7 +169,7 @@ describe('Send message', () => {
 
         const messageToSend = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
           })
@@ -197,7 +198,7 @@ describe('Send message', () => {
             generatePrivateKey(),
             user1.authHeaders
           )({
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user2.inbox3.keyPair.publicKeyPemBase64,
           })
@@ -223,7 +224,7 @@ describe('Send message', () => {
 
         const messageToSend = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           })
@@ -251,7 +252,7 @@ describe('Send message', () => {
 
         const messageToSend = yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           })
         )

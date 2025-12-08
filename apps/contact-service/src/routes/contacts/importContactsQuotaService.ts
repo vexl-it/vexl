@@ -66,7 +66,7 @@ export class ImportContactsQuotaService extends Context.Tag(
               )
               const alreadyImportedContactsCount = yield* _(
                 redis.get(ImportContactsQuotaRecord)(quotaRecordKey),
-                Effect.catchTag('RecordDoesNotExistsReddisError', () =>
+                Effect.catchTag('NoSuchElementException', () =>
                   Effect.succeed(0)
                 )
               )

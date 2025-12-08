@@ -12,10 +12,10 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
   },
   "dependencies": {
-    "@effect/platform": "^0.92.1",
+    "@effect/platform": "^0.93.6",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "next": "^15.1.9",
     "qrcode.react": "^4.2.0",
     "react": "19.1.2",

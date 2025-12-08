@@ -25,13 +25,14 @@
   "dependencies": {
     "@vexl-next/cryptography": "0.0.0",
     "awesome-phonenumber": "^7.4.0",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",
     "just-truncate": "^2.2.0",
     "luxon": "^3.3.0",
     "match-sorter": "^6.3.4",
+    "ws": "^8.18.3",
     "zod": "^3.22.3"
   },
   "eslintConfig": {

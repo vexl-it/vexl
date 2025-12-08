@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -52,7 +53,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -92,7 +93,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -102,7 +103,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -128,7 +129,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -145,7 +146,7 @@ describe('Request approval', () => {
         const toNotFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -157,7 +158,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -183,7 +184,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -195,7 +196,7 @@ describe('Request approval', () => {
           client.Inboxes.approveRequest({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'approval message',
+                message: 'approval message' as MessageCypher,
                 approve: true,
                 publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               })
@@ -207,7 +208,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -233,7 +234,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -245,7 +246,7 @@ describe('Request approval', () => {
           client.Inboxes.approveRequest({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'approval message',
+                message: 'approval message' as MessageCypher,
                 approve: false,
                 publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               })
@@ -257,7 +258,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -283,7 +284,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -305,7 +306,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -331,7 +332,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -341,7 +342,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.cancelRequestApproval({
             payload: {
-              message: 'cancel message',
+              message: 'cancel message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -351,7 +352,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -377,7 +378,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -387,7 +388,7 @@ describe('Request approval', () => {
         yield* _(
           client.Inboxes.cancelRequestApproval({
             payload: {
-              message: 'cancel message',
+              message: 'cancel message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -404,7 +405,7 @@ describe('Request approval', () => {
         const toNotFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -417,7 +418,7 @@ describe('Request approval', () => {
         const toFail = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request',
+              message: 'request' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -443,7 +444,7 @@ describe('Request approval', () => {
         const failedResponse = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: generatePrivateKey().publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,
@@ -476,7 +477,7 @@ describe('Request approval', () => {
         const failedResponse = yield* _(
           client.Inboxes.requestApproval({
             payload: {
-              message: 'request message',
+              message: 'request message' as MessageCypher,
               publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
             },
             headers: commonAndSecurityHeaders,

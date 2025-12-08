@@ -8,11 +8,11 @@ import {
   type HttpApiGroup,
   type HttpApiMiddleware,
 } from '@effect/platform'
+import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option, Schema} from 'effect'
 import {type Simplify} from 'effect/Types'
-import {type PlatformName} from './PlatformName'
 import {type ServiceUrl} from './ServiceUrl.brand'
 import {
   CommonHeaders,

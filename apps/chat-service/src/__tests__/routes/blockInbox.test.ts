@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {
   ReceiverInboxDoesNotExistError,
   SenderInboxDoesNotExistError,
@@ -42,7 +43,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'someMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -54,7 +55,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -89,7 +90,7 @@ describe('Block inbox', () => {
           client.Messages.sendMessage({
             payload: (yield* _(
               user1.addChallengeForMainInbox({
-                message: 'someMessage',
+                message: 'someMessage' as MessageCypher,
                 messageType: 'MESSAGE' as const,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })

@@ -1,10 +1,10 @@
+import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {
   SemverStringE,
   type SemverString,
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Array, Either, Number, Option, Schema, String} from 'effect'
-import {PlatformName} from './PlatformName'
 import {HEADER_CLIENT_VERSION, HEADER_PLATFORM} from './constants'
 
 export const AppSource = Schema.String.pipe(Schema.brand('AppSource'))

@@ -1,5 +1,6 @@
 import {SqlClient, type SqlError} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -42,7 +43,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -54,7 +55,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -72,7 +73,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders3,
@@ -84,7 +85,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox2.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })

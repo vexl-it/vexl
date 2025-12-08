@@ -8,9 +8,11 @@
     "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "yarn jest"
   },
   "devDependencies": {
+    "@types/ws": "^8",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
@@ -23,13 +25,13 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
-    "@effect/platform": "^0.92.1",
+    "@effect/platform": "^0.93.6",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "awesome-phonenumber": "^7.4.0",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

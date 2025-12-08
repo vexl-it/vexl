@@ -1,14 +1,15 @@
+import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect} from 'effect/index'
 import {createClientInstance} from '../../client'
 import {type AppSource} from '../../commonHeaders'
-import {type PlatformName} from '../../PlatformName'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
 import {
   type IssueNotificationRequest,
+  type IssueStreamOnlyMessageRequest,
   type ReportNotificationProcessedRequest,
 } from './contract'
 import {NotificationApiSpecification} from './specification'
@@ -57,6 +58,8 @@ export function api({
     )
     return {
       getNotificationPublicKey: () => client.getNotificationPublicKey({}),
+      issueStreamOnlyMessage: (payload: IssueStreamOnlyMessageRequest) =>
+        client.issueStreamOnlyMessage({payload}),
       issueNotification: (payload: IssueNotificationRequest) =>
         client.issueNotification({payload}),
       reportNotificationProcessed: (

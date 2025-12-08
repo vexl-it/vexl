@@ -5,6 +5,7 @@ import {
 import {
   type ChatMessage,
   type ChatMessagePayload,
+  type MessageCypher,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
@@ -32,7 +33,7 @@ export function messageToNetwork(
   | JsonStringifyError
   | ZodParseError<ChatMessagePayload>
   | ErrorEncryptingMessage,
-  string
+  MessageCypher
 > {
   return flow(
     serializeChatMessage,

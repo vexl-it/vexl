@@ -18,12 +18,12 @@ const keepDbConfig = Config.boolean('TEST_KEEP_DB').pipe(
 const testServicePgClient = testDbConfig.pipe(
   Effect.map((config) =>
     PgClient.layer({
-      url: Redacted.make(
-        `postgresql://${config.host}:${config.port}/${config.database}`
-      ),
+      host: config.host,
+      port: config.port,
+      database: config.database,
       username: config.username,
       password: config.password,
-      debug: config.debug,
+      // debug: config.debug,
     })
   ),
   Layer.unwrapEffect,

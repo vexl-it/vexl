@@ -1,5 +1,6 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
+  MessageCypherE,
   MessageTypeE,
   ServerMessageE,
 } from '@vexl-next/domain/src/general/messaging'
@@ -125,7 +126,7 @@ export type BlockInboxResponse = Schema.Schema.Type<typeof BlockInboxResponse>
 
 export const RequestApprovalRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
 })
 export type RequestApprovalRequest = typeof RequestApprovalRequest.Type
 
@@ -138,13 +139,13 @@ export type RequestApprovalResponse = typeof RequestApprovalResponse.Type
 export const RequestApprovalV2Request = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   receiverPublicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
 })
 export type RequestApprovalV2Request = typeof RequestApprovalV2Request.Type
 
 export const CancelApprovalRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
 })
 export type CancelApprovalRequest = typeof CancelApprovalRequest.Type
 
@@ -157,14 +158,14 @@ export type CancelApprovalResponse = typeof CancelApprovalResponse.Type
 export const CancelApprovalV2Request = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   receiverPublicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
 })
 export type CancelApprovalV2Request = typeof CancelApprovalV2Request.Type
 
 export const ApproveRequestRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   publicKeyToConfirm: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
   approve: Schema.Boolean,
 })
 export type ApproveRequestRequest = typeof ApproveRequestRequest.Type
@@ -202,7 +203,7 @@ export const SendMessageRequest = Schema.Struct({
   signedChallenge: SignedChallenge,
   senderPublicKey: PublicKeyPemBase64E,
   receiverPublicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
   messageType: MessageTypeE,
   messagePreview: Schema.optional(Schema.String),
 })
@@ -218,7 +219,7 @@ export const LeaveChatRequest = Schema.Struct({
   senderPublicKey: PublicKeyPemBase64E,
   signedChallenge: SignedChallenge,
   receiverPublicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
 })
 export type LeaveChatRequest = Schema.Schema.Type<typeof LeaveChatRequest>
 
@@ -230,7 +231,7 @@ export type LeaveChatResponse = Schema.Schema.Type<typeof LeaveChatResponse>
 
 export const MessageInBatch = Schema.Struct({
   receiverPublicKey: PublicKeyPemBase64E,
-  message: Schema.String,
+  message: MessageCypherE,
   messageType: MessageTypeE,
   messagePreview: Schema.optional(Schema.String),
 })

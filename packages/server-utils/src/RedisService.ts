@@ -10,6 +10,7 @@ import {
   type ParseResult,
 } from 'effect'
 import {type NonEmptyArray} from 'effect/Array'
+import {NoSuchElementException} from 'effect/Cause'
 import {catchAllDefect} from 'effect/Effect'
 import Redlock, {type Lock} from 'redlock'
 import {RedisConnectionService} from './RedisConnection'
@@ -27,9 +28,6 @@ export class RedisLockError extends Schema.TaggedError<RedisLockError>(
   cause: Schema.Unknown,
 }) {}
 
-export class RecordDoesNotExistsReddisError extends Schema.TaggedError<RecordDoesNotExistsReddisError>(
-  'RecordDoesNotExistsReddisError'
-)('RecordDoesNotExistsReddisError', {}) {}
 export interface RedisOperations {
   get: <A, I, R>(
     schema: Schema.Schema<A, I, R>
@@ -37,7 +35,7 @@ export interface RedisOperations {
     key: string
   ) => Effect.Effect<
     A,
-    ParseResult.ParseError | RedisError | RecordDoesNotExistsReddisError,
+    ParseResult.ParseError | RedisError | NoSuchElementException,
     R
   >
 
@@ -62,9 +60,23 @@ export interface RedisOperations {
     key: string
   ) => Effect.Effect<
     readonly A[],
-    ParseResult.ParseError | RedisError | RecordDoesNotExistsReddisError,
+    ParseResult.ParseError | RedisError | NoSuchElementException,
     R
   >
+
+  setExpiresAt: (
+    key: string,
+    expiresAt: UnixMilliseconds
+  ) => Effect.Effect<void, RedisError | NoSuchElementException>
+
+  exists: (key: string) => Effect.Effect<boolean, RedisError>
+
+  isInSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    value: A
+  ) => Effect.Effect<boolean, ParseResult.ParseError | RedisError, R>
 
   delete: (key: string) => Effect.Effect<void, RedisError, never>
   withLock: <A, E, R>(
@@ -154,19 +166,31 @@ export class RedisService extends Context.Tag('RedisService')<
             })
           )
 
+      const setExpiresAt: RedisOperations['setExpiresAt'] = (
+        key: string,
+        expiresAt: UnixMilliseconds
+      ) =>
+        Effect.tryPromise({
+          try: async () => await redisClient.pexpireat(key, expiresAt),
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.filterOrFail(
+            (result) => result === 1,
+            () => new NoSuchElementException()
+          ),
+          Effect.asVoid
+        )
+
       const getString = (
         key: string
-      ): Effect.Effect<string, RedisError | RecordDoesNotExistsReddisError> =>
-        Effect.async<string, RedisError | RecordDoesNotExistsReddisError>(
-          (cb) => {
-            void redisClient.get(key, (err, res) => {
-              if (err) cb(Effect.fail(new RedisError({cause: err})))
-              else if (!res)
-                cb(Effect.fail(new RecordDoesNotExistsReddisError()))
-              else cb(Effect.succeed(res))
-            })
-          }
-        ).pipe(
+      ): Effect.Effect<string, RedisError | NoSuchElementException> =>
+        Effect.async<string, RedisError | NoSuchElementException>((cb) => {
+          void redisClient.get(key, (err, res) => {
+            if (err) cb(Effect.fail(new RedisError({cause: err})))
+            else if (!res) cb(Effect.fail(new NoSuchElementException()))
+            else cb(Effect.succeed(res))
+          })
+        }).pipe(
           Effect.catchAllDefect((e) =>
             Effect.zipRight(
               Effect.logError('Error while reading reddis', e, key),
@@ -227,6 +251,20 @@ export class RedisService extends Context.Tag('RedisService')<
         Schema.NullishOr(Schema.Array(Schema.String))
       )
 
+      const isInSet = (
+        key: string,
+        value: string
+      ): Effect.Effect<boolean, RedisError> =>
+        Effect.async<boolean, RedisError>((cb) => {
+          void redisClient.sismember(key, value, (err, res) => {
+            if (err) {
+              cb(Effect.fail(new RedisError({cause: err})))
+            } else {
+              cb(Effect.succeed(res === 1))
+            }
+          })
+        }).pipe(Effect.withSpan('Redis isInSet', {attributes: {key, value}}))
+
       const readAndDeleteSet = (
         key: string
       ): Effect.Effect<Option.Option<readonly string[]>, RedisError> =>
@@ -284,6 +322,19 @@ export class RedisService extends Context.Tag('RedisService')<
               )
             )
         },
+        setExpiresAt,
+        exists: (key) =>
+          Effect.tryPromise({
+            try: async () => (await redisClient.exists(key)) === 1,
+            catch: (e) => new RedisError({cause: e}),
+          }),
+        isInSet: (schema) => {
+          const encode = Schema.encode(Schema.parseJson(schema))
+          return (key, value) =>
+            encode(value).pipe(
+              Effect.flatMap((encoded) => isInSet(key, encoded))
+            )
+        },
         insertToSet: (schema) => {
           const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
           return (key, ...value) =>
@@ -299,7 +350,7 @@ export class RedisService extends Context.Tag('RedisService')<
               Effect.flatMap(decode),
               Effect.catchTag(
                 'NoSuchElementException',
-                () => new RecordDoesNotExistsReddisError()
+                () => new NoSuchElementException()
               )
             )
         },

@@ -14,6 +14,7 @@ import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerTo
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
@@ -25,7 +26,6 @@ import {
   PageRequestMeta,
   PageResponse,
 } from '../../Pagination.brand'
-import {PlatformName} from '../../PlatformName'
 
 export class InboxDoesNotExistError extends Schema.TaggedError<InboxDoesNotExistError>(
   'InboxDoesNotExist'

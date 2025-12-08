@@ -1,7 +1,8 @@
 import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {FcmCypherE} from '@vexl-next/domain/src/general/notifications/index'
+import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Schema} from 'effect'
 
 export const GetPublicKeyResponse = Schema.Struct({
@@ -13,9 +14,10 @@ export type GetPublicKeyResponse = typeof GetPublicKeyResponse.Type
 export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequest>(
   'IssueNotificationRequest'
 )({
-  // Once we depreciate old version remove fcm cypher and make notification cypher mandatory!
-  fcmCypher: Schema.optional(FcmCypherE),
-  notificationCypher: Schema.optional(NotificationCypherE),
+  notificationCypher: NotificationCypherE,
+  /**
+   * Wether to send a system notification indicating there is a new chat notification.
+   */
   sendNewChatMessageNotification: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
@@ -31,6 +33,14 @@ export class IssueNotificationResponse extends Schema.Class<IssueNotificationRes
   'IssueNotificationResponse'
 )({
   success: Schema.Literal(true),
+}) {}
+
+export class IssueStreamOnlyMessageRequest extends Schema.Class<IssueStreamOnlyMessageRequest>(
+  'IssueStreamOnlyMessageRequest'
+)({
+  notificationCypher: NotificationCypherE,
+  message: StreamOnlyMessageCypher,
+  minimalOtherSideVersion: Schema.optional(VersionCode),
 }) {}
 
 export class InvalidFcmCypherError extends Schema.TaggedError<InvalidFcmCypherError>()(

@@ -36,7 +36,7 @@ export const platform = Schema.decodeSync(PlatformName)(
   Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
 )
 
-function getApiPreset(): EnvPreset {
+export function getApiPreset(): EnvPreset {
   if (apiPreset === 'prodEnv') {
     return ENV_PRESETS.prodEnv
   }

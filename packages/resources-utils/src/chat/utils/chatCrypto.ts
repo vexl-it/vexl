@@ -2,8 +2,13 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type ServerMessage} from '@vexl-next/domain/src/general/messaging'
+import {
+  MessageCypherE,
+  type MessageCypher,
+  type ServerMessage,
+} from '@vexl-next/domain/src/general/messaging'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {Schema} from 'effect/index'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
 import {eciesDecrypt, eciesEncrypt} from '../../utils/crypto'
@@ -12,9 +17,12 @@ export type ErrorEncryptingMessage = BasicError<'ErrorEncryptingMessage'>
 
 export function encryptMessage(
   publicKey: PublicKeyPemBase64
-): (messageString: string) => TE.TaskEither<ErrorEncryptingMessage, string> {
+): (
+  messageString: string
+) => TE.TaskEither<ErrorEncryptingMessage, MessageCypher> {
   return flow(
     eciesEncrypt(publicKey),
+    TE.map(Schema.decodeSync(MessageCypherE)),
     TE.mapLeft(toError('ErrorEncryptingMessage'))
   )
 }

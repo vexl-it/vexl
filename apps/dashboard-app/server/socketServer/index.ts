@@ -107,7 +107,7 @@ const handleClientConnection = (
     )
   }).pipe(Effect.withSpan('handleClientConnection'))
 
-export const SocketServerLive = Layer.scopedDiscard(
+export const SocketServerLive = Layer.effectDiscard(
   IncommingConnectionsStreamContext.pipe(
     Effect.flatMap(Stream.runForEach(flow(handleClientConnection, Effect.fork)))
   )

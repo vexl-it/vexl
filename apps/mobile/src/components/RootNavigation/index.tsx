@@ -2,12 +2,14 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
+import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
 import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
+import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AppLogsScreen from '../AppLogsScreen'
 import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
@@ -51,10 +53,13 @@ function LoggedInHookGroup(): null {
   useHandleNotificationOpen()
   useHideInnactivityReminderNotificationsOnResume()
   useSetupBackgroundTask()
+  useConsumeNotificationStream()
 
   // navigation
   useHandlePostLoginFlowRedirect()
   useHandleUniversalAndAppLinks()
+
+  useManageTypingIndications()
 
   return null
 }

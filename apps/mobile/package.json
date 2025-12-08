@@ -21,7 +21,8 @@
   "dependencies": {
     "@alexzunik/react-native-money-input": "^0.5.3",
     "@bam.tech/react-native-image-resizer": "^3.0.5",
-    "@effect/platform": "^0.92.1",
+    "@effect/platform": "^0.93.6",
+    "@effect/rpc": "^0.72.2",
     "@likashefqet/react-native-image-zoom": "^4.3.0",
     "@miblanchard/react-native-slider": "^2.3.1",
     "@notifee/react-native": "^9.1.8",
@@ -61,7 +62,7 @@
     "crypto-browserify": "^3.12.0",
     "dayjs": "^1.11.11",
     "deep-equal": "^2.2.3",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "entities": "~2.0.0",
     "expo": "54.0.23",
     "expo-background-task": "~1.0.8",
@@ -182,9 +183,6 @@
     "react-test-renderer": "^18.2.0",
     "ts-node": "^10.9.1",
     "typescript": "~5.9.2"
-  },
-  "installConfig": {
-    "hoistingLimits": "workspaces"
   },
   "prettier": "@vexl-next/prettier-config",
   "private": true

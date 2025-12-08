@@ -10,9 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@effect/opentelemetry": "^0.58.0",
-    "@effect/platform": "^0.92.1",
-    "@effect/platform-node": "^0.98.3",
+    "@effect/opentelemetry": "^0.59.2",
+    "@effect/platform": "^0.93.6",
+    "@effect/platform-node": "^0.103.0",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",
@@ -22,7 +22,7 @@
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
     "dynamic-import-polyfill": "^0.1.1",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "qrcode": "^1.5.3",
     "serve-handler": "^6.1.5"

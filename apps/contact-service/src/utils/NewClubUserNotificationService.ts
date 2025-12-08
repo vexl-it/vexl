@@ -152,7 +152,7 @@ export class NewClubUserNotificationsService extends Context.Tag(
           Effect.gen(function* (_) {
             const dataFromRedis = yield* _(
               readAndDeleteList(NEW_CLUB_USER_NOTIFICATIONS_KEY),
-              Effect.catchTag('RecordDoesNotExistsReddisError', () =>
+              Effect.catchTag('NoSuchElementException', () =>
                 Effect.zipRight(
                   Effect.log('No new clubs notifications to report'),
                   Effect.succeed([] as readonly ClubNotificationRecord[])

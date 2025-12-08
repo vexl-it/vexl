@@ -2,6 +2,7 @@ import {Effect, Schema} from 'effect'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -37,7 +38,7 @@ beforeAll(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -49,7 +50,7 @@ beforeAll(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -81,7 +82,7 @@ describe('Delete pulled messages', () => {
 
         const messageToSend = (yield* _(
           user2.inbox1.addChallenge({
-            message: 'Message sent after pull',
+            message: 'Message sent after pull' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
           })

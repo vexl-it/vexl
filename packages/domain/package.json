@@ -27,7 +27,7 @@
     "awesome-phonenumber": "^7.4.0",
     "compare-versions": "^6.1.0",
     "dayjs": "^1.11.11",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "js-base64": "^3.7.5",

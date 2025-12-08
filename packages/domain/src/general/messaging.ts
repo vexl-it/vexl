@@ -361,12 +361,19 @@ export const ChatE = Schema.Struct({
 })
 export type Chat = Schema.Schema.Type<typeof ChatE>
 
+export const MessageCypher = z.string().transform((v) => {
+  return Brand.nominal<typeof v & Brand.Brand<'MessageCypher'>>()(v)
+})
+export const MessageCypherE = Schema.String.pipe(Schema.brand('MessageCypher'))
+
+export type MessageCypher = Schema.Schema.Type<typeof MessageCypherE>
+
 export const ServerMessage = z.object({
-  message: z.string(),
+  message: MessageCypher,
   senderPublicKey: PublicKeyPemBase64,
 })
 export const ServerMessageE = Schema.Struct({
-  message: Schema.String,
+  message: MessageCypherE,
   senderPublicKey: PublicKeyPemBase64E,
 })
 export type ServerMessage = Schema.Schema.Type<typeof ServerMessageE>
@@ -405,3 +412,21 @@ export const ChatMessageRequiringNewerVersionE = Schema.Struct({
 
 export type ChatMessageRequiringNewerVersion =
   typeof ChatMessageRequiringNewerVersionE.Type
+
+export const TYPING_INDICATION_TIMEOUT_MS = 5_000 // 5 seconds
+
+export class TypingMessage extends Schema.TaggedClass<TypingMessage>(
+  'TypingMessage'
+)('TypingMessage', {
+  typing: Schema.Boolean,
+  myPublicKey: PublicKeyPemBase64E,
+}) {}
+
+export const StreamOnlyChatMessagePayload = Schema.Union(TypingMessage)
+export type StreamOnlyChatMessagePayload =
+  typeof StreamOnlyChatMessagePayload.Type
+
+export const StreamOnlyMessageCypher = Schema.String.pipe(
+  Schema.brand('StreamOnlyMessageCypher')
+)
+export type StreamOnlyMessageCypher = typeof StreamOnlyMessageCypher.Type

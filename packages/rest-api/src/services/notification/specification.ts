@@ -12,6 +12,7 @@ import {
   InvalidNotificationCypherError,
   IssueNotificationRequest,
   IssueNotificationResponse,
+  IssueStreamOnlyMessageRequest,
   ReportNotificationProcessedRequest,
   SendingNotificationError,
 } from './contract'
@@ -26,6 +27,15 @@ export const IssueNotificationEndpoint = HttpApiEndpoint.post(
   .addError(SendingNotificationError, {status: 400})
   .addError(InvalidNotificationCypherError, {status: 400})
   .annotate(MaxExpectedDailyCall, 5000)
+
+export const IssueStreamOnlyMessageEndpoint = HttpApiEndpoint.post(
+  'issueStreamOnlyMessage',
+  '/issue-stream-only-message'
+)
+  .setPayload(IssueStreamOnlyMessageRequest)
+  .addError(SendingNotificationError)
+  .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 500_000)
 
 export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
   'reportNotificationProcessed',
@@ -45,6 +55,7 @@ export const GetNotificationPublicKeyEndpoint = HttpApiEndpoint.get(
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(IssueNotificationEndpoint)
   .add(ReportNotificationProcessedEndpoint)
+  .add(IssueStreamOnlyMessageEndpoint)
   .add(GetNotificationPublicKeyEndpoint)
 
 export const NotificationApiSpecification = HttpApi.make('Notification API')

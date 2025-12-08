@@ -12,7 +12,7 @@ export class IncommingConnectionsStreamContext extends Context.Tag(
   IncommingConnectionsStreamContext,
   Stream.Stream<WebSocket, ServerSocketError, never>
 >() {
-  static readonly Live = Layer.scoped(
+  static readonly Live = Layer.effect(
     IncommingConnectionsStreamContext,
     createWebSocketServer.pipe(Effect.map(createConnectionsStream))
   )

@@ -1,12 +1,17 @@
 import {NodeHttpServer} from '@effect/platform-node'
-import {Effect, Layer} from 'effect/index'
-import {createServer} from 'http'
+import {Context, Effect, Layer} from 'effect/index'
+import {createServer, type Server} from 'http'
 import {
   headersTimeoutMsConfig,
   keepAliveTimeoutMsConfig,
   portConfig,
   requestTimeoutMsConfig,
 } from './commonConfigs'
+
+export class HttpServerInstance extends Context.Tag('HttpServerInstance')<
+  HttpServerInstance,
+  Server
+>() {}
 
 export const NodeHttpServerLiveWithPortFromEnv = Effect.gen(function* (_) {
   const port = yield* _(portConfig)
@@ -17,7 +22,6 @@ export const NodeHttpServerLiveWithPortFromEnv = Effect.gen(function* (_) {
   return NodeHttpServer.layer(
     () => {
       const server = createServer()
-
       server.keepAliveTimeout = keepAliveTimeoutMs
       server.headersTimeout = headersTimeoutMs
       server.requestTimeout = requestTimeoutMs

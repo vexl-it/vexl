@@ -29,12 +29,23 @@ export const healthServerPortConfig = Config.option(
   Config.number('HEALTH_PORT')
 )
 
-export const databaseConfig = Config.unwrap<PgClient.PgClientConfig>({
-  url: Config.redacted('DB_URL'),
+export const databaseConfig = Config.unwrap({
+  url: Config.string('DB_URL'),
   username: Config.string('DB_USER'),
   password: Config.redacted('DB_PASSWORD'),
-  debug: Config.boolean('DB_DEBUG').pipe(Config.withDefault(false)),
-})
+  // debug: Config.boolean('DB_DEBUG').pipe(Config.withDefault(false)),
+}).pipe(
+  Effect.map((config): PgClient.PgClientConfig => {
+    const parsedUrl = new URL(config.url)
+    return {
+      host: parsedUrl.hostname,
+      port: parsedUrl.port ? Number(parsedUrl.port) : 5432,
+      database: parsedUrl.pathname.slice(1), // Remove leading '/'
+      username: config.username,
+      password: config.password,
+    }
+  })
+)
 
 export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
   Config.mapOrFail((v) =>

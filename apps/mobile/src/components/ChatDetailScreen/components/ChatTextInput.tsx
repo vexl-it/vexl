@@ -23,6 +23,7 @@ import {chatMolecule} from '../atoms'
 import CancelSvg from '../images/cancelSvg'
 import sendSvg from '../images/sendSvg'
 import SendImageButton from './SendImageButton'
+import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
 
 const styles = StyleSheet.create({
   textInput: {
@@ -56,6 +57,8 @@ function ChatTextInput(): React.ReactElement | null {
   )
 
   const preferences = useAtomValue(preferencesAtom)
+
+  usePeriodicTypingIndication(!!value.trim())
 
   const animatedStyle = useAnimatedStyle(() => {
     return {

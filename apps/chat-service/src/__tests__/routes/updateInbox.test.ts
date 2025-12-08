@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {
@@ -28,7 +29,7 @@ beforeAll(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -40,7 +41,7 @@ beforeAll(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })

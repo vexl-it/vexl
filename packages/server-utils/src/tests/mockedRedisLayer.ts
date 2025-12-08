@@ -1,9 +1,6 @@
 import {Effect, HashMap, Layer, Ref, Schema} from 'effect'
-import {
-  RecordDoesNotExistsReddisError,
-  RedisService,
-  type RedisOperations,
-} from '../RedisService'
+import {NoSuchElementException} from 'effect/Cause'
+import {RedisService, type RedisOperations} from '../RedisService'
 
 export const mockedRedisLayer = Layer.effect(
   RedisService,
@@ -22,16 +19,22 @@ export const mockedRedisLayer = Layer.effect(
 
     const toReturn: RedisOperations = {
       delete: (key: string) => Ref.update(state, HashMap.remove(key)),
+      exists: (key: string) =>
+        Ref.get(state).pipe(Effect.map((hm) => HashMap.has(hm, key))),
+
+      setExpiresAt: (key: string, expiresAt: number) =>
+        Ref.update(state, (hm) =>
+          HashMap.modify(hm, key, (v) => ({
+            ...v,
+            expiration: expiresAt,
+          }))
+        ),
       get: (schema) => (key: string) =>
         Ref.get(state).pipe(
           Effect.flatMap(HashMap.get(key)),
-          Effect.catchTag(
-            'NoSuchElementException',
-            () => new RecordDoesNotExistsReddisError()
-          ),
           Effect.filterOrFail(
             (val) => val.expiration === -1 || val.expiration > Date.now(),
-            () => new RecordDoesNotExistsReddisError()
+            () => new NoSuchElementException()
           ),
           Effect.flatMap((v) =>
             Schema.decode(Schema.parseJson(schema))(v.value)
@@ -50,6 +53,16 @@ export const mockedRedisLayer = Layer.effect(
           )
         ),
 
+      isInSet: (schema) => (key, value) =>
+        Schema.encode(Schema.parseJson(schema))(value).pipe(
+          Effect.flatMap((encoded) =>
+            Ref.get(listState).pipe(
+              Effect.flatMap(HashMap.get(key)),
+              Effect.map((one) => one.value.includes(encoded))
+            )
+          ),
+          Effect.catchTag('NoSuchElementException', () => Effect.succeed(false))
+        ),
       insertToSet:
         (schema) =>
         (key, ...values) =>
@@ -71,11 +84,7 @@ export const mockedRedisLayer = Layer.effect(
           Effect.flatMap(HashMap.get(key)),
           Effect.map((one) => one.value),
           Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
-          Effect.zipLeft(Ref.update(listState, HashMap.remove(key))),
-          Effect.catchTag(
-            'NoSuchElementException',
-            () => new RecordDoesNotExistsReddisError()
-          )
+          Effect.zipLeft(Ref.update(listState, HashMap.remove(key)))
         ),
 
       withLock: (effect) => () => effect,

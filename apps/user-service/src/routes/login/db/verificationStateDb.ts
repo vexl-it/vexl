@@ -82,7 +82,7 @@ export class VerificationStateDbService extends Context.Tag(
             Effect.catchTags({
               ParseError: () =>
                 Effect.fail(new UnexpectedServerError({status: 500})),
-              RecordDoesNotExistsReddisError: () =>
+              NoSuchElementException: () =>
                 Effect.fail(
                   new VerificationNotFoundError({status: 404, code: '100104'})
                 ),
@@ -115,7 +115,7 @@ export class VerificationStateDbService extends Context.Tag(
             Effect.catchTags({
               ParseError: () =>
                 Effect.fail(new UnexpectedServerError({status: 500})),
-              RecordDoesNotExistsReddisError: () =>
+              NoSuchElementException: () =>
                 Effect.fail(
                   new VerificationNotFoundError({status: 404, code: '100104'})
                 ),

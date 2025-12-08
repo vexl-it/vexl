@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -44,7 +45,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -57,7 +58,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -68,7 +69,7 @@ beforeEach(async () => {
       // Will send message user2 -> user1
       const messageToSend = (yield* _(
         user2.inbox1.addChallenge({
-          message: 'someMessage',
+          message: 'cancelMessage' as MessageCypher,
           messageType: 'MESSAGE' as const,
           receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
         })
@@ -96,7 +97,7 @@ describe('Leave chat', () => {
           client.Inboxes.leaveChat({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'leaveMessage',
+                message: 'leaveMessage' as MessageCypher,
                 receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
               })
             ),
@@ -138,7 +139,7 @@ describe('Leave chat', () => {
             client.Inboxes.leaveChat({
               payload: yield* _(
                 user2.inbox1.addChallenge({
-                  message: 'leaveMessage',
+                  message: 'leaveMessage' as MessageCypher,
                   receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
                 })
               ),
@@ -164,7 +165,7 @@ describe('Leave chat', () => {
                   generatePrivateKey(),
                   user2.authHeaders
                 )({
-                  message: 'leaveMessage',
+                  message: 'leaveMessage' as MessageCypher,
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
                 })
               ),
@@ -187,7 +188,7 @@ describe('Leave chat', () => {
             client.Inboxes.leaveChat({
               payload: yield* _(
                 user2.inbox1.addChallenge({
-                  message: 'leaveMessage',
+                  message: 'leaveMessage' as MessageCypher,
                   receiverPublicKey: user1.inbox1.keyPair.publicKeyPemBase64,
                 })
               ),

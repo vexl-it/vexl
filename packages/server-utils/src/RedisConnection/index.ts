@@ -5,12 +5,13 @@ import {
   Effect,
   Layer,
   Metric,
+  Stream,
 } from 'effect'
 import type IORedis from 'ioredis'
 import {createRedisAndConnect} from './createRedisAndConnect'
 import {type SettingUpRedisConnectionError} from './domain'
-import {onRedisConnectionChange} from './onRedisConnectionChange'
 import {parseUrl} from './parseUrl'
+import {redisConnectionChanges} from './redisConnectionChanges'
 
 const RedisConnectionStateGauge = Metric.gauge('redis_connection_state', {
   description: 'Redis connection state. 1 = connected, 0 = disconnected',
@@ -35,7 +36,8 @@ export class RedisConnectionService extends Context.Tag(
         )
 
         yield* _(
-          onRedisConnectionChange(redisConnection, (state) =>
+          redisConnectionChanges(redisConnection),
+          Stream.runForEach((state) =>
             Effect.zip(
               Metric.set(
                 RedisConnectionStateGauge,
@@ -43,20 +45,8 @@ export class RedisConnectionService extends Context.Tag(
               ),
               Effect.logInfo('Redis connection state changed', state)
             )
-          )
-        )
-
-        const shutdownSilentlyEffect = Effect.sync(async () => {
-          redisConnection.disconnect(false)
-        }).pipe(Effect.ignore)
-
-        yield* _(
-          Effect.addFinalizer(() =>
-            Effect.zip(
-              shutdownSilentlyEffect,
-              Effect.log('Redis connection closed')
-            )
-          )
+          ),
+          Effect.forkScoped
         )
 
         return redisConnection

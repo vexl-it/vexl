@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -45,7 +46,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -81,7 +82,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -92,7 +93,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -114,7 +115,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -132,7 +133,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -145,7 +146,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -167,7 +168,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -179,7 +180,7 @@ describe('Request approval V2', () => {
           client.Inboxes.approveRequest({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'approval message',
+                message: 'approval message' as MessageCypher,
                 approve: true,
                 publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
               })
@@ -192,7 +193,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -214,7 +215,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -226,7 +227,7 @@ describe('Request approval V2', () => {
           client.Inboxes.approveRequest({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'approval message',
+                message: 'approval message' as MessageCypher,
                 approve: false,
                 publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
               })
@@ -239,7 +240,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -261,7 +262,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -284,7 +285,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -306,7 +307,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -317,7 +318,7 @@ describe('Request approval V2', () => {
           client.Inboxes.cancelRequestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'cancel message',
+                message: 'cancel message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -328,7 +329,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -350,7 +351,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -361,7 +362,7 @@ describe('Request approval V2', () => {
           client.Inboxes.cancelRequestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'cancel message',
+                message: 'cancel message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -379,7 +380,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -393,7 +394,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request',
+                message: 'request' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -415,7 +416,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
               })
             ),
@@ -450,7 +451,7 @@ describe('Request approval V2', () => {
           client.Inboxes.requestApprovalV2({
             payload: yield* _(
               dummyAddChallenge({
-                message: 'request message',
+                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),

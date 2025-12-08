@@ -11,7 +11,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@effect/platform": "^0.92.1",
+    "@effect/platform": "^0.93.6",
     "@remix-run/node": "^2.16.8",
     "@remix-run/react": "^2.16.8",
     "@remix-run/serve": "^2.16.8",
@@ -36,7 +36,7 @@
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "cross-env": "^7.0.3",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "eslint": "^8.57.1",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",

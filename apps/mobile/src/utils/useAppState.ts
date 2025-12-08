@@ -1,12 +1,25 @@
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import {AppState, type AppStateStatus} from 'react-native'
 
 export function useAppState(
-  callback: (state: AppStateStatus) => void,
-  runCallbackOnInit: boolean = true
+  callback:
+    | ((state: AppStateStatus) => () => void)
+    | ((state: AppStateStatus) => void)
 ): void {
+  const [appState, setAppState] = useState<AppStateStatus | null>(
+    AppState.currentState
+  )
+
   useEffect(() => {
-    if (runCallbackOnInit) callback(AppState.currentState)
-    return AppState.addEventListener('change', callback).remove
-  }, [callback, runCallbackOnInit])
+    const subscription = AppState.addEventListener('change', setAppState)
+    return () => {
+      subscription.remove()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (appState === null) return
+    const cleanup = callback(appState)
+    if (cleanup) return cleanup
+  }, [appState, callback])
 }

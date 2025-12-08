@@ -1,4 +1,4 @@
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
 
 export class NotFoundError extends Schema.TaggedError<NotFoundError>(
@@ -32,6 +32,19 @@ export class UnexpectedServerError extends Schema.TaggedError<UnexpectedServerEr
       message: 'Internal server error',
     })
   }
+
+  static wrapErrors = (
+    message: string
+  ): (<A, I, R>(
+    effect: Effect.Effect<A, I, R>
+  ) => Effect.Effect<A, UnexpectedServerError, R>) =>
+    Effect.catchAll(
+      (e) =>
+        new UnexpectedServerError({
+          cause: e,
+          message,
+        })
+    )
 }
 
 export class UnauthorizedError extends Schema.TaggedError<UnauthorizedError>(

@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -43,7 +44,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'someMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -66,7 +67,7 @@ describe('Approve request', () => {
           client.Inboxes.approveRequest({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'acceptMessage',
+                message: 'acceptMessage' as MessageCypher,
                 publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
                 approve: true,
               })
@@ -94,7 +95,7 @@ describe('Approve request', () => {
                 client.Messages.sendMessage({
                   payload: yield* _(
                     user2.inbox1.addChallenge({
-                      message: 'someOtherMessage',
+                      message: 'someOtherMessage' as MessageCypher,
                       receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
                       messageType: 'MESSAGE' as const,
                     })
@@ -109,7 +110,7 @@ describe('Approve request', () => {
                 client.Messages.sendMessage({
                   payload: yield* _(
                     user1.addChallengeForMainInbox({
-                      message: 'someOtherMessage2',
+                      message: 'someOtherMessage2' as MessageCypher,
                       receiverPublicKey:
                         user2.inbox1.keyPair.publicKeyPemBase64,
                       messageType: 'MESSAGE' as const,
@@ -136,7 +137,7 @@ describe('Approve request', () => {
           client.Inboxes.approveRequest({
             payload: yield* _(
               user2.inbox1.addChallenge({
-                message: 'disapproveMessage',
+                message: 'disapproveMessage' as MessageCypher,
                 publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
                 approve: false,
               })
@@ -164,7 +165,7 @@ describe('Approve request', () => {
                 client.Messages.sendMessage({
                   payload: yield* _(
                     user2.inbox1.addChallenge({
-                      message: 'someOtherMessage',
+                      message: 'someOtherMessage' as MessageCypher,
                       receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
                       messageType: 'MESSAGE' as const,
                     })
@@ -180,7 +181,7 @@ describe('Approve request', () => {
                 client.Messages.sendMessage({
                   payload: yield* _(
                     user1.addChallengeForMainInbox({
-                      message: 'someOtherMessage2',
+                      message: 'someOtherMessage2' as MessageCypher,
                       receiverPublicKey:
                         user2.inbox1.keyPair.publicKeyPemBase64,
                       messageType: 'MESSAGE' as const,
@@ -216,7 +217,7 @@ describe('Approve request', () => {
           yield* _(
             client.Inboxes.cancelRequestApproval({
               payload: {
-                message: 'someMessage2',
+                message: 'someMessage2' as MessageCypher,
                 publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               },
               headers: commonAndSecurityHeaders,
@@ -228,7 +229,7 @@ describe('Approve request', () => {
             client.Inboxes.approveRequest({
               payload: yield* _(
                 user2.inbox1.addChallenge({
-                  message: 'acceptMessage',
+                  message: 'acceptMessage' as MessageCypher,
                   publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
                   approve: true,
                 })
@@ -251,7 +252,7 @@ describe('Approve request', () => {
             client.Inboxes.approveRequest({
               payload: yield* _(
                 user2.inbox1.addChallenge({
-                  message: 'acceptMessage',
+                  message: 'acceptMessage' as MessageCypher,
                   publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
                   approve: true,
                 })
@@ -274,7 +275,7 @@ describe('Approve request', () => {
             client.Inboxes.approveRequest({
               payload: yield* _(
                 user2.inbox1.addChallenge({
-                  message: 'acceptMessage',
+                  message: 'acceptMessage' as MessageCypher,
                   publicKeyToConfirm: generatePrivateKey().publicKeyPemBase64,
                   approve: true,
                 })
@@ -300,7 +301,7 @@ describe('Approve request', () => {
                   generatePrivateKey(),
                   user1.authHeaders
                 )({
-                  message: 'acceptMessage',
+                  message: 'acceptMessage' as MessageCypher,
                   publicKeyToConfirm: user2.inbox1.keyPair.publicKeyPemBase64,
                   approve: true,
                 })

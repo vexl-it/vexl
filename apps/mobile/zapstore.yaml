@@ -1,6 +1,6 @@
 name: Vexl
 repository: https://github.com/vexl-it/vexl
-icon: apps/mobile/assets/icon.png
+icon: assets/icon.png
 license: GPL-3.0
 remote_metadata:
   - github

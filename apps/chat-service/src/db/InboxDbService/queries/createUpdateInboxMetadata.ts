@@ -1,8 +1,8 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {PlatformName} from '@vexl-next/rest-api/src/PlatformName'
 import {Effect, flow, Schema} from 'effect'
 import {InboxRecordId} from '../domain'
 

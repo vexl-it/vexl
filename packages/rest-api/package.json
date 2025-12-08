@@ -25,10 +25,11 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
-    "@effect/platform": "^0.92.1",
+    "@effect/platform": "^0.93.6",
+    "@effect/rpc": "^0.72.2",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
-    "effect": "^3.18.4",
+    "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
     "url-join": "^5.0.0",

@@ -1,10 +1,10 @@
-import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   PLATFORM_ANDROID,
   PLATFORM_IOS,
-} from '@vexl-next/rest-api/src/PlatformName'
+} from '@vexl-next/domain/src/utility/PlatformName'
+import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {Schema} from 'effect'
 import Constants from 'expo-constants'
 import * as Device from 'expo-device'

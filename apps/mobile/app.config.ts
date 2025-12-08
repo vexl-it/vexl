@@ -182,6 +182,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [
       'expo-notifications',

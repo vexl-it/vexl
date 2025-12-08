@@ -13,12 +13,12 @@
     "print-api-call-limits": "npx tsx src/printApiCallLimits.ts"
   },
   "dependencies": {
-    "@effect/platform": "^0.92.1",
-    "@effect/platform-node": "^0.98.3",
+    "@effect/platform": "^0.93.6",
+    "@effect/platform-node": "^0.103.0",
     "@vexl-next/rest-api": "0.0.0",
     "dotenv": "^16.4.5",
     "dynamic-import-polyfill": "^0.1.1",
-    "effect": "^3.18.4"
+    "effect": "^3.19.9"
   },
   "devDependencies": {
     "@vexl-next/eslint-config": "0.0.0",

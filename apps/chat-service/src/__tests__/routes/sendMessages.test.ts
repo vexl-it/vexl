@@ -1,5 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -46,7 +47,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -58,7 +59,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -76,7 +77,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders2,
@@ -88,7 +89,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox2.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -106,7 +107,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders3,
@@ -118,7 +119,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -136,7 +137,7 @@ beforeEach(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox2.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders4,
@@ -148,7 +149,7 @@ beforeEach(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox2.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user3.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -173,12 +174,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1',
+                  message: '1fromUser2inbox1' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1',
+                  message: '2fromUser2inbox1' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -190,12 +191,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2',
+                  message: '3fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2',
+                  message: '4fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -252,12 +253,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1',
+                  message: '1fromUser2inbox1' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1',
+                  message: '2fromUser2inbox1' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -269,12 +270,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
-                  message: '3fromUser2inbox2',
+                  message: '3fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2',
+                  message: '4fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -335,12 +336,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '1fromUser2inbox1',
+                  message: '1fromUser2inbox1' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '2fromUser2inbox1',
+                  message: '2fromUser2inbox1' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -352,12 +353,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2',
+                  message: '3fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2',
+                  message: '4fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -372,12 +373,12 @@ describe('Send messages', () => {
               messages: [
                 {
                   receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                  message: '3fromUser2inbox2',
+                  message: '3fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
                 {
                   receiverPublicKey: user3.mainKeyPair.publicKeyPemBase64,
-                  message: '4fromUser2inbox2',
+                  message: '4fromUser2inbox2' as MessageCypher,
                   messageType: 'MESSAGE' as const,
                 },
               ],
@@ -442,7 +443,7 @@ describe('Send messages', () => {
                     messages: [
                       {
                         receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1',
+                        message: '1fromUser2inbox1' as MessageCypher,
                         messageType: 'REQUEST_MESSAGING' as const,
                       },
                     ],
@@ -465,7 +466,7 @@ describe('Send messages', () => {
                     messages: [
                       {
                         receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1',
+                        message: '1fromUser2inbox1' as MessageCypher,
                         messageType: 'APPROVE_MESSAGING' as const,
                       },
                     ],
@@ -488,7 +489,7 @@ describe('Send messages', () => {
                     messages: [
                       {
                         receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1',
+                        message: '1fromUser2inbox1' as MessageCypher,
                         messageType: 'DISAPPROVE_MESSAGING' as const,
                       },
                     ],
@@ -511,7 +512,7 @@ describe('Send messages', () => {
                     messages: [
                       {
                         receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
-                        message: '1fromUser2inbox1',
+                        message: '1fromUser2inbox1' as MessageCypher,
                         messageType: 'CANCEL_REQUEST_MESSAGING' as const,
                       },
                     ],

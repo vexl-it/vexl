@@ -1,0 +1,109 @@
+import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
+import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+
+import {
+  createNotificationTrackingId,
+  NotificationTrackingId,
+} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {
+  UnixMillisecondsE,
+  unixMillisecondsNow,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
+import {
+  NewChatMessageNoticeMessage,
+  NotificationsStreamClientInfo,
+  StreamOnlyChatMessage,
+  type NotificationStreamError,
+  type NotificationStreamMessage,
+} from '@vexl-next/rest-api/src/services/notification/Rpcs'
+import {Schema, type Effect} from 'effect/index'
+
+export const ConnectionManagerChannelId = Schema.String.pipe(
+  Schema.brand('ConnectionManagerChannelId')
+)
+export type ConnectionManagerChannelId = typeof ConnectionManagerChannelId.Type
+
+export const ConnectionRedisRecord = Schema.Struct({
+  clientInfo: NotificationsStreamClientInfo,
+  managerId: ConnectionManagerChannelId,
+})
+export type ConnectionRedisRecord = typeof ConnectionRedisRecord.Type
+
+export interface ConnectionToClient {
+  connectionInfo: NotificationsStreamClientInfo
+  send: (message: NotificationStreamMessage) => Effect.Effect<boolean>
+  kickOut: (error?: NotificationStreamError) => Effect.Effect<void>
+}
+
+const SendMessageTaskId = Schema.String.pipe(Schema.brand('SendMessageTaskId'))
+const newSendMessageTaskId = (): SendMessageTaskId =>
+  Schema.decodeSync(SendMessageTaskId)(generateUuid())
+export type SendMessageTaskId = typeof SendMessageTaskId.Type
+
+/**
+ * Representing a task to send a new chat message notice notification.
+ */
+export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMessageNoticeSendTask>(
+  'NewChatMessageNoticeSendTask'
+)('NewChatMessageNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationToken,
+  targetCypher: NotificationCypherE,
+  sendNewChatMessageNotification: Schema.Boolean,
+  sentAt: Schema.optionalWith(UnixMillisecondsE, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): NewChatMessageNoticeMessage {
+    return new NewChatMessageNoticeMessage({
+      sentAt: this.sentAt,
+      targetCypher: this.targetCypher,
+      trackingId: this.trackingId,
+    })
+  }
+}
+
+/**
+ * Representing a task to send a message that should only be sent over the stream connection (if any)
+ */
+export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnlyChatMessageSendTask>(
+  'StreamOnlyChatMessageSendTask'
+)('StreamOnlyChatMessageSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationToken,
+  targetCypher: NotificationCypherE,
+  message: StreamOnlyMessageCypher,
+  sentAt: Schema.optionalWith(UnixMillisecondsE, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): StreamOnlyChatMessage {
+    return new StreamOnlyChatMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+      message: this.message,
+      targetCypher: this.targetCypher,
+    })
+  }
+}
+
+export const SendMessageTask = Schema.Union(
+  NewChatMessageNoticeSendTask,
+  StreamOnlyChatMessageSendTask
+)
+export type SendMessageTask = typeof SendMessageTask.Type

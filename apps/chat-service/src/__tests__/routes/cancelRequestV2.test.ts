@@ -1,6 +1,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
@@ -37,7 +38,7 @@ beforeEach(async () => {
           payload: yield* _(
             user1.inbox1.addChallenge({
               receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              message: 'someMessage',
+              message: 'cancelMessage' as MessageCypher,
             })
           ),
         })
@@ -60,7 +61,7 @@ describe('Cancel request', () => {
             payload: yield* _(
               user1.inbox1.addChallenge({
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-                message: 'cancelMessage',
+                message: 'cancelMessage' as MessageCypher,
               })
             ),
           })
@@ -93,7 +94,7 @@ describe('Cancel request', () => {
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                  message: 'cancelMessage',
+                  message: 'cancelMessage' as MessageCypher,
                 })
               ),
             }),
@@ -117,7 +118,7 @@ describe('Cancel request', () => {
                 user2.inbox1.addChallenge({
                   publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
                   approve: true,
-                  message: 'approve',
+                  message: 'approve' as MessageCypher,
                 })
               ),
             })
@@ -129,7 +130,7 @@ describe('Cancel request', () => {
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                  message: 'cancelMessage',
+                  message: 'cancelMessage' as MessageCypher,
                 })
               ),
             }),
@@ -153,7 +154,7 @@ describe('Cancel request', () => {
                 user2.inbox1.addChallenge({
                   publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
                   approve: false,
-                  message: 'approve',
+                  message: 'approve' as MessageCypher,
                 })
               ),
             })
@@ -165,7 +166,7 @@ describe('Cancel request', () => {
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                  message: 'cancelMessage',
+                  message: 'cancelMessage' as MessageCypher,
                 })
               ),
             }),
@@ -199,7 +200,7 @@ describe('Cancel request', () => {
                   dummyAuthHeaders
                 )({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
-                  message: 'cancelMessage',
+                  message: 'cancelMessage' as MessageCypher,
                 })
               ),
             }),
@@ -221,7 +222,7 @@ describe('Cancel request', () => {
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
-                  message: 'cancelMessage',
+                  message: 'cancelMessage' as MessageCypher,
                 })
               ),
             }),

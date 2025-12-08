@@ -72,7 +72,7 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
                 UnexpectedServerError | NotFoundError
               > => {
                 if (
-                  e._tag === 'RecordDoesNotExistsReddisError' ||
+                  e._tag === 'NoSuchElementException' ||
                   e._tag === 'RedisError'
                 )
                   return Effect.zipLeft(

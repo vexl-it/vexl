@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql'
+import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -31,7 +32,7 @@ beforeAll(async () => {
       yield* _(
         client.Inboxes.requestApproval({
           payload: {
-            message: 'someMessage',
+            message: 'cancelMessage' as MessageCypher,
             publicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           },
           headers: commonAndSecurityHeaders,
@@ -43,7 +44,7 @@ beforeAll(async () => {
         client.Inboxes.approveRequest({
           payload: yield* _(
             user2.inbox1.addChallenge({
-              message: 'someMessage2',
+              message: 'someMessage2' as MessageCypher,
               publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
               approve: true,
             })
@@ -65,7 +66,7 @@ describe('clear expired messages', () => {
 
         const messageToSend = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessageToBeDeleted',
+            message: 'someMessageToBeDeleted' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           })
@@ -73,7 +74,7 @@ describe('clear expired messages', () => {
 
         const messageToSend2 = (yield* _(
           user1.addChallengeForMainInbox({
-            message: 'someMessageToNotBeDeleted',
+            message: 'someMessageToNotBeDeleted' as MessageCypher,
             messageType: 'MESSAGE' as const,
             receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
           })

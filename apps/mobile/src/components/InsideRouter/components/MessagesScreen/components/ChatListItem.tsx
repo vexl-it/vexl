@@ -10,6 +10,7 @@ import Swipeable, {
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
+import {createIsOtherSideTypingAtom} from '../../../../../state/chat/atoms/typingIndication'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {clubsWithMembersAtom} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
@@ -74,6 +75,9 @@ function ChatListItem({
   }, [clubsWithMembers, dataAtom])
 
   const chatInfo = useAtomValue(chatInfoAtom)
+  const isTyping = useAtomValue(
+    useMemo(() => createIsOtherSideTypingAtom(chatInfo.id), [chatInfo.id])
+  )
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
@@ -158,11 +162,17 @@ function ChatListItem({
                   ellipsizeMode="tail"
                   mr="$3"
                 >
-                  <MessagePreview
-                    lastMessageAtom={lastMessageAtom}
-                    name={userName}
-                    unread={isUnread}
-                  />
+                  {isTyping ? (
+                    <Text color="$greyOnBlack" fs={14} ff="$body600">
+                      {t('messages.typing')}
+                    </Text>
+                  ) : (
+                    <MessagePreview
+                      lastMessageAtom={lastMessageAtom}
+                      name={userName}
+                      unread={isUnread}
+                    />
+                  )}
                 </Text>
                 <Text color="$greyOnBlack">
                   <LastMessageDateView lastMessageAtom={lastMessageAtom} />

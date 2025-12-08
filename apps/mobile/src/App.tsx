@@ -31,7 +31,7 @@ import {useAppState} from './utils/useAppState'
 function App(): React.ReactElement {
   const theme = useTheme()
 
-  useAppState(setLastTimeAppWasRunningToNow, true)
+  useAppState(setLastTimeAppWasRunningToNow)
 
   useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()

@@ -1,11 +1,14 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type VexlNotificationToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {type NotificationsStreamClientInfo} from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Context, Effect, Layer} from 'effect'
 import {type NoSuchElementException} from 'effect/Cause'
-import {ConnectionRedisRecord} from '../domain'
+import {
+  ConnectionRedisRecord,
+  vexlNotificationTokenFromExpoToken,
+  type VexlNotificationToken,
+} from '../domain'
 import {MyManagerIdProvider} from './MyManagerIdProvider'
 
 const CONNECTION_KEY_PREFIX = 'notification-service:notification-socket:'
@@ -51,7 +54,9 @@ export class RedisConnectionRegistry extends Context.Tag(
             clientInfo,
             managerId: myManagerId,
           }
-          const key = createRedisKey(clientInfo.notificationToken)
+          const key = createRedisKey(
+            vexlNotificationTokenFromExpoToken(clientInfo.notificationToken)
+          )
 
           return storeConnection(key, record, {
             expiresAt: unixMillisecondsFromNow(CONNECTION_TTL_MS),

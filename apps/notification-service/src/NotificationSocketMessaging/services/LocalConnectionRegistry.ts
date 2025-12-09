@@ -1,4 +1,3 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {type NoSuchElementException} from 'effect/Cause'
 import {
   Context,
@@ -8,7 +7,11 @@ import {
   Ref,
   SynchronizedRef,
 } from 'effect/index'
-import {type ConnectionToClient} from '../domain'
+import {
+  vexlNotificationTokenFromExpoToken,
+  type ConnectionToClient,
+  type VexlNotificationToken,
+} from '../domain'
 
 export interface SocketRegistryOperations {
   registerConnection: (connection: ConnectionToClient) => Effect.Effect<void>
@@ -34,7 +37,12 @@ export class LocalConnectionRegistry extends Context.Tag(
         registerConnection: (record) =>
           Ref.update(
             registryRef,
-            HashMap.set(record.connectionInfo.notificationToken, record)
+            HashMap.set(
+              vexlNotificationTokenFromExpoToken(
+                record.connectionInfo.notificationToken
+              ),
+              record
+            )
           ),
         removeConnection: (id) => Ref.update(registryRef, HashMap.remove(id)),
         findConnection: (id) =>

@@ -6,12 +6,15 @@ import {
   NotificationTrackingId,
 } from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {
+  ExpoNotificationTokenE,
+  type ExpoNotificationToken,
+} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {
   UnixMillisecondsE,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {VexlNotificationToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {
   NewChatMessageNoticeMessage,
   NotificationsStreamClientInfo,
@@ -19,7 +22,35 @@ import {
   type NotificationStreamError,
   type NotificationStreamMessage,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
-import {Schema, type Effect} from 'effect/index'
+import {Option, pipe, Schema, String, type Effect} from 'effect/index'
+
+const EXPO_PREFIX = 'expo-'
+
+export const VexlNotificationToken = Schema.String.pipe(
+  Schema.brand('VexlNotificaitionToken'),
+  Schema.filter(String.startsWith(EXPO_PREFIX))
+)
+export type VexlNotificationToken = typeof VexlNotificationToken.Type
+
+export const vexlNotificationTokenToExpoToken = (
+  vexlNotificationToken: VexlNotificationToken
+): Option.Option<ExpoNotificationToken> => {
+  return pipe(
+    Option.some(vexlNotificationToken),
+    Option.filter(String.startsWith(EXPO_PREFIX)),
+    Option.map(String.replace(EXPO_PREFIX, '')),
+    Option.flatMap(Schema.decodeOption(ExpoNotificationTokenE))
+  )
+}
+
+export const vexlNotificationTokenFromExpoToken = (
+  expoNotificationToken: ExpoNotificationToken
+): VexlNotificationToken => {
+  return pipe(
+    String.concat(EXPO_PREFIX, expoNotificationToken),
+    Schema.decodeSync(VexlNotificationToken)
+  )
+}
 
 export const ConnectionManagerChannelId = Schema.String.pipe(
   Schema.brand('ConnectionManagerChannelId')

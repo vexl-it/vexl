@@ -1,6 +1,5 @@
 import {Socket} from '@effect/platform'
 import {RpcClient, RpcSerialization} from '@effect/rpc'
-import {vexlNotificationTokenFromExpoToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {
   type NotificationStreamMessage,
   Rpcs,
@@ -50,7 +49,7 @@ const processMessageActionAtom = atom(
   null,
   (get, set, message: NotificationStreamMessage) =>
     Effect.gen(function* (_) {
-      if (message._tag === 'DebugClass') {
+      if (message._tag === 'DebugMessage') {
         yield* _(
           Console.debug('Received debug message from notification stream')
         )
@@ -139,8 +138,7 @@ const startListeningToNotificationStreamActionAtom = atom(null, (get, set) =>
     const rpc = yield* _(makeClient)
     return yield* rpc
       .listenToNotifications({
-        notificationToken:
-          vexlNotificationTokenFromExpoToken(notificationToken),
+        notificationToken,
         platform,
         version: versionCode,
       })

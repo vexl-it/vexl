@@ -1,7 +1,6 @@
-import {vexlNotificationTokenToExpoToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {Context, Effect, Layer, pipe} from 'effect/index'
 import {ExpoNotificationService} from '../../utils'
-import {type SendMessageTask} from '../domain'
+import {vexlNotificationTokenToExpoToken, type SendMessageTask} from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 
 export class TaskProcessor extends Context.Tag('TaskProcessor')<

@@ -45,7 +45,7 @@
     "react": "19.1.2",
     "react-animated-numbers": "^0.18.0",
     "react-confetti": "^6.1.0",
-    "react-dom": "19.1.0",
+    "react-dom": "19.1.2",
     "react-spring": "^9.7.3",
     "react-use": "^17.5.0",
     "serve-handler": "^6.1.5",

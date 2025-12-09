@@ -19,7 +19,7 @@
     "next": "^15.1.9",
     "qrcode.react": "^4.2.0",
     "react": "19.1.2",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",

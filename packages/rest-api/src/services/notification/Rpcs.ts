@@ -4,15 +4,15 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {VexlNotificationToken} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {Schema} from 'effect'
 
 export const NotificationsStreamClientInfo = Schema.Struct({
   version: VersionCode,
-  notificationToken: VexlNotificationToken, // TODO create endpoint for validation
+  notificationToken: ExpoNotificationTokenE, // TODO create endpoint for validation
   platform: PlatformName,
 })
 export type NotificationsStreamClientInfo =

@@ -134,14 +134,17 @@ export class SendMessageTasksManager extends Context.Tag(
   }: {
     timeout: Duration.DurationInput
   }): Layer.Layer<
-    SendMessageTasksManager,
+    | TaskProcessor
+    | TimeoutJobsStream
+    | TimeoutProcessor
+    | SendMessageTasksManager
+    | EnqueuePendingTask,
     SendMessageTasksManagerError,
-    | RedisService
     | RedisPubSubService
+    | RedisService
     | RedisConnectionService
     | LocalConnectionRegistry
     | ExpoNotificationService
-    | MyManagerIdProvider
   > =>
     Layer.scoped(
       SendMessageTasksManager,

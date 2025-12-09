@@ -2,10 +2,6 @@ import {type StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messag
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {
-  type VexlNotificationToken,
-  vexlNotificationTokenFromExpoToken,
-} from '@vexl-next/domain/src/utility/VexlNotificationToken'
 import {type NewChatMessageNoticeMessage} from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
 import {NoSuchElementException} from 'effect/Cause'
@@ -14,6 +10,8 @@ import {
   type ConnectionRedisRecord,
   NewChatMessageNoticeSendTask,
   StreamOnlyChatMessageSendTask,
+  type VexlNotificationToken,
+  vexlNotificationTokenFromExpoToken,
 } from './domain'
 import {LocalConnectionRegistry} from './services/LocalConnectionRegistry'
 import {MyManagerIdProvider} from './services/MyManagerIdProvider'

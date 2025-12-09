@@ -21,20 +21,19 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
     const messageTime = unixMillisecondsToLocaleDateTime(
       getMessageTime(message)
     )
-    if (
-      prevMessageTime &&
-      prevMessageTime.diff(messageTime, 'minutes').minutes > 10
-    ) {
+
+    const minutesDiff = prevMessageTime
+      ? messageTime.diff(prevMessageTime, 'minutes').minutes
+      : 0
+
+    if (prevMessageTime && minutesDiff > 10) {
       result.push({
         type: 'time',
         time: prevMessageTime,
         key: `time-${getUniqueKey(message)}`,
       })
       prevMessageTime = messageTime
-    } else if (
-      prevMessageTime &&
-      prevMessageTime.diff(messageTime, 'minutes').minutes > 1
-    ) {
+    } else if (prevMessageTime && minutesDiff > 1) {
       result.push({
         type: 'space',
         key: `space-${getUniqueKey(message)}`,
@@ -46,7 +45,7 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
       type: 'message',
       time: messageTime,
       message: message.message,
-      isLatest: i === messages.length - 1,
+      isLatest: i === 0,
       key: `message-${getUniqueKey(message)}`,
     })
   }

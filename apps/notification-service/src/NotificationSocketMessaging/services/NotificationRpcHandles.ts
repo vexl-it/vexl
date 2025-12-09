@@ -7,6 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {Effect, Either, identity, Queue, Schedule, Stream} from 'effect/index'
 import {type Scope} from 'effect/Scope'
+import {vexlNotificationTokenFromExpoToken} from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 import {RedisConnectionRegistry} from './RedisConnectionRegistry'
 
@@ -14,7 +15,9 @@ const keepAliveAsLongAsScopeInRedisRegistry = (
   clientInfo: NotificationsStreamClientInfo
 ): Effect.Effect<void, never, RedisConnectionRegistry | Scope> =>
   Effect.flatMap(RedisConnectionRegistry, (registry) =>
-    registry.keepAlive(clientInfo.notificationToken)
+    registry.keepAlive(
+      vexlNotificationTokenFromExpoToken(clientInfo.notificationToken)
+    )
   ).pipe(Effect.schedule(Schedule.spaced('1 minute')), Effect.forkScoped)
 
 export const NotificationRpcsHandlers = Rpcs.toLayer(
@@ -81,7 +84,9 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
                 }),
                 () =>
                   localRegistry.removeConnection(
-                    connectionInfo.notificationToken
+                    vexlNotificationTokenFromExpoToken(
+                      connectionInfo.notificationToken
+                    )
                   )
               )
             )
@@ -90,7 +95,11 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
                 redisRegistry.registerConnection(connectionInfo),
                 () =>
                   redisRegistry
-                    .removeConnection(connectionInfo.notificationToken)
+                    .removeConnection(
+                      vexlNotificationTokenFromExpoToken(
+                        connectionInfo.notificationToken
+                      )
+                    )
                     .pipe(Effect.ignore)
               )
             )

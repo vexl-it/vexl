@@ -81,12 +81,12 @@ export const HttpServerLive = Layer.mergeAll(
 ).pipe(
   Layer.merge(Layer.mergeAll(TaskWorkerLayer, TimeoutWorkerLayer)),
   Layer.provideMerge(NotificationSocketMessaging.Live),
-  Layer.provideMerge(RateLimitingService.Live),
-  Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(ExpoNotificationService.Live),
   Layer.provideMerge(ExpoClientService.Live),
   Layer.provideMerge(NotificationMetricsService.Live),
+  Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(MetricsClientService.Live),
   Layer.provideMerge(RedisService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl))
+  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
+  Layer.provideMerge(ServerCrypto.layer(cryptoConfig))
 )

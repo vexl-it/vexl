@@ -26,6 +26,8 @@ async function proxyRequest(request: NextRequest, method: string) {
       }
     }
 
+    console.log(`Proxying ${method} request to:`, backendUrl.toString())
+
     // Forward the request to the backend
     const backendResponse = await fetch(backendUrl.toString(), {
       method,

@@ -8521,7 +8521,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tailwindcss/postcss@npm:^4.0.0":
+"@tailwindcss/postcss@npm:^4.0.0, @tailwindcss/postcss@npm:^4.1.17":
   version: 4.1.17
   resolution: "@tailwindcss/postcss@npm:4.1.17"
   dependencies:
@@ -12420,6 +12420,7 @@ __metadata:
     "@remix-run/node": ^2.16.8
     "@remix-run/react": ^2.16.8
     "@remix-run/serve": ^2.16.8
+    "@tailwindcss/postcss": ^4.1.17
     "@types/eslint-plugin-jsx-a11y": ^6
     "@types/react": ~19.1.10
     "@types/react-dom": ~19.1.7

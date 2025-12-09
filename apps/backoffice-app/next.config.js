@@ -5,8 +5,8 @@ const nextConfig = {
 
   // Environment variables accessible in the browser
   env: {
-    NEXT_PUBLIC_API_INTERNAL_URL:
-      process.env.API_INTERNAL_URL || 'http://localhost:3003',
+    // NEXT_PUBLIC_API_INTERNAL_URL:
+    //   process.env.API_INTERNAL_URL || 'http://localhost:3003',
   },
 
   // Optional: suppress ESLint during builds (since we run it separately)

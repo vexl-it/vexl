@@ -16,7 +16,7 @@ import {
   Schema,
   Stream,
 } from 'effect/index'
-import {type ExpoNotificationService} from '../../../utils'
+import {type ExpoNotificationService} from '../../../PushNotificationService'
 import {
   type ConnectionManagerChannelId,
   SendMessageTask,

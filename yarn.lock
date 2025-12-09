@@ -11447,7 +11447,7 @@ __metadata:
     prettier: ^3.3.2
     qrcode.react: ^4.2.0
     react: 19.1.2
-    react-dom: 19.1.0
+    react-dom: 19.1.2
     tailwindcss: ^4.1.12
     typescript: ~5.9.2
   languageName: unknown
@@ -11715,7 +11715,7 @@ __metadata:
     react: 19.1.2
     react-animated-numbers: ^0.18.0
     react-confetti: ^6.1.0
-    react-dom: 19.1.0
+    react-dom: 19.1.2
     react-spring: ^9.7.3
     react-use: ^17.5.0
     rimraf: ^4.4.0
@@ -12150,7 +12150,7 @@ __metadata:
     luxon: ^3.3.0
     optics-ts: ^2.4.0
     prettier: ^3.3.2
-    react: 19.1.2
+    react: 19.1.0
     react-dom: 19.1.0
     react-native: 0.81.5
     react-native-autolink: ^4.2.0
@@ -12579,9 +12579,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"account-deletion-website2@workspace:apps/account-deletion-website":
+"account-deletion-website@workspace:apps/account-deletion-website":
   version: 0.0.0-use.local
-  resolution: "account-deletion-website2@workspace:apps/account-deletion-website"
+  resolution: "account-deletion-website@workspace:apps/account-deletion-website"
   dependencies:
     "@effect/platform": ^0.93.6
     "@remix-run/dev": ^2.16.8
@@ -12609,7 +12609,7 @@ __metadata:
     isbot: ^4.1.0
     prettier: ^3.3.2
     react: 19.1.2
-    react-dom: 19.1.0
+    react-dom: 19.1.2
     tailwindcss: ^4.1.12
     typescript: ~5.9.2
     vite: ^6.1.6
@@ -27012,6 +27012,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-dom@npm:19.1.2":
+  version: 19.1.2
+  resolution: "react-dom@npm:19.1.2"
+  dependencies:
+    scheduler: ^0.26.0
+  peerDependencies:
+    react: ^19.1.2
+  checksum: a89e90dc7a3a97e9661b7d055560e654c010f6833152a7f66c79d7589ec3fa69e4d88f06c72521eefa048e806b0de397426a3ffbe1d498926acc1195f529a87a
+  languageName: node
+  linkType: hard
+
 "react-freeze@npm:^1.0.0, react-freeze@npm:^1.0.3":
   version: 1.0.4
   resolution: "react-freeze@npm:1.0.4"
@@ -27742,6 +27753,13 @@ __metadata:
     react: "*"
     react-dom: "*"
   checksum: c76de18b56b554bfbb28199e4ad4098f4e4ab15f0d3cefef661a7a5e6a4c167ae85390fc7bc648c34b80c17498abf1e8223d7078f3e51c09e4da70e11a41a54e
+  languageName: node
+  linkType: hard
+
+"react@npm:19.1.0":
+  version: 19.1.0
+  resolution: "react@npm:19.1.0"
+  checksum: c0905f8cfb878b0543a5522727e5ed79c67c8111dc16ceee135b7fe19dce77b2c1c19293513061a8934e721292bfc1517e0487e262d1906f306bdf95fa54d02f
   languageName: node
   linkType: hard
 

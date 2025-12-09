@@ -1,0 +1,7 @@
+{
+  "ignoredRules": [],
+  "workspaceProtocol": "allow",
+  "packages": {
+    "ignore": ["apps/mobile"]
+  }
+}

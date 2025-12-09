@@ -1,5 +1,5 @@
 {
-  "name": "account-deletion-website2",
+  "name": "account-deletion-website",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -17,7 +17,7 @@
     "@remix-run/serve": "^2.16.8",
     "isbot": "^4.1.0",
     "react": "19.1.2",
-    "react-dom": "19.1.0",
+    "react-dom": "19.1.2",
     "tailwindcss": "^4.1.12"
   },
   "devDependencies": {

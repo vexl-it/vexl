@@ -53,9 +53,10 @@ export const ENV_PRESETS: {stageEnv: EnvPreset; prodEnv: EnvPreset} = {
     chatMs: Schema.decodeSync(ServiceUrl)('https://stage-chat.vexl.it'),
     offerMs: Schema.decodeSync(ServiceUrl)('https://stage-offer2.vexl.it'),
     locationMs: Schema.decodeSync(ServiceUrl)('https://stage-location.vexl.it'),
-    notificationMs: Schema.decodeSync(ServiceUrl)(
-      'https://stage-notification.vexl.it'
-    ),
+    // notificationMs: Schema.decodeSync(ServiceUrl)(
+    //   'https://stage-notification.vexl.it'
+    // ),
+    notificationMs: Schema.decodeSync(ServiceUrl)('http://10.0.2.2:3001'),
     btcExchangeRateMs: Schema.decodeSync(ServiceUrl)(
       'https://stage-btc-exchange-rate.vexl.it'
     ),

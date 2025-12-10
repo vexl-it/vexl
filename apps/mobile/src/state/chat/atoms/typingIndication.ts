@@ -18,7 +18,7 @@ export const ChatsWithTypingIndicationsAtom = atom<
   HashMap.HashMap<ChatId, UnixMilliseconds>
 >(HashMap.empty())
 
-export const ReportTypingIndicationReceivedActionAtom = atom(
+export const reportTypingIndicationReceivedActionAtom = atom(
   null,
   (_, set, chatId: ChatId, typing: boolean) => {
     typing

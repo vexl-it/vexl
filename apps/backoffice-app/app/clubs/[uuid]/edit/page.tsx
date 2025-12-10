@@ -243,7 +243,7 @@ export default function EditClubPage() {
               </p>
             </div>
 
-            {previewUrl && !uploadedImageUrl && (
+            {!!previewUrl && !uploadedImageUrl && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
@@ -256,7 +256,7 @@ export default function EditClubPage() {
               </div>
             )}
 
-            {uploading && (
+            {!!uploading && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Upload Progress
@@ -273,7 +273,7 @@ export default function EditClubPage() {
               </div>
             )}
 
-            {selectedFile && !uploadedImageUrl && !uploading && (
+            {!!selectedFile && !uploadedImageUrl && !uploading && (
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -294,7 +294,7 @@ export default function EditClubPage() {
               </div>
             )}
 
-            {uploadedImageUrl && (
+            {!!uploadedImageUrl && (
               <div className="bg-green-50 p-4 rounded-md">
                 <p className="text-sm font-medium text-green-900 mb-2">
                   Image uploaded successfully!
@@ -314,7 +314,7 @@ export default function EditClubPage() {
               </div>
             )}
 
-            {uploadError && (
+            {!!uploadError && (
               <div className="bg-red-50 p-4 rounded-md">
                 <p className="text-red-800 text-sm">{uploadError}</p>
               </div>
@@ -342,7 +342,7 @@ export default function EditClubPage() {
             <p className="mt-1 text-sm text-gray-500">
               Auto-filled when you upload an image above, or enter URL manually
             </p>
-            {formData.clubImageUrl && !uploadedImageUrl && (
+            {!!formData.clubImageUrl && !uploadedImageUrl && (
               <div className="mt-2">
                 <p className="text-sm font-medium text-gray-700 mb-1">
                   Current Image:
@@ -404,7 +404,7 @@ export default function EditClubPage() {
             />
           </div>
 
-          {error && formData && (
+          {!!error && !!formData && (
             <div className="bg-red-50 p-4 rounded-md">
               <p className="text-red-800">{error}</p>
             </div>

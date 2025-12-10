@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint",
+    "lint": "eslint app src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint app src --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
   },
@@ -30,7 +31,6 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.1.8",
     "postcss": "^8.4.49",
     "prettier": "^3.3.2",
     "tailwindcss": "^4.1.12",

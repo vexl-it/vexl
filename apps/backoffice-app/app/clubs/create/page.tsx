@@ -197,7 +197,7 @@ export default function CreateClubPage() {
               </p>
             </div>
 
-            {previewUrl && !uploadedImageUrl && (
+            {!!previewUrl && !uploadedImageUrl && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
@@ -210,7 +210,7 @@ export default function CreateClubPage() {
               </div>
             )}
 
-            {uploading && (
+            {!!uploading && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Upload Progress
@@ -227,7 +227,7 @@ export default function CreateClubPage() {
               </div>
             )}
 
-            {selectedFile && !uploadedImageUrl && !uploading && (
+            {!!selectedFile && !uploadedImageUrl && !uploading && (
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -248,7 +248,7 @@ export default function CreateClubPage() {
               </div>
             )}
 
-            {uploadedImageUrl && (
+            {!!uploadedImageUrl && (
               <div className="bg-green-50 p-4 rounded-md">
                 <p className="text-sm font-medium text-green-900 mb-2">
                   Image uploaded successfully!
@@ -268,7 +268,7 @@ export default function CreateClubPage() {
               </div>
             )}
 
-            {uploadError && (
+            {!!uploadError && (
               <div className="bg-red-50 p-4 rounded-md">
                 <p className="text-red-800 text-sm">{uploadError}</p>
               </div>
@@ -339,7 +339,7 @@ export default function CreateClubPage() {
             />
           </div>
 
-          {error && (
+          {!!error && (
             <div className="bg-red-50 p-4 rounded-md">
               <p className="text-red-800">{error}</p>
             </div>

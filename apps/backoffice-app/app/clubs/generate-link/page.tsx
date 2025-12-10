@@ -192,13 +192,13 @@ export default function GenerateLinkPage() {
                 </select>
               </div>
 
-              {error && (
+              {!!error && (
                 <div className="bg-red-50 p-4 rounded-md">
                   <p className="text-red-800">{error}</p>
                 </div>
               )}
 
-              {generatedLink && (
+              {!!generatedLink && (
                 <div className="bg-green-50 p-4 rounded-md space-y-3">
                   <p className="text-sm font-medium text-green-900">
                     Invite link generated successfully!

@@ -147,7 +147,7 @@ export default function ClubsListPage() {
                     <tr key={club.uuid}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">
                         <div className="flex items-center">
-                          {club.clubImageUrl && (
+                          {!!club.clubImageUrl && (
                             <img
                               src={club.clubImageUrl}
                               alt={club.name}
@@ -209,7 +209,7 @@ export default function ClubsListPage() {
         </div>
       </div>
 
-      {hoveredDescription && (
+      {!!hoveredDescription && (
         <div
           className="fixed z-50 max-w-xs bg-gray-900 text-white text-sm rounded-lg shadow-lg p-3 pointer-events-none"
           style={{

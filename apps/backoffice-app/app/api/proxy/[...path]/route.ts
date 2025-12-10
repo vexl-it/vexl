@@ -28,13 +28,21 @@ async function proxyRequest(request: NextRequest, method: string) {
 
     console.log(`Proxying ${method} request to:`, backendUrl.toString())
 
+    // Prepare headers to forward
+    const headersToForward: Record<string, string> = {
+      'Content-Type': request.headers.get('content-type') ?? 'application/json',
+    }
+
+    // Forward cf-connecting-ip header if present (Cloudflare client IP)
+    const cfConnectingIp = request.headers.get('cf-connecting-ip')
+    if (cfConnectingIp) {
+      headersToForward['cf-connecting-ip'] = cfConnectingIp
+    }
+
     // Forward the request to the backend
     const backendResponse = await fetch(backendUrl.toString(), {
       method,
-      headers: {
-        'Content-Type':
-          request.headers.get('content-type') ?? 'application/json',
-      },
+      headers: headersToForward,
       body,
     })
 

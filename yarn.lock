@@ -8521,7 +8521,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tailwindcss/postcss@npm:^4.0.0, @tailwindcss/postcss@npm:^4.1.17":
+"@tailwindcss/postcss@npm:^4.1.17":
   version: 4.1.17
   resolution: "@tailwindcss/postcss@npm:4.1.17"
   dependencies:
@@ -11263,7 +11263,7 @@ __metadata:
   resolution: "@vexl-next/backoffice-app@workspace:apps/backoffice-app"
   dependencies:
     "@effect/platform": ^0.93.6
-    "@tailwindcss/postcss": ^4.0.0
+    "@tailwindcss/postcss": ^4.1.17
     "@types/node": ^22.10.5
     "@types/react": ~19.1.10
     "@types/react-dom": ~19.1.7

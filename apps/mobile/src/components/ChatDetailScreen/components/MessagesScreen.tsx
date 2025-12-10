@@ -66,9 +66,7 @@ function MessagesScreen(): React.ReactElement {
       </Stack>
       {!!canSendMessages && (
         <Stack mx="$4" mb="$2">
-          <Text color="$greyOnBlack">
-            <TypingIndication />
-          </Text>
+          <TypingIndication />
           <ChatTextInput />
         </Stack>
       )}

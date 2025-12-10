@@ -4,7 +4,7 @@ import {Array, Effect, Option, pipe} from 'effect/index'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
 import {type InboxInState} from '../domain'
-import {ReportTypingIndicationReceivedActionAtom} from './typingIndication'
+import {reportTypingIndicationReceivedActionAtom} from './typingIndication'
 
 export const processStreamOnlyNotificationActionAtom = atom(
   null,
@@ -36,7 +36,7 @@ export const processStreamOnlyNotificationActionAtom = atom(
             },
             onSome: (chat) => {
               set(
-                ReportTypingIndicationReceivedActionAtom,
+                reportTypingIndicationReceivedActionAtom,
                 chat.chat.id,
                 payload.typing
               )

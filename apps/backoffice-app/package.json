@@ -23,7 +23,7 @@
     "react-dom": "19.1.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^22.10.5",
     "@types/react": "~19.1.10",
     "@types/react-dom": "~19.1.7",

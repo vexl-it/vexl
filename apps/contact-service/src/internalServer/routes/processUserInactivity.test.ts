@@ -28,7 +28,7 @@ describe('Process user inactivity', () => {
       }).pipe(Logger.withMinimumLogLevel(LogLevel.None))
     )
   })
-  it.only('Notifies inactive users and sets refreshed_at to null for users that were notified', async () => {
+  it('Notifies inactive users and sets refreshed_at to null for users that were notified', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         yield* _(Effect.sleep(100)) // Send notifications mock is called asynchronously, so thats whiy the sleep

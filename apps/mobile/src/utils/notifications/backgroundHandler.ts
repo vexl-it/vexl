@@ -8,9 +8,7 @@ import {
 } from '@vexl-next/domain/src/general/notifications'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Effect, Option, Schema} from 'effect'
-import {BackgroundTaskResult} from 'expo-background-task'
 import * as Notifications from 'expo-notifications'
-import * as TaskManager from 'expo-task-manager'
 import {getDefaultStore} from 'jotai'
 import {AppState, Platform} from 'react-native'
 import {apiAtom} from '../../api'
@@ -33,6 +31,7 @@ import processChatNotificationActionAtom from '../../state/notifications/process
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
 import {translationAtom} from '../localization/I18nProvider'
 import reportError from '../reportError'
+import {BACKGROUND_NOTIFICATION_TASK} from './defineBackgroundNotificationTask'
 import {extractDataPayloadFromNotification} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
@@ -243,23 +242,6 @@ export async function processBackgroundMessage(
     )
   }
 }
-
-const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK'
-
-TaskManager.defineTask<Notifications.NotificationTaskPayload>(
-  BACKGROUND_NOTIFICATION_TASK,
-  async ({data}) => {
-    try {
-      await processBackgroundMessage(data)
-      return BackgroundTaskResult.Success
-    } catch (e) {
-      reportError('error', new Error('Error in background notification task'), {
-        error: e,
-      })
-      return BackgroundTaskResult.Failed
-    }
-  }
-)
 
 async function setupBackgroundMessaging(): Promise<void> {
   try {

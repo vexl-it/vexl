@@ -51,7 +51,6 @@ export function usePeriodicTypingIndication(hasText: boolean): void {
   }, [sendTypingIndication])
 
   useEffect(() => {
-    console.log(shouldSend)
     if (!shouldSend) return
 
     // Send immediately when conditions are met

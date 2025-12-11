@@ -1,5 +1,7 @@
 // import './src/utils/wdyr'
 import './globals'
+import './src/utils/backgroundTask/defineBackgroundTask'
+import './src/utils/notifications/defineBackgroundNotificationTask'
 import './src/utils/setupCrypto'
 
 import './src/utils/setupSentry'

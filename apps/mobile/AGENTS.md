@@ -21,3 +21,4 @@ Notes for agents:
 
 - Metro caches can be sticky; use `fresh-start-*` scripts if bundling breaks.
 - When integrating native utilities, reuse provided modules (e.g., `packages/ecdh-platform-native-utils`, `fix-brorand-for-expo`) instead of adding new native code paths.
+- When using expo related packages and functions use expo/expo documentation from context7

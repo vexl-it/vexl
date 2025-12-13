@@ -29,12 +29,12 @@ import {
   TaskWorkerLayer,
   TimeoutWorkerLayer,
 } from './NotificationSocketMessaging/services/SendMessageTasksManager'
+import {ExpoNotificationService} from './PushNotificationService'
 import {NotificationMetricsService} from './metrics'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {issueNotifcationHandler} from './routes/issueNotificationHandler'
 import {issueStreamOnlyMessageHandler} from './routes/issueStreamOnlyMessageHandler'
 import {reportNotificationProcessedHandler} from './routes/reportNotificationProcessed'
-import {ExpoNotificationService} from './utils'
 
 const RootGroupLive = HttpApiBuilder.group(
   NotificationApiSpecification,

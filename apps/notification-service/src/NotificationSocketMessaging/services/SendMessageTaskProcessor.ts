@@ -45,6 +45,8 @@ export class TimeoutProcessor extends Context.Tag('TimeoutProcessor')<
             ),
             Effect.ignore
           )
+
+        // we don't process other task types for now
         return Effect.void
       }
     })

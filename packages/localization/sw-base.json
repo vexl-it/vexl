@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "Hii itakuwa mazungumzo yako ya kwanza na mtumiaji huyu kuhusu ofa hii.",
   "messages.thisUserIsAlsoMemberOff": "Mtumiaji huyu pia ni mwanachama wa {{clubs}}",
   "messages.wellLetYouKnowOnceUserAccepts": "Ombi lako liko katika hali ya kusubiri. Tutakujulisha mara tu upande mwingine utakapojibu.",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} ameomba kufichua utambulisho",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Utambulisho umefichuliwa",

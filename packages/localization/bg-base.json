@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "Това ще бъде първото ви взаимодействие с този потребител относно тази оферта.",
   "messages.thisUserIsAlsoMemberOff": "Този потребител е също член на {{clubs}}",
   "messages.wellLetYouKnowOnceUserAccepts": "Вашата заявка е в очакване. Ще ви уведомим, след като другата страна отговори.",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} поиска разкриване на самоличността",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Самоличността е разкрита",

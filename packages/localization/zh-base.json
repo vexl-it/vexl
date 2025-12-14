@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "这将是您与该用户关于此报价进行的首次互动。",
   "messages.thisUserIsAlsoMemberOff": "该用户也是 {{clubs}} 里的会员",
   "messages.wellLetYouKnowOnceUserAccepts": "您的请求正在待处理中。一旦对方回复，我们将会通知您。",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}：{{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} 请求身份透露",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "身份已被透露！",

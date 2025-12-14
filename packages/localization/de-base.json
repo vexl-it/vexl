@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "Dies wird deine erste Interaktion mit diesem Angebot sein.",
   "messages.thisUserIsAlsoMemberOff": "Dieser Benutzer ist auch Mitglied von {{clubs}}",
   "messages.wellLetYouKnowOnceUserAccepts": "Anfrage gesendet. Wir werden dich benachrichtigen, sobald die andere Seite geantwortet hat.",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} beantragte Identitätsenthüllung",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identität offenbart",

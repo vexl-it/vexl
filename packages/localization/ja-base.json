@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "オファーの担当者との最初のやり取りになります。",
   "messages.thisUserIsAlsoMemberOff": "This user is also a member of {{clubs}}",
   "messages.wellLetYouKnowOnceUserAccepts": "依頼は保留中です。相手からの返信があればお知らせします。",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} が本人確認を要求しました",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "身分が公開されました",

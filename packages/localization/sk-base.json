@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "Toto bude tvoja prvá interakcia s týmto používateľom v súvislosti s touto ponukou.",
   "messages.thisUserIsAlsoMemberOff": "Tento používateľ je tiež členom {{clubs}}",
   "messages.wellLetYouKnowOnceUserAccepts": "Žiadosť odoslaná. Dáme ti vedieť hneď, keď druhá strana odpovie.",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} požiadal o odhalenie identity",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identita odhalená",

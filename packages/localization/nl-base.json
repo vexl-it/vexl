@@ -776,6 +776,7 @@
   "messages.thisWillBeYourFirstInteraction": "Dit is je eerste interactie met deze gebruiker over deze aanbieding.",
   "messages.thisUserIsAlsoMemberOff": "Deze gebruiker is ook lid van {{clubs}}",
   "messages.wellLetYouKnowOnceUserAccepts": "Je verzoek is in behandeling. We zullen je laten weten zodra de andere partij heeft gereageerd.",
+  "messages.typing": "typing...",
   "messages.messagePreviews.incoming.MESSAGE": "{{them}}: {{message}}",
   "messages.messagePreviews.incoming.REQUEST_REVEAL": "{{them}} gevraagde identiteit onthullen",
   "messages.messagePreviews.incoming.APPROVE_REVEAL": "Identiteit onthuld",

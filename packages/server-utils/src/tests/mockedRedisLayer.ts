@@ -1,4 +1,5 @@
 import {Effect, HashMap, Layer, Ref, Schema} from 'effect'
+import {isNonEmptyReadonlyArray} from 'effect/Array'
 import {NoSuchElementException} from 'effect/Cause'
 import {RedisService, type RedisOperations} from '../RedisService'
 
@@ -63,20 +64,47 @@ export const mockedRedisLayer = Layer.effect(
           ),
           Effect.catchTag('NoSuchElementException', () => Effect.succeed(false))
         ),
-      insertToSet:
-        (schema) =>
-        (key, ...values) =>
-          Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
-            Effect.flatMap((encoded) =>
-              Ref.update(listState, (hashMap) =>
-                HashMap.has(hashMap, key)
-                  ? HashMap.modify(hashMap, key, (v) => ({
-                      value: [...v.value, ...encoded],
-                    }))
-                  : HashMap.set(hashMap, key, {value: encoded})
-              )
+      insertToSet: (schema) => (key, values, opts) =>
+        Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
+          Effect.flatMap((encoded) =>
+            Ref.update(listState, (hashMap) =>
+              HashMap.has(hashMap, key)
+                ? HashMap.modify(hashMap, key, (v) => ({
+                    value: [...v.value, ...encoded],
+                  }))
+                : HashMap.set(hashMap, key, {value: encoded})
             )
           ),
+          Effect.flatMap(() => {
+            const expiresAt = opts?.expiresAt
+            return expiresAt !== undefined
+              ? Ref.update(state, (hm) =>
+                  HashMap.has(hm, key)
+                    ? HashMap.modify(hm, key, (v) => ({
+                        ...v,
+                        expiration: expiresAt,
+                      }))
+                    : HashMap.set(hm, key, {
+                        expiration: expiresAt,
+                        value: '',
+                      })
+                )
+              : Effect.void
+          })
+        ),
+
+      deleteFromSet: (schema) => (key, values) =>
+        Schema.encode(Schema.Array(Schema.parseJson(schema)))(values).pipe(
+          Effect.flatMap((encoded) =>
+            Ref.update(listState, (hashMap) =>
+              HashMap.has(hashMap, key)
+                ? HashMap.modify(hashMap, key, (v) => ({
+                    value: v.value.filter((item) => !encoded.includes(item)),
+                  }))
+                : hashMap
+            )
+          )
+        ),
 
       readAndDeleteSet: (schema) => (key) =>
         Ref.get(listState).pipe(
@@ -85,6 +113,14 @@ export const mockedRedisLayer = Layer.effect(
           Effect.map((one) => one.value),
           Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
           Effect.zipLeft(Ref.update(listState, HashMap.remove(key)))
+        ),
+
+      getSet: (schema) => (key) =>
+        Ref.get(listState).pipe(
+          Effect.flatMap(HashMap.get(key)),
+          Effect.map((one) => one.value),
+          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
+          Effect.filterOrFail(isNonEmptyReadonlyArray)
         ),
 
       withLock: (effect) => () => effect,

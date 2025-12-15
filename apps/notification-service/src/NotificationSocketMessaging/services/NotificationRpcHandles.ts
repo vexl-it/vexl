@@ -1,23 +1,26 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  type NotificationsStreamClientInfo,
   type NotificationStreamError,
   type NotificationStreamMessage,
   Rpcs,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {Effect, Either, identity, Queue, Schedule, Stream} from 'effect/index'
 import {type Scope} from 'effect/Scope'
-import {vexlNotificationTokenFromExpoToken} from '../domain'
+import {
+  type ClientInfo,
+  newStreamConnectionId,
+  type StreamConnectionId,
+  vexlNotificationTokenFromExpoToken,
+} from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 import {RedisConnectionRegistry} from './RedisConnectionRegistry'
 
 const keepAliveAsLongAsScopeInRedisRegistry = (
-  clientInfo: NotificationsStreamClientInfo
+  connectionId: StreamConnectionId,
+  clientInfo: ClientInfo
 ): Effect.Effect<void, never, RedisConnectionRegistry | Scope> =>
   Effect.flatMap(RedisConnectionRegistry, (registry) =>
-    registry.keepAlive(
-      vexlNotificationTokenFromExpoToken(clientInfo.notificationToken)
-    )
+    registry.keepAlive(connectionId, clientInfo.notificationToken)
   ).pipe(Effect.schedule(Schedule.spaced('1 minute')), Effect.forkScoped)
 
 export const NotificationRpcsHandlers = Rpcs.toLayer(
@@ -29,15 +32,26 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
       listenToNotifications: (connectionInfo) =>
         Stream.unwrapScoped(
           Effect.gen(function* (_) {
+            const connectionId = newStreamConnectionId()
+            const clientInfo: ClientInfo = {
+              notificationToken: vexlNotificationTokenFromExpoToken(
+                connectionInfo.notificationToken
+              ),
+              platform: connectionInfo.platform,
+              version: connectionInfo.version,
+            }
+
             yield* _(
               Effect.acquireRelease(
                 Effect.log(
                   'New notification stream connection established',
+                  connectionId,
                   connectionInfo
                 ),
                 () =>
                   Effect.log(
                     'Notification stream connection closed',
+                    connectionId,
                     connectionInfo
                   )
               )
@@ -77,36 +91,32 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
             // Register connection in both local and redis registries
             yield* _(
               Effect.acquireRelease(
-                localRegistry.registerConnection({
-                  connectionInfo,
-                  send,
-                  kickOut,
-                }),
-                () =>
-                  localRegistry.removeConnection(
-                    vexlNotificationTokenFromExpoToken(
-                      connectionInfo.notificationToken
-                    )
-                  )
+                localRegistry.registerConnection(
+                  {
+                    connectionInfo,
+                    send,
+                    kickOut,
+                  },
+                  connectionId
+                ),
+                () => localRegistry.removeConnection(connectionId)
               )
             )
             yield* _(
               Effect.acquireRelease(
-                redisRegistry.registerConnection(connectionInfo),
+                redisRegistry.registerConnection(connectionId, clientInfo),
                 () =>
-                  redisRegistry
-                    .removeConnection(
-                      vexlNotificationTokenFromExpoToken(
-                        connectionInfo.notificationToken
-                      )
-                    )
-                    .pipe(Effect.ignore)
+                  redisRegistry.removeConnection(
+                    connectionId,
+                    clientInfo.notificationToken
+                  )
               )
             )
 
             // Keep the connection alive in redis registry
-
-            yield* _(keepAliveAsLongAsScopeInRedisRegistry(connectionInfo))
+            yield* _(
+              keepAliveAsLongAsScopeInRedisRegistry(connectionId, clientInfo)
+            )
 
             return Stream.fromQueue(queue).pipe(
               Stream.tap((e) =>

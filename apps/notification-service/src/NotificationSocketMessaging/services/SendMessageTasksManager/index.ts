@@ -6,9 +6,11 @@ import {type RedisConnectionService} from '@vexl-next/server-utils/src/RedisConn
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {
+  Array,
   Context,
   Duration,
   Effect,
+  Either,
   flow,
   identity,
   Layer,
@@ -35,7 +37,7 @@ import {EnqueuePendingTask, TimeoutJobsStream} from './utils'
 export interface SendMessageTasksManagerOperations {
   emitTask: (
     task: SendMessageTask,
-    managerId: ConnectionManagerChannelId
+    ...managerId: Array.NonEmptyArray<ConnectionManagerChannelId>
   ) => Effect.Effect<void, SendMessageTasksManagerError>
 }
 
@@ -188,12 +190,42 @@ export class SendMessageTasksManager extends Context.Tag(
         const enqueueTimeout = yield* _(EnqueuePendingTask)
 
         return {
-          emitTask: (task, managerId) =>
-            Effect.all([
+          emitTask: (task, ...managerIds) => {
+            const insertTaskAndEnqueueTimeout = Effect.zip(
               insertAsPendingToRedis(task),
-              enqueueTimeout(task, {delay: timeoutMs}),
-              publishTask(task, managerId),
-            ]),
+              enqueueTimeout(task, {delay: timeoutMs})
+            )
+
+            const publishToManagers = pipe(
+              managerIds,
+              Array.map((managerId) =>
+                publishTask(task, managerId).pipe(
+                  Effect.tapError((e) =>
+                    Effect.logError(
+                      'Error while publishing task to manager',
+                      managerId,
+                      e
+                    )
+                  )
+                )
+              ),
+              Effect.allWith({concurrency: 'unbounded', mode: 'either'}),
+              // At least one manager must have received the task
+              Effect.filterOrFail(
+                Array.some(Either.isRight),
+                (e) =>
+                  new SendMessageTasksManagerError({
+                    'cause': Array.filterMap(e, Either.getLeft),
+                    'message': 'Failed to emit task to any manager',
+                  })
+              )
+            )
+
+            return Effect.andThen(
+              insertTaskAndEnqueueTimeout,
+              publishToManagers
+            )
+          },
         }
       })
     ).pipe(

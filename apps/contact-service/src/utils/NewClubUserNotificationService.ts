@@ -137,7 +137,7 @@ export class NewClubUserNotificationsService extends Context.Tag(
             if (!Array.isNonEmptyArray(recordsToSave)) return
 
             yield* _(
-              saveIntoRedis(NEW_CLUB_USER_NOTIFICATIONS_KEY, ...recordsToSave),
+              saveIntoRedis(NEW_CLUB_USER_NOTIFICATIONS_KEY, recordsToSave),
               Effect.catchAll(
                 (e) =>
                   new UnexpectedServerError({

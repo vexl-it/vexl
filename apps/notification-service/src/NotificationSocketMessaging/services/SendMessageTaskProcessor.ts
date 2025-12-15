@@ -1,4 +1,4 @@
-import {Context, Effect, Layer, pipe} from 'effect/index'
+import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect/index'
 import {ExpoNotificationService} from '../../utils'
 import {vexlNotificationTokenToExpoToken, type SendMessageTask} from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
@@ -14,9 +14,17 @@ export class TaskProcessor extends Context.Tag('TaskProcessor')<
 
       return (task: SendMessageTask) =>
         pipe(
-          localConnectionRegistry.findConnection(task.notificationToken),
-          Effect.flatMap((connection) => connection.send(task.socketMessage)),
-          Effect.isSuccess
+          localConnectionRegistry.findConnectionForNotificationToken(
+            task.notificationToken
+          ),
+          Effect.flatMap(
+            flow(
+              Array.map((connection) => connection.send(task.socketMessage)),
+              Effect.allWith({concurrency: 'unbounded'})
+            )
+          ),
+          Effect.map((results) => results.some(identity)),
+          Effect.catchTag('NoSuchElementException', () => Effect.succeed(false))
         )
     })
   )

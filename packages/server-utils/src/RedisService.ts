@@ -9,7 +9,11 @@ import {
   Schema,
   type ParseResult,
 } from 'effect'
-import {type NonEmptyArray} from 'effect/Array'
+import {
+  isNonEmptyReadonlyArray,
+  type NonEmptyArray,
+  type NonEmptyReadonlyArray,
+} from 'effect/Array'
 import {NoSuchElementException} from 'effect/Cause'
 import {catchAllDefect} from 'effect/Effect'
 import Redlock, {type Lock} from 'redlock'
@@ -51,7 +55,15 @@ export interface RedisOperations {
     schema: Schema.Schema<A, I, R>
   ) => (
     key: string,
-    ...value: NonEmptyArray<A>
+    values: NonEmptyArray<A>,
+    opts?: {expiresAt?: UnixMilliseconds}
+  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+
+  deleteFromSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    values: NonEmptyArray<A>
   ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
 
   readAndDeleteSet: <A, I, R>(
@@ -60,6 +72,16 @@ export interface RedisOperations {
     key: string
   ) => Effect.Effect<
     readonly A[],
+    ParseResult.ParseError | RedisError | NoSuchElementException,
+    R
+  >
+
+  getSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string
+  ) => Effect.Effect<
+    readonly [A, ...A[]],
     ParseResult.ParseError | RedisError | NoSuchElementException,
     R
   >
@@ -234,18 +256,45 @@ export class RedisService extends Context.Tag('RedisService')<
 
       const insertToSet = (
         key: string,
-        ...value: string[]
-      ): Effect.Effect<void, RedisError> =>
-        // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-        Effect.async<void, RedisError>((cb) => {
-          void redisClient.sadd(key, ...value, (err) => {
-            if (err) {
-              cb(Effect.fail(new RedisError({cause: err})))
-            } else {
-              cb(Effect.succeed(Effect.void))
-            }
-          })
-        }).pipe(Effect.withSpan('Redis insertToList', {attributes: {key}}))
+        value: readonly string[],
+        expiresAt?: UnixMilliseconds
+      ): Effect.Effect<void, RedisError> => {
+        const addToSet = Effect.tryPromise({
+          try: async () => {
+            await redisClient.sadd(key, ...value)
+          },
+          catch: (e) => new RedisError({cause: e}),
+        })
+
+        const setExpiration =
+          expiresAt !== undefined
+            ? Effect.tryPromise({
+                try: async () => await redisClient.pexpireat(key, expiresAt),
+                catch: (e) => new RedisError({cause: e}),
+              }).pipe(Effect.asVoid)
+            : Effect.void
+
+        return addToSet.pipe(
+          Effect.flatMap(() => setExpiration),
+          Effect.withSpan('Redis insertToSet', {attributes: {key, expiresAt}})
+        )
+      }
+
+      const deleteFromSet = (
+        key: string,
+        value: readonly string[]
+      ): Effect.Effect<void, RedisError> => {
+        const removeFromSet = Effect.tryPromise({
+          try: async () => {
+            await redisClient.srem(key, ...value)
+          },
+          catch: (e) => new RedisError({cause: e}),
+        })
+
+        return removeFromSet.pipe(
+          Effect.withSpan('Redis deleteFromSet', {attributes: {key}})
+        )
+      }
 
       const decodeListResult = Schema.decodeUnknownOption(
         Schema.NullishOr(Schema.Array(Schema.String))
@@ -264,6 +313,36 @@ export class RedisService extends Context.Tag('RedisService')<
             }
           })
         }).pipe(Effect.withSpan('Redis isInSet', {attributes: {key, value}}))
+
+      const getSetMembers = (
+        key: string
+      ): Effect.Effect<
+        Option.Option<NonEmptyReadonlyArray<string>>,
+        RedisError
+      > =>
+        Effect.tryPromise({
+          try: async () => await redisClient.smembers(key),
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.flatMap((res) => {
+            const listData = decodeListResult(res)
+
+            if (Option.isNone(listData)) {
+              return Effect.fail(
+                new RedisError({
+                  cause: new Error('Unable to decode list data'),
+                })
+              )
+            }
+
+            return Effect.succeed(
+              listData.value && isNonEmptyReadonlyArray(listData.value)
+                ? Option.some(listData.value)
+                : Option.none()
+            )
+          }),
+          Effect.withSpan('Redis getSetMembers', {attributes: {key}})
+        )
 
       const readAndDeleteSet = (
         key: string
@@ -337,21 +416,32 @@ export class RedisService extends Context.Tag('RedisService')<
         },
         insertToSet: (schema) => {
           const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
-          return (key, ...value) =>
-            encode(value).pipe(
-              Effect.flatMap((encoded) => insertToSet(key, ...encoded))
+          return (key, values, opts) =>
+            encode(values).pipe(
+              Effect.flatMap((encoded) =>
+                insertToSet(key, encoded, opts?.expiresAt)
+              )
+            )
+        },
+        deleteFromSet: (schema) => {
+          const encode = Schema.encode(Schema.Array(Schema.parseJson(schema)))
+          return (key, values) =>
+            encode(values).pipe(
+              Effect.flatMap((encoded) => deleteFromSet(key, encoded))
             )
         },
         readAndDeleteSet: (schema) => {
           const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
           return (key) =>
-            readAndDeleteSet(key).pipe(
+            readAndDeleteSet(key).pipe(Effect.flatten, Effect.flatMap(decode))
+        },
+        getSet: (schema) => {
+          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          return (key) =>
+            getSetMembers(key).pipe(
               Effect.flatten,
               Effect.flatMap(decode),
-              Effect.catchTag(
-                'NoSuchElementException',
-                () => new NoSuchElementException()
-              )
+              Effect.filterOrFail(Array.isNonEmptyReadonlyArray)
             )
         },
         delete: deleteKey,

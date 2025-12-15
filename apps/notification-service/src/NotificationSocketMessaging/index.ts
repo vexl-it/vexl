@@ -5,9 +5,9 @@ import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {type NewChatMessageNoticeMessage} from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
 import {NoSuchElementException} from 'effect/Cause'
-import {Context, Effect, Layer, pipe} from 'effect/index'
+import {Array, Context, Effect, flow, Layer, pipe} from 'effect/index'
 import {
-  type ConnectionRedisRecord,
+  type ConnectionManagerChannelId,
   NewChatMessageNoticeSendTask,
   StreamOnlyChatMessageSendTask,
   type VexlNotificationToken,
@@ -49,17 +49,25 @@ export class NotificationSocketMessaging extends Context.Tag(
       const registry = yield* _(RedisConnectionRegistry)
       const sendMessageTaskManager = yield* _(SendMessageTasksManager)
 
-      const findOpenConnection = (
+      const findManagerIdsForOpenConnections = (
         token: VexlNotificationToken,
         minimalClientVersion?: VersionCode
-      ): Effect.Effect<ConnectionRedisRecord, NoSuchElementException> =>
+      ): Effect.Effect<
+        Array.NonEmptyArray<ConnectionManagerChannelId>,
+        NoSuchElementException
+      > =>
         pipe(
-          registry.getConnectionForToken(token),
-          Effect.filterOrFail(
-            (connection): boolean =>
-              connection.clientInfo.version >= (minimalClientVersion ?? 0),
-            () => new NoSuchElementException()
+          registry.getConnectionsForToken(token),
+          Effect.map(
+            flow(
+              Array.filter(
+                (c) => c.clientInfo.version >= (minimalClientVersion ?? 0)
+              ),
+              Array.map((c) => c.managerId),
+              Array.dedupe
+            )
           ),
+          Effect.filterOrFail(Array.isNonEmptyArray),
           Effect.catchTag(
             'UnexpectedServerError',
             () => new NoSuchElementException()
@@ -76,12 +84,15 @@ export class NotificationSocketMessaging extends Context.Tag(
               minimalClientVersion: opts?.minimalClientVersion,
             })
 
-            const openConnection = yield* _(
-              findOpenConnection(vexlToken, opts?.minimalClientVersion)
+            const managerIdsToEmitTo = yield* _(
+              findManagerIdsForOpenConnections(
+                vexlToken,
+                opts?.minimalClientVersion
+              )
             )
 
             yield* _(
-              sendMessageTaskManager.emitTask(task, openConnection.managerId)
+              sendMessageTaskManager.emitTask(task, ...managerIdsToEmitTo)
             )
           })
 
@@ -90,8 +101,8 @@ export class NotificationSocketMessaging extends Context.Tag(
           Effect.gen(function* (_) {
             const token = vexlNotificationTokenFromExpoToken(expoToken)
 
-            const connectionMetadata = yield* _(
-              findOpenConnection(token, opts.minimalClientVersion)
+            const managerIdsToEmitTo = yield* _(
+              findManagerIdsForOpenConnections(token, opts.minimalClientVersion)
             )
             const task = new NewChatMessageNoticeSendTask({
               notificationToken: token,
@@ -104,10 +115,7 @@ export class NotificationSocketMessaging extends Context.Tag(
             })
 
             yield* _(
-              sendMessageTaskManager.emitTask(
-                task,
-                connectionMetadata.managerId
-              )
+              sendMessageTaskManager.emitTask(task, ...managerIdsToEmitTo)
             )
           })
 

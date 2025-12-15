@@ -15,10 +15,11 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {PlatformName} from '@vexl-next/rest-api'
 import {
   NewChatMessageNoticeMessage,
-  NotificationsStreamClientInfo,
   StreamOnlyChatMessage,
+  type NotificationsStreamClientInfo,
   type NotificationStreamError,
   type NotificationStreamMessage,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
@@ -31,6 +32,20 @@ export const VexlNotificationToken = Schema.String.pipe(
   Schema.filter(String.startsWith(EXPO_PREFIX))
 )
 export type VexlNotificationToken = typeof VexlNotificationToken.Type
+
+export const ClientInfo = Schema.Struct({
+  notificationToken: VexlNotificationToken,
+  version: VersionCode,
+  platform: PlatformName,
+})
+export type ClientInfo = typeof ClientInfo.Type
+
+export const StreamConnectionId = Schema.String.pipe(
+  Schema.brand('StreamConnectionId')
+)
+export type StreamConnectionId = typeof StreamConnectionId.Type
+export const newStreamConnectionId = (): StreamConnectionId =>
+  Schema.decodeSync(StreamConnectionId)(generateUuid())
 
 export const vexlNotificationTokenToExpoToken = (
   vexlNotificationToken: VexlNotificationToken
@@ -58,7 +73,8 @@ export const ConnectionManagerChannelId = Schema.String.pipe(
 export type ConnectionManagerChannelId = typeof ConnectionManagerChannelId.Type
 
 export const ConnectionRedisRecord = Schema.Struct({
-  clientInfo: NotificationsStreamClientInfo,
+  connectionId: StreamConnectionId,
+  clientInfo: ClientInfo,
   managerId: ConnectionManagerChannelId,
 })
 export type ConnectionRedisRecord = typeof ConnectionRedisRecord.Type

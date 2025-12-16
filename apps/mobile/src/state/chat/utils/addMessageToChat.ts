@@ -51,18 +51,42 @@ function updateFcmToken(
   }
 }
 
+function markLastMessageAsNotReadByOtherSide(
+  message: ChatMessageWithState
+): (chat: ChatWithMessages) => ChatWithMessages {
+  return (chat) => {
+    if (
+      message.state === 'sent' &&
+      !['VERSION_UPDATE', 'FCM_CYPHER_UPDATE', 'MESSAGE_READ'].includes(
+        message.message.messageType
+      )
+    ) {
+      return {
+        ...chat,
+        chat: {
+          ...chat.chat,
+          lastMessageReadByOtherSideAt: undefined,
+        },
+      }
+    }
+    return chat
+  }
+}
+
 export default function addMessageToChat(
   message: ChatMessageWithState
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return flow(
     (chat) =>
       message.message.messageType === 'VERSION_UPDATE' ||
-      message.message.messageType === 'FCM_CYPHER_UPDATE'
+      message.message.messageType === 'FCM_CYPHER_UPDATE' ||
+      message.message.messageType === 'MESSAGE_READ'
         ? chat
         : ({
             ...chat,
             messages: addMessageToMessagesArray(chat.messages)(message),
           } satisfies ChatWithMessages),
+    markLastMessageAsNotReadByOtherSide(message),
     updateChatVersion(message),
     updateFcmToken(message)
   )

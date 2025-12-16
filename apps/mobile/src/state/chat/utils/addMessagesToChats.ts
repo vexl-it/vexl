@@ -81,7 +81,8 @@ export default function addMessagesToChats(
         const isOnlyMetadataUpdate = !messagesToAddToThisChat.some(
           (one) =>
             one.message.messageType !== 'VERSION_UPDATE' &&
-            one.message.messageType !== 'FCM_CYPHER_UPDATE'
+            one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
+            one.message.messageType !== 'MESSAGE_READ'
         )
 
         const fcmCypherUpdateFromOtherSide = messagesToAddToThisChat.findLast(
@@ -97,7 +98,8 @@ export default function addMessagesToChats(
             messages: messages.filter(
               (one) =>
                 (one.message.messageType !== 'VERSION_UPDATE' &&
-                  one.message.messageType !== 'FCM_CYPHER_UPDATE') ||
+                  one.message.messageType !== 'FCM_CYPHER_UPDATE' &&
+                  one.message.messageType !== 'MESSAGE_READ') ||
                 // Show messages with forceShow flag
                 (one.state !== 'receivedButRequiresNewerVersion' &&
                   one.message.forceShow)

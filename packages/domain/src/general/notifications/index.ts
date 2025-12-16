@@ -32,6 +32,7 @@ export const ChatNotificationType = S.Literal(
   'DISAPPROVE_CONTACT_REVEAL',
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
+  'MESSAGE_READ',
   'UNKNOWN'
 )
 

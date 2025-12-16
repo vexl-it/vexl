@@ -99,6 +99,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const chatAtom = focusAtom(chatWithMessagesAtom, (o) => o.prop('chat'))
 
+  const chatIsReadAtom = selectAtom(chatAtom, (chat) => !chat?.isUnread)
+
   const messagesAtom = selectAtom(
     chatWithMessagesAtom,
     (o) => o?.messages ?? []
@@ -131,6 +133,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const otherSideClubsIdsAtom = focusAtom(chatAtom, (o) =>
     o.prop('otherSide').prop('clubsIds')
+  )
+
+  const lastMessageReadByOtherSideAtAtom = focusAtom(chatAtom, (o) =>
+    o.prop('lastMessageReadByOtherSideAt')
   )
 
   function createFindMessageIndexInListAtom({
@@ -1238,6 +1244,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     messageAtomAtoms,
     offerForChatAtom,
     chatUiModeAtom,
+    chatIsReadAtom,
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
     requestMessageAtom: focusRequestMessageAtom(chatWithMessagesAtom),
     deniedMessageAtom: focusDenyRequestMessageAtom(chatWithMessagesAtom),
@@ -1308,5 +1315,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideClubsIdsAtom,
     approveChatRequestActionAtom,
     lastTradeChecklistMessageAtom,
+    lastMessageReadByOtherSideAtAtom,
   }
 })

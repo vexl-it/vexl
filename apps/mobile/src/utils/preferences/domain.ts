@@ -57,6 +57,7 @@ export const Preferences = z
     showCheckUpdatedPrivacyPolicySuggestion: z.boolean().default(true),
     defaultCurrency: CurrencyCode.optional().default(currencies.USD.code),
     runTasksInParallel: z.boolean().default(true),
+    sendReadReceipts: z.boolean().default(true),
   })
   .readonly()
 
@@ -111,6 +112,9 @@ export const PreferencesE = Schema.Struct({
     default: () => currencies.USD.code,
   }),
   runTasksInParallel: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
+  sendReadReceipts: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
 })

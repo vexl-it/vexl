@@ -9,6 +9,7 @@ import {
   type Atom,
   type SetStateAction,
 } from 'jotai'
+import {DateTime} from 'luxon'
 import React, {useCallback, useMemo} from 'react'
 import {
   Image,
@@ -127,8 +128,12 @@ function TextMessage({
     replyToMessageAtom,
     otherSideDataAtom,
     openedImageUriAtom,
+    lastMessageReadByOtherSideAtAtom,
   } = useMolecule(chatMolecule)
   const sendMessage = useSetAtom(sendMessageAtom)
+  const lastMessageReadByOtherSideAt = useAtomValue(
+    lastMessageReadByOtherSideAtAtom
+  )
   const {t} = useTranslation()
 
   const {isExtended, hideExtended, toggleExtended} = useIsExtended(messageItem)
@@ -322,8 +327,17 @@ function TextMessage({
             color={message.state === 'sendingError' ? '$red' : '$greyOnBlack'}
           >
             {message.state === 'sending' && t('messages.sending')}
-            {(message.state === 'sent' || message.state === 'received') &&
+            {message.state === 'sent' &&
+              !!lastMessageReadByOtherSideAt &&
+              t('messages.readAt', {
+                time: formatChatTime(
+                  DateTime.fromMillis(lastMessageReadByOtherSideAt)
+                ),
+              })}
+            {message.state === 'sent' &&
+              !lastMessageReadByOtherSideAt &&
               formatChatTime(time)}
+            {message.state === 'received' && formatChatTime(time)}
           </Text>
         )}
       </Stack>

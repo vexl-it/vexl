@@ -59,6 +59,7 @@ export const MessageType = z.enum([
   'TRADE_CHECKLIST_UPDATE',
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
+  'MESSAGE_READ',
 ])
 export const MessageTypeE = Schema.Literal(
   'MESSAGE',
@@ -78,7 +79,8 @@ export const MessageTypeE = Schema.Literal(
   'REQUEST_CONTACT_REVEAL',
   'TRADE_CHECKLIST_UPDATE',
   'VERSION_UPDATE',
-  'FCM_CYPHER_UPDATE'
+  'FCM_CYPHER_UPDATE',
+  'MESSAGE_READ'
 )
 export type MessageType = Schema.Schema.Type<typeof MessageTypeE>
 
@@ -342,6 +344,7 @@ export const Chat = z.object({
   origin: ChatOrigin,
   otherSide: ChatUserIdentity,
   isUnread: z.boolean().default(true),
+  lastMessageReadByOtherSideAt: UnixMilliseconds.optional(),
   showInfoBar: z.boolean().default(true),
   showVexlbotNotifications: z.boolean().default(true),
   showVexlbotInitialMessage: z.boolean().default(true),
@@ -350,6 +353,7 @@ export const Chat = z.object({
   lastReportedVersion: SemverString.optional(),
   otherSideFcmCypher: NotificationCypher.optional(),
   lastReportedFcmToken: MyNotificationTokenInfo.optional(),
+  lastReadByOtherSide: UnixMilliseconds.optional(),
 })
 export const ChatE = Schema.Struct({
   id: ChatIdE,
@@ -357,6 +361,9 @@ export const ChatE = Schema.Struct({
   origin: ChatOriginE,
   otherSide: ChatUserIdentityE,
   isUnread: Schema.optionalWith(Schema.Boolean, {default: () => true}),
+  lastMessageReadByOtherSideAt: Schema.optionalWith(UnixMillisecondsE, {
+    nullable: true,
+  }),
   showInfoBar: Schema.optionalWith(Schema.Boolean, {default: () => true}),
   showVexlbotNotifications: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
@@ -369,6 +376,7 @@ export const ChatE = Schema.Struct({
   lastReportedVersion: Schema.optional(SemverStringE),
   otherSideFcmCypher: Schema.optional(NotificationCypherE),
   lastReportedFcmToken: Schema.optional(MyNotificationTokenInfoE),
+  lastReadByOtherSide: Schema.optional(UnixMillisecondsE),
 })
 export type Chat = Schema.Schema.Type<typeof ChatE>
 

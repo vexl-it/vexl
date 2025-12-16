@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn turbo:typecheck:*)",
+      "Bash(yarn turbo:format:*)",
+      "Bash(yarn turbo:format:fix:*)",
+      "Bash(yarn workspace @vexl-next/mobile-app lint:*)",
+      "Bash(yarn turbo:lint:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

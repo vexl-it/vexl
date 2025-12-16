@@ -13,8 +13,7 @@ import MessagesScreen from './MessagesScreen'
 import RequestScreen from './RequestScreen'
 
 export default function MessagesListOrApprovalPreview(): React.ReactElement {
-  const {chatUiModeAtom, chatAtom, publicKeyPemBase64Atom} =
-    useMolecule(chatMolecule)
+  const {chatUiModeAtom, publicKeyPemBase64Atom} = useMolecule(chatMolecule)
   const chatUiMode = useAtomValue(chatUiModeAtom)
   const fetchAndStoreMessagesForInbox = useSetAtom(
     fetchAndStoreMessagesForInboxHandleNotificationsActionAtom
@@ -40,7 +39,7 @@ export default function MessagesListOrApprovalPreview(): React.ReactElement {
 
   return (
     <>
-      <MarkAsReadWhenRendered chatAtom={chatAtom} />
+      <MarkAsReadWhenRendered />
       <Screen>{toRender}</Screen>
       <ChatInfoModal />
     </>

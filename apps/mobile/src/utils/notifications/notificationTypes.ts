@@ -16,6 +16,7 @@ export const ChatNotificationType = z.enum([
   'DISAPPROVE_CONTACT_REVEAL',
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
+  'MESSAGE_READ',
 ])
 export type ChatNotificationType = z.TypeOf<typeof ChatNotificationType>
 

@@ -39,11 +39,16 @@ type HANDLED_MESSAGE_TYPES =
   | 'TRADE_CHECKLIST_UPDATE'
   | 'FCM_CYPHER_UPDATE'
   | 'VERSION_UPDATE'
+  | 'MESSAGE_READ'
 
 const sendSystemNotification = (
   messageType: HANDLED_MESSAGE_TYPES
 ): boolean => {
-  if (messageType === 'FCM_CYPHER_UPDATE' || messageType === 'VERSION_UPDATE')
+  if (
+    messageType === 'FCM_CYPHER_UPDATE' ||
+    messageType === 'VERSION_UPDATE' ||
+    messageType === 'MESSAGE_READ'
+  )
     return false
 
   return true

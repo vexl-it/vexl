@@ -157,6 +157,47 @@ const handleOtherSideReportedFcmCypher = atom(
   }
 )
 
+const handleOtherSideReadMessages = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      newMessages,
+      inbox,
+    }: {newMessages: readonly ChatMessageWithState[]; inbox: InboxInState}
+  ) => {
+    const messageReadMessages = pipe(
+      newMessages,
+      Array.filter(
+        (one) =>
+          one.state === 'received' && one.message.messageType === 'MESSAGE_READ'
+      ),
+      Array.groupBy((one) => one.message.senderPublicKey),
+      Record.values,
+      Array.filterMap(Array.last)
+    )
+
+    messageReadMessages.forEach((messageReadMessage) => {
+      const chatAtom = focusChatByInboxKeyAndSenderKey({
+        inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
+        senderKey: messageReadMessage.message.senderPublicKey,
+      })
+      const chat = get(chatAtom)
+
+      if (!chat) return
+
+      set(chatAtom, {
+        ...chat,
+        chat: {
+          ...chat.chat,
+          lastMessageReadByOtherSideAt: messageReadMessage.message.time,
+        },
+      })
+    })
+  }
+)
+
 function focusInboxInMessagingStateAtom(
   publicKey: PublicKeyPemBase64
 ): WritableAtom<
@@ -486,6 +527,11 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
         })
 
         set(handleOtherSideReportedFcmCypher, {
+          newMessages,
+          inbox: updatedInbox,
+        })
+
+        set(handleOtherSideReadMessages, {
           newMessages,
           inbox: updatedInbox,
         })

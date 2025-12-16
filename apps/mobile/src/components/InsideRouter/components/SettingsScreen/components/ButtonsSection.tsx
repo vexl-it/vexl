@@ -55,6 +55,7 @@ import AllowScreenshots from './AllowScreenshots'
 import ItemText from './ButtonSectionItemText'
 import ContactsImportedTitle from './ContactsImportedTitle'
 import SelectedCurrencyTitle from './SelectedCurrencyTitle'
+import SendReadReceipts from './SendReadReceipts'
 
 interface ItemProps {
   text: string | React.ReactElement
@@ -207,6 +208,13 @@ function ButtonsSection(): React.ReactElement {
             icon: imageIconSvg,
             onPress: toggleScreenshotsDisabled,
             children: <AllowScreenshots />,
+          },
+          {
+            testID: '@buttonsSection/sendReadReceiptsButton',
+            text: t('settings.items.sendReadReceipts'),
+            icon: notificationsIconSvg,
+            onPress: () => {},
+            children: <SendReadReceipts />,
           },
           {
             testID: '@buttonsSection/notificationPreferencesButton',

@@ -7,7 +7,10 @@ import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
-import {ReportNotificationInteractionRequest} from './contracts'
+import {
+  ReportAnalyticsEventRequest,
+  ReportNotificationInteractionRequest,
+} from './contracts'
 
 export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
   'reportNotificationInteraction',
@@ -18,9 +21,18 @@ export const ReportNotificationInteractionEndpoint = HttpApiEndpoint.get(
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 5000)
 
-const RootGroup = HttpApiGroup.make('root', {topLevel: true}).add(
-  ReportNotificationInteractionEndpoint
+export const ReportAnalyticsEvent = HttpApiEndpoint.post(
+  'reportAnalyticsEvent',
+  '/report/analytics-event'
 )
+  .setHeaders(CommonHeaders)
+  .setPayload(ReportAnalyticsEventRequest)
+  .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 5000)
+
+const RootGroup = HttpApiGroup.make('root', {topLevel: true})
+  .add(ReportNotificationInteractionEndpoint)
+  .add(ReportAnalyticsEvent)
 
 export const MetricsApiSpecification = HttpApi.make('Metrics Service')
   .middleware(RateLimitingMiddleware)

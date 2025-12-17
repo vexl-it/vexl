@@ -1,3 +1,4 @@
+import {AnalyticsEvent} from '@vexl-next/domain/src/general/analytics'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
@@ -21,3 +22,7 @@ export const ReportNotificationInteractionRequest = Schema.Struct({
 
 export type ReportNotificationInteractionRequest =
   typeof ReportNotificationInteractionRequest.Type
+
+export const ReportAnalyticsEventRequest = Schema.Struct({
+  event: AnalyticsEvent,
+})

@@ -96,7 +96,7 @@ export class ChallengeService extends Context.Tag('ChallengeService')<
 
           return isValid
         }).pipe(
-          withRedisLock(`verifyChallenge:${challenge}`),
+          withRedisLock(`verifyChallenge:${challenge}`, 2_000),
           Effect.withSpan('VerifyChallenge')
         )
 

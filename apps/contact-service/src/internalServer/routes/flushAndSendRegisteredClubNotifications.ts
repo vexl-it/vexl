@@ -15,7 +15,7 @@ export const flushAndSendRegisteredClubNotifications = Effect.gen(
     yield* _(Effect.log('Sending registered club notifications'))
   }
 ).pipe(
-  withRedisLock('flushAndSendRegisteredClubNotifications'),
+  withRedisLock('flushAndSendRegisteredClubNotifications', 60_000),
   Effect.withSpan('Flush and send registered club notifications'),
   Effect.catchTags({
     'RedisLockError': (e) =>

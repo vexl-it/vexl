@@ -58,7 +58,8 @@ export const reportOffer = HttpApiBuilder.handler(
       withRedisLockFromEffect(
         CurrentSecurity.pipe(
           Effect.map((security) => `reportOffer:${security['public-key']}`)
-        )
+        ),
+        500
       ),
       Effect.zipLeft(reportOfferReported(req.payload.offerId)),
       makeEndpointEffect

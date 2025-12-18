@@ -29,7 +29,7 @@ export const withOfferAdminActionRedisLock =
       Effect.map((hashedIds) =>
         withRedisLock<A, E, R>(
           Array.map(hashedIds, (id) => `offerAdminAction:${id}`),
-          5000
+          10_000
         )
       ),
       Effect.flatMap((lockFunction) => lockFunction(fnc))

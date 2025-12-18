@@ -50,25 +50,28 @@ export const issueNotificationsToTokens = ({
     )
 
     return yield* _(
-      Effect.all([
-        Array.isNonEmptyArray(fcmTokens)
-          ? Effect.either(
-              sendFcmNotificationToAllHandleNonExistingTokens({
-                data,
-                notification,
-                tokens: fcmTokens,
-              })
-            )
-          : Effect.succeed(Either.right<IssueNotificationResult[]>([])),
-        Array.isNonEmptyArray(expoTokens)
-          ? Effect.either(
-              sendExpoNotificationToAllHandleNonExistingTokens({
-                data,
-                notification,
-                tokens: expoTokens,
-              })
-            )
-          : Effect.succeed(Either.right<ExpoPushTicket[]>([])),
-      ]).pipe(Effect.map(([firebase, expo]) => ({firebase, expo})))
+      Effect.all(
+        [
+          Array.isNonEmptyArray(fcmTokens)
+            ? Effect.either(
+                sendFcmNotificationToAllHandleNonExistingTokens({
+                  data,
+                  notification,
+                  tokens: fcmTokens,
+                })
+              )
+            : Effect.succeed(Either.right<IssueNotificationResult[]>([])),
+          Array.isNonEmptyArray(expoTokens)
+            ? Effect.either(
+                sendExpoNotificationToAllHandleNonExistingTokens({
+                  data,
+                  notification,
+                  tokens: expoTokens,
+                })
+              )
+            : Effect.succeed(Either.right<ExpoPushTicket[]>([])),
+        ],
+        {concurrency: 10}
+      ).pipe(Effect.map(([firebase, expo]) => ({firebase, expo})))
     )
   })

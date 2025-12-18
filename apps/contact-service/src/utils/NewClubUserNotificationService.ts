@@ -182,7 +182,8 @@ export class NewClubUserNotificationsService extends Context.Tag(
               Effect.all(
                 Array.map(notificationsToSend, (one) =>
                   sendExpoNotificationToAllHandleNonExistingTokens(one)
-                )
+                ),
+                {concurrency: 10}
               ),
               Effect.catchAll(
                 (a) =>

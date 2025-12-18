@@ -42,7 +42,7 @@ export const processNewContentNotifications = Effect.gen(function* (_) {
     })
   )
 }).pipe(
-  withRedisLock('processNewContentNotifications', 10_000),
+  withRedisLock('processNewContentNotifications', 20_000),
   Effect.tapError((e) =>
     Effect.logError('Error processing new content notification', e)
   ),

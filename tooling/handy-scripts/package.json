@@ -7,7 +7,8 @@
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cleanup-unused-translations": "npx tsx src/cleanupUnusedTranslations.ts"
   },
   "dependencies": {
     "@effect/opentelemetry": "^0.59.2",
@@ -28,6 +29,7 @@
     "serve-handler": "^6.1.5"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "@types/qrcode": "^1",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",

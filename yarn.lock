@@ -11716,6 +11716,7 @@ __metadata:
     "@effect/opentelemetry": ^0.59.2
     "@effect/platform": ^0.93.6
     "@effect/platform-node": ^0.103.0
+    "@types/node": ^22.10.5
     "@types/qrcode": ^1
     "@vexl-next/cryptography": 0.0.0
     "@vexl-next/domain": 0.0.0

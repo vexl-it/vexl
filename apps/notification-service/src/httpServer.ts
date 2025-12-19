@@ -22,19 +22,19 @@ import {
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
-import {ExpoClientService} from './ExpoMessagingLayer'
-import {NotificationSocketMessaging} from './NotificationSocketMessaging'
-import {NotificationRpcsHandlers} from './NotificationSocketMessaging/services/NotificationRpcHandles'
-import {
-  TaskWorkerLayer,
-  TimeoutWorkerLayer,
-} from './NotificationSocketMessaging/services/SendMessageTasksManager'
 import {NotificationMetricsService} from './metrics'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
 import {issueNotifcationHandler} from './routes/issueNotificationHandler'
 import {issueStreamOnlyMessageHandler} from './routes/issueStreamOnlyMessageHandler'
 import {reportNotificationProcessedHandler} from './routes/reportNotificationProcessed'
-import {ExpoNotificationService} from './utils'
+import {NotificationSocketMessaging} from './services/NotificationSocketMessaging'
+import {NotificationRpcsHandlers} from './services/NotificationSocketMessaging/services/NotificationRpcHandles'
+import {
+  TaskWorkerLayer,
+  TimeoutWorkerLayer,
+} from './services/NotificationSocketMessaging/services/SendMessageTasksManager'
+import {ThrottledPushNotificationService} from './services/ThrottledPushNotificationService'
+import {processThrottledNotificationsWorker} from './services/ThrottledPushNotificationService/services/ThrottledNotificationMq'
 
 const RootGroupLive = HttpApiBuilder.group(
   NotificationApiSpecification,
@@ -75,14 +75,19 @@ const ApiServerLive = HttpLayerRouter.serve(
   )
 ).pipe(Layer.provide(NodeHttpServerLiveWithPortFromEnv))
 
+const workers = Layer.mergeAll(
+  TaskWorkerLayer,
+  TimeoutWorkerLayer,
+  processThrottledNotificationsWorker
+)
+
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
-  healthServerLayer({port: healthServerPortConfig})
+  healthServerLayer({port: healthServerPortConfig}),
+  workers
 ).pipe(
-  Layer.merge(Layer.mergeAll(TaskWorkerLayer, TimeoutWorkerLayer)),
   Layer.provideMerge(NotificationSocketMessaging.Live),
-  Layer.provideMerge(ExpoNotificationService.Live),
-  Layer.provideMerge(ExpoClientService.Live),
+  Layer.provideMerge(ThrottledPushNotificationService.Live),
   Layer.provideMerge(NotificationMetricsService.Live),
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(MetricsClientService.Live),

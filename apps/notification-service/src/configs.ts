@@ -12,3 +12,7 @@ export const fcmTokenPrivateKeyConfig = Config.string(
 ).pipe(Config.map(Schema.decodeSync(PrivateKeyPemBase64E)))
 
 export const expoAccessToken = Config.string('EXPO_ACCESS_TOKEN')
+
+export const notificationThrottleTtlMinutesConfig = Config.number(
+  'NOTIFICATION_THROTTLE_TTL_MINUTES'
+).pipe(Config.withDefault(10))

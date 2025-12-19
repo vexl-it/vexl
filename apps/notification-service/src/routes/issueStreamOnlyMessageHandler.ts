@@ -5,8 +5,11 @@ import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/not
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
 import {fcmTokenPrivateKeyConfig} from '../configs'
-import {NotificationSocketMessaging} from '../NotificationSocketMessaging'
-import {vexlNotificationTokenFromExpoToken} from '../NotificationSocketMessaging/domain'
+import {NotificationSocketMessaging} from '../services/NotificationSocketMessaging'
+import {
+  StreamOnlyChatMessageSendTask,
+  vexlNotificationTokenFromExpoToken,
+} from '../services/NotificationSocketMessaging/domain'
 
 export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
   NotificationApiSpecification,
@@ -17,6 +20,7 @@ export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
       Effect.gen(function* (_) {
         const {notificationCypher} = req.payload
         const privateKey = yield* _(fcmTokenPrivateKeyConfig)
+        const socketMessaging = yield* _(NotificationSocketMessaging)
 
         const {expoToken} = yield* _(
           decryptNotificationToken({
@@ -28,14 +32,14 @@ export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
           )
         )
 
-        const socketMessaging = yield* _(NotificationSocketMessaging)
-
         yield* _(
           socketMessaging.sendStreamOnlyChatMessage(
-            vexlNotificationTokenFromExpoToken(expoToken),
-            req.payload.message,
-            notificationCypher,
-            {minimalClientVersion: req.payload.minimalOtherSideVersion}
+            new StreamOnlyChatMessageSendTask({
+              notificationToken: vexlNotificationTokenFromExpoToken(expoToken),
+              targetCypher: notificationCypher,
+              message: req.payload.message,
+              minimalClientVersion: req.payload.minimalOtherSideVersion,
+            })
           ),
           Effect.ignore
         )

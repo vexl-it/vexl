@@ -18,7 +18,7 @@ import {
   Schema,
   Stream,
 } from 'effect/index'
-import {type ExpoNotificationService} from '../../../utils'
+import {type ThrottledPushNotificationService} from '../../../ThrottledPushNotificationService'
 import {
   type ConnectionManagerChannelId,
   SendMessageTask,
@@ -146,7 +146,7 @@ export class SendMessageTasksManager extends Context.Tag(
     | RedisService
     | RedisConnectionService
     | LocalConnectionRegistry
-    | ExpoNotificationService
+    | ThrottledPushNotificationService
   > =>
     Layer.scoped(
       SendMessageTasksManager,

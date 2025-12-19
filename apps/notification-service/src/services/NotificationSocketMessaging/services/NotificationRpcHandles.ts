@@ -4,8 +4,18 @@ import {
   type NotificationStreamMessage,
   Rpcs,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
-import {Effect, Either, identity, Queue, Schedule, Stream} from 'effect/index'
+import {
+  Array,
+  Chunk,
+  Effect,
+  Either,
+  identity,
+  Queue,
+  Schedule,
+  Stream,
+} from 'effect/index'
 import {type Scope} from 'effect/Scope'
+import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {
   type ClientInfo,
   newStreamConnectionId,
@@ -27,6 +37,9 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
   Effect.gen(function* (_) {
     const localRegistry = yield* _(LocalConnectionRegistry)
     const redisRegistry = yield* _(RedisConnectionRegistry)
+    const throttledPushNotificationService = yield* _(
+      ThrottledPushNotificationService
+    )
 
     return {
       listenToNotifications: (connectionInfo) =>
@@ -118,11 +131,26 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               keepAliveAsLongAsScopeInRedisRegistry(connectionId, clientInfo)
             )
 
+            const notificationsWaitingThrottled = yield* _(
+              throttledPushNotificationService.getPendingNotificationsAndCancelThrottleTimeout(
+                clientInfo.notificationToken
+              ),
+              Effect.map(Array.map((one) => one.socketMessage)),
+              Effect.catchAll(
+                (a) =>
+                  new UnexpectedServerError({
+                    message: 'Failed to get pending notifications',
+                    cause: a,
+                  })
+              )
+            )
+
             return Stream.fromQueue(queue).pipe(
               Stream.tap((e) =>
                 Effect.log('Sending event to client', e, connectionInfo)
               ),
-              Stream.mapEffect(identity)
+              Stream.mapEffect(identity),
+              Stream.prepend(Chunk.fromIterable(notificationsWaitingThrottled))
             )
           })
         ).pipe(

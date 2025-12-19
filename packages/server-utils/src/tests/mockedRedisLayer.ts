@@ -18,6 +18,15 @@ export const mockedRedisLayer = Layer.effect(
       )
     )
 
+    const sortedSetState = yield* _(
+      Ref.make<
+        HashMap.HashMap<
+          string,
+          {value: ReadonlyArray<{item: string; score: number}>}
+        >
+      >(HashMap.empty())
+    )
+
     const toReturn: RedisOperations = {
       delete: (key: string) => Ref.update(state, HashMap.remove(key)),
       exists: (key: string) =>
@@ -121,6 +130,50 @@ export const mockedRedisLayer = Layer.effect(
           Effect.map((one) => one.value),
           Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
           Effect.filterOrFail(isNonEmptyReadonlyArray)
+        ),
+
+      addIntoSortedSet: (schema) => (key, value, score) =>
+        Schema.encode(Schema.parseJson(schema))(value).pipe(
+          Effect.flatMap((encoded) =>
+            Ref.update(sortedSetState, (hashMap) =>
+              HashMap.has(hashMap, key)
+                ? HashMap.modify(hashMap, key, (v) => ({
+                    value: [...v.value, {item: encoded, score}],
+                  }))
+                : HashMap.set(hashMap, key, {value: [{item: encoded, score}]})
+            )
+          )
+        ),
+
+      getSortedSet: (schema) => (key, order) =>
+        Ref.get(sortedSetState).pipe(
+          Effect.flatMap(HashMap.get(key)),
+          Effect.map((one) =>
+            [...one.value]
+              .sort((a, b) =>
+                order === 'asc' ? a.score - b.score : b.score - a.score
+              )
+              .map((v) => v.item)
+          ),
+          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
+          Effect.catchTag('NoSuchElementException', () => Effect.succeed([]))
+        ),
+
+      clearSortedSet: (key) => Ref.update(sortedSetState, HashMap.remove(key)),
+
+      getAndDropSortedSet: (schema) => (key, order) =>
+        Ref.get(sortedSetState).pipe(
+          Effect.flatMap(HashMap.get(key)),
+          Effect.map((one) =>
+            [...one.value]
+              .sort((a, b) =>
+                order === 'asc' ? a.score - b.score : b.score - a.score
+              )
+              .map((v) => v.item)
+          ),
+          Effect.flatMap(Schema.decode(Schema.Array(Schema.parseJson(schema)))),
+          Effect.zipLeft(Ref.update(sortedSetState, HashMap.remove(key))),
+          Effect.catchTag('NoSuchElementException', () => Effect.succeed([]))
         ),
 
       withLock: (effect) => () => effect,

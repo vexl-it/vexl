@@ -107,6 +107,30 @@ export interface RedisOperations {
     resources: string[] | string,
     duration?: Duration.DurationInput
   ) => Effect.Effect<A, E | RedisLockError, R>
+
+  addIntoSortedSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    value: A,
+    score: number
+  ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
+
+  getSortedSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    order: 'asc' | 'desc'
+  ) => Effect.Effect<readonly A[], ParseResult.ParseError | RedisError, R>
+
+  clearSortedSet: (key: string) => Effect.Effect<void, RedisError>
+
+  getAndDropSortedSet: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    order: 'asc' | 'desc'
+  ) => Effect.Effect<readonly A[], ParseResult.ParseError | RedisError, R>
 }
 
 export class RedisService extends Context.Tag('RedisService')<
@@ -385,6 +409,77 @@ export class RedisService extends Context.Tag('RedisService')<
             })
         }).pipe(Effect.withSpan('Redis readAndDeleteList', {attributes: {key}}))
 
+      const addIntoSortedSet = (
+        key: string,
+        value: string,
+        score: number
+      ): Effect.Effect<void, RedisError> =>
+        Effect.tryPromise({
+          try: async () => {
+            await redisClient.zadd(key, score, value)
+          },
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.withSpan('Redis addIntoSortedSet', {attributes: {key, score}})
+        )
+
+      const getSortedSet = (
+        key: string,
+        order: 'asc' | 'desc'
+      ): Effect.Effect<string[], RedisError> =>
+        Effect.tryPromise({
+          try: async () =>
+            order === 'asc'
+              ? await redisClient.zrange(key, 0, -1)
+              : await redisClient.zrevrange(key, 0, -1),
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.withSpan('Redis getSortedSet', {attributes: {key, order}})
+        )
+
+      const clearSortedSet = (key: string): Effect.Effect<void, RedisError> =>
+        Effect.tryPromise({
+          try: async () => {
+            await redisClient.del(key)
+          },
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(Effect.withSpan('Redis clearSortedSet', {attributes: {key}}))
+
+      const getAndDropSortedSet = (
+        key: string,
+        order: 'asc' | 'desc'
+      ): Effect.Effect<readonly string[], RedisError> =>
+        Effect.tryPromise({
+          try: async () => {
+            const multi = redisClient.multi()
+            if (order === 'asc') {
+              multi.zrange(key, 0, -1)
+            } else {
+              multi.zrevrange(key, 0, -1)
+            }
+            multi.del(key)
+            const res = await multi.exec()
+
+            const listResult = res?.[0]
+            if (!listResult) {
+              return []
+            }
+
+            const [listError, listDataUnknown] = listResult
+            if (listError) {
+              throw listError
+            }
+
+            const listData = decodeListResult(listDataUnknown)
+            return Option.isSome(listData) ? (listData.value ?? []) : []
+          },
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.withSpan('Redis getAndDropSortedSet', {
+            attributes: {key, order},
+          })
+        )
+
       const toReturn: RedisOperations = {
         get: (schema) => {
           const decode = Schema.decode(Schema.parseJson(schema))
@@ -446,6 +541,24 @@ export class RedisService extends Context.Tag('RedisService')<
         },
         delete: deleteKey,
         withLock,
+        addIntoSortedSet: (schema) => {
+          const encode = Schema.encode(Schema.parseJson(schema))
+          return (key, value, score) =>
+            encode(value).pipe(
+              Effect.flatMap((encoded) => addIntoSortedSet(key, encoded, score))
+            )
+        },
+        getSortedSet: (schema) => {
+          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          return (key, order) =>
+            getSortedSet(key, order).pipe(Effect.flatMap(decode))
+        },
+        clearSortedSet,
+        getAndDropSortedSet: (schema) => {
+          const decode = Schema.decode(Schema.Array(Schema.parseJson(schema)))
+          return (key, order) =>
+            getAndDropSortedSet(key, order).pipe(Effect.flatMap(decode))
+        },
       }
 
       return toReturn

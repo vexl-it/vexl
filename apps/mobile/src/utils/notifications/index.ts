@@ -1,8 +1,5 @@
 import notifee, {AuthorizationStatus} from '@notifee/react-native'
-import {
-  ExpoNotificationTokenE,
-  type ExpoNotificationToken,
-} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, Schema} from 'effect'
 import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
@@ -87,7 +84,7 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
         reportError('error', new Error('Token type is not expo'), {token})
         return null
       }
-      return Schema.decodeSync(ExpoNotificationTokenE)(token.data)
+      return Schema.decodeSync(ExpoNotificationToken)(token.data)
     } catch (e) {
       return null
     }

@@ -1,18 +1,18 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubInfo} from '@vexl-next/domain/src/general/clubs'
-import {ChatIdE} from '@vexl-next/domain/src/general/messaging'
-import {OfferIdE} from '@vexl-next/domain/src/general/offers'
+import {ChatId} from '@vexl-next/domain/src/general/messaging'
+import {OfferId} from '@vexl-next/domain/src/general/offers'
 import {HashSet, Schema} from 'effect'
 
 export const ClubStats = Schema.Struct({
-  allOffersIdsForClub: Schema.HashSet(OfferIdE),
-  allChatsIdsForClub: Schema.HashSet(ChatIdE),
+  allOffersIdsForClub: Schema.HashSet(OfferId),
+  allChatsIdsForClub: Schema.HashSet(ChatId),
 })
 export type ClubStats = typeof ClubStats.Type
 
 export const ClubWithMembers = Schema.Struct({
   club: ClubInfo,
-  members: Schema.Array(PublicKeyPemBase64E),
+  members: Schema.Array(PublicKeyPemBase64),
   isModerator: Schema.Boolean,
   stats: Schema.optionalWith(ClubStats, {
     default: () => ({

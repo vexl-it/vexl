@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {SqlClient} from '@effect/sql'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
@@ -48,7 +48,7 @@ beforeAll(async () => {
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
@@ -87,7 +87,7 @@ beforeAll(async () => {
 
       const request2: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
@@ -120,7 +120,7 @@ beforeAll(async () => {
 
       const request3: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
@@ -759,7 +759,7 @@ describe('Get removed offers', () => {
 
         const request: CreateNewOfferRequest = {
           adminId: generateAdminId(),
-          countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+          countryPrefix: Schema.decodeSync(CountryPrefix)(420),
           offerPrivateList: [
             {
               payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,

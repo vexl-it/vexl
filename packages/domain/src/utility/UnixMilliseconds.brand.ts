@@ -1,26 +1,16 @@
 import dayjs from 'dayjs'
-import {Brand, Schema} from 'effect'
+import {Schema} from 'effect'
 import {DateTime} from 'luxon'
-import {z} from 'zod'
 
-export const UnixMillisecondsE = Schema.Number.pipe(
+export const UnixMilliseconds = Schema.Number.pipe(
   Schema.int(),
   Schema.greaterThanOrEqualTo(0),
   Schema.brand('UnixMilliseconds')
 )
-
-export const UnixMilliseconds = z
-  .number()
-  .int()
-  .min(0)
-  .transform((v) =>
-    Brand.nominal<typeof v & Brand.Brand<'UnixMilliseconds'>>()(v)
-  )
-
-export type UnixMilliseconds = Schema.Schema.Type<typeof UnixMillisecondsE>
+export type UnixMilliseconds = Schema.Schema.Type<typeof UnixMilliseconds>
 
 export function now(): UnixMilliseconds {
-  return UnixMilliseconds.parse(Date.now())
+  return Schema.decodeSync(UnixMilliseconds)(Date.now())
 }
 
 export function unixMillisecondsNow(): UnixMilliseconds {
@@ -30,21 +20,21 @@ export function unixMillisecondsNow(): UnixMilliseconds {
 export function unixMillisecondsFromNow(
   milliseconds: number
 ): UnixMilliseconds {
-  return UnixMilliseconds.parse(Date.now() + milliseconds)
+  return Schema.decodeSync(UnixMilliseconds)(Date.now() + milliseconds)
 }
 
 export function unixMilliseconds(): UnixMilliseconds {
   return now()
 }
 
-export const UnixMilliseconds0 = UnixMilliseconds.parse(0)
+export const UnixMilliseconds0 = Schema.decodeSync(UnixMilliseconds)(0)
 
 export function fromDateTime(dateTime: DateTime): UnixMilliseconds {
-  return UnixMilliseconds.parse(dateTime.valueOf())
+  return Schema.decodeSync(UnixMilliseconds)(dateTime.valueOf())
 }
 
 export function getNextMidnightOnSelectedDate(date: Date): UnixMilliseconds {
-  return UnixMilliseconds.parse(
+  return Schema.decodeSync(UnixMilliseconds)(
     DateTime.fromJSDate(date).endOf('day').toMillis()
   )
 }

@@ -7,12 +7,9 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
-  HashedPhoneNumberE,
-  type HashedPhoneNumber,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   EcdsaSignature,
   hmacSignE,
@@ -32,7 +29,7 @@ import {
 import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 const keys = generatePrivateKey()
-const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
+const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
 
 let oldHash: HashedPhoneNumber
 let oldServerHash: ServerHashedNumber
@@ -127,7 +124,7 @@ beforeEach(async () => {
 
       oldHash = yield* _(
         hmacSignE('vexlOldHmacKeyWhatever')(phoneNumber),
-        Effect.flatMap(Schema.decode(HashedPhoneNumberE))
+        Effect.flatMap(Schema.decode(HashedPhoneNumber))
       )
 
       oldServerHash = yield* _(serverHashPhoneNumber(oldHash))
@@ -135,7 +132,7 @@ beforeEach(async () => {
       newHash = yield* _(
         cryptoConfig.hmacKey,
         Effect.flatMap((hash) => hmacSignE(hash)(phoneNumber)),
-        Effect.flatMap(Schema.decode(HashedPhoneNumberE))
+        Effect.flatMap(Schema.decode(HashedPhoneNumber))
       )
 
       newServerHash = yield* _(serverHashPhoneNumber(newHash))
@@ -169,7 +166,7 @@ beforeEach(async () => {
         app.User.createUser({
           payload: {
             firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
           },
           headers: commonAndSecurityHeadersOld,
         })
@@ -184,7 +181,7 @@ beforeEach(async () => {
         app.User.createUser({
           payload: {
             firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
           },
           headers: commonAndSecurityHeadersNew,
         })
@@ -199,7 +196,7 @@ beforeEach(async () => {
           '+420733333335',
           '+420733333336',
         ],
-        Schema.decodeSync(Schema.Array(E164PhoneNumberE)),
+        Schema.decodeSync(Schema.Array(E164PhoneNumber)),
         Array.map(hashPhoneNumber),
         Effect.all
       )

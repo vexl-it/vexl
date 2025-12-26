@@ -1,5 +1,5 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Effect} from 'effect/index'
+import {Effect, Schema} from 'effect/index'
 import {useSetAtom, useStore} from 'jotai'
 import {type DateTime} from 'luxon'
 import React, {useCallback} from 'react'
@@ -51,7 +51,9 @@ function PickTimeFromSuggestions({
       if (shouldSendOnSubmit) {
         selectItem(item)
       } else {
-        saveDateTimePick({dateTime: UnixMilliseconds.parse(item.toMillis())})
+        saveDateTimePick({
+          dateTime: Schema.decodeSync(UnixMilliseconds)(item.toMillis()),
+        })
         navigation.popTo('AgreeOnTradeDetails')
       }
     },
@@ -63,7 +65,9 @@ function PickTimeFromSuggestions({
 
     showLoadingOverlay(true)
     saveDateTimePick({
-      dateTime: UnixMilliseconds.parse(selectedItem.data.toMillis()),
+      dateTime: Schema.decodeSync(UnixMilliseconds)(
+        selectedItem.data.toMillis()
+      ),
     })
     void Effect.runPromise(submitTradeChecklistUpdates())
       .then((success) => {

@@ -1,4 +1,4 @@
-import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
 export const MetricRecordId = Schema.BigInt.pipe(Schema.brand('MetricRecordId'))
@@ -6,7 +6,7 @@ export type MetricRecordId = typeof MetricRecordId.Type
 
 export class MetricRecord extends Schema.Class<MetricRecord>('MetricRecord')({
   id: MetricRecordId,
-  uuid: UuidE,
+  uuid: Uuid,
   name: Schema.String,
   value: Schema.Int,
   timestamp: Schema.DateFromSelf,

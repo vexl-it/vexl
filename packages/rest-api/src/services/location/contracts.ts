@@ -1,8 +1,5 @@
-import {LocationPlaceIdE} from '@vexl-next/domain/src/general/offers'
-import {
-  LatitudeE,
-  LongitudeE,
-} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Schema} from 'effect'
 
 export class GetLocationSuggestionsRequest extends Schema.Class<GetLocationSuggestionsRequest>(
@@ -18,19 +15,19 @@ export class GetLocationSuggestionsRequest extends Schema.Class<GetLocationSugge
 }) {}
 
 export class LocationData extends Schema.Class<LocationData>('LocationData')({
-  placeId: LocationPlaceIdE,
+  placeId: LocationPlaceId,
   suggestFirstRow: Schema.String,
   suggestSecondRow: Schema.String,
-  latitude: LatitudeE,
-  longitude: LongitudeE,
+  latitude: Latitude,
+  longitude: Longitude,
   viewport: Schema.Struct({
     northeast: Schema.Struct({
-      latitude: LatitudeE,
-      longitude: LongitudeE,
+      latitude: Latitude,
+      longitude: Longitude,
     }),
     southwest: Schema.Struct({
-      latitude: LatitudeE,
-      longitude: LongitudeE,
+      latitude: Latitude,
+      longitude: Longitude,
     }),
   }),
 }) {}
@@ -50,26 +47,26 @@ export class GetLocationSuggestionsResponse extends Schema.Class<GetLocationSugg
 export class GetGeocodedCoordinatesRequest extends Schema.Class<GetGeocodedCoordinatesRequest>(
   'GetGeocodedCoordinatesRequest'
 )({
-  latitude: Schema.NumberFromString.pipe(Schema.compose(LatitudeE)),
-  longitude: Schema.NumberFromString.pipe(Schema.compose(LongitudeE)),
+  latitude: Schema.NumberFromString.pipe(Schema.compose(Latitude)),
+  longitude: Schema.NumberFromString.pipe(Schema.compose(Longitude)),
   lang: Schema.String.pipe(Schema.minLength(2)),
 }) {}
 
 export class GetGeocodedCoordinatesResponse extends Schema.Class<GetGeocodedCoordinatesResponse>(
   'GetGeocodedCoordinatesResponse'
 )({
-  placeId: LocationPlaceIdE,
+  placeId: LocationPlaceId,
   address: Schema.String,
-  latitude: LatitudeE,
-  longitude: LongitudeE,
+  latitude: Latitude,
+  longitude: Longitude,
   viewport: Schema.Struct({
     northeast: Schema.Struct({
-      latitude: LatitudeE,
-      longitude: LongitudeE,
+      latitude: Latitude,
+      longitude: Longitude,
     }),
     southwest: Schema.Struct({
-      latitude: LatitudeE,
-      longitude: LongitudeE,
+      latitude: Latitude,
+      longitude: Longitude,
     }),
   }),
 }) {}

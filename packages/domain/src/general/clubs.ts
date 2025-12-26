@@ -1,9 +1,8 @@
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
-import {ExpoNotificationTokenE} from '../utility/ExpoNotificationToken.brand'
-import {UriStringE} from '../utility/UriString.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {Schema} from 'effect'
+import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
+import {UriString} from '../utility/UriString.brand'
 
 export class ClubKeyNotFoundInInnerStateError extends Schema.TaggedError<ClubKeyNotFoundInInnerStateError>(
   'ClubKeyNotFoundInInnerStateError'
@@ -11,22 +10,18 @@ export class ClubKeyNotFoundInInnerStateError extends Schema.TaggedError<ClubKey
   cause: Schema.Unknown,
 }) {}
 
-export const ClubUuid = z
-  .string()
-  .uuid()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ClubUuid'>>()(v))
-export const ClubUuidE = Schema.UUID.pipe(Schema.brand('ClubUuid'))
-export type ClubUuid = Schema.Schema.Type<typeof ClubUuidE>
+export const ClubUuid = Schema.UUID.pipe(Schema.brand('ClubUuid'))
+export type ClubUuid = typeof ClubUuid.Type
 
 export const generateClubUuid = (): ClubUuid =>
-  Schema.decodeSync(ClubUuidE)(getCrypto().randomUUID())
+  Schema.decodeSync(ClubUuid)(getCrypto().randomUUID())
 
 export const ClubInfo = Schema.Struct({
-  uuid: ClubUuidE,
+  uuid: ClubUuid,
   name: Schema.String,
   description: Schema.optionalWith(Schema.String, {as: 'Option'}),
   membersCountLimit: Schema.Number,
-  clubImageUrl: UriStringE,
+  clubImageUrl: UriString,
   validUntil: Schema.DateFromString,
   reportLimit: Schema.optionalWith(Schema.Int, {default: () => 0}),
 })
@@ -39,8 +34,8 @@ export const ClubInfoForUser = Schema.Struct({
 export type ClubInfoForUser = typeof ClubInfoForUser.Type
 
 export const ClubAdmitionRequest = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
-  notificationToken: Schema.optionalWith(ExpoNotificationTokenE, {
+  publicKey: PublicKeyPemBase64,
+  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
   }),
   langCode: Schema.String,
@@ -48,13 +43,13 @@ export const ClubAdmitionRequest = Schema.Struct({
 export type ClubAdmitionRequest = typeof ClubAdmitionRequest.Type
 
 export const ClubCode = Schema.String.pipe(Schema.brand('ClubCode'))
-export type ClubCode = Schema.Schema.Type<typeof ClubCode>
+export type ClubCode = typeof ClubCode.Type
 
 export const ClubLinkInfo = Schema.Struct({
   code: ClubCode,
   fullLink: Schema.String,
 })
-export type ClubLinkInfo = Schema.Schema.Type<typeof ClubLinkInfo>
+export type ClubLinkInfo = typeof ClubLinkInfo.Type
 
 export const OfferIdHashed = Schema.String.pipe(Schema.brand('OfferIdHashed'))
-export type OfferIdHashed = Schema.Schema.Type<typeof OfferIdHashed>
+export type OfferIdHashed = typeof OfferIdHashed.Type

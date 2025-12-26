@@ -1,5 +1,5 @@
 import {
-  LocationState,
+  type LocationState,
   type PaymentMethod,
 } from '@vexl-next/domain/src/general/offers'
 import {useMemo} from 'react'
@@ -14,13 +14,13 @@ export default function useContent(): Record<
 
   return useMemo(
     () => ({
-      [LocationState.enum.IN_PERSON]: [
+      IN_PERSON: [
         {
           title: t('offerForm.paymentMethod.cash'),
           type: 'CASH',
         },
       ],
-      [LocationState.enum.ONLINE]: [
+      ONLINE: [
         {
           title: t('offerForm.paymentMethod.bank'),
           type: 'BANK',

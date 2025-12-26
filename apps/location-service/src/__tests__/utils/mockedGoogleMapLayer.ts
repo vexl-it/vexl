@@ -1,9 +1,6 @@
 import {jest} from '@jest/globals'
-import {LocationPlaceIdE} from '@vexl-next/domain/src/general/offers'
-import {
-  LatitudeE,
-  LongitudeE,
-} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
   GetGeocodedCoordinatesResponse,
   GetLocationSuggestionsResponse,
@@ -18,18 +15,18 @@ export const queryGeocodeMock = jest.fn<GoogleMapsOperations['queryGeocode']>(
   () =>
     Effect.succeed(
       new GetGeocodedCoordinatesResponse({
-        placeId: Schema.decodeSync(LocationPlaceIdE)('placeid'),
+        placeId: Schema.decodeSync(LocationPlaceId)('placeid'),
         address: 'address',
-        latitude: Schema.decodeSync(LatitudeE)(2),
-        longitude: Schema.decodeSync(LongitudeE)(4),
+        latitude: Schema.decodeSync(Latitude)(2),
+        longitude: Schema.decodeSync(Longitude)(4),
         viewport: {
           northeast: {
-            latitude: Schema.decodeSync(LatitudeE)(2),
-            longitude: Schema.decodeSync(LongitudeE)(4),
+            latitude: Schema.decodeSync(Latitude)(2),
+            longitude: Schema.decodeSync(Longitude)(4),
           },
           southwest: {
-            latitude: Schema.decodeSync(LatitudeE)(2),
-            longitude: Schema.decodeSync(LongitudeE)(4),
+            latitude: Schema.decodeSync(Latitude)(2),
+            longitude: Schema.decodeSync(Longitude)(4),
           },
         },
       })
@@ -43,19 +40,19 @@ export const querySuggestMock = jest.fn<GoogleMapsOperations['querySuggest']>(
         result: [
           {
             userData: {
-              latitude: Schema.decodeSync(LatitudeE)(2),
-              longitude: Schema.decodeSync(LongitudeE)(4),
-              placeId: Schema.decodeSync(LocationPlaceIdE)('placeid'),
+              latitude: Schema.decodeSync(Latitude)(2),
+              longitude: Schema.decodeSync(Longitude)(4),
+              placeId: Schema.decodeSync(LocationPlaceId)('placeid'),
               suggestFirstRow: 'suggestFirstRow',
               suggestSecondRow: 'suggestSecondRow',
               viewport: {
                 northeast: {
-                  latitude: Schema.decodeSync(LatitudeE)(2),
-                  longitude: Schema.decodeSync(LongitudeE)(4),
+                  latitude: Schema.decodeSync(Latitude)(2),
+                  longitude: Schema.decodeSync(Longitude)(4),
                 },
                 southwest: {
-                  latitude: Schema.decodeSync(LatitudeE)(2),
-                  longitude: Schema.decodeSync(LongitudeE)(4),
+                  latitude: Schema.decodeSync(Latitude)(2),
+                  longitude: Schema.decodeSync(Longitude)(4),
                 },
               },
             },

@@ -1,4 +1,4 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {Challenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {Schema} from 'effect'
 
@@ -12,7 +12,7 @@ export class ChallengeRecord extends Schema.Class<ChallengeRecord>(
 )({
   id: ChallengeRecordId,
   challenge: Challenge,
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   createdAt: Schema.DateFromSelf,
   valid: Schema.Boolean,
 }) {}

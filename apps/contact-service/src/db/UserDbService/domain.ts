@@ -1,7 +1,7 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
@@ -13,14 +13,14 @@ export type UserRecordId = typeof UserRecordId.Type
 
 export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   id: UserRecordId,
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   hash: ServerHashedNumber,
   clientVersion: Schema.optionalWith(VersionCode, {
     as: 'Option',
     nullable: true,
   }),
-  firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option', nullable: true}),
-  expoToken: Schema.optionalWith(ExpoNotificationTokenE, {
+  firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option', nullable: true}),
+  expoToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
     nullable: true,
   }),
@@ -36,7 +36,7 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   initialImportDone: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
-  countryPrefix: Schema.optionalWith(CountryPrefixE, {
+  countryPrefix: Schema.optionalWith(CountryPrefix, {
     as: 'Option',
     nullable: true,
   }),
@@ -47,8 +47,8 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
 }) {}
 
 export const NotificationTokens = Schema.Struct({
-  firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option', nullable: true}),
-  expoToken: Schema.optionalWith(ExpoNotificationTokenE, {
+  firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option', nullable: true}),
+  expoToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
     nullable: true,
   }),

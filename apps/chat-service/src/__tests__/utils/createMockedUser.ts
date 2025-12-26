@@ -4,7 +4,7 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
@@ -113,7 +113,7 @@ export const createMockedUser = (
   Effect.gen(function* (_) {
     const initHeaders = yield* _(TestRequestHeaders.getHeaders)
     const mainKeyPair = generatePrivateKey()
-    const number = Schema.decodeSync(E164PhoneNumberE)(numberRaw)
+    const number = Schema.decodeSync(E164PhoneNumber)(numberRaw)
 
     const authHeaders = yield* _(
       createDummyAuthHeadersForUser({

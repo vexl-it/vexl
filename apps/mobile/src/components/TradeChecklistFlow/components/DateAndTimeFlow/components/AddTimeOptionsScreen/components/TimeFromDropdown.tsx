@@ -1,4 +1,5 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Schema} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useMemo} from 'react'
@@ -21,7 +22,7 @@ function createTimeOptionsFromData(
   const options: Array<DropdownItemProps<UnixMilliseconds>> = []
 
   for (let i = 0; i < 24; i++) {
-    const timeOptionMillis = UnixMilliseconds.parse(
+    const timeOptionMillis = Schema.decodeSync(UnixMilliseconds)(
       unixMillisecondsToLocaleDateTime(availableDateTimeFrom)
         .startOf('day')
         .plus({hour: i})

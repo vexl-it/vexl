@@ -15,7 +15,7 @@ export function generateRandomUserInSessionData({
   session: Session
   goldenAvatarType?: GoldenAvatarType
 }): RealLifeInfo {
-  return RealLifeInfo.parse({
+  return Schema.decodeSync(RealLifeInfo)({
     image: fromSvgString(
       getRandomAvatarSvgFromSeed({
         seed: Schema.decodeSync(RandomSeed)(

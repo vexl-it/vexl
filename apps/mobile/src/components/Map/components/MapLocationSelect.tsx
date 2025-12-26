@@ -1,5 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
@@ -55,8 +55,8 @@ function useAtoms({
         get(apiAtom)
           .location.getGeocodedCoordinates({
             lang: getCurrentLocale(),
-            latitude: Latitude.parse(region.latitude),
-            longitude: Longitude.parse(region.longitude),
+            latitude: Schema.decodeSync(Latitude)(region.latitude),
+            longitude: Schema.decodeSync(Longitude)(region.longitude),
           })
           .pipe(
             Effect.tap((data) =>

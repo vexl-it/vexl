@@ -1,4 +1,4 @@
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   InvalidLoginSignatureError,
   type LoginChallengeClientSignature,
@@ -48,7 +48,7 @@ describe('Initialize verification', () => {
             }),
             payload: {
               challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           })
         )
@@ -78,7 +78,7 @@ describe('Initialize verification', () => {
             }),
             payload: {
               challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
           Effect.either
@@ -106,7 +106,7 @@ describe('Initialize verification', () => {
                 ...challenge,
                 clientSignature: 'bad' as LoginChallengeClientSignature,
               },
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
           Effect.either
@@ -134,7 +134,7 @@ describe('Initialize verification', () => {
                 ...challenge,
                 serverSignature: 'bad' as LoginChallengeServerSignature,
               },
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
           Effect.either
@@ -166,7 +166,7 @@ describe('Initialize verification', () => {
                 clientSignature,
                 serverSignature: 'bad' as LoginChallengeServerSignature,
               },
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
           Effect.either
@@ -190,7 +190,7 @@ describe('Initialize verification', () => {
             }),
             payload: {
               challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333331'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333331'),
             },
           })
         )
@@ -224,7 +224,7 @@ describe('Initialize verification', () => {
             }),
             payload: {
               challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           }),
           Effect.either

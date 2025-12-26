@@ -1,6 +1,6 @@
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsFromNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
@@ -21,9 +21,9 @@ export const dummySid = Schema.decodeSync(SmsVerificationSid)('dummy')
 
 export const VerificationIdPayload = Schema.parseJson(
   Schema.Struct({
-    phoneNumber: E164PhoneNumberE,
+    phoneNumber: E164PhoneNumber,
     verificationId: SmsVerificationSid,
-    expiresAt: UnixMillisecondsE,
+    expiresAt: UnixMilliseconds,
   })
 )
 export type VerificationIdPayload = typeof VerificationIdPayload.Type

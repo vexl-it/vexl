@@ -46,10 +46,10 @@ export function getApiPreset(): EnvPreset {
 
 export const apiEnv = getApiPreset()
 // export const apiEnv = {
-//   userMs: ServiceUrl.parse('http://localhost:8000'),
-//   contactMs: ServiceUrl.parse('http://localhost:8003'),
-//   offerMs: ServiceUrl.parse('http://localhost:8002'),
-//   chatMs: ServiceUrl.parse('http://localhost:8001'),
+//   userMs: Schema.decodeSync(ServiceUrl)('http://localhost:8000'),
+//   contactMs: Schema.decodeSync(ServiceUrl)('http://localhost:8003'),
+//   offerMs: Schema.decodeSync(ServiceUrl)('http://localhost:8002'),
+//   chatMs: Schema.decodeSync(ServiceUrl)('http://localhost:8001'),
 // }
 
 const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {

@@ -1,8 +1,5 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
-import {
-  CountryPrefixE,
-  type CountryPrefix,
-} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
@@ -80,7 +77,7 @@ export const reportMetricsLayer = Layer.effectDiscard(
       Request: Schema.Null,
       Result: Schema.Struct({
         count: Schema.NumberFromString,
-        countryPrefix: Schema.Union(CountryPrefixE, Schema.Null),
+        countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
       }),
       execute: () => sql`
         SELECT

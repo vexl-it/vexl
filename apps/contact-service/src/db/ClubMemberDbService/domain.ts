@@ -1,5 +1,5 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Schema} from 'effect'
 import {ClubRecordId} from '../ClubsDbService/domain'
 
@@ -11,8 +11,8 @@ export class ClubMemberRecord extends Schema.Class<ClubMemberRecord>(
 )({
   id: ClubMemberRecordId,
   clubId: ClubRecordId,
-  publicKey: PublicKeyPemBase64E,
-  notificationToken: Schema.NullOr(ExpoNotificationTokenE),
+  publicKey: PublicKeyPemBase64,
+  notificationToken: Schema.NullOr(ExpoNotificationToken),
   lastRefreshedAt: Schema.DateFromSelf,
   isModerator: Schema.optionalWith(Schema.Boolean, {
     default: () => false,

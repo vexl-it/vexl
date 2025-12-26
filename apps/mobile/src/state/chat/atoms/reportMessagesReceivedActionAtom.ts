@@ -1,9 +1,6 @@
+import {ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {
-  type ChatMessageId,
-  ChatMessageIdE,
-} from '@vexl-next/domain/src/general/messaging'
-import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsFromNow,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -12,21 +9,21 @@ import {Array, Effect, Option, pipe, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {areNotificationsEnabledE} from '../../../utils/notifications'
 import {reportErrorE} from '../../../utils/reportError'
 
 // 2 DAYS
 const RECORD_PRUNE_TIME_MILLISEC = 2 * 24 * 60 * 60 * 1000
 
-const reportedMessagesStorage = atomWithParsedMmkvStorageE(
+const reportedMessagesStorage = atomWithParsedMmkvStorage(
   'reportedMessagesStorage',
   {uuids: []},
   Schema.Struct({
     uuids: Schema.Array(
       Schema.Struct({
-        uuid: ChatMessageIdE,
-        reportedAt: UnixMillisecondsE,
+        uuid: ChatMessageId,
+        reportedAt: UnixMilliseconds,
       })
     ),
   })

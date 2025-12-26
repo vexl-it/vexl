@@ -1,6 +1,6 @@
 import {type SqlError} from '@effect/sql/SqlError'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Effect, Option, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
 import {PgUserClient} from './layer'
@@ -12,8 +12,8 @@ export type PubKeyToCountryPrefixId = typeof PubKeyToCountryPrefixId.Type
 
 export class UserRow extends Schema.Class<UserRow>('UserRow')({
   id: Schema.compose(Schema.NumberFromString, PubKeyToCountryPrefixId),
-  publicKey: PublicKeyPemBase64E,
-  countryPrefix: CountryPrefixE,
+  publicKey: PublicKeyPemBase64,
+  countryPrefix: CountryPrefix,
 }) {}
 
 const decodeUserRows = Schema.decodeUnknown(Schema.Array(UserRow))

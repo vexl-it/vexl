@@ -2,11 +2,8 @@ import {
   generatePrivateKey,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
-  HashedPhoneNumberE,
-  type HashedPhoneNumber,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   hmacSignE,
   type EcdsaSignature,
@@ -40,11 +37,11 @@ describe('Regenerate session credentials', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const keys = generatePrivateKey()
-        const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420777777777')
+        const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420777777777')
         const wronglyHashedNumber = yield* _(
           oldHmacKeyUsedForHashingNumbersConfig.pipe(
             Effect.flatMap((oldHmacKey) => hmacSignE(oldHmacKey)(phoneNumber)),
-            Effect.flatMap(Schema.decode(HashedPhoneNumberE))
+            Effect.flatMap(Schema.decode(HashedPhoneNumber))
           )
         )
 
@@ -82,7 +79,7 @@ describe('Regenerate session credentials', () => {
           client.regenerateSessionCredentials({
             payload: {
               myPhoneNumber:
-                Schema.decodeSync(E164PhoneNumberE)('+420777777778'),
+                Schema.decodeSync(E164PhoneNumber)('+420777777778'),
             },
             headers: commonAndSecurityHeaders,
           }),
@@ -98,7 +95,7 @@ describe('Regenerate session credentials', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-        const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420777777777')
+        const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420777777777')
 
         const authHeaders = {
           'public-key': publicKey,

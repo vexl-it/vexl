@@ -1,8 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   OfferPrivatePart,
-  OfferPrivatePartE,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {
@@ -15,7 +13,6 @@ import {
   Record,
   Schema,
 } from 'effect'
-import {z} from 'zod'
 import {keys} from '../../utils/keys'
 import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
 
@@ -26,22 +23,12 @@ export class PrivatePayloadsConstructionError extends Schema.TaggedError<Private
   cause: Schema.Unknown,
 }) {}
 
-export const OfferPrivatePayloadToEncrypt = z
-  .object({
-    toPublicKey: PublicKeyPemBase64,
-    payloadPrivate: OfferPrivatePart,
-  })
-  .readonly()
-export type OfferPrivatePayloadToEncrypt = z.TypeOf<
-  typeof OfferPrivatePayloadToEncrypt
->
-
-export const OfferPrivatePayloadToEncryptE = Schema.Struct({
-  toPublicKey: PublicKeyPemBase64E,
-  payloadPrivate: OfferPrivatePartE,
+export const OfferPrivatePayloadToEncrypt = Schema.Struct({
+  toPublicKey: PublicKeyPemBase64,
+  payloadPrivate: OfferPrivatePart,
 })
-export type OfferPrivatePayloadToEncryptE =
-  typeof OfferPrivatePayloadToEncryptE.Type
+export type OfferPrivatePayloadToEncrypt =
+  typeof OfferPrivatePayloadToEncrypt.Type
 
 const addOrCreate = <K extends string, T>(
   record: Record<K, HashSet.HashSet<T>>,

@@ -1,7 +1,7 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {OfferIdE} from '@vexl-next/domain/src/general/offers'
+import {OfferId} from '@vexl-next/domain/src/general/offers'
 import {Effect, flow, Schema} from 'effect'
 import {OfferAdminIdHashed} from '../domain'
 
@@ -14,7 +14,7 @@ export const createUpdateRefreshOffer = Effect.gen(function* (_) {
   const UpdateRefreshOffer = yield* _(
     SqlResolver.ordered('UpdateRefreshOffer', {
       Request: UpdateRefreshOfferRequest,
-      Result: Schema.Struct({offerId: OfferIdE}),
+      Result: Schema.Struct({offerId: OfferId}),
       execute: (adminIds) => {
         return sql`
           UPDATE offer_public

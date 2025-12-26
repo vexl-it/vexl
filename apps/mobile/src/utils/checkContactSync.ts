@@ -1,4 +1,5 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {Option, Schema} from 'effect/index'
 import * as Contacts from 'expo-contacts'
 import {SortTypes} from 'expo-contacts'
 import {getDefaultStore} from 'jotai'
@@ -20,9 +21,11 @@ export default async function checkContactSync(
   const deviceContactsNumbers = deviceContacts.data
     .map((one) =>
       one.phoneNumbers?.map((one) => {
-        const parseResult = E164PhoneNumber.safeParse(one.number)
-        if (parseResult.success) {
-          return parseResult.data
+        const parseResult = Schema.decodeUnknownOption(E164PhoneNumber)(
+          one.number
+        )
+        if (Option.isSome(parseResult)) {
+          return parseResult.value
         }
         return undefined
       })

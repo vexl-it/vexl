@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
@@ -437,7 +437,7 @@ describe('Request approval V2', () => {
         const dummyKeyPair = generatePrivateKey()
         const dummyAuthHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333332'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333332'),
             publicKey: dummyKeyPair.publicKeyPemBase64,
           })
         )

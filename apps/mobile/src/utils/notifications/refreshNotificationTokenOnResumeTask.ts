@@ -1,5 +1,5 @@
 import {apiAtom} from '../../api'
-import {storage} from '../mmkv/fpMmkv'
+import {storage} from '../mmkv/effectMmkv'
 import {reportErrorE} from '../reportError'
 
 import {Effect} from 'effect/index'

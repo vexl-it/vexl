@@ -2,7 +2,6 @@ import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar
 import {
   generateChatMessageId,
   type ChatMessage,
-  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {type TradeChecklistUpdate} from '@vexl-next/domain/src/general/tradeChecklist'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
@@ -12,11 +11,8 @@ import sendMessage, {
 } from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
-import {Array, Effect} from 'effect/index'
+import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
+import {Array, Effect, Schema, type ParseResult} from 'effect/index'
 import {flow, pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -32,7 +28,7 @@ import processTradeChecklistContactRevealMessageIfAny from '../utils/processTrad
 import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
 
-const MINIMAL_REQUIRED_VERSION = SemverString.parse('1.25.0')
+const MINIMAL_REQUIRED_VERSION = Schema.decodeSync(SemverString)('1.25.0')
 
 export default function createSubmitChecklistUpdateActionAtom(
   chatWithMessagesAtom: FocusAtomType<ChatWithMessages>
@@ -43,7 +39,7 @@ export default function createSubmitChecklistUpdateActionAtom(
     | SendMessageApiErrors
     | ErrorEncryptingMessage
     | JsonStringifyError
-    | ZodParseError<ChatMessagePayload>
+    | ParseResult.ParseError
   >
 > {
   return atom(null, (get, set, update: TradeChecklistUpdate) => {

@@ -1,7 +1,4 @@
-import {
-  LatitudeE,
-  LongitudeE,
-} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {LocationNotFoundError} from '@vexl-next/rest-api/src/services/location/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setDummyAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -28,8 +25,8 @@ describe('geocode', () => {
           client.getGeocodedCoordinates({
             urlParams: {
               lang: 'EN',
-              latitude: Schema.decodeSync(LatitudeE)(20),
-              longitude: Schema.decodeSync(LongitudeE)(10),
+              latitude: Schema.decodeSync(Latitude)(20),
+              longitude: Schema.decodeSync(Longitude)(10),
             },
           })
         )
@@ -53,8 +50,8 @@ describe('geocode', () => {
           client.getGeocodedCoordinates({
             urlParams: {
               lang: 'EN',
-              latitude: Schema.decodeSync(LatitudeE)(20),
-              longitude: Schema.decodeSync(LongitudeE)(10),
+              latitude: Schema.decodeSync(Latitude)(20),
+              longitude: Schema.decodeSync(Longitude)(10),
             },
           }),
           Effect.either

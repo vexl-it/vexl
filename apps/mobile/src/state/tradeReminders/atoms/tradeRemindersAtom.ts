@@ -1,7 +1,7 @@
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {TradeRemindersState, TradeRemindersState0} from '../domain'
 
-const tradeRemindersAtom = atomWithParsedMmkvStorageE(
+const tradeRemindersAtom = atomWithParsedMmkvStorage(
   'tradeReminders',
   TradeRemindersState0,
   TradeRemindersState

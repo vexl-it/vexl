@@ -14,7 +14,6 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {flow} from 'fp-ts/function'
 import {Image} from 'react-native'
-import {type z, type ZodError} from 'zod'
 import {type GettingImageSizeError} from '../state/chat/utils/replaceBase64UriWithImageFileUri'
 
 export class JsonParseError extends Schema.TaggedError<JsonParseError>(
@@ -30,34 +29,6 @@ export function parseJson(json: string): Effect.Effect<any, JsonParseError> {
   })
 }
 export const parseJsonFp = flow(parseJson, effectToEither)
-
-export interface ZodParseError<T> {
-  readonly _tag: 'ParseError'
-  readonly error: ZodError<T>
-  readonly originalData: unknown
-}
-
-/**
- * @deprecated use schema
- */
-export function safeParse<T extends z.ZodType>(
-  zodType: T
-): (a: unknown) => E.Either<ZodParseError<z.TypeOf<T>>, z.TypeOf<T>> {
-  return flow(
-    E.of,
-    E.chainW((v) => {
-      const result = zodType.safeParse(v)
-      if (!result.success) {
-        return E.left<ZodParseError<T>>({
-          _tag: 'ParseError',
-          error: result.error,
-          originalData: JSON.stringify(v),
-        })
-      }
-      return E.right(result.data)
-    })
-  )
-}
 
 export class StoreEmpty extends Schema.TaggedError<StoreEmpty>('StoreEmpty')(
   'StoreEmpty',
@@ -244,7 +215,7 @@ export function getImageSize(
         imageUri,
         (width, height) => {
           resolve(
-            Dimensions.parse({
+            Schema.decodeSync(Dimensions)({
               width,
               height,
             })

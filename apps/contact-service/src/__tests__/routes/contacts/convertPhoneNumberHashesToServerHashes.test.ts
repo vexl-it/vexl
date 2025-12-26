@@ -1,4 +1,4 @@
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, pipe, Schema} from 'effect/index'
@@ -18,7 +18,7 @@ it('Converts phone number hashes to server hashes', async () => {
         Array.map((numberString) =>
           pipe(
             numberString,
-            Schema.decode(E164PhoneNumberE),
+            Schema.decode(E164PhoneNumber),
             Effect.flatMap(hashPhoneNumber)
           )
         ),

@@ -2,10 +2,7 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {
-  type ChatMessage,
-  type ChatMessagePayload,
-} from '@vexl-next/domain/src/general/messaging'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
@@ -14,12 +11,12 @@ import {
   type MessageInBatch,
   type ServerMessageWithId,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {Array, Effect, pipe} from 'effect'
+import {Array, Effect, pipe, type ParseResult} from 'effect'
 import * as A from 'fp-ts/Array'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {
   generateSignedChallengeBatch,
@@ -45,9 +42,7 @@ function createMessageInBatch({
   message: ChatMessage
   receiverPublicKey: PublicKeyPemBase64
 }): TE.TaskEither<
-  | JsonStringifyError
-  | ZodParseError<ChatMessagePayload>
-  | ErrorEncryptingMessage,
+  JsonStringifyError | ParseResult.ParseError | ErrorEncryptingMessage,
   MessageInBatch
 > {
   return pipe(
@@ -93,7 +88,7 @@ function createInboxInBatch(
   senderPublicKey: PublicKeyPemBase64
 }) => TE.TaskEither<
   | JsonStringifyError
-  | ZodParseError<ChatMessagePayload>
+  | ParseResult.ParseError
   | ErrorEncryptingMessage
   | ErrorNoChallengeForPublicKey,
   InboxInBatch
@@ -133,7 +128,7 @@ export default function sendMessagesBatch({
   readonly ServerMessageWithId[],
   | ErrorGeneratingSignedChallengeBatch
   | JsonStringifyError
-  | ZodParseError<ChatMessagePayload>
+  | ParseResult.ParseError
   | ErrorEncryptingMessage
   | ErrorNoChallengeForPublicKey
   | ApiErrorSendingMessagesBatch

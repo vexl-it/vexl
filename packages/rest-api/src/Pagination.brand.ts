@@ -1,4 +1,4 @@
-import {Base64StringE} from '@vexl-next/domain/src/utility/Base64String.brand'
+import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import {Schema} from 'effect'
 
 const DEFAULT_PAGE_SIZE = 20
@@ -28,7 +28,7 @@ export const PageRequestMeta = Schema.Struct({
     ),
     {default: () => DEFAULT_PAGE_SIZE}
   ),
-  nextPageToken: Schema.optional(Base64StringE),
+  nextPageToken: Schema.optional(Base64String),
 })
 export type PageRequestMeta = typeof PageRequestMeta.Type
 
@@ -43,7 +43,7 @@ export const PageResponse = Schema.Struct({
 })
 
 export const PageResponseMeta = Schema.Struct({
-  nextPageToken: Schema.NullOr(Base64StringE),
+  nextPageToken: Schema.NullOr(Base64String),
   hasNext: Schema.Boolean,
   limit: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
 })

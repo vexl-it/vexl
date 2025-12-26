@@ -4,7 +4,7 @@ import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {effectToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Option, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -15,7 +15,6 @@ import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
 import {hashPhoneNumber} from '../../../state/contacts/utils'
-import {safeParse} from '../../../utils/fpUtils'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -82,7 +81,7 @@ function RevealedContactMessageItem({
           ? () => {
               pipe(
                 fullPhoneNumber,
-                safeParse(E164PhoneNumber),
+                Schema.decodeUnknownEither(E164PhoneNumber),
                 E.bindTo('normalizedNumber'),
                 E.bindW('hash', ({normalizedNumber}) =>
                   hashPhoneNumber(normalizedNumber)

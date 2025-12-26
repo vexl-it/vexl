@@ -1,7 +1,6 @@
 import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsFromNow,
-  type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   RedisError,
@@ -41,8 +40,8 @@ export class LastTimeIssuedForNotificationTokenDb extends Context.Tag(
     Effect.gen(function* (_) {
       const redis = yield* _(RedisService)
 
-      const getValue = redis.get(UnixMillisecondsE)
-      const setValue = redis.set(UnixMillisecondsE)
+      const getValue = redis.get(UnixMilliseconds)
+      const setValue = redis.set(UnixMilliseconds)
 
       return {
         getLastTimeIssuedForNotificationToken: (token) => {

@@ -1,31 +1,11 @@
-import {CurrencyCodeE} from '@vexl-next/domain/src/general/currency.brand'
-import {
-  CurrencyCode,
-  GoldenAvatarType,
-  GoldenAvatarTypeE,
-} from '@vexl-next/domain/src/general/offers'
-import {
-  UnixMilliseconds,
-  UnixMillisecondsE,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
-import {z} from 'zod'
-import {FiatOrSats, FiatOrSatsE} from '../../state/marketplace/domain'
+import {FiatOrSats} from '../../state/marketplace/domain'
 import {currencies} from '../localization/currency'
 
-const NotificationPreferences = z
-  .object({
-    offer: z.boolean(),
-    chat: z.boolean(),
-    marketplace: z.boolean(),
-    newOfferInMarketplace: z.boolean(),
-    newPhoneContacts: z.boolean(),
-    inactivityWarnings: z.boolean(),
-    marketing: z.boolean(),
-  })
-  .readonly()
-
-const NotificationPreferencesE = Schema.Struct({
+const NotificationPreferences = Schema.Struct({
   offer: Schema.Boolean,
   chat: Schema.Boolean,
   marketplace: Schema.Boolean,
@@ -35,40 +15,17 @@ const NotificationPreferencesE = Schema.Struct({
   marketing: Schema.Boolean,
 })
 
-export const Preferences = z
-  .object({
-    disableOfferRerequestLimit: z.boolean().default(false),
-    allowSendingImages: z.boolean().default(false),
-    notificationPreferences: NotificationPreferences,
-    enableNewOffersNotificationDevMode: z.boolean().default(false),
-    showFriendLevelBanner: z.boolean().default(true),
-    offerFeedbackEnabled: z.boolean().default(false),
-    showTextDebugButton: z.boolean().default(false),
-    disableScreenshots: z.boolean().default(false),
-    isDeveloper: z.boolean().default(false),
-    appLanguage: z.string().optional(),
-    showOfferDetail: z.boolean().optional().default(false),
-    marketplaceFiatOrSatsCurrency: FiatOrSats.default('FIAT'),
-    goldenAvatarType: GoldenAvatarType.optional(),
-    showVexlSearchForCooSuggestion: z.boolean().default(true),
-    showSuggestReencryptOffersMissingOnServer: z.boolean().default(false),
-    lastDisplayOfDonationPromptTimestamp: UnixMilliseconds.optional(),
-    showTosSummaryForAlreadyLoggedInUser: z.boolean().default(true),
-    showCheckUpdatedPrivacyPolicySuggestion: z.boolean().default(true),
-    defaultCurrency: CurrencyCode.optional().default(currencies.USD.code),
-    runTasksInParallel: z.boolean().default(true),
-    sendReadReceipts: z.boolean().default(true),
-  })
-  .readonly()
-
-export const PreferencesE = Schema.Struct({
+export const Preferences = Schema.Struct({
   disableOfferRerequestLimit: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
   allowSendingImages: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
-  notificationPreferences: NotificationPreferencesE,
+  notificationPreferences: NotificationPreferences,
+  showOfferDetail: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
   enableNewOffersNotificationDevMode: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
@@ -88,10 +45,10 @@ export const PreferencesE = Schema.Struct({
     default: () => false,
   }),
   appLanguage: Schema.optional(Schema.String),
-  marketplaceFiatOrSatsCurrency: Schema.optionalWith(FiatOrSatsE, {
+  marketplaceFiatOrSatsCurrency: Schema.optionalWith(FiatOrSats, {
     default: () => 'FIAT',
   }),
-  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
+  goldenAvatarType: Schema.optional(GoldenAvatarType),
   showVexlSearchForCooSuggestion: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
@@ -101,14 +58,14 @@ export const PreferencesE = Schema.Struct({
       default: () => false,
     }
   ),
-  lastDisplayOfDonationPromptTimestamp: Schema.optional(UnixMillisecondsE),
+  lastDisplayOfDonationPromptTimestamp: Schema.optional(UnixMilliseconds),
   showTosSummaryForAlreadyLoggedInUser: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
   showCheckUpdatedPrivacyPolicySuggestion: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
-  defaultCurrency: Schema.optionalWith(CurrencyCodeE, {
+  defaultCurrency: Schema.optionalWith(CurrencyCode, {
     default: () => currencies.USD.code,
   }),
   runTasksInParallel: Schema.optionalWith(Schema.Boolean, {
@@ -119,4 +76,4 @@ export const PreferencesE = Schema.Struct({
   }),
 })
 
-export type Preferences = typeof PreferencesE.Type
+export type Preferences = typeof Preferences.Type

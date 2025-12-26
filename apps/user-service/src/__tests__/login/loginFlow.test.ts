@@ -1,6 +1,6 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {ecdsaSign} from '@vexl-next/cryptography/src/operations/ecdsa'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {verifyUserSecurity} from '@vexl-next/server-utils/src/serverSecurity'
@@ -44,7 +44,7 @@ describe('loginFlow', () => {
             }),
             payload: {
               challenge: yield* _(generateAndSignChallenge),
-              phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             },
           })
         )

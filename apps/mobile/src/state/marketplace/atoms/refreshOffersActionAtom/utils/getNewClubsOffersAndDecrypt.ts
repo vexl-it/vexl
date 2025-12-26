@@ -1,6 +1,6 @@
-import {type PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder'
-import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {OfferInfoE} from '@vexl-next/domain/src/general/offers'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
@@ -18,13 +18,13 @@ export type ApiErrorFetchingClubsOffers = Effect.Effect.Error<
 export class NotOfferForExpectedClubError extends Schema.TaggedError<NotOfferForExpectedClubError>(
   'NotOfferForExpectedClubError'
 )('NotOfferForExpectedClubError', {
-  expectedClubUuid: ClubUuidE,
-  receivedClubUuid: ClubUuidE,
-  offerInfo: OfferInfoE,
+  expectedClubUuid: ClubUuid,
+  receivedClubUuid: ClubUuid,
+  offerInfo: OfferInfo,
 }) {}
 
 const validateOfferIsForClub =
-  (clubUuid: ClubUuid) => (offerInfo: OfferInfoE) => {
+  (clubUuid: ClubUuid) => (offerInfo: OfferInfo) => {
     const offerClubIds = offerInfo.privatePart.clubIds
     const friendLevel = offerInfo.privatePart.friendLevel
     const commonFriends = offerInfo.privatePart.commonFriends
@@ -50,7 +50,7 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
       lastPrivatePartIdBase64,
     }: {
       offersApi: OfferApi
-      keyPair: PrivateKeyHolderE
+      keyPair: PrivateKeyHolder
       clubUuid: ClubUuid
       lastPrivatePartIdBase64?: Base64String
     }
@@ -65,6 +65,8 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
               keyPair,
             }),
           storeNextPageToken: (nextPageToken) => {
+            if (!nextPageToken) return
+
             set(
               clubOffersNextPageParamAtom,
               Record.set(clubUuid, nextPageToken)

@@ -8,10 +8,9 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
-import {Array, Effect, Option, Record} from 'effect'
+import {Array, Effect, Option, Record, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
-import {z} from 'zod'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
@@ -29,11 +28,9 @@ import {singleOfferAtom, singleOfferByAdminIdAtom} from './offersState'
 export const offersMissingOnServerStorageAtom = atomWithParsedMmkvStorage(
   'offers-missing-on-server',
   {offerIds: []},
-  z
-    .object({
-      offerIds: z.array(OfferId),
-    })
-    .readonly()
+  Schema.Struct({
+    offerIds: Schema.Array(OfferId),
+  })
 )
 
 export const unmarkOfferAsMissingActionAtom = atom(

@@ -1,28 +1,25 @@
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
-  type E164PhoneNumber,
-  E164PhoneNumberE,
-} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
+  UnixMilliseconds,
   UnixMilliseconds0,
-  UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
-import {atomWithParsedMmkvStorageE} from '../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const CAN_LOGIN_AGAIN_AFTER_MILLIS = 1000 * 60 // 1 day
 
 const LoginAttemptsDataStored = Schema.Struct({
   data: Schema.Struct({
-    phoneNumbers: Schema.Array(E164PhoneNumberE),
-    timestamp: UnixMillisecondsE,
+    phoneNumbers: Schema.Array(E164PhoneNumber),
+    timestamp: UnixMilliseconds,
   }),
 })
 type LoginAttemptsDataStored = typeof LoginAttemptsDataStored.Type
 
-const loginAttemptsPhoneNumbersMmkvAtom = atomWithParsedMmkvStorageE(
+const loginAttemptsPhoneNumbersMmkvAtom = atomWithParsedMmkvStorage(
   'numberOfLoginAttempts',
   {data: {phoneNumbers: [], timestamp: UnixMilliseconds0}},
   LoginAttemptsDataStored
@@ -54,7 +51,7 @@ export const updateNumberOfLoginAttemptsActionAtom = atom(
       set(loginAttemptsPhoneNumbersAtom, [])
       set(
         loginAttemptsTimestampAtom,
-        Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+        Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
       )
     }
 
@@ -63,7 +60,7 @@ export const updateNumberOfLoginAttemptsActionAtom = atom(
       set(loginAttemptsPhoneNumbersAtom, [...currentPhoneNumbers, phoneNumber])
       set(
         loginAttemptsTimestampAtom,
-        Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+        Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
       )
     }
   }

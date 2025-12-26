@@ -7,6 +7,7 @@ import {
   type OfferId,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
+import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Record} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, type Atom, type WritableAtom} from 'jotai'
@@ -23,6 +24,7 @@ export const offersStateAtom = atomWithParsedMmkvStorage(
     contactOffersNextPageParam: undefined,
     clubOffersNextPageParam: {},
     offers: [],
+    lastUpdatedAt1: MINIMAL_DATE,
   },
   OffersState
 )

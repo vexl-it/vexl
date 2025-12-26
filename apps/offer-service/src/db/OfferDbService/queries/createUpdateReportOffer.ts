@@ -1,14 +1,14 @@
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {OfferIdE} from '@vexl-next/domain/src/general/offers'
+import {OfferId} from '@vexl-next/domain/src/general/offers'
 import {Effect, Schema} from 'effect'
 import {expirationPeriodDaysConfig} from '../../../configs'
 import {offerNotExpired} from '../utils'
 
 export const UpdateReportOfferRequest = Schema.Struct({
-  offerId: OfferIdE,
-  userPublicKey: PublicKeyPemBase64E,
+  offerId: OfferId,
+  userPublicKey: PublicKeyPemBase64,
 })
 export type UpdateReportOfferRequest = typeof UpdateReportOfferRequest.Type
 

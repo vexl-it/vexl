@@ -1,26 +1,13 @@
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
-import {FcmToken, FcmTokenE} from './FcmToken.brand'
+import {Schema} from 'effect'
+import {FcmToken} from './FcmToken.brand'
 
-export const ExpoNotificationToken = z
-  .string()
-  .transform((v) =>
-    Brand.nominal<typeof v & Brand.Brand<'ExpoNotificationToken'>>()(v)
-  )
-export const ExpoNotificationTokenE = Schema.String.pipe(
+export const ExpoNotificationToken = Schema.String.pipe(
   Schema.brand('ExpoNotificationToken')
 )
+export type ExpoNotificationToken = typeof ExpoNotificationToken.Type
 
-export type ExpoNotificationToken = Schema.Schema.Type<
-  typeof ExpoNotificationTokenE
->
-
-export const ExpoOrFcmNotificationToken = z.union([
+export const ExpoOrFcmNotificationToken = Schema.Union(
   ExpoNotificationToken,
-  FcmToken,
-])
-export const ExpoOrFcmNotificationTokenE = Schema.Union(
-  ExpoNotificationTokenE,
-  FcmTokenE
+  FcmToken
 )
-export type ExpoOrFcmNotificationToken = typeof ExpoOrFcmNotificationTokenE.Type
+export type ExpoOrFcmNotificationToken = typeof ExpoOrFcmNotificationToken.Type

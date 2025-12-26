@@ -1,20 +1,10 @@
-import {
-  E164PhoneNumber,
-  E164PhoneNumberE,
-} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
-  HashedPhoneNumber,
-  HashedPhoneNumberE,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {
-  UriString,
-  UriStringE,
-} from '@vexl-next/domain/src/utility/UriString.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {getDefaultStore} from 'jotai'
-import {z} from 'zod'
 import {
   importedContactsAtom,
   lastImportOfContactsAtom,
@@ -24,43 +14,31 @@ import {
 import loadContactsFromDeviceActionAtom from '../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import normalizeStoredContactsActionAtom from '../../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {type StoredContactWithComputedValues} from '../../../state/contacts/domain'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../../utils/reportError'
 import {contactsMigratedAtom} from '../atoms'
 import {type MigrationProgress} from '../types'
 
-const ContactNormalized = z
-  .object({
-    name: z.string(),
-    label: z.string().optional(),
-    numberToDisplay: z.string(),
-    normalizedNumber: E164PhoneNumber,
-    imageUri: UriString.optional(),
-    fromContactList: z.boolean(),
-    hash: HashedPhoneNumber,
-  })
-  .readonly()
-
-const ContactNormalizedE = Schema.Struct({
+const ContactNormalized = Schema.Struct({
   name: Schema.String,
   label: Schema.optionalWith(Schema.String, {as: 'Option'}),
   numberToDisplay: Schema.String,
-  normalizedNumber: E164PhoneNumberE,
-  imageUri: Schema.optionalWith(UriStringE, {as: 'Option'}),
+  normalizedNumber: E164PhoneNumber,
+  imageUri: Schema.optionalWith(UriString, {as: 'Option'}),
   fromContactList: Schema.Boolean,
-  hash: HashedPhoneNumberE,
+  hash: HashedPhoneNumber,
 })
-type ContactNormalized = typeof ContactNormalizedE.Type
+type ContactNormalized = typeof ContactNormalized.Type
 
-const oldImportedContactsStorageAtom = atomWithParsedMmkvStorageE(
+const oldImportedContactsStorageAtom = atomWithParsedMmkvStorage(
   'importedContacts',
   {
     importedContacts: [],
     lastImport: undefined,
   },
   Schema.Struct({
-    importedContacts: Schema.Array(ContactNormalizedE).pipe(Schema.mutable),
-    lastImport: Schema.optional(IsoDatetimeStringE),
+    importedContacts: Schema.Array(ContactNormalized).pipe(Schema.mutable),
+    lastImport: Schema.optional(IsoDatetimeString),
   })
 )
 

@@ -1,5 +1,6 @@
 import {SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import {Option, Schema} from 'effect/index'
 import React from 'react'
 import {
   Image as RNImage,
@@ -11,13 +12,13 @@ import {
 import {SvgXml, type XmlProps} from 'react-native-svg'
 
 export function isSvgString(something: unknown): something is SvgString {
-  return SvgString.safeParse(something).success
+  return Option.isSome(Schema.decodeUnknownOption(SvgString)(something))
 }
 
 export function stringToSvgStringRuntimeError(s: string): SvgString {
-  const parse = SvgString.safeParse({xml: s})
-  if (parse.success) {
-    return parse.data
+  const parseResult = Schema.decodeUnknownOption(SvgString)({xml: s})
+  if (Option.isSome(parseResult)) {
+    return parseResult.value
   }
   throw Error(
     `Trying to convert string to SvgString but string is not valid SvgString. String: ${s}`

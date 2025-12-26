@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
@@ -48,7 +48,7 @@ beforeEach(async () => {
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
@@ -95,7 +95,7 @@ beforeEach(async () => {
 
       const request2: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
@@ -123,7 +123,7 @@ beforeEach(async () => {
 
       const request3: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,

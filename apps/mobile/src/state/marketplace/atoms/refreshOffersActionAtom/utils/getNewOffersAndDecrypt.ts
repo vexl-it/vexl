@@ -1,7 +1,7 @@
-import {type PrivateKeyHolderE} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   type FriendLevel,
-  type OfferInfoE,
+  type OfferInfo,
 } from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
@@ -14,7 +14,7 @@ import {contactOffersNextPageParamAtom} from '../../offersState'
 
 const OFFERS_PAGE_LIMIT = 30
 
-const validateOfferIsFromContactNetwork = (offerInfo: OfferInfoE): boolean => {
+const validateOfferIsFromContactNetwork = (offerInfo: OfferInfo): boolean => {
   if (offerInfo.privatePart.adminId) return true
 
   const friendLevel = offerInfo.privatePart.friendLevel
@@ -45,7 +45,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
       /**
        * KeyPair to decrypt offers with.
        */
-      keyPair: PrivateKeyHolderE
+      keyPair: PrivateKeyHolder
       /**
        * Only offers with ids that were not previously fetched will be fetched.
        */

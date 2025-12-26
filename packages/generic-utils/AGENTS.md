@@ -2,7 +2,7 @@
 
 Purpose: Shared generic utilities (string/number/time helpers, matching, truncation, etc.) used across services and mobile.
 
-Stack: TypeScript ESM utilities with Effect/fp-ts/zod where helpful; exposed via `src/index`.
+Stack: TypeScript ESM utilities with Effect/fp-ts where helpful; exposed via `src/index`.
 
 Commands (root):
 

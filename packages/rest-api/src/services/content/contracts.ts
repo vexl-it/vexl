@@ -1,7 +1,7 @@
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
-import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
 export const Speaker = Schema.Struct({
@@ -42,7 +42,7 @@ export const BlogArticlePreview = Schema.Struct({
   title: Schema.String,
   slug: BlogSlug,
   teaserText: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  mainImage: Schema.optionalWith(UriStringE, {as: 'Option'}),
+  mainImage: Schema.optionalWith(UriString, {as: 'Option'}),
   link: Schema.String,
   publishedOn: Schema.DateFromString,
 })
@@ -64,7 +64,7 @@ export const ClearEventsCacheRequest = Schema.Struct({
 })
 
 export const VexlBotNews = Schema.Struct({
-  id: UuidE,
+  id: Uuid,
   content: Schema.String,
   type: Schema.Literal('info', 'warning'),
   action: Schema.Struct({
@@ -84,7 +84,7 @@ export const VexlBotNews = Schema.Struct({
 export type VexlBotNews = typeof VexlBotNews.Type
 
 export const FullScreenWarning = Schema.Struct({
-  id: UuidE,
+  id: Uuid,
   type: Schema.Literal('RED', 'YELLOW', 'GREEN'),
   title: Schema.String,
   description: Schema.String,
@@ -190,8 +190,8 @@ export const CreateInvoiceResponse = Schema.Struct({
   paymentLink: PaymentLink,
   status: InvoiceStatus,
   paymentMethod: InvoicePaymentMethod,
-  createdTime: UnixMillisecondsE,
-  expirationTime: UnixMillisecondsE,
+  createdTime: UnixMilliseconds,
+  expirationTime: UnixMilliseconds,
 })
 export type CreateInvoiceResponse = typeof CreateInvoiceResponse.Type
 
@@ -257,7 +257,7 @@ export const UpdateInvoiceStatusWebhookRequest = Schema.Struct({
     default: () => true,
   }),
   type: InvoiceStatusType,
-  timestamp: UnixMillisecondsE,
+  timestamp: UnixMilliseconds,
   partiallyPaid: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   generateAdminId,
   newOfferId,
@@ -35,7 +35,7 @@ beforeAll(async () => {
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
@@ -58,7 +58,7 @@ beforeAll(async () => {
 
       const authHeaders = yield* _(
         createDummyAuthHeadersForUser({
-          phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
           publicKey: me.publicKeyPemBase64,
         })
       )
@@ -100,7 +100,7 @@ describe('Refresh offer', () => {
             yield* _(
               createDummyAuthHeadersForUser({
                 phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
                 publicKey: me.publicKeyPemBase64,
               })
             )
@@ -139,7 +139,7 @@ describe('Refresh offer', () => {
             yield* _(
               createDummyAuthHeadersForUser({
                 phoneNumber:
-                  Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
                 publicKey: me.publicKeyPemBase64,
               })
             )

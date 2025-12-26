@@ -1,7 +1,4 @@
-import {
-  type ChatMessage,
-  type ChatMessagePayload,
-} from '@vexl-next/domain/src/general/messaging'
+import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
 } from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
@@ -10,10 +7,8 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
+import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
+import {type ParseResult} from 'effect/index'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
@@ -46,7 +41,7 @@ const acceptMessagingRequestAtom = atom(
   ): TE.TaskEither<
     | ApiConfirmMessagingRequest
     | JsonStringifyError
-    | ZodParseError<ChatMessagePayload>
+    | ParseResult.ParseError
     | ErrorEncryptingMessage,
     ChatMessageWithState
   > => {

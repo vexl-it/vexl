@@ -2,7 +2,16 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array, Effect, HashMap, HashSet, Option, Ref, pipe} from 'effect'
+import {
+  Array,
+  Effect,
+  HashMap,
+  HashSet,
+  Option,
+  Ref,
+  Schema,
+  pipe,
+} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
@@ -273,7 +282,7 @@ export const submitContactsActionAtom = atom(
 
       set(
         lastImportOfContactsAtom,
-        IsoDatetimeString.parse(new Date().toISOString())
+        Schema.decodeSync(IsoDatetimeString)(new Date().toISOString())
       )
 
       set(updatePersistentDataAboutNumberOfImportedContactsActionAtom)

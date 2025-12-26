@@ -13,6 +13,7 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Schema} from 'effect/index'
 import * as O from 'fp-ts/Option'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -28,7 +29,8 @@ import {
   updateMyNotificationTokenInfoInChat,
 } from './generateMyNotificationTokenInfoActionAtom'
 
-const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION = SemverString.parse('1.13.1')
+const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION =
+  Schema.decodeSync(SemverString)('1.13.1')
 
 function createFcmCypherUpdateMessage(
   senderPublicKey: PublicKeyPemBase64,

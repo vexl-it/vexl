@@ -1,5 +1,6 @@
 import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
 import {BtcAddress} from '@vexl-next/domain/src/utility/BtcAddress.brand'
+import {Option, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {addNetworkActionAtom} from '../../atoms/updatesToBeSentAtom'
 
@@ -15,11 +16,11 @@ export const saveBtcAddressActionAtom = atom(
       return true
     }
 
-    const parsingResult = BtcAddress.safeParse(btcAddress)
-    set(displayParsingErrorAtom, !parsingResult.success)
+    const parsingResult = Schema.decodeUnknownOption(BtcAddress)(btcAddress)
+    set(displayParsingErrorAtom, Option.isNone(parsingResult))
 
-    if (parsingResult.success) {
-      set(btcAddressAtom, parsingResult.data)
+    if (Option.isSome(parsingResult)) {
+      set(btcAddressAtom, parsingResult.value)
       return true
     }
 

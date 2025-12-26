@@ -1,5 +1,5 @@
 import {FetchHttpClient} from '@effect/platform/index'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {contact} from '@vexl-next/rest-api'
 import {Effect, Schema} from 'effect'
@@ -102,7 +102,7 @@ export default function PhoneNumberHashBugMigration({
               ),
             },
             oldData: {
-              hash: Schema.decodeSync(HashedPhoneNumberE)(oldCredentials.hash),
+              hash: Schema.decodeSync(HashedPhoneNumber)(oldCredentials.hash),
               signature: Schema.decodeSync(EcdsaSignature)(
                 oldCredentials.signature
               ),

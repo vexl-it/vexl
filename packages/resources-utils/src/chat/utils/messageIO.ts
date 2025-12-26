@@ -4,14 +4,14 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ChatMessage,
-  type ChatMessagePayload,
   type MessageCypher,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type ParseResult} from 'effect/index'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
-import {type JsonStringifyError, type ZodParseError} from '../../utils/parsing'
+import {type JsonStringifyError} from '../../utils/parsing'
 import {
   decryptMessage,
   encryptMessage,
@@ -30,9 +30,7 @@ export function messageToNetwork(
 ): (
   message: ChatMessage
 ) => TE.TaskEither<
-  | JsonStringifyError
-  | ZodParseError<ChatMessagePayload>
-  | ErrorEncryptingMessage,
+  JsonStringifyError | ParseResult.ParseError | ErrorEncryptingMessage,
   MessageCypher
 > {
   return flow(

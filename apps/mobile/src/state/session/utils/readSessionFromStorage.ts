@@ -3,7 +3,7 @@ import {
   type CryptoError,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect, Schema, type ParseResult} from 'effect/index'
-import {SessionE, type Session} from '../../../brands/Session.brand'
+import {Session} from '../../../brands/Session.brand'
 import {
   getItemFromAsyncStorage,
   getItemFromSecretStorage,
@@ -34,7 +34,7 @@ export function readSessionFromStorageE({
 
     return yield* _(
       aesCTRDecrypt(secretToken)(encryptedSessionJson),
-      Effect.flatMap(Schema.decode(Schema.parseJson(SessionE)))
+      Effect.flatMap(Schema.decode(Schema.parseJson(Session)))
     )
   })
 }

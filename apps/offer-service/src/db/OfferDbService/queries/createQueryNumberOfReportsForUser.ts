@@ -1,6 +1,6 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Option, Schema} from 'effect'
 import {reportLimitIntervalDaysConfig} from '../../../configs'
@@ -11,11 +11,11 @@ export const createQueryNumberOfReportsForUser = Effect.gen(function* (_) {
 
   const QueryOffers = yield* _(
     SqlResolver.grouped('NumberOfReportsForUser', {
-      Request: PublicKeyPemBase64E,
+      Request: PublicKeyPemBase64,
       RequestGroupKey: (userPublicKey) => userPublicKey,
       Result: Schema.Struct({
         numberOfReports: Schema.Int,
-        userPublicKey: PublicKeyPemBase64E,
+        userPublicKey: PublicKeyPemBase64,
       }),
       ResultGroupKey: (result) => result.userPublicKey,
       execute: (query) => {

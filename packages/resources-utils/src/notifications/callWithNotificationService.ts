@@ -1,14 +1,17 @@
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import * as SemverString from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {
+  SemverString,
+  compare,
+} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 
 const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
-  SemverString.SemverString.parse('1.17.0')
+  Schema.decodeSync(SemverString)('1.17.0')
 
 interface NotificationArgs {
-  otherSideVersion?: SemverString.SemverString | undefined
+  otherSideVersion?: SemverString | undefined
   notificationCypher?: NotificationCypher | undefined
   notificationApi: NotificationApi
   sendSystemNotification: boolean
@@ -33,10 +36,7 @@ export function callWithNotificationService<
       if (
         !notificationCypher ||
         !otherSideVersion ||
-        SemverString.compare(otherSideVersion)(
-          '<',
-          FE_VERSION_SUPPORTING_V2_NOTIFICATIONS
-        )
+        compare(otherSideVersion)('<', FE_VERSION_SUPPORTING_V2_NOTIFICATIONS)
       ) {
         return yield* _(f({...(fArgs as T), notificationServiceReady: false}))
       }

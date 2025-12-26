@@ -2,7 +2,7 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   type InvoiceId,
   InvoiceStatusType,
@@ -36,7 +36,7 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
         createOrUpdateInvoiceState: ({invoiceId, type}) =>
           Effect.gen(function* (_) {
             const invoiceRecordKey = createInvoiceRecordKey(invoiceId)
-            const expiresAt = Schema.decodeSync(UnixMillisecondsE)(
+            const expiresAt = Schema.decodeSync(UnixMilliseconds)(
               DateTime.now().plus({days: 1}).toMillis()
             )
 

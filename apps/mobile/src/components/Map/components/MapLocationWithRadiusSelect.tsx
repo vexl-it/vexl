@@ -4,7 +4,7 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
@@ -68,8 +68,8 @@ function useAtoms({
         get(apiAtom)
           .location.getGeocodedCoordinates({
             lang: getCurrentLocale(),
-            latitude: Latitude.parse(region.latitude),
-            longitude: Longitude.parse(region.longitude),
+            latitude: Schema.decodeSync(Latitude)(region.latitude),
+            longitude: Schema.decodeSync(Longitude)(region.longitude),
           })
           .pipe(
             Effect.tap((data) => {
@@ -78,9 +78,9 @@ function useAtoms({
 
               onPick({
                 ...data,
-                latitude: Latitude.parse(region.latitude),
-                longitude: Longitude.parse(region.longitude),
-                radius: Radius.parse(
+                latitude: Schema.decodeSync(Latitude)(region.latitude),
+                longitude: Schema.decodeSync(Longitude)(region.longitude),
+                radius: Schema.decodeSync(Radius)(
                   (Math.abs(region.longitudeDelta) * usedWidthWithoutPadding) /
                     2
                 ),
@@ -103,7 +103,7 @@ function useAtoms({
           Math.round(
             longitudeDeltaToKilometers(
               radiusLongitudeDeg,
-              Latitude.parse(selectedRegion.latitude)
+              Schema.decodeSync(Latitude)(selectedRegion.latitude)
             ) * 10
           ) / 10
         )

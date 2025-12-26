@@ -1,8 +1,7 @@
-import {Effect} from 'effect'
+import {Effect, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {showErrorAlert} from '../components/ErrorAlert'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../utils/localization/I18nProvider'
@@ -14,7 +13,7 @@ import {sessionDataOrDummyAtom} from './session'
 export const postLoginFinishedStorageAtom = atomWithParsedMmkvStorage(
   'postLoginFinished1',
   {postLoginFinished: false},
-  z.object({postLoginFinished: z.boolean()}).readonly()
+  Schema.Struct({postLoginFinished: Schema.Boolean})
 )
 export const postLoginFinishedAtom = focusAtom(
   postLoginFinishedStorageAtom,

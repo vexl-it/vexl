@@ -1,12 +1,12 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
-import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Schema} from 'effect'
 
 export const GetPublicKeyResponse = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
 })
 
 export type GetPublicKeyResponse = typeof GetPublicKeyResponse.Type
@@ -14,7 +14,7 @@ export type GetPublicKeyResponse = typeof GetPublicKeyResponse.Type
 export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequest>(
   'IssueNotificationRequest'
 )({
-  notificationCypher: NotificationCypherE,
+  notificationCypher: NotificationCypher,
   /**
    * Wether to send a system notification indicating there is a new chat notification.
    */
@@ -38,7 +38,7 @@ export class IssueNotificationResponse extends Schema.Class<IssueNotificationRes
 export class IssueStreamOnlyMessageRequest extends Schema.Class<IssueStreamOnlyMessageRequest>(
   'IssueStreamOnlyMessageRequest'
 )({
-  notificationCypher: NotificationCypherE,
+  notificationCypher: NotificationCypher,
   message: StreamOnlyMessageCypher,
   minimalOtherSideVersion: Schema.optional(VersionCode),
 }) {}
@@ -52,8 +52,8 @@ export class InvalidFcmCypherError extends Schema.TaggedError<InvalidFcmCypherEr
   }
 ) {}
 
-export class InvalidNotificationCypherError extends Schema.TaggedError<InvalidNotificationCypherError>()(
-  'InvalidNotificationCypherError',
+export class InvalidNotificationCypherrror extends Schema.TaggedError<InvalidNotificationCypherrror>()(
+  'InvalidNotificationCypherrror',
   {
     status: Schema.optionalWith(Schema.Literal(400), {
       default: () => 400 as const,

@@ -1,5 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Effect, flow, Schema} from 'effect'
 import {type ConnectingIp} from '../../getConnectingIp'
 import {RedisConnectionService} from '../../RedisConnection'
@@ -100,7 +100,7 @@ const RateLimitResponse = Schema.Union(
     allowed: Schema.Literal(false),
     currentCallCount: Schema.Number,
     retryAfterMs: Schema.Number,
-    rateLimitResetAtMs: UnixMillisecondsE,
+    rateLimitResetAtMs: UnixMilliseconds,
   })
 )
 export type RateLimitResponse = typeof RateLimitResponse.Type

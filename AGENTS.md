@@ -23,7 +23,9 @@ Agent playbook:
 - When touching HTTP services, build on `HttpApiBuilder` + `Layer`; reuse middlewares, rate limiting, crypto, and error helpers from `packages/server-utils`. Keep schemas/types in shared packages; avoid ad-hoc types.
 - For client code (dashboard/mobile/remix), keep hooks/components typed, prefer shared domain/rest-api utilities, and align with Prettier/ESLint rules.
 - Update the relevant workspace AGENTS.md if you change conventions or commands.
-- Automatically use context7 for code generation and library documentation.
+- Always use context7 when I need code generation, setup or configuration steps, or
+  library/API documentation. This means you should automatically use the Context7 MCP
+  tools to resolve library id and get library docs without me having to explicitly ask.
 - When using effect use effect-ts/effect documentation from context7
 - When accepting data outside of application doamin, always validate via effect/schema. Never use `as` keyword in typescript use Schema.decodeUnknown instead
 - After doing changes in any of the subpackage run typecheck to check if your code is valid. After impementing and finishing with your chagnes, run typecheck, format and lint. Check output of each command and fix errors (if format script fails run format:fix first)

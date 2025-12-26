@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {
-  ForbiddenMessageTypeError,
+  ForbiddenMessageTyperror,
   type NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {
@@ -42,7 +42,7 @@ const sendMessage = (
   | NotPermittedToSendMessageToTargetInboxError
   | ConfigError.ConfigError
   | RedisLockError
-  | ForbiddenMessageTypeError,
+  | ForbiddenMessageTyperror,
   | WhitelistDbService
   | MessagesDbService
   | InboxDbService
@@ -63,7 +63,7 @@ const sendMessage = (
     )
 
     if (forbiddenMessageTypes.includes(message.messageType)) {
-      return yield* _(Effect.fail(new ForbiddenMessageTypeError()))
+      return yield* _(Effect.fail(new ForbiddenMessageTyperror()))
     }
 
     const messagesDb = yield* _(MessagesDbService)

@@ -1,5 +1,4 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   aesDecrpytE,
@@ -76,7 +75,7 @@ export const decryptPublicKey = (
       publicKey,
       Schema.decode(AesGtmCypher),
       Effect.flatMap(decrypt),
-      Effect.flatMap(Schema.decode(PublicKeyPemBase64E)),
+      Effect.flatMap(Schema.decode(PublicKeyPemBase64)),
       Effect.catchAll((e) =>
         Effect.zipRight(
           Effect.logError('Error while decrypting publicKey', e),

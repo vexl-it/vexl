@@ -1,15 +1,13 @@
-import {z} from 'zod'
+import {Schema} from 'effect/index'
 
-export const Width = z.number().brand('WidthDimension')
-export type Width = z.TypeOf<typeof Width>
+export const Width = Schema.Number.pipe(Schema.brand('WidthDimension'))
+export type Width = typeof Width.Type
 
-export const Height = z.number().brand('HeightDimension')
-export type Height = z.TypeOf<typeof Height>
+export const Height = Schema.Number.pipe(Schema.brand('HeightDimension'))
+export type Height = typeof Height.Type
 
-export const Dimensions = z
-  .object({
-    width: Width,
-    height: Height,
-  })
-  .readonly()
-export type Dimensions = z.TypeOf<typeof Dimensions>
+export const Dimensions = Schema.Struct({
+  width: Width,
+  height: Height,
+})
+export type Dimensions = typeof Dimensions.Type

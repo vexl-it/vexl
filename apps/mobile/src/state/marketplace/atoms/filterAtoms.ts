@@ -2,15 +2,14 @@ import {Record, Schema} from 'effect'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type DropdownItemProps} from '../../../components/Dropdown'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {
-  OffersFilterE,
-  offersFilterEquals,
+  OffersFilter,
+  OffersFilterEquals,
   type BaseOffersFilter,
-  type OffersFilter,
 } from '../domain'
 
 export const offersFilterInitialState = {
@@ -32,10 +31,10 @@ export const offersFilterInitialState = {
   clubsUuids: undefined,
 } satisfies OffersFilter
 
-export const offersFilterStorageAtom = atomWithParsedMmkvStorageE(
+export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
   'offersFilter',
   {filter: offersFilterInitialState},
-  Schema.Struct({filter: OffersFilterE})
+  Schema.Struct({filter: OffersFilter})
 )
 
 export const offersFilterFromStorageAtom = focusAtom(
@@ -97,7 +96,7 @@ export const isFilterActiveAtom = atom((get) => {
     ...filterInitialState
   } = offersFilterInitialState
 
-  return !offersFilterEquals(
+  return !OffersFilterEquals(
     {
       ...offersFilterFromStorage,
       singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,

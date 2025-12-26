@@ -1,7 +1,4 @@
-import {
-  UriString,
-  UriStringE,
-} from '@vexl-next/domain/src/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Effect, Schema} from 'effect'
 import * as FileSystem from 'expo-file-system'
@@ -11,7 +8,7 @@ import {PROFILE_PICTURE_DIRECTORY} from './fsDirectories'
 export const SelectedImage = Schema.Struct({
   width: Schema.Number.pipe(Schema.brand('imageWidth')),
   height: Schema.Number.pipe(Schema.brand('imageHeight')),
-  uri: UriStringE,
+  uri: UriString,
 })
 export type SelectedImage = typeof SelectedImage.Type
 
@@ -55,7 +52,7 @@ export function moveImageToInternalDirectory({
 
       new FileSystem.File(imagePath).copy(new FileSystem.File(path))
       const infoTo = new FileSystem.File(path)
-      return Schema.decodeSync(UriStringE)(infoTo.uri)
+      return Schema.decodeSync(UriString)(infoTo.uri)
     },
     catch(error) {
       return new ImagePickerError({reason: 'FileError', error})
@@ -115,7 +112,7 @@ export function getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay({
 
     return Effect.succeed(
       Schema.decodeSync(SelectedImage)({
-        uri: Schema.decodeSync(UriStringE)(selectedImage.uri),
+        uri: Schema.decodeSync(UriString)(selectedImage.uri),
         width: selectedImage.width,
         height: selectedImage.height,
       })
@@ -181,7 +178,7 @@ export function getImageFromCameraAndTryToResolveThePermissionsAlongTheWay({
 
     return Effect.succeed(
       Schema.decodeSync(SelectedImage)({
-        uri: Schema.decodeSync(UriStringE)(selectedImage.uri),
+        uri: Schema.decodeSync(UriString)(selectedImage.uri),
         width: selectedImage.width,
         height: selectedImage.height,
       })
@@ -215,7 +212,7 @@ export function getImageFromCameraResolvePermissionsAndMoveItToInternalDirectory
 
     const path = yield* _(
       moveImageToInternalDirectory({
-        imagePath: UriString.parse(selectedImage.uri),
+        imagePath: Schema.decodeSync(UriString)(selectedImage.uri),
         mode: saveTo,
         directory: PROFILE_PICTURE_DIRECTORY,
       })
@@ -244,7 +241,7 @@ export function getImageFromGalleryResolvePermissionsAndMoveItToInternalDirector
 
     const path = yield* _(
       moveImageToInternalDirectory({
-        imagePath: UriString.parse(selectedImage.uri),
+        imagePath: Schema.decodeSync(UriString)(selectedImage.uri),
         mode: saveTo,
         directory: PROFILE_PICTURE_DIRECTORY,
       })

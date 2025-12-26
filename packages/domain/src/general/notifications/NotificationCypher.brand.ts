@@ -1,13 +1,6 @@
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
+import {Schema} from 'effect'
 
-export const NotificationCypher = z
-  .string()
-  .transform((v) =>
-    Brand.nominal<typeof v & Brand.Brand<'NotificationCypher'>>()(v)
-  )
-
-export const NotificationCypherE = Schema.String.pipe(
+export const NotificationCypher = Schema.String.pipe(
   Schema.brand('NotificationCypher')
 )
-export type NotificationCypher = Schema.Schema.Type<typeof NotificationCypherE>
+export type NotificationCypher = typeof NotificationCypher.Type

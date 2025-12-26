@@ -11,17 +11,13 @@ import {
 import {
   generateChatMessageId,
   type ChatMessage,
-  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
+import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
 import {
   type ErrorSigningChallenge,
   type InvalidChallengeError,
@@ -30,7 +26,7 @@ import {
   type ReceiverInboxDoesNotExistError,
   type SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {type ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {type ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {type ParseResult} from 'effect/index'
 import * as E from 'fp-ts/Either'
@@ -52,7 +48,7 @@ export default function blockChatActionAtom(
     | ErrorEncryptingMessage
     | HttpApiDecodeError
     | InvalidChallengeError
-    | ForbiddenMessageTypeError
+    | ForbiddenMessageTyperror
     | NotFoundError
     | UnexpectedServerError
     | ParseResult.ParseError
@@ -64,7 +60,7 @@ export default function blockChatActionAtom(
     | CryptoError
     | RequestError
     | ResponseError
-    | ZodParseError<ChatMessagePayload>
+    | ParseResult.ParseError
     | JsonStringifyError,
     ChatMessageWithState
   >

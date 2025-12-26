@@ -1,15 +1,13 @@
+import {Option, Schema} from 'effect/index'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const vexlCalendarStorageAtom = atomWithParsedMmkvStorage(
   'vexlCalendar',
-  {id: undefined},
-  z
-    .object({
-      id: z.string().optional(),
-    })
-    .readonly()
+  {id: Option.none()},
+  Schema.Struct({
+    id: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  })
 )
 
 export default vexlCalendarStorageAtom

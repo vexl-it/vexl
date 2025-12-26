@@ -1,11 +1,11 @@
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 
 export const TradeReminder = Schema.Struct({
   chatId: Schema.String,
   notificationId: Schema.String,
-  scheduledFor: UnixMillisecondsE,
-  meetingTime: UnixMillisecondsE,
+  scheduledFor: UnixMilliseconds,
+  meetingTime: UnixMilliseconds,
 })
 
 export type TradeReminder = Schema.Schema.Type<typeof TradeReminder>

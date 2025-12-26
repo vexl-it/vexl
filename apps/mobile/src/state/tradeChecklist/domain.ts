@@ -8,91 +8,90 @@ import {
   MeetingLocationChatMessage,
   NetworkChatMessage,
 } from '@vexl-next/domain/src/general/tradeChecklist'
-import {z} from 'zod'
+import {Either, Schema} from 'effect/index'
 import reportError from '../../utils/reportError'
 
-export const ChatDataForTradeChecklist = z
-  .object({
-    chatId: ChatId,
-    inboxKey: PublicKeyPemBase64,
-  })
-  .readonly()
-export type ChatDataForTradeChecklist = z.TypeOf<
-  typeof ChatDataForTradeChecklist
->
+export const ChatDataForTradeChecklist = Schema.Struct({
+  chatId: ChatId,
+  inboxKey: PublicKeyPemBase64,
+})
+export type ChatDataForTradeChecklist = typeof ChatDataForTradeChecklist.Type
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-function catchFormatError<T>(err: T): {} {
-  reportError(
-    'error',
-    new Error('Trade checklist in state formatting error caught'),
-    {
-      err,
-    }
-  )
-  return {}
+export const withFallback = <A, I, R>(
+  self: Schema.Schema<A, I, R>,
+  fallback: NoInfer<A>
+): Schema.Schema<A, I, R> => {
+  return self.annotations({
+    decodingFallback: (issue) => {
+      reportError(
+        'error',
+        new Error('Trade checklist in state formatting error caught'),
+        {
+          err: issue,
+        }
+      )
+      return Either.right(fallback)
+    },
+  })
 }
 
-export const TradeChecklistInState = z
-  .object({
-    dateAndTime: z
-      .object({
-        sent: DateTimeChatMessage.optional(),
-        received: DateTimeChatMessage.optional(),
-      })
-      .readonly()
-      .default({})
-      .catch(catchFormatError),
-    location: z
-      .object({
-        sent: MeetingLocationChatMessage.optional(),
-        received: MeetingLocationChatMessage.optional(),
-      })
-      .readonly()
-      .default({})
-      .catch(catchFormatError),
-    amount: z
-      .object({
-        sent: AmountChatMessage.optional(),
-        received: AmountChatMessage.optional(),
-      })
-      .readonly()
-      .default({})
-      .catch(catchFormatError),
-    network: z
-      .object({
-        sent: NetworkChatMessage.optional(),
-        received: NetworkChatMessage.optional(),
-      })
-      .readonly()
-      .default({})
-      .catch(catchFormatError),
-    identity: z
-      .object({
-        sent: IdentityRevealChatMessage.optional(),
-        received: IdentityRevealChatMessage.optional(),
-      })
-      .readonly()
-      .default({})
-      .catch(catchFormatError),
-    contact: z
-      .object({
-        sent: ContactRevealChatMessage.optional(),
-        received: ContactRevealChatMessage.optional(),
-      })
-      .readonly()
-      .default({})
-      .catch(catchFormatError),
-  })
-  .readonly()
-
-export type TradeChecklistInState = z.TypeOf<typeof TradeChecklistInState>
-
-export const createEmptyTradeChecklistInState = (): TradeChecklistInState => ({
-  dateAndTime: {},
-  location: {},
-  amount: {},
-  network: {},
-  identity: {},
-  contact: {},
+export const TradeChecklistInState = Schema.Struct({
+  dateAndTime: withFallback(
+    Schema.Struct({
+      sent: Schema.optionalWith(DateTimeChatMessage, {nullable: true}),
+      received: Schema.optionalWith(DateTimeChatMessage, {nullable: true}),
+    }),
+    {}
+  ),
+  location: withFallback(
+    Schema.Struct({
+      sent: Schema.optionalWith(MeetingLocationChatMessage, {nullable: true}),
+      received: Schema.optionalWith(MeetingLocationChatMessage, {
+        nullable: true,
+      }),
+    }),
+    {}
+  ),
+  amount: withFallback(
+    Schema.Struct({
+      sent: Schema.optionalWith(AmountChatMessage, {nullable: true}),
+      received: Schema.optionalWith(AmountChatMessage, {nullable: true}),
+    }),
+    {}
+  ),
+  network: withFallback(
+    Schema.Struct({
+      sent: Schema.optionalWith(NetworkChatMessage, {nullable: true}),
+      received: Schema.optionalWith(NetworkChatMessage, {nullable: true}),
+    }),
+    {}
+  ),
+  identity: withFallback(
+    Schema.Struct({
+      sent: Schema.optionalWith(IdentityRevealChatMessage, {nullable: true}),
+      received: Schema.optionalWith(IdentityRevealChatMessage, {
+        nullable: true,
+      }),
+    }),
+    {}
+  ),
+  contact: withFallback(
+    Schema.Struct({
+      sent: Schema.optionalWith(ContactRevealChatMessage, {nullable: true}),
+      received: Schema.optionalWith(ContactRevealChatMessage, {nullable: true}),
+    }),
+    {}
+  ),
 })
+export type TradeChecklistInState = typeof TradeChecklistInState.Type
+
+export function createEmptyTradeChecklistInState(): TradeChecklistInState {
+  return {
+    dateAndTime: {},
+    location: {},
+    amount: {},
+    network: {},
+    identity: {},
+    contact: {},
+  }
+}

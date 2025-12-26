@@ -1,5 +1,5 @@
 import {SqlClient} from '@effect/sql'
-import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
+import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
@@ -18,7 +18,7 @@ describe('Feedback service test', () => {
         const body = {
           formId: Schema.decodeSync(FeedbackFormId)('testFeedbackFormId'),
           type: Schema.decodeSync(FeedbackType)('create'),
-          countryCode: Schema.decodeSync(RegionCodeE)('CZ'),
+          countryCode: Schema.decodeSync(RegionCode)('CZ'),
           objections: 'testObjections',
           stars: 5,
           textComment: 'testTextComment',

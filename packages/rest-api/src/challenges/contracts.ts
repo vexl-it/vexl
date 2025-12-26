@@ -1,4 +1,4 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect/index'
 
@@ -12,7 +12,7 @@ export const SignedChallenge = Schema.Struct({
 export type SignedChallenge = Schema.Schema.Type<typeof SignedChallenge>
 
 export const RequestBaseWithChallenge = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   signedChallenge: SignedChallenge,
 })
 export type RequestBaseWithChallenge = typeof RequestBaseWithChallenge.Type

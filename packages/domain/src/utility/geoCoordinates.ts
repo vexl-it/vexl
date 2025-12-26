@@ -1,30 +1,13 @@
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
+import {Schema} from 'effect'
 
-export const Latitude = z
-  .number()
-  .min(-90)
-  .max(90)
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Latitude'>>()(v))
-export const LatitudeE = Schema.Number.pipe(
+export const Latitude = Schema.Number.pipe(
   Schema.greaterThanOrEqualTo(-90),
   Schema.lessThanOrEqualTo(90),
   Schema.brand('Latitude')
 )
-export type Latitude = Schema.Schema.Type<typeof LatitudeE>
+export type Latitude = Schema.Schema.Type<typeof Latitude>
 
-export const Longitude = z
-  .number()
-  .transform((v) => {
-    const maxLongitude = 180
-    const minLongitude = -180
-    const range = maxLongitude - minLongitude
-    return ((((v - minLongitude) % range) + range) % range) + minLongitude
-  })
-  .refine((v) => v <= 180 && v >= -180)
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Longitude'>>()(v))
-
-export const LongitudeE = Schema.transform(Schema.Number, Schema.Number, {
+export const Longitude = Schema.transform(Schema.Number, Schema.Number, {
   decode: (v): number => {
     const maxLongitude = 180
     const minLongitude = -180
@@ -37,7 +20,7 @@ export const LongitudeE = Schema.transform(Schema.Number, Schema.Number, {
   Schema.lessThanOrEqualTo(180),
   Schema.brand('Longitude')
 )
-export type Longitude = Schema.Schema.Type<typeof LongitudeE>
+export type Longitude = Schema.Schema.Type<typeof Longitude>
 
 export interface LatLong {
   latitude: Latitude
@@ -50,21 +33,17 @@ export interface Viewport {
   southwest: LatLong
 }
 
-export const Radius = z
-  .number()
-  .min(0)
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Radius'>>()(v))
-export const RadiusE = Schema.Number.pipe(
+export const Radius = Schema.Number.pipe(
   Schema.positive(),
   Schema.brand('Radius')
 )
-export type Radius = Schema.Schema.Type<typeof RadiusE>
+export type Radius = Schema.Schema.Type<typeof Radius>
 
 export function calculateViewportRadius(viewport: {
   northeast: LatLong
   southwest: LatLong
 }): Radius {
-  return Radius.parse(
+  return Schema.decodeSync(Radius)(
     Math.abs(viewport.northeast.longitude - viewport.southwest.longitude) / 2
   )
 }
@@ -74,7 +53,7 @@ const EARTH_RADIUS_METERS = 6_378_137
 export const DEFAULT_RADIUS_METERS = 200
 
 export function getDefaultRadius(latitude: Latitude): Radius {
-  return Radius.parse(
+  return Schema.decodeSync(Radius)(
     metersAtLatitudeToDegreesLongitude(DEFAULT_RADIUS_METERS, latitude)
   )
 }
@@ -129,18 +108,18 @@ export function metersAtLatitudeToDegreesLongitude(
 
 export const latitudeHelper = {
   add: (a: Latitude, b: number) => {
-    return Latitude.parse(Math.max(Math.min(a + b, 90), -90))
+    return Schema.decodeSync(Latitude)(Math.max(Math.min(a + b, 90), -90))
   },
   subtract: (a: Latitude, b: number) => {
-    return Latitude.parse(Math.max(Math.min(a - b, 90), -90))
+    return Schema.decodeSync(Latitude)(Math.max(Math.min(a - b, 90), -90))
   },
 }
 
 export const longitudeHelper = {
   add: (a: Longitude, b: number) => {
-    return Longitude.parse(Math.max(Math.min(a + b, 180), -180))
+    return Schema.decodeSync(Longitude)(Math.max(Math.min(a + b, 180), -180))
   },
   subtract: (a: Longitude, b: number) => {
-    return Longitude.parse(Math.max(Math.min(a - b, 180), -180))
+    return Schema.decodeSync(Longitude)(Math.max(Math.min(a - b, 180), -180))
   },
 }

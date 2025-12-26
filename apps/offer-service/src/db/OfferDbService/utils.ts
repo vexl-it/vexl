@@ -1,6 +1,6 @@
 import {type PgClient} from '@effect/sql-pg'
 import {type Fragment} from '@effect/sql/Statement'
-import {OfferTypeE} from '@vexl-next/domain/src/general/offers'
+import {OfferType} from '@vexl-next/domain/src/general/offers'
 import {Schema} from 'effect'
 import {OfferParts} from './domain'
 
@@ -26,7 +26,7 @@ export const OfferSelectRecord = Schema.Struct({
   'offerPublic.offerId': Schema.String,
   'offerPublic.createdAt': Schema.DateFromSelf,
   'offerPublic.modifiedAt': Schema.DateFromSelf,
-  'offerPublic.offerType': OfferTypeE,
+  'offerPublic.offerType': OfferType,
   'offerPublic.report': Schema.Int,
   'offerPublic.payloadPublic': Schema.String,
   'offerPublic.refreshedAt': Schema.DateFromSelf,

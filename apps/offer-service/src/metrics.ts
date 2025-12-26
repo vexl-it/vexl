@@ -1,8 +1,5 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
-import {
-  type CountryPrefix,
-  CountryPrefixE,
-} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
@@ -267,7 +264,7 @@ export const reportTotalOffersFlaggedAcrossAll = ({
   )
 
 const OffersStatsQueryResult = Schema.Struct({
-  countryPrefix: Schema.Union(CountryPrefixE, Schema.Null),
+  countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
   buy: Schema.Int,
   sell: Schema.Int,
 })
@@ -402,7 +399,7 @@ const queryTotalOffersFlagged = Effect.gen(function* (_) {
 })
 
 const OfferVisibilityPerCountryQueryResult = Schema.Struct({
-  countryPrefix: CountryPrefixE,
+  countryPrefix: CountryPrefix,
   value: Schema.Number,
 })
 

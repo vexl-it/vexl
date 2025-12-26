@@ -1,14 +1,14 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   LoginChallengeClientSignature,
   LoginChallengeRequestEncoded,
   LoginChallengeServerSignature,
 } from '@vexl-next/domain/src/general/loginChallenge'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
-import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
@@ -142,7 +142,7 @@ export class InvalidVerificationError extends Schema.TaggedError<InvalidVerifica
 export class InitPhoneVerificationRequest extends Schema.Class<InitPhoneVerificationRequest>(
   'InitPhoneVerificationRequest'
 )({
-  phoneNumber: E164PhoneNumberE,
+  phoneNumber: E164PhoneNumber,
   challenge: CompletedLoginChallenge,
 }) {}
 
@@ -171,7 +171,7 @@ export class InitPhoneVerificationResponse extends Schema.Class<InitPhoneVerific
   'InitPhoneVerificationResponse'
 )({
   verificationId: PhoneNumberVerificationId,
-  expirationAt: IsoDatetimeStringE,
+  expirationAt: IsoDatetimeString,
 }) {}
 
 export class VerifyPhoneNumberRequest extends Schema.Class<VerifyPhoneNumberRequest>(
@@ -179,7 +179,7 @@ export class VerifyPhoneNumberRequest extends Schema.Class<VerifyPhoneNumberRequ
 )({
   id: PhoneNumberVerificationId,
   code: Schema.String.pipe(Schema.length(6)),
-  userPublicKey: PublicKeyPemBase64E,
+  userPublicKey: PublicKeyPemBase64,
 }) {}
 
 export const VerificationChallenge = Schema.String.pipe(
@@ -197,14 +197,14 @@ export class VerifyPhoneNumberResponse extends Schema.Class<VerifyPhoneNumberRes
 export class VerifyChallengeRequest extends Schema.Class<VerifyChallengeRequest>(
   'VerifyChallengeRequest'
 )({
-  userPublicKey: PublicKeyPemBase64E,
+  userPublicKey: PublicKeyPemBase64,
   signature: EcdsaSignature,
 }) {}
 
 export class VerifyChallengeResponse extends Schema.Class<VerifyChallengeResponse>(
   'VerifyChallengeResponse'
 )({
-  hash: HashedPhoneNumberE,
+  hash: HashedPhoneNumber,
   signature: EcdsaSignature,
   challengeVerified: Schema.Literal(true),
 }) {}
@@ -228,14 +228,14 @@ export const VerifyChallengeInput = Schema.Struct({
 export type VerifyChallengeInput = typeof VerifyChallengeInput.Type
 
 export const RegenerateSessionCredentialsRequest = Schema.Struct({
-  myPhoneNumber: E164PhoneNumberE,
+  myPhoneNumber: E164PhoneNumber,
 })
 
 export type RegenerateSessionCredentialsRequest =
   typeof RegenerateSessionCredentialsRequest.Type
 
 export const RegenerateSessionCredentialsResponse = Schema.Struct({
-  hash: HashedPhoneNumberE,
+  hash: HashedPhoneNumber,
   signature: EcdsaSignature,
 })
 export type RegenerateSessionCredentialsResponse =
@@ -246,8 +246,8 @@ export const GetVersionServiceInfoResponse = Schema.Struct({
   offerRerequestLimitDays: Schema.Int.pipe(Schema.positive()),
   maintenanceUntil: Schema.optionalWith(
     Schema.Struct({
-      start: UnixMillisecondsE,
-      end: UnixMillisecondsE,
+      start: UnixMilliseconds,
+      end: UnixMilliseconds,
     }),
     {as: 'Option'}
   ),
@@ -259,7 +259,7 @@ export const EraseUserVerificationId = Schema.String.pipe(
 export type EraseUserVerificationId = typeof EraseUserVerificationId.Type
 
 export const InitEraseUserRequest = Schema.Struct({
-  phoneNumber: E164PhoneNumberE,
+  phoneNumber: E164PhoneNumber,
 })
 export type InitEraseUserRequest = typeof InitEraseUserRequest.Type
 

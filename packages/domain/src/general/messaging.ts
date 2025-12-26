@@ -1,67 +1,25 @@
-import {KeyHolder} from '@vexl-next/cryptography/src'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
-  PrivateKeyHolderE,
-  PublicKeyPemBase64E,
-} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
-import {Base64String, Base64StringE} from '../utility/Base64String.brand'
-import {
-  ExpoNotificationToken,
-  ExpoNotificationTokenE,
-} from '../utility/ExpoNotificationToken.brand'
-import {SemverString, SemverStringE} from '../utility/SmeverString.brand'
-import {
-  UnixMilliseconds,
-  UnixMillisecondsE,
-} from '../utility/UnixMilliseconds.brand'
-import {UriString, UriStringE} from '../utility/UriString.brand'
-import {Uuid, generateUuid} from '../utility/Uuid.brand'
-import {DeanonymizedUser, DeanonymizedUserE} from './DeanonymizedUser'
-import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
-import {HashedPhoneNumber, HashedPhoneNumberE} from './HashedPhoneNumber.brand'
-import {UserName, UserNameE} from './UserName.brand'
-import {RealLifeInfo, RealLifeInfoE} from './UserNameAndAvatar.brand'
-import {ClubUuid, ClubUuidE} from './clubs'
-import {
-  NotificationCypher,
-  NotificationCypherE,
-} from './notifications/NotificationCypher.brand'
-import {
-  FriendLevel,
-  FriendLevelE,
-  GoldenAvatarType,
-  GoldenAvatarTypeE,
-  OfferId,
-  OfferIdE,
-  OneOfferInState,
-  OneOfferInStateE,
-} from './offers'
-import {TradeChecklistUpdate, TradeChecklistUpdateE} from './tradeChecklist'
+  PrivateKeyHolder,
+  PublicKeyPemBase64,
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {Schema} from 'effect'
+import {Base64String} from '../utility/Base64String.brand'
+import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
+import {SemverString} from '../utility/SmeverString.brand'
+import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
+import {UriString} from '../utility/UriString.brand'
+import {generateUuid} from '../utility/Uuid.brand'
+import {DeanonymizedUser} from './DeanonymizedUser'
+import {E164PhoneNumber} from './E164PhoneNumber.brand'
+import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
+import {UserName} from './UserName.brand'
+import {RealLifeInfo} from './UserNameAndAvatar.brand'
+import {ClubUuid} from './clubs'
+import {NotificationCypher} from './notifications/NotificationCypher.brand'
+import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
+import {TradeChecklistUpdate} from './tradeChecklist'
 
-export const MessageType = z.enum([
-  'MESSAGE',
-  'REQUEST_REVEAL',
-  'APPROVE_REVEAL',
-  'DISAPPROVE_REVEAL',
-  'REQUEST_MESSAGING',
-  'APPROVE_MESSAGING',
-  'DISAPPROVE_MESSAGING',
-  'CANCEL_REQUEST_MESSAGING',
-  'DELETE_CHAT',
-  'BLOCK_CHAT',
-  'OFFER_DELETED',
-  'INBOX_DELETED',
-  'APPROVE_CONTACT_REVEAL',
-  'DISAPPROVE_CONTACT_REVEAL',
-  'REQUEST_CONTACT_REVEAL',
-  'TRADE_CHECKLIST_UPDATE',
-  'VERSION_UPDATE',
-  'FCM_CYPHER_UPDATE',
-  'MESSAGE_READ',
-])
-export const MessageTypeE = Schema.Literal(
+export const MessageType = Schema.Literal(
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -82,286 +40,142 @@ export const MessageTypeE = Schema.Literal(
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ'
 )
-export type MessageType = Schema.Schema.Type<typeof MessageTypeE>
+export type MessageType = typeof MessageType.Type
 
-export const ChatUserIdentity = z
-  .object({
-    publicKey: PublicKeyPemBase64,
-    goldenAvatarType: GoldenAvatarType.optional(),
-    clubsIds: z.array(ClubUuid).optional().readonly(),
-    realLifeInfo: RealLifeInfo.optional(),
-  })
-  .readonly()
-export const ChatUserIdentityE = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
-  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
-  clubsIds: Schema.optional(Schema.Array(ClubUuidE)),
-  realLifeInfo: Schema.optional(RealLifeInfoE),
+export const ChatUserIdentity = Schema.Struct({
+  publicKey: PublicKeyPemBase64,
+  goldenAvatarType: Schema.optional(GoldenAvatarType),
+  clubsIds: Schema.optional(Schema.Array(ClubUuid)),
+  realLifeInfo: Schema.optional(RealLifeInfo),
 })
-export type ChatUserIdentity = Schema.Schema.Type<typeof ChatUserIdentityE>
+export type ChatUserIdentity = typeof ChatUserIdentity.Type
 
-export const ChatMessageId = z
-  .string()
-  .uuid()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatMessageId'>>()(v))
-export const ChatMessageIdE = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
-export type ChatMessageId = Schema.Schema.Type<typeof ChatMessageIdE>
+export const ChatMessageId = Schema.UUID.pipe(Schema.brand('ChatMessageId'))
+export type ChatMessageId = typeof ChatMessageId.Type
 
-export const RepliedToData = z
-  .object({
-    text: z.string(),
-    messageAuthor: z.enum(['me', 'them']),
-    image: UriString.optional(),
-  })
-  .readonly()
-export const RepliedToDataE = Schema.Struct({
+export const RepliedToData = Schema.Struct({
   text: Schema.String,
   messageAuthor: Schema.Literal('me', 'them'),
-  image: Schema.optional(UriStringE),
+  image: Schema.optional(UriString),
 })
-export type RepliedToData = Schema.Schema.Type<typeof RepliedToDataE>
+export type RepliedToData = typeof RepliedToData.Type
 
-export const RepliedToDataPayload = z
-  .object({
-    text: z.string(),
-    messageAuthor: z.enum(['me', 'them']),
-    image: Base64String.optional(),
-  })
-  .readonly()
-export const RepliedToDataPayloadE = Schema.Struct({
+export const RepliedToDataPayload = Schema.Struct({
   text: Schema.String,
   messageAuthor: Schema.Literal('me', 'them'),
-  image: Base64StringE,
+  image: Base64String,
 })
+export type RepliedToDataPayload = typeof RepliedToDataPayload.Type
 
-export type RepliedToDataPayload = typeof RepliedToDataPayloadE.Type
-
-export const ChatMessagePayload = z
-  .object({
-    uuid: ChatMessageId,
-    text: z.string().optional(),
-    image: UriString.optional(),
-    repliedTo: RepliedToData.optional(),
-    time: UnixMilliseconds,
-    messageType: MessageType,
-    lastReceivedVersion: SemverString.optional(),
-    myVersion: SemverString.optional(),
-    goldenAvatarType: GoldenAvatarType.optional(),
-    tradeChecklistUpdate: TradeChecklistUpdate.optional(),
-    minimalRequiredVersion: SemverString.optional(),
-    deanonymizedUser: z
-      .object({
-        name: UserName,
-        imageBase64: Base64String.optional(),
-        partialPhoneNumber: z.string().optional(),
-        fullPhoneNumber: E164PhoneNumber.optional(),
-      })
-      .optional()
-      .readonly(),
-    myFcmCypher: NotificationCypher.optional(),
-    lastReceivedFcmCypher: NotificationCypher.optional(),
-    senderClubsUuids: z.array(ClubUuid).optional().readonly(),
-    commonFriends: z.array(HashedPhoneNumber).optional().readonly(),
-    friendLevel: z.array(FriendLevel).optional().readonly(),
-  })
-  .readonly()
-
-export const ChatMessagePayloadE = Schema.Struct({
-  uuid: ChatMessageIdE,
+export const ChatMessagePayload = Schema.Struct({
+  uuid: ChatMessageId,
   text: Schema.optional(Schema.String),
-  image: Schema.optional(UriStringE),
-  repliedTo: Schema.optional(RepliedToDataE),
-  time: UnixMillisecondsE,
-  messageType: MessageTypeE,
-  lastReceivedVersion: Schema.optional(SemverStringE),
-  myVersion: Schema.optional(SemverStringE),
-  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
-  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdateE),
-  minimalRequiredVersion: Schema.optional(SemverStringE),
+  image: Schema.optional(UriString),
+  repliedTo: Schema.optional(RepliedToData),
+  time: UnixMilliseconds,
+  messageType: MessageType,
+  lastReceivedVersion: Schema.optional(SemverString),
+  myVersion: Schema.optional(SemverString),
+  goldenAvatarType: Schema.optional(GoldenAvatarType),
+  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
+  minimalRequiredVersion: Schema.optional(SemverString),
   deanonymizedUser: Schema.optional(
     Schema.Struct({
-      name: UserNameE,
-      imageBase64: Schema.optional(Base64StringE),
+      name: UserName,
+      imageBase64: Schema.optional(Base64String),
       partialPhoneNumber: Schema.optional(Schema.String),
-      fullPhoneNumber: Schema.optional(E164PhoneNumberE),
+      fullPhoneNumber: Schema.optional(E164PhoneNumber),
     })
   ),
-  myFcmCypher: Schema.optional(NotificationCypherE),
-  lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
-  senderClubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumberE)),
-  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
+  myFcmCypher: Schema.optional(NotificationCypher),
+  lastReceivedFcmCypher: Schema.optional(NotificationCypher),
+  senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
-export type ChatMessagePayload = Schema.Schema.Type<typeof ChatMessagePayloadE>
+export type ChatMessagePayload = typeof ChatMessagePayload.Type
 
 export function generateChatMessageId(): ChatMessageId {
-  return ChatMessageId.parse(generateUuid())
+  return Schema.decodeSync(ChatMessageId)(generateUuid())
 }
 
-export const ChatMessage = z
-  .object({
-    uuid: ChatMessageId,
-    text: z.string(),
-    minimalRequiredVersion: SemverString.optional(),
-    time: UnixMilliseconds,
-    myVersion: SemverString.optional(),
-    goldenAvatarType: GoldenAvatarType.optional(),
-
-    /**
-     * Used only for messages  of type `VERSION_UPDATE`
-     */
-    lastReceivedVersion: SemverString.optional(),
-    forceShow: z.boolean().optional(),
-
-    image: UriString.optional(),
-    repliedTo: RepliedToData.optional(),
-    tradeChecklistUpdate: TradeChecklistUpdate.optional(),
-    deanonymizedUser: DeanonymizedUser.optional(),
-    senderPublicKey: PublicKeyPemBase64,
-    messageType: MessageType,
-
-    myFcmCypher: NotificationCypher.optional(),
-    lastReceivedFcmCypher: NotificationCypher.optional(),
-    senderClubsUuids: z.array(ClubUuid).optional().readonly(),
-    commonFriends: z.array(HashedPhoneNumber).optional().readonly(),
-    friendLevel: z.array(FriendLevel).optional().readonly(),
-  })
-  .readonly()
-
-const ChatMessageE = Schema.Struct({
-  uuid: ChatMessageIdE,
+export const ChatMessage = Schema.Struct({
+  uuid: ChatMessageId,
   text: Schema.String,
-  minimalRequiredVersion: Schema.optional(SemverStringE),
-  time: UnixMillisecondsE,
-  myVersion: Schema.optional(SemverStringE),
-  goldenAvatarType: Schema.optional(GoldenAvatarTypeE),
+  minimalRequiredVersion: Schema.optional(SemverString),
+  time: UnixMilliseconds,
+  myVersion: Schema.optional(SemverString),
+  goldenAvatarType: Schema.optional(GoldenAvatarType),
 
   /**
    * Used only for messages  of type `VERSION_UPDATE`
    */
-  lastReceivedVersion: Schema.optional(SemverStringE),
+  lastReceivedVersion: Schema.optional(SemverString),
   forceShow: Schema.optional(Schema.Boolean),
 
-  image: Schema.optional(UriStringE),
-  repliedTo: Schema.optional(RepliedToDataE),
-  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdateE),
-  deanonymizedUser: Schema.optional(DeanonymizedUserE),
-  senderPublicKey: PublicKeyPemBase64E,
-  messageType: MessageTypeE,
-  myFcmCypher: Schema.optional(NotificationCypherE),
-  lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
-  senderClubsUuids: Schema.optional(Schema.Array(ClubUuidE)),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumberE)),
-  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
+  image: Schema.optional(UriString),
+  repliedTo: Schema.optional(RepliedToData),
+  tradeChecklistUpdate: Schema.optional(TradeChecklistUpdate),
+  deanonymizedUser: Schema.optional(DeanonymizedUser),
+  senderPublicKey: PublicKeyPemBase64,
+  messageType: MessageType,
+  myFcmCypher: Schema.optional(NotificationCypher),
+  lastReceivedFcmCypher: Schema.optional(NotificationCypher),
+  senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
+export type ChatMessage = typeof ChatMessage.Type
 
-export type ChatMessage = typeof ChatMessageE.Type
-
-export const Inbox = z
-  .object({
-    privateKey: KeyHolder.PrivateKeyHolder,
-    offerId: OfferId.optional(),
-    requestOfferId: OfferId.optional(),
-  })
-  .readonly()
-export const InboxE = Schema.Struct({
-  privateKey: PrivateKeyHolderE,
+export const Inbox = Schema.Struct({
+  privateKey: PrivateKeyHolder,
   // if the user is author of the offer
-  offerId: Schema.optional(OfferIdE),
+  offerId: Schema.optional(OfferId),
   // If the user has requested the offer
-  requestOfferId: Schema.optional(OfferIdE),
+  requestOfferId: Schema.optional(OfferId),
 })
-export type Inbox = Schema.Schema.Type<typeof InboxE>
+export type Inbox = typeof Inbox.Type
 
-export const ChatOrigin = z
-  .discriminatedUnion('type', [
-    z.object({
-      type: z.literal('myOffer'),
-      offerId: OfferId,
-      offer: OneOfferInState.optional(),
-    }),
-    z.object({
-      type: z.literal('theirOffer'),
-      offerId: OfferId,
-      offer: OneOfferInState.optional(),
-    }),
-    z.object({type: z.literal('unknown')}),
-  ])
-  .readonly()
-
-export const ChatOriginE = Schema.Union(
+export const ChatOrigin = Schema.Union(
   Schema.Struct({
     type: Schema.Literal('myOffer'),
-    offerId: OfferIdE,
-    offer: Schema.optional(OneOfferInStateE),
+    offerId: OfferId,
+    offer: Schema.optional(OneOfferInState),
   }),
   Schema.Struct({
     type: Schema.Literal('theirOffer'),
-    offerId: OfferIdE,
-    offer: Schema.optional(OneOfferInStateE),
+    offerId: OfferId,
+    offer: Schema.optional(OneOfferInState),
   }),
   Schema.Struct({type: Schema.Literal('unknown')})
 )
-export type ChatOrigin = Schema.Schema.Type<typeof ChatOriginE>
+export type ChatOrigin = typeof ChatOrigin.Type
 
-export const ChatId = z
-  .string()
-  .uuid()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'ChatId'>>()(v))
-
-export const ChatIdE = Schema.String.pipe(Schema.brand('ChatId'))
-export type ChatId = Schema.Schema.Type<typeof ChatIdE>
+export const ChatId = Schema.String.pipe(Schema.brand('ChatId'))
+export type ChatId = typeof ChatId.Type
 
 export function generateChatId(): ChatId {
-  return ChatId.parse(Uuid.parse(generateUuid()))
+  return Schema.decodeSync(ChatId)(generateUuid())
 }
 
-export const CalendarEventId = z
-  .string()
-  .transform((v) =>
-    Brand.nominal<typeof v & Brand.Brand<'CalendarEventId'>>()(v)
-  )
-export const CalendarEventIdE = Schema.String.pipe(
+export const CalendarEventId = Schema.String.pipe(
   Schema.brand('CalendarEventId')
 )
-export type CalendarEventId = Schema.Schema.Type<typeof CalendarEventIdE>
+export type CalendarEventId = typeof CalendarEventId.Type
 
-export const MyNotificationTokenInfo = z.object({
+export const MyNotificationTokenInfo = Schema.Struct({
   token: ExpoNotificationToken,
   cypher: NotificationCypher,
 })
-export const MyNotificationTokenInfoE = Schema.Struct({
-  token: ExpoNotificationTokenE,
-  cypher: NotificationCypherE,
-})
-export type MyNotificationTokenInfo = Schema.Schema.Type<
-  typeof MyNotificationTokenInfoE
->
+export type MyNotificationTokenInfo = typeof MyNotificationTokenInfo.Type
 
-export const Chat = z.object({
+export const Chat = Schema.Struct({
   id: ChatId,
   inbox: Inbox,
   origin: ChatOrigin,
   otherSide: ChatUserIdentity,
-  isUnread: z.boolean().default(true),
-  lastMessageReadByOtherSideAt: UnixMilliseconds.optional(),
-  showInfoBar: z.boolean().default(true),
-  showVexlbotNotifications: z.boolean().default(true),
-  showVexlbotInitialMessage: z.boolean().default(true),
-  tradeChecklistCalendarEventId: CalendarEventId.optional(),
-  otherSideVersion: SemverString.optional(),
-  lastReportedVersion: SemverString.optional(),
-  otherSideFcmCypher: NotificationCypher.optional(),
-  lastReportedFcmToken: MyNotificationTokenInfo.optional(),
-  lastReadByOtherSide: UnixMilliseconds.optional(),
-})
-export const ChatE = Schema.Struct({
-  id: ChatIdE,
-  inbox: InboxE,
-  origin: ChatOriginE,
-  otherSide: ChatUserIdentityE,
   isUnread: Schema.optionalWith(Schema.Boolean, {default: () => true}),
-  lastMessageReadByOtherSideAt: Schema.optionalWith(UnixMillisecondsE, {
+  lastMessageReadByOtherSideAt: Schema.optionalWith(UnixMilliseconds, {
     nullable: true,
   }),
   showInfoBar: Schema.optionalWith(Schema.Boolean, {default: () => true}),
@@ -371,70 +185,43 @@ export const ChatE = Schema.Struct({
   showVexlbotInitialMessage: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
-  tradeChecklistCalendarEventId: Schema.optional(CalendarEventIdE),
-  otherSideVersion: Schema.optional(SemverStringE),
-  lastReportedVersion: Schema.optional(SemverStringE),
-  otherSideFcmCypher: Schema.optional(NotificationCypherE),
-  lastReportedFcmToken: Schema.optional(MyNotificationTokenInfoE),
-  lastReadByOtherSide: Schema.optional(UnixMillisecondsE),
+  tradeChecklistCalendarEventId: Schema.optional(CalendarEventId),
+  otherSideVersion: Schema.optional(SemverString),
+  lastReportedVersion: Schema.optional(SemverString),
+  otherSideFcmCypher: Schema.optional(NotificationCypher),
+  lastReportedFcmToken: Schema.optional(MyNotificationTokenInfo),
+  lastReadByOtherSide: Schema.optional(UnixMilliseconds),
 })
-export type Chat = Schema.Schema.Type<typeof ChatE>
+export type Chat = typeof Chat.Type
 
-export const MessageCypher = z.string().transform((v) => {
-  return Brand.nominal<typeof v & Brand.Brand<'MessageCypher'>>()(v)
-})
-export const MessageCypherE = Schema.String.pipe(Schema.brand('MessageCypher'))
+export const MessageCypher = Schema.String.pipe(Schema.brand('MessageCypher'))
+export type MessageCypher = typeof MessageCypher.Type
 
-export type MessageCypher = Schema.Schema.Type<typeof MessageCypherE>
-
-export const ServerMessage = z.object({
+export const ServerMessage = Schema.Struct({
   message: MessageCypher,
   senderPublicKey: PublicKeyPemBase64,
 })
-export const ServerMessageE = Schema.Struct({
-  message: MessageCypherE,
-  senderPublicKey: PublicKeyPemBase64E,
-})
-export type ServerMessage = Schema.Schema.Type<typeof ServerMessageE>
+export type ServerMessage = typeof ServerMessage.Type
 
-export const ChatMessageRequiringNewerVersion = z.object({
+export const ChatMessageRequiringNewerVersion = Schema.Struct({
   uuid: ChatMessageId,
-  messageType: z.literal('REQUIRES_NEWER_VERSION'),
+  messageType: Schema.Literal('REQUIRES_NEWER_VERSION'),
   serverMessage: ServerMessage,
-  myVersion: SemverString.optional(),
+  myVersion: Schema.optionalWith(SemverString, {nullable: true}),
   minimalRequiredVersion: SemverString,
   time: UnixMilliseconds,
   senderPublicKey: PublicKeyPemBase64,
-  messageParsed: z.unknown(),
-  text: z.literal('-'),
-  deanonymizedUser: z.undefined(),
-  image: z.undefined(),
-  myFcmCypher: NotificationCypher.optional(),
-  lastReceivedFcmCypher: NotificationCypher.optional(),
-  commonFriends: z.array(HashedPhoneNumber).optional().readonly(),
-  friendLevel: z.array(FriendLevel).optional().readonly(),
-})
-
-export const ChatMessageRequiringNewerVersionE = Schema.Struct({
-  uuid: ChatMessageIdE,
-  messageType: Schema.Literal('REQUIRES_NEWER_VERSION'),
-  serverMessage: ServerMessageE,
-  myVersion: Schema.optional(SemverStringE),
-  minimalRequiredVersion: SemverStringE,
-  time: UnixMillisecondsE,
-  senderPublicKey: PublicKeyPemBase64E,
   messageParsed: Schema.optional(Schema.Unknown),
   text: Schema.Literal('-'),
   deanonymizedUser: Schema.optional(Schema.Undefined),
   image: Schema.optional(Schema.Undefined),
-  myFcmCypher: Schema.optional(NotificationCypherE),
-  lastReceivedFcmCypher: Schema.optional(NotificationCypherE),
-  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumberE)),
-  friendLevel: Schema.optional(Schema.Array(FriendLevelE)),
+  myFcmCypher: Schema.optional(NotificationCypher),
+  lastReceivedFcmCypher: Schema.optional(NotificationCypher),
+  commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
-
 export type ChatMessageRequiringNewerVersion =
-  typeof ChatMessageRequiringNewerVersionE.Type
+  typeof ChatMessageRequiringNewerVersion.Type
 
 export const TYPING_INDICATION_TIMEOUT_MS = 5_000 // 5 seconds
 
@@ -442,7 +229,7 @@ export class TypingMessage extends Schema.TaggedClass<TypingMessage>(
   'TypingMessage'
 )('TypingMessage', {
   typing: Schema.Boolean,
-  myPublicKey: PublicKeyPemBase64E,
+  myPublicKey: PublicKeyPemBase64,
 }) {}
 
 export const StreamOnlyChatMessagePayload = Schema.Union(TypingMessage)

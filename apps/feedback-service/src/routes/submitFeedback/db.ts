@@ -1,5 +1,5 @@
 import {SqlClient, SqlResolver} from '@effect/sql'
-import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
+import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {
   FeedbackFormId,
   FeedbackType,
@@ -14,7 +14,7 @@ const FeedbackInsert = Schema.Struct({
   ),
   objections: Schema.optional(Schema.String),
   textComment: Schema.optional(Schema.String),
-  countryCode: Schema.optional(RegionCodeE),
+  countryCode: Schema.optional(RegionCode),
 })
 
 const makeInsertFeedbackService = Effect.gen(function* (_) {

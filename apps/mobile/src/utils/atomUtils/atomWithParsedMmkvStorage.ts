@@ -1,24 +1,43 @@
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
+import {Either, Schema, pipe, type ParseResult} from 'effect'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {InteractionManager} from 'react-native'
-import {type z} from 'zod'
-import {safeParse} from '../fpUtils'
-import {storage} from '../mmkv/fpMmkv'
+import {type WritingToStoreError} from '../mmkv/domain'
+import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
-const AUTHOR_ID_KEY = '___author_id'
-const CLEAR_STORAGE_KEY = '__clear_storage'
+const AUTHOR_ID_KEY = '___author_id' as const
+export const CLEAR_STORAGE_KEY = '__clear_storage'
 
-export type AtomWithParsedMmkvStorage<Value extends z.ZodObject<any>> =
-  PrimitiveAtom<z.TypeOf<Value>>
+const AuthorKeySchema = Schema.Struct({
+  [AUTHOR_ID_KEY]: Schema.String,
+})
 
-function toShadowStorageAtom<Value extends z.ZodObject<any>>(
+const saveWithAuthorKey = <A, I extends object>({
+  schema,
+  authorKey,
+  value,
+  key,
+}: {
+  schema: Schema.Schema<A, I, never>
+  authorKey: string
+  value: A
   key: string
-): (
-  baseAtom: PrimitiveAtom<z.TypeOf<Value>>
-) => PrimitiveAtom<z.TypeOf<Value>> {
+}): Either.Either<void, WritingToStoreError | ParseResult.ParseError> => {
+  const schemaWithAuthorKey = Schema.extend(AuthorKeySchema)(schema)
+
+  const valueToSave: typeof schemaWithAuthorKey.Type = {
+    ...value,
+    [AUTHOR_ID_KEY]: authorKey,
+  }
+
+  return storage.saveVerified(key, schemaWithAuthorKey)(valueToSave)
+}
+
+function toShadowStorageAtom<A, I extends object>(
+  key: string,
+  schema: Schema.Schema<A, I, never>
+): (baseAtom: PrimitiveAtom<A>) => PrimitiveAtom<A> {
   return (baseAtom) =>
     atom(
       (get) => get(baseAtom),
@@ -30,9 +49,13 @@ function toShadowStorageAtom<Value extends z.ZodObject<any>>(
 
         void InteractionManager.runAfterInteractions(() => {
           pipe(
-            {...newValue, [AUTHOR_ID_KEY]: baseAtom.toString()},
-            storage.setJSON(key),
-            E.getOrElseW((l) => {
+            saveWithAuthorKey({
+              schema,
+              authorKey: baseAtom.toString(),
+              value: newValue,
+              key,
+            }),
+            Either.getOrElse((l) => {
               reportError(
                 'warn',
                 new Error(`Error while saving value to storage. Key: ${key}`),
@@ -45,18 +68,18 @@ function toShadowStorageAtom<Value extends z.ZodObject<any>>(
     )
 }
 
-function getInitialValue<Value extends z.ZodReadonly<z.ZodObject<any>>>({
+function getInitialValue<A, I extends object>({
   key,
-  zodType,
+  schema,
   defaultValue,
 }: {
-  zodType: Value
+  schema: Schema.Schema<A, I, never>
   key: string
-  defaultValue: z.TypeOf<Value>
-}): z.TypeOf<Value> {
+  defaultValue: A
+}): A {
   return pipe(
-    storage.getVerified<Value>(key, zodType),
-    E.getOrElse((l) => {
+    storage.getVerified(key, schema),
+    Either.getOrElse((l) => {
       if (l._tag !== 'ValueNotSet') {
         reportError(
           'warn',
@@ -71,16 +94,14 @@ function getInitialValue<Value extends z.ZodReadonly<z.ZodObject<any>>>({
   )
 }
 
-export function atomWithParsedMmkvStorage<
-  Value extends z.ZodReadonly<z.ZodObject<any>>,
->(
+export function atomWithParsedMmkvStorage<A, I extends object>(
   key: string,
-  defaultValue: z.TypeOf<Value>,
-  zodType: Value,
+  defaultValue: A,
+  schema: Schema.Schema<A, I, never>,
   debugLabel?: string
-): PrimitiveAtom<z.TypeOf<Value>> {
-  const coreAtom = atom(getInitialValue({key, zodType, defaultValue}))
-  const mmkvAtom = pipe(coreAtom, toShadowStorageAtom(key))
+): PrimitiveAtom<A> {
+  const coreAtom = atom(getInitialValue({key, schema, defaultValue}))
+  const mmkvAtom = pipe(coreAtom, toShadowStorageAtom(key, schema))
 
   mmkvAtom.debugLabel = `${
     debugLabel ?? ''
@@ -94,7 +115,8 @@ export function atomWithParsedMmkvStorage<
     // If the value has changed from when the atom was created,
     // atom won't be updated, because it was not mounted yet and thus
     // not listening for changes
-    setAtom(getInitialValue({key, zodType, defaultValue}))
+    setAtom(getInitialValue({key, schema, defaultValue}))
+    const decodeValue = Schema.decodeUnknownEither(schema)
 
     const listener = storage._storage.addOnValueChangedListener(
       (changedKey) => {
@@ -108,35 +130,38 @@ export function atomWithParsedMmkvStorage<
 
         void InteractionManager.runAfterInteractions(() => {
           pipe(
-            storage.getJSON(key),
-            E.filterOrElseW(
+            storage.getVerified(key, AuthorKeySchema),
+            Either.filterOrLeft(
               (value) => value[AUTHOR_ID_KEY] !== coreAtom.toString(),
               () =>
                 ({
                   _tag: 'authoredByThisAtom',
                 }) as const
             ),
-            E.map(({[AUTHOR_ID_KEY]: _, ...rest}) => rest),
-            E.chainW(safeParse(zodType)),
-            E.match((e) => {
-              if (e._tag === 'authoredByThisAtom') {
-                return
-              }
-              if (e._tag === 'ValueNotSet') {
-                console.info(
-                  `MMKV value for key '${key}' was deleted. Setting atom to default value`
+            Either.flatMap(() => storage.getVerified(key, schema)),
+            Either.flatMap(decodeValue),
+            Either.match({
+              onLeft: (e) => {
+                if (e._tag === 'authoredByThisAtom') {
+                  return
+                }
+                if (e._tag === 'ValueNotSet') {
+                  console.info(
+                    `MMKV value for key '${key}' was deleted. Setting atom to default value`
+                  )
+                  setAtom(defaultValue)
+                  return
+                }
+                reportError(
+                  'warn',
+                  new Error(
+                    `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
+                  ),
+                  {e}
                 )
-                setAtom(defaultValue)
-                return
-              }
-              reportError(
-                'warn',
-                new Error(
-                  `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
-                ),
-                {e}
-              )
-            }, setAtom)
+              },
+              onRight: setAtom,
+            })
           )
         })
       }

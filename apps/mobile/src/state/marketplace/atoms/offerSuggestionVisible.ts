@@ -1,6 +1,6 @@
+import {Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 
 export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
@@ -13,7 +13,9 @@ export const createOfferSuggestionVisibleStorageAtom =
     {
       visible: true,
     },
-    z.object({visible: z.boolean().default(true)}).readonly()
+    Schema.Struct({
+      visible: Schema.Boolean,
+    })
   )
 
 export const createOfferSuggestionVisibleAtom = focusAtom(

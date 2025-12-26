@@ -1,5 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Array} from 'effect'
+import {Array, Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
@@ -199,8 +199,8 @@ const viewportToFilterByAtom = atom((get) => {
     return deltasToViewport({
       point: {
         ...selectedRegion,
-        latitude: Latitude.parse(selectedRegion.latitude),
-        longitude: Longitude.parse(selectedRegion.longitude),
+        latitude: Schema.decodeSync(Latitude)(selectedRegion.latitude),
+        longitude: Schema.decodeSync(Longitude)(selectedRegion.longitude),
       },
       latitudeDelta: selectedRegion.latitudeDelta,
       longitudeDelta: selectedRegion.longitudeDelta,

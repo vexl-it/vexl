@@ -4,6 +4,7 @@ import {
   fromSvgString,
 } from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Schema} from 'effect/index'
 import {atom, useAtomValue} from 'jotai'
 import React from 'react'
 import {Stack, Text, useMedia} from 'tamagui'
@@ -59,7 +60,7 @@ function PhotoScreen({
         disabled={false}
         onPress={() => {
           navigation.navigate('AnonymizationAnimation', {
-            realUserData: RealLifeInfo.parse({
+            realUserData: Schema.decodeSync(RealLifeInfo)({
               userName,
               image: selectedImageUri
                 ? fromImageUri(selectedImageUri)

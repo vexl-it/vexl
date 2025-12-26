@@ -8,13 +8,13 @@ import {
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import updatePrivateParts from '@vexl-next/resources-utils/src/offers/updatePrivateParts'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
-import {Array, Effect, Option, Record, Struct} from 'effect'
+import {Array, Effect, Option, Record, Schema, Struct} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
@@ -31,7 +31,7 @@ import connectionStateAtom from './connectionStateAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
-const offerToConnectionsAtom = atomWithParsedMmkvStorageE(
+const offerToConnectionsAtom = atomWithParsedMmkvStorage(
   'offer-to-connections',
   {
     offerToConnections: [],
@@ -380,7 +380,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
   > =>
     Effect.gen(function* (_) {
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
-        ? UnixMilliseconds.parse(
+        ? Schema.decodeSync(UnixMilliseconds)(
             unixMillisecondsNow() + BACKGROUND_TIME_LIMIT_MS
           )
         : undefined

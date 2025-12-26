@@ -1,15 +1,15 @@
-import {PrivateKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PrivateKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {Effect, flow, Schema} from 'effect/index'
 import {type ParseError} from 'effect/ParseResult'
-import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 
 export const LoginChallengeRequestPayload = Schema.compose(
   Schema.StringFromBase64,
   Schema.parseJson(
     Schema.Struct({
-      privateKey: PrivateKeyPemBase64E,
+      privateKey: PrivateKeyPemBase64,
       challenge: Schema.String,
-      validUntil: UnixMillisecondsE,
+      validUntil: UnixMilliseconds,
     })
   )
 )

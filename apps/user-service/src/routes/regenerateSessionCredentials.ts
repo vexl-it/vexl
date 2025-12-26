@@ -1,9 +1,6 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
-  HashedPhoneNumberE,
-  type HashedPhoneNumber,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {hmacSignE} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
@@ -29,7 +26,7 @@ const checkPhoneNumberAgainstOldHash = ({
 }): Effect.Effect<boolean, UnexpectedServerError> =>
   oldHmacKeyUsedForHashingNumbersConfig.pipe(
     Effect.flatMap((oldHmacKey) => hmacSignE(oldHmacKey)(phoneNumber)),
-    Effect.flatMap(Schema.decode(HashedPhoneNumberE)),
+    Effect.flatMap(Schema.decode(HashedPhoneNumber)),
     Effect.catchAll((e) =>
       Effect.fail(
         new UnexpectedServerError({

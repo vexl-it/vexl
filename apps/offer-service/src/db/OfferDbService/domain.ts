@@ -1,11 +1,11 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
-  OfferIdE,
-  OfferTypeE,
+  OfferId,
+  OfferType,
   PrivatePartRecordId,
-  PrivatePayloadEncryptedE,
-  PublicPayloadEncryptedE,
+  PrivatePayloadEncrypted,
+  PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {Schema} from 'effect'
 
@@ -25,23 +25,23 @@ export class PublicPartRecord extends Schema.Class<PublicPartRecord>(
 )({
   id: PublicPartId,
   adminId: OfferAdminIdHashed,
-  offerId: OfferIdE,
+  offerId: OfferId,
   createdAt: Schema.DateFromSelf,
   modifiedAt: Schema.DateFromSelf,
-  offerType: OfferTypeE,
+  offerType: OfferType,
   report: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
-  payloadPublic: PublicPayloadEncryptedE,
+  payloadPublic: PublicPayloadEncrypted,
   refreshedAt: Schema.DateFromSelf,
-  countryPrefix: CountryPrefixE,
+  countryPrefix: CountryPrefix,
 }) {}
 
 export class PrivatePartRecord extends Schema.Class<PrivatePartRecord>(
   'PrivatePartRecord'
 )({
   id: PrivatePartRecordId,
-  userPublicKey: PublicKeyPemBase64E,
+  userPublicKey: PublicKeyPemBase64,
   offerId: PublicPartId,
-  payloadPrivate: PrivatePayloadEncryptedE,
+  payloadPrivate: PrivatePayloadEncrypted,
 }) {}
 
 export const OfferParts = Schema.Struct({

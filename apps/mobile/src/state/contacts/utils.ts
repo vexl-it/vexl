@@ -1,8 +1,5 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {
-  HashedPhoneNumber,
-  HashedPhoneNumberE,
-} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   hmacSignE,
   type CryptoError,
@@ -38,7 +35,7 @@ export function hashPhoneNumber(
   return pipe(
     normalizedPhoneNumber,
     hmacSign(hmacPassword),
-    E.map(HashedPhoneNumber.parse)
+    E.map(Schema.decodeSync(HashedPhoneNumber))
   )
 }
 
@@ -46,7 +43,7 @@ export function hashPhoneNumberE(
   normalizedPhoneNumber: E164PhoneNumber
 ): Effect.Effect<HashedPhoneNumber, CryptoError> {
   return hmacSignE(hmacPassword)(normalizedPhoneNumber).pipe(
-    Effect.map(Schema.decodeSync(HashedPhoneNumberE))
+    Effect.map(Schema.decodeSync(HashedPhoneNumber))
   )
 }
 

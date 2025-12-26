@@ -11,7 +11,7 @@ import {Effect, Match, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
-import {SessionE, type Session} from '../../../../brands/Session.brand'
+import {Session} from '../../../../brands/Session.brand'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
 import {sessionAtom} from '../../../../state/session'
 import {
@@ -150,7 +150,7 @@ export const finishLoginActionAtom = atom(
       )
 
       const session = yield* _(
-        Schema.decode(SessionE)({
+        Schema.decode(Session)({
           version: 1,
           sessionCredentials: {
             publicKey: privateKey.publicKeyPemBase64,

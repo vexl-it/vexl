@@ -1,12 +1,12 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {ClubMemberRecord} from '../domain'
 
 export const FindClubMemberByPublicKeyParams = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
 })
 export type FindClubMemberByPublicKeyParams =
   typeof FindClubMemberByPublicKeyParams.Type

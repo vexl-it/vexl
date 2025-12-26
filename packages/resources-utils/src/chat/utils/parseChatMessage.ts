@@ -17,10 +17,11 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {Either, Option, Schema, flow} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
-import {z} from 'zod'
-import {parseJson, safeParse} from '../../utils/parsing'
+import {effectToEither} from '../../effect-helpers/TaskEitherConverter'
+import {parseJson} from '../../utils/parsing'
 
 function setImageForBackwardCompatibility(
   payload: ChatMessagePayload
@@ -34,11 +35,11 @@ function setImageForBackwardCompatibility(
   ) {
     return pipe(
       `data:image/jpg;base64,${payload.deanonymizedUser.imageBase64}`,
-      safeParse(UriString),
-      E.fold(
-        () => payload,
-        (image) => ({...payload, image})
-      )
+      Schema.decodeUnknownOption(UriString),
+      Option.match({
+        onNone: () => payload,
+        onSome: (image) => ({...payload, image}),
+      })
     )
   }
   return payload
@@ -50,18 +51,28 @@ export interface ErrorChatMessageRequiresNewerVersion {
   message: ChatMessageRequiringNewerVersion
 }
 
-const ChatMessageRequiringNewerVersionWithDefaults = z
-  .object({
-    minimalRequiredVersion: SemverString,
-    senderPublicKey: PublicKeyPemBase64,
-    messageParsed: z.unknown(),
-    serverMessage: ServerMessage,
-    myVersion: SemverString.optional(),
-    time: UnixMilliseconds.catch(() => unixMillisecondsNow()),
-    uuid: ChatMessageId.catch(() => generateChatMessageId()),
-    text: z.literal('-').catch('-'),
-  })
-  .readonly()
+const ChatMessageRequiringNewerVersionWithDefaults = Schema.Struct({
+  minimalRequiredVersion: SemverString,
+  senderPublicKey: PublicKeyPemBase64,
+  messageParsed: Schema.Unknown,
+  serverMessage: ServerMessage,
+  myVersion: Schema.optionalWith(SemverString, {nullable: true}),
+  time: UnixMilliseconds.pipe(
+    Schema.annotations({
+      decodingFallback: () => Either.right(unixMillisecondsNow()),
+    })
+  ),
+  uuid: ChatMessageId.pipe(
+    Schema.annotations({
+      decodingFallback: () => Either.right(generateChatMessageId()),
+    })
+  ),
+  text: Schema.Literal('-').pipe(
+    Schema.annotations({
+      decodingFallback: () => Either.right('-'),
+    })
+  ),
+})
 
 function ensureCompatibleVersion({
   appVersion,
@@ -82,34 +93,41 @@ function ensureCompatibleVersion({
       // If it's not set, we assume it's sent from earlier versions and this is compatible
       if (!unsafeMinimalRequiredVersion) return E.right(payloadJson)
 
-      const minimalRequiredVersionParsed = SemverString.safeParse(
-        unsafeMinimalRequiredVersion
+      const minimalRequiredVersionParsed = pipe(
+        Schema.decodeUnknownOption(SemverString)(unsafeMinimalRequiredVersion)
       )
-      if (!minimalRequiredVersionParsed.success)
+      if (Option.isNone(minimalRequiredVersionParsed))
         return E.left(
-          toError('ErrorParsingChatMessage')(minimalRequiredVersionParsed.error)
+          toError('ErrorParsingChatMessage')(
+            new Error('Invalid semver version')
+          )
         )
 
-      if (compareSemver(appVersion)('>=', minimalRequiredVersionParsed.data)) {
+      if (compareSemver(appVersion)('>=', minimalRequiredVersionParsed.value)) {
         // Is compatible
         return E.right(payloadJson)
       }
 
-      const errorDataParsed =
-        ChatMessageRequiringNewerVersionWithDefaults.safeParse({
-          messageParsed: payloadJson,
-          serverMessage,
-          senderPublicKey: serverMessage.senderPublicKey,
-          ...(payloadJson as any),
-        })
-      if (!errorDataParsed.success)
-        return E.left(toError('ErrorParsingChatMessage')(errorDataParsed.error))
+      const errorDataParsed = Schema.decodeUnknownOption(
+        ChatMessageRequiringNewerVersionWithDefaults
+      )({
+        messageParsed: payloadJson,
+        serverMessage,
+        senderPublicKey: serverMessage.senderPublicKey,
+        ...(payloadJson as any),
+      })
+      if (Option.isNone(errorDataParsed))
+        return E.left(
+          toError('ErrorParsingChatMessage')(
+            new Error('Failed to parse error data')
+          )
+        )
 
       return E.left({
         _tag: 'ErrorChatMessageRequiresNewerVersion',
         message: {
-          ...errorDataParsed.data,
-          myVersion: errorDataParsed.data.myVersion,
+          ...errorDataParsed.value,
+          myVersion: errorDataParsed.value.myVersion,
           messageType: 'REQUIRES_NEWER_VERSION',
         },
       } satisfies ErrorChatMessageRequiresNewerVersion)
@@ -167,7 +185,7 @@ export function parseChatMessage({
       E.right(jsonString),
       E.chainW(parseJson),
       E.chainFirstW(ensureCompatibleVersion({appVersion, serverMessage})),
-      E.chainW(safeParse(ChatMessagePayload)),
+      E.chainW(flow(Schema.decodeUnknown(ChatMessagePayload), effectToEither)),
       E.map(setImageForBackwardCompatibility),
       E.map(chatMessagePayloadToChatMessage(serverMessage.senderPublicKey)),
       E.mapLeft((error) => {

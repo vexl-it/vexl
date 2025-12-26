@@ -1,18 +1,16 @@
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {Schema} from 'effect/index'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {MessagingState} from '../domain'
 
 export const messagingStateAtomStorageAtom = atomWithParsedMmkvStorage(
   'messagingState',
   {messagingState: [], lastDecodedSemver: undefined},
-  z
-    .object({
-      messagingState: MessagingState,
-      lastDecodedSemver: SemverString.optional(),
-    })
-    .readonly()
+  Schema.Struct({
+    messagingState: MessagingState.pipe(Schema.mutable),
+    lastDecodedSemver: Schema.optionalWith(SemverString, {nullable: true}),
+  })
 )
 
 const messagingStateAtom = focusAtom(messagingStateAtomStorageAtom, (o) =>

@@ -1,15 +1,9 @@
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
+import {Schema} from 'effect/index'
 import {atom, useAtom, type PrimitiveAtom, type SetStateAction} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {useCallback, useMemo} from 'react'
-import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
-
-const HideForMessageAtomType = z
-  .object({
-    hidden: z.boolean(),
-  })
-  .readonly()
 
 export default function createHideActionForMessageMmkvAtom(
   messageId: ChatMessageId
@@ -17,7 +11,9 @@ export default function createHideActionForMessageMmkvAtom(
   const atom = atomWithParsedMmkvStorage(
     `hideForMessage-${messageId}`,
     {hidden: false},
-    HideForMessageAtomType
+    Schema.Struct({
+      hidden: Schema.Boolean,
+    })
   )
 
   return focusAtom(atom, (p) => p.prop('hidden'))

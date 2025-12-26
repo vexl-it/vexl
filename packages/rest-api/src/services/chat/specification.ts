@@ -18,7 +18,7 @@ import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
-  ForbiddenMessageTypeError,
+  ForbiddenMessageTyperror,
   InboxDoesNotExistError,
   NotPermittedToSendMessageToTargetInboxError,
 } from '../contact/contracts'
@@ -221,7 +221,7 @@ export const SendMessageEndpoint = HttpApiEndpoint.post(
   .addError(ReceiverInboxDoesNotExistError, {status: 404})
   .addError(SenderInboxDoesNotExistError, {status: 404})
   .addError(NotPermittedToSendMessageToTargetInboxError, {status: 400})
-  .addError(ForbiddenMessageTypeError, {status: 400})
+  .addError(ForbiddenMessageTyperror, {status: 400})
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 5000)
 
@@ -235,7 +235,7 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   .addError(ReceiverInboxDoesNotExistError, {status: 404})
   .addError(SenderInboxDoesNotExistError, {status: 404})
   .addError(NotPermittedToSendMessageToTargetInboxError, {status: 400})
-  .addError(ForbiddenMessageTypeError, {status: 400})
+  .addError(ForbiddenMessageTyperror, {status: 400})
   .addError(InvalidChallengeError, {status: 401})
   .annotate(MaxExpectedDailyCall, 10)
 

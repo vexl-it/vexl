@@ -15,7 +15,9 @@ export default function generateSymmetricKey(): Effect.Effect<
 > {
   return Effect.try({
     try: () =>
-      SymmetricKey.parse(getCrypto().randomBytes(32).toString('base64')),
+      Schema.decodeSync(SymmetricKey)(
+        getCrypto().randomBytes(32).toString('base64')
+      ),
     catch: (e) =>
       new SymmetricKeyGenerationError({
         cause: e,

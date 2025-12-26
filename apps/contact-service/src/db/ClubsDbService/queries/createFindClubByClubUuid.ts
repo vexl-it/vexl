@@ -1,12 +1,12 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {ClubUuidE} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {ClubDbRecord} from '../domain'
 
 export const FindClubByUuidParams = Schema.Struct({
-  uuid: ClubUuidE,
+  uuid: ClubUuid,
 })
 export type FindClubByUuidParams = typeof FindClubByUuidParams.Type
 

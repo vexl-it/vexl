@@ -1,8 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {
-  ExpoNotificationTokenE,
-  type ExpoNotificationToken,
-} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Array, Effect, pipe, Schema} from 'effect'
 import {isNotUndefined} from 'effect/Predicate'
 import {type ExpoPushMessage, type ExpoPushTicket} from 'expo-server-sdk'
@@ -83,7 +80,7 @@ export const sendExpoNotificationToAllHandleNonExistingTokens = ({
     const userDb = yield* _(UserDbService)
     const results = yield* _(sendPushNotificationExpo({data, tokens}))
 
-    const decodeNotificationToken = Schema.decodeSync(ExpoNotificationTokenE)
+    const decodeNotificationToken = Schema.decodeSync(ExpoNotificationToken)
 
     const invalidTokens = pipe(
       results,

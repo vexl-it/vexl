@@ -1,9 +1,9 @@
 import {Schema} from 'effect'
-import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 
 const BtcPriceFetched = Schema.Struct({
   BTC: Schema.Number,
-  lastUpdatedAt: Schema.optionalWith(UnixMillisecondsE, {as: 'Option'}),
+  lastUpdatedAt: Schema.optionalWith(UnixMilliseconds, {as: 'Option'}),
 })
 
 export const BtcPriceDataWithState = Schema.Union(
@@ -14,7 +14,7 @@ export const BtcPriceDataWithState = Schema.Union(
   Schema.Struct({
     state: Schema.Literal('success'),
     btcPrice: BtcPriceFetched,
-    lastRefreshAt: UnixMillisecondsE,
+    lastRefreshAt: UnixMilliseconds,
   }),
   Schema.Struct({
     state: Schema.Literal('error'),

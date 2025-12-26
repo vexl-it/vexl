@@ -1,12 +1,12 @@
+import {Schema} from 'effect/index'
 import {focusAtom} from 'jotai-optics'
-import {z} from 'zod'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 
 export const showVexlbotInitialMessageForAllChatsStorageAtom =
   atomWithParsedMmkvStorage(
     'showVexlbotInitialMessageForAllChats',
     {visible: true},
-    z.object({visible: z.boolean().default(true)}).readonly()
+    Schema.Struct({visible: Schema.Boolean})
   )
 
 export const showVexlbotInitialMessageForAllChatsAtom = focusAtom(

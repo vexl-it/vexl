@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   ClubAlreadyExistsError,
   InvalidAdminTokenError,
@@ -12,7 +12,7 @@ import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
-const SOME_URL = Schema.decodeSync(UriStringE)('https://some.url')
+const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 describe('Create club', () => {
   beforeEach(async () => {

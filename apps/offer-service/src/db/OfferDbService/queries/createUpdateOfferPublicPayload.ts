@@ -1,16 +1,16 @@
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  OfferIdE,
-  PublicPayloadEncryptedE,
+  OfferId,
+  PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {Effect, Schema} from 'effect'
 import {OfferAdminIdHashed} from '../domain'
 
 export const UpdateOfferPublicPayloadRequest = Schema.Struct({
-  offerId: OfferIdE,
+  offerId: OfferId,
   adminId: OfferAdminIdHashed,
-  payloadPublic: PublicPayloadEncryptedE,
+  payloadPublic: PublicPayloadEncrypted,
 })
 export type UpdateOfferPublicPayloadRequest =
   typeof UpdateOfferPublicPayloadRequest.Type

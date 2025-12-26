@@ -8,7 +8,7 @@ import {
   type RegionCode,
 } from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {pipe} from 'effect'
+import {Option, pipe} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
@@ -103,5 +103,8 @@ export const invalidUsernameUIFeedbackAtom = atom(null, async (get, set) => {
 })
 
 export const regionCodeAtom = atom<RegionCode | undefined>((get) => {
-  return phoneNumberToRegionCode(get(sessionDataOrDummyAtom).phoneNumber)
+  return pipe(
+    phoneNumberToRegionCode(get(sessionDataOrDummyAtom).phoneNumber),
+    Option.getOrElse(() => undefined)
+  )
 })

@@ -9,32 +9,27 @@ import {
   ChatMessageRequiringNewerVersion,
   generateChatId,
   Inbox,
-  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
+import {JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
 import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
+  ErrorSigningChallenge,
+  InvalidChallengeError,
 } from '@vexl-next/rest-api/src/challenges/contracts'
-import {type SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {SenderInboxDoesNotExistError} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {
-  type ForbiddenMessageTypeError,
-  type InboxDoesNotExistError,
-  type NotPermittedToSendMessageToTargetInboxError,
+  ForbiddenMessageTyperror,
+  InboxDoesNotExistError,
+  NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
+import {ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Schema} from 'effect/index'
-import {z} from 'zod'
 import {
   createEmptyTradeChecklistInState,
   TradeChecklistInState,
 } from '../tradeChecklist/domain'
-import {type ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
+import {ReadingFileError} from './utils/replaceImageFileUrisWithBase64'
 export class ApiErrorCreatingInbox extends Schema.TaggedError<ApiErrorCreatingInbox>(
   'ApiErrorCreatingInbox'
 )('ApiErrorCreatingInbox', {
@@ -46,43 +41,59 @@ export class ErrorInboxAlreadyExists extends Schema.TaggedError<ErrorInboxAlread
   cause: Schema.Unknown,
 }) {}
 
-export const ChatMessageWithState = z
-  .discriminatedUnion('state', [
-    z.object({state: z.literal('received'), message: ChatMessage}),
-    z.object({
-      state: z.literal('receivedButRequiresNewerVersion'),
-      message: ChatMessageRequiringNewerVersion,
-    }),
-    z.object({state: z.literal('sending'), message: ChatMessage}),
-    z.object({
-      state: z.literal('sendingError'),
-      message: ChatMessage,
-      error: z.custom<
-        | ErrorEncryptingMessage
-        | ErrorGeneratingChallenge
-        | ErrorSigningChallenge
-        | InvalidChallengeError
-        | InboxDoesNotExistError
-        | NotPermittedToSendMessageToTargetInboxError
-        | JsonStringifyError
-        | ZodParseError<ChatMessagePayload>
-        | ReadingFileError
-        | SenderInboxDoesNotExistError
-        | ForbiddenMessageTypeError
-        | CryptoError
-        | {_tag: string}
-      >((one) => !!one._tag),
-    }),
-    z.object({state: z.literal('sent'), message: ChatMessage}),
-  ])
-  .readonly()
-export type ChatMessageWithState = z.TypeOf<typeof ChatMessageWithState>
+export const ReceivedMessage = Schema.Struct({
+  state: Schema.Literal('received'),
+  message: ChatMessage,
+})
 
-export const ChatWithMessages = z
-  .object({
-    chat: Chat,
-    messages: z.array(ChatMessageWithState),
-    tradeChecklist: TradeChecklistInState.default({
+export const ReceivedButRequiresNewerVersionMessage = Schema.Struct({
+  state: Schema.Literal('receivedButRequiresNewerVersion'),
+  message: ChatMessageRequiringNewerVersion,
+})
+
+export const SendingMessage = Schema.Struct({
+  state: Schema.Literal('sending'),
+  message: ChatMessage,
+})
+
+export const SentMessage = Schema.Struct({
+  state: Schema.Literal('sent'),
+  message: ChatMessage,
+})
+
+export const SendingErrorMessage = Schema.Struct({
+  state: Schema.Literal('sendingError'),
+  message: ChatMessage,
+  error: Schema.Union(
+    ErrorEncryptingMessage,
+    ErrorGeneratingChallenge,
+    ErrorSigningChallenge,
+    InvalidChallengeError,
+    InboxDoesNotExistError,
+    NotPermittedToSendMessageToTargetInboxError,
+    JsonStringifyError,
+    Schema.Struct({_tag: Schema.String}),
+    ReadingFileError,
+    SenderInboxDoesNotExistError,
+    ForbiddenMessageTyperror,
+    CryptoError
+  ),
+})
+
+export const ChatMessageWithState = Schema.Union(
+  ReceivedMessage,
+  ReceivedButRequiresNewerVersionMessage,
+  SendingMessage,
+  SentMessage,
+  SendingErrorMessage
+)
+export type ChatMessageWithState = typeof ChatMessageWithState.Type
+
+export const ChatWithMessages = Schema.Struct({
+  chat: Chat,
+  messages: Schema.Array(ChatMessageWithState).pipe(Schema.mutable),
+  tradeChecklist: Schema.optionalWith(TradeChecklistInState, {
+    default: () => ({
       dateAndTime: {},
       location: {},
       amount: {},
@@ -90,39 +101,35 @@ export const ChatWithMessages = z
       identity: {},
       contact: {},
     }),
-  })
-  .readonly()
-export type ChatWithMessages = z.TypeOf<typeof ChatWithMessages>
+  }),
+})
+export type ChatWithMessages = typeof ChatWithMessages.Type
 
-export const InboxInState = z
-  .object({
-    inbox: Inbox,
-    chats: z.array(ChatWithMessages),
-  })
-  .readonly()
-export type InboxInState = z.TypeOf<typeof InboxInState>
+export const InboxInState = Schema.Struct({
+  inbox: Inbox,
+  chats: Schema.Array(ChatWithMessages).pipe(Schema.mutable),
+})
+export type InboxInState = typeof InboxInState.Type
 
-export const MessagingState = z.array(InboxInState)
-export type MessagingState = z.TypeOf<typeof MessagingState>
+export const MessagingState = Schema.Array(InboxInState).pipe(Schema.mutable)
+export type MessagingState = typeof MessagingState.Type
 
-export const ChatIds = z
-  .object({
-    chatId: ChatId,
-    inboxKey: PublicKeyPemBase64,
-  })
-  .readonly()
-export type ChatIds = z.TypeOf<typeof ChatIds>
+export const ChatIds = Schema.Struct({
+  chatId: ChatId,
+  inboxKey: PublicKeyPemBase64,
+})
+export type ChatIds = typeof ChatIds.Type
 
-export const RequestState = z.enum([
+export const RequestState = Schema.Literal(
   'initial',
   'requested',
   'denied',
   'cancelled',
   'accepted',
   'deleted',
-  'otherSideLeft',
-])
-export type RequestState = z.TypeOf<typeof RequestState>
+  'otherSideLeft'
+)
+export type RequestState = typeof RequestState.Type
 
 export const dummyChatWithMessages: ChatWithMessages = {
   chat: {

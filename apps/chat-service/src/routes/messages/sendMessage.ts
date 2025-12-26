@@ -1,7 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SendMessageResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
-import {ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
@@ -28,7 +28,7 @@ export const sendMessage = HttpApiBuilder.handler(
       )
 
       if (forbiddenMessageTypes.includes(req.payload.messageType)) {
-        return yield* _(Effect.fail(new ForbiddenMessageTypeError()))
+        return yield* _(Effect.fail(new ForbiddenMessageTyperror()))
       }
 
       const {receiverInbox} = yield* _(

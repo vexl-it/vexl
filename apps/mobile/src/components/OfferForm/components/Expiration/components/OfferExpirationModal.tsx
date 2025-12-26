@@ -1,4 +1,5 @@
 import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
+import {Schema} from 'effect/index'
 import {useAtom, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useMemo} from 'react'
@@ -64,7 +65,9 @@ function OfferExpirationModal({
             <Calendar
               markedDates={markedDates}
               onDayPress={(date) => {
-                setExpirationDate(JSDateString.parse(date.dateString))
+                setExpirationDate(
+                  Schema.decodeSync(JSDateString)(date.dateString)
+                )
                 setOfferExpirationModalVisible(false)
               }}
             />

@@ -5,7 +5,7 @@ const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 const APP_SOURCE = process.env.APP_SOURCE ?? 'local'
 
 // // check if version is valid
-// SemverString.parse(VERSION)
+// Schema.decodeSync(SemverString)(VERSION)
 
 const presets = {
   stage: {

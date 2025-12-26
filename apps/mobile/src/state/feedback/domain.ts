@@ -1,25 +1,14 @@
-import {Feedback, FeedbackE} from '@vexl-next/domain/src/general/feedback'
-import {ChatId, ChatIdE} from '@vexl-next/domain/src/general/messaging'
+import {Feedback} from '@vexl-next/domain/src/general/feedback'
+import {ChatId} from '@vexl-next/domain/src/general/messaging'
 import {Schema} from 'effect'
-import {z} from 'zod'
 
-export const ChatToFeedbackItem = z
-  .object({
-    chatId: ChatId,
-    feedback: Feedback,
-  })
-  .readonly()
-export const ChatToFeedbackItemE = Schema.Struct({
-  chatId: ChatIdE,
-  feedback: FeedbackE,
+export const ChatToFeedbackItem = Schema.Struct({
+  chatId: ChatId,
+  feedback: Feedback,
 })
-export type ChatToFeedbackItem = Schema.Schema.Type<typeof ChatToFeedbackItemE>
+export type ChatToFeedbackItem = typeof ChatToFeedbackItem.Type
 
-export const ChatToFeedbackItems = z
-  .object({
-    chatsToFeedbacks: z.array(ChatToFeedbackItem),
-  })
-  .readonly()
-export const ChatToFeedbackItemsE = Schema.Struct({
-  chatsToFeedbacks: Schema.Array(ChatToFeedbackItemE),
+export const ChatToFeedbackItems = Schema.Struct({
+  chatsToFeedbacks: Schema.Array(ChatToFeedbackItem),
 })
+export type ChatToFeedbackItems = typeof ChatToFeedbackItems.Type

@@ -1,6 +1,6 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {ClubRecordId} from '../../ClubsDbService/domain'
@@ -8,7 +8,7 @@ import {ClubMemberRecord} from '../domain'
 
 export const UpdateIsModeratorParamas = Schema.Struct({
   id: ClubRecordId,
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   isModerator: Schema.Boolean, // TODO brand
 })
 export type UpdateIsModeratorParamas = typeof UpdateIsModeratorParamas.Type

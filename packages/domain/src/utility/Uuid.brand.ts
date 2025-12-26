@@ -1,16 +1,10 @@
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
+import {Schema} from 'effect'
 
-export const Uuid = z
-  .string()
-  .uuid()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'Uuid'>>()(v))
+export const Uuid = Schema.UUID.pipe(Schema.brand('Uuid'))
 
-export const UuidE = Schema.UUID.pipe(Schema.brand('Uuid'))
-
-export type Uuid = Schema.Schema.Type<typeof UuidE>
+export type Uuid = typeof Uuid.Type
 
 export function generateUuid(): Uuid {
-  return Uuid.parse(getCrypto().randomUUID())
+  return Schema.decodeSync(Uuid)(getCrypto().randomUUID())
 }

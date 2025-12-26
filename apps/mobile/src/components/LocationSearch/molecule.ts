@@ -7,17 +7,19 @@ import {
   useMolecule,
 } from 'bunshi/dist/react'
 import {randomUUID} from 'crypto'
+import {Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {z} from 'zod'
 import {apiAtom} from '../../api'
 import {createEffectAtomWithProgress} from '../../utils/atomUtils/createEffectAtomWithProgress'
 import {getCurrentLocale} from '../../utils/localization/I18nProvider'
 
-export const LocationSessionId = z.string().uuid().brand<'LocationSessionId'>()
-export type LocationSessionId = z.TypeOf<typeof LocationSessionId>
+export const LocationSessionId = Schema.UUID.pipe(
+  Schema.brand('LocationSessionId')
+)
+export type LocationSessionId = typeof LocationSessionId.Type
 export function newLocationSessionId(): LocationSessionId {
-  return LocationSessionId.parse(randomUUID())
+  return Schema.decodeSync(LocationSessionId)(randomUUID())
 }
 export const LocationSearchScope = createScope<LocationSessionId>(
   newLocationSessionId()

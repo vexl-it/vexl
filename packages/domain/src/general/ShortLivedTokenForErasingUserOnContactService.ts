@@ -1,6 +1,6 @@
 import {Schema} from 'effect/index'
-import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
-import {HashedPhoneNumberE} from './HashedPhoneNumber.brand'
+import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
+import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 
 export const ShortLivedTokenForErasingUserOnContactService = Schema.String.pipe(
   Schema.brand('ShortLivedTokenForErasingUserOnContactService')
@@ -11,8 +11,8 @@ export type ShortLivedTokenForErasingUserOnContactService =
 export const ShortLivedTokenForErasingUserOnContactServicePayload =
   Schema.parseJson(
     Schema.Struct({
-      phoneNumberHash: HashedPhoneNumberE,
-      expiresAt: UnixMillisecondsE,
+      phoneNumberHash: HashedPhoneNumber,
+      expiresAt: UnixMilliseconds,
     })
   )
 export type ShortLivedTokenForErasingUserOnContactServicePayload =

@@ -6,7 +6,7 @@ import {
   ReceiverInboxDoesNotExistError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {ForbiddenMessageTypeError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
@@ -454,7 +454,7 @@ describe('Send messages', () => {
           }),
           Effect.either
         )
-        expectErrorResponse(ForbiddenMessageTypeError)(errorResponse1)
+        expectErrorResponse(ForbiddenMessageTyperror)(errorResponse1)
 
         const errorResponse2 = yield* _(
           client.Messages.sendMessages({
@@ -477,7 +477,7 @@ describe('Send messages', () => {
           }),
           Effect.either
         )
-        expectErrorResponse(ForbiddenMessageTypeError)(errorResponse2)
+        expectErrorResponse(ForbiddenMessageTyperror)(errorResponse2)
 
         const errorResponse3 = yield* _(
           client.Messages.sendMessages({
@@ -500,7 +500,7 @@ describe('Send messages', () => {
           }),
           Effect.either
         )
-        expectErrorResponse(ForbiddenMessageTypeError)(errorResponse3)
+        expectErrorResponse(ForbiddenMessageTyperror)(errorResponse3)
 
         const errorResponse4 = yield* _(
           client.Messages.sendMessages({
@@ -523,7 +523,7 @@ describe('Send messages', () => {
           }),
           Effect.either
         )
-        expectErrorResponse(ForbiddenMessageTypeError)(errorResponse4)
+        expectErrorResponse(ForbiddenMessageTyperror)(errorResponse4)
       })
     )
   })

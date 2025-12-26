@@ -1,16 +1,13 @@
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
-import {NotificationCypherE} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 
 import {
   createNotificationTrackingId,
   NotificationTrackingId,
 } from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
-  ExpoNotificationTokenE,
-  type ExpoNotificationToken,
-} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
@@ -54,7 +51,7 @@ export const vexlNotificationTokenToExpoToken = (
     Option.some(vexlNotificationToken),
     Option.filter(String.startsWith(EXPO_PREFIX)),
     Option.map(String.replace(EXPO_PREFIX, '')),
-    Option.flatMap(Schema.decodeOption(ExpoNotificationTokenE))
+    Option.flatMap(Schema.decodeOption(ExpoNotificationToken))
   )
 }
 
@@ -100,9 +97,9 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationToken,
-  targetCypher: NotificationCypherE,
+  targetCypher: NotificationCypher,
   sendNewChatMessageNotification: Schema.Boolean,
-  sentAt: Schema.optionalWith(UnixMillisecondsE, {
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
   trackingId: Schema.optionalWith(NotificationTrackingId, {
@@ -129,9 +126,9 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationToken,
-  targetCypher: NotificationCypherE,
+  targetCypher: NotificationCypher,
   message: StreamOnlyMessageCypher,
-  sentAt: Schema.optionalWith(UnixMillisecondsE, {
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
   }),
   trackingId: Schema.optionalWith(NotificationTrackingId, {

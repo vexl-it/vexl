@@ -1,19 +1,10 @@
 import {Schema} from 'effect'
-import {z} from 'zod'
-import {E164PhoneNumber, E164PhoneNumberE} from './E164PhoneNumber.brand'
-import {UserName, UserNameE} from './UserName.brand'
+import {E164PhoneNumber} from './E164PhoneNumber.brand'
+import {UserName} from './UserName.brand'
 
-export const DeanonymizedUser = z
-  .object({
-    name: UserName,
-    partialPhoneNumber: z.string().optional(),
-    fullPhoneNumber: E164PhoneNumber.optional(),
-  })
-  .readonly()
-
-export const DeanonymizedUserE = Schema.Struct({
-  name: UserNameE,
+export const DeanonymizedUser = Schema.Struct({
+  name: UserName,
   partialPhoneNumber: Schema.optional(Schema.String),
-  fullPhoneNumber: Schema.optional(E164PhoneNumberE),
+  fullPhoneNumber: Schema.optional(E164PhoneNumber),
 })
-export type DeanonymizedUser = z.TypeOf<typeof DeanonymizedUser>
+export type DeanonymizedUser = typeof DeanonymizedUser.Type

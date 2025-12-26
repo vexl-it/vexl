@@ -1,8 +1,5 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
-import {
-  type UnixMilliseconds,
-  UnixMillisecondsE,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {DateTime} from 'luxon'
 
@@ -10,11 +7,11 @@ export function createAvailableDateTimeEntry(
   timestamp: UnixMilliseconds
 ): AvailableDateTimeOption {
   return {
-    from: Schema.decodeSync(UnixMillisecondsE)(
+    from: Schema.decodeSync(UnixMilliseconds)(
       DateTime.fromMillis(timestamp).startOf('hour').toMillis()
     ),
     to: timestamp,
-    date: Schema.decodeSync(UnixMillisecondsE)(
+    date: Schema.decodeSync(UnixMilliseconds)(
       DateTime.fromMillis(timestamp).startOf('day').toMillis()
     ),
   }
@@ -43,7 +40,7 @@ export function convertDateTimesToNewFormat(
 
     const splitIntervals: AvailableDateTimeOption[] = []
     for (let i = 0; i < diffInMinutes; i += 15) {
-      const timeOptionMillis = Schema.decodeSync(UnixMillisecondsE)(
+      const timeOptionMillis = Schema.decodeSync(UnixMilliseconds)(
         DateTime.fromMillis(dateTime.from).plus({minutes: i}).toMillis()
       )
 

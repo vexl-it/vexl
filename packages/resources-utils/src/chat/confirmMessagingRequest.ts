@@ -6,17 +6,16 @@ import {
 import {
   generateChatMessageId,
   type ChatMessage,
-  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect} from 'effect'
+import {Effect, type ParseResult} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
-import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
 
@@ -82,7 +81,7 @@ export default function confirmMessagingRequest({
   ChatMessage,
   | ApiConfirmMessagingRequest
   | JsonStringifyError
-  | ZodParseError<ChatMessagePayload>
+  | ParseResult.ParseError
   | ErrorEncryptingMessage
 > {
   return Effect.gen(function* (_) {

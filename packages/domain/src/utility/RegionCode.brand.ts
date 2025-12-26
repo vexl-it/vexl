@@ -1,23 +1,14 @@
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
+import {Schema, type Option} from 'effect'
 import {type E164PhoneNumber} from '../general/E164PhoneNumber.brand'
 
-export const RegionCodeE = Schema.NonEmptyString.pipe(
-  Schema.brand('RegionCode')
-)
+export const RegionCode = Schema.NonEmptyString.pipe(Schema.brand('RegionCode'))
 
-export const RegionCode = z
-  .string()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'RegionCode'>>()(v))
-
-export type RegionCode = Schema.Schema.Type<typeof RegionCodeE>
+export type RegionCode = Schema.Schema.Type<typeof RegionCode>
 
 export function phoneNumberToRegionCode(
   phoneNumber: E164PhoneNumber
-): RegionCode | undefined {
+): Option.Option<RegionCode> {
   const rawRegionCode = parsePhoneNumber(phoneNumber)?.regionCode
-  if (rawRegionCode) {
-    return RegionCode.parse(rawRegionCode)
-  }
+  return Schema.decodeUnknownOption(RegionCode)(rawRegionCode)
 }

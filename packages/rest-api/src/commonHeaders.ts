@@ -1,8 +1,5 @@
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
-import {
-  SemverStringE,
-  type SemverString,
-} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Array, Either, Number, Option, Schema, String} from 'effect'
 import {HEADER_CLIENT_VERSION, HEADER_PLATFORM} from './constants'
@@ -25,7 +22,7 @@ export const VexlAppUserAgentHeader = Schema.TaggedStruct(
   {
     platform: PlatformName,
     versionCode: VersionCode,
-    semver: Schema.optionalWith(SemverStringE, {as: 'Option', nullable: true}),
+    semver: Schema.optionalWith(SemverString, {as: 'Option', nullable: true}),
   }
 )
 export type UserAgentHeader = Schema.Schema.Type<typeof VexlAppUserAgentHeader>
@@ -41,7 +38,7 @@ export type UnknownUserAgentHeader = typeof UnknownUserAgentHeader.Type
 export const VexlAppMetaHeader = Schema.Struct({
   platform: PlatformName,
   versionCode: VersionCode,
-  semver: SemverStringE,
+  semver: SemverString,
   appSource: AppSource,
   language: Schema.String,
   isDeveloper: Schema.Boolean,

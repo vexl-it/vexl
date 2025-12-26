@@ -8,7 +8,7 @@ import {
   type SendMessageRequest,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {
-  ForbiddenMessageTypeError,
+  ForbiddenMessageTyperror,
   NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -265,7 +265,7 @@ describe('Send message', () => {
           Effect.either
         )
 
-        expectErrorResponse(ForbiddenMessageTypeError)(response)
+        expectErrorResponse(ForbiddenMessageTyperror)(response)
 
         const response2 = yield* _(
           client.Messages.sendMessage({
@@ -274,7 +274,7 @@ describe('Send message', () => {
           Effect.either
         )
 
-        expectErrorResponse(ForbiddenMessageTypeError)(response2)
+        expectErrorResponse(ForbiddenMessageTyperror)(response2)
 
         const response3 = yield* _(
           client.Messages.sendMessage({
@@ -283,7 +283,7 @@ describe('Send message', () => {
           Effect.either
         )
 
-        expectErrorResponse(ForbiddenMessageTypeError)(response3)
+        expectErrorResponse(ForbiddenMessageTyperror)(response3)
 
         const response4 = yield* _(
           client.Messages.sendMessage({
@@ -295,7 +295,7 @@ describe('Send message', () => {
           Effect.either
         )
 
-        expectErrorResponse(ForbiddenMessageTypeError)(response4)
+        expectErrorResponse(ForbiddenMessageTyperror)(response4)
       })
     )
   })

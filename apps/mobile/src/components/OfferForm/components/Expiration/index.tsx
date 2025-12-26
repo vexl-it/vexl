@@ -1,4 +1,5 @@
 import {JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
+import {Schema} from 'effect/index'
 import {useAtom, useSetAtom, type PrimitiveAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback} from 'react'
@@ -35,7 +36,7 @@ function Expiration({
     if (expirationDate) setExpirationDate(undefined)
     else
       setExpirationDate(
-        JSDateString.parse(
+        Schema.decodeSync(JSDateString)(
           DateTime.now().toFormat(REACT_NATIVE_CALENDARS_DATE_FORMAT)
         )
       )

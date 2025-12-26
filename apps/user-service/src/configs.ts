@@ -1,4 +1,4 @@
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Config, ConfigError, Effect, Either, Schema, String} from 'effect'
 
@@ -29,7 +29,7 @@ export const loginCodeDummies = Config.option(
       Config.map(String.split(',')),
       Config.mapOrFail((v) =>
         Either.mapLeft(
-          Schema.decodeEither(Schema.Array(E164PhoneNumberE))(v),
+          Schema.decodeEither(Schema.Array(E164PhoneNumber))(v),
           (e) =>
             ConfigError.InvalidData(['LOGIN_CODE_DUMMY_NUMBERS'], e.message)
         )

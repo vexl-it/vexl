@@ -1,4 +1,4 @@
-import {type Uuid, UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {
   type FullScreenWarning,
   type NewsAndAnnouncementsResponse,
@@ -8,7 +8,7 @@ import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, type WritableAtom} from 'jotai'
 import {apiAtom} from '../../api'
-import {atomWithParsedMmkvStorageE} from '../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {ignoreReportErrors} from '../../utils/reportError'
 
 const newsAndAnnouncementsAtom = atom<NewsAndAnnouncementsResponse | null>()
@@ -32,11 +32,11 @@ export const announcmentsAtom = atom(
   }
 )
 
-const cancelledIdsMmkv = atomWithParsedMmkvStorageE(
+const cancelledIdsMmkv = atomWithParsedMmkvStorage(
   'cancelledIds',
   {ids: []},
   Schema.Struct({
-    ids: Schema.Array(UuidE),
+    ids: Schema.Array(Uuid),
   })
 )
 

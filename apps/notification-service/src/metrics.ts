@@ -1,8 +1,5 @@
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
-import {
-  UnixMillisecondsE,
-  type UnixMilliseconds,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
@@ -15,8 +12,8 @@ const NOTIFICATION_SENT = 'NOTIFICATION_SENT'
 const NOTIFICATION_PROCESSED = 'NOTIFICATION_PROCESSED'
 
 const AnalyticsRecord = Schema.Struct({
-  sentAt: UnixMillisecondsE,
-  processedByClientAt: Schema.optionalWith(UnixMillisecondsE, {as: 'Option'}),
+  sentAt: UnixMilliseconds,
+  processedByClientAt: Schema.optionalWith(UnixMilliseconds, {as: 'Option'}),
   clientVersion: VersionCode,
   clientPlatform: PlatformName,
 })

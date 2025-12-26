@@ -5,7 +5,7 @@ import {Array, HashSet, Option, pipe, Schema} from 'effect'
 import {type Atom, atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {myOffersAtom} from '../../marketplace/atoms/myOffers'
 import {ClubWithMembers} from '../domain'
 
@@ -29,7 +29,7 @@ export class UserClubKeypairMissingError extends Schema.TaggedError<UserClubKeyp
   message: Schema.String,
 }) {}
 
-export const clubsWithMembersStorageAtom = atomWithParsedMmkvStorageE(
+export const clubsWithMembersStorageAtom = atomWithParsedMmkvStorage(
   'clubsWithMembers',
   {data: []},
   Schema.Struct({

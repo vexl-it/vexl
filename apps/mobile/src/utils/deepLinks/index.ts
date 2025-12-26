@@ -4,7 +4,6 @@ import * as Linking from 'expo-linking'
 import {atom, useSetAtom, useStore} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Alert} from 'react-native'
-import {z} from 'zod'
 import {showErrorAlert} from '../../components/ErrorAlert'
 import {admitUserToClubActionAtom} from '../../state/clubs/atom/admitUserToClubActionAtom'
 import {submitCodeToJoinClubActionAtom} from '../../state/clubs/atom/submitCodeToJoinClubActionAtom'
@@ -25,13 +24,13 @@ import {
 export const lastInitialLinkStorageAtom = atomWithParsedMmkvStorage(
   'lastInitialLink',
   {lastLinkImported: null},
-  z.object({lastLinkImported: z.string().nullable()}).readonly()
+  Schema.Struct({lastLinkImported: Schema.NullOr(Schema.String)})
 )
 
 export const lastUniversalOrAppLinkStorageAtom = atomWithParsedMmkvStorage(
   'lastUniversalOrAppLink',
   {lastUniversalOrAppLinkImported: null},
-  z.object({lastUniversalOrAppLinkImported: z.string().nullable()}).readonly()
+  Schema.Struct({lastUniversalOrAppLinkImported: Schema.NullOr(Schema.String)})
 )
 
 export class InvalidDeepLinkTypeError extends Schema.TaggedError<InvalidDeepLinkTypeError>(

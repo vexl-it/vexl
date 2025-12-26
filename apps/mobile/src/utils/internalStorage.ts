@@ -1,22 +1,23 @@
 import {PathString} from '@vexl-next/domain/src/utility/PathString.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import * as FileSystem from 'expo-file-system'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import urlJoin from 'url-join'
-import {safeParse} from './fpUtils'
 
 export interface FileSystemError {
   _tag: 'fileSystemError'
   error: unknown
 }
 function documentDirectoryOrLeft(): E.Either<FileSystemError, string> {
-  const parseResult = UriString.safeParse(FileSystem.Paths.document.uri)
-  if (parseResult.success) {
-    return E.right(parseResult.data)
+  const parseResult = Schema.decodeUnknownOption(UriString)(
+    FileSystem.Paths.document.uri
+  )
+  if (Option.isSome(parseResult)) {
+    return E.right(parseResult.value)
   }
   return E.left({
     _tag: 'fileSystemError',
@@ -54,7 +55,7 @@ function filenameOrLeft(
   return pipe(
     splitPath.at(-1),
     E.right,
-    E.chainW(safeParse(PathString)),
+    E.chainW(Schema.decodeUnknownEither(PathString)),
     E.mapLeft((e) => ({_tag: 'fileSystemError', error: e}))
   )
 }
@@ -71,7 +72,7 @@ export function copyFileToNewPath({
     E.map((documentDirectory) =>
       FileSystem.Paths.join(documentDirectory, localDirectoryFilePath)
     ),
-    E.chainW(safeParse(UriString)),
+    E.chainW(Schema.decodeUnknownEither(UriString)),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
       effectToTaskEither(copyFileE({from: sourceUri, to: fullPathToNewFile}))
@@ -80,7 +81,7 @@ export function copyFileToNewPath({
       if (e._tag === 'ParseError') {
         return {
           _tag: 'fileSystemError',
-          error: e.error,
+          error: e.cause,
         }
       }
       return e
@@ -98,7 +99,7 @@ export function copyFileLocalDirectoryAndKeepName({
   return pipe(
     filenameOrLeft(sourceUri),
     E.map((fileName) => urlJoin(targetFolder, fileName)),
-    E.chainW(safeParse(PathString)),
+    E.chainW(Schema.decodeUnknownEither(PathString)),
     TE.fromEither,
     TE.chainW((fullPathToNewFile) =>
       copyFileToNewPath({sourceUri, localDirectoryFilePath: fullPathToNewFile})
@@ -107,7 +108,7 @@ export function copyFileLocalDirectoryAndKeepName({
       if (e._tag === 'ParseError') {
         return {
           _tag: 'fileSystemError',
-          error: e.error,
+          error: e.cause,
         }
       }
       return e

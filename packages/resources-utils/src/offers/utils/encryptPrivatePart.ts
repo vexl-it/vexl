@@ -1,5 +1,5 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
-import {PrivatePayloadEncryptedE} from '@vexl-next/domain/src/general/offers'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PrivatePayloadEncrypted} from '@vexl-next/domain/src/general/offers'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Effect, Schema} from 'effect'
 import {eciesEncryptE} from '../../utils/crypto'
@@ -11,7 +11,7 @@ export class PrivatePartEncryptionError extends Schema.TaggedError<PrivatePartEn
 )('PrivatePartEncryptionError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: PublicKeyPemBase64E,
+  toPublicKey: PublicKeyPemBase64,
 }) {}
 
 export function encryptPrivatePart(
@@ -25,7 +25,7 @@ export function encryptPrivatePart(
     const encrypted = yield* _(
       eciesEncryptE(privatePart.toPublicKey)(privatePartsStringified),
       Effect.map((json) => `0${json}`),
-      Effect.flatMap(Schema.decode(PrivatePayloadEncryptedE))
+      Effect.flatMap(Schema.decode(PrivatePayloadEncrypted))
     )
 
     return {

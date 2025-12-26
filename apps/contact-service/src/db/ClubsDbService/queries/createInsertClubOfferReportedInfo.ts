@@ -1,12 +1,12 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {ClubUuidE, OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid, OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 
 export const InsertClubOfferReportedInfoRequest = Schema.Struct({
   offerId: OfferIdHashed,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   reportedAt: Schema.DateFromSelf,
 })
 

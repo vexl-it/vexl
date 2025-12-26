@@ -1,7 +1,7 @@
 import { type ActionFunction } from "@remix-run/node";
 import { Form, Link, json, useActionData, useParams } from "@remix-run/react";
 import { type PrivateKeyHolder } from "@vexl-next/cryptography/src/KeyHolder";
-import { PublicKeyPemBase64E } from "@vexl-next/cryptography/src/KeyHolder/brands";
+import { PublicKeyPemBase64 } from "@vexl-next/cryptography/src/KeyHolder/brands";
 import { EcdsaSignature } from "@vexl-next/generic-utils/src/effect-helpers/crypto";
 import { effectToTaskEither } from "@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter";
 import { Schema } from "effect";
@@ -90,7 +90,7 @@ export const action: ActionFunction = async ({ request }) => {
       parseFormData(
         Schema.Struct({
           signature: EcdsaSignature,
-          pubKey: PublicKeyPemBase64E,
+          pubKey: PublicKeyPemBase64,
         }),
       )(request),
     ),

@@ -1,4 +1,5 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {Option, Schema} from 'effect/index'
 import {useAtom, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {Stack, getTokens} from 'tamagui'
@@ -45,12 +46,14 @@ function EditNameScreen(): React.ReactElement {
         <Stack pb="$3" gap="$2">
           <Button
             onPress={() => {
-              const parsedUserName = UserName.safeParse(name.trim())
-              if (!parsedUserName.success) {
+              const parsedUserName = Schema.decodeUnknownOption(UserName)(
+                name.trim()
+              )
+              if (Option.isNone(parsedUserName)) {
                 void showInvalidUsernameUIFeedback()
                 return
               }
-              setUserName(parsedUserName.data)
+              setUserName(parsedUserName.value)
               safeGoBack()
             }}
             variant="secondary"

@@ -1,8 +1,5 @@
 import {BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
-import {
-  type CurrencyCode,
-  CurrencyCodeE,
-} from '@vexl-next/domain/src/general/currency.brand'
+import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Schema} from 'effect'
@@ -12,7 +9,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../api'
-import {atomWithParsedMmkvStorageE} from '../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 import {currencies} from '../utils/localization/currency'
 import {defaultCurrencyAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
@@ -24,12 +21,12 @@ const FETCH_LIMIT = 10 * 60 * 1000 // 10 minutes
 
 const PriceDataStored = Schema.Struct({
   data: Schema.partial(
-    Schema.Record({key: CurrencyCodeE, value: BtcPriceDataWithState})
+    Schema.Record({key: CurrencyCode, value: BtcPriceDataWithState})
   ),
 })
 type PriceDataStored = typeof PriceDataStored.Type
 
-const btcPriceMmkvAtom = atomWithParsedMmkvStorageE(
+const btcPriceMmkvAtom = atomWithParsedMmkvStorage(
   'brcPrice',
   {data: {} as Record<CurrencyCode, BtcPriceDataWithState>},
   PriceDataStored

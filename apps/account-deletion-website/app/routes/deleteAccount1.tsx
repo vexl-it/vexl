@@ -1,6 +1,6 @@
 import { type ActionFunction } from "@remix-run/node";
 import { Form, redirect, useActionData } from "@remix-run/react";
-import { E164PhoneNumberE } from "@vexl-next/domain/src/general/E164PhoneNumber.brand";
+import { E164PhoneNumber } from "@vexl-next/domain/src/general/E164PhoneNumber.brand";
 import { effectToTaskEither } from "@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter";
 import { Schema } from "effect";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -40,9 +40,7 @@ export const action: ActionFunction = async ({ request }) => {
     TE.Do,
     TE.chainW(() =>
       effectToTaskEither(
-        parseFormData(Schema.Struct({ phoneNumber: E164PhoneNumberE }))(
-          request,
-        ),
+        parseFormData(Schema.Struct({ phoneNumber: E164PhoneNumber }))(request),
       ),
     ),
     TE.chainW(({ phoneNumber }) =>

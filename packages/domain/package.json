@@ -33,8 +33,7 @@
     "js-base64": "^3.7.5",
     "luxon": "^3.3.0",
     "match-sorter": "^6.3.4",
-    "path.join": "^1.0.0",
-    "zod": "^3.22.3"
+    "path.join": "^1.0.0"
   },
   "eslintConfig": {
     "root": true,

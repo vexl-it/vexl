@@ -4,21 +4,20 @@ import {
   PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from "@vexl-next/cryptography/src/KeyHolder";
-import { SemverStringE } from "@vexl-next/domain/src/utility/SmeverString.brand";
+import { SemverString } from "@vexl-next/domain/src/utility/SmeverString.brand";
 import { VersionCode } from "@vexl-next/domain/src/utility/VersionCode.brand";
+import { effectToEither } from "@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter";
 import {
   parseJson,
-  safeParse,
   stringifyToJson,
   type JsonParseError,
   type JsonStringifyError,
-  type ZodParseError,
 } from "@vexl-next/resources-utils/src/utils/parsing";
 import { ENV_PRESETS, type EnvPreset } from "@vexl-next/rest-api";
 import { AppSource } from "@vexl-next/rest-api/src/commonHeaders";
 import * as contactsApi from "@vexl-next/rest-api/src/services/contact";
 import * as userApi from "@vexl-next/rest-api/src/services/user";
-import { Effect, Schema } from "effect";
+import { Effect, flow, ParseResult, Schema } from "effect";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
 
@@ -26,7 +25,7 @@ const STORAGE_KEYPAIR_KEY = "keypair";
 
 const apiMeta = {
   clientVersion: Schema.decodeSync(VersionCode)(0),
-  clientSemver: Schema.decodeSync(SemverStringE)("0.0.1"),
+  clientSemver: Schema.decodeSync(SemverString)("0.0.1"),
   platform: "WEB" as const,
   language: "en",
   isDeveloper: false,
@@ -46,7 +45,7 @@ interface ErrorGettingKeypair {
 export function getKeypair(): E.Either<
   | ErrorGettingKeypair
   | NoKeypairStored
-  | ZodParseError<PrivateKeyHolder>
+  | ParseResult.ParseError
   | JsonParseError,
   PrivateKeyHolder
 > {
@@ -57,7 +56,7 @@ export function getKeypair(): E.Either<
     ),
     E.chainW(E.fromNullable({ _tag: "NoKeypairStored" } as const)),
     E.chainW(parseJson),
-    E.chainW(safeParse(PrivateKeyHolder)),
+    E.chainW(flow(Schema.decodeUnknown(PrivateKeyHolder), effectToEither)),
   );
 }
 

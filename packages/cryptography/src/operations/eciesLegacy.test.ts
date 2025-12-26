@@ -1,3 +1,4 @@
+import {Schema} from 'effect/index'
 import {
   PublicKeyPemBase64,
   generatePrivateKey,
@@ -9,7 +10,7 @@ import {eciesLegacyDecrypt, eciesLegacyEncrypt} from './eciesLegacy'
 
 it('Should decrypt message as expected', async () => {
   const privateKey = importPrivateKey({
-    privateKeyPemBase64: PrivateKeyPemBase64.parse(
+    privateKeyPemBase64: Schema.decodeSync(PrivateKeyPemBase64)(
       'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1IZ0NBUUF3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0VFWVRCZkFnRUJCQnhJWTl5Q3prMU4vWXU3UFZlbVJWc1QKTStCYjFMODRWbDNUZ2QvMm9Ud0RPZ0FFWUFxNWc5RGxBZ1VSWHUvc3JKQnByRWNnYlp3cDBJL2xudjgvR2NQNApGeU92YkorQXZ1RzZjL1pXR0lldUVSVXpKVlZIZzVyVjRRND0KLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLQo='
     ),
   })
@@ -45,7 +46,7 @@ it('Should encrypt and decrypt message', async () => {
 })
 
 it('Should encrypt message with specific secp256k1 key', async () => {
-  const key = PublicKeyPemBase64.parse(
+  const key = Schema.decodeSync(PublicKeyPemBase64)(
     'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVJRFlZd0gyalBNaUhTTGxoeUJYTFcxOUE1bkZVOXBWZAorVDF6M1d4STFrUnA1RGt6UFV5YnVVck9Nd1E1dG1OejVEZzc0LzZrd3Q0YUJBN2QwbThtYUE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K'
   )
   const message = 'some message'
@@ -55,7 +56,7 @@ it('Should encrypt message with specific secp256k1 key', async () => {
 })
 
 it('Should encrypt and decrypt message with secp256k1 key', async () => {
-  const key = generatePrivateKey(Curve.parse('secp256k1'))
+  const key = generatePrivateKey(Schema.decodeSync(Curve)('secp256k1'))
   const message = 'some message'
 
   const cipher = await eciesLegacyEncrypt({

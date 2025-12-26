@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
 import {KeyHolder} from '@vexl-next/cryptography'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {Schema} from 'effect/index'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -72,16 +73,16 @@ function reportError(error: Error, extra: Record<string, unknown>): void {
 // -------------- end of duplicated code
 
 const dummyPrivKey = KeyHolder.generatePrivateKey()
-export const dummySession: Session = Session.parse({
+export const dummySession: Session = Schema.decodeSync(Session)({
   privateKey: dummyPrivKey,
   sessionCredentials: {
     hash: '',
     publicKey: dummyPrivKey.publicKeyPemBase64,
     signature: 'dummysign',
   },
-  phoneNumber: E164PhoneNumber.parse('+420733733733'),
+  phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
   version: 0,
-})
+} satisfies Session)
 
 type SessionAtomValueType =
   | {readonly state: 'initial'}

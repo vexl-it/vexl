@@ -1,6 +1,6 @@
 import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
@@ -21,7 +21,7 @@ import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEn
 
 const ADMIN_TOKEN = 'dev'
 const CLUB_VALID_UNTIL = new Date(Date.now() + 1000 * 60 * 60)
-const SOME_URL = Schema.decodeSync(UriStringE)('https://some.url')
+const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 let user1: MockedUser
 let user2: MockedUser
 

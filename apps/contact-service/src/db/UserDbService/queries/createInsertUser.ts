@@ -1,9 +1,9 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
@@ -12,10 +12,10 @@ import {ServerHashedNumber} from '../../../utils/serverHashContact'
 import {UserRecord} from '../domain'
 
 export const CreateUserParams = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   hash: ServerHashedNumber,
-  firebaseToken: Schema.optionalWith(FcmTokenE, {as: 'Option'}),
-  expoToken: Schema.optionalWith(ExpoNotificationTokenE, {as: 'Option'}),
+  firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option'}),
+  expoToken: Schema.optionalWith(ExpoNotificationToken, {as: 'Option'}),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
   platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
   appSource: Schema.optionalWith(AppSource, {as: 'Option'}),

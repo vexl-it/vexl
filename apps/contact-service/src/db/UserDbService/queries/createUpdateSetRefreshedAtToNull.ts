@@ -1,14 +1,11 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Effect, flow, Schema} from 'effect'
 
-const UpdateSetRefreshedAtParams = Schema.Union(
-  ExpoNotificationTokenE,
-  FcmTokenE
-)
+const UpdateSetRefreshedAtParams = Schema.Union(ExpoNotificationToken, FcmToken)
 
 export type UpdateSetRefreshedAtParams = typeof UpdateSetRefreshedAtParams.Type
 

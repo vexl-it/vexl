@@ -2,7 +2,7 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
@@ -55,7 +55,7 @@ beforeAll(async () => {
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
@@ -97,7 +97,7 @@ beforeAll(async () => {
 
       const request2: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
@@ -135,7 +135,7 @@ beforeAll(async () => {
 
       const request3: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer3payloadPrivate' as PrivatePayloadEncrypted,
@@ -836,7 +836,7 @@ describe('Get removed club offers', () => {
 
         const request: CreateNewOfferRequest = {
           adminId: generateAdminId(),
-          countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+          countryPrefix: Schema.decodeSync(CountryPrefix)(420),
           offerPrivateList: [
             {
               payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,

@@ -1,9 +1,9 @@
 import {Feedback} from '@vexl-next/domain/src/general/feedback'
 import {ChatId} from '@vexl-next/domain/src/general/messaging'
+import {Schema} from 'effect/index'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type SetStateAction} from 'react'
-import {z} from 'zod'
 import {generateInitialFeedback} from '../../components/UserFeedback/atoms'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
@@ -13,7 +13,7 @@ export const newOfferFeedbackDoneStorageAtom = atomWithParsedMmkvStorage(
   {
     newOfferFeedbackDone: false,
   },
-  z.object({newOfferFeedbackDone: z.boolean().default(false)}).readonly()
+  Schema.Struct({newOfferFeedbackDone: Schema.Boolean})
 )
 
 export const newOfferFeedbackDoneAtom = focusAtom(
@@ -24,7 +24,7 @@ export const newOfferFeedbackDoneAtom = focusAtom(
 export const feedbacksForClosedChatsStorageAtom = atomWithParsedMmkvStorage(
   'chatClosedFeedbacksAtom',
   {feedbacks: {}},
-  z.object({feedbacks: z.record(ChatId, Feedback)}).readonly()
+  Schema.Struct({feedbacks: Schema.Record({key: ChatId, value: Feedback})})
 )
 
 export const feedbacksForClosedChatsAtom = focusAtom(

@@ -1,6 +1,7 @@
 import {animated, useTransition} from '@react-spring/native'
 import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import {Schema} from 'effect/index'
 import React, {useMemo, useState} from 'react'
 import {Stack, Text, styled} from 'tamagui'
 import {type LoginStackScreenProps} from '../../../../navigationTypes'
@@ -39,7 +40,7 @@ function AnonymizationAnimationScreen({
 
   const anonymizedUserData = useMemo<RealLifeInfo>(
     () =>
-      RealLifeInfo.parse({
+      Schema.decodeSync(RealLifeInfo)({
         image: fromSvgString(getAvatarSvg({avatarIndex: randomNumber(0, 3)})),
         userName: randomName(),
       }),

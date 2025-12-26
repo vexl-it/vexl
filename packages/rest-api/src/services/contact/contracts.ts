@@ -1,19 +1,19 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   ClubAdmitionRequest,
   ClubCode,
   ClubInfo,
   ClubInfoForUser,
   ClubLinkInfo,
-  ClubUuidE,
+  ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
-import {ConnectionLevelE, OfferIdE} from '@vexl-next/domain/src/general/offers'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
@@ -45,9 +45,9 @@ export class NotPermittedToSendMessageToTargetInboxError extends Schema.TaggedEr
   }),
 }) {}
 
-export class ForbiddenMessageTypeError extends Schema.TaggedError<ForbiddenMessageTypeError>(
-  'ForbiddenMessageTypeError'
-)('ForbiddenMessageTypeError', {
+export class ForbiddenMessageTyperror extends Schema.TaggedError<ForbiddenMessageTyperror>(
+  'ForbiddenMessageTyperror'
+)('ForbiddenMessageTyperror', {
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
@@ -64,7 +64,7 @@ export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportCo
 }) {}
 
 const CommonConnectionsForUserFromApi = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   common: Schema.Struct({
     hashes: Schema.Array(ServerToClientHashedNumber),
   }),
@@ -80,8 +80,8 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
 }) {}
 
 export const CreateUserRequest = Schema.Struct({
-  firebaseToken: Schema.NullOr(FcmTokenE),
-  expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationTokenE), {
+  firebaseToken: Schema.NullOr(FcmToken),
+  expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationToken), {
     default: () => null,
   }),
 })
@@ -89,25 +89,25 @@ export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
 export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
-  countryPrefix: Schema.optionalWith(CountryPrefixE, {
+  countryPrefix: Schema.optionalWith(CountryPrefix, {
     as: 'Option',
   }),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
 
 export const UpdateFirebaseTokenRequest = Schema.Struct({
-  firebaseToken: Schema.NullOr(FcmTokenE),
+  firebaseToken: Schema.NullOr(FcmToken),
 })
 export type UpdateFirebaseTokenRequest = typeof UpdateFirebaseTokenRequest.Type
 
 export const UpdateNotificationTokenRequest = Schema.Struct({
-  expoToken: Schema.NullOr(ExpoNotificationTokenE),
+  expoToken: Schema.NullOr(ExpoNotificationToken),
 })
 export type UpdateNotificationTokenRequest =
   typeof UpdateNotificationTokenRequest.Type
 
 export const ImportContactsRequest = Schema.Struct({
-  contacts: Schema.Array(HashedPhoneNumberE),
+  contacts: Schema.Array(HashedPhoneNumber),
   replace: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
 export type ImportContactsRequest = typeof ImportContactsRequest.Type
@@ -116,7 +116,7 @@ export const ImportContactsResponse = Schema.Struct({
   imported: Schema.Boolean,
   phoneNumberHashesToServerToClientHash: Schema.Array(
     Schema.Struct({
-      hashedNumber: HashedPhoneNumberE,
+      hashedNumber: HashedPhoneNumber,
       serverToClientHash: ServerToClientHashedNumber,
     })
   ),
@@ -127,7 +127,7 @@ export type ImportContactsResponse = typeof ImportContactsResponse.Type
 
 export const FetchMyContactsRequest = Schema.Struct({
   ...PageRequest.fields,
-  level: ConnectionLevelE,
+  level: ConnectionLevel,
 })
 export type FetchMyContactsRequest = typeof FetchMyContactsRequest.Type
 
@@ -135,7 +135,7 @@ export const FetchMyContactsResponse = Schema.Struct({
   ...PageResponse.fields,
   items: Schema.Array(
     Schema.Struct({
-      publicKey: PublicKeyPemBase64E,
+      publicKey: PublicKeyPemBase64,
     })
   ),
 })
@@ -143,19 +143,19 @@ export type FetchMyContactsResponse = typeof FetchMyContactsResponse.Type
 
 export const FetchMyContactsPaginatedRequest = Schema.Struct({
   ...PageRequestMeta.fields,
-  level: ConnectionLevelE.pipe(Schema.pickLiteral('FIRST', 'SECOND')),
+  level: ConnectionLevel.pipe(Schema.pickLiteral('FIRST', 'SECOND')),
 })
 
 export type FetchMyContactsPaginatedRequest =
   typeof FetchMyContactsPaginatedRequest.Type
 
 export const FetchMyContactsPaginatedResponse =
-  createPageResponse(PublicKeyPemBase64E)
+  createPageResponse(PublicKeyPemBase64)
 export type FetchMyContactsPaginatedResponse =
   typeof FetchMyContactsPaginatedResponse.Type
 
 export const FetchCommonConnectionsRequest = Schema.Struct({
-  publicKeys: Schema.Array(PublicKeyPemBase64E),
+  publicKeys: Schema.Array(PublicKeyPemBase64),
 })
 export type FetchCommonConnectionsRequest =
   typeof FetchCommonConnectionsRequest.Type
@@ -168,7 +168,7 @@ export type FetchCommonConnectionsResponse =
 
 export const FetchCommonConnectionsPaginatedRequest = Schema.Struct({
   ...PageRequestMeta.fields,
-  publicKeys: Schema.Array(PublicKeyPemBase64E),
+  publicKeys: Schema.Array(PublicKeyPemBase64),
 })
 export type FetchCommonConnectionsPaginatedRequest =
   typeof FetchCommonConnectionsPaginatedRequest.Type
@@ -192,7 +192,7 @@ export type UserExistsResponse = Schema.Schema.Type<typeof UserExistsResponse>
 export const HashDataWithValidation = Schema.Struct({})
 
 export const HashWithSignature = Schema.Struct({
-  hash: HashedPhoneNumberE,
+  hash: HashedPhoneNumber,
   signature: EcdsaSignature,
 })
 
@@ -210,7 +210,7 @@ export class UnableToVerifySignatureError extends Schema.TaggedError<UnableToVer
 ) {}
 
 export const UpdateBadOwnerHashRequest = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   oldData: HashWithSignature,
   newData: HashWithSignature,
   removePreviousUser: Schema.optionalWith(Schema.Boolean, {
@@ -262,13 +262,13 @@ export const CreateClubResponse = Schema.Struct({
 export type CreateClubResponse = Schema.Schema.Type<typeof CreateClubResponse>
 
 export const GenerateInviteLinkForAdminRequest = Schema.Struct({
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
 })
 export type GenerateInviteLinkForAdminRequest =
   typeof GenerateInviteLinkForAdminRequest.Type
 
 export const GenerateInviteLinkForAdminResponse = Schema.Struct({
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   link: ClubLinkInfo,
 })
 export type GenerateInviteLinkForAdminResponse =
@@ -322,7 +322,7 @@ export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyIn
 
 export const GetClubInfoRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  notificationToken: Schema.optionalWith(ExpoNotificationTokenE, {
+  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
   }),
 })
@@ -336,7 +336,7 @@ export const GetClubInfoResponse = Schema.Struct({
 export const JoinClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   code: ClubCode,
-  notificationToken: Schema.optionalWith(ExpoNotificationTokenE, {
+  notificationToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
   }),
   contactsImported: Schema.Boolean,
@@ -350,7 +350,7 @@ export type JoinClubResponse = typeof JoinClubResponse.Type
 
 export const LeaveClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
 })
 export type LeaveClubRequest = typeof LeaveClubRequest.Type
 
@@ -362,13 +362,13 @@ export class UserIsNotModeratorError extends Schema.TaggedError<UserIsNotModerat
 
 export const GenerateClubJoinLinkRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
 })
 export type GenerateClubJoinLinkRequest =
   typeof GenerateClubJoinLinkRequest.Type
 
 export const GenerateClubJoinLinkResponse = Schema.Struct({
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   codeInfo: ClubLinkInfo,
 })
 
@@ -383,12 +383,12 @@ export class InviteCodeNotFoundError extends Schema.TaggedError<InviteCodeNotFou
 
 export const DeactivateClubJoinLinkRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   code: ClubCode,
 })
 
 export const DeactivateClubJoinLinkResponse = Schema.Struct({
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   deactivatedCode: ClubCode,
 })
 export type DeactivateClubJoinLinkResponse =
@@ -399,7 +399,7 @@ export type DeactivateClubJoinLinkRequest =
 
 export const AddUserToTheClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   adminitionRequest: ClubAdmitionRequest,
 })
 export type AddUserToTheClubRequest = typeof AddUserToTheClubRequest.Type
@@ -411,25 +411,25 @@ export type AddUserToTheClubResponse = typeof AddUserToTheClubResponse.Type
 
 export const ListClubLinksRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
 })
 export type ListClubLinksRequest = typeof ListClubLinksRequest.Type
 
 export const ListClubLinksResponse = Schema.Struct({
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   links: Schema.Array(ClubLinkInfo),
 })
 export type ListClubLinksResponse = typeof ListClubLinksResponse.Type
 export const GetClubContactsRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
 })
 
 export type GetClubContactsRequest = typeof GetClubContactsRequest.Type
 
 export const GetClubContactsResponse = Schema.Struct({
-  clubUuid: ClubUuidE,
-  items: Schema.Array(PublicKeyPemBase64E),
+  clubUuid: ClubUuid,
+  items: Schema.Array(PublicKeyPemBase64),
 })
 
 export type GetClubContactsResponse = typeof GetClubContactsResponse.Type
@@ -454,8 +454,8 @@ export class ReportClubLimitReachedError extends Schema.TaggedError<ReportClubLi
 }) {}
 
 export const ReportClubRequest = Schema.Struct({
-  offerId: OfferIdE,
-  clubUuid: ClubUuidE,
+  offerId: OfferId,
+  clubUuid: ClubUuid,
   ...RequestBaseWithChallenge.fields,
 })
 export type ReportClubRequest = Schema.Schema.Type<typeof ReportClubRequest>
@@ -522,7 +522,7 @@ export type EraseUserFromNetworkResponse =
   typeof EraseUserFromNetworkResponse.Type
 
 export const ConvertPhoneNumberHashesToServerHashesRequest = Schema.Struct({
-  hashedPhoneNumbers: Schema.Array(HashedPhoneNumberE),
+  hashedPhoneNumbers: Schema.Array(HashedPhoneNumber),
 })
 export type ConvertPhoneNumberHashesToServerHashesRequest =
   typeof ConvertPhoneNumberHashesToServerHashesRequest.Type
@@ -530,7 +530,7 @@ export type ConvertPhoneNumberHashesToServerHashesRequest =
 export const ConvertPhoneNumberHashesToServerHashesResponse = Schema.Struct({
   result: Schema.Array(
     Schema.Struct({
-      hashedNumber: HashedPhoneNumberE,
+      hashedNumber: HashedPhoneNumber,
       serverToClientHash: ServerToClientHashedNumber,
     })
   ),

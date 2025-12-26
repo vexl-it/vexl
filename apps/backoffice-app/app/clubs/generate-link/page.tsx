@@ -3,11 +3,7 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
-import {
-  ClubUuidE,
-  type ClubInfo,
-  type ClubUuid,
-} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Schema} from 'effect'
 import {useRouter} from 'next/navigation'
 import {QRCodeSVG} from 'qrcode.react'
@@ -176,7 +172,7 @@ export default function GenerateLinkPage() {
                   value={selectedClubUuid}
                   onChange={(e) => {
                     setSelectedClubUuid(
-                      Schema.decodeSync(ClubUuidE)(e.target.value)
+                      Schema.decodeSync(ClubUuid)(e.target.value)
                     )
                     setGeneratedLink(null)
                     setCopiedCode(false)

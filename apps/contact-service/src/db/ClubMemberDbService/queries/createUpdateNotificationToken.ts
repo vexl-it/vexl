@@ -1,16 +1,16 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Effect, flow, Schema} from 'effect'
 import {ClubRecordId} from '../../ClubsDbService/domain'
 import {ClubMemberRecord} from '../domain'
 
 export const UpdateNotificationTokenParams = Schema.Struct({
   id: ClubRecordId,
-  publicKey: PublicKeyPemBase64E,
-  notificationToken: Schema.NullOr(ExpoNotificationTokenE),
+  publicKey: PublicKeyPemBase64,
+  notificationToken: Schema.NullOr(ExpoNotificationToken),
 })
 export type UpdateNotificationTokenParams =
   typeof UpdateNotificationTokenParams.Type

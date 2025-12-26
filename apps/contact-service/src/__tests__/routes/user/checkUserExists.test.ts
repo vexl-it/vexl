@@ -4,15 +4,15 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {sendNotificationsMock} from '../../utils/mockedExpoNotificationService'
 import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
 
 const keys = generatePrivateKey()
-const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
+const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -34,7 +34,7 @@ beforeAll(async () => {
         app.User.createUser({
           payload: {
             firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationTokenE)(
+            expoToken: Schema.decodeSync(ExpoNotificationToken)(
               'notificationToken'
             ),
           },
@@ -54,7 +54,7 @@ describe('Check user exists', () => {
         const keys = generatePrivateKey()
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333334'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333334'),
             publicKey: keys.publicKeyPemBase64,
           })
         )
@@ -144,7 +144,7 @@ describe('Check user exist notification', () => {
         const keys = generatePrivateKey()
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333334'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333334'),
             publicKey: keys.publicKeyPemBase64,
           })
         )

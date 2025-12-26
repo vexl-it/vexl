@@ -1,18 +1,14 @@
 import {
   generateChatMessageId,
   type ChatMessage,
-  type ChatMessagePayload,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendLeaveChat from '@vexl-next/resources-utils/src/chat/sendLeaveChat'
 import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sendMessage'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {
-  type JsonStringifyError,
-  type ZodParseError,
-} from '@vexl-next/resources-utils/src/utils/parsing'
-import {flow, pipe, type Effect} from 'effect'
+import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
+import {flow, pipe, type Effect, type ParseResult} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
@@ -40,7 +36,7 @@ export default function deleteChatActionAtom(
             | 'NotPermittedToSendMessageToTargetInboxError'
         }
       >
-    | ZodParseError<ChatMessagePayload>
+    | ParseResult.ParseError
     | JsonStringifyError,
     ChatMessageWithState
   >

@@ -1,10 +1,7 @@
 import {SqlClient, SqlResolver} from '@effect/sql'
-import {
-  PublicKeyPemBase64E,
-  type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Context, Effect, flow, Layer, Schema} from 'effect'
 
 const UserRecordId = Schema.String.pipe(Schema.brand('UserRecordId'))
@@ -12,13 +9,13 @@ export type UserRecordId = Schema.Schema.Type<typeof UserRecordId>
 
 export class UserRecord extends Schema.TaggedClass<UserRecord>()('UserRecord', {
   id: UserRecordId,
-  publicKey: PublicKeyPemBase64E,
-  countryPrefix: Schema.optional(CountryPrefixE),
+  publicKey: PublicKeyPemBase64,
+  countryPrefix: Schema.optional(CountryPrefix),
 }) {}
 
 export const UserInsert = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
-  countryPrefix: Schema.optional(CountryPrefixE),
+  publicKey: PublicKeyPemBase64,
+  countryPrefix: Schema.optional(CountryPrefix),
 })
 export type UserInsert = Schema.Schema.Type<typeof UserInsert>
 
@@ -51,7 +48,7 @@ export class LoggedInUsersDbService extends Context.Tag(
 
       const deleteUserResolver = yield* _(
         SqlResolver.void('deleteUser', {
-          Request: PublicKeyPemBase64E,
+          Request: PublicKeyPemBase64,
           execute: (requests) => {
             return sql`
               DELETE FROM users

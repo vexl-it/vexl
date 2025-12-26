@@ -4,6 +4,7 @@ import {
   type TradePriceType,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Schema} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
@@ -60,7 +61,7 @@ export const btcPriceCurrencyAtom = atom(
     get(tradeOrOriginOfferCurrencyAtom) ??
     'USD',
   (get, set, currency: CurrencyCode) => {
-    set(selectedCurrencyCodeAtom, CurrencyCode.parse(currency))
+    set(selectedCurrencyCodeAtom, Schema.decodeSync(CurrencyCode)(currency))
     void set(refreshCurrentBtcPriceActionAtom)()
   }
 )

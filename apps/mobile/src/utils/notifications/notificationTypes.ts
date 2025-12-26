@@ -1,6 +1,6 @@
-import {z} from 'zod'
+import {Schema} from 'effect/index'
 
-export const ChatNotificationType = z.enum([
+export const ChatNotificationType = Schema.Literal(
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -16,9 +16,9 @@ export const ChatNotificationType = z.enum([
   'DISAPPROVE_CONTACT_REVEAL',
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
-  'MESSAGE_READ',
-])
-export type ChatNotificationType = z.TypeOf<typeof ChatNotificationType>
+  'MESSAGE_READ'
+)
+export type ChatNotificationType = typeof ChatNotificationType.Type
 
 export const CHAT_NOTIFICATION_TYPE = {
   MESSAGE: 'MESSAGE',

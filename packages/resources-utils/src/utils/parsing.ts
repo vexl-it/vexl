@@ -1,33 +1,6 @@
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
-import {Effect} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
-import {flow} from 'fp-ts/function'
-import {type ZodError, type infer as ZodInfer, type ZodType} from 'zod'
-
-export interface ZodParseError<T> extends BasicError<'ZodParseError'> {
-  zodError: ZodError<T>
-  originalData: unknown
-}
-
-export function safeParse<T extends ZodType>(
-  zodType: T
-): (a: unknown) => E.Either<ZodParseError<ZodInfer<T>>, ZodInfer<T>> {
-  return flow(
-    E.of,
-    E.chainW((v) => {
-      const result = zodType.safeParse(v)
-      if (!result.success) {
-        return E.left<ZodParseError<T>>({
-          _tag: 'ZodParseError',
-          error: new Error(result.error.message),
-          zodError: result.error,
-          originalData: JSON.stringify(v),
-        })
-      }
-      return E.right(result.data)
-    })
-  )
-}
 
 export type JsonParseError = BasicError<'JsonParseError'>
 
@@ -35,21 +8,19 @@ export function parseJson(json: string): E.Either<JsonParseError, any> {
   return E.tryCatch(() => JSON.parse(json), toError('JsonParseError'))
 }
 
-export type JsonStringifyError = BasicError<'JsonStringifyError'>
+export class JsonStringifyError extends Schema.TaggedError<JsonStringifyError>(
+  'JsonStringifyError'
+)('JsonStringifyError', {
+  cause: Schema.Unknown,
+}) {}
 
 export function stringifyToJson(
   data: unknown
-): E.Either<JsonStringifyError, string> {
-  return E.tryCatch(() => JSON.stringify(data), toError('JsonStringifyError'))
-}
-
-export function stringifyToPrettyJson(
-  data: unknown
-): E.Either<JsonStringifyError, string> {
-  return E.tryCatch(
-    () => JSON.stringify(data, null, 2),
-    toError('JsonStringifyError')
-  )
+): Either.Either<string, JsonStringifyError> {
+  return Either.try({
+    try: () => JSON.stringify(data),
+    catch: (e) => new JsonStringifyError({cause: e}),
+  })
 }
 
 export function stringifyE(
@@ -58,6 +29,6 @@ export function stringifyE(
 ): Effect.Effect<string, JsonStringifyError> {
   return Effect.try({
     try: () => (pretty ? JSON.stringify(data, null, 2) : JSON.stringify(data)),
-    catch: toError('JsonStringifyError'),
+    catch: (e) => new JsonStringifyError({cause: e}),
   })
 }

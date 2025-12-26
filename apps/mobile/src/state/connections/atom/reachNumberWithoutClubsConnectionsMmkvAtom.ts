@@ -1,7 +1,7 @@
 import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {importedContactsCountAtom} from '../../contacts/atom/contactsStore'
 import {fistAndSecondLevelConnectionsReachAtom} from './connectionStateAtom'
 
@@ -15,7 +15,7 @@ type PersistentDataAboutReachAndImportedContacts =
   typeof PersistentDataAboutReachAndImportedContacts.Type
 
 const persistentDataAboutReachAndImportedContactsMmkvAtom =
-  atomWithParsedMmkvStorageE(
+  atomWithParsedMmkvStorage(
     'persistedDataAboutReachAndImportedContacts',
     {data: {reach: 0, numberOfImportedContacts: 0}},
     PersistentDataAboutReachAndImportedContacts

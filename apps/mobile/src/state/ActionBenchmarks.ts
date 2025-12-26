@@ -1,16 +1,16 @@
 import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Effect, Option, Record, Schema} from 'effect/index'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, getDefaultStore} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {atomWithParsedMmkvStorageE} from '../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const BenchmarkRecord = Schema.Struct({
-  startedAt: UnixMillisecondsE,
-  endedAt: UnixMillisecondsE,
+  startedAt: UnixMilliseconds,
+  endedAt: UnixMilliseconds,
   description: Schema.optional(Schema.String),
 })
 const BenchmarkStorage = Schema.Struct({
@@ -21,7 +21,7 @@ const BenchmarkStorage = Schema.Struct({
   }),
 })
 
-const storageAtom = atomWithParsedMmkvStorageE(
+const storageAtom = atomWithParsedMmkvStorage(
   'actionsBenchmarks',
   {benchmarks: {}, enabled: false},
   BenchmarkStorage

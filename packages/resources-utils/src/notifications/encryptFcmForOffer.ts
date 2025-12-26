@@ -2,7 +2,7 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {FcmCypher} from '@vexl-next/domain/src/general/notifications'
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {type Effect} from 'effect'
+import {Schema, type Effect} from 'effect'
 import * as TE from 'fp-ts/lib/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
 import {effectToTaskEither} from '../effect-helpers/TaskEitherConverter'
@@ -36,6 +36,6 @@ export function encryptFcmForOffer({
     fcmToken,
     eciesEncrypt(publicKey),
     // Should not fail
-    TE.map((cypher) => FcmCypher.parse(`${publicKey}.${cypher}`))
+    TE.map((cypher) => Schema.decodeSync(FcmCypher)(`${publicKey}.${cypher}`))
   )
 }

@@ -1,13 +1,13 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const FindCommonFriendsPaginatedParams = Schema.Struct({
   ownerHash: ServerHashedNumber,
-  publicKeys: Schema.Array(PublicKeyPemBase64E),
+  publicKeys: Schema.Array(PublicKeyPemBase64),
   userContactId: Schema.Int,
   limit: Schema.Int,
 })
@@ -15,7 +15,7 @@ export type FindCommonFriendsPaginatedParams =
   typeof FindCommonFriendsPaginatedParams.Type
 
 export const FindCommonFriendsPaginatedResult = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   commonFriends: Schema.Array(ServerHashedNumber),
   userContactId: Schema.NumberFromString,
 })

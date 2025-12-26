@@ -8,7 +8,7 @@ import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
-import {Effect} from 'effect/index'
+import {Effect, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
@@ -30,7 +30,7 @@ function createUpdateNoticeChatMessage({
     uuid: generateChatMessageId(),
     text: `I have updated to ${version}`,
     messageType: 'VERSION_UPDATE',
-    minimalRequiredVersion: SemverString.parse('1.13.1'),
+    minimalRequiredVersion: Schema.decodeSync(SemverString)('1.13.1'),
     lastReceivedVersion: chat.otherSideVersion,
     time: now(),
     myVersion: version,

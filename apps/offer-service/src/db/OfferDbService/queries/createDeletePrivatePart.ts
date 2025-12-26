@@ -1,12 +1,12 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {PublicPartId} from '../domain'
 
 export const DeletePrivatePartRequest = Schema.Struct({
-  forPublicKey: PublicKeyPemBase64E,
+  forPublicKey: PublicKeyPemBase64,
   offerId: PublicPartId,
 })
 export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type

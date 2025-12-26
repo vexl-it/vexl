@@ -7,7 +7,7 @@ import {focusAtom} from 'jotai-optics'
 import {Platform} from 'react-native'
 import {areNotificationsEnabledE} from '.'
 import {apiAtom} from '../../api'
-import {atomWithParsedMmkvStorageE} from '../atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {reportErrorE} from '../reportError'
 
 const SystemNotificationId = Schema.String.pipe(
@@ -15,7 +15,7 @@ const SystemNotificationId = Schema.String.pipe(
 )
 type SystemNotificationId = typeof SystemNotificationId.Type
 
-const alreadyReportedNotificationsIdsStorageAtom = atomWithParsedMmkvStorageE(
+const alreadyReportedNotificationsIdsStorageAtom = atomWithParsedMmkvStorage(
   'alreadyReportedNotificationsIds',
   {alreadyReportedIds: []},
   Schema.Struct({

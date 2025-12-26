@@ -1,7 +1,6 @@
 import {
   UnixMilliseconds,
   UnixMilliseconds0,
-  UnixMillisecondsE,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {useAtom} from 'jotai'
@@ -16,7 +15,7 @@ function TimeToSelectableCell({
   label: string | undefined
   value: UnixMilliseconds | undefined
 }): React.ReactElement {
-  const timestamp = Schema.decodeSync(UnixMillisecondsE)(
+  const timestamp = Schema.decodeSync(UnixMilliseconds)(
     value ?? UnixMilliseconds0
   )
   const [isSelected, setIsSelected] = useAtom(

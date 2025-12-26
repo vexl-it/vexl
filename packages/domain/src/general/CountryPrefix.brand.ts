@@ -1,19 +1,14 @@
 import {parsePhoneNumber} from 'awesome-phonenumber'
-import {Brand, Effect, Schema} from 'effect'
-import {z} from 'zod'
-import {E164PhoneNumberE, type E164PhoneNumber} from './E164PhoneNumber.brand'
+import {Effect, Schema} from 'effect'
+import {E164PhoneNumber} from './E164PhoneNumber.brand'
 
-export const CountryPrefixE = Schema.Number.pipe(Schema.brand('CountryPrefix'))
-export const CountryPrefix = z
-  .number()
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'CountryPrefix'>>()(v))
-
-export type CountryPrefix = Schema.Schema.Type<typeof CountryPrefixE>
+export const CountryPrefix = Schema.Number.pipe(Schema.brand('CountryPrefix'))
+export type CountryPrefix = Schema.Schema.Type<typeof CountryPrefix>
 
 export class UnknownCountryPrefix extends Schema.TaggedError<UnknownCountryPrefix>(
   'UnknownCountryPrefix'
 )('UnknownCountryPrefix', {
-  number: E164PhoneNumberE,
+  number: E164PhoneNumber,
 }) {}
 export const countryPrefixFromNumber = (
   number: E164PhoneNumber
@@ -22,6 +17,6 @@ export const countryPrefixFromNumber = (
     try: () => parsePhoneNumber(number).countryCode,
     catch: () => new UnknownCountryPrefix({number}),
   }).pipe(
-    Effect.flatMap(Schema.decodeUnknown(CountryPrefixE)),
+    Effect.flatMap(Schema.decodeUnknown(CountryPrefix)),
     Effect.catchAll(() => Effect.fail(new UnknownCountryPrefix({number})))
   )

@@ -3,14 +3,9 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
-import * as E from 'fp-ts/Either'
+import {Either, Option, Schema, type ParseResult} from 'effect/index'
 import {pipe} from 'fp-ts/lib/function'
-import {
-  safeParse,
-  stringifyToJson,
-  type JsonStringifyError,
-  type ZodParseError,
-} from '../../utils/parsing'
+import {stringifyToJson, type JsonStringifyError} from '../../utils/parsing'
 
 function deanonymizedUserToPayload(
   message: ChatMessage
@@ -28,15 +23,15 @@ function deanonymizedUserToPayload(
 
     return pipe(
       message.image?.replace(/data:image\/.*;base64,/, ''),
-      safeParse(Base64String),
-      E.match(
-        () => message.deanonymizedUser,
-        (image) => ({
+      Schema.decodeUnknownOption(Base64String),
+      Option.match({
+        onNone: () => message.deanonymizedUser,
+        onSome: (image) => ({
           name,
           partialPhoneNumber,
           imageBase64: image,
-        })
-      )
+        }),
+      })
     )
   }
 
@@ -45,7 +40,7 @@ function deanonymizedUserToPayload(
 
 export default function serializeChatMessage(
   message: ChatMessage
-): E.Either<JsonStringifyError | ZodParseError<ChatMessagePayload>, string> {
+): Either.Either<string, JsonStringifyError | ParseResult.ParseError> {
   return pipe(
     {
       time: message.time,
@@ -66,7 +61,7 @@ export default function serializeChatMessage(
       commonFriends: message.commonFriends,
       friendLevel: message.friendLevel,
     } satisfies ChatMessagePayload,
-    safeParse(ChatMessagePayload),
-    E.chainW(stringifyToJson)
+    Schema.decodeUnknownEither(ChatMessagePayload),
+    Either.flatMap(stringifyToJson)
   )
 }

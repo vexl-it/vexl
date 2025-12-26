@@ -1,12 +1,12 @@
 import {type SqlError} from '@effect/sql/SqlError'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {Effect, Option, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
 import {type ContactConnectionId} from './ContactConnectionId'
 import {PgContactClient} from './layer'
 
 const PubKeyToConnectionsRow = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   count: Schema.NumberFromString,
 })
 export type PubKeyToConnectionsRow = typeof PubKeyToConnectionsRow.Type

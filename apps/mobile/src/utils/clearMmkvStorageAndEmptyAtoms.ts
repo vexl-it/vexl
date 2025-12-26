@@ -1,5 +1,5 @@
-import {CLEAR_STORAGE_KEY} from './atomUtils/atomWithParsedMmkvStorageE'
-import {storage} from './mmkv/fpMmkv'
+import {CLEAR_STORAGE_KEY} from './atomUtils/atomWithParsedMmkvStorage'
+import {storage} from './mmkv/effectMmkv'
 
 export default function clearMmkvStorageAndEmptyAtoms(): void {
   // set all atoms to defaultValue

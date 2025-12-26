@@ -34,7 +34,7 @@ import {
 import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Array, Effect, Option, pipe, Record} from 'effect'
+import {Array, Effect, Option, pipe, Record, Schema} from 'effect'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {Alert} from 'react-native'
@@ -221,7 +221,7 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
   )
 
   return {
-    offerPublicKey: PublicKeyPemBase64.parse('offerPublicKey'),
+    offerPublicKey: Schema.decodeSync(PublicKeyPemBase64)('offerPublicKey'),
     location: [],
     offerDescription: '',
     amountBottomLimit: 0,
@@ -245,7 +245,7 @@ export function createOfferDummyPublicPart(): OfferPublicPart {
 export const offerFormMolecule = molecule(() => {
   const dummyOffer: OneOfferInState = {
     ownershipInfo: {
-      adminId: OfferAdminId.parse('offerAdminId'),
+      adminId: Schema.decodeSync(OfferAdminId)('offerAdminId'),
       intendedConnectionLevel: 'ALL',
       intendedClubs: [],
     },
@@ -253,20 +253,22 @@ export const offerFormMolecule = molecule(() => {
       reported: false,
     },
     offerInfo: {
-      id: IdNumeric.parse(1),
-      offerId: OfferId.parse(Uuid.parse(generateUuid())),
+      id: Schema.decodeSync(IdNumeric)(1),
+      offerId: Schema.decodeSync(OfferId)(
+        Schema.decodeSync(Uuid)(generateUuid())
+      ),
       privatePart: {
         commonFriends: [
-          HashedPhoneNumber.parse('Mike'),
-          HashedPhoneNumber.parse('John'),
+          Schema.decodeSync(HashedPhoneNumber)('Mike'),
+          Schema.decodeSync(HashedPhoneNumber)('John'),
         ],
         friendLevel: ['FIRST_DEGREE'],
-        symmetricKey: SymmetricKey.parse('symmetricKey'),
+        symmetricKey: Schema.decodeSync(SymmetricKey)('symmetricKey'),
         clubIds: [],
       },
       publicPart: createOfferDummyPublicPart(),
-      createdAt: IsoDatetimeString.parse(MINIMAL_DATE),
-      modifiedAt: IsoDatetimeString.parse(MINIMAL_DATE),
+      createdAt: Schema.decodeSync(IsoDatetimeString)(MINIMAL_DATE),
+      modifiedAt: Schema.decodeSync(IsoDatetimeString)(MINIMAL_DATE),
     },
   }
 

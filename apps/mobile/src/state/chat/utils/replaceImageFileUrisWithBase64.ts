@@ -2,10 +2,7 @@ import ImageResizer from '@bam.tech/react-native-image-resizer'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {type IdentityRevealChatMessage} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  toBasicError,
-  type BasicError,
-} from '@vexl-next/domain/src/utility/errors'
+import {Schema} from 'effect/index'
 import * as FileSystem from 'expo-file-system'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -15,7 +12,11 @@ import joinUrl from 'url-join'
 import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 
-export type ReadingFileError = BasicError<'ReadingFileError'>
+export class ReadingFileError extends Schema.TaggedError<ReadingFileError>(
+  'ReadingFileError'
+)('ReadingFileError', {
+  cause: Schema.Unknown,
+}) {}
 
 function readAsBase64({
   path,
@@ -24,40 +25,46 @@ function readAsBase64({
   imageWidthOrHeightLimit: number
   path: UriString
 }): TE.TaskEither<ReadingFileError, UriString> {
-  return TE.tryCatch(async () => {
-    const cacheDir = FileSystem.Paths.cache
-    if (!cacheDir) throw new Error('No cacheDir')
+  return TE.tryCatch(
+    async () => {
+      const cacheDir = FileSystem.Paths.cache
+      if (!cacheDir) throw new Error('No cacheDir')
 
-    const fromPath = (() => {
-      if (Platform.OS === 'ios') return resolveLocalUri(path)
-      else return path.replace('file://', '')
-    })()
+      const fromPath = (() => {
+        if (Platform.OS === 'ios') return resolveLocalUri(path)
+        else return path.replace('file://', '')
+      })()
 
-    const toPath = (() => {
-      if (Platform.OS === 'ios') return joinUrl(cacheDir.uri)
-      else return joinUrl(cacheDir.uri).replace('file://', '')
-    })()
+      const toPath = (() => {
+        if (Platform.OS === 'ios') return joinUrl(cacheDir.uri)
+        else return joinUrl(cacheDir.uri).replace('file://', '')
+      })()
 
-    const resizeResponse = await ImageResizer.createResizedImage(
-      fromPath,
-      imageWidthOrHeightLimit,
-      imageWidthOrHeightLimit,
-      'JPEG',
-      85,
-      0,
-      toPath,
-      false,
-      {
-        onlyScaleDown: true,
-        mode: 'contain',
-      }
-    )
+      const resizeResponse = await ImageResizer.createResizedImage(
+        fromPath,
+        imageWidthOrHeightLimit,
+        imageWidthOrHeightLimit,
+        'JPEG',
+        85,
+        0,
+        toPath,
+        false,
+        {
+          onlyScaleDown: true,
+          mode: 'contain',
+        }
+      )
 
-    const bytes = new FileSystem.File(
-      `file://${resizeResponse.path}`
-    ).base64Sync()
-    return UriString.parse(`data:image/jpeg;base64,${bytes}`)
-  }, toBasicError('ReadingFileError'))
+      const bytes = new FileSystem.File(
+        `file://${resizeResponse.path}`
+      ).base64Sync()
+      return Schema.decodeSync(UriString)(`data:image/jpeg;base64,${bytes}`)
+    },
+    (e) =>
+      new ReadingFileError({
+        cause: e,
+      })
+  )
 }
 
 function setImage(

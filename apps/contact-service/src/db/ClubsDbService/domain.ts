@@ -1,5 +1,5 @@
-import {ClubUuidE} from '@vexl-next/domain/src/general/clubs'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Schema} from 'effect'
 
 // Club table schema
@@ -8,14 +8,14 @@ export type ClubRecordId = typeof ClubRecordId.Type
 
 export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   id: ClubRecordId,
-  uuid: ClubUuidE,
+  uuid: ClubUuid,
   name: Schema.String,
   description: Schema.optionalWith(Schema.String, {
     as: 'Option',
     nullable: true,
   }),
   membersCountLimit: Schema.Number,
-  clubImageUrl: UriStringE,
+  clubImageUrl: UriString,
   validUntil: Schema.DateFromSelf,
   madeInactiveAt: Schema.optionalWith(Schema.DateFromSelf, {
     as: 'Option',
@@ -36,6 +36,6 @@ export class ClubOfferReporedInfoRecord extends Schema.Class<ClubOfferReporedInf
 )({
   id: ClubOfferReporedInfoRecordId,
   offerId: Schema.String,
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   reportedAt: Schema.DateFromSelf,
 }) {}

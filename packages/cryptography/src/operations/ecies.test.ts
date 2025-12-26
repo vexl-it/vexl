@@ -1,3 +1,4 @@
+import {Schema} from 'effect/index'
 import * as crypto from 'node:crypto'
 import {PrivateKeyPemBase64, generatePrivateKey} from '../KeyHolder'
 import {normalizeCurveName} from '../KeyHolder/Curve.brand'
@@ -26,7 +27,7 @@ describe('ECIES GTM', () => {
   })
 
   it('Should decrypt a static message as expected', async () => {
-    const privateKey2 = PrivateKeyPemBase64.parse(
+    const privateKey2 = Schema.decodeSync(PrivateKeyPemBase64)(
       privateRawToPem(
         Buffer.from('6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg==', 'base64'),
         normalizeCurveName('secp224r1')
@@ -109,7 +110,7 @@ describe('ECIES CTR', () => {
   })
 
   it('Should decrypt a static message as expected', async () => {
-    const privateKey2 = PrivateKeyPemBase64.parse(
+    const privateKey2 = Schema.decodeSync(PrivateKeyPemBase64)(
       privateRawToPem(
         Buffer.from('6HizupRO2bZAhj4UHOB3uQsatrDJll8t1LSnxg==', 'base64'),
         normalizeCurveName('secp224r1')

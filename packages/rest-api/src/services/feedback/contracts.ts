@@ -1,4 +1,4 @@
-import {RegionCodeE} from '@vexl-next/domain/src/utility/RegionCode.brand'
+import {RegionCode} from '@vexl-next/domain/src/utility/RegionCode.brand'
 import {Schema} from 'effect'
 
 export const FeedbackFormId = Schema.NonEmptyString.pipe(
@@ -19,5 +19,5 @@ export class SubmitFeedbackRequest extends Schema.Class<SubmitFeedbackRequest>(
   ),
   objections: Schema.optional(Schema.String),
   textComment: Schema.optional(Schema.String),
-  countryCode: Schema.optional(RegionCodeE),
+  countryCode: Schema.optional(RegionCode),
 }) {}

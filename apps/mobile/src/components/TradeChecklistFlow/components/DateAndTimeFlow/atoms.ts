@@ -1,8 +1,7 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {
   fromDateTime,
-  type UnixMilliseconds,
-  UnixMillisecondsE,
+  UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array as ArrayE, Effect, pipe, Schema} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
@@ -166,12 +165,12 @@ export const addTimeOptionForAvailableDateActionAtom = atom(
       )
       .map((entry) => entry)
 
-    const maxAvailableDateTimeInDay = Schema.decodeSync(UnixMillisecondsE)(
+    const maxAvailableDateTimeInDay = Schema.decodeSync(UnixMilliseconds)(
       Math.max(...availableDateTimesToAddTo)
     )
 
     set(manageAvailableDateTimesActionAtom, {
-      newTimestamp: Schema.decodeSync(UnixMillisecondsE)(
+      newTimestamp: Schema.decodeSync(UnixMilliseconds)(
         DateTime.fromMillis(maxAvailableDateTimeInDay)
           .plus({hour: 1})
           .toMillis()
@@ -234,12 +233,12 @@ export const handleAvailableDaysChangeActionAtom = atom(
       set(removeAvailableDateTimeActionAtom, {timestamp: millis, unit: 'day'})
     } else {
       if (DateTime.now().hasSame(DateTime.fromMillis(millis), 'day')) {
-        const newTimestamp = Schema.decodeSync(UnixMillisecondsE)(
+        const newTimestamp = Schema.decodeSync(UnixMilliseconds)(
           DateTime.now().startOf('hour').plus({hour: 1}).toMillis()
         )
         set(manageAvailableDateTimesActionAtom, {newTimestamp})
       } else {
-        const newTimestamp = Schema.decodeSync(UnixMillisecondsE)(
+        const newTimestamp = Schema.decodeSync(UnixMilliseconds)(
           DateTime.fromMillis(millis).set({hour: 12}).toMillis()
         )
         set(manageAvailableDateTimesActionAtom, {newTimestamp})

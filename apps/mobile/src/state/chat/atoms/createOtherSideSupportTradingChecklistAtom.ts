@@ -3,9 +3,11 @@ import {
   compare,
   SemverString,
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {Schema} from 'effect/index'
 import {atom, type Atom} from 'jotai'
 
-const MINIMAL_VERSION_FOR_TRADING_CHECKLIST = SemverString.parse('1.13.1')
+const MINIMAL_VERSION_FOR_TRADING_CHECKLIST =
+  Schema.decodeSync(SemverString)('1.13.1')
 
 export function createOtherSideSupportsTradingChecklistAtom(
   chatAtom: Atom<Chat>

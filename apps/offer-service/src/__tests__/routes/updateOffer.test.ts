@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
-  PrivatePayloadEncryptedE,
-  PublicPayloadEncryptedE,
+  PrivatePayloadEncrypted,
+  PublicPayloadEncrypted,
   generateAdminId,
   newOfferId,
-  type PrivatePayloadEncrypted,
-  type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {
   DuplicatedPublicKeyError,
@@ -40,7 +38,7 @@ beforeAll(async () => {
 
       const request1: CreateNewOfferRequest = {
         adminId: generateAdminId(),
-        countryPrefix: Schema.decodeSync(CountryPrefixE)(420),
+        countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
             payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
@@ -64,7 +62,7 @@ beforeAll(async () => {
 
       const authHeaders = yield* _(
         createDummyAuthHeadersForUser({
-          phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+          phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
           publicKey: me.publicKeyPemBase64,
         })
       )
@@ -94,7 +92,7 @@ describe('Update offer', () => {
 
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
@@ -108,7 +106,7 @@ describe('Update offer', () => {
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
                 'newPayloadPublic'
               ),
               offerPrivateList: [],
@@ -140,7 +138,7 @@ describe('Update offer', () => {
 
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
@@ -154,20 +152,20 @@ describe('Update offer', () => {
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
                 'newPayloadPublic2'
               ),
               offerPrivateList: [
                 {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: me.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2ForMe'),
                 },
               ],
@@ -214,7 +212,7 @@ describe('Update offer', () => {
 
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
@@ -228,14 +226,14 @@ describe('Update offer', () => {
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
                 'newPayloadPublic2'
               ),
               offerPrivateList: [
                 {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
               ],
@@ -256,7 +254,7 @@ describe('Update offer', () => {
 
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
@@ -270,26 +268,26 @@ describe('Update offer', () => {
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
                 'newPayloadPublic2'
               ),
               offerPrivateList: [
                 {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: me.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
               ],
@@ -310,7 +308,7 @@ describe('Update offer', () => {
 
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
@@ -324,20 +322,20 @@ describe('Update offer', () => {
           client.updateOffer({
             payload: {
               adminId: generateAdminId(),
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
                 'newPayloadPublic2'
               ),
               offerPrivateList: [
                 {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: me.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
-                    PrivatePayloadEncryptedE
+                    PrivatePayloadEncrypted
                   )('newPayloadPrivate2'),
                 },
               ],
@@ -372,7 +370,7 @@ describe('Update offer', () => {
 
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333333'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
             publicKey: me.publicKeyPemBase64,
           })
         )
@@ -386,7 +384,7 @@ describe('Update offer', () => {
           client.updateOffer({
             payload: {
               adminId: offer1.adminId,
-              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncryptedE)(
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
                 'newPayloadPublic'
               ),
               offerPrivateList: [],

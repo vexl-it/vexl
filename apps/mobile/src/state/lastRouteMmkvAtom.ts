@@ -1,4 +1,4 @@
-import {z} from 'zod'
+import {Schema} from 'effect/index'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
 
 const wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom =
@@ -7,11 +7,9 @@ const wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom =
     {
       value: false,
     },
-    z
-      .object({
-        value: z.boolean().default(false),
-      })
-      .readonly()
+    Schema.Struct({
+      value: Schema.Boolean,
+    })
   )
 
 export default wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom

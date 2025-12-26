@@ -1,7 +1,7 @@
 import {type PgClient} from '@effect/sql-pg'
 import {
-  PrivateKeyPemBase64E,
-  PublicKeyPemBase64E,
+  PrivateKeyPemBase64,
+  PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {Config, ConfigError, Effect, Either, Option, Schema} from 'effect'
 
@@ -49,7 +49,7 @@ export const databaseConfig = Config.unwrap({
 
 export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
   Config.mapOrFail((v) =>
-    Either.mapLeft(Schema.decodeEither(PublicKeyPemBase64E)(v), (e) =>
+    Either.mapLeft(Schema.decodeEither(PublicKeyPemBase64)(v), (e) =>
       ConfigError.InvalidData(['SECRET_PUBLIC_KEY'], e.message)
     )
   )
@@ -57,7 +57,7 @@ export const secretPublicKey = Config.string('SECRET_PUBLIC_KEY').pipe(
 
 export const secretPrivateKey = Config.string('SECRET_PRIVATE_KEY').pipe(
   Config.mapOrFail((v) =>
-    Either.mapLeft(Schema.decodeEither(PrivateKeyPemBase64E)(v), (e) =>
+    Either.mapLeft(Schema.decodeEither(PrivateKeyPemBase64)(v), (e) =>
       ConfigError.InvalidData(['SECRET_PRIVATE_KEY'], e.message)
     )
   )

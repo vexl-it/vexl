@@ -4,9 +4,9 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -15,7 +15,7 @@ import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectError
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 
 const keys = generatePrivateKey()
-const phoneNumber = Schema.decodeSync(E164PhoneNumberE)('+420733333333')
+const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
 
 const commonHeaders = Schema.decodeSync(CommonHeaders)({
   'user-agent': 'Vexl/1 (1.0.0) ANDROID',
@@ -47,7 +47,7 @@ beforeAll(async () => {
         app.User.createUser({
           payload: {
             firebaseToken: null,
-            expoToken: Schema.decodeSync(ExpoNotificationTokenE)('someToken'),
+            expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
           },
           headers: commonAndSecurityHeaders,
         })
@@ -97,9 +97,7 @@ describe('Refresh user', () => {
           app.User.refreshUser({
             payload: {
               offersAlive: true,
-              countryPrefix: Option.some(
-                Schema.decodeSync(CountryPrefixE)(420)
-              ),
+              countryPrefix: Option.some(Schema.decodeSync(CountryPrefix)(420)),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -125,7 +123,7 @@ describe('Refresh user', () => {
       Effect.gen(function* (_) {
         const authHeaders = yield* _(
           createDummyAuthHeadersForUser({
-            phoneNumber: Schema.decodeSync(E164PhoneNumberE)('+420733333334'),
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333334'),
             publicKey: generatePrivateKey().publicKeyPemBase64,
           })
         )

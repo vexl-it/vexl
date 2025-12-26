@@ -3,11 +3,11 @@ import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
-import {atomWithParsedMmkvStorageE} from '../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 import {MyDonation} from './domain'
 
-const myDonationsStorageAtom = atomWithParsedMmkvStorageE(
+const myDonationsStorageAtom = atomWithParsedMmkvStorage(
   'myDonations',
   {data: [], state: 'loaded'},
   Schema.Struct({

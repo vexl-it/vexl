@@ -1,17 +1,14 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {
-  LocationStateE,
-  OfferInfoE,
-  OfferLocationE,
-  OfferPrivatePartE,
-  OfferPublicPartE,
-  type OfferInfo,
-  type OfferPrivatePart,
-  type OfferPublicPart,
+  LocationState,
+  OfferInfo,
+  OfferLocation,
+  OfferPrivatePart,
+  OfferPublicPart,
 } from '@vexl-next/domain/src/general/offers'
 import {
   compare,
-  SemverStringE,
+  SemverString,
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
@@ -43,9 +40,9 @@ function decryptedPayloadsToOffer({
   serverOffer: ServerOffer
   privatePayload: OfferPrivatePart
   publicPayload: OfferPublicPart
-}): Effect.Effect<Either.Either<OfferInfoE, ParseError>> {
+}): Effect.Effect<Either.Either<OfferInfo, ParseError>> {
   return pipe(
-    Schema.decode(OfferInfoE)({
+    Schema.decode(OfferInfo)({
       id: serverOffer.id,
       offerId: serverOffer.offerId,
       privatePart: privatePayload,
@@ -58,20 +55,20 @@ function decryptedPayloadsToOffer({
 }
 
 const OfferPublicPartIncludingLegacyPropsToDecrypt = Schema.Struct({
-  ...OfferPublicPartE.fields,
+  ...OfferPublicPart.fields,
   active: BooleanFromString,
   location: Schema.Unknown,
-  locationV2: Schema.Array(OfferLocationE),
-  locationState: LocationStateE,
-  locationStateV2: Schema.Array(LocationStateE),
+  locationV2: Schema.Array(OfferLocation),
+  locationState: LocationState,
+  locationStateV2: Schema.Array(LocationState),
 })
 
 const OfferPublicPayloadUnion = Schema.Union(
   OfferPublicPartIncludingLegacyPropsToDecrypt,
-  OfferPublicPartE
+  OfferPublicPart
 )
 
-const firstSupportedSemverString = Schema.decodeSync(SemverStringE)('1.16.0')
+const firstSupportedSemverString = Schema.decodeSync(SemverString)('1.16.0')
 const ensureOfferFromSupportedClient = (
   offerStrign: string
 ): Effect.Effect<void, NonCompatibleOfferVersionError> =>
@@ -80,7 +77,7 @@ const ensureOfferFromSupportedClient = (
     Schema.decodeUnknown(
       Schema.parseJson(
         Schema.Struct({
-          authorClientVersion: SemverStringE,
+          authorClientVersion: SemverString,
         })
       )
     ),
@@ -127,7 +124,7 @@ export default function decryptOffer(
         Effect.succeed(serverOffer.privatePayload.substring(1)),
         Effect.flatMap(eciesDecryptE(privateKey.privateKeyPemBase64)),
         Effect.flatMap(
-          Schema.decodeUnknown(Schema.parseJson(OfferPrivatePartE))
+          Schema.decodeUnknown(Schema.parseJson(OfferPrivatePart))
         ),
         Effect.either
       )

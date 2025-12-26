@@ -1,5 +1,5 @@
 import {SqlClient, SqlError} from '@effect/sql'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {Array, Effect, Schema} from 'effect'
 
 export default Effect.gen(function* (_) {
@@ -15,7 +15,7 @@ export default Effect.gen(function* (_) {
     `,
     Effect.flatMap(
       Schema.decodeUnknown(
-        Schema.Array(Schema.Struct({hashesToRemove: HashedPhoneNumberE}))
+        Schema.Array(Schema.Struct({hashesToRemove: HashedPhoneNumber}))
       )
     ),
     Effect.map(Array.map((one) => one.hashesToRemove)),

@@ -10,13 +10,12 @@ import {
   hashMD5,
   type CryptoError,
 } from '@vexl-next/resources-utils/src/utils/crypto'
-import {Effect, Schema, type Either} from 'effect'
+import {Effect, Option, Schema, type Either} from 'effect'
 import {Directory, File, Paths} from 'expo-file-system'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {safeParse} from '../../../utils/fpUtils'
 import {IMAGES_DIRECTORY} from '../../../utils/fsDirectories'
 import reportError from '../../../utils/reportError'
 import {type ChatMessageWithState} from '../domain'
@@ -55,10 +54,10 @@ function documentDirectoryOrLeft(): E.Either<
   NoDocumentDirectoryError,
   UriString
 > {
-  const parseResult = UriString.safeParse(Paths.document.uri)
+  const parseResult = Schema.decodeUnknownOption(UriString)(Paths.document.uri)
 
-  if (parseResult.success) {
-    return E.right(parseResult.data)
+  if (Option.isSome(parseResult)) {
+    return E.right(parseResult.value)
   }
 
   return E.left({
@@ -135,7 +134,7 @@ function saveBase64ImageToStorage(
     E.bindW('filePath', ({directoryPath, fileName}) => {
       return pipe(
         E.right(Paths.join(directoryPath, fileName)),
-        E.chainW(safeParse(UriString)),
+        E.chainW(Schema.decodeUnknownEither(UriString)),
         E.mapLeft(toBasicError('BadFileName'))
       )
     }),

@@ -1,5 +1,5 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Challenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {Effect, Schema, flow} from 'effect'
@@ -8,7 +8,7 @@ import {ChallengeRecord} from '../domain'
 
 export const FindChallengeByChallengeAndPublicKey = Schema.Struct({
   challenge: Challenge,
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
 })
 export type FindChallengeByChallengeAndPublicKey =
   typeof FindChallengeByChallengeAndPublicKey.Type

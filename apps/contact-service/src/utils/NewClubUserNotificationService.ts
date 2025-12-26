@@ -1,11 +1,8 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {ClubUuidE, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {NewClubConnectionNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {
-  ExpoNotificationTokenE,
-  type ExpoNotificationToken,
-} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {
   Array,
@@ -26,8 +23,8 @@ import {type ExpoNotificationsService} from './expoNotifications/ExpoNotificatio
 
 export const NEW_CLUB_USER_NOTIFICATIONS_KEY = 'NewClubUserNotifications'
 export const ClubNotificationRecord = Schema.Struct({
-  clubUuid: ClubUuidE,
-  token: ExpoNotificationTokenE,
+  clubUuid: ClubUuid,
+  token: ExpoNotificationToken,
 })
 type ClubNotificationRecord = typeof ClubNotificationRecord.Type
 

@@ -1,4 +1,4 @@
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   statusTypeToStatusMap,
   type InvoiceId,
@@ -31,8 +31,8 @@ export const dummyDonation: MyDonation = {
   fiatAmount: '0',
   btcAmount: '0',
   currency: 'EUR',
-  createdTime: Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis()),
-  expirationTime: Schema.decodeSync(UnixMillisecondsE)(
+  createdTime: Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis()),
+  expirationTime: Schema.decodeSync(UnixMilliseconds)(
     DateTime.now().toMillis()
   ),
 }

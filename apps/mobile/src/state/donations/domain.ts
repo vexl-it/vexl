@@ -1,4 +1,4 @@
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   InvoiceId,
   InvoicePaymentMethod,
@@ -18,7 +18,7 @@ export const MyDonation = Schema.Struct({
   fiatAmount: Schema.String,
   btcAmount: Schema.String,
   currency: Schema.Literal('EUR'),
-  createdTime: UnixMillisecondsE,
-  expirationTime: UnixMillisecondsE,
+  createdTime: UnixMilliseconds,
+  expirationTime: UnixMilliseconds,
 })
 export type MyDonation = typeof MyDonation.Type

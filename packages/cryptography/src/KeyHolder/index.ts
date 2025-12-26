@@ -1,12 +1,10 @@
+import {Schema} from 'effect/index'
 import {getCrypto} from '../getCrypto'
 import {defaultCurve, type Curve} from './Curve.brand'
 import {
   PrivateKeyHolder,
-  PrivateKeyHolderE,
   PrivateKeyPemBase64,
-  PrivateKeyPemBase64E,
   PublicKeyPemBase64,
-  PublicKeyPemBase64E,
 } from './brands'
 import {
   privateRawToPem,
@@ -45,7 +43,7 @@ function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
   const privateKeyPem = privateRawToPem(ecdh.getPrivateKey(), curve)
   const publicKeyPem = publicRawToPem(ecdh.getPublicKey(), curve)
 
-  return PrivateKeyHolder.parse({
+  return Schema.decodeSync(PrivateKeyHolder)({
     publicKeyPemBase64: publicKeyPem.toString('base64'),
     privateKeyPemBase64: privateKeyPem.toString('base64'),
   })
@@ -55,9 +53,6 @@ export {
   generatePrivateKey,
   importPrivateKey,
   PrivateKeyHolder,
-  PrivateKeyHolderE,
   PrivateKeyPemBase64,
-  PrivateKeyPemBase64E,
   PublicKeyPemBase64,
-  PublicKeyPemBase64E,
 }

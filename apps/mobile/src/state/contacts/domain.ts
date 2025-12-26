@@ -1,11 +1,11 @@
 import {ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {
-  E164PhoneNumberE,
+  E164PhoneNumber,
   E164PhoneNumberUnsafe,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {HashedPhoneNumberE} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Schema} from 'effect'
 
 export const NonUniqueContactIdE = Schema.String.pipe(
@@ -26,27 +26,26 @@ export const ContactInfoE = Schema.Struct({
 })
 export type ContactInfo = typeof ContactInfoE.Type
 
-export const ContactComputedValuesE = Schema.Struct({
+export const ContactComputedValues = Schema.Struct({
   normalizedNumber: E164PhoneNumberUnsafe,
-  hash: HashedPhoneNumberE,
+  hash: HashedPhoneNumber,
 })
-export type ContactComputedValues = typeof ContactComputedValuesE.Type
-
-export const ContactFlagsE = Schema.Struct({
+export type ContactComputedValues = typeof ContactComputedValues.Type
+export const ContactFlags = Schema.Struct({
   seen: Schema.Boolean,
   imported: Schema.Boolean,
   importedManually: Schema.Boolean,
   invalidNumber: Schema.Literal('notTriedYet', 'valid', 'invalid'),
 })
-export type ContactFlags = typeof ContactFlagsE.Type
+export type ContactFlags = typeof ContactFlags.Type
 
-export const StoredContactE = Schema.Struct({
+export const StoredContact = Schema.Struct({
   info: ContactInfoE,
-  computedValues: Schema.optionalWith(ContactComputedValuesE, {as: 'Option'}),
+  computedValues: Schema.optionalWith(ContactComputedValues, {as: 'Option'}),
   serverHashToClient: Schema.optionalWith(ServerToClientHashedNumber, {
     as: 'Option',
   }),
-  flags: Schema.optionalWith(ContactFlagsE, {
+  flags: Schema.optionalWith(ContactFlags, {
     default: () => ({
       seen: false,
       imported: false,
@@ -55,15 +54,15 @@ export const StoredContactE = Schema.Struct({
     }),
   }),
 })
-export type StoredContact = typeof StoredContactE.Type
+export type StoredContact = typeof StoredContact.Type
 
-export const StoredContactWithComputedValuesE = Schema.Struct({
+export const StoredContactWithComputedValues = Schema.Struct({
   info: ContactInfoE,
-  computedValues: ContactComputedValuesE,
+  computedValues: ContactComputedValues,
   serverHashToClient: Schema.optionalWith(ServerToClientHashedNumber, {
     as: 'Option',
   }),
-  flags: Schema.optionalWith(ContactFlagsE, {
+  flags: Schema.optionalWith(ContactFlags, {
     default: () => ({
       seen: false,
       imported: false,
@@ -73,7 +72,7 @@ export const StoredContactWithComputedValuesE = Schema.Struct({
   }),
 })
 export type StoredContactWithComputedValues =
-  typeof StoredContactWithComputedValuesE.Type
+  typeof StoredContactWithComputedValues.Type
 
 export type StoredContactWithoutComputedValues = StoredContact & {
   computedValues: undefined
@@ -82,8 +81,8 @@ export type StoredContactWithoutComputedValues = StoredContact & {
 export const ImportContactFromLinkPayloadE = Schema.Struct({
   name: Schema.String,
   label: Schema.String,
-  numberToDisplay: E164PhoneNumberE,
-  imageUri: Schema.optional(UriStringE),
+  numberToDisplay: E164PhoneNumber,
+  imageUri: Schema.optional(UriString),
 })
 export type ImportContactFromLinkPayload =
   typeof ImportContactFromLinkPayloadE.Type

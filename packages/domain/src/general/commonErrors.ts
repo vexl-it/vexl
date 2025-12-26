@@ -1,5 +1,5 @@
 import {Effect, Schema} from 'effect'
-import {UnixMillisecondsE} from '../utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '../utility/UnixMilliseconds.brand'
 
 export class NotFoundError extends Schema.TaggedError<NotFoundError>(
   'NotFoundError'
@@ -61,7 +61,7 @@ export class RateLimitedError extends Schema.TaggedError<RateLimitedError>(
   'RateLimitedError'
 )('RateLimitedError', {
   retryAfterMs: Schema.Number,
-  rateLimitResetAtMs: UnixMillisecondsE,
+  rateLimitResetAtMs: UnixMilliseconds,
   status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 

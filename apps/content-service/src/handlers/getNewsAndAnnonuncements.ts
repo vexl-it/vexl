@@ -1,5 +1,5 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -80,7 +80,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
   ({headers}) =>
     Effect.gen(function* (_) {
       // const vexlBotNewsForBlog1: VexlBotNews = {
-      //   id: Schema.decodeSync(UuidE)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
+      //   id: Schema.decodeSync(Uuid)('085f7bbe-f142-4e71-8b80-eb9b9107ddef'),
       //   type: 'info',
       //   content:
       //     'Borders are drawn with numbers now.\nThis week, we dive into how control is coded into your currency. ➡️',
@@ -96,7 +96,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
       // }
 
       // const vexlBotNewsForBlog1: VexlBotNews = {
-      //   id: Schema.decodeSync(UuidE)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
+      //   id: Schema.decodeSync(Uuid)('5785f0ed-6451-412a-b5e2-3f5b186e3d00'),
       //   type: 'info',
       //   content:
       //     'This week, we dive into how due process was quietly deleted from the financial system. ➡️',
@@ -112,7 +112,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
       // }
 
       // const vexlBotNewsForBlog2: VexlBotNews = {
-      //   id: Schema.decodeSync(UuidE)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
+      //   id: Schema.decodeSync(Uuid)('f4e4161b-04e1-4a0c-8d07-e42d11daa2cf'),
       //   type: 'info',
       //   content:
       //     'This week, we dive into how money became a tool to silence dissent.\nCensorship doesn’t need a courtroom—just a bank account. ➡️',
@@ -128,7 +128,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
       // }
 
       // const vexlBotNewsForBlog3: VexlBotNews = {
-      //   id: Schema.decodeSync(UuidE)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
+      //   id: Schema.decodeSync(Uuid)('e1f4dabd-f989-4aaa-8c84-1739c83b0ee7'),
       //   type: 'info',
       //   content:
       //     'From permissionless to permissioned. This week we dive into how fast “your money” becomes theirs. ➡️',
@@ -150,9 +150,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
             action: Option.none(),
             cancelable: false,
             cancelForever: false,
-            id: Schema.decodeSync(UuidE)(
-              'e2334f43-b925-40ec-9a17-bf5302f0fd0d'
-            ),
+            id: Schema.decodeSync(Uuid)('e2334f43-b925-40ec-9a17-bf5302f0fd0d'),
             type: 'YELLOW',
             title: 'Maintenance Mode',
             description:
@@ -174,9 +172,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
             action: Option.none(),
             cancelable: false,
             cancelForever: false,
-            id: Schema.decodeSync(UuidE)(
-              '61362ca8-6ee2-4044-996f-cff885f8ae19'
-            ),
+            id: Schema.decodeSync(Uuid)('61362ca8-6ee2-4044-996f-cff885f8ae19'),
             type: 'RED',
             title: 'Update Required',
             description:

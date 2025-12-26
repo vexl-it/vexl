@@ -8,10 +8,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import truncate from 'just-truncate'
 import {eciesDecrypt, eciesEncrypt} from '../../utils/crypto'
-import {
-  type ErrorDecryptingMessage,
-  type ErrorEncryptingMessage,
-} from './chatCrypto'
+import {ErrorEncryptingMessage, type ErrorDecryptingMessage} from './chatCrypto'
 
 export function messagePreviewToNetwork(
   publicKey: PublicKeyPemBase64
@@ -23,7 +20,7 @@ export function messagePreviewToNetwork(
     return pipe(
       TE.right(truncate(message.text, 250)),
       TE.chainW(eciesEncrypt(publicKey)),
-      TE.mapLeft(toError('ErrorEncryptingMessage'))
+      TE.mapLeft((e) => new ErrorEncryptingMessage({cause: e}))
     )
   }
 }

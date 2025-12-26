@@ -1,5 +1,5 @@
 import notifee, {AndroidImportance} from '@notifee/react-native'
-import {ClubUuidE, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import {ClubUuid, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Effect, Schema} from 'effect'
 import {type TFunction} from '../localization/I18nProvider'
 import {getDefaultChannel} from './notificationChannels'
@@ -7,7 +7,7 @@ import {getDefaultChannel} from './notificationChannels'
 export class ClubAdmissionInternalNotificationData extends Schema.TaggedClass<ClubAdmissionInternalNotificationData>(
   'ClubAdmissionInternalNotificationData'
 )('ClubAdmissionInternalNotificationData', {
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
 }) {
   get encoded(): typeof ClubAdmissionInternalNotificationData.Encoded {
     return Schema.encodeSync(ClubAdmissionInternalNotificationData)(this)

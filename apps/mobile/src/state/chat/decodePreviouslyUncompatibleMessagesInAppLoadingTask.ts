@@ -1,4 +1,4 @@
-import {ChatMessagePayloadE} from '@vexl-next/domain/src/general/messaging'
+import {ChatMessagePayload} from '@vexl-next/domain/src/general/messaging'
 import {compare} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {chatMessagePayloadToChatMessage} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
@@ -43,7 +43,7 @@ export const decodePreviouslyUncompatibleMessagesInAppLoadingTaskId =
               Array.map((message) =>
                 pipe(
                   message.messageParsed,
-                  Schema.decodeUnknownOption(ChatMessagePayloadE),
+                  Schema.decodeUnknownOption(ChatMessagePayload),
                   Option.map(
                     chatMessagePayloadToChatMessage(message.senderPublicKey)
                   ),

@@ -1,3 +1,4 @@
+import {Schema} from 'effect/index'
 import {getCrypto} from '../getCrypto'
 import {normalizeCurveName, type Curve} from './Curve.brand'
 import ECConverter from './ECConverter'
@@ -49,7 +50,7 @@ export function publicPemFromPrivatePem(
 ): PublicKeyPemBase64 {
   const {publicKey: publicKeyRaw, curve} = privatePemToRaw(privateKey)
 
-  return PublicKeyPemBase64.parse(
+  return Schema.decodeSync(PublicKeyPemBase64)(
     publicRawToPem(publicKeyRaw, curve).toString('base64')
   )
 }

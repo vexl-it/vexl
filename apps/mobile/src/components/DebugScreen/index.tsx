@@ -2,7 +2,7 @@ import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
@@ -41,7 +41,7 @@ import offerToConnectionsAtom, {
   updateAndReencryptAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
-import {StoredContactE} from '../../state/contacts/domain'
+import {StoredContact} from '../../state/contacts/domain'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
@@ -90,7 +90,6 @@ import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
 import Preferences from './components/Preferences'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
-import MmkvAtomTest from './components/mmkvAtomTest'
 import {
   generateTestContacts,
   NUMBER_OF_TEST_CONTACTS,
@@ -742,7 +741,7 @@ function DebugScreen(): React.ReactElement {
               text="Simulate reach drop to 0"
               onPress={() => {
                 setConnectionsState({
-                  lastUpdate: Schema.decodeSync(UnixMillisecondsE)(
+                  lastUpdate: Schema.decodeSync(UnixMilliseconds)(
                     DateTime.now().toMillis()
                   ),
                   firstLevel: [],
@@ -800,7 +799,7 @@ function DebugScreen(): React.ReactElement {
                   const result = pipe(
                     contacts,
                     Schema.decodeSync(
-                      Schema.parseJson(Schema.Array(StoredContactE))
+                      Schema.parseJson(Schema.Array(StoredContact))
                     )
                   )
 
@@ -825,7 +824,6 @@ function DebugScreen(): React.ReactElement {
           <SimulateMissingOfferInbox />
           <Preferences />
           <AfterInteractionTaskDemo />
-          <MmkvAtomTest />
         </ScrollView>
         <Button variant="secondary" text="back" onPress={safeGoBack} />
       </WhiteContainer>

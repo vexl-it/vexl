@@ -1,17 +1,17 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
 
 export const UpdateRefreshUserParams = Schema.Struct({
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   hash: ServerHashedNumber,
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
-  countryPrefix: Schema.optionalWith(CountryPrefixE, {as: 'Option'}),
+  countryPrefix: Schema.optionalWith(CountryPrefix, {as: 'Option'}),
   appSource: Schema.optionalWith(Schema.String, {as: 'Option'}),
   refreshedAt: Schema.Date,
 })

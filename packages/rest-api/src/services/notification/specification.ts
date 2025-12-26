@@ -9,7 +9,7 @@ import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   GetPublicKeyResponse,
   InvalidFcmCypherError,
-  InvalidNotificationCypherError,
+  InvalidNotificationCypherrror,
   IssueNotificationRequest,
   IssueNotificationResponse,
   IssueStreamOnlyMessageRequest,
@@ -25,7 +25,7 @@ export const IssueNotificationEndpoint = HttpApiEndpoint.post(
   .addSuccess(IssueNotificationResponse)
   .addError(InvalidFcmCypherError, {status: 400})
   .addError(SendingNotificationError, {status: 400})
-  .addError(InvalidNotificationCypherError, {status: 400})
+  .addError(InvalidNotificationCypherrror, {status: 400})
   .annotate(MaxExpectedDailyCall, 5000)
 
 export const IssueStreamOnlyMessageEndpoint = HttpApiEndpoint.post(

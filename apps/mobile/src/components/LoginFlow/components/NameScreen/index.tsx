@@ -1,4 +1,5 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {Option, Schema} from 'effect/index'
 import React, {useState} from 'react'
 import {Alert} from 'react-native'
 import {Stack, Text} from 'tamagui'
@@ -48,12 +49,12 @@ function NameScreen({navigation}: Props): React.ReactElement {
       <NextButtonProxy
         disabled={!value.trim()}
         onPress={() => {
-          const validation = UserName.safeParse(value.trim())
-          if (!validation.success) {
+          const validation = Schema.decodeUnknownOption(UserName)(value.trim())
+          if (Option.isNone(validation)) {
             Alert.alert(t('loginFlow.name.nameValidationError'))
             return
           }
-          navigation.navigate('Photo', {userName: validation.data})
+          navigation.navigate('Photo', {userName: validation.value})
         }}
         text={t('common.save')}
       />

@@ -1,6 +1,6 @@
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
-import {generateUuid, UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, Option, Schema} from 'effect/index'
@@ -86,7 +86,7 @@ const processChatNotificationProcessed = (
         count: 1,
         notificationType: 'Chat',
         type: 'BackgroundMessageReceived',
-        uuid: Schema.decodeSync(UuidE)(notificationTrackingId),
+        uuid: Schema.decodeSync(Uuid)(notificationTrackingId),
         ...(Option.isSome(notificationsEnabled)
           ? {
               notificationsEnabled: notificationsEnabled.value.notifications,

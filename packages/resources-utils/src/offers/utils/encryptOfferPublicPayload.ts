@@ -1,11 +1,9 @@
 import {
-  LocationStateToArrayE,
-  OfferLocationE,
-  OfferPublicPartE,
-  PublicPayloadEncryptedE,
+  LocationStateToArray,
+  OfferLocation,
+  OfferPublicPart,
+  PublicPayloadEncrypted,
   type LocationState,
-  type OfferPublicPart,
-  type PublicPayloadEncrypted,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
 import {type BasicError} from '@vexl-next/domain/src/utility/errors'
@@ -44,12 +42,12 @@ export class PublicPartEncryptionError extends Schema.TaggedError<PublicPartEncr
 export type ErrorEncryptingPublicPart = BasicError<'ErrorEncryptingPublicPart'>
 
 const OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Struct({
-  ...OfferPublicPartE.fields,
+  ...OfferPublicPart.fields,
   active: Schema.Literal('true', 'false'),
   location: Schema.Array(Schema.String),
-  locationV2: Schema.Array(OfferLocationE),
+  locationV2: Schema.Array(OfferLocation),
   locationState: Schema.String,
-  locationStateV2: LocationStateToArrayE,
+  locationStateV2: LocationStateToArray,
 })
 
 type OfferPublicPartIncludingLegacyPropsToEncrypt = Schema.Schema.Type<
@@ -99,7 +97,7 @@ export default function encryptOfferPublicPayload({
     ),
     Effect.flatMap(aesGCMIgnoreTagEncrypt(symmetricKey)),
     Effect.map((encrypted) => `0${encrypted}`),
-    Effect.map(flow(Schema.decode(PublicPayloadEncryptedE), Effect.runSync)),
+    Effect.map(flow(Schema.decode(PublicPayloadEncrypted), Effect.runSync)),
     Effect.mapError(
       (e) => new PublicPartEncryptionError({message: e.message, cause: e.cause})
     )

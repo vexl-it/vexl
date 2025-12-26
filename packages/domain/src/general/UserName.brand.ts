@@ -1,15 +1,7 @@
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
+import {Schema} from 'effect'
 
-export const UserName = z
-  .string()
-  .trim()
-  .min(1)
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'UserName'>>()(v))
-
-export const UserNameE = Schema.Trim.pipe(
+export const UserName = Schema.Trim.pipe(
   Schema.minLength(1),
   Schema.brand('UserName')
 )
-
-export type UserName = Schema.Schema.Type<typeof UserNameE>
+export type UserName = typeof UserName.Type

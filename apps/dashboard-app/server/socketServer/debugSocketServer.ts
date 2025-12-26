@@ -1,5 +1,5 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import 'dotenv/config'
 import {
@@ -41,7 +41,7 @@ const generateRandomUser = Effect.gen(function* (_) {
     Random.nextIntBetween(0, dummyPrefixes.length)
   )
   const countryPrefix = yield* _(
-    Schema.decode(CountryPrefixE)(dummyPrefixes[randomPrefixIndex])
+    Schema.decode(CountryPrefix)(dummyPrefixes[randomPrefixIndex])
   )
   const receivedAt = unixMillisecondsNow()
 
@@ -54,7 +54,7 @@ const generateRandomUser = Effect.gen(function* (_) {
 })
 
 const generateDummyCountriesScore = Effect.gen(function* (_) {
-  const decodePrexies = Schema.decode(Schema.Array(CountryPrefixE))
+  const decodePrexies = Schema.decode(Schema.Array(CountryPrefix))
   const prefixes = yield* _(decodePrexies(dummyPrefixes))
   const scores = yield* _(
     Effect.all(prefixes.map(() => Random.nextIntBetween(5000, 500_000)))

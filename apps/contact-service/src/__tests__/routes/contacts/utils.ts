@@ -1,6 +1,6 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
@@ -37,7 +37,7 @@ export const makeTestCommonAndSecurityHeaders = (
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const generateKeysAndHasheForNumber = (numberRaw: string) =>
   Effect.gen(function* (_) {
-    const number = yield* _(Schema.decode(E164PhoneNumberE)(numberRaw))
+    const number = yield* _(Schema.decode(E164PhoneNumber)(numberRaw))
     const hashedNumber = yield* _(hashPhoneNumber(number))
     const keys = generatePrivateKey()
     const authHeaders = yield* _(
@@ -57,7 +57,7 @@ export const generateKeysAndHasheForNumber = (numberRaw: string) =>
       hashedNumber,
       keys,
       authHeaders,
-      notificationToken: Schema.decodeSync(ExpoNotificationTokenE)(
+      notificationToken: Schema.decodeSync(ExpoNotificationToken)(
         `token:${number}`
       ),
       serverHashedNumber,

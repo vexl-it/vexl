@@ -3,7 +3,7 @@ import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   InvalidChallengeError,
   type SignedChallenge,
@@ -20,7 +20,7 @@ import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
 const ADMIN_TOKEN = 'dev'
-const SOME_URL = Schema.decodeSync(UriStringE)('https://some.url')
+const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 
 const userKey = generatePrivateKey()
 

@@ -1,7 +1,7 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {FcmTokenE} from '@vexl-next/domain/src/utility/FcmToken.brand'
+import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Effect, flow} from 'effect'
 
 export const createUpdateInvalidateFirebaseToken = Effect.gen(function* (_) {
@@ -9,7 +9,7 @@ export const createUpdateInvalidateFirebaseToken = Effect.gen(function* (_) {
 
   const resolver = yield* _(
     SqlResolver.void('UpdateInvalidateFirebaseToken', {
-      Request: FcmTokenE,
+      Request: FcmToken,
       execute: (params) => sql`
         UPDATE users
         SET

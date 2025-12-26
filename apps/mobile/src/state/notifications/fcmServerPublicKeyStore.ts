@@ -5,10 +5,9 @@ import {
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, Option} from 'effect/index'
+import {Effect, Option, Schema} from 'effect/index'
 import type * as TO from 'fp-ts/TaskOption'
 import {atom} from 'jotai'
-import {z} from 'zod'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../utils/reportError'
@@ -18,15 +17,13 @@ const FCM_TOKEN_CACHE_MILIS = 1000 * 60 * 60 * 24 // 24h
 export const notificationServerKeyStorageAtom = atomWithParsedMmkvStorage(
   'notificationServerKey',
   {
-    publicKey: undefined,
+    publicKey: Option.none(),
     lastRefresh: UnixMilliseconds0,
   },
-  z
-    .object({
-      publicKey: PublicKeyPemBase64.optional(),
-      lastRefresh: UnixMilliseconds,
-    })
-    .readonly()
+  Schema.Struct({
+    publicKey: Schema.optionalWith(PublicKeyPemBase64, {as: 'Option'}),
+    lastRefresh: UnixMilliseconds,
+  })
 )
 
 export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
@@ -35,8 +32,11 @@ export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
     Effect.gen(function* (_) {
       const {publicKey, lastRefresh} = get(notificationServerKeyStorageAtom)
       // If cache is valid return it
-      if (publicKey && lastRefresh + FCM_TOKEN_CACHE_MILIS > Date.now()) {
-        return Option.some(publicKey)
+      if (
+        Option.isSome(publicKey) &&
+        lastRefresh + FCM_TOKEN_CACHE_MILIS > Date.now()
+      ) {
+        return Option.some(publicKey.value)
       }
 
       // Otherwise fetch a new one
@@ -50,11 +50,11 @@ export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(
               new Error('Erro while refreshing notification server key'),
               {e}
             )
-            return Option.fromNullable(publicKey)
+            return publicKey
           },
           onSuccess: ({publicKey}) => {
             set(notificationServerKeyStorageAtom, {
-              publicKey,
+              publicKey: Option.some(publicKey),
               lastRefresh: unixMillisecondsNow(),
             })
             return Option.some(publicKey)

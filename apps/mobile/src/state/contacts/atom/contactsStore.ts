@@ -1,16 +1,16 @@
-import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
-import {StoredContactE, type StoredContactWithComputedValues} from '../domain'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {StoredContact, type StoredContactWithComputedValues} from '../domain'
 
-export const contactsStoreAtom = atomWithParsedMmkvStorageE(
+export const contactsStoreAtom = atomWithParsedMmkvStorage(
   'storedContacts',
   {contacts: []},
   Schema.Struct({
-    contacts: Schema.Array(StoredContactE).pipe(Schema.mutable),
-    lastImport: Schema.optional(IsoDatetimeStringE),
+    contacts: Schema.Array(StoredContact).pipe(Schema.mutable),
+    lastImport: Schema.optional(IsoDatetimeString),
   })
 )
 

@@ -1,6 +1,6 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
@@ -11,7 +11,7 @@ export const createFindSecondLevelContactsPublicKeysByHashFrom = Effect.gen(
 
     const query = SqlSchema.findAll({
       Request: ServerHashedNumber,
-      Result: Schema.Struct({publicKey: PublicKeyPemBase64E}),
+      Result: Schema.Struct({publicKey: PublicKeyPemBase64}),
       execute: (hash) => sql`
         SELECT DISTINCT
           second_lvl_friend.public_key

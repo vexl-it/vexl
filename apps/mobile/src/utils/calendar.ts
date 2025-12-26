@@ -1,4 +1,5 @@
 import {type CalendarEventId} from '@vexl-next/domain/src/general/messaging'
+import {Option} from 'effect/index'
 import * as Calendar from 'expo-calendar'
 import {
   CalendarAccessLevel,
@@ -75,21 +76,21 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
             color: getTokens().color.main.val,
           } satisfies Partial<ExpoCalendar>
 
-          if (!vexlCalendarId) {
+          if (Option.isNone(vexlCalendarId)) {
             const calendarId = await Calendar.createCalendarAsync(vexlCalendar)
-            set(vexlCalendarIdAtom, calendarId)
+            set(vexlCalendarIdAtom, Option.some(calendarId))
 
             return E.right(calendarId)
           }
 
           const calendars = await Calendar.getCalendarsAsync()
           const calendar = calendars.find(
-            (calendar) => calendar.id === vexlCalendarId
+            (calendar) => calendar.id === vexlCalendarId.value
           )
 
           if (!calendar) {
             const calendarId = await Calendar.createCalendarAsync(vexlCalendar)
-            set(vexlCalendarIdAtom, calendarId)
+            set(vexlCalendarIdAtom, Option.some(calendarId))
 
             return E.right(calendarId)
           }

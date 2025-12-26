@@ -1,3 +1,4 @@
+import {Schema} from 'effect/index'
 import {generatePrivateKey} from '../KeyHolder'
 import {PublicKeyPemBase64} from '../KeyHolder/brands'
 import {stripVersion} from '../versionWrapper'
@@ -24,7 +25,7 @@ it('Should successfully sign message and verify the message is signed', () => {
 })
 
 it('Should successfully verify message that was signed using openssl command', () => {
-  const publicKey = PublicKeyPemBase64.parse(
+  const publicKey = Schema.decodeSync(PublicKeyPemBase64)(
     'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUU0d0VBWUhLb1pJemowQ0FRWUZLNEVFQUNFRE9nQUVSZGtIN1hHM1VRaGZIR1RzQmJ5alVXRmU2SFNycmxZWQpYcm95b0cvdGszMDlxaEprbGtCcGN0eWV2OUJIQUE0VlVPWi9GSytpNzZFPQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0='
   )
 

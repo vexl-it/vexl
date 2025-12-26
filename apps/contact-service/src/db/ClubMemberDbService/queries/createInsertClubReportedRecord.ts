@@ -1,11 +1,11 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 
 export const InsertClubReportedRecordParams = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64E,
+  userPublicKey: PublicKeyPemBase64,
   reportedAt: Schema.DateFromSelf,
 })
 

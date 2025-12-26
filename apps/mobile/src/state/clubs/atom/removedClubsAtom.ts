@@ -1,14 +1,14 @@
 import {ClubInfo, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {ClubDeactivatedNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsFromNow,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Option, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {ClubStats} from '../domain'
 
@@ -16,7 +16,7 @@ const COMPLETELY_REMOVE_CLUB_AFTER_DAYS = 30
 
 const RemovedClubInfo = Schema.Struct({
   clubInfo: ClubInfo,
-  removedAt: UnixMillisecondsE,
+  removedAt: UnixMilliseconds,
   notified: Schema.Boolean,
   reason: Schema.optionalWith(ClubDeactivatedNotificationData.fields.reason, {
     as: 'Option',
@@ -26,7 +26,7 @@ const RemovedClubInfo = Schema.Struct({
 })
 export type RemovedClubInfo = typeof RemovedClubInfo.Type
 
-const removedClubsStorageAtom = atomWithParsedMmkvStorageE(
+const removedClubsStorageAtom = atomWithParsedMmkvStorage(
   'removedClubs',
   {data: []},
   Schema.Struct({

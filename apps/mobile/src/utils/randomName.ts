@@ -1,4 +1,5 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {Schema} from 'effect/index'
 import seed from 'seed-random'
 import {type RandomSeed} from './RandomSeed'
 
@@ -40,5 +41,7 @@ export default function randomName(seedString?: RandomSeed): UserName {
   const lowercase = ['', '', '', '']
     .map(() => sils[Math.floor(getRandom() * (sils.length - 1))])
     .join('')
-  return UserName.parse(lowercase.charAt(0).toUpperCase() + lowercase.slice(1))
+  return Schema.decodeSync(UserName)(
+    lowercase.charAt(0).toUpperCase() + lowercase.slice(1)
+  )
 }

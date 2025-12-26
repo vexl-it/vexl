@@ -1,4 +1,5 @@
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Option, Schema} from 'effect/index'
 import {Paths} from 'expo-file-system'
 import {Platform} from 'react-native'
 
@@ -21,7 +22,7 @@ export default function resolveLocalUri(uri: UriString): UriString {
       Paths.cache.uri ?? ''
     )
 
-  const parsed = UriString.safeParse(replaced)
-  if (!parsed.success) return uri
-  return parsed.data
+  const parsed = Schema.decodeUnknownOption(UriString)(replaced)
+  if (Option.isNone(parsed)) return uri
+  return parsed.value
 }

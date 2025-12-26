@@ -1,4 +1,4 @@
-import {UuidE} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type Job} from 'bullmq'
 import {type ConfigError, Effect, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
@@ -7,7 +7,7 @@ import {serviceNameConfig} from '../commonConfigs'
 export class MetricsMessage extends Schema.Class<MetricsMessage>(
   'MetricsMessage'
 )({
-  uuid: UuidE,
+  uuid: Uuid,
   name: Schema.String,
   value: Schema.optionalWith(Schema.Int, {default: () => 1}),
   timestamp: Schema.optionalWith(Schema.DateFromString, {

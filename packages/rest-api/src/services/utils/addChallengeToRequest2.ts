@@ -2,7 +2,6 @@ import {type HttpApiDecodeError} from '@effect/platform/HttpApiError'
 import {type HttpClientError} from '@effect/platform/index'
 import {
   type PrivateKeyHolder,
-  type PrivateKeyHolderE,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
@@ -61,7 +60,7 @@ function generateChallenge2(createChallengeCall: CreateChallengeCall) {
 
 export function addChallengeToRequest2(
   createChallengeCall: CreateChallengeCall
-): <T extends {keyPair: PrivateKeyHolderE}>(
+): <T extends {keyPair: PrivateKeyHolder}>(
   data: T
 ) => Effect.Effect<
   Omit<T, 'keyPair'> & {

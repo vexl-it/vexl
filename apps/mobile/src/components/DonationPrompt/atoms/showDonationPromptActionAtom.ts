@@ -1,4 +1,4 @@
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
@@ -80,7 +80,7 @@ const showDonationPromptActionAtom = atom(null, (get, set) => {
 
     set(
       lastDisplayOfDonationPromptTimestampAtom,
-      Schema.decodeSync(UnixMillisecondsE)(DateTime.now().toMillis())
+      Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
     )
 
     yield* _(

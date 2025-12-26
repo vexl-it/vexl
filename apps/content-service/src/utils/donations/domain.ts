@@ -1,4 +1,4 @@
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 
 // Vexl will use only few of the fields, if other are needed,
@@ -61,9 +61,9 @@ export const InvoiceResponseInternal = Schema.Struct({
   amount: Schema.String,
   type: Schema.Literal('Standard'),
   checkoutLink: Schema.String,
-  createdTime: UnixMillisecondsE,
-  expirationTime: UnixMillisecondsE,
-  monitoringExpiration: UnixMillisecondsE,
+  createdTime: UnixMilliseconds,
+  expirationTime: UnixMilliseconds,
+  monitoringExpiration: UnixMilliseconds,
   status: Schema.Literal(
     'New',
     'Expired',

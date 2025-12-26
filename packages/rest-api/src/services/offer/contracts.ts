@@ -1,15 +1,15 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
-  OfferAdminIdE,
-  OfferIdE,
-  OfferTypeE,
-  PrivatePayloadEncryptedE,
-  PublicPayloadEncryptedE,
+  OfferAdminId,
+  OfferId,
+  OfferType,
+  PrivatePayloadEncrypted,
+  PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
-import {IdNumericE} from '@vexl-next/domain/src/utility/IdNumeric'
-import {IsoDatetimeStringE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Schema} from 'effect'
 import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
@@ -34,13 +34,13 @@ export class DuplicatedPublicKeyError extends Schema.TaggedError<DuplicatedPubli
 }) {}
 
 export const ServerOffer = Schema.Struct({
-  id: IdNumericE,
-  offerId: OfferIdE,
-  expiration: Schema.optional(UnixMillisecondsE), // Depreciated
-  publicPayload: PublicPayloadEncryptedE,
-  privatePayload: PrivatePayloadEncryptedE,
-  createdAt: IsoDatetimeStringE,
-  modifiedAt: IsoDatetimeStringE,
+  id: IdNumeric,
+  offerId: OfferId,
+  expiration: Schema.optional(UnixMilliseconds),
+  publicPayload: PublicPayloadEncrypted,
+  privatePayload: PrivatePayloadEncrypted,
+  createdAt: IsoDatetimeString,
+  modifiedAt: IsoDatetimeString,
 })
 export type ServerOffer = Schema.Schema.Type<typeof ServerOffer>
 
@@ -50,7 +50,7 @@ export const GetClubOffersForMeRequest = Schema.Struct({
 export type GetClubOffersForMeRequest = typeof GetClubOffersForMeRequest.Type
 
 export const GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
-  modifiedAt: IsoDatetimeStringE,
+  modifiedAt: IsoDatetimeString,
 })
 export type GetOffersForMeCreatedOrModifiedAfterRequest =
   typeof GetOffersForMeCreatedOrModifiedAfterRequest.Type
@@ -62,7 +62,7 @@ export type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
 
 export const GetClubOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  modifiedAt: IsoDatetimeStringE,
+  modifiedAt: IsoDatetimeString,
 })
 export type GetClubOffersForMeCreatedOrModifiedAfterRequest =
   typeof GetClubOffersForMeCreatedOrModifiedAfterRequest.Type
@@ -88,33 +88,33 @@ export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64E,
-  payloadPrivate: PrivatePayloadEncryptedE,
+  userPublicKey: PublicKeyPemBase64,
+  payloadPrivate: PrivatePayloadEncrypted,
 })
 export type ServerPrivatePart = Schema.Schema.Type<typeof ServerPrivatePart>
 
 export const CreateNewOfferRequest = Schema.Struct({
-  offerType: OfferTypeE,
-  payloadPublic: PublicPayloadEncryptedE,
+  offerType: OfferType,
+  payloadPublic: PublicPayloadEncrypted,
   offerPrivateList: Schema.Array(ServerPrivatePart),
-  countryPrefix: CountryPrefixE,
-  adminId: OfferAdminIdE,
-  offerId: Schema.optional(OfferIdE),
+  countryPrefix: CountryPrefix,
+  adminId: OfferAdminId,
+  offerId: Schema.optional(OfferId),
 })
 export type CreateNewOfferRequest = typeof CreateNewOfferRequest.Type
 
 export const CreateNewOfferResponse = Schema.Struct({
-  adminId: OfferAdminIdE, // TODO is this really necessary? Shouldn't client generate it and store it?
+  adminId: OfferAdminId, // TODO is this really necessary? Shouldn't client generate it and store it?
   ...ServerOffer.fields,
 })
 export type CreateNewOfferResponse = typeof CreateNewOfferResponse.Type
 
 export const RefreshOfferRequest = Schema.Struct({
-  adminIds: Schema.Array(OfferAdminIdE),
+  adminIds: Schema.Array(OfferAdminId),
 })
 export type RefreshOfferRequest = Schema.Schema.Type<typeof RefreshOfferRequest>
 
-export const RefreshOfferResponse = Schema.Array(OfferIdE)
+export const RefreshOfferResponse = Schema.Array(OfferId)
 export type RefreshOfferResponse = typeof RefreshOfferResponse.Type
 
 export const DeleteOfferRequest = Schema.Struct({
@@ -133,7 +133,7 @@ export const DeleteOfferRequest = Schema.Struct({
         }
       )
     ),
-    Schema.compose(Schema.Array(OfferAdminIdE))
+    Schema.compose(Schema.Array(OfferAdminId))
   ),
 })
 export type DeleteOfferRequest = Schema.Schema.Type<typeof DeleteOfferRequest>
@@ -142,14 +142,14 @@ export const DeleteOfferResponse = NoContentResponse
 export type DeleteOfferResponse = Schema.Schema.Type<typeof NoContentResponse>
 
 export const OfferPrivateListItem = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64E,
-  payloadPrivate: PrivatePayloadEncryptedE,
+  userPublicKey: PublicKeyPemBase64,
+  payloadPrivate: PrivatePayloadEncrypted,
 })
 export type OfferPrivateListItem = typeof OfferPrivateListItem.Type
 
 export const UpdateOfferRequest = Schema.Struct({
-  adminId: OfferAdminIdE,
-  payloadPublic: PublicPayloadEncryptedE,
+  adminId: OfferAdminId,
+  payloadPublic: PublicPayloadEncrypted,
   offerPrivateList: Schema.Array(OfferPrivateListItem),
 })
 export type UpdateOfferRequest = Schema.Schema.Type<typeof UpdateOfferRequest>
@@ -158,7 +158,7 @@ export const UpdateOfferResponse = ServerOffer
 export type UpdateOfferResponse = Schema.Schema.Type<typeof UpdateOfferResponse>
 
 export const CreatePrivatePartRequest = Schema.Struct({
-  adminId: OfferAdminIdE,
+  adminId: OfferAdminId,
   offerPrivateList: Schema.Array(ServerPrivatePart),
 })
 export type CreatePrivatePartRequest = typeof CreatePrivatePartRequest.Type
@@ -174,8 +174,8 @@ export class CanNotDeletePrivatePartOfAuthor extends Schema.TaggedError<CanNotDe
 }) {}
 
 export const DeletePrivatePartRequest = Schema.Struct({
-  adminIds: Schema.Array(OfferAdminIdE),
-  publicKeys: Schema.Array(PublicKeyPemBase64E),
+  adminIds: Schema.Array(OfferAdminId),
+  publicKeys: Schema.Array(PublicKeyPemBase64),
 })
 export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type
 
@@ -183,13 +183,13 @@ export const DeletePrivatePartResponse = NoContentResponse
 export type DeletePrivatePartResponse = typeof DeletePrivatePartResponse.Type
 
 export const RemovedOfferIdsRequest = Schema.Struct({
-  offerIds: Schema.Array(OfferIdE),
+  offerIds: Schema.Array(OfferId),
 })
 export type RemovedOfferIdsRequest = typeof RemovedOfferIdsRequest.Type
 
 export const RemovedClubOfferIdsRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  offerIds: Schema.Array(OfferIdE),
+  offerIds: Schema.Array(OfferId),
 })
 export type RemovedClubOfferIdsRequest = typeof RemovedClubOfferIdsRequest.Type
 
@@ -197,7 +197,7 @@ export const RemovedOfferIdsResponse = RemovedOfferIdsRequest
 export type RemovedOfferIdsResponse = typeof RemovedOfferIdsRequest.Type
 
 export const ReportOfferRequest = Schema.Struct({
-  offerId: OfferIdE,
+  offerId: OfferId,
 })
 export type ReportOfferRequest = Schema.Schema.Type<typeof ReportOfferRequest>
 
@@ -205,7 +205,7 @@ export const ReportOfferResponse = NoContentResponse
 export type ReportOfferResponse = Schema.Schema.Type<typeof ReportOfferResponse>
 
 export const ReportClubOfferRequest = Schema.Struct({
-  offerId: OfferIdE,
+  offerId: OfferId,
   ...RequestBaseWithChallenge.fields,
 })
 export type ReportClubOfferRequest = Schema.Schema.Type<

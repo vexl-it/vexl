@@ -1,12 +1,6 @@
-import {Brand, Schema} from 'effect'
-import {z} from 'zod'
+import {Schema} from 'effect'
 
-export const HashedPhoneNumber = z
-  .string()
-  .transform((v) =>
-    Brand.nominal<typeof v & Brand.Brand<'HashedPhoneNumber'>>()(v)
-  )
-export const HashedPhoneNumberE = Schema.String.pipe(
+export const HashedPhoneNumber = Schema.String.pipe(
   Schema.brand('HashedPhoneNumber')
 )
-export type HashedPhoneNumber = Schema.Schema.Type<typeof HashedPhoneNumberE>
+export type HashedPhoneNumber = typeof HashedPhoneNumber.Type

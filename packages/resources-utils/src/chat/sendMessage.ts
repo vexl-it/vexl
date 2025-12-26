@@ -4,17 +4,16 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ChatMessage,
-  type ChatMessagePayload,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {Effect} from 'effect'
+import {Effect, type ParseResult} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
 import {callWithNotificationService} from '../notifications/callWithNotificationService'
-import {type JsonStringifyError, type ZodParseError} from '../utils/parsing'
+import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
 import {messagePreviewToNetwork} from './utils/messagePreviewIO'
@@ -79,7 +78,7 @@ export default function sendMessage({
   | ErrorEncryptingMessage
   | SendMessageApiErrors
   | JsonStringifyError
-  | ZodParseError<ChatMessagePayload>
+  | ParseResult.ParseError
 > {
   return Effect.gen(function* (_) {
     const encryptedMessage = yield* _(

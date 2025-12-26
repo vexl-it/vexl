@@ -12,9 +12,8 @@ import {addContactToPhoneWithUIFeedbackActionAtom} from '../../../../state/conta
 import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
-  StoredContactWithComputedValuesE,
+  StoredContactWithComputedValues,
   type ContactsFilter,
-  type StoredContactWithComputedValues,
 } from '../../../../state/contacts/domain'
 import {
   areContactsPermissionsGranted,
@@ -277,7 +276,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     if (Option.isNone(hash)) return Option.none()
 
     return Option.some(
-      Schema.decodeSync(StoredContactWithComputedValuesE)({
+      Schema.decodeSync(StoredContactWithComputedValues)({
         info: {
           name: searchText,
           numberToDisplay: searchText,

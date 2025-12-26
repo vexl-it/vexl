@@ -1,4 +1,7 @@
-import {z} from 'zod'
+import {Schema} from 'effect/index'
 
-export const PathString = z.string().min(1).brand<'PathString'>()
-export type PathString = z.TypeOf<typeof PathString>
+export const PathString = Schema.String.pipe(
+  Schema.minLength(1),
+  Schema.brand('PathString')
+)
+export type PathString = typeof PathString.Type

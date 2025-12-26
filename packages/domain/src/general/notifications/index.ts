@@ -1,22 +1,16 @@
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
-import {Brand, Schema as S, Schema} from 'effect'
+import {Schema} from 'effect'
 import {BooleanFromString} from 'effect/Schema'
-import {z} from 'zod'
-import {UnixMillisecondsE} from '../../utility/UnixMilliseconds.brand'
-import {ClubUuidE} from '../clubs'
+import {UnixMilliseconds} from '../../utility/UnixMilliseconds.brand'
+import {ClubUuid} from '../clubs'
 import {NotificationTrackingId} from '../NotificationTrackingId.brand'
-import {NotificationCypherE} from './NotificationCypher.brand'
+import {NotificationCypher} from './NotificationCypher.brand'
 
-export const FcmCypher = z
-  .string()
-  .includes('.')
-  .transform((v) => Brand.nominal<typeof v & Brand.Brand<'FcmCypher'>>()(v))
+export const FcmCypher = Schema.String.pipe(Schema.brand('FcmCypher'))
+export type FcmCypher = typeof FcmCypher.Type
 
-export const FcmCypherE = S.String.pipe(S.brand('FcmCypher'))
-export type FcmCypher = S.Schema.Type<typeof FcmCypherE>
-
-export const ChatNotificationType = S.Literal(
+export const ChatNotificationType = Schema.Literal(
   'MESSAGE',
   'REQUEST_REVEAL',
   'APPROVE_REVEAL',
@@ -36,24 +30,24 @@ export const ChatNotificationType = S.Literal(
   'UNKNOWN'
 )
 
-export class ChatNotificationData extends S.Class<ChatNotificationData>(
+export class ChatNotificationData extends Schema.Class<ChatNotificationData>(
   'NotificationData'
 )({
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   type: ChatNotificationType.pipe(orElseSchema('UNKNOWN')),
-  inbox: PublicKeyPemBase64E,
-  sender: PublicKeyPemBase64E,
-  preview: S.String.pipe(S.optional),
+  inbox: PublicKeyPemBase64,
+  sender: PublicKeyPemBase64,
+  preview: Schema.String.pipe(Schema.optional),
 }) {
-  static parseUnkownOption = S.decodeUnknownOption(ChatNotificationData)
+  static parseUnkownOption = Schema.decodeUnknownOption(ChatNotificationData)
 }
 
-export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatMessageNoticeNotificationData>(
+export class NewChatMessageNoticeNotificationData extends Schema.TaggedClass<NewChatMessageNoticeNotificationData>(
   'NewChatMessageNoticeNotificationData'
 )('NewChatMessageNoticeNotificationData', {
-  targetCypher: NotificationCypherE,
+  targetCypher: NotificationCypher,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
-  sentAt: Schema.compose(Schema.NumberFromString, UnixMillisecondsE),
+  sentAt: Schema.compose(Schema.NumberFromString, UnixMilliseconds),
   // Is true if the notification was sent with a system notification
   // (i.e. a notification that shows up in the system tray)
   // This will be false for foreground notifications that do not show up in the system tray
@@ -66,7 +60,7 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
     as: 'Option',
   }),
 }) {
-  static parseUnkownOption = S.decodeUnknownOption(
+  static parseUnkownOption = Schema.decodeUnknownOption(
     NewChatMessageNoticeNotificationData
   )
 }
@@ -74,7 +68,7 @@ export class NewChatMessageNoticeNotificationData extends S.TaggedClass<NewChatM
 export class NewClubConnectionNotificationData extends Schema.TaggedClass<NewClubConnectionNotificationData>(
   'NewClubConnectionNotificationData'
 )('NewClubConnectionNotificationData', {
-  clubUuids: Schema.parseJson(Schema.NonEmptyArray(ClubUuidE)),
+  clubUuids: Schema.parseJson(Schema.NonEmptyArray(ClubUuid)),
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
@@ -86,7 +80,7 @@ export class NewSocialNetworkConnectionNotificationData extends Schema.TaggedCla
 )('NewSocialNetworkConnectionNotificationData', {
   type: Schema.Literal('NEW_APP_USER'), // backward compatibility
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
-  sentAt: Schema.compose(Schema.NumberFromString, UnixMillisecondsE),
+  sentAt: Schema.compose(Schema.NumberFromString, UnixMilliseconds),
 }) {
   toData = (): Record<string, string> =>
     Schema.encodeSync(NewSocialNetworkConnectionNotificationData)(this)
@@ -95,7 +89,7 @@ export class NewSocialNetworkConnectionNotificationData extends Schema.TaggedCla
 export class AdmitedToClubNetworkNotificationData extends Schema.TaggedClass<AdmitedToClubNetworkNotificationData>(
   'AdmitedToClubNetworkNotificationData'
 )('AdmitedToClubNetworkNotificationData', {
-  publicKey: PublicKeyPemBase64E,
+  publicKey: PublicKeyPemBase64,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>
@@ -105,7 +99,7 @@ export class AdmitedToClubNetworkNotificationData extends Schema.TaggedClass<Adm
 export class ClubDeactivatedNotificationData extends Schema.TaggedClass<ClubDeactivatedNotificationData>(
   'ClubDeactivatedNotificationData'
 )('ClubDeactivatedNotificationData', {
-  clubUuid: ClubUuidE,
+  clubUuid: ClubUuid,
   reason: Schema.Literal('EXPIRED', 'FLAGGED', 'OTHER'),
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
@@ -116,7 +110,7 @@ export class ClubDeactivatedNotificationData extends Schema.TaggedClass<ClubDeac
 export class OpenBrowserLinkNotificationData extends Schema.TaggedClass<OpenBrowserLinkNotificationData>(
   'OpenBrowserLinkNotificationData'
 )('OpenBrowserLinkNotificationData', {
-  url: S.String,
+  url: Schema.String,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): Record<string, string> =>

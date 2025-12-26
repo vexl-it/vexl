@@ -1,6 +1,6 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Option, Schema} from 'effect'
 import {clubReportLimitIntervalDaysConfig} from '../../../configs'
@@ -12,7 +12,7 @@ export const createQueryNumberOfClubReportsForUser = Effect.gen(function* (_) {
   )
 
   const query = SqlSchema.findAll({
-    Request: PublicKeyPemBase64E,
+    Request: PublicKeyPemBase64,
     Result: Schema.Struct({
       numberOfClubReports: Schema.Int,
     }),

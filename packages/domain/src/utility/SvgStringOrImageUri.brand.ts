@@ -1,55 +1,35 @@
 import {Schema} from 'effect'
-import {z} from 'zod'
-import {SvgString, SvgStringE} from './SvgString.brand'
-import {UriString, UriStringE} from './UriString.brand'
+import {SvgString} from './SvgString.brand'
+import {UriString} from './UriString.brand'
 
-export const SvgStringOrImageUri = z.custom<
-  | {
-      type: 'imageUri'
-      imageUri: UriString
-    }
-  | {
-      type: 'svgXml'
-      svgXml: SvgString
-    }
->((value: any) => {
-  if (!value) return
-  if (value.type === 'imageUri') {
-    return UriString.safeParse(value.imageUri)
-  } else if (value.type === 'svgXml') {
-    return SvgString.safeParse(value.xvgXml)
-  }
-  return false
-})
-
-export const SvgStringOrImageUriE = Schema.Union(
+export const SvgStringOrImageUri = Schema.Union(
   Schema.Struct({
     type: Schema.Literal('imageUri'),
-    imageUri: UriStringE,
+    imageUri: UriString,
   }),
   Schema.Struct({
     type: Schema.Literal('svgXml'),
-    svgXml: SvgStringE,
+    svgXml: SvgString,
   })
 )
-export type SvgStringOrImageUri = typeof SvgStringOrImageUriE.Type
+export type SvgStringOrImageUri = typeof SvgStringOrImageUri.Type
 
 export function fromImageUri(imageUri: UriString): SvgStringOrImageUri {
-  return SvgStringOrImageUri.parse({
+  return Schema.decodeSync(SvgStringOrImageUri)({
     type: 'imageUri',
     imageUri,
   })
 }
 
 export function fromBase64Uri(base64: string): SvgStringOrImageUri {
-  return SvgStringOrImageUri.parse({
+  return Schema.decodeSync(SvgStringOrImageUri)({
     type: 'imageUri',
     imageUri: base64,
   })
 }
 
 export function fromSvgString(svgString: SvgString): SvgStringOrImageUri {
-  return SvgStringOrImageUri.parse({
+  return Schema.decodeSync(SvgStringOrImageUri)({
     type: 'svgXml',
     svgXml: svgString,
   })

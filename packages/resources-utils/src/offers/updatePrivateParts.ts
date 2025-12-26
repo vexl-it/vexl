@@ -1,7 +1,4 @@
-import {
-  PublicKeyPemBase64E,
-  type PublicKeyPemBase64,
-} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {
@@ -74,7 +71,7 @@ export class TimeLimitReachedError extends Schema.TaggedError<TimeLimitReachedEr
 )('TimeLimitReachedError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: PublicKeyPemBase64E,
+  toPublicKey: PublicKeyPemBase64,
 }) {}
 
 function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({

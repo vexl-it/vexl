@@ -1,3 +1,4 @@
+import {Schema} from 'effect/index'
 import {PrivateKeyPemBase64} from './brands'
 import {generatePrivateKey, importPrivateKey} from './index'
 
@@ -13,7 +14,7 @@ describe('private key', () => {
 
   it('from pem key', () => {
     const keyHolder = importPrivateKey({
-      privateKeyPemBase64: PrivateKeyPemBase64.parse(
+      privateKeyPemBase64: Schema.decodeSync(PrivateKeyPemBase64)(
         privKey.privateKeyPemBase64
       ),
     })

@@ -1,6 +1,6 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {PrivatePartRecordId} from '@vexl-next/domain/src/general/offers'
 import {Effect, flow, Schema} from 'effect'
@@ -16,7 +16,7 @@ import {
 } from '../utils'
 
 export const QueryOffersPaginatedRequest = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64E,
+  userPublicKey: PublicKeyPemBase64,
   lastPrivatePartId: PrivatePartRecordId,
   limit: Schema.Int,
 })

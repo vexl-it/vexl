@@ -16,7 +16,7 @@ export const enableHiddenFeatures =
   Constants.expoConfig?.extra?.enableHiddenFeatures
 
 export const apiPreset = Constants.expoConfig?.extra?.apiPreset ?? 'stageEnv'
-export const version = SemverString.parse(
+export const version = Schema.decodeSync(SemverString)(
   Constants.expoConfig?.extra?.semver ?? '0.0.0'
 )
 

@@ -11479,7 +11479,6 @@ __metadata:
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
     typescript: ~5.9.2
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -11569,7 +11568,6 @@ __metadata:
     rimraf: ^4.4.0
     ts-node: ^10.9.1
     typescript: ~5.9.2
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -11705,7 +11703,6 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ~5.9.2
     ws: ^8.18.3
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -12009,7 +12006,6 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ~5.9.2
     url-parse: ^1.5.10
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -12162,7 +12158,6 @@ __metadata:
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
     typescript: ~5.9.2
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -12189,7 +12184,6 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ~5.9.2
     url-join: ^5.0.0
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -12432,7 +12426,6 @@ __metadata:
     typescript: ~5.9.2
     vite: ^6.4.1
     vite-tsconfig-paths: ^4.2.1
-    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -32437,7 +32430,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.3, zod@npm:^3.23.8, zod@npm:^3.25.76":
+"zod@npm:^3.23.8, zod@npm:^3.25.76":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: c9a403a62b329188a5f6bd24d5d935d2bba345f7ab8151d1baa1505b5da9f227fb139354b043711490c798e91f3df75991395e40142e6510a4b16409f302b849

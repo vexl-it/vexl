@@ -3,6 +3,7 @@ import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Option, Schema} from 'effect/index'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
@@ -137,20 +138,20 @@ export const revealIdentityDialogUIAtom = atom(
       TE.bindW('username', ({type}) => {
         if (type === 'DISAPPROVE_REVEAL') return TE.right(undefined)
 
-        const username = UserName.safeParse(
+        const username = Schema.decodeUnknownOption(UserName)(
           get(revealIdentityUsernameAtom).trim()
         )
 
-        if (!username.success)
+        if (Option.isNone(username))
           return TE.left(
             toBasicError('UsernameEmptyError')(new Error('UsernameEmpty'))
           )
 
         const usernameSavedForFutureUse = get(usernameSavedForFutureUseAtom)
 
-        if (usernameSavedForFutureUse) set(realUserNameAtom, username.data)
+        if (usernameSavedForFutureUse) set(realUserNameAtom, username.value)
 
-        return TE.right(username.data)
+        return TE.right(username.value)
       }),
       TE.bindW('imageUri', ({type}) => {
         if (type === 'DISAPPROVE_REVEAL') return TE.right(undefined)

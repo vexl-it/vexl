@@ -1,4 +1,4 @@
-import {UriStringE} from '@vexl-next/domain/src/utility/UriString.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   BlogId,
   BlogSlug,
@@ -68,7 +68,7 @@ export const WebflowBlogItem = Schema.Struct({
     slug: BlogSlug,
     'main-image': Schema.optionalWith(
       Schema.Struct({
-        url: UriStringE,
+        url: UriString,
       }),
       {as: 'Option'}
     ),

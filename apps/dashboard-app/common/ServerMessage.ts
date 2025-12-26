@@ -1,5 +1,5 @@
-import {CountryPrefixE} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {UnixMillisecondsE} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import DebugMessage from './DebugMessage'
 import {HashedPubKey} from './HashedPubKey'
@@ -16,7 +16,7 @@ export class TimeoutClose extends Schema.TaggedClass<TimeoutClose>(
 export class ConnectionsCountByCountry extends Schema.Class<ConnectionsCountByCountry>(
   'ConnectionsCountByCountry'
 )({
-  countryCode: CountryPrefixE,
+  countryCode: CountryPrefix,
   count: Schema.Number,
 }) {}
 
@@ -32,8 +32,8 @@ export class UserWithConnections extends Schema.Class<UserWithConnections>(
 )({
   pubKey: HashedPubKey,
   connectionsCount: Schema.Number,
-  countryPrefix: CountryPrefixE,
-  receivedAt: UnixMillisecondsE,
+  countryPrefix: CountryPrefix,
+  receivedAt: UnixMilliseconds,
 }) {}
 
 export class NewUserWithConnectionsMessage extends Schema.TaggedClass<NewUserWithConnectionsMessage>(

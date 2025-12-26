@@ -1,7 +1,4 @@
-import {
-  type UnixMilliseconds,
-  UnixMillisecondsE,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {DateTime} from 'luxon'
 import React, {useMemo} from 'react'
@@ -25,7 +22,7 @@ function TimeToOptions({timeFromTimestamp}: Props): React.ReactElement {
       unixMillisecondsToLocaleDateTime(timeFromTimestamp)
 
     for (let i = 0; i < 4; i++) {
-      const timeOptionMillis = Schema.decodeSync(UnixMillisecondsE)(
+      const timeOptionMillis = Schema.decodeSync(UnixMilliseconds)(
         localizedTimestamp.plus({minutes: 15 * i}).toMillis()
       )
       const timeOptionString = DateTime.fromMillis(

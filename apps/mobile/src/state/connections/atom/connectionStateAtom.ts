@@ -13,7 +13,7 @@ import {Array, Effect, flow, HashMap, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {atomWithParsedMmkvStorageE} from '../../../utils/atomUtils/atomWithParsedMmkvStorageE'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import deduplicate from '../../../utils/deduplicate'
 import {
   areNotificationsEnabledE,
@@ -26,7 +26,7 @@ import {clubsWithMembersAtom} from '../../clubs/atom/clubsWithMembersAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {ConnectionsState} from '../domain'
 
-const connectionStateAtom = atomWithParsedMmkvStorageE(
+const connectionStateAtom = atomWithParsedMmkvStorage(
   'connectionsStateV2',
   {
     lastUpdate: UnixMilliseconds0,

@@ -3,7 +3,7 @@ import {
   generatePrivateKey,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {E164PhoneNumberE} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
@@ -18,7 +18,7 @@ import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const user1Credentials = generatePrivateKey()
-const user1Number = Schema.decodeSync(E164PhoneNumberE)('+420733333330')
+const user1Number = Schema.decodeSync(E164PhoneNumber)('+420733333330')
 let user1authHeaders: {
   'public-key': PublicKeyPemBase64
   signature: EcdsaSignature

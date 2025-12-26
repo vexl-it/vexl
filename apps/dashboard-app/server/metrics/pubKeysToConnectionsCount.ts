@@ -1,7 +1,6 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
-  UnixMillisecondsE,
+  UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
@@ -22,7 +21,7 @@ import {queryPubkeysToConnections} from '../db/queryPubkeyToConnectionCount'
 
 export class CountWithDate extends Schema.Class<CountWithDate>('CountWithDate')(
   {
-    date: UnixMillisecondsE,
+    date: UnixMilliseconds,
     count: Schema.Number,
   }
 ) {}
@@ -105,8 +104,8 @@ export const pubKeysToConnectionsChanges =
 export class ConnectionWithDate extends Schema.Class<ConnectionWithDate>(
   'ConnectionWithDate'
 )({
-  publicKey: PublicKeyPemBase64E,
-  date: UnixMillisecondsE,
+  publicKey: PublicKeyPemBase64,
+  date: UnixMilliseconds,
   count: Schema.Number,
 }) {}
 

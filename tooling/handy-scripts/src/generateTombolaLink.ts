@@ -2,7 +2,7 @@ import {FileSystem} from '@effect/platform'
 import {NodeFileSystem, NodeRuntime} from '@effect/platform-node'
 import {importKeyPair} from '@vexl-next/cryptography/src/KeyHolder'
 import {
-  PrivateKeyPemBase64E,
+  PrivateKeyPemBase64,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {eciesLegacyEncrypt} from '@vexl-next/cryptography/src/operations/eciesLegacy'
@@ -13,7 +13,7 @@ import {fileURLToPath} from 'url'
 const LIGHTNING_URL_PREFIX = 'lightning:'
 const CSV_DELIMITER = '\n'
 
-const privateKey = Schema.decode(PrivateKeyPemBase64E)(
+const privateKey = Schema.decode(PrivateKeyPemBase64)(
   'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFndWIyTDJaMFd5YVhvSVZmaUk3b3IKUFZTK2JTOGpGUXpVaUxvUkNjT2N3MnFoUkFOQ0FBU1c2USs4NXRQQ3RjMDFMdU5nZUVMY3ZIZGlDbmErMThOdwpWanpVUXc2T3RvbDdvWW5BMUVzR2tWOUZqdUVURzJzSTBIdG1RQmk0eFlXT3VQVTdRYmNvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K'
 )
 

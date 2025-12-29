@@ -3,14 +3,19 @@ import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.bran
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect} from 'effect/index'
 import {createClientInstance} from '../../client'
-import {type AppSource} from '../../commonHeaders'
+import {type AppSource, type CommonHeaders} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
 import {
+  type CreateNotificationSecretRequest,
+  type GenerateNotificationTokenRequest,
+  type InvalidateNotificationSecretRequest,
+  type InvalidateNotificationTokenRequest,
   type IssueNotificationRequest,
   type IssueStreamOnlyMessageRequest,
   type ReportNotificationProcessedRequest,
+  type UpdateNotificationInfoRequest,
 } from './contract'
 import {NotificationApiSpecification} from './specification'
 
@@ -65,6 +70,31 @@ export function api({
       reportNotificationProcessed: (
         request: ReportNotificationProcessedRequest
       ) => client.reportNotificationProcessed({payload: request}),
+      createNotificationSecret: (
+        payload: CreateNotificationSecretRequest,
+        headers: CommonHeaders
+      ) =>
+        client.NotificationTokenGroup.CreateNotificationSecret({
+          payload,
+          headers,
+        }),
+      updateNotificationInfo: (
+        payload: UpdateNotificationInfoRequest,
+        headers: CommonHeaders
+      ) =>
+        client.NotificationTokenGroup.updateNoficationInfo({
+          payload,
+          headers,
+        }),
+      generateNotificationToken: (payload: GenerateNotificationTokenRequest) =>
+        client.NotificationTokenGroup.generateNotificationToken({payload}),
+      invalidateNotificationToken: (
+        payload: InvalidateNotificationTokenRequest
+      ) => client.NotificationTokenGroup.invalidateNotificationToken({payload}),
+      invalidateNotificationSecret: (
+        payload: InvalidateNotificationSecretRequest
+      ) =>
+        client.NotificationTokenGroup.invalidateNotificationSecret({payload}),
     }
   })
 }

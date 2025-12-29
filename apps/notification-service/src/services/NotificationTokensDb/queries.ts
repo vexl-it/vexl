@@ -50,7 +50,7 @@ export const createSaveNotificationTokenSecret = Effect.gen(function* () {
     Result: NotificationSecretRecord,
     execute: (params) => sql`
       INSERT INTO
-        notification_secret ${sql.insert(params)}
+        notification_token_secrets ${sql.insert(params)}
       RETURNING
         *
     `,
@@ -77,7 +77,7 @@ export const createSaveNotificationToken = Effect.gen(function* () {
     Result: NotificationTokenRecord,
     execute: (params) => sql`
       INSERT INTO
-        notification_token ${sql.insert(params)}
+        notification_tokens ${sql.insert(params)}
       RETURNING
         *
     `,
@@ -103,7 +103,7 @@ export const createUpdateClientInfo = Effect.gen(function* () {
     Request: UpdateClientInfoParams,
     Result: NotificationSecretRecord,
     execute: (params) => sql`
-      UPDATE notification_secret
+      UPDATE notification_token_secrets
       SET
         ${sql.update({
         expoNotificationToken: params.expoNotificationToken,
@@ -143,8 +143,8 @@ export const createFindSecretByNotificationToken = Effect.gen(function* () {
       SELECT
         ns.*
       FROM
-        notification_secret ns
-        INNER JOIN notification_token nt ON nt.secret_id = ns.id
+        notification_token_secrets ns
+        INNER JOIN notification_tokens nt ON nt.secret_id = ns.id
       WHERE
         nt.token = ${token}
     `,
@@ -173,8 +173,8 @@ export const createFindAllTokensForSecret = Effect.gen(function* () {
       SELECT
         nt.*
       FROM
-        notification_token nt
-        INNER JOIN notification_secret ns ON ns.id = nt.secret_id
+        notification_tokens nt
+        INNER JOIN notification_token_secrets ns ON ns.id = nt.secret_id
       WHERE
         ns.secret = ${secret}
     `,
@@ -203,7 +203,7 @@ export const createFindSecretBySecretValue = Effect.gen(function* () {
       SELECT
         *
       FROM
-        notification_secret
+        notification_token_secrets
       WHERE
         secret = ${secret}
     `,
@@ -228,7 +228,7 @@ export const createDeleteNotificationToken = Effect.gen(function* () {
   const resolver = yield* SqlResolver.void('deleteNotificationToken', {
     Request: VexlNotificationToken,
     execute: (params) => sql`
-      DELETE FROM notification_token
+      DELETE FROM notification_tokens
       WHERE
         ${sql.in('token', params)}
     `,
@@ -253,7 +253,7 @@ export const createDeleteNotificationSecret = Effect.gen(function* () {
   const resolver = yield* SqlResolver.void('deleteNotificationSecret', {
     Request: VexlNotificationTokenSecret,
     execute: (params) => sql`
-      DELETE FROM notification_secret
+      DELETE FROM notification_token_secrets
       WHERE
         ${sql.in('secret', params)}
     `,

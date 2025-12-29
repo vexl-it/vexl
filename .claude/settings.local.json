@@ -7,7 +7,8 @@
       "Bash(yarn workspace @vexl-next/mobile-app lint:*)",
       "Bash(yarn turbo:lint:*)",
       "Bash(yarn tsc:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(yarn test:*)"
     ],
     "deny": [],
     "ask": []

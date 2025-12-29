@@ -23,16 +23,23 @@ import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsC
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
 import {NotificationMetricsService} from './metrics'
+import {createNotificationSecretHandler} from './routes/createNotificationSecretHandler'
+import {generateNotificationTokenHandler} from './routes/generateNotificationTokenHandler'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
+import {invalidateNotificationSecretHandler} from './routes/invalidateNotificationSecretHandler'
+import {invalidateNotificationTokenHandler} from './routes/invalidateNotificationTokenHandler'
 import {issueNotifcationHandler} from './routes/issueNotificationHandler'
 import {issueStreamOnlyMessageHandler} from './routes/issueStreamOnlyMessageHandler'
 import {reportNotificationProcessedHandler} from './routes/reportNotificationProcessed'
+import {updateNotificationInfoHandler} from './routes/updateNotificationInfoHandler'
 import {NotificationSocketMessaging} from './services/NotificationSocketMessaging'
 import {NotificationRpcsHandlers} from './services/NotificationSocketMessaging/services/NotificationRpcHandles'
 import {
   TaskWorkerLayer,
   TimeoutWorkerLayer,
 } from './services/NotificationSocketMessaging/services/SendMessageTasksManager'
+import {NotificationTokensDb} from './services/NotificationTokensDb'
+import {PosgressDbLive} from './services/PostgressDb'
 import {ThrottledPushNotificationService} from './services/ThrottledPushNotificationService'
 import {processThrottledNotificationsWorker} from './services/ThrottledPushNotificationService/services/ThrottledNotificationMq'
 
@@ -47,10 +54,26 @@ const RootGroupLive = HttpApiBuilder.group(
       .handle('issueStreamOnlyMessage', issueStreamOnlyMessageHandler)
 )
 
+const NotificationTokenGroupLive = HttpApiBuilder.group(
+  NotificationApiSpecification,
+  'NotificationTokenGroup',
+  (h) =>
+    h
+      .handle('CreateNotificationSecret', createNotificationSecretHandler)
+      .handle('updateNoficationInfo', updateNotificationInfoHandler)
+      .handle('generateNotificationToken', generateNotificationTokenHandler)
+      .handle('invalidateNotificationToken', invalidateNotificationTokenHandler)
+      .handle(
+        'invalidateNotificationSecret',
+        invalidateNotificationSecretHandler
+      )
+)
+
 const NotificationHttpApiLive = HttpLayerRouter.addHttpApi(
   NotificationApiSpecification
 ).pipe(
   Layer.provide(RootGroupLive),
+  Layer.provide(NotificationTokenGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(NotificationApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
@@ -89,6 +112,8 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(NotificationSocketMessaging.Live),
   Layer.provideMerge(ThrottledPushNotificationService.Live),
   Layer.provideMerge(NotificationMetricsService.Live),
+  Layer.provideMerge(NotificationTokensDb.Live),
+  Layer.provideMerge(PosgressDbLive),
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(MetricsClientService.Live),
   Layer.provideMerge(RedisService.Live),

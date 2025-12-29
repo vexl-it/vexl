@@ -36,6 +36,8 @@
     "@effect/platform": "^0.93.6",
     "@effect/platform-node": "^0.103.0",
     "@effect/rpc": "^0.72.2",
+    "@effect/sql": "^0.48.6",
+    "@effect/sql-pg": "^0.49.7",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/esbuild": "0.0.0",
     "@vexl-next/localization": "0.0.0",

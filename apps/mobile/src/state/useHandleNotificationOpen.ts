@@ -132,19 +132,8 @@ const reactOnNotificationOpenAtom = atom(
     })
 )
 
-const reactOnSystemNotificationOpenAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
-    if (navigationRef.isReady()) {
-      navigationRef.navigate('InsideTabs', {screen: 'Messages'})
-    }
-  })
-)
-
 export default function useHandleNotificationOpen(): void {
   const reactOnNotificationOpen = useSetAtom(reactOnNotificationOpenAtom)
-  const reactOnSystemNotificationOpen = useSetAtom(
-    reactOnSystemNotificationOpenAtom
-  )
 
   useAppState(
     useCallback(
@@ -152,16 +141,13 @@ export default function useHandleNotificationOpen(): void {
         if (appState !== 'active') return
         void (async () => {
           const initialNotification = await notifee.getInitialNotification()
-          if (initialNotification) {
+          if (initialNotification)
             await Effect.runPromise(
               reactOnNotificationOpen(initialNotification.notification)
             )
-          } else {
-            await Effect.runPromise(reactOnSystemNotificationOpen())
-          }
         })()
       },
-      [reactOnNotificationOpen, reactOnSystemNotificationOpen]
+      [reactOnNotificationOpen]
     )
   )
   useEffect(() => {

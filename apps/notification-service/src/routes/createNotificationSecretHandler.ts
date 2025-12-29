@@ -8,18 +8,20 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {Effect, Option, Schema} from 'effect'
 import {NotificationTokensDb} from '../services/NotificationTokensDb'
 
-const generateSecret = Schema.decode(VexlNotificationTokenSecret)(
-  generateUuid()
-).pipe(
-  Effect.catchAll(() =>
-    Effect.fail(
-      new UnexpectedServerError({
-        status: 500,
-        cause: 'Failed to decode secret',
-      })
+const generateSecret = (): Effect.Effect<
+  VexlNotificationTokenSecret,
+  UnexpectedServerError
+> =>
+  Schema.decode(VexlNotificationTokenSecret)(generateUuid()).pipe(
+    Effect.catchAll(() =>
+      Effect.fail(
+        new UnexpectedServerError({
+          status: 500,
+          cause: 'Failed to decode secret',
+        })
+      )
     )
   )
-)
 
 export const createNotificationSecretHandler = HttpApiBuilder.handler(
   NotificationApiSpecification,
@@ -43,7 +45,7 @@ export const createNotificationSecretHandler = HttpApiBuilder.handler(
 
         const db = yield* NotificationTokensDb
 
-        const secret = yield* _(generateSecret)
+        const secret = yield* _(generateSecret())
 
         const now = new Date()
         yield* db.saveNotificationTokenSecret({

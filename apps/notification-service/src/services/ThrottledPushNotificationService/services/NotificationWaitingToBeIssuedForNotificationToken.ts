@@ -1,3 +1,4 @@
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   RedisError,
@@ -5,7 +6,6 @@ import {
 } from '@vexl-next/server-utils/src/RedisService'
 import {Context, Duration, Effect, Layer} from 'effect'
 import {SupportedPushNotificationTask} from '../../../domain'
-import {type VexlNotificationToken} from '../../NotificationSocketMessaging/domain'
 
 const KEY_PREFIX = 'notification-service:waiting-notifications:'
 const TTL_MS = Duration.toMillis(Duration.decode('1 day'))

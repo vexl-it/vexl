@@ -1,6 +1,6 @@
 import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {ExpoNotificationTokenE} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {SemverStringE} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {
   AppSource,
@@ -11,9 +11,9 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 const validVersionCode = Schema.decodeSync(VersionCode)(100)
-const validSemver = Schema.decodeSync(SemverStringE)('1.0.0')
+const validSemver = Schema.decodeSync(SemverString)('1.0.0')
 const validAppSource = Schema.decodeSync(AppSource)('playStore')
-const validExpoToken = Schema.decodeSync(ExpoNotificationTokenE)(
+const validExpoToken = Schema.decodeSync(ExpoNotificationToken)(
   'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'
 )
 
@@ -62,6 +62,7 @@ describe('GenerateNotificationToken', () => {
           Effect.either
         )
 
+        console.log(resp)
         expect(resp._tag).toEqual('Right')
         if (resp._tag === 'Right') {
           expect(resp.right.token).toBeDefined()

@@ -3,7 +3,7 @@ import {MissingCommonHeadersError} from '@vexl-next/rest-api/src/services/notifi
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
-import {NotificationTokensDb} from '../services/NotificationTokensDb'
+import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
 export const updateNotificationInfoHandler = HttpApiBuilder.handler(
   NotificationApiSpecification,

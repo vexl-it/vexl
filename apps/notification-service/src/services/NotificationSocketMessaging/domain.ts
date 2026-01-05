@@ -1,5 +1,6 @@
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 
 import {
   createNotificationTrackingId,
@@ -23,12 +24,6 @@ import {
 import {Option, pipe, Schema, String, type Effect} from 'effect/index'
 
 const EXPO_PREFIX = 'expo-'
-
-export const VexlNotificationToken = Schema.String.pipe(
-  Schema.brand('VexlNotificaitionToken'),
-  Schema.filter(String.startsWith(EXPO_PREFIX))
-)
-export type VexlNotificationToken = typeof VexlNotificationToken.Type
 
 export const ClientInfo = Schema.Struct({
   notificationToken: VexlNotificationToken,
@@ -97,7 +92,12 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationToken,
-  targetCypher: NotificationCypher,
+  // todo #2124 - remove this since notification cypher is not used anymore
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.optional(VexlNotificationToken),
   sendNewChatMessageNotification: Schema.Boolean,
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
@@ -111,6 +111,7 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
     return new NewChatMessageNoticeMessage({
       sentAt: this.sentAt,
       targetCypher: this.targetCypher,
+      targetToken: this.targetToken,
       trackingId: this.trackingId,
     })
   }
@@ -126,7 +127,12 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
     default: () => newSendMessageTaskId(),
   }),
   notificationToken: VexlNotificationToken,
-  targetCypher: NotificationCypher,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.optional(VexlNotificationToken),
   message: StreamOnlyMessageCypher,
   sentAt: Schema.optionalWith(UnixMilliseconds, {
     default: () => unixMillisecondsNow(),
@@ -142,6 +148,7 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
       trackingId: this.trackingId,
       message: this.message,
       targetCypher: this.targetCypher,
+      targetToken: this.targetToken,
     })
   }
 }

@@ -1,3 +1,4 @@
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   UnixMilliseconds,
   unixMillisecondsFromNow,
@@ -8,7 +9,6 @@ import {
 } from '@vexl-next/server-utils/src/RedisService'
 import {Context, Duration, Effect, Layer} from 'effect'
 import {type NoSuchElementException} from 'effect/Cause'
-import {type VexlNotificationToken} from '../../NotificationSocketMessaging/domain'
 
 const KEY_PREFIX = 'notification-service:last-issued:'
 const TTL_MS = Duration.toMillis(Duration.decode('1 day'))

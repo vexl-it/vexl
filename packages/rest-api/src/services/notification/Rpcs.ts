@@ -3,6 +3,7 @@ import {Rpc, RpcGroup} from '@effect/rpc'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
@@ -12,7 +13,14 @@ import {Schema} from 'effect'
 
 export const NotificationsStreamClientInfo = Schema.Struct({
   version: VersionCode,
-  notificationToken: ExpoNotificationToken, // TODO create endpoint for validation
+  notificationToken: VexlNotificationToken,
+  platform: PlatformName,
+})
+
+// todo #2124
+export const NotificationsStreamClientInfoOld = Schema.Struct({
+  version: VersionCode,
+  notificationToken: Schema.Union(ExpoNotificationToken, VexlNotificationToken),
   platform: PlatformName,
 })
 export type NotificationsStreamClientInfo =
@@ -22,7 +30,12 @@ export class NewChatMessageNoticeMessage extends Schema.TaggedClass<NewChatMessa
   'NewChatMessageNoticeMessage'
 )('NewChatMessageNoticeMessage', {
   sentAt: UnixMilliseconds,
-  targetCypher: NotificationCypher,
+  // TODO remove #2124
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // TODO remove optional #2124
+  targetToken: Schema.optional(VexlNotificationToken),
   trackingId: NotificationTrackingId,
 }) {}
 
@@ -32,7 +45,12 @@ export class StreamOnlyChatMessage extends Schema.TaggedClass<StreamOnlyChatMess
   sentAt: UnixMilliseconds,
   trackingId: NotificationTrackingId,
   message: StreamOnlyMessageCypher,
-  targetCypher: NotificationCypher,
+  // TODO remove #2124
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // TODO remove nullOr #2124
+  targetToken: Schema.optional(VexlNotificationToken),
 }) {}
 
 export class DebugMessage extends Schema.TaggedClass<DebugMessage>(
@@ -60,7 +78,7 @@ export type NotificationStreamError = typeof NotificationStreamError.Type
 
 export class Rpcs extends RpcGroup.make(
   Rpc.make('listenToNotifications', {
-    payload: NotificationsStreamClientInfo,
+    payload: NotificationsStreamClientInfoOld,
     error: NotificationStreamError,
     success: NotificationStreamMessage,
     stream: true,

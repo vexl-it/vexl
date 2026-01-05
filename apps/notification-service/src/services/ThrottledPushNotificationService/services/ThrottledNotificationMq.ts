@@ -1,3 +1,4 @@
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
@@ -6,7 +7,6 @@ import {
 import {makeMqService} from '@vexl-next/server-utils/src/mqService'
 import {Data, Effect, Schema} from 'effect/index'
 import {notificationThrottleTtlMinutesConfig} from '../../../configs'
-import {VexlNotificationToken} from '../../NotificationSocketMessaging/domain'
 import {PushNotificationService} from '../../PushNotificationService'
 import {lockOnNotificationToken} from '../utils'
 import {LastTimeIssuedForNotificationTokenDb} from './LastTimeIssuedForNotificationTokenDb'

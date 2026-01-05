@@ -1,6 +1,6 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {
-  type VexlNotificaitionToken,
+  type VexlNotificationToken,
   type VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {Context, Effect, Layer, type Option} from 'effect'
@@ -36,7 +36,7 @@ export interface NotificationTokensDbOperations {
   ) => Effect.Effect<NotificationSecretRecord, UnexpectedServerError>
 
   findSecretByNotificationToken: (
-    Notification: VexlNotificaitionToken
+    Notification: VexlNotificationToken
   ) => Effect.Effect<
     Option.Option<NotificationSecretRecord>,
     UnexpectedServerError
@@ -54,7 +54,7 @@ export interface NotificationTokensDbOperations {
   >
 
   deleteNotificationToken: (
-    token: VexlNotificaitionToken
+    token: VexlNotificationToken
   ) => Effect.Effect<void, UnexpectedServerError>
 
   deleteNotificationSecret: (

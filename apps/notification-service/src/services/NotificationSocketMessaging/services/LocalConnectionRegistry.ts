@@ -1,3 +1,4 @@
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type NonEmptyArray} from 'effect/Array'
 import {type NoSuchElementException} from 'effect/Cause'
 import {
@@ -9,12 +10,7 @@ import {
   Ref,
   SynchronizedRef,
 } from 'effect/index'
-import {
-  vexlNotificationTokenFromExpoToken,
-  type ConnectionToClient,
-  type StreamConnectionId,
-  type VexlNotificationToken,
-} from '../domain'
+import {type ConnectionToClient, type StreamConnectionId} from '../domain'
 
 export interface SocketRegistryOperations {
   registerConnection: (
@@ -48,9 +44,7 @@ export class LocalConnectionRegistry extends Context.Tag(
             Effect.map(
               HashMap.filter(
                 (a) =>
-                  vexlNotificationTokenFromExpoToken(
-                    a.connectionInfo.notificationToken
-                  ) === vexlNotificationToken
+                  a.connectionInfo.notificationToken === vexlNotificationToken
               )
             ),
             Effect.map(HashMap.toValues),

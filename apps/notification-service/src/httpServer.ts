@@ -23,15 +23,15 @@ import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsC
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
 import {Layer} from 'effect'
 import {NotificationMetricsService} from './metrics'
-import {createNotificationSecretHandler} from './routes/createNotificationSecretHandler'
-import {generateNotificationTokenHandler} from './routes/generateNotificationTokenHandler'
 import {getCypherPublicKeyHandler} from './routes/getCypherPublicKeyHandler'
-import {invalidateNotificationSecretHandler} from './routes/invalidateNotificationSecretHandler'
-import {invalidateNotificationTokenHandler} from './routes/invalidateNotificationTokenHandler'
 import {issueNotifcationHandler} from './routes/issueNotificationHandler'
 import {issueStreamOnlyMessageHandler} from './routes/issueStreamOnlyMessageHandler'
+import {createNotificationSecretHandler} from './routes/notificationToken/createNotificationSecretHandler'
+import {generateNotificationTokenHandler} from './routes/notificationToken/generateNotificationTokenHandler'
+import {invalidateNotificationSecretHandler} from './routes/notificationToken/invalidateNotificationSecretHandler'
+import {invalidateNotificationTokenHandler} from './routes/notificationToken/invalidateNotificationTokenHandler'
+import {updateNotificationInfoHandler} from './routes/notificationToken/updateNotificationInfoHandler'
 import {reportNotificationProcessedHandler} from './routes/reportNotificationProcessed'
-import {updateNotificationInfoHandler} from './routes/updateNotificationInfoHandler'
 import {NotificationSocketMessaging} from './services/NotificationSocketMessaging'
 import {NotificationRpcsHandlers} from './services/NotificationSocketMessaging/services/NotificationRpcHandles'
 import {
@@ -42,6 +42,7 @@ import {NotificationTokensDb} from './services/NotificationTokensDb'
 import {PosgressDbLive} from './services/PostgressDb'
 import {ThrottledPushNotificationService} from './services/ThrottledPushNotificationService'
 import {processThrottledNotificationsWorker} from './services/ThrottledPushNotificationService/services/ThrottledNotificationMq'
+import {VexlNotificationTokenService} from './services/VexlNotificationTokenService'
 
 const RootGroupLive = HttpApiBuilder.group(
   NotificationApiSpecification,
@@ -111,6 +112,7 @@ export const HttpServerLive = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(NotificationSocketMessaging.Live),
   Layer.provideMerge(ThrottledPushNotificationService.Live),
+  Layer.provideMerge(VexlNotificationTokenService.Live),
   Layer.provideMerge(NotificationMetricsService.Live),
   Layer.provideMerge(NotificationTokensDb.Live),
   Layer.provideMerge(PosgressDbLive),

@@ -1,4 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   type NotificationStreamError,
   type NotificationStreamMessage,
@@ -16,11 +17,11 @@ import {
 } from 'effect/index'
 import {type Scope} from 'effect/Scope'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
+import {VexlNotificationTokenService} from '../../VexlNotificationTokenService'
 import {
   type ClientInfo,
   newStreamConnectionId,
   type StreamConnectionId,
-  vexlNotificationTokenFromExpoToken,
 } from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
 import {RedisConnectionRegistry} from './RedisConnectionRegistry'
@@ -45,11 +46,22 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
       listenToNotifications: (connectionInfo) =>
         Stream.unwrapScoped(
           Effect.gen(function* (_) {
+            const notificationTokenService = yield* _(
+              VexlNotificationTokenService
+            )
+
+            // TODO #2124 - use token from info directly
+            const vexlNotificationToken = isVexlNotificationToken(
+              connectionInfo.notificationToken
+            )
+              ? connectionInfo.notificationToken
+              : notificationTokenService.createTemporaryVexlNotificationToken(
+                  connectionInfo.notificationToken
+                )
+
             const connectionId = newStreamConnectionId()
             const clientInfo: ClientInfo = {
-              notificationToken: vexlNotificationTokenFromExpoToken(
-                connectionInfo.notificationToken
-              ),
+              notificationToken: vexlNotificationToken,
               platform: connectionInfo.platform,
               version: connectionInfo.version,
             }
@@ -106,7 +118,10 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               Effect.acquireRelease(
                 localRegistry.registerConnection(
                   {
-                    connectionInfo,
+                    connectionInfo: {
+                      ...connectionInfo,
+                      notificationToken: vexlNotificationToken,
+                    },
                     send,
                     kickOut,
                   },

@@ -1,3 +1,4 @@
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
@@ -12,7 +13,6 @@ import {Array, Context, Effect, Layer} from 'effect/index'
 import {type ParseError} from 'effect/ParseResult'
 import {notificationThrottleTtlMinutesConfig} from '../../configs'
 import {type SupportedPushNotificationTask} from '../../domain'
-import {type VexlNotificationToken} from '../NotificationSocketMessaging/domain'
 import {PushNotificationService} from '../PushNotificationService'
 import {type ExpoSdkError} from '../PushNotificationService/services/ExpoClientService/utils'
 import {LastTimeIssuedForNotificationTokenDb} from './services/LastTimeIssuedForNotificationTokenDb'

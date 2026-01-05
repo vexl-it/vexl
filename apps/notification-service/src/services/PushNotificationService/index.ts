@@ -1,8 +1,9 @@
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, Context, Data, Effect, flow, identity, Layer, pipe} from 'effect'
 import {type SupportedPushNotificationTask} from '../../domain'
 import {NotificationMetricsService} from '../../metrics'
-import {type VexlNotificationToken} from '../NotificationSocketMessaging/domain'
+import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
 import {ExpoClientService} from './services/ExpoClientService'
 import {type ExpoSdkError} from './services/ExpoClientService/utils'
 import {generatePushNotificationsFromNewChatMessageNoticeSendTask} from './utils'
@@ -26,6 +27,9 @@ export class PushNotificationService extends Context.Tag(
     Effect.gen(function* (_) {
       const expoClient = yield* _(ExpoClientService)
       const notificationMetrics = yield* _(NotificationMetricsService)
+      const vexlNotificationTokenService = yield* _(
+        VexlNotificationTokenService
+      )
 
       return {
         sendNotificationViaExpoNotification: (tasks) =>
@@ -62,6 +66,10 @@ export class PushNotificationService extends Context.Tag(
               )
             )
           }).pipe(
+            Effect.provideService(
+              VexlNotificationTokenService,
+              vexlNotificationTokenService
+            ),
             Effect.withSpan('sendingPushNotifications', {
               attributes: {tasks},
             })

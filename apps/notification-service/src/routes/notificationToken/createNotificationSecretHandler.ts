@@ -6,7 +6,7 @@ import {MissingCommonHeadersError} from '@vexl-next/rest-api/src/services/notifi
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
-import {NotificationTokensDb} from '../services/NotificationTokensDb'
+import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
 const generateSecret = (): Effect.Effect<
   VexlNotificationTokenSecret,

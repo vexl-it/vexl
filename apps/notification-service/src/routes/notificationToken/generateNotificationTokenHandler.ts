@@ -4,21 +4,23 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {
-  type VexlNotificaitionToken,
+  VEXL_TOKEN_PREFIX,
   VexlNotificationToken,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Schema} from 'effect'
-import {NotificationTokensDb} from '../services/NotificationTokensDb'
+import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
 const generateVexlNotificationToken = (): Effect.Effect<
-  VexlNotificaitionToken,
+  VexlNotificationToken,
   UnexpectedServerError,
   never
 > =>
-  Schema.decode(VexlNotificationToken)(generateUuid()).pipe(
+  Schema.decode(VexlNotificationToken)(
+    `${VEXL_TOKEN_PREFIX}${generateUuid()}`
+  ).pipe(
     Effect.catchAll(() =>
       Effect.fail(
         new UnexpectedServerError({

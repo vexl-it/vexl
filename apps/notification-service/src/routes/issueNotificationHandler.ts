@@ -1,8 +1,8 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {decryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {
   IssueNotificationResponse,
   SendingNotificationError,
@@ -10,13 +10,10 @@ import {
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
-import {fcmTokenPrivateKeyConfig} from '../configs'
 import {NotificationSocketMessaging} from '../services/NotificationSocketMessaging'
-import {
-  NewChatMessageNoticeSendTask,
-  vexlNotificationTokenFromExpoToken,
-} from '../services/NotificationSocketMessaging/domain'
+import {NewChatMessageNoticeSendTask} from '../services/NotificationSocketMessaging/domain'
 import {ThrottledPushNotificationService} from '../services/ThrottledPushNotificationService'
+import {VexlNotificationTokenService} from '../services/VexlNotificationTokenService'
 
 export const issueNotifcationHandler = HttpApiBuilder.handler(
   NotificationApiSpecification,
@@ -24,15 +21,17 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
   'issueNotification',
   (req) =>
     Effect.gen(function* (_) {
-      const {notificationCypher} = req.payload
-      const privateKey = yield* _(fcmTokenPrivateKeyConfig)
-      const notificationSocketMessaging = yield* _(NotificationSocketMessaging)
+      const tokenOrCypher =
+        req.payload.notificationCypher ?? req.payload.notificationToken
+      if (!tokenOrCypher)
+        return yield* _(new SendingNotificationError({tokenInvalid: true}))
 
-      const {expoToken} = yield* _(
-        decryptNotificationToken({
-          privateKey,
-          notificationCypher,
-        }),
+      const notificationSocketMessaging = yield* _(NotificationSocketMessaging)
+      const vexlNotificationTokenService = yield* _(
+        VexlNotificationTokenService
+      )
+      const vexlNotificationToken = yield* _(
+        vexlNotificationTokenService.normalizeToExpoToken(tokenOrCypher),
         Effect.catchAll(
           () => new SendingNotificationError({tokenInvalid: false})
         )
@@ -40,8 +39,8 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
 
       yield* _(
         Effect.log(
-          'Processing notification cypher',
-          notificationCypher,
+          'Processing notification',
+          {vexlNotificationToken},
           'First try to push to socket'
         )
       )
@@ -49,8 +48,13 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
 
       const task = new NewChatMessageNoticeSendTask({
-        notificationToken: vexlNotificationTokenFromExpoToken(expoToken),
-        targetCypher: notificationCypher,
+        notificationToken: vexlNotificationToken,
+        targetCypher: tokenOrCypher,
+        // TODO #2124
+        // Only if the tokenOrCypher is a VexlNotificationToken, we set it as targetToken
+        targetToken: isVexlNotificationToken(tokenOrCypher)
+          ? tokenOrCypher
+          : undefined,
         sendNewChatMessageNotification:
           req.payload.sendNewChatMessageNotification,
         sentAt: unixMillisecondsNow(),

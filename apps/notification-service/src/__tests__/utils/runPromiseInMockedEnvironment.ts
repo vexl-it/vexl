@@ -2,7 +2,7 @@ import {NodeContext, NodeHttpServer} from '@effect/platform-node/index'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
-import {PublicKeyPemBase64E} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   GetPublicKeyResponse,
   IssueNotificationResponse,
@@ -31,13 +31,14 @@ import {
   Schema,
   type Scope,
 } from 'effect'
-import {createNotificationSecretHandler} from '../../routes/createNotificationSecretHandler'
-import {generateNotificationTokenHandler} from '../../routes/generateNotificationTokenHandler'
-import {invalidateNotificationSecretHandler} from '../../routes/invalidateNotificationSecretHandler'
-import {invalidateNotificationTokenHandler} from '../../routes/invalidateNotificationTokenHandler'
-import {updateNotificationInfoHandler} from '../../routes/updateNotificationInfoHandler'
+import {createNotificationSecretHandler} from '../../routes/notificationToken/createNotificationSecretHandler'
+import {generateNotificationTokenHandler} from '../../routes/notificationToken/generateNotificationTokenHandler'
+import {invalidateNotificationSecretHandler} from '../../routes/notificationToken/invalidateNotificationSecretHandler'
+import {invalidateNotificationTokenHandler} from '../../routes/notificationToken/invalidateNotificationTokenHandler'
+import {updateNotificationInfoHandler} from '../../routes/notificationToken/updateNotificationInfoHandler'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 import {PosgressDbLive} from '../../services/PostgressDb'
+import {VexlNotificationTokenService} from '../../services/VexlNotificationTokenService'
 
 export type MockedContexts =
   | RedisService
@@ -50,7 +51,7 @@ export type MockedContexts =
   | RateLimitingService
 
 // Dummy public key for stub handler
-const testPublicKey = Schema.decodeSync(PublicKeyPemBase64E)(
+const testPublicKey = Schema.decodeSync(PublicKeyPemBase64)(
   'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVidE9rYzJ0RmZ5VHhkVmxqSzlPQUZGYXFMMVRwU3FUaQpLbGpNenVPbjh5WjVUM3I4c04vdmUvbWdlUzg4ckNBZ29tVnJpK2pMdFU1WXQvVzlVbVozS1E9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K'
 )
 
@@ -145,6 +146,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(mockServiceLayers),
+  Layer.provideMerge(VexlNotificationTokenService.Live),
   Layer.provideMerge(dbServiceLayers),
   Layer.provideMerge(NodeContext.layer)
 )

@@ -1,4 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   RedisService,
@@ -11,7 +12,6 @@ import {
   ConnectionRedisRecord,
   StreamConnectionId,
   type ClientInfo,
-  type VexlNotificationToken,
 } from '../domain'
 import {MyManagerIdProvider} from './MyManagerIdProvider'
 

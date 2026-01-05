@@ -1,21 +1,21 @@
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {
+  isVexlNotificationToken,
+  type VexlNotificationToken,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   createNotificationTrackingId,
   type NotificationTrackingId,
 } from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import * as translations from '@vexl-next/localization/src/translations'
-import {
-  type ExpoV2CypherPayload,
-  extractPartsOfNotificationCypher,
-} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
-import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
+import {type PlatformName} from '@vexl-next/rest-api'
+import {type InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {type Array, Data, Effect, Option, Schema} from 'effect'
-import {
-  type NewChatMessageNoticeSendTask,
-  type VexlNotificationToken,
-  vexlNotificationTokenToExpoToken,
-} from '../NotificationSocketMessaging/domain'
+import {type NewChatMessageNoticeSendTask} from '../NotificationSocketMessaging/domain'
+import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
 import {type NotificationToSend} from './services/ExpoClientService'
 
 export class NoExpoTokenError extends Data.TaggedError('NoExpoTokenError')<{
@@ -56,15 +56,21 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
   {
     notificationToSend: Array.NonEmptyArray<NotificationToSend>
     trackingId: NotificationTrackingId
-    metadata: ExpoV2CypherPayload
+    metadata: {
+      locale: string
+      clientVersion: VersionCode
+      clientPlatform: PlatformName
+    }
   },
-  NoExpoTokenError | InvalidFcmCypherError
+  NoExpoTokenError | InvalidFcmCypherError,
+  VexlNotificationTokenService
 > =>
   Effect.gen(function* (_) {
+    const vexlNotificationTokenService = yield* _(VexlNotificationTokenService)
+
     const token = yield* _(
-      vexlNotificationTokenToExpoToken(task.notificationToken),
-      Effect.catchTag(
-        'NoSuchElementException',
+      vexlNotificationTokenService.getExpoToken(task.notificationToken),
+      Effect.catchAll(
         () =>
           new NoExpoTokenError({
             message: 'No Expo token for given Vexl notification token',
@@ -79,13 +85,16 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
 
     const targetCypher = task.targetCypher
 
-    const {data: metadata} = yield* _(
-      extractPartsOfNotificationCypher({
-        notificationCypher: targetCypher,
-      }),
-      Effect.catchTag(
-        'NoSuchElementException',
-        () => new InvalidFcmCypherError()
+    const metadata = yield* _(
+      vexlNotificationTokenService.getMetadata(
+        task.targetCypher ?? task.notificationToken
+      ),
+      Effect.catchAll(
+        () =>
+          new NoExpoTokenError({
+            message: 'Unable to find metadata for the token',
+            vexlToken: task.notificationToken,
+          })
       )
     )
 
@@ -99,7 +108,12 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
         new NewChatMessageNoticeNotificationData({
           trackingId: Option.some(trackingId),
           sentAt: unixMillisecondsNow(),
-          targetCypher,
+          targetCypher:
+            task.targetCypher && isVexlNotificationToken(task.targetCypher)
+              ? undefined
+              : // Backward compatibility - it's checked at the top
+                (task.targetCypher as NotificationCypher),
+          targetToken: task.targetToken,
           includesSystemNotification: true,
           systemNotificationSent: Option.some(sendSystemNotification),
         })
@@ -112,7 +126,12 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
         new NewChatMessageNoticeNotificationData({
           trackingId: Option.some(trackingId),
           sentAt: unixMillisecondsNow(),
-          targetCypher,
+          targetCypher:
+            // TODO remove #2124
+            !!targetCypher && !isVexlNotificationToken(targetCypher)
+              ? undefined
+              : (targetCypher as NotificationCypher),
+          targetToken: task.targetToken,
           includesSystemNotification: false,
           systemNotificationSent: Option.some(sendSystemNotification),
         })

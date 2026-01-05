@@ -1,3 +1,4 @@
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
 import {NoSuchElementException} from 'effect/Cause'
@@ -6,7 +7,6 @@ import {
   type ConnectionManagerChannelId,
   type NewChatMessageNoticeSendTask,
   type StreamOnlyChatMessageSendTask,
-  type VexlNotificationToken,
 } from './domain'
 import {LocalConnectionRegistry} from './services/LocalConnectionRegistry'
 import {MyManagerIdProvider} from './services/MyManagerIdProvider'

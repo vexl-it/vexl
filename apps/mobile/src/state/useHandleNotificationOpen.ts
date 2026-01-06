@@ -5,6 +5,7 @@ import {
   OpenBrowserLinkNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {Effect, Either, Option, Schema} from 'effect'
+import * as Notifications from 'expo-notifications'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {Linking} from 'react-native'
@@ -23,6 +24,32 @@ import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
 
 const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
+
+const lastHandledExpoNotificationDateAtom = atom<number | undefined>(undefined)
+
+const handleExpoNotificationResponseAtom = atom(
+  null,
+  (get, set, response: Notifications.NotificationResponse) =>
+    Effect.gen(function* (_) {
+      const notificationDate = response.notification.date
+
+      // Prevent re-navigation on app resume
+      // Notifications.getLastNotificationResponse() returns the last opened notification every time
+      // until the app is killed
+      if (get(lastHandledExpoNotificationDateAtom) === notificationDate) return
+      set(lastHandledExpoNotificationDateAtom, notificationDate)
+
+      const newChatMessageNoticeO = Schema.decodeUnknownOption(
+        NewChatMessageNoticeNotificationData
+      )(response.notification.request.content.data)
+
+      if (Option.isSome(newChatMessageNoticeO) && navigationRef.isReady()) {
+        if (!isOnMessagesList(navigationRef.getState())) {
+          navigationRef.navigate('InsideTabs', {screen: 'Messages'})
+        }
+      }
+    })
+)
 
 const reactOnNotificationOpenAtom = atom(
   null,
@@ -134,6 +161,9 @@ const reactOnNotificationOpenAtom = atom(
 
 export default function useHandleNotificationOpen(): void {
   const reactOnNotificationOpen = useSetAtom(reactOnNotificationOpenAtom)
+  const handleExpoNotificationResponse = useSetAtom(
+    handleExpoNotificationResponseAtom
+  )
 
   useAppState(
     useCallback(
@@ -141,19 +171,42 @@ export default function useHandleNotificationOpen(): void {
         if (appState !== 'active') return
         void (async () => {
           const initialNotification = await notifee.getInitialNotification()
-          if (initialNotification)
+
+          if (initialNotification) {
             await Effect.runPromise(
               reactOnNotificationOpen(initialNotification.notification)
             )
+            return
+          }
+
+          const lastResponse = Notifications.getLastNotificationResponse()
+
+          if (lastResponse) {
+            await Effect.runPromise(
+              handleExpoNotificationResponse(lastResponse)
+            )
+          }
         })()
       },
-      [reactOnNotificationOpen]
+      [reactOnNotificationOpen, handleExpoNotificationResponse]
     )
   )
+
   useEffect(() => {
     return notifee.onForegroundEvent(({type, detail}) => {
       if (type === EventType.PRESS && detail.notification)
         Effect.runFork(reactOnNotificationOpen(detail.notification))
     })
   }, [reactOnNotificationOpen])
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        Effect.runFork(handleExpoNotificationResponse(response))
+      }
+    )
+    return (): void => {
+      subscription.remove()
+    }
+  }, [handleExpoNotificationResponse])
 }

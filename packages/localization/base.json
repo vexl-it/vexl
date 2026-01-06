@@ -753,6 +753,8 @@
   "messages.messagePreviews.outgoing.APPROVE_CONTACT_REVEAL": "Phone number was shared",
   "messages.messagePreviews.outgoing.DISAPPROVE_CONTACT_REVEAL": "They declined to share their phone number",
   "messages.messagePreviews.outgoing.TRADE_CHECKLIST_UPDATE": "You updated trading checklist",
+  "messages.fallbackMessage.body": "You have received a new message in Vexl",
+  "messages.fallbackMessage.title": "New message in Vexl",
   "messages.deleteChat": "Delete chat",
   "messages.askToReveal": "Ask to reveal identity",
   "messages.blockUser": "Block user",

@@ -123,9 +123,7 @@ export type SymmetricKey = typeof SymmetricKey.Type
 export const IntendedConnectionLevel = Schema.Literal('FIRST', 'ALL')
 export type IntendedConnectionLevel = typeof IntendedConnectionLevel.Type
 
-export const GoldenAvatarType = Schema.Literal('BACKGROUND_AND_GLASSES').pipe(
-  orElseSchema('BACKGROUND_AND_GLASSES' as const)
-)
+export const GoldenAvatarType = Schema.Literal('BACKGROUND_AND_GLASSES')
 export type GoldenAvatarType = typeof GoldenAvatarType.Type
 
 export const PrivatePartRecordId = Schema.NumberFromString.pipe(

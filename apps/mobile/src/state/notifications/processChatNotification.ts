@@ -11,7 +11,7 @@ import {areNotificationsEnabledE} from '../../utils/notifications'
 import reportError, {reportErrorE} from '../../utils/reportError'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
 import {loadSession} from '../session/loadSession'
-import {getKeyHolderForNotificationCypherActionAtom} from './fcmCypherToKeyHolderAtom'
+import {getKeyHolderForNotificationTokenOrCypherActionAtom} from './fcmCypherToKeyHolderAtom'
 
 const processChatNotificationProcessed = (
   notificationTrackingId: NotificationTrackingId,
@@ -167,7 +167,7 @@ const processChatNotificationActionAtom = atom(
       // if (notification.includesSystemNotification) return false
 
       const inboxForCypher = set(
-        getKeyHolderForNotificationCypherActionAtom,
+        getKeyHolderForNotificationTokenOrCypherActionAtom,
         notification.targetCypher
       )
       if (!inboxForCypher) {

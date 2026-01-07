@@ -2,7 +2,6 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {orElseSchema} from '@vexl-next/generic-utils/src/effect-helpers/orElseSchema'
 import {Array, Either, Schema} from 'effect'
-import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
 import {IdNumeric} from '../utility/IdNumeric'
 import {IsoDatetimeString} from '../utility/IsoDatetimeString.brand'
 import {JSDateString} from '../utility/JSDateString.brand'
@@ -12,6 +11,7 @@ import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {ClubUuid} from './clubs'
 import {CurrencyCode} from './currency.brand'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
+import {VexlNotificationTokenNotTemporary} from './notifications/VexlNotificationToken'
 
 export const Sort = Schema.Literal(
   'LOWEST_FEE_FIRST',
@@ -175,7 +175,13 @@ export const OfferPublicPart = Schema.Struct({
   active: Schema.Boolean,
   groupUuids: Schema.Array(Schema.String),
   listingType: Schema.optional(ListingType),
-  fcmCypher: Schema.optional(NotificationCypher),
+  // Accepts both NotificationCypher (legacy encrypted) and VexlNotificationToken (new system)
+  // For backwards compatibility, vexlNotificationToken is also stored here
+  fcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  // New dedicated field for vexl notification token
+  vexlNotificationToken: Schema.optional(VexlNotificationTokenNotTemporary),
   authorClientVersion: Schema.optional(SemverString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
 })
@@ -233,7 +239,6 @@ export type OwnershipInfo = typeof OwnershipInfo.Type
 export const OneOfferInState = Schema.Struct({
   offerInfo: OfferInfo,
   flags: OfferFlags,
-  lastCommitedFcmToken: Schema.optional(ExpoNotificationToken),
   ownershipInfo: Schema.optional(OwnershipInfo),
 })
 export type OneOfferInState = typeof OneOfferInState.Type
@@ -241,7 +246,6 @@ export type OneOfferInState = typeof OneOfferInState.Type
 export const MyOfferInState = Schema.Struct({
   offerInfo: OfferInfo,
   flags: OfferFlags,
-  lastCommitedFcmToken: Schema.optional(ExpoNotificationToken),
   ownershipInfo: OwnershipInfo,
 })
 export type MyOfferInState = typeof MyOfferInState.Type

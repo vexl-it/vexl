@@ -2,10 +2,8 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatMessageId,
   type ChatMessage,
-  type MyNotificationTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import sendMessage from '@vexl-next/resources-utils/src/chat/sendMessage'
@@ -13,8 +11,8 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Schema} from 'effect/index'
-import * as O from 'fp-ts/Option'
+import {type NotificationTokenOrCypher} from '@vexl-next/resources-utils/src/notifications/callWithNotificationService'
+import {Effect, Option, Schema} from 'effect/index'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/lib/function'
@@ -22,24 +20,23 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
+import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatWithMessages} from '../domain'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
-import {
-  generateMyNotificationTokenInfoActionAtom,
-  updateMyNotificationTokenInfoInChat,
-} from './generateMyNotificationTokenInfoActionAtom'
+import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
 
 const FCM_TOKEN_UPDATE_MESSAGE_MINIMAL_VERSION =
   Schema.decodeSync(SemverString)('1.13.1')
 
 function createFcmCypherUpdateMessage(
   senderPublicKey: PublicKeyPemBase64,
-  info?: MyNotificationTokenInfo,
-  lastReceivedFcmCypher?: NotificationCypher
+  vexlToken?: VexlNotificationToken,
+  lastReceivedFcmCypher?: NotificationTokenOrCypher
 ): ChatMessage {
   return {
     uuid: generateChatMessageId(),
-    myFcmCypher: info?.cypher,
+    myFcmCypher: vexlToken,
+    myVexlToken: vexlToken,
     time: now(),
     myVersion: version,
     lastReceivedFcmCypher,
@@ -52,11 +49,7 @@ function createFcmCypherUpdateMessage(
 
 export const sendFcmCypherUpdateMessageActionAtom = atom(
   null,
-  (
-    get,
-    set,
-    notificationToken?: ExpoNotificationToken
-  ): ((chatWithMessages: ChatWithMessages) => T.Task<boolean>) => {
+  (get, set): ((chatWithMessages: ChatWithMessages) => T.Task<boolean>) => {
     return (chatWithMessages) => {
       return pipe(
         T.Do,
@@ -66,21 +59,20 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
           )
           return o
         }),
-        T.bind('notificationTokenInfo', () =>
+        T.bind('vexlNotificationToken', () =>
           effectToTask(
-            set(
-              generateMyNotificationTokenInfoActionAtom,
-              notificationToken,
-              chatWithMessages.chat.inbox.privateKey
-            )
+            set(generateVexlTokenActionAtom, {
+              keyHolder: chatWithMessages.chat.inbox.privateKey,
+            }).pipe(Effect.option)
           )
         ),
-        T.bind('messageToSend', ({notificationTokenInfo}) =>
+        T.bind('messageToSend', ({vexlNotificationToken}) =>
           T.of(
             createFcmCypherUpdateMessage(
               chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
-              O.toUndefined(notificationTokenInfo),
-              chatWithMessages.chat.otherSideFcmCypher
+              Option.getOrUndefined(vexlNotificationToken),
+              chatWithMessages.chat.otherSideVexlToken ??
+                chatWithMessages.chat.otherSideFcmCypher
             )
           )
         ),
@@ -93,12 +85,14 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
               receiverPublicKey: chatWithMessages.chat.otherSide.publicKey,
               message: messageToSend,
               notificationApi: get(apiAtom).notification,
-              theirNotificationCypher: chatWithMessages.chat.otherSideFcmCypher,
+              theirNotificationCypher:
+                chatWithMessages.chat.otherSideVexlToken ??
+                chatWithMessages.chat.otherSideFcmCypher,
               otherSideVersion: chatWithMessages.chat.otherSideVersion,
             })
           )
         ),
-        TE.map(({notificationTokenInfo}) => {
+        TE.map(({vexlNotificationToken}) => {
           const chatAtom = focusChatByInboxKeyAndSenderKey({
             inboxKey: chatWithMessages.chat.inbox.privateKey.publicKeyPemBase64,
             senderKey: chatWithMessages.chat.otherSide.publicKey,
@@ -106,7 +100,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
           set(
             chatAtom,
             updateMyNotificationTokenInfoInChat(
-              O.toUndefined(notificationTokenInfo)
+              Option.getOrUndefined(vexlNotificationToken)
             )
           )
         }),

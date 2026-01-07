@@ -90,18 +90,10 @@ export class SendingNotificationError extends Schema.TaggedError<SendingNotifica
   }
 ) {}
 
-// TODO
-// Create notification secret
-// Update notification info
-// Generate notification token
-// Invalidate notification token
-
-// QASCOM
-
 export class CreateNotificationSecretRequest extends Schema.Class<CreateNotificationSecretRequest>(
   'CreateNotificationSecretRequest'
 )({
-  expoNotificationToken: ExpoNotificationToken,
+  expoNotificationToken: Schema.optional(ExpoNotificationToken),
 }) {}
 
 export class CreateNotificationSecretResponse extends Schema.Class<CreateNotificationSecretResponse>(

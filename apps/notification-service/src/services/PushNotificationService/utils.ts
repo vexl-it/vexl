@@ -129,8 +129,8 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
           targetCypher:
             // TODO remove #2124
             !!targetCypher && !isVexlNotificationToken(targetCypher)
-              ? undefined
-              : (targetCypher as NotificationCypher),
+              ? targetCypher
+              : undefined,
           targetToken: task.targetToken,
           includesSystemNotification: false,
           systemNotificationSent: Option.some(sendSystemNotification),

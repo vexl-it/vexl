@@ -127,7 +127,8 @@ export default function revealIdentityActionAtom(
               receiverPublicKey: chat.otherSide.publicKey,
               message,
               notificationApi: api.notification,
-              theirNotificationCypher: chat.otherSideFcmCypher,
+              theirNotificationCypher:
+                chat.otherSideVexlToken ?? chat.otherSideFcmCypher,
               otherSideVersion: chat.otherSideVersion,
             })
           )

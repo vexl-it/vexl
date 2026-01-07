@@ -102,16 +102,16 @@ export class VexlNotificationTokenService extends Context.Tag(
               }
             }
 
-            const {data: metadata} = yield* _(
+            const parts = yield* _(
               extractPartsOfNotificationCypher({
                 notificationCypher: tokenOrCypher,
               })
             )
 
             return {
-              locale: metadata.locale,
-              clientVersion: metadata.clientVersion,
-              clientPlatform: metadata.clientPlatform,
+              locale: parts.data.locale,
+              clientVersion: parts.data.clientVersion,
+              clientPlatform: parts.data.clientPlatform,
             }
           }),
         getExpoToken: (vexlTokenOrCypher) =>

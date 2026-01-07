@@ -16,6 +16,7 @@ import {UserName} from './UserName.brand'
 import {RealLifeInfo} from './UserNameAndAvatar.brand'
 import {ClubUuid} from './clubs'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
+import {VexlNotificationTokenNotTemporary} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
 import {TradeChecklistUpdate} from './tradeChecklist'
 
@@ -87,8 +88,16 @@ export const ChatMessagePayload = Schema.Struct({
       fullPhoneNumber: Schema.optional(E164PhoneNumber),
     })
   ),
-  myFcmCypher: Schema.optional(NotificationCypher),
-  lastReceivedFcmCypher: Schema.optional(NotificationCypher),
+  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
+  myFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  lastReceivedFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  // New dedicated fields for vexl notification tokens
+  myVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  lastReceivedVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
@@ -119,8 +128,16 @@ export const ChatMessage = Schema.Struct({
   deanonymizedUser: Schema.optional(DeanonymizedUser),
   senderPublicKey: PublicKeyPemBase64,
   messageType: MessageType,
-  myFcmCypher: Schema.optional(NotificationCypher),
-  lastReceivedFcmCypher: Schema.optional(NotificationCypher),
+  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
+  myFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  lastReceivedFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  // New dedicated fields for vexl notification tokens
+  myVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  lastReceivedVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
@@ -188,8 +205,13 @@ export const Chat = Schema.Struct({
   tradeChecklistCalendarEventId: Schema.optional(CalendarEventId),
   otherSideVersion: Schema.optional(SemverString),
   lastReportedVersion: Schema.optional(SemverString),
-  otherSideFcmCypher: Schema.optional(NotificationCypher),
-  lastReportedFcmToken: Schema.optional(MyNotificationTokenInfo),
+  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
+  otherSideFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  // New dedicated fields for vexl notification tokens
+  otherSideVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  lastReportedVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
   lastReadByOtherSide: Schema.optional(UnixMilliseconds),
 })
 export type Chat = typeof Chat.Type
@@ -215,8 +237,16 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   text: Schema.Literal('-'),
   deanonymizedUser: Schema.optional(Schema.Undefined),
   image: Schema.optional(Schema.Undefined),
-  myFcmCypher: Schema.optional(NotificationCypher),
-  lastReceivedFcmCypher: Schema.optional(NotificationCypher),
+  // Accepts both NotificationCypher (legacy) and VexlNotificationToken (new)
+  myFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  lastReceivedFcmCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+  ),
+  // New dedicated fields for vexl notification tokens
+  myVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  lastReceivedVexlToken: Schema.optional(VexlNotificationTokenNotTemporary),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })

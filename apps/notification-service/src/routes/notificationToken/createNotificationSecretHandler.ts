@@ -50,7 +50,7 @@ export const createNotificationSecretHandler = HttpApiBuilder.handler(
         const now = new Date()
         yield* db.saveNotificationTokenSecret({
           secret,
-          expoNotificationToken: payload.expoNotificationToken,
+          expoNotificationToken: payload.expoNotificationToken ?? null,
           clientPlatform,
           clientVersion,
           clientAppSource,

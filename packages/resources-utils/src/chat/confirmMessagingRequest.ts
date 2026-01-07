@@ -7,14 +7,17 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
+import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {callWithNotificationService} from '../notifications/callWithNotificationService'
+import {
+  callWithNotificationService,
+  type NotificationTokenOrCypher,
+} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
@@ -31,8 +34,8 @@ function createApproveChatMessage({
   senderPublicKey: PublicKeyPemBase64
   approve: boolean
   myVersion: SemverString
-  myNotificationCypher?: NotificationCypher
-  lastReceivedNotificationCypher?: NotificationCypher
+  myNotificationCypher?: NotificationTokenOrCypher
+  lastReceivedNotificationCypher?: NotificationTokenOrCypher
 }): ChatMessage {
   return {
     uuid: generateChatMessageId(),
@@ -41,7 +44,12 @@ function createApproveChatMessage({
     time: now(),
     myVersion,
     senderPublicKey,
+    // TODO #2124
     myFcmCypher: myNotificationCypher,
+    myVexlToken:
+      myNotificationCypher && isVexlNotificationToken(myNotificationCypher)
+        ? myNotificationCypher
+        : undefined,
     lastReceivedFcmCypher: lastReceivedNotificationCypher,
     senderClubsUuids: [],
     commonFriends: [],
@@ -72,9 +80,9 @@ export default function confirmMessagingRequest({
   api: ChatApi
   approve: boolean
   myVersion: SemverString
-  myNotificationCypher?: NotificationCypher
-  lastReceivedNotificationCypher?: NotificationCypher
-  theirNotificationCypher?: NotificationCypher | undefined
+  myNotificationCypher?: NotificationTokenOrCypher
+  lastReceivedNotificationCypher?: NotificationTokenOrCypher
+  theirNotificationCypher?: NotificationTokenOrCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<

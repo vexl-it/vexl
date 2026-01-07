@@ -21,7 +21,7 @@ import {getApiPreset} from '../../api'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {processStreamOnlyNotificationActionAtom} from '../../state/chat/atoms/processStreamOnlyChatMessage'
-import {getKeyHolderForNotificationCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
+import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
 import {platform, versionCode} from '../environment'
 import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
@@ -60,7 +60,7 @@ const processMessageActionAtom = atom(
 
       const cypher = message.targetCypher
       const inboxForCypher = set(
-        getKeyHolderForNotificationCypherActionAtom,
+        getKeyHolderForNotificationTokenOrCypherActionAtom,
         cypher
       )
       if (!inboxForCypher) {

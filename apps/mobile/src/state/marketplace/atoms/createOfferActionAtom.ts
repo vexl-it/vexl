@@ -10,7 +10,6 @@ import {
   type OfferPublicPart,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts, {
   type ApiErrorWhileCreatingOffer,
@@ -27,12 +26,12 @@ import {Array, Effect, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import getCountryPrefix from '../../../utils/getCountryCode'
-import {getNotificationToken} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
-import addNotificationCypherToPublicPayloadActionAtom from '../../notifications/addNotificationTokenToPublicPayloadActionAtom'
+import {type NoVexlSecretError} from '../../notifications/actions/NoVexlSecretError'
+import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {offersAtom} from './offersState'
 
@@ -53,6 +52,7 @@ export const createOfferActionAtom = atom<
     | ApiErrorFetchingContactsForOffer
     | PrivatePayloadsConstructionError
     | ApiErrorWhileCreatingOffer
+    | NoVexlSecretError
     | SymmetricKeyGenerationError
     | PublicPartEncryptionError
     | NonCompatibleOfferVersionError
@@ -77,17 +77,16 @@ export const createOfferActionAtom = atom<
       Record.fromEntries
     )
 
-    const notificationToken = yield* _(taskToEffect(getNotificationToken()))
-
-    const publicPayloadWithNotificationToken = yield* _(
-      taskToEffect(
-        set(addNotificationCypherToPublicPayloadActionAtom, {
-          publicPart: payloadPublic,
-          notificationToken: Option.fromNullable(notificationToken),
-          keyHolder: params.offerKey,
-        })
-      )
+    const vexlNotificationToken = yield* _(
+      set(generateVexlTokenActionAtom, {keyHolder: params.offerKey})
     )
+
+    const publicPayloadWithNotificationToken = {
+      ...payloadPublic,
+      // backward compatibility #2124 remove once all clients are updated
+      fcmCypher: vexlNotificationToken,
+      vexlNotificationToken,
+    }
 
     const serverToClientHashesToHashedPhoneNumbersMap = yield* _(
       set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
@@ -97,7 +96,7 @@ export const createOfferActionAtom = atom<
       createNewOfferForMyContacts({
         offerApi: api.offer,
         offerId: params.offerId,
-        publicPart: publicPayloadWithNotificationToken.publicPart,
+        publicPart: publicPayloadWithNotificationToken,
         countryPrefix: getCountryPrefix(session.phoneNumber),
         serverToClientHashesToHashedPhoneNumbersMap,
         contactApi: api.contact,
@@ -120,10 +119,6 @@ export const createOfferActionAtom = atom<
         intendedConnectionLevel,
         intendedClubs,
       },
-      lastCommitedFcmToken:
-        publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-          ? (notificationToken ?? undefined)
-          : undefined,
       flags: {
         reported: false,
       },

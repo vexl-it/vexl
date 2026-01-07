@@ -1,7 +1,6 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {sendMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendMessagingRequest'
 import {Array, Effect, Record} from 'effect'
-import * as O from 'fp-ts/Option'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -13,9 +12,9 @@ import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
+import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
 import {version} from './../../../utils/environment'
-import {generateMyNotificationTokenInfoActionAtom} from './generateMyNotificationTokenInfoActionAtom'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
 
 const sendRequestActionAtom = atom(
@@ -42,14 +41,9 @@ const sendRequestActionAtom = atom(
           offerId: originOffer.offerInfo.offerId,
         })
       )
-      const encryptedToken = yield* _(
-        set(
-          generateMyNotificationTokenInfoActionAtom,
-          undefined,
-          inbox.privateKey
-        )
+      const notificationToken = yield* _(
+        set(generateVexlTokenActionAtom, {keyHolder: inbox.privateKey})
       )
-
       const message = yield* _(
         sendMessagingRequest({
           text,
@@ -61,7 +55,7 @@ const sendRequestActionAtom = atom(
           toPublicKey: originOffer.offerInfo.publicPart.offerPublicKey,
           otherSideVersion:
             originOffer.offerInfo.publicPart.authorClientVersion,
-          myNotificationCypher: O.toUndefined(encryptedToken)?.cypher,
+          myNotificationCypher: notificationToken,
           lastReceivedNotificationCypher:
             originOffer.offerInfo.publicPart.fcmCypher,
           goldenAvatarType,
@@ -74,7 +68,7 @@ const sendRequestActionAtom = atom(
       return set(upsertChatForTheirOfferActionAtom, {
         inbox: {privateKey: inbox.privateKey},
         initialMessage: {state: 'sent', message},
-        sentFcmTokenInfo: O.toUndefined(encryptedToken),
+        sentVexlNotificationToken: notificationToken,
         offer: originOffer,
       })
     })

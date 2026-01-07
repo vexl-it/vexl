@@ -31,11 +31,11 @@ import ChatRequestPreview from './ChatRequestPreview'
 import {PHOTO_AND_INFO_PHOTO_TOP_HEIGHT} from './OtherSideNamePhotoAndInfo'
 
 function NotificationTokenDebug({chat}: {chat: Chat}): React.ReactElement {
-  const [lastReportedTokenS, setLastReportedTokenS] = useState('none')
-  const [lastReceivedTokenS, setLastReceviedTokenS] = useState('none')
+  const [lastReportedTokens, setLastReportedTokens] = useState('none')
+  const [lastReceivedTokens, setLastReceviedTokens] = useState('none')
 
   useEffect(() => {
-    const lastReportedToken = chat.lastReportedFcmToken?.cypher
+    const lastReportedToken = chat.lastReportedVexlToken
     const lastReceivedToken = chat.otherSideFcmCypher
 
     try {
@@ -46,10 +46,10 @@ function NotificationTokenDebug({chat}: {chat: Chat}): React.ReactElement {
           }),
           Option.getOrElse(() => 'none')
         )
-        setLastReportedTokenS(JSON.stringify(parts, null, 2))
-      } else setLastReportedTokenS('none')
+        setLastReportedTokens(JSON.stringify(parts, null, 2))
+      } else setLastReportedTokens('none')
     } catch (e) {
-      setLastReportedTokenS(`error: ${(e as any)?.message ?? 'unknown'}`)
+      setLastReportedTokens(`error: ${(e as any)?.message ?? 'unknown'}`)
     }
 
     try {
@@ -60,20 +60,20 @@ function NotificationTokenDebug({chat}: {chat: Chat}): React.ReactElement {
           }),
           Option.getOrElse(() => 'none')
         )
-        setLastReceviedTokenS(JSON.stringify(parts, null, 2))
-      } else setLastReceviedTokenS('none')
+        setLastReceviedTokens(JSON.stringify(parts, null, 2))
+      } else setLastReceviedTokens('none')
     } catch (e) {
-      setLastReceviedTokenS(`error: ${(e as any)?.message ?? 'unknown'}`)
+      setLastReceviedTokens(`error: ${(e as any)?.message ?? 'unknown'}`)
     }
-  }, [chat, setLastReportedTokenS, setLastReceviedTokenS])
+  }, [chat, setLastReportedTokens, setLastReceviedTokens])
 
   return (
     <>
-      <Text>Last reported cypher: {lastReportedTokenS}</Text>
-      <Text> gotNotificationToken: {lastReceivedTokenS}</Text>
+      <Text>Last reported cypher: {lastReportedTokens}</Text>
+      <Text> gotNotificationToken: {lastReceivedTokens}</Text>
       <Text>
         last reported token:{' '}
-        {JSON.stringify(chat.lastReportedFcmToken, null, 2)}
+        {JSON.stringify(chat.lastReportedVexlToken, null, 2)}
       </Text>
     </>
   )

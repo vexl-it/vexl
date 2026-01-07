@@ -125,6 +125,14 @@ export default function addMessagesToChats(
                   ? lastReceivedMessage?.message?.myFcmCypher
                   : oneChat.chat.otherSideFcmCypher
               })(),
+              otherSideVexlToken: (() => {
+                if (fcmCypherUpdateFromOtherSide)
+                  return fcmCypherUpdateFromOtherSide.message.myVexlToken
+
+                return lastReceivedMessage?.message?.myVexlToken
+                  ? lastReceivedMessage?.message?.myVexlToken
+                  : oneChat.chat.otherSideVexlToken
+              })(),
               otherSideVersion:
                 lastReceivedMessage?.message.myVersion ??
                 oneChat.chat.otherSideVersion,

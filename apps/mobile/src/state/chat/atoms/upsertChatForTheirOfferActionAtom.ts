@@ -2,8 +2,8 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   generateChatId,
   type Inbox,
-  type MyNotificationTokenInfo,
 } from '@vexl-next/domain/src/general/messaging'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 import {flow} from 'fp-ts/lib/function'
@@ -28,13 +28,13 @@ import messagingStateAtom from './messagingStateAtom'
 function createNewChat({
   inbox,
   initialMessage,
-  sentFcmTokenInfo,
+  sentVexlToken,
   offer,
   clubsWithMembers,
 }: {
   inbox: Inbox
   initialMessage: ChatMessageWithState
-  sentFcmTokenInfo?: MyNotificationTokenInfo
+  sentVexlToken?: VexlNotificationToken
   offer: OneOfferInState
   clubsWithMembers: ClubWithMembers[]
 }): ChatWithMessages {
@@ -70,8 +70,12 @@ function createNewChat({
       },
       isUnread: false,
       showInfoBar: true,
-      lastReportedFcmToken: sentFcmTokenInfo,
       showVexlbotInitialMessage: true,
+      otherSideVexlToken: offer.offerInfo.publicPart.vexlNotificationToken,
+      otherSideFcmCypher:
+        offer.offerInfo.publicPart.vexlNotificationToken ??
+        offer.offerInfo.publicPart.fcmCypher,
+      lastReportedVexlToken: sentVexlToken,
       showVexlbotNotifications: true,
       lastReportedVersion,
       otherSideVersion,
@@ -99,12 +103,12 @@ const upsertChatForTheirOfferActionAtom = atom(
     {
       inbox,
       initialMessage,
-      sentFcmTokenInfo,
+      sentVexlNotificationToken,
       offer,
     }: {
       inbox: Inbox
       initialMessage: ChatMessageWithState
-      sentFcmTokenInfo?: MyNotificationTokenInfo
+      sentVexlNotificationToken?: VexlNotificationToken
       offer: OneOfferInState
     }
   ) => {
@@ -120,7 +124,7 @@ const upsertChatForTheirOfferActionAtom = atom(
         existingChatAtom,
         flow(
           addMessageToChat(initialMessage),
-          updateMyNotificationTokenInfoInChat(sentFcmTokenInfo)
+          updateMyNotificationTokenInfoInChat(sentVexlNotificationToken)
         )
       )
       return existingChat.chat
@@ -129,7 +133,7 @@ const upsertChatForTheirOfferActionAtom = atom(
         inbox,
         initialMessage,
         offer,
-        sentFcmTokenInfo,
+        sentVexlToken: sentVexlNotificationToken,
         clubsWithMembers,
       })
       set(messagingStateAtom, (old) =>

@@ -1,5 +1,6 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MyNotificationTokenInfo} from '@vexl-next/domain/src/general/messaging'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {ecnryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {Effect, Option} from 'effect/index'
@@ -59,13 +60,13 @@ export const generateMyNotificationTokenInfoActionAtom = atom(
 )
 
 export function updateMyNotificationTokenInfoInChat(
-  myNotificationTokenInfo?: MyNotificationTokenInfo
+  myNotificationTokenInfo?: VexlNotificationToken
 ): (chat: ChatWithMessages) => ChatWithMessages {
   return (chat) => ({
     ...chat,
     chat: {
       ...chat.chat,
-      lastReportedFcmToken: myNotificationTokenInfo,
+      lastReportedVexlToken: myNotificationTokenInfo,
     },
   })
 }

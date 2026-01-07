@@ -90,6 +90,7 @@ export default function createSubmitChecklistUpdateActionAtom(
                 message,
                 notificationApi: api.notification,
                 theirNotificationCypher:
+                  chatWithMessages.chat.otherSideVexlToken ??
                   chatWithMessages.chat.otherSideFcmCypher,
                 otherSideVersion: chatWithMessages.chat.otherSideVersion,
               })

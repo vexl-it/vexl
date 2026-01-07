@@ -65,10 +65,12 @@ export default function createNewChatsFromFirstMessagesActionAtom({
             // If i received the message
             lastMessage.state === 'received' ||
             lastMessage.state === 'receivedButRequiresNewerVersion'
-              ? lastMessage.message.myFcmCypher
+              ? (lastMessage.message.myVexlToken ??
+                lastMessage.message.myFcmCypher)
               : // If the offer is theirs
                 !inboxOffer?.ownershipInfo?.adminId
-                ? inboxOffer?.offerInfo.publicPart.fcmCypher
+                ? (inboxOffer?.offerInfo.publicPart.vexlNotificationToken ??
+                  inboxOffer?.offerInfo.publicPart.fcmCypher)
                 : undefined
 
           const otherSideClubsids =

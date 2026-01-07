@@ -1,4 +1,3 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
@@ -8,7 +7,6 @@ import {
   type OneOfferInState,
   type SymmetricKey,
 } from '@vexl-next/domain/src/general/offers'
-import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {
   type DecryptingOfferError,
   type NonCompatibleOfferVersionError,
@@ -20,14 +18,12 @@ import updateOffer, {
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect, Option, pipe, Schema} from 'effect'
+import {Effect, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {getNotificationToken} from '../../../utils/notifications'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../clubs/atom/refreshClubsActionAtom'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
 import {updateAndReencryptSingleOfferConnectionActionAtom} from '../../connections/atom/offerToConnectionsAtom'
-import addNotificationCypherToPublicPayloadActionAtom from '../../notifications/addNotificationTokenToPublicPayloadActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {reencryptSingleOfferMissingOnServerWhenEditingActionAtom} from './offersMissingOnServer'
 import {offersAtom} from './offersState'
@@ -49,10 +45,7 @@ export const updateOfferActionAtom = atom<
       intendedClubs: readonly ClubUuid[]
       updatePrivateParts: boolean
       onProgress?: (s: OfferEncryptionProgress) => void
-    } & (
-      | {updateFcmCypher: false}
-      | {updateFcmCypher: true; offerKey: PrivateKeyHolder}
-    ),
+    },
   ],
   Effect.Effect<
     OneOfferInState,
@@ -76,31 +69,14 @@ export const updateOfferActionAtom = atom<
       intendedConnectionLevel,
     } = params
 
-    const notificationToken = yield* _(taskToEffect(getNotificationToken()))
-
     if (params.onProgress)
       params.onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
-
-    const publicPayloadWithNotificationToken = !params.updateFcmCypher
-      ? {
-          publicPart: payloadPublic,
-          tokenSuccessfullyAdded: false,
-        }
-      : yield* _(
-          taskToEffect(
-            set(addNotificationCypherToPublicPayloadActionAtom, {
-              publicPart: payloadPublic,
-              notificationToken: Option.fromNullable(notificationToken),
-              keyHolder: params.offerKey,
-            })
-          )
-        )
 
     const offerInfo = yield* _(
       updateOffer({
         offerApi: api.offer,
         adminId,
-        publicPayload: publicPayloadWithNotificationToken.publicPart,
+        publicPayload: payloadPublic,
         symmetricKey,
         intendedConnectionLevel,
         intendedClubs: intendedClubs ?? [],
@@ -110,7 +86,7 @@ export const updateOfferActionAtom = atom<
           pipe(
             set(reencryptSingleOfferMissingOnServerWhenEditingActionAtom, {
               adminId,
-              publicPayload: publicPayloadWithNotificationToken.publicPart,
+              publicPayload: payloadPublic,
               intendedConnectionLevel,
               intendedClubs,
               onProgress: params.onProgress,
@@ -128,10 +104,6 @@ export const updateOfferActionAtom = atom<
       flags: {
         reported: false,
       },
-      lastCommitedFcmToken:
-        publicPayloadWithNotificationToken.tokenSuccessfullyAdded
-          ? (notificationToken ?? undefined)
-          : undefined,
       ownershipInfo: {
         adminId,
         intendedConnectionLevel,

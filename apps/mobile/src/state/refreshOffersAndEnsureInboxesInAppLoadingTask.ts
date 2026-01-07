@@ -106,8 +106,6 @@ const recreateInboxAndUpdateOfferAtom = atom(
             symmetricKey,
             adminId,
             intendedConnectionLevel,
-            updateFcmCypher: true,
-            offerKey: inbox.privateKey,
             updatePrivateParts: false,
           })
         )

@@ -15,6 +15,7 @@ import {PlatformName} from '@vexl-next/rest-api'
 import {InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {Effect, Option, pipe, Schema, String} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
+import {type NotificationTokenOrCypher} from './callWithNotificationService'
 
 const EXPO_V2_CYPHER_PREFIX = 'EXPO_V2'
 
@@ -66,11 +67,17 @@ export function ecnryptNotificationToken({
   })
 }
 
+export interface ExtractedNotificationParts {
+  type: 'expoV2'
+  data: ExpoV2CypherPayload
+}
+
 export function extractPartsOfNotificationCypher({
   notificationCypher,
 }: {
-  notificationCypher: NotificationCypher
-}): Option.Option<{type: 'expoV2'; data: ExpoV2CypherPayload}> {
+  notificationCypher: NotificationTokenOrCypher
+}): Option.Option<ExtractedNotificationParts> {
+  // Otherwise try to parse as encrypted cypher
   return pipe(
     Option.some(notificationCypher),
     Option.filter(String.startsWith(EXPO_V2_CYPHER_PREFIX)),

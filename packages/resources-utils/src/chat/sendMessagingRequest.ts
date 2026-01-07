@@ -8,7 +8,6 @@ import {
   generateChatMessageId,
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   type FriendLevel,
   type GoldenAvatarType,
@@ -25,7 +24,10 @@ import {type NotificationApi} from '@vexl-next/rest-api/src/services/notificatio
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Effect, type ParseResult} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {callWithNotificationService} from '../notifications/callWithNotificationService'
+import {
+  callWithNotificationService,
+  type NotificationTokenOrCypher,
+} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
@@ -42,8 +44,8 @@ function createRequestChatMessage({
   friendLevel,
 }: {
   text: string
-  myNotificationCypher?: NotificationCypher
-  lastReceivedNotificationCypher?: NotificationCypher
+  myNotificationCypher?: NotificationTokenOrCypher
+  lastReceivedNotificationCypher?: NotificationTokenOrCypher
   senderPublicKey: PublicKeyPemBase64
   myVersion: SemverString
   goldenAvatarType?: GoldenAvatarType
@@ -90,11 +92,11 @@ export function sendMessagingRequest({
   text: string
   fromKeypair: PrivateKeyHolder
   toPublicKey: PublicKeyPemBase64
-  myNotificationCypher?: NotificationCypher
-  lastReceivedNotificationCypher?: NotificationCypher
+  myNotificationCypher?: NotificationTokenOrCypher
+  lastReceivedNotificationCypher?: NotificationTokenOrCypher
   api: ChatApi
   myVersion: SemverString
-  theirNotificationCypher?: NotificationCypher | undefined
+  theirNotificationCypher?: NotificationTokenOrCypher | undefined
   notificationApi: NotificationApi
   otherSideVersion?: SemverString | undefined
   goldenAvatarType?: GoldenAvatarType

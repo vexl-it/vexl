@@ -33,7 +33,8 @@ const deleteAllInboxesActionAtom = atom(null, (get, set) => {
             myVersion: version,
           },
           senderKeypair: oneChat.chat.inbox.privateKey,
-          theirNotificationCypher: oneChat.chat.otherSideFcmCypher,
+          theirNotificationCypher:
+            oneChat.chat.otherSideVexlToken ?? oneChat.chat.otherSideFcmCypher,
           notificationApi: api.notification,
           otherSideVersion: oneChat.chat.otherSideVersion,
         }),

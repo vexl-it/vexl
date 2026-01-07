@@ -44,7 +44,12 @@ function updateFcmToken(
     if (message.state === 'received') {
       return {
         ...chat,
-        chat: {...chat.chat, otherSideFcmCypher: message.message.myFcmCypher},
+        chat: {
+          ...chat.chat,
+          otherSideFcmCypher:
+            message.message.myVexlToken ?? message.message.myFcmCypher,
+          otherSideVexlToken: message.message.myVexlToken,
+        },
       }
     }
     return chat

@@ -930,7 +930,6 @@ export const offerFormMolecule = molecule(() => {
             ? offer.ownershipInfo.intendedConnectionLevel
             : 'FIRST',
           intendedClubs: offer.ownershipInfo.intendedClubs,
-          updateFcmCypher: false,
           ...(offer.offerInfo.privatePart.intendedClubs && {
             intendedClubs: [...offer.offerInfo.privatePart.intendedClubs],
           }),
@@ -1034,7 +1033,6 @@ export const offerFormMolecule = molecule(() => {
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,
           intendedConnectionLevel,
           intendedClubs: [...intendedClubs],
-          updateFcmCypher: false,
           updatePrivateParts: targetRecipientsHasChanged,
           onProgress: (progress) => {
             set(progressModal.showStep, {

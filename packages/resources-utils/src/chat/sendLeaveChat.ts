@@ -6,13 +6,15 @@ import {
   type ChatMessage,
   type ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
-import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
 import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {callWithNotificationService} from '../notifications/callWithNotificationService'
+import {
+  callWithNotificationService,
+  type NotificationTokenOrCypher,
+} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
 import {messageToNetwork} from './utils/messageIO'
@@ -34,7 +36,7 @@ export default function sendLeaveChat({
   receiverPublicKey: PublicKeyPemBase64
   message: ChatMessage
   senderKeypair: PrivateKeyHolder
-  theirNotificationCypher?: NotificationCypher | undefined
+  theirNotificationCypher?: NotificationTokenOrCypher | undefined
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<

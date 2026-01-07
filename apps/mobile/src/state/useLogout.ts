@@ -18,6 +18,7 @@ import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
 import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from './connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
 import {myOffersAtom} from './marketplace/atoms/myOffers'
+import {invalidateVexlSecretActionAtom} from './notifications/actions/invalidateVexlSecretActionAtom'
 import {sessionAtom} from './session'
 
 async function failSilently<T>(promise: Promise<T>): Promise<
@@ -86,6 +87,9 @@ export const logoutActionAtom = atom(null, async (get, set) => {
 
     // Notification badge
     await failSilently(notifee.setBadgeCount(0))
+
+    // Invalidate vexl notification secret on server (before clearing local storage)
+    await failSilently(Effect.runPromise(set(invalidateVexlSecretActionAtom)))
 
     // session
     set(sessionAtom, O.none)

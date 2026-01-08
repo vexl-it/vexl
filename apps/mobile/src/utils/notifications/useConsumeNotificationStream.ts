@@ -16,12 +16,12 @@ import {
 } from 'effect'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {getNotificationTokenE} from '.'
 import {getApiPreset} from '../../api'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {processStreamOnlyNotificationActionAtom} from '../../state/chat/atoms/processStreamOnlyChatMessage'
 import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
+import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
 import {platform, versionCode} from '../environment'
 import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
@@ -58,7 +58,7 @@ const processMessageActionAtom = atom(
 
       yield* _(Console.log('Received notification stream message', message))
 
-      const cypher = message.targetCypher
+      const cypher = message.targetToken ?? message.targetCypher
       const inboxForCypher = set(
         getKeyHolderForNotificationTokenOrCypherActionAtom,
         cypher
@@ -131,14 +131,14 @@ const processMessageActionAtom = atom(
 
 const startListeningToNotificationStreamActionAtom = atom(null, (get, set) =>
   Effect.gen(function* (_) {
-    const notificationToken = yield* _(getNotificationTokenE())
+    const notificationSecret = get(vexlNotificationTokenAtom).secret
     // We don't have a notification token, so do nothing
-    if (!notificationToken) return Effect.void
+    if (!notificationSecret) return Effect.void
 
     const rpc = yield* _(makeClient)
     return yield* rpc
       .listenToNotifications({
-        notificationToken,
+        notificationToken: notificationSecret,
         platform,
         version: versionCode,
       })

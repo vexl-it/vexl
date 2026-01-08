@@ -14,8 +14,8 @@ import {vexlNotificationTokenAtom} from './vexlNotificationTokenAtom'
 export const refreshVexlTokenMetadataTaskId = registerInAppLoadingTask({
   name: 'refreshVexlTokenMetadata',
   requirements: {
-    requiresUserLoggedIn: true,
     runOn: 'resume',
+    requiresUserLoggedIn: true,
   },
   dependsOn: [{id: ensureVexlSecretExistsTaskId}],
   task: (store) =>

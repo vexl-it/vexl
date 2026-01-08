@@ -1,4 +1,3 @@
-import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
 import {Array, Effect} from 'effect'
@@ -15,7 +14,6 @@ import {reportErrorE} from '../../utils/reportError'
 import {inboxesAtom} from '../chat/atoms/messagingStateAtom'
 import {generateVexlTokenActionAtom} from '../notifications/actions/generateVexlTokenActionAtom'
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
-import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../notifications/fcmCypherToKeyHolderAtom'
 import {refreshOffersAndEnsureInboxesTaskId} from '../refreshOffersAndEnsureInboxesInAppLoadingTask'
 import {myOffersAtom} from './atoms/myOffers'
 import {updateOfferActionAtom} from './atoms/updateOfferActionAtom'
@@ -24,24 +22,7 @@ const doesOfferNeedsUpdateNotificationToken = atom(
   null,
   (get, set): ((oneOffer: MyOfferInState) => boolean) => {
     return (oneOffer) => {
-      // No fcm cypher in offer, update it because fcmToken is clearly defined (no need to handle if fcm token)
-      if (!oneOffer.offerInfo.publicPart.fcmCypher) return true
-
-      const fcmCypher = oneOffer.offerInfo.publicPart.fcmCypher
-
-      // If it's a vexl notification token, metadata is managed server-side
-      // We only need to check if it's registered locally
-      if (isVexlNotificationToken(fcmCypher)) {
-        const keyHolder = set(
-          getKeyHolderForNotificationTokenOrCypherActionAtom,
-          fcmCypher
-        )
-        // If not registered locally, need update
-        return !keyHolder
-      } else {
-        // always update if it's not a vexl notification token
-        return true
-      }
+      return !!oneOffer.offerInfo.publicPart.vexlNotificationToken
     }
   }
 )

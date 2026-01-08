@@ -1,4 +1,4 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type NonEmptyArray} from 'effect/Array'
 import {type NoSuchElementException} from 'effect/Cause'
 import {
@@ -19,7 +19,7 @@ export interface SocketRegistryOperations {
   ) => Effect.Effect<void>
   removeConnection: (id: StreamConnectionId) => Effect.Effect<void>
   findConnectionForNotificationToken: (
-    id: VexlNotificationToken
+    id: VexlNotificationTokenSecret
   ) => Effect.Effect<NonEmptyArray<ConnectionToClient>, NoSuchElementException>
 }
 

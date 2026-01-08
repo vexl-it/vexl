@@ -1,4 +1,4 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {RedisPubSubService} from '@vexl-next/server-utils/src/RedisPubSubService'
 import {NoSuchElementException} from 'effect/Cause'
@@ -39,7 +39,7 @@ export class NotificationSocketMessaging extends Context.Tag(
       const sendMessageTaskManager = yield* _(SendMessageTasksManager)
 
       const findManagerIdsForOpenConnections = (
-        token: VexlNotificationToken,
+        token: VexlNotificationTokenSecret,
         minimalClientVersion?: VersionCode
       ): Effect.Effect<
         Array.NonEmptyArray<ConnectionManagerChannelId>,

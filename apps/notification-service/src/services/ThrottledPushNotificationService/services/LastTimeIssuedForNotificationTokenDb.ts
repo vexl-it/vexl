@@ -1,4 +1,4 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   UnixMilliseconds,
   unixMillisecondsFromNow,
@@ -13,18 +13,18 @@ import {type NoSuchElementException} from 'effect/Cause'
 const KEY_PREFIX = 'notification-service:last-issued:'
 const TTL_MS = Duration.toMillis(Duration.decode('1 day'))
 
-const createRedisKey = (token: VexlNotificationToken): string =>
+const createRedisKey = (token: VexlNotificationTokenSecret): string =>
   `${KEY_PREFIX}${token}`
 
 export interface LastTimeIssuedForNotificationTokenDbOperations {
   getLastTimeIssuedForNotificationToken: (
-    token: VexlNotificationToken
+    token: VexlNotificationTokenSecret
   ) => Effect.Effect<UnixMilliseconds, RedisError | NoSuchElementException>
   deleteLastTimeIssuedForNotificationToken: (
-    token: VexlNotificationToken
+    token: VexlNotificationTokenSecret
   ) => Effect.Effect<void, RedisError>
   setLastTimeIssuedForNotificationToken: (
-    token: VexlNotificationToken,
+    token: VexlNotificationTokenSecret,
     time: UnixMilliseconds
   ) => Effect.Effect<void, RedisError>
 }

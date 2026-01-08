@@ -1,4 +1,4 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
@@ -31,7 +31,7 @@ export interface ThrottledPushNotificationServiceOperations {
     MqServiceError | ExpoSdkError | ParseError | RedisError | RedisLockError
   >
   getPendingNotificationsAndCancelThrottleTimeout: (
-    token: VexlNotificationToken
+    token: VexlNotificationTokenSecret
   ) => Effect.Effect<
     readonly SupportedPushNotificationTask[],
     RedisError | RedisLockError
@@ -109,7 +109,7 @@ export class ThrottledPushNotificationService extends Context.Tag(
             Effect.provideService(RedisService, redisService)
           ),
         getPendingNotificationsAndCancelThrottleTimeout: (
-          token: VexlNotificationToken
+          token: VexlNotificationTokenSecret
         ) =>
           Effect.gen(function* (_) {
             yield* _(

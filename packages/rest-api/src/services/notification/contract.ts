@@ -2,7 +2,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
-  VexlNotificationTokenNotTemporary,
+  VexlNotificationToken,
   VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
@@ -25,10 +25,10 @@ export class IssueNotificationRequest extends Schema.Class<IssueNotificationRequ
 )({
   // todo: #2124 remove this
   notificationCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+    Schema.Union(NotificationCypher, VexlNotificationToken)
   ),
   // todo: #2124 remove nullOr and temporary tokens
-  notificationToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  notificationToken: Schema.optional(VexlNotificationToken),
   /**
    * Wether to send a system notification indicating there is a new chat notification.
    */
@@ -54,10 +54,10 @@ export class IssueStreamOnlyMessageRequest extends Schema.Class<IssueStreamOnlyM
 )({
   // todo: #2124 remove this
   notificationCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+    Schema.Union(NotificationCypher, VexlNotificationToken)
   ),
   // todo: #2124 remove nullOr and temporary tokens
-  notificationToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  notificationToken: Schema.optional(VexlNotificationToken),
   message: StreamOnlyMessageCypher,
   minimalOtherSideVersion: Schema.optional(VersionCode),
 }) {}
@@ -118,14 +118,14 @@ export class GenerateNotificationTokenRequest extends Schema.Class<GenerateNotif
 export class GenerateNotificationTokenResponse extends Schema.Class<GenerateNotificationTokenResponse>(
   'GenerateNotificationTokenResponse'
 )({
-  token: VexlNotificationTokenNotTemporary,
+  token: VexlNotificationToken,
 }) {}
 
 export class InvalidateNotificationTokenRequest extends Schema.Class<InvalidateNotificationTokenRequest>(
   'InvalidateNotificationTokenRequest'
 )({
   secret: VexlNotificationTokenSecret,
-  tokenToInvalidate: VexlNotificationTokenNotTemporary,
+  tokenToInvalidate: VexlNotificationToken,
 }) {}
 
 export class InvalidateNotificationSecretRequest extends Schema.Class<InvalidateNotificationSecretRequest>(

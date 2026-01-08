@@ -1,5 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {isVexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   type NotificationStreamError,
   type NotificationStreamMessage,
@@ -17,7 +17,7 @@ import {
 } from 'effect/index'
 import {type Scope} from 'effect/Scope'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
-import {VexlNotificationTokenService} from '../../VexlNotificationTokenService'
+import {createTemporaryVexlNotificationTokenSecret} from '../../VexlNotificationTokenService/utils'
 import {
   type ClientInfo,
   newStreamConnectionId,
@@ -46,16 +46,12 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
       listenToNotifications: (connectionInfo) =>
         Stream.unwrapScoped(
           Effect.gen(function* (_) {
-            const notificationTokenService = yield* _(
-              VexlNotificationTokenService
-            )
-
             // TODO #2124 - use token from info directly
-            const vexlNotificationToken = isVexlNotificationToken(
+            const vexlNotificationToken = isVexlNotificationTokenSecret(
               connectionInfo.notificationToken
             )
               ? connectionInfo.notificationToken
-              : notificationTokenService.createTemporaryVexlNotificationToken(
+              : createTemporaryVexlNotificationTokenSecret(
                   connectionInfo.notificationToken
                 )
 

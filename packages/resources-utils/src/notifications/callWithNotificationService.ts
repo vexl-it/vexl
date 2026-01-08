@@ -1,7 +1,7 @@
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   isVexlNotificationToken,
-  type VexlNotificationTokenNotTemporary,
+  type VexlNotificationToken,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   SemverString,
@@ -17,7 +17,7 @@ const FE_VERSION_SUPPORTING_V2_NOTIFICATIONS =
 // Union type for notification token - accepts both legacy cypher and new vexl token
 export type NotificationTokenOrCypher =
   | NotificationCypher
-  | typeof VexlNotificationTokenNotTemporary.Type
+  | VexlNotificationToken
 
 interface NotificationArgs {
   otherSideVersion?: SemverString | undefined

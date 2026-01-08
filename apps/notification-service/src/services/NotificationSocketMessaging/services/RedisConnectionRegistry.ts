@@ -1,5 +1,5 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   RedisService,
@@ -24,7 +24,7 @@ const createConnectionIdToClientInfoKey = (
 ): string => `${CONNECTION_ID_TO_MANAGER_ID}${connectionId}`
 
 const createTokenToConnectionIdKey = (
-  notificationToken: VexlNotificationToken
+  notificationToken: VexlNotificationTokenSecret
 ): string => `${NOTIFICATION_TOKENS_TO_CONNECTION_IDS}${notificationToken}`
 
 // Connection expiration time in milliseconds (5 minutes)
@@ -37,17 +37,17 @@ interface RedisConnectionRegistryOperations {
   ) => Effect.Effect<ConnectionRedisRecord, UnexpectedServerError>
   keepAlive: (
     connectionId: StreamConnectionId,
-    notificationToken: VexlNotificationToken
+    notificationToken: VexlNotificationTokenSecret
   ) => Effect.Effect<void, UnexpectedServerError>
   getConnectionsForToken: (
-    notificationToken: VexlNotificationToken
+    notificationToken: VexlNotificationTokenSecret
   ) => Effect.Effect<
     Array.NonEmptyArray<ConnectionRedisRecord>,
     NoSuchElementException | UnexpectedServerError
   >
   removeConnection: (
     connectionId: StreamConnectionId,
-    notificationToken: VexlNotificationToken
+    notificationToken: VexlNotificationTokenSecret
   ) => Effect.Effect<void>
 }
 
@@ -87,7 +87,7 @@ export class RedisConnectionRegistry extends Context.Tag(
         notificationToken,
         connectionId,
       }: {
-        notificationToken: VexlNotificationToken
+        notificationToken: VexlNotificationTokenSecret
         connectionId: StreamConnectionId
       }): Effect.Effect<void, ParseError | RedisError, never> =>
         redis.insertToSet(StreamConnectionId)(
@@ -97,7 +97,7 @@ export class RedisConnectionRegistry extends Context.Tag(
         )
 
       const getConnectionsIds = (
-        notificationToken: VexlNotificationToken
+        notificationToken: VexlNotificationTokenSecret
       ): Effect.Effect<
         readonly [StreamConnectionId, ...StreamConnectionId[]],
         ParseError | RedisError | NoSuchElementException
@@ -110,7 +110,7 @@ export class RedisConnectionRegistry extends Context.Tag(
         notificationToken,
         connectionId,
       }: {
-        notificationToken: VexlNotificationToken
+        notificationToken: VexlNotificationTokenSecret
         connectionId: StreamConnectionId
       }): Effect.Effect<void, ParseError | RedisError, never> =>
         redis.deleteFromSet(StreamConnectionId)(

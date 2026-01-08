@@ -1,4 +1,7 @@
-import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VexlNotificationTokenSecret,
+  type VexlNotificationToken,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
@@ -28,7 +31,7 @@ const THROTTLED_NOTIFICATIONS_PROCESSING_QUEUE_KEY =
 
 const {EnqueueTask, producerLayer, consumerLayer} = makeMqService(
   THROTTLED_NOTIFICATIONS_PROCESSING_QUEUE_KEY,
-  Schema.Struct({token: VexlNotificationToken})
+  Schema.Struct({token: VexlNotificationTokenSecret})
 )
 
 export const scheduleThrottledNotificationProducerLayer = producerLayer

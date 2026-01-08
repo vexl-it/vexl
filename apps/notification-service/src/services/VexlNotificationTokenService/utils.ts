@@ -1,25 +1,25 @@
-import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {
+  VEXL_NOTIFICATION_TOKEN_SECRET_TEMPORARY_PREFIX,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {Option, Schema} from 'effect/index'
 
-const TEMPORARAY_VEXL_NOTIFICATION_TOKEN_PREFIX = 'temp_vexl_nt_'
-export const createTemporaryVexlNotificationToken = (
+export const createTemporaryVexlNotificationTokenSecret = (
   expoToken: ExpoNotificationToken
-): VexlNotificationToken => {
-  return Schema.decodeSync(VexlNotificationToken)(
-    `${TEMPORARAY_VEXL_NOTIFICATION_TOKEN_PREFIX}${expoToken}`
+): VexlNotificationTokenSecret => {
+  return Schema.decodeSync(VexlNotificationTokenSecret)(
+    `${VEXL_NOTIFICATION_TOKEN_SECRET_TEMPORARY_PREFIX}${expoToken}`
   )
 }
 
 export const getExpoTokenFromTemporaryVexlNotificationToken = (
-  vexlToken: VexlNotificationToken
+  vexlToken: VexlNotificationTokenSecret
 ): Option.Option<ExpoNotificationToken> => {
-  if (vexlToken.startsWith(TEMPORARAY_VEXL_NOTIFICATION_TOKEN_PREFIX)) {
+  if (vexlToken.startsWith(VEXL_NOTIFICATION_TOKEN_SECRET_TEMPORARY_PREFIX)) {
     return Option.some(
-      vexlToken.slice(
-        TEMPORARAY_VEXL_NOTIFICATION_TOKEN_PREFIX.length
-      ) as ExpoNotificationToken
-    )
+      vexlToken.slice(VEXL_NOTIFICATION_TOKEN_SECRET_TEMPORARY_PREFIX.length)
+    ).pipe(Option.flatMap(Schema.decodeOption(ExpoNotificationToken)))
   }
   return Option.none()
 }

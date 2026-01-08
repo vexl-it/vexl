@@ -31,9 +31,12 @@ export const issueNotifcationHandler = HttpApiBuilder.handler(
         VexlNotificationTokenService
       )
       const vexlNotificationToken = yield* _(
-        vexlNotificationTokenService.normalizeToExpoToken(tokenOrCypher),
-        Effect.catchAll(
-          () => new SendingNotificationError({tokenInvalid: false})
+        vexlNotificationTokenService.normalizeToVexlNotificationTokenSecret(
+          tokenOrCypher
+        ),
+        Effect.catchTag(
+          'NoSuchElementException',
+          (e) => new SendingNotificationError({tokenInvalid: true})
         )
       )
 

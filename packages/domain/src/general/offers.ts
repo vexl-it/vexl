@@ -11,7 +11,7 @@ import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {ClubUuid} from './clubs'
 import {CurrencyCode} from './currency.brand'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
-import {VexlNotificationTokenNotTemporary} from './notifications/VexlNotificationToken'
+import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 
 export const Sort = Schema.Literal(
   'LOWEST_FEE_FIRST',
@@ -178,10 +178,10 @@ export const OfferPublicPart = Schema.Struct({
   // Accepts both NotificationCypher (legacy encrypted) and VexlNotificationToken (new system)
   // For backwards compatibility, vexlNotificationToken is also stored here
   fcmCypher: Schema.optional(
-    Schema.Union(NotificationCypher, VexlNotificationTokenNotTemporary)
+    Schema.Union(NotificationCypher, VexlNotificationToken)
   ),
   // New dedicated field for vexl notification token
-  vexlNotificationToken: Schema.optional(VexlNotificationTokenNotTemporary),
+  vexlNotificationToken: Schema.optional(VexlNotificationToken),
   authorClientVersion: Schema.optional(SemverString),
   goldenAvatarType: Schema.optional(GoldenAvatarType),
 })

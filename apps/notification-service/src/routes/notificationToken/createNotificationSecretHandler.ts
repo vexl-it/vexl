@@ -1,6 +1,9 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VEXL_NOTIFICATION_TOKEN_SECRET_PREFIX,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {MissingCommonHeadersError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
@@ -12,7 +15,9 @@ const generateSecret = (): Effect.Effect<
   VexlNotificationTokenSecret,
   UnexpectedServerError
 > =>
-  Schema.decode(VexlNotificationTokenSecret)(generateUuid()).pipe(
+  Schema.decode(VexlNotificationTokenSecret)(
+    `${VEXL_NOTIFICATION_TOKEN_SECRET_PREFIX}${generateUuid()}`
+  ).pipe(
     Effect.catchAll(() =>
       Effect.fail(
         new UnexpectedServerError({

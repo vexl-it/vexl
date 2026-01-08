@@ -2,7 +2,7 @@ import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/genera
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   isVexlNotificationToken,
-  type VexlNotificationToken,
+  type VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   createNotificationTrackingId,
@@ -20,7 +20,7 @@ import {type NotificationToSend} from './services/ExpoClientService'
 
 export class NoExpoTokenError extends Data.TaggedError('NoExpoTokenError')<{
   message: string
-  vexlToken: VexlNotificationToken
+  vexlToken: VexlNotificationTokenSecret
 }> {}
 
 export function getNotificationContentByLocale(locale: string): {

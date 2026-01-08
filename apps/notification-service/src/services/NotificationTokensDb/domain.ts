@@ -1,3 +1,7 @@
+import {
+  VexlNotificationToken,
+  VexlNotificationTokenSecretNotTemporary,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
@@ -18,7 +22,7 @@ export class NotificationTokenRecord extends Schema.Class<NotificationTokenRecor
   'NotificationTokenRecord'
 )({
   id: NotificationTokenRecordId,
-  token: Schema.String,
+  token: VexlNotificationToken,
   secretId: NotificationSecretRecordId,
 }) {}
 
@@ -26,7 +30,7 @@ export class NotificationSecretRecord extends Schema.Class<NotificationSecretRec
   'NotificationSecretRecord'
 )({
   id: NotificationSecretRecordId,
-  secret: Schema.String,
+  secret: VexlNotificationTokenSecretNotTemporary,
   expoNotificationToken: Schema.NullOr(ExpoNotificationToken),
   clientPlatform: PlatformName,
   clientVersion: VersionCode,

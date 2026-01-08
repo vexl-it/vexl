@@ -1,4 +1,4 @@
-import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   RedisError,
@@ -10,7 +10,7 @@ import {SupportedPushNotificationTask} from '../../../domain'
 const KEY_PREFIX = 'notification-service:waiting-notifications:'
 const TTL_MS = Duration.toMillis(Duration.decode('1 day'))
 
-const createRedisKey = (token: VexlNotificationToken): string =>
+const createRedisKey = (token: VexlNotificationTokenSecret): string =>
   `${KEY_PREFIX}${token}`
 
 export interface NotificationWaitingToBeIssuedForNotificationTokenOperations {
@@ -19,7 +19,7 @@ export interface NotificationWaitingToBeIssuedForNotificationTokenOperations {
   ) => Effect.Effect<void, RedisError>
 
   getAndClearWaitingListForToken: (
-    notificationToken: VexlNotificationToken
+    notificationToken: VexlNotificationTokenSecret
   ) => Effect.Effect<readonly SupportedPushNotificationTask[], RedisError>
 }
 

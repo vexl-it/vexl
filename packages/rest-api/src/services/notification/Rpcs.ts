@@ -3,7 +3,10 @@ import {Rpc, RpcGroup} from '@effect/rpc'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VexlNotificationToken,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
@@ -13,14 +16,17 @@ import {Schema} from 'effect'
 
 export const NotificationsStreamClientInfo = Schema.Struct({
   version: VersionCode,
-  notificationToken: VexlNotificationToken,
+  notificationToken: VexlNotificationTokenSecret,
   platform: PlatformName,
 })
 
 // todo #2124
 export const NotificationsStreamClientInfoOld = Schema.Struct({
   version: VersionCode,
-  notificationToken: Schema.Union(ExpoNotificationToken, VexlNotificationToken),
+  notificationToken: Schema.Union(
+    ExpoNotificationToken,
+    VexlNotificationTokenSecret
+  ),
   platform: PlatformName,
 })
 export type NotificationsStreamClientInfo =

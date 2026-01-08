@@ -1,6 +1,9 @@
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
-import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VexlNotificationToken,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 
 import {
   createNotificationTrackingId,
@@ -26,7 +29,7 @@ import {Option, pipe, Schema, String, type Effect} from 'effect/index'
 const EXPO_PREFIX = 'expo-'
 
 export const ClientInfo = Schema.Struct({
-  notificationToken: VexlNotificationToken,
+  notificationToken: VexlNotificationTokenSecret,
   version: VersionCode,
   platform: PlatformName,
 })
@@ -91,7 +94,7 @@ export class NewChatMessageNoticeSendTask extends Schema.TaggedClass<NewChatMess
   id: Schema.optionalWith(SendMessageTaskId, {
     default: () => newSendMessageTaskId(),
   }),
-  notificationToken: VexlNotificationToken,
+  notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - remove this since notification cypher is not used anymore
   targetCypher: Schema.optional(
     Schema.Union(NotificationCypher, VexlNotificationToken)
@@ -126,7 +129,7 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
   id: Schema.optionalWith(SendMessageTaskId, {
     default: () => newSendMessageTaskId(),
   }),
-  notificationToken: VexlNotificationToken,
+  notificationToken: VexlNotificationTokenSecret,
   // todo #2124 - Remove
   targetCypher: Schema.optional(
     Schema.Union(NotificationCypher, VexlNotificationToken)

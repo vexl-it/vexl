@@ -1,55 +1,48 @@
-import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   isVexlNotificationToken,
+  isVexlNotificationTokenSecret,
   type VexlNotificationToken,
+  type VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   decryptNotificationToken,
   extractPartsOfNotificationCypher,
 } from '@vexl-next/resources-utils/src/notifications/notificationTokenActions'
 import {type PlatformName} from '@vexl-next/rest-api'
-import {type InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
-import {type NoSuchElementException} from 'effect/Cause'
+import {NoSuchElementException} from 'effect/Cause'
 import {Context, Effect, Layer} from 'effect/index'
 import {fcmTokenPrivateKeyConfig} from '../../configs'
 import {NotificationTokensDb} from '../NotificationTokensDb'
 import {
-  createTemporaryVexlNotificationToken,
+  createTemporaryVexlNotificationTokenSecret,
   getExpoTokenFromTemporaryVexlNotificationToken,
 } from './utils'
 
 export interface VexlNotificationTokenServiceOperations {
-  createTemporaryVexlNotificationToken: (
-    expoToken: ExpoNotificationToken
-  ) => VexlNotificationToken
-
   getExpoToken: (
-    // TODO #2124 - remove types for decrypting token
-    vexlTokenOrCypher: VexlNotificationToken | NotificationCypher
+    vexlTokenOrCypher: VexlNotificationTokenSecret | NotificationCypher
   ) => Effect.Effect<
     ExpoNotificationToken,
-    | NoSuchElementException
-    | UnexpectedServerError
-    // TODO #2124 - remove types for decrypting token
-    | CryptoError
-    | InvalidFcmCypherError
+    NoSuchElementException | UnexpectedServerError
   >
-  normalizeToExpoToken: (
+
+  normalizeToVexlNotificationTokenSecret: (
     tokenOrCypher: VexlNotificationToken | NotificationCypher
   ) => Effect.Effect<
-    VexlNotificationToken,
-    | NoSuchElementException
-    | UnexpectedServerError
-    | CryptoError
-    | InvalidFcmCypherError,
-    VexlNotificationTokenService
+    VexlNotificationTokenSecret,
+    NoSuchElementException | UnexpectedServerError,
+    never
   >
+
   getMetadata: (
-    tokenOrCypher: VexlNotificationToken | NotificationCypher
+    tokenOrCypher:
+      | VexlNotificationTokenSecret
+      | NotificationCypher
+      | VexlNotificationToken
   ) => Effect.Effect<
     {
       locale: string
@@ -71,25 +64,42 @@ export class VexlNotificationTokenService extends Context.Tag(
       const tokenDb = yield* _(NotificationTokensDb)
 
       return {
-        normalizeToExpoToken: (tokenOrCypher) =>
+        normalizeToVexlNotificationTokenSecret: (tokenOrCypher) =>
           Effect.gen(function* (_) {
             if (isVexlNotificationToken(tokenOrCypher)) {
-              return tokenOrCypher
+              return yield* _(
+                tokenDb.findSecretByNotificationToken(tokenOrCypher),
+                Effect.flatten,
+                Effect.map((one) => one.secret)
+              )
             }
 
-            const expoToken = yield* _(
+            return yield* _(
               decryptNotificationToken({
-                privateKey,
                 notificationCypher: tokenOrCypher,
+                privateKey,
               }),
-              Effect.map((r) => r.expoToken)
+              Effect.map((r) =>
+                createTemporaryVexlNotificationTokenSecret(r.expoToken)
+              ),
+              Effect.catchAll((e) => new NoSuchElementException())
             )
-
-            return createTemporaryVexlNotificationToken(expoToken)
           }),
-        createTemporaryVexlNotificationToken,
+
         getMetadata: (tokenOrCypher) =>
           Effect.gen(function* (_) {
+            if (isVexlNotificationTokenSecret(tokenOrCypher)) {
+              const data = yield* _(
+                tokenDb.findSecretBySecretValue(tokenOrCypher),
+                Effect.flatten
+              )
+              return {
+                locale: data.clientLanguage,
+                clientVersion: data.clientVersion,
+                clientPlatform: data.clientPlatform,
+              }
+            }
+
             if (isVexlNotificationToken(tokenOrCypher)) {
               const data = yield* _(
                 tokenDb.findSecretByNotificationToken(tokenOrCypher),
@@ -116,13 +126,13 @@ export class VexlNotificationTokenService extends Context.Tag(
           }),
         getExpoToken: (vexlTokenOrCypher) =>
           Effect.gen(function* (_) {
-            if (isVexlNotificationToken(vexlTokenOrCypher)) {
+            if (isVexlNotificationTokenSecret(vexlTokenOrCypher)) {
               return yield* _(
                 getExpoTokenFromTemporaryVexlNotificationToken(
                   vexlTokenOrCypher
                 ),
                 Effect.catchTag('NoSuchElementException', () =>
-                  tokenDb.findSecretByNotificationToken(vexlTokenOrCypher).pipe(
+                  tokenDb.findSecretBySecretValue(vexlTokenOrCypher).pipe(
                     Effect.flatten,
                     Effect.flatMap((r) =>
                       Effect.fromNullable(r.expoNotificationToken)
@@ -135,7 +145,15 @@ export class VexlNotificationTokenService extends Context.Tag(
                 decryptNotificationToken({
                   notificationCypher: vexlTokenOrCypher,
                   privateKey,
-                }),
+                }).pipe(
+                  Effect.catchAll(
+                    (e) =>
+                      new UnexpectedServerError({
+                        message: 'Failed to decrypt notification token',
+                        cause: e,
+                      })
+                  )
+                ),
                 Effect.map((r) => r.expoToken)
               )
             }

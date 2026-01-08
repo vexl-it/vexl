@@ -23,12 +23,22 @@ export const issueStreamOnlyMessageHandler = HttpApiBuilder.handler(
         const vexlNotificationTokenService = yield* _(
           VexlNotificationTokenService
         )
+
         const vexlNotificationToken = yield* _(
-          vexlNotificationTokenService.normalizeToExpoToken(tokenOrCypher),
-          Effect.catchAll(
-            () => new SendingNotificationError({tokenInvalid: false})
+          vexlNotificationTokenService.normalizeToVexlNotificationTokenSecret(
+            tokenOrCypher
+          ),
+          Effect.catchTag(
+            'NoSuchElementException',
+            (e) => new SendingNotificationError({tokenInvalid: true})
           )
         )
+        // const vexlNotificationToken = yield* _(
+        //   vexlNotificationTokenService.normalizeToExpoToken(tokenOrCypher),
+        //   Effect.catchAll(
+        //     () => new SendingNotificationError({tokenInvalid: false})
+        //   )
+        // )
 
         const socketMessaging = yield* _(NotificationSocketMessaging)
 

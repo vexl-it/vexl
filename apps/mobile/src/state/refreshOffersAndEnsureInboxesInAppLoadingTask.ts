@@ -37,7 +37,7 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
     )
 
     if (Array.isEmptyArray(adminIds)) {
-      return yield* _(Effect.fail({_tag: 'noOffersToRefresh'}))
+      return yield* _(Effect.fail({_tag: 'noOffersToRefresh' as const}))
     }
 
     const offerIdsOnServer = yield* _(api.offer.refreshOffer({adminIds}))
@@ -54,6 +54,7 @@ const refreshOffersActionAtom = atom(null, (get, set) => {
     Effect.catchAll((e) => {
       if (e._tag === 'noOffersToRefresh') {
         console.info('🦋 No offers to refresh')
+        return Effect.void
       } else {
         console.error('🦋 🚨 Error while refreshing offers', e._tag)
         reportError('warn', new Error('Error while refreshing offers'), {e})
@@ -168,7 +169,10 @@ export const refreshOffersAndEnsureInboxesTaskId = registerInAppLoadingTask({
         pipe(
           refreshOffers,
           Effect.andThen(checkOfferInboxesExistAndRecreateIfNot),
-          Effect.mapError((e) => new InAppLoadingTaskError({cause: e}))
+          Effect.mapError((e) => {
+            console.log('Error asdf', JSON.stringify(e, null, 2))
+            return new InAppLoadingTaskError({cause: e})
+          })
         )
       )
     }),

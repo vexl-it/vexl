@@ -1,5 +1,5 @@
 import {PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/index'
-import {VexlNotificationTokenNotTemporary} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -9,7 +9,7 @@ export const vexlTokenToKeyHolderAtom = atomWithParsedMmkvStorage(
   {data: {}},
   Schema.Struct({
     data: Schema.Record({
-      key: VexlNotificationTokenNotTemporary,
+      key: VexlNotificationToken,
       value: PrivateKeyHolder,
     }),
   })
@@ -24,7 +24,7 @@ export const registerVexlTokenActionAtom = atom(
       vexlToken,
       keyHolder,
     }: {
-      vexlToken: typeof VexlNotificationTokenNotTemporary.Type
+      vexlToken: VexlNotificationToken
       keyHolder: PrivateKeyHolder
     }
   ): void => {
@@ -39,7 +39,7 @@ export const getKeyHolderForVexlTokenActionAtom = atom(
   (
     get,
     set,
-    vexlToken: typeof VexlNotificationTokenNotTemporary.Type
+    vexlToken: VexlNotificationToken
   ): PrivateKeyHolder | undefined => {
     return get(vexlTokenToKeyHolderAtom).data[vexlToken]
   }

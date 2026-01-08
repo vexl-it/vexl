@@ -11,7 +11,6 @@ import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
 import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
-import InAppLoadingTasksIndicator from './components/InAppLoadingTasksIndicator'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import PhoneNumberHashBugMigration from './components/PhoneNumberHashBugMigration'
 import PreventScreenshots from './components/PreventScreenshots'
@@ -79,7 +78,7 @@ function App(): React.ReactElement {
                 <OverlayInfoScreen>
                   <GestureHandlerRootView style={{flex: 1}}>
                     <RootNavigation />
-                    <InAppLoadingTasksIndicator />
+                    {/* <InAppLoadingTasksIndicator /> */}
                   </GestureHandlerRootView>
                 </OverlayInfoScreen>
               </PhoneNumberHashBugMigration>

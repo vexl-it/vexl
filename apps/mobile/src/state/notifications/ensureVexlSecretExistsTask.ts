@@ -12,7 +12,7 @@ export const ensureVexlSecretExistsTaskId = registerInAppLoadingTask({
   name: 'ensureVexlSecretExists',
   requirements: {
     requiresUserLoggedIn: true,
-    runOn: 'start',
+    runOn: 'resume',
   },
   task: (store) =>
     Effect.gen(function* () {

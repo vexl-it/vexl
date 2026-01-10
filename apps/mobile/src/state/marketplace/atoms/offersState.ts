@@ -24,7 +24,7 @@ export const offersStateAtom = atomWithParsedMmkvStorage(
     contactOffersNextPageParam: undefined,
     clubOffersNextPageParam: {},
     offers: [],
-    lastUpdatedAt1: MINIMAL_DATE,
+    lastUpdatedAt2: MINIMAL_DATE,
   },
   OffersState
 )

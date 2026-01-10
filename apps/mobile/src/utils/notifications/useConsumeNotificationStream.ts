@@ -1,5 +1,6 @@
 import {Socket} from '@effect/platform'
 import {RpcClient, RpcSerialization} from '@effect/rpc'
+import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   type NotificationStreamMessage,
   Rpcs,
@@ -14,7 +15,7 @@ import {
   Schedule,
   Stream,
 } from 'effect'
-import {atom, useSetAtom} from 'jotai'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {getApiPreset} from '../../api'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
@@ -129,42 +130,42 @@ const processMessageActionAtom = atom(
     )
 )
 
-const startListeningToNotificationStreamActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
-    const notificationSecret = get(vexlNotificationTokenAtom).secret
-    // We don't have a notification token, so do nothing
-    if (!notificationSecret) return Effect.void
-
-    const rpc = yield* _(makeClient)
-    return yield* rpc
-      .listenToNotifications({
-        notificationToken: notificationSecret,
-        platform,
-        version: versionCode,
-      })
-      .pipe(
-        Stream.runForEach((message) => set(processMessageActionAtom, message)),
-        Effect.exit,
-        Effect.tap((e) =>
-          Console.log(
-            'Notification stream ended. Retrying...',
-            JSON.stringify(e, null, 2)
-          )
-        ),
-        Effect.repeat({
-          schedule: __DEV__
-            ? Schedule.spaced(1000) // In dev retry quickly
-            : Schedule.exponential(1000).pipe(Schedule.jittered), // In prod exponential backoff with jitter to prevent thundering herd
+const startListeningToNotificationStreamActionAtom = atom(
+  null,
+  (get, set, notificationSecret: VexlNotificationTokenSecret) =>
+    Effect.gen(function* (_) {
+      const rpc = yield* _(makeClient)
+      return yield* rpc
+        .listenToNotifications({
+          notificationToken: notificationSecret,
+          platform,
+          version: versionCode,
         })
-      )
-  }).pipe(
-    Effect.scoped,
-    Effect.provide(ProtocoSocketLive),
-    Effect.runFork,
-    (fiber) => () => {
-      Effect.runFork(Fiber.interrupt(fiber))
-    }
-  )
+        .pipe(
+          Stream.runForEach((message) =>
+            set(processMessageActionAtom, message)
+          ),
+          Effect.exit,
+          Effect.tap((e) =>
+            Console.log(
+              'Notification stream ended. Retrying...',
+              JSON.stringify(e, null, 2)
+            )
+          ),
+          Effect.repeat({
+            schedule: __DEV__
+              ? Schedule.spaced(1000) // In dev retry quickly
+              : Schedule.exponential(1000).pipe(Schedule.jittered), // In prod exponential backoff with jitter to prevent thundering herd
+          })
+        )
+    }).pipe(
+      Effect.scoped,
+      Effect.provide(ProtocoSocketLive),
+      Effect.runFork,
+      (fiber) => () => {
+        Effect.runFork(Fiber.interrupt(fiber))
+      }
+    )
 )
 
 export function useConsumeNotificationStream(): void {
@@ -172,13 +173,16 @@ export function useConsumeNotificationStream(): void {
     startListeningToNotificationStreamActionAtom
   )
 
+  const {secret} = useAtomValue(vexlNotificationTokenAtom)
+
   useAppState(
     useCallback(
       (appState) => {
         if (appState !== 'active') return
-        return startListeningToNotificationStream()
+        if (!secret) return
+        return startListeningToNotificationStream(secret)
       },
-      [startListeningToNotificationStream]
+      [startListeningToNotificationStream, secret]
     )
   )
 }

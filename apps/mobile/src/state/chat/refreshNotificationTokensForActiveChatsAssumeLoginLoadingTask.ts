@@ -2,14 +2,16 @@ import {taskToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEi
 import {Array, Effect, flow, pipe} from 'effect/index'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
+import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
 import allChatsAtom from './atoms/allChatsAtom'
 import {sendFcmCypherUpdateMessageActionAtom} from './atoms/refreshNotificationTokensActionAtom'
 import {type ChatWithMessages} from './domain'
+import isChatOpen from './utils/isChatOpen'
 
 function doesOtherSideNeedsToBeNotifiedAboutTokenChange(
   chat: ChatWithMessages
 ): boolean {
-  return !chat.chat.lastReportedVexlToken
+  return isChatOpen(chat) && !chat.chat.lastReportedVexlToken
 }
 export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
   registerInAppLoadingTask({
@@ -18,6 +20,7 @@ export const refreshNotificationTokensForActiveChatsAssumeLoginLoadingTaskId =
       requiresUserLoggedIn: true,
       runOn: 'resume',
     },
+    dependsOn: [{id: ensureVexlSecretExistsTaskId}],
     task: (store) =>
       Effect.gen(function* (_) {
         console.info(

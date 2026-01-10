@@ -187,7 +187,11 @@ function OfferInfo({
               <RerequestInfo chat={chatForOffer} />
             )}
         </YStack>
-        {!!(!!enableHiddenFeatures || preferences.showOfferDetail) && (
+        {!!(
+          !!enableHiddenFeatures ||
+          preferences.showOfferDetail ||
+          __DEV__
+        ) && (
           <Text
             onPress={() => {
               Clipboard.setString(JSON.stringify(offer, null, 2))

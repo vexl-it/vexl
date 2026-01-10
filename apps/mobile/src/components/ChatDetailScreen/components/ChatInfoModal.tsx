@@ -137,7 +137,7 @@ function ChatInfoModal(): React.ReactElement | null {
           <Stack mt="$4" mb="$7">
             <ChatRequestPreview mode="offerFirst" />
           </Stack>
-          {!!showOfferDetail && (
+          {!!(!!showOfferDetail || __DEV__) && (
             <>
               <Text>
                 Last reported version: {chat.lastReportedVersion ?? 'none'} :

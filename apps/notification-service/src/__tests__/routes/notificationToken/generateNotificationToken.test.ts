@@ -1,4 +1,7 @@
-import {VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {
+  VEXL_NOTIFICATION_TOKEN_SECRET_TEMPORARY_PREFIX,
+  VexlNotificationTokenSecret,
+} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -29,7 +32,8 @@ const validHeaders = makeCommonHeaders({
 })
 
 const nonExistentSecret = Schema.decodeSync(VexlNotificationTokenSecret)(
-  '550e8400-e29b-41d4-a716-446655440000'
+  VEXL_NOTIFICATION_TOKEN_SECRET_TEMPORARY_PREFIX +
+    '550e8400-e29b-41d4-a716-446655440000'
 )
 
 describe('GenerateNotificationToken', () => {

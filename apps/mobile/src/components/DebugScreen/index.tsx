@@ -238,7 +238,7 @@ function DebugScreen(): React.ReactElement {
               text="Clear offers state"
               onPress={() => {
                 store.set(offersStateAtom, {
-                  lastUpdatedAt1: MINIMAL_DATE,
+                  lastUpdatedAt2: MINIMAL_DATE,
                   offers: [],
                   contactOffersNextPageParam: undefined,
                   clubOffersNextPageParam: {},

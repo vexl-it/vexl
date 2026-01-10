@@ -68,7 +68,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
           contacts: removedContactOfferIds,
         },
       }),
-      lastUpdatedAt1: updateStartedAt,
+      lastUpdatedAt2: updateStartedAt,
     }))
 
     yield* _(

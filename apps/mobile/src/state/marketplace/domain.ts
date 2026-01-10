@@ -41,7 +41,7 @@ export class NotOfferFromContactNetworkError extends Schema.TaggedError<NotOffer
 
 export const OffersState = Schema.Struct({
   // changedName to force clients to refetch all offers after update of the offers location shape
-  lastUpdatedAt1: Schema.optionalWith(IsoDatetimeString, {
+  lastUpdatedAt2: Schema.optionalWith(IsoDatetimeString, {
     default: () => MINIMAL_DATE,
   }),
   contactOffersNextPageParam: Schema.optional(Base64String),

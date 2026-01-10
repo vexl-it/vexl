@@ -22,7 +22,7 @@ const doesOfferNeedsUpdateNotificationToken = atom(
   null,
   (get, set): ((oneOffer: MyOfferInState) => boolean) => {
     return (oneOffer) => {
-      return !!oneOffer.offerInfo.publicPart.vexlNotificationToken
+      return !oneOffer.offerInfo.publicPart.vexlNotificationToken
     }
   }
 )
@@ -50,13 +50,14 @@ const updateOfferNotificationTokenActionAtom = atom(
       const vexlNotificationToken = yield* _(
         set(generateVexlTokenActionAtom, {keyHolder: offerKeyHolder.privateKey})
       )
+
       return yield* _(
         set(updateOfferActionAtom, {
           payloadPublic: {
+            ...offer.offerInfo.publicPart,
             vexlNotificationToken,
             // backward compatibility #2124 remove once all clients are updated
             fcmCypher: vexlNotificationToken,
-            ...offer.offerInfo.publicPart,
           },
           intendedClubs: offer.ownershipInfo.intendedClubs,
           symmetricKey: offer.offerInfo.privatePart.symmetricKey,

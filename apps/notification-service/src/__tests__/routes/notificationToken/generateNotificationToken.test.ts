@@ -62,7 +62,6 @@ describe('GenerateNotificationToken', () => {
           Effect.either
         )
 
-        console.log(resp)
         expect(resp._tag).toEqual('Right')
         if (resp._tag === 'Right') {
           expect(resp.right.token).toBeDefined()

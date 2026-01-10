@@ -168,7 +168,7 @@ const processChatNotificationActionAtom = atom(
 
       const inboxForCypher = set(
         getKeyHolderForNotificationTokenOrCypherActionAtom,
-        notification.targetCypher
+        notification.targetToken ?? notification.targetCypher
       )
       if (!inboxForCypher) {
         reportError(

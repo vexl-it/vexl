@@ -1,0 +1,241 @@
+/* Vexl Trading Calculator - Global Styles */
+
+/* TT Satoshi Font */
+@font-face {
+  font-family: 'TT Satoshi';
+  src: url('/fonts/tt_satoshi_400.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TT Satoshi';
+  src: url('/fonts/tt_satoshi_500.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TT Satoshi';
+  src: url('/fonts/tt_satoshi_600.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TT Satoshi';
+  src: url('/fonts/tt_satoshi_700.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* PP Monument Font */
+@font-face {
+  font-family: 'PP Monument';
+  src: url('/fonts/pp_monument_700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* CSS Variables - Vexl Design System */
+:root {
+  /* Colors */
+  --color-main: #fccd6c;
+  --color-main-dark: #957a44;
+  --color-background: #101010;
+  --color-background-secondary: #262626;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-grey: #262626;
+  --color-grey-accent-1: #4c4c4c;
+  --color-grey-accent-2: #848484;
+  --color-grey-accent-3: #dddddd;
+  --color-grey-on-black: #afafaf;
+  --color-green: #acd9b7;
+  --color-red: #ee675e;
+  --color-pink: #fcc5f3;
+  --color-yellow-accent-1: #957a44;
+  --color-yellow-accent-2: #4c3d20;
+  --color-yellow-accent-3: #322916;
+  --color-pink-accent-1: #322930;
+  --color-pink-accent-2: #4c3b49;
+
+  /* Typography */
+  --font-body: 'TT Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-heading: 'PP Monument', 'TT Satoshi', sans-serif;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  /* Border Radius */
+  --radius-1: 4px;
+  --radius-2: 6px;
+  --radius-3: 8px;
+  --radius-4: 10px;
+  --radius-5: 12px;
+  --radius-6: 16px;
+  --radius-7: 20px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-white);
+  background-color: var(--color-background);
+  min-height: 100vh;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-main);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-grey-accent-1);
+  border-radius: var(--radius-2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-grey-accent-2);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-main);
+  color: var(--color-black);
+}
+
+/* Input number arrows removal */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Link styles */
+a {
+  color: var(--color-main);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* Button reset */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+/* Input reset */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Utility classes */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

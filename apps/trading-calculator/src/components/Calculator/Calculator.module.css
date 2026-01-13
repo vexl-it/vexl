@@ -1,0 +1,911 @@
+/* Calculator Component Styles */
+
+.calculator {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-5);
+  background-color: var(--color-grey);
+  border-radius: var(--radius-5);
+  box-shadow: var(--shadow-lg);
+}
+
+.sharedBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background-color: var(--color-yellow-accent-3);
+  border-radius: var(--radius-3);
+  font-size: 0.875rem;
+}
+
+.sharedBanner button {
+  color: var(--color-main);
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+.sharedBanner button:hover {
+  opacity: 0.8;
+}
+
+/* Input Groups */
+.inputGroup {
+  margin-bottom: var(--space-4);
+}
+
+.inputHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.inputLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-grey-accent-3);
+}
+
+.unitToggle {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-main);
+  background-color: var(--color-yellow-accent-3);
+  border-radius: var(--radius-2);
+  transition: all var(--transition-fast);
+}
+
+.unitToggle:hover {
+  background-color: var(--color-yellow-accent-2);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-4);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background-color: var(--color-background);
+  border: 2px solid transparent;
+  border-radius: var(--radius-4);
+  transition: border-color var(--transition-fast);
+}
+
+.input:focus {
+  border-color: var(--color-main);
+}
+
+.input::placeholder {
+  color: var(--color-grey-accent-1);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.inputPrefix,
+.inputSuffix {
+  position: absolute;
+  color: var(--color-grey-accent-2);
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.inputPrefix {
+  left: var(--space-4);
+}
+
+.inputSuffix {
+  right: var(--space-4);
+}
+
+.input:has(+ .inputSuffix) {
+  padding-right: 60px;
+}
+
+.inputWrapper:has(.inputPrefix) .input {
+  padding-left: 40px;
+}
+
+.loadingIndicator {
+  position: absolute;
+  right: var(--space-4);
+  color: var(--color-grey-accent-2);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Currency Select */
+.currencySelect {
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+  border-radius: var(--radius-2);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.currencySelect:hover {
+  background-color: var(--color-grey-accent-2);
+}
+
+.currencySelect:focus {
+  outline: 2px solid var(--color-main);
+  outline-offset: 2px;
+}
+
+/* Price Display */
+.priceDisplay {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background-color: var(--color-background);
+  border-radius: var(--radius-4);
+}
+
+.priceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.priceModeIndicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.liveDot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-main);
+  border-radius: 50%;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.priceModeEmoji {
+  font-size: 1rem;
+}
+
+.priceModeLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-grey-accent-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-grey-accent-2);
+  background-color: transparent;
+  border-radius: var(--radius-3);
+  transition: all var(--transition-fast);
+}
+
+.refreshButton:hover {
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.priceValue {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.priceLabel {
+  font-size: 0.875rem;
+  color: var(--color-grey-accent-2);
+}
+
+.priceAmount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.priceTimestamp {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-grey-accent-2);
+}
+
+.staleWarning {
+  cursor: help;
+}
+
+.staleText {
+  color: var(--color-main);
+}
+
+.priceSource {
+  margin-top: var(--space-2);
+  font-size: 0.625rem;
+  color: var(--color-grey-accent-2);
+}
+
+.priceSource a {
+  color: var(--color-grey-accent-2);
+  text-decoration: underline;
+}
+
+.priceSource a:hover {
+  color: var(--color-grey-accent-3);
+}
+
+/* Price Header - Collapsible */
+.priceHeaderContainer {
+  margin-bottom: var(--space-4);
+}
+
+.priceHeaderButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-background);
+  border-radius: var(--radius-4);
+  transition: background-color var(--transition-fast);
+}
+
+.priceHeaderButton:hover {
+  background-color: var(--color-grey-accent-1);
+}
+
+.priceHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.priceHeaderTextWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.priceHeaderLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-main);
+}
+
+.priceHeaderText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.chevronIcon {
+  color: var(--color-grey-accent-2);
+  transition: transform var(--transition-fast);
+}
+
+.chevronExpanded {
+  transform: rotate(180deg);
+}
+
+.priceHeaderContent {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.priceHeaderContentHidden {
+  max-height: 0;
+  opacity: 0;
+}
+
+.priceHeaderContentVisible {
+  max-height: 600px;
+  opacity: 1;
+}
+
+.priceHeaderDetails {
+  padding: var(--space-4);
+  padding-top: var(--space-3);
+  background-color: var(--color-background);
+  border-radius: 0 0 var(--radius-4) var(--radius-4);
+  margin-top: -10px;
+}
+
+.priceTimestampInline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  color: var(--color-grey-accent-2);
+  margin-bottom: var(--space-2);
+}
+
+.refreshButtonSmall {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--color-grey-accent-2);
+  background-color: transparent;
+  border-radius: var(--radius-2);
+  transition: all var(--transition-fast);
+  margin-left: var(--space-1);
+}
+
+.refreshButtonSmall:hover {
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+}
+
+.refreshButtonSmall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Premium Slider */
+.premiumContainer {
+  margin-bottom: var(--space-4);
+}
+
+.tradeModeToggle {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.tradeModeBtn {
+  flex: 1;
+  padding: var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-grey-accent-2);
+  background-color: var(--color-background);
+  border-radius: var(--radius-3);
+  transition: all var(--transition-fast);
+}
+
+.tradeModeBtn:hover:not(:disabled) {
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+}
+
+.tradeModeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tradeModeActive {
+  color: var(--color-black);
+  background-color: var(--color-main);
+}
+
+.tradeModeActive:hover:not(:disabled) {
+  background-color: var(--color-main);
+  opacity: 0.9;
+}
+
+.premiumMessage {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-white);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background-color: var(--color-background);
+  border-radius: var(--radius-3);
+}
+
+.premiumMessageYellow {
+  color: var(--color-main);
+}
+
+.premiumMessageRed {
+  color: var(--color-red);
+}
+
+.premiumHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+
+.premiumInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.premiumInput {
+  width: 60px;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: right;
+  color: var(--color-white);
+  background-color: var(--color-background);
+  border-radius: var(--radius-2);
+}
+
+.premiumPercent {
+  color: var(--color-grey-accent-2);
+}
+
+.slider {
+  position: relative;
+  height: 40px;
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.slider.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sliderTrack {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: var(--color-grey-accent-1);
+  border-radius: 2px;
+  transform: translateY(-50%);
+}
+
+.sliderFill {
+  position: absolute;
+  height: 100%;
+  background-color: var(--color-main);
+  border-radius: 2px;
+}
+
+.sliderThumb {
+  position: absolute;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-main);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform var(--transition-fast);
+  box-shadow: var(--shadow-md);
+}
+
+.sliderThumb.active {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.sliderValue {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-black);
+  background-color: var(--color-main);
+  border-radius: var(--radius-2);
+  white-space: nowrap;
+}
+
+.sliderMarkers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.sliderMarker {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-grey-accent-1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: background-color var(--transition-fast);
+}
+
+.sliderMarker.active {
+  background-color: var(--color-main);
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  font-size: 0.75rem;
+  color: var(--color-grey-accent-2);
+}
+
+.sliderLabelLeft,
+.sliderLabelRight {
+  max-width: 40%;
+}
+
+.sliderLabelLeft {
+  text-align: left;
+}
+
+.sliderLabelRight {
+  text-align: right;
+}
+
+.presetButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.presetButton {
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-grey-accent-2);
+  background-color: var(--color-background);
+  border-radius: var(--radius-3);
+  transition: all var(--transition-fast);
+}
+
+.presetButton:hover {
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+}
+
+.presetButton.active {
+  color: var(--color-black);
+  background-color: var(--color-main);
+}
+
+.presetButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Price Mode Selector - Button Style */
+.priceModeButtons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.priceModeBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-grey-accent-3);
+  background-color: var(--color-grey);
+  border-radius: var(--radius-3);
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.priceModeBtn:hover:not(:disabled) {
+  background-color: var(--color-grey-accent-1);
+  color: var(--color-white);
+}
+
+.priceModeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.priceModeActive {
+  background-color: var(--color-yellow-accent-3);
+  color: var(--color-white);
+}
+
+.priceModeActive:hover:not(:disabled) {
+  background-color: var(--color-yellow-accent-2);
+}
+
+.liveDotSmall {
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-main);
+  border-radius: 50%;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.priceModeEmojiSmall {
+  font-size: 0.875rem;
+}
+
+.customPriceInputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: var(--color-grey);
+  border-radius: var(--radius-3);
+}
+
+.customPriceLabel {
+  font-size: 0.875rem;
+  color: var(--color-grey-accent-2);
+  white-space: nowrap;
+}
+
+.customPriceField {
+  flex: 1;
+  min-width: 80px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background-color: var(--color-background);
+  border: 2px solid transparent;
+  border-radius: var(--radius-3);
+}
+
+.customPriceField:focus {
+  border-color: var(--color-main);
+}
+
+.customPriceCurrency {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-grey-accent-2);
+}
+
+.priceDifference {
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: var(--space-2);
+}
+
+.priceDifferencePositive {
+  color: var(--color-green);
+}
+
+.priceDifferenceNegative {
+  color: var(--color-red);
+}
+
+/* Share/Copy Buttons */
+.actionButtons {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.shareButton,
+.copyButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-4);
+  transition: all var(--transition-fast);
+}
+
+.shareButton {
+  color: var(--color-black);
+  background-color: var(--color-main);
+}
+
+.shareButton:hover {
+  opacity: 0.9;
+}
+
+.copyButton {
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+}
+
+.copyButton:hover {
+  background-color: var(--color-grey-accent-2);
+}
+
+.copyButton:disabled,
+.shareButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Reset Button */
+.resetButton {
+  width: 100%;
+  padding: var(--space-3);
+  margin-top: var(--space-3);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-grey-accent-2);
+  background-color: transparent;
+  border-radius: var(--radius-3);
+  transition: all var(--transition-fast);
+}
+
+.resetButton:hover {
+  color: var(--color-white);
+  background-color: var(--color-grey-accent-1);
+}
+
+/* Divider */
+.divider {
+  height: 1px;
+  margin: var(--space-4) 0;
+  background-color: var(--color-grey-accent-1);
+}
+
+/* Toggle Switch - Vexl Style */
+.toggleWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.toggleLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-white);
+}
+
+.toggle {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  background-color: var(--color-grey-accent-1);
+  border-radius: 31px;
+  transition: background-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--color-main);
+  outline-offset: 2px;
+}
+
+.toggleChecked {
+  background-color: var(--color-main);
+}
+
+.toggleDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  background-color: var(--color-white);
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggleChecked .toggleThumb {
+  transform: translateX(20px);
+}
+
+/* Premium Toggle Row */
+.premiumToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+}
+
+.premiumContent {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+}
+
+.premiumContentHidden {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+.premiumContentVisible {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: var(--space-4);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .calculator {
+    padding: var(--space-4);
+    border-radius: var(--radius-4);
+  }
+
+  .input {
+    font-size: 1.125rem;
+    padding: var(--space-3);
+  }
+
+  .priceAmount {
+    font-size: 1.25rem;
+  }
+
+  .presetButtons {
+    gap: var(--space-1);
+  }
+
+  .presetButton {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.625rem;
+  }
+}

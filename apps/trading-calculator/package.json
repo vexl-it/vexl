@@ -1,0 +1,33 @@
+{
+  "name": "@vexl-next/trading-calculator",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx --cache --cache-location 'node_modules/.cache/.eslintcache'",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
+  },
+  "dependencies": {
+    "next": "^16.1.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.3.3",
+    "prettier": "^3.3.2",
+    "typescript": "~5.9.2"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

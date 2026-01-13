@@ -10,14 +10,37 @@ export function getUserLocale(): string {
 }
 
 /**
- * Format a number according to the user's locale
+ * Non-breaking space for thousands separator
+ * Using regular space for better compatibility, but could use \u00A0 for non-breaking
+ */
+const THOUSANDS_SEPARATOR = ' '
+
+/**
+ * Replace locale-specific group separators with space
+ */
+function applySpaceThousandsSeparator(formatted: string, locale: string): string {
+  // Get the group separator for this locale
+  const parts = new Intl.NumberFormat(locale).formatToParts(1234567)
+  const groupSeparator = parts.find((p) => p.type === 'group')?.value
+
+  if (groupSeparator && groupSeparator !== THOUSANDS_SEPARATOR) {
+    // Replace all occurrences of the locale group separator with space
+    return formatted.split(groupSeparator).join(THOUSANDS_SEPARATOR)
+  }
+
+  return formatted
+}
+
+/**
+ * Format a number according to the user's locale, using space as thousands separator
  */
 export function formatNumber(
   value: number,
   options?: Intl.NumberFormatOptions
 ): string {
   const locale = getUserLocale()
-  return new Intl.NumberFormat(locale, options).format(value)
+  const formatted = new Intl.NumberFormat(locale, options).format(value)
+  return applySpaceThousandsSeparator(formatted, locale)
 }
 
 /**
@@ -49,12 +72,13 @@ export function formatFiatAmount(
   const locale = getUserLocale()
 
   if (showSymbol) {
-    return new Intl.NumberFormat(locale, {
+    const formatted = new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value)
+    return applySpaceThousandsSeparator(formatted, locale)
   }
 
   return formatNumber(value, {
@@ -145,6 +169,9 @@ export function parseFormattedNumber(value: string): number {
     normalized = normalized.split(groupSeparator).join('')
   }
 
+  // Also remove spaces (our consistent thousands separator)
+  normalized = normalized.split(' ').join('')
+
   // Replace locale decimal with standard decimal
   if (decimalSeparator !== '.') {
     normalized = normalized.replace(decimalSeparator, '.')
@@ -194,12 +221,54 @@ export function formatInputNumber(
 }
 
 /**
- * Validate if string is a valid numeric input
+ * Format a numeric string with thousands separators for display
+ * e.g., "50000.25" -> "50 000.25"
+ */
+export function formatInputWithSeparators(value: string): string {
+  if (!value) return ''
+
+  // Don't format special cases
+  if (value === '.' || value === '-' || value === '-.') {
+    return value
+  }
+
+  // Split by decimal point
+  const parts = value.split('.')
+  const integerPart = parts[0] || ''
+  const decimalPart = parts[1]
+
+  // Handle negative numbers
+  const isNegative = integerPart.startsWith('-')
+  const absIntegerPart = isNegative ? integerPart.slice(1) : integerPart
+
+  // Add thousands separators to integer part
+  const formattedInteger = absIntegerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+
+  // Reconstruct
+  const signedInteger = isNegative ? `-${formattedInteger}` : formattedInteger
+
+  if (decimalPart !== undefined) {
+    return `${signedInteger}.${decimalPart}`
+  }
+
+  return signedInteger
+}
+
+/**
+ * Strip thousands separators from input value
+ */
+export function stripThousandsSeparators(value: string): string {
+  return value.split(' ').join('')
+}
+
+/**
+ * Validate if string is a valid numeric input (allows spaces as thousands separators)
  */
 export function isValidNumericInput(value: string): boolean {
   if (value === '' || value === '.' || value === '-' || value === '-.') {
     return true
   }
 
-  return /^-?\d*\.?\d*$/.test(value)
+  // Allow digits, decimal point, minus sign, and spaces (for thousands separators)
+  return /^-?[\d ]*\.?[\d]*$/.test(value)
 }

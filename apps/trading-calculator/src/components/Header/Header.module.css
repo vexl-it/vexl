@@ -26,6 +26,12 @@
   flex-wrap: wrap;
 }
 
+.bannerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .bannerText {
   display: flex;
   align-items: center;
@@ -53,6 +59,27 @@
 
 .downloadLink:hover {
   background-color: rgba(0, 0, 0, 0.25);
+  opacity: 1;
+}
+
+.dismissButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--color-black);
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius-2);
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+}
+
+.dismissButton:hover {
+  background-color: rgba(0, 0, 0, 0.15);
   opacity: 1;
 }
 
@@ -93,24 +120,58 @@
 
 /* Responsive */
 @media (max-width: 600px) {
+  .banner {
+    padding: var(--space-2) var(--space-3);
+  }
+
   .bannerContent {
-    justify-content: center;
-    text-align: center;
+    gap: var(--space-2);
+    flex-wrap: nowrap;
+  }
+
+  .bannerActions {
+    gap: var(--space-2);
+    flex-shrink: 0;
   }
 
   .bannerText {
-    font-size: 0.75rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    font-size: 0.7rem;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .bannerEmoji {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .downloadLink {
+    padding: var(--space-1) var(--space-2);
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .dismissButton {
+    width: 24px;
+    height: 24px;
   }
 
   .nav {
-    flex-direction: column;
+    padding: var(--space-2) var(--space-3);
     gap: var(--space-2);
-    text-align: center;
+  }
+
+  .logoImage {
+    width: 28px;
+    height: 28px;
+  }
+
+  .logoText {
+    font-size: 1.125rem;
   }
 
   .title {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
   }
 }

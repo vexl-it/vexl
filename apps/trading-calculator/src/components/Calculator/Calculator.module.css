@@ -196,7 +196,7 @@
 }
 
 .priceModeEmoji {
-  font-size: 1rem;
+  font-size: 0.75rem;
 }
 
 .priceModeLabel {
@@ -293,17 +293,17 @@
 
 /* Price Header - Collapsible */
 .priceHeaderContainer {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
 }
 
 .priceHeaderButton {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  background-color: var(--color-background);
-  border-radius: var(--radius-4);
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  padding-left: 0;
+  background-color: transparent;
+  border-radius: var(--radius-2);
   transition: background-color var(--transition-fast);
 }
 
@@ -311,27 +311,23 @@
   background-color: var(--color-grey-accent-1);
 }
 
-.priceHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
 .priceHeaderTextWrapper {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 1px;
 }
 
 .priceHeaderLabel {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
-  color: var(--color-main);
+  color: var(--color-grey-accent-2);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .priceHeaderText {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-white);
 }

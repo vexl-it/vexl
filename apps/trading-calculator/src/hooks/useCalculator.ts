@@ -11,7 +11,11 @@ import {
   parseNumericInput,
   roundTo,
 } from '@/lib/calculations'
-import { formatInputNumber, isValidNumericInput } from '@/lib/formatters'
+import {
+  formatInputNumber,
+  isValidNumericInput,
+  stripThousandsSeparators,
+} from '@/lib/formatters'
 import { getStateFromUrl, updateUrl } from '@/lib/urlState'
 
 interface UseCalculatorResult {
@@ -188,7 +192,9 @@ export function useCalculator(): UseCalculatorResult {
     (value: string) => {
       if (!isValidNumericInput(value)) return
 
-      const formatted = formatInputNumber(value, btcOrSat === 'SAT' ? 0 : 8)
+      // Strip thousands separators before processing
+      const stripped = stripThousandsSeparators(value)
+      const formatted = formatInputNumber(stripped, btcOrSat === 'SAT' ? 0 : 8)
       setBtcAmountState(formatted)
       lastEditedField.current = 'btc'
 
@@ -208,7 +214,9 @@ export function useCalculator(): UseCalculatorResult {
     (value: string) => {
       if (!isValidNumericInput(value)) return
 
-      const formatted = formatInputNumber(value, 2)
+      // Strip thousands separators before processing
+      const stripped = stripThousandsSeparators(value)
+      const formatted = formatInputNumber(stripped, 2)
       setFiatAmountState(formatted)
       lastEditedField.current = 'fiat'
 
@@ -287,7 +295,9 @@ export function useCalculator(): UseCalculatorResult {
   // Custom price setter
   const setCustomPrice = useCallback((price: string) => {
     if (!isValidNumericInput(price)) return
-    const formatted = formatInputNumber(price, 2)
+    // Strip thousands separators before processing
+    const stripped = stripThousandsSeparators(price)
+    const formatted = formatInputNumber(stripped, 2)
     setCustomPriceState(formatted)
   }, [])
 

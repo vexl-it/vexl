@@ -1,7 +1,7 @@
 'use client'
 
 import type { CurrencyCode } from '@/types'
-import { getCurrencySymbol } from '@/lib/formatters'
+import { getCurrencySymbol, formatInputWithSeparators } from '@/lib/formatters'
 import styles from './Calculator.module.css'
 
 interface FiatAmountInputProps {
@@ -21,6 +21,8 @@ export function FiatAmountInput({
   isLoading = false,
   disabled = false,
 }: FiatAmountInputProps) {
+  const displayValue = formatInputWithSeparators(value)
+
   return (
     <div className={styles.inputGroup}>
       <div className={styles.inputHeader}>
@@ -42,7 +44,7 @@ export function FiatAmountInput({
           type="text"
           inputMode="decimal"
           className={styles.input}
-          value={value}
+          value={displayValue}
           onChange={(e) => onChange(e.target.value)}
           placeholder="0.00"
           disabled={disabled || isLoading}

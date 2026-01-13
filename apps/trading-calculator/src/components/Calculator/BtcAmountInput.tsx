@@ -2,6 +2,7 @@
 
 import type { BtcOrSat } from '@/types'
 import { useIsTouchDevice } from '@/hooks/useIsTouchDevice'
+import { formatInputWithSeparators } from '@/lib/formatters'
 import styles from './Calculator.module.css'
 
 interface BtcAmountInputProps {
@@ -20,6 +21,7 @@ export function BtcAmountInput({
   disabled = false,
 }: BtcAmountInputProps) {
   const isTouchDevice = useIsTouchDevice()
+  const displayValue = formatInputWithSeparators(value)
 
   return (
     <div className={styles.inputGroup}>
@@ -43,7 +45,7 @@ export function BtcAmountInput({
           type="text"
           inputMode="decimal"
           className={styles.input}
-          value={value}
+          value={displayValue}
           onChange={(e) => onChange(e.target.value)}
           placeholder={btcOrSat === 'BTC' ? '0.00000000' : '0'}
           disabled={disabled}

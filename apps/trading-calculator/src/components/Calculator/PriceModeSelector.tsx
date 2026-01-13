@@ -2,7 +2,7 @@
 
 import type { PriceMode, CurrencyCode } from '@/types'
 import { parseNumericInput, getPriceDifference } from '@/lib/calculations'
-import { formatPercentage } from '@/lib/formatters'
+import { formatPercentage, formatInputWithSeparators } from '@/lib/formatters'
 import styles from './Calculator.module.css'
 
 interface PriceModeSelectorProps {
@@ -78,7 +78,7 @@ export function PriceModeSelector({
             type="text"
             inputMode="decimal"
             className={styles.customPriceField}
-            value={customPrice}
+            value={formatInputWithSeparators(customPrice)}
             onChange={(e) => onCustomPriceChange(e.target.value)}
             placeholder="Enter price"
             disabled={disabled}

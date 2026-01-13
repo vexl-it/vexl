@@ -39,19 +39,6 @@ export function PriceHeader({
 }: PriceHeaderProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const renderPriceModeIcon = () => {
-    switch (priceMode) {
-      case 'live':
-        return <span className={styles.liveDot} />
-      case 'frozen':
-        return <span className={styles.priceModeEmoji}>❄️</span>
-      case 'custom':
-        return <span className={styles.priceModeEmoji}>👤</span>
-      default:
-        return <span className={styles.liveDot} />
-    }
-  }
-
   const getPriceModeLabel = () => {
     switch (priceMode) {
       case 'live':
@@ -59,7 +46,7 @@ export function PriceHeader({
       case 'frozen':
         return 'Frozen Price'
       case 'custom':
-        return 'Custom Price'
+        return 'Your Price'
       default:
         return 'Market Price'
     }
@@ -73,14 +60,11 @@ export function PriceHeader({
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
       >
-        <div className={styles.priceHeaderLeft}>
-          {renderPriceModeIcon()}
-          <div className={styles.priceHeaderTextWrapper}>
-            <span className={styles.priceHeaderLabel}>{getPriceModeLabel()}</span>
-            <span className={styles.priceHeaderText}>
-              1 BTC = {price > 0 ? formatBtcPrice(price, currency) : '—'}
-            </span>
-          </div>
+        <div className={styles.priceHeaderTextWrapper}>
+          <span className={styles.priceHeaderLabel}>{getPriceModeLabel()}</span>
+          <span className={styles.priceHeaderText}>
+            1 BTC = {price > 0 ? formatBtcPrice(price, currency) : '—'}
+          </span>
         </div>
         <ChevronIcon expanded={isExpanded} />
       </button>
@@ -151,8 +135,8 @@ export function PriceHeader({
 function ChevronIcon({ expanded }: { expanded: boolean }) {
   return (
     <svg
-      width="20"
-      height="20"
+      width="14"
+      height="14"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

@@ -67,7 +67,8 @@ export const SpokenLanguage = Schema.Literal(
   'FRA',
   'ITA',
   'ESP',
-  'BG'
+  'BG',
+  'FAS' // Persian
 ).pipe(orElseSchema('ENG' as const))
 export type SpokenLanguage = typeof SpokenLanguage.Type
 
@@ -197,6 +198,7 @@ export const spokenLanguagesOptions: SpokenLanguage[] = [
   'SVK',
   'PRT',
   'BG',
+  'FAS', // Persian
 ]
 
 export const OfferInfo = Schema.Struct({

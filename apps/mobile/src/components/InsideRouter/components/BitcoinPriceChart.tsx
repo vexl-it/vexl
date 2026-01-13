@@ -56,7 +56,7 @@ function BitcoinPriceChart(): React.ReactElement {
   )
 
   return (
-    <YStack alignItems="flex-end" px="$6" py="$1">
+    <YStack fs={1} alignItems="flex-start" px="$6" py="$1">
       <XStack jc="space-between" alignItems="center">
         <TouchableOpacity
           onPress={() => {
@@ -103,7 +103,14 @@ function BitcoinPriceChart(): React.ReactElement {
                 )}
               </XStack>
             ) : (
-              <Text fos={20} ff="$heading" color="$yellowAccent1">
+              <Text
+                als="flex-start"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                fos={20}
+                ff="$heading"
+                color="$yellowAccent1"
+              >
                 {btcPriceForSelectedCurrency?.state === 'error' ||
                 !btcPriceForSelectedCurrency?.btcPrice
                   ? '-'

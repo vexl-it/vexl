@@ -449,6 +449,17 @@ export const currencies = {
     maxAmount: 527000000, // 10000 EUR * 52700 (approx. conversion rate)
     countryCode: [98],
   }),
+  'IRT': decodeCurrencyInfo({
+    code: 'IRT',
+    flag: '🇮🇷',
+    name: 'Iranian Toman',
+    // There isn’t a universally standardized single-character Unicode symbol for “toman”.
+    // The currency name is commonly written out in Persian as “تومان”.
+    symbol: 'تومان',
+    position: 'after',
+    maxAmount: 52700000, // 10000 EUR * 5270 (approx. conversion rate)
+    countryCode: [98],
+  }),
   'ISK': decodeCurrencyInfo({
     code: 'ISK',
     flag: '🇮🇸',

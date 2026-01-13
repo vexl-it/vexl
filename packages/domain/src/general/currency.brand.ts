@@ -51,6 +51,7 @@ export const CurrencyCode = Schema.Literal(
   'ILS',
   'INR',
   'IRR',
+  'IRT',
   'ISK',
   'JMD',
   'JOD',

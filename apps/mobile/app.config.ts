@@ -182,6 +182,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    'react-native-quick-crypto',
     './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [

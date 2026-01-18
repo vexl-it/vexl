@@ -89,20 +89,25 @@ export async function* runTests() {
   }
 
   yield `Testing ECDSA`
-  const signature = ecdsa.ecdsaSign({
-    privateKey: keypair1.privateKeyPemBase64,
-    challenge: dummySymetricKey,
-  })
-  if (
-    !ecdsa.ecdsaVerify({
+  try {
+    const signature = ecdsa.ecdsaSign({
+      privateKey: keypair1.privateKeyPemBase64,
       challenge: dummySymetricKey,
-      signature,
-      pubKey: keypair1.publicKeyPemBase64,
     })
-  ) {
-    yield `🚨  ECDSA failed`
-  } else {
-    yield `✅ ECDSA OK`
+    if (
+      !ecdsa.ecdsaVerify({
+        challenge: dummySymetricKey,
+        signature,
+        pubKey: keypair1.publicKeyPemBase64,
+      })
+    ) {
+      yield `🚨  ECDSA failed`
+    } else {
+      yield `✅ ECDSA OK`
+    }
+  } catch (e) {
+    console.log(e)
+    yield `🚨  ECDSA failed with exception ${String(e)}`
   }
 }
 

@@ -5200,6 +5200,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kaladivo/react-native-quick-crypto@npm:1.0.7":
+  version: 1.0.7
+  resolution: "@kaladivo/react-native-quick-crypto@npm:1.0.7"
+  dependencies:
+    "@craftzdog/react-native-buffer": 6.1.0
+    events: 3.3.0
+    react-native-quick-base64: 2.2.2
+    readable-stream: 4.5.2
+    safe-buffer: ^5.2.1
+    util: 0.12.5
+  peerDependencies:
+    expo: ">=48.0.0"
+    expo-build-properties: "*"
+    react: "*"
+    react-native: "*"
+    react-native-nitro-modules: ">=0.29.1"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+    expo-build-properties:
+      optional: true
+  checksum: 6c0dd476654d5cff8da8f6f49f03136b72ccb70b560932bfd289a8f17675f42628e0e603b4f51ba2ea177360325a1926c1e0f6fe1e555cb5e25b49a548d27364
+  languageName: node
+  linkType: hard
+
 "@likashefqet/react-native-image-zoom@npm:^4.3.0":
   version: 4.3.0
   resolution: "@likashefqet/react-native-image-zoom@npm:4.3.0"
@@ -11853,6 +11878,7 @@ __metadata:
     "@bam.tech/react-native-image-resizer": ^3.0.5
     "@effect/platform": ^0.93.6
     "@effect/rpc": ^0.72.2
+    "@kaladivo/react-native-quick-crypto": 1.0.7
     "@likashefqet/react-native-image-zoom": ^4.3.0
     "@miblanchard/react-native-slider": ^2.3.1
     "@notifee/react-native": ^9.1.8
@@ -11988,7 +12014,6 @@ __metadata:
     react-native-pager-view: 6.9.1
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.2.2
-    react-native-quick-crypto: ^1.0.6
     react-native-reanimated: ~4.1.1
     react-native-safe-area-context: ~5.6.0
     react-native-screens: ~4.16.0
@@ -27074,31 +27099,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 51cd8df0b7f78d4c10996f157927cc075b8a9e85f7d0e48790a4247a033ca335e440c96572969fb6f6b49135d51dbf87c6d659fba509b51b9237957d41a6c580
-  languageName: node
-  linkType: hard
-
-"react-native-quick-crypto@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "react-native-quick-crypto@npm:1.0.6"
-  dependencies:
-    "@craftzdog/react-native-buffer": 6.1.0
-    events: 3.3.0
-    react-native-quick-base64: 2.2.2
-    readable-stream: 4.5.2
-    safe-buffer: ^5.2.1
-    util: 0.12.5
-  peerDependencies:
-    expo: ">=48.0.0"
-    expo-build-properties: "*"
-    react: "*"
-    react-native: "*"
-    react-native-nitro-modules: ">=0.29.1"
-  peerDependenciesMeta:
-    expo:
-      optional: true
-    expo-build-properties:
-      optional: true
-  checksum: 2a73f3fabd5101822e963bbd268574fd635ec7f90a8177bb4f934ec94d144c82341d0a71c1ad05019dd4fef0cca1c69f095a2ecb7a0f7eef8e84928599b63096
   languageName: node
   linkType: hard
 

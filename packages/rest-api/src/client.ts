@@ -8,6 +8,7 @@ import {
   type HttpApiGroup,
   type HttpApiMiddleware,
 } from '@effect/platform'
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -57,6 +58,7 @@ export interface ClientProps<
   loggingFunction?: LoggingFunction | null
   deviceModel?: string
   osVersion?: string
+  prefix?: CountryPrefix
 }
 
 const makeClient =
@@ -220,6 +222,7 @@ export function createClientInstance<
   loggingFunction,
   deviceModel,
   osVersion,
+  prefix,
 }: ClientProps<ApiId, Groups, ApiError, ApiR>): Effect.Effect<
   Simplify<HttpApiClient.Client<Groups, ApiError, never>>,
   never,
@@ -237,6 +240,7 @@ export function createClientInstance<
     isDeveloper,
     deviceModel: Option.fromNullable(deviceModel),
     osVersion: Option.fromNullable(osVersion),
+    prefix: Option.fromNullable(prefix),
   }
 
   return HttpApiClient.make(api, {

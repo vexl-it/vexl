@@ -16,7 +16,8 @@ import {
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
 import {FetchHttpClient} from '@effect/platform/index'
-import {Effect, Schema} from 'effect'
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {Effect, Option, Schema} from 'effect'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {dummySession, sessionHolderAtom} from '../state/session'
@@ -76,6 +77,16 @@ export const apiAtom = atom((get) =>
     const language = t('localeName')
     const isDeveloper = get(isDeveloperAtom)
 
+    const sessionHolder = get(sessionHolderAtom)
+    const prefix =
+      sessionHolder.state === 'loggedIn'
+        ? yield* _(
+            countryPrefixFromNumber(sessionHolder.session.phoneNumber).pipe(
+              Effect.option
+            )
+          )
+        : Option.none()
+
     return {
       contact: yield* _(
         contact.api({
@@ -87,6 +98,7 @@ export const apiAtom = atom((get) =>
           url: apiEnv.contactMs,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       offer: yield* _(
@@ -101,6 +113,7 @@ export const apiAtom = atom((get) =>
           deviceModel,
           osVersion,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       chat: yield* _(
@@ -115,6 +128,7 @@ export const apiAtom = atom((get) =>
           osVersion,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       user: yield* _(
@@ -129,6 +143,7 @@ export const apiAtom = atom((get) =>
           url: apiEnv.userMs,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       location: yield* _(
@@ -143,6 +158,7 @@ export const apiAtom = atom((get) =>
           url: apiEnv.locationMs,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       notification: yield* _(
@@ -157,6 +173,7 @@ export const apiAtom = atom((get) =>
           osVersion,
           url: apiEnv.notificationMs,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       btcExchangeRate: yield* _(
@@ -171,6 +188,7 @@ export const apiAtom = atom((get) =>
           deviceModel,
           osVersion,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       feedback: yield* _(
@@ -183,6 +201,7 @@ export const apiAtom = atom((get) =>
           url: apiEnv.feedbackMs,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       content: yield* _(
@@ -197,6 +216,7 @@ export const apiAtom = atom((get) =>
           url: apiEnv.contentMs,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
       metrics: yield* _(
@@ -211,6 +231,7 @@ export const apiAtom = atom((get) =>
           url: apiEnv.metrics,
           isDeveloper,
           getUserSessionCredentials,
+          prefix: Option.getOrUndefined(prefix),
         })
       ),
     }

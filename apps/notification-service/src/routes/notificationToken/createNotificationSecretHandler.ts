@@ -48,6 +48,8 @@ export const createNotificationSecretHandler = HttpApiBuilder.handler(
             Effect.mapError(() => new MissingCommonHeadersError())
           )
 
+        const clientPrefix = Option.getOrNull(headers.prefixOrNone)
+
         const db = yield* NotificationTokensDb
 
         const secret = yield* _(generateSecret())
@@ -60,6 +62,7 @@ export const createNotificationSecretHandler = HttpApiBuilder.handler(
           clientVersion,
           clientAppSource,
           clientLanguage,
+          clientPrefix,
           createdAt: now,
           updatedAt: now,
         })

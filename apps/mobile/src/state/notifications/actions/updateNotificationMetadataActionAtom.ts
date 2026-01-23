@@ -1,3 +1,4 @@
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   makeCommonHeaders,
@@ -16,6 +17,7 @@ import {
 } from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../../../utils/preferences'
+import {sessionDataOrDummyAtom} from '../../session'
 import {vexlNotificationTokenAtom} from '../vexlNotificationTokenAtom'
 import {NoVexlSecretError} from './NoVexlSecretError'
 
@@ -42,6 +44,10 @@ export const updateNotificationMetadataActionAtom = atom(
         return yield* Effect.fail(new NoVexlSecretError({}))
       }
 
+      const prefix = yield* countryPrefixFromNumber(
+        get(sessionDataOrDummyAtom).phoneNumber
+      ).pipe(Effect.option)
+
       const vexlAppMetaHeader: VexlAppMetaHeader = {
         platform,
         versionCode,
@@ -51,6 +57,7 @@ export const updateNotificationMetadataActionAtom = atom(
         isDeveloper,
         deviceModel: deviceModel ? Option.some(deviceModel) : Option.none(),
         osVersion: osVersion ? Option.some(osVersion) : Option.none(),
+        prefix,
       }
       const headers = makeCommonHeaders(vexlAppMetaHeader)
 

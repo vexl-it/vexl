@@ -25,6 +25,8 @@ export const updateNotificationInfoHandler = HttpApiBuilder.handler(
             Effect.mapError(() => new MissingCommonHeadersError())
           )
 
+        const clientPrefix = Option.getOrNull(headers.prefixOrNone)
+
         const db = yield* NotificationTokensDb
 
         yield* db.updateClientInfo({
@@ -34,6 +36,7 @@ export const updateNotificationInfoHandler = HttpApiBuilder.handler(
           clientPlatform,
           clientVersion,
           clientAppSource,
+          clientPrefix,
         })
       })
     )

@@ -1,3 +1,4 @@
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -31,6 +32,7 @@ export interface UserApiProps {
   deviceModel?: string
   osVersion?: string
   getUserSessionCredentials: GetUserSessionCredentials
+  prefix?: CountryPrefix
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -46,6 +48,7 @@ export function api({
   loggingFunction,
   deviceModel,
   osVersion,
+  prefix,
 }: UserApiProps) {
   return Effect.gen(function* (_) {
     const client = yield* _(
@@ -61,6 +64,7 @@ export function api({
         loggingFunction,
         deviceModel,
         osVersion,
+        prefix,
       })
     )
 
@@ -73,6 +77,7 @@ export function api({
       language,
       deviceModel: Option.fromNullable(deviceModel),
       osVersion: Option.fromNullable(osVersion),
+      prefix: Option.fromNullable(prefix),
     })
 
     const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(

@@ -1,3 +1,4 @@
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   VexlNotificationToken,
   VexlNotificationTokenSecretNotTemporary,
@@ -38,4 +39,5 @@ export class NotificationSecretRecord extends Schema.Class<NotificationSecretRec
   clientLanguage: Schema.String,
   createdAt: Schema.DateFromSelf,
   updatedAt: Schema.DateFromSelf,
+  clientPrefix: Schema.NullOr(CountryPrefix),
 }) {}

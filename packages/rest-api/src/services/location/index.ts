@@ -1,3 +1,4 @@
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -27,6 +28,7 @@ export function api({
   loggingFunction,
   deviceModel,
   osVersion,
+  prefix,
 }: {
   platform: PlatformName
   clientVersion: VersionCode
@@ -40,6 +42,7 @@ export function api({
   getUserSessionCredentials: GetUserSessionCredentials
   signal?: AbortSignal
   loggingFunction?: LoggingFunction | null
+  prefix?: CountryPrefix
 }) {
   return Effect.gen(function* (_) {
     const client = yield* _(
@@ -55,6 +58,7 @@ export function api({
         loggingFunction,
         deviceModel,
         osVersion,
+        prefix,
       })
     )
 

@@ -1,3 +1,4 @@
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   makeCommonHeaders,
@@ -16,6 +17,7 @@ import {
 } from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../../../utils/preferences'
+import {sessionDataOrDummyAtom} from '../../session'
 import {vexlNotificationTokenAtom} from '../vexlNotificationTokenAtom'
 
 export const createVexlSecretActionAtom = atom(
@@ -32,6 +34,9 @@ export const createVexlSecretActionAtom = atom(
       const {t} = get(translationAtom)
       const language = t('localeName')
       const isDeveloper = get(isDeveloperAtom)
+      const prefix = yield* countryPrefixFromNumber(
+        get(sessionDataOrDummyAtom).phoneNumber
+      ).pipe(Effect.option)
 
       const vexlAppMetaHeader: VexlAppMetaHeader = {
         platform,
@@ -40,8 +45,9 @@ export const createVexlSecretActionAtom = atom(
         appSource,
         language,
         isDeveloper,
-        deviceModel: deviceModel ? Option.some(deviceModel) : Option.none(),
-        osVersion: osVersion ? Option.some(osVersion) : Option.none(),
+        deviceModel: Option.fromNullable(deviceModel),
+        osVersion: Option.fromNullable(osVersion),
+        prefix,
       }
       const headers = makeCommonHeaders(vexlAppMetaHeader)
       const request = new CreateNotificationSecretRequest({

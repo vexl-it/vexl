@@ -57,7 +57,7 @@ export const InitVerificationEndpoint = HttpApiEndpoint.post(
   .addError(PreviousCodeNotExpiredError, {status: 400})
   .addError(UnsupportedVersionToLoginError, {status: 400})
   .addError(InvalidLoginSignatureError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const VerifyCodeEndpoint = HttpApiEndpoint.post(
   'verifyCode',
@@ -70,7 +70,7 @@ export const VerifyCodeEndpoint = HttpApiEndpoint.post(
   .addError(InvalidVerificationIdError, {status: 400})
   .addError(UnableToVerifySmsCodeError, {status: 400})
   .addError(InvalidVerificationError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
   'verifyChallenge',
@@ -82,7 +82,7 @@ export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
   .addError(UnableToGenerateSignatureError, {status: 400})
   .addError(VerificationNotFoundError, {status: 400})
   .addError(InvalidVerificationError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const LogoutUserEndpoint = HttpApiEndpoint.del(
   'logoutUser',
@@ -91,7 +91,7 @@ export const LogoutUserEndpoint = HttpApiEndpoint.del(
   .setHeaders(CommonAndSecurityHeaders)
   .middleware(ServerSecurityMiddleware)
   .addSuccess(Schema.String)
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 const LoginGroup = HttpApiGroup.make('Login')
   .add(InitVerificationEndpoint)
@@ -109,7 +109,7 @@ export const InitEraseUserEndpoint = HttpApiEndpoint.post(
   .addError(PreviousCodeNotExpiredError, {status: 400})
   .addError(UnsupportedVersionToLoginError, {status: 400})
   .addError(InvalidLoginSignatureError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
   'verifyAndEraseuser',
@@ -121,7 +121,7 @@ export const VerifyAndEraseUserEndpoint = HttpApiEndpoint.del(
   .addError(VerificationNotFoundError, {status: 400})
   .addError(UnableToVerifySmsCodeError, {status: 400})
   .addError(InvalidVerificationError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 const EraseUserGroup = HttpApiGroup.make('EraseUser')
   .add(InitEraseUserEndpoint)
@@ -152,7 +152,7 @@ export const GenerateLoginChallenge = HttpApiEndpoint.get(
   '/api/v1/generate-login-challenge'
 )
   .addSuccess(GenerateLoginChallengeResponse)
-  .annotate(MaxExpectedDailyCall, 5)
+  .annotate(MaxExpectedDailyCall, 100)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(LogoutUserEndpoint)

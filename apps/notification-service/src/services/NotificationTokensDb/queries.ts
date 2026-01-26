@@ -1,5 +1,6 @@
 import {SqlClient, SqlResolver, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   VexlNotificationToken,
   VexlNotificationTokenSecret,
@@ -18,6 +19,7 @@ const CreateNotificationTokenParams = Schema.Struct({
   clientVersion: VersionCode,
   clientAppSource: AppSource,
   clientLanguage: Schema.String,
+  clientPrefix: Schema.NullOr(CountryPrefix),
   createdAt: Schema.DateFromSelf,
   updatedAt: Schema.DateFromSelf,
 })
@@ -38,6 +40,7 @@ export const UpdateClientInfoParams = Schema.Struct({
   clientVersion: VersionCode,
   clientAppSource: AppSource,
   clientLanguage: Schema.String,
+  clientPrefix: Schema.NullOr(CountryPrefix),
 })
 export type UpdateClientInfoParams = typeof UpdateClientInfoParams.Type
 
@@ -111,6 +114,7 @@ export const createUpdateClientInfo = Effect.gen(function* () {
         clientVersion: params.clientVersion,
         clientAppSource: params.clientAppSource,
         clientLanguage: params.clientLanguage,
+        clientPrefix: params.clientPrefix,
         updatedAt: new Date(),
       })}
       WHERE

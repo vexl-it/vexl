@@ -1,10 +1,8 @@
 import {Effect} from 'effect'
-import {versionCode} from '../../utils/environment'
 import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
-import {translationAtom} from '../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../utils/notifications'
 import {reportErrorE} from '../../utils/reportError'
 import {updateNotificationMetadataActionAtom} from './actions/updateNotificationMetadataActionAtom'
@@ -29,30 +27,6 @@ export const refreshVexlTokenMetadataTaskId = registerInAppLoadingTask({
       }
 
       const expoToken = yield* getNotificationTokenE()
-      const {t} = store.get(translationAtom)
-      const currentLocale = t('localeName')
-      const currentVersion = versionCode
-
-      const lastMetadata = vexlNotificationState.lastUpdatedMetadata
-
-      // Check if anything changed
-      const expoTokenChanged =
-        expoToken && lastMetadata?.expoToken !== expoToken
-      const versionChanged = lastMetadata?.version !== currentVersion
-      const localeChanged = lastMetadata?.locale !== currentLocale
-
-      if (!expoTokenChanged && !versionChanged && !localeChanged) {
-        console.log(
-          'Vexl notification metadata is up to date, skipping refresh'
-        )
-        return
-      }
-
-      console.log('Refreshing vexl notification metadata...', {
-        expoTokenChanged,
-        versionChanged,
-        localeChanged,
-      })
 
       yield* Effect.either(
         store

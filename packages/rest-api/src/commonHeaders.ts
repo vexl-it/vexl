@@ -1,3 +1,4 @@
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -45,6 +46,7 @@ export const VexlAppMetaHeader = Schema.Struct({
   // TODO backward compatibility
   deviceModel: Schema.optionalWith(Schema.String, {as: 'Option'}),
   osVersion: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  prefix: Schema.optionalWith(CountryPrefix, {as: 'Option'}),
 })
 export type VexlAppMetaHeader = Schema.Schema.Type<typeof VexlAppMetaHeader>
 
@@ -159,6 +161,14 @@ export class CommonHeaders extends Schema.Class<CommonHeaders>('CommonHeaders')(
   get osVersionOrNone(): Option.Option<string> {
     if (this['vexl-app-meta']) {
       return this['vexl-app-meta'].osVersion
+    }
+
+    return Option.none()
+  }
+
+  get prefixOrNone(): Option.Option<CountryPrefix> {
+    if (this['vexl-app-meta']) {
+      return this['vexl-app-meta'].prefix
     }
 
     return Option.none()

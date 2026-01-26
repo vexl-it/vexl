@@ -29,6 +29,7 @@ const validHeaders = makeCommonHeaders({
   isDeveloper: false,
   deviceModel: Option.none(),
   osVersion: Option.none(),
+  prefix: Option.none(),
 })
 
 const nonExistentSecret = Schema.decodeSync(VexlNotificationTokenSecret)(

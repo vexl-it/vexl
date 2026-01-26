@@ -3,12 +3,18 @@ import {databaseConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigrationsFromEffect'
 import {Effect, Layer, String} from 'effect/index'
 import {createNotificationTokens} from './migrations/001_createNotificationTokens'
+import {addClientPrefix} from './migrations/002_addClientPrefix'
 
 const migrations = [
   {
     id: 1,
     name: 'create_notification_tokens',
     migrationEffect: createNotificationTokens,
+  },
+  {
+    id: 2,
+    name: 'add_client_prefix',
+    migrationEffect: addClientPrefix,
   },
 ] as const
 

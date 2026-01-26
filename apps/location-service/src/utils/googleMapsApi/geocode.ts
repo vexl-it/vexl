@@ -161,7 +161,7 @@ export const googleGeocode =
               params: {
                 key: apiKey,
                 language: lang,
-                result_type: 'locality|political',
+                result_type: 'locality|political|street_address',
                 latlng: `${latitude},${longitude}`,
               },
             }

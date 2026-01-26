@@ -1,5 +1,5 @@
-const VERSION_CODE = 690
-const VERSION = '1.40.0'
+const VERSION_CODE = 400
+const VERSION = '1.40.1'
 const ENV_PRESET = process.env.ENV_PRESET
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
 const APP_SOURCE = process.env.APP_SOURCE ?? 'local'

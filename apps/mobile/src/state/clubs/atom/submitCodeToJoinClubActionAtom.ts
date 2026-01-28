@@ -13,6 +13,7 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
 
@@ -79,6 +80,8 @@ export const submitCodeToJoinClubActionAtom = atom(
         [club.club.uuid]: keyPair,
       }))
 
+      const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
+
       const {clubInfoForUser} = yield* _(
         api.contact
           .joinClub({
@@ -86,6 +89,7 @@ export const submitCodeToJoinClubActionAtom = atom(
             code,
             contactsImported: true,
             notificationToken,
+            vexlNotificationToken: Option.some(vexlNotificationToken),
           })
           .pipe(
             Effect.tapError(() =>

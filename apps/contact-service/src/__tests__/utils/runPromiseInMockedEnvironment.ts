@@ -28,12 +28,9 @@ import {UserDbService} from '../../db/UserDbService'
 import DbLayer from '../../db/layer'
 import {ContactApiLive} from '../../httpServer'
 import {ImportContactsQuotaService} from '../../routes/contacts/importContactsQuotaService'
-import {NewClubUserNotificationsService} from '../../utils/NewClubUserNotificationService'
+import {UserNotificationService} from '../../services/UserNotificationService'
 import {type S3Service} from '../../utils/S3Service'
-import {type ExpoNotificationsService} from '../../utils/expoNotifications/ExpoNotificationsService'
-import {type FirebaseMessagingService} from '../../utils/notifications/FirebaseMessagingService'
-import {mockedExpoNotificationlayer} from './mockedExpoNotificationService'
-import {mockedFirebaseMessagingServiceLayer} from './mockedFirebaseMessagingService'
+import {mockedEnqueueUserNotificationLayer} from './mockEnqueueUserNotification'
 import {mockedS3ServiceLayer} from './mockedS3Service'
 
 export type MockedContexts =
@@ -43,7 +40,6 @@ export type MockedContexts =
   | SqlClient
   | UserDbService
   | ContactDbService
-  | FirebaseMessagingService
   | DashboardReportsService
   | MetricsClientService
   | ImportContactsQuotaService
@@ -52,13 +48,10 @@ export type MockedContexts =
   | ClubInvitationLinkDbService
   | ChallengeService
   | ChallengeDbService
-  | ExpoNotificationsService
-  | ChallengeService
-  | ChallengeDbService
-  | NewClubUserNotificationsService
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
+  | UserNotificationService
 
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
 
@@ -72,9 +65,11 @@ const mockServiceLayers = Layer.mergeAll(
   mockedRedisLayer,
   mockedS3ServiceLayer,
   mockedDashboardReportsService,
-  mockedMetricsClientService,
-  mockedFirebaseMessagingServiceLayer,
-  mockedExpoNotificationlayer
+  mockedMetricsClientService
+)
+
+const UserNotificationServiceTest = UserNotificationService.Layer.pipe(
+  Layer.provide(mockedEnqueueUserNotificationLayer)
 )
 
 const dbServiceLayers = Layer.mergeAll(
@@ -89,9 +84,9 @@ const dbServiceLayers = Layer.mergeAll(
 const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
+  Layer.provideMerge(UserNotificationServiceTest),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(ImportContactsQuotaService.Live),
-  Layer.provideMerge(NewClubUserNotificationsService.Live),
   Layer.provideMerge(ChallengeService.Live),
   Layer.provideMerge(mockServiceLayers),
   Layer.provideMerge(dbServiceLayers),

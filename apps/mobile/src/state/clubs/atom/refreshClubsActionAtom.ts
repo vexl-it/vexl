@@ -1,5 +1,6 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -7,6 +8,7 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {removeClubOffersNextPageParamFromStateActionAtom} from '../../marketplace/atoms/offersState'
+import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {fetchClubWithMembersReportApiErrors} from '../utils'
 import {
   clubsToKeyHolderAtom,
@@ -16,6 +18,7 @@ import {
   clubsWithMembersLoadingStateAtom,
   clubsWithMembersStorageAtom,
   removeClubWithMembersFromStateActionAtom,
+  upsertClubWithMembersActionAtom,
 } from './clubsWithMembersAtom'
 import {addClubToRemovedClubsActionAtom} from './removedClubsAtom'
 import {updateOffersWhenUserIsNoLongerInClubActionAtom} from './updateOffersWhenUserIsNoLongerInClubActionAtom'
@@ -48,9 +51,11 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
     {
       clubUuid,
       keyPair,
+      vexlNotificationToken,
     }: {
       clubUuid: ClubUuid
       keyPair: PrivateKeyHolder
+      vexlNotificationToken: Option.Option<VexlNotificationToken>
     }
   ) =>
     Effect.gen(function* (_) {
@@ -68,6 +73,7 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
           contactApi: api.contact,
           keyPair,
           notificationToken,
+          vexlNotificationToken,
         }).pipe(
           Effect.tapError((e) => Effect.fail(e)),
           Effect.tapErrorTag('ClubNotFoundError', (e) => {
@@ -94,7 +100,15 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
 
 export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
   null,
-  (get, set, {clubUuid}: {clubUuid: ClubUuid}) =>
+  (
+    get,
+    set,
+    {
+      clubUuid,
+    }: {
+      clubUuid: ClubUuid
+    }
+  ) =>
     Effect.gen(function* (_) {
       const keyPair = yield* _(Record.get(get(clubsToKeyHolderAtom), clubUuid))
 
@@ -104,6 +118,7 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
         set(fetchClubWithMembersHandleStateIfNotFoundActionAtom, {
           clubUuid,
           keyPair,
+          vexlNotificationToken: Option.none(),
         }),
         Effect.either
       )
@@ -119,7 +134,10 @@ export const syncSingleClubHandleStateWhenNotFoundActionAtom = atom(
           prev.data,
           Array.map((o) => [o.club.uuid, o] as const),
           Record.fromEntries,
-          Record.set(clubUuid, clubE.right),
+          Record.set(clubUuid, {
+            ...clubE.right,
+            vexlNotificationToken: clubE.right.vexlNotificationToken,
+          }),
           Record.values
         ),
       }))
@@ -159,10 +177,38 @@ export const syncAllClubsHandleStateWhenNotFoundActionAtom = atom(
                 })
               )
 
+            const existingClub = pipe(
+              get(clubsWithMembersStorageAtom).data,
+              Array.findFirst((c) => c.club.uuid === clubUuid)
+            )
+
+            const vexlNotificationToken = yield* _(
+              pipe(
+                existingClub,
+                Option.flatMap((c) => c.vexlNotificationToken),
+                Option.match({
+                  onSome: (token) => Effect.succeed(Option.some(token)),
+                  onNone: () =>
+                    set(generateVexlTokenActionAtom).pipe(
+                      Effect.map(Option.some),
+                      Effect.catchAll(() => Effect.succeed(Option.none()))
+                    ),
+                })
+              )
+            )
+
+            if (Option.isSome(existingClub)) {
+              set(upsertClubWithMembersActionAtom, {
+                ...existingClub.value,
+                vexlNotificationToken,
+              })
+            }
+
             return yield* _(
               set(fetchClubWithMembersHandleStateIfNotFoundActionAtom, {
                 clubUuid,
                 keyPair,
+                vexlNotificationToken,
               })
             )
           }).pipe(Effect.either)

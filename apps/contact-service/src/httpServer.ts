@@ -36,7 +36,6 @@ import DbLayer from './db/layer'
 import {internalServerLive} from './internalServer'
 
 import {reportGaguesLayer} from './metrics'
-import {sendBulkNotificationHandler} from './routes/admin/sendBulkMessages'
 import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
@@ -67,10 +66,8 @@ import {refreshUser} from './routes/user/refreshUser'
 import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
 import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
-import {NewClubUserNotificationsService} from './utils/NewClubUserNotificationService'
+import {UserNotificationService} from './services/UserNotificationService'
 import {S3Service} from './utils/S3Service'
-import {ExpoNotificationsService} from './utils/expoNotifications/ExpoNotificationsService'
-import {FirebaseMessagingService} from './utils/notifications/FirebaseMessagingService'
 
 const UserApiGroupLive = HttpApiBuilder.group(
   ContactApiSpecification,
@@ -142,12 +139,6 @@ const ClubsModeratorApiGroupLive = HttpApiBuilder.group(
       .handle('listClubLinks', listClubLinks)
 )
 
-const AdminApiGroupLive = HttpApiBuilder.group(
-  ContactApiSpecification,
-  'Admin',
-  (h) => h.handle('sendBulkNotification', sendBulkNotificationHandler)
-)
-
 const ChallengeApiGroupLive = HttpApiBuilder.group(
   ContactApiSpecification,
   'Challenges',
@@ -163,7 +154,6 @@ export const ContactApiLive = HttpApiBuilder.api(ContactApiSpecification).pipe(
   Layer.provide(ClubsAdminApiGroupLive),
   Layer.provide(ClubsMemberApiGroupLive),
   Layer.provide(ClubsModeratorApiGroupLive),
-  Layer.provide(AdminApiGroupLive),
   Layer.provide(ChallengeApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(ContactApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
@@ -192,10 +182,8 @@ export const HttpServerLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provide(RateLimitingService.Live),
-  Layer.provide(FirebaseMessagingService.Live),
-  Layer.provide(ExpoNotificationsService.Live),
+  Layer.provide(UserNotificationService.Live),
   Layer.provide(ImportContactsQuotaService.Live),
-  Layer.provide(NewClubUserNotificationsService.Live),
   Layer.provide(ChallengeService.Live),
   Layer.provide(DbsLive),
   Layer.provide(RedisService.Live),

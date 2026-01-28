@@ -74,7 +74,7 @@ export class NewClubConnectionNotificationData extends Schema.TaggedClass<NewClu
   clubUuids: Schema.parseJson(Schema.NonEmptyArray(ClubUuid)),
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
-  toData = (): Record<string, string> =>
+  toData = (): typeof NewClubConnectionNotificationData.Encoded =>
     Schema.encodeSync(NewClubConnectionNotificationData)(this)
 }
 
@@ -85,7 +85,7 @@ export class NewSocialNetworkConnectionNotificationData extends Schema.TaggedCla
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
   sentAt: Schema.compose(Schema.NumberFromString, UnixMilliseconds),
 }) {
-  toData = (): Record<string, string> =>
+  toData = (): typeof NewSocialNetworkConnectionNotificationData.Encoded =>
     Schema.encodeSync(NewSocialNetworkConnectionNotificationData)(this)
 }
 
@@ -95,8 +95,35 @@ export class AdmitedToClubNetworkNotificationData extends Schema.TaggedClass<Adm
   publicKey: PublicKeyPemBase64,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
-  toData = (): Record<string, string> =>
+  toData = (): typeof AdmitedToClubNetworkNotificationData.Encoded =>
     Schema.encodeSync(AdmitedToClubNetworkNotificationData)(this)
+}
+
+export class UserInactivityNotificationData extends Schema.TaggedClass<UserInactivityNotificationData>(
+  'UserInactivityNotificationData'
+)('UserInactivityNotificationData', {
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+}) {
+  toData = (): typeof UserInactivityNotificationData.Encoded =>
+    Schema.encodeSync(UserInactivityNotificationData)(this)
+}
+
+export class UserLoginOnDifferentDeviceNotificationData extends Schema.TaggedClass<UserLoginOnDifferentDeviceNotificationData>(
+  'UserLoginOnDifferentDeviceNotificationData'
+)('UserLoginOnDifferentDeviceNotificationData', {
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+}) {
+  toData = (): typeof UserLoginOnDifferentDeviceNotificationData.Encoded =>
+    Schema.encodeSync(UserLoginOnDifferentDeviceNotificationData)(this)
+}
+
+export class NewContentNotificationData extends Schema.TaggedClass<NewContentNotificationData>(
+  'NewContentNotificationData'
+)('NewContentNotificationData', {
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+}) {
+  toData = (): typeof NewContentNotificationData.Encoded =>
+    Schema.encodeSync(NewContentNotificationData)(this)
 }
 
 export class ClubDeactivatedNotificationData extends Schema.TaggedClass<ClubDeactivatedNotificationData>(
@@ -106,7 +133,7 @@ export class ClubDeactivatedNotificationData extends Schema.TaggedClass<ClubDeac
   reason: Schema.Literal('EXPIRED', 'FLAGGED', 'OTHER'),
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
-  toData = (): Record<string, string> =>
+  toData = (): typeof ClubDeactivatedNotificationData.Encoded =>
     Schema.encodeSync(ClubDeactivatedNotificationData)(this)
 }
 
@@ -116,6 +143,6 @@ export class OpenBrowserLinkNotificationData extends Schema.TaggedClass<OpenBrow
   url: Schema.String,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
-  toData = (): Record<string, string> =>
+  toData = (): typeof OpenBrowserLinkNotificationData.Encoded =>
     Schema.encodeSync(OpenBrowserLinkNotificationData)(this)
 }

@@ -31,7 +31,7 @@ import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {type NoVexlSecretError} from '../../notifications/actions/NoVexlSecretError'
-import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
+import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {offersAtom} from './offersState'
 
@@ -78,7 +78,7 @@ export const createOfferActionAtom = atom<
     )
 
     const vexlNotificationToken = yield* _(
-      set(generateVexlTokenActionAtom, {keyHolder: params.offerKey})
+      set(generateAndRegisterVexlTokenActionAtom, {keyHolder: params.offerKey})
     )
 
     const publicPayloadWithNotificationToken = {

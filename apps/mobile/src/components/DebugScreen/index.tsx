@@ -56,6 +56,7 @@ import {
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
 import {getNewContactNetworkOffersAndDecryptPaginatedActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom/utils/getNewOffersAndDecrypt'
+import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
 import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
@@ -121,6 +122,7 @@ function DebugScreen(): React.ReactElement {
   const getNewContactNetworkOffersAndDecryptPaginated = useSetAtom(
     getNewContactNetworkOffersAndDecryptPaginatedActionAtom
   )
+  const notificationToken = useAtomValue(vexlNotificationTokenAtom)
 
   if (!isDeveloper) {
     const buttonText = !isDeveloper
@@ -171,6 +173,10 @@ function DebugScreen(): React.ReactElement {
             </Text>
             <Text color="$black">
               apiEnv: {JSON.stringify(apiEnv, null, 2)}
+            </Text>
+            <Text color="$black">
+              notficationSecretState:{' '}
+              {JSON.stringify(notificationToken, null, 2)}
             </Text>
             <Spacer />
             <ActionBenchmarks />

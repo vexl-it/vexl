@@ -7,6 +7,7 @@ import {Effect, Option} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 
+// todo #2124 - remove after migration to VexlNotificationToken
 export const updateFirebaseToken = HttpApiBuilder.handler(
   ContactApiSpecification,
   'User',

@@ -1,5 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
@@ -21,6 +22,10 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   }),
   firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option', nullable: true}),
   expoToken: Schema.optionalWith(ExpoNotificationToken, {
+    as: 'Option',
+    nullable: true,
+  }),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
     nullable: true,
   }),
@@ -49,6 +54,10 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
 export const NotificationTokens = Schema.Struct({
   firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option', nullable: true}),
   expoToken: Schema.optionalWith(ExpoNotificationToken, {
+    as: 'Option',
+    nullable: true,
+  }),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
     nullable: true,
   }),

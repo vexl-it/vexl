@@ -2,13 +2,14 @@ import {
   generatePrivateKey,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   EcdsaSignature,
@@ -167,6 +168,9 @@ beforeEach(async () => {
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+            ),
           },
           headers: commonAndSecurityHeadersOld,
         })
@@ -182,6 +186,9 @@ beforeEach(async () => {
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+            ),
           },
           headers: commonAndSecurityHeadersNew,
         })

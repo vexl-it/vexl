@@ -7,12 +7,15 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {contact, user} from '@vexl-next/rest-api/src'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Match, Schema} from 'effect'
+import {Effect, Match, Option, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
 import {Session} from '../../../../brands/Session.brand'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
+import {createVexlSecretActionAtom} from '../../../../state/notifications/actions/createVexlSecretActionAtom'
+import {generateVexlTokenActionAtom} from '../../../../state/notifications/actions/generateVexlTokenActionAtom'
+import {vexlNotificationTokenAtom} from '../../../../state/notifications/vexlNotificationTokenAtom'
 import {sessionAtom} from '../../../../state/session'
 import {
   appSource,
@@ -23,6 +26,7 @@ import {
 } from '../../../../utils/environment'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../../utils/navigation'
+import {getNotificationTokenE} from '../../../../utils/notifications'
 import {isDeveloperAtom} from '../../../../utils/preferences'
 import reportError from '../../../../utils/reportError'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
@@ -63,7 +67,13 @@ const handleUserCreationActionAtom = atom(
       })
       .pipe(
         Effect.flatMap((contactApi) =>
-          contactApi.createUser({firebaseToken: null, expoToken: null})
+          contactApi.createUser({
+            firebaseToken: null,
+            expoToken: null,
+            vexlNotificationToken: Option.fromNullable(
+              session.sessionNotificationToken
+            ),
+          })
         ),
         Effect.tapError((e) => {
           reportError('error', new Error('Error creating user at contact MS'), {
@@ -115,6 +125,42 @@ const deleteUserAndResetFlowActionAtom = atom(
   }
 )
 
+const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
+  null,
+  (get, set) =>
+    Effect.gen(function* (_) {
+      if (get(vexlNotificationTokenAtom).secret) {
+        console.log(
+          'Vexl notification secret already exists, this should not happen, lets remove it first'
+        )
+
+        set(vexlNotificationTokenAtom, {
+          secret: null,
+          lastUpdatedMetadata: null,
+        })
+      }
+
+      console.log('Vexl notification secret does not exist, creating...')
+      const expoToken = yield* _(getNotificationTokenE())
+
+      yield* _(
+        set(createVexlSecretActionAtom, {
+          expoNotificationToken: expoToken,
+        }),
+        Effect.either
+      )
+
+      console.log('Vexl notification secret created successfully')
+
+      const sessionNotificationToken = yield* _(
+        set(generateVexlTokenActionAtom),
+        Effect.option
+      )
+
+      return sessionNotificationToken
+    })
+)
+
 export const finishLoginActionAtom = atom(
   null,
   (
@@ -131,7 +177,7 @@ export const finishLoginActionAtom = atom(
     }
   ) => {
     const {t} = get(translationAtom)
-    const publicUser = get(apiAtom).user
+    const api = get(apiAtom)
 
     set(contactsMigratedAtom, true)
 
@@ -143,10 +189,14 @@ export const finishLoginActionAtom = atom(
       )
 
       const verifiedChallengeResponse = yield* _(
-        publicUser.verifyChallenge({
+        api.user.verifyChallenge({
           userPublicKey: privateKey.publicKeyPemBase64,
           signature: Schema.decodeSync(EcdsaSignature)(signature),
         })
+      )
+
+      const sessionNotificationToken = yield* _(
+        set(handleSecretTokenAndSessionTokenCreationActionAtom)
       )
 
       const session = yield* _(
@@ -159,6 +209,9 @@ export const finishLoginActionAtom = atom(
           },
           phoneNumber,
           privateKey,
+          sessionNotificationToken: Option.getOrUndefined(
+            sessionNotificationToken
+          ),
         })
       )
 

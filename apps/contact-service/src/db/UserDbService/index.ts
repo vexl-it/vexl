@@ -4,9 +4,12 @@ import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNoti
 import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type ServerHashedNumber} from '../../utils/serverHashContact'
-import {type NotificationTokens, type UserRecord} from './domain'
+import {type UserRecord} from './domain'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
-import {createFindFirebaseTokensOfInactiveUsers} from './queries/createFindFirebaseTokensOfInactiveUsers'
+import {
+  createFindFirebaseTokensOfInactiveUsers,
+  type FindFirebaseTokensOfInactiveUsersResult,
+} from './queries/createFindFirebaseTokensOfInactiveUsers'
 import {
   createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact,
   type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams,
@@ -17,9 +20,30 @@ import {
   type FindTokensOfUsersWhoDirectlyImportedHashParams,
   type FindTokensOfUsersWhoDirectlyImportedHashResult,
 } from './queries/createFindTokenOfUsersWhoDirectlyImportedHash'
-import {createFindTokensForNewContentNotification} from './queries/createFindTokensForNewContentNotification'
+import {
+  createFindTokensForNewContentNotification,
+  type FindFirebaseTokensForNewContentNotificationResults,
+} from './queries/createFindTokensForNewContentNotification'
 import {createFindUserByHash} from './queries/createFindUserByHash'
 import {createFindUserbyPublicKeyAndHash} from './queries/createFindUserByPublicKeyAndHash'
+import {
+  createFindVexlNotificationTokensForNewContentNotification,
+  type NewContentNotificationResults,
+} from './queries/createFindVexlNotificationTokensForNewContentNotification'
+import {
+  createFindVexlNotificationTokensOfInactiveUsers,
+  type InactiveUsersNotificationResults,
+} from './queries/createFindVexlNotificationTokensOfInactiveUsers'
+import {
+  createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash,
+  type FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams,
+  type FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashResult,
+} from './queries/createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash'
+import {
+  createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact,
+  type FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactParams,
+  type FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult,
+} from './queries/createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact'
 import {
   createInsertUser,
   type CreateUserParams,
@@ -83,13 +107,47 @@ export interface UserDbOperations {
     UnexpectedServerError
   >
 
+  findVexlNotificationTokensOfUsersWhoDirectlyImportedHash: (
+    args: FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams
+  ) => Effect.Effect<
+    readonly FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashResult[],
+    UnexpectedServerError
+  >
+
+  findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact: (
+    args: FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactParams
+  ) => Effect.Effect<
+    readonly FindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactResult[],
+    UnexpectedServerError
+  >
+
   findFirebaseTokensOfInactiveUsers: (
     beforeRefreshetAt: Date
-  ) => Effect.Effect<readonly NotificationTokens[], UnexpectedServerError>
+  ) => Effect.Effect<
+    readonly FindFirebaseTokensOfInactiveUsersResult[],
+    UnexpectedServerError
+  >
+
+  findVexlNotificationTokensOfInactiveUsers: (
+    beforeRefreshetAt: Date
+  ) => Effect.Effect<
+    readonly InactiveUsersNotificationResults[],
+    UnexpectedServerError
+  >
 
   findFirebaseTokensForNewContentNotification: (
     beforeRefreshetAt: Date
-  ) => Effect.Effect<readonly NotificationTokens[], UnexpectedServerError>
+  ) => Effect.Effect<
+    readonly FindFirebaseTokensForNewContentNotificationResults[],
+    UnexpectedServerError
+  >
+
+  findVexlNotificationTokensForNewContentNotification: (
+    beforeRefreshetAt: Date
+  ) => Effect.Effect<
+    readonly NewContentNotificationResults[],
+    UnexpectedServerError
+  >
 
   deleteUserByPublicKeyAndHash: (args: {
     publicKey: PublicKeyPemBase64
@@ -165,8 +223,20 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact
       )
 
+      const findVexlNotificationTokensOfUsersWhoDirectlyImportedHash = yield* _(
+        createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash
+      )
+      const findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact =
+        yield* _(
+          createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact
+        )
+
       const findFirebaseTokensOfInactiveUsers = yield* _(
         createFindFirebaseTokensOfInactiveUsers
+      )
+
+      const findVexlNotificationTokensOfInactiveUsers = yield* _(
+        createFindVexlNotificationTokensOfInactiveUsers
       )
 
       const updateSetRefreshedAtToNull = yield* _(
@@ -175,6 +245,10 @@ export class UserDbService extends Context.Tag('UserDbService')<
 
       const findFirebaseTokensForNewContentNotification = yield* _(
         createFindTokensForNewContentNotification
+      )
+
+      const findVexlNotificationTokensForNewContentNotification = yield* _(
+        createFindVexlNotificationTokensForNewContentNotification
       )
 
       const updateUserHash = yield* _(createUpdateUserHash)
@@ -197,9 +271,13 @@ export class UserDbService extends Context.Tag('UserDbService')<
         updateInvalidateExpoToken,
         findFirebaseTokensOfUsersWhoDirectlyImportedHash,
         findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact,
+        findVexlNotificationTokensOfUsersWhoDirectlyImportedHash,
+        findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact,
         findFirebaseTokensOfInactiveUsers,
+        findVexlNotificationTokensOfInactiveUsers,
         updateSetRefreshedAtToNull,
         findFirebaseTokensForNewContentNotification,
+        findVexlNotificationTokensForNewContentNotification,
         updateUserHash,
         updateUserInitialImportDone,
         updateAppSourceForUser,

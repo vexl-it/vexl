@@ -1,3 +1,5 @@
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
@@ -18,8 +20,16 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
 import {
+  ClubExpiredNoticeMessage,
+  ClubFlaggedNoticeMessage,
   NewChatMessageNoticeMessage,
+  NewClubUserNoticeMessage,
+  NewContentNoticeMessage,
+  NewUserNoticeMessage,
   StreamOnlyChatMessage,
+  UserAdmittedToClubNoticeMessage,
+  UserInactivityNoticeMessage,
+  UserLoginOnDifferentDeviceNoticeMessage,
   type NotificationsStreamClientInfo,
   type NotificationStreamError,
   type NotificationStreamMessage,
@@ -156,8 +166,259 @@ export class StreamOnlyChatMessageSendTask extends Schema.TaggedClass<StreamOnly
   }
 }
 
+/**
+ * Representing a task to send a new user notice notification.
+ */
+export class NewUserNoticeSendTask extends Schema.TaggedClass<NewUserNoticeSendTask>(
+  'NewUserNoticeSendTask'
+)('NewUserNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): NewUserNoticeMessage {
+    return new NewUserNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+    })
+  }
+}
+
+export class NewClubUserNoticeSendTask extends Schema.TaggedClass<NewClubUserNoticeSendTask>(
+  'NewClubUserNoticeSendTask'
+)('NewClubUserNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+  clubUuid: ClubUuid,
+}) {
+  get socketMessage(): NewClubUserNoticeMessage {
+    return new NewClubUserNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+      clubUuid: this.clubUuid,
+    })
+  }
+}
+
+export class UserAdmittedToClubNoticeSendTask extends Schema.TaggedClass<UserAdmittedToClubNoticeSendTask>(
+  'UserAdmittedToClubNoticeSendTask'
+)('UserAdmittedToClubNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+  publicKey: PublicKeyPemBase64,
+}) {
+  get socketMessage(): UserAdmittedToClubNoticeMessage {
+    return new UserAdmittedToClubNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+      publicKey: this.publicKey,
+    })
+  }
+}
+
+export class UserInactivityNoticeSendTask extends Schema.TaggedClass<UserInactivityNoticeSendTask>(
+  'UserInactivityNoticeSendTask'
+)('UserInactivityNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): UserInactivityNoticeMessage {
+    return new UserInactivityNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+    })
+  }
+}
+
+export class UserLoginOnDifferentDeviceNoticeSendTask extends Schema.TaggedClass<UserLoginOnDifferentDeviceNoticeSendTask>(
+  'UserLoginOnDifferentDeviceNoticeSendTask'
+)('UserLoginOnDifferentDeviceNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): UserLoginOnDifferentDeviceNoticeMessage {
+    return new UserLoginOnDifferentDeviceNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+    })
+  }
+}
+
+export class ClubFlaggedNoticeSendTask extends Schema.TaggedClass<ClubFlaggedNoticeSendTask>(
+  'ClubFlaggedNoticeSendTask'
+)('ClubFlaggedNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+  clubUuid: ClubUuid,
+}) {
+  get socketMessage(): ClubFlaggedNoticeMessage {
+    return new ClubFlaggedNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+      clubUuid: this.clubUuid,
+    })
+  }
+}
+
+export class ClubExpiredNoticeSendTask extends Schema.TaggedClass<ClubExpiredNoticeSendTask>(
+  'ClubExpiredNoticeSendTask'
+)('ClubExpiredNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+  clubUuid: ClubUuid,
+}) {
+  get socketMessage(): ClubExpiredNoticeMessage {
+    return new ClubExpiredNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+      clubUuid: this.clubUuid,
+    })
+  }
+}
+
+export class NewContentNoticeSendTask extends Schema.TaggedClass<NewContentNoticeSendTask>(
+  'NewContentNoticeSendTask'
+)('NewContentNoticeSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): NewContentNoticeMessage {
+    return new NewContentNoticeMessage({
+      sentAt: this.sentAt,
+      trackingId: this.trackingId,
+    })
+  }
+}
+
 export const SendMessageTask = Schema.Union(
   NewChatMessageNoticeSendTask,
-  StreamOnlyChatMessageSendTask
+  NewUserNoticeSendTask,
+  StreamOnlyChatMessageSendTask,
+  NewClubUserNoticeSendTask,
+  UserAdmittedToClubNoticeSendTask,
+  UserInactivityNoticeSendTask,
+  UserLoginOnDifferentDeviceNoticeSendTask,
+  ClubFlaggedNoticeSendTask,
+  ClubExpiredNoticeSendTask,
+  NewContentNoticeSendTask
 )
 export type SendMessageTask = typeof SendMessageTask.Type

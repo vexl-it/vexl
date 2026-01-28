@@ -32,6 +32,7 @@ export const getClubInfo = HttpApiBuilder.handler(
         )
       )
 
+      // todo #2124 - Remove notification token update when fully migrated to VexlNotificationToken
       yield* _(
         membersDb.updateNotificationToken({
           id: member.clubId,
@@ -39,6 +40,16 @@ export const getClubInfo = HttpApiBuilder.handler(
           notificationToken: Option.getOrNull(req.payload.notificationToken),
         })
       )
+
+      if (Option.isSome(req.payload.vexlNotificationToken)) {
+        yield* _(
+          membersDb.updateVexlNotificationToken({
+            id: member.clubId,
+            publicKey: member.publicKey,
+            vexlNotificationToken: req.payload.vexlNotificationToken.value,
+          })
+        )
+      }
 
       const club = yield* _(
         clubsDb.findClub({
@@ -67,6 +78,9 @@ export const getClubInfo = HttpApiBuilder.handler(
         clubInfoForUser: {
           club,
           isModerator: member.isModerator,
+          vexlNotificationToken: Option.fromNullable(
+            member.vexlNotificationToken
+          ),
         },
       }
     }).pipe(makeEndpointEffect)

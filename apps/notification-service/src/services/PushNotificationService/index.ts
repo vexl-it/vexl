@@ -1,12 +1,32 @@
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Context, Data, Effect, flow, identity, Layer, pipe} from 'effect'
+import {
+  Array,
+  Context,
+  Data,
+  Effect,
+  identity,
+  Layer,
+  Match,
+  Option,
+  pipe,
+} from 'effect'
 import {type SupportedPushNotificationTask} from '../../domain'
 import {NotificationMetricsService} from '../../metrics'
 import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
 import {ExpoClientService} from './services/ExpoClientService'
 import {type ExpoSdkError} from './services/ExpoClientService/utils'
-import {generatePushNotificationsFromNewChatMessageNoticeSendTask} from './utils'
+import {
+  generatePushNotificationsFromClubExpiredNoticeSendTask,
+  generatePushNotificationsFromClubFlaggedNoticeSendTask,
+  generatePushNotificationsFromNewChatMessageNoticeSendTask,
+  generatePushNotificationsFromNewClubUserNoticeSendTask,
+  generatePushNotificationsFromNewContentNoticeSendTask,
+  generatePushNotificationsFromNewUserNoticeSendTask,
+  generatePushNotificationsFromUserAdmittedToClubNoticeSendTask,
+  generatePushNotificationsFromUserInactivityNoticeSendTask,
+  generatePushNotificationsFromUserLoginOnDifferentDeviceNoticeSendTask,
+} from './utils'
 
 export class NoExpoTokenError extends Data.TaggedError('NoExpoTokenError')<{
   message: string
@@ -35,10 +55,45 @@ export class PushNotificationService extends Context.Tag(
         sendNotificationViaExpoNotification: (tasks) =>
           Effect.gen(function* (_) {
             const dataToSend = yield* _(
-              Array.map(
-                tasks,
-                flow(
-                  generatePushNotificationsFromNewChatMessageNoticeSendTask,
+              Array.map(tasks, (task) =>
+                Match.value(task).pipe(
+                  Match.tag(
+                    'NewChatMessageNoticeSendTask',
+                    generatePushNotificationsFromNewChatMessageNoticeSendTask
+                  ),
+                  Match.tag(
+                    'NewUserNoticeSendTask',
+                    generatePushNotificationsFromNewUserNoticeSendTask
+                  ),
+                  Match.tag(
+                    'NewClubUserNoticeSendTask',
+                    generatePushNotificationsFromNewClubUserNoticeSendTask
+                  ),
+                  Match.tag(
+                    'UserAdmittedToClubNoticeSendTask',
+                    generatePushNotificationsFromUserAdmittedToClubNoticeSendTask
+                  ),
+                  Match.tag(
+                    'UserInactivityNoticeSendTask',
+                    generatePushNotificationsFromUserInactivityNoticeSendTask
+                  ),
+                  Match.tag(
+                    'UserLoginOnDifferentDeviceNoticeSendTask',
+                    generatePushNotificationsFromUserLoginOnDifferentDeviceNoticeSendTask
+                  ),
+                  Match.tag(
+                    'ClubFlaggedNoticeSendTask',
+                    generatePushNotificationsFromClubFlaggedNoticeSendTask
+                  ),
+                  Match.tag(
+                    'ClubExpiredNoticeSendTask',
+                    generatePushNotificationsFromClubExpiredNoticeSendTask
+                  ),
+                  Match.tag(
+                    'NewContentNoticeSendTask',
+                    generatePushNotificationsFromNewContentNoticeSendTask
+                  ),
+                  Match.exhaustive,
                   Effect.option
                 )
               ),
@@ -48,22 +103,30 @@ export class PushNotificationService extends Context.Tag(
 
             const notificationsToSend = pipe(
               dataToSend,
-              Array.flatMap((d) => d.notificationToSend)
+              Array.flatMap((d) =>
+                Array.isArray(d.notificationToSend)
+                  ? d.notificationToSend
+                  : [d.notificationToSend]
+              )
             )
 
             // TODO check if notifications were delivered successfully and deactivate tokens
             yield* _(expoClient.sendNotification(notificationsToSend))
 
             yield* _(
-              Effect.forEach(dataToSend, (d) =>
-                notificationMetrics.reportNotificationSent({
+              Effect.forEach(dataToSend, (d) => {
+                if (Option.isNone(d.metadata)) return Effect.void
+
+                return notificationMetrics.reportNotificationSent({
                   id: d.trackingId,
-                  clientPlatform: d.metadata.clientPlatform,
-                  clientVersion: d.metadata.clientVersion,
-                  systemNotificationSent: d.notificationToSend.length > 1,
+                  clientPlatform: d.metadata.value.clientPlatform,
+                  clientVersion: d.metadata.value.clientVersion,
+                  systemNotificationSent:
+                    Array.isArray(d.notificationToSend) &&
+                    d.notificationToSend.length > 1,
                   sentAt: unixMillisecondsNow(),
                 })
-              )
+              })
             )
           }).pipe(
             Effect.provideService(

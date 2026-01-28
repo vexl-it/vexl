@@ -89,6 +89,7 @@ export const admitUserToClubActionAtom = atom(
           adminitionRequest: {
             langCode: link.langCode,
             notificationToken: link.notificationToken,
+            vexlNotificationToken: link.vexlNotificationToken,
             publicKey: link.publicKey,
           },
           clubUuid: get(selectedClubAtom).club.uuid,

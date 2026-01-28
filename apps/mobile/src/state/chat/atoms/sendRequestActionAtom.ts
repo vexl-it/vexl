@@ -12,7 +12,7 @@ import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
-import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
+import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
 import {version} from './../../../utils/environment'
 import upsertChatForTheirOfferActionAtom from './upsertChatForTheirOfferActionAtom'
@@ -42,7 +42,9 @@ const sendRequestActionAtom = atom(
         })
       )
       const notificationToken = yield* _(
-        set(generateVexlTokenActionAtom, {keyHolder: inbox.privateKey})
+        set(generateAndRegisterVexlTokenActionAtom, {
+          keyHolder: inbox.privateKey,
+        })
       )
       const message = yield* _(
         sendMessagingRequest({

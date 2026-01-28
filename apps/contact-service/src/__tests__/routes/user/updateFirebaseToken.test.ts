@@ -1,10 +1,11 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -37,6 +38,9 @@ beforeAll(async () => {
           payload: {
             expoToken: null,
             firebaseToken: Schema.decodeSync(FcmToken)('someToken'),
+            vexlNotificationToken: Option.some(
+              Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+            ),
           },
           headers: commonAndSecurityHeaders,
         })

@@ -7,7 +7,7 @@ import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotifi
 import reportError from '../../../../utils/reportError'
 import {startBenchmark} from '../../../ActionBenchmarks'
 import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderAtom'
-import {updateOffersIdsForClubStatActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
+import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
@@ -40,7 +40,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
       })
     )
 
-    set(updateOffersIdsForClubStatActionAtom, {newOffers: newClubsOffers})
+    set(updateOffersIdsForClubStateActionAtom, {newOffers: newClubsOffers})
 
     const {removedClubsOfferIdsToClubUuid, removedContactOfferIds} = yield* _(
       getRemovedOffersIds({

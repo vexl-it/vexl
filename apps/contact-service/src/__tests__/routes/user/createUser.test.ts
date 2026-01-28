@@ -1,11 +1,12 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
@@ -47,6 +48,9 @@ describe('create user', () => {
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+              vexlNotificationToken: Option.some(
+                Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+              ),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -105,6 +109,9 @@ describe('create user', () => {
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+              vexlNotificationToken: Option.some(
+                Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+              ),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -159,6 +166,9 @@ describe('create user', () => {
             payload: {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+              vexlNotificationToken: Option.some(
+                Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
+              ),
             },
             headers: commonAndSecurityHeaders2,
           })
@@ -173,6 +183,99 @@ describe('create user', () => {
             hash_from = ${serverHashedNumber}
         `)
         expect(result).toHaveLength(0)
+      })
+    )
+  })
+
+  it('Should store vexlNotificationToken when provided', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const keys = generatePrivateKey()
+        const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333335')
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber,
+            publicKey: keys.publicKeyPemBase64,
+          })
+        )
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
+        yield* _(
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+              vexlNotificationToken: Option.some(
+                Schema.decodeSync(VexlNotificationToken)('vexl_nt_session_test')
+              ),
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const result = yield* _(sql`
+          SELECT
+            *
+          FROM
+            users
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+        expect(result[0]).toHaveProperty(
+          'vexlNotificationToken',
+          'vexl_nt_session_test'
+        )
+      })
+    )
+  })
+
+  it('Should store null vexlNotificationToken when not provided', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const keys = generatePrivateKey()
+        const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333336')
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber,
+            publicKey: keys.publicKeyPemBase64,
+          })
+        )
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeaders =
+          makeTestCommonAndSecurityHeaders(authHeaders)
+
+        yield* _(
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+              vexlNotificationToken: Option.none(),
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const result = yield* _(sql`
+          SELECT
+            *
+          FROM
+            users
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+        expect(result[0]).toHaveProperty('vexlNotificationToken', null)
       })
     )
   })

@@ -9,6 +9,7 @@
     "dev:backend": "tsx src/dev-backend.ts",
     "health": "tsx src/health.ts",
     "dev:mobile": "tsx src/dev-mobile.ts",
+    "clear-db": "tsx src/clear-db.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "lint": "eslint 'src/**/*.{ts,tsx}' --cache --cache-location 'node_modules/.cache/.eslintcache'",

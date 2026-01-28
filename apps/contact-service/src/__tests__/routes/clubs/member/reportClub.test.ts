@@ -9,6 +9,7 @@ import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -83,6 +84,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
         })
       )
 
@@ -93,6 +95,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
         })
       )
     })

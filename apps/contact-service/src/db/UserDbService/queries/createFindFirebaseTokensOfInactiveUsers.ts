@@ -1,8 +1,19 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {Effect, flow, Schema} from 'effect'
 import {NotificationTokens} from '../domain'
+
+export const FindFirebaseTokensOfInactiveUsersResult = Schema.Struct({
+  ...NotificationTokens.fields,
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
+    as: 'Option',
+    nullable: true,
+  }),
+})
+export type FindFirebaseTokensOfInactiveUsersResult =
+  typeof FindFirebaseTokensOfInactiveUsersResult.Type
 
 export const createFindFirebaseTokensOfInactiveUsers = Effect.gen(
   function* (_) {
@@ -10,11 +21,12 @@ export const createFindFirebaseTokensOfInactiveUsers = Effect.gen(
 
     const query = SqlSchema.findAll({
       Request: Schema.DateFromSelf,
-      Result: NotificationTokens,
+      Result: FindFirebaseTokensOfInactiveUsersResult,
       execute: (params) => sql`
         SELECT
           u.firebase_token,
-          u.expo_token
+          u.expo_token,
+          u.vexl_notification_token
         FROM
           users u
         WHERE
@@ -23,6 +35,7 @@ export const createFindFirebaseTokensOfInactiveUsers = Effect.gen(
           AND (
             u.firebase_token IS NOT NULL
             OR u.expo_token IS NOT NULL
+            OR u.vexl_notification_token IS NOT NULL
           )
       `,
     })

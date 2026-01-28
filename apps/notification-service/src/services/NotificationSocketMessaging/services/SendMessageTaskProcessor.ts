@@ -1,4 +1,13 @@
-import {Array, Context, Effect, flow, identity, Layer, pipe} from 'effect/index'
+import {
+  Array,
+  Context,
+  Effect,
+  flow,
+  identity,
+  Layer,
+  Match,
+  pipe,
+} from 'effect/index'
 import {ThrottledPushNotificationService} from '../../ThrottledPushNotificationService'
 import {type SendMessageTask} from '../domain'
 import {LocalConnectionRegistry} from './LocalConnectionRegistry'
@@ -39,13 +48,38 @@ export class TimeoutProcessor extends Context.Tag('TimeoutProcessor')<
     Effect.gen(function* (_) {
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
 
-      return (task: SendMessageTask) => {
-        if (task._tag === 'NewChatMessageNoticeSendTask')
-          return pipe(issuePushNotification(task), Effect.ignore)
-
-        // we don't process other task types for now
-        return Effect.void
-      }
+      return (task: SendMessageTask) =>
+        Match.value(task).pipe(
+          Match.tag('NewChatMessageNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('NewUserNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('NewClubUserNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('UserAdmittedToClubNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('UserInactivityNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('UserLoginOnDifferentDeviceNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('ClubFlaggedNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('ClubExpiredNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('NewContentNoticeSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
+          Match.tag('StreamOnlyChatMessageSendTask', () => Effect.void),
+          Match.exhaustive
+        )
     })
   )
 }

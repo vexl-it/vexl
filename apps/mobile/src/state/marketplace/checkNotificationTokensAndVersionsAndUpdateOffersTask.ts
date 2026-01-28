@@ -12,7 +12,7 @@ import {refreshNotificationTaskId} from '../../utils/notifications/refreshNotifi
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {reportErrorE} from '../../utils/reportError'
 import {inboxesAtom} from '../chat/atoms/messagingStateAtom'
-import {generateVexlTokenActionAtom} from '../notifications/actions/generateVexlTokenActionAtom'
+import {generateAndRegisterVexlTokenActionAtom} from '../notifications/actions/generateVexlTokenActionAtom'
 import {ensureVexlSecretExistsTaskId} from '../notifications/ensureVexlSecretExistsTask'
 import {refreshOffersAndEnsureInboxesTaskId} from '../refreshOffersAndEnsureInboxesInAppLoadingTask'
 import {myOffersAtom} from './atoms/myOffers'
@@ -48,7 +48,9 @@ const updateOfferNotificationTokenActionAtom = atom(
         )
       )
       const vexlNotificationToken = yield* _(
-        set(generateVexlTokenActionAtom, {keyHolder: offerKeyHolder.privateKey})
+        set(generateAndRegisterVexlTokenActionAtom, {
+          keyHolder: offerKeyHolder.privateKey,
+        })
       )
 
       return yield* _(

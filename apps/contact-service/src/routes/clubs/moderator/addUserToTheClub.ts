@@ -15,8 +15,7 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
-import {issueClubAdmissionNotification} from '../../../utils/issueClubAdmissionNotification'
-import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotificationService'
+import {UserNotificationService} from '../../../services/UserNotificationService'
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
@@ -30,6 +29,7 @@ export const addUserToTheClub = HttpApiBuilder.handler(
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
+      const userNotificationService = yield* _(UserNotificationService)
 
       const moderatorMember = yield* _(
         membersDb.findClubMemberByPublicKey({publicKey: req.payload.publicKey}),
@@ -79,26 +79,22 @@ export const addUserToTheClub = HttpApiBuilder.handler(
           notificationToken: Option.getOrNull(
             req.payload.adminitionRequest.notificationToken
           ),
+          vexlNotificationToken: Option.getOrNull(
+            req.payload.adminitionRequest.vexlNotificationToken
+          ),
         })
       )
 
-      if (Option.isSome(req.payload.adminitionRequest.notificationToken)) {
-        yield* _(
-          issueClubAdmissionNotification({
-            admittedMemberPublickey: req.payload.adminitionRequest.publicKey,
-            notificationToken:
-              req.payload.adminitionRequest.notificationToken.value,
-          })
+      yield* _(
+        userNotificationService.notifyUserAboutClubAddmission(
+          req.payload.adminitionRequest.publicKey
         )
-      }
+      )
 
       yield* _(
-        NewClubUserNotificationsService,
-        Effect.flatMap((s) =>
-          s.registerNewClubNotification({
-            clubUuid: club.uuid,
-            triggeringUser: req.payload.publicKey,
-          })
+        userNotificationService.notifyOthersAboutNewClubUser(
+          club.uuid,
+          req.payload.adminitionRequest.publicKey
         )
       )
 

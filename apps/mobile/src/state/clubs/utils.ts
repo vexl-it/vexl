@@ -1,5 +1,6 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {Effect, HashSet, Schema, type Option} from 'effect'
@@ -22,10 +23,12 @@ export const fetchClubWithMembersReportApiErrors = ({
   keyPair,
   contactApi,
   notificationToken,
+  vexlNotificationToken,
 }: {
   keyPair: PrivateKeyHolder
   contactApi: ContactApi
   notificationToken: Option.Option<ExpoNotificationToken>
+  vexlNotificationToken: Option.Option<VexlNotificationToken>
 }): Effect.Effect<
   ClubWithMembers,
   ClubNotFoundError | FetchingClubError,
@@ -33,11 +36,13 @@ export const fetchClubWithMembersReportApiErrors = ({
 > =>
   Effect.gen(function* (_) {
     const clubInfo = yield* _(
-      contactApi.getClubInfo({keyPair, notificationToken}).pipe(
-        Effect.catchTag('NotFoundError', (e) => {
-          return Effect.fail({_tag: 'clubDoesNotExist', e})
-        })
-      )
+      contactApi
+        .getClubInfo({keyPair, notificationToken, vexlNotificationToken})
+        .pipe(
+          Effect.catchTag('NotFoundError', (e) => {
+            return Effect.fail({_tag: 'clubDoesNotExist', e})
+          })
+        )
     )
 
     const clubMembers = yield* _(
@@ -51,6 +56,7 @@ export const fetchClubWithMembersReportApiErrors = ({
       club: clubInfo.clubInfoForUser.club,
       members: clubMembers.items,
       isModerator: clubInfo.clubInfoForUser.isModerator,
+      vexlNotificationToken: clubInfo.clubInfoForUser.vexlNotificationToken,
       stats: {
         allOffersIdsForClub: HashSet.empty(),
         allChatsIdsForClub: HashSet.empty(),

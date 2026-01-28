@@ -11,6 +11,7 @@ import {getNotificationTokenE} from './index'
 
 const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
 
+// todo #2124: remove after migrating to vexl notification token
 export const refreshNotificationTaskId = registerInAppLoadingTask({
   name: 'refreshNotificationTokenOnResume',
   requirements: {

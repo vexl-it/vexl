@@ -38,6 +38,7 @@ export const refreshUser = HttpApiBuilder.handler(
           clientVersion: req.headers.clientVersionOrNone,
           countryPrefix: req.payload.countryPrefix,
           appSource: req.headers.appSourceOrNone,
+          vexlNotificationToken: req.payload.vexlNotificationToken,
           refreshedAt: new Date(),
         })
       )

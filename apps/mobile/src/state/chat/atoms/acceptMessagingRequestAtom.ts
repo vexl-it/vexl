@@ -19,7 +19,7 @@ import {atom, type PrimitiveAtom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import {type NoVexlSecretError} from '../../notifications/actions/NoVexlSecretError'
-import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
+import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
@@ -60,7 +60,9 @@ const acceptMessagingRequestAtom = atom(
       TE.Do,
       TE.chainW(() =>
         effectToTaskEither(
-          set(generateVexlTokenActionAtom, {keyHolder: chat.inbox.privateKey})
+          set(generateAndRegisterVexlTokenActionAtom, {
+            keyHolder: chat.inbox.privateKey,
+          })
         )
       ),
       TE.bindTo('vexlToken'),

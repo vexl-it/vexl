@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   ImportContactsQuotaReachedError,
   InitialImportContactsQuotaReachedError,
@@ -7,13 +8,15 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, LogLevel, Logger, Order, pipe} from 'effect'
-import {isArray} from 'effect/Array'
+import {Array, Effect, LogLevel, Logger, pipe} from 'effect'
 import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
 } from '../../../routes/contacts/importContactsQuotaService'
-import {sendNotificationsMock} from '../../utils/mockedExpoNotificationService'
+import {
+  clearEnqueuedNotifications,
+  getEnqueuedNotifications,
+} from '../../utils/mockEnqueueUserNotification'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
@@ -285,6 +288,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              vexlNotificationToken: me.vexlNotificationToken,
             },
             headers: commonAndSecurityHeaders,
           })
@@ -357,6 +361,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              vexlNotificationToken: me.vexlNotificationToken,
             },
           })
         )
@@ -427,6 +432,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              vexlNotificationToken: me.vexlNotificationToken,
             },
           })
         )
@@ -556,6 +562,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              vexlNotificationToken: me.vexlNotificationToken,
             },
             headers: commonAndSecurityHeaders,
           })
@@ -661,6 +668,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              vexlNotificationToken: me.vexlNotificationToken,
             },
           })
         )
@@ -696,15 +704,44 @@ describe('Notification', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         yield* _(Effect.sleep(400))
-        sendNotificationsMock.mockClear()
+        yield* _(clearEnqueuedNotifications)
       })
     )
   })
 
-  it('Notifies other users about new user', async () => {
+  it('Enqueues notifications for users with vexlNotificationToken when contacts are imported', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
+        yield* _(clearEnqueuedNotifications)
+
         const me = networkOne[0]
+        const sql = yield* _(SqlClient.SqlClient)
+
+        // Clear all vexl_notification_tokens first
+        yield* _(sql`
+          UPDATE users
+          SET
+            vexl_notification_token = NULL
+        `)
+
+        // Set vexlNotificationToken for two users from networkOne
+        const userWithVexlToken1 = networkOne[1]
+        const userWithVexlToken2 = networkOne[2]
+
+        yield* _(sql`
+          UPDATE users
+          SET
+            vexl_notification_token = ${'vexl_nt_net1_user2' as VexlNotificationToken}
+          WHERE
+            public_key = ${userWithVexlToken1.keys.publicKeyPemBase64}
+        `)
+        yield* _(sql`
+          UPDATE users
+          SET
+            vexl_notification_token = ${'vexl_nt_net1_user3' as VexlNotificationToken}
+          WHERE
+            public_key = ${userWithVexlToken2.keys.publicKeyPemBase64}
+        `)
 
         const app = yield* _(NodeTestingApp)
         yield* _(setAuthHeaders(me.authHeaders))
@@ -712,18 +749,17 @@ describe('Notification', () => {
           me.authHeaders
         )
 
+        // Clear contacts first
         yield* _(
           app.Contact.importContacts({
             payload: {contacts: [], replace: true},
             headers: commonAndSecurityHeaders,
           })
         )
-
         yield* _(Effect.sleep(200))
-        expect(sendNotificationsMock).not.toHaveBeenCalled()
+        yield* _(clearEnqueuedNotifications)
 
-        sendNotificationsMock.mockClear()
-
+        // Import contacts to trigger notifications
         const contactsToImport = Array.filter(
           [...networkOne],
           (one) => one.hashedNumber !== me.hashedNumber
@@ -741,26 +777,43 @@ describe('Notification', () => {
 
         yield* _(Effect.sleep(200))
 
-        const call = sendNotificationsMock.mock.calls[0][0]
+        // New MQ path: notifications are enqueued for all users
+        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const newUserNotifications = enqueuedNotifications.filter(
+          (n) => n.task._tag === 'NewUserNotificationMqEntry'
+        )
 
+        // Filter for notifications with vexlNotificationToken set
+        const notificationsWithVexlToken = newUserNotifications.filter(
+          (n) =>
+            n.task._tag === 'NewUserNotificationMqEntry' &&
+            n.task.token !== null
+        )
+
+        expect(notificationsWithVexlToken).toHaveLength(2)
         expect(
-          pipe(
-            call.map((one) => (isArray(one.to) ? one.to : [one.to])),
-            Array.flatten,
-            Array.sort(Order.string),
-            Array.join(',')
-          )
-        ).toBe(
-          pipe(
-            [...networkOne, ...networkTwo],
-            Array.filter(
-              (one) => one.notificationToken !== me.notificationToken
-            ),
-            Array.map((c) => c.notificationToken),
-            Array.sort(Order.string),
-            Array.join(',')
+          notificationsWithVexlToken
+            .map((n) =>
+              n.task._tag === 'NewUserNotificationMqEntry' ? n.task.token : ''
+            )
+            .sort((a, b) => (a ?? '').localeCompare(b ?? ''))
+        ).toEqual(
+          ['vexl_nt_net1_user2', 'vexl_nt_net1_user3'].sort((a, b) =>
+            a.localeCompare(b)
           )
         )
+
+        // Clean up: remove vexl_notification_tokens
+        yield* _(sql`
+          UPDATE users
+          SET
+            vexl_notification_token = NULL
+          WHERE
+            public_key IN (
+              ${userWithVexlToken1.keys.publicKeyPemBase64},
+              ${userWithVexlToken2.keys.publicKeyPemBase64}
+            )
+        `)
       })
     )
   })

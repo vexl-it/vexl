@@ -59,6 +59,7 @@ export const createUser = HttpApiBuilder.handler(
               hash: security.serverHash,
               expoToken: Option.fromNullable(req.payload.expoToken),
               firebaseToken: Option.fromNullable(req.payload.firebaseToken),
+              vexlNotificationToken: req.payload.vexlNotificationToken,
               clientVersion: req.headers.clientVersionOrNone,
               platform: req.headers.clientPlatformOrNone,
               appSource: req.headers.appSourceOrNone,

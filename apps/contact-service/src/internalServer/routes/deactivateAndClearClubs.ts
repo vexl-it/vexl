@@ -1,16 +1,12 @@
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {ClubDeactivatedNotificationData} from '@vexl-next/domain/src/general/notifications'
 import dayjs from 'dayjs'
-import {Array, Effect, flow, Option, pipe} from 'effect'
-import {isNotNullable} from 'effect/Predicate'
+import {Array, Effect, Option, pipe} from 'effect'
 import {clubRemoveAfterMarkedAsDeletedDaysConfig} from '../../configs'
 import {ClubInvitationLinkDbService} from '../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../db/ClubsDbService'
 import {type ClubDbRecord} from '../../db/ClubsDbService/domain'
-import {type UserDbService} from '../../db/UserDbService'
-import {sendExpoNotificationToAllHandleNonExistingTokens} from '../../utils/expoNotifications'
-import {type ExpoNotificationsService} from '../../utils/expoNotifications/ExpoNotificationsService'
+import {UserNotificationService} from '../../services/UserNotificationService'
 
 const findExpiredClubs = ClubsDbService.pipe(
   Effect.flatMap((one) => one.listExpiredClubs())
@@ -48,44 +44,9 @@ const removeClubCompletely = (
     Effect.withSpan('removeClubCompletely', {attributes: {id: club.id, club}})
   )
 
-const sendNotificationToMembers = (
-  club: ClubDbRecord,
-  reason: ClubDeactivatedNotificationData['reason']
-): Effect.Effect<
-  void,
-  UnexpectedServerError,
-  ClubMembersDbService | ExpoNotificationsService | UserDbService
-> =>
-  Effect.gen(function* (_) {
-    const membersDb = yield* _(ClubMembersDbService)
-    const notificationTokensToSendTo = yield* _(
-      membersDb.queryAllClubMembers({id: club.id}),
-      Effect.map(
-        flow(
-          Array.map((one) => one.notificationToken),
-          Array.filter(isNotNullable)
-        )
-      )
-    )
-
-    const notificationToIssue = new ClubDeactivatedNotificationData({
-      trackingId: Option.none(),
-      clubUuid: club.uuid,
-      reason,
-    })
-
-    yield* _(
-      sendExpoNotificationToAllHandleNonExistingTokens({
-        data: notificationToIssue.toData(),
-        tokens: notificationTokensToSendTo,
-      })
-    )
-  }).pipe(
-    Effect.withSpan('sendNotificationToMembers', {attributes: {club, reason}})
-  )
-
 const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
   const clubsDb = yield* _(ClubsDbService)
+  const userNotificationService = yield* _(UserNotificationService)
 
   const expiredClubs = yield* _(findExpiredClubs)
   const flaggedClubs = yield* _(findFlaggedClubs)
@@ -97,17 +58,25 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
   yield* _(Effect.log('Deactivating clubs', idsOfClubsToDeactivate))
 
   yield* _(clubsDb.updateSetClubsInactive({id: idsOfClubsToDeactivate}))
+
   yield* _(
     expiredClubs,
     Array.map((expiredClub) =>
-      sendNotificationToMembers(expiredClub, 'EXPIRED')
+      userNotificationService.notifyUsersAboutExpiredClub(
+        expiredClub.id,
+        expiredClub.uuid
+      )
     ),
     Effect.all
   )
+
   yield* _(
     flaggedClubs,
-    Array.map((expiredClub) =>
-      sendNotificationToMembers(expiredClub, 'FLAGGED')
+    Array.map((flaggedClub) =>
+      userNotificationService.notifyUsersAboutFlaggedClub(
+        flaggedClub.id,
+        flaggedClub.uuid
+      )
     ),
     Effect.all
   )

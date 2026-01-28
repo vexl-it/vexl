@@ -151,7 +151,6 @@ export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
 export type PostLoginFlowStackParamsList = {
   ImportContactsExplanationScreen: undefined
   ImportContacts: undefined
-  AllowNotificationsExplanation: undefined
   FindOffersInVexlClubsScreen: undefined
 }
 

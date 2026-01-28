@@ -51,6 +51,7 @@ export async function showUINotificationFromRemoteMessage(
       )
       return true
     }
+
     await notifee.displayNotification({
       title: t(`notifications.INACTIVITY_REMINDER.title`),
       body: t(`notifications.INACTIVITY_REMINDER.body`),

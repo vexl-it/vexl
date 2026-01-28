@@ -1,5 +1,7 @@
 // Rcps.ts
 import {Rpc, RpcGroup} from '@effect/rpc'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
@@ -59,6 +61,66 @@ export class StreamOnlyChatMessage extends Schema.TaggedClass<StreamOnlyChatMess
   targetToken: Schema.optional(VexlNotificationToken),
 }) {}
 
+export class NewUserNoticeMessage extends Schema.TaggedClass<NewUserNoticeMessage>(
+  'NewUserNoticeMessage'
+)('NewUserNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+}) {}
+
+export class NewClubUserNoticeMessage extends Schema.TaggedClass<NewClubUserNoticeMessage>(
+  'NewClubUserNoticeMessage'
+)('NewClubUserNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+  clubUuid: ClubUuid,
+}) {}
+
+export class UserAdmittedToClubNoticeMessage extends Schema.TaggedClass<UserAdmittedToClubNoticeMessage>(
+  'UserAdmittedToClubNoticeMessage'
+)('UserAdmittedToClubNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+  publicKey: PublicKeyPemBase64,
+}) {}
+
+export class UserInactivityNoticeMessage extends Schema.TaggedClass<UserInactivityNoticeMessage>(
+  'UserInactivityNoticeMessage'
+)('UserInactivityNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+}) {}
+
+export class UserLoginOnDifferentDeviceNoticeMessage extends Schema.TaggedClass<UserLoginOnDifferentDeviceNoticeMessage>(
+  'UserLoginOnDifferentDeviceNoticeMessage'
+)('UserLoginOnDifferentDeviceNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+}) {}
+
+export class ClubFlaggedNoticeMessage extends Schema.TaggedClass<ClubFlaggedNoticeMessage>(
+  'ClubFlaggedNoticeMessage'
+)('ClubFlaggedNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+  clubUuid: ClubUuid,
+}) {}
+
+export class ClubExpiredNoticeMessage extends Schema.TaggedClass<ClubExpiredNoticeMessage>(
+  'ClubExpiredNoticeMessage'
+)('ClubExpiredNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+  clubUuid: ClubUuid,
+}) {}
+
+export class NewContentNoticeMessage extends Schema.TaggedClass<NewContentNoticeMessage>(
+  'NewContentNoticeMessage'
+)('NewContentNoticeMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+}) {}
+
 export class DebugMessage extends Schema.TaggedClass<DebugMessage>(
   'DebugMessage'
 )('DebugMessage', {
@@ -67,7 +129,15 @@ export class DebugMessage extends Schema.TaggedClass<DebugMessage>(
 
 export const NotificationStreamMessage = Schema.Union(
   NewChatMessageNoticeMessage,
+  NewUserNoticeMessage,
   StreamOnlyChatMessage,
+  NewClubUserNoticeMessage,
+  UserAdmittedToClubNoticeMessage,
+  UserInactivityNoticeMessage,
+  UserLoginOnDifferentDeviceNoticeMessage,
+  ClubFlaggedNoticeMessage,
+  ClubExpiredNoticeMessage,
+  NewContentNoticeMessage,
   DebugMessage
 )
 export type NotificationStreamMessage = typeof NotificationStreamMessage.Type

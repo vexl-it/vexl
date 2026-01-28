@@ -6,6 +6,7 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import {showInternalNotificationForClubAdmission} from '../../../utils/notifications/clubNotifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
+import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ClubWithMembers} from '../domain'
 import {fetchClubWithMembersReportApiErrors} from '../utils'
 import {
@@ -28,11 +29,19 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
       keysWaitingForAdmission,
       Array.map((key) =>
         Effect.gen(function* (_) {
+          const vexlNotificationToken = yield* _(
+            set(generateVexlTokenActionAtom).pipe(
+              Effect.map(Option.some),
+              Effect.catchAll(() => Effect.succeed(Option.none()))
+            )
+          )
+
           const clubWithMembers: ClubWithMembers = yield* _(
             fetchClubWithMembersReportApiErrors({
               keyPair: key,
               contactApi: api.contact,
               notificationToken,
+              vexlNotificationToken,
             })
           )
 
@@ -74,7 +83,7 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
             data: {...data.data, [clubWithMembers.club.uuid]: key},
             waitingForAdmission: Array.filter(
               data.waitingForAdmission,
-              (k) => k.privateKeyPemBase64 === key.privateKeyPemBase64
+              (k) => k.privateKeyPemBase64 !== key.privateKeyPemBase64
             ),
           }))
 

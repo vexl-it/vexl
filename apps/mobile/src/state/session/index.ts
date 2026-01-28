@@ -14,6 +14,7 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
+import {focusAtom} from 'jotai-optics'
 import {Session} from '../../brands/Session.brand'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {replaceAll} from '../../utils/replaceAll'
@@ -82,7 +83,7 @@ export const dummySession: Session = Schema.decodeSync(Session)({
   },
   phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
   version: 0,
-} satisfies Session)
+})
 
 type SessionAtomValueType =
   | {readonly state: 'initial'}
@@ -158,6 +159,11 @@ export const sessionDataOrDummyAtom = atom(
 
     set(sessionAtom, O.some(newValue))
   }
+)
+
+export const sessionNotificationTokenAtom = focusAtom(
+  sessionDataOrDummyAtom,
+  (optic) => optic.prop('sessionNotificationToken')
 )
 
 // --------- hooks ---------

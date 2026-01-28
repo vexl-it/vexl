@@ -75,9 +75,6 @@ import {
   RequestClubImageUploadRequest,
   RequestClubImageUploadResponse,
   S3ServiceError,
-  SendBulkNotificationError,
-  SendBulkNotificationRequest,
-  SendBulkNotificationResponse,
   UnableToVerifySignatureError,
   UpdateBadOwnerHashRequest,
   UpdateBadOwnerHashResponse,
@@ -387,17 +384,6 @@ export const ReportClubEndpoint = HttpApiEndpoint.post(
   .addError(ReportClubLimitReachedError, {status: 429})
   .annotate(MaxExpectedDailyCall, 10)
 
-export const SendBulkNotificationEndpoint = HttpApiEndpoint.post(
-  'sendBulkNotification',
-  '/api/v1/notifications/bulk'
-)
-  .setUrlParams(AdminTokenParams)
-  .setPayload(SendBulkNotificationRequest)
-  .addSuccess(SendBulkNotificationResponse)
-  .addError(SendBulkNotificationError, {status: 400})
-  .addError(InvalidAdminTokenError, {status: 401})
-  .annotate(MaxExpectedDailyCall, 10)
-
 const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)
   .add(CreateUserEndpoint)
@@ -437,10 +423,6 @@ const ClubsModeratorApiGroup = HttpApiGroup.make('ClubsModerator')
   .add(AddUserToTheClubEndpint)
   .add(ListClubLinksEndpoint)
 
-const AdminApiGroup = HttpApiGroup.make('Admin').add(
-  SendBulkNotificationEndpoint
-)
-
 export const ContactApiSpecification = HttpApi.make('Contact API')
   .middleware(RateLimitingMiddleware)
   .add(UserApiGroup)
@@ -448,7 +430,6 @@ export const ContactApiSpecification = HttpApi.make('Contact API')
   .add(ClubsAdminApiGroup)
   .add(ClubsMemberApiGroup)
   .add(ClubsModeratorApiGroup)
-  .add(AdminApiGroup)
   .add(ChallengeApiGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

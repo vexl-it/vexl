@@ -13,7 +13,7 @@ import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbServi
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {reportUserJoinedClubAndImportedContacts} from '../../../metrics'
-import {NewClubUserNotificationsService} from '../../../utils/NewClubUserNotificationService'
+import {UserNotificationService} from '../../../services/UserNotificationService'
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
@@ -28,6 +28,7 @@ export const joinClub = HttpApiBuilder.handler(
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
       const linksDb = yield* _(ClubInvitationLinkDbService)
+      const userNotificationService = yield* _(UserNotificationService)
 
       const inviteLink = yield* _(
         linksDb.findInvitationLinkByCode({
@@ -82,6 +83,9 @@ export const joinClub = HttpApiBuilder.handler(
               notificationToken: Option.getOrNull(
                 req.payload.notificationToken
               ),
+              vexlNotificationToken: Option.getOrNull(
+                req.payload.vexlNotificationToken
+              ),
             })
           )
 
@@ -95,12 +99,9 @@ export const joinClub = HttpApiBuilder.handler(
           }
 
           yield* _(
-            NewClubUserNotificationsService,
-            Effect.flatMap((s) =>
-              s.registerNewClubNotification({
-                clubUuid: club.uuid,
-                triggeringUser: req.payload.publicKey,
-              })
+            userNotificationService.notifyOthersAboutNewClubUser(
+              club.uuid,
+              req.payload.publicKey
             )
           )
 
@@ -116,6 +117,9 @@ export const joinClub = HttpApiBuilder.handler(
             clubInfoForUser: {
               club,
               isModerator: member.isModerator,
+              vexlNotificationToken: Option.fromNullable(
+                member.vexlNotificationToken
+              ),
             },
           }
         }),

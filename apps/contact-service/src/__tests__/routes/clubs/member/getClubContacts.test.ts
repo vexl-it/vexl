@@ -3,6 +3,7 @@ import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {
   InvalidChallengeError,
@@ -97,6 +98,9 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
+              ),
             },
           })
         )
@@ -122,6 +126,9 @@ describe('Get club contacts', () => {
               publicKey: challengeForUser2.publicKey,
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
+              ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
               ),
             },
           })
@@ -203,6 +210,9 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
+              ),
             },
           })
         )
@@ -282,6 +292,9 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
+              ),
             },
           })
         )
@@ -330,6 +343,9 @@ describe('Get club contacts', () => {
               publicKey: challengeForUser2.publicKey,
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
+              ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
               ),
             },
           })
@@ -406,6 +422,9 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
+              ),
             },
           })
         )
@@ -480,6 +499,9 @@ describe('Get club contacts', () => {
               publicKey: challengeForUser1.publicKey,
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
+              ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
               ),
             },
           })

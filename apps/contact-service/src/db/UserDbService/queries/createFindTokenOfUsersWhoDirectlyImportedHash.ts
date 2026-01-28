@@ -1,6 +1,7 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
@@ -15,6 +16,10 @@ export type FindTokensOfUsersWhoDirectlyImportedHashParams =
 
 export const FindTokensOfUsersWhoDirectlyImportedHashResult = Schema.Struct({
   ...NotificationTokens.fields,
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
+    as: 'Option',
+    nullable: true,
+  }),
   clientVersion: Schema.NullOr(VersionCode),
 })
 export type FindTokensOfUsersWhoDirectlyImportedHashResult =
@@ -31,6 +36,7 @@ export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
         SELECT DISTINCT
           u.firebase_token,
           u.expo_token,
+          u.vexl_notification_token,
           u.client_version
         FROM
           users u
@@ -39,6 +45,7 @@ export const createFindTokensOfUsersWhoDirectlyImportedHash = Effect.gen(
           (
             u.firebase_token IS NOT NULL
             OR u.expo_token IS NOT NULL
+            OR u.vexl_notification_token IS NOT NULL
           )
           AND uc.hash_to = ${params.userHash}
           AND ${sql.in('u.hash', params.importedHashes)}

@@ -85,7 +85,7 @@ export const removeClubWithMembersFromStateActionAtom = atom(
   }
 )
 
-export const updateOffersIdsForClubStatActionAtom = atom(
+export const updateOffersIdsForClubStateActionAtom = atom(
   null,
   (get, set, {newOffers}: {newOffers: readonly OfferInfo[]}) => {
     const myOffersIds = get(myOffersAtom).map(

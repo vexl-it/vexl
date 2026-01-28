@@ -20,7 +20,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
-import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
+import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {type ChatWithMessages} from '../domain'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {updateMyNotificationTokenInfoInChat} from './generateMyNotificationTokenInfoActionAtom'
@@ -61,7 +61,7 @@ export const sendFcmCypherUpdateMessageActionAtom = atom(
         }),
         T.bind('vexlNotificationToken', () =>
           effectToTask(
-            set(generateVexlTokenActionAtom, {
+            set(generateAndRegisterVexlTokenActionAtom, {
               keyHolder: chatWithMessages.chat.inbox.privateKey,
             }).pipe(Effect.option)
           )

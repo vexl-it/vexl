@@ -2,6 +2,7 @@ import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -67,6 +68,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
         })
       )
     })
@@ -93,6 +95,9 @@ describe('Leave club', () => {
               ...(yield* _(generateAndSignChallenge(userKey))),
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
+              ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_test' as VexlNotificationToken
               ),
             },
           }),

@@ -6,6 +6,7 @@ import {Array, Context, Effect, flow, Layer, pipe} from 'effect/index'
 import {
   type ConnectionManagerChannelId,
   type NewChatMessageNoticeSendTask,
+  type SendMessageTask,
   type StreamOnlyChatMessageSendTask,
 } from './domain'
 import {LocalConnectionRegistry} from './services/LocalConnectionRegistry'
@@ -23,6 +24,12 @@ export interface NotificationSocketMessagingOperations {
   >
   sendStreamOnlyChatMessage: (
     task: StreamOnlyChatMessageSendTask
+  ) => Effect.Effect<
+    void,
+    NoSuchElementException | SendMessageTasksManagerError
+  >
+  sendNotice: (
+    task: SendMessageTask
   ) => Effect.Effect<
     void,
     NoSuchElementException | SendMessageTasksManagerError
@@ -73,6 +80,14 @@ export class NotificationSocketMessaging extends Context.Tag(
             (managerIds) => sendMessageTaskManager.emitTask(task, ...managerIds)
           ),
         sendStreamOnlyChatMessage: (task) =>
+          Effect.flatMap(
+            findManagerIdsForOpenConnections(
+              task.notificationToken,
+              task.minimalClientVersion
+            ),
+            (managerIds) => sendMessageTaskManager.emitTask(task, ...managerIds)
+          ),
+        sendNotice: (task) =>
           Effect.flatMap(
             findManagerIdsForOpenConnections(
               task.notificationToken,

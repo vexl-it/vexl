@@ -2,6 +2,7 @@ import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -67,6 +68,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
         })
       )
     })
@@ -86,6 +88,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.none(),
             },
           })
         )
@@ -93,6 +96,9 @@ describe('Get club info', () => {
         expect(result.clubInfoForUser).toEqual({
           club,
           isModerator: false,
+          vexlNotificationToken: Option.some(
+            'vexl_nt_test' as VexlNotificationToken
+          ),
         })
       })
     )
@@ -110,6 +116,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.none(),
             },
           })
         )
@@ -124,6 +131,79 @@ describe('Get club info', () => {
                 club_member
               WHERE
                 notification_token = 'someToken2'
+            `
+          )
+        )
+        expect(data.length).toBe(1)
+      })
+    )
+  })
+
+  it('Correctly updates vexl notification token', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        yield* _(
+          app.ClubsMember.getClubInfo({
+            payload: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              vexlNotificationToken: Option.some(
+                'vexl_nt_updated' as VexlNotificationToken
+              ),
+            },
+          })
+        )
+
+        const data = yield* _(
+          SqlClient.SqlClient,
+          Effect.flatMap(
+            (sql) => sql`
+              SELECT
+                *
+              FROM
+                club_member
+              WHERE
+                vexl_notification_token = 'vexl_nt_updated'
+            `
+          )
+        )
+        expect(data.length).toBe(1)
+      })
+    )
+  })
+
+  it('Does not clear vexl notification token when Option.none() is provided', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        yield* _(
+          app.ClubsMember.getClubInfo({
+            payload: {
+              ...(yield* _(generateAndSignChallenge(userKey))),
+              notificationToken: Option.some(
+                'someToken' as ExpoNotificationToken
+              ),
+              vexlNotificationToken: Option.none(),
+            },
+          })
+        )
+
+        const data = yield* _(
+          SqlClient.SqlClient,
+          Effect.flatMap(
+            (sql) => sql`
+              SELECT
+                *
+              FROM
+                club_member
+              WHERE
+                vexl_notification_token = 'vexl_nt_test'
+                AND public_key = ${userKey.publicKeyPemBase64}
             `
           )
         )
@@ -153,6 +233,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.none(),
             },
           }),
           Effect.either
@@ -175,6 +256,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.none(),
             },
           }),
           Effect.either
@@ -204,6 +286,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.none(),
             },
           })
         )
@@ -211,6 +294,9 @@ describe('Get club info', () => {
         expect(result.clubInfoForUser).toEqual({
           club,
           isModerator: true,
+          vexlNotificationToken: Option.some(
+            'vexl_nt_test' as VexlNotificationToken
+          ),
         })
       })
     )
@@ -233,6 +319,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
+              vexlNotificationToken: Option.none(),
             },
           }),
           Effect.either

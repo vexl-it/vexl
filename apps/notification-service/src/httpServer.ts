@@ -34,6 +34,7 @@ import {updateNotificationInfoHandler} from './routes/notificationToken/updateNo
 import {reportNotificationProcessedHandler} from './routes/reportNotificationProcessed'
 import {NotificationSocketMessaging} from './services/NotificationSocketMessaging'
 import {NotificationRpcsHandlers} from './services/NotificationSocketMessaging/services/NotificationRpcHandles'
+import {ProcessUserNotificationsWorker} from './services/NotificationSocketMessaging/services/ProcessUserNotificationWorker'
 import {
   TaskWorkerLayer,
   TimeoutWorkerLayer,
@@ -102,7 +103,8 @@ const ApiServerLive = HttpLayerRouter.serve(
 const workers = Layer.mergeAll(
   TaskWorkerLayer,
   TimeoutWorkerLayer,
-  processThrottledNotificationsWorker
+  processThrottledNotificationsWorker,
+  ProcessUserNotificationsWorker
 )
 
 export const HttpServerLive = Layer.mergeAll(
@@ -110,15 +112,15 @@ export const HttpServerLive = Layer.mergeAll(
   healthServerLayer({port: healthServerPortConfig}),
   workers
 ).pipe(
-  Layer.provideMerge(NotificationSocketMessaging.Live),
-  Layer.provideMerge(ThrottledPushNotificationService.Live),
-  Layer.provideMerge(VexlNotificationTokenService.Live),
-  Layer.provideMerge(NotificationMetricsService.Live),
-  Layer.provideMerge(NotificationTokensDb.Live),
-  Layer.provideMerge(PosgressDbLive),
-  Layer.provideMerge(RateLimitingService.Live),
-  Layer.provideMerge(MetricsClientService.Live),
-  Layer.provideMerge(RedisService.Live),
-  Layer.provideMerge(RedisConnectionService.layer(redisUrl)),
-  Layer.provideMerge(ServerCrypto.layer(cryptoConfig))
+  Layer.provide(NotificationSocketMessaging.Live),
+  Layer.provide(ThrottledPushNotificationService.Live),
+  Layer.provide(VexlNotificationTokenService.Live),
+  Layer.provide(NotificationMetricsService.Live),
+  Layer.provide(NotificationTokensDb.Live),
+  Layer.provide(PosgressDbLive),
+  Layer.provide(RateLimitingService.Live),
+  Layer.provide(MetricsClientService.Live),
+  Layer.provide(RedisService.Live),
+  Layer.provide(RedisConnectionService.layer(redisUrl)),
+  Layer.provide(ServerCrypto.layer(cryptoConfig))
 )

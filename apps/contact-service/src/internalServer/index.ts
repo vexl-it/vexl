@@ -8,19 +8,19 @@ import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfig
 import {Effect, Schema} from 'effect'
 import {clubReportLimitIntervalDaysConfig} from '../configs'
 import {ClubMembersDbService} from '../db/ClubMemberDbService'
+import {UserNotificationService} from '../services/UserNotificationService'
 import {checkForInactiveUsers} from './routes/checkForInactiveUsers'
 import {deactivateAndClearClubs} from './routes/deactivateAndClearClubs'
-import {flushAndSendRegisteredClubNotifications} from './routes/flushAndSendRegisteredClubNotifications'
-import {processNewContentNotifications} from './routes/processNewContentNotifications'
-import {processUserInactivity} from './routes/processUserInactivity'
-import {sendCreateOfferPromptToGeneralTopic} from './routes/sendCreateOfferPromptToGeneralTopic'
 import {testHasingSpeed} from './routes/testHashingSpeed'
 
 export const internalServerLive = makeInternalServer(
   HttpRouter.empty.pipe(
     HttpRouter.post(
       '/process-user-inactivity',
-      processUserInactivity.pipe(
+      Effect.gen(function* (_) {
+        const userNotificationService = yield* _(UserNotificationService)
+        yield* _(userNotificationService.notifyUsersAboutInactivity())
+      }).pipe(
         Effect.mapBoth({
           onFailure: (error) =>
             HttpServerResponse.text(error.message, {status: 500}),
@@ -30,27 +30,10 @@ export const internalServerLive = makeInternalServer(
     ),
     HttpRouter.post(
       '/process-new-content-notification',
-      processNewContentNotifications.pipe(
-        Effect.mapBoth({
-          onFailure: (error) =>
-            HttpServerResponse.text(error.message, {status: 500}),
-          onSuccess: () => HttpServerResponse.text('ok', {status: 200}),
-        })
-      )
-    ),
-    HttpRouter.post(
-      '/send-create-offer-prompt-to-general-topic',
-      sendCreateOfferPromptToGeneralTopic.pipe(
-        Effect.mapBoth({
-          onFailure: (error) =>
-            HttpServerResponse.text(error.message, {status: 500}),
-          onSuccess: () => HttpServerResponse.text('ok', {status: 200}),
-        })
-      )
-    ),
-    HttpRouter.post(
-      '/flush-and-send-registered-club-notifications',
-      flushAndSendRegisteredClubNotifications.pipe(
+      Effect.gen(function* (_) {
+        const userNotificationService = yield* _(UserNotificationService)
+        yield* _(userNotificationService.notifyUsersAboutNewContent())
+      }).pipe(
         Effect.mapBoth({
           onFailure: (error) =>
             HttpServerResponse.text(error.message, {status: 500}),

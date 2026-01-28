@@ -9,12 +9,12 @@ import {
 } from '@vexl-next/domain/src/general/clubs'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
 import {ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
-import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
@@ -80,6 +80,11 @@ export class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>(
 }) {}
 
 export const CreateUserRequest = Schema.Struct({
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
+    as: 'Option',
+    nullable: true,
+  }),
+  // todo #2124 remove after all clients are migrated to vexl notification tokens
   firebaseToken: Schema.NullOr(FcmToken),
   expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationToken), {
     default: () => null,
@@ -90,6 +95,9 @@ export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
   countryPrefix: Schema.optionalWith(CountryPrefix, {
+    as: 'Option',
+  }),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
 })
@@ -322,7 +330,11 @@ export class MemberAlreadyInClubError extends Schema.TaggedError<MemberAlreadyIn
 
 export const GetClubInfoRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
+  // #2124 - remove notificationToken when fully migrated to VexlNotificationToken
   notificationToken: Schema.optionalWith(ExpoNotificationToken, {
+    as: 'Option',
+  }),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
 })
@@ -336,7 +348,11 @@ export const GetClubInfoResponse = Schema.Struct({
 export const JoinClubRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   code: ClubCode,
+  // #2124 - remove notificationToken when fully migrated to VexlNotificationToken
   notificationToken: Schema.optionalWith(ExpoNotificationToken, {
+    as: 'Option',
+  }),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
   contactsImported: Schema.Boolean,
@@ -461,53 +477,6 @@ export const ReportClubRequest = Schema.Struct({
 export type ReportClubRequest = Schema.Schema.Type<typeof ReportClubRequest>
 
 export const ReportClubResponse = NoContentResponse
-
-export class SendBulkNotificationError extends Schema.TaggedError<SendBulkNotificationError>(
-  'SendBulkNotificationError'
-)('SendBulkNotificationError', {
-  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  description: Schema.String,
-}) {}
-
-export const SendBulkNotificationRequest = Schema.Struct({
-  dryRun: Schema.Boolean,
-  filters: Schema.Struct({
-    versionFromIncluded: Schema.optionalWith(Schema.Number, {
-      as: 'Option',
-      nullable: true,
-    }),
-    versionToIncluded: Schema.optionalWith(Schema.Number, {
-      as: 'Option',
-      nullable: true,
-    }),
-    platform: Schema.Array(PlatformName),
-    fcm: Schema.Boolean,
-    expo: Schema.Boolean,
-  }),
-  notification: Schema.Struct({
-    title: Schema.String,
-    body: Schema.String,
-    data: Schema.optionalWith(
-      Schema.Record({key: Schema.String, value: Schema.String}),
-      {as: 'Option', nullable: true}
-    ),
-  }),
-})
-
-export const SendBulkNotificationResponse = Schema.Struct({
-  sentCount: Schema.Number,
-  dryRun: Schema.Boolean,
-  expo: Schema.Struct({
-    failed: Schema.Number,
-    success: Schema.Number,
-  }),
-  fcm: Schema.Struct({
-    failed: Schema.Number,
-    success: Schema.Number,
-  }),
-})
-export type SendBulkNotificationResponse =
-  typeof SendBulkNotificationResponse.Type
 
 export const EraseUserFromNetworkRequest = Schema.Struct({
   token: ShortLivedTokenForErasingUserOnContactService,

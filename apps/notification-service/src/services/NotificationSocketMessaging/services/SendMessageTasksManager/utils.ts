@@ -10,11 +10,7 @@ import {
   Schema,
   Stream,
 } from 'effect/index'
-import {
-  type NewChatMessageNoticeSendTask,
-  SendMessageTask,
-  type StreamOnlyChatMessageSendTask,
-} from '../../domain'
+import {SendMessageTask} from '../../domain'
 import {SendMessageTasksManagerError} from './domain'
 
 const PENDING_TASKS_QUEUE_NAME = 'notification-service_pendingTasksQueue'
@@ -125,7 +121,7 @@ const createJobStream = Effect.map(RedisConnectionService, (connection) =>
 export class TimeoutJobsStream extends Context.Tag('TimeoutJobsStream')<
   TimeoutJobsStream,
   Stream.Stream<
-    NewChatMessageNoticeSendTask | StreamOnlyChatMessageSendTask,
+    SendMessageTask,
     SendMessageTasksManagerError,
     RedisConnectionService
   >

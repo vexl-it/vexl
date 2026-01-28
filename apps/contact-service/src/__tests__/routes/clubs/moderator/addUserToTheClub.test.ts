@@ -2,7 +2,7 @@ import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
-import {AdmitedToClubNetworkNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
@@ -14,19 +14,17 @@ import {
   MemberAlreadyInClubError,
   UserIsNotModeratorError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
-import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {ClubMembersDbService} from '../../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
-import {
-  ClubNotificationRecord,
-  NEW_CLUB_USER_NOTIFICATIONS_KEY,
-} from '../../../../utils/NewClubUserNotificationService'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
-import {sendNotificationsMock} from '../../../utils/mockedExpoNotificationService'
+import {
+  clearEnqueuedNotifications,
+  getEnqueuedNotifications,
+} from '../../../utils/mockEnqueueUserNotification'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -86,6 +84,7 @@ beforeEach(async () => {
           isModerator: true,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
         })
       )
     })
@@ -103,6 +102,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -118,12 +118,14 @@ describe('Add user to the club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
               notificationToken: Option.none(),
+              vexlNotificationToken: Option.none(),
             },
           })
         )
         expect(clubInfo.clubInfoForUser).toEqual({
           club,
           isModerator: false,
+          vexlNotificationToken: Option.none(),
         })
       })
     )
@@ -139,6 +141,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -153,6 +156,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user2.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -167,6 +171,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user3.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -191,6 +196,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -205,6 +211,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -233,6 +240,7 @@ describe('Add user to the club', () => {
             isModerator: false,
             lastRefreshedAt: new Date(),
             notificationToken: null,
+            vexlNotificationToken: null,
           })
         )
 
@@ -242,6 +250,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -269,6 +278,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -294,6 +304,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: generateClubUuid(),
@@ -321,6 +332,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -339,10 +351,10 @@ describe('Add user to the club', () => {
     )
   })
 
-  it('Schedules notification for club members', async () => {
+  it('Enqueues VexlNotificationToken notifications for club members when user is added', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
-        const app = yield* _(NodeTestingApp)
+        yield* _(clearEnqueuedNotifications)
 
         const clubDb = yield* _(ClubsDbService)
         yield* _(
@@ -362,7 +374,9 @@ describe('Add user to the club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
-            notificationToken: '1someToken1' as ExpoNotificationToken,
+            notificationToken: null,
+            vexlNotificationToken:
+              'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
           })
@@ -371,23 +385,16 @@ describe('Add user to the club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
-            notificationToken: '2someToken2' as ExpoNotificationToken,
-            isModerator: false,
-            lastRefreshedAt: new Date(),
-          })
-        )
-
-        yield* _(
-          membersDb.insertClubMember({
-            clubId,
-            publicKey: user3.publicKeyPemBase64,
             notificationToken: null,
+            vexlNotificationToken:
+              'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
           })
         )
 
         const user4 = generatePrivateKey()
+        const app = yield* _(NodeTestingApp)
 
         yield* _(
           app.ClubsModerator.addUserToTheClub({
@@ -395,6 +402,7 @@ describe('Add user to the club', () => {
               adminitionRequest: {
                 langCode: 'en',
                 notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
                 publicKey: user4.publicKeyPemBase64,
               },
               clubUuid: club.uuid,
@@ -403,33 +411,48 @@ describe('Add user to the club', () => {
           })
         )
 
-        const redisService = yield* _(RedisService)
-        const savedData = yield* _(
-          redisService.readAndDeleteSet(ClubNotificationRecord)(
-            NEW_CLUB_USER_NOTIFICATIONS_KEY
-          )
+        yield* _(Effect.sleep('100 millis'))
+
+        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const clubNotifications = enqueuedNotifications.filter(
+          (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
         )
-        expect(savedData).toHaveLength(2)
+
+        // 3 notifications: moderator (vexl_nt_test from beforeEach) + user1 + user2
+        expect(clubNotifications).toHaveLength(3)
         expect(
-          savedData.map((one) => `${one.token}:${one.clubUuid}`).sort()
+          clubNotifications
+            .map((n) =>
+              n.task._tag === 'NewClubUserNotificationMqEntry'
+                ? n.task.token
+                : ''
+            )
+            .sort((a, b) => (a ?? '').localeCompare(b ?? ''))
         ).toEqual(
-          [`1someToken1:${club.uuid}`, `2someToken2:${club.uuid}`].sort()
+          [
+            'vexl_nt_member1_token',
+            'vexl_nt_member2_token',
+            'vexl_nt_test',
+          ].sort((a, b) => a.localeCompare(b))
         )
       })
     )
   })
 
-  it('Sends notification to new user', async () => {
+  it('Enqueues admission notification for added user with vexlNotificationToken', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
+        yield* _(clearEnqueuedNotifications)
+
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsModerator.addUserToTheClub({
             payload: {
               adminitionRequest: {
                 langCode: 'en',
-                notificationToken: Option.some(
-                  'token' as ExpoNotificationToken
+                notificationToken: Option.none(),
+                vexlNotificationToken: Option.some(
+                  'vexl_nt_admitted_user' as VexlNotificationToken
                 ),
                 publicKey: user1.publicKeyPemBase64,
               },
@@ -439,16 +462,121 @@ describe('Add user to the club', () => {
           })
         )
 
-        yield* _(Effect.sleep(100))
-        expect(sendNotificationsMock).toHaveBeenCalledWith([
-          {
-            to: ['token'],
-            data: new AdmitedToClubNetworkNotificationData({
-              trackingId: Option.none(),
-              publicKey: user1.publicKeyPemBase64,
-            }).toData(),
-          },
-        ])
+        yield* _(Effect.sleep('100 millis'))
+
+        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const admissionNotifications = enqueuedNotifications.filter(
+          (n) => n.task._tag === 'UserAdmittedToClubNotificationMqEntry'
+        )
+
+        expect(admissionNotifications).toHaveLength(1)
+        if (
+          admissionNotifications[0]?.task._tag ===
+          'UserAdmittedToClubNotificationMqEntry'
+        ) {
+          expect(admissionNotifications[0].task.token).toBe(
+            'vexl_nt_admitted_user'
+          )
+          expect(admissionNotifications[0].task.publicKey).toBe(
+            user1.publicKeyPemBase64
+          )
+        }
+      })
+    )
+  })
+
+  it('Routes notifications correctly when members have mixed token types', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        yield* _(clearEnqueuedNotifications)
+
+        const clubDb = yield* _(ClubsDbService)
+        yield* _(
+          clubDb.updateClub({
+            id: clubId,
+            data: {
+              madeInactiveAt: Option.none(),
+              report: 0,
+              ...club,
+              membersCountLimit: 100,
+            },
+          })
+        )
+
+        const membersDb = yield* _(ClubMembersDbService)
+
+        // Member with ONLY expo token (no vexl token - won't receive notification via new path)
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user1.publicKeyPemBase64,
+            notificationToken: 'expo_only_token' as ExpoNotificationToken,
+            vexlNotificationToken: null,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+
+        // Member with BOTH expo and vexl token (new path only)
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user2.publicKeyPemBase64,
+            notificationToken: 'expo_token_2' as ExpoNotificationToken,
+            vexlNotificationToken:
+              'vexl_nt_member2_token' as VexlNotificationToken,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+          })
+        )
+
+        const user4 = generatePrivateKey()
+        const app = yield* _(NodeTestingApp)
+
+        yield* _(
+          app.ClubsModerator.addUserToTheClub({
+            payload: {
+              adminitionRequest: {
+                langCode: 'en',
+                notificationToken: Option.none(),
+                vexlNotificationToken: Option.none(),
+                publicKey: user4.publicKeyPemBase64,
+              },
+              clubUuid: club.uuid,
+              ...(yield* _(generateAndSignChallenge(userKey))),
+            },
+          })
+        )
+
+        yield* _(Effect.sleep('100 millis'))
+
+        // Notifications are sent to all members, filter for those with vexlNotificationToken
+        const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+        const clubNotifications = enqueuedNotifications.filter(
+          (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
+        )
+
+        // Filter for notifications with non-null vexlNotificationToken
+        const notificationsWithVexlToken = clubNotifications.filter(
+          (n) =>
+            n.task._tag === 'NewClubUserNotificationMqEntry' &&
+            n.task.token !== null
+        )
+
+        expect(notificationsWithVexlToken).toHaveLength(2)
+        expect(
+          notificationsWithVexlToken
+            .map((n) =>
+              n.task._tag === 'NewClubUserNotificationMqEntry'
+                ? n.task.token
+                : ''
+            )
+            .sort((a, b) => (a ?? '').localeCompare(b ?? ''))
+        ).toEqual(
+          ['vexl_nt_member2_token', 'vexl_nt_test'].sort((a, b) =>
+            a.localeCompare(b)
+          )
+        )
       })
     )
   })

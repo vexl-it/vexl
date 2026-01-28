@@ -65,7 +65,7 @@ export const TaskWorkerLayer = Layer.effectDiscard(
         Stream.flatMap(
           (task) =>
             processTask(task).pipe(
-              Effect.filterOrFail((a) => identity(a)),
+              Effect.filterOrFail(identity),
               Effect.zip(deletePendingFromRedis(task.id)),
               Effect.ignore
             ),

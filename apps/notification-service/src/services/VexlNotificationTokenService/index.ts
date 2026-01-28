@@ -6,7 +6,10 @@ import {
   type VexlNotificationToken,
   type VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
-import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {
+  isExpoNotificationToken,
+  type ExpoNotificationToken,
+} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {
   decryptNotificationToken,
@@ -31,7 +34,10 @@ export interface VexlNotificationTokenServiceOperations {
   >
 
   normalizeToVexlNotificationTokenSecret: (
-    tokenOrCypher: VexlNotificationToken | NotificationCypher
+    tokenOrCypher:
+      | VexlNotificationToken
+      | NotificationCypher
+      | ExpoNotificationToken
   ) => Effect.Effect<
     VexlNotificationTokenSecret,
     NoSuchElementException | UnexpectedServerError,
@@ -74,6 +80,10 @@ export class VexlNotificationTokenService extends Context.Tag(
               )
             }
 
+            if (isExpoNotificationToken(tokenOrCypher)) {
+              return createTemporaryVexlNotificationTokenSecret(tokenOrCypher)
+            }
+
             return yield* _(
               decryptNotificationToken({
                 notificationCypher: tokenOrCypher,
@@ -85,7 +95,6 @@ export class VexlNotificationTokenService extends Context.Tag(
               Effect.catchAll((e) => new NoSuchElementException())
             )
           }),
-
         getMetadata: (tokenOrCypher) =>
           Effect.gen(function* (_) {
             if (isVexlNotificationTokenSecret(tokenOrCypher)) {

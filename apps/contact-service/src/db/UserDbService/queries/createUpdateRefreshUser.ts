@@ -3,6 +3,7 @@ import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
@@ -13,6 +14,9 @@ export const UpdateRefreshUserParams = Schema.Struct({
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
   countryPrefix: Schema.optionalWith(CountryPrefix, {as: 'Option'}),
   appSource: Schema.optionalWith(Schema.String, {as: 'Option'}),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
+    as: 'Option',
+  }),
   refreshedAt: Schema.Date,
 })
 export type UpdateRefreshUserParams = typeof UpdateRefreshUserParams.Type
@@ -28,7 +32,8 @@ export const createUpdateRefreshUser = Effect.gen(function* (_) {
         client_version = ${params.clientVersion ?? null},
         refreshed_at = ${params.refreshedAt},
         country_prefix = ${params.countryPrefix ?? null},
-        app_source = ${params.appSource ?? null}
+        app_source = ${params.appSource ?? null},
+        vexl_notification_token = ${params.vexlNotificationToken ?? null}
       WHERE
         public_key = ${params.publicKey}
         AND hash = ${params.hash}

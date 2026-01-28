@@ -2,6 +2,7 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
@@ -16,6 +17,9 @@ export const CreateUserParams = Schema.Struct({
   hash: ServerHashedNumber,
   firebaseToken: Schema.optionalWith(FcmToken, {as: 'Option'}),
   expoToken: Schema.optionalWith(ExpoNotificationToken, {as: 'Option'}),
+  vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
+    as: 'Option',
+  }),
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
   platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
   appSource: Schema.optionalWith(AppSource, {as: 'Option'}),
@@ -36,6 +40,7 @@ export const createInsertUser = Effect.gen(function* (_) {
           hash: params.hash,
           firebaseToken: params.firebaseToken ?? null,
           expoToken: params.expoToken ?? null,
+          vexlNotificationToken: params.vexlNotificationToken ?? null,
           clientVersion: params.clientVersion ?? null,
           platform: params.platform ?? null,
           refreshedAt: new Date(),

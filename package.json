@@ -26,7 +26,10 @@
     "offer-service:build-docker-image": "./scripts/build-app-docker-image.sh offer-service",
     "metrics-service:build-docker-image": "./scripts/build-app-docker-image.sh metrics-service",
     "content-service:build-docker-image": "./scripts/build-app-docker-image.sh content-service",
-    "DISABLEpostinstall": "manypkg check"
+    "DISABLEpostinstall": "manypkg check",
+    "dev:health": "yarn workspace @vexl-next/dev-orchestrator health",
+    "dev:backend": "yarn workspace @vexl-next/dev-orchestrator dev:backend",
+    "dev:mobile": "yarn workspace @vexl-next/dev-orchestrator dev:mobile"
   },
   "private": true,
   "dependencies": {

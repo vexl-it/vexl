@@ -24,7 +24,11 @@ node_modules
 /local/*
 
 .env
+.env.local
 
 #Claude code
 
 CLAUDE.md
+
+# Planning docs
+.planning/

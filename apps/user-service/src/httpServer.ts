@@ -37,7 +37,6 @@ import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimit
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {PreludeService} from './utils/prelude'
-import {TwilioVerificationClient} from './utils/twilio'
 
 const LoginApiGroupLive = HttpApiBuilder.group(
   UserApiSpecification,
@@ -91,7 +90,6 @@ export const HttpServerLive = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
-  Layer.provideMerge(TwilioVerificationClient.Live),
   Layer.provideMerge(PreludeService.Live),
   Layer.provideMerge(MetricsClientService.Live),
   Layer.provideMerge(

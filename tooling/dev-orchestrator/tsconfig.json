@@ -1,0 +1,14 @@
+{
+  "extends": "@vexl-next/tsconfig/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "noEmit": false,
+    "jsx": "react-jsx"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -17,12 +17,6 @@ export {
   secretPublicKey,
 } from '@vexl-next/server-utils/src/commonConfigs'
 
-export const twilioConfig = Config.unwrap({
-  accountSid: Config.string('TWILIO_SID'),
-  authToken: Config.string('TWILIO_TOKEN'),
-  verifyServiceSid: Config.string('TWILIO_VERIFY_SERVICE_SID'),
-})
-
 export const loginCodeDummies = Config.option(
   Config.unwrap({
     numbers: Config.string('LOGIN_CODE_DUMMY_NUMBERS').pipe(

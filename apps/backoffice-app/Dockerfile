@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 
 # Copy entire monorepo
@@ -16,7 +16,7 @@ RUN yarn build
 RUN cp -r .next/static .next/standalone/apps/backoffice-app/.next/ || true
 RUN if [ -d "public" ]; then cp -r public .next/standalone/apps/backoffice-app/; fi
 
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ARG SERVICE_VERSION

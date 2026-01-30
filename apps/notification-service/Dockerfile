@@ -1,4 +1,4 @@
-FROM node:20 as builder
+FROM node:24 as builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN yarn workspaces focus @vexl-next/notification-service
 RUN yarn build
 
 
-FROM node:20 as runner
+FROM node:24 as runner
 
 ARG SERVICE_VERSION
 ARG ENVIRONMENT

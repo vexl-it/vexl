@@ -13,6 +13,7 @@ import {
   user,
   type EnvPreset,
 } from '@vexl-next/rest-api'
+import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 
 import {FetchHttpClient} from '@effect/platform/index'
@@ -31,15 +32,69 @@ import {
 } from '../utils/environment'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../utils/preferences'
-// import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 
 export const platform = Schema.decodeSync(PlatformName)(
   Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
 )
 
+/**
+ * Build localEnv from EXPO_PUBLIC_* environment variables.
+ * Orchestrator sets these vars when spawning Expo for local development.
+ * Returns null if any required env var is missing (fallback to stage).
+ */
+function buildLocalEnvFromEnvVars(): EnvPreset | null {
+  const userMs = process.env.EXPO_PUBLIC_LOCAL_USER_MS
+  const contactMs = process.env.EXPO_PUBLIC_LOCAL_CONTACT_MS
+  const chatMs = process.env.EXPO_PUBLIC_LOCAL_CHAT_MS
+  const offerMs = process.env.EXPO_PUBLIC_LOCAL_OFFER_MS
+  const locationMs = process.env.EXPO_PUBLIC_LOCAL_LOCATION_MS
+  const notificationMs = process.env.EXPO_PUBLIC_LOCAL_NOTIFICATION_MS
+  const btcExchangeRateMs = process.env.EXPO_PUBLIC_LOCAL_BTC_EXCHANGE_RATE_MS
+  const feedbackMs = process.env.EXPO_PUBLIC_LOCAL_FEEDBACK_MS
+  const contentMs = process.env.EXPO_PUBLIC_LOCAL_CONTENT_MS
+  const metricsMs = process.env.EXPO_PUBLIC_LOCAL_METRICS_MS
+
+  if (
+    !userMs ||
+    !contactMs ||
+    !chatMs ||
+    !offerMs ||
+    !locationMs ||
+    !notificationMs ||
+    !btcExchangeRateMs ||
+    !feedbackMs ||
+    !contentMs ||
+    !metricsMs
+  ) {
+    console.warn('Local env vars not fully configured, falling back to stage')
+    return null
+  }
+
+  return {
+    userMs: Schema.decodeSync(ServiceUrl)(userMs),
+    contactMs: Schema.decodeSync(ServiceUrl)(contactMs),
+    chatMs: Schema.decodeSync(ServiceUrl)(chatMs),
+    offerMs: Schema.decodeSync(ServiceUrl)(offerMs),
+    locationMs: Schema.decodeSync(ServiceUrl)(locationMs),
+    notificationMs: Schema.decodeSync(ServiceUrl)(notificationMs),
+    btcExchangeRateMs: Schema.decodeSync(ServiceUrl)(btcExchangeRateMs),
+    feedbackMs: Schema.decodeSync(ServiceUrl)(feedbackMs),
+    contentMs: Schema.decodeSync(ServiceUrl)(contentMs),
+    metrics: Schema.decodeSync(ServiceUrl)(metricsMs),
+  }
+}
+
 export function getApiPreset(): EnvPreset {
   if (apiPreset === 'prodEnv') {
     return ENV_PRESETS.prodEnv
+  }
+
+  if (apiPreset === 'localEnv') {
+    const localEnv = buildLocalEnvFromEnvVars()
+    if (localEnv) {
+      return localEnv
+    }
+    // Fallback to stage if env vars not configured
   }
 
   return ENV_PRESETS.stageEnv

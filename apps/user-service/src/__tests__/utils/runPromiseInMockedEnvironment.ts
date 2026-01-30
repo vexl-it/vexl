@@ -16,13 +16,10 @@ import {cryptoConfig} from '../../configs'
 import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {UserApiLive} from '../../httpServer'
 import {VerificationStateDbService} from '../../routes/login/db/verificationStateDb'
-import {type TwilioVerificationClient} from '../../utils/twilio'
 import {mockedPreludeClient} from './mockedPreludeClient'
-import {mockedTwilioLayer} from './mockedTwilioClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
 
 export type MockedContexts =
-  | TwilioVerificationClient
   | RedisService
   | ServerCrypto
   | LoggedInUsersDbService
@@ -46,7 +43,6 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedRateLimitingLayer),
-  Layer.provideMerge(mockedTwilioLayer),
   Layer.provideMerge(mockedUsersDbService),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(VerificationStateDbService.Live),

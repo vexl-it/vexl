@@ -6,17 +6,8 @@ import {
   type VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, type ConfigError} from 'effect/index'
-import {verificationProviderConfig} from '../configs'
 import {PreludeService} from './prelude'
 import {type SmsVerificationSid} from './SmsVerificationSid.brand'
-import {TwilioVerificationClient} from './twilio'
-
-const getVerificationProvider = Effect.gen(function* (_) {
-  const verificationProvider = yield* _(verificationProviderConfig)
-  if (verificationProvider === 'twilio')
-    return yield* _(TwilioVerificationClient)
-  else return yield* _(PreludeService)
-})
 
 export const createVerification = (
   phone: E164PhoneNumber,
@@ -24,9 +15,9 @@ export const createVerification = (
 ): Effect.Effect<
   SmsVerificationSid,
   UnableToSendVerificationSmsError | ConfigError.ConfigError,
-  TwilioVerificationClient | PreludeService
+  PreludeService
 > =>
-  getVerificationProvider.pipe(
+  PreludeService.pipe(
     Effect.flatMap((provider) =>
       provider.createVerification(phone, requestHeaders)
     )
@@ -40,8 +31,8 @@ export const checkVerification = (args: {
   | UnableToVerifySmsCodeError
   | VerificationNotFoundError
   | ConfigError.ConfigError,
-  TwilioVerificationClient | PreludeService
+  PreludeService
 > =>
-  getVerificationProvider.pipe(
+  PreludeService.pipe(
     Effect.flatMap((provider) => provider.checkVerification(args))
   )

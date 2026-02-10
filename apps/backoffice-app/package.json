@@ -17,7 +17,7 @@
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
     "effect": "^3.19.9",
-    "next": "^15.1.9",
+    "next": "^16.1.5",
     "qrcode.react": "^4.2.0",
     "react": "19.1.2",
     "react-dom": "19.1.2"

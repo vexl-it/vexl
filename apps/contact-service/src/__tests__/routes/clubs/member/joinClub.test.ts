@@ -108,6 +108,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -119,6 +120,7 @@ describe('Join club', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -157,6 +159,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -168,6 +171,7 @@ describe('Join club', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -206,6 +210,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -219,6 +224,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -242,6 +248,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -255,6 +262,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -268,6 +276,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -297,6 +306,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -318,6 +328,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -331,6 +342,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -352,6 +364,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -396,6 +409,7 @@ describe('Join club', () => {
             notificationToken: '1someToken1' as ExpoNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: Option.none(),
           })
         )
         yield* _(
@@ -405,6 +419,7 @@ describe('Join club', () => {
             notificationToken: '2someToken2' as ExpoNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: Option.none(),
           })
         )
 
@@ -415,6 +430,7 @@ describe('Join club', () => {
             notificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: Option.none(),
           })
         )
 
@@ -427,6 +443,7 @@ describe('Join club', () => {
                 'someToken' as ExpoNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )

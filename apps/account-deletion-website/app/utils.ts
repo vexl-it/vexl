@@ -4,8 +4,10 @@ import {
   PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from "@vexl-next/cryptography/src/KeyHolder";
+import { HashedPhoneNumber } from "@vexl-next/domain/src/general/HashedPhoneNumber.brand";
 import { SemverString } from "@vexl-next/domain/src/utility/SmeverString.brand";
 import { VersionCode } from "@vexl-next/domain/src/utility/VersionCode.brand";
+import { EcdsaSignature } from "@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand";
 import { effectToEither } from "@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter";
 import {
   parseJson,
@@ -130,9 +132,9 @@ export function createUserPublicApi(): userApi.UserApi {
       deviceModel: "web",
       osVersion: "web",
       getUserSessionCredentials: () => ({
-        signature: "dumy",
+        signature: "dumy" as EcdsaSignature,
         publicKey: "dummy" as PublicKeyPemBase64,
-        hash: "dummy",
+        hash: "dummy" as HashedPhoneNumber,
       }),
     })
     .pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync);
@@ -146,9 +148,9 @@ export function createContactsPublicApi(): contactsApi.ContactApi {
       deviceModel: "web",
       osVersion: "web",
       getUserSessionCredentials: () => ({
-        signature: "dumy",
+        signature: "dumy" as EcdsaSignature,
         publicKey: "dummy" as PublicKeyPemBase64,
-        hash: "dummy",
+        hash: "dummy" as HashedPhoneNumber,
       }),
     })
     .pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync);

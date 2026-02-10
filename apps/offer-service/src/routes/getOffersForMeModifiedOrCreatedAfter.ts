@@ -18,7 +18,7 @@ export const getOffersForMeModifiedOrCreatedAfter = HttpApiBuilder.handler(
       const offers = yield* _(
         offerDbService.queryOffersForUser({
           modifiedAt: new Date(req.urlParams.modifiedAt),
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
         }),
         Effect.map(Array.map(offerPartsToServerOffer))
       )

@@ -86,6 +86,7 @@ beforeEach(async () => {
           isModerator: true,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
     })
@@ -118,6 +119,7 @@ describe('Add user to the club', () => {
             payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
               notificationToken: Option.none(),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -233,6 +235,7 @@ describe('Add user to the club', () => {
             isModerator: false,
             lastRefreshedAt: new Date(),
             notificationToken: null,
+            publicKeyV2: Option.none(),
           })
         )
 
@@ -365,6 +368,7 @@ describe('Add user to the club', () => {
             notificationToken: '1someToken1' as ExpoNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: Option.none(),
           })
         )
         yield* _(
@@ -374,6 +378,7 @@ describe('Add user to the club', () => {
             notificationToken: '2someToken2' as ExpoNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: Option.none(),
           })
         )
 
@@ -384,6 +389,7 @@ describe('Add user to the club', () => {
             notificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: Option.none(),
           })
         )
 

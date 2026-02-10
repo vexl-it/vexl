@@ -1,3 +1,4 @@
+import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import decryptOffer from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import encryptOfferPublicPayload from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
@@ -40,7 +41,11 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
               offerPrivateList: [],
             }),
             Effect.flatMap((encryptedPayload) =>
-              decryptOffer(session.privateKey)(encryptedPayload)
+              decryptOffer(
+                session.privateKey,
+                // TODO(new-keys) pass a correct key when having new keys in storage
+                {} as KeyPairV2
+              )(encryptedPayload)
             )
           )
         ),

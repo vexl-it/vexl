@@ -33,7 +33,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
         Effect.flatMap((userDb) =>
           userDb.updateAppSourceForUser({
             appSource: req.headers.appSourceOrNone,
-            publicKey: security['public-key'],
+            publicKey: security.publicKey,
             hash: security.serverHash,
           })
         )
@@ -72,8 +72,13 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
         ...toReturn,
         items: pipe(
           toReturn.items,
-          Array.map((oneContact) => oneContact.publicKey),
-          Array.filter((publicKey) => publicKey !== security['public-key'])
+          Array.filter(
+            (oneContact) => oneContact.publicKey !== security.publicKey
+          ),
+          Array.map((oneContact) => ({
+            publicKey: oneContact.publicKey,
+            publicKeyV2: oneContact.publicKeyV2,
+          }))
         ),
       }
     }).pipe(

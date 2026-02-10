@@ -8,6 +8,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import createNewOfferForMyContacts from '@vexl-next/resources-utils/src/offers/createNewOfferForMyContacts'
+import {extractPublicKeysFromClubContacts} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {Array, Effect, Option, Record, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
@@ -146,7 +147,10 @@ const reencryptOneOfferActionAtom = atom(
                 offer.ownershipInfo.intendedConnectionLevel === 'ALL'
                   ? r.encryptedFor.secondDegreeConnections
                   : [],
-              clubs: r.encryptedFor.clubsConnections,
+              // Extract just public keys from club connections (V2 keys used in Phase 3)
+              clubs: extractPublicKeysFromClubContacts(
+                r.encryptedFor.clubsConnections
+              ),
             },
             adminId: r.adminId,
             symmetricKey: r.symmetricKey,

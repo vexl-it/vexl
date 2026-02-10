@@ -55,13 +55,14 @@ export const createUser = HttpApiBuilder.handler(
 
           yield* _(
             userDb.insertUser({
-              publicKey: security['public-key'],
+              publicKey: security.publicKey,
               hash: security.serverHash,
               expoToken: Option.fromNullable(req.payload.expoToken),
               firebaseToken: Option.fromNullable(req.payload.firebaseToken),
               clientVersion: req.headers.clientVersionOrNone,
               platform: req.headers.clientPlatformOrNone,
               appSource: req.headers.appSourceOrNone,
+              publicKeyV2: req.payload.publicKeyV2,
             })
           )
           return {}

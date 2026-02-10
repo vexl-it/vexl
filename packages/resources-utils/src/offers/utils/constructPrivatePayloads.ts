@@ -1,4 +1,9 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  PublicKeyPemBase64 as PublicKeyPemBase64Schema,
+  type PublicKeyV2,
+  PublicKeyV2 as PublicKeyV2Schema,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   OfferPrivatePart,
   type SymmetricKey,
@@ -14,7 +19,10 @@ import {
   Schema,
 } from 'effect'
 import {keys} from '../../utils/keys'
-import {type ConnectionsInfoForOffer} from './fetchContactsForOffer'
+import {
+  type ConnectionsInfoForOffer,
+  type ContactWithV2Key,
+} from './fetchContactsForOffer'
 
 export class PrivatePayloadsConstructionError extends Schema.TaggedError<PrivatePayloadsConstructionError>(
   'PrivatePayloadsConstructionError'
@@ -24,11 +32,16 @@ export class PrivatePayloadsConstructionError extends Schema.TaggedError<Private
 }) {}
 
 export const OfferPrivatePayloadToEncrypt = Schema.Struct({
-  toPublicKey: PublicKeyPemBase64,
+  toPublicKey: Schema.Union(PublicKeyPemBase64Schema, PublicKeyV2Schema),
   payloadPrivate: OfferPrivatePart,
 })
 export type OfferPrivatePayloadToEncrypt =
   typeof OfferPrivatePayloadToEncrypt.Type
+
+// Helper to extract public key from ContactWithV2Key
+const extractPublicKey = (
+  contact: ContactWithV2Key
+): PublicKeyPemBase64 | PublicKeyV2 => contact.publicKey
 
 const addOrCreate = <K extends string, T>(
   record: Record<K, HashSet.HashSet<T>>,
@@ -62,7 +75,7 @@ export default function constructPrivatePayloads({
       // First we need to find out friend levels for each connection.
       // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
       const friendLevel: Record<
-        PublicKeyPemBase64,
+        PublicKeyPemBase64 | PublicKeyV2,
         HashSet.HashSet<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
       > = {}
 
@@ -77,8 +90,10 @@ export default function constructPrivatePayloads({
           addOrCreate(friendLevel, secondDegreeFriendPublicKey, 'SECOND_DEGREE')
       }
 
-      const allTargetPublicKeysForClubs = Array.flatten(
-        Record.values(clubsConnections)
+      const allTargetPublicKeysForClubs = pipe(
+        Record.values(clubsConnections),
+        Array.flatten,
+        Array.map(extractPublicKey)
       )
 
       // There will be no duplicates but to keep code consistent
@@ -94,8 +109,12 @@ export default function constructPrivatePayloads({
         const clubIdForKey = isFromClub
           ? pipe(
               Record.toEntries(clubsConnections),
-              Array.findFirst(([_, publicKeys]) =>
-                Array.contains(publicKeys, toPublicKey)
+              Array.findFirst(([_, contacts]) =>
+                pipe(
+                  contacts,
+                  Array.map(extractPublicKey),
+                  Array.contains(toPublicKey)
+                )
               ),
               Option.map(([clubUuid]) => [clubUuid]),
               Option.getOrElse(() => [])
@@ -105,8 +124,10 @@ export default function constructPrivatePayloads({
         const commonFriendsToPayload = (() => {
           // This is optimization. Club key does not have common friends
           if (isFromClub) return []
+          // Common friends only available for V1 keys
+          if (toPublicKey.startsWith('V2_PUB_')) return []
           return Option.getOrElse(
-            HashMap.get(commonFriends, toPublicKey),
+            HashMap.get(commonFriends, toPublicKey as PublicKeyPemBase64),
             () => []
           )
         })()

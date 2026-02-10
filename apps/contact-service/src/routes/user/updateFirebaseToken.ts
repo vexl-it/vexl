@@ -21,7 +21,7 @@ export const updateFirebaseToken = HttpApiBuilder.handler(
       yield* _(
         userDb.findUserByPublicKeyAndHash({
           hash: security.serverHash,
-          publicKey: security['public-key'],
+          publicKey: security.publicKey,
         }),
         Effect.flatten,
         Effect.catchTag('NoSuchElementException', () =>
@@ -31,7 +31,7 @@ export const updateFirebaseToken = HttpApiBuilder.handler(
 
       yield* _(
         userDb.updateFirebaseToken({
-          publicKey: security['public-key'],
+          publicKey: security.publicKey,
           hash: security.serverHash,
           firebaseToken: Option.fromNullable(req.payload.firebaseToken),
         })

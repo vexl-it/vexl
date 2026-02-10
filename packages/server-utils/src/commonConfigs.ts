@@ -1,4 +1,5 @@
 import {type PgClient} from '@effect/sql-pg'
+import {PrivateKeyV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   PrivateKeyPemBase64,
   PublicKeyPemBase64,
@@ -66,11 +67,20 @@ export const secretPrivateKey = Config.string('SECRET_PRIVATE_KEY').pipe(
 export const hmacKey = Config.string('SECRET_HMAC_KEY')
 export const easKey = Config.string('SECRET_EAS_KEY')
 
+export const libsodiumPrivateKey = Config.string('LIBSODIUM_PRIVATE_KEY').pipe(
+  Config.mapOrFail((v) =>
+    Either.mapLeft(Schema.decodeEither(PrivateKeyV2)(v), (e) =>
+      ConfigError.InvalidData(['LIBSODIUM_PRIVATE_KEY'], e.message)
+    )
+  )
+)
+
 export const cryptoConfig = {
   publicKey: secretPublicKey,
   privateKey: secretPrivateKey,
   hmacKey,
   easKey,
+  libsodiumPrivateKey,
 }
 
 export const redisUrl = Config.string('REDIS_URL')

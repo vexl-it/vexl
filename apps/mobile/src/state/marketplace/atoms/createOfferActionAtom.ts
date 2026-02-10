@@ -20,7 +20,10 @@ import {
 } from '@vexl-next/resources-utils/src/offers/decryptOffer'
 import {type PrivatePayloadsConstructionError} from '@vexl-next/resources-utils/src/offers/utils/constructPrivatePayloads'
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
-import {type ApiErrorFetchingContactsForOffer} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
+import {
+  type ApiErrorFetchingContactsForOffer,
+  extractPublicKeysFromClubContacts,
+} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import {type SymmetricKeyGenerationError} from '@vexl-next/resources-utils/src/offers/utils/generateSymmetricKey'
 import {Array, Effect, Option, Record, pipe} from 'effect'
 import {atom} from 'jotai'
@@ -102,6 +105,7 @@ export const createOfferActionAtom = atom<
         contactApi: api.contact,
         intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
+        ownerKeyPairV2: session.keyPairV2,
         intendedClubs: intendedClubsRecord,
         onProgress,
       })
@@ -134,7 +138,10 @@ export const createOfferActionAtom = atom<
           intendedConnectionLevel === 'ALL'
             ? createOfferResult.encryptedFor.secondDegreeConnections
             : [],
-        clubs: createOfferResult.encryptedFor.clubsConnections,
+        // Extract just public keys from club connections (V2 keys used in Phase 3)
+        clubs: extractPublicKeysFromClubContacts(
+          createOfferResult.encryptedFor.clubsConnections
+        ),
       },
       adminId: createOfferResult.adminId,
       symmetricKey: createOfferResult.symmetricKey,

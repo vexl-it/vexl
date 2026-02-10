@@ -40,6 +40,16 @@ export const getClubInfo = HttpApiBuilder.handler(
         })
       )
 
+      if (Option.isSome(req.payload.publicKeyV2)) {
+        yield* _(
+          membersDb.updateClubMemberPublicKeyV2({
+            clubId: member.clubId,
+            publicKey: member.publicKey,
+            publicKeyV2: req.payload.publicKeyV2.value,
+          })
+        )
+      }
+
       const club = yield* _(
         clubsDb.findClub({
           id: member.clubId,

@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
@@ -14,6 +15,11 @@ export type UserRecordId = typeof UserRecordId.Type
 export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
   id: UserRecordId,
   publicKey: PublicKeyPemBase64,
+  // V2 public key for cryptobox - nullable for backward compatibility
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+    nullable: true,
+  }),
   hash: ServerHashedNumber,
   clientVersion: Schema.optionalWith(VersionCode, {
     as: 'Option',

@@ -24,6 +24,4 @@ export const withInboxActionRedisLock = <A, E, R, R2>(
 export const withInboxActionFromSecurityRedisLock = <A, E, R>(): ReturnType<
   typeof withRedisLock<A, E, R | CurrentSecurity>
 > =>
-  withInboxActionRedisLock(
-    CurrentSecurity.pipe(Effect.map((s) => s['public-key']))
-  )
+  withInboxActionRedisLock(CurrentSecurity.pipe(Effect.map((s) => s.publicKey)))

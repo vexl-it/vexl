@@ -1,9 +1,11 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Effect, HashSet, Schema, type Option} from 'effect'
+import {Effect, HashSet, Option, Schema} from 'effect'
 import reportError from '../../utils/reportError'
+import {getClubV2KeyPair} from './atom/clubV2KeysAtom'
 import {type ClubWithMembers} from './domain'
 
 export class ClubNotFoundError extends Schema.TaggedError<ClubNotFoundError>(
@@ -22,22 +24,35 @@ export const fetchClubWithMembersReportApiErrors = ({
   keyPair,
   contactApi,
   notificationToken,
+  clubUuid,
 }: {
   keyPair: PrivateKeyHolder
   contactApi: ContactApi
   notificationToken: Option.Option<ExpoNotificationToken>
+  clubUuid?: ClubUuid
 }): Effect.Effect<
   ClubWithMembers,
   ClubNotFoundError | FetchingClubError,
   never
 > =>
   Effect.gen(function* (_) {
+    // Get V2 public key for this club if available
+    const publicKeyV2 = clubUuid
+      ? Option.map(getClubV2KeyPair(clubUuid), (kp) => kp.publicKey)
+      : Option.none()
+
     const clubInfo = yield* _(
-      contactApi.getClubInfo({keyPair, notificationToken}).pipe(
-        Effect.catchTag('NotFoundError', (e) => {
-          return Effect.fail({_tag: 'clubDoesNotExist', e})
+      contactApi
+        .getClubInfo({
+          keyPair,
+          notificationToken,
+          publicKeyV2,
         })
-      )
+        .pipe(
+          Effect.catchTag('NotFoundError', (e) => {
+            return Effect.fail({_tag: 'clubDoesNotExist', e})
+          })
+        )
     )
 
     const clubMembers = yield* _(
@@ -49,7 +64,7 @@ export const fetchClubWithMembersReportApiErrors = ({
 
     return {
       club: clubInfo.clubInfoForUser.club,
-      members: clubMembers.items,
+      members: clubMembers.itemsV2,
       isModerator: clubInfo.clubInfoForUser.isModerator,
       stats: {
         allOffersIdsForClub: HashSet.empty(),

@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
@@ -79,7 +82,11 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
         allClubOffersForMe,
         Array.map(
           flow(
-            decryptOffer(keyPair),
+            decryptOffer(
+              keyPair,
+              // TODO(new-keys) pass a correct key when having new keys in storage
+              {} as KeyPairV2
+            ),
             Effect.filterOrFail(
               validateOfferIsForClub(clubUuid),
               (offerInfo) =>

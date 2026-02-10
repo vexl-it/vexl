@@ -31,7 +31,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
       const pubKeysToLookFor = pipe(
         req.payload.publicKeys,
         Array.dedupe,
-        Array.filter((a) => a !== security['public-key'])
+        Array.filter((a) => a !== security.publicKey)
       )
 
       const toReturn = yield* _(

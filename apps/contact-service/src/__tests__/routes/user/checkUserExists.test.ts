@@ -1,5 +1,5 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
@@ -37,6 +37,7 @@ beforeAll(async () => {
             expoToken: Schema.decodeSync(ExpoNotificationToken)(
               'notificationToken'
             ),
+            publicKeyV2: Option.none(),
           },
           headers: commonAndSecurityHeaders,
         })

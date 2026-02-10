@@ -36,7 +36,7 @@ export const reportClubOffer = HttpApiBuilder.handler(
       }
 
       const numberOfReportsForUser = yield* _(
-        offerDbService.queryNumberOfReportsForUser(security['public-key'])
+        offerDbService.queryNumberOfReportsForUser(security.publicKey)
       )
 
       if (numberOfReportsForUser >= reportLimitCount) {
@@ -52,7 +52,7 @@ export const reportClubOffer = HttpApiBuilder.handler(
 
       yield* _(
         offerDbService.insertOfferReportedRecord({
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
           reportedAt: new Date(),
         })
       )
@@ -61,7 +61,7 @@ export const reportClubOffer = HttpApiBuilder.handler(
     }).pipe(
       withReportClubOfferRedisLock({
         publicKeyE: CurrentSecurity.pipe(
-          Effect.map((security) => security['public-key'])
+          Effect.map((security) => security.publicKey)
         ),
         offerId: req.payload.offerId,
       }),

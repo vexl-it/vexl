@@ -1,9 +1,10 @@
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {Effect} from 'effect/index'
+import {Effect, Option} from 'effect/index'
 import {apiAtom} from '../api'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
 import reportError from '../utils/reportError'
 import {sessionDataOrDummyAtom} from './session'
+import {getV2SessionKeyPair} from './session/v2Keys'
 import {logoutActionAtom} from './useLogout'
 
 export const refreshUserOnContactServiceInAppBackgroundTaskId =
@@ -21,10 +22,15 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
           Effect.option
         )
 
+        // Include V2 public key if available
+        const v2KeyPair = getV2SessionKeyPair()
+        const publicKeyV2 = Option.map(v2KeyPair, (kp) => kp.publicKey)
+
         yield* _(
           store.get(apiAtom).contact.refreshUser({
             offersAlive: true,
             countryPrefix,
+            publicKeyV2,
           }),
 
           Effect.match({

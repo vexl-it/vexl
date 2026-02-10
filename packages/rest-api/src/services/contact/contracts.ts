@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
   ClubAdmitionRequest,
   ClubCode,
@@ -84,12 +85,20 @@ export const CreateUserRequest = Schema.Struct({
   expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationToken), {
     default: () => null,
   }),
+  // V2 public key for cryptobox - optional for backward compatibility
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+  }),
 })
 export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
 export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
   countryPrefix: Schema.optionalWith(CountryPrefix, {
+    as: 'Option',
+  }),
+  // V2 public key - allows clients to update their key on refresh
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
     as: 'Option',
   }),
 })
@@ -136,6 +145,11 @@ export const FetchMyContactsResponse = Schema.Struct({
   items: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64,
+      // V2 public key if available
+      publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+        as: 'Option',
+        nullable: true,
+      }),
     })
   ),
 })
@@ -149,8 +163,15 @@ export const FetchMyContactsPaginatedRequest = Schema.Struct({
 export type FetchMyContactsPaginatedRequest =
   typeof FetchMyContactsPaginatedRequest.Type
 
-export const FetchMyContactsPaginatedResponse =
-  createPageResponse(PublicKeyPemBase64)
+export const FetchMyContactsPaginatedResponse = createPageResponse(
+  Schema.Struct({
+    publicKey: PublicKeyPemBase64,
+    publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+      as: 'Option',
+      nullable: true,
+    }),
+  })
+)
 export type FetchMyContactsPaginatedResponse =
   typeof FetchMyContactsPaginatedResponse.Type
 
@@ -325,6 +346,10 @@ export const GetClubInfoRequest = Schema.Struct({
   notificationToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
   }),
+  // Club-specific V2 public key - updates on each fetch
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+  }),
 })
 
 export type GetClubInfoRequest = typeof GetClubInfoRequest.Type
@@ -340,6 +365,10 @@ export const JoinClubRequest = Schema.Struct({
     as: 'Option',
   }),
   contactsImported: Schema.Boolean,
+  // Club-specific V2 public key
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+  }),
 })
 export type JoinClubRequest = typeof JoinClubRequest.Type
 
@@ -429,7 +458,18 @@ export type GetClubContactsRequest = typeof GetClubContactsRequest.Type
 
 export const GetClubContactsResponse = Schema.Struct({
   clubUuid: ClubUuid,
+  // Legacy field for backward compatibility with old clients - contains only publicKey
   items: Schema.Array(PublicKeyPemBase64),
+  // V2 field with full contact info including optional V2 public key
+  itemsV2: Schema.Array(
+    Schema.Struct({
+      publicKey: PublicKeyPemBase64,
+      publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+        as: 'Option',
+        nullable: true,
+      }),
+    })
+  ),
 })
 
 export type GetClubContactsResponse = typeof GetClubContactsResponse.Type

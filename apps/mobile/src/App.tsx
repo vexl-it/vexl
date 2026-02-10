@@ -11,8 +11,8 @@ import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
 import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
+import InAppLoadingTasksIndicator from './components/InAppLoadingTasksIndicator'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
-import PhoneNumberHashBugMigration from './components/PhoneNumberHashBugMigration'
 import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
@@ -74,14 +74,12 @@ function App(): React.ReactElement {
         >
           <LoadingOverlayProvider>
             <VersionMigrations>
-              <PhoneNumberHashBugMigration>
-                <OverlayInfoScreen>
-                  <GestureHandlerRootView style={{flex: 1}}>
-                    <RootNavigation />
-                    {/* <InAppLoadingTasksIndicator /> */}
-                  </GestureHandlerRootView>
-                </OverlayInfoScreen>
-              </PhoneNumberHashBugMigration>
+              <OverlayInfoScreen>
+                <GestureHandlerRootView style={{flex: 1}}>
+                  <RootNavigation />
+                  <InAppLoadingTasksIndicator />
+                </GestureHandlerRootView>
+              </OverlayInfoScreen>
             </VersionMigrations>
             <UploadingOfferProgressModal />
           </LoadingOverlayProvider>

@@ -10,7 +10,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {verifyUserSecurity} from '@vexl-next/server-utils/src/serverSecurity'
+import {verifyOldAuthHeaders} from '@vexl-next/server-utils/src/serverSecurity'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
@@ -26,7 +26,7 @@ const validateHashAndSignature = ({
   signature: EcdsaSignature
   publicKey: PublicKeyPemBase64
 }): Effect.Effect<boolean, never, ServerCrypto> =>
-  verifyUserSecurity({hash, signature, 'public-key': publicKey}).pipe(
+  verifyOldAuthHeaders({hash, signature, publicKey}).pipe(
     Effect.match({
       onFailure: () => false,
       onSuccess: () => true,

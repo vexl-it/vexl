@@ -11,14 +11,7 @@ import {
   checkVerificationMock,
   createVerificationMock,
 } from '../utils/mockedPreludeClient'
-import {
-  disposeRuntime,
-  runPromiseInMockedEnvironment,
-  startRuntime,
-} from '../utils/runPromiseInMockedEnvironment'
-
-beforeAll(startRuntime)
-afterAll(disposeRuntime)
+import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 beforeEach(() => {
   createVerificationMock.mockClear()

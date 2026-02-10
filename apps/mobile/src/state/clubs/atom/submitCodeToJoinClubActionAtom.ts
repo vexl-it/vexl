@@ -14,6 +14,7 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
+import {generateClubV2KeyPair, removeClubV2KeyPair} from './clubV2KeysAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
 
 export const submitCodeToJoinClubActionAtom = atom(
@@ -79,6 +80,28 @@ export const submitCodeToJoinClubActionAtom = atom(
         [club.club.uuid]: keyPair,
       }))
 
+      // Generate V2 keypair for this club
+      const v2Keypair = yield* generateClubV2KeyPair(club.club.uuid).pipe(
+        Effect.tapError((e) =>
+          Effect.logError(
+            `Failed to generate V2 key for club ${club.club.uuid}`,
+            e
+          )
+        ),
+        Effect.catchAll((e) => {
+          // V2 key generation failure is not blocking - log and continue without V2 key
+          reportError(
+            'warn',
+            new Error('Club V2 key generation failed', {cause: e})
+          )
+          return Effect.succeed(undefined)
+        })
+      )
+
+      const publicKeyV2 = v2Keypair
+        ? Option.some(v2Keypair.publicKey)
+        : Option.none()
+
       const {clubInfoForUser} = yield* _(
         api.contact
           .joinClub({
@@ -86,11 +109,14 @@ export const submitCodeToJoinClubActionAtom = atom(
             code,
             contactsImported: true,
             notificationToken,
+            publicKeyV2,
           })
           .pipe(
             Effect.tapError(() =>
               Effect.sync(() => {
                 set(clubsToKeyHolderAtom, Struct.omit(club.club.uuid))
+                // Also remove V2 key on failure
+                removeClubV2KeyPair(club.club.uuid)
               })
             )
           )

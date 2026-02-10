@@ -97,6 +97,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -123,6 +124,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -142,11 +144,20 @@ describe('Get club contacts', () => {
         )
 
         expect(clubMembers.items).toHaveLength(2)
+        expect(clubMembers.itemsV2).toHaveLength(2)
         expect(clubMembers.clubUuid).toEqual(forClubUuid)
+        // Legacy items field contains only publicKey strings
         expect(clubMembers.items).toContain(
           user1.mainKeyPair.publicKeyPemBase64
         )
         expect(clubMembers.items).toContain(
+          user2.mainKeyPair.publicKeyPemBase64
+        )
+        // V2 items field contains objects with publicKey and optional publicKeyV2
+        expect(clubMembers.itemsV2.map((item) => item.publicKey)).toContain(
+          user1.mainKeyPair.publicKeyPemBase64
+        )
+        expect(clubMembers.itemsV2.map((item) => item.publicKey)).toContain(
           user2.mainKeyPair.publicKeyPemBase64
         )
       })
@@ -203,6 +214,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -282,6 +294,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -331,6 +344,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -406,6 +420,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -481,6 +496,7 @@ describe('Get club contacts', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )

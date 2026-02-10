@@ -46,11 +46,15 @@ export const getClubContacts = HttpApiBuilder.handler(
         clubMembersDb.queryAllClubMembers({id: club.id})
       )
 
-      const pubKeys = clubContacts.map((contact) => contact.publicKey)
-
       return {
         clubUuid: req.payload.clubUuid,
-        items: pubKeys,
+        // Legacy field for backward compatibility - only publicKey
+        items: clubContacts.map((contact) => contact.publicKey),
+        // V2 field with full contact info
+        itemsV2: clubContacts.map((contact) => ({
+          publicKey: contact.publicKey,
+          publicKeyV2: contact.publicKeyV2,
+        })),
       }
     }).pipe(
       Effect.withSpan('Fetch club contacts', {

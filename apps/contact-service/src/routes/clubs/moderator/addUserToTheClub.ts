@@ -79,6 +79,7 @@ export const addUserToTheClub = HttpApiBuilder.handler(
           notificationToken: Option.getOrNull(
             req.payload.adminitionRequest.notificationToken
           ),
+          publicKeyV2: Option.none(),
         })
       )
 

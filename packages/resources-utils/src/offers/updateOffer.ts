@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
@@ -28,6 +31,7 @@ export default function updateOffer({
   publicPayload,
   symmetricKey,
   ownerKeypair,
+  ownerKeyPairV2,
   intendedConnectionLevel,
   intendedClubs,
 }: {
@@ -36,6 +40,7 @@ export default function updateOffer({
   publicPayload: OfferPublicPart
   symmetricKey: SymmetricKey
   ownerKeypair: PrivateKeyHolder
+  ownerKeyPairV2?: KeyPairV2
   intendedConnectionLevel: IntendedConnectionLevel
   intendedClubs: readonly ClubUuid[]
 }): Effect.Effect<
@@ -59,6 +64,7 @@ export default function updateOffer({
       updateOwnerPrivatePayload({
         api: offerApi,
         ownerCredentials: ownerKeypair,
+        ownerKeyPairV2,
         symmetricKey,
         adminId,
         intendedConnectionLevel,
@@ -72,7 +78,13 @@ export default function updateOffer({
         payloadPublic: encryptedPayload,
         offerPrivateList: [],
       }),
-      Effect.flatMap(decryptOffer(ownerKeypair))
+      Effect.flatMap(
+        decryptOffer(
+          ownerKeypair,
+          // Use real V2 keypair when available, otherwise placeholder for backward compat
+          ownerKeyPairV2 ?? ({} as KeyPairV2)
+        )
+      )
     )
 
     return updatedOffer

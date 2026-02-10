@@ -88,6 +88,7 @@ import {ActionBenchmarks} from './components/ActionBenchmarks'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
+import NewCrypto from './components/NewCrypto'
 import Preferences from './components/Preferences'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 import {
@@ -172,6 +173,8 @@ function DebugScreen(): React.ReactElement {
             <Text color="$black">
               apiEnv: {JSON.stringify(apiEnv, null, 2)}
             </Text>
+            <Spacer />
+            <NewCrypto />
             <Spacer />
             <ActionBenchmarks />
             <Spacer />

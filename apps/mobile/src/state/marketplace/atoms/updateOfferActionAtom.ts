@@ -81,6 +81,7 @@ export const updateOfferActionAtom = atom<
         intendedConnectionLevel,
         intendedClubs: intendedClubs ?? [],
         ownerKeypair: session.privateKey,
+        ownerKeyPairV2: session.keyPairV2,
       }).pipe(
         Effect.catchTag('NotFoundError', () =>
           pipe(

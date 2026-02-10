@@ -67,6 +67,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
     })
@@ -86,6 +87,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -110,6 +112,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -153,6 +156,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -175,6 +179,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -204,6 +209,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -233,6 +239,7 @@ describe('Get club info', () => {
               notificationToken: Option.some(
                 'someToken2' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either

@@ -18,7 +18,7 @@ export const deletePrivatePart = HttpApiBuilder.handler(
       const security = yield* _(CurrentSecurity)
       const offerDbService = yield* _(OfferDbService)
 
-      if (Array.contains(req.payload.publicKeys, security['public-key'])) {
+      if (Array.contains(req.payload.publicKeys, security.publicKey)) {
         return yield* _(
           Effect.fail(
             new CanNotDeletePrivatePartOfAuthor({

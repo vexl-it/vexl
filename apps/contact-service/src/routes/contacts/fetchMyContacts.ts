@@ -22,7 +22,7 @@ export const fetchMyContacts = HttpApiBuilder.handler(
         Effect.flatMap((userDb) =>
           userDb.updateAppSourceForUser({
             appSource: req.headers.appSourceOrNone,
-            publicKey: security['public-key'],
+            publicKey: security.publicKey,
             hash: userServerHash,
           })
         )
@@ -51,10 +51,14 @@ export const fetchMyContacts = HttpApiBuilder.handler(
       const combined = yield* _(
         Effect.sync(() =>
           pipe(
-            Array.dedupe([...firstLevelContacts, ...secondLevelContacts]),
-            Array.map((publicKey) => ({publicKey})),
+            [...firstLevelContacts, ...secondLevelContacts],
+            // Dedupe by publicKey while keeping the full contact structure
+            Array.dedupeWith(
+              (a, b) =>
+                a.publicKey === b.publicKey && a.publicKeyV2 === b.publicKeyV2
+            ),
             // HOTFIX - remove owner public key from the list of returned contacts
-            Array.filter(({publicKey}) => publicKey !== security['public-key'])
+            Array.filter((contact) => contact.publicKey !== security.publicKey)
           )
         ),
         Effect.withSpan('Deduplicating public keys')

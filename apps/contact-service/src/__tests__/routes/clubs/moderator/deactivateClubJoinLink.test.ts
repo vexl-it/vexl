@@ -81,6 +81,7 @@ beforeEach(async () => {
           isModerator: true,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
 
@@ -123,6 +124,7 @@ describe('Deactivate link', () => {
               code,
               notificationToken: Option.none(),
               contactsImported: false,
+              publicKeyV2: Option.none(),
               ...(yield* _(generateAndSignChallenge(user1))),
             },
           }),
@@ -167,6 +169,7 @@ describe('Deactivate link', () => {
             isModerator: false,
             lastRefreshedAt: new Date(),
             notificationToken: null,
+            publicKeyV2: Option.none(),
           })
         )
 

@@ -25,7 +25,7 @@ export const deleteUser = HttpApiBuilder.handler(
           yield* _(
             userDb.deleteUserByPublicKeyAndHash({
               hash: security.serverHash,
-              publicKey: security['public-key'],
+              publicKey: security.publicKey,
             })
           )
           return {}

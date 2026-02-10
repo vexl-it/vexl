@@ -6,7 +6,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, pipe, Schema} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   hashForClient,
   serverHashPhoneNumber,
@@ -87,6 +87,7 @@ export const createAndImportUsersFromNetwork = (
         payload: {
           expoToken: user.notificationToken,
           firebaseToken: null,
+          publicKeyV2: Option.none(),
         },
         headers: commonAndSecurityHeaders,
       })
@@ -125,6 +126,7 @@ export const createUserOnNetwork = (
         payload: {
           expoToken: user.notificationToken,
           firebaseToken: null,
+          publicKeyV2: Option.none(),
         },
         headers: commonAndSecurityHeaders,
       })

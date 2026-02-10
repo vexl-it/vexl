@@ -41,6 +41,10 @@ import {
 } from './queries/createQueryAllClubMembers'
 import {createQueryNumberOfClubReportsForUser} from './queries/createQueryNumberOfClubReportsForUser'
 import {
+  createUpdateClubMemberPublicKeyV2,
+  type UpdateClubMemberPublicKeyV2Params,
+} from './queries/createUpdateClubMemberPublicKeyV2'
+import {
   createUpdateIsModerator,
   type UpdateIsModeratorParamas,
 } from './queries/createUpdateIsModerator'
@@ -96,6 +100,10 @@ export interface ClubMembersDbOperations {
   findClubMemberByPublicKey: (
     params: FindClubMemberByPublicKeyParams
   ) => Effect.Effect<Option.Option<ClubMemberRecord>, UnexpectedServerError>
+
+  updateClubMemberPublicKeyV2: (
+    params: UpdateClubMemberPublicKeyV2Params
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
@@ -127,6 +135,9 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
       const deleteClubReportedRecordByReportedAtBefore = yield* _(
         createDeleteClubReportedRecordByReportedAtBefore
       )
+      const updateClubMemberPublicKeyV2 = yield* _(
+        createUpdateClubMemberPublicKeyV2
+      )
 
       return {
         countClubMembers,
@@ -143,6 +154,7 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         updateNotificationToken,
         deleteAllClubMembers,
         deleteClubReportedRecordByReportedAtBefore,
+        updateClubMemberPublicKeyV2,
       }
     })
   )

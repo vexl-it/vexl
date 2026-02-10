@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
@@ -17,6 +20,7 @@ import {
 export default function updateOwnerPrivatePayload({
   api,
   ownerCredentials,
+  ownerKeyPairV2,
   symmetricKey,
   adminId,
   intendedConnectionLevel,
@@ -24,6 +28,7 @@ export default function updateOwnerPrivatePayload({
 }: {
   api: OfferApi
   ownerCredentials: PrivateKeyHolder
+  ownerKeyPairV2?: KeyPairV2
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
   intendedConnectionLevel: IntendedConnectionLevel
@@ -35,6 +40,7 @@ export default function updateOwnerPrivatePayload({
 > {
   const privatePayload = constructPrivatePayloadForOwner({
     ownerCredentials,
+    ownerKeyPairV2,
     symmetricKey,
     adminId,
     intendedConnectionLevel,

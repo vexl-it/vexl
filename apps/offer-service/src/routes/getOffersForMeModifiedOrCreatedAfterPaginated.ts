@@ -43,7 +43,7 @@ export const getOffersForMeModifiedOrCreatedAfterPaginated =
 
         const offers = yield* _(
           offerDbService.queryOffersForUserPaginated({
-            userPublicKey: security['public-key'],
+            userPublicKey: security.publicKey,
             lastPrivatePartId,
             limit: increasedLimit,
           }),

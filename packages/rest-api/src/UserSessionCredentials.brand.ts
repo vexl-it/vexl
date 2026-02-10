@@ -1,11 +1,14 @@
-import {KeyHolder} from '@vexl-next/cryptography'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
+import {VexlAuthHeader} from './VexlAuthHeader'
 
-// TODO refine properties
 export const UserSessionCredentials = Schema.Struct({
-  publicKey: KeyHolder.PublicKeyPemBase64,
-  hash: Schema.String,
-  signature: Schema.String,
+  publicKey: PublicKeyPemBase64,
+  hash: HashedPhoneNumber,
+  signature: EcdsaSignature,
+  vexlAuthHeader: Schema.optional(VexlAuthHeader),
 })
 
 export type UserSessionCredentials = typeof UserSessionCredentials.Type

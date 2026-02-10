@@ -36,7 +36,7 @@ export const createNewOffer = HttpApiBuilder.handler(
 
       yield* _(
         validatePrivatePartsWhenSavingAll({
-          ownersPublicKey: security['public-key'],
+          ownersPublicKey: security.publicKey,
           privateParts: req.payload.offerPrivateList,
         })
       )
@@ -45,6 +45,7 @@ export const createNewOffer = HttpApiBuilder.handler(
         Effect.forEach(
           req.payload.offerPrivateList,
           (privatePart) =>
+            // @ts-expect-error TODO(new-keys) implement-this-when we support V2 offers
             offerDb.insertOfferPrivatePart({
               ...privatePart,
               offerId: insertedOffer.id,
@@ -56,7 +57,7 @@ export const createNewOffer = HttpApiBuilder.handler(
       return yield* _(
         offerDb.queryOfferByPublicKeyAndOfferId({
           id: insertedOffer.offerId,
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
         }),
         Effect.flatten,
         Effect.catchTag('NoSuchElementException', () =>

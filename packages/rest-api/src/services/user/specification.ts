@@ -24,18 +24,20 @@ import {
   InitEraseUserResponse,
   InitPhoneVerificationRequest,
   InitPhoneVerificationResponse,
+  InitUpgradeAuthRequest,
+  InitUpgradeAuthResponse,
   InvalidSignatureError,
   InvalidVerificationError,
   InvalidVerificationIdError,
-  NumberDoesNotMatchOldHashError,
   PreviousCodeNotExpiredError,
-  RegenerateSessionCredentialsRequest,
-  RegenerateSessionCredentialsResponse,
+  SubmitUpgradeAuthRequest,
+  SubmitUpgradeAuthResponse,
   UnableToGenerateChallengeError,
   UnableToGenerateSignatureError,
   UnableToSendVerificationSmsError,
   UnableToVerifySmsCodeError,
   UnsupportedVersionToLoginError,
+  UpgradeAuthInvalidSignatureError,
   VerificationNotFoundError,
   VerifyAndEraseUserRequest,
   VerifyAndEraseUserResponse,
@@ -127,18 +129,6 @@ const EraseUserGroup = HttpApiGroup.make('EraseUser')
   .add(InitEraseUserEndpoint)
   .add(VerifyAndEraseUserEndpoint)
 
-export const RegenerateSessionCredentialsEndpoint = HttpApiEndpoint.post(
-  'regenerateSessionCredentials',
-  '/api/v1/regenerate-session-credentials'
-)
-  .setHeaders(CommonAndSecurityHeaders)
-  .middleware(ServerSecurityMiddleware)
-  .setPayload(RegenerateSessionCredentialsRequest)
-  .addSuccess(RegenerateSessionCredentialsResponse)
-  .addError(NumberDoesNotMatchOldHashError, {status: 400})
-  .addError(UnableToGenerateSignatureError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 1)
-
 export const GetVersionServiceInfoEndpoint = HttpApiEndpoint.get(
   'getVersionServiceInfo',
   '/api/v1/version-service-info'
@@ -156,14 +146,47 @@ export const GenerateLoginChallenge = HttpApiEndpoint.get(
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
   .add(LogoutUserEndpoint)
-  .add(RegenerateSessionCredentialsEndpoint)
   .add(GetVersionServiceInfoEndpoint)
   .add(GenerateLoginChallenge)
+
+export const InitUpgradeAuthEndpoint = HttpApiEndpoint.post(
+  'initUpgradeAuth',
+  '/api/v1/upgrade-auth/init'
+)
+  .annotate(
+    OpenApi.Description,
+    'Initialize auth upgrade by submitting new public key V2 and receiving a challenge'
+  )
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(InitUpgradeAuthRequest)
+  .addSuccess(InitUpgradeAuthResponse)
+  .annotate(MaxExpectedDailyCall, 100)
+
+export const SubmitUpgradeAuthEndpoint = HttpApiEndpoint.post(
+  'submitUpgradeAuth',
+  '/api/v1/upgrade-auth/submit'
+)
+  .annotate(
+    OpenApi.Description,
+    'Submit signed challenge to receive VexlAuthHeader'
+  )
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(SubmitUpgradeAuthRequest)
+  .addSuccess(SubmitUpgradeAuthResponse)
+  .addError(UpgradeAuthInvalidSignatureError, {status: 400})
+  .annotate(MaxExpectedDailyCall, 100)
+
+const UpgradeAuthGroup = HttpApiGroup.make('UpgradeAuth')
+  .add(InitUpgradeAuthEndpoint)
+  .add(SubmitUpgradeAuthEndpoint)
 
 export const UserApiSpecification = HttpApi.make('User API')
   .middleware(RateLimitingMiddleware)
   .add(LoginGroup)
   .add(EraseUserGroup)
+  .add(UpgradeAuthGroup)
   .add(RootGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

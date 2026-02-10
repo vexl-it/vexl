@@ -48,6 +48,7 @@ beforeAll(async () => {
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            publicKeyV2: Option.none(),
           },
           headers: commonAndSecurityHeaders,
         })
@@ -98,6 +99,7 @@ describe('Refresh user', () => {
             payload: {
               offersAlive: true,
               countryPrefix: Option.some(Schema.decodeSync(CountryPrefix)(420)),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -148,6 +150,7 @@ describe('Refresh user', () => {
             payload: {
               offersAlive: true,
               countryPrefix: Option.none(),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           }),

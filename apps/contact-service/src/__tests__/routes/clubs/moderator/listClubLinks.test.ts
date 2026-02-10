@@ -71,6 +71,7 @@ beforeEach(async () => {
           isModerator: true,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
     })
@@ -147,6 +148,7 @@ describe('List club links', () => {
             isModerator: false,
             lastRefreshedAt: new Date(),
             notificationToken: null,
+            publicKeyV2: Option.none(),
           })
         )
 
@@ -277,6 +279,7 @@ describe('List club links', () => {
               ...(yield* _(generateAndSignChallenge(user2))),
               contactsImported: false,
               notificationToken: Option.none(),
+              publicKeyV2: Option.none(),
             },
           })
         )

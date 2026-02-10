@@ -54,6 +54,7 @@ export const createPrivatePart = HttpApiBuilder.handler(
         userPublicKey: PublicKeyPemBase64
       }>((a, b) => a.userPublicKey === b.userPublicKey)(
         existingPrivateParts,
+        // @ts-expect-error TODO(new-keys) implement-this-when we support V2 offers
         req.payload.offerPrivateList
       )
 
@@ -73,6 +74,7 @@ export const createPrivatePart = HttpApiBuilder.handler(
         Effect.forEach(
           req.payload.offerPrivateList,
           (privatePart) =>
+            // @ts-expect-error TODO(new-keys) implement-this-when we support V2 offers
             offerDbService.insertOfferPrivatePart({
               ...privatePart,
               offerId: offer.value.id,

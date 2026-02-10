@@ -67,6 +67,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
     })
@@ -94,6 +95,7 @@ describe('Leave club', () => {
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either

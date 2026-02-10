@@ -1,3 +1,4 @@
+import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   type FriendLevel,
@@ -70,7 +71,11 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
         allOffers,
         Array.map(
           flow(
-            decryptOffer(keyPair),
+            decryptOffer(
+              keyPair,
+              // TODO(new-keys) pass a correct key when having new keys in storage
+              {} as KeyPairV2
+            ),
             Effect.filterOrFail(
               validateOfferIsFromContactNetwork,
               (offerInfo) => new NotOfferFromContactNetworkError({offerInfo})

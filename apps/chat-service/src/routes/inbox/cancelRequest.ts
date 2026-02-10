@@ -27,7 +27,7 @@ export const cancelRequest = HttpApiBuilder.handler(
       const {receiverInbox, senderInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
           receiver: req.payload.publicKey,
-          sender: security['public-key'],
+          sender: security.publicKey,
         })
       )
 
@@ -56,7 +56,7 @@ export const cancelRequest = HttpApiBuilder.handler(
         })
       )
 
-      const senderPublicKey = yield* _(encryptPublicKey(security['public-key']))
+      const senderPublicKey = yield* _(encryptPublicKey(security.publicKey))
 
       const messagesDb = yield* _(MessagesDbService)
       const sentMessage = yield* _(
@@ -74,14 +74,14 @@ export const cancelRequest = HttpApiBuilder.handler(
       return {
         id: Number(sentMessage.id),
         message: sentMessage.message,
-        senderPublicKey: security['public-key'],
+        senderPublicKey: security.publicKey,
         notificationHandled: false,
       } satisfies CancelApprovalResponse
     }).pipe(
       withInboxActionRedisLock(
         Effect.gen(function* (_) {
           const security = yield* _(CurrentSecurity)
-          return security['public-key']
+          return security.publicKey
         }),
         req.payload.publicKey
       ),

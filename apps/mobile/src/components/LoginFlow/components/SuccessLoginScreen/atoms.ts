@@ -1,5 +1,6 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   EcdsaSignature,
@@ -7,7 +8,7 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {contact, user} from '@vexl-next/rest-api/src'
 import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Match, Schema} from 'effect'
+import {Effect, Match, Option, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
@@ -48,10 +49,10 @@ const handleUserCreationActionAtom = atom(
       session: Session
     }
   ) => {
-    const startedAt = Date.now()
+    return Effect.gen(function* () {
+      const startedAt = Date.now()
 
-    return contact
-      .api({
+      const contactApi = yield* contact.api({
         platform,
         clientVersion: versionCode,
         clientSemver: version,
@@ -61,28 +62,28 @@ const handleUserCreationActionAtom = atom(
         language: get(translationAtom).t('localeName'),
         isDeveloper: get(isDeveloperAtom),
       })
-      .pipe(
-        Effect.flatMap((contactApi) =>
-          contactApi.createUser({firebaseToken: null, expoToken: null})
-        ),
-        Effect.tapError((e) => {
-          reportError('error', new Error('Error creating user at contact MS'), {
-            e,
-          })
 
-          resetNavigationToIntroScreen()
+      yield* contactApi.createUser({
+        firebaseToken: null,
+        expoToken: null,
+        publicKeyV2: Option.none<PublicKeyV2>(),
+      })
 
-          return Effect.fail(e)
-        }),
-        Effect.tap(() => {
-          const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
-          if (leftToWait > 0)
-            setTimeout(() => {
-              set(sessionAtom, O.some(session))
-            }, leftToWait)
-          else set(sessionAtom, O.some(session))
+      const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
+      if (leftToWait > 0)
+        setTimeout(() => {
+          set(sessionAtom, O.some(session))
+        }, leftToWait)
+      else set(sessionAtom, O.some(session))
+    }).pipe(
+      Effect.tapError((e) => {
+        reportError('error', new Error('Error creating user at contact MS'), {
+          e,
         })
-      )
+        resetNavigationToIntroScreen()
+        return Effect.succeed(undefined)
+      })
+    )
   }
 )
 

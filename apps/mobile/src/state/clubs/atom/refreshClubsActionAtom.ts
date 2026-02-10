@@ -68,6 +68,7 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
           contactApi: api.contact,
           keyPair,
           notificationToken,
+          clubUuid,
         }).pipe(
           Effect.tapError((e) => Effect.fail(e)),
           Effect.tapErrorTag('ClubNotFoundError', (e) => {

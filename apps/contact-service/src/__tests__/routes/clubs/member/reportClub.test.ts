@@ -83,6 +83,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
 
@@ -93,6 +94,7 @@ beforeEach(async () => {
           isModerator: false,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
     })

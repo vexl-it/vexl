@@ -29,7 +29,8 @@ import {initVerificationHandler} from './routes/login/handlers/initVerificationH
 import {verifyChallengeHandler} from './routes/login/handlers/verifyChallengeHandler'
 import {verifyCodeHandler} from './routes/login/handlers/verifyCodeHandler'
 import {logoutUserHandler} from './routes/logoutUser'
-import {regenerateCredentialsHandler} from './routes/regenerateSessionCredentials'
+import {initUpgradeAuthHandler} from './routes/upgradeAuth/initUpgradeAuth'
+import {submitUpgradeAuthHandler} from './routes/upgradeAuth/submitUpgradeAuth'
 
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
@@ -63,14 +64,23 @@ const RootApiGroupLive = HttpApiBuilder.group(
   (h) =>
     h
       .handle('logoutUser', logoutUserHandler)
-      .handle('regenerateSessionCredentials', regenerateCredentialsHandler)
       .handle('getVersionServiceInfo', getVersionServiceInfoHandler)
       .handle('generateLoginChallenge', generateLoginChallengeHandler)
+)
+
+const UpgradeAuthApiGroupLive = HttpApiBuilder.group(
+  UserApiSpecification,
+  'UpgradeAuth',
+  (h) =>
+    h
+      .handle('initUpgradeAuth', initUpgradeAuthHandler)
+      .handle('submitUpgradeAuth', submitUpgradeAuthHandler)
 )
 
 export const UserApiLive = HttpApiBuilder.api(UserApiSpecification).pipe(
   Layer.provide(LoginApiGroupLive),
   Layer.provide(EraseUserApiGroupLive),
+  Layer.provide(UpgradeAuthApiGroupLive),
   Layer.provide(RootApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(UserApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)

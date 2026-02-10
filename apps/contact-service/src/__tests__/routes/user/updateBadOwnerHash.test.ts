@@ -2,7 +2,7 @@ import {
   generatePrivateKey,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
@@ -167,6 +167,7 @@ beforeEach(async () => {
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            publicKeyV2: Option.none(),
           },
           headers: commonAndSecurityHeadersOld,
         })
@@ -182,6 +183,7 @@ beforeEach(async () => {
           payload: {
             firebaseToken: null,
             expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
+            publicKeyV2: Option.none(),
           },
           headers: commonAndSecurityHeadersNew,
         })

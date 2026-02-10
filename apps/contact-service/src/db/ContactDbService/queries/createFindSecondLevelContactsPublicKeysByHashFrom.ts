@@ -1,9 +1,18 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
-import {Array, Effect, flow, Schema} from 'effect'
+import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
+
+const ContactWithV2Key = Schema.Struct({
+  publicKey: PublicKeyPemBase64,
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+    nullable: true,
+  }),
+})
 
 export const createFindSecondLevelContactsPublicKeysByHashFrom = Effect.gen(
   function* (_) {
@@ -11,10 +20,11 @@ export const createFindSecondLevelContactsPublicKeysByHashFrom = Effect.gen(
 
     const query = SqlSchema.findAll({
       Request: ServerHashedNumber,
-      Result: Schema.Struct({publicKey: PublicKeyPemBase64}),
+      Result: ContactWithV2Key,
       execute: (hash) => sql`
         SELECT DISTINCT
-          second_lvl_friend.public_key
+          second_lvl_friend.public_key,
+          second_lvl_friend.public_key_v2
         FROM
           user_contact my_contacts
           INNER JOIN user_contact their_contacts ON my_contacts.hash_to = their_contacts.hash_to
@@ -27,7 +37,6 @@ export const createFindSecondLevelContactsPublicKeysByHashFrom = Effect.gen(
 
     return flow(
       query,
-      Effect.map(Array.map((e) => e.publicKey)),
       Effect.catchAll((e) =>
         Effect.zipRight(
           Effect.logError(

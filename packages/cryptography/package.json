@@ -19,9 +19,11 @@
     "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
+    "libsodium-wrappers": "^0.8.0",
     "react-native-get-random-values": "^1.8.0"
   },
   "devDependencies": {
+    "@types/libsodium-wrappers": "^0.7.14",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",

@@ -86,6 +86,7 @@ export const updateMyOfferPrivatePayloadActionAtom = atom(
           adminId: offerToUpdate.ownershipInfo.adminId,
           symmetricKey: offerToUpdate.offerInfo.privatePart.symmetricKey,
           ownerCredentials: get(sessionDataOrDummyAtom).privateKey,
+          ownerKeyPairV2: get(sessionDataOrDummyAtom).keyPairV2,
           intendedConnectionLevel,
           intendedClubs,
           api: get(apiAtom).offer,

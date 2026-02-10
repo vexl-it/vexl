@@ -77,7 +77,7 @@ export const requestApproval = HttpApiBuilder.handler(
       const {receiverInbox, senderInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
           receiver: req.payload.publicKey,
-          sender: security['public-key'],
+          sender: security.publicKey,
         })
       )
 
@@ -102,9 +102,7 @@ export const requestApproval = HttpApiBuilder.handler(
         })
       )
 
-      const encryptedSenderKey = yield* _(
-        encryptPublicKey(security['public-key'])
-      )
+      const encryptedSenderKey = yield* _(encryptPublicKey(security.publicKey))
       const messagesDb = yield* _(MessagesDbService)
       const insertedMessage = yield* _(
         messagesDb.insertMessageForInbox({
@@ -121,7 +119,7 @@ export const requestApproval = HttpApiBuilder.handler(
       return {
         id: Number(insertedMessage.id),
         message: insertedMessage.message,
-        senderPublicKey: security['public-key'],
+        senderPublicKey: security.publicKey,
         notificationHandled: false,
       } satisfies RequestApprovalResponse
     }).pipe(

@@ -200,6 +200,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    ['react-native-libsodium', {}],
     './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [

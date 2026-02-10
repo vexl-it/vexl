@@ -118,6 +118,7 @@
     "react-native-international-phone-number": "^0.10.5",
     "react-native-keyboard-controller": "1.18.5",
     "react-native-launch-arguments": "^4.1.0",
+    "react-native-libsodium": "github:sairanjit/react-native-libsodium#feat/upgrade-react-native-79",
     "react-native-map-clustering": "^3.4.2",
     "react-native-maps": "1.26.14",
     "react-native-markdown-display": "^7.0.0-alpha.2",

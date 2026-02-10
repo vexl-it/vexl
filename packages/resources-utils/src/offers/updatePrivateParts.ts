@@ -1,4 +1,9 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  PublicKeyPemBase64 as PublicKeyPemBase64Schema,
+  PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyV2 as PublicKeyV2Type} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {
@@ -8,7 +13,7 @@ import {
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type ServerPrivatePart} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Array, Effect, Either, pipe, Record, Schema} from 'effect'
+import {Array, Effect, Either, Option, pipe, Record, Schema} from 'effect'
 import {type ReadonlyRecord} from 'effect/Record'
 import reportErrorFromResourcesUtils from '../reportErrorFromResourcesUtils'
 import {deduplicate, subtractArrays} from '../utils/array'
@@ -21,8 +26,36 @@ import {
   encryptPrivatePart,
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
+import {type ContactWithV2Key} from './utils/fetchContactsForOffer'
 
-type ClubConnections = Record<ClubUuid, readonly PublicKeyPemBase64[]>
+type ClubConnections = Record<
+  ClubUuid,
+  ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+>
+
+// Convert club connections (Union types) to ContactWithV2Key format for constructPrivatePayloads
+const toContactsWithEmptyV2Keys = (
+  clubConnections: ClubConnections
+): Record<ClubUuid, readonly ContactWithV2Key[]> =>
+  pipe(
+    clubConnections,
+    Record.map((keys) =>
+      Array.map(keys, (key) => {
+        // If it's a V2 key, store it and mark it in publicKeyV2
+        if (key.startsWith('V2_PUB_')) {
+          return {
+            publicKey: key as PublicKeyV2Type,
+            publicKeyV2: Option.some(key as PublicKeyV2Type),
+          }
+        }
+        // Otherwise it's a V1 key
+        return {
+          publicKey: key as PublicKeyPemBase64,
+          publicKeyV2: Option.none(),
+        }
+      })
+    )
+  )
 
 const calculateNewClubsConnections = ({
   currentConnections,
@@ -71,7 +104,7 @@ export class TimeLimitReachedError extends Schema.TaggedError<TimeLimitReachedEr
 )('TimeLimitReachedError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: PublicKeyPemBase64,
+  toPublicKey: Schema.Union(PublicKeyPemBase64Schema, PublicKeyV2),
 }) {}
 
 function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
@@ -79,10 +112,12 @@ function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
   removedClubsConnections,
 }: {
   targetConnections: {
-    readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel: readonly PublicKeyPemBase64[]
+    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
   }
-  readonly removedClubsConnections: readonly PublicKeyPemBase64[]
+  readonly removedClubsConnections: ReadonlyArray<
+    PublicKeyPemBase64 | PublicKeyV2Type
+  >
 }): void {
   const offerMeantForKeys = pipe(
     [targetConnections.firstLevel, targetConnections.secondLevel],
@@ -186,14 +221,20 @@ export default function updatePrivateParts({
   onProgress,
 }: {
   currentConnections: {
-    readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel: readonly PublicKeyPemBase64[]
-    readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    readonly clubs: Record<
+      ClubUuid,
+      ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    >
   }
   targetConnections: {
-    readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel: readonly PublicKeyPemBase64[]
-    readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    readonly clubs: Record<
+      ClubUuid,
+      ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+    >
   }
   commonFriends: CommonConnectionsForUsers
   adminId: OfferAdminId
@@ -205,11 +246,14 @@ export default function updatePrivateParts({
   {
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
-    removedConnections: PublicKeyPemBase64[]
+    removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2Type>
     newConnections: {
-      firstLevel: PublicKeyPemBase64[]
-      secondLevel: PublicKeyPemBase64[] | undefined
-      clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+      firstLevel: Array<PublicKeyPemBase64 | PublicKeyV2Type>
+      secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2Type> | undefined
+      clubs: Record<
+        ClubUuid,
+        ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2Type>
+      >
     }
   },
   | PrivatePayloadsConstructionError
@@ -299,7 +343,8 @@ export default function updatePrivateParts({
           firstDegreeConnections: newFirstLevelConnections,
           secondDegreeConnections: newSecondLevelConnections ?? [],
           commonFriends,
-          clubsConnections: newClubsConnections,
+          // Convert to ContactWithV2Key format (empty V2 keys since we don't have them for stored connections)
+          clubsConnections: toContactsWithEmptyV2Keys(newClubsConnections),
         },
         symmetricKey,
       })
@@ -350,7 +395,7 @@ export default function updatePrivateParts({
 
     if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
     let uploadErrors: Array<{
-      toPublicKey: PublicKeyPemBase64
+      toPublicKey: PublicKeyPemBase64 | PublicKeyV2Type
       error: Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
     }> = []
     if (encryptionResult.privateParts.length > 0) {
@@ -370,12 +415,20 @@ export default function updatePrivateParts({
     }
 
     if (removedConnections.length > 0) {
-      yield* _(
-        api.deletePrivatePart({
-          adminIds: [adminId],
-          publicKeys: removedConnections,
-        })
-      )
+      // Filter to V1 keys only - deletePrivatePart API doesn't support V2 keys yet
+      const v1KeysToRemove = Array.filter(
+        removedConnections,
+        (key) => !key.startsWith('V2_PUB_')
+      ) as PublicKeyPemBase64[]
+
+      if (v1KeysToRemove.length > 0) {
+        yield* _(
+          api.deletePrivatePart({
+            adminIds: [adminId],
+            publicKeys: v1KeysToRemove,
+          })
+        )
+      }
     }
     if (onProgress) onProgress({type: 'DONE'})
 

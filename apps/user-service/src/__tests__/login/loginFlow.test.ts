@@ -99,7 +99,7 @@ describe('loginFlow', () => {
             verifyUserSecurity({
               hash: verifyChallenge.hash,
               signature: verifyChallenge.signature,
-              'public-key': keypair.publicKeyPemBase64,
+              publicKey: keypair.publicKeyPemBase64,
             }),
             Effect.either
           ))._tag

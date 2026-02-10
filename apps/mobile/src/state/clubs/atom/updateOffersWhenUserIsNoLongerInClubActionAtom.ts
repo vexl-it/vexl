@@ -77,6 +77,7 @@ export const updateOffersWhenUserIsNoLongerInClubActionAtom = atom(
       )
 
       yield* _(
+        // @ts-expect-error TODO(new-keys) implement-this-when we support V2 offers
         deletePrivatePartsForOffers(myOffersWithConnectionsForClub, offerApi),
         ignoreReportErrors(
           'warn',

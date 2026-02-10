@@ -108,7 +108,14 @@ describe('Fetch my contacts paginated', () => {
         expect(userInDb).toHaveLength(1)
         expect(userInDb[0]).toHaveProperty('appSource', 'Some test')
 
-        expect(pipe(items, Array.sort(Order.string), Array.join(','))).toBe(
+        expect(
+          pipe(
+            items,
+            Array.map((item) => item.publicKey),
+            Array.sort(Order.string),
+            Array.join(',')
+          )
+        ).toBe(
           pipe(
             userContacts,
             Array.map((one) => one.keys.publicKeyPemBase64),
@@ -156,7 +163,12 @@ describe('Fetch my contacts paginated', () => {
         )
 
         expect(
-          pipe(response.items, Array.sort(Order.string), Array.join(','))
+          pipe(
+            response.items,
+            Array.map((item) => item.publicKey),
+            Array.sort(Order.string),
+            Array.join(',')
+          )
         ).toBe(
           pipe(
             [...networkTwo, ...userContacts],
@@ -189,6 +201,7 @@ describe('Fetch my contacts paginated', () => {
         expect(
           pipe(
             secondPageResponse.items,
+            Array.map((item) => item.publicKey),
             Array.sort(Order.string),
             Array.join(',')
           )
@@ -434,7 +447,12 @@ describe('Fetch my contacts paginated', () => {
             })
           )
 
-          expect(result.items).not.toContain(me.keys.publicKeyPemBase64)
+          expect(
+            pipe(
+              result.items,
+              Array.map((item) => item.publicKey)
+            )
+          ).not.toContain(me.keys.publicKeyPemBase64)
         }
       })
     )

@@ -9,6 +9,7 @@ import {
   removeClubFromKeyHolderStateActionAtom,
 } from './clubsToKeyHolderAtom'
 import {removeClubWithMembersFromStateActionAtom} from './clubsWithMembersAtom'
+import {removeClubV2KeyPair} from './clubV2KeysAtom'
 import {updateOffersWhenUserIsNoLongerInClubActionAtom} from './updateOffersWhenUserIsNoLongerInClubActionAtom'
 
 export class ClubNotFoundInInnerStateError extends Schema.TaggedError<ClubNotFoundInInnerStateError>(
@@ -42,6 +43,7 @@ export const leaveClubActionAtom = atom(
         )
       )
       set(removeClubFromKeyHolderStateActionAtom, clubUuid)
+      removeClubV2KeyPair(clubUuid) // Remove V2 key when leaving club
       set(removeClubWithMembersFromStateActionAtom, clubUuid)
       set(removeClubOffersNextPageParamFromStateActionAtom, clubUuid)
     })

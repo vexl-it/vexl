@@ -82,6 +82,7 @@ export const joinClub = HttpApiBuilder.handler(
               notificationToken: Option.getOrNull(
                 req.payload.notificationToken
               ),
+              publicKeyV2: req.payload.publicKeyV2,
             })
           )
 

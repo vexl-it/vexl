@@ -39,6 +39,10 @@ import {
 import {createUpdateInvalidateExpoToken} from './queries/createUpdateInvalidateExpoToken'
 import {createUpdateInvalidateFirebaseToken} from './queries/createUpdateInvalidateFirebaseToken'
 import {
+  createUpdatePublicKeyV2,
+  type UpdatePublicKeyV2Params,
+} from './queries/createUpdatePublicKeyV2'
+import {
   createUpdateRefreshUser,
   type UpdateRefreshUserParams,
 } from './queries/createUpdateRefreshUser'
@@ -131,6 +135,10 @@ export interface UserDbOperations {
   updateAppSourceForUser: (
     args: UpdateAppSourceForUserParams
   ) => Effect.Effect<void, UnexpectedServerError>
+
+  updatePublicKeyV2: (
+    args: UpdatePublicKeyV2Params
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class UserDbService extends Context.Tag('UserDbService')<
@@ -184,6 +192,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
       )
 
       const updateAppSourceForUser = yield* _(createUpdateAppSourceForUser)
+      const updatePublicKeyV2 = yield* _(createUpdatePublicKeyV2)
 
       return {
         insertUser,
@@ -203,6 +212,7 @@ export class UserDbService extends Context.Tag('UserDbService')<
         updateUserHash,
         updateUserInitialImportDone,
         updateAppSourceForUser,
+        updatePublicKeyV2,
       }
     })
   )

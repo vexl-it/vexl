@@ -1,5 +1,8 @@
 import {type KeyHolder} from '@vexl-next/cryptography'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import {
@@ -36,6 +39,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   symmetricKey,
   adminId,
   ownerCredentials,
+  ownerKeyPairV2,
   intendedClubs,
   serverToClientHashesToHashedPhoneNumbersMap,
   onProgress,
@@ -44,6 +48,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
   intendedConnectionLevel: IntendedConnectionLevel
   symmetricKey: SymmetricKey
   ownerCredentials: PrivateKeyHolder
+  ownerKeyPairV2?: KeyPairV2
   adminId: OfferAdminId
   serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
     ServerToClientHashedNumber,
@@ -86,6 +91,7 @@ export function fetchInfoAndGeneratePrivatePayloads({
     const encryptedPrivatePayloadForOwner = yield* _(
       constructAndEncryptPrivatePayloadForOwner({
         ownerCredentials,
+        ownerKeyPairV2,
         symmetricKey,
         adminId,
         intendedConnectionLevel,

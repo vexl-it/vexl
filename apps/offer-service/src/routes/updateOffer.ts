@@ -37,7 +37,7 @@ export const updateOffer = HttpApiBuilder.handler(
         yield* _(
           validatePrivatePartsWhenSavingAll({
             privateParts: req.payload.offerPrivateList,
-            ownersPublicKey: security['public-key'],
+            ownersPublicKey: security.publicKey,
           })
         )
 
@@ -66,7 +66,7 @@ export const updateOffer = HttpApiBuilder.handler(
       return yield* _(
         offerDb.queryOfferByPublicKeyAndOfferId({
           id: publicPartFromDb.offerId,
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
           skipValidation: true,
         }),
         Effect.flatten,

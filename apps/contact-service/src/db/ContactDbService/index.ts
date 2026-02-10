@@ -1,4 +1,3 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer} from 'effect'
 import {type ServerHashedNumber} from '../../utils/serverHashContact'
@@ -19,7 +18,10 @@ import {
   type FindCommonFriendsPaginatedResult,
 } from './queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {createFindContactsByHashFrom} from './queries/createFindContactsByHashFrom'
-import {createFindFirstLevelContactsPublicKeysByHashFrom} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
+import {
+  createFindFirstLevelContactsPublicKeysByHashFrom,
+  type ContactWithV2Key,
+} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
 import {
   createFindFirstLevelContactsPublicKeysByHashFromPaginated,
   type FindFirstLevelContactsPublicKeysByHashFromPaginatedParams,
@@ -64,7 +66,7 @@ export interface ContactDbOperations {
 
   findFirstLevelContactsPublicKeysByHashFrom: (
     hash: ServerHashedNumber
-  ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
+  ) => Effect.Effect<readonly ContactWithV2Key[], UnexpectedServerError>
 
   findFirstLevelContactsPublicKeysByHashFromPaginated: (
     args: FindFirstLevelContactsPublicKeysByHashFromPaginatedParams
@@ -75,7 +77,7 @@ export interface ContactDbOperations {
 
   findSecondLevelContactsPublicKeysByHashFrom: (
     hash: ServerHashedNumber
-  ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
+  ) => Effect.Effect<readonly ContactWithV2Key[], UnexpectedServerError>
 
   findSecondLevelContactsPublicKeysByHashFromPaginated: (
     args: FindSecondLevelContactsPublicKeysByHashFromPaginatedParams

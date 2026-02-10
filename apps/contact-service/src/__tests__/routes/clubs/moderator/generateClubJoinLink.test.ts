@@ -73,6 +73,7 @@ beforeEach(async () => {
           isModerator: true,
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
+          publicKeyV2: Option.none(),
         })
       )
     })
@@ -106,6 +107,7 @@ describe('Generate club join link', () => {
               ...(yield* _(generateAndSignChallenge(user1))),
               contactsImported: false,
               notificationToken: Option.none(),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -127,6 +129,7 @@ describe('Generate club join link', () => {
             isModerator: false,
             lastRefreshedAt: new Date(),
             notificationToken: null,
+            publicKeyV2: Option.none(),
           })
         )
 

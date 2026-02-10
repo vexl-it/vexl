@@ -1,3 +1,4 @@
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -88,7 +89,7 @@ export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64,
+  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   payloadPrivate: PrivatePayloadEncrypted,
 })
 export type ServerPrivatePart = Schema.Schema.Type<typeof ServerPrivatePart>

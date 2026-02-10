@@ -60,7 +60,7 @@ export const reportClub = HttpApiBuilder.handler(
       )
 
       const numberOfReportsForUser = yield* _(
-        membersDb.queryNumberOfClubReportsForUser(security['public-key'])
+        membersDb.queryNumberOfClubReportsForUser(security.publicKey)
       )
 
       if (numberOfReportsForUser >= reportLimitCount) {
@@ -104,7 +104,7 @@ export const reportClub = HttpApiBuilder.handler(
 
       yield* _(
         membersDb.insertClubReportedRecord({
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
           reportedAt: new Date(),
         })
       )

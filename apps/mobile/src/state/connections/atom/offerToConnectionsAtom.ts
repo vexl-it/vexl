@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
 import {
@@ -194,7 +195,10 @@ export const ensureConnectionsForEveryOffer = atom(null, (get, set) => {
   }))
 })
 
-type ClubConnections = Record<ClubUuid, readonly PublicKeyPemBase64[]>
+type ClubConnections = Record<
+  ClubUuid,
+  ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+>
 const processClubConnections = ({
   currentConnections,
   newConnections,
@@ -202,7 +206,7 @@ const processClubConnections = ({
 }: {
   currentConnections: ClubConnections
   newConnections: ClubConnections
-  removedConnections: readonly PublicKeyPemBase64[]
+  removedConnections: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
 }): ClubConnections => {
   const allClubsUuids = Array.dedupe([
     ...Record.keys(currentConnections),
@@ -259,7 +263,16 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
         Array.filter((one) =>
           Array.contains(clubIdsToEncryptFor ?? [], one.club.uuid)
         ),
-        Array.map(({club, members}) => [club.uuid, members] as const),
+        // Extract publicKeyV2 when available, otherwise publicKey
+        Array.map(
+          ({club, members}) =>
+            [
+              club.uuid,
+              Array.map(members, (m) =>
+                Option.isSome(m.publicKeyV2) ? m.publicKeyV2.value : m.publicKey
+              ),
+            ] as const
+        ),
         Record.fromEntries
       )
 

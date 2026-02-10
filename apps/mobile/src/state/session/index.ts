@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
 import {KeyHolder} from '@vexl-next/cryptography'
+import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Schema} from 'effect/index'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
+import {Option, Schema} from 'effect/index'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
 import * as TE from 'fp-ts/TaskEither'
@@ -19,6 +22,17 @@ import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFrom
 import {replaceAll} from '../../utils/replaceAll'
 import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
 import writeSessionToStorage from './utils/writeSessionToStorage'
+import {useV2SessionKeyPair} from './v2Keys'
+
+// Re-export V2 key utilities for external use
+export {
+  ensureV2SessionKeysExist,
+  generateV2KeyPair,
+  getV2SessionKeyPair,
+  useV2SessionKeyPair,
+  V2KeyGenerationError,
+  V2KeySyncError,
+} from './v2Keys'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -30,6 +44,10 @@ function removeSensitiveData(string: string): string {
     session.sessionCredentials.publicKey,
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
+    // Strip V2 key material if present
+    ...(session.keyPairV2
+      ? [session.keyPairV2.publicKey, session.keyPairV2.privateKey]
+      : []),
   ]
   return replaceAll(string, toReplace, '[[stripped]]')
 }
@@ -76,9 +94,9 @@ const dummyPrivKey = KeyHolder.generatePrivateKey()
 export const dummySession: Session = Schema.decodeSync(Session)({
   privateKey: dummyPrivKey,
   sessionCredentials: {
-    hash: '',
+    hash: '' as HashedPhoneNumber,
     publicKey: dummyPrivKey.publicKeyPemBase64,
-    signature: 'dummysign',
+    signature: 'dummysign' as EcdsaSignature,
   },
   phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
   version: 0,
@@ -106,6 +124,7 @@ export const sessionAtom: WritableAtom<
       console.info('🔑 Logging out user and removing session from storage.')
 
       void AsyncStorage.removeItem(SESSION_KEY)
+      // V2 keys are now stored in session, so they are cleared automatically
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
 
       set(sessionHolderAtom, {state: 'loggedOut'})
@@ -176,4 +195,13 @@ export function useIsUserLoggedIn(): boolean {
 
 export function useIsSessionLoaded(): boolean {
   return useAtomValue(sessionLoadedAtom)
+}
+
+/**
+ * Returns V2 session keypair, assuming user is logged in and keys exist.
+ * Returns undefined if keys don't exist (shouldn't happen after login).
+ */
+export function useV2SessionKeyPairAssumeExists(): KeyPairV2 | undefined {
+  const keyPair = useV2SessionKeyPair()
+  return Option.getOrUndefined(keyPair)
 }

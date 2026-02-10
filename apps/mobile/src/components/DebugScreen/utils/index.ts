@@ -4,6 +4,7 @@ import {
   generatePrivateKey,
   importPrivateKey,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {isPublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
   eciesLegacyDecrypt,
   eciesLegacyEncrypt,
@@ -208,9 +209,14 @@ export async function* simulateEncrypting5000Offers() {
   yield 'Starting encryption'
   yield 'Progress printed every 250th encryption'
 
+  if (isPublicKeyV2(privatePartToEncrypt.toPublicKey)) {
+    throw new Error('pubKeyV2 not supported in debug benchmark')
+  }
+
   for (let i = 0; i < 5000; i++) {
     if (i % 250 === 0) yield `encrypting ${i} / 5000`
     await eciesLegacy.eciesLegacyEncrypt({
+      // Debug screen this is ok
       publicKey: privatePartToEncrypt.toPublicKey,
       data: JSON.stringify(privatePartToEncrypt.payloadPrivate),
     })

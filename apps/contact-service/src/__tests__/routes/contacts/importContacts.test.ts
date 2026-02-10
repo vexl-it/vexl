@@ -7,7 +7,7 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, LogLevel, Logger, Order, pipe} from 'effect'
+import {Array, Effect, LogLevel, Logger, Option, Order, pipe} from 'effect'
 import {isArray} from 'effect/Array'
 import {
   ImportContactsQuotaRecord,
@@ -285,6 +285,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -357,6 +358,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -427,6 +429,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -556,6 +559,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -661,6 +665,7 @@ describe('Import contacts', () => {
             payload: {
               firebaseToken: null,
               expoToken: me.notificationToken,
+              publicKeyV2: Option.none(),
             },
           })
         )

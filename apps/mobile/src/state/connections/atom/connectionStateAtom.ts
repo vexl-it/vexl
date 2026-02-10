@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {
@@ -43,7 +44,7 @@ function fetchContacts(
   level: 'FIRST' | 'SECOND',
   api: ContactApi
 ): Effect.Effect<
-  PublicKeyPemBase64[],
+  Array<PublicKeyPemBase64 | PublicKeyV2>,
   Effect.Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
 > {
   return fetchAllPaginatedData({
@@ -53,7 +54,15 @@ function fetchContacts(
         limit: FETCH_CONNECTIONS_PAGE_SIZE,
         nextPageToken,
       }),
-  })
+  }).pipe(
+    Effect.map(
+      Array.map((item) =>
+        Option.isSome(item.publicKeyV2)
+          ? item.publicKeyV2.value
+          : item.publicKey
+      )
+    )
+  )
 }
 
 export const syncConnectionsActionAtom = atom(
@@ -141,7 +150,16 @@ export const syncConnectionsActionAtom = atom(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
             api.contact.fetchCommonConnectionsPaginated({
-              publicKeys: deduplicate([...firstLevel, ...secondLevel]),
+              publicKeys: pipe(
+                [...firstLevel, ...secondLevel],
+                deduplicate,
+                // Common connections API expects V1 keys only
+                Array.filterMap((key) =>
+                  key.startsWith('V2_PUB_')
+                    ? Option.none()
+                    : Option.some(key as PublicKeyPemBase64)
+                )
+              ),
               limit: FETCH_CONNECTIONS_PAGE_SIZE,
               nextPageToken,
             }),

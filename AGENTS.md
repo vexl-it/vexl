@@ -10,25 +10,26 @@ Structure:
 - packages/\*: Shared TypeScript libraries (domain schemas, REST API specs, crypto, utilities, localization, server helpers).
 - tooling/\*: Shared configs (eslint, prettier, tsconfig), esbuild helpers, API limit generator, handy scripts.
 
-Tooling & style:
+Commands:
 
-- Yarn only; root scripts run Turbo (`yarn turbo:*`). Use `yarn workspace <name> <script>` inside workspaces.
-- TypeScript strict configs (`tooling/tsconfig`), ESLint extends `standard-with-typescript` (+ React when needed), Prettier config enforces single quotes, no semicolons, tight braces, trailing commas.
-- Tests mostly Jest; Effect/Schema used for runtime types; REST API contracts live in `packages/rest-api` and domain errors in `packages/domain`.
+- **MUST use `yarn` only** (never npm/pnpm). Install deps with `yarn` at repo root.
+- Run workspace scripts: `yarn workspace <name> <script>`
+- Turbo tasks: `yarn turbo:lint`, `yarn turbo:typecheck`, `yarn turbo:format` (or `:fix`), `yarn turbo:test`
 
-Agent playbook:
+Code rules:
 
-- Install deps with `yarn` at repo root; avoid npm/pnpm. Node 20+ assumed.
-- For quick checks use `yarn turbo:lint`, `yarn turbo:typecheck`, `yarn turbo:format` (or `:fix`). Some services also have `yarn turbo:test` (runs API limit checker plus tests).
-- When touching HTTP services, build on `HttpApiBuilder` + `Layer`; reuse middlewares, rate limiting, crypto, and error helpers from `packages/server-utils`. Keep schemas/types in shared packages; avoid ad-hoc types.
-- For client code (dashboard/mobile/remix), keep hooks/components typed, prefer shared domain/rest-api utilities, and align with Prettier/ESLint rules.
-- Update the relevant workspace AGENTS.md if you change conventions or commands.
-- Always use context7 when I need code generation, setup or configuration steps, or
-  library/API documentation. This means you should automatically use the Context7 MCP
-  tools to resolve library id and get library docs without me having to explicitly ask.
-- When using effect use effect-ts/effect documentation from context7
-- When accepting data outside of application doamin, always validate via effect/schema. Never use `as` keyword in typescript use Schema.decodeUnknown instead
-- After doing changes in any of the subpackage run typecheck to check if your code is valid. After impementing and finishing with your chagnes, run typecheck, format and lint. Check output of each command and fix errors (if format script fails run format:fix first)
-- when possible, don't use function on array (such as, filter, map, ...) but use Effect Array helpers with Effect's pipe function.
-- When checking if array is empty or not empty use Effect.isNotEmptyArray this ensure proper typechecking and makes the code readable
-- When migrating fp-ts to effect use fp-to-effect-migrator agent
+- **NEVER use the `as` keyword in TypeScript.** Use `Schema.decodeUnknown` to validate external data via `effect/Schema`.
+- HTTP services: build on `HttpApiBuilder` + `Layer`; reuse helpers from `packages/server-utils`. Keep schemas/types in shared packages.
+- Prefer Effect `Array` helpers with `pipe` over native array methods (`filter`, `map`, etc.). Use `Array.isNonEmptyArray` for emptiness checks.
+- Always use Context7 MCP tools (`resolve-library-id` then `query-docs`) for library documentation. For Effect, use the `effect-ts/effect` library ID.
+- When migrating fp-ts to Effect, use the `fp-to-effect-migrator` agent.
+- Define custom errors by extending `Schema.TaggedError` (for example `class MyError extends Schema.TaggedError<MyError>(...)`) instead of extending `Error`, to keep error handling consistent across the codebase.
+
+IMPORTANT -- Verification steps (do this after EVERY change):
+
+1. Run `yarn turbo:typecheck` in the affected workspace. Read the output and fix all errors.
+2. Run `yarn turbo:format`. If it fails, run `yarn turbo:format:fix` first, then re-run.
+3. Run `yarn turbo:lint`. Fix any errors.
+4. Do NOT consider your work done until all three pass cleanly.
+
+Workspace AGENTS.md: Update the relevant workspace AGENTS.md if you change conventions or commands.

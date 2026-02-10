@@ -200,6 +200,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    '@kaladivo/react-native-quick-crypto',
     './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [

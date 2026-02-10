@@ -1,2 +1,2 @@
-import {install} from 'react-native-quick-crypto'
+import {install} from '@kaladivo/react-native-quick-crypto'
 install()

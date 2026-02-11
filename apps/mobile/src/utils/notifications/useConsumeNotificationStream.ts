@@ -50,6 +50,7 @@ import {notificationPreferencesAtom} from '../preferences'
 import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
 import {getDefaultChannel} from './notificationChannels'
+import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 
 const WebSocketConstructorLive = Layer.succeed(
   Socket.WebSocketConstructor,
@@ -216,7 +217,7 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
       if (clubInfo) {
         yield* _(
           Effect.promise(async () => {
-            await notifee.displayNotification({
+            void notifee.displayNotification({
               title: t(`notifications.CLUB_DEACTIVATED.${reason}.title`),
               body: t(`notifications.CLUB_DEACTIVATED.${reason}.body`, {
                 name: clubInfo.clubInfo.name,
@@ -255,7 +256,7 @@ const processUserInactivityNotificationActionAtom = atom(null, (get, set) =>
 
     yield* _(
       Effect.promise(async () => {
-        await notifee.displayNotification({
+        void notifee.displayNotification({
           title: t(`notifications.INACTIVITY_REMINDER.title`),
           body: t(`notifications.INACTIVITY_REMINDER.body`),
           // data,
@@ -280,7 +281,7 @@ const processUserLoginOnDifferentDeviceNotificationActionAtom = atom(
 
       yield* _(
         Effect.promise(async () => {
-          await notifee.displayNotification({
+          void notifee.displayNotification({
             title: t('notifications.loggingOnDifferentDevice.title'),
             body: t('notifications.loggingOnDifferentDevice.body'),
             // data,
@@ -309,6 +310,18 @@ const processNewStreamNotificationActionAtom = atom(
         )
         return
       }
+
+      void showDebugNotificationIfEnabled({
+        title: `Notification ${message._tag}`,
+        subtitle: 'processNewStreamNotificationActionAtom',
+        body: JSON.stringify(
+          {
+            data: message,
+          },
+          null,
+          2
+        ),
+      })
 
       yield* _(
         Match.value(message).pipe(

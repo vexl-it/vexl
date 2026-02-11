@@ -143,5 +143,11 @@ export const ProcessUserNotificationsWorker =
           )
         )
       )
-    })
+    }).pipe(
+      Effect.catchTag('SendingNotificationError', (e) =>
+        Effect.logWarning('Skipping notification due to invalid token', e).pipe(
+          Effect.annotateLogs({entry: JSON.stringify(entry)})
+        )
+      )
+    )
   )

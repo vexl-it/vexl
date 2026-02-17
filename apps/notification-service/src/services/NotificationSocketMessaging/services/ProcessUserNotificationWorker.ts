@@ -131,17 +131,21 @@ export const ProcessUserNotificationsWorker =
               'Unable to send notification via socket, falling back to push notification',
               e
             ),
-            issuePushNotification(task).pipe(
-              Effect.catchAll(
-                (e) =>
-                  new UnexpectedServerError({
-                    message: 'Failed to issue push notification',
-                    cause: e,
-                  })
-              )
-            )
+            issuePushNotification(task)
           )
         )
       )
-    })
+    }).pipe(
+      Effect.catchAll((e) =>
+        Effect.zipRight(
+          Effect.logError('Failed to process user notification', entry),
+          new UnexpectedServerError({
+            message: 'Failed to issue push notification',
+            cause: e,
+          })
+        )
+      ),
+      // TODO:
+      Effect.ignore
+    )
   )

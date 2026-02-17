@@ -139,7 +139,15 @@ export const runMainInNode = <A, E>(
       ? effectOrLayer
       : Layer.launch(effectOrLayer)
     ).pipe(
-      Effect.catchAll((error) => Effect.logFatal('Error', error)),
+      Effect.withSpan('AppRoot'),
+      Effect.catchAll((error) =>
+        Effect.zipRight(
+          Effect.sync(() => {
+            console.log('App fatal error:', error)
+          }),
+          Effect.logFatal('Error', error)
+        )
+      ),
       Effect.catchAllDefect((error) => {
         console.error(error)
         return Effect.logError('Defect', error)

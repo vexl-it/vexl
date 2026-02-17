@@ -11506,7 +11506,7 @@ __metadata:
     effect: ^3.19.9
     esbuild: ^0.25.0
     eslint: ^8.57.1
-    expo-server-sdk: ^3.14.0
+    expo-server-sdk: ^5.0.0
     fast-check: ^3.20.0
     firebase-admin: ^12.3.1
     glob: ^11.1.0
@@ -12182,9 +12182,8 @@ __metadata:
     effect: ^3.19.9
     esbuild: ^0.25.0
     eslint: ^8.57.1
-    expo-server-sdk: ^3.14.0
+    expo-server-sdk: ^5.0.0
     fast-check: ^3.20.0
-    firebase-admin: ^12.3.1
     ioredis: ^5.4.1
     jest: ^29.7.0
     prettier: ^3.3.2
@@ -18306,14 +18305,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-server-sdk@npm:^3.14.0":
-  version: 3.15.0
-  resolution: "expo-server-sdk@npm:3.15.0"
+"expo-server-sdk@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "expo-server-sdk@npm:5.0.0"
   dependencies:
-    node-fetch: ^2.6.0
     promise-limit: ^2.7.0
     promise-retry: ^2.0.1
-  checksum: f2a3b7483ccade6eabad3d4225976a19fc6cb883f941c76bf7868f1856c2ee3006eca5c298ee6e5417c9604867142000c2069a107e307cc168897ab4f6070243
+    undici: ^7.2.0
+  checksum: dbb4ce51c2366dab6d20ae65d5069b708068af07a02f6149b8138d452ce80eef6de27e0e919fca4948f39800ed38ae64ae2ff42ed6fd23ebeafb2c2aafe7a54b
   languageName: node
   linkType: hard
 
@@ -24963,7 +24962,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.7, node-fetch@npm:^2.6.9, node-fetch@npm:^2.7.0":
+"node-fetch@npm:^2.6.7, node-fetch@npm:^2.6.9, node-fetch@npm:^2.7.0":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
   dependencies:
@@ -31537,6 +31536,13 @@ __metadata:
   version: 7.16.0
   resolution: "undici@npm:7.16.0"
   checksum: dca60e323e44c2d408e0d1f5eb540632ad4e75631d5b6fcd7791876bab54e0e263a66e5606eaa717d436b2db5988c2f4af912dfa221ce53e3fc7fcb7d224c9cd
+  languageName: node
+  linkType: hard
+
+"undici@npm:^7.2.0":
+  version: 7.22.0
+  resolution: "undici@npm:7.22.0"
+  checksum: 3eaad0283f946ce12d4aa70da49d23870fcab9a3de5ae0b2855710b58fece570b1675913268dfa8b97589385ff4fb706c004a0614c3b193b617475e7d0a34e3a
   languageName: node
   linkType: hard
 

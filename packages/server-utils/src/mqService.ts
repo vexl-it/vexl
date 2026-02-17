@@ -23,9 +23,7 @@ type EnqueueTask<A, R> = (
   options?: JobsOptions
 ) => Effect.Effect<Job, MqServiceError | ParseResult.ParseError, R>
 
-type ConsumeJob<A, E, R> = (
-  payload: A
-) => Effect.Effect<void, MqServiceError | E, R>
+type ConsumeJob<A, R> = (payload: A) => Effect.Effect<void, never, R>
 
 export const makeMqService = <A, I, R, TAG extends string>(
   queueName: TAG,
@@ -37,9 +35,9 @@ export const makeMqService = <A, I, R, TAG extends string>(
     MqServiceError,
     RedisConnectionService
   >
-  consumerLayer: <E, R2>(
-    consume: ConsumeJob<A, E, R2>
-  ) => Layer.Layer<never, MqServiceError | E, R2 | R | RedisConnectionService>
+  consumerLayer: <R2>(
+    consume: ConsumeJob<A, R2>
+  ) => Layer.Layer<never, MqServiceError, R2 | R | RedisConnectionService>
 } => {
   const tag = `mqService/${queueName}` as const
 
@@ -144,9 +142,9 @@ export const makeMqService = <A, I, R, TAG extends string>(
     Stream.filterMap(identity)
   )
 
-  const consumerLayer = <E, R2>(
-    consume: ConsumeJob<A, E, R2>
-  ): Layer.Layer<never, MqServiceError | E, R | R2 | RedisConnectionService> =>
+  const consumerLayer = <R2>(
+    consume: ConsumeJob<A, R2>
+  ): Layer.Layer<never, MqServiceError, R | R2 | RedisConnectionService> =>
     Layer.effectDiscard(Stream.runForEach(jobsStream, consume))
 
   return {

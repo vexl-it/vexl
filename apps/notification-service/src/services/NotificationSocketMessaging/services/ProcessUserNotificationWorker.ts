@@ -143,5 +143,5 @@ export const ProcessUserNotificationsWorker =
           )
         )
       )
-    })
+    }).pipe(Effect.ignore)
   )

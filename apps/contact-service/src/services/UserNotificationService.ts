@@ -139,6 +139,11 @@ export class UserNotificationService extends Context.Tag(
 
             yield* _(
               allTokens,
+              Array.filter(
+                (entry) =>
+                  Option.isSome(entry.vexlNotificationToken) ||
+                  Option.isSome(entry.expoToken)
+              ),
               Array.map((entry) =>
                 pipe(
                   enqueueUserNotification(
@@ -200,6 +205,11 @@ export class UserNotificationService extends Context.Tag(
 
             const notificationsRecords = pipe(
               members,
+              Array.filter(
+                (one) =>
+                  one.notificationToken !== null ||
+                  one.vexlNotificationToken !== null
+              ),
               Array.filter((one) => one.publicKey !== triggeringUser),
               Array.map(
                 (entry) =>
@@ -248,6 +258,19 @@ export class UserNotificationService extends Context.Tag(
               )
             )
 
+            if (
+              member.notificationToken === null &&
+              member.vexlNotificationToken === null
+            ) {
+              yield* _(
+                Effect.logWarning(
+                  'No notification token found for user admitted to club, skipping notification',
+                  {publicKey}
+                )
+              )
+              return
+            }
+
             yield* _(
               enqueueUserNotification(
                 new UserAdmittedToClubNotificationMqEntry({
@@ -278,6 +301,13 @@ export class UserNotificationService extends Context.Tag(
             // todo #2142 - remove after moving to vexlNotificationToken
             const inactivityNotifications = yield* _(
               userDbService.findFirebaseTokensOfInactiveUsers(notifyBeforeDate),
+              Effect.map(
+                Array.filter(
+                  (token) =>
+                    Option.isSome(token.expoToken) ||
+                    Option.isSome(token.vexlNotificationToken)
+                )
+              ),
               Effect.map(
                 flow(
                   Array.map(
@@ -364,6 +394,13 @@ export class UserNotificationService extends Context.Tag(
             const flaggedClubNotifications = yield* _(
               clubMemberDb.queryAllClubMembers({id}),
               Effect.map(
+                Array.filter(
+                  (one) =>
+                    one.notificationToken !== null ||
+                    one.vexlNotificationToken !== null
+                )
+              ),
+              Effect.map(
                 flow(
                   Array.map(
                     (entry) =>
@@ -405,6 +442,11 @@ export class UserNotificationService extends Context.Tag(
               clubMemberDb.queryAllClubMembers({id}),
               Effect.map(
                 flow(
+                  Array.filter(
+                    (one) =>
+                      one.vexlNotificationToken !== null ||
+                      one.notificationToken !== null
+                  ),
                   Array.map(
                     (entry) =>
                       new ClubExpiredNotificationMqEntry({
@@ -444,6 +486,15 @@ export class UserNotificationService extends Context.Tag(
           notificationToken: ExpoNotificationToken | null
         ) =>
           Effect.gen(function* (_) {
+            if (token === null && notificationToken === null) {
+              yield* _(
+                Effect.logWarning(
+                  'No notification token found for user login on different device, skipping notification'
+                )
+              )
+              return
+            }
+
             yield* _(
               enqueueUserNotification(
                 new UserLoginOnDifferentDeviceNotificationMqEntry({
@@ -484,6 +535,11 @@ export class UserNotificationService extends Context.Tag(
 
             yield* _(
               tokensToNofify,
+              Array.filter(
+                (entry) =>
+                  Option.isSome(entry.expoToken) ||
+                  Option.isSome(entry.vexlNotificationToken)
+              ),
               Array.map((entry) =>
                 pipe(
                   enqueueUserNotification(

@@ -9,7 +9,7 @@ export type ExpoNotificationToken = typeof ExpoNotificationToken.Type
 export const isExpoNotificationToken = (
   token: unknown
 ): token is ExpoNotificationToken =>
-  String.isString(token) && String.startsWith(token)('ExponentPushToken')
+  String.isString(token) && String.startsWith('ExponentPushToken')(token)
 
 export const ExpoOrFcmNotificationToken = Schema.Union(
   ExpoNotificationToken,

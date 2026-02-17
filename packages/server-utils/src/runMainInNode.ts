@@ -143,13 +143,13 @@ export const runMainInNode = <A, E>(
       Effect.catchAll((error) =>
         Effect.zipRight(
           Effect.sync(() => {
-            console.log('App fatal error:', error)
+            console.error('App fatal error:', error)
           }),
           Effect.logFatal('Error', error)
         )
       ),
       Effect.catchAllDefect((error) => {
-        console.error(error)
+        console.error('Fatal defect:', error)
         return Effect.logError('Defect', error)
       }),
       Effect.provide(memoryDebugLayer),

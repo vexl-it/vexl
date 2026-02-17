@@ -27,8 +27,14 @@ export const ProcessUserNotificationsWorker =
       const vexlNotificationTokenOrExpoToken =
         entry.token ?? entry.notificationToken
 
-      if (!vexlNotificationTokenOrExpoToken)
-        return yield* _(new SendingNotificationError({tokenInvalid: true}))
+      if (!vexlNotificationTokenOrExpoToken) {
+        yield* Effect.logWarning(
+          'No notification token found in the entry, skipping processing',
+          entry
+        )
+
+        return
+      }
 
       const secret = yield* _(
         tokenService.normalizeToVexlNotificationTokenSecret(
@@ -138,7 +144,7 @@ export const ProcessUserNotificationsWorker =
     }).pipe(
       Effect.catchAll((e) =>
         Effect.zipRight(
-          Effect.logError('Failed to process user notification', entry),
+          Effect.logError('Failed to process user notification', e, entry),
           new UnexpectedServerError({
             message: 'Failed to issue push notification',
             cause: e,

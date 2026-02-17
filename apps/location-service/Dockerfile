@@ -26,4 +26,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 WORKDIR /app/apps/location-service
 
-CMD ["node", "dist/index.cjs"]
+CMD ["node", "--enable-source-maps", "dist/index.cjs"]

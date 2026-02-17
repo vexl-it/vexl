@@ -145,7 +145,13 @@ export const makeMqService = <A, I, R, TAG extends string>(
   const consumerLayer = <R2>(
     consume: ConsumeJob<A, R2>
   ): Layer.Layer<never, MqServiceError, R | R2 | RedisConnectionService> =>
-    Layer.effectDiscard(Stream.runForEach(jobsStream, consume))
+    Layer.effectDiscard(
+      Stream.runForEach(jobsStream, (data) =>
+        Effect.withSpan(consume(data), `Consumer/${queueName}`, {
+          attributes: {data},
+        })
+      )
+    )
 
   return {
     EnqueueTask: EnqueueTaskTag,

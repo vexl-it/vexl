@@ -139,7 +139,6 @@ export const runMainInNode = <A, E>(
       ? effectOrLayer
       : Layer.launch(effectOrLayer)
     ).pipe(
-      Effect.withSpan('AppRoot'),
       Effect.catchAll((error) =>
         Effect.zipRight(
           Effect.sync(() => {

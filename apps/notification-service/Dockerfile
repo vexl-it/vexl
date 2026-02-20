@@ -25,4 +25,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 WORKDIR /app/apps/notification-service
 
-CMD ["node", "--enable-source-maps", "dist/index.cjs"]
+CMD ["node", "dist/index.cjs"]

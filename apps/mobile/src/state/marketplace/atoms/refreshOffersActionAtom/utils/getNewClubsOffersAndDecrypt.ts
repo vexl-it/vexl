@@ -1,4 +1,3 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type Base64String} from '@vexl-next/domain/src/utility/Base64String.brand'
@@ -7,12 +6,12 @@ import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, flow, Record, Schema} from 'effect'
 import {atom} from 'jotai'
+import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {clubOffersNextPageParamAtom} from '../../offersState'
 
 const OFFERS_PAGE_LIMIT = 30
-
 export type ApiErrorFetchingClubsOffers = Effect.Effect.Error<
-  ReturnType<OfferApi['getClubOffersForMeModifiedOrCreatedAfter']>
+  ReturnType<OfferApi['getClubOffersForMeModifiedOrCreatedAfterPaginated']>
 >
 
 export class NotOfferForExpectedClubError extends Schema.TaggedError<NotOfferForExpectedClubError>(
@@ -50,7 +49,7 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
       lastPrivatePartIdBase64,
     }: {
       offersApi: OfferApi
-      keyPair: PrivateKeyHolder
+      keyPair: ClubKeys
       clubUuid: ClubUuid
       lastPrivatePartIdBase64?: Base64String
     }
@@ -62,7 +61,8 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
             offersApi.getClubOffersForMeModifiedOrCreatedAfterPaginated({
               nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
               limit: OFFERS_PAGE_LIMIT,
-              keyPair,
+              keyPair: keyPair.oldKeyPair,
+              keyPairV2: keyPair.keyPair,
             }),
           storeNextPageToken: (nextPageToken) => {
             if (!nextPageToken) return
@@ -79,7 +79,7 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
         allClubOffersForMe,
         Array.map(
           flow(
-            decryptOffer(keyPair),
+            decryptOffer(keyPair.oldKeyPair, keyPair.keyPair),
             Effect.filterOrFail(
               validateOfferIsForClub(clubUuid),
               (offerInfo) =>

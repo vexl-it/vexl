@@ -2,6 +2,7 @@ import {type HttpClient} from '@effect/platform/index'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
+  type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type CryptoError,
@@ -9,7 +10,7 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'
 
 class ErrorGeneratingChallenge extends Schema.TaggedError<ErrorGeneratingChallenge>(
@@ -24,6 +25,7 @@ export const generateAndSignChallenge = (
   {
     signedChallenge: SignedChallenge
     publicKey: PublicKeyPemBase64
+    publicKeyV2: Option.Option<PublicKeyV2>
   },
   CryptoError | ErrorGeneratingChallenge,
   HttpClient.HttpClient | TestRequestHeaders
@@ -32,7 +34,10 @@ export const generateAndSignChallenge = (
     const app = yield* _(NodeTestingApp)
     const challenge = yield* _(
       app.Challenges.createChallenge({
-        payload: {publicKey: key.publicKeyPemBase64},
+        payload: {
+          publicKey: key.publicKeyPemBase64,
+          publicKeyV2: Option.none(),
+        },
       }),
       Effect.mapError((cause) => new ErrorGeneratingChallenge({cause}))
     )
@@ -41,6 +46,11 @@ export const generateAndSignChallenge = (
     )
     return {
       publicKey: key.publicKeyPemBase64,
-      signedChallenge: {challenge: challenge.challenge, signature},
+      publicKeyV2: Option.none(),
+      signedChallenge: {
+        challenge: challenge.challenge,
+        signature,
+        signatureV2: Option.none(),
+      },
     }
   })

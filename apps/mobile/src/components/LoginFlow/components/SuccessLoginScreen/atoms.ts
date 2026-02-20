@@ -1,5 +1,6 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {
   EcdsaSignature,
@@ -11,12 +12,13 @@ import {Effect, Match, Option, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../../api'
-import {Session} from '../../../../brands/Session.brand'
+import {type Session, type SessionV2} from '../../../../brands/Session.brand'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
 import {createVexlSecretActionAtom} from '../../../../state/notifications/actions/createVexlSecretActionAtom'
 import {generateVexlTokenActionAtom} from '../../../../state/notifications/actions/generateVexlTokenActionAtom'
 import {vexlNotificationTokenAtom} from '../../../../state/notifications/vexlNotificationTokenAtom'
 import {sessionAtom} from '../../../../state/session'
+import {upgradeSession} from '../../../../state/session/upgradeSession'
 import {
   appSource,
   deviceModel,
@@ -49,13 +51,13 @@ const handleUserCreationActionAtom = atom(
     {
       session,
     }: {
-      session: Session
+      session: SessionV2
     }
   ) => {
-    const startedAt = Date.now()
+    return Effect.gen(function* () {
+      const startedAt = Date.now()
 
-    return contact
-      .api({
+      const contactApi = yield* contact.api({
         platform,
         clientVersion: versionCode,
         clientSemver: version,
@@ -65,34 +67,31 @@ const handleUserCreationActionAtom = atom(
         language: get(translationAtom).t('localeName'),
         isDeveloper: get(isDeveloperAtom),
       })
-      .pipe(
-        Effect.flatMap((contactApi) =>
-          contactApi.createUser({
-            firebaseToken: null,
-            expoToken: null,
-            vexlNotificationToken: Option.fromNullable(
-              session.sessionNotificationToken
-            ),
-          })
+
+      yield* contactApi.createUser({
+        firebaseToken: null,
+        expoToken: null,
+        publicKeyV2: Option.none<PublicKeyV2>(),
+        vexlNotificationToken: Option.fromNullable(
+          session.sessionNotificationToken
         ),
-        Effect.tapError((e) => {
-          reportError('error', new Error('Error creating user at contact MS'), {
-            e,
-          })
+      })
 
-          resetNavigationToIntroScreen()
-
-          return Effect.fail(e)
-        }),
-        Effect.tap(() => {
-          const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
-          if (leftToWait > 0)
-            setTimeout(() => {
-              set(sessionAtom, O.some(session))
-            }, leftToWait)
-          else set(sessionAtom, O.some(session))
+      const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
+      if (leftToWait > 0)
+        setTimeout(() => {
+          set(sessionAtom, O.some(session))
+        }, leftToWait)
+      else set(sessionAtom, O.some(session))
+    }).pipe(
+      Effect.tapError((e) => {
+        reportError('error', new Error('Error creating user at contact MS'), {
+          e,
         })
-      )
+        resetNavigationToIntroScreen()
+        return Effect.succeed(undefined)
+      })
+    )
   }
 )
 
@@ -199,21 +198,20 @@ export const finishLoginActionAtom = atom(
         set(handleSecretTokenAndSessionTokenCreationActionAtom)
       )
 
-      const session = yield* _(
-        Schema.decode(Session)({
-          version: 1,
-          sessionCredentials: {
-            publicKey: privateKey.publicKeyPemBase64,
-            hash: verifiedChallengeResponse.hash,
-            signature: verifiedChallengeResponse.signature,
-          },
-          phoneNumber,
-          privateKey,
-          sessionNotificationToken: Option.getOrUndefined(
-            sessionNotificationToken
-          ),
-        })
-      )
+      const session = yield* upgradeSession({
+        version: 1,
+        sessionCredentials: {
+          publicKey: privateKey.publicKeyPemBase64,
+          hash: verifiedChallengeResponse.hash,
+          signature: verifiedChallengeResponse.signature,
+        },
+        keyPairV2: undefined,
+        phoneNumber,
+        privateKey,
+        sessionNotificationToken: Option.getOrUndefined(
+          sessionNotificationToken
+        ),
+      })
 
       const contactApi = yield* _(
         contact.api({
@@ -254,7 +252,10 @@ export const finishLoginActionAtom = atom(
               set(handleUserCreationActionAtom, {
                 session,
               }),
-            onFailure: () => set(deleteUserAndResetFlowActionAtom, {session}),
+            onFailure: () =>
+              set(deleteUserAndResetFlowActionAtom, {
+                session,
+              }),
           })
         )
       } else {

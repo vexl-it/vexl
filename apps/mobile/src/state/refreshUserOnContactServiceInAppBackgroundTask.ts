@@ -1,4 +1,3 @@
-import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Effect, Match, Option} from 'effect/index'
 import {apiAtom} from '../api'
 import {registerInAppLoadingTask} from '../utils/inAppLoadingTasks'
@@ -16,12 +15,6 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
     },
     task: (store) =>
       Effect.gen(function* (_) {
-        const countryPrefix = yield* _(
-          store.get(sessionDataOrDummyAtom).phoneNumber,
-          countryPrefixFromNumber,
-          Effect.option
-        )
-
         const session = store.get(sessionDataOrDummyAtom)
 
         const sessionNotificationToken = yield* _(
@@ -59,7 +52,6 @@ export const refreshUserOnContactServiceInAppBackgroundTaskId =
         yield* _(
           store.get(apiAtom).contact.refreshUser({
             offersAlive: true,
-            countryPrefix,
             vexlNotificationToken: sessionNotificationToken,
           }),
           Effect.match({

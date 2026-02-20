@@ -1,7 +1,6 @@
 import {HttpRouter, HttpServerResponse} from '@effect/platform'
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
-import {cleanInvalidChallenges} from '@vexl-next/server-utils/src/services/challenge/internalServer/routes/cleanInvalidChallenges'
 import {Effect} from 'effect'
 import {reportLimitIntervalDaysConfig} from './configs'
 import {OfferDbService} from './db/OfferDbService'
@@ -21,8 +20,7 @@ export const InternalServerLive = makeInternalServer(
 
         return HttpServerResponse.text('ok', {status: 200})
       })
-    ),
-    HttpRouter.post('/clean-invalid-challenges', cleanInvalidChallenges)
+    )
   ),
   {port: internalServerPortConfig}
 )

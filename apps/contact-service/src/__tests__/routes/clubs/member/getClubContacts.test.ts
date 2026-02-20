@@ -5,10 +5,8 @@ import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
-import {
-  InvalidChallengeError,
-  type SignedChallenge,
-} from '@vexl-next/rest-api/src/challenges/contracts'
+import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
@@ -25,6 +23,9 @@ const CLUB_VALID_UNTIL = new Date(Date.now() + 1000 * 60 * 60)
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 let user1: MockedUser
 let user2: MockedUser
+const commonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
 
 describe('Get club contacts', () => {
   beforeEach(async () => {
@@ -101,6 +102,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -130,6 +132,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -140,9 +143,11 @@ describe('Get club contacts', () => {
 
         const clubMembers = yield* _(
           app.ClubsMember.getClubContacts({
+            headers: commonHeaders,
             payload: {
               clubUuid: forClubUuid,
               publicKey: secondChallengeForUser1.publicKey,
+              publicKeyV2: secondChallengeForUser1.publicKeyV2,
               signedChallenge: secondChallengeForUser1.signedChallenge,
             },
           })
@@ -150,6 +155,7 @@ describe('Get club contacts', () => {
 
         expect(clubMembers.items).toHaveLength(2)
         expect(clubMembers.clubUuid).toEqual(forClubUuid)
+        // Response items are compatible keys (v1 and v2).
         expect(clubMembers.items).toContain(
           user1.mainKeyPair.publicKeyPemBase64
         )
@@ -213,6 +219,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -223,13 +230,12 @@ describe('Get club contacts', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.getClubContacts({
+            headers: commonHeaders,
             payload: {
               clubUuid: forClubUuid,
-              publicKey: secondChallengeForUser.publicKey,
-              signedChallenge: {
-                ...secondChallengeForUser.signedChallenge,
-                challenge: 'badChallenge' as SignedChallenge['challenge'],
-              },
+              publicKey: challengeForUser.publicKey,
+              publicKeyV2: secondChallengeForUser.publicKeyV2,
+              signedChallenge: secondChallengeForUser.signedChallenge,
             },
           }),
           Effect.either
@@ -295,6 +301,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -347,6 +354,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -357,9 +365,11 @@ describe('Get club contacts', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.getClubContacts({
+            headers: commonHeaders,
             payload: {
               clubUuid: forClubUuid1,
               publicKey: secondChallengeForUser2.publicKey,
+              publicKeyV2: secondChallengeForUser2.publicKeyV2,
               signedChallenge: secondChallengeForUser2.signedChallenge,
             },
           }),
@@ -425,6 +435,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -435,9 +446,11 @@ describe('Get club contacts', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.getClubContacts({
+            headers: commonHeaders,
             payload: {
               clubUuid: notExistingClubUuid,
               publicKey: challengeForUser2.publicKey,
+              publicKeyV2: challengeForUser2.publicKeyV2,
               signedChallenge: challengeForUser2.signedChallenge,
             },
           }),
@@ -503,6 +516,7 @@ describe('Get club contacts', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -513,9 +527,11 @@ describe('Get club contacts', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.getClubContacts({
+            headers: commonHeaders,
             payload: {
               clubUuid: forClubUuid,
               publicKey: challengeForUser2.publicKey,
+              publicKeyV2: challengeForUser2.publicKeyV2,
               signedChallenge: challengeForUser2.signedChallenge,
             },
           }),

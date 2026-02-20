@@ -16,7 +16,10 @@ export const getRemovedClubOffers = HttpApiBuilder.handler(
       const offerDbService = yield* _(OfferDbService)
 
       const existingIds = yield* _(
-        offerDbService.queryOffersIds(req.payload.publicKey)
+        offerDbService.queryOffersIds({
+          userPublicKey: req.payload.publicKey,
+          userPublicKeyV2: req.payload.publicKeyV2,
+        })
       )
 
       const nonExistingIds = Array.filter(

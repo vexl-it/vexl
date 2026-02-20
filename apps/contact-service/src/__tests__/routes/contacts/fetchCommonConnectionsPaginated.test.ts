@@ -1,11 +1,19 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {generateKeyPair} from '@vexl-next/cryptography/src/operations/cryptobox'
 import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
+import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
+import {
+  UserDataShape,
+  VexlAuthHeader,
+} from '@vexl-next/rest-api/src/VexlAuthHeader'
+import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, Order, pipe} from 'effect'
+import {Array, Effect, Option, Order, pipe, Schema} from 'effect'
 import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
+  commonHeaders,
   createAndImportUsersFromNetwork,
   generateKeysAndHasheForNumber,
   makeTestCommonAndSecurityHeaders,
@@ -13,10 +21,49 @@ import {
 } from './utils'
 
 let networkOne: [DummyUser, ...DummyUser[]]
+type PublicKeyV2KeyPair = Awaited<ReturnType<typeof generateKeyPair>>
+const networkOnePublicKeyV2ByPublicKey = new Map<string, PublicKeyV2KeyPair>()
+
+const getPublicKeyV2ForUser = (user: DummyUser): PublicKeyV2KeyPair => {
+  const publicKeyV2 = networkOnePublicKeyV2ByPublicKey.get(
+    user.keys.publicKeyPemBase64
+  )
+
+  if (!publicKeyV2) {
+    throw new Error(
+      `Missing publicKeyV2 for user ${user.keys.publicKeyPemBase64}`
+    )
+  }
+
+  return publicKeyV2
+}
+
+const createVexlAuthHeader = ({
+  hash,
+  publicKeyV2,
+}: {
+  hash: DummyUser['authHeaders']['hash']
+  publicKeyV2: PublicKeyV2KeyPair['publicKey']
+}): Effect.Effect<typeof VexlAuthHeader.Type, unknown, ServerCrypto> =>
+  Effect.gen(function* (_) {
+    const crypto = yield* _(ServerCrypto)
+    const encodedData = yield* _(
+      Schema.encode(UserDataShape)({
+        hash,
+        pk: publicKeyV2,
+      })
+    )
+
+    const signature = yield* _(crypto.cryptoBoxSign(encodedData))
+    return yield* _(
+      Schema.decode(VexlAuthHeader)(`VexlAuth ${encodedData}.${signature}`)
+    )
+  })
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
     Effect.gen(function* (_) {
+      const app = yield* _(NodeTestingApp)
       networkOne = yield* _(
         Effect.all([
           generateKeysAndHasheForNumber('+420733333001'),
@@ -30,6 +77,47 @@ beforeAll(async () => {
       yield* _(
         Effect.forEach(networkOne, (oneUser) =>
           createAndImportUsersFromNetwork(oneUser, networkOne)
+        )
+      )
+
+      yield* _(
+        Effect.forEach(networkOne, (oneUser) =>
+          Effect.gen(function* (_) {
+            const publicKeyV2 = yield* _(
+              Effect.promise(async () => await generateKeyPair())
+            )
+            networkOnePublicKeyV2ByPublicKey.set(
+              oneUser.keys.publicKeyPemBase64,
+              publicKeyV2
+            )
+
+            yield* _(setAuthHeaders(oneUser.authHeaders))
+            const authorization = yield* _(
+              createVexlAuthHeader({
+                hash: oneUser.authHeaders.hash,
+                publicKeyV2: publicKeyV2.publicKey,
+              })
+            )
+            const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+              () => ({
+                publicKey: oneUser.authHeaders['public-key'],
+                hash: oneUser.authHeaders.hash,
+                signature: oneUser.authHeaders.signature,
+                vexlAuthHeader: authorization,
+              }),
+              commonHeaders
+            )
+
+            yield* _(
+              app.User.refreshUser({
+                payload: {
+                  offersAlive: true,
+                  vexlNotificationToken: Option.none(),
+                },
+                headers: commonAndSecurityHeaders,
+              })
+            )
+          })
         )
       )
     })
@@ -136,6 +224,139 @@ describe('Common connections paginated', () => {
             connections.hasNext
               ? String
               : connections.nextPageToken?.constructor
+          )
+        )
+      })
+    )
+  })
+
+  it('Fetches common connections for array of friends by publicKeyV2', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const me = networkOne[0]
+        const userContacts = Array.filter(
+          networkOne,
+          (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
+        const connections = yield* _(
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload: {
+              publicKeys: Array.map(
+                userContacts,
+                (one) => getPublicKeyV2ForUser(one).publicKey
+              ),
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const resultKeys = pipe(
+          connections.items,
+          Array.map((c) => c.publicKey),
+          Array.sort(Order.string),
+          Array.join(', ')
+        )
+
+        expect(resultKeys).toBe(
+          pipe(
+            userContacts,
+            Array.map((o) => o.keys.publicKeyPemBase64),
+            Array.sort(Order.string),
+            Array.join(', ')
+          )
+        )
+
+        for (const {common, publicKey} of connections.items) {
+          const otherFriendsHashes = pipe(
+            userContacts,
+            Array.filter((o) => o.keys.publicKeyPemBase64 !== publicKey),
+            Array.map((o) => o.serverHashedNumberForClient),
+            Array.sort(Order.string),
+            Array.join(',')
+          )
+
+          expect(
+            pipe(common.hashes, Array.sort(Order.string), Array.join(','))
+          ).toEqual(otherFriendsHashes)
+        }
+      })
+    )
+  })
+
+  it('Ignores requester publicKeyV2 in payload when caller provides VexlAuth header', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const me = networkOne[0]
+        const mePublicKeyV2 = getPublicKeyV2ForUser(me)
+        const userContacts = Array.filter(
+          networkOne,
+          (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        const authorization = yield* _(
+          createVexlAuthHeader({
+            hash: me.authHeaders.hash,
+            publicKeyV2: mePublicKeyV2.publicKey,
+          })
+        )
+
+        const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: me.authHeaders['public-key'],
+            hash: me.authHeaders.hash,
+            signature: me.authHeaders.signature,
+            vexlAuthHeader: authorization,
+          }),
+          commonHeaders
+        )
+
+        const connections = yield* _(
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload: {
+              publicKeys: [
+                ...Array.map(
+                  userContacts,
+                  (one) => getPublicKeyV2ForUser(one).publicKey
+                ),
+                mePublicKeyV2.publicKey,
+              ],
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const meIsInResults = pipe(
+          connections.items,
+          Array.filter((item) => item.publicKey === me.keys.publicKeyPemBase64),
+          Array.isNonEmptyArray
+        )
+
+        expect(meIsInResults).toBe(false)
+        expect(
+          pipe(
+            connections.items,
+            Array.map((item) => item.publicKey),
+            Array.sort(Order.string),
+            Array.join(', ')
+          )
+        ).toBe(
+          pipe(
+            userContacts,
+            Array.map((o) => o.keys.publicKeyPemBase64),
+            Array.sort(Order.string),
+            Array.join(', ')
           )
         )
       })

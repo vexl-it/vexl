@@ -2,6 +2,10 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
@@ -14,14 +18,19 @@ import {Array, Effect, flow, HashMap, pipe, Record} from 'effect'
 export const FETCH_CONNECTIONS_PAGE_SIZE = 500
 
 export interface ConnectionsInfoForOffer {
-  firstDegreeConnections: PublicKeyPemBase64[]
-  secondDegreeConnections: PublicKeyPemBase64[]
+  firstDegreeConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
+  secondDegreeConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
   commonFriends: CommonConnectionsForUsers
-  clubsConnections: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+  clubsConnections: Record<
+    ClubUuid,
+    ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+  >
 }
 
 export type ApiErrorFetchingContactsForOffer = Effect.Effect.Error<
-  ReturnType<ContactApi['fetchMyContacts' | 'fetchCommonConnectionsPaginated']>
+  ReturnType<
+    ContactApi['fetchMyContactsPaginated' | 'fetchCommonConnectionsPaginated']
+  >
 >
 
 export default function fetchContactsForOffer({
@@ -36,7 +45,10 @@ export default function fetchContactsForOffer({
     ServerToClientHashedNumber,
     HashedPhoneNumber
   >
-  intendedClubs: Record<ClubUuid, PrivateKeyHolder>
+  intendedClubs: Record<
+    ClubUuid,
+    {keyPair: KeyPairV2; oldKeyPair: PrivateKeyHolder}
+  >
 }): Effect.Effect<ConnectionsInfoForOffer, ApiErrorFetchingContactsForOffer> {
   return Effect.gen(function* (_) {
     const firstDegreeConnections = yield* _(
@@ -68,11 +80,9 @@ export default function fetchContactsForOffer({
       fetchAllPaginatedData({
         fetchEffectToRun: (nextPageToken) =>
           contactApi.fetchCommonConnectionsPaginated({
-            publicKeys: Array.fromIterable(
-              new Set<PublicKeyPemBase64>([
-                ...firstDegreeConnections,
-                ...secondDegreeConnections,
-              ])
+            publicKeys: pipe(
+              [...firstDegreeConnections, ...secondDegreeConnections],
+              Array.dedupe
             ),
             nextPageToken,
             limit: FETCH_CONNECTIONS_PAGE_SIZE,
@@ -102,7 +112,8 @@ export default function fetchContactsForOffer({
           contactApi
             .getClubContacts({
               clubUuid,
-              keyPair,
+              keyPair: keyPair.oldKeyPair,
+              keyPairV2: keyPair.keyPair,
             })
             .pipe(Effect.option)
         ),

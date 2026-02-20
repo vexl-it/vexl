@@ -21,7 +21,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect, pipe, type ConfigError} from 'effect'
+import {Array, Effect, Option, pipe, type ConfigError} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {type WhitelistDbService} from '../../db/WhiteListDbService'
@@ -99,6 +99,7 @@ export const sendMessages = HttpApiBuilder.handler(
           yield* _(
             validateChallengeInBody({
               publicKey: oneMessage.senderPublicKey,
+              publicKeyV2: Option.none(),
               ...oneMessage,
             })
           )

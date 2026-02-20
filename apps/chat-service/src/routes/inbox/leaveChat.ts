@@ -4,7 +4,7 @@ import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specif
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
@@ -23,6 +23,7 @@ export const leaveChat = HttpApiBuilder.handler(
         validateChallengeInBody({
           signedChallenge: req.payload.signedChallenge,
           publicKey: req.payload.senderPublicKey,
+          publicKeyV2: Option.none(),
         })
       )
 

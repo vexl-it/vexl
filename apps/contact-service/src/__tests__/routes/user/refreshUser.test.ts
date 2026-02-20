@@ -4,7 +4,6 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 
 import {SqlClient} from '@effect/sql'
-import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
@@ -52,6 +51,7 @@ beforeAll(async () => {
             vexlNotificationToken: Option.some(
               Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
             ),
+            publicKeyV2: Option.none(),
           },
           headers: commonAndSecurityHeaders,
         })
@@ -101,7 +101,6 @@ describe('Refresh user', () => {
           app.User.refreshUser({
             payload: {
               offersAlive: true,
-              countryPrefix: Option.some(Schema.decodeSync(CountryPrefix)(420)),
               vexlNotificationToken: Option.none(),
             },
             headers: commonAndSecurityHeaders,
@@ -118,7 +117,6 @@ describe('Refresh user', () => {
         `)
         expect(userInDb[0]).toHaveProperty('clientVersion', 2)
         expect(userInDb[0]).toHaveProperty('refreshedAt', expect.any(Date))
-        expect(userInDb[0]).toHaveProperty('countryPrefix', 420)
         expect(userInDb[0]).toHaveProperty('appSource', 'Some test123')
       })
     )
@@ -148,7 +146,6 @@ describe('Refresh user', () => {
           app.User.refreshUser({
             payload: {
               offersAlive: true,
-              countryPrefix: Option.none(),
               vexlNotificationToken: Option.some(
                 'vexl_nt_refreshed' as VexlNotificationToken
               ),
@@ -210,7 +207,6 @@ describe('Refresh user', () => {
           app.User.refreshUser({
             payload: {
               offersAlive: true,
-              countryPrefix: Option.none(),
               vexlNotificationToken: Option.none(),
             },
             headers: commonAndSecurityHeaders,
@@ -259,7 +255,6 @@ describe('Refresh user', () => {
           app.User.refreshUser({
             payload: {
               offersAlive: true,
-              countryPrefix: Option.none(),
               vexlNotificationToken: Option.none(),
             },
             headers: commonAndSecurityHeaders,

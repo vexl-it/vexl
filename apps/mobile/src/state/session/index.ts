@@ -1,12 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {captureException} from '@sentry/react-native'
-import {KeyHolder} from '@vexl-next/cryptography'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Schema} from 'effect/index'
+import {Effect} from 'effect/index'
 import * as SecretStorage from 'expo-secure-store'
 import * as O from 'fp-ts/Option'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
 import {
   atom,
   getDefaultStore,
@@ -15,11 +11,14 @@ import {
   type WritableAtom,
 } from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {Session} from '../../brands/Session.brand'
+import {type SessionV2} from '../../brands/Session.brand'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {replaceAll} from '../../utils/replaceAll'
-import {SECRET_TOKEN_KEY, SESSION_KEY} from './sessionKeys'
-import writeSessionToStorage from './utils/writeSessionToStorage'
+import {dummySession} from './dummySesssion'
+import writeSessionToStorage, {
+  SECRET_TOKEN_KEY,
+  SESSION_KEY,
+} from './utils/writeSessionToStorage'
 
 // duplicated code but we can not remove cyclic dependency otherwise
 // --------------
@@ -31,6 +30,10 @@ function removeSensitiveData(string: string): string {
     session.sessionCredentials.publicKey,
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
+    // Strip V2 key material if present
+    ...(session.keyPairV2
+      ? [session.keyPairV2.publicKey, session.keyPairV2.privateKey]
+      : []),
   ]
   return replaceAll(string, toReplace, '[[stripped]]')
 }
@@ -73,32 +76,19 @@ function reportError(error: Error, extra: Record<string, unknown>): void {
 
 // -------------- end of duplicated code
 
-const dummyPrivKey = KeyHolder.generatePrivateKey()
-export const dummySession: Session = Schema.decodeSync(Session)({
-  privateKey: dummyPrivKey,
-  sessionCredentials: {
-    hash: '',
-    publicKey: dummyPrivKey.publicKeyPemBase64,
-    signature: 'dummysign',
-  },
-  phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
-  version: 0,
-})
-
 type SessionAtomValueType =
   | {readonly state: 'initial'}
   | {readonly state: 'loading'}
   | {readonly state: 'loggedOut'}
-  | {readonly state: 'loggedIn'; readonly session: Session}
+  | {readonly state: 'loggedIn'; readonly session: SessionV2}
 
-// ----- atoms -----
 export const sessionHolderAtom = atom({
   state: 'initial',
 } as SessionAtomValueType)
 
 export const sessionAtom: WritableAtom<
   SessionAtomValueType,
-  [nextValue: O.Option<Session>],
+  [nextValue: O.Option<SessionV2>],
   void
 > = atom(
   (get) => get(sessionHolderAtom),
@@ -107,6 +97,7 @@ export const sessionAtom: WritableAtom<
       console.info('🔑 Logging out user and removing session from storage.')
 
       void AsyncStorage.removeItem(SESSION_KEY)
+      // V2 keys are now stored in session, so they are cleared automatically
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
 
       set(sessionHolderAtom, {state: 'loggedOut'})
@@ -117,21 +108,21 @@ export const sessionAtom: WritableAtom<
     // TODO we should show UI indication that we are saving the session and also show error if it fails
 
     set(sessionHolderAtom, {state: 'loggedIn', session: nextValue.value})
-    void pipe(
-      writeSessionToStorage(nextValue.value, {
-        asyncStorageKey: SESSION_KEY,
-        secretStorageKey: SECRET_TOKEN_KEY,
-      }),
-      TE.mapLeft((error) => {
-        reportError(
-          new Error('‼️ Error while writing user data to secure storage.'),
-          {error}
+    Effect.runFork(
+      writeSessionToStorage(nextValue.value).pipe(
+        Effect.catchAll((error) =>
+          Effect.sync(() => {
+            reportError(
+              new Error('‼️ Error while writing user data to secure storage.'),
+              {error}
+            )
+            void AsyncStorage.removeItem(SESSION_KEY)
+            void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
+            set(sessionHolderAtom, {state: 'loggedOut'})
+          })
         )
-        void AsyncStorage.removeItem(SESSION_KEY)
-        void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
-        set(sessionHolderAtom, {state: 'loggedOut'})
-      })
-    )()
+      )
+    )
   }
 )
 
@@ -150,10 +141,10 @@ export const sessionDataOrDummyAtom = atom(
     if (session.state === 'loggedIn') return session.session
     return dummySession
   },
-  (get, set, action: SetStateAction<Session>) => {
+  (get, set, action: SetStateAction<SessionV2>) => {
     const currentSession = get(sessionAtom)
     if (currentSession.state !== 'loggedIn') return
-    const newValue: Session = getValueFromSetStateActionOfAtom(action)(
+    const newValue: SessionV2 = getValueFromSetStateActionOfAtom(action)(
       () => currentSession.session
     )
 
@@ -167,7 +158,7 @@ export const sessionNotificationTokenAtom = focusAtom(
 )
 
 // --------- hooks ---------
-export function useSessionAssumeLoggedIn(): Session {
+export function useSessionAssumeLoggedIn(): SessionV2 {
   const value = useAtomValue(sessionAtom)
   if (value.state === 'loggedIn') {
     return value.session

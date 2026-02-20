@@ -9,6 +9,7 @@ import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/chal
 import {DateTime, Effect, Option} from 'effect'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
 
 export const getClubInfo = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -22,13 +23,8 @@ export const getClubInfo = HttpApiBuilder.handler(
       const membersDb = yield* _(ClubMembersDbService)
 
       const member = yield* _(
-        membersDb.findClubMemberByPublicKey({
-          publicKey: req.payload.publicKey,
-        }),
-        Effect.flatten,
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new NotFoundError({message: 'Member not found'})
+        findClubMemberByPublicKeyV1OrV2(
+          Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
         )
       )
 

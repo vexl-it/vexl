@@ -9,6 +9,7 @@ import {
   generateAdminId,
   newOfferId,
 } from '@vexl-next/domain/src/general/offers'
+import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   DuplicatedPublicKeyError,
   MissingOwnerPrivatePartError,
@@ -20,6 +21,7 @@ import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectError
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
+import {makeTestCommonAndSecurityHeadersWithPublicKeyV2} from '../utils/makeTestCommonAndSecurityHeadersWithPublicKeyV2'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
@@ -41,17 +43,17 @@ beforeAll(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: user1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer1payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.publicKeyPemBase64,
           },
 
           {
             payloadPrivate:
-              'offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
+              '0offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
             userPublicKey: me.publicKeyPemBase64,
           },
         ],
@@ -160,13 +162,13 @@ describe('Update offer', () => {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: me.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2ForMe'),
+                  )('0newPayloadPrivate2ForMe'),
                 },
               ],
             },
@@ -200,7 +202,7 @@ describe('Update offer', () => {
 
         expect(updatedOfferPrivatePayload.at(0)).toHaveProperty(
           'payloadPrivate',
-          'newPayloadPrivate2'
+          '0newPayloadPrivate2'
         )
       })
     )
@@ -234,7 +236,7 @@ describe('Update offer', () => {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
               ],
             },
@@ -276,19 +278,19 @@ describe('Update offer', () => {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: me.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
               ],
             },
@@ -330,13 +332,13 @@ describe('Update offer', () => {
                   userPublicKey: user1.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
                 {
                   userPublicKey: me.publicKeyPemBase64,
                   payloadPrivate: Schema.decodeUnknownSync(
                     PrivatePayloadEncrypted
-                  )('newPayloadPrivate2'),
+                  )('0newPayloadPrivate2'),
                 },
               ],
             },
@@ -404,6 +406,63 @@ describe('Update offer', () => {
         `)
 
         expect(result._tag).toBe('Right')
+      })
+    )
+  })
+
+  it('Updates offer when visibility is through public key v2', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+
+        yield* _(sql`
+          UPDATE offer_private
+          SET
+            user_public_key = ${publicKeyV2.publicKey}
+          WHERE
+            id IN (
+              SELECT
+                offer_private.id
+              FROM
+                offer_public
+                LEFT JOIN offer_private ON offer_public.id = offer_private.offer_id
+              WHERE
+                offer_public.offer_id = ${offer1.offerId}
+                AND offer_private.user_public_key = ${me.publicKeyPemBase64}
+            );
+        `)
+
+        const authHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+            publicKey: me.publicKeyPemBase64,
+          })
+        )
+        yield* _(setAuthHeaders(authHeaders))
+
+        const commonAndSecurityHeadersWithPublicKeyV2 = yield* _(
+          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+            authHeaders,
+            publicKeyV2: publicKeyV2.publicKey,
+          })
+        )
+
+        const response = yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+                'newPayloadPublicFromV2'
+              ),
+              offerPrivateList: [],
+            },
+            headers: commonAndSecurityHeadersWithPublicKeyV2,
+          })
+        )
+
+        expect(response.publicPayload).toEqual('newPayloadPublicFromV2')
       })
     )
   })

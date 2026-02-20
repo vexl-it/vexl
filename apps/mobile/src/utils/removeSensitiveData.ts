@@ -5,16 +5,18 @@ import {replaceAll} from './replaceAll'
 
 export default function removeSensitiveData(string: string): string {
   const session = getDefaultStore().get(sessionDataOrDummyAtom)
-  const toReplace = [
+  const toReplace: string[] = [
     session.sessionCredentials.signature,
     session.sessionCredentials.hash,
     session.sessionCredentials.publicKey,
     session.phoneNumber,
     session.privateKey.privateKeyPemBase64,
+    session.keyPairV2.privateKey,
   ].filter((one) => Boolean(one.trim()))
 
-  if (session.realUserData?.userName)
-    toReplace.push(session.realUserData.userName)
+  const userName = session.realUserData?.userName
+
+  if (userName) toReplace.push(userName)
 
   return replaceAll(string, toReplace, '[[stripped]]')
 }

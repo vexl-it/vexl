@@ -4,7 +4,7 @@ import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/c
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {WhitelistDbService} from '../../db/WhiteListDbService'
@@ -19,7 +19,12 @@ export const deleteInboxes = HttpApiBuilder.handler(
     Effect.all(
       Array.map(req.payload.dataForRemoval, (inboxToDelete) =>
         Effect.gen(function* (_) {
-          yield* _(validateChallengeInBody(inboxToDelete))
+          yield* _(
+            validateChallengeInBody({
+              ...inboxToDelete,
+              publicKeyV2: Option.none(),
+            })
+          )
           const hashedPublicKey = yield* _(
             hashPublicKey(inboxToDelete.publicKey)
           )

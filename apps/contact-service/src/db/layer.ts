@@ -20,6 +20,9 @@ import add_table_club_reported_record from './migrations/0015_add_table_club_rep
 import remove_unused_tables from './migrations/0016_remove_unused_tables'
 import add_app_source from './migrations/0017_add_app_source'
 import add_vexl_notification_token_to_users_table_and_club_member_table from './migrations/0018_add_vexl_notification_token_to_users_table_and_club_member_table'
+import add_public_key_v2_columns from './migrations/0019_add_public_key_v2_columns'
+import drop_challenge_table from './migrations/0020_drop_challenge_table'
+import add_public_key_v2_indexes from './migrations/0021_add_public_key_v2_indexes'
 
 const migrations = [
   {
@@ -112,6 +115,21 @@ const migrations = [
     name: 'add_vexl_notification_token_to_users_table_and_club_member_table',
     migrationEffect:
       add_vexl_notification_token_to_users_table_and_club_member_table,
+  },
+  {
+    id: 19,
+    name: 'add_public_key_v2_columns',
+    migrationEffect: add_public_key_v2_columns,
+  },
+  {
+    id: 20,
+    name: 'drop_challenge_table',
+    migrationEffect: drop_challenge_table,
+  },
+  {
+    id: 21,
+    name: 'add_public_key_v2_indexes',
+    migrationEffect: add_public_key_v2_indexes,
   },
 ] as const
 

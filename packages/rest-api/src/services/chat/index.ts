@@ -6,6 +6,10 @@ import {Effect, Option} from 'effect'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {
+  type CreateChallengeRequest,
+  type CreateChallengesRequest,
+} from '../../challenges/contracts'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type LoggingFunction} from '../../utils'
@@ -18,8 +22,6 @@ import {
   type BlockInboxRequest,
   type CancelApprovalRequest,
   type CancelApprovalV2Request,
-  type CreateChallengeRequest,
-  type CreateChallengesRequest,
   type CreateInboxRequest,
   type DeleteInboxRequest,
   type DeleteInboxesRequest,

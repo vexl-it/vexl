@@ -5,11 +5,9 @@ import {
   ServerMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
-import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
 import {Schema} from 'effect'
 import {
-  Challenge,
   RequestBaseWithChallenge,
   SignedChallenge,
 } from '../../challenges/contracts'
@@ -256,30 +254,3 @@ export const SendMessagesResponse = Schema.Array(
   })
 )
 export type SendMessagesResponse = typeof SendMessagesResponse.Type
-
-export const CreateChallengeRequest = Schema.Struct({
-  publicKey: PublicKeyPemBase64,
-})
-export type CreateChallengeRequest = typeof CreateChallengeRequest.Type
-
-export const CreateChallengeResponse = Schema.Struct({
-  challenge: Challenge,
-  expiration: UnixMilliseconds,
-})
-export type CreateChallengeResponse = typeof CreateChallengeResponse.Type
-
-export const CreateChallengesRequest = Schema.Struct({
-  publicKeys: Schema.Array(PublicKeyPemBase64),
-})
-export type CreateChallengesRequest = typeof CreateChallengesRequest.Type
-
-export const CreateChallengesResponse = Schema.Struct({
-  challenges: Schema.Array(
-    Schema.Struct({
-      publicKey: PublicKeyPemBase64,
-      challenge: Challenge,
-    })
-  ),
-  expiration: UnixMilliseconds,
-})
-export type CreateChallengesResponse = typeof CreateChallengeResponse.Type

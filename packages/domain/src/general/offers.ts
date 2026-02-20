@@ -219,8 +219,24 @@ export const OfferFlags = Schema.Struct({
 })
 export type OfferFlags = typeof OfferFlags.Type
 
-export const PrivatePayloadEncrypted = Schema.String.pipe(
-  Schema.brand('PrivatePayloadEncrypted')
+export const PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX = '0'
+export const PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX = '1'
+
+export const PrivatePayloadEncryptedV1 = Schema.String.pipe(
+  Schema.filter((s) => s.startsWith(PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX)),
+  Schema.brand('PrivatePayloadEncryptedV1')
+)
+export type PrivatePayloadEncryptedV1 = typeof PrivatePayloadEncryptedV1.Type
+
+export const PrivatePayloadEncryptedV2 = Schema.String.pipe(
+  Schema.filter((s) => s.startsWith(PRIVATE_PAYLOAD_ENCRYPTED_V2_PREFIX)),
+  Schema.brand('PrivatePayloadEncryptedV2')
+)
+export type PrivatePayloadEncryptedV2 = typeof PrivatePayloadEncryptedV2.Type
+
+export const PrivatePayloadEncrypted = Schema.Union(
+  PrivatePayloadEncryptedV1,
+  PrivatePayloadEncryptedV2
 )
 export type PrivatePayloadEncrypted = typeof PrivatePayloadEncrypted.Type
 

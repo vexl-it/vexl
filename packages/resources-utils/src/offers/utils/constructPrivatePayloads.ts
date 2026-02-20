@@ -1,4 +1,9 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  PublicKeyPemBase64 as PublicKeyPemBase64Schema,
+  type PublicKeyV2,
+  PublicKeyV2 as PublicKeyV2Schema,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   OfferPrivatePart,
   type SymmetricKey,
@@ -24,7 +29,7 @@ export class PrivatePayloadsConstructionError extends Schema.TaggedError<Private
 }) {}
 
 export const OfferPrivatePayloadToEncrypt = Schema.Struct({
-  toPublicKey: PublicKeyPemBase64,
+  toPublicKey: Schema.Union(PublicKeyPemBase64Schema, PublicKeyV2Schema),
   payloadPrivate: OfferPrivatePart,
 })
 export type OfferPrivatePayloadToEncrypt =
@@ -62,7 +67,7 @@ export default function constructPrivatePayloads({
       // First we need to find out friend levels for each connection.
       // We can do that by iterating over firstDegreeFriends and secondDegreeFriends
       const friendLevel: Record<
-        PublicKeyPemBase64,
+        PublicKeyPemBase64 | PublicKeyV2,
         HashSet.HashSet<'FIRST_DEGREE' | 'SECOND_DEGREE' | 'CLUB'>
       > = {}
 
@@ -77,8 +82,9 @@ export default function constructPrivatePayloads({
           addOrCreate(friendLevel, secondDegreeFriendPublicKey, 'SECOND_DEGREE')
       }
 
-      const allTargetPublicKeysForClubs = Array.flatten(
-        Record.values(clubsConnections)
+      const allTargetPublicKeysForClubs = pipe(
+        Record.values(clubsConnections),
+        Array.flatten
       )
 
       // There will be no duplicates but to keep code consistent
@@ -94,8 +100,8 @@ export default function constructPrivatePayloads({
         const clubIdForKey = isFromClub
           ? pipe(
               Record.toEntries(clubsConnections),
-              Array.findFirst(([_, publicKeys]) =>
-                Array.contains(publicKeys, toPublicKey)
+              Array.findFirst(([_, contacts]) =>
+                pipe(contacts, Array.contains(toPublicKey))
               ),
               Option.map(([clubUuid]) => [clubUuid]),
               Option.getOrElse(() => [])

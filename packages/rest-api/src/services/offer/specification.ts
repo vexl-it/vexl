@@ -29,11 +29,8 @@ import {
   DeletePrivatePartResponse,
   DuplicatedPublicKeyError,
   GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest,
-  GetClubOffersForMeCreatedOrModifiedAfterRequest,
   GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
   GetOffersForMeCreatedOrModifiedAfterPaginatedResponse,
-  GetOffersForMeCreatedOrModifiedAfterRequest,
-  GetOffersForMeCreatedOrModifiedAfterResponse,
   MissingOwnerPrivatePartError,
   RefreshOfferRequest,
   RefreshOfferResponse,
@@ -48,17 +45,6 @@ import {
   UpdateOfferRequest,
   UpdateOfferResponse,
 } from './contracts'
-
-export const GetOffersForMeModifiedOrCreatedAfterEndpoint = HttpApiEndpoint.get(
-  'getOffersForMeModifiedOrCreatedAfter',
-  '/api/v2/offers/me/modified'
-)
-  .setHeaders(CommonAndSecurityHeaders)
-  .annotate(OpenApi.Summary, 'Get offers for me modified or created after')
-  .middleware(ServerSecurityMiddleware)
-  .setUrlParams(GetOffersForMeCreatedOrModifiedAfterRequest)
-  .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
-  .annotate(MaxExpectedDailyCall, 200)
 
 export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
   HttpApiEndpoint.get(
@@ -75,20 +61,6 @@ export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
     .addSuccess(GetOffersForMeCreatedOrModifiedAfterPaginatedResponse)
     .addError(InvalidNextPageTokenError, {status: 400})
     .annotate(MaxExpectedDailyCall, 600)
-
-export const GetClubOffersForMeModifiedOrCreatedAfterEndpoint =
-  HttpApiEndpoint.post(
-    'getClubOffersForMeModifiedOrCreatedAfter',
-    '/api/v2/clubOffers/me/modified'
-  )
-    .annotate(
-      OpenApi.Summary,
-      'Get club offers for me modified or created after'
-    )
-    .setPayload(GetClubOffersForMeCreatedOrModifiedAfterRequest)
-    .addSuccess(GetOffersForMeCreatedOrModifiedAfterResponse)
-    .addError(InvalidChallengeError, {status: 401})
-    .annotate(MaxExpectedDailyCall, 200)
 
 export const GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
   HttpApiEndpoint.post(
@@ -226,9 +198,7 @@ export const ReportClubOfferEndpoint = HttpApiEndpoint.post(
   .annotate(MaxExpectedDailyCall, 10)
 
 const RootGroup = HttpApiGroup.make('root', {topLevel: true})
-  .add(GetOffersForMeModifiedOrCreatedAfterEndpoint)
   .add(GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint)
-  .add(GetClubOffersForMeModifiedOrCreatedAfterEndpoint)
   .add(GetClubOffersForMeModifiedOrCreatedAfterPaginatedEndpoint)
   .add(CreateNewOfferEndpoint)
   .add(RefreshOfferEndpoint)

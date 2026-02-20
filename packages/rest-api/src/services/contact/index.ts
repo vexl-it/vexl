@@ -5,7 +5,7 @@ import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
 import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
 import {createClientInstance} from '../../client'
-import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
+import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
@@ -21,9 +21,7 @@ import {
   type DeactivateClubJoinLinkRequest,
   type EraseUserFromNetworkRequest,
   type FetchCommonConnectionsPaginatedRequest,
-  type FetchCommonConnectionsRequest,
   type FetchMyContactsPaginatedRequest,
-  type FetchMyContactsRequest,
   type GenerateClubJoinLinkRequest,
   type GetClubContactsRequest,
   type GetClubInfoByAccessCodeRequest,
@@ -34,7 +32,7 @@ import {
   type ListClubLinksRequest,
   type RefreshUserRequest,
   type ReportClubRequest,
-  type UpdateBadOwnerHashRequest,
+  type SetPublicKeyV2Request,
   type UpdateNotificationTokenRequest,
 } from './contracts'
 import {ContactApiSpecification} from './specification'
@@ -138,21 +136,10 @@ export function api({
           payload: body,
           headers: commonAndSecurityHeaders,
         }),
-
-      fetchMyContacts: (query: FetchMyContactsRequest) =>
-        client.Contact.fetchMyContacts({
-          headers: commonAndSecurityHeaders,
-          urlParams: query,
-        }),
       fetchMyContactsPaginated: (query: FetchMyContactsPaginatedRequest) =>
         client.Contact.fetchMyContactsPaginated({
           headers: commonAndSecurityHeaders,
           urlParams: query,
-        }),
-      fetchCommonConnections: (body: FetchCommonConnectionsRequest) =>
-        client.Contact.fetchCommonConnections({
-          payload: body,
-          headers: commonAndSecurityHeaders,
         }),
       fetchCommonConnectionsPaginated: (
         body: FetchCommonConnectionsPaginatedRequest
@@ -167,14 +154,15 @@ export function api({
         client.Contact.convertPhoneNumberHashesToServerHashes({
           payload: body,
         }),
-      updateBadOwnerHash: (args: UpdateBadOwnerHashRequest) =>
-        client.User.updateBadOwnerHash({payload: args}),
       getClubContacts: (
         getClubContactsRequest: RequestWithGeneratableChallenge<GetClubContactsRequest>
       ) =>
         addChallenge(getClubContactsRequest).pipe(
           Effect.flatMap((body) =>
-            client.ClubsMember.getClubContacts({payload: body})
+            client.ClubsMember.getClubContacts({
+              payload: body,
+              headers: commonHeaders,
+            })
           )
         ),
       joinClub: (
@@ -241,6 +229,17 @@ export function api({
         addChallenge(getClubInfoByAccessCodeRequest).pipe(
           Effect.flatMap((body) =>
             client.ClubsModerator.listClubLinks({payload: body})
+          )
+        ),
+      setPublicKeyV2: (
+        body: RequestWithGeneratableChallenge<SetPublicKeyV2Request>
+      ) =>
+        addChallenge(body).pipe(
+          Effect.flatMap((body) =>
+            client.ClubsMember.setPublicKeyV2({
+              payload: body,
+              headers: commonAndSecurityHeaders,
+            })
           )
         ),
       reportClub: (

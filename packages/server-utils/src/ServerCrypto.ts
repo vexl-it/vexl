@@ -1,10 +1,16 @@
 import {
   type PrivateKeyPemBase64,
+  type PrivateKeyV2,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   aesDecrpytE,
   aesEncrpytE,
+  cryptoBoxSeal,
+  cryptoBoxSign,
+  cryptoBoxUnseal,
+  cryptoBoxVerifySignature,
+  derivePubKey,
   ecdsaSignE,
   ecdsaVerifyE,
   eciesGTMDecryptE,
@@ -12,6 +18,8 @@ import {
   hmacSignE,
   hmacVerifyE,
   type AesGtmCypher,
+  type CryptoBoxCypher,
+  type CryptoBoxSignature,
   type CryptoError,
   type EcdsaSignature,
   type EciesGTMECypher,
@@ -21,9 +29,9 @@ import {
   Config,
   Context,
   Effect,
+  flow,
   Layer,
   Schema,
-  flow,
   type ConfigError,
   type ParseResult,
 } from 'effect'
@@ -64,6 +72,26 @@ export interface ServerCryptoOperations {
   ) => (
     data: AesGtmCypher
   ) => Effect.Effect<A, CryptoError | ParseResult.ParseError, R>
+
+  cryptoBoxSign: (
+    challenge: string
+  ) => Effect.Effect<CryptoBoxSignature, CryptoError>
+  cryptoBoxVerifySignature: (
+    data: string,
+    signature: CryptoBoxSignature
+  ) => Effect.Effect<boolean, CryptoError>
+
+  cryptoBoxSeal: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    data: A
+  ) => Effect.Effect<CryptoBoxCypher, CryptoError | ParseResult.ParseError, R>
+
+  cryptoBoxUnseal: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    data: CryptoBoxCypher
+  ) => Effect.Effect<A, CryptoError | ParseResult.ParseError, R>
 }
 
 export type CryptoConfig = Config.Config.Wrap<{
@@ -71,6 +99,7 @@ export type CryptoConfig = Config.Config.Wrap<{
   privateKey: PrivateKeyPemBase64
   hmacKey: string
   easKey: string
+  libsodiumPrivateKey: PrivateKeyV2
 }>
 
 export class ServerCrypto extends Context.Tag('ServerCrypto')<
@@ -79,11 +108,15 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
 >() {
   static readonly layer = (
     cryptoConfig: CryptoConfig
-  ): Layer.Layer<ServerCrypto, ConfigError.ConfigError, never> =>
+  ): Layer.Layer<ServerCrypto, ConfigError.ConfigError | CryptoError, never> =>
     Layer.effect(
       ServerCrypto,
       Effect.gen(function* (_) {
         const cryptoConfigUnwraped = yield* _(Config.unwrap(cryptoConfig))
+
+        const libsodiumPublicKey = yield* _(
+          derivePubKey(cryptoConfigUnwraped.libsodiumPrivateKey)
+        )
 
         const encryptEciesWithServerKey = eciesGTMEncryptE(
           cryptoConfigUnwraped.publicKey
@@ -126,6 +159,28 @@ export class ServerCrypto extends Context.Tag('ServerCrypto')<
           decryptAES: (schema) => {
             const decodeJson = Schema.decode(Schema.parseJson(schema))
             return flow(decryptAesWithServiceKey, Effect.flatMap(decodeJson))
+          },
+          cryptoBoxSign: cryptoBoxSign(
+            cryptoConfigUnwraped.libsodiumPrivateKey
+          ),
+          cryptoBoxVerifySignature:
+            cryptoBoxVerifySignature(libsodiumPublicKey),
+          cryptoBoxSeal: (schema) => {
+            const encodeJson = Schema.encode(Schema.parseJson(schema))
+            return flow(
+              encodeJson,
+              Effect.flatMap(cryptoBoxSeal(libsodiumPublicKey))
+            )
+          },
+          cryptoBoxUnseal: (schema) => {
+            const decodeJson = Schema.decode(Schema.parseJson(schema))
+            return flow(
+              cryptoBoxUnseal({
+                privateKey: cryptoConfigUnwraped.libsodiumPrivateKey,
+                publicKey: libsodiumPublicKey,
+              }),
+              Effect.flatMap(decodeJson)
+            )
           },
         }
       })

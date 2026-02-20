@@ -43,6 +43,7 @@ const devConfig = {
     // Security - pull from .env.local (required for most services)
     SECRET_PUBLIC_KEY: process.env.SECRET_PUBLIC_KEY ?? "",
     SECRET_PRIVATE_KEY: process.env.SECRET_PRIVATE_KEY ?? "",
+    LIBSODIUM_PRIVATE_KEY: process.env.LIBSODIUM_PRIVATE_KEY ?? "",
     SECRET_HMAC_KEY: process.env.SECRET_HMAC_KEY ?? "",
     SECRET_EAS_KEY: process.env.SECRET_EAS_KEY ?? "",
 
@@ -156,6 +157,7 @@ const devConfig = {
     // AWS S3 for club images
     S3_BUCKET_NAME: process.env.DEV_CONTACT_SERVICE_S3_BUCKET_NAME ?? "",
     AWS_REGION: process.env.DEV_CONTACT_SERVICE_AWS_REGION ?? "eu-west-1",
+    APP_VERSION_SUPPORTING_V2_KEYS: "710",
   },
 
   /**

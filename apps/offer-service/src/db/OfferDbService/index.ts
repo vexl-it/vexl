@@ -40,11 +40,10 @@ import {
   createQueryOfferByPublicKeyAndOfferId,
   type QueryOfferByPublicKeyAndOfferIdRequest,
 } from './queries/createQueryOfferByPublicKeyAndOfferId'
-import {createQueryOfferIdsForUser} from './queries/createQueryOfferIdsForUser'
 import {
-  createQueryOffersForUser,
-  type QueryOffersRequest,
-} from './queries/createQueryOffersForUser'
+  createQueryOfferIdsForUser,
+  type QueryOfferIdsForUserRequest,
+} from './queries/createQueryOfferIdsForUser'
 import {
   createQueryOffersForUserPaginated,
   type QueryOffersPaginatedRequest,
@@ -58,10 +57,6 @@ import {
   type UpdateOfferPublicPayloadRequest,
 } from './queries/createUpdateOfferPublicPayload'
 import {
-  createUpdateOfferPublicPayloadModifiedNow,
-  type UpdateOfferPublicPayloadModifiedNowRequest,
-} from './queries/createUpdateOfferPublicPayloadModifiedNow'
-import {
   createUpdateRefreshOffer,
   type UpdateRefreshOfferRequest,
 } from './queries/createUpdateRefreshOffer'
@@ -71,10 +66,6 @@ import {
 } from './queries/createUpdateReportOffer'
 
 export interface OfferDbOperations {
-  queryOffersForUser: (
-    args: QueryOffersRequest
-  ) => Effect.Effect<readonly OfferParts[], UnexpectedServerError>
-
   queryOffersForUserPaginated: (
     args: QueryOffersPaginatedRequest
   ) => Effect.Effect<readonly OfferParts[], UnexpectedServerError>
@@ -84,7 +75,7 @@ export interface OfferDbOperations {
   ) => Effect.Effect<Option.Option<OfferParts>, UnexpectedServerError>
 
   queryOffersIds: (
-    args: PublicKeyPemBase64
+    args: QueryOfferIdsForUserRequest
   ) => Effect.Effect<readonly OfferId[], UnexpectedServerError>
 
   queryNumberOfReportsForUser: (
@@ -123,10 +114,6 @@ export interface OfferDbOperations {
     args: UpdateOfferPublicPayloadRequest
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  updateOfferPublicPartModifiedNow: (
-    args: UpdateOfferPublicPayloadModifiedNowRequest
-  ) => Effect.Effect<void, UnexpectedServerError>
-
   deletePublicPart: (
     args: DeletePublicPartRequest
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -152,11 +139,9 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
     OfferDbService,
     Effect.gen(function* (_) {
       return {
-        queryOffersForUser: yield* _(createQueryOffersForUser),
         queryOffersForUserPaginated: yield* _(
           createQueryOffersForUserPaginated
         ),
-        queryClubOffersForUser: yield* _(createQueryOffersForUser),
         queryOfferByPublicKeyAndOfferId: yield* _(
           createQueryOfferByPublicKeyAndOfferId
         ),
@@ -174,9 +159,6 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
         updateReportOffer: yield* _(createUpdateReportOffer),
         updateRefreshOffer: yield* _(createUpdateRefreshOffer),
         updateOfferPublicPayload: yield* _(createUpdateOfferPublicPayload),
-        updateOfferPublicPartModifiedNow: yield* _(
-          createUpdateOfferPublicPayloadModifiedNow
-        ),
         deletePublicPart: yield* _(createDeletePublicPart),
         deletePrivatePart: yield* _(createDeletePrivatePart),
         deleteAllPrivatePartsForAdminId: yield* _(

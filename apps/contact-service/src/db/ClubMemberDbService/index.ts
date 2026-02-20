@@ -18,11 +18,19 @@ import {
   createDeleteClubMemeber,
   type DeleteClubMemberParams,
 } from './queries/createDeleteClubMemeber'
+import {
+  createDeleteClubMemeberByPublicKeyV2,
+  type DeleteClubMemberByPublicKeyV2Params,
+} from './queries/createDeleteClubMemeberByPublicKeyV2'
 import {createDeleteClubReportedRecordByReportedAtBefore} from './queries/createDeleteClubReportedRecordByReportedAtBefore'
 import {
   createFindClubMemeberByPublicKey,
   type FindClubMemberByPublicKeyParams,
 } from './queries/createFindClubMemberByPublicKey'
+import {
+  createFindClubMemeberByPublicKeyV2,
+  type FindClubMemberByPublicKeyV2Params,
+} from './queries/createFindClubMemberByPublicKeyV2'
 import {
   createFindClubMemeber,
   type FindClubMemberParams,
@@ -40,6 +48,10 @@ import {
   type QueryAllClubMemebersParams as QueryAllClubMembersParams,
 } from './queries/createQueryAllClubMembers'
 import {createQueryNumberOfClubReportsForUser} from './queries/createQueryNumberOfClubReportsForUser'
+import {
+  createUpdateClubMemberPublicKeyV2,
+  type UpdateClubMemberPublicKeyV2Params,
+} from './queries/createUpdateClubMemberPublicKeyV2'
 import {
   createUpdateIsModerator,
   type UpdateIsModeratorParamas,
@@ -63,6 +75,9 @@ export interface ClubMembersDbOperations {
   ) => Effect.Effect<number, UnexpectedServerError>
   deleteClubMember: (
     params: DeleteClubMemberParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+  deleteClubMemberByPublicKeyV2: (
+    params: DeleteClubMemberByPublicKeyV2Params
   ) => Effect.Effect<void, UnexpectedServerError>
   deleteAllClubMembers: (
     params: DeleteAllClubMemberParams
@@ -103,6 +118,13 @@ export interface ClubMembersDbOperations {
   findClubMemberByPublicKey: (
     params: FindClubMemberByPublicKeyParams
   ) => Effect.Effect<Option.Option<ClubMemberRecord>, UnexpectedServerError>
+  findClubMemberByPublicKeyV2: (
+    params: FindClubMemberByPublicKeyV2Params
+  ) => Effect.Effect<Option.Option<ClubMemberRecord>, UnexpectedServerError>
+
+  updateClubMemberPublicKeyV2: (
+    params: UpdateClubMemberPublicKeyV2Params
+  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
@@ -114,9 +136,15 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
     Effect.gen(function* (_) {
       const countClubMembers = yield* _(createCountClubMemebers)
       const deleteClubMember = yield* _(createDeleteClubMemeber)
+      const deleteClubMemberByPublicKeyV2 = yield* _(
+        createDeleteClubMemeberByPublicKeyV2
+      )
       const findClubMember = yield* _(createFindClubMemeber)
       const findClubMemberByPublicKey = yield* _(
         createFindClubMemeberByPublicKey
+      )
+      const findClubMemberByPublicKeyV2 = yield* _(
+        createFindClubMemeberByPublicKeyV2
       )
       const insertClubMember = yield* _(createInsertClubMember)
       const insertClubReportedRecord = yield* _(createInsertClubReportedRecord)
@@ -137,12 +165,17 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
       const deleteClubReportedRecordByReportedAtBefore = yield* _(
         createDeleteClubReportedRecordByReportedAtBefore
       )
+      const updateClubMemberPublicKeyV2 = yield* _(
+        createUpdateClubMemberPublicKeyV2
+      )
 
       return {
         countClubMembers,
         deleteClubMember,
+        deleteClubMemberByPublicKeyV2,
         findClubMember,
         findClubMemberByPublicKey,
+        findClubMemberByPublicKeyV2,
         insertClubMember,
         insertClubReportedRecord,
         queryAllClubMembers,
@@ -154,6 +187,7 @@ export class ClubMembersDbService extends Context.Tag('ClubMembersDbService')<
         updateVexlNotificationToken,
         deleteAllClubMembers,
         deleteClubReportedRecordByReportedAtBefore,
+        updateClubMemberPublicKeyV2,
       }
     })
   )

@@ -1,10 +1,12 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {ChallengeApiSpecification} from '@vexl-next/rest-api/src/challenges/specification'
 import {Effect} from 'effect'
+import {challengeExpirationMinutesConfig} from '../../../commonConfigs'
 import {makeEndpointEffect} from '../../../makeEndpointEffect'
-import {ChallengeService} from '../ChallengeService'
-import {challengeExpirationMinutesConfig} from '../db/ChallegeDbService/configs'
+import {type ChallengePayload} from '../utils/challengePayload'
+import {sealChallenge} from '../utils/sealChallenge'
 
 export const createChallenge = HttpApiBuilder.handler(
   ChallengeApiSpecification,
@@ -12,15 +14,29 @@ export const createChallenge = HttpApiBuilder.handler(
   'createChallenge',
   ({payload}) =>
     Effect.gen(function* (_) {
-      const challengeService = yield* _(ChallengeService)
-      const publicKey = payload.publicKey
       const expirationMinutes = yield* _(challengeExpirationMinutesConfig)
+      const expiration = unixMillisecondsFromNow(expirationMinutes * 60 * 1000)
 
-      const challenge = yield* _(challengeService.createChallenge(publicKey))
+      const challengePayload: ChallengePayload = {
+        publicKey: payload.publicKey,
+        publicKeyV2: payload.publicKeyV2,
+        expiresAt: expiration,
+      }
+
+      const sealedChallenge = yield* _(
+        sealChallenge(challengePayload),
+        Effect.mapError(
+          (e) =>
+            new UnexpectedServerError({
+              message: 'Failed to create challenge',
+              cause: e,
+            })
+        )
+      )
 
       return {
-        challenge,
-        expiration: unixMillisecondsFromNow(expirationMinutes * 60 * 1000),
+        challenge: sealedChallenge,
+        expiration,
       }
     }).pipe(makeEndpointEffect)
 )

@@ -8,7 +8,6 @@ import {
   type PrivatePayloadEncrypted,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
-import {type SecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {type CreateNewOfferRequest} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -17,8 +16,10 @@ import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
+type DummyAuthHeaders = Parameters<typeof makeTestCommonAndSecurityHeaders>[0]
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const createOffer = (authHeaders: SecurityHeaders) =>
+const createOffer = (authHeaders: DummyAuthHeaders) =>
   Effect.gen(function* (_) {
     const user1 = generatePrivateKey()
     const user2 = generatePrivateKey()
@@ -28,15 +29,15 @@ const createOffer = (authHeaders: SecurityHeaders) =>
       countryPrefix: Schema.decodeSync(CountryPrefix)(420),
       offerPrivateList: [
         {
-          payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
+          payloadPrivate: '0payloadPrivate' as PrivatePayloadEncrypted,
           userPublicKey: user1.publicKeyPemBase64,
         },
         {
-          payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
+          payloadPrivate: '0payloadPrivate2' as PrivatePayloadEncrypted,
           userPublicKey: user2.publicKeyPemBase64,
         },
         {
-          payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
+          payloadPrivate: '0payloadPrivateForMe' as PrivatePayloadEncrypted,
           userPublicKey: authHeaders['public-key'],
         },
       ],

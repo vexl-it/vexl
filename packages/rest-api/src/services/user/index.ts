@@ -13,7 +13,8 @@ import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {
   type InitEraseUserRequest,
   type InitPhoneVerificationRequest,
-  type RegenerateSessionCredentialsRequest,
+  type InitUpgradeAuthRequest,
+  type SubmitUpgradeAuthRequest,
   type VerifyAndEraseUserRequest,
   type VerifyChallengeRequest,
   type VerifyPhoneNumberRequest,
@@ -97,13 +98,6 @@ export function api({
       verifyChallenge: (body: VerifyChallengeRequest) =>
         client.Login.verifyChallenge({payload: body}),
       deleteUser: () => client.logoutUser({headers: commonAndSecurityHeaders}),
-      regenerateSessionCredentials: (
-        body: RegenerateSessionCredentialsRequest
-      ) =>
-        client.regenerateSessionCredentials({
-          payload: body,
-          headers: commonAndSecurityHeaders,
-        }),
       getVersionServiceInfo: () =>
         client.getVersionServiceInfo({
           headers: commonHeaders,
@@ -116,6 +110,16 @@ export function api({
       verifyAndEraseUser: (request: VerifyAndEraseUserRequest) =>
         client.EraseUser.verifyAndEraseuser({
           payload: request,
+        }),
+      initUpgradeAuth: (request: InitUpgradeAuthRequest) =>
+        client.UpgradeAuth.initUpgradeAuth({
+          payload: request,
+          headers: commonAndSecurityHeaders,
+        }),
+      submitUpgradeAuth: (request: SubmitUpgradeAuthRequest) =>
+        client.UpgradeAuth.submitUpgradeAuth({
+          payload: request,
+          headers: commonAndSecurityHeaders,
         }),
     }
   })

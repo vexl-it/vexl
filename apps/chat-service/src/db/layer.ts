@@ -5,6 +5,7 @@ import {databaseConfig} from '../configs'
 import initialMigraiton from './migrations/0001_initial'
 import addExpiresAtToMessage from './migrations/0002_add_expires_at_to_messages'
 import removeUnusedTables from './migrations/0003_remove_unused_tables'
+import dropChallengeTable from './migrations/0004_drop_challenge_table'
 
 const migrations = [
   {
@@ -21,6 +22,11 @@ const migrations = [
     id: 3,
     name: 'Remove_unused_tables',
     migrationEffect: removeUnusedTables,
+  },
+  {
+    id: 4,
+    name: 'Drop challenge table',
+    migrationEffect: dropChallengeTable,
   },
 ] as const
 

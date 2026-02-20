@@ -85,6 +85,7 @@ beforeEach(async () => {
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+          publicKeyV2: null,
         })
       )
 
@@ -96,6 +97,7 @@ beforeEach(async () => {
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+          publicKeyV2: null,
         })
       )
     })

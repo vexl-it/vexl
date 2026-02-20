@@ -1,7 +1,7 @@
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
@@ -62,6 +62,7 @@ it('Create challenge works', async () => {
         client.Challenges.createChallenge({
           payload: {
             publicKey: generatePrivateKey().publicKeyPemBase64,
+            publicKeyV2: Option.none(),
           },
         })
       )

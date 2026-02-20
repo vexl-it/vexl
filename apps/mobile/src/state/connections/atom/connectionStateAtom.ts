@@ -1,4 +1,5 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ChatUserIdentity} from '@vexl-next/domain/src/general/messaging'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {
@@ -43,7 +44,7 @@ function fetchContacts(
   level: 'FIRST' | 'SECOND',
   api: ContactApi
 ): Effect.Effect<
-  PublicKeyPemBase64[],
+  Array<PublicKeyPemBase64 | PublicKeyV2>,
   Effect.Effect.Error<ReturnType<ContactApi['fetchMyContactsPaginated']>>
 > {
   return fetchAllPaginatedData({
@@ -141,12 +142,11 @@ export const syncConnectionsActionAtom = atom(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
             api.contact.fetchCommonConnectionsPaginated({
-              publicKeys: deduplicate([...firstLevel, ...secondLevel]),
+              publicKeys: pipe([...firstLevel, ...secondLevel], deduplicate),
               limit: FETCH_CONNECTIONS_PAGE_SIZE,
               nextPageToken,
             }),
         }),
-        // Transform serverToClientHashes to hashedPhoneNumbers
         Effect.map(
           flow(
             Array.map(

@@ -1,4 +1,5 @@
 import {type ClubCode} from '@vexl-next/domain/src/general/clubs'
+import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {generateKeyPair} from '@vexl-next/resources-utils/src/utils/crypto'
 import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -14,7 +15,7 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
-import {clubsToKeyHolderAtom} from './clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from './clubsToKeyHolderV2Atom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
 
 export const submitCodeToJoinClubActionAtom = atom(
@@ -25,6 +26,7 @@ export const submitCodeToJoinClubActionAtom = atom(
 
     return Effect.gen(function* (_) {
       const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
+      const newKeypairV2 = yield* _(generateV2KeyPair())
       const notificationToken = yield* _(
         getNotificationTokenE(),
         Effect.map(Option.fromNullable)
@@ -34,6 +36,7 @@ export const submitCodeToJoinClubActionAtom = atom(
         api.contact.getClubInfoByAccessCode({
           code,
           keyPair: newKeypair,
+          keyPairV2: newKeypairV2,
         })
       )
 
@@ -69,7 +72,11 @@ export const submitCodeToJoinClubActionAtom = atom(
       set(loadingOverlayDisplayedAtom, true)
 
       const myStoredClubs = get(clubsToKeyHolderAtom)
-      const keyPair = newKeypair
+      const oldKeyPair = newKeypair
+      const clubKeys = {
+        keyPair: newKeypairV2,
+        oldKeyPair,
+      }
 
       if (myStoredClubs[club.club.uuid]) {
         yield* _(Effect.fail(new MemberAlreadyInClubError()))
@@ -77,7 +84,7 @@ export const submitCodeToJoinClubActionAtom = atom(
 
       set(clubsToKeyHolderAtom, (prevState) => ({
         ...prevState,
-        [club.club.uuid]: keyPair,
+        [club.club.uuid]: clubKeys,
       }))
 
       const vexlNotificationToken = yield* _(set(generateVexlTokenActionAtom))
@@ -85,11 +92,12 @@ export const submitCodeToJoinClubActionAtom = atom(
       const {clubInfoForUser} = yield* _(
         api.contact
           .joinClub({
-            keyPair,
+            keyPair: oldKeyPair,
             code,
             contactsImported: true,
             notificationToken,
             vexlNotificationToken: Option.some(vexlNotificationToken),
+            keyPairV2: newKeypairV2,
           })
           .pipe(
             Effect.tapError(() =>

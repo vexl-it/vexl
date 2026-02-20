@@ -6,10 +6,7 @@ import {
 } from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  InvalidChallengeError,
-  type SignedChallenge,
-} from '@vexl-next/rest-api/src/challenges/contracts'
+import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
@@ -90,7 +87,8 @@ describe('Get club info by access code', () => {
         const clubInfo = yield* _(
           app.ClubsMember.getClubInfoByAccessCode({
             payload: {
-              publicKey: userKey.publicKeyPemBase64,
+              publicKey: challengeForUser.publicKey,
+              publicKeyV2: challengeForUser.publicKeyV2,
               signedChallenge: challengeForUser.signedChallenge,
               code: inviteLink.code,
             },
@@ -124,7 +122,8 @@ describe('Get club info by access code', () => {
         const clubInfo = yield* _(
           app.ClubsMember.getClubInfoByAccessCode({
             payload: {
-              publicKey: userKey.publicKeyPemBase64,
+              publicKey: challengeForUser.publicKey,
+              publicKeyV2: challengeForUser.publicKeyV2,
               signedChallenge: challengeForUser.signedChallenge,
               code: inviteLink.link.code,
             },
@@ -146,7 +145,8 @@ describe('Get club info by access code', () => {
         const errorResponse = yield* _(
           app.ClubsMember.getClubInfoByAccessCode({
             payload: {
-              publicKey: userKey.publicKeyPemBase64,
+              publicKey: challengeForUser.publicKey,
+              publicKeyV2: challengeForUser.publicKeyV2,
               signedChallenge: challengeForUser.signedChallenge,
               code: 'badCode' as ClubCode,
             },
@@ -165,6 +165,7 @@ describe('Get club info by access code', () => {
         const app = yield* _(NodeTestingApp)
 
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
+        const invalidKey = generatePrivateKey()
 
         yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
         const inviteLink = yield* _(
@@ -181,11 +182,9 @@ describe('Get club info by access code', () => {
         const errorResponse = yield* _(
           app.ClubsMember.getClubInfoByAccessCode({
             payload: {
-              publicKey: signedChallenge.publicKey,
-              signedChallenge: {
-                ...signedChallenge.signedChallenge,
-                challenge: 'badChallenge' as SignedChallenge['challenge'],
-              },
+              publicKey: invalidKey.publicKeyPemBase64,
+              publicKeyV2: signedChallenge.publicKeyV2,
+              signedChallenge: signedChallenge.signedChallenge,
               code: inviteLink.link.code,
             },
           }),

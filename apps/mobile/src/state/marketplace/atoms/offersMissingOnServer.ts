@@ -15,7 +15,7 @@ import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
-import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
   deleteOfferToConnectionsAtom,
   upsertOfferToConnectionsActionAtom,
@@ -112,6 +112,7 @@ const reencryptOneOfferActionAtom = atom(
             intendedConnectionLevel ??
             offer.ownershipInfo.intendedConnectionLevel,
           ownerKeyPair: session.privateKey,
+          ownerKeyPairV2: session.keyPairV2,
           onProgress,
           intendedClubs: intendedClubsRecord,
           offerId: offer.offerInfo.offerId,

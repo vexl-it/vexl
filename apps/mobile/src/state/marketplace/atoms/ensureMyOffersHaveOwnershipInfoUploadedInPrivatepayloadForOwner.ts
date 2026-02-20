@@ -26,6 +26,7 @@ export const ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner =
           updateOwnerPrivatePayload({
             api: get(apiAtom).offer,
             ownerCredentials: get(sessionDataOrDummyAtom).privateKey,
+            ownerKeyPairV2: get(sessionDataOrDummyAtom).keyPairV2,
             symmetricKey: one.offerInfo.privatePart.symmetricKey,
             adminId: one.ownershipInfo.adminId,
             intendedConnectionLevel: one.ownershipInfo.intendedConnectionLevel,

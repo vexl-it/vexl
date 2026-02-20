@@ -1,3 +1,5 @@
+import {FetchHttpClient} from '@effect/platform/index'
+import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   ENV_PRESETS,
   PlatformName,
@@ -15,13 +17,11 @@ import {
 } from '@vexl-next/rest-api'
 import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
-
-import {FetchHttpClient} from '@effect/platform/index'
-import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Effect, Option, Schema} from 'effect'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
-import {dummySession, sessionHolderAtom} from '../state/session'
+import {sessionHolderAtom} from '../state/session'
+import {dummySession} from '../state/session/dummySesssion'
 import {
   apiPreset,
   appSource,

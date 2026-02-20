@@ -14,7 +14,7 @@ export const logoutUserHandler = HttpApiBuilder.handler(
       const security = yield* _(CurrentSecurity)
       const usersDb = yield* _(LoggedInUsersDbService)
 
-      yield* _(usersDb.deleteUser(security['public-key']))
+      yield* _(usersDb.deleteUser(security.publicKey))
 
       return 'ok'
     }).pipe(makeEndpointEffect)

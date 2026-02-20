@@ -1,9 +1,10 @@
-import {aes, ecdsa, eciesLegacy} from '@vexl-next/cryptography'
+import {aes, cryptobox, ecdsa, eciesLegacy} from '@vexl-next/cryptography'
 import {
   PrivateKeyPemBase64,
   generatePrivateKey,
   importPrivateKey,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {isPublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
   eciesLegacyDecrypt,
   eciesLegacyEncrypt,
@@ -54,6 +55,39 @@ export async function* runTests() {
   } else {
     yield `✅ ECIES OK`
   }
+
+  yield `Testing Cryptobox offer encryption/decryption`
+  const cryptoboxKeypair = await cryptobox.generateKeyPair()
+
+  const cryptoboxEncrypted = await cryptobox.seal(
+    dummyPrivatePart,
+    cryptoboxKeypair.publicKey
+  )
+  const cryptoboxDecrypted = await cryptobox.unseal(
+    cryptoboxEncrypted,
+    cryptoboxKeypair
+  )
+
+  if (cryptoboxDecrypted !== dummyPrivatePart) {
+    yield `🚨 Cryptobox offer encryption/decryption failed`
+  } else {
+    yield `✅ Cryptobox offer encryption/decryption OK`
+  }
+
+  yield `Testing cryptobox signing / verification`
+  const toSign = 'test'
+  const signatureSodium = await cryptobox.sign(
+    toSign,
+    cryptoboxKeypair.privateKey
+  )
+  const isValid = await cryptobox.verifySignature(
+    toSign,
+    signatureSodium,
+    cryptoboxKeypair.publicKey
+  )
+  yield isValid
+    ? `✅ Cryptobox signing/verification OK`
+    : `🚨 Cryptobox signing/verification failed`
 
   yield `Testing ECIES decryption with another cypher`
   const cipher =
@@ -136,6 +170,29 @@ export async function* runBenchmark() {
   yield `Took ${msToString(Date.now() - nowMs)}`
 
   nowMs = Date.now()
+  const cryptoboxEncryptedPrivateParts = []
+  const cryptoboxKeypair = await cryptobox.generateKeyPair()
+  yield `Cryptobox encrypting dummy offer private parts ${NUMBER_OF_GENERATIONS} times`
+  for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
+    const one = await cryptobox.seal(
+      `${dummyPrivatePart}${i}`,
+      cryptoboxKeypair.publicKey
+    )
+    cryptoboxEncryptedPrivateParts.push(one)
+  }
+  yield `Took ${msToString(Date.now() - nowMs)}`
+
+  nowMs = Date.now()
+  yield `Cryptobox decrypting dummy offer private parts ${NUMBER_OF_GENERATIONS} times`
+  for (let i = 0; i < cryptoboxEncryptedPrivateParts.length; i++) {
+    await cryptobox.unseal(
+      cryptoboxEncryptedPrivateParts[i] ?? '',
+      cryptoboxKeypair
+    )
+  }
+  yield `Took ${msToString(Date.now() - nowMs)}`
+
+  nowMs = Date.now()
   const encryptedPublicParts = []
   yield `AES encrypting dummy public parts ${NUMBER_OF_GENERATIONS} times`
   for (let i = 0; i < NUMBER_OF_GENERATIONS; i++) {
@@ -208,9 +265,14 @@ export async function* simulateEncrypting5000Offers() {
   yield 'Starting encryption'
   yield 'Progress printed every 250th encryption'
 
+  if (isPublicKeyV2(privatePartToEncrypt.toPublicKey)) {
+    throw new Error('pubKeyV2 not supported in debug benchmark')
+  }
+
   for (let i = 0; i < 5000; i++) {
     if (i % 250 === 0) yield `encrypting ${i} / 5000`
     await eciesLegacy.eciesLegacyEncrypt({
+      // Debug screen this is ok
       publicKey: privatePartToEncrypt.toPublicKey,
       data: JSON.stringify(privatePartToEncrypt.payloadPrivate),
     })

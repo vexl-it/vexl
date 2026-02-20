@@ -1,25 +1,14 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer} from 'effect'
 import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type ContactRecord} from './domain'
 import {createDeleteContactsByHashFrom} from './queries/createDeleteContactsByHashFrom'
 import {
-  createDeleteContactsByHashFromAndHashTo,
-  type DeleteContactsByHashFromAndHashToQuery,
-} from './queries/createDeleteContactsByHashFromAndHashTo'
-import {
-  createFindCommonFriendsByOwnerHashAndPublicKeys,
-  type FindCommonFriendsParams,
-  type FindCommonFriendsResult,
-} from './queries/createFindCommonFriendsByOwnerHashAndPublicKeys'
-import {
   createFindCommonFriendsByOwnerHashAndPublicKeysPaginated,
   type FindCommonFriendsPaginatedParams,
   type FindCommonFriendsPaginatedResult,
 } from './queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {createFindContactsByHashFrom} from './queries/createFindContactsByHashFrom'
-import {createFindFirstLevelContactsPublicKeysByHashFrom} from './queries/createFindFirstLevelContactsPublicKeysByHashFrom'
 import {
   createFindFirstLevelContactsPublicKeysByHashFromPaginated,
   type FindFirstLevelContactsPublicKeysByHashFromPaginatedParams,
@@ -30,7 +19,6 @@ import {
   type FindNotificationTokensByFiltersArgs,
   type FindNotificationTokensByFiltersResult,
 } from './queries/createFindNotificationTokensByFilter'
-import {createFindSecondLevelContactsPublicKeysByHashFrom} from './queries/createFindSecondLevelContactsPublicKeysByHashFrom'
 import {
   createFindSecondLevelContactsPublicKeysByHashFromPaginated,
   type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams,
@@ -40,18 +28,10 @@ import {
   createInsertContact,
   type InsertContactParams,
 } from './queries/createSaveContact'
-import {
-  createUpdateContactsHashFrom,
-  type UpdateContactsHashFromQuery,
-} from './queries/createUpdateContactsHashFrom'
 
 export interface ContactDbOperations {
   deleteContactsByHashFrom: (
     hash: ServerHashedNumber
-  ) => Effect.Effect<void, UnexpectedServerError>
-
-  deleteContactsByHashFromAndHashTo: (
-    args: DeleteContactsByHashFromAndHashToQuery
   ) => Effect.Effect<void, UnexpectedServerError>
 
   findContactsByHashFrom: (
@@ -62,10 +42,6 @@ export interface ContactDbOperations {
     contact: InsertContactParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  findFirstLevelContactsPublicKeysByHashFrom: (
-    hash: ServerHashedNumber
-  ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
-
   findFirstLevelContactsPublicKeysByHashFromPaginated: (
     args: FindFirstLevelContactsPublicKeysByHashFromPaginatedParams
   ) => Effect.Effect<
@@ -73,20 +49,12 @@ export interface ContactDbOperations {
     UnexpectedServerError
   >
 
-  findSecondLevelContactsPublicKeysByHashFrom: (
-    hash: ServerHashedNumber
-  ) => Effect.Effect<readonly PublicKeyPemBase64[], UnexpectedServerError>
-
   findSecondLevelContactsPublicKeysByHashFromPaginated: (
     args: FindSecondLevelContactsPublicKeysByHashFromPaginatedParams
   ) => Effect.Effect<
     readonly FindSecondLevelContactsPublicKeysByHashFromPaginatedResult[],
     UnexpectedServerError
   >
-
-  findCommonFriends: (
-    args: FindCommonFriendsParams
-  ) => Effect.Effect<readonly FindCommonFriendsResult[], UnexpectedServerError>
 
   findCommonFriendsPaginated: (
     args: FindCommonFriendsPaginatedParams
@@ -101,10 +69,6 @@ export interface ContactDbOperations {
     readonly FindNotificationTokensByFiltersResult[],
     UnexpectedServerError
   >
-
-  updateContactHashFrom: (
-    args: UpdateContactsHashFromQuery
-  ) => Effect.Effect<void, UnexpectedServerError>
 }
 
 export class ContactDbService extends Context.Tag('ContactDbService')<
@@ -115,25 +79,13 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
     ContactDbService,
     Effect.gen(function* (_) {
       const deleteContactsByHashFrom = yield* _(createDeleteContactsByHashFrom)
-      const deleteContactsByHashFromAndHashTo = yield* _(
-        createDeleteContactsByHashFromAndHashTo
-      )
       const findContactsByHashFrom = yield* _(createFindContactsByHashFrom)
       const insertContact = yield* _(createInsertContact)
-      const findFirstLevelContactsPublicKeysByHashFrom = yield* _(
-        createFindFirstLevelContactsPublicKeysByHashFrom
-      )
       const findFirstLevelContactsPublicKeysByHashFromPaginated = yield* _(
         createFindFirstLevelContactsPublicKeysByHashFromPaginated
       )
-      const findSecondLevelContactsPublicKeysByHashFrom = yield* _(
-        createFindSecondLevelContactsPublicKeysByHashFrom
-      )
       const findSecondLevelContactsPublicKeysByHashFromPaginated = yield* _(
         createFindSecondLevelContactsPublicKeysByHashFromPaginated
-      )
-      const findCommonFriends = yield* _(
-        createFindCommonFriendsByOwnerHashAndPublicKeys
       )
       const findCommonFriendsPaginated = yield* _(
         createFindCommonFriendsByOwnerHashAndPublicKeysPaginated
@@ -142,21 +94,14 @@ export class ContactDbService extends Context.Tag('ContactDbService')<
         createFindNotificationTokensByFilter
       )
 
-      const updateContactHashFrom = yield* _(createUpdateContactsHashFrom)
-
       return {
         deleteContactsByHashFrom,
-        deleteContactsByHashFromAndHashTo,
         findContactsByHashFrom,
         insertContact,
-        findFirstLevelContactsPublicKeysByHashFrom,
         findFirstLevelContactsPublicKeysByHashFromPaginated,
-        findSecondLevelContactsPublicKeysByHashFrom,
         findSecondLevelContactsPublicKeysByHashFromPaginated,
         findNotificationTokensByFilter,
-        findCommonFriends,
         findCommonFriendsPaginated,
-        updateContactHashFrom,
       }
     })
   )

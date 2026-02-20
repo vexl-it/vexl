@@ -7,8 +7,6 @@ import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
-import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
-import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
@@ -46,8 +44,6 @@ export type MockedContexts =
   | ClubsDbService
   | ClubMembersDbService
   | ClubInvitationLinkDbService
-  | ChallengeService
-  | ChallengeDbService
   | HttpClient
   | TestRequestHeaders
   | RateLimitingService
@@ -77,8 +73,7 @@ const dbServiceLayers = Layer.mergeAll(
   ContactDbService.Live,
   ClubsDbService.Live,
   ClubMembersDbService.Live,
-  ClubInvitationLinkDbService.Live,
-  ChallengeDbService.Live
+  ClubInvitationLinkDbService.Live
 ).pipe(Layer.provideMerge(DbLayer))
 
 const context = Layer.empty.pipe(
@@ -87,7 +82,6 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(UserNotificationServiceTest),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(ImportContactsQuotaService.Live),
-  Layer.provideMerge(ChallengeService.Live),
   Layer.provideMerge(mockServiceLayers),
   Layer.provideMerge(dbServiceLayers),
   Layer.provideMerge(NodeContext.layer)

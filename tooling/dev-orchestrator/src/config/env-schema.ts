@@ -58,6 +58,7 @@ export const orchestratorConfig = Config.all({
   security: Config.all({
     publicKey: Config.string('SECRET_PUBLIC_KEY'),
     privateKey: Config.redacted('SECRET_PRIVATE_KEY'),
+    libsodiumPrivateKey: Config.redacted('LIBSODIUM_PRIVATE_KEY'),
     hmacKey: Config.redacted('SECRET_HMAC_KEY'),
     easKey: Config.redacted('SECRET_EAS_KEY'),
   }),

@@ -38,16 +38,16 @@ beforeAll(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: user1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer1payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.publicKeyPemBase64,
           },
           {
             payloadPrivate:
-              'offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
+              '0offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
             userPublicKey: me.publicKeyPemBase64,
           },
         ],

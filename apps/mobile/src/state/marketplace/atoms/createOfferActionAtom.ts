@@ -27,7 +27,7 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
-import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {type NoVexlSecretError} from '../../notifications/actions/NoVexlSecretError'
@@ -102,6 +102,7 @@ export const createOfferActionAtom = atom<
         contactApi: api.contact,
         intendedConnectionLevel,
         ownerKeyPair: session.privateKey,
+        ownerKeyPairV2: session.keyPairV2,
         intendedClubs: intendedClubsRecord,
         onProgress,
       })

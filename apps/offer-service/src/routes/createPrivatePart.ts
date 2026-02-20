@@ -1,5 +1,8 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   DuplicatedPublicKeyError,
@@ -51,7 +54,7 @@ export const createPrivatePart = HttpApiBuilder.handler(
       )
 
       const privatePartsToRemove = Array.intersectionWith<{
-        userPublicKey: PublicKeyPemBase64
+        userPublicKey: PublicKeyPemBase64 | PublicKeyV2
       }>((a, b) => a.userPublicKey === b.userPublicKey)(
         existingPrivateParts,
         req.payload.offerPrivateList

@@ -44,6 +44,7 @@ export const getClubOffersForMeModifiedOrCreatedAfterPaginated =
         const offers = yield* _(
           offerDbService.queryOffersForUserPaginated({
             userPublicKey: req.payload.publicKey,
+            userPublicKeyV2: req.payload.publicKeyV2,
             lastPrivatePartId,
             limit,
           }),

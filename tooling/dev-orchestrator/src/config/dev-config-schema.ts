@@ -21,6 +21,7 @@ export interface CommonEnv {
   // Security - crypto keys used for signing/verification
   readonly SECRET_PUBLIC_KEY: string
   readonly SECRET_PRIVATE_KEY: string
+  readonly LIBSODIUM_PRIVATE_KEY: string
   readonly SECRET_HMAC_KEY: string
   readonly SECRET_EAS_KEY: string
 

@@ -1,3 +1,4 @@
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -49,23 +50,10 @@ export const GetClubOffersForMeRequest = Schema.Struct({
 })
 export type GetClubOffersForMeRequest = typeof GetClubOffersForMeRequest.Type
 
-export const GetOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
-  modifiedAt: IsoDatetimeString,
-})
-export type GetOffersForMeCreatedOrModifiedAfterRequest =
-  typeof GetOffersForMeCreatedOrModifiedAfterRequest.Type
-
 export const GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
   PageRequestMeta
 export type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedRequest.Type
-
-export const GetClubOffersForMeCreatedOrModifiedAfterRequest = Schema.Struct({
-  ...RequestBaseWithChallenge.fields,
-  modifiedAt: IsoDatetimeString,
-})
-export type GetClubOffersForMeCreatedOrModifiedAfterRequest =
-  typeof GetClubOffersForMeCreatedOrModifiedAfterRequest.Type
 
 export const GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest =
   Schema.Struct({
@@ -75,12 +63,6 @@ export const GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest =
 export type GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest =
   typeof GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest.Type
 
-export const GetOffersForMeCreatedOrModifiedAfterResponse = Schema.Struct({
-  offers: Schema.Array(ServerOffer),
-})
-export type GetOffersForMeCreatedOrModifiedAfterResponse =
-  typeof GetOffersForMeCreatedOrModifiedAfterResponse.Type
-
 export const GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
   createPageResponse(ServerOffer)
 
@@ -88,7 +70,7 @@ export type GetOffersForMeCreatedOrModifiedAfterPaginatedResponse =
   typeof GetOffersForMeCreatedOrModifiedAfterPaginatedResponse.Type
 
 export const ServerPrivatePart = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64,
+  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   payloadPrivate: PrivatePayloadEncrypted,
 })
 export type ServerPrivatePart = Schema.Schema.Type<typeof ServerPrivatePart>
@@ -175,7 +157,7 @@ export class CanNotDeletePrivatePartOfAuthor extends Schema.TaggedError<CanNotDe
 
 export const DeletePrivatePartRequest = Schema.Struct({
   adminIds: Schema.Array(OfferAdminId),
-  publicKeys: Schema.Array(PublicKeyPemBase64),
+  publicKeys: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
 })
 export type DeletePrivatePartRequest = typeof DeletePrivatePartRequest.Type
 

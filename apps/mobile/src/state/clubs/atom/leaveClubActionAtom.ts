@@ -7,7 +7,7 @@ import {removeClubOffersNextPageParamFromStateActionAtom} from '../../marketplac
 import {
   clubsToKeyHolderAtom,
   removeClubFromKeyHolderStateActionAtom,
-} from './clubsToKeyHolderAtom'
+} from './clubsToKeyHolderV2Atom'
 import {removeClubWithMembersFromStateActionAtom} from './clubsWithMembersAtom'
 import {updateOffersWhenUserIsNoLongerInClubActionAtom} from './updateOffersWhenUserIsNoLongerInClubActionAtom'
 
@@ -31,7 +31,13 @@ export const leaveClubActionAtom = atom(
       const {contact} = get(apiAtom)
 
       if (Option.isSome(clubKeyPair)) {
-        yield* _(contact.leaveClub({clubUuid, keyPair: clubKeyPair.value}))
+        yield* _(
+          contact.leaveClub({
+            clubUuid,
+            keyPair: clubKeyPair.value.oldKeyPair,
+            keyPairV2: clubKeyPair.value.keyPair,
+          })
+        )
       }
 
       yield* _(

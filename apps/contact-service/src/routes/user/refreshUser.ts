@@ -23,7 +23,7 @@ export const refreshUser = HttpApiBuilder.handler(
       yield* _(
         userDb.findUserByPublicKeyAndHash({
           hash: security.serverHash,
-          publicKey: security['public-key'],
+          publicKey: security.publicKey,
         }),
         Effect.flatten,
         Effect.catchTag('NoSuchElementException', () =>
@@ -33,13 +33,14 @@ export const refreshUser = HttpApiBuilder.handler(
 
       yield* _(
         userDb.updateRefreshUser({
-          publicKey: security['public-key'],
+          publicKey: security.publicKey,
           hash: security.serverHash,
           clientVersion: req.headers.clientVersionOrNone,
-          countryPrefix: req.payload.countryPrefix,
+          countryPrefix: req.headers.prefixOrNone,
           appSource: req.headers.appSourceOrNone,
           vexlNotificationToken: req.payload.vexlNotificationToken,
           refreshedAt: new Date(),
+          publicKeyV2: security.publicKeyV2,
         })
       )
       return {}

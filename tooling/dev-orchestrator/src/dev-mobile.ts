@@ -12,7 +12,9 @@ import {checkAllServicesHealth} from './health/index.js'
 import {
   type BuildMode,
   detectLanIpWithPrompt,
+  type Device,
   findAvailableMetroPort,
+  getAvailableDevices,
   type MobileCommandConfig,
   selectDeviceInteractively,
   startExpoWithMode,
@@ -31,6 +33,8 @@ interface MobileOptions {
   platform: 'ios' | 'android'
   prebuild?: boolean
   build?: boolean
+  releaseMode?: boolean
+  clearCache?: boolean
   device?: string | boolean
   host?: string
 }
@@ -95,11 +99,11 @@ const checkBackendAndWarn = (): Effect.Effect<void> =>
  * - true: -d flag used without value, trigger interactive selection
  * - string: explicit device ID provided
  *
- * @returns Effect resolving to device ID string or undefined
+ * @returns Effect resolving to selected device metadata or undefined
  */
 const resolveDevice = (
   options: MobileOptions
-): Effect.Effect<string | undefined, StartupError> => {
+): Effect.Effect<Device | undefined, StartupError> => {
   if (options.device === undefined) {
     // No -d flag used
     return Effect.succeed(undefined)
@@ -111,25 +115,40 @@ const resolveDevice = (
     return selectDeviceInteractively(options.platform)
   }
 
+  const fallbackDevice: Device = {
+    id: options.device,
+    name: options.device,
+    type: 'physical',
+  }
+
   // Explicit device ID provided (string)
-  return Effect.succeed(options.device)
+  return getAvailableDevices(options.platform).pipe(
+    Effect.map((devices) => {
+      for (const device of devices) {
+        if (device.id === options.device) return device
+      }
+
+      return fallbackDevice
+    }),
+    // Fall back to physical device if discovery fails (e.g. missing SDK tooling)
+    Effect.catchAll(() => Effect.succeed(fallbackDevice))
+  )
 }
 
 /**
- * Determine host address based on platform and device flag.
- * - No device: ios -> localhost, android -> 10.0.2.2
- * - Device specified: auto-detect LAN IP (or use --host override)
+ * Determine host address based on platform and selected device type.
+ * - Emulator/simulator: ios -> localhost, android -> 10.0.2.2
+ * - Physical device: auto-detect LAN IP (or use --host override)
  */
 const determineHost = (
   platform: 'ios' | 'android',
-  device: string | undefined,
+  device: Device | undefined,
   hostOverride: string | undefined
 ): Effect.Effect<string, LanIpDetectionError> => {
-  if (device) {
-    // Physical device - need LAN IP
+  if (device?.type === 'physical') {
     return detectLanIpWithPrompt(hostOverride)
   }
-  // Simulator/emulator - use appropriate address
+
   return Effect.succeed(platform === 'ios' ? 'localhost' : '10.0.2.2')
 }
 
@@ -149,7 +168,7 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
     console.log('')
 
     // Step 2: Resolve device (interactive selection if -d without value)
-    const device = yield* resolveDevice(options)
+    const selectedDevice = yield* resolveDevice(options)
 
     // Step 3: Find available Metro port
     logWithPrefix('mobile', 'Finding available Metro port...')
@@ -158,7 +177,11 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
 
     // Step 4: Determine host address
     logWithPrefix('mobile', 'Determining host address...')
-    const host = yield* determineHost(options.platform, device, options.host)
+    const host = yield* determineHost(
+      options.platform,
+      selectedDevice,
+      options.host
+    )
     logWithPrefix('mobile', `Host: ${host}`)
     console.log('')
 
@@ -167,7 +190,10 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
     const config: MobileCommandConfig = {
       platform: options.platform,
       buildMode,
-      device,
+      releaseMode: options.releaseMode ?? false,
+      clearCache: options.clearCache ?? false,
+      device: selectedDevice?.id,
+      deviceType: selectedDevice?.type,
       port,
       host,
     }
@@ -244,14 +270,28 @@ program
   .option('--prebuild', 'Run expo prebuild --clean before native build')
   .option('--build', 'Run native build directly (expo run:ios|android)')
   .option(
+    '--release-mode',
+    'Launch native app in release mode (requires --build)'
+  )
+  .option(
     '-d, --device [device]',
     'Target device (without value: interactive selection, with value: use that device ID)'
+  )
+  .option(
+    '--clear-cache',
+    'Clear Metro bundler cache before building (auto-enabled with --release-mode)'
   )
   .option('--host <ip>', 'Override auto-detected LAN IP')
   .action((options: MobileOptions) => {
     // Validate platform
     if (options.platform !== 'ios' && options.platform !== 'android') {
       console.error('Error: --platform must be "ios" or "android"')
+      process.exit(1)
+    }
+
+    // Validate release-mode dependency
+    if (options.releaseMode && !options.build) {
+      console.error('Error: --release-mode requires --build')
       process.exit(1)
     }
 

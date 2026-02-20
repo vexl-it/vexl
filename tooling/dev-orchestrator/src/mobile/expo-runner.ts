@@ -1,6 +1,9 @@
 import {Effect} from 'effect'
 import type {ChildProcess} from 'node:child_process'
 import {spawn} from 'node:child_process'
+import {readdir, rm} from 'node:fs/promises'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
 import type {MobileConfig} from '../config/dev-config-schema.js'
 import {findProjectRoot} from '../config/env-loader.js'
 import {
@@ -32,7 +35,10 @@ export type BuildMode = 'expo-go' | 'prebuild' | 'native-build'
 export interface MobileCommandConfig {
   platform: 'ios' | 'android'
   buildMode: BuildMode
+  releaseMode: boolean
+  clearCache: boolean
   device?: string
+  deviceType?: 'physical' | 'emulator' | 'simulator'
   port: number
   host: string // LAN IP or localhost or 10.0.2.2
 }
@@ -62,21 +68,109 @@ export const buildExpoPublicEnvVars = (
 })
 
 /**
+ * Log resolved API URLs that will be injected into the mobile app.
+ */
+const logResolvedApiUrls = (preset: Record<string, string>): void => {
+  logWithPrefix('expo', 'Resolved local API URLs:')
+  for (const [service, url] of Object.entries(preset)) {
+    logWithPrefix('expo', `  ${service}: ${url}`)
+  }
+}
+
+/**
  * Determine platform type for env var generation.
  *
  * @param platform - Target platform (ios or android)
- * @param device - Optional device name/ID (indicates physical device)
+ * @param deviceType - Optional selected device type
  * @returns MobilePlatform for URL generation
  */
 const getPlatformType = (
   platform: 'ios' | 'android',
-  device?: string
+  deviceType?: 'physical' | 'emulator' | 'simulator'
 ): MobilePlatform => {
-  // If device specified, assume physical device
-  if (device) return 'physical-device'
-  // Otherwise, simulator/emulator based on platform
+  if (deviceType === 'physical') return 'physical-device'
+  if (deviceType === 'simulator') return 'ios-simulator'
+  if (deviceType === 'emulator') return 'android-emulator'
   return platform === 'ios' ? 'ios-simulator' : 'android-emulator'
 }
+
+/**
+ * Remove a directory silently (no error if missing).
+ */
+const rmDir = (path: string): Effect.Effect<boolean> =>
+  Effect.tryPromise({
+    try: async () => {
+      await rm(path, {recursive: true, force: true})
+      return true
+    },
+    catch: () => new Error(`Failed to remove ${path}`),
+  }).pipe(Effect.catchAll(() => Effect.succeed(false)))
+
+/**
+ * Clear Metro bundler cache directories from the system temp folder.
+ *
+ * Metro caches transformed JS modules (including inlined EXPO_PUBLIC_* env vars)
+ * independently of Gradle's build cache. Without clearing these, stale env var
+ * values from previous builds can persist even when --no-build-cache is used.
+ */
+const clearMetroCache = (): Effect.Effect<void> =>
+  Effect.gen(function* () {
+    logWithPrefix('expo', 'Clearing Metro bundler cache...')
+
+    const tmp = tmpdir()
+    const noEntries: string[] = []
+    const entries = yield* Effect.tryPromise({
+      try: async () => await readdir(tmp),
+      catch: () => new Error('Failed to read temp directory'),
+    }).pipe(Effect.catchAll(() => Effect.succeed(noEntries)))
+
+    const metroDirs = entries.filter(
+      (name: string) =>
+        name.startsWith('metro-') || name.startsWith('haste-map-')
+    )
+
+    let cleared = 0
+    yield* Effect.forEach(
+      metroDirs,
+      (dir) =>
+        rmDir(join(tmp, dir)).pipe(
+          Effect.map((ok) => {
+            if (ok) cleared++
+          })
+        ),
+      {concurrency: 'unbounded'}
+    )
+
+    if (cleared > 0) {
+      logWithPrefix(
+        'expo',
+        `Cleared ${String(cleared)} Metro cache director${cleared === 1 ? 'y' : 'ies'}`
+      )
+    } else {
+      logWithPrefix('expo', 'No Metro cache found')
+    }
+  })
+
+/**
+ * Clean the Android Gradle build output that contains the pre-built JS bundle.
+ *
+ * Gradle's up-to-date check does NOT track environment variables as task inputs.
+ * When EXPO_PUBLIC_* values change (e.g. switching between emulator/physical device),
+ * Gradle skips re-bundling the JS because no source files changed, leaving stale
+ * env var values baked into the JS bundle. Deleting the build output forces Gradle
+ * to re-run the bundling task.
+ */
+const cleanAndroidBuildOutput = (mobileAppPath: string): Effect.Effect<void> =>
+  Effect.gen(function* () {
+    const buildDir = join(mobileAppPath, 'android', 'app', 'build')
+    logWithPrefix('expo', 'Cleaning Android build output...')
+    const removed = yield* rmDir(buildDir)
+    if (removed) {
+      logWithPrefix('expo', 'Android build output cleaned')
+    } else {
+      logWithPrefix('expo', 'No Android build output to clean')
+    }
+  })
 
 /**
  * Start Expo in Expo Go mode (npx expo start --dev-client).
@@ -133,12 +227,37 @@ export const runNativeBuild = (
   expoPublicEnvVars: Record<string, string>
 ): Effect.Effect<ChildProcess, ExpoStartupError> =>
   Effect.gen(function* () {
+    // Clear all JS bundler caches when in release mode or explicitly requested.
+    // Both Metro and Gradle cache JS bundles with inlined EXPO_PUBLIC_* values.
+    // Gradle's up-to-date check doesn't track env vars as inputs, so stale
+    // values (e.g. wrong host IP) persist across builds without this cleanup.
+    if (config.releaseMode || config.clearCache) {
+      yield* clearMetroCache()
+      if (config.platform === 'android') {
+        yield* cleanAndroidBuildOutput(mobileAppPath)
+      }
+    }
+
     const args = [
       'expo',
       `run:${config.platform}`,
       '--port',
       String(config.port),
     ]
+
+    // Ensure fresh native artifacts so EXPO_PUBLIC_LOCAL_* changes are always applied.
+    if (config.platform === 'android') {
+      args.push('--no-build-cache')
+    }
+
+    if (config.releaseMode) {
+      if (config.platform === 'android') {
+        args.push('--variant', 'release')
+      } else {
+        args.push('--configuration', 'Release')
+      }
+    }
+
     if (config.device) {
       args.push('--device', config.device)
     }
@@ -195,7 +314,12 @@ export const runPrebuildThenNative = (
             ['expo', 'prebuild', '--clean', '--platform', platform],
             {
               cwd: mobileAppPath,
-              env: {...process.env, EXPO_NO_GIT_STATUS: '1'},
+              env: {
+                ...process.env,
+                EXPO_NO_GIT_STATUS: '1',
+                ENV_PRESET: 'local',
+                ...expoPublicEnvVars,
+              },
               stdio: 'inherit',
               shell: true,
             }
@@ -234,16 +358,13 @@ export const startExpoWithMode = (
     const mobileAppPath = `${projectRoot}/apps/mobile`
 
     // Determine platform type for URL generation
-    const platformType = getPlatformType(config.platform, config.device)
+    const platformType = getPlatformType(config.platform, config.deviceType)
 
     // Generate local service URLs based on platform type
-    // But override host if device specified (use LAN IP from config.host)
-    const preset = yield* generateLocalEnvPreset(
-      config.device ? 'physical-device' : platformType
-    ).pipe(
+    // For physical devices, rewrite generated URLs to the selected LAN host.
+    const preset = yield* generateLocalEnvPreset(platformType).pipe(
       Effect.map((p) => {
-        // If custom host provided (for physical device), rewrite URLs
-        if (config.device && config.host !== 'localhost') {
+        if (config.deviceType === 'physical' && config.host !== 'localhost') {
           const rewritten: Record<string, string> = {}
           for (const [key, url] of Object.entries(p)) {
             // Replace host in URL
@@ -259,12 +380,16 @@ export const startExpoWithMode = (
 
     // Build EXPO_PUBLIC env vars
     const expoPublicEnvVars = buildExpoPublicEnvVars(preset)
+    logResolvedApiUrls(preset)
 
     logWithPrefix('expo', `Platform: ${config.platform}`)
     logWithPrefix('expo', `Build mode: ${config.buildMode}`)
+    logWithPrefix('expo', `Release mode: ${config.releaseMode ? 'ON' : 'OFF'}`)
     logWithPrefix('expo', `Metro port: ${config.port}`)
     if (config.device) {
       logWithPrefix('expo', `Device: ${config.device}`)
+    }
+    if (config.deviceType === 'physical') {
       logWithPrefix('expo', `Host: ${config.host}`)
     }
 

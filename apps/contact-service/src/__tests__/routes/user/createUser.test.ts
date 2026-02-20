@@ -51,6 +51,7 @@ describe('create user', () => {
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -112,6 +113,7 @@ describe('create user', () => {
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -169,6 +171,7 @@ describe('create user', () => {
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders2,
           })
@@ -214,6 +217,7 @@ describe('create user', () => {
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_session_test')
               ),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -261,6 +265,7 @@ describe('create user', () => {
               firebaseToken: null,
               expoToken: Schema.decodeSync(ExpoNotificationToken)('someToken'),
               vexlNotificationToken: Option.none(),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })

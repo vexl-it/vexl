@@ -1,5 +1,7 @@
-import {type KeyHolder} from '@vexl-next/cryptography'
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   type ClubKeyNotFoundInInnerStateError,
   type ClubUuid,
@@ -56,6 +58,7 @@ export default function createNewOfferForMyContacts({
   contactApi,
   publicPart,
   ownerKeyPair,
+  ownerKeyPairV2,
   countryPrefix,
   intendedConnectionLevel,
   onProgress,
@@ -68,9 +71,13 @@ export default function createNewOfferForMyContacts({
   contactApi: ContactApi
   publicPart: OfferPublicPart
   ownerKeyPair: PrivateKeyHolder
+  ownerKeyPairV2: KeyPairV2
   countryPrefix: CountryPrefix
   intendedConnectionLevel: IntendedConnectionLevel
-  intendedClubs: Record<ClubUuid, KeyHolder.PrivateKeyHolder>
+  intendedClubs: Record<
+    ClubUuid,
+    {keyPair: KeyPairV2; oldKeyPair: PrivateKeyHolder}
+  >
   onProgress?: (status: OfferEncryptionProgress) => void
   offerId: OfferId
   serverToClientHashesToHashedPhoneNumbersMap: HashMap.HashMap<
@@ -108,6 +115,7 @@ export default function createNewOfferForMyContacts({
         intendedConnectionLevel,
         contactApi,
         ownerCredentials: ownerKeyPair,
+        ownerKeyPairV2,
         intendedClubs,
         serverToClientHashesToHashedPhoneNumbersMap,
         onProgress,
@@ -133,7 +141,7 @@ export default function createNewOfferForMyContacts({
     )
 
     const offerInfo = yield* _(
-      decryptOffer(ownerKeyPair)(sendOfferToNetworkResponse)
+      decryptOffer(ownerKeyPair, ownerKeyPairV2)(sendOfferToNetworkResponse)
     )
 
     if (onProgress) onProgress({type: 'DONE'})

@@ -16,6 +16,7 @@ import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {deactivateAndClearClubs} from '../../../internalServer/routes/deactivateAndClearClubs'
 import {reportClubDeactivated, reportClubReported} from '../../../metrics'
+import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
 
 export const reportClub = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -31,13 +32,8 @@ export const reportClub = HttpApiBuilder.handler(
       const reportLimitCount = yield* _(clubReportLimistCount)
 
       const member = yield* _(
-        membersDb.findClubMemberByPublicKey({
-          publicKey: req.payload.publicKey,
-        }),
-        Effect.flatten,
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new NotFoundError({message: 'Member not found'})
+        findClubMemberByPublicKeyV1OrV2(
+          Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
         )
       )
 
@@ -60,7 +56,7 @@ export const reportClub = HttpApiBuilder.handler(
       )
 
       const numberOfReportsForUser = yield* _(
-        membersDb.queryNumberOfClubReportsForUser(security['public-key'])
+        membersDb.queryNumberOfClubReportsForUser(security.publicKey)
       )
 
       if (numberOfReportsForUser >= reportLimitCount) {
@@ -104,7 +100,7 @@ export const reportClub = HttpApiBuilder.handler(
 
       yield* _(
         membersDb.insertClubReportedRecord({
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
           reportedAt: new Date(),
         })
       )

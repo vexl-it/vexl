@@ -22,6 +22,11 @@ config.resolver.unstable_enablePackageExports = false
 // config.resolver.disableHierarchicalLookup = true
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Alias libsodium-wrappers to react-native-libsodium for shared packages
+  if (moduleName === 'libsodium-wrappers') {
+    return context.resolveRequest(context, 'react-native-libsodium', platform)
+  }
+
   if (moduleName === 'crypto' || moduleName === 'node:crypto') {
     // return require.resolve(path.resolve(projectRoot, 'merged-crypto'))
 

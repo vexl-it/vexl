@@ -1,6 +1,7 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
@@ -23,6 +24,7 @@ export const CreateUserParams = Schema.Struct({
   clientVersion: Schema.optionalWith(VersionCode, {as: 'Option'}),
   platform: Schema.optionalWith(PlatformName, {as: 'Option'}),
   appSource: Schema.optionalWith(AppSource, {as: 'Option'}),
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
 })
 export type CreateUserParams = Schema.Schema.Type<typeof CreateUserParams>
 
@@ -46,6 +48,7 @@ export const createInsertUser = Effect.gen(function* (_) {
           refreshedAt: new Date(),
           lastNewContentNotificationSentAt: null,
           appSource: params.appSource ?? null,
+          publicKeyV2: params.publicKeyV2 ?? null,
         },
       ])}
       RETURNING

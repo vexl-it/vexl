@@ -24,7 +24,7 @@ import {type Effect, Schema} from 'effect'
 import {fastDeepEqualRemoveUndefineds} from '../../utils/fastDeepEqualRemoveUndefineds'
 
 export type ApiErrorFetchingOffers = Effect.Effect.Error<
-  ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfter']>
+  ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfterPaginated']>
 >
 
 export type ApiErrorFetchingRemovedOffers =

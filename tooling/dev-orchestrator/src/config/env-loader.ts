@@ -60,7 +60,7 @@ export const ensureEnvLocalExists = Effect.gen(function* () {
   yield* Console.log('')
   yield* Console.log('Required values:')
   yield* Console.log(
-    '  - Security keys (SECRET_PUBLIC_KEY, SECRET_PRIVATE_KEY, etc.)'
+    '  - Security keys (SECRET_PUBLIC_KEY, SECRET_PRIVATE_KEY, LIBSODIUM_PRIVATE_KEY, etc.)'
   )
   yield* Console.log('  - External service credentials (if needed)')
   yield* Console.log('')

@@ -6,7 +6,7 @@ import {ExpoStartupError} from '../errors/startup-errors.js'
 
 const execAsync = promisify(exec)
 
-interface Device {
+export interface Device {
   id: string
   name: string
   type: 'physical' | 'emulator' | 'simulator'
@@ -200,7 +200,7 @@ const getIosSimulators = (): Effect.Effect<Device[], ExpoStartupError> =>
 const promptUserForDevice = (
   devices: Device[],
   platform: 'ios' | 'android'
-): Effect.Effect<string, ExpoStartupError> =>
+): Effect.Effect<Device, ExpoStartupError> =>
   Effect.async((resume) => {
     console.log('')
     console.log(
@@ -234,7 +234,7 @@ const promptUserForDevice = (
       if (selected) {
         console.log('')
         console.log(`Selected: ${selected.name}`)
-        resume(Effect.succeed(selected.id))
+        resume(Effect.succeed(selected))
       } else {
         resume(
           Effect.fail(
@@ -266,11 +266,11 @@ export const getAvailableDevices = (
  * Shows list of available devices and prompts user to select one.
  *
  * @param platform - Target platform (ios or android)
- * @returns Effect that resolves to selected device ID
+ * @returns Effect that resolves to selected device
  */
 export const selectDeviceInteractively = (
   platform: 'ios' | 'android'
-): Effect.Effect<string, ExpoStartupError> =>
+): Effect.Effect<Device, ExpoStartupError> =>
   Effect.gen(function* () {
     const devices = yield* getAvailableDevices(platform)
 
@@ -292,7 +292,7 @@ export const selectDeviceInteractively = (
       if (device) {
         console.log('')
         console.log(`Using ${device.name} (only device available)`)
-        return device.id
+        return device
       }
     }
 

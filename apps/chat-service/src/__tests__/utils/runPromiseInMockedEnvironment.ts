@@ -6,8 +6,6 @@ import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
-import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
-import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {mockedDashboardReportsService} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
@@ -29,7 +27,6 @@ export type MockedContexts =
   | RedisService
   | ServerCrypto
   | SqlClient
-  | ChallengeDbService
   | InboxDbService
   | MessagesDbService
   | WhitelistDbService
@@ -50,11 +47,9 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestServerLive),
   Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(TestRequestHeaders.Live),
-  Layer.provideMerge(ChallengeService.Live),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(
     Layer.mergeAll(
-      ChallengeDbService.Live,
       InboxDbService.Live,
       MessagesDbService.Live,
       WhitelistDbService.Live

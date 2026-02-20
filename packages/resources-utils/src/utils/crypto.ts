@@ -5,6 +5,7 @@ import {
   type PrivateKeyHolder,
   type PrivateKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
+import {PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX} from '@vexl-next/domain/src/general/offers'
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {
   CryptoError as CryptoErrorE,
@@ -66,11 +67,13 @@ export function eciesEncryptE(
 ): (data: string) => Effect.Effect<string, CryptoErrorE> {
   return (data) =>
     Effect.tryPromise({
-      try: async () =>
-        await crypto.eciesLegacy.eciesLegacyEncrypt({
+      try: async () => {
+        const ciphertext = await crypto.eciesLegacy.eciesLegacyEncrypt({
           data,
           publicKey,
-        }),
+        })
+        return `${PRIVATE_PAYLOAD_ENCRYPTED_V1_PREFIX}${ciphertext}`
+      },
       catch: (error) =>
         new CryptoErrorE({
           message: 'Error while encrypting data',

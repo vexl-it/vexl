@@ -11,7 +11,7 @@ import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../uti
 import {goldenAvatarTypeAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../hooks/useCreateInbox'
 import {version} from './../../../utils/environment'

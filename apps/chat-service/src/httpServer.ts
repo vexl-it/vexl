@@ -15,8 +15,6 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
-import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
-import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Layer} from 'effect'
@@ -103,12 +101,10 @@ export const HttpServerLive = Layer.mergeAll(
   reportMetricsLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
-  Layer.provide(ChallengeService.Live),
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provide(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(
     Layer.mergeAll(
-      ChallengeDbService.Live,
       InboxDbService.Live,
       MessagesDbService.Live,
       WhitelistDbService.Live

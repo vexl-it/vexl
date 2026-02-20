@@ -8,7 +8,7 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {mockedReportContactsImported} from '@vexl-next/server-utils/src/tests/mockedDashboardReportsService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, LogLevel, Logger, pipe} from 'effect'
+import {Array, Effect, LogLevel, Logger, Option, pipe} from 'effect'
 import {
   ImportContactsQuotaRecord,
   createQuotaRecordKey,
@@ -289,6 +289,7 @@ describe('Import contacts', () => {
               firebaseToken: null,
               expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -362,6 +363,7 @@ describe('Import contacts', () => {
               firebaseToken: null,
               expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -433,6 +435,7 @@ describe('Import contacts', () => {
               firebaseToken: null,
               expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -563,6 +566,7 @@ describe('Import contacts', () => {
               firebaseToken: null,
               expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })
@@ -669,6 +673,7 @@ describe('Import contacts', () => {
               firebaseToken: null,
               expoToken: me.notificationToken,
               vexlNotificationToken: me.vexlNotificationToken,
+              publicKeyV2: Option.none(),
             },
           })
         )

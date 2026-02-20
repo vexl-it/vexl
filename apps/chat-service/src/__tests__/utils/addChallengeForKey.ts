@@ -8,12 +8,12 @@ import {
   ecdsaSignE,
   type EcdsaSignature,
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
+import {type RequestBaseWithChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {
   setAuthHeaders,
   TestRequestHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from './NodeTestingApp'
 
 export class AddingChallengeError extends Schema.TaggedError<AddingChallengeError>(
@@ -35,11 +35,10 @@ export const addChallengeForKey =
     request: T,
     simulateInvalidChallenge?: boolean
   ): Effect.Effect<
-    T & {
-      readonly publicKey: PublicKeyPemBase64
-      readonly senderPublicKey: PublicKeyPemBase64 // Make this compatible with all requests is ignored when ot used
-      readonly signedChallenge: SignedChallenge
-    },
+    T &
+      RequestBaseWithChallenge & {
+        readonly senderPublicKey: PublicKeyPemBase64 // Make this compatible with all requests is ignored when ot used
+      },
     AddingChallengeError,
     HttpClient.HttpClient | TestRequestHeaders
   > =>
@@ -50,7 +49,10 @@ export const addChallengeForKey =
       yield* _(setAuthHeaders(authHeaders))
       const challenge = yield* _(
         client.Challenges.createChallenge({
-          payload: {publicKey: key.publicKeyPemBase64},
+          payload: {
+            publicKey: key.publicKeyPemBase64,
+            publicKeyV2: Option.none(),
+          },
         })
       )
 
@@ -64,10 +66,12 @@ export const addChallengeForKey =
       return {
         ...request,
         publicKey: key.publicKeyPemBase64,
+        publicKeyV2: Option.none(),
         senderPublicKey: key.publicKeyPemBase64,
         signedChallenge: {
           challenge: challenge.challenge,
           signature: signedChallenge,
+          signatureV2: Option.none(),
         },
       }
     }).pipe(Effect.mapError((e) => new AddingChallengeError({cause: e})))

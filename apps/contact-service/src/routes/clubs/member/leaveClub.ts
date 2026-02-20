@@ -3,10 +3,11 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Array, Effect, flow} from 'effect'
+import {Array, Effect, flow, Option} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
 
 export const leaveClub = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -21,13 +22,8 @@ export const leaveClub = HttpApiBuilder.handler(
       const linkDb = yield* _(ClubInvitationLinkDbService)
 
       const member = yield* _(
-        membersDb.findClubMemberByPublicKey({
-          publicKey: req.payload.publicKey,
-        }),
-        Effect.flatten,
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new NotFoundError({message: 'Member not found'})
+        findClubMemberByPublicKeyV1OrV2(
+          Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
         )
       )
 
@@ -62,12 +58,19 @@ export const leaveClub = HttpApiBuilder.handler(
         )
       )
 
-      yield* _(
-        membersDb.deleteClubMember({
+      if (Option.isSome(req.payload.publicKeyV2)) {
+        yield* membersDb.deleteClubMemberByPublicKeyV2({
           clubId: club.id,
-          publicKey: req.payload.publicKey,
+          publicKeyV2: req.payload.publicKeyV2.value,
         })
-      )
+      } else {
+        yield* _(
+          membersDb.deleteClubMember({
+            clubId: club.id,
+            publicKey: req.payload.publicKey,
+          })
+        )
+      }
 
       return {}
     }).pipe(makeEndpointEffect)

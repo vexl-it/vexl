@@ -6,7 +6,7 @@ import {apiAtom} from '../../../../api'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
 import {startBenchmark} from '../../../ActionBenchmarks'
-import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWithMembersAtom'
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
@@ -36,6 +36,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
       set(fetchOffersReportErrorsActionAtom, {
         offersApi: api.offer,
         contactNetworkKeyPair: session.privateKey,
+        contactNetworkKeyPairV2: session.keyPairV2,
         clubs: myStoredClubs,
       })
     )

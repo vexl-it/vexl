@@ -5,7 +5,7 @@ import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
 import {reportOfferCreated} from '../metrics'
 import {hashAdminId} from '../utils/hashAdminId'
@@ -36,7 +36,10 @@ export const createNewOffer = HttpApiBuilder.handler(
 
       yield* _(
         validatePrivatePartsWhenSavingAll({
-          ownersPublicKey: security['public-key'],
+          ownersPublicKey: Option.getOrElse(
+            security.publicKeyV2,
+            () => security.publicKey
+          ),
           privateParts: req.payload.offerPrivateList,
         })
       )
@@ -56,7 +59,8 @@ export const createNewOffer = HttpApiBuilder.handler(
       return yield* _(
         offerDb.queryOfferByPublicKeyAndOfferId({
           id: insertedOffer.offerId,
-          userPublicKey: security['public-key'],
+          userPublicKey: security.publicKey,
+          userPublicKeyV2: security.publicKeyV2,
         }),
         Effect.flatten,
         Effect.catchTag('NoSuchElementException', () =>

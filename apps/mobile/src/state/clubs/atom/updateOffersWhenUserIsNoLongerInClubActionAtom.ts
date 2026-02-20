@@ -1,4 +1,7 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type MyOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
@@ -15,7 +18,10 @@ import {updateOrFilterOffersFromDeletedClubsActionAtom} from '../../marketplace/
 
 const deletePrivatePartsForOffers = (
   connectionsWithOffers: Array<{
-    connections: readonly [PublicKeyPemBase64, ...PublicKeyPemBase64[]]
+    connections: readonly [
+      PublicKeyPemBase64 | PublicKeyV2,
+      ...Array<PublicKeyPemBase64 | PublicKeyV2>,
+    ]
     offer: MyOfferInState
   }>,
   offerApi: OfferApi

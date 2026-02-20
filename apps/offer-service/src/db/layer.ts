@@ -7,6 +7,7 @@ import addIndexOnOfferIdInOfferPrivate from './migrations/0002_add_index_on_offe
 import addCreatedAtOnOfferPrivate from './migrations/0003_add_created_at_on_offer_private'
 import createChallengeTableAndAddIndex from './migrations/0004_create_challenge_table_and_add_index'
 import removeUnusedTables from './migrations/0005_remove_unused_tables'
+import dropChallengeTable from './migrations/0006_drop_challenge_table'
 
 const migrations = [
   {
@@ -33,6 +34,11 @@ const migrations = [
     id: 5,
     name: 'Remove unused tables',
     migrationEffect: removeUnusedTables,
+  },
+  {
+    id: 6,
+    name: 'Drop challenge table',
+    migrationEffect: dropChallengeTable,
   },
 ] as const
 

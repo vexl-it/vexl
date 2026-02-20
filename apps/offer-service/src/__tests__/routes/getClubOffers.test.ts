@@ -9,15 +9,14 @@ import {
   type PrivatePayloadEncrypted,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
-import {fromJsDate} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type CreateNewOfferRequest,
   type CreateNewOfferResponse,
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import dayjs from 'dayjs'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   createMockedUser,
@@ -58,19 +57,19 @@ beforeAll(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
+            payloadPrivate: '0payloadPrivateForMe' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForMe.publicKeyPemBase64,
           },
         ],
@@ -100,19 +99,19 @@ beforeAll(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
+            payloadPrivate: '0payloadPrivateForMe' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForMe.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer2payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
         ],
@@ -138,19 +137,19 @@ beforeAll(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer3payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer3payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer3payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer3payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
+            payloadPrivate: '0payloadPrivateForMe' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForMe.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer3payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer3payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
         ],
@@ -179,272 +178,6 @@ beforeAll(async () => {
       `)
     })
   )
-})
-
-describe('Get club offers for me modified or created after', () => {
-  it('Returns club offers for me', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '3 days'
-          WHERE
-            offer_id = ${offer1.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '2 days'
-          WHERE
-            offer_id = ${offer2.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '7 days'
-          WHERE
-            offer_id = ${offer3.offerId};
-        `)
-        const client = yield* _(NodeTestingApp)
-        const modifiedAt = fromJsDate(dayjs().subtract(2, 'days').toDate())
-
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
-
-        yield* _(setAuthHeaders(me.authHeaders))
-
-        const clubOffers = yield* _(
-          client.getClubOffersForMeModifiedOrCreatedAfter({
-            payload: {
-              modifiedAt,
-              publicKey: requestWithChallenge.publicKey,
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-          })
-        )
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW()
-          WHERE
-            offer_id = ${offer2.offerId};
-        `)
-
-        expect(clubOffers.offers.map((o) => o.offerId).join()).toEqual(
-          [offer2.offerId].join()
-        )
-      })
-    )
-  })
-
-  it('Returns club offers for me that have public parts not modified after but private parts were uploaded after', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '2 days'
-          WHERE
-            offer_id = ${offer1.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '2 days'
-          WHERE
-            offer_id = ${offer2.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '2 days'
-          WHERE
-            offer_id = ${offer3.offerId};
-        `)
-
-        yield* _(sql`
-          UPDATE offer_private
-          SET
-            created_at = NOW()
-          WHERE
-            id IN (
-              SELECT
-                offer_private.id
-              FROM
-                offer_public
-                LEFT JOIN offer_private ON offer_public.id = offer_private.offer_id
-              WHERE
-                offer_public.offer_id = ${offer2.offerId}
-            )
-        `)
-
-        const client = yield* _(NodeTestingApp)
-        const modifiedAt = fromJsDate(dayjs().subtract(0, 'days').toDate())
-
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
-        yield* _(setAuthHeaders(me.authHeaders))
-        const clubOffers = yield* _(
-          client.getClubOffersForMeModifiedOrCreatedAfter({
-            payload: {
-              modifiedAt,
-              publicKey: requestWithChallenge.publicKey,
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-          })
-        )
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW()
-          WHERE
-            offer_id = ${offer2.offerId};
-        `)
-
-        yield* _(sql`
-          UPDATE offer_private
-          SET
-            created_at = now() - interval '10 day';
-        `)
-
-        expect(clubOffers.offers.map((o) => o.offerId).join()).toEqual(
-          [offer2.offerId].join()
-        )
-      })
-    )
-  })
-
-  it('Does not return expired club offers', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '3 days'
-          WHERE
-            offer_id = ${offer1.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            refreshed_at = NOW() - INTERVAL '8 days'
-          WHERE
-            offer_id = ${offer2.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            refreshed_at = NOW() - INTERVAL '8 days'
-          WHERE
-            offer_id = ${offer3.offerId};
-        `)
-        const client = yield* _(NodeTestingApp)
-        const modifiedAt = fromJsDate(dayjs().subtract(2, 'days').toDate())
-
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
-        yield* _(setAuthHeaders(me.authHeaders))
-        const clubOffers = yield* _(
-          client.getClubOffersForMeModifiedOrCreatedAfter({
-            payload: {
-              modifiedAt,
-              publicKey: requestWithChallenge.publicKey,
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-          })
-        )
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW(),
-            refreshed_at = NOW()
-          WHERE
-            ${sql.in('offer_id', [
-            offer1.offerId,
-            offer2.offerId,
-            offer3.offerId,
-          ])}
-        `)
-
-        expect(clubOffers.offers.map((o) => o.offerId)).toEqual([])
-      })
-    )
-  })
-
-  it('Does not return flagged club offers', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const sql = yield* _(SqlClient.SqlClient)
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '3 days'
-          WHERE
-            offer_id = ${offer1.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            report = 3
-          WHERE
-            offer_id = ${offer2.offerId};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            report = 3
-          WHERE
-            offer_id = ${offer3.offerId};
-        `)
-        const client = yield* _(NodeTestingApp)
-        const modifiedAt = fromJsDate(dayjs().subtract(2, 'days').toDate())
-
-        const requestWithChallenge = yield* _(
-          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
-        )
-
-        yield* _(setAuthHeaders(me.authHeaders))
-        const clubOffers = yield* _(
-          client.getClubOffersForMeModifiedOrCreatedAfter({
-            payload: {
-              modifiedAt,
-              publicKey: requestWithChallenge.publicKey,
-              signedChallenge: requestWithChallenge.signedChallenge,
-            },
-          })
-        )
-
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW(),
-            report = 0
-          WHERE
-            ${sql.in('offer_id', [
-            offer1.offerId,
-            offer2.offerId,
-            offer3.offerId,
-          ])};
-        `)
-
-        expect(clubOffers.offers.map((o) => o.offerId)).toEqual([])
-      })
-    )
-  })
 })
 
 describe('Get club offers for me modified or created after paginated', () => {
@@ -488,6 +221,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           })
@@ -506,6 +240,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge2.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge2.signedChallenge,
               nextPageToken: response1.nextPageToken!,
             },
@@ -560,6 +295,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           })
@@ -607,6 +343,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           })
@@ -659,6 +396,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           })
@@ -711,6 +449,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           })
@@ -775,6 +514,7 @@ describe('Get club offers for me modified or created after paginated', () => {
             payload: {
               limit,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           })
@@ -816,6 +556,7 @@ describe('Get club offers for me modified or created after paginated', () => {
               limit,
               nextPageToken: 'invalid',
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
           }),
@@ -839,20 +580,20 @@ describe('Get removed club offers', () => {
           countryPrefix: Schema.decodeSync(CountryPrefix)(420),
           offerPrivateList: [
             {
-              payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
+              payloadPrivate: '0payloadPrivate' as PrivatePayloadEncrypted,
               userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
             },
             {
-              payloadPrivate: 'payloadPrivate' as PrivatePayloadEncrypted,
+              payloadPrivate: '0payloadPrivate' as PrivatePayloadEncrypted,
               userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
             },
             {
-              payloadPrivate: 'payloadPrivate2' as PrivatePayloadEncrypted,
+              payloadPrivate: '0payloadPrivate2' as PrivatePayloadEncrypted,
               userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
             },
 
             {
-              payloadPrivate: 'payloadPrivateForMe' as PrivatePayloadEncrypted,
+              payloadPrivate: '0payloadPrivateForMe' as PrivatePayloadEncrypted,
               userPublicKey: clubKeypairForMe.publicKeyPemBase64,
             },
           ],
@@ -881,6 +622,7 @@ describe('Get removed club offers', () => {
           client.getRemovedClubOffers({
             payload: {
               publicKey: firstRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: firstRequestWithChallenge.signedChallenge,
               offerIds,
             },
@@ -905,6 +647,7 @@ describe('Get removed club offers', () => {
           client.getRemovedClubOffers({
             payload: {
               publicKey: secondRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: secondRequestWithChallenge.signedChallenge,
               offerIds,
             },
@@ -945,6 +688,7 @@ describe('Get removed club offers', () => {
           client.getRemovedClubOffers({
             payload: {
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
               offerIds,
             },
@@ -991,6 +735,7 @@ describe('Get removed club offers', () => {
           client.getRemovedClubOffers({
             payload: {
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
               offerIds,
             },
@@ -1006,6 +751,68 @@ describe('Get removed club offers', () => {
         `)
 
         expect(clubOffers.offerIds.join()).toEqual([offer2.offerId].join())
+      })
+    )
+  })
+
+  it('Does not report existing club offers as removed when private part exists only under public key v2', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        const client = yield* _(NodeTestingApp)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+
+        yield* _(sql`
+          UPDATE offer_private
+          SET
+            user_public_key = ${publicKeyV2.publicKey}
+          WHERE
+            id IN (
+              SELECT
+                offer_private.id
+              FROM
+                offer_public
+                LEFT JOIN offer_private ON offer_public.id = offer_private.offer_id
+              WHERE
+                offer_public.offer_id = ${offer1.offerId}
+                AND offer_private.user_public_key = ${clubKeypairForMe.publicKeyPemBase64}
+            );
+        `)
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders, publicKeyV2)({})
+        )
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const removedOffers = yield* _(
+          client.getRemovedClubOffers({
+            payload: {
+              publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: requestWithChallenge.publicKeyV2,
+              signedChallenge: requestWithChallenge.signedChallenge,
+              offerIds: [offer1.offerId],
+            },
+          })
+        )
+
+        yield* _(sql`
+          UPDATE offer_private
+          SET
+            user_public_key = ${clubKeypairForMe.publicKeyPemBase64}
+          WHERE
+            id IN (
+              SELECT
+                offer_private.id
+              FROM
+                offer_public
+                LEFT JOIN offer_private ON offer_public.id = offer_private.offer_id
+              WHERE
+                offer_public.offer_id = ${offer1.offerId}
+                AND offer_private.user_public_key = ${publicKeyV2.publicKey}
+            );
+        `)
+
+        expect(removedOffers.offerIds).toEqual([])
       })
     )
   })

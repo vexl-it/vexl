@@ -89,6 +89,7 @@ import {ActionBenchmarks} from './components/ActionBenchmarks'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
+import NewCrypto from './components/NewCrypto'
 import Preferences from './components/Preferences'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
 import {
@@ -179,6 +180,8 @@ function DebugScreen(): React.ReactElement {
               {JSON.stringify(notificationToken, null, 2)}
             </Text>
             <Spacer />
+            <NewCrypto />
+            <Spacer />
             <ActionBenchmarks />
             <Spacer />
             <LanguagePicker />
@@ -261,6 +264,7 @@ function DebugScreen(): React.ReactElement {
                   effectToTaskEither(
                     getNewContactNetworkOffersAndDecryptPaginated({
                       keyPair: session.privateKey,
+                      keyPairV2: session.keyPairV2,
                       offersApi: store.get(apiAtom).offer,
                       lastPrivatePartIdBase64: undefined,
                     })

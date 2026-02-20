@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {ChatId} from '@vexl-next/domain/src/general/messaging'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -16,7 +17,7 @@ export const ClubWithMembers = Schema.Struct({
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
-  members: Schema.Array(PublicKeyPemBase64),
+  members: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
   isModerator: Schema.Boolean,
   stats: Schema.optionalWith(ClubStats, {
     default: () => ({

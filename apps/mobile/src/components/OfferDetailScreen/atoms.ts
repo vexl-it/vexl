@@ -6,7 +6,7 @@ import {Array, Effect, Either, Option, Record} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../api'
-import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/offersState'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
@@ -100,7 +100,8 @@ export const reportOfferActionAtom = atom(
           Option.map(([_, keyPair]) =>
             api.offer.reportClubOffer({
               offerId: offer.offerInfo.offerId,
-              keyPair,
+              keyPair: keyPair.oldKeyPair,
+              keyPairV2: keyPair.keyPair,
             })
           ),
           Effect.flatten
@@ -123,7 +124,8 @@ export const reportOfferActionAtom = atom(
                   .reportClub({
                     clubUuid,
                     offerId: offer.offerInfo.offerId,
-                    keyPair,
+                    keyPair: keyPair.oldKeyPair,
+                    keyPairV2: keyPair.keyPair,
                   })
                   .pipe(Effect.either)
               )

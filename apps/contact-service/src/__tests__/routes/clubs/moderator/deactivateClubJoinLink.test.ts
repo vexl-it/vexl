@@ -83,6 +83,7 @@ beforeEach(async () => {
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+          publicKeyV2: null,
         })
       )
 
@@ -171,6 +172,7 @@ describe('Deactivate link', () => {
             lastRefreshedAt: new Date(),
             notificationToken: null,
             vexlNotificationToken: null,
+            publicKeyV2: null,
           })
         )
 
@@ -250,6 +252,7 @@ describe('Deactivate link', () => {
               signedChallenge: {
                 challenge: challenge.signedChallenge.challenge,
                 signature: 'invalidSignature' as SignedChallenge['signature'],
+                signatureV2: Option.none(),
               },
             },
           }),

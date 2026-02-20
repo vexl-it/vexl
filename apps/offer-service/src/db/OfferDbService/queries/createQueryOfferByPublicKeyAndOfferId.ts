@@ -1,5 +1,6 @@
-import {SqlResolver} from '@effect/sql'
+import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
+import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {OfferId} from '@vexl-next/domain/src/general/offers'
@@ -17,6 +18,7 @@ import {
 
 export const QueryOfferByPublicKeyAndOfferIdRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
+  userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
   id: OfferId,
   skipValidation: Schema.optional(Schema.Boolean),
 })
@@ -28,41 +30,39 @@ export const createQueryOfferByPublicKeyAndOfferId = Effect.gen(function* (_) {
   const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
   const offerReportFilter = yield* _(offerReportFilterConfig)
 
-  const QueryOfferByPublicKeyAndOfferId = yield* _(
-    SqlResolver.grouped('QueryOfferByPublicKeyAndOfferId', {
-      Request: QueryOfferByPublicKeyAndOfferIdRequest,
-      RequestGroupKey: (req) => `${req.userPublicKey}:${req.id}`,
-      Result: OfferSelectToOfferParts,
-      ResultGroupKey: (result) =>
-        `${result.privatePart.userPublicKey}:${result.publicPart.offerId}`,
-      execute: (query) => {
-        return sql`
-          SELECT
-            ${offerSelect(sql)}
-          FROM
-            offer_public
-            INNER JOIN offer_private ON offer_public.id = offer_private.offer_id
-          WHERE
-            ${sql.or(
-            Array.map(query, (one) =>
-              sql.and([
-                sql`offer_public.offer_id = ${one.id}`,
-                sql`offer_private.user_public_key = ${one.userPublicKey}`,
-                one.skipValidation
-                  ? 'true'
-                  : offerNotExpired(sql, expirationPeriodDays),
-                one.skipValidation
-                  ? 'true'
-                  : offerNotFlagged(sql, offerReportFilter),
-              ])
-            )
-          )}
-        `
-      },
-    })
-  )
+  const query = SqlSchema.findAll({
+    Request: QueryOfferByPublicKeyAndOfferIdRequest,
+    Result: OfferSelectToOfferParts,
+    execute: (params) => sql`
+      SELECT
+        ${offerSelect(sql)}
+      FROM
+        offer_public
+        INNER JOIN offer_private ON offer_public.id = offer_private.offer_id
+      WHERE
+        ${sql.and([
+        sql`offer_public.offer_id = ${params.id}`,
+        sql.or([
+          sql`offer_private.user_public_key = ${params.userPublicKey}`,
+          sql`
+            offer_private.user_public_key = ${params.userPublicKeyV2 ??
+            // This is important to avoid comparing the v2 public key with null in the database,
+            // which would return all offers where the v2 public key is null
+            // (which is all offers created before we introduced the v2 public key)
+            'no-key'}
+          `,
+        ]),
+        params.skipValidation
+          ? 'true'
+          : offerNotExpired(sql, expirationPeriodDays),
+        params.skipValidation
+          ? 'true'
+          : offerNotFlagged(sql, offerReportFilter),
+      ])}
+    `,
+  })
   return flow(
-    QueryOfferByPublicKeyAndOfferId.execute,
+    query,
     Effect.map(Array.head),
     Effect.catchAll((e) =>
       Effect.zipRight(

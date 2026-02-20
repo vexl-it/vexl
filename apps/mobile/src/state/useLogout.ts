@@ -13,7 +13,7 @@ import notEmpty from '../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
-import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
 import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from './connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {deleteOffersActionAtom} from './marketplace/atoms/deleteOffersActionAtom'
@@ -64,9 +64,13 @@ export const logoutActionAtom = atom(null, async (get, set) => {
         get(clubsWithMembersAtom),
         Array.filterMap((club) =>
           Record.get(get(clubsToKeyHolderAtom), club.club.uuid).pipe(
-            Option.map((keyPair) =>
+            Option.map((clubKeys) =>
               get(apiAtom)
-                .contact.leaveClub({clubUuid: club.club.uuid, keyPair})
+                .contact.leaveClub({
+                  clubUuid: club.club.uuid,
+                  keyPair: clubKeys.oldKeyPair,
+                  keyPairV2: clubKeys.keyPair,
+                })
                 .pipe(Effect.ignore)
             )
           )

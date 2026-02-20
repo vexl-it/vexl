@@ -71,3 +71,7 @@ export const s3Config = Config.all({
   region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),
   bucketName: Config.string('S3_BUCKET_NAME'),
 })
+
+export const appVersionSupportingV2KeysConfig = Config.number(
+  'APP_VERSION_SUPPORTING_V2_KEYS'
+)

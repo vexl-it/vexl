@@ -7,7 +7,7 @@ import {showErrorAlert} from '../../../../components/ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../../../components/LoadingOverlayProvider'
 import {type DeepLinkRequestClubAdmition} from '../../../../utils/deepLinks/parseDeepLink'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {clubsToKeyHolderAtom} from '../clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from '../clubsWithMembersAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from '../refreshClubsActionAtom'
 import {SelectClubComponent} from './SelectClubComponent'
@@ -91,9 +91,11 @@ export const admitUserToClubActionAtom = atom(
             notificationToken: link.notificationToken,
             vexlNotificationToken: link.vexlNotificationToken,
             publicKey: link.publicKey,
+            publicKeyV2: link.publicKeyV2,
           },
           clubUuid: get(selectedClubAtom).club.uuid,
-          keyPair: clubKey,
+          keyPair: clubKey.oldKeyPair,
+          keyPairV2: clubKey.keyPair,
         }),
         Effect.ensuring(
           Effect.sync(() => {

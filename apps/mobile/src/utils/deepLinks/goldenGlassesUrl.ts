@@ -40,7 +40,10 @@ export const handleGoldenGlassesDeepLinkActionAtom = atom(null, (get, set) => {
               offerPrivateList: [],
             }),
             Effect.flatMap((encryptedPayload) =>
-              decryptOffer(session.privateKey)(encryptedPayload)
+              decryptOffer(
+                session.privateKey,
+                session.keyPairV2
+              )(encryptedPayload)
             )
           )
         ),

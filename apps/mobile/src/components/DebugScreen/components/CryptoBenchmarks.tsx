@@ -34,6 +34,23 @@ const dummy10Implementation = createDummyImplementation(10)
 
 // setEcdhComputeSecretImplementation(createDummyImplementation(2))
 
+function formatGeneratorError(error: unknown): string {
+  if (error instanceof Error) {
+    const cause =
+      error.cause === undefined ? '' : `\nCause: ${String(error.cause)}`
+    const stack = error.stack === undefined ? '' : `\n${error.stack}`
+    return `${error.name}: ${error.message}${cause}${stack}`
+  }
+
+  if (typeof error === 'string') return error
+
+  try {
+    return JSON.stringify(error, null, 2)
+  } catch {
+    return String(error)
+  }
+}
+
 export default function CryptoBenchmarks(): React.ReactElement {
   const [text, setText] = useState('Not started yet')
 
@@ -54,11 +71,16 @@ export default function CryptoBenchmarks(): React.ReactElement {
     generator: AsyncGenerator<string, any, unknown>
   ) {
     setText('')
-    let curr = await generator.next()
+    try {
+      let curr = await generator.next()
 
-    while (!curr.done) {
-      addText(curr.value)
-      curr = await generator.next()
+      while (!curr.done) {
+        addText(curr.value)
+        curr = await generator.next()
+      }
+    } catch (error) {
+      addText('🚨 Generator failed')
+      addText(formatGeneratorError(error))
     }
   }
 

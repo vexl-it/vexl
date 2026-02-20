@@ -4,6 +4,7 @@ import {Effect, Layer, String} from 'effect'
 import {databaseConfig} from '../configs'
 import initialMigraiton from './migrations/0001_initial'
 import removeUnusedTables from './migrations/0002_remove_unused_tables'
+import addPublicKeyV2ToUsers from './migrations/0003_add_public_key_v2_to_users'
 
 const migrations = [
   {
@@ -15,6 +16,11 @@ const migrations = [
     id: 2,
     name: 'remove_unused_tables',
     migrationEffect: removeUnusedTables,
+  },
+  {
+    id: 3,
+    name: 'add_public_key_v2_to_users',
+    migrationEffect: addPublicKeyV2ToUsers,
   },
 ] as const
 

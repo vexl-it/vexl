@@ -1,5 +1,8 @@
 import {type SqlClient} from '@effect/sql/SqlClient'
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -37,7 +40,7 @@ export interface UserNotificationServiceOperations {
   ) => Effect.Effect<void>
   notifyOthersAboutNewClubUser: (
     clubUuid: ClubUuid,
-    triggeringUser: PublicKeyPemBase64
+    triggeringUser: PublicKeyPemBase64 | PublicKeyV2
   ) => Effect.Effect<void, UnexpectedServerError>
   notifyUserAboutClubAddmission: (
     publicKey: PublicKeyPemBase64
@@ -180,7 +183,7 @@ export class UserNotificationService extends Context.Tag(
           ),
         notifyOthersAboutNewClubUser: (
           clubUuid: ClubUuid,
-          triggeringUser: PublicKeyPemBase64
+          triggeringUser: PublicKeyPemBase64 | PublicKeyV2
         ) =>
           Effect.gen(function* (_) {
             const club = yield* _(
@@ -210,7 +213,11 @@ export class UserNotificationService extends Context.Tag(
                   one.notificationToken !== null ||
                   one.vexlNotificationToken !== null
               ),
-              Array.filter((one) => one.publicKey !== triggeringUser),
+              Array.filter(
+                (one) =>
+                  one.publicKey !== triggeringUser &&
+                  one.publicKeyV2 !== triggeringUser
+              ),
               Array.map(
                 (entry) =>
                   new NewClubUserNotificationMqEntry({

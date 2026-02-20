@@ -1,9 +1,13 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Effect, HashSet, Schema, type Option} from 'effect'
+import {Effect, HashSet, type Option, Schema} from 'effect'
 import reportError from '../../utils/reportError'
 import {type ClubWithMembers} from './domain'
 
@@ -21,23 +25,33 @@ export class FetchingClubError extends Schema.TaggedError<FetchingClubError>(
 
 export const fetchClubWithMembersReportApiErrors = ({
   keyPair,
+  oldKeyPair,
   contactApi,
   notificationToken,
   vexlNotificationToken,
 }: {
-  keyPair: PrivateKeyHolder
+  oldKeyPair: PrivateKeyHolder
+  keyPair: KeyPairV2
   contactApi: ContactApi
   notificationToken: Option.Option<ExpoNotificationToken>
   vexlNotificationToken: Option.Option<VexlNotificationToken>
+  clubUuid?: ClubUuid
 }): Effect.Effect<
   ClubWithMembers,
   ClubNotFoundError | FetchingClubError,
   never
 > =>
   Effect.gen(function* (_) {
+    // Get V2 public key for this club if available
+
     const clubInfo = yield* _(
       contactApi
-        .getClubInfo({keyPair, notificationToken, vexlNotificationToken})
+        .getClubInfo({
+          keyPair: oldKeyPair,
+          keyPairV2: keyPair,
+          notificationToken,
+          vexlNotificationToken,
+        })
         .pipe(
           Effect.catchTag('NotFoundError', (e) => {
             return Effect.fail({_tag: 'clubDoesNotExist', e})
@@ -48,7 +62,8 @@ export const fetchClubWithMembersReportApiErrors = ({
     const clubMembers = yield* _(
       contactApi.getClubContacts({
         clubUuid: clubInfo.clubInfoForUser.club.uuid,
-        keyPair,
+        keyPair: oldKeyPair,
+        keyPairV2: keyPair,
       })
     )
 

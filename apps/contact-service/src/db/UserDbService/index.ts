@@ -56,12 +56,12 @@ import {
   createUpdateExpoToken,
   type UpdateExpoTokenParams,
 } from './queries/createUpdateExpoToken'
-import {
-  createUpdateFirebaseToken,
-  type UpdateFirebaseTokenParams,
-} from './queries/createUpdateFirebaseToken'
 import {createUpdateInvalidateExpoToken} from './queries/createUpdateInvalidateExpoToken'
 import {createUpdateInvalidateFirebaseToken} from './queries/createUpdateInvalidateFirebaseToken'
+import {
+  createUpdatePublicKeyV2,
+  type UpdatePublicKeyV2Params,
+} from './queries/createUpdatePublicKeyV2'
 import {
   createUpdateRefreshUser,
   type UpdateRefreshUserParams,
@@ -70,10 +70,6 @@ import {
   createUpdateSetRefreshedAtToNull,
   type UpdateSetRefreshedAtParams,
 } from './queries/createUpdateSetRefreshedAtToNull'
-import {
-  createUpdateUserHash,
-  type UpdateUserHashParams,
-} from './queries/createUpdateUserHash'
 import {
   createUpdateUserInitialImportDone,
   type UpdateUserInitialImportDoneParams,
@@ -158,10 +154,6 @@ export interface UserDbOperations {
     args: UpdateRefreshUserParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  updateFirebaseToken: (
-    args: UpdateFirebaseTokenParams
-  ) => Effect.Effect<void, UnexpectedServerError>
-
   updateExpoToken: (
     args: UpdateExpoTokenParams
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -178,16 +170,16 @@ export interface UserDbOperations {
     args: UpdateSetRefreshedAtParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  updateUserHash: (
-    args: UpdateUserHashParams
-  ) => Effect.Effect<void, UnexpectedServerError>
-
   updateUserInitialImportDone: (
     args: UpdateUserInitialImportDoneParams
   ) => Effect.Effect<void, UnexpectedServerError>
 
   updateAppSourceForUser: (
     args: UpdateAppSourceForUserParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  updatePublicKeyV2: (
+    args: UpdatePublicKeyV2Params
   ) => Effect.Effect<void, UnexpectedServerError>
 }
 
@@ -207,7 +199,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createDeleteUserByPublicKeyAndHash
       )
       const updateRefreshUser = yield* _(createUpdateRefreshUser)
-      const updateFirebaseToken = yield* _(createUpdateFirebaseToken)
       const updateExpoToken = yield* _(createUpdateExpoToken)
       const updateInvalidateFirebaseToken = yield* _(
         createUpdateInvalidateFirebaseToken
@@ -251,13 +242,12 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createFindVexlNotificationTokensForNewContentNotification
       )
 
-      const updateUserHash = yield* _(createUpdateUserHash)
-
       const updateUserInitialImportDone = yield* _(
         createUpdateUserInitialImportDone
       )
 
       const updateAppSourceForUser = yield* _(createUpdateAppSourceForUser)
+      const updatePublicKeyV2 = yield* _(createUpdatePublicKeyV2)
 
       return {
         insertUser,
@@ -265,7 +255,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findUserByPublicKeyAndHash,
         deleteUserByPublicKeyAndHash,
         updateRefreshUser,
-        updateFirebaseToken,
         updateExpoToken,
         updateInvalidateFirebaseToken,
         updateInvalidateExpoToken,
@@ -278,9 +267,9 @@ export class UserDbService extends Context.Tag('UserDbService')<
         updateSetRefreshedAtToNull,
         findFirebaseTokensForNewContentNotification,
         findVexlNotificationTokensForNewContentNotification,
-        updateUserHash,
         updateUserInitialImportDone,
         updateAppSourceForUser,
+        updatePublicKeyV2,
       }
     })
   )

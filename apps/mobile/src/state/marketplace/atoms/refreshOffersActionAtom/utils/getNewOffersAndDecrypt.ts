@@ -1,3 +1,4 @@
+import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   type FriendLevel,
@@ -36,6 +37,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
     {
       offersApi,
       keyPair,
+      keyPairV2,
       lastPrivatePartIdBase64,
     }: {
       /**
@@ -46,6 +48,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
        * KeyPair to decrypt offers with.
        */
       keyPair: PrivateKeyHolder
+      keyPairV2: KeyPairV2
       /**
        * Only offers with ids that were not previously fetched will be fetched.
        */
@@ -70,7 +73,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
         allOffers,
         Array.map(
           flow(
-            decryptOffer(keyPair),
+            decryptOffer(keyPair, keyPairV2),
             Effect.filterOrFail(
               validateOfferIsFromContactNetwork,
               (offerInfo) => new NotOfferFromContactNetworkError({offerInfo})

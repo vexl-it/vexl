@@ -4,12 +4,12 @@ import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.bran
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
 import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {type CreateChallengeRequest} from '../../challenges/contracts'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
-import {type CreateChallengeRequest} from '../chat/contracts'
 import {
   addChallengeToRequest2,
   type RequestWithGeneratableChallenge,
@@ -20,9 +20,7 @@ import {
   type DeleteOfferRequest,
   type DeletePrivatePartRequest,
   type GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest,
-  type GetClubOffersForMeCreatedOrModifiedAfterRequest,
   type GetOffersForMeCreatedOrModifiedAfterPaginatedRequest,
-  type GetOffersForMeCreatedOrModifiedAfterRequest,
   type RefreshOfferRequest,
   type RemovedClubOfferIdsRequest,
   type RemovedOfferIdsRequest,
@@ -100,13 +98,6 @@ export function api({
     )
 
     return {
-      getOffersForMeModifiedOrCreatedAfter: (
-        req: GetOffersForMeCreatedOrModifiedAfterRequest
-      ) =>
-        client.getOffersForMeModifiedOrCreatedAfter({
-          urlParams: req,
-          headers: commonAndSecurityHeaders,
-        }),
       getOffersForMeModifiedOrCreatedAfterPaginated: (
         req: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
       ) =>
@@ -114,16 +105,6 @@ export function api({
           urlParams: req,
           headers: commonAndSecurityHeaders,
         }),
-      getClubOffersForMeModifiedOrCreatedAfter: (
-        body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterRequest>
-      ) =>
-        addChallenge(body).pipe(
-          Effect.flatMap((body) =>
-            client.getClubOffersForMeModifiedOrCreatedAfter({
-              payload: body,
-            })
-          )
-        ),
       getClubOffersForMeModifiedOrCreatedAfterPaginated: (
         body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest>
       ) =>

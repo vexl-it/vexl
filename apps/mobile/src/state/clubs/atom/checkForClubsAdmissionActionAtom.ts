@@ -12,7 +12,7 @@ import {fetchClubWithMembersReportApiErrors} from '../utils'
 import {
   clubsKeyHolderStorageAtom,
   keysWaitingForAdmissionAtom,
-} from './clubsToKeyHolderAtom'
+} from './clubsToKeyHolderV2Atom'
 import {upsertClubWithMembersActionAtom} from './clubsWithMembersAtom'
 
 export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
@@ -38,7 +38,8 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
 
           const clubWithMembers: ClubWithMembers = yield* _(
             fetchClubWithMembersReportApiErrors({
-              keyPair: key,
+              oldKeyPair: key.oldKeyPair,
+              keyPair: key.keyPair,
               contactApi: api.contact,
               notificationToken,
               vexlNotificationToken,
@@ -58,7 +59,8 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
             // Leaving club
             yield* _(
               api.contact.leaveClub({
-                keyPair: key,
+                keyPair: key.oldKeyPair,
+                keyPairV2: key.keyPair,
                 clubUuid: clubWithMembers.club.uuid,
               }),
               ignoreReportErrors(
@@ -72,7 +74,7 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
               ...data,
               waitingForAdmission: Array.filter(
                 data.waitingForAdmission,
-                (k) => k.privateKeyPemBase64 !== key.privateKeyPemBase64
+                (k) => k.keyPair.privateKey !== key.keyPair.privateKey
               ),
             }))
             return
@@ -83,7 +85,7 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
             data: {...data.data, [clubWithMembers.club.uuid]: key},
             waitingForAdmission: Array.filter(
               data.waitingForAdmission,
-              (k) => k.privateKeyPemBase64 !== key.privateKeyPemBase64
+              (k) => k.keyPair.privateKey !== key.keyPair.privateKey
             ),
           }))
 

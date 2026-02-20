@@ -1,5 +1,8 @@
 import {SqlClient} from '@effect/sql'
-import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  PublicKeyV2,
+  generatePrivateKey,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
@@ -36,6 +39,8 @@ const userKey = generatePrivateKey()
 const user1 = generatePrivateKey()
 const user2 = generatePrivateKey()
 const user3 = generatePrivateKey()
+const toPublicKeyV2 = (publicKey: string): typeof PublicKeyV2.Type =>
+  Schema.decodeSync(PublicKeyV2)(`V2_PUB_${publicKey}`)
 
 const club = {
   clubImageUrl: SOME_URL,
@@ -85,6 +90,7 @@ beforeEach(async () => {
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+          publicKeyV2: null,
         })
       )
     })
@@ -104,6 +110,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -119,6 +126,7 @@ describe('Add user to the club', () => {
               ...(yield* _(generateAndSignChallenge(user1))),
               notificationToken: Option.none(),
               vexlNotificationToken: Option.none(),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -143,6 +151,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -158,6 +167,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user2.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user2.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -173,6 +183,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user3.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user3.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -198,6 +209,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -213,6 +225,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -241,6 +254,7 @@ describe('Add user to the club', () => {
             lastRefreshedAt: new Date(),
             notificationToken: null,
             vexlNotificationToken: null,
+            publicKeyV2: null,
           })
         )
 
@@ -252,6 +266,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
@@ -280,6 +295,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(nonModeratorMember))),
@@ -306,6 +322,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: generateClubUuid(),
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -334,12 +351,14 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...challenge,
               signedChallenge: {
                 challenge: challenge.signedChallenge.challenge,
                 signature: 'invalidSignature' as SignedChallenge['signature'],
+                signatureV2: Option.none(),
               },
             },
           }),
@@ -379,17 +398,31 @@ describe('Add user to the club', () => {
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
         yield* _(
           membersDb.insertClubMember({
             clubId,
             publicKey: user2.publicKeyPemBase64,
+            notificationToken: '2someToken2' as ExpoNotificationToken,
+            vexlNotificationToken: null,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+            publicKeyV2: null,
+          })
+        )
+
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user3.publicKeyPemBase64,
             notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -404,6 +437,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user4.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -418,8 +452,8 @@ describe('Add user to the club', () => {
           (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
         )
 
-        // 3 notifications: moderator (vexl_nt_test from beforeEach) + user1 + user2
-        expect(clubNotifications).toHaveLength(3)
+        // 4 notifications: moderator + 3 existing members with either vexl or expo token.
+        expect(clubNotifications).toHaveLength(4)
         expect(
           clubNotifications
             .map((n) =>
@@ -427,6 +461,7 @@ describe('Add user to the club', () => {
                 ? n.task.token
                 : ''
             )
+            .filter((token) => token !== null)
             .sort((a, b) => (a ?? '').localeCompare(b ?? ''))
         ).toEqual(
           [
@@ -434,6 +469,18 @@ describe('Add user to the club', () => {
             'vexl_nt_member2_token',
             'vexl_nt_test',
           ].sort((a, b) => a.localeCompare(b))
+        )
+        expect(
+          clubNotifications
+            .map((n) =>
+              n.task._tag === 'NewClubUserNotificationMqEntry'
+                ? (n.task.notificationToken ?? '')
+                : ''
+            )
+            .filter((notificationToken) => notificationToken !== '')
+            .sort((a, b) => a.localeCompare(b))
+        ).toEqual(
+          ['2someToken2', 'someToken'].sort((a, b) => a.localeCompare(b))
         )
       })
     )
@@ -455,6 +502,7 @@ describe('Add user to the club', () => {
                   'vexl_nt_admitted_user' as VexlNotificationToken
                 ),
                 publicKey: user1.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user1.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),
@@ -514,6 +562,7 @@ describe('Add user to the club', () => {
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -527,6 +576,7 @@ describe('Add user to the club', () => {
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -541,6 +591,7 @@ describe('Add user to the club', () => {
                 notificationToken: Option.none(),
                 vexlNotificationToken: Option.none(),
                 publicKey: user4.publicKeyPemBase64,
+                publicKeyV2: toPublicKeyV2(user4.publicKeyPemBase64),
               },
               clubUuid: club.uuid,
               ...(yield* _(generateAndSignChallenge(userKey))),

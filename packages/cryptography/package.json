@@ -14,14 +14,17 @@
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",
+    "@noble/hashes": "^1.8.0",
     "@noble/secp256k1": "^2.0.0",
     "asn1.js": "^5.4.1",
     "effect": "^3.19.9",
     "fast-check": "^3.20.0",
     "fp-ts": "^2.13.1",
+    "libsodium-wrappers": "^0.8.0",
     "react-native-get-random-values": "^1.8.0"
   },
   "devDependencies": {
+    "@types/libsodium-wrappers": "^0.7.14",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",

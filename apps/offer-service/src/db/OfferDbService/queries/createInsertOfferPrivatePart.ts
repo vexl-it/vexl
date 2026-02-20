@@ -1,5 +1,6 @@
 import {SqlResolver} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
+import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {PrivatePayloadEncrypted} from '@vexl-next/domain/src/general/offers'
@@ -7,7 +8,7 @@ import {Effect, flow, Schema} from 'effect'
 import {PublicPartId} from '../domain'
 
 export const InsertOfferPrivatePartRequest = Schema.Struct({
-  userPublicKey: PublicKeyPemBase64,
+  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   payloadPrivate: PrivatePayloadEncrypted,
   offerId: PublicPartId,
 })

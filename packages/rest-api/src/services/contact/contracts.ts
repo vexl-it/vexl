@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
   ClubAdmitionRequest,
   ClubCode,
@@ -7,7 +8,6 @@ import {
   ClubLinkInfo,
   ClubUuid,
 } from '@vexl-next/domain/src/general/clubs'
-import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ConnectionLevel, OfferId} from '@vexl-next/domain/src/general/offers'
@@ -65,6 +65,7 @@ export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportCo
 
 const CommonConnectionsForUserFromApi = Schema.Struct({
   publicKey: PublicKeyPemBase64,
+  publicKeyV2: Schema.optional(PublicKeyV2),
   common: Schema.Struct({
     hashes: Schema.Array(ServerToClientHashedNumber),
   }),
@@ -89,24 +90,20 @@ export const CreateUserRequest = Schema.Struct({
   expoToken: Schema.optionalWith(Schema.NullOr(ExpoNotificationToken), {
     default: () => null,
   }),
+  // V2 public key for cryptobox - optional for backward compatibility
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+  }),
 })
 export type CreateUserRequest = Schema.Schema.Type<typeof CreateUserRequest>
 
 export const RefreshUserRequest = Schema.Struct({
   offersAlive: Schema.Boolean,
-  countryPrefix: Schema.optionalWith(CountryPrefix, {
-    as: 'Option',
-  }),
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
 })
 export type RefreshUserRequest = Schema.Schema.Type<typeof RefreshUserRequest>
-
-export const UpdateFirebaseTokenRequest = Schema.Struct({
-  firebaseToken: Schema.NullOr(FcmToken),
-})
-export type UpdateFirebaseTokenRequest = typeof UpdateFirebaseTokenRequest.Type
 
 export const UpdateNotificationTokenRequest = Schema.Struct({
   expoToken: Schema.NullOr(ExpoNotificationToken),
@@ -144,6 +141,7 @@ export const FetchMyContactsResponse = Schema.Struct({
   items: Schema.Array(
     Schema.Struct({
       publicKey: PublicKeyPemBase64,
+      publicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
     })
   ),
 })
@@ -157,26 +155,15 @@ export const FetchMyContactsPaginatedRequest = Schema.Struct({
 export type FetchMyContactsPaginatedRequest =
   typeof FetchMyContactsPaginatedRequest.Type
 
-export const FetchMyContactsPaginatedResponse =
-  createPageResponse(PublicKeyPemBase64)
+export const FetchMyContactsPaginatedResponse = createPageResponse(
+  Schema.Union(PublicKeyPemBase64, PublicKeyV2)
+)
 export type FetchMyContactsPaginatedResponse =
   typeof FetchMyContactsPaginatedResponse.Type
 
-export const FetchCommonConnectionsRequest = Schema.Struct({
-  publicKeys: Schema.Array(PublicKeyPemBase64),
-})
-export type FetchCommonConnectionsRequest =
-  typeof FetchCommonConnectionsRequest.Type
-
-export const FetchCommonConnectionsResponse = Schema.Struct({
-  commonContacts: Schema.Array(CommonConnectionsForUserFromApi),
-})
-export type FetchCommonConnectionsResponse =
-  typeof FetchCommonConnectionsResponse.Type
-
 export const FetchCommonConnectionsPaginatedRequest = Schema.Struct({
   ...PageRequestMeta.fields,
-  publicKeys: Schema.Array(PublicKeyPemBase64),
+  publicKeys: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
 })
 export type FetchCommonConnectionsPaginatedRequest =
   typeof FetchCommonConnectionsPaginatedRequest.Type
@@ -203,36 +190,6 @@ export const HashWithSignature = Schema.Struct({
   hash: HashedPhoneNumber,
   signature: EcdsaSignature,
 })
-
-export class UnableToVerifySignatureError extends Schema.TaggedError<UnableToVerifySignatureError>(
-  'UnableToVerifySignatureError'
-)(
-  'UnableToVerifySignatureError',
-  {
-    status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
-  },
-  {
-    description:
-      'Is thrown when updateBadOwnerHashRequest includes data that can not be verified against the signature...',
-  }
-) {}
-
-export const UpdateBadOwnerHashRequest = Schema.Struct({
-  publicKey: PublicKeyPemBase64,
-  oldData: HashWithSignature,
-  newData: HashWithSignature,
-  removePreviousUser: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
-})
-export type UpdateBadOwnerHashRequest = typeof UpdateBadOwnerHashRequest.Type
-
-export const UpdateBadOwnerHashResponse = Schema.Struct({
-  updated: Schema.Boolean,
-  willDeleteExistingUserIfRan: Schema.optional(Schema.Literal(true)),
-})
-
-export type UpdateBadOwnerHashResponse = typeof UpdateBadOwnerHashResponse.Type
 
 // ---------
 //   Clubs 👇
@@ -337,6 +294,10 @@ export const GetClubInfoRequest = Schema.Struct({
   vexlNotificationToken: Schema.optionalWith(VexlNotificationToken, {
     as: 'Option',
   }),
+  // Club-specific V2 public key - updates on each fetch
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+  }),
 })
 
 export type GetClubInfoRequest = typeof GetClubInfoRequest.Type
@@ -356,6 +317,10 @@ export const JoinClubRequest = Schema.Struct({
     as: 'Option',
   }),
   contactsImported: Schema.Boolean,
+  // Club-specific V2 public key
+  publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+    as: 'Option',
+  }),
 })
 export type JoinClubRequest = typeof JoinClubRequest.Type
 
@@ -436,6 +401,12 @@ export const ListClubLinksResponse = Schema.Struct({
   links: Schema.Array(ClubLinkInfo),
 })
 export type ListClubLinksResponse = typeof ListClubLinksResponse.Type
+export const SetPublicKeyV2Request = Schema.Struct({
+  ...RequestBaseWithChallenge.fields,
+  clubUuid: ClubUuid,
+})
+export type SetPublicKeyV2Request = typeof SetPublicKeyV2Request.Type
+
 export const GetClubContactsRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
   clubUuid: ClubUuid,
@@ -445,7 +416,7 @@ export type GetClubContactsRequest = typeof GetClubContactsRequest.Type
 
 export const GetClubContactsResponse = Schema.Struct({
   clubUuid: ClubUuid,
-  items: Schema.Array(PublicKeyPemBase64),
+  items: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
 })
 
 export type GetClubContactsResponse = typeof GetClubContactsResponse.Type

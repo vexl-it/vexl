@@ -1,40 +1,48 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {ChallengeApiSpecification} from '@vexl-next/rest-api/src/challenges/specification'
-import {Array, Effect, pipe} from 'effect'
+import {Array, Effect, Option} from 'effect'
+import {challengeExpirationMinutesConfig} from '../../../commonConfigs'
 import {makeEndpointEffect} from '../../../makeEndpointEffect'
-import {ChallengeService} from '../ChallengeService'
-import {challengeExpirationMinutesConfig} from '../db/ChallegeDbService/configs'
+import {sealChallenge} from '../utils/sealChallenge'
 
 export const createChallenges = HttpApiBuilder.handler(
   ChallengeApiSpecification,
   'Challenges',
   'createChallengeBatch',
   ({payload}) =>
-    pipe(
-      payload.publicKeys,
-      Array.map((publicKey) =>
-        Effect.gen(function* (_) {
-          const challengeService = yield* _(ChallengeService)
+    Effect.gen(function* (_) {
+      const expirationMinutes = yield* _(challengeExpirationMinutesConfig)
+      const expiration = unixMillisecondsFromNow(expirationMinutes * 60 * 1000)
 
-          const challenge = yield* _(
-            challengeService.createChallenge(publicKey)
-          )
-
-          return {
+      const challenges = yield* _(
+        payload.publicKeys,
+        Array.map((publicKey) =>
+          sealChallenge({
             publicKey,
-            challenge,
-          }
-        })
-      ),
-      Effect.all,
-      Effect.flatMap((v) =>
-        challengeExpirationMinutesConfig.pipe(
-          Effect.map((expirationMinutes) => ({
-            challenges: v,
-            expiration: unixMillisecondsFromNow(expirationMinutes * 60 * 1000),
-          }))
-        )
+            publicKeyV2: Option.none(),
+            expiresAt: expiration,
+          }).pipe(
+            Effect.mapError(
+              (e) =>
+                new UnexpectedServerError({
+                  message: 'Failed to create challenge',
+                  cause: e,
+                })
+            ),
+            Effect.map((challenge) => ({
+              publicKey,
+              challenge,
+            }))
+          )
+        ),
+        Effect.all
       )
-    ).pipe(makeEndpointEffect)
+
+      return {
+        challenges,
+        expiration,
+      }
+    }).pipe(makeEndpointEffect)
 )

@@ -5,10 +5,7 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  InvalidChallengeError,
-  type SignedChallenge,
-} from '@vexl-next/rest-api/src/challenges/contracts'
+import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
@@ -69,6 +66,7 @@ beforeEach(async () => {
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+          publicKeyV2: null,
         })
       )
     })
@@ -99,6 +97,7 @@ describe('Leave club', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -114,15 +113,14 @@ describe('Leave club', () => {
         const app = yield* _(NodeTestingApp)
 
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
+        const invalidKey = generatePrivateKey()
 
         const errorResponse = yield* _(
           app.ClubsMember.leaveClub({
             payload: {
-              publicKey: signedChallenge.publicKey,
-              signedChallenge: {
-                ...signedChallenge.signedChallenge,
-                challenge: 'badChallenge' as SignedChallenge['challenge'],
-              },
+              publicKey: invalidKey.publicKeyPemBase64,
+              publicKeyV2: signedChallenge.publicKeyV2,
+              signedChallenge: signedChallenge.signedChallenge,
               clubUuid: club.uuid,
             },
           }),

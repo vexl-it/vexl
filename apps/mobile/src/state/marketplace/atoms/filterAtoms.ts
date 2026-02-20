@@ -5,7 +5,7 @@ import {type DropdownItemProps} from '../../../components/Dropdown'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
   OffersFilter,
   OffersFilterEquals,

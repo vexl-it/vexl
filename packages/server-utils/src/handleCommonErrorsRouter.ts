@@ -9,11 +9,9 @@ import {
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Effect} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
-import {type InvalidSessionError} from './ServerUserSession'
 import {type UrlParamsError} from './schemaUrlQuery'
 
 type ErrorsToCatch =
-  | InvalidSessionError
   | HttpBody.HttpBodyError
   | ParseError
   | HttpServerError.RequestError
@@ -25,9 +23,6 @@ type ErrorsToCatch =
 const handleCommonErrorsRouter = Effect.catchAll((e: ErrorsToCatch) => {
   if (e._tag === 'RouteNotFound') {
     return HttpServerResponse.json({message: 'Not found'}, {status: 404})
-  }
-  if (e._tag === 'InvalidSessionError') {
-    return HttpServerResponse.json(e, {status: 401})
   }
 
   if (e._tag === 'ParseError') {

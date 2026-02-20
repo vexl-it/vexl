@@ -1,6 +1,7 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
@@ -17,6 +18,10 @@ export type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
 export const FindSecondLevelContactsPublicKeysByHashFromPaginatedResult =
   Schema.Struct({
     publicKey: PublicKeyPemBase64,
+    publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+      as: 'Option',
+      nullable: true,
+    }),
     userId: Schema.NumberFromString,
   })
 export type FindSecondLevelContactsPublicKeysByHashFromPaginatedResult =
@@ -32,7 +37,8 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
       execute: (params) => sql`
         SELECT DISTINCT
           MAX(their_contacts.id) AS user_id,
-          second_lvl_friend.public_key
+          second_lvl_friend.public_key,
+          second_lvl_friend.public_key_v2
         FROM
           user_contact my_contacts
           INNER JOIN user_contact their_contacts ON my_contacts.hash_to = their_contacts.hash_to
@@ -44,7 +50,8 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
           sql`second_lvl_friend.hash != ${params.hashFrom}`,
         ])}
         GROUP BY
-          second_lvl_friend.public_key
+          second_lvl_friend.public_key,
+          second_lvl_friend.public_key_v2
         ORDER BY
           MAX(their_contacts.id) ASC
         LIMIT
@@ -55,7 +62,11 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
     return flow(
       query,
       Effect.map(
-        Array.map((e) => ({publicKey: e.publicKey, userId: e.userId}))
+        Array.map((e) => ({
+          publicKey: e.publicKey,
+          publicKeyV2: e.publicKeyV2,
+          userId: e.userId,
+        }))
       ),
       Effect.catchAll((e) =>
         Effect.zipRight(

@@ -8,10 +8,7 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {
-  InvalidChallengeError,
-  type SignedChallenge,
-} from '@vexl-next/rest-api/src/challenges/contracts'
+import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {
   ClubUserLimitExceededError,
   MemberAlreadyInClubError,
@@ -113,6 +110,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -127,6 +125,7 @@ describe('Join club', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -171,6 +170,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -185,6 +185,7 @@ describe('Join club', () => {
               vexlNotificationToken: Option.some(
                 'vexl_nt_test' as VexlNotificationToken
               ),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -229,6 +230,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -245,6 +247,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -271,6 +274,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -287,6 +291,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -303,6 +308,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -318,15 +324,13 @@ describe('Join club', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
+        const invalidKey = generatePrivateKey()
 
         const errorResponse = yield* _(
           app.ClubsMember.joinClub({
             payload: {
-              signedChallenge: {
-                ...signedChallenge.signedChallenge,
-                challenge: 'badChallenge' as SignedChallenge['challenge'],
-              },
-              publicKey: signedChallenge.publicKey,
+              signedChallenge: signedChallenge.signedChallenge,
+              publicKey: invalidKey.publicKeyPemBase64,
               code: INVITATION_CODE,
               notificationToken: Option.some(
                 'someToken' as ExpoNotificationToken
@@ -335,6 +339,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -359,6 +364,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -375,6 +381,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -399,6 +406,7 @@ describe('Join club', () => {
                 'vexl_nt_test' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           }),
           Effect.either
@@ -437,6 +445,7 @@ describe('Join club', () => {
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
         yield* _(
@@ -448,6 +457,7 @@ describe('Join club', () => {
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -523,6 +533,7 @@ describe('Join club', () => {
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -535,6 +546,7 @@ describe('Join club', () => {
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -547,6 +559,7 @@ describe('Join club', () => {
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -622,6 +635,7 @@ describe('Join club', () => {
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -691,6 +705,7 @@ describe('Join club', () => {
             vexlNotificationToken: null,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -704,6 +719,7 @@ describe('Join club', () => {
               'vexl_nt_member2_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -770,11 +786,35 @@ describe('Join club', () => {
           membersDb.insertClubMember({
             clubId,
             publicKey: user1.publicKeyPemBase64,
+            notificationToken: '1someToken1' as ExpoNotificationToken,
+            vexlNotificationToken: null,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+            publicKeyV2: null,
+          })
+        )
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user2.publicKeyPemBase64,
+            notificationToken: '2someToken2' as ExpoNotificationToken,
+            vexlNotificationToken: null,
+            isModerator: false,
+            lastRefreshedAt: new Date(),
+            publicKeyV2: null,
+          })
+        )
+
+        yield* _(
+          membersDb.insertClubMember({
+            clubId,
+            publicKey: user3.publicKeyPemBase64,
             notificationToken: null,
             vexlNotificationToken:
               'vexl_nt_member1_token' as VexlNotificationToken,
             isModerator: false,
             lastRefreshedAt: new Date(),
+            publicKeyV2: null,
           })
         )
 
@@ -789,6 +829,7 @@ describe('Join club', () => {
                 'vexl_nt_joiner_token' as VexlNotificationToken
               ),
               contactsImported: false,
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -801,12 +842,14 @@ describe('Join club', () => {
           (n) => n.task._tag === 'NewClubUserNotificationMqEntry'
         )
 
-        expect(clubNotifications).toHaveLength(1)
-
-        const notification = clubNotifications[0]
-        if (notification?.task._tag === 'NewClubUserNotificationMqEntry') {
-          expect(notification.task.clubUuid).toBe(club.uuid)
-        }
+        expect(clubNotifications).toHaveLength(3)
+        expect(
+          clubNotifications.every(
+            (notification) =>
+              notification.task._tag === 'NewClubUserNotificationMqEntry' &&
+              notification.task.clubUuid === club.uuid
+          )
+        ).toBe(true)
       })
     )
   })

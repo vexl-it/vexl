@@ -16,8 +16,6 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
-import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
-import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Config, Layer, Option} from 'effect'
@@ -47,14 +45,13 @@ import {getClubInfoByAccessCode} from './routes/clubs/member/getClubInfoByAccess
 import {joinClub} from './routes/clubs/member/joinClub'
 import {leaveClub} from './routes/clubs/member/leaveClub'
 import {reportClub} from './routes/clubs/member/reportClub'
+import {setPublicKeyV2} from './routes/clubs/member/setPublicKeyV2'
 import {addUserToTheClub} from './routes/clubs/moderator/addUserToTheClub'
 import {deactivateClubJoinLink} from './routes/clubs/moderator/deactivateClubJoinLink'
 import {generateClubJoinLink} from './routes/clubs/moderator/generateClubJoinLink'
 import {listClubLinks} from './routes/clubs/moderator/listClubLinks'
 import {convertPhoneNumberHashesToServerHashes} from './routes/contacts/convertPhoneNumberHashesToServerHashes'
-import {fetchCommonConnections} from './routes/contacts/fetchCommonConnections'
 import {fetchCommonConnectionsPaginated} from './routes/contacts/fetchCommonConnectionsPaginated'
-import {fetchMyContacts} from './routes/contacts/fetchMyContacts'
 import {fetchMyContactsPaginated} from './routes/contacts/fetchMyContactsPaginated'
 import {importContacts} from './routes/contacts/importContacts'
 import {ImportContactsQuotaService} from './routes/contacts/importContactsQuotaService'
@@ -63,8 +60,6 @@ import {createUser} from './routes/user/createUser'
 import {deleteUser} from './routes/user/deleteUser'
 import {eraseUserFromNetwork} from './routes/user/eraseUserFromNetwork'
 import {refreshUser} from './routes/user/refreshUser'
-import {updateBadOwnerHash} from './routes/user/updateBadOwnerHash'
-import {updateFirebaseToken} from './routes/user/updateFirebaseToken'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
 import {UserNotificationService} from './services/UserNotificationService'
 import {S3Service} from './utils/S3Service'
@@ -77,10 +72,8 @@ const UserApiGroupLive = HttpApiBuilder.group(
       .handle('checkUserExists', checkUserExists)
       .handle('createUser', createUser)
       .handle('refreshUser', refreshUser)
-      .handle('updateFirebaseToken', updateFirebaseToken)
       .handle('deleteUser', deleteUser)
       .handle('eraseUserFromNetwork', eraseUserFromNetwork)
-      .handle('updateBadOwnerHash', updateBadOwnerHash)
       .handle('updateNotificationToken', updateNotificationToken)
 )
 
@@ -90,9 +83,7 @@ const ContactApiGroupLive = HttpApiBuilder.group(
   (h) =>
     h
       .handle('importContacts', importContacts)
-      .handle('fetchMyContacts', fetchMyContacts)
       .handle('fetchMyContactsPaginated', fetchMyContactsPaginated)
-      .handle('fetchCommonConnections', fetchCommonConnections)
       .handle(
         'fetchCommonConnectionsPaginated',
         fetchCommonConnectionsPaginated
@@ -126,6 +117,7 @@ const ClubsMemberApiGroupLive = HttpApiBuilder.group(
       .handle('getClubContacts', getClubContacts)
       .handle('getClubInfoByAccessCode', getClubInfoByAccessCode)
       .handle('reportClub', reportClub)
+      .handle('setPublicKeyV2', setPublicKeyV2)
 )
 
 const ClubsModeratorApiGroupLive = HttpApiBuilder.group(
@@ -170,7 +162,6 @@ const DbsLive = Layer.mergeAll(
   ContactDbService.Live,
   UserDbService.Live,
   ClubsDbService.Live,
-  ChallengeDbService.Live,
   ClubMembersDbService.Live,
   ClubInvitationLinkDbService.Live
 ).pipe(Layer.provideMerge(DbLayer))
@@ -184,7 +175,6 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provide(RateLimitingService.Live),
   Layer.provide(UserNotificationService.Live),
   Layer.provide(ImportContactsQuotaService.Live),
-  Layer.provide(ChallengeService.Live),
   Layer.provide(DbsLive),
   Layer.provide(RedisService.Live),
   Layer.provide(S3Service.Live),

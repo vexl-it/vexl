@@ -12,7 +12,7 @@ import {
   type StoreEmpty,
 } from '../../../utils/fpUtils'
 
-export function readSessionFromStorageE({
+export function readSessionFromStorage({
   asyncStorageKey,
   secretStorageKey,
 }: {

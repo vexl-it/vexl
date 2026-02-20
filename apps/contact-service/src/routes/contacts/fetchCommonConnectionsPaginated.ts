@@ -1,9 +1,11 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {isPublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import createPaginatedResponse from '@vexl-next/server-utils/src/createPaginatedResponse'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, pipe, Schema} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindCommonFriendsPaginatedResult} from '../../db/ContactDbService/queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {
@@ -31,8 +33,19 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
       const pubKeysToLookFor = pipe(
         req.payload.publicKeys,
         Array.dedupe,
-        Array.filter((a) => a !== security['public-key'])
+        Array.filter(
+          (a) =>
+            a !== security.publicKey &&
+            (Option.isNone(security.publicKeyV2) ||
+              a !== security.publicKeyV2.value)
+        )
       )
+
+      const pubKeysV1 = Array.filter(
+        pubKeysToLookFor,
+        (a): a is PublicKeyPemBase64 => !isPublicKeyV2(a)
+      )
+      const pubKeysV2 = Array.filter(pubKeysToLookFor, (a) => isPublicKeyV2(a))
 
       const toReturn = yield* _(
         createPaginatedResponse({
@@ -50,7 +63,8 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
           dbEffectToRun: ({limit, decodedNextPageToken}) =>
             contactDb.findCommonFriendsPaginated({
               ownerHash: security.serverHash,
-              publicKeys: pubKeysToLookFor,
+              publicKeys: pubKeysV1,
+              publicKeysV2: pubKeysV2,
               limit,
               userContactId: decodedNextPageToken?.lastUserContactId,
             }),

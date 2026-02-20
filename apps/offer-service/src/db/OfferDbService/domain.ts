@@ -1,3 +1,4 @@
+import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
@@ -39,7 +40,7 @@ export class PrivatePartRecord extends Schema.Class<PrivatePartRecord>(
   'PrivatePartRecord'
 )({
   id: PrivatePartRecordId,
-  userPublicKey: PublicKeyPemBase64,
+  userPublicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   offerId: PublicPartId,
   payloadPrivate: PrivatePayloadEncrypted,
 }) {}

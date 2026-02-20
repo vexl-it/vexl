@@ -1,4 +1,8 @@
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  PublicKeyPemBase64 as PublicKeyPemBase64Schema,
+  PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {
@@ -22,7 +26,10 @@ import {
   type PrivatePartEncryptionError,
 } from './utils/encryptPrivatePart'
 
-type ClubConnections = Record<ClubUuid, readonly PublicKeyPemBase64[]>
+type ClubConnections = Record<
+  ClubUuid,
+  ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+>
 
 const calculateNewClubsConnections = ({
   currentConnections,
@@ -71,7 +78,7 @@ export class TimeLimitReachedError extends Schema.TaggedError<TimeLimitReachedEr
 )('TimeLimitReachedError', {
   cause: Schema.Unknown,
   message: Schema.String,
-  toPublicKey: PublicKeyPemBase64,
+  toPublicKey: Schema.Union(PublicKeyPemBase64Schema, PublicKeyV2),
 }) {}
 
 function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
@@ -79,10 +86,12 @@ function checkAndReportRemovingClubConnectionThatIsAlsoFromSocualNetwork({
   removedClubsConnections,
 }: {
   targetConnections: {
-    readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel: readonly PublicKeyPemBase64[]
+    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
   }
-  readonly removedClubsConnections: readonly PublicKeyPemBase64[]
+  readonly removedClubsConnections: ReadonlyArray<
+    PublicKeyPemBase64 | PublicKeyV2
+  >
 }): void {
   const offerMeantForKeys = pipe(
     [targetConnections.firstLevel, targetConnections.secondLevel],
@@ -186,14 +195,20 @@ export default function updatePrivateParts({
   onProgress,
 }: {
   currentConnections: {
-    readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel: readonly PublicKeyPemBase64[]
-    readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    readonly clubs: Record<
+      ClubUuid,
+      ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    >
   }
   targetConnections: {
-    readonly firstLevel: readonly PublicKeyPemBase64[]
-    readonly secondLevel: readonly PublicKeyPemBase64[]
-    readonly clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+    readonly firstLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    readonly secondLevel: ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    readonly clubs: Record<
+      ClubUuid,
+      ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
+    >
   }
   commonFriends: CommonConnectionsForUsers
   adminId: OfferAdminId
@@ -205,11 +220,11 @@ export default function updatePrivateParts({
   {
     encryptionErrors: PrivatePartEncryptionError[]
     timeLimitReachedErrors: TimeLimitReachedError[]
-    removedConnections: PublicKeyPemBase64[]
+    removedConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
     newConnections: {
-      firstLevel: PublicKeyPemBase64[]
-      secondLevel: PublicKeyPemBase64[] | undefined
-      clubs: Record<ClubUuid, readonly PublicKeyPemBase64[]>
+      firstLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
+      secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2> | undefined
+      clubs: Record<ClubUuid, ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>>
     }
   },
   | PrivatePayloadsConstructionError
@@ -350,7 +365,7 @@ export default function updatePrivateParts({
 
     if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
     let uploadErrors: Array<{
-      toPublicKey: PublicKeyPemBase64
+      toPublicKey: PublicKeyPemBase64 | PublicKeyV2
       error: Effect.Effect.Error<ReturnType<OfferApi['createPrivatePart']>>
     }> = []
     if (encryptionResult.privateParts.length > 0) {

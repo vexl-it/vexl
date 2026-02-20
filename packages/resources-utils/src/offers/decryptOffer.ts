@@ -5,14 +5,20 @@ import {
   OfferLocation,
   OfferPrivatePart,
   OfferPublicPart,
+  PrivatePayloadEncryptedV1,
+  PrivatePayloadEncryptedV2,
 } from '@vexl-next/domain/src/general/offers'
 import {
   compare,
   SemverString,
 } from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {BooleanFromString} from '@vexl-next/generic-utils/src/effect-helpers/BooleanFromString'
+import {
+  CryptoBoxCypher,
+  cryptoBoxUnseal,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
-import {Effect, Either, Schema} from 'effect'
+import {Effect, Either, flow, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
 import {pipe} from 'fp-ts/function'
 import {aesGCMIgnoreTagDecrypt, eciesDecryptE} from '../utils/crypto'
@@ -97,7 +103,8 @@ const ensureOfferFromSupportedClient = (
 
 // TODO write unit test for this function
 export default function decryptOffer(
-  privateKey: KeyHolder.PrivateKeyHolder
+  privateKey: KeyHolder.PrivateKeyHolder,
+  privateKeyV2: KeyHolder.KeyPairV2
 ): (
   serverOffer: ServerOffer
 ) => Effect.Effect<
@@ -106,10 +113,14 @@ export default function decryptOffer(
 > {
   return (serverOffer: ServerOffer) => {
     return Effect.gen(function* (_) {
-      if (
-        serverOffer.publicPayload.at(0) !== '0' ||
-        serverOffer.privatePayload.at(0) !== '0'
-      ) {
+      const isV1 = Schema.is(PrivatePayloadEncryptedV1)(
+        serverOffer.privatePayload
+      )
+      const isV2 = Schema.is(PrivatePayloadEncryptedV2)(
+        serverOffer.privatePayload
+      )
+
+      if (!isV1 && !isV2) {
         return yield* _(
           Effect.fail(
             new NonCompatibleOfferVersionError({
@@ -121,8 +132,13 @@ export default function decryptOffer(
       }
 
       const privatePayload = yield* _(
-        Effect.succeed(serverOffer.privatePayload.substring(1)),
-        Effect.flatMap(eciesDecryptE(privateKey.privateKeyPemBase64)),
+        serverOffer.privatePayload.substring(1),
+        isV1
+          ? eciesDecryptE(privateKey.privateKeyPemBase64)
+          : flow(
+              Schema.decode(CryptoBoxCypher),
+              Effect.flatMap(cryptoBoxUnseal(privateKeyV2))
+            ),
         Effect.flatMap(
           Schema.decodeUnknown(Schema.parseJson(OfferPrivatePart))
         ),

@@ -15,7 +15,10 @@ export const getRemovedOffers = HttpApiBuilder.handler(
       const offerDbService = yield* _(OfferDbService)
 
       const existingIds = yield* _(
-        offerDbService.queryOffersIds(security['public-key'])
+        offerDbService.queryOffersIds({
+          userPublicKey: security.publicKey,
+          userPublicKeyV2: security.publicKeyV2,
+        })
       )
 
       const nonExistingIds = Array.filter(

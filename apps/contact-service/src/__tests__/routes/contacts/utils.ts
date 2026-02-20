@@ -92,6 +92,7 @@ export const createAndImportUsersFromNetwork = (
           expoToken: user.notificationToken,
           firebaseToken: null,
           vexlNotificationToken: user.vexlNotificationToken,
+          publicKeyV2: Option.none(),
         },
         headers: commonAndSecurityHeaders,
       })
@@ -131,6 +132,7 @@ export const createUserOnNetwork = (
           expoToken: user.notificationToken,
           firebaseToken: null,
           vexlNotificationToken: user.vexlNotificationToken,
+          publicKeyV2: Option.none(),
         },
         headers: commonAndSecurityHeaders,
       })

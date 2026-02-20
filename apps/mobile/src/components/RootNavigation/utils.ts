@@ -6,7 +6,7 @@ import {navigationRef} from '../../utils/navigation'
 export function useHandlePostLoginFlowRedirect(): void {
   const isLoggedIn = useIsUserLoggedIn()
   const isOnPostLoginFlow = navigationRef.isReady()
-    ? navigationRef.getState().routes[0]?.name === 'PostLoginFlow'
+    ? navigationRef.getState()?.routes[0]?.name === 'PostLoginFlow'
     : false
   const isPostLoginFinished = useIsPostLoginFinished()
 

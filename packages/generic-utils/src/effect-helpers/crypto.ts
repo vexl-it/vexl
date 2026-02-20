@@ -1,10 +1,15 @@
+import {cryptobox, type KeyHolder} from '@vexl-next/cryptography'
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
 import {
+  type KeyPairV2,
   type PrivateKeyPemBase64,
+  type PrivateKeyV2,
   type PublicKeyPemBase64,
+  type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {
   aesCTRDecryptPromise,
+  aesCTREncrypt as aesCTREncryptRaw,
   aesGCMDecrypt,
   aesGCMEncrypt,
   aesGCMIgnoreTagDecrypt,
@@ -26,6 +31,8 @@ import * as EcdaBrands from './EcdsaSignature.brand'
 
 export const ECIES_GTM_CYPHER_PREFIX = 'EciesGtm-' as const
 const AES_GCM_CYPHER_PREFIX = 'AesGCm-' as const
+const CRYPTO_BOX_CYPHER_PREFIX = 'CBCiph-' as const
+const CRYPTO_BOX_SIGNATURE_PREFIX = 'CBSig-' as const
 
 export class CryptoError extends Schema.TaggedError<CryptoError>('CryptoError')(
   'CryptoError',
@@ -40,7 +47,22 @@ export const EciesGTMECypher = Schema.String.pipe(
   Schema.filter((v) => v.startsWith(ECIES_GTM_CYPHER_PREFIX)),
   Schema.brand('EciesGTMECypher')
 )
-export type EciesGTMECypher = Schema.Schema.Type<typeof EciesGTMECypher>
+export type EciesGTMECypher = typeof EciesGTMECypher.Type
+
+export const CryptoBoxCypher = Schema.String.pipe(
+  Schema.nonEmptyString(),
+  Schema.filter((v) => v.startsWith(CRYPTO_BOX_CYPHER_PREFIX)),
+  Schema.brand('CryptoBoxCypher')
+)
+
+export type CryptoBoxCypher = typeof CryptoBoxCypher.Type
+
+export const CryptoBoxSignature = Schema.String.pipe(
+  Schema.nonEmptyString(),
+  Schema.filter((v) => v.startsWith(CRYPTO_BOX_SIGNATURE_PREFIX)),
+  Schema.brand('CryptoBoxSignature')
+)
+export type CryptoBoxSignature = typeof CryptoBoxSignature.Type
 
 export const eciesGTMEncryptE =
   (publicKey: PublicKeyPemBase64) =>
@@ -255,6 +277,25 @@ export const aesCTRDecrypt =
         }),
     })
 
+export const aesCTREncrypt =
+  (password: string) =>
+  (data: string): Effect.Effect<string, CryptoError> =>
+    Effect.sync(() =>
+      aesCTREncryptRaw({
+        data,
+        password,
+      })
+    ).pipe(
+      Effect.catchAllDefect((e) =>
+        Effect.fail(
+          new CryptoError({
+            message: 'Error aes ctr encrypt',
+            error: e,
+          })
+        )
+      )
+    )
+
 export const hashSha256 = (data: string): Effect.Effect<string, CryptoError> =>
   Effect.sync(() => sha256(data)).pipe(
     Effect.catchAllDefect(
@@ -303,3 +344,97 @@ export const pbkdf2 = (
         error: e,
       }),
   })
+
+export const cryptoBoxSeal =
+  (publicKey: KeyHolder.PublicKeyV2) =>
+  (data: string): Effect.Effect<CryptoBoxCypher, CryptoError> =>
+    Effect.tryPromise({
+      try: async () => {
+        const toReturn = await cryptobox.seal(data, publicKey)
+        return `${CRYPTO_BOX_CYPHER_PREFIX}${toReturn}`
+      },
+      catch: (error) =>
+        new CryptoError({
+          message: 'Error while encrypting data with cryptobox',
+          error,
+        }),
+    }).pipe(Effect.map(Schema.decodeSync(CryptoBoxCypher)))
+
+export const cryptoBoxUnseal =
+  (keyPairV2: KeyHolder.KeyPairV2) =>
+  (data: CryptoBoxCypher): Effect.Effect<string, CryptoError> =>
+    Effect.tryPromise({
+      // eslint-disable-next-line @typescript-eslint/return-await
+      try: async () =>
+        await cryptobox.unseal(
+          data.slice(CRYPTO_BOX_CYPHER_PREFIX.length),
+          keyPairV2
+        ),
+      catch: (error) =>
+        new CryptoError({
+          message: 'Error while encrypting data with cryptobox',
+          error,
+        }),
+    })
+
+export const cryptoBoxSign =
+  (privateKey: KeyHolder.PrivateKeyV2) =>
+  (message: string): Effect.Effect<CryptoBoxSignature, CryptoError> =>
+    Effect.tryPromise({
+      try: async () => {
+        const signature = await cryptobox.sign(message, privateKey)
+        return `${CRYPTO_BOX_SIGNATURE_PREFIX}${signature}`
+      },
+      catch: (error) =>
+        new CryptoError({
+          message: 'Error while signing data with cryptobox',
+          error,
+        }),
+    }).pipe(
+      Effect.map((signature) =>
+        Schema.decodeSync(CryptoBoxSignature)(signature)
+      )
+    )
+
+export const cryptoBoxVerifySignature =
+  (publicKey: KeyHolder.PublicKeyV2) =>
+  (message: string, signature: CryptoBoxSignature) =>
+    Effect.tryPromise({
+      try: async () => {
+        return await cryptobox.verifySignature(
+          message,
+          signature.slice(CRYPTO_BOX_SIGNATURE_PREFIX.length),
+          publicKey
+        )
+      },
+      catch: (error) =>
+        new CryptoError({
+          message: 'Error while verifying signature with cryptobox',
+          error,
+        }),
+    })
+
+export const derivePubKey = (
+  privateKey: PrivateKeyV2
+): Effect.Effect<PublicKeyV2, CryptoError> =>
+  Effect.tryPromise({
+    try: async () => {
+      return await cryptobox.derivePubKey(privateKey)
+    },
+    catch: (error) =>
+      new CryptoError({
+        message: 'Error while deriving public key from private key',
+        error,
+      }),
+  })
+
+export function generateV2KeyPair(): Effect.Effect<KeyPairV2, CryptoError> {
+  return Effect.tryPromise({
+    try: async () => await cryptobox.generateKeyPair(),
+    catch: (e) =>
+      new CryptoError({
+        message: 'Failed to generate V2 keypair',
+        error: e,
+      }),
+  })
+}

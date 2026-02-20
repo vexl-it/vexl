@@ -1,5 +1,8 @@
 import {getCrypto} from '@vexl-next/cryptography/src/getCrypto'
-import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  PublicKeyPemBase64,
+  PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {Schema} from 'effect'
 import {ExpoNotificationToken} from '../utility/ExpoNotificationToken.brand'
 import {UriString} from '../utility/UriString.brand'
@@ -40,6 +43,7 @@ export type ClubInfoForUser = typeof ClubInfoForUser.Type
 export const ClubAdmitionRequest = Schema.Struct({
   publicKey: PublicKeyPemBase64,
   // todo #2124 remove after all clients are migrated to vexl notification tokens
+  publicKeyV2: PublicKeyV2,
   notificationToken: Schema.optionalWith(ExpoNotificationToken, {
     as: 'Option',
   }),

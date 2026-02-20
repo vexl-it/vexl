@@ -75,6 +75,7 @@ beforeEach(async () => {
           lastRefreshedAt: new Date(),
           notificationToken: 'someToken' as ExpoNotificationToken,
           vexlNotificationToken: 'vexl_nt_test' as VexlNotificationToken,
+          publicKeyV2: null,
         })
       )
     })
@@ -109,6 +110,7 @@ describe('Generate club join link', () => {
               contactsImported: false,
               notificationToken: Option.none(),
               vexlNotificationToken: Option.none(),
+              publicKeyV2: Option.none(),
             },
           })
         )
@@ -131,6 +133,7 @@ describe('Generate club join link', () => {
             lastRefreshedAt: new Date(),
             notificationToken: null,
             vexlNotificationToken: null,
+            publicKeyV2: null,
           })
         )
 
@@ -206,6 +209,7 @@ describe('Generate club join link', () => {
               signedChallenge: {
                 challenge: challenge.signedChallenge.challenge,
                 signature: 'invalidSignature' as SignedChallenge['signature'],
+                signatureV2: Option.none(),
               },
             },
           }),

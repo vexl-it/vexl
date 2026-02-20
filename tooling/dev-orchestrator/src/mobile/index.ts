@@ -21,4 +21,8 @@ export {detectLanIpWithPrompt} from './network-interface.js'
 export {findAvailableMetroPort} from './port-allocator.js'
 
 // Device selection
-export {selectDeviceInteractively} from './device-selector.js'
+export {
+  getAvailableDevices,
+  selectDeviceInteractively,
+} from './device-selector.js'
+export type {Device} from './device-selector.js'

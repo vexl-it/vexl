@@ -1,4 +1,7 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type PublicKeyPemBase64,
+  type PublicKeyV2,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   DuplicatedPublicKeyError,
   MissingOwnerPrivatePartError,
@@ -11,7 +14,7 @@ export const validatePrivatePartsWhenSavingAll = ({
   ownersPublicKey,
 }: {
   privateParts: readonly ServerPrivatePart[]
-  ownersPublicKey: PublicKeyPemBase64
+  ownersPublicKey: PublicKeyPemBase64 | PublicKeyV2
 }): Effect.Effect<
   void,
   MissingOwnerPrivatePartError | DuplicatedPublicKeyError

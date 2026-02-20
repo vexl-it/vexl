@@ -1,4 +1,3 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type OfferId,
@@ -7,6 +6,7 @@ import {
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import reportError from '../../../../../utils/reportError'
+import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 
 export const getRemovedOffersIds = ({
   storedOffers,
@@ -15,7 +15,7 @@ export const getRemovedOffersIds = ({
 }: {
   storedOffers: OneOfferInState[]
   offersApi: OfferApi
-  storedClubs: Record<ClubUuid, PrivateKeyHolder>
+  storedClubs: Record<ClubUuid, ClubKeys>
 }): Effect.Effect<{
   removedContactOfferIds: readonly OfferId[]
   removedClubsOfferIdsToClubUuid: ReadonlyArray<{
@@ -77,7 +77,8 @@ export const getRemovedOffersIds = ({
         offersApi
           .getRemovedClubOffers({
             offerIds: offersIds,
-            keyPair: clubKey,
+            keyPair: clubKey.oldKeyPair,
+            keyPairV2: clubKey.keyPair,
           })
           .pipe(
             Effect.map((removedIds) => ({

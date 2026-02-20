@@ -7,6 +7,7 @@ import {
   type PrivatePayloadEncrypted,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   ReportOfferLimitReachedError,
   type CreateNewOfferRequest,
@@ -14,7 +15,7 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   createMockedUser,
@@ -51,24 +52,24 @@ beforeEach(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer1payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer1payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer1payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser2.publicKeyPemBase64,
           },
           {
             payloadPrivate:
-              'offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
+              '0offer1payloadPrivateForMe' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForMe.publicKeyPemBase64,
           },
         ],
@@ -98,11 +99,11 @@ beforeEach(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer2payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
         ],
@@ -126,11 +127,11 @@ beforeEach(async () => {
         countryPrefix: Schema.decodeSync(CountryPrefix)(420),
         offerPrivateList: [
           {
-            payloadPrivate: 'offer2payloadPrivate' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate' as PrivatePayloadEncrypted,
             userPublicKey: clubKeypairForUser1.publicKeyPemBase64,
           },
           {
-            payloadPrivate: 'offer2payloadPrivate2' as PrivatePayloadEncrypted,
+            payloadPrivate: '0offer2payloadPrivate2' as PrivatePayloadEncrypted,
             userPublicKey: user2.mainKeyPair.publicKeyPemBase64,
           },
         ],
@@ -173,6 +174,7 @@ describe('Report club offer', () => {
             payload: {
               offerId: offer1.offerId,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
             headers: commonAndSecurityHeaders,
@@ -180,6 +182,65 @@ describe('Report club offer', () => {
         )
 
         const sql = yield* _(SqlClient.SqlClient)
+        const reportedInDb = yield* _(sql`
+          SELECT
+            report
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+        expect(reportedInDb.at(0)).toHaveProperty('report', 1)
+      })
+    )
+  })
+
+  it('Should properly increase report counter when visibility is through public key v2', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+
+        yield* _(sql`
+          UPDATE offer_private
+          SET
+            user_public_key = ${publicKeyV2.publicKey}
+          WHERE
+            id IN (
+              SELECT
+                offer_private.id
+              FROM
+                offer_public
+                LEFT JOIN offer_private ON offer_public.id = offer_private.offer_id
+              WHERE
+                offer_public.offer_id = ${offer1.offerId}
+                AND offer_private.user_public_key = ${clubKeypairForMe.publicKeyPemBase64}
+            );
+        `)
+
+        const requestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders, publicKeyV2)({})
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
+        yield* _(
+          client.reportClubOffer({
+            payload: {
+              offerId: offer1.offerId,
+              publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: requestWithChallenge.publicKeyV2,
+              signedChallenge: requestWithChallenge.signedChallenge,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
         const reportedInDb = yield* _(sql`
           SELECT
             report
@@ -213,6 +274,7 @@ describe('Report club offer', () => {
             payload: {
               offerId: offer1.offerId,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
             headers: commonAndSecurityHeaders,
@@ -228,6 +290,7 @@ describe('Report club offer', () => {
             payload: {
               offerId: offer2.offerId,
               publicKey: secondRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: secondRequestWithChallenge.signedChallenge,
             },
             headers: commonAndSecurityHeaders,
@@ -243,6 +306,7 @@ describe('Report club offer', () => {
             payload: {
               offerId: offer3.offerId,
               publicKey: thirdRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: thirdRequestWithChallenge.signedChallenge,
             },
             headers: commonAndSecurityHeaders,
@@ -275,6 +339,7 @@ describe('Report club offer', () => {
             payload: {
               offerId: offer2.offerId,
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
             headers: commonAndSecurityHeaders,
@@ -320,6 +385,7 @@ describe('Report club offer', () => {
             payload: {
               offerId: newOfferId(),
               publicKey: requestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
               signedChallenge: requestWithChallenge.signedChallenge,
             },
             headers: commonAndSecurityHeaders,

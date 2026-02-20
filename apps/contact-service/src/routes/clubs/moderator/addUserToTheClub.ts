@@ -82,6 +82,7 @@ export const addUserToTheClub = HttpApiBuilder.handler(
           vexlNotificationToken: Option.getOrNull(
             req.payload.adminitionRequest.vexlNotificationToken
           ),
+          publicKeyV2: req.payload.adminitionRequest.publicKeyV2,
         })
       )
 

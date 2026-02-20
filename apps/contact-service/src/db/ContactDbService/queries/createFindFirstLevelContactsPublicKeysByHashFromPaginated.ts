@@ -1,6 +1,7 @@
 import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
@@ -17,6 +18,10 @@ export type FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =
 export const FindFirstLevelContactsPublicKeysByHashFromPaginatedResult =
   Schema.Struct({
     publicKey: PublicKeyPemBase64,
+    publicKeyV2: Schema.optionalWith(PublicKeyV2, {
+      as: 'Option',
+      nullable: true,
+    }),
     userId: Schema.NumberFromString,
   })
 export type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult =
@@ -32,7 +37,8 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
       execute: (params) => sql`
         SELECT
           users.id AS user_id,
-          users.public_key
+          users.public_key,
+          users.public_key_v2
         FROM
           user_contact
           INNER JOIN users ON users.hash = user_contact.hash_to
@@ -43,7 +49,8 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
         ])}
         GROUP BY
           users.id,
-          users.public_key
+          users.public_key,
+          users.public_key_v2
         ORDER BY
           users.id ASC
         LIMIT
@@ -54,7 +61,11 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
     return flow(
       query,
       Effect.map(
-        Array.map((e) => ({publicKey: e.publicKey, userId: e.userId}))
+        Array.map((e) => ({
+          publicKey: e.publicKey,
+          publicKeyV2: e.publicKeyV2,
+          userId: e.userId,
+        }))
       ),
       Effect.catchAll((e) =>
         Effect.zipRight(

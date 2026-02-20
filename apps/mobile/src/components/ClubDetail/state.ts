@@ -9,7 +9,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {apiAtom} from '../../api'
-import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderAtom'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 
 type ListLinksError = Effect.Effect.Error<
   ReturnType<ContactApi['listClubLinks']>
@@ -53,7 +53,13 @@ export const fetchClubLinksActionAtom = atom(
     return pipe(
       Option.fromNullable(clubUuidKeyPair),
       Effect.catchAll(() => Effect.fail(new ClubKeypairMissingError())),
-      Effect.flatMap((keyPair) => contact.listClubLinks({clubUuid, keyPair})),
+      Effect.flatMap((keyPair) =>
+        contact.listClubLinks({
+          clubUuid,
+          keyPair: keyPair.oldKeyPair,
+          keyPairV2: keyPair.keyPair,
+        })
+      ),
       Effect.tapBoth({
         onFailure: (error) =>
           Effect.sync(() => {
@@ -86,24 +92,26 @@ export const regenerateClubLinkActionAtom = atom(
       })
     }
 
+    const challengePayload = {
+      clubUuid,
+      keyPair: clubUuidKeyPair.oldKeyPair,
+      keyPairV2: clubUuidKeyPair.keyPair,
+    }
+
     const fetchLinks = contact
-      .listClubLinks({clubUuid, keyPair: clubUuidKeyPair})
+      .listClubLinks(challengePayload)
       .pipe(Effect.map((d) => d.links))
     const removeExistingLinks = fetchLinks.pipe(
       Effect.flatMap(
         Effect.forEach((link) =>
           contact.deactivateClubJoinLink({
-            clubUuid,
-            keyPair: clubUuidKeyPair,
+            ...challengePayload,
             code: link.code,
           })
         )
       )
     )
-    const generateNewLink = contact.generateClubJoinLink({
-      clubUuid,
-      keyPair: clubUuidKeyPair,
-    })
+    const generateNewLink = contact.generateClubJoinLink(challengePayload)
     const refreshData = set(fetchClubLinksActionAtom, clubUuid)
 
     return pipe(

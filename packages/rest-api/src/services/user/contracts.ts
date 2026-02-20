@@ -1,4 +1,5 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
@@ -10,8 +11,13 @@ import {ShortLivedTokenForErasingUserOnContactService} from '@vexl-next/domain/s
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
+import {
+  CryptoBoxCypher,
+  CryptoBoxSignature,
+} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
 import {Schema} from 'effect'
+import {VexlAuthHeader} from '../../VexlAuthHeader'
 export interface InvalidPhoneNumber {
   _tag: 'InvalidPhoneNumber'
 }
@@ -227,20 +233,6 @@ export const VerifyChallengeInput = Schema.Struct({
 
 export type VerifyChallengeInput = typeof VerifyChallengeInput.Type
 
-export const RegenerateSessionCredentialsRequest = Schema.Struct({
-  myPhoneNumber: E164PhoneNumber,
-})
-
-export type RegenerateSessionCredentialsRequest =
-  typeof RegenerateSessionCredentialsRequest.Type
-
-export const RegenerateSessionCredentialsResponse = Schema.Struct({
-  hash: HashedPhoneNumber,
-  signature: EcdsaSignature,
-})
-export type RegenerateSessionCredentialsResponse =
-  typeof RegenerateSessionCredentialsResponse.Type
-
 export const GetVersionServiceInfoResponse = Schema.Struct({
   requestForceUpdate: Schema.Boolean,
   offerRerequestLimitDays: Schema.Int.pipe(Schema.positive()),
@@ -278,3 +270,37 @@ export const VerifyAndEraseUserResponse = Schema.Struct({
   shortLivedTokenForErasingUserOnContactService:
     ShortLivedTokenForErasingUserOnContactService,
 })
+
+export const UpgradeAuthChallenge = CryptoBoxCypher.pipe(
+  Schema.brand('UpgradeAuthChallenge')
+)
+export type UpgradeAuthChallenge = typeof UpgradeAuthChallenge.Type
+
+export const InitUpgradeAuthRequest = Schema.Struct({
+  publicKeyV2: PublicKeyV2,
+})
+export type InitUpgradeAuthRequest = typeof InitUpgradeAuthRequest.Type
+
+export const InitUpgradeAuthResponse = Schema.Struct({
+  challenge: UpgradeAuthChallenge,
+})
+export type InitUpgradeAuthResponse = typeof InitUpgradeAuthResponse.Type
+
+export const SubmitUpgradeAuthRequest = Schema.Struct({
+  publicKeyV2: PublicKeyV2,
+  challenge: UpgradeAuthChallenge,
+  signature: CryptoBoxSignature,
+})
+export type SubmitUpgradeAuthRequest = typeof SubmitUpgradeAuthRequest.Type
+
+export const SubmitUpgradeAuthResponse = Schema.Struct({
+  vexlAuthHeader: VexlAuthHeader,
+})
+export type SubmitUpgradeAuthResponse = typeof SubmitUpgradeAuthResponse.Type
+
+export class UpgradeAuthInvalidSignatureError extends Schema.TaggedError<UpgradeAuthInvalidSignatureError>(
+  'UpgradeAuthInvalidSignatureError'
+)('UpgradeAuthInvalidSignatureError', {
+  message: Schema.String,
+  cause: Schema.Unknown,
+}) {}

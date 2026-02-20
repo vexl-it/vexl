@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type IntendedConnectionLevel,
@@ -15,6 +18,7 @@ import {
 
 export function constructPrivatePayloadForOwner({
   ownerCredentials,
+  ownerKeyPairV2,
   symmetricKey,
   adminId,
   intendedConnectionLevel,
@@ -23,11 +27,14 @@ export function constructPrivatePayloadForOwner({
   intendedConnectionLevel: IntendedConnectionLevel
   intendedClubs: readonly ClubUuid[]
   ownerCredentials: PrivateKeyHolder
+  ownerKeyPairV2?: KeyPairV2
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
 }): OfferPrivatePayloadToEncrypt {
   return {
-    toPublicKey: ownerCredentials.publicKeyPemBase64,
+    // Use V2 public key if available, otherwise fall back to V1
+    toPublicKey:
+      ownerKeyPairV2?.publicKey ?? ownerCredentials.publicKeyPemBase64,
     payloadPrivate: {
       commonFriends: [],
       clubIds: [],
@@ -45,18 +52,21 @@ export function constructAndEncryptPrivatePayloadForOwner({
   intendedConnectionLevel,
   intendedClubs,
   ownerCredentials,
+  ownerKeyPairV2,
   symmetricKey,
   adminId,
 }: {
   intendedConnectionLevel: IntendedConnectionLevel
   intendedClubs: readonly ClubUuid[]
   ownerCredentials: PrivateKeyHolder
+  ownerKeyPairV2?: KeyPairV2
   symmetricKey: SymmetricKey
   adminId: OfferAdminId
 }): Effect.Effect<ServerPrivatePart, PrivatePartEncryptionError> {
   return encryptPrivatePart(
     constructPrivatePayloadForOwner({
       ownerCredentials,
+      ownerKeyPairV2,
       symmetricKey,
       adminId,
       intendedConnectionLevel,

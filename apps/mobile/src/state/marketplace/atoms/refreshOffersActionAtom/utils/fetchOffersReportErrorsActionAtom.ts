@@ -1,4 +1,7 @@
-import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {
+  type KeyPairV2,
+  type PrivateKeyHolder,
+} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {
@@ -9,6 +12,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import reportError from '../../../../../utils/reportError'
+import {type ClubKeys} from '../../../../clubs/atom/clubsToKeyHolderV2Atom'
 import {type NotOfferFromContactNetworkError} from '../../../domain'
 import {
   clubOffersNextPageParamAtom,
@@ -77,11 +81,13 @@ export const fetchOffersReportErrorsActionAtom = atom(
     {
       offersApi,
       contactNetworkKeyPair,
+      contactNetworkKeyPairV2,
       clubs,
     }: {
       offersApi: OfferApi
       contactNetworkKeyPair: PrivateKeyHolder
-      clubs: Record<ClubUuid, PrivateKeyHolder>
+      contactNetworkKeyPairV2: KeyPairV2
+      clubs: Record<ClubUuid, ClubKeys>
     }
   ) => {
     const contactOffersNextPageParam = get(contactOffersNextPageParamAtom)
@@ -92,6 +98,7 @@ export const fetchOffersReportErrorsActionAtom = atom(
         set(getNewContactNetworkOffersAndDecryptPaginatedActionAtom, {
           offersApi,
           keyPair: contactNetworkKeyPair,
+          keyPairV2: contactNetworkKeyPairV2,
           lastPrivatePartIdBase64: contactOffersNextPageParam,
         }),
         Effect.map(filterAndReportDecryptionErrors)

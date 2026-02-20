@@ -5,7 +5,7 @@ import {
 import {toError, type BasicError} from '@vexl-next/domain/src/utility/errors'
 import {type SignedChallenge} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {type Effect} from 'effect'
+import {Option, type Effect} from 'effect'
 import * as O from 'fp-ts/Option'
 import * as RA from 'fp-ts/ReadonlyArray'
 import * as TE from 'fp-ts/TaskEither'
@@ -67,6 +67,7 @@ export function generateSignedChallengeBatch(
                 challenge: {
                   signature,
                   challenge: challenge.challenge,
+                  signatureV2: Option.none(),
                 },
               }))
             )

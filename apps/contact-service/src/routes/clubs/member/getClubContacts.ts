@@ -3,9 +3,11 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
+import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
+import {toCompatiblePublicKeyArray} from '../../../utils/toCompatiblePublicKeyArray'
 
 export const getClubContacts = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -28,17 +30,12 @@ export const getClubContacts = HttpApiBuilder.handler(
       )
 
       yield* _(
-        clubMembersDb.findClubMemberByPublicKey({
-          publicKey: req.payload.publicKey,
-        }),
-        Effect.flatten,
+        findClubMemberByPublicKeyV1OrV2(
+          Option.getOrElse(req.payload.publicKeyV2, () => req.payload.publicKey)
+        ),
         Effect.filterOrFail(
           (member) => club.id === member.clubId,
           () => new NotFoundError({message: 'Club not found'})
-        ),
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new NotFoundError({message: 'Member not found'})
         )
       )
 
@@ -46,11 +43,11 @@ export const getClubContacts = HttpApiBuilder.handler(
         clubMembersDb.queryAllClubMembers({id: club.id})
       )
 
-      const pubKeys = clubContacts.map((contact) => contact.publicKey)
-
       return {
         clubUuid: req.payload.clubUuid,
-        items: pubKeys,
+        items: yield* toCompatiblePublicKeyArray(
+          req.headers.clientVersionOrNone
+        )(clubContacts),
       }
     }).pipe(
       Effect.withSpan('Fetch club contacts', {

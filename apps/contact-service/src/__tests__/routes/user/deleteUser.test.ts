@@ -41,6 +41,7 @@ describe('delete user', () => {
               vexlNotificationToken: Option.some(
                 Schema.decodeSync(VexlNotificationToken)('vexl_nt_test')
               ),
+              publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
           })

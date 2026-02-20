@@ -6,6 +6,7 @@ import {
   PrivateKeyPemBase64,
   PublicKeyPemBase64,
 } from './brands'
+import {KeyPairV2, PrivateKeyV2, PublicKeyV2} from './brandsV2'
 import {
   privateRawToPem,
   publicPemFromPrivatePem,
@@ -52,7 +53,11 @@ function generatePrivateKey(curve: Curve = defaultCurve): PrivateKeyHolder {
 export {
   generatePrivateKey,
   importPrivateKey,
+  // V2 key types for libsodium
+  KeyPairV2,
   PrivateKeyHolder,
   PrivateKeyPemBase64,
+  PrivateKeyV2,
   PublicKeyPemBase64,
+  PublicKeyV2,
 }

@@ -1,8 +1,8 @@
-const VERSION_CODE = 690
-const VERSION = '1.40.0'
+const VERSION_CODE = 710
+const VERSION = '1.41.0'
 const ENV_PRESET = process.env.ENV_PRESET
+const IS_LOCAL_ENV = ENV_PRESET === 'local'
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
-const APP_SOURCE = process.env.APP_SOURCE ?? 'local'
 
 // // check if version is valid
 // Schema.decodeSync(SemverString)(VERSION)
@@ -23,7 +23,6 @@ const presets = {
     hmacPassword:
       'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
     commitHash: COMMIT_HASH,
-    appSource: APP_SOURCE,
     iconV2: './assets/icon-stage.icon',
   },
   local: {
@@ -38,10 +37,8 @@ const presets = {
     foregroundImage: './assets/android-front.png',
     backgroundImage: './assets/android-back-stage.png',
     icon: './assets/icon-stage.png',
-    hmacPassword:
-      'UHQyykWs4nE1Yn8IQi/lsz2QemK3zA+JIWdGll3PEtle9/aMMBvQk6kKgYkjyewTiK0ypuquBSBVJwuSiYs8FQ==',
-    commitHash: COMMIT_HASH,
-    appSource: APP_SOURCE,
+    hmacPassword: 'VexlVexl',
+    commitHash: 'local',
     iconV2: './assets/icon-stage.icon',
   },
   prod: {
@@ -59,7 +56,6 @@ const presets = {
     hmacPassword:
       'rv5AKXDcED4txmI5Nltz9eZFAHOI1VrLT3JWOpEZefE5uGInq53rfHkQLUIjaMUHv3hicbk/wtSKOfsNZ3aNNw==',
     commitHash: COMMIT_HASH,
-    appSource: APP_SOURCE,
     iconV2: './assets/icon.icon',
   },
 }
@@ -200,6 +196,7 @@ export default {
     'policy': 'sdkVersion',
   },
   'plugins': [
+    ['react-native-libsodium', {}],
     './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [
@@ -264,6 +261,9 @@ export default {
         'organization': 'vexl',
       },
     ],
+    ...(IS_LOCAL_ENV
+      ? ['./expo-plugins/android-manifest-local-cleartext-plugin.js']
+      : []),
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',

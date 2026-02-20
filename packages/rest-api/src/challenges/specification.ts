@@ -3,14 +3,14 @@ import {
   NotFoundError,
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
+
+import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
 import {
   CreateChallengeRequest,
   CreateChallengeResponse,
   CreateChallengesRequest,
   CreateChallengesResponse,
-} from '@vexl-next/rest-api/src/services/chat/contracts'
-
-import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
+} from './contracts'
 
 export const CreateChallengeEndpoint = HttpApiEndpoint.post(
   'createChallenge',

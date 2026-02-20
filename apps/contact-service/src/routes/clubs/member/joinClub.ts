@@ -14,6 +14,7 @@ import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {reportUserJoinedClubAndImportedContacts} from '../../../metrics'
 import {UserNotificationService} from '../../../services/UserNotificationService'
+import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
 import {withClubJoiningActionRedisLock} from '../../../utils/withClubJoiningActionRedisLock'
 import {clubHasCapacityForAnotherUser} from '../utils/clubHasCapacityForAnotherUser'
 
@@ -65,9 +66,13 @@ export const joinClub = HttpApiBuilder.handler(
         Effect.gen(function* (_) {
           yield* _(clubHasCapacityForAnotherUser(club))
           yield* _(
-            membersDb.findClubMemberByPublicKey({
-              publicKey: req.payload.publicKey,
-            }),
+            findClubMemberByPublicKeyV1OrV2(
+              Option.getOrElse(
+                req.payload.publicKeyV2,
+                () => req.payload.publicKey
+              )
+            ),
+            Effect.option,
             Effect.filterOrFail(
               Option.isNone,
               () => new MemberAlreadyInClubError()
@@ -78,6 +83,7 @@ export const joinClub = HttpApiBuilder.handler(
             membersDb.insertClubMember({
               clubId: club.id,
               publicKey: req.payload.publicKey,
+              publicKeyV2: Option.getOrNull(req.payload.publicKeyV2),
               isModerator: inviteLink.forAdmin,
               lastRefreshedAt: new Date(),
               notificationToken: Option.getOrNull(
@@ -101,7 +107,10 @@ export const joinClub = HttpApiBuilder.handler(
           yield* _(
             userNotificationService.notifyOthersAboutNewClubUser(
               club.uuid,
-              req.payload.publicKey
+              Option.getOrElse(
+                req.payload.publicKeyV2,
+                () => req.payload.publicKey
+              )
             )
           )
 

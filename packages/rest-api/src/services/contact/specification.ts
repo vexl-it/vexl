@@ -1,9 +1,4 @@
-import {
-  HttpApi,
-  HttpApiEndpoint,
-  HttpApiGroup,
-  OpenApi,
-} from '@effect/platform/index'
+import {HttpApi, HttpApiEndpoint, HttpApiGroup} from '@effect/platform/index'
 import {
   InvalidNextPageTokenError,
   NotFoundError,
@@ -14,8 +9,13 @@ import {
   CommonAndSecurityHeaders,
   ServerSecurityMiddleware,
 } from '../../apiSecurity'
-import {InvalidChallengeError} from '../../challenges/contracts'
+import {
+  InvalidChallengeError,
+  KeyAlreadySetError,
+  PublicKeyV2MissingError,
+} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
+import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {RateLimitingMiddleware} from '../../rateLimititing'
@@ -37,12 +37,8 @@ import {
   EraseUserFromNetworkResponse,
   FetchCommonConnectionsPaginatedRequest,
   FetchCommonConnectionsPaginatedResponse,
-  FetchCommonConnectionsRequest,
-  FetchCommonConnectionsResponse,
   FetchMyContactsPaginatedRequest,
   FetchMyContactsPaginatedResponse,
-  FetchMyContactsRequest,
-  FetchMyContactsResponse,
   GenerateClubJoinLinkRequest,
   GenerateClubJoinLinkResponse,
   GenerateInviteLinkForAdminRequest,
@@ -75,10 +71,7 @@ import {
   RequestClubImageUploadRequest,
   RequestClubImageUploadResponse,
   S3ServiceError,
-  UnableToVerifySignatureError,
-  UpdateBadOwnerHashRequest,
-  UpdateBadOwnerHashResponse,
-  UpdateFirebaseTokenRequest,
+  SetPublicKeyV2Request,
   UpdateNotificationTokenRequest,
   UserExistsResponse,
   UserIsNotModeratorError,
@@ -114,18 +107,6 @@ export const RefreshUserEndpoint = HttpApiEndpoint.post(
   .setPayload(RefreshUserRequest)
   .addSuccess(NoContentResponse)
   .addError(UserNotFoundError, {status: 404})
-  .annotate(MaxExpectedDailyCall, 1)
-
-export const UpdateFirebaseTokenEndpoint = HttpApiEndpoint.put(
-  'updateFirebaseToken',
-  '/api/v1/users'
-)
-  .setHeaders(CommonAndSecurityHeaders)
-  .middleware(ServerSecurityMiddleware)
-  .setPayload(UpdateFirebaseTokenRequest)
-  .addError(UserNotFoundError, {status: 404})
-  .addSuccess(NoContentResponse)
-  .annotate(OpenApi.Deprecated, true)
   .annotate(MaxExpectedDailyCall, 1)
 
 export const UpdateNotificationTokenEndpoint = HttpApiEndpoint.put(
@@ -171,16 +152,6 @@ export const ImportContactsEndpoint = HttpApiEndpoint.post(
   .addError(ImportContactsQuotaReachedError, {status: 429})
   .annotate(MaxExpectedDailyCall, 100)
 
-export const FetchMyContactsEndpoint = HttpApiEndpoint.get(
-  'fetchMyContacts',
-  '/api/v1/contacts/me'
-)
-  .setHeaders(CommonAndSecurityHeaders)
-  .middleware(ServerSecurityMiddleware)
-  .setUrlParams(FetchMyContactsRequest)
-  .addSuccess(FetchMyContactsResponse)
-  .annotate(MaxExpectedDailyCall, 100)
-
 export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   'fetchMyContactsPaginated',
   '/api/v1/contacts/me/paginated'
@@ -191,16 +162,6 @@ export const FetchMyContactsPaginatedEndpoint = HttpApiEndpoint.get(
   .addSuccess(FetchMyContactsPaginatedResponse)
   .addError(InvalidNextPageTokenError, {status: 400})
   .annotate(MaxExpectedDailyCall, 500)
-
-export const FetchCommonConnectionsEndpoint = HttpApiEndpoint.post(
-  'fetchCommonConnections',
-  '/api/v1/contacts/common'
-)
-  .setHeaders(CommonAndSecurityHeaders)
-  .middleware(ServerSecurityMiddleware)
-  .setPayload(FetchCommonConnectionsRequest)
-  .addSuccess(FetchCommonConnectionsResponse)
-  .annotate(MaxExpectedDailyCall, 100)
 
 export const FetchCommonConnectionsPaginatedEndpoint = HttpApiEndpoint.post(
   'fetchCommonConnectionsPaginated',
@@ -221,15 +182,6 @@ export const ConvertPhoneNumberHashesToServerHashesEndpoint =
     .setPayload(ConvertPhoneNumberHashesToServerHashesRequest)
     .addSuccess(ConvertPhoneNumberHashesToServerHashesResponse)
     .annotate(MaxExpectedDailyCall, 100)
-
-export const UpdateBadOwnerHashEndpoint = HttpApiEndpoint.post(
-  'updateBadOwnerHash',
-  '/api/v1/update-bad-owner-hash'
-)
-  .setPayload(UpdateBadOwnerHashRequest)
-  .addSuccess(UpdateBadOwnerHashResponse)
-  .addError(UnableToVerifySignatureError, {status: 400})
-  .annotate(MaxExpectedDailyCall, 1)
 
 export const CreateClubEndpoint = HttpApiEndpoint.post(
   'createClub',
@@ -354,10 +306,25 @@ export const ListClubLinksEndpoint = HttpApiEndpoint.post(
   .addError(UserIsNotModeratorError, {status: 403})
   .annotate(MaxExpectedDailyCall, 100)
 
+export const SetPublicKeyV2Endpoint = HttpApiEndpoint.put(
+  'setPublicKeyV2',
+  '/api/v1/clubs/member/set-public-key-v2'
+)
+  .setHeaders(CommonHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(SetPublicKeyV2Request)
+  .addError(InvalidChallengeError, {status: 401})
+  .addError(PublicKeyV2MissingError, {status: 400})
+  .addError(KeyAlreadySetError, {status: 400})
+  .addError(NotFoundError, {status: 404})
+  .addSuccess(NoContentResponse)
+  .annotate(MaxExpectedDailyCall, 1000)
+
 export const GetClubContactsEndpoint = HttpApiEndpoint.post(
   'getClubContacts',
   '/api/v1/clubs/member/get-contacts'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(GetClubContactsRequest)
   .addSuccess(GetClubContactsResponse)
   .addError(InvalidChallengeError, {status: 401})
@@ -388,18 +355,14 @@ const UserApiGroup = HttpApiGroup.make('User')
   .add(CheckUserExistsEndpoint)
   .add(CreateUserEndpoint)
   .add(RefreshUserEndpoint)
-  .add(UpdateFirebaseTokenEndpoint)
   .add(UpdateNotificationTokenEndpoint)
   .add(DeleteUserEndpoint)
-  .add(UpdateBadOwnerHashEndpoint)
   .add(EraseUserFromNetworkEndpoint)
 
 const ContactApiGroup = HttpApiGroup.make('Contact')
   .add(ImportContactsEndpoint)
   .add(ConvertPhoneNumberHashesToServerHashesEndpoint)
-  .add(FetchMyContactsEndpoint)
   .add(FetchMyContactsPaginatedEndpoint)
-  .add(FetchCommonConnectionsEndpoint)
   .add(FetchCommonConnectionsPaginatedEndpoint)
 
 const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
@@ -416,6 +379,7 @@ const ClubsMemberApiGroup = HttpApiGroup.make('ClubsMember')
   .add(GetClubContactsEndpoint)
   .add(GetClubInfoByAccessCodeEndpoint)
   .add(ReportClubEndpoint)
+  .add(SetPublicKeyV2Endpoint)
 
 const ClubsModeratorApiGroup = HttpApiGroup.make('ClubsModerator')
   .add(GenerateClubJoinLinkEndpoint)

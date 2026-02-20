@@ -14,8 +14,6 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSecurity'
-import {ChallengeService} from '@vexl-next/server-utils/src/services/challenge/ChallengeService'
-import {ChallengeDbService} from '@vexl-next/server-utils/src/services/challenge/db/ChallegeDbService'
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Layer} from 'effect'
@@ -28,9 +26,7 @@ import {createNewOffer} from './routes/createNewOffer'
 import {createPrivatePart} from './routes/createPrivatePart'
 import {deleteOffer} from './routes/deleteOffer'
 import {deletePrivatePart} from './routes/deletePrivatePart'
-import {getClubOffersForMeModifiedOrCreatedAfter} from './routes/getClubOffersForMeModifiedOrCreatedAfter'
 import {getClubOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getClubOffersForMeModifiedOrCreatedAfterPaginated'
-import {getOffersForMeModifiedOrCreatedAfter} from './routes/getOffersForMeModifiedOrCreatedAfter'
 import {getOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getOffersForMeModifiedOrCreatedAfterPaginated'
 import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
 import {getRemovedOffers} from './routes/getRemovedOffers'
@@ -45,14 +41,6 @@ const RootGroupLive = HttpApiBuilder.group(OfferApiSpecification, 'root', (h) =>
     .handle('createPrivatePart', createPrivatePart)
     .handle('deleteOffer', deleteOffer)
     .handle('deletePrivatePart', deletePrivatePart)
-    .handle(
-      'getClubOffersForMeModifiedOrCreatedAfter',
-      getClubOffersForMeModifiedOrCreatedAfter
-    )
-    .handle(
-      'getOffersForMeModifiedOrCreatedAfter',
-      getOffersForMeModifiedOrCreatedAfter
-    )
     .handle('getRemovedClubOffers', getRemovedClubOffers)
     .handle('getRemovedOffers', getRemovedOffers)
     .handle('reportClubOffer', reportClubOffer)
@@ -98,8 +86,6 @@ export const HttpServerLive = Layer.empty.pipe(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(InternalServerLive),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
-  Layer.provideMerge(ChallengeService.Live),
-  Layer.provideMerge(ChallengeDbService.Live),
   Layer.provideMerge(healthServerLayer({port: healthServerPortConfig})),
   Layer.provideMerge(OfferDbService.Live),
   Layer.provideMerge(DbLayer),

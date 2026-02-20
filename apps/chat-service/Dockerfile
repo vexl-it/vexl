@@ -8,7 +8,6 @@ WORKDIR /app/apps/chat-service
 
 RUN yarn workspaces focus @vexl-next/chat-service
 RUN yarn build
-# RUN npx @sentry/wizard@latest -i sourcemaps
 
 
 FROM node:24 as runner
@@ -26,4 +25,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 WORKDIR /app/apps/chat-service
 
-CMD ["node", "--enable-source-maps", "dist/index.cjs"]
+CMD ["node", "dist/index.cjs"]

@@ -1,6 +1,6 @@
 ---
 name: implement-component
-description: Implement a Tamagui component in @vexl-next/ui from a Figma design node and add a preview screen to the ui-preview app. Use when given a component name and Figma URL or node ID to build a production-ready component with proper token usage, theme support, jotai state management, exports, and an interactive demo screen.
+description: Implement a Tamagui component in @vexl-next/ui from a Figma design node and add a preview screen to the ui-book app. Use when given a component name and Figma URL or node ID to build a production-ready component with proper token usage, theme support, jotai state management, exports, and an interactive demo screen.
 ---
 
 # Implement Component
@@ -139,9 +139,9 @@ The barrel in `src/index.ts` (`export * from './components'`) propagates it auto
 
 ### 4. Add Preview Screen
 
-Add a demo screen to `apps/ui-preview` for the new component.
+Add a demo screen to `apps/ui-book` for the new component.
 
-**Create the screen file** at `apps/ui-preview/screens/<ComponentName>Screen.tsx`:
+**Create the screen file** at `apps/ui-book/screens/<ComponentName>Screen.tsx`:
 
 ```tsx
 import {Button, ButtonText, YStack, SizableText} from '@vexl-next/ui'
@@ -165,7 +165,7 @@ export function ButtonScreen(): React.JSX.Element {
 }
 ```
 
-**Register the screen** in `apps/ui-preview/screens/index.ts`. Each entry maps a label to a screen component:
+**Register the screen** in `apps/ui-book/screens/index.ts`. Each entry maps a label to a screen component:
 
 ```ts
 import type React from 'react'
@@ -218,11 +218,11 @@ export function App(): React.JSX.Element {
 
 When adding a new component, only two changes are needed:
 
-1. Create the screen file in `apps/ui-preview/screens/`
-2. Add an entry to the `screens` array in `apps/ui-preview/screens/index.ts`
+1. Create the screen file in `apps/ui-book/screens/`
+2. Add an entry to the `screens` array in `apps/ui-book/screens/index.ts`
 
 If the navigation infrastructure does not exist yet, create the `screens/` directory, the registry file, and update `App.tsx` to use the pattern above before adding the first screen.
 
 ### 5. Verify
 
-Run the standard AGENTS.md verification steps (typecheck, format, lint) for both `@vexl-next/ui` and `@vexl-next/ui-preview` workspaces. Fix all errors before considering the task complete.
+Run the standard AGENTS.md verification steps (typecheck, format, lint) for both `@vexl-next/ui` and `@vexl-next/ui-book` workspaces. Fix all errors before considering the task complete.

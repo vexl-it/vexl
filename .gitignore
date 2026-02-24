@@ -26,6 +26,10 @@ node_modules
 .env
 .env.local
 
+# Expo / Tamagui generated
+.expo/
+.tamagui/
+
 #Claude code
 
 # Planning docs

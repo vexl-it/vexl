@@ -12383,9 +12383,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@vexl-next/ui-preview@workspace:apps/ui-preview":
+"@vexl-next/ui-book@workspace:apps/ui-book":
   version: 0.0.0-use.local
-  resolution: "@vexl-next/ui-preview@workspace:apps/ui-preview"
+  resolution: "@vexl-next/ui-book@workspace:apps/ui-book"
   dependencies:
     "@babel/core": ^7.12.9
     "@tamagui/babel-plugin": ^1.137.0

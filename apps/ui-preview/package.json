@@ -1,0 +1,41 @@
+{
+  "name": "@vexl-next/ui-preview",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "npx expo start",
+    "android": "npx expo run:android",
+    "ios": "npx expo run:ios",
+    "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
+  },
+  "dependencies": {
+    "@tamagui/babel-plugin": "^1.137.0",
+    "@vexl-next/ui": "0.0.0",
+    "expo": "~54.0.27",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.2",
+    "react-native": "0.81.5",
+    "tamagui": "^1.137.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.9",
+    "@types/react": "~19.1.10",
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/tsconfig": "0.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.2",
+    "typescript": "~5.9.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@vexl-next/eslint-config/react"
+    ]
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

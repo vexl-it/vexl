@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Vexl UI Preview",
+    "slug": "vexl-ui-preview",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "vexl-ui-preview",
+    "platforms": ["ios", "android"]
+  }
+}

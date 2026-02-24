@@ -1,5 +1,5 @@
 {
-  "name": "@vexl-next/ui-preview",
+  "name": "@vexl-next/ui-book",
   "version": "1.0.0",
   "main": "index.js",
   "private": true,
@@ -13,6 +13,7 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\""
   },
   "dependencies": {
+    "@gorhom/portal": "^1.0.14",
     "@tamagui/babel-plugin": "^1.137.0",
     "@vexl-next/ui": "0.0.0",
     "expo": "~54.0.27",

@@ -13,6 +13,7 @@ module.exports = function (api) {
           logTimings: true,
         },
       ],
+      'react-native-reanimated/plugin',
     ],
   }
 }

@@ -24,6 +24,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (
     moduleName === 'react' ||
     moduleName === 'react-native' ||
+    moduleName === 'react-native-reanimated' ||
     moduleName === 'react-native-svg'
   ) {
     return {

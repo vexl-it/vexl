@@ -1,5 +1,6 @@
 export {Button} from './Button'
 export {CardButton} from './CardButton'
+export {DotTypingIndicator} from './DotTypingIndicator'
 export {FabButton} from './FabButton'
 export {IconButton} from './IconButton'
 export {NavButton} from './NavButton'

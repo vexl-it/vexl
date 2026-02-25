@@ -12333,6 +12333,7 @@ __metadata:
     prettier: ^3.3.2
     react: 19.1.2
     react-native: 0.81.5
+    react-native-reanimated: ~4.1.1
     react-native-svg: 15.12.1
     tamagui: ^1.137.0
     typescript: ~5.9.2
@@ -12353,6 +12354,7 @@ __metadata:
     prettier: ^3.3.2
     react: 19.1.2
     react-native: 0.81.5
+    react-native-reanimated: ~4.1.1
     react-native-svg: 15.12.1
     rimraf: ^4.4.0
     tamagui: ^1.137.0
@@ -12361,6 +12363,7 @@ __metadata:
     jotai: ">=2"
     react: ">=18"
     react-native: ">=0.81"
+    react-native-reanimated: ">=4"
     react-native-svg: ">=13"
   languageName: unknown
   linkType: soft

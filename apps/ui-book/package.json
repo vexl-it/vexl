@@ -21,6 +21,7 @@
     "jotai": "^2.15.0",
     "react": "19.1.2",
     "react-native": "0.81.5",
+    "react-native-reanimated": "~4.1.1",
     "react-native-svg": "15.12.1",
     "tamagui": "^1.137.0"
   },

@@ -2,6 +2,7 @@ import type React from 'react'
 
 import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
+import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
 import {FabButtonScreen} from './FabButtonScreen'
 import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
@@ -21,4 +22,5 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Nav Button', component: NavButtonScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Switch', component: SwitchScreen},
+  {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
 ]

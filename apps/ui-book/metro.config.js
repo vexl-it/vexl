@@ -21,7 +21,11 @@ config.resolver.nodeModulesPaths = [
 const appModules = path.resolve(projectRoot, 'node_modules')
 const defaultResolveRequest = config.resolver.resolveRequest
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (moduleName === 'react' || moduleName === 'react-native') {
+  if (
+    moduleName === 'react' ||
+    moduleName === 'react-native' ||
+    moduleName === 'react-native-svg'
+  ) {
     return {
       type: 'sourceFile',
       filePath: require.resolve(moduleName, {paths: [appModules]}),

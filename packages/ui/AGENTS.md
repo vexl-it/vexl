@@ -2,7 +2,7 @@
 
 Purpose: Shared UI package providing the Vexl design system built on Tamagui. Native-only (no web/media queries).
 
-Stack: TypeScript, Tamagui v1, React.
+Stack: TypeScript, Tamagui v1, React, react-native-reanimated v4.
 
 Structure:
 
@@ -15,6 +15,7 @@ Structure:
   - `FabButton` — Floating action button (icon + label, always yellow primary).
   - `IconButton` — Square icon button with optional badge.
   - `NavButton` — Navigation bar button (icon/text × highlighted/destructive/normal). Normal variant wraps in `<Theme name="light">` to stay light in dark mode.
+  - `DotTypingIndicator` — Animated typing indicator (3 bouncing dots) using react-native-reanimated.
 
 Design tokens sourced from Figma file `P7IaNcwu4qoS9uTL7ECiWL` (Vexl redesign DEV, node 593:39715):
 
@@ -29,6 +30,7 @@ Component patterns:
 - Components needing coordinated styling (e.g. frame + label sharing a variant) use a functional component that composes internal styled primitives and forwards variant props to each.
 - Use theme tokens (`$foregroundPrimary`) over raw color tokens (`$black100`) unless the design intentionally avoids theme-switching (e.g. CardButton filled without contrast).
 - When a variant must ignore the surrounding theme, wrap it in `<Theme name="light">` (see NavButton normal variant).
+- For animated components, use `react-native-reanimated` (shared values, `useAnimatedStyle`, `withTiming`/`withSequence`/`withRepeat`). When Animated.View needs token-derived pixel values, resolve via `getTokens()` from tamagui (e.g. `getTokens().size.$3.val`).
 
 Gotchas:
 

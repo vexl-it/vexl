@@ -20,7 +20,7 @@ const GRAYSCALE_FILTER = [
 
 function resolveSizePx(size: AvatarSize, customSize?: number): number {
   if (customSize != null) return customSize
-  return Number(getTokens().size[SIZE_TOKEN_MAP[size]].val)
+  return getTokens().size[SIZE_TOKEN_MAP[size]].val
 }
 
 export interface AvatarProps {

@@ -72,7 +72,7 @@ function AnimatedDot({
 export function DotTypingIndicator(): React.JSX.Element {
   const theme = useTheme()
   const sizeTokens = getTokens().size
-  const dotSize = useMemo(() => Number(sizeTokens.$3.val), [sizeTokens])
+  const dotSize = useMemo(() => sizeTokens.$3.val, [sizeTokens])
   const bounceHeight = dotSize
   const color = theme.foregroundTertiary.val
 

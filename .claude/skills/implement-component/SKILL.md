@@ -335,6 +335,10 @@ When adding a new component, only two changes are needed:
 
 If the navigation infrastructure does not exist yet, create the `screens/` directory, the registry file, and update `App.tsx` to use the pattern above before adding the first screen.
 
-### 5. Verify
+### 5. Update AGENTS.md
+
+After creating the component, update `packages/ui/AGENTS.md` to document the new component in the `src/components/` list. Add a one-line entry following the existing format: component name, brief description of its purpose, variants/states, and any notable implementation details (e.g. special patterns like `cloneElement`, `useTheme`, jotai atoms, animation approach).
+
+### 6. Verify
 
 Run the standard AGENTS.md verification steps (typecheck, format, lint) for both `@vexl-next/ui` and `@vexl-next/ui-book` workspaces. Fix all errors before considering the task complete.

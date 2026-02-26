@@ -14,7 +14,8 @@ Structure:
   - `Button` — Primary action button (5 variants × 3 sizes).
   - `CardButton` — Small card-level button (filled/text × contrast flag). Filled+contrast uses theme tokens; filled without uses primitives ($black100/$white100).
   - `FabButton` — Floating action button (icon + label, always yellow primary).
-  - `IconButton` — Square icon button with optional badge.
+  - `Dot` — Small circle indicator. 2 variants: `small` (8px, default) and `number` (20px, shows a `count` label). Default background `$pinkBright100`, settable via `backgroundColor` prop. Number label uses plain RN `Text` (not `SizableText`) with font values resolved from `bodyFont` config to avoid Tamagui lineHeight misalignment inside the circle.
+  - `IconButton` — Square icon button with optional badge (uses `Dot` with `size="$5"` and `$accentYellowPrimary` background).
   - `NavButton` — Navigation bar button (icon/text × highlighted/destructive/normal). Normal variant wraps in `<Theme name="light">` to stay light in dark mode.
   - `Avatar` — Rectangular avatar with border radius `$2.5` (8px). 3 sizes (small/medium/large) + customSize. Supports raster image (`source` prop, grayscale via `FilterImage` from `react-native-svg/filter-image`) or children (icons, SVG avatar components). For children, grayscale is handled by the child component itself (e.g. anonymous avatar `grayscale` prop).
   - `FilterTag` — Pill-shaped filter tag (default/selected states). Optional `icon` prop (`React.ComponentType<IconProps>`) — pass the icon component reference (e.g. `icon={TagLabel}`), color and size are controlled by FilterTag internally.
@@ -36,7 +37,7 @@ Component patterns:
 - Components needing coordinated styling (e.g. frame + label sharing a variant) use a functional component that composes internal styled primitives and forwards variant props to each.
 - Use theme tokens (`$foregroundPrimary`) over raw color tokens (`$black100`) unless the design intentionally avoids theme-switching (e.g. CardButton filled without contrast).
 - When a variant must ignore the surrounding theme, wrap it in `<Theme name="light">` (see NavButton normal variant).
-- For animated components, use `react-native-reanimated` (shared values, `useAnimatedStyle`, `withTiming`/`withSequence`/`withRepeat`). When Animated.View needs token-derived pixel values, resolve via `getTokens()` from tamagui (e.g. `getTokens().size.$3.val`). Wrap `Number(token.val)` computations in `useMemo` to avoid recalculating on every render.
+- For animated components, use `react-native-reanimated` (shared values, `useAnimatedStyle`, `withTiming`/`withSequence`/`withRepeat`). When Animated.View needs token-derived pixel values, resolve via `getTokens()` from tamagui (e.g. `getTokens().size.$3.val`). Wrap token `.val` lookups in `useMemo` to avoid recalculating on every render. Do NOT wrap `.val` in `Number()` or `String()` — token values are already the correct type.
 - For image filters (grayscale, color transforms), use `react-native-svg` SVG filters (`Filter`, `FeColorMatrix`, etc.) instead of third-party native filter libraries — they work with Fabric/New Architecture out of the box. Render images via SVG `<Image>` with `preserveAspectRatio="xMidYMid slice"` for cover-like behavior.
 - For icon props, pass the component type (`React.ComponentType<IconProps>`) not a rendered element. The consuming component destructures with a capital alias (`icon: Icon`) and renders `<Icon color={...} size={...} />` directly. Never use `React.cloneElement` for color injection.
 

@@ -1,6 +1,7 @@
 export {Avatar} from './Avatar'
 export {Button} from './Button'
 export {CardButton} from './CardButton'
+export {Dot} from './Dot'
 export {DotTypingIndicator} from './DotTypingIndicator'
 export {FabButton} from './FabButton'
 export {FilterTag} from './FilterTag'

@@ -69,8 +69,8 @@ export function FilterTag({
 }: FilterTagProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = selected
-    ? String(theme.accentHighlightPrimary.val)
-    : String(theme.foregroundPrimary.val)
+    ? theme.accentHighlightPrimary.val
+    : theme.foregroundPrimary.val
 
   return (
     <FilterTagFrame selected={selected} {...rest}>

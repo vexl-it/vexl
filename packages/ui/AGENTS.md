@@ -20,6 +20,7 @@ Structure:
   - `FilterTag` — Pill-shaped filter tag (default/selected states). Optional `icon` prop (`React.ComponentType<IconProps>`) — pass the icon component reference (e.g. `icon={TagLabel}`), color and size are controlled by FilterTag internally.
   - `DotTypingIndicator` — Animated typing indicator (3 bouncing dots) using react-native-reanimated.
   - `Tabs` — Horizontal tab bar (large/small sizes). Uses jotai `activeIndexAtom` for state. Animated underline slides between tabs via react-native-reanimated (`useSharedValue`/`withTiming`). Wrapped in RN `ScrollView` (horizontal) for overflow. Tab labels use heading font (`$heading`) with bold/regular weight toggle. Measures tab positions via `onLayout` and tracks ScrollView width for auto-scroll on press.
+  - `TextTag` — Small status tag with asymmetric border radii. 10 typed variants (`TextTagVariant`): offer, request, approved, waiting, new, paused, set, accepted, waitingForConfirmation, outdated. Each variant binds background color, text color, and border-radius shape (left-leaning for offer/request, right-leaning for all others). Uses coordinated `styled()` variants on both frame (`TextTagFrame`) and label (`TextTagLabel`). Typography: body font, weight 500, size `$1` (12px).
 
 Design tokens sourced from Figma file `P7IaNcwu4qoS9uTL7ECiWL` (Vexl redesign DEV, node 593:39715):
 

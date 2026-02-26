@@ -1,3 +1,4 @@
+export {Avatar} from './Avatar'
 export {Button} from './Button'
 export {CardButton} from './CardButton'
 export {DotTypingIndicator} from './DotTypingIndicator'

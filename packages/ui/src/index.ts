@@ -17,3 +17,6 @@ export * from './components'
 
 // Icons
 export * from './icons'
+
+// Anonymous Avatars
+export * from './assets/anonymousAvatars'

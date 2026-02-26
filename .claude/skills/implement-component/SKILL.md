@@ -236,6 +236,7 @@ Create file(s) in `packages/ui/src/components/`.
 - For state: jotai atoms passed as props. Use `useAtom` when you need both getter and setter, `useAtomValue` when you need only the getter, `useSetAtom` when you need only the setter.
 - When the design maps to an existing RN component (Switch, TextInput, Slider), **always wrap the native component** instead of building a custom one. This ensures platform-specific behavior and accessibility.
 - For native wrappers, use `useTheme()` to resolve theme tokens to color strings. Extend the RN props type, omitting internally-managed props.
+- When reading values from font configs (`bodyFont`, `headingFont`) or `getTokens()`, do **not** wrap them in `String()` or `Number()` constructors — they are already the correct types.
 
 Read `packages/ui/src/config/themes.ts` for available theme token names.
 

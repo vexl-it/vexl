@@ -9,6 +9,7 @@ import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {NavButtonScreen} from './NavButtonScreen'
 import {SwitchScreen} from './SwitchScreen'
+import {TabsScreen} from './TabsScreen'
 
 export interface ScreenEntry {
   readonly label: string
@@ -25,4 +26,5 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Icons', component: IconsScreen},
   {label: 'Switch', component: SwitchScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
+  {label: 'Tabs', component: TabsScreen},
 ]

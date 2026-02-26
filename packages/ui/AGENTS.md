@@ -18,6 +18,7 @@ Structure:
   - `NavButton` — Navigation bar button (icon/text × highlighted/destructive/normal). Normal variant wraps in `<Theme name="light">` to stay light in dark mode.
   - `Avatar` — Rectangular avatar with border radius `$2.5` (8px). 3 sizes (small/medium/large) + customSize. Supports raster image (`source` prop, grayscale via `FilterImage` from `react-native-svg/filter-image`) or children (icons, SVG avatar components). For children, grayscale is handled by the child component itself (e.g. anonymous avatar `grayscale` prop).
   - `DotTypingIndicator` — Animated typing indicator (3 bouncing dots) using react-native-reanimated.
+  - `Tabs` — Horizontal tab bar (large/small sizes). Uses jotai `activeIndexAtom` for state. Animated underline slides between tabs via react-native-reanimated (`useSharedValue`/`withTiming`). Wrapped in RN `ScrollView` (horizontal) for overflow. Tab labels use heading font (`$heading`) with bold/regular weight toggle. Measures tab positions via `onLayout` and tracks ScrollView width for auto-scroll on press.
 
 Design tokens sourced from Figma file `P7IaNcwu4qoS9uTL7ECiWL` (Vexl redesign DEV, node 593:39715):
 
@@ -32,7 +33,7 @@ Component patterns:
 - Components needing coordinated styling (e.g. frame + label sharing a variant) use a functional component that composes internal styled primitives and forwards variant props to each.
 - Use theme tokens (`$foregroundPrimary`) over raw color tokens (`$black100`) unless the design intentionally avoids theme-switching (e.g. CardButton filled without contrast).
 - When a variant must ignore the surrounding theme, wrap it in `<Theme name="light">` (see NavButton normal variant).
-- For animated components, use `react-native-reanimated` (shared values, `useAnimatedStyle`, `withTiming`/`withSequence`/`withRepeat`). When Animated.View needs token-derived pixel values, resolve via `getTokens()` from tamagui (e.g. `getTokens().size.$3.val`).
+- For animated components, use `react-native-reanimated` (shared values, `useAnimatedStyle`, `withTiming`/`withSequence`/`withRepeat`). When Animated.View needs token-derived pixel values, resolve via `getTokens()` from tamagui (e.g. `getTokens().size.$3.val`). Wrap `Number(token.val)` computations in `useMemo` to avoid recalculating on every render.
 - For image filters (grayscale, color transforms), use `react-native-svg` SVG filters (`Filter`, `FeColorMatrix`, etc.) instead of third-party native filter libraries — they work with Fabric/New Architecture out of the box. Render images via SVG `<Image>` with `preserveAspectRatio="xMidYMid slice"` for cover-like behavior.
 
 Gotchas:

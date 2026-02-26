@@ -5,6 +5,7 @@ import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
 import {FabButtonScreen} from './FabButtonScreen'
+import {FilterTagScreen} from './FilterTagScreen'
 import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {NavButtonScreen} from './NavButtonScreen'
@@ -26,5 +27,6 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Icons', component: IconsScreen},
   {label: 'Switch', component: SwitchScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
+  {label: 'Filter Tag', component: FilterTagScreen},
   {label: 'Tabs', component: TabsScreen},
 ]

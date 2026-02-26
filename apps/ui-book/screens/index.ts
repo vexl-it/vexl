@@ -1,5 +1,6 @@
 import type React from 'react'
 
+import {AvatarScreen} from './AvatarScreen'
 import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
@@ -15,6 +16,7 @@ export interface ScreenEntry {
 }
 
 export const screens: readonly ScreenEntry[] = [
+  {label: 'Avatar', component: AvatarScreen},
   {label: 'Button', component: ButtonScreen},
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Fab Button', component: FabButtonScreen},

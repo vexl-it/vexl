@@ -45,10 +45,7 @@ export function Tabs({
   const underlineOpacity = useSharedValue(0)
 
   const gap = useMemo(
-    () =>
-      size === 'large'
-        ? Number(spaceTokens.$7.val)
-        : Number(spaceTokens.$5.val),
+    () => (size === 'large' ? spaceTokens.$7.val : spaceTokens.$5.val),
     [size, spaceTokens]
   )
 
@@ -112,7 +109,7 @@ export function Tabs({
         gap={gap}
         alignItems="flex-start"
         paddingRight={gap}
-        paddingBottom={Number(spaceTokens.$2.val) + UNDERLINE_HEIGHT}
+        paddingBottom={spaceTokens.$2.val + UNDERLINE_HEIGHT}
       >
         {items.map((label, index) => {
           const isSelected = index === activeIndex

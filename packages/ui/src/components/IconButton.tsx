@@ -1,7 +1,8 @@
 import React from 'react'
 import {styled} from 'tamagui'
 
-import {Circle, Stack} from '../primitives'
+import {Stack} from '../primitives'
+import {Dot} from './Dot'
 
 const IconButtonFrame = styled(Stack, {
   name: 'IconButton',
@@ -20,15 +21,6 @@ const IconButtonFrame = styled(Stack, {
   },
 })
 
-const IconButtonBadge = styled(Circle, {
-  name: 'IconButtonBadge',
-  position: 'absolute',
-  top: '$-2',
-  right: '$-2',
-  size: '$5',
-  backgroundColor: '$accentYellowPrimary',
-})
-
 type IconButtonFrameProps = React.ComponentProps<typeof IconButtonFrame>
 
 interface IconButtonProps extends IconButtonFrameProps {
@@ -43,7 +35,15 @@ export function IconButton({
   return (
     <IconButtonFrame {...rest}>
       {children}
-      {showBadge ? <IconButtonBadge /> : null}
+      {showBadge ? (
+        <Dot
+          position="absolute"
+          top="$-2"
+          right="$-2"
+          size="$5"
+          backgroundColor="$accentYellowPrimary"
+        />
+      ) : null}
     </IconButtonFrame>
   )
 }

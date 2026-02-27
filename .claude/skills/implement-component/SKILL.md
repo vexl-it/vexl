@@ -334,6 +334,8 @@ When adding a new component, only two changes are needed:
 1. Create the screen file in `apps/ui-book/screens/`
 2. Add an entry to the `screens` array in `apps/ui-book/screens/index.ts`
 
+**Keep the `screens` array sorted alphabetically by `label`.** Insert the new entry at the correct position to maintain alphabetical order.
+
 If the navigation infrastructure does not exist yet, create the `screens/` directory, the registry file, and update `App.tsx` to use the pattern above before adding the first screen.
 
 ### 5. Update AGENTS.md

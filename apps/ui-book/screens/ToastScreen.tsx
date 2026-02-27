@@ -45,8 +45,8 @@ export function ToastScreen(): React.JSX.Element {
           fontSize="$2"
           color="$foregroundSecondary"
         >
-          Tap any button to show a toast. It fades in, stays for 3 seconds,
-          then fades out automatically.
+          Tap any button to show a toast. It fades in, stays for 3 seconds, then
+          fades out automatically.
         </SizableText>
 
         <TriggerButton

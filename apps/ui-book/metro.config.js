@@ -20,13 +20,17 @@ config.resolver.nodeModulesPaths = [
 // "Invalid hook call" errors from duplicate React instances.
 const appModules = path.resolve(projectRoot, 'node_modules')
 const defaultResolveRequest = config.resolver.resolveRequest
+const pinnedPackages = [
+  'react',
+  'react-native',
+  'react-native-reanimated',
+  'react-native-svg',
+]
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (
-    moduleName === 'react' ||
-    moduleName === 'react-native' ||
-    moduleName === 'react-native-reanimated' ||
-    moduleName === 'react-native-svg'
-  ) {
+  const pinnedMatch = pinnedPackages.find(
+    (pkg) => moduleName === pkg || moduleName.startsWith(pkg + '/')
+  )
+  if (pinnedMatch) {
     return {
       type: 'sourceFile',
       filePath: require.resolve(moduleName, {paths: [appModules]}),

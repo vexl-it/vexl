@@ -12331,7 +12331,7 @@ __metadata:
     expo-status-bar: ~3.0.9
     jotai: ^2.15.0
     prettier: ^3.3.2
-    react: 19.1.2
+    react: 19.1.0
     react-native: 0.81.5
     react-native-reanimated: ~4.1.1
     react-native-svg: 15.12.1
@@ -12352,7 +12352,7 @@ __metadata:
     eslint: ^8.57.1
     jotai: ^2.15.0
     prettier: ^3.3.2
-    react: 19.1.2
+    react: 19.1.0
     react-native: 0.81.5
     react-native-reanimated: ~4.1.1
     react-native-svg: 15.12.1

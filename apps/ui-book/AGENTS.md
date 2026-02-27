@@ -2,7 +2,7 @@
 
 Purpose: Minimal Expo app for previewing and testing @vexl-next/ui components on iOS and Android.
 
-Stack: Expo 54, React 19.1.2, React Native 0.81.5, Tamagui v1.
+Stack: Expo 54, React 19.1.0, React Native 0.81.5, Tamagui v1.
 
 Structure:
 
@@ -18,7 +18,8 @@ Adding a new preview screen requires two changes:
 Gotchas:
 
 - The `tamagui.config.ts` at project root re-exports from `@vexl-next/ui` — this is needed for the Babel plugin. It requires an `eslint-disable` for `no-restricted-exports` (default export).
-- Metro is configured to resolve from the monorepo root (`watchFolders` + `nodeModulesPaths` in `metro.config.js`). Native modules used by workspace packages (e.g. `react-native-svg`, `react-native-reanimated` from `@vexl-next/ui`) must be pinned in `metro.config.js` `resolveRequest` alongside `react` and `react-native` to prevent duplicate instances — otherwise the copy in the workspace's `node_modules` won't have native bindings registered.
+- Metro is configured to resolve from the monorepo root (`watchFolders` + `nodeModulesPaths` in `metro.config.js`). Native modules used by workspace packages (e.g. `react-native-svg`, `react-native-reanimated` from `@vexl-next/ui`) must be pinned in `metro.config.js` `resolveRequest` alongside `react` and `react-native` to prevent duplicate instances — otherwise the copy in the workspace's `node_modules` won't have native bindings registered. The resolver uses `startsWith` matching so subpath imports (e.g. `react-native-svg/filter-image`) are also pinned to the app's single copy.
+- React version **must** match the renderer bundled inside `react-native` (e.g. RN 0.81.5 bundles renderer 19.1.0, so `react` must be 19.1.0). A mismatch causes an "Incompatible React versions" runtime error.
 - The `react-native-reanimated/plugin` Babel plugin must be listed **last** in `babel.config.js` (required by reanimated).
 - The lint script covers all files (`'**/*.{js,ts,tsx,jsx,cjs,mjs}'`), not just `src/` — there is no `src/` directory.
 - Use `React.JSX.Element` return type (not bare `JSX.Element`).

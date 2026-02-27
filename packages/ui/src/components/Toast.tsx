@@ -120,9 +120,7 @@ export function Toast({
 
   return (
     <View style={[styles.container, {top: topOffset}]} pointerEvents="none">
-      <Animated.View
-        style={[pillStyle, {opacity, transform: [{translateY}]}]}
-      >
+      <Animated.View style={[pillStyle, {opacity, transform: [{translateY}]}]}>
         {displayedMessage ? (
           <Text style={labelStyle}>{displayedMessage}</Text>
         ) : null}

@@ -15,6 +15,7 @@ import {NavButtonScreen} from './NavButtonScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SwitchScreen} from './SwitchScreen'
 import {TabsScreen} from './TabsScreen'
+import {TextFieldScreen} from './TextFieldScreen'
 import {TextTagScreen} from './TextTagScreen'
 import {ToastScreen} from './ToastScreen'
 
@@ -28,17 +29,18 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Button', component: ButtonScreen},
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Dot', component: DotScreen},
+  {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
   {label: 'Fab Button', component: FabButtonScreen},
   {label: 'Filter Bar', component: FilterBarScreen},
+  {label: 'Filter Tag', component: FilterTagScreen},
   {label: 'Icon Button', component: IconButtonScreen},
-  {label: 'Nav Button', component: NavButtonScreen},
-  {label: 'Search Bar', component: SearchBarScreen},
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},
+  {label: 'Nav Button', component: NavButtonScreen},
+  {label: 'Search Bar', component: SearchBarScreen},
   {label: 'Switch', component: SwitchScreen},
-  {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
-  {label: 'Filter Tag', component: FilterTagScreen},
   {label: 'Tabs', component: TabsScreen},
+  {label: 'Text Field', component: TextFieldScreen},
   {label: 'Text Tag', component: TextTagScreen},
   {label: 'Toast', component: ToastScreen},
 ]

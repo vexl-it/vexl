@@ -13,6 +13,8 @@ import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
 import {InputHintScreen} from './InputHintScreen'
+import {MenuItemScreen} from './MenuItemScreen'
+import {MenuScreen} from './MenuScreen'
 import {NavButtonScreen} from './NavButtonScreen'
 import {PickerScreen} from './PickerScreen'
 import {RowButtonScreen} from './RowButtonScreen'
@@ -47,6 +49,8 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Input Hint', component: InputHintScreen},
   {label: 'Icons', component: IconsScreen},
+  {label: 'Menu', component: MenuScreen},
+  {label: 'Menu Item', component: MenuItemScreen},
   {label: 'Nav Button', component: NavButtonScreen},
   {label: 'Picker', component: PickerScreen},
   {label: 'Row Button', component: RowButtonScreen},

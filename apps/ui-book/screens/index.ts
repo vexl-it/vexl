@@ -5,12 +5,14 @@ import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {DotScreen} from './DotScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
+import {ExchangeScreen} from './ExchangeScreen'
 import {FabButtonScreen} from './FabButtonScreen'
 import {FilterBarScreen} from './FilterBarScreen'
 import {FilterTagScreen} from './FilterTagScreen'
 import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
+import {InputHintScreen} from './InputHintScreen'
 import {NavButtonScreen} from './NavButtonScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SwitchScreen} from './SwitchScreen'
@@ -30,11 +32,13 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Dot', component: DotScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
+  {label: 'Exchange', component: ExchangeScreen},
   {label: 'Fab Button', component: FabButtonScreen},
   {label: 'Filter Bar', component: FilterBarScreen},
   {label: 'Filter Tag', component: FilterTagScreen},
   {label: 'Icon Button', component: IconButtonScreen},
   {label: 'Icon Tag', component: IconTagScreen},
+  {label: 'Input Hint', component: InputHintScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Nav Button', component: NavButtonScreen},
   {label: 'Search Bar', component: SearchBarScreen},

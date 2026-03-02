@@ -1,5 +1,3 @@
-import type {SetStateAction, WritableAtom} from 'jotai'
-import {useAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef} from 'react'
 import type {LayoutChangeEvent, ScrollView as RNScrollView} from 'react-native'
 import {ScrollView} from 'react-native'
@@ -20,18 +18,24 @@ interface TabLayout {
   readonly width: number
 }
 
-export interface TabsProps {
-  readonly items: readonly string[]
-  readonly activeIndexAtom: WritableAtom<number, [SetStateAction<number>], void>
+export interface TabItem<T> {
+  readonly label: string
+  readonly value: T
+}
+
+export interface TabsProps<T> {
+  readonly tabs: ReadonlyArray<TabItem<T>>
+  readonly activeTab: T
+  readonly onTabPress: (value: T) => void
   readonly size?: 'small' | 'large'
 }
 
-export function Tabs({
-  items,
-  activeIndexAtom,
+export function Tabs<T>({
+  tabs,
+  activeTab,
+  onTabPress,
   size = 'large',
-}: TabsProps): React.JSX.Element {
-  const [activeIndex, setActiveIndex] = useAtom(activeIndexAtom)
+}: TabsProps<T>): React.JSX.Element {
   const theme = useTheme()
   const spaceTokens = getTokens().space
 
@@ -54,6 +58,11 @@ export function Tabs({
     width: underlineWidth.value,
     opacity: underlineOpacity.value,
   }))
+
+  const activeIndex = useMemo(
+    () => tabs.findIndex((tab) => tab.value === activeTab),
+    [tabs, activeTab]
+  )
 
   const handleTabLayout = useCallback(
     (index: number, event: LayoutChangeEvent) => {
@@ -80,7 +89,9 @@ export function Tabs({
   const handleTabPress = useCallback(
     (index: number) => {
       if (index === activeIndex) return
-      setActiveIndex(index)
+      const tab = tabs[index]
+      if (!tab) return
+      onTabPress(tab.value)
 
       const layout = tabLayouts.current[index]
       if (layout && scrollViewRef.current) {
@@ -93,7 +104,7 @@ export function Tabs({
         scrollViewRef.current.scrollTo({x: scrollX, animated: true})
       }
     },
-    [activeIndex, gap, setActiveIndex]
+    [activeIndex, gap, onTabPress, tabs]
   )
 
   return (
@@ -111,11 +122,11 @@ export function Tabs({
         paddingRight={gap}
         paddingBottom={spaceTokens.$2.val + UNDERLINE_HEIGHT}
       >
-        {items.map((label, index) => {
+        {tabs.map((tab, index) => {
           const isSelected = index === activeIndex
           return (
             <Stack
-              key={`${label}-${String(index)}`}
+              key={tab.label}
               onPress={() => {
                 handleTabPress(index)
               }}
@@ -133,7 +144,7 @@ export function Tabs({
                     : '$foregroundSecondary'
                 }
               >
-                {label}
+                {tab.label}
               </SizableText>
             </Stack>
           )

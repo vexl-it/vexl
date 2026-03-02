@@ -1,6 +1,8 @@
 export {Avatar} from './Avatar'
 export {Button} from './Button'
 export {CardButton} from './CardButton'
+export {ChecklistCell} from './ChecklistCell'
+export type {ChecklistCellProps, ChecklistCellState} from './ChecklistCell'
 export {Dot} from './Dot'
 export {DotTypingIndicator} from './DotTypingIndicator'
 export {Exchange} from './Exchange'

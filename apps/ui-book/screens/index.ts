@@ -3,6 +3,7 @@ import type React from 'react'
 import {AvatarScreen} from './AvatarScreen'
 import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
+import {ChecklistCellScreen} from './ChecklistCellScreen'
 import {DotScreen} from './DotScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
 import {ExchangeScreen} from './ExchangeScreen'
@@ -39,6 +40,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Avatar', component: AvatarScreen},
   {label: 'Button', component: ButtonScreen},
   {label: 'Card Button', component: CardButtonScreen},
+  {label: 'Checklist Cell', component: ChecklistCellScreen},
   {label: 'Dot', component: DotScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
   {label: 'Exchange', component: ExchangeScreen},

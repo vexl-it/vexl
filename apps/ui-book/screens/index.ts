@@ -20,6 +20,7 @@ import {RowCheckboxScreen} from './RowCheckboxScreen'
 import {RowRadiobuttonScreen} from './RowRadiobuttonScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SegmentedPickerScreen} from './SegmentedPickerScreen'
+import {SelectableItemScreen} from './SelectableItemScreen'
 import {SelectorScreen} from './SelectorScreen'
 import {SwitchScreen} from './SwitchScreen'
 import {TabsScreen} from './TabsScreen'
@@ -52,6 +53,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Row Checkbox', component: RowCheckboxScreen},
   {label: 'Row Radiobutton', component: RowRadiobuttonScreen},
   {label: 'Search Bar', component: SearchBarScreen},
+  {label: 'Selectable Item', component: SelectableItemScreen},
   {label: 'Segmented Picker', component: SegmentedPickerScreen},
   {label: 'Selector', component: SelectorScreen},
   {label: 'Switch', component: SwitchScreen},

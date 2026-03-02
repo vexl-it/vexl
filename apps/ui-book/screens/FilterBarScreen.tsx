@@ -1,14 +1,21 @@
 import {FilterBar, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
-import {atom} from 'jotai'
-import React from 'react'
+import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 
-const fewItemsAtom = atom<ReadonlySet<number>>(new Set<number>([0]))
-const manyItemsAtom = atom<ReadonlySet<number>>(new Set<number>([0, 1]))
-const noneSelectedAtom = atom<ReadonlySet<number>>(new Set<number>())
-const allSelectedAtom = atom<ReadonlySet<number>>(
-  new Set<number>([0, 1, 2, 3, 4, 5])
-)
+const fewItems = [
+  {label: 'Buy BTC', value: 'buy-btc'},
+  {label: 'Sell BTC', value: 'sell-btc'},
+  {label: 'Buy product', value: 'buy-product'},
+] as const
+
+const manyItems = [
+  {label: 'Buy BTC', value: 'buy-btc'},
+  {label: 'Sell BTC', value: 'sell-btc'},
+  {label: 'Buy product', value: 'buy-product'},
+  {label: 'Sell product', value: 'sell-product'},
+  {label: 'Offer service', value: 'offer-service'},
+  {label: 'Request service', value: 'request-service'},
+] as const
 
 function SectionLabel({
   children,
@@ -33,6 +40,35 @@ function ThemedColumn({
 }: {
   readonly theme: 'light' | 'dark'
 }): React.JSX.Element {
+  const [fewSelected, setFewSelected] = useState<ReadonlySet<string>>(
+    new Set(['buy-btc'])
+  )
+  const [noneSelected, setNoneSelected] = useState<ReadonlySet<string>>(
+    new Set()
+  )
+  const [allSelected, setAllSelected] = useState<ReadonlySet<string>>(
+    new Set([
+      'buy-btc',
+      'sell-btc',
+      'buy-product',
+      'sell-product',
+      'offer-service',
+      'request-service',
+    ])
+  )
+
+  const handleFewChange = useCallback((values: ReadonlySet<string>) => {
+    setFewSelected(values)
+  }, [])
+
+  const handleNoneChange = useCallback((values: ReadonlySet<string>) => {
+    setNoneSelected(values)
+  }, [])
+
+  const handleAllChange = useCallback((values: ReadonlySet<string>) => {
+    setAllSelected(values)
+  }, [])
+
   return (
     <Theme name={theme}>
       <YStack
@@ -53,27 +89,23 @@ function ThemedColumn({
 
         <SectionLabel>Few items (3)</SectionLabel>
         <FilterBar
-          items={['Buy BTC', 'Sell BTC', 'Buy product']}
-          selectedIndicesAtom={fewItemsAtom}
+          items={fewItems}
+          selectedValues={fewSelected}
+          onSelectedValuesChange={handleFewChange}
         />
 
         <SectionLabel>None selected</SectionLabel>
         <FilterBar
-          items={['Buy BTC', 'Sell BTC', 'Buy product']}
-          selectedIndicesAtom={noneSelectedAtom}
+          items={fewItems}
+          selectedValues={noneSelected}
+          onSelectedValuesChange={handleNoneChange}
         />
 
         <SectionLabel>All selected</SectionLabel>
         <FilterBar
-          items={[
-            'Buy BTC',
-            'Sell BTC',
-            'Buy product',
-            'Sell product',
-            'Offer service',
-            'Request service',
-          ]}
-          selectedIndicesAtom={allSelectedAtom}
+          items={manyItems}
+          selectedValues={allSelected}
+          onSelectedValuesChange={handleAllChange}
         />
       </YStack>
     </Theme>
@@ -81,6 +113,14 @@ function ThemedColumn({
 }
 
 export function FilterBarScreen(): React.JSX.Element {
+  const [scrollableSelected, setScrollableSelected] = useState<
+    ReadonlySet<string>
+  >(new Set(['buy-btc', 'sell-btc']))
+
+  const handleScrollableChange = useCallback((values: ReadonlySet<string>) => {
+    setScrollableSelected(values)
+  }, [])
+
   return (
     <ScrollView style={{flex: 1}}>
       <YStack padding="$5" gap="$4">
@@ -100,15 +140,9 @@ export function FilterBarScreen(): React.JSX.Element {
 
         <SectionLabel>Scrollable (overflow)</SectionLabel>
         <FilterBar
-          items={[
-            'Buy BTC',
-            'Sell BTC',
-            'Buy product',
-            'Sell product',
-            'Offer service',
-            'Request service',
-          ]}
-          selectedIndicesAtom={manyItemsAtom}
+          items={manyItems}
+          selectedValues={scrollableSelected}
+          onSelectedValuesChange={handleScrollableChange}
         />
       </YStack>
     </ScrollView>

@@ -27,6 +27,12 @@ export {SearchBar} from './SearchBar'
 export type {SearchBarProps} from './SearchBar'
 export {SegmentedPicker} from './SegmentedPicker'
 export type {SegmentedPickerProps, SegmentedPickerTab} from './SegmentedPicker'
+export {Selector} from './Selector'
+export type {
+  SelectorActionProps,
+  SelectorProps,
+  SelectorSwitchProps,
+} from './Selector'
 export {Switch} from './Switch'
 export {Tabs} from './Tabs'
 export type {TabItem, TabsProps} from './Tabs'

@@ -14,6 +14,7 @@ import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
 import {InputHintScreen} from './InputHintScreen'
 import {NavButtonScreen} from './NavButtonScreen'
+import {RowButtonScreen} from './RowButtonScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SwitchScreen} from './SwitchScreen'
 import {TabsScreen} from './TabsScreen'
@@ -41,6 +42,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Input Hint', component: InputHintScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Nav Button', component: NavButtonScreen},
+  {label: 'Row Button', component: RowButtonScreen},
   {label: 'Search Bar', component: SearchBarScreen},
   {label: 'Switch', component: SwitchScreen},
   {label: 'Tabs', component: TabsScreen},

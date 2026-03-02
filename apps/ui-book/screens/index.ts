@@ -16,6 +16,7 @@ import {InputHintScreen} from './InputHintScreen'
 import {NavButtonScreen} from './NavButtonScreen'
 import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
+import {RowRadiobuttonScreen} from './RowRadiobuttonScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SwitchScreen} from './SwitchScreen'
 import {TabsScreen} from './TabsScreen'
@@ -45,6 +46,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Nav Button', component: NavButtonScreen},
   {label: 'Row Button', component: RowButtonScreen},
   {label: 'Row Checkbox', component: RowCheckboxScreen},
+  {label: 'Row Radiobutton', component: RowRadiobuttonScreen},
   {label: 'Search Bar', component: SearchBarScreen},
   {label: 'Switch', component: SwitchScreen},
   {label: 'Tabs', component: TabsScreen},

@@ -1,5 +1,3 @@
-import type {SetStateAction, WritableAtom} from 'jotai'
-import {useAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef} from 'react'
 import type {
   LayoutChangeEvent,
@@ -13,13 +11,15 @@ import {getTokens} from 'tamagui'
 import {XStack} from '../primitives'
 import {FilterTag} from './FilterTag'
 
-export interface FilterBarProps {
-  readonly items: readonly string[]
-  readonly selectedIndicesAtom: WritableAtom<
-    ReadonlySet<number>,
-    [SetStateAction<ReadonlySet<number>>],
-    void
-  >
+export interface FilterBarItem<T> {
+  readonly label: string
+  readonly value: T
+}
+
+export interface FilterBarProps<T> {
+  readonly items: ReadonlyArray<FilterBarItem<T>>
+  readonly selectedValues: ReadonlySet<T>
+  readonly onSelectedValuesChange: (values: ReadonlySet<T>) => void
 }
 
 interface TagLayout {
@@ -27,14 +27,14 @@ interface TagLayout {
   readonly width: number
 }
 
-export function FilterBar({
+export function FilterBar<T>({
   items,
-  selectedIndicesAtom,
-}: FilterBarProps): React.JSX.Element {
-  const [selectedIndices, setSelectedIndices] = useAtom(selectedIndicesAtom)
+  selectedValues,
+  onSelectedValuesChange,
+}: FilterBarProps<T>): React.JSX.Element {
   const spaceTokens = getTokens().space
 
-  const gap = useMemo(() => Number(spaceTokens.$3.val), [spaceTokens])
+  const gap = useMemo(() => spaceTokens.$3.val, [spaceTokens])
 
   const scrollViewRef = useRef<RNScrollView>(null)
   const scrollViewWidth = useRef(0)
@@ -83,18 +83,18 @@ export function FilterBar({
 
   const handlePress = useCallback(
     (index: number) => {
-      setSelectedIndices((prev) => {
-        const next = new Set(prev)
-        if (next.has(index)) {
-          next.delete(index)
-        } else {
-          next.add(index)
-        }
-        return next
-      })
+      const item = items[index]
+      if (!item) return
+      const next = new Set(selectedValues)
+      if (next.has(item.value)) {
+        next.delete(item.value)
+      } else {
+        next.add(item.value)
+      }
+      onSelectedValuesChange(next)
       scrollToReveal(index)
     },
-    [setSelectedIndices, scrollToReveal]
+    [items, selectedValues, onSelectedValuesChange, scrollToReveal]
   )
 
   return (
@@ -110,11 +110,11 @@ export function FilterBar({
     >
       <XStack gap={gap} alignItems="center">
         {items.map((item, index) => {
-          const selected = selectedIndices.has(index)
+          const selected = selectedValues.has(item.value)
           return (
             <FilterTag
-              key={`${item}-${String(index)}`}
-              label={item}
+              key={item.label}
+              label={item.label}
               selected={selected}
               onPress={() => {
                 handlePress(index)

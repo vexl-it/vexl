@@ -1,11 +1,28 @@
 import {SizableText, Tabs, Theme, XStack, YStack} from '@vexl-next/ui'
-import {atom} from 'jotai'
-import React from 'react'
+import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 
-const largeTwoAtom = atom(0)
-const smallFiveAtom = atom(0)
-const scrollableAtom = atom(0)
+const largeTwoTabs = [
+  {label: 'Offers', value: 'offers'},
+  {label: 'Messages', value: 'messages'},
+] as const
+
+const smallFiveTabs = [
+  {label: 'All', value: 'all'},
+  {label: 'Buy', value: 'buy'},
+  {label: 'Sell', value: 'sell'},
+  {label: 'Saved', value: 'saved'},
+  {label: 'Drafts', value: 'drafts'},
+] as const
+
+const scrollableTabs = [
+  {label: 'Featured', value: 'featured'},
+  {label: 'Nearby', value: 'nearby'},
+  {label: 'Recent', value: 'recent'},
+  {label: 'Popular', value: 'popular'},
+  {label: 'Trending', value: 'trending'},
+  {label: 'Recommended', value: 'recommended'},
+] as const
 
 function SectionLabel({
   children,
@@ -30,6 +47,24 @@ function ThemedColumn({
 }: {
   readonly theme: 'light' | 'dark'
 }): React.JSX.Element {
+  const [largeActive, setLargeActive] = useState<'offers' | 'messages'>(
+    'offers'
+  )
+  const [smallActive, setSmallActive] = useState<
+    'all' | 'buy' | 'sell' | 'saved' | 'drafts'
+  >('all')
+
+  const handleLargePress = useCallback((value: 'offers' | 'messages') => {
+    setLargeActive(value)
+  }, [])
+
+  const handleSmallPress = useCallback(
+    (value: 'all' | 'buy' | 'sell' | 'saved' | 'drafts') => {
+      setSmallActive(value)
+    },
+    []
+  )
+
   return (
     <Theme name={theme}>
       <YStack
@@ -50,15 +85,17 @@ function ThemedColumn({
 
         <SectionLabel>Large (2 items)</SectionLabel>
         <Tabs
-          items={['Offers', 'Messages']}
-          activeIndexAtom={largeTwoAtom}
+          tabs={largeTwoTabs}
+          activeTab={largeActive}
+          onTabPress={handleLargePress}
           size="large"
         />
 
         <SectionLabel>Small (5 items)</SectionLabel>
         <Tabs
-          items={['All', 'Buy', 'Sell', 'Saved', 'Drafts']}
-          activeIndexAtom={smallFiveAtom}
+          tabs={smallFiveTabs}
+          activeTab={smallActive}
+          onTabPress={handleSmallPress}
           size="small"
         />
       </YStack>
@@ -67,6 +104,25 @@ function ThemedColumn({
 }
 
 export function TabsScreen(): React.JSX.Element {
+  const [scrollableActive, setScrollableActive] = useState<
+    'featured' | 'nearby' | 'recent' | 'popular' | 'trending' | 'recommended'
+  >('featured')
+
+  const handleScrollablePress = useCallback(
+    (
+      value:
+        | 'featured'
+        | 'nearby'
+        | 'recent'
+        | 'popular'
+        | 'trending'
+        | 'recommended'
+    ) => {
+      setScrollableActive(value)
+    },
+    []
+  )
+
   return (
     <ScrollView style={{flex: 1}}>
       <YStack padding="$5" gap="$4">
@@ -86,15 +142,9 @@ export function TabsScreen(): React.JSX.Element {
 
         <SectionLabel>Scrollable (overflow)</SectionLabel>
         <Tabs
-          items={[
-            'Featured',
-            'Nearby',
-            'Recent',
-            'Popular',
-            'Trending',
-            'Recommended',
-          ]}
-          activeIndexAtom={scrollableAtom}
+          tabs={scrollableTabs}
+          activeTab={scrollableActive}
+          onTabPress={handleScrollablePress}
           size="large"
         />
       </YStack>

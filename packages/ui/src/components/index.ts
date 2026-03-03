@@ -1,6 +1,11 @@
 export {Avatar} from './Avatar'
 export {Button} from './Button'
 export {CardButton} from './CardButton'
+export {ChatMessageItem} from './ChatMessageItem'
+export type {
+  ChatMessageItemProps,
+  ChatMessageItemVariant,
+} from './ChatMessageItem'
 export {ChecklistCell} from './ChecklistCell'
 export type {ChecklistCellProps, ChecklistCellState} from './ChecklistCell'
 export {Dot} from './Dot'

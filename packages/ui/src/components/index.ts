@@ -50,6 +50,8 @@ export type {
   SelectorProps,
   SelectorSwitchProps,
 } from './Selector'
+export {StepperCheck, StepperCheckContainer} from './StepperCheck'
+export type {StepperCheckProps} from './StepperCheck'
 export {Switch} from './Switch'
 export {Tabs} from './Tabs'
 export type {TabItem, TabsProps} from './Tabs'

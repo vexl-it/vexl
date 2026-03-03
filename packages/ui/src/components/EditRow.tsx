@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PencilWriteEdit} from '../icons/PencilWriteEdit'
@@ -134,8 +134,8 @@ export function EditRow({
   const icon = 'icon' in rest ? rest.icon : undefined
   const avatar = 'avatar' in rest ? rest.avatar : undefined
   const theme = useTheme()
-  const whiteColor = useMemo(() => getTokens().color.white100.val, [])
-  const iconBoxSize = useMemo(() => getTokens().size.$9.val, [])
+  const whiteColor = getTokens().color.white100.val
+  const iconBoxSize = getTokens().size.$9.val
 
   const isInitial = state === 'initial'
   const isProfile = state === 'profile'
@@ -143,7 +143,7 @@ export function EditRow({
 
   const foregroundColor = theme.foregroundPrimary.val
 
-  const iconBoxBg = useMemo(() => {
+  const iconBoxBg = (() => {
     switch (state) {
       case 'completed':
         return theme.greenForeground.val
@@ -153,14 +153,9 @@ export function EditRow({
       case 'initial':
         return theme.backgroundSecondary.val
     }
-  }, [
-    state,
-    theme.greenForeground.val,
-    theme.backgroundTertiary.val,
-    theme.backgroundSecondary.val,
-  ])
+  })()
 
-  const leadingIcon = useMemo(() => {
+  const leadingIcon = (() => {
     switch (state) {
       case 'completed':
         return <RadiobuttonCircleFilled color={whiteColor} size={24} />
@@ -170,7 +165,7 @@ export function EditRow({
       case 'initial':
         return <QuestionmarkCircle color={foregroundColor} size={24} />
     }
-  }, [state, whiteColor, foregroundColor, Icon])
+  })()
 
   return (
     <EditRowFrame

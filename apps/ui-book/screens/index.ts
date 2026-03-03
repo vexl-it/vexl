@@ -22,6 +22,7 @@ import {InputHintScreen} from './InputHintScreen'
 import {MenuItemScreen} from './MenuItemScreen'
 import {MenuScreen} from './MenuScreen'
 import {NavButtonScreen} from './NavButtonScreen'
+import {NoteScreen} from './NoteScreen'
 import {NotificationCardScreen} from './NotificationCardScreen'
 import {PickerScreen} from './PickerScreen'
 import {ReachStatsScreen} from './ReachStatsScreen'
@@ -68,6 +69,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Menu', component: MenuScreen},
   {label: 'Menu Item', component: MenuItemScreen},
   {label: 'Nav Button', component: NavButtonScreen},
+  {label: 'Note', component: NoteScreen},
   {label: 'Notification Card', component: NotificationCardScreen},
   {label: 'Picker', component: PickerScreen},
   {label: 'Reach Stats', component: ReachStatsScreen},

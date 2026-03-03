@@ -35,10 +35,7 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
     as: 'Option',
     nullable: true,
   }),
-  refreshedAt: Schema.optionalWith(Schema.DateFromSelf, {
-    as: 'Option',
-    nullable: true,
-  }),
+  refreshedAt: Schema.DateFromSelf,
   platform: Schema.optionalWith(PlatformName, {as: 'Option', nullable: true}),
   lastNewContentNotificaionSentAt: Schema.optionalWith(VersionCode, {
     as: 'Option',

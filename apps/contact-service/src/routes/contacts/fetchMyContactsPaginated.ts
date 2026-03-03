@@ -4,6 +4,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import createPaginatedResponse from '@vexl-next/server-utils/src/createPaginatedResponse'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {contactActiveWindowDaysConfig} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindFirstLevelContactsPublicKeysByHashFromPaginatedResult} from '../../db/ContactDbService/queries/createFindFirstLevelContactsPublicKeysByHashFromPaginated'
 import {UserDbService} from '../../db/UserDbService'
@@ -29,6 +30,7 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
         Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
       )
       const contactDb = yield* _(ContactDbService)
+      const contactActiveWindowDays = yield* _(contactActiveWindowDaysConfig)
 
       yield* _(
         UserDbService,
@@ -60,11 +62,13 @@ export const fetchMyContactsPaginated = HttpApiBuilder.handler(
                   hashFrom: security.serverHash,
                   limit,
                   userId: decodedNextPageToken?.userId,
+                  activeWithinDays: contactActiveWindowDays,
                 })
               : contactDb.findSecondLevelContactsPublicKeysByHashFromPaginated({
                   hashFrom: security.serverHash,
                   limit,
                   userId: decodedNextPageToken?.userId,
+                  activeWithinDays: contactActiveWindowDays,
                 }),
         }),
         Effect.withSpan('Fetch first level contacts')

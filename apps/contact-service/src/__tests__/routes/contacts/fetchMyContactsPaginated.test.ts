@@ -439,4 +439,53 @@ describe('Fetch my contacts paginated', () => {
       })
     )
   })
+
+  it('Does not return inactive contacts when active window filter is enabled', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = networkOne[0]
+        const inactiveContact = networkOne[1]
+        const app = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient)
+
+        yield* _(sql`
+          UPDATE users
+          SET
+            refreshed_at = CURRENT_DATE - 180
+          WHERE
+            public_key = ${inactiveContact.keys.publicKeyPemBase64}
+        `)
+
+        const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+          'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+          'vexl-app-meta':
+            '{"appSource":"test", "versionCode": 1, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+        })
+        const headers = makeTestCommonAndSecurityHeaders(
+          me.authHeaders,
+          testCommonHeaders
+        )
+
+        const result = yield* _(
+          app.Contact.fetchMyContactsPaginated({
+            headers,
+            urlParams: {level: 'FIRST' as const, limit: 50},
+          }),
+          Effect.ensuring(
+            Effect.ignore(sql`
+              UPDATE users
+              SET
+                refreshed_at = CURRENT_DATE
+              WHERE
+                public_key = ${inactiveContact.keys.publicKeyPemBase64}
+            `)
+          )
+        )
+
+        expect(result.items).not.toContain(
+          inactiveContact.keys.publicKeyPemBase64
+        )
+      })
+    )
+  })
 })

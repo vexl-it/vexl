@@ -11,6 +11,7 @@ export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
     hashFrom: ServerHashedNumber,
     userId: Schema.Int,
     limit: Schema.Int,
+    activeWithinDays: Schema.Int,
   })
 export type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
   typeof FindSecondLevelContactsPublicKeysByHashFromPaginatedParams.Type
@@ -48,6 +49,12 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
           sql`their_contacts.id > ${params.userId}`,
           sql`my_contacts.hash_from = ${params.hashFrom}`,
           sql`second_lvl_friend.hash != ${params.hashFrom}`,
+          sql.or([
+            sql`${params.activeWithinDays}::int = -1`,
+            sql`
+              second_lvl_friend.refreshed_at >= CURRENT_DATE - ${params.activeWithinDays}::int
+            `,
+          ]),
         ])}
         GROUP BY
           second_lvl_friend.public_key,

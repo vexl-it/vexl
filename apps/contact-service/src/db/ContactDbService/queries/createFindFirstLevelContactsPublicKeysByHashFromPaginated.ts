@@ -11,6 +11,7 @@ export const FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =
     hashFrom: ServerHashedNumber,
     userId: Schema.Int,
     limit: Schema.Int,
+    activeWithinDays: Schema.Int,
   })
 export type FindFirstLevelContactsPublicKeysByHashFromPaginatedParams =
   typeof FindFirstLevelContactsPublicKeysByHashFromPaginatedParams.Type
@@ -46,6 +47,12 @@ export const createFindFirstLevelContactsPublicKeysByHashFromPaginated =
           ${sql.and([
           sql`users.id > ${params.userId}`,
           sql`hash_from = ${params.hashFrom}`,
+          sql.or([
+            sql`${params.activeWithinDays}::int = -1`,
+            sql`
+              users.refreshed_at >= CURRENT_DATE - ${params.activeWithinDays}::int
+            `,
+          ]),
         ])}
         GROUP BY
           users.id,

@@ -75,3 +75,14 @@ export const s3Config = Config.all({
 export const appVersionSupportingV2KeysConfig = Config.number(
   'APP_VERSION_SUPPORTING_V2_KEYS'
 )
+
+export const contactActiveWindowDaysConfig = Config.number(
+  'CONTACT_ACTIVE_WINDOW_DAYS'
+).pipe(
+  Config.validate({
+    validation: (d) => d > 0 || d === -1,
+    message:
+      'contactActiveWindowDaysConfig must be greater than 0 or equal to -1 (if you do not want to use this feature)',
+  }),
+  Config.withDefault(90)
+)

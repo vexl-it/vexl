@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import type {TextStyle} from 'react-native'
 import {Text} from 'react-native'
 import {getTokens, styled} from 'tamagui'
@@ -38,17 +38,14 @@ interface DotProps extends Omit<DotFrameProps, 'variant' | 'children'> {
 export function Dot({count, variant, ...rest}: DotProps): React.JSX.Element {
   const resolvedVariant = count !== undefined ? 'number' : (variant ?? 'small')
 
-  const labelStyle = useMemo<TextStyle>(
-    () => ({
-      fontFamily: bodyFont.family,
-      fontWeight: bodyFont.weight?.[5] as TextStyle['fontWeight'],
-      fontSize: bodyFont.size[1],
-      letterSpacing: bodyFont.letterSpacing[1],
-      color: getTokens().color.black100.val,
-      textAlign: 'center',
-    }),
-    []
-  )
+  const labelStyle: TextStyle = {
+    fontFamily: bodyFont.family,
+    fontWeight: bodyFont.weight?.[5] as TextStyle['fontWeight'],
+    fontSize: bodyFont.size[1],
+    letterSpacing: bodyFont.letterSpacing[1],
+    color: getTokens().color.black100.val,
+    textAlign: 'center',
+  }
 
   return (
     <DotFrame variant={resolvedVariant} {...rest}>

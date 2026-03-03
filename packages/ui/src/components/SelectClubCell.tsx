@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import {CheckboxFilled} from '../icons/CheckboxFilled'
@@ -86,20 +86,9 @@ export function SelectClubCell({
 }: SelectClubCellProps): React.JSX.Element {
   const theme = useTheme()
 
-  const checkboxColor = useMemo(
-    () => theme.accentHighlightSecondary.val,
-    [theme.accentHighlightSecondary.val]
-  )
-
-  const iconBoxBg = useMemo(
-    () => theme.accentYellowSecondary.val,
-    [theme.accentYellowSecondary.val]
-  )
-
-  const descriptionIconColor = useMemo(
-    () => theme.foregroundSecondary.val,
-    [theme.foregroundSecondary.val]
-  )
+  const checkboxColor = theme.accentHighlightSecondary.val
+  const iconBoxBg = theme.accentYellowSecondary.val
+  const descriptionIconColor = theme.foregroundSecondary.val
 
   return (
     <SelectClubCellFrame selected={selected} onPress={onPress}>

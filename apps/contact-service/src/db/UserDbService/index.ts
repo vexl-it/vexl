@@ -67,10 +67,6 @@ import {
   type UpdateRefreshUserParams,
 } from './queries/createUpdateRefreshUser'
 import {
-  createUpdateSetRefreshedAtToNull,
-  type UpdateSetRefreshedAtParams,
-} from './queries/createUpdateSetRefreshedAtToNull'
-import {
   createUpdateUserInitialImportDone,
   type UpdateUserInitialImportDoneParams,
 } from './queries/createUpdateUserInitialImportDone'
@@ -166,10 +162,6 @@ export interface UserDbOperations {
     args: ExpoNotificationToken
   ) => Effect.Effect<void, UnexpectedServerError>
 
-  updateSetRefreshedAtToNull: (
-    args: UpdateSetRefreshedAtParams
-  ) => Effect.Effect<void, UnexpectedServerError>
-
   updateUserInitialImportDone: (
     args: UpdateUserInitialImportDoneParams
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -230,10 +222,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
         createFindVexlNotificationTokensOfInactiveUsers
       )
 
-      const updateSetRefreshedAtToNull = yield* _(
-        createUpdateSetRefreshedAtToNull
-      )
-
       const findFirebaseTokensForNewContentNotification = yield* _(
         createFindTokensForNewContentNotification
       )
@@ -264,7 +252,6 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact,
         findFirebaseTokensOfInactiveUsers,
         findVexlNotificationTokensOfInactiveUsers,
-        updateSetRefreshedAtToNull,
         findFirebaseTokensForNewContentNotification,
         findVexlNotificationTokensForNewContentNotification,
         updateUserInitialImportDone,

@@ -23,6 +23,7 @@ import add_vexl_notification_token_to_users_table_and_club_member_table from './
 import add_public_key_v2_columns from './migrations/0019_add_public_key_v2_columns'
 import drop_challenge_table from './migrations/0020_drop_challenge_table'
 import add_public_key_v2_indexes from './migrations/0021_add_public_key_v2_indexes'
+import backfill_refreshed_at_for_existing_users from './migrations/0022_backfill_refreshed_at_for_existing_users'
 
 const migrations = [
   {
@@ -130,6 +131,11 @@ const migrations = [
     id: 21,
     name: 'add_public_key_v2_indexes',
     migrationEffect: add_public_key_v2_indexes,
+  },
+  {
+    id: 22,
+    name: 'backfill_refreshed_at_for_existing_users',
+    migrationEffect: backfill_refreshed_at_for_existing_users,
   },
 ] as const
 

@@ -10,9 +10,14 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {makeCommonAndSecurityHeaders} from '@vexl-next/rest-api/src/apiSecurity'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  clearEnqueuedNotifications,
+  getEnqueuedNotifications,
+} from '../../utils/mockEnqueueUserNotification'
 
 const keys = generatePrivateKey()
 const phoneNumber = Schema.decodeSync(E164PhoneNumber)('+420733333333')
@@ -67,7 +72,7 @@ describe('Refresh user', () => {
         yield* _(sql`
           UPDATE users
           SET
-            refreshed_at = NULL,
+            refreshed_at = CURRENT_DATE - 180,
             client_version = NULL,
             country_prefix = NULL
           WHERE
@@ -262,6 +267,125 @@ describe('Refresh user', () => {
           Effect.either
         )
         expectErrorResponse(UserNotFoundError)(result)
+      })
+    )
+  })
+
+  it('Notifies contacts when user transitions from inactive to active', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const sql = yield* _(SqlClient.SqlClient)
+        const app = yield* _(NodeTestingApp)
+        const firstUserAuthHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber,
+            publicKey: keys.publicKeyPemBase64,
+          })
+        )
+
+        const secondUserKeys = generatePrivateKey()
+        const secondUserPhoneNumber =
+          Schema.decodeSync(E164PhoneNumber)('+420733333335')
+        const secondUserAuthHeaders = yield* _(
+          createDummyAuthHeadersForUser({
+            phoneNumber: secondUserPhoneNumber,
+            publicKey: secondUserKeys.publicKeyPemBase64,
+          })
+        )
+
+        const secondUserHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: secondUserAuthHeaders['public-key'],
+            hash: secondUserAuthHeaders.hash,
+            signature: secondUserAuthHeaders.signature,
+          }),
+          commonHeaders
+        )
+
+        yield* _(setAuthHeaders(secondUserAuthHeaders))
+        yield* _(
+          app.User.createUser({
+            payload: {
+              firebaseToken: null,
+              expoToken: null,
+              vexlNotificationToken: Option.some(
+                Schema.decodeSync(VexlNotificationToken)(
+                  'vexl_nt_refresh_contact'
+                )
+              ),
+              publicKeyV2: Option.none(),
+            },
+            headers: secondUserHeaders,
+          })
+        )
+
+        const firstUserHashedPhoneNumber = yield* _(
+          hashPhoneNumber(phoneNumber)
+        )
+        const secondUserHashedPhoneNumber = yield* _(
+          hashPhoneNumber(secondUserPhoneNumber)
+        )
+
+        const firstUserHeaders = makeCommonAndSecurityHeaders(
+          () => ({
+            publicKey: keys.publicKeyPemBase64,
+            hash: firstUserAuthHeaders.hash,
+            signature: firstUserAuthHeaders.signature,
+          }),
+          commonHeaders
+        )
+
+        yield* _(setAuthHeaders(firstUserAuthHeaders))
+        yield* _(
+          app.Contact.importContacts({
+            payload: {
+              contacts: [secondUserHashedPhoneNumber],
+              replace: true,
+            },
+            headers: firstUserHeaders,
+          })
+        )
+
+        yield* _(setAuthHeaders(secondUserAuthHeaders))
+        yield* _(
+          app.Contact.importContacts({
+            payload: {
+              contacts: [firstUserHashedPhoneNumber],
+              replace: true,
+            },
+            headers: secondUserHeaders,
+          })
+        )
+
+        yield* _(sql`
+          UPDATE users
+          SET
+            refreshed_at = CURRENT_DATE - 180
+          WHERE
+            public_key = ${keys.publicKeyPemBase64}
+        `)
+
+        yield* _(clearEnqueuedNotifications)
+        yield* _(setAuthHeaders(firstUserAuthHeaders))
+        yield* _(
+          app.User.refreshUser({
+            payload: {
+              offersAlive: true,
+              vexlNotificationToken: Option.none(),
+            },
+            headers: firstUserHeaders,
+          })
+        )
+        yield* _(Effect.sleep(200))
+
+        const notifications = yield* _(getEnqueuedNotifications)
+        const newUserNotifications = notifications.filter(
+          (one) =>
+            one.task._tag === 'NewUserNotificationMqEntry' &&
+            one.task.token === 'vexl_nt_refresh_contact'
+        )
+
+        expect(newUserNotifications.length).toBeGreaterThan(0)
       })
     )
   })

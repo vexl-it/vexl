@@ -86,8 +86,8 @@ function PickerDropdown<T extends string>({
   readonly closing: boolean
 }): React.JSX.Element {
   const theme = useTheme()
-  const spaceTokens = useMemo(() => getTokens().space, [])
-  const topMargin = useMemo(() => spaceTokens.$2.val, [spaceTokens])
+  const spaceTokens = getTokens().space
+  const topMargin = spaceTokens.$2.val
 
   const measuredHeight = useSharedValue(0)
   const animatedHeight = useSharedValue(0)

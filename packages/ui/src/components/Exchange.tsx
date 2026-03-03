@@ -115,7 +115,7 @@ export function Exchange({
   const [btcFocused, setBtcFocused] = useState(false)
   const [fiatFocused, setFiatFocused] = useState(false)
 
-  const arrowsIconColor = useMemo(() => getTokens().color.black100.val, [])
+  const arrowsIconColor = getTokens().color.black100.val
 
   const toggleBtcUnit = useCallback(() => {
     const newUnit = btcUnit === 'BTC' ? 'SATS' : 'BTC'

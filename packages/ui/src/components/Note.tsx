@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import {Calendar} from '../icons/Calendar'
@@ -92,10 +92,7 @@ export function Note({
   onPress,
 }: NoteProps): React.JSX.Element {
   const theme = useTheme()
-  const iconColor = useMemo(
-    () => theme.foregroundSecondary.val,
-    [theme.foregroundSecondary]
-  )
+  const iconColor = theme.foregroundSecondary.val
   const isPressable = !!onPress
 
   return (

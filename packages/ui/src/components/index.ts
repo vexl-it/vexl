@@ -42,6 +42,8 @@ export {SegmentedPicker} from './SegmentedPicker'
 export type {SegmentedPickerProps, SegmentedPickerTab} from './SegmentedPicker'
 export {SelectableItem} from './SelectableItem'
 export type {SelectableItemProps} from './SelectableItem'
+export {SelectClubCell} from './SelectClubCell'
+export type {SelectClubCellProps} from './SelectClubCell'
 export {Selector} from './Selector'
 export type {
   SelectorActionProps,

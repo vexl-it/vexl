@@ -229,6 +229,7 @@ Create file(s) in `packages/ui/src/components/`.
 
 **Key rules:**
 
+- **Do NOT add section comments** (e.g. `// --- Styled primitives ---`, `// --- Types ---`, `// --- Component ---`). Let the code speak for itself.
 - `name` property in every `styled()` call, matching the export name.
 - Theme tokens (`$foregroundPrimary`) over raw color tokens (`$black100`). Theme tokens adapt to light/dark.
 - **NEVER use hardcoded numeric values for styling.** Always use token references (`$5`, `$10`, etc.) for spacing, sizing, radius, font sizes, and letter spacing. Read `packages/ui/src/config/tokens.ts` for the available scale steps and `packages/ui/src/config/fonts.ts` for font size/letterSpacing keys. If a Figma value doesn't match a token exactly, use the nearest token — do not fall back to a raw number.

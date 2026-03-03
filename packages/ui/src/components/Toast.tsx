@@ -1,6 +1,6 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
 import {useAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import type {TextStyle, ViewStyle} from 'react-native'
 import {Animated, StyleSheet, Text, View} from 'react-native'
 import {getTokens, useTheme} from 'tamagui'
@@ -95,28 +95,22 @@ export function Toast({
   const spaceTokens = getTokens().space
   const radiusTokens = getTokens().radius
 
-  const pillStyle = useMemo<ViewStyle>(
-    () => ({
-      backgroundColor: theme.foregroundPrimary.val,
-      borderRadius: radiusTokens.$4.val,
-      paddingHorizontal: spaceTokens.$4.val,
-      paddingVertical: spaceTokens.$3.val,
-      alignItems: 'center',
-      justifyContent: 'center',
-    }),
-    [theme.foregroundPrimary.val, radiusTokens, spaceTokens]
-  )
+  const pillStyle: ViewStyle = {
+    backgroundColor: theme.foregroundPrimary.val,
+    borderRadius: radiusTokens.$4.val,
+    paddingHorizontal: spaceTokens.$4.val,
+    paddingVertical: spaceTokens.$3.val,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
 
-  const labelStyle = useMemo<TextStyle>(
-    () => ({
-      fontFamily: bodyFont.family,
-      fontWeight: bodyFont.weight?.[6] as TextStyle['fontWeight'],
-      fontSize: bodyFont.size[2],
-      letterSpacing: bodyFont.letterSpacing[2],
-      color: theme.backgroundPrimary.val,
-    }),
-    [theme.backgroundPrimary.val]
-  )
+  const labelStyle: TextStyle = {
+    fontFamily: bodyFont.family,
+    fontWeight: bodyFont.weight?.[6] as TextStyle['fontWeight'],
+    fontSize: bodyFont.size[2],
+    letterSpacing: bodyFont.letterSpacing[2],
+    color: theme.backgroundPrimary.val,
+  }
 
   return (
     <View style={[styles.container, {top: topOffset}]} pointerEvents="none">

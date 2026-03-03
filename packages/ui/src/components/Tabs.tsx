@@ -48,10 +48,7 @@ export function Tabs<T>({
   const underlineWidth = useSharedValue(0)
   const underlineOpacity = useSharedValue(0)
 
-  const gap = useMemo(
-    () => (size === 'large' ? spaceTokens.$7.val : spaceTokens.$5.val),
-    [size, spaceTokens]
-  )
+  const gap = size === 'large' ? spaceTokens.$7.val : spaceTokens.$5.val
 
   const animatedUnderlineStyle = useAnimatedStyle(() => ({
     left: underlineLeft.value,

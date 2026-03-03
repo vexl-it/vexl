@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons/ChevronRight'
@@ -76,7 +76,7 @@ export function ChecklistCell({
   onPress,
 }: ChecklistCellProps): React.JSX.Element {
   const theme = useTheme()
-  const whiteColor = useMemo(() => getTokens().color.white100.val, [])
+  const whiteColor = getTokens().color.white100.val
 
   const isPressable = state !== 'completed'
 

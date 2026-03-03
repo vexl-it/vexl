@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react'
+import React, {useEffect} from 'react'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -72,7 +72,7 @@ function AnimatedDot({
 export function DotTypingIndicator(): React.JSX.Element {
   const theme = useTheme()
   const sizeTokens = getTokens().size
-  const dotSize = useMemo(() => sizeTokens.$3.val, [sizeTokens])
+  const dotSize = sizeTokens.$3.val
   const bounceHeight = dotSize
   const color = theme.foregroundPrimary.val
 

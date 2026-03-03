@@ -74,7 +74,7 @@ export function DotTypingIndicator(): React.JSX.Element {
   const sizeTokens = getTokens().size
   const dotSize = useMemo(() => sizeTokens.$3.val, [sizeTokens])
   const bounceHeight = dotSize
-  const color = theme.foregroundTertiary.val
+  const color = theme.foregroundPrimary.val
 
   return (
     <XStack alignItems="flex-end" gap="$2">

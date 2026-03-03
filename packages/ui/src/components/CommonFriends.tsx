@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import Svg, {
   Defs,
   Rect,
@@ -40,11 +40,11 @@ export function CommonFriends({
 }: CommonFriendsProps): React.JSX.Element {
   const theme = useTheme()
 
-  const bgColor = useMemo(() => theme.backgroundSecondary.val, [theme])
-  const chevronColor = useMemo(() => theme.foregroundSecondary.val, [theme])
+  const bgColor = theme.backgroundSecondary.val
+  const chevronColor = theme.foregroundSecondary.val
 
-  const gradientWidth = useMemo(() => getTokens().size.$12.val, [])
-  const gap = useMemo(() => getTokens().space.$3.val, [])
+  const gradientWidth = getTokens().size.$12.val
+  const gap = getTokens().space.$3.val
 
   return (
     <CommonFriendsFrame onPress={onPress}>

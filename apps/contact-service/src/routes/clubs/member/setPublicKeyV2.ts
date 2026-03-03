@@ -6,6 +6,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Effect, Option} from 'effect'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
+import {ClubsDbService} from '../../../db/ClubsDbService'
 
 export const setPublicKeyV2 = HttpApiBuilder.handler(
   ContactApiSpecification,
@@ -15,10 +16,18 @@ export const setPublicKeyV2 = HttpApiBuilder.handler(
     Effect.gen(function* (_) {
       yield* _(validateChallengeInBody(req.payload))
 
+      const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
+      const club = yield* _(
+        clubsDb.findClubByUuid({
+          uuid: req.payload.clubUuid,
+        }),
+        Effect.flatten
+      )
 
       const member = yield* _(
-        membersDb.findClubMemberByPublicKey({
+        membersDb.findClubMember({
+          id: club.id,
           publicKey: req.payload.publicKey,
         }),
         Effect.flatten
@@ -39,7 +48,7 @@ export const setPublicKeyV2 = HttpApiBuilder.handler(
     }).pipe(
       Effect.catchTag(
         'NoSuchElementException',
-        () => new NotFoundError({message: 'Member not found'})
+        () => new NotFoundError({message: 'Club or member not found'})
       ),
       makeEndpointEffect
     )

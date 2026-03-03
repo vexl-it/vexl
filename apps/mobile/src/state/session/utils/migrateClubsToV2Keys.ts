@@ -14,7 +14,7 @@ export class ErrorMigratingClubsToV2Keys extends Data.TaggedError(
 export const migrateClubsToV2Keys = (
   session: SessionV2,
   contactApi: ContactApi
-): Effect.Effect<void> =>
+): Effect.Effect<boolean> =>
   Effect.gen(function* (_) {
     const existingClubsInSession = getDefaultStore().get(
       oldClubsKeyHolderStorageAtom
@@ -24,7 +24,7 @@ export const migrateClubsToV2Keys = (
 
     if (!Array.isNonEmptyArray(clubUuids)) {
       // No clubs to migrate, we can exit early
-      return
+      return true
     }
 
     const migratedClubs = yield* pipe(
@@ -92,7 +92,10 @@ export const migrateClubsToV2Keys = (
           }
         )
       )
+      return false
     }
+
+    return true
 
     // yield* ensureMissingClubV2Keys(clubUuids)
   })

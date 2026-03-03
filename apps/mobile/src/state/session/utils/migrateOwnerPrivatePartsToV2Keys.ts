@@ -29,7 +29,7 @@ const updateOffer = ({
     })
 
     // Delete the old private part encrypted with V1 keys
-    offerApi.deletePrivatePart({
+    yield* offerApi.deletePrivatePart({
       adminIds: [offer.ownershipInfo.adminId],
       publicKeys: [session.privateKey.publicKeyPemBase64],
     })

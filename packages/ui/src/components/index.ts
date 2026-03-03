@@ -1,4 +1,6 @@
 export {Avatar} from './Avatar'
+export {Banner} from './Banner'
+export type {BannerButton, BannerColor, BannerProps} from './Banner'
 export {Button} from './Button'
 export {CardButton} from './CardButton'
 export {ChatMessageItem} from './ChatMessageItem'

@@ -20,6 +20,7 @@ import {MenuItemScreen} from './MenuItemScreen'
 import {MenuScreen} from './MenuScreen'
 import {NavButtonScreen} from './NavButtonScreen'
 import {PickerScreen} from './PickerScreen'
+import {ReachStatsScreen} from './ReachStatsScreen'
 import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
 import {RowRadiobuttonScreen} from './RowRadiobuttonScreen'
@@ -61,6 +62,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Menu Item', component: MenuItemScreen},
   {label: 'Nav Button', component: NavButtonScreen},
   {label: 'Picker', component: PickerScreen},
+  {label: 'Reach Stats', component: ReachStatsScreen},
   {label: 'Row Button', component: RowButtonScreen},
   {label: 'Row Checkbox', component: RowCheckboxScreen},
   {label: 'Row Radiobutton', component: RowRadiobuttonScreen},

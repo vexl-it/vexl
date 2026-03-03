@@ -20,3 +20,6 @@ export * from './icons'
 
 // Anonymous Avatars
 export * from './assets/anonymousAvatars'
+
+// Fonts
+export {vexlFonts} from './assets/fonts'

@@ -1,6 +1,7 @@
 import type React from 'react'
 
 import {AvatarScreen} from './AvatarScreen'
+import {BannerScreen} from './BannerScreen'
 import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {ChatMessageItemScreen} from './ChatMessageItemScreen'
@@ -45,6 +46,7 @@ export interface ScreenEntry {
 
 export const screens: readonly ScreenEntry[] = [
   {label: 'Avatar', component: AvatarScreen},
+  {label: 'Banner', component: BannerScreen},
   {label: 'Button', component: ButtonScreen},
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},

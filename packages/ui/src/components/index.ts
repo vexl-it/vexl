@@ -8,6 +8,8 @@ export type {
 } from './ChatMessageItem'
 export {ChecklistCell} from './ChecklistCell'
 export type {ChecklistCellProps, ChecklistCellState} from './ChecklistCell'
+export {CommonFriends} from './CommonFriends'
+export type {CommonFriend, CommonFriendsProps} from './CommonFriends'
 export {Dot} from './Dot'
 export {DotTypingIndicator} from './DotTypingIndicator'
 export {EditRow} from './EditRow'

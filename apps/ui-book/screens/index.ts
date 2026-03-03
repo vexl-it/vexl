@@ -11,6 +11,7 @@ import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {DotScreen} from './DotScreen'
 import {DotTypingIndicatorScreen} from './DotTypingIndicatorScreen'
 import {EditRowScreen} from './EditRowScreen'
+import {EventCardScreen} from './EventCardScreen'
 import {ExchangeScreen} from './ExchangeScreen'
 import {FabButtonScreen} from './FabButtonScreen'
 import {FilterBarScreen} from './FilterBarScreen'
@@ -58,6 +59,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Dot', component: DotScreen},
   {label: 'Edit Row', component: EditRowScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
+  {label: 'Event Card', component: EventCardScreen},
   {label: 'Exchange', component: ExchangeScreen},
   {label: 'Fab Button', component: FabButtonScreen},
   {label: 'Filter Bar', component: FilterBarScreen},

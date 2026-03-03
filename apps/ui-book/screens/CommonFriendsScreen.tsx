@@ -11,17 +11,17 @@ function FriendAvatar(): React.JSX.Element {
 }
 
 const SAMPLE_FRIENDS: readonly CommonFriend[] = [
-  {name: 'Marcel Mrkev', avatar: <FriendAvatar />},
-  {name: 'Stepan', avatar: <FriendAvatar />},
-  {name: 'Grafon', avatar: <FriendAvatar />},
-  {name: 'Alice', avatar: <FriendAvatar />},
-  {name: 'Bob', avatar: <FriendAvatar />},
-  {name: 'Charlie', avatar: <FriendAvatar />},
+  {id: '1', name: 'Marcel Mrkev', avatar: <FriendAvatar />},
+  {id: '2', name: 'Stepan', avatar: <FriendAvatar />},
+  {id: '3', name: 'Grafon', avatar: <FriendAvatar />},
+  {id: '4', name: 'Alice', avatar: <FriendAvatar />},
+  {id: '5', name: 'Bob', avatar: <FriendAvatar />},
+  {id: '6', name: 'Charlie', avatar: <FriendAvatar />},
 ]
 
 const FEW_FRIENDS: readonly CommonFriend[] = [
-  {name: 'Marcel', avatar: <FriendAvatar />},
-  {name: 'Stepan', avatar: <FriendAvatar />},
+  {id: '1', name: 'Marcel', avatar: <FriendAvatar />},
+  {id: '2', name: 'Stepan', avatar: <FriendAvatar />},
 ]
 
 function ThemeGroup({

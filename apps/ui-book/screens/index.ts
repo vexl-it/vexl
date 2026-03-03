@@ -28,6 +28,7 @@ import {SegmentedPickerScreen} from './SegmentedPickerScreen'
 import {SelectableItemScreen} from './SelectableItemScreen'
 import {SelectClubCellScreen} from './SelectClubCellScreen'
 import {SelectorScreen} from './SelectorScreen'
+import {StepperCheckScreen} from './StepperCheckScreen'
 import {SwitchScreen} from './SwitchScreen'
 import {TabsScreen} from './TabsScreen'
 import {TextFieldScreen} from './TextFieldScreen'
@@ -68,6 +69,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Select Club Cell', component: SelectClubCellScreen},
   {label: 'Segmented Picker', component: SegmentedPickerScreen},
   {label: 'Selector', component: SelectorScreen},
+  {label: 'Stepper Check', component: StepperCheckScreen},
   {label: 'Switch', component: SwitchScreen},
   {label: 'Tabs', component: TabsScreen},
   {label: 'Text Field', component: TextFieldScreen},

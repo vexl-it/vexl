@@ -238,6 +238,7 @@ Create file(s) in `packages/ui/src/components/`.
 - When the design maps to an existing RN component (Switch, TextInput, Slider), **always wrap the native component** instead of building a custom one. This ensures platform-specific behavior and accessibility.
 - For native wrappers, use `useTheme()` to resolve theme tokens to color strings. Extend the RN props type, omitting internally-managed props.
 - When reading values from font configs (`bodyFont`, `headingFont`) or `getTokens()`, do **not** wrap them in `String()` or `Number()` constructors — they are already the correct types.
+- **Do NOT wrap `useTheme()` values or `getTokens()` lookups in `useMemo`.** `useTheme()` is already reactive — it tracks accessed keys and only re-renders when those values change. `getTokens()` returns static config defined once at setup. This also applies to simple conditional derivations (e.g. `state === 'upcoming' ? theme.foregroundPrimary.val : theme.foregroundSecondary.val`) — a trivial ternary is cheaper than `useMemo` overhead. Only use `useMemo` for genuinely expensive computations (complex object construction, iteration over large arrays, etc.).
 
 Read `packages/ui/src/config/themes.ts` for available theme token names.
 

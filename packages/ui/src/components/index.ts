@@ -12,12 +12,20 @@ export type {
 } from './ChatMessageItem'
 export {ChecklistCell} from './ChecklistCell'
 export type {ChecklistCellProps, ChecklistCellState} from './ChecklistCell'
+export {Chip} from './Chip'
+export type {ChipProps} from './Chip'
 export {CommonFriends} from './CommonFriends'
 export type {CommonFriend, CommonFriendsProps} from './CommonFriends'
 export {Dot} from './Dot'
 export {DotTypingIndicator} from './DotTypingIndicator'
 export {EditRow} from './EditRow'
 export type {EditRowProps, EditRowState} from './EditRow'
+export {EventCard} from './EventCard'
+export type {
+  EventCardAttendee,
+  EventCardProps,
+  EventCardState,
+} from './EventCard'
 export {Exchange} from './Exchange'
 export type {BtcUnit, ExchangeProps} from './Exchange'
 export {FabButton} from './FabButton'

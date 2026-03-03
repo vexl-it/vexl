@@ -9,8 +9,10 @@ import {getTokens, styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Chip} from './Chip'
 
 export interface CommonFriend {
+  readonly id: string
   readonly name: string
   readonly avatar: React.ReactNode
 }
@@ -29,17 +31,6 @@ const CommonFriendsFrame = styled(Stack, {
   pressStyle: {
     opacity: 0.7,
   },
-})
-
-const FriendChipFrame = styled(XStack, {
-  name: 'FriendChipFrame',
-  backgroundColor: '$backgroundTertiary',
-  borderRadius: '$2',
-  padding: '$2',
-  gap: '$2',
-  alignItems: 'center',
-  overflow: 'hidden',
-  flexShrink: 0,
 })
 
 export function CommonFriends({
@@ -67,22 +58,8 @@ export function CommonFriends({
           {label}
         </SizableText>
         <XStack gap={gap} alignItems="center" overflow="hidden">
-          {friends.map((friend, index) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <FriendChipFrame key={index}>
-              <Stack width="$5" height="$5" borderRadius="$2" overflow="hidden">
-                {friend.avatar}
-              </Stack>
-              <SizableText
-                fontFamily="$body"
-                fontSize="$1"
-                fontWeight="500"
-                color="$foregroundSecondary"
-                numberOfLines={1}
-              >
-                {friend.name}
-              </SizableText>
-            </FriendChipFrame>
+          {friends.map((friend) => (
+            <Chip key={friend.id} name={friend.name} avatar={friend.avatar} />
           ))}
         </XStack>
       </YStack>

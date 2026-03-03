@@ -6,6 +6,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import createPaginatedResponse from '@vexl-next/server-utils/src/createPaginatedResponse'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {appVersionSupportingV2KeysConfig} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindCommonFriendsPaginatedResult} from '../../db/ContactDbService/queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {
@@ -71,13 +72,24 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
         })
       )
 
+      const minimalVersionSupportingV2keys =
+        yield* appVersionSupportingV2KeysConfig
+      const clientVersion = Option.getOrElse(
+        req.headers.clientVersionOrNone,
+        () => 0
+      )
+      const clientSupportsV2Keys =
+        clientVersion >= minimalVersionSupportingV2keys
+
       const commonFriendsWithClientHash = yield* _(
         toReturn.items,
         Array.map((oneContact) =>
           pipe(
             hashForClientBatch(oneContact.commonFriends),
             Effect.map((hashes) => ({
-              publicKey: oneContact.publicKey,
+              publicKey: clientSupportsV2Keys
+                ? (oneContact.publicKeyV2 ?? oneContact.publicKey)
+                : oneContact.publicKey,
               common: {hashes},
             }))
           )

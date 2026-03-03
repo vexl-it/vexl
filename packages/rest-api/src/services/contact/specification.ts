@@ -311,7 +311,6 @@ export const SetPublicKeyV2Endpoint = HttpApiEndpoint.put(
   '/api/v1/clubs/member/set-public-key-v2'
 )
   .setHeaders(CommonHeaders)
-  .middleware(ServerSecurityMiddleware)
   .setPayload(SetPublicKeyV2Request)
   .addError(InvalidChallengeError, {status: 401})
   .addError(PublicKeyV2MissingError, {status: 400})

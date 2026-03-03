@@ -208,7 +208,7 @@ const ensureV2SessionIfNotCreateAndWrite = (
       yield* contactApi
         .refreshUser({
           vexlNotificationToken: Option.fromNullable(
-            session.sessionNotificationToken
+            upgradedSession.sessionNotificationToken
           ),
           offersAlive: true,
         })

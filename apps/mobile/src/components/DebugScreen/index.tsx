@@ -35,7 +35,9 @@ import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesA
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from '../../state/chat/atoms/focusChatByInboxKeyAndSenderKey'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
-import connectionStateAtom from '../../state/connections/atom/connectionStateAtom'
+import connectionStateAtom, {
+  syncConnectionsActionAtom,
+} from '../../state/connections/atom/connectionStateAtom'
 import offerToConnectionsAtom, {
   deleteOrphanRecordsActionAtom,
   updateAndReencryptAllOffersConnectionsActionAtom,
@@ -186,6 +188,21 @@ function DebugScreen(): React.ReactElement {
             <Spacer />
             <LanguagePicker />
             <Spacer />
+            <Button
+              variant="primary"
+              size="small"
+              text="Refresh connectionss"
+              onPress={() => {
+                Effect.runFork(
+                  Effect.gen(function* (_) {
+                    yield* store.set(syncConnectionsActionAtom)
+
+                    const connectionState = store.get(connectionStateAtom)
+                    console.log(connectionState)
+                  })
+                )
+              }}
+            />
             <Button
               variant="primary"
               size="small"

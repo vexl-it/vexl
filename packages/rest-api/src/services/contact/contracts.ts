@@ -64,8 +64,7 @@ export class ImportContactsQuotaReachedError extends Schema.TaggedError<ImportCo
 }) {}
 
 const CommonConnectionsForUserFromApi = Schema.Struct({
-  publicKey: PublicKeyPemBase64,
-  publicKeyV2: Schema.optional(PublicKeyV2),
+  publicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   common: Schema.Struct({
     hashes: Schema.Array(ServerToClientHashedNumber),
   }),

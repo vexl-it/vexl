@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons/ChevronRight'
@@ -69,18 +69,11 @@ export function StepperCheck({
 
   const isPressable = !selected
 
-  const iconColor = useMemo(
-    () =>
-      selected
-        ? theme.accentHighlightSecondary.val
-        : theme.foregroundTertiary.val,
-    [selected, theme.accentHighlightSecondary.val, theme.foregroundTertiary.val]
-  )
+  const iconColor = selected
+    ? theme.accentHighlightSecondary.val
+    : theme.foregroundTertiary.val
 
-  const chevronColor = useMemo(
-    () => theme.foregroundTertiary.val,
-    [theme.foregroundTertiary.val]
-  )
+  const chevronColor = theme.foregroundTertiary.val
 
   return (
     <StepperCheckFrame

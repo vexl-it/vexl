@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useRef} from 'react'
+import React, {useCallback, useRef} from 'react'
 import type {
   LayoutChangeEvent,
   NativeScrollEvent,
@@ -34,7 +34,7 @@ export function FilterBar<T>({
 }: FilterBarProps<T>): React.JSX.Element {
   const spaceTokens = getTokens().space
 
-  const gap = useMemo(() => spaceTokens.$3.val, [spaceTokens])
+  const gap = spaceTokens.$3.val
 
   const scrollViewRef = useRef<RNScrollView>(null)
   const scrollViewWidth = useRef(0)

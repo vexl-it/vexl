@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React from 'react'
 import {getTokens, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
@@ -28,9 +28,9 @@ export function ReachStats({
   onButtonPress,
 }: ReachStatsProps): React.JSX.Element {
   const theme = useTheme()
-  const stepIconSize = useMemo(() => getTokens().size.$5.val, [])
-  const activeIconColor = useMemo(() => theme.foregroundPrimary.val, [theme])
-  const defaultIconColor = useMemo(() => theme.foregroundTertiary.val, [theme])
+  const stepIconSize = getTokens().size.$5.val
+  const activeIconColor = theme.foregroundPrimary.val
+  const defaultIconColor = theme.foregroundTertiary.val
 
   return (
     <YStack

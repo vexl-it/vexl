@@ -2,10 +2,12 @@ import {
   SizableText,
   Stack,
   useVexlTheme,
+  vexlFonts,
   VexlThemeProvider,
   XStack,
   YStack,
 } from '@vexl-next/ui'
+import {useFonts} from 'expo-font'
 import {StatusBar} from 'expo-status-bar'
 import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
@@ -132,6 +134,12 @@ function ScreenNav(): React.JSX.Element {
 }
 
 export default function App(): React.JSX.Element {
+  const [fontsLoaded] = useFonts(vexlFonts)
+
+  if (!fontsLoaded) {
+    return <></>
+  }
+
   return (
     <VexlThemeProvider>
       <ScreenNav />

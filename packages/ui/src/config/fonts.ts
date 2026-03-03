@@ -45,6 +45,12 @@ export const bodyFont = createFont({
     7: -0.8, // pres body: -2%
     true: 0,
   },
+  face: {
+    400: {normal: 'TTSatoshi400'},
+    500: {normal: 'TTSatoshi500'},
+    600: {normal: 'TTSatoshi600'},
+    700: {normal: 'TTSatoshi700'},
+  },
 })
 
 export const headingFont = createFont({
@@ -79,5 +85,9 @@ export const headingFont = createFont({
     5: -1, // Heading 2: -1px
     6: -1, // Heading 1: -1px
     true: -1,
+  },
+  face: {
+    400: {normal: 'PPMonument700'},
+    700: {normal: 'PPMonument700'},
   },
 })

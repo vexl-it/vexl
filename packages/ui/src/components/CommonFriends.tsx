@@ -70,12 +70,7 @@ export function CommonFriends({
           {friends.map((friend, index) => (
             // eslint-disable-next-line react/no-array-index-key
             <FriendChipFrame key={index}>
-              <Stack
-                width="$5"
-                height="$5"
-                borderRadius="$2"
-                overflow="hidden"
-              >
+              <Stack width="$5" height="$5" borderRadius="$2" overflow="hidden">
                 {friend.avatar}
               </Stack>
               <SizableText

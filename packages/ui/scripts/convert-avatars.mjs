@@ -181,7 +181,14 @@ function generateComponent(name, svgXml) {
   allImports.add('G')
   const importList = [...allImports].filter((i) => i !== 'Svg').join(', ')
 
-  return `import React from 'react'
+  // Only add eslint-disable when the SVG uses x/y attributes (on Mask/Rect)
+  // which trigger false-positive @typescript-eslint/no-deprecated warnings
+  const hasDeprecatedXY = / [xy]="/.test(jsxWithGrayscale)
+  const eslintDisable = hasDeprecatedXY
+    ? '/* eslint-disable @typescript-eslint/no-deprecated */\n'
+    : ''
+
+  return `${eslintDisable}import React from 'react'
 import Svg, {${importList}} from 'react-native-svg'
 
 interface Props {

@@ -24,6 +24,7 @@ import {InputHintScreen} from './InputHintScreen'
 import {MenuItemScreen} from './MenuItemScreen'
 import {MenuScreen} from './MenuScreen'
 import {NavButtonScreen} from './NavButtonScreen'
+import {NavigationBarScreen} from './NavigationBarScreen'
 import {NoteScreen} from './NoteScreen'
 import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
@@ -74,6 +75,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Menu', component: MenuScreen},
   {label: 'Menu Item', component: MenuItemScreen},
   {label: 'Nav Button', component: NavButtonScreen},
+  {label: 'Navigation Bar', component: NavigationBarScreen},
   {label: 'Note', component: NoteScreen},
   {label: 'Notification Card', component: NotificationCardScreen},
   {label: 'Offer Card', component: OfferCardScreen},

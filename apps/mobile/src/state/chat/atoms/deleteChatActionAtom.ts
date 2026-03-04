@@ -72,8 +72,7 @@ export default function deleteChatActionAtom(
               otherSideVersion: chat.otherSideVersion,
             })
           )
-        : // eslint-disable-next-line @typescript-eslint/ban-types
-          TE.right<Effect.Effect.Error<ReturnType<typeof sendLeaveChat>>, {}>(
+        : TE.right<Effect.Effect.Error<ReturnType<typeof sendLeaveChat>>, {}>(
             {}
           ),
       TE.matchW(

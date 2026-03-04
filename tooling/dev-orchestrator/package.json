@@ -12,7 +12,7 @@
     "clear-db": "tsx src/clear-db.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --cache --cache-location 'node_modules/.cache/.eslintcache'",
+    "lint": "eslint src",
     "format": "prettier src --check",
     "format:fix": "prettier src --write"
   },
@@ -40,18 +40,10 @@
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.20.0",
     "prettier": "^3.3.2",
     "tsx": "^4.16.0",
     "typescript": "~5.9.2"
   },
-  "prettier": "@vexl-next/prettier-config",
-  "eslintConfig": {
-    "extends": [
-      "@vexl-next/eslint-config/react.js"
-    ],
-    "parserOptions": {
-      "project": true
-    }
-  }
+  "prettier": "@vexl-next/prettier-config"
 }

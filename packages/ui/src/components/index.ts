@@ -18,8 +18,14 @@ export {ClubCard} from './ClubCard'
 export type {ClubCardProps} from './ClubCard'
 export {CommonFriends} from './CommonFriends'
 export type {CommonFriend, CommonFriendsProps} from './CommonFriends'
-export {Dialog, DialogDescription, DialogLabel, DialogTitle} from './Dialog'
-export type {DialogProps} from './Dialog'
+export {
+  DialogDescription,
+  DialogFromAtom,
+  DialogLabel,
+  DialogTitle,
+  createDialogAtom,
+} from './Dialog'
+export type {DialogAtom, DialogAtomConfig, DialogFromAtomProps} from './Dialog'
 export {Dot} from './Dot'
 export {DotTypingIndicator} from './DotTypingIndicator'
 export {EditRow} from './EditRow'

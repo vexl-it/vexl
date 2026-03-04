@@ -33,6 +33,7 @@ import {ReachStatsScreen} from './ReachStatsScreen'
 import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
 import {RowRadiobuttonScreen} from './RowRadiobuttonScreen'
+import {ScreenScreen} from './ScreenScreen'
 import {SearchBarScreen} from './SearchBarScreen'
 import {SegmentedPickerScreen} from './SegmentedPickerScreen'
 import {SelectableItemScreen} from './SelectableItemScreen'
@@ -58,12 +59,12 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Button', component: ButtonScreen},
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},
-  {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Checklist Cell', component: ChecklistCellScreen},
   {label: 'Club Card', component: ClubCardScreen},
+  {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Dot', component: DotScreen},
-  {label: 'Edit Row', component: EditRowScreen},
   {label: 'Dot Typing Indicator', component: DotTypingIndicatorScreen},
+  {label: 'Edit Row', component: EditRowScreen},
   {label: 'Event Card', component: EventCardScreen},
   {label: 'Exchange', component: ExchangeScreen},
   {label: 'Fab Button', component: FabButtonScreen},
@@ -71,8 +72,8 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Filter Tag', component: FilterTagScreen},
   {label: 'Icon Button', component: IconButtonScreen},
   {label: 'Icon Tag', component: IconTagScreen},
-  {label: 'Input Hint', component: InputHintScreen},
   {label: 'Icons', component: IconsScreen},
+  {label: 'Input Hint', component: InputHintScreen},
   {label: 'Menu', component: MenuScreen},
   {label: 'Menu Item', component: MenuItemScreen},
   {label: 'Nav Button', component: NavButtonScreen},
@@ -85,10 +86,11 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Row Button', component: RowButtonScreen},
   {label: 'Row Checkbox', component: RowCheckboxScreen},
   {label: 'Row Radiobutton', component: RowRadiobuttonScreen},
+  {label: 'Screen', component: ScreenScreen},
   {label: 'Search Bar', component: SearchBarScreen},
+  {label: 'Segmented Picker', component: SegmentedPickerScreen},
   {label: 'Selectable Item', component: SelectableItemScreen},
   {label: 'Select Club Cell', component: SelectClubCellScreen},
-  {label: 'Segmented Picker', component: SegmentedPickerScreen},
   {label: 'Selector', component: SelectorScreen},
   {label: 'Stepper Check', component: StepperCheckScreen},
   {label: 'Switch', component: SwitchScreen},

@@ -175,7 +175,7 @@ interface NavigationBarBaseProps {
 
 interface NavigationBarMainProps extends NavigationBarBaseProps {
   readonly style: 'main'
-  readonly title: string
+  readonly title?: string
   readonly rightActions?: readonly NavigationBarAction[]
 }
 
@@ -264,7 +264,7 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
       {props.style === 'main' ? (
         <MainBar>
           <MainTitleArea>
-            <MainTitle>{props.title}</MainTitle>
+            {props.title ? <MainTitle>{props.title}</MainTitle> : null}
           </MainTitleArea>
           {props.rightActions && props.rightActions.length > 0 ? (
             <MainIconsArea>

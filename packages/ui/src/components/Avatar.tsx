@@ -40,7 +40,6 @@ export function Avatar({
 }: AvatarProps): React.JSX.Element {
   const dimension = customSize ?? SIZE_TOKEN_MAP[size]
 
-  // Raster image (with FilterImage for grayscale)
   if (source != null) {
     const px = resolveSizePx(size, customSize)
 
@@ -62,7 +61,6 @@ export function Avatar({
     )
   }
 
-  // Children (icon, SVG component, etc.)
   return (
     <ZStack
       width={dimension}

@@ -43,9 +43,11 @@ function ThemedColumn({
           {theme.charAt(0).toUpperCase() + theme.slice(1)}
         </SizableText>
 
-        <FabButton icon={<IconPlaceholder />} onPress={() => {}}>
-          Label
-        </FabButton>
+        <FabButton
+          icon={<IconPlaceholder />}
+          label="Label"
+          onPress={() => {}}
+        />
       </YStack>
     </Theme>
   )

@@ -1,4 +1,4 @@
-import {Button, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
+import {Button, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -100,10 +100,10 @@ export function ButtonScreen(): React.JSX.Element {
           Buttons
         </SizableText>
 
-        <XStack gap="$3">
+        <YStack gap="$3">
           <ThemedColumn theme="light" />
           <ThemedColumn theme="dark" />
-        </XStack>
+        </YStack>
       </YStack>
     </ScrollView>
   )

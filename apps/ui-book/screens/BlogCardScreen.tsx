@@ -2,7 +2,6 @@ import {BlogCard, Image, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const testBlogSource = require('../assets/testBlog.png') as number
 
 function BlogImage(): React.JSX.Element {

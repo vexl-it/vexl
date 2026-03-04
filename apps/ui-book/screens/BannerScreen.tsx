@@ -2,7 +2,6 @@ import {Banner, Image, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const testBannerSource = require('../assets/testBanner.png') as number
 
 function SectionLabel({

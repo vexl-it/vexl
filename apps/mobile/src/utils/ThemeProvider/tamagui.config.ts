@@ -1,4 +1,3 @@
-import {createMedia} from '@tamagui/react-native-media-driver'
 import {shorthands} from '@tamagui/shorthands'
 import {createFont, createTamagui, createTokens} from 'tamagui'
 
@@ -140,11 +139,11 @@ const breakpoints = {
   md: 500,
 }
 
-const media = createMedia({
+const media = {
   sm: {maxWidth: breakpoints.sm},
   md: {minWidth: breakpoints.sm + 1, maxWidth: breakpoints.md},
   lg: {minWidth: breakpoints.md + 1},
-})
+}
 
 export const tokens = createTokens({
   space,

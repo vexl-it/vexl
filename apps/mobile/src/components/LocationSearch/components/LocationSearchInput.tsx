@@ -14,7 +14,6 @@ import Input from '../../Input'
 import magnifyingGlass from '../../images/magnifyingGlass'
 import {useLocationSearchMolecule} from '../molecule'
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props {}
 
 function LoadingIndicator(): React.ReactElement | null {

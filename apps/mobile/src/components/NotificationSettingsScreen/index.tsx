@@ -34,7 +34,7 @@ function NotificationSettingsScreen(): React.ReactElement {
         withBackButton
       />
       <ScrollView>
-        <YStack space={6}>
+        <YStack gap={6}>
           {contents.map((one) => (
             <PreferenceItem key={one.atom.toString()} {...one} />
           ))}

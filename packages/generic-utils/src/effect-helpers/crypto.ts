@@ -364,7 +364,6 @@ export const cryptoBoxUnseal =
   (keyPairV2: KeyHolder.KeyPairV2) =>
   (data: CryptoBoxCypher): Effect.Effect<string, CryptoError> =>
     Effect.tryPromise({
-      // eslint-disable-next-line @typescript-eslint/return-await
       try: async () =>
         await cryptobox.unseal(
           data.slice(CRYPTO_BOX_CYPHER_PREFIX.length),

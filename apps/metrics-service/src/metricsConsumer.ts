@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-invalid-void-type */
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type Job} from 'bullmq'

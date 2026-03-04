@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { PassThrough } from "node:stream";
 
 import type { EntryContext } from "@remix-run/node";

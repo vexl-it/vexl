@@ -41,7 +41,7 @@ test('onPageChange is called after next button is clicked', async () => {
 
   const nextButton = screen.getByText('common.next')
   fireEvent.press(nextButton, {})
-  expect(onPageChange).toBeCalledWith(1)
+  expect(onPageChange).toHaveBeenCalledWith(1)
 })
 
 test('onPageChange is called after back button is clicked', async () => {
@@ -50,7 +50,7 @@ test('onPageChange is called after back button is clicked', async () => {
 
   const backButton = screen.getByText('common.back')
   fireEvent.press(backButton, {})
-  expect(onPageChange).toBeCalledWith(1)
+  expect(onPageChange).toHaveBeenCalledWith(1)
 })
 
 test('onSkip is called after skip button is clicked', async () => {
@@ -59,7 +59,7 @@ test('onSkip is called after skip button is clicked', async () => {
 
   const skipButton = screen.getByText('common.skip')
   fireEvent.press(skipButton, {})
-  expect(onSkip).toBeCalled()
+  expect(onSkip).toHaveBeenCalled()
 })
 
 test('finish button is displayed when on the last page, onFinish is called when finish button is pressed', async () => {
@@ -68,5 +68,5 @@ test('finish button is displayed when on the last page, onFinish is called when 
 
   const finishButton = screen.getByText('common.finish')
   fireEvent.press(finishButton, {})
-  expect(onFinish).toBeCalled()
+  expect(onFinish).toHaveBeenCalled()
 })

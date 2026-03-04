@@ -303,7 +303,7 @@ function TextMessage({
           {message.state === 'sendingError' && (
             <Pressable onPress={onPressResend}>
               <Text
-                selectable
+                userSelect="auto"
                 textAlign={isMine ? 'right' : 'left'}
                 mt="$1"
                 mb="$2"
@@ -320,7 +320,7 @@ function TextMessage({
         </XStack>
         {!!isLatest && (
           <Text
-            selectable
+            userSelect="auto"
             textAlign={isMine ? 'right' : 'left'}
             mt="$1"
             mb="$2"

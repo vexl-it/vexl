@@ -89,8 +89,8 @@ describe('verify challenge', () => {
 
         const usersDb = yield* _(LoggedInUsersDbService)
 
-        expect(usersDb.insertUser).not.toBeCalled()
-        expect(mockedReportNewUserCreated).not.toBeCalled()
+        expect(usersDb.insertUser).not.toHaveBeenCalled()
+        expect(mockedReportNewUserCreated).not.toHaveBeenCalled()
       })
     )
   })

@@ -33,7 +33,7 @@ function ClubListItem({
 
   return (
     <XStack gap="$2" alignItems="center">
-      <Image width={48} height={48} br="$2" src={club.clubImageUrl} />
+      <Image width={48} height={48} br="$2" source={{uri: club.clubImageUrl}} />
       <YStack f={1}>
         <Text
           numberOfLines={1}

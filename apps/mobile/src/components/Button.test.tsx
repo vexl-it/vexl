@@ -7,5 +7,5 @@ test('onPress call function', () => {
   render(<Button variant="primary" text="text" onPress={onPress} />)
 
   fireEvent.press(screen.getByText(text), {})
-  expect(onPress).toBeCalledTimes(1)
+  expect(onPress).toHaveBeenCalledTimes(1)
 })

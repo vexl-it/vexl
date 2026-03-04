@@ -29,7 +29,7 @@ export const userDatabaseConfig = Config.unwrap<PgClientConfig>({
   host: Config.string('DB_HOST'),
   port: Config.number('DB_PORT'),
   username: Config.string('DB_USER'),
-  password: Config.secret('DB_PASSWORD'),
+  password: Config.redacted('DB_PASSWORD'),
   maxConnections: Config.succeed(1),
 })
 
@@ -38,6 +38,6 @@ export const contactDatabaseConfig = Config.unwrap<PgClientConfig>({
   host: Config.string('DB_HOST'),
   port: Config.number('DB_PORT'),
   username: Config.string('DB_USER'),
-  password: Config.secret('DB_PASSWORD'),
+  password: Config.redacted('DB_PASSWORD'),
   maxConnections: Config.succeed(1),
 })

@@ -43,7 +43,7 @@ export function ClubDetail({
           <Text ff="$body400" fontSize={32} f={1}>
             {club.name}
           </Text>
-          <Image width={48} height={48} src={club.clubImageUrl} />
+          <Image width={48} height={48} source={{uri: club.clubImageUrl}} />
         </XStack>
         <YStack bc="$grey" p="$4" br="$4" gap="$2">
           {Option.isSome(club.description) && (

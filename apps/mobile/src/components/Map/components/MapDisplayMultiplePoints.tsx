@@ -27,7 +27,6 @@ import {Stack, getTokens, useDebounce} from 'tamagui'
 import europeRegion from '../utils/europeRegion'
 import mapTheme from '../utils/mapStyle'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const markerImage = require('../img/pin.png')
 
 export interface Point<T> {

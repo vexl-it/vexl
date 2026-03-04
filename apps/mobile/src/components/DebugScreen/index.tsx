@@ -166,7 +166,7 @@ function DebugScreen(): React.ReactElement {
             <Text color="$black">
               App version: {version} ({versionCode})
             </Text>
-            <Text color="$black" selectable>
+            <Text color="$black" userSelect="auto">
               On Commit: {commitHash}
             </Text>
             <Text color="$black">__DEV__: {__DEV__}</Text>
@@ -674,7 +674,6 @@ function DebugScreen(): React.ReactElement {
               variant="primary"
               size="small"
               text="Create and Copy notification cypher"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onPress={() => {
                 Effect.runFork(
                   Effect.gen(function* (_) {

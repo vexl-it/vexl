@@ -1,10 +1,10 @@
 import React from 'react'
-import {styled} from 'tamagui'
+import {styled, useTheme} from 'tamagui'
 
+import type {IconProps} from '../icons/types'
 import {SizableText, Stack, Theme} from '../primitives'
 
-type NavButtonVariant = 'highlighted' | 'destructive' | 'normal'
-type NavButtonType = 'icon' | 'text'
+export type NavButtonVariant = 'highlighted' | 'destructive' | 'normal'
 
 const NavButtonFrame = styled(Stack, {
   name: 'NavButton',
@@ -78,32 +78,61 @@ const NavButtonLabel = styled(SizableText, {
 
 type NavButtonFrameProps = React.ComponentProps<typeof NavButtonFrame>
 
-interface NavButtonProps extends Omit<NavButtonFrameProps, 'children'> {
-  readonly children: React.ReactNode
+type NavButtonBaseProps = Omit<
+  NavButtonFrameProps,
+  'children' | 'type' | 'variant'
+> & {
   readonly variant?: NavButtonVariant
-  readonly type?: NavButtonType
 }
 
-export function NavButton({
-  children,
-  variant = 'highlighted',
-  type = 'icon',
-  ...rest
-}: NavButtonProps): React.JSX.Element {
-  const content = (
-    <NavButtonFrame variant={variant} type={type} {...rest}>
-      {type === 'text' ? (
-        <NavButtonLabel variant={variant}>{children}</NavButtonLabel>
-      ) : (
-        children
-      )}
-    </NavButtonFrame>
-  )
+interface NavButtonIconProps extends NavButtonBaseProps {
+  readonly type?: 'icon'
+  readonly icon: React.ComponentType<IconProps>
+}
 
-  // Normal variant always renders in light mode per Figma design
-  if (variant === 'normal') {
-    return <Theme name="light">{content}</Theme>
+interface NavButtonTextProps extends NavButtonBaseProps {
+  readonly type: 'text'
+  readonly children: string
+}
+
+export type NavButtonProps = NavButtonIconProps | NavButtonTextProps
+
+function NavButtonContent(props: NavButtonProps): React.JSX.Element {
+  const theme = useTheme()
+  const variant = props.variant ?? 'highlighted'
+
+  const iconColor =
+    variant === 'highlighted'
+      ? theme.accentHighlightSecondary.val
+      : variant === 'destructive'
+        ? '#FFFFFF'
+        : theme.foregroundPrimary.val
+
+  if (props.type === 'text') {
+    const {type: _, variant: __, children, ...rest} = props
+    return (
+      <NavButtonFrame variant={variant} type="text" {...rest}>
+        <NavButtonLabel variant={variant}>{children}</NavButtonLabel>
+      </NavButtonFrame>
+    )
   }
 
-  return content
+  const {type: _, variant: __, icon: Icon, ...rest} = props
+  return (
+    <NavButtonFrame variant={variant} type="icon" {...rest}>
+      <Icon color={iconColor} size={24} />
+    </NavButtonFrame>
+  )
+}
+
+// Normal variant always renders in light mode per Figma design
+export function NavButton(props: NavButtonProps): React.JSX.Element {
+  if ((props.variant ?? 'highlighted') === 'normal') {
+    return (
+      <Theme name="light">
+        <NavButtonContent {...props} />
+      </Theme>
+    )
+  }
+  return <NavButtonContent {...props} />
 }

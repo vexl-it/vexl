@@ -1,19 +1,7 @@
-import {
-  NavButton,
-  SizableText,
-  Square,
-  Theme,
-  XStack,
-  YStack,
-} from '@vexl-next/ui'
+import {NavButton, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
+import {BellNotification} from '@vexl-next/ui/src/icons/BellNotification'
 import React from 'react'
 import {ScrollView} from 'react-native'
-
-function IconPlaceholder({color}: {readonly color: string}): React.JSX.Element {
-  return (
-    <Square size="$7" borderRadius="$1" borderWidth={2} borderColor={color} />
-  )
-}
 
 function SectionLabel({
   children,
@@ -59,17 +47,23 @@ function ThemedColumn({
         <SectionLabel>Icon type</SectionLabel>
 
         <XStack gap="$3">
-          <NavButton variant="highlighted" onPress={() => {}}>
-            <IconPlaceholder color="#BE8821" />
-          </NavButton>
+          <NavButton
+            variant="highlighted"
+            icon={BellNotification}
+            onPress={() => {}}
+          />
 
-          <NavButton variant="destructive" onPress={() => {}}>
-            <IconPlaceholder color="#FFFFFF" />
-          </NavButton>
+          <NavButton
+            variant="destructive"
+            icon={BellNotification}
+            onPress={() => {}}
+          />
 
-          <NavButton variant="normal" onPress={() => {}}>
-            <IconPlaceholder color="#000000" />
-          </NavButton>
+          <NavButton
+            variant="normal"
+            icon={BellNotification}
+            onPress={() => {}}
+          />
         </XStack>
 
         <SectionLabel>Text type</SectionLabel>

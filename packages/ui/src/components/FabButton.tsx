@@ -32,18 +32,18 @@ type FabButtonFrameProps = React.ComponentProps<typeof FabButtonFrame>
 
 interface FabButtonProps extends Omit<FabButtonFrameProps, 'children'> {
   readonly icon: React.ReactNode
-  readonly children: string
+  readonly label: string
 }
 
 export function FabButton({
   icon,
-  children,
+  label,
   ...rest
 }: FabButtonProps): React.JSX.Element {
   return (
     <FabButtonFrame {...rest}>
       {icon}
-      <FabButtonLabel>{children}</FabButtonLabel>
+      <FabButtonLabel>{label}</FabButtonLabel>
     </FabButtonFrame>
   )
 }

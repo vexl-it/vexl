@@ -32,10 +32,6 @@ export interface ExchangeProps {
   readonly locale?: string
 }
 
-// ---------------------------------------------------------------------------
-// Styled primitives
-// ---------------------------------------------------------------------------
-
 const FieldFrame = styled(XStack, {
   name: 'ExchangeFieldFrame',
   alignItems: 'center',
@@ -81,10 +77,6 @@ const CurrencyButton = styled(XStack, {
   },
 })
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function formatNumber(value: string, locale: string): string {
   if (value === '') return ''
   const num = Number(value)
@@ -94,10 +86,6 @@ function formatNumber(value: string, locale: string): string {
     useGrouping: true,
   }).format(num)
 }
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 
 export function Exchange({
   btcValue,
@@ -226,6 +214,7 @@ export function Exchange({
             <ChevronDown size={24} color={theme.foregroundPrimary.val} />
           </CurrencyButton>
           <FieldInput
+            autoFocus
             value={fiatDisplayValue}
             onChangeText={onFiatValueChange}
             placeholder="0.00"

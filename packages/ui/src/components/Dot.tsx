@@ -35,17 +35,17 @@ interface DotProps extends Omit<DotFrameProps, 'variant' | 'children'> {
   readonly count?: number
 }
 
+const labelStyle: TextStyle = {
+  fontFamily: bodyFont.family,
+  fontWeight: bodyFont.weight?.[5] as TextStyle['fontWeight'],
+  fontSize: bodyFont.size[1],
+  letterSpacing: bodyFont.letterSpacing[1],
+  color: getTokens().color.black100.val,
+  textAlign: 'center',
+}
+
 export function Dot({count, variant, ...rest}: DotProps): React.JSX.Element {
   const resolvedVariant = count !== undefined ? 'number' : (variant ?? 'small')
-
-  const labelStyle: TextStyle = {
-    fontFamily: bodyFont.family,
-    fontWeight: bodyFont.weight?.[5] as TextStyle['fontWeight'],
-    fontSize: bodyFont.size[1],
-    letterSpacing: bodyFont.letterSpacing[1],
-    color: getTokens().color.black100.val,
-    textAlign: 'center',
-  }
 
   return (
     <DotFrame variant={resolvedVariant} {...rest}>

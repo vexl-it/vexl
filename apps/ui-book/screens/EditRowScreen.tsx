@@ -15,7 +15,6 @@ import {
 import React, {useCallback} from 'react'
 import {Alert, ScrollView} from 'react-native'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const testAvatar = require('../assets/testAvatar.png') as number
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

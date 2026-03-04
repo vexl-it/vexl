@@ -12141,11 +12141,11 @@ __metadata:
     react-native-qrcode-svg: ^6.2.0
     react-native-quick-base64: ^2.2.2
     react-native-quick-crypto: ^0.7.17
-    react-native-reanimated: ~4.1.1
+    react-native-reanimated: ~4.2.0
     react-native-safe-area-context: ~5.6.2
     react-native-screens: ~4.23.0
     react-native-sound: ^0.11.2
-    react-native-svg: 15.12.1
+    react-native-svg: 15.15.3
     react-native-tab-view: ^3.5.1
     react-native-uuid: ^2.0.1
     react-native-web: ^0.21.0
@@ -12409,8 +12409,8 @@ __metadata:
     prettier: ^3.3.2
     react: 19.2.0
     react-native: 0.83.2
-    react-native-reanimated: ~4.1.1
-    react-native-svg: 15.12.1
+    react-native-reanimated: ~4.2.0
+    react-native-svg: 15.15.3
     tamagui: ^1.137.0
     typescript: ~5.9.2
   languageName: unknown
@@ -12430,8 +12430,8 @@ __metadata:
     prettier: ^3.3.2
     react: 19.2.0
     react-native: 0.83.2
-    react-native-reanimated: ~4.1.1
-    react-native-svg: 15.12.1
+    react-native-reanimated: ~4.2.0
+    react-native-svg: 15.15.3
     rimraf: ^4.4.0
     tamagui: ^1.137.0
     typescript: ~5.9.2
@@ -27817,7 +27817,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-is-edge-to-edge@npm:^1.2.1":
+"react-native-is-edge-to-edge@npm:1.2.1, react-native-is-edge-to-edge@npm:^1.2.1":
   version: 1.2.1
   resolution: "react-native-is-edge-to-edge@npm:1.2.1"
   peerDependencies:
@@ -27989,18 +27989,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:~4.1.1":
-  version: 4.1.6
-  resolution: "react-native-reanimated@npm:4.1.6"
+"react-native-reanimated@npm:~4.2.0":
+  version: 4.2.2
+  resolution: "react-native-reanimated@npm:4.2.2"
   dependencies:
-    react-native-is-edge-to-edge: ^1.2.1
-    semver: 7.7.2
+    react-native-is-edge-to-edge: 1.2.1
+    semver: 7.7.3
   peerDependencies:
-    "@babel/core": ^7.0.0-0
     react: "*"
     react-native: "*"
-    react-native-worklets: ">=0.5.0"
-  checksum: e166e2a02d9eebe26ea6e5877626f354a5c21659ff0a8a92057addb5bfe6bcfeb44515c080ed0d65d0d95c03ca49692244f768e0238b0e3a8d052754c6957632
+    react-native-worklets: ">=0.7.0"
+  checksum: 2497901472996aece1e350ffa02233ad0f9f7a16e389a201246474fae872f3ec9834a0b7c3801241d5844b9f7dbf0309d868728b3b35555de5d1836b3f527644
   languageName: node
   linkType: hard
 
@@ -28046,9 +28045,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-svg@npm:15.12.1":
-  version: 15.12.1
-  resolution: "react-native-svg@npm:15.12.1"
+"react-native-svg@npm:15.15.3":
+  version: 15.15.3
+  resolution: "react-native-svg@npm:15.15.3"
   dependencies:
     css-select: ^5.1.0
     css-tree: ^1.1.3
@@ -28056,7 +28055,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 5761d3b37e5adb4e58945146b210009decf0a436c194fc3dc5c025581aa5c602b5698d7eea493ddf9d31b4d90433fa54eaf1ed0cec721ab820cf895e1cf9614a
+  checksum: 82ec0096ff0e55509382bfaaa79b55787e4131aaa404c8f83b4198c4f6b351ef1543592ed61adc0e2e794e143d39356614988d84eb97e28d647bc2e4bc2208c9
   languageName: node
   linkType: hard
 
@@ -29363,15 +29362,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.7.2, semver@npm:^7.1.1, semver@npm:^7.1.3, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.1, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.2":
-  version: 7.7.2
-  resolution: "semver@npm:7.7.2"
-  bin:
-    semver: bin/semver.js
-  checksum: dd94ba8f1cbc903d8eeb4dd8bf19f46b3deb14262b6717d0de3c804b594058ae785ef2e4b46c5c3b58733c99c83339068203002f9e37cfe44f7e2cc5e3d2f621
-  languageName: node
-  linkType: hard
-
 "semver@npm:7.7.3, semver@npm:^7.7.3":
   version: 7.7.3
   resolution: "semver@npm:7.7.3"
@@ -29387,6 +29377,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: ae47d06de28836adb9d3e25f22a92943477371292d9b665fb023fae278d345d508ca1958232af086d85e0155aee22e313e100971898bbb8d5d89b8b1d4054ca2
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.1.1, semver@npm:^7.1.3, semver@npm:^7.3.4, semver@npm:^7.3.5, semver@npm:^7.3.7, semver@npm:^7.5.1, semver@npm:^7.5.3, semver@npm:^7.5.4, semver@npm:^7.6.0, semver@npm:^7.7.2":
+  version: 7.7.2
+  resolution: "semver@npm:7.7.2"
+  bin:
+    semver: bin/semver.js
+  checksum: dd94ba8f1cbc903d8eeb4dd8bf19f46b3deb14262b6717d0de3c804b594058ae785ef2e4b46c5c3b58733c99c83339068203002f9e37cfe44f7e2cc5e3d2f621
   languageName: node
   linkType: hard
 

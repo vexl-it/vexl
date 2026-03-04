@@ -2,7 +2,6 @@ import {Avatar, Chip, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
 
 function ChipAvatar(): React.JSX.Element {

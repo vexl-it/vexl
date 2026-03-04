@@ -5,7 +5,7 @@
   "main": "src/index",
   "scripts": {
     "clean": "rimraf .turbo node_modules",
-    "lint": "eslint '**/*.{js,ts,tsx,jsx,cjs,mjs}'",
+    "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit"
@@ -24,8 +24,8 @@
     "prettier": "^3.3.2",
     "react": "19.2.0",
     "react-native": "0.83.2",
-    "react-native-reanimated": "~4.1.1",
-    "react-native-svg": "15.12.1",
+    "react-native-reanimated": "~4.2.0",
+    "react-native-svg": "15.15.3",
     "rimraf": "^4.4.0",
     "typescript": "~5.9.2"
   },
@@ -35,12 +35,6 @@
     "react-native": ">=0.81",
     "react-native-reanimated": ">=4",
     "react-native-svg": ">=13"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@vexl-next/eslint-config/react"
-    ]
   },
   "prettier": "@vexl-next/prettier-config"
 }

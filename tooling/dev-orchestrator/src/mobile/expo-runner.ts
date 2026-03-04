@@ -37,6 +37,7 @@ export interface MobileCommandConfig {
   buildMode: BuildMode
   releaseMode: boolean
   clearCache: boolean
+  staging: boolean
   device?: string
   deviceType?: 'physical' | 'emulator' | 'simulator'
   port: number
@@ -183,7 +184,6 @@ const startExpoGoMode = (
   Effect.gen(function* () {
     const env: NodeJS.ProcessEnv = {
       ...process.env,
-      ENV_PRESET: 'local',
       ...expoPublicEnvVars,
     }
 
@@ -264,7 +264,6 @@ export const runNativeBuild = (
 
     const env: NodeJS.ProcessEnv = {
       ...process.env,
-      ENV_PRESET: 'local',
       ...expoPublicEnvVars,
     }
 
@@ -317,7 +316,6 @@ export const runPrebuildThenNative = (
               env: {
                 ...process.env,
                 EXPO_NO_GIT_STATUS: '1',
-                ENV_PRESET: 'local',
                 ...expoPublicEnvVars,
               },
               stdio: 'inherit',
@@ -357,34 +355,47 @@ export const startExpoWithMode = (
     const projectRoot = findProjectRoot()
     const mobileAppPath = `${projectRoot}/apps/mobile`
 
-    // Determine platform type for URL generation
-    const platformType = getPlatformType(config.platform, config.deviceType)
+    // When --staging is used, skip local env generation and use staging preset
+    const expoPublicEnvVars: Record<string, string> = config.staging
+      ? {ENV_PRESET: 'stage'}
+      : yield* Effect.gen(function* () {
+          // Determine platform type for URL generation
+          const platformType = getPlatformType(
+            config.platform,
+            config.deviceType
+          )
 
-    // Generate local service URLs based on platform type
-    // For physical devices, rewrite generated URLs to the selected LAN host.
-    const preset = yield* generateLocalEnvPreset(platformType).pipe(
-      Effect.map((p) => {
-        if (config.deviceType === 'physical' && config.host !== 'localhost') {
-          const rewritten: Record<string, string> = {}
-          for (const [key, url] of Object.entries(p)) {
-            // Replace host in URL
-            const urlObj = new URL(url)
-            urlObj.hostname = config.host
-            rewritten[key] = urlObj.toString().replace(/\/$/, '') // Remove trailing slash
-          }
-          return rewritten
-        }
-        return p
-      })
-    )
+          // Generate local service URLs based on platform type
+          // For physical devices, rewrite generated URLs to the selected LAN host.
+          const preset = yield* generateLocalEnvPreset(platformType).pipe(
+            Effect.map((p) => {
+              if (
+                config.deviceType === 'physical' &&
+                config.host !== 'localhost'
+              ) {
+                const rewritten: Record<string, string> = {}
+                for (const [key, url] of Object.entries(p)) {
+                  // Replace host in URL
+                  const urlObj = new URL(url)
+                  urlObj.hostname = config.host
+                  rewritten[key] = urlObj.toString().replace(/\/$/, '') // Remove trailing slash
+                }
+                return rewritten
+              }
+              return p
+            })
+          )
 
-    // Build EXPO_PUBLIC env vars
-    const expoPublicEnvVars = buildExpoPublicEnvVars(preset)
-    logResolvedApiUrls(preset)
+          logResolvedApiUrls(preset)
+          return {...buildExpoPublicEnvVars(preset), ENV_PRESET: 'local'}
+        })
 
     logWithPrefix('expo', `Platform: ${config.platform}`)
     logWithPrefix('expo', `Build mode: ${config.buildMode}`)
     logWithPrefix('expo', `Release mode: ${config.releaseMode ? 'ON' : 'OFF'}`)
+    if (config.staging) {
+      logWithPrefix('expo', 'Environment: STAGING')
+    }
     logWithPrefix('expo', `Metro port: ${config.port}`)
     if (config.device) {
       logWithPrefix('expo', `Device: ${config.device}`)

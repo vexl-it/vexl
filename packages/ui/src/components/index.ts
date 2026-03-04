@@ -44,6 +44,13 @@ export type {MenuProps} from './Menu'
 export {MenuItem} from './MenuItem'
 export type {MenuItemProps, MenuItemVariant} from './MenuItem'
 export {NavButton} from './NavButton'
+export type {NavButtonProps, NavButtonVariant} from './NavButton'
+export {NavigationBar} from './NavigationBar'
+export type {
+  NavigationBarAction,
+  NavigationBarProps,
+  NavigationBarStyle,
+} from './NavigationBar'
 export {Note} from './Note'
 export type {NoteProps} from './Note'
 export {NotificationCard} from './NotificationCard'

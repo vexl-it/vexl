@@ -40,6 +40,7 @@ import {SelectClubCellScreen} from './SelectClubCellScreen'
 import {SelectorScreen} from './SelectorScreen'
 import {StepperCheckScreen} from './StepperCheckScreen'
 import {SwitchScreen} from './SwitchScreen'
+import {TabBarScreen} from './TabBarScreen'
 import {TabsScreen} from './TabsScreen'
 import {TextFieldScreen} from './TextFieldScreen'
 import {TextTagScreen} from './TextTagScreen'
@@ -91,6 +92,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Selector', component: SelectorScreen},
   {label: 'Stepper Check', component: StepperCheckScreen},
   {label: 'Switch', component: SwitchScreen},
+  {label: 'Tab Bar', component: TabBarScreen},
   {label: 'Tabs', component: TabsScreen},
   {label: 'Text Field', component: TextFieldScreen},
   {label: 'Text Tag', component: TextTagScreen},

@@ -1,8 +1,8 @@
 # AGENTS
 
-Purpose: Shared ESLint configs (`index.js` base + `react.js`) consumed across workspaces.
+Purpose: Shared ESLint configs (`index.mjs` base + `react.mjs`) consumed across workspaces.
 
-Stack: ESLint 8, `standard-with-typescript` + Prettier; React plugin with hooks rules.
+Stack: ESLint 9 flat config, `eslint-config-love` + Prettier; React plugin with hooks rules.
 
 Gotchas:
 

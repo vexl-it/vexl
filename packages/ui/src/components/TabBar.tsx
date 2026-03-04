@@ -101,10 +101,7 @@ function AnimatedTabIcon({
   }, [active, direction, iconRotate, iconScale])
 
   const animatedIconStyle = useAnimatedStyle(() => ({
-    transform: [
-      {scale: iconScale.value},
-      {rotate: `${iconRotate.value}deg`},
-    ],
+    transform: [{scale: iconScale.value}, {rotate: `${iconRotate.value}deg`}],
   }))
 
   return (

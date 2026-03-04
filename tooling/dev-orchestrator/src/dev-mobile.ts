@@ -165,7 +165,10 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
 
     // Step 1: Check backend services (warn but don't block)
     if (options.staging) {
-      logWithPrefix('mobile', 'Using STAGING backend - skipping local health check')
+      logWithPrefix(
+        'mobile',
+        'Using STAGING backend - skipping local health check'
+      )
     } else {
       logWithPrefix('mobile', 'Checking backend services...')
       yield* checkBackendAndWarn()

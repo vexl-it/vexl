@@ -21,7 +21,6 @@ export const mockedS3ServiceLayer = Layer.effect(
   S3Service,
   Effect.succeed({
     generatePresignedUploadUrl: (params) =>
-      // eslint-disable-next-line @typescript-eslint/return-await
       Effect.promise(async () => await generatePresignedUploadUrlMock(params)),
   })
 )

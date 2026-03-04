@@ -44,7 +44,6 @@ interface GoogleGeocodeResponse {
 // const regionRegex = /(?: region| kraj)/gi
 
 // Just keep this just in case. Might be useful
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const findTypeInAddressComponents = (
   type: string,
   components: Array<{

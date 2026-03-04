@@ -10,7 +10,6 @@ import {type MapValue} from '../brands'
 import mapTheme from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const markerImage = require('../img/pin.png')
 
 type Props = React.ComponentProps<typeof Stack> & {

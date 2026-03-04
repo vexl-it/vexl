@@ -250,7 +250,7 @@ export default function GenerateLinkPage() {
                         value={generatedLink.fullLink}
                         size={200}
                         level="M"
-                        includeMargin={true}
+                        marginSize={4}
                       />
                     </div>
                   </div>

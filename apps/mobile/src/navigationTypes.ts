@@ -154,7 +154,6 @@ export type PostLoginFlowStackParamsList = {
   FindOffersInVexlClubsScreen: undefined
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PostLoginFlowStackScreenProps<
   T extends keyof PostLoginFlowStackParamsList,
 > = CompositeScreenProps<
@@ -210,7 +209,6 @@ export type TradeCalculatorStackParamsList = {
   SetYourOwnPrice: undefined
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeCalculatorStackScreenProps<
   T extends keyof TradeCalculatorStackParamsList,
 > = CompositeScreenProps<
@@ -252,7 +250,6 @@ export type TradeChecklistStackParamsList = {
   LocationSearch: undefined
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackScreenProps<
   T extends keyof TradeChecklistStackParamsList,
 > = CompositeScreenProps<

@@ -195,7 +195,7 @@ describe('Initialize verification', () => {
           })
         )
 
-        expect(createVerificationMock).not.toBeCalled()
+        expect(createVerificationMock).not.toHaveBeenCalled()
         expect(data.verificationId).toBeDefined()
         expect(data.expirationAt).toBeDefined()
       })

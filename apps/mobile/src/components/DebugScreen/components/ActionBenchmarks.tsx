@@ -42,7 +42,7 @@ export function ActionBenchmarks(): React.ReactElement {
   const clearBenchmarks = useSetAtom(clearBenchmarksActionAtom)
   const store = useStore()
   return (
-    <YStack space="$2">
+    <YStack gap="$2">
       <XStack>
         <Text color="$black">Action Benchmarks</Text>
         <Switch

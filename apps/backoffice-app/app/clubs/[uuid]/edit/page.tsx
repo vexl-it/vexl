@@ -74,7 +74,7 @@ export default function EditClubPage() {
     void loadClub()
   }, [clubUuid, runEffect, router])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!formData) return
 
@@ -248,7 +248,6 @@ export default function EditClubPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
                 </label>
-                {/* eslint-disable-next-line -- blob URLs not supported by next/image */}
                 <img
                   src={previewUrl}
                   alt="Preview"

@@ -27,7 +27,6 @@ export function parseStringWithVersion(b64: string): {
   data: string
 } {
   const [version, ...data] = b64.split('.')
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!version || !data) {
     throw new Error('Provided string does not contain a version')
   }

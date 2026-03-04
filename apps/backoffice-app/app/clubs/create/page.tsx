@@ -45,7 +45,7 @@ export default function CreateClubPage() {
     }
   }, [uploadedImageUrl])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const adminToken = getAdminToken()
@@ -202,7 +202,6 @@ export default function CreateClubPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Preview
                 </label>
-                {/* eslint-disable-next-line -- blob URLs not supported by next/image */}
                 <img
                   src={previewUrl}
                   alt="Preview"

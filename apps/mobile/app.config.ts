@@ -1,4 +1,4 @@
-const VERSION_CODE = 711
+const VERSION_CODE = 712
 const VERSION = '1.41.0'
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'

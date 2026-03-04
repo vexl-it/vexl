@@ -73,9 +73,16 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
 
       const {t} = get(translationAtom)
 
-      const descriptionText = `⚠️ ${t(
+      const explanationDescription1 = t(
         'notificationPrompt.explanation1.description1'
-      )}\n\n${t('notificationPrompt.explanation1.description2')}`
+      )
+      const explanationDescription2 = t(
+        'notificationPrompt.explanation1.description2'
+      ).trim()
+      const descriptionText =
+        explanationDescription2.length > 0
+          ? `${explanationDescription1}\n\n${explanationDescription2}`
+          : explanationDescription1
 
       const showDialog = set(askAreYouSureActionAtom, {
         variant: 'info',

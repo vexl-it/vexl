@@ -35,6 +35,7 @@ interface MobileOptions {
   build?: boolean
   releaseMode?: boolean
   clearCache?: boolean
+  staging?: boolean
   device?: string | boolean
   host?: string
 }
@@ -163,8 +164,12 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
     console.log('')
 
     // Step 1: Check backend services (warn but don't block)
-    logWithPrefix('mobile', 'Checking backend services...')
-    yield* checkBackendAndWarn()
+    if (options.staging) {
+      logWithPrefix('mobile', 'Using STAGING backend - skipping local health check')
+    } else {
+      logWithPrefix('mobile', 'Checking backend services...')
+      yield* checkBackendAndWarn()
+    }
     console.log('')
 
     // Step 2: Resolve device (interactive selection if -d without value)
@@ -192,6 +197,7 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
       buildMode,
       releaseMode: options.releaseMode ?? false,
       clearCache: options.clearCache ?? false,
+      staging: options.staging ?? false,
       device: selectedDevice?.id,
       deviceType: selectedDevice?.type,
       port,
@@ -280,6 +286,10 @@ program
   .option(
     '--clear-cache',
     'Clear Metro bundler cache before building (auto-enabled with --release-mode)'
+  )
+  .option(
+    '--staging',
+    'Use staging backend instead of local (ENV_PRESET=stage)'
   )
   .option('--host <ip>', 'Override auto-detected LAN IP')
   .action((options: MobileOptions) => {

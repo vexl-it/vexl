@@ -118,7 +118,6 @@ export default {
     },
   },
   'android': {
-    'edgeToEdgeEnabled': true,
     'versionCode': VERSION_CODE,
     'softwareKeyboardLayoutMode': 'resize',
     'adaptiveIcon': {

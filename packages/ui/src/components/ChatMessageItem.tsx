@@ -23,7 +23,7 @@ export interface ChatMessageItemProps {
   readonly icon?: React.ComponentType<IconProps>
   readonly isTyping?: boolean
   readonly grayscaleAvatar?: boolean
-  readonly onPress?: () => void
+  readonly onPress: () => void
 }
 
 const ChatMessageItemFrame = styled(XStack, {
@@ -101,7 +101,6 @@ export function ChatMessageItem({
   onPress,
 }: ChatMessageItemProps): React.JSX.Element {
   const theme = useTheme()
-  const isPressable = !!onPress
 
   const iconColor = (() => {
     switch (variant) {
@@ -117,7 +116,7 @@ export function ChatMessageItem({
   })()
 
   return (
-    <ChatMessageItemFrame pressable={isPressable} onPress={onPress}>
+    <ChatMessageItemFrame pressable onPress={onPress}>
       {grayscaleAvatar ? (
         <View style={{filter: [{grayscale: 1}]}}>{avatar}</View>
       ) : (

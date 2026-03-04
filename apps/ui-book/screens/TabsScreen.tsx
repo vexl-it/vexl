@@ -1,4 +1,4 @@
-import {SizableText, Tabs, Theme, XStack, YStack} from '@vexl-next/ui'
+import {SizableText, Tabs, Theme, YStack} from '@vexl-next/ui'
 import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 
@@ -42,6 +42,14 @@ function SectionLabel({
   )
 }
 
+type ScrollableTabValue =
+  | 'featured'
+  | 'nearby'
+  | 'recent'
+  | 'popular'
+  | 'trending'
+  | 'recommended'
+
 function ThemedColumn({
   theme,
 }: {
@@ -53,6 +61,8 @@ function ThemedColumn({
   const [smallActive, setSmallActive] = useState<
     'all' | 'buy' | 'sell' | 'saved' | 'drafts'
   >('all')
+  const [scrollableActive, setScrollableActive] =
+    useState<ScrollableTabValue>('featured')
 
   const handleLargePress = useCallback((value: 'offers' | 'messages') => {
     setLargeActive(value)
@@ -65,6 +75,10 @@ function ThemedColumn({
     []
   )
 
+  const handleScrollablePress = useCallback((value: ScrollableTabValue) => {
+    setScrollableActive(value)
+  }, [])
+
   return (
     <Theme name={theme}>
       <YStack
@@ -72,7 +86,6 @@ function ThemedColumn({
         padding="$5"
         backgroundColor="$backgroundPrimary"
         borderRadius="$4"
-        flex={1}
       >
         <SizableText
           fontFamily="$body"
@@ -98,31 +111,20 @@ function ThemedColumn({
           onTabPress={handleSmallPress}
           size="small"
         />
+
+        <SectionLabel>Scrollable (overflow)</SectionLabel>
+        <Tabs
+          tabs={scrollableTabs}
+          activeTab={scrollableActive}
+          onTabPress={handleScrollablePress}
+          size="large"
+        />
       </YStack>
     </Theme>
   )
 }
 
 export function TabsScreen(): React.JSX.Element {
-  const [scrollableActive, setScrollableActive] = useState<
-    'featured' | 'nearby' | 'recent' | 'popular' | 'trending' | 'recommended'
-  >('featured')
-
-  const handleScrollablePress = useCallback(
-    (
-      value:
-        | 'featured'
-        | 'nearby'
-        | 'recent'
-        | 'popular'
-        | 'trending'
-        | 'recommended'
-    ) => {
-      setScrollableActive(value)
-    },
-    []
-  )
-
   return (
     <ScrollView style={{flex: 1}}>
       <YStack padding="$5" gap="$4">
@@ -135,18 +137,8 @@ export function TabsScreen(): React.JSX.Element {
           Tabs
         </SizableText>
 
-        <XStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </XStack>
-
-        <SectionLabel>Scrollable (overflow)</SectionLabel>
-        <Tabs
-          tabs={scrollableTabs}
-          activeTab={scrollableActive}
-          onTabPress={handleScrollablePress}
-          size="large"
-        />
+        <ThemedColumn theme="light" />
+        <ThemedColumn theme="dark" />
       </YStack>
     </ScrollView>
   )

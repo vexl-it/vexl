@@ -1,4 +1,4 @@
-import {FilterBar, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
+import {FilterBar, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 
@@ -112,18 +112,49 @@ function ThemedColumn({
   )
 }
 
-export function FilterBarScreen(): React.JSX.Element {
-  const [scrollableSelected, setScrollableSelected] = useState<
-    ReadonlySet<string>
-  >(new Set(['buy-btc', 'sell-btc']))
+function ScrollableSection({
+  theme,
+}: {
+  readonly theme: 'light' | 'dark'
+}): React.JSX.Element {
+  const [selected, setSelected] = useState<ReadonlySet<string>>(
+    new Set(['buy-btc', 'sell-btc'])
+  )
 
-  const handleScrollableChange = useCallback((values: ReadonlySet<string>) => {
-    setScrollableSelected(values)
+  const handleChange = useCallback((values: ReadonlySet<string>) => {
+    setSelected(values)
   }, [])
 
   return (
+    <Theme name={theme}>
+      <YStack
+        gap="$5"
+        padding="$5"
+        backgroundColor="$backgroundPrimary"
+        borderRadius="$4"
+      >
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$3"
+          color="$foregroundPrimary"
+        >
+          {`Scrollable — ${theme.charAt(0).toUpperCase() + theme.slice(1)}`}
+        </SizableText>
+        <FilterBar
+          items={manyItems}
+          selectedValues={selected}
+          onSelectedValuesChange={handleChange}
+        />
+      </YStack>
+    </Theme>
+  )
+}
+
+export function FilterBarScreen(): React.JSX.Element {
+  return (
     <ScrollView style={{flex: 1}}>
-      <YStack padding="$5" gap="$4">
+      <YStack padding="$5" paddingBottom="$12" gap="$4">
         <SizableText
           fontFamily="$heading"
           fontWeight="700"
@@ -133,17 +164,11 @@ export function FilterBarScreen(): React.JSX.Element {
           Filter Bar
         </SizableText>
 
-        <XStack gap="$3">
-          <ThemedColumn theme="light" />
-          <ThemedColumn theme="dark" />
-        </XStack>
+        <ThemedColumn theme="light" />
+        <ThemedColumn theme="dark" />
 
-        <SectionLabel>Scrollable (overflow)</SectionLabel>
-        <FilterBar
-          items={manyItems}
-          selectedValues={scrollableSelected}
-          onSelectedValuesChange={handleScrollableChange}
-        />
+        <ScrollableSection theme="light" />
+        <ScrollableSection theme="dark" />
       </YStack>
     </ScrollView>
   )

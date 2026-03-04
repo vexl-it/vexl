@@ -9,7 +9,6 @@ import {
 import React from 'react'
 import {ScrollView} from 'react-native'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const testAvatarSource = require('../assets/testAvatar.png') as number
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

@@ -2,7 +2,6 @@ import {Avatar, SelectClubCell, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const clubTestAvatar = require('../assets/clubTestAvatar.png') as number
 
 const clubAvatar = <Avatar customSize={40} source={clubTestAvatar} />

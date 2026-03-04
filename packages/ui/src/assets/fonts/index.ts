@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports */
-
 /**
  * Font map for use with expo-font's `useFonts` hook.
  * Keys must match the face names declared in the Tamagui font config.

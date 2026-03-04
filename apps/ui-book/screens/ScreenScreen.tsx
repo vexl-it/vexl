@@ -24,6 +24,8 @@ type ActiveExample =
   | 'backFooter-light'
   | 'scrolled-dark'
   | 'scrolled-light'
+  | 'graphicHeader-dark'
+  | 'graphicHeader-light'
   | null
 
 function MainStyleExample({
@@ -206,6 +208,75 @@ function ScrolledNavExample({
   )
 }
 
+function GraphicHeaderExample({
+  onBack,
+  theme,
+}: {
+  readonly onBack: () => void
+  readonly theme: 'light' | 'dark'
+}): React.JSX.Element {
+  return (
+    <Theme name={theme}>
+      <YStack flex={1}>
+        <Screen
+          topInset={TOP_INSET}
+          bottomInset={BOTTOM_INSET}
+          graphicHeader
+          navigationBar={(scrolled) => (
+            <NavigationBar
+              style="main"
+              title="Chats"
+              scrolled={scrolled}
+              rightActions={[
+                {icon: TuneSettings, onPress: () => {}},
+                {icon: UserProfile, onPress: onBack},
+              ]}
+            />
+          )}
+        >
+          <YStack gap="$5" paddingTop="$5">
+            <SizableText
+              fontFamily="$body"
+              fontWeight="500"
+              fontSize="$2"
+              color="$foregroundSecondary"
+            >
+              Navigation bar floats over content. Scroll to see it get a
+              background.
+            </SizableText>
+            {Array.from({length: 20}, (_, i) => (
+              <YStack
+                key={i}
+                backgroundColor="$backgroundSecondary"
+                borderRadius="$5"
+                padding="$5"
+                gap="$3"
+              >
+                <SizableText
+                  fontFamily="$body"
+                  fontWeight="600"
+                  fontSize="$2"
+                  color="$foregroundPrimary"
+                >
+                  {`Chat item ${i + 1}`}
+                </SizableText>
+                <SizableText
+                  fontFamily="$body"
+                  fontWeight="500"
+                  fontSize="$2"
+                  color="$foregroundSecondary"
+                >
+                  Message preview text
+                </SizableText>
+              </YStack>
+            ))}
+          </YStack>
+        </Screen>
+      </YStack>
+    </Theme>
+  )
+}
+
 const examples: ReadonlyArray<{
   readonly key: ActiveExample & string
   readonly label: string
@@ -216,6 +287,8 @@ const examples: ReadonlyArray<{
   {key: 'backFooter-light', label: 'Back style with footer (light)'},
   {key: 'scrolled-dark', label: 'Scrolled nav background (dark)'},
   {key: 'scrolled-light', label: 'Scrolled nav background (light)'},
+  {key: 'graphicHeader-dark', label: 'Graphic header (dark)'},
+  {key: 'graphicHeader-light', label: 'Graphic header (light)'},
 ]
 
 function ActiveScreen({
@@ -231,6 +304,8 @@ function ActiveScreen({
     return <MainStyleExample onBack={onBack} theme={theme} />
   if (active.startsWith('backFooter'))
     return <BackStyleWithFooterExample onBack={onBack} theme={theme} />
+  if (active.startsWith('graphicHeader'))
+    return <GraphicHeaderExample onBack={onBack} theme={theme} />
   return <ScrolledNavExample onBack={onBack} theme={theme} />
 }
 

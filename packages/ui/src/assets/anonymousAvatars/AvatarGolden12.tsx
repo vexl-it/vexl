@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-deprecated */
 import React from 'react'
 import Svg, {
   ClipPath,

@@ -8,6 +8,9 @@
     "platforms": ["ios", "android"],
     "ios": {
       "bundleIdentifier": "it.vexl.ui-book"
+    },
+    "android": {
+      "package": "it.vexl.uibook"
     }
   }
 }

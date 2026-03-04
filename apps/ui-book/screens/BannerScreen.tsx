@@ -28,7 +28,7 @@ function BannerImage(): React.JSX.Element {
     <Image
       source={testBannerSource}
       style={{width: '100%', height: 98, borderRadius: 10}}
-      resizeMode="cover"
+      objectFit="cover"
     />
   )
 }

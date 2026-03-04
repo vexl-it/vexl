@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useRef} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import type {LayoutChangeEvent, ScrollView as RNScrollView} from 'react-native'
 import {ScrollView} from 'react-native'
 import Animated, {
@@ -66,22 +66,25 @@ export function Tabs<T>({
       const {x, width} = event.nativeEvent.layout
       tabLayouts.current[index] = {x, width}
 
-      if (index === activeIndex) {
-        if (!hasInitialized.current) {
-          underlineLeft.value = x
-          underlineWidth.value = width
-          underlineOpacity.value = withTiming(1, {duration: 150})
-          hasInitialized.current = true
-        } else {
-          underlineLeft.value = withTiming(x, {duration: ANIMATION_DURATION})
-          underlineWidth.value = withTiming(width, {
-            duration: ANIMATION_DURATION,
-          })
-        }
+      if (index === activeIndex && !hasInitialized.current) {
+        underlineLeft.value = x
+        underlineWidth.value = width
+        underlineOpacity.value = withTiming(1, {duration: 150})
+        hasInitialized.current = true
       }
     },
     [activeIndex, underlineLeft, underlineOpacity, underlineWidth]
   )
+
+  useEffect(() => {
+    if (!hasInitialized.current) return
+    const layout = tabLayouts.current[activeIndex]
+    if (!layout) return
+    underlineLeft.value = withTiming(layout.x, {duration: ANIMATION_DURATION})
+    underlineWidth.value = withTiming(layout.width, {
+      duration: ANIMATION_DURATION,
+    })
+  }, [activeIndex, underlineLeft, underlineWidth])
 
   const handleTabPress = useCallback(
     (index: number) => {
@@ -92,7 +95,11 @@ export function Tabs<T>({
 
       const layout = tabLayouts.current[index]
       if (layout && scrollViewRef.current) {
-        const tabEnd = layout.x + layout.width + gap
+        const nextLayout = tabLayouts.current[index + 1]
+        const peekExtra = nextLayout
+          ? gap + Math.min(nextLayout.width, nextLayout.width * 0.5 + gap)
+          : 0
+        const tabEnd = layout.x + layout.width + peekExtra
         const viewWidth = scrollViewWidth.current
         const scrollX =
           viewWidth > 0

@@ -2,6 +2,7 @@ import React from 'react'
 import {styled} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {CardButton} from './CardButton'
 
 export type BannerColor = 'green' | 'pink'
 
@@ -70,51 +71,6 @@ const DescriptionText = styled(SizableText, {
   color: '$foregroundSecondary',
 })
 
-const PrimaryButtonFrame = styled(XStack, {
-  name: 'BannerPrimaryButton',
-  backgroundColor: '$black100',
-  height: '$8',
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingHorizontal: '$4',
-  borderRadius: '$3',
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const PrimaryButtonLabel = styled(SizableText, {
-  name: 'BannerPrimaryButtonLabel',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$white100',
-})
-
-const SecondaryButtonFrame = styled(XStack, {
-  name: 'BannerSecondaryButton',
-  height: '$8',
-  alignItems: 'center',
-  justifyContent: 'center',
-  paddingHorizontal: '$4',
-  borderRadius: '$3',
-  pressStyle: {
-    opacity: 0.7,
-  },
-})
-
-const SecondaryButtonLabel = styled(SizableText, {
-  name: 'BannerSecondaryButtonLabel',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundPrimary',
-})
-
 export function Banner({
   color = 'green',
   title,
@@ -132,16 +88,14 @@ export function Banner({
         {primaryButton != null || secondaryButton != null ? (
           <XStack gap="$3">
             {primaryButton != null ? (
-              <PrimaryButtonFrame onPress={primaryButton.onPress}>
-                <PrimaryButtonLabel>{primaryButton.label}</PrimaryButtonLabel>
-              </PrimaryButtonFrame>
+              <CardButton onPress={primaryButton.onPress}>
+                {primaryButton.label}
+              </CardButton>
             ) : null}
             {secondaryButton != null ? (
-              <SecondaryButtonFrame onPress={secondaryButton.onPress}>
-                <SecondaryButtonLabel>
-                  {secondaryButton.label}
-                </SecondaryButtonLabel>
-              </SecondaryButtonFrame>
+              <CardButton type="text" onPress={secondaryButton.onPress}>
+                {secondaryButton.label}
+              </CardButton>
             ) : null}
           </XStack>
         ) : null}

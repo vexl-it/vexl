@@ -2,6 +2,7 @@ import {Avatar, SelectClubCell, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React, {useCallback, useState} from 'react'
 import {ScrollView} from 'react-native'
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const clubTestAvatar = require('../assets/clubTestAvatar.png') as number
 
 const clubAvatar = <Avatar customSize={40} source={clubTestAvatar} />
@@ -77,24 +78,6 @@ function ClubList(): React.JSX.Element {
   )
 }
 
-function StaticDemos(): React.JSX.Element {
-  return (
-    <YStack gap="$3">
-      <SelectClubCell
-        name="Bitcoin Prague"
-        description="10 members"
-        avatar={clubAvatar}
-      />
-      <SelectClubCell
-        selected
-        name="Bitcoin Prague"
-        description="10 members"
-        avatar={clubAvatar}
-      />
-    </YStack>
-  )
-}
-
 export function SelectClubCellScreen(): React.JSX.Element {
   return (
     <ScrollView>
@@ -113,23 +96,6 @@ export function SelectClubCellScreen(): React.JSX.Element {
         >
           SelectClubCell
         </SizableText>
-
-        <Section title="Light">
-          <StaticDemos />
-        </Section>
-
-        <Section title="Dark">
-          <Theme name="dark">
-            <YStack
-              gap="$3"
-              padding="$5"
-              borderRadius="$5"
-              backgroundColor="$backgroundPrimary"
-            >
-              <StaticDemos />
-            </YStack>
-          </Theme>
-        </Section>
 
         <Section title="Multi-select list">
           <ClubList />

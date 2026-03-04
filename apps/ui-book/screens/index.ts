@@ -7,6 +7,7 @@ import {ButtonScreen} from './ButtonScreen'
 import {CardButtonScreen} from './CardButtonScreen'
 import {ChatMessageItemScreen} from './ChatMessageItemScreen'
 import {ChecklistCellScreen} from './ChecklistCellScreen'
+import {ChipScreen} from './ChipScreen'
 import {ClubCardScreen} from './ClubCardScreen'
 import {CommonFriendsScreen} from './CommonFriendsScreen'
 import {DialogScreen} from './DialogScreen'
@@ -61,6 +62,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Card Button', component: CardButtonScreen},
   {label: 'Chat Message Item', component: ChatMessageItemScreen},
   {label: 'Checklist Cell', component: ChecklistCellScreen},
+  {label: 'Chip', component: ChipScreen},
   {label: 'Club Card', component: ClubCardScreen},
   {label: 'Common Friends', component: CommonFriendsScreen},
   {label: 'Dialog', component: DialogScreen},

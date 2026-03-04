@@ -48,16 +48,6 @@ const IconBox = styled(Stack, {
   justifyContent: 'center',
 })
 
-const EditButtonBox = styled(Stack, {
-  name: 'EditRowEditButton',
-  width: '$9',
-  height: '$9',
-  borderRadius: '$3',
-  backgroundColor: '$backgroundTertiary',
-  alignItems: 'center',
-  justifyContent: 'center',
-})
-
 const OptionalTag = styled(XStack, {
   name: 'EditRowOptionalTag',
   backgroundColor: '$backgroundTertiary',
@@ -134,7 +124,6 @@ export function EditRow({
   const icon = 'icon' in rest ? rest.icon : undefined
   const avatar = 'avatar' in rest ? rest.avatar : undefined
   const theme = useTheme()
-  const whiteColor = getTokens().color.white100.val
   const iconBoxSize = getTokens().size.$9.val
 
   const isInitial = state === 'initial'
@@ -158,7 +147,12 @@ export function EditRow({
   const leadingIcon = (() => {
     switch (state) {
       case 'completed':
-        return <RadiobuttonCircleFilled color={whiteColor} size={24} />
+        return (
+          <RadiobuttonCircleFilled
+            color={theme.backgroundSecondary.val}
+            size={24}
+          />
+        )
       case 'editing':
       case 'profile':
         return Icon ? <Icon color={foregroundColor} size={24} /> : null
@@ -188,9 +182,9 @@ export function EditRow({
         </OptionalTag>
       ) : null}
       {showEditButton ? (
-        <EditButtonBox>
+        <IconBox backgroundColor="$backgroundTertiary">
           <PencilWriteEdit color={foregroundColor} size={24} />
-        </EditButtonBox>
+        </IconBox>
       ) : null}
     </EditRowFrame>
   )

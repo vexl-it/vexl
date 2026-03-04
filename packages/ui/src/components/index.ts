@@ -84,6 +84,8 @@ export type {
 export {StepperCheck, StepperCheckContainer} from './StepperCheck'
 export type {StepperCheckProps} from './StepperCheck'
 export {Switch} from './Switch'
+export {TabBar} from './TabBar'
+export type {TabBarItem, TabBarProps} from './TabBar'
 export {Tabs} from './Tabs'
 export type {TabItem, TabsProps} from './Tabs'
 export {TextField} from './TextField'

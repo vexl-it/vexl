@@ -1,6 +1,7 @@
 import {
   SizableText,
   Stack,
+  Toast,
   useVexlTheme,
   vexlFonts,
   VexlThemeProvider,
@@ -8,9 +9,11 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useFonts} from 'expo-font'
+
 import {StatusBar} from 'expo-status-bar'
 import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
+import {toastAtom} from './state/toastAtom'
 
 import {screens} from './screens'
 
@@ -143,6 +146,7 @@ export default function App(): React.JSX.Element {
   return (
     <VexlThemeProvider>
       <ScreenNav />
+      <Toast messageAtom={toastAtom} topOffset={60} />
     </VexlThemeProvider>
   )
 }

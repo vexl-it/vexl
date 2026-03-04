@@ -85,6 +85,7 @@ function ThemeGroup({
 
         <SectionLabel>Unread + highlighted</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="New request received"
@@ -93,6 +94,7 @@ function ThemeGroup({
           variant="highlighted"
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="Reacted to your offer"
@@ -101,6 +103,7 @@ function ThemeGroup({
           variant="highlighted"
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar2 />}
           name="Direct friend"
           message="Responded to your note"
@@ -109,6 +112,7 @@ function ThemeGroup({
           variant="highlighted"
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar3 />}
           name="Direct friend"
           message="Updated trading checklist"
@@ -119,12 +123,14 @@ function ThemeGroup({
 
         <SectionLabel>Regular messages</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="Hi, is this offer still active?"
           time="Tue"
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar2 />}
           name="Direct friend"
           message="You: Lorem ipsum dolor sit amet, consectetur adipiscing elit"
@@ -133,6 +139,7 @@ function ThemeGroup({
 
         <SectionLabel>Typing</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="Last message before typing"
@@ -142,6 +149,7 @@ function ThemeGroup({
 
         <SectionLabel>Revealed (icon + success)</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar2 />}
           name="Direct friend"
           message="Identity revealed"
@@ -150,6 +158,7 @@ function ThemeGroup({
           icon={EyeOpen}
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar2 />}
           name="Direct friend"
           message="Phone numbers revealed"
@@ -160,6 +169,7 @@ function ThemeGroup({
 
         <SectionLabel>Declined (icon + destructive)</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="Declined to reveal identity"
@@ -168,6 +178,7 @@ function ThemeGroup({
           icon={Rejected}
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="Declined to reveal phone number"
@@ -178,6 +189,7 @@ function ThemeGroup({
 
         <SectionLabel>Destructive actions</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar3 />}
           name="Direct friend"
           message="Chat blocked"
@@ -186,6 +198,7 @@ function ThemeGroup({
           grayscaleAvatar
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar3 />}
           name="Direct friend"
           message="Cancelled trade request"
@@ -197,6 +210,7 @@ function ThemeGroup({
 
         <SectionLabel>You: destructive</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="You: Cancel trade request"
@@ -204,6 +218,7 @@ function ThemeGroup({
           variant="destructive"
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar />}
           name="Direct friend"
           message="You: Request declined"
@@ -213,6 +228,7 @@ function ThemeGroup({
 
         <SectionLabel>Deleted (icon + destructive)</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar2 />}
           name="Direct friend"
           message="Deleted offer"
@@ -222,6 +238,7 @@ function ThemeGroup({
           grayscaleAvatar
         />
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar2 />}
           name="Direct friend"
           message="Deleted chat"
@@ -233,6 +250,7 @@ function ThemeGroup({
 
         <SectionLabel>Left the chat</SectionLabel>
         <ChatMessageItem
+          onPress={() => {}}
           avatar={<DemoAvatar3 />}
           name="Direct friend"
           message="Left the chat"

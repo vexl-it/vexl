@@ -1,4 +1,6 @@
-import React, {useEffect, useState} from 'react'
+import type {WritableAtom} from 'jotai'
+import {atom, useAtomValue} from 'jotai'
+import React, {useEffect, useRef, useState} from 'react'
 import {Dimensions, Modal, Pressable, StyleSheet} from 'react-native'
 import Animated, {
   Easing,
@@ -10,6 +12,7 @@ import {scheduleOnRN} from 'react-native-worklets'
 import {styled} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Button} from './Button'
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
@@ -28,7 +31,7 @@ export const DialogLabel = styled(SizableText, {
 export const DialogTitle = styled(SizableText, {
   name: 'DialogTitle',
   fontFamily: '$heading',
-  fontSize: '$4',
+  fontSize: '$5',
   fontWeight: '400',
   color: '$foregroundPrimary',
 })
@@ -123,20 +126,20 @@ export function Dialog({
         </Animated.View>
         <Animated.View style={contentAnimatedStyle}>
           <YStack
-            paddingTop="$4"
+            paddingTop="$5"
             paddingBottom="$8"
-            paddingHorizontal="$4"
-            gap="$2"
+            paddingHorizontal="$5"
+            gap="$3"
           >
             <YStack
               backgroundColor="$backgroundSecondary"
               borderRadius="$5"
-              padding="$4"
-              gap="$4"
+              padding="$5"
+              gap="$5"
             >
               {children}
             </YStack>
-            {footer != null ? <XStack gap="$2">{footer}</XStack> : null}
+            {footer != null ? <XStack gap="$3">{footer}</XStack> : null}
           </YStack>
         </Animated.View>
       </Stack>
@@ -149,3 +152,103 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
 })
+
+export interface DialogAtomConfig {
+  readonly title: string
+  readonly subtitle?: string
+  readonly children?: React.ReactNode
+  readonly positiveButtonText: string
+  readonly negativeButtonText?: string
+}
+
+interface DialogAtomInternalState extends DialogAtomConfig {
+  readonly onResult: (confirmed: boolean) => void
+}
+
+export type DialogAtom = WritableAtom<
+  DialogAtomInternalState | null,
+  [config: DialogAtomConfig],
+  Promise<boolean>
+>
+
+export function createDialogAtom(): DialogAtom {
+  const stateAtom = atom<DialogAtomInternalState | null>(null)
+
+  return atom(
+    (get) => get(stateAtom),
+    (get, set, config: DialogAtomConfig): Promise<boolean> => {
+      const existing = get(stateAtom)
+      existing?.onResult(false)
+
+      return new Promise<boolean>((resolve) => {
+        let resolved = false
+        set(stateAtom, {
+          ...config,
+          onResult: (confirmed: boolean) => {
+            if (resolved) return
+            resolved = true
+            set(stateAtom, null)
+            resolve(confirmed)
+          },
+        })
+      })
+    }
+  )
+}
+
+export interface DialogFromAtomProps {
+  readonly dialogAtom: DialogAtom
+}
+
+export function DialogFromAtom({
+  dialogAtom,
+}: DialogFromAtomProps): React.JSX.Element {
+  const state = useAtomValue(dialogAtom)
+  const lastStateRef = useRef<DialogAtomInternalState | null>(null)
+
+  if (state != null) {
+    lastStateRef.current = state
+  }
+
+  const displayState = state ?? lastStateRef.current
+  const hasNegativeButton = displayState?.negativeButtonText != null
+
+  return (
+    <Dialog
+      visible={state != null}
+      onClose={() => state?.onResult(false)}
+      footer={
+        displayState != null ? (
+          <>
+            {hasNegativeButton ? (
+              <Button
+                variant="secondary"
+                size="large"
+                flex={1}
+                onPress={() => state?.onResult(false)}
+              >
+                {displayState.negativeButtonText}
+              </Button>
+            ) : null}
+            <Button
+              variant="primary"
+              size="large"
+              flex={1}
+              onPress={() => state?.onResult(true)}
+            >
+              {displayState.positiveButtonText}
+            </Button>
+          </>
+        ) : undefined
+      }
+    >
+      {displayState?.title != null ? (
+        <DialogTitle>{displayState.title}</DialogTitle>
+      ) : null}
+      {displayState?.subtitle != null ? (
+        <DialogDescription>{displayState.subtitle}</DialogDescription>
+      ) : null}
+      {displayState?.children ?? null}
+    </Dialog>
+  )
+}

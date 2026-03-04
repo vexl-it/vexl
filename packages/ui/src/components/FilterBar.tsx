@@ -66,14 +66,23 @@ export function FilterBar<T>({
       const tagLeft = layout.x
       const tagRight = layout.x + layout.width
 
-      if (tagRight > offset + viewWidth) {
+      const nextLayout = tagLayouts.current[index + 1]
+      const peekExtra = nextLayout
+        ? gap + Math.min(nextLayout.width, nextLayout.width * 0.5 + gap)
+        : 0
+
+      if (tagRight + peekExtra > offset + viewWidth) {
         scrollViewRef.current.scrollTo({
-          x: tagRight - viewWidth + gap,
+          x: tagRight + peekExtra - viewWidth,
           animated: true,
         })
       } else if (tagLeft < offset) {
+        const prevLayout = tagLayouts.current[index - 1]
+        const peekBefore = prevLayout
+          ? gap + Math.min(prevLayout.width, prevLayout.width * 0.5 + gap)
+          : 0
         scrollViewRef.current.scrollTo({
-          x: Math.max(0, tagLeft - gap),
+          x: Math.max(0, tagLeft - peekBefore),
           animated: true,
         })
       }

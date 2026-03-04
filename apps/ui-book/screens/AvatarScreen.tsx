@@ -122,7 +122,7 @@ function ThemedColumn({
         </XStack>
 
         <SectionLabel>With SVG avatar (grayscale)</SectionLabel>
-        <XStack gap="$3" alignItems="center">
+        <XStack gap="$3" alignItems="center" flexWrap="wrap">
           <Avatar size="small">
             <BasicAvatar size={32} grayscale />
           </Avatar>

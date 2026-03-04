@@ -15,6 +15,7 @@ const ChipFrame = styled(XStack, {
   padding: '$2',
   gap: '$2',
   alignItems: 'center',
+  alignSelf: 'flex-start',
   overflow: 'hidden',
   flexShrink: 0,
 })

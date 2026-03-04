@@ -14,10 +14,6 @@ const RowButtonFrame = styled(XStack, {
   borderRadius: '$5',
   backgroundColor: '$backgroundSecondary',
 
-  pressStyle: {
-    opacity: 0.7,
-  },
-
   variants: {
     selected: {
       true: {

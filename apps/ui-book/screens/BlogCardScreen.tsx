@@ -10,7 +10,7 @@ function BlogImage(): React.JSX.Element {
     <Image
       source={testBlogSource}
       style={{width: '100%', height: 162}}
-      resizeMode="cover"
+      objectFit="cover"
     />
   )
 }

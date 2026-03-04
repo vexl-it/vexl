@@ -40,6 +40,7 @@ const SegmentLabel = styled(SizableText, {
   fontWeight: '500',
   color: '$foregroundPrimary',
   textAlign: 'center',
+  numberOfLines: 1,
 
   variants: {
     selected: {

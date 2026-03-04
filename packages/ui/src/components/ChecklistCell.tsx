@@ -1,5 +1,5 @@
 import React from 'react'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {styled, useTheme} from 'tamagui'
 
 import {ChevronRight} from '../icons/ChevronRight'
 import {ClockTime} from '../icons/ClockTime'
@@ -76,8 +76,6 @@ export function ChecklistCell({
   onPress,
 }: ChecklistCellProps): React.JSX.Element {
   const theme = useTheme()
-  const whiteColor = getTokens().color.white100.val
-
   const isPressable = state !== 'completed'
 
   const iconBoxBg = (() => {
@@ -94,7 +92,12 @@ export function ChecklistCell({
   const renderIcon = (): React.JSX.Element | null => {
     switch (state) {
       case 'completed':
-        return <RadiobuttonCircleFilled color={whiteColor} size={24} />
+        return (
+          <RadiobuttonCircleFilled
+            color={theme.backgroundSecondary.val}
+            size={24}
+          />
+        )
       case 'pending':
         return (
           <ClockTime color={theme.accentHighlightSecondary.val} size={24} />

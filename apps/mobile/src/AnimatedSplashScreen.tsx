@@ -1,4 +1,6 @@
+import {vexlFonts} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
+import {useFonts} from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import React, {useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
@@ -12,7 +14,6 @@ import {useIsSessionLoaded} from './state/session'
 import {loadSession} from './state/session/loadSession'
 import {subscribeToGeneralTopic} from './utils/notifications'
 import reportError from './utils/reportError'
-import useLoadFonts from './utils/useLoadFonts'
 import useSetupVersionServiceState from './utils/versionService/useSetupVersionServiceState'
 
 const styles = StyleSheet.create({
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: getTokens().color.main.val,
+    backgroundColor: getTokens().color.yellow100.val,
   },
   image: {
     width: 290,
@@ -53,7 +54,7 @@ function AnimatedSplashScreen({
   const [isAppReady, setIsAppReady] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
-  const [fontsLoaded] = useLoadFonts()
+  const [fontsLoaded] = useFonts(vexlFonts)
   const sessionLoaded = useIsSessionLoaded()
   useSetupVersionServiceState()
 

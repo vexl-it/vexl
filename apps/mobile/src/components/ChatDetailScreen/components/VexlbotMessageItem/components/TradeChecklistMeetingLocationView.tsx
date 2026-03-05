@@ -3,7 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import React, {useMemo} from 'react'
+import React from 'react'
 import {getTokens, Stack} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
@@ -12,11 +12,9 @@ import {
   type TFunction,
 } from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
-import checkIconSvg from '../../../../images/checkIconSvg'
 import copySvg from '../../../../images/copySvg'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
-import {type ToastNotificationState} from '../../../../ToastNotification/domain'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
@@ -82,14 +80,7 @@ export default function TradeChecklistMeetingLocationView({
   const calendarEventId = useAtomValue(calendarEventIdAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
-  const toastContent: ToastNotificationState = useMemo(
-    () => ({
-      visible: true,
-      text: t('common.copied'),
-      icon: checkIconSvg,
-    }),
-    [t]
-  )
+  const toastContent = t('common.copied')
 
   if (
     (message.state === 'sent' || message.state === 'received') &&

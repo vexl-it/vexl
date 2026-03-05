@@ -26,7 +26,6 @@ import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164Pho
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
-import checkIconSvg from '../../../images/checkIconSvg'
 import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{
@@ -242,12 +241,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         )
 
         if (result) {
-          set(toastNotificationAtom, {
-            visible: true,
-            text: t('contacts.contactsSubmitted'),
-            icon: checkIconSvg,
-            hideAfterMillis: 2000,
-          })
+          set(toastNotificationAtom, t('contacts.contactsSubmitted'))
         }
         return result === 'success'
       })

@@ -36,7 +36,6 @@ import Info from '../../Info'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import infoSvg from '../../images/infoSvg'
 import {showCommonFriendsExplanationActionAtom} from '../atoms'
 import RerequestInfo from './RerequestInfo'
 import Title from './Title'
@@ -125,18 +124,10 @@ function OfferInfo({
     !chatForOffer || requestPossibleInfo.canBeRerequested
 
   useEffect(() => {
-    setToastNotification({
-      visible: true,
-      text: t(`offer.requestStatus.${requestState}`),
-      icon: infoSvg,
-      iconFill: getTokens().color.black.val,
-      showCloseButton: true,
-      hideAfterMillis: 3000,
-      bottomMargin: mapIsVisible ? toastBottomMargin : undefined,
-    })
+    setToastNotification(t(`offer.requestStatus.${requestState}`))
 
     return () => {
-      setToastNotification((prev) => ({...prev, visible: false}))
+      setToastNotification(null)
     }
   }, [mapIsVisible, requestState, setToastNotification, t, toastBottomMargin])
 

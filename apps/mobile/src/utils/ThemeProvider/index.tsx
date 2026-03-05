@@ -1,13 +1,12 @@
+import {VexlThemeProvider} from '@vexl-next/ui'
 import React from 'react'
-import {TamaguiProvider} from 'tamagui'
-import config from './tamagui.config'
 
 function ThemeProvider({
   children,
 }: {
   children: React.ReactNode
 }): React.ReactElement {
-  return <TamaguiProvider config={config}>{children}</TamaguiProvider>
+  return <VexlThemeProvider defaultMode="dark">{children}</VexlThemeProvider>
 }
 
 export default ThemeProvider

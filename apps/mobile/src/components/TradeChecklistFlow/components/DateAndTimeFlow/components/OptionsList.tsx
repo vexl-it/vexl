@@ -2,7 +2,6 @@ import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList, TouchableWithoutFeedback} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
-import {tokens} from '../../../../../utils/ThemeProvider/tamagui.config'
 
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
@@ -79,12 +78,7 @@ function Item<T>({
             </Text>
           )}
         </Stack>
-        {!!showChevron && (
-          <Image
-            stroke={tokens.color.greyOnBlack.val}
-            source={chevronRightSvg}
-          />
-        )}
+        {!!showChevron && <Image stroke="#AFAFAF" source={chevronRightSvg} />}
         {!!selected && <Image source={selectedCheckSvg}></Image>}
         {!!item.outdated && (
           <XStack ai="center" gap="$1" p="$1">
@@ -92,7 +86,7 @@ function Item<T>({
               height={12}
               width={12}
               source={closeSvg}
-              stroke={getTokens().color.main.val}
+              stroke={getTokens().color.yellow100.val}
             />
             <Text fos={12} col="$main">
               {t('common.outdated')}

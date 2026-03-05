@@ -9,7 +9,7 @@ import {
   KeyboardAwareScrollView,
   KeyboardStickyView,
 } from 'react-native-keyboard-controller'
-import {Stack, YStack, getTokens} from 'tamagui'
+import {Stack, YStack} from 'tamagui'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import getRerequestPossibleInDaysText from '../../../utils/getRerequestPossibleInDaysText'
@@ -20,7 +20,6 @@ import InfoSquare from '../../InfoSquare'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {ApprovalStatusMessage, chatMolecule} from '../atoms'
-import infoSvg from '../images/infoSvg'
 import AcceptDeclineButtons from './AcceptDeclineButtons'
 import ChatHeader from './ChatHeader'
 import ChatRequestPreview from './ChatRequestPreview'
@@ -129,18 +128,11 @@ function RequestScreen(): React.ReactElement {
 
   useEffect(() => {
     if (previousCommunicationInfoMessageIncludingClubs) {
-      setToastNotification({
-        visible: true,
-        text: previousCommunicationInfoMessageIncludingClubs,
-        icon: infoSvg,
-        iconFill: getTokens().color.black.val,
-        showCloseButton: true,
-        hideAfterMillis: 3000,
-      })
+      setToastNotification(previousCommunicationInfoMessageIncludingClubs)
     }
 
     return () => {
-      setToastNotification((prev) => ({...prev, visible: false}))
+      setToastNotification(null)
     }
   }, [
     previousCommunicationInfoMessageIncludingClubs,

@@ -3,7 +3,7 @@ import {useNavigation} from '@react-navigation/native'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback} from 'react'
 import {Stack, XStack, getTokens} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
@@ -22,12 +22,10 @@ import {preferencesAtom} from '../../../../../utils/preferences'
 import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
-import {type ToastNotificationState} from '../../../../ToastNotification/domain'
 import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
-import checkIconSvg from '../../../../images/checkIconSvg'
 import copySvg from '../../../../images/copySvg'
 import {chatMolecule} from '../../../atoms'
 import VexlbotBubble from './VexlbotBubble'
@@ -96,14 +94,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
         : 0,
   })
 
-  const toastContent: ToastNotificationState = useMemo(
-    () => ({
-      visible: true,
-      text: t('common.copied'),
-      icon: checkIconSvg,
-    }),
-    [t]
-  )
+  const toastContent = t('common.copied')
 
   const onAcceptButtonPress = useCallback(() => {
     if (amountData.received) {

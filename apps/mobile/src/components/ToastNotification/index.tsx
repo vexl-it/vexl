@@ -1,35 +1,11 @@
-import {useAtom} from 'jotai'
-import React, {useEffect} from 'react'
-import {Stack} from 'tamagui'
+import {Toast} from '@vexl-next/ui'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {toastNotificationAtom} from './atom'
-import ToastNotificationContent from './components/ToastNotificationContent'
 
-function ToastNotification(): React.ReactElement {
-  const [state, setState] = useAtom(toastNotificationAtom)
+function ToastNotification(): React.JSX.Element {
+  const {top: insetTop} = useSafeAreaInsets()
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setState({...state, visible: false})
-    }, state?.hideAfterMillis ?? 1000)
-
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [setState, state])
-
-  return (
-    // this view has to be present in tree
-    // without it exiting animation on Toast will not work
-    <Stack
-      pos="absolute"
-      alignSelf="center"
-      left={0}
-      right={0}
-      {...(state?.position === 'top' ? {top: -10} : {bottom: -10})}
-    >
-      <ToastNotificationContent {...state} />
-    </Stack>
-  )
+  return <Toast topOffset={insetTop} messageAtom={toastNotificationAtom} />
 }
 
 export default ToastNotification

@@ -8,7 +8,6 @@ import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
-import checkIconSvg from '../../../../images/checkIconSvg'
 import copySvg from '../../../../images/copySvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {chatMolecule} from '../../../atoms'
@@ -94,11 +93,7 @@ function TradeChecklistNetworkView({
                     message.message.tradeChecklistUpdate?.network?.btcAddress ??
                       ''
                   )
-                  setToastNotification({
-                    visible: true,
-                    text: t('common.copied'),
-                    icon: checkIconSvg,
-                  })
+                  setToastNotification(t('common.copied'))
                 }}
                 beforeIcon={copySvg}
                 text={t('vexlbot.btcAddress')}

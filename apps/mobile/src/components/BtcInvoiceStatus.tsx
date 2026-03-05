@@ -9,7 +9,6 @@ import {TouchableOpacity} from 'react-native'
 import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import Image from './Image'
-import checkIconSvg from './images/checkIconSvg'
 import clockSvg from './images/clockSvg'
 import copySvg from './images/copySvg'
 import slashSvg from './images/slashSvg'
@@ -130,11 +129,7 @@ function BtcInvoiceStatus({
             <TouchableOpacity
               onPress={() => {
                 Clipboard.setString(paymentLink)
-                setToastNotification({
-                  visible: true,
-                  text: t('common.copied'),
-                  icon: checkIconSvg,
-                })
+                setToastNotification(t('common.copied'))
               }}
             >
               <Image source={copySvg} fill={getTokens().color.grey.val} />

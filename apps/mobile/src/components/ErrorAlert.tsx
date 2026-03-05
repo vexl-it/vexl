@@ -5,7 +5,6 @@ import {Stack, Text, useWindowDimensions} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import Button from './Button'
 import {toastNotificationAtom} from './ToastNotification/atom'
-import checkIconSvg from './images/checkIconSvg'
 
 interface ErrorAlertProps {
   title: string
@@ -59,11 +58,7 @@ function ErrorAlert(): React.ReactElement | null {
             variant="secondary"
             onPress={() => {
               Clipboard.setString(JSON.stringify(errorAlert.error, null, 2))
-              setToastNotification({
-                visible: true,
-                text: t('common.copied'),
-                icon: checkIconSvg,
-              })
+              setToastNotification(t('common.copied'))
               showErrorAlert(null)
             }}
           />

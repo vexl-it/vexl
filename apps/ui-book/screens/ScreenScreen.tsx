@@ -222,17 +222,17 @@ function GraphicHeaderExample({
           topInset={TOP_INSET}
           bottomInset={BOTTOM_INSET}
           graphicHeader
-          navigationBar={(scrolled) => (
+          navigationBar={
             <NavigationBar
               style="main"
               title="Chats"
-              scrolled={scrolled}
+              scrolled={false}
               rightActions={[
                 {icon: TuneSettings, onPress: () => {}},
                 {icon: UserProfile, onPress: onBack},
               ]}
             />
-          )}
+          }
         >
           <YStack gap="$5" paddingTop="$5">
             <SizableText

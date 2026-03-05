@@ -2,7 +2,6 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import React from 'react'
 import {type InsideTabParamsList} from '../../navigationTypes'
 import CommunityScreen from './components/CommunityScreen'
-import Header from './components/Header'
 import MarketplaceScreen from './components/MarketplaceScreen'
 import MessagesScreen from './components/MessagesScreen'
 import TabBar from './components/TabBar'
@@ -15,17 +14,14 @@ const screenOptionsEmptyHeader = {
 
 export default function InsideScreen(): React.ReactElement {
   return (
-    <>
-      <Header />
-      <Tab.Navigator
-        screenOptions={screenOptionsEmptyHeader}
-        tabBar={(props) => <TabBar {...props} />}
-        initialRouteName="Marketplace"
-      >
-        <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
-        <Tab.Screen name="Messages" component={MessagesScreen} />
-        <Tab.Screen name="Community" component={CommunityScreen} />
-      </Tab.Navigator>
-    </>
+    <Tab.Navigator
+      screenOptions={screenOptionsEmptyHeader}
+      tabBar={(props) => <TabBar {...props} />}
+      initialRouteName="Marketplace"
+    >
+      <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
+      <Tab.Screen name="Messages" component={MessagesScreen} />
+      <Tab.Screen name="Community" component={CommunityScreen} />
+    </Tab.Navigator>
   )
 }

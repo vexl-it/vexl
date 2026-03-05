@@ -16,7 +16,10 @@ export const TAB_BAR_HEIGHT_PX = 72
 
 const TABS: ReadonlyArray<
   Omit<TabBarItem<string>, 'badge' | 'label'> & {
-    readonly translationKey: 'tabBar.marketplace' | 'tabBar.messages' | 'tabBar.community'
+    readonly translationKey:
+      | 'tabBar.marketplace'
+      | 'tabBar.messages'
+      | 'tabBar.community'
   }
 > = [
   {

@@ -52,6 +52,7 @@
     "@vexl-next/react-native-ecdh-platform-native-utils": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",
     "@vexl-next/rest-api": "0.0.0",
+    "@vexl-next/ui": "0.0.0",
     "asn1.js": "^5.4.1",
     "awesome-phonenumber": "^7.4.0",
     "babel-plugin-transform-inline-environment-variables": "^0.4.4",

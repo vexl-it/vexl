@@ -24,7 +24,7 @@ module.exports = function (api) {
         '@tamagui/babel-plugin',
         {
           components: ['tamagui'],
-          config: './src/utils/ThemeProvider/tamagui.config.ts',
+          config: require.resolve('@vexl-next/ui/src/config/tamagui.config.ts'),
           logTimings: true,
         },
       ],

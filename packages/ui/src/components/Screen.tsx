@@ -1,9 +1,8 @@
-import React, {useCallback, useState} from 'react'
+import React, {createContext, useCallback, useContext, useMemo, useState} from 'react'
 import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  ScrollView,
 } from 'react-native'
 import Svg, {Polygon} from 'react-native-svg'
 import {styled} from 'tamagui'
@@ -14,12 +13,6 @@ const ScreenFrame = styled(YStack, {
   name: 'Screen',
   flex: 1,
   backgroundColor: '$backgroundPrimary',
-})
-
-const ScreenContentPadding = styled(YStack, {
-  name: 'ScreenContentPadding',
-  paddingHorizontal: '$5',
-  flexGrow: 1,
 })
 
 const ScreenFooterFrame = styled(Stack, {
@@ -60,18 +53,32 @@ function GraphicHeaderDecoration(): React.JSX.Element {
   )
 }
 
-export interface ScreenProps {
-  readonly navigationBar?:
-    | React.ReactNode
-    | ((scrolled: boolean) => React.ReactNode)
-  readonly graphicHeader?: boolean
-  readonly children: React.ReactNode
-  readonly footer?: React.ReactNode
-  readonly topInset?: number
-  readonly bottomInset?: number
+interface ScreenScrollContextValue {
+  readonly scrolled: boolean
+  readonly onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+  readonly resetScroll: () => void
+}
+
+const ScreenScrollContext = createContext<ScreenScrollContextValue>({
+  scrolled: false,
+  onScroll: () => {},
+  resetScroll: () => {},
+})
+
+export function useScreenScroll(): ScreenScrollContextValue {
+  return useContext(ScreenScrollContext)
 }
 
 const SCROLL_THRESHOLD = 1
+
+export interface ScreenProps {
+  readonly navigationBar?: React.ReactNode
+  readonly graphicHeader?: boolean
+  readonly footer?: React.ReactNode
+  readonly topInset?: number
+  readonly bottomInset?: number
+  readonly children: React.ReactNode
+}
 
 export function Screen({
   navigationBar,
@@ -91,71 +98,62 @@ export function Screen({
     []
   )
 
+  const resetScroll = useCallback(() => {
+    setScrolled(false)
+  }, [])
+
   const handleNavBarLayout = useCallback((event: LayoutChangeEvent) => {
     setNavBarHeight(event.nativeEvent.layout.height)
   }, [])
 
-  const resolvedNavigationBar =
-    typeof navigationBar === 'function'
-      ? navigationBar(scrolled)
-      : navigationBar
+  const scrollContext = useMemo(
+    () => ({scrolled, onScroll: handleScroll, resetScroll}),
+    [scrolled, handleScroll, resetScroll]
+  )
 
   if (graphicHeader) {
     return (
-      <ScreenFrame>
-        <GraphicHeaderDecoration />
-        <Stack
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          zIndex={1}
-          paddingTop={topInset}
-          onLayout={handleNavBarLayout}
-          backgroundColor={scrolled ? '$backgroundSecondary' : '$transparent'}
-        >
-          {resolvedNavigationBar}
-        </Stack>
-        <ScrollView
-          style={{flex: 1}}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{flexGrow: 1}}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-        >
-          <ScreenContentPadding
-            paddingTop={navBarHeight}
-            paddingBottom={bottomInset}
+      <ScreenScrollContext.Provider value={scrollContext}>
+        <ScreenFrame>
+          <GraphicHeaderDecoration />
+          <Stack
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            zIndex={1}
+            paddingTop={topInset}
+            onLayout={handleNavBarLayout}
+            backgroundColor={scrolled ? '$backgroundSecondary' : '$transparent'}
           >
+            {navigationBar}
+          </Stack>
+          <YStack flex={1} paddingTop={navBarHeight}>
             {children}
-          </ScreenContentPadding>
-        </ScrollView>
+          </YStack>
+          {footer ? (
+            <ScreenFooterFrame paddingBottom={bottomInset}>
+              {footer}
+            </ScreenFooterFrame>
+          ) : null}
+        </ScreenFrame>
+      </ScreenScrollContext.Provider>
+    )
+  }
+
+  return (
+    <ScreenScrollContext.Provider value={scrollContext}>
+      <ScreenFrame paddingTop={topInset}>
+        {navigationBar}
+        <YStack flex={1}>
+          {children}
+        </YStack>
         {footer ? (
           <ScreenFooterFrame paddingBottom={bottomInset}>
             {footer}
           </ScreenFooterFrame>
         ) : null}
       </ScreenFrame>
-    )
-  }
-
-  return (
-    <ScreenFrame paddingTop={topInset}>
-      {resolvedNavigationBar}
-      <ScrollView
-        style={{flex: 1}}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{flexGrow: 1}}
-      >
-        <ScreenContentPadding paddingBottom={bottomInset}>
-          {children}
-        </ScreenContentPadding>
-      </ScrollView>
-      {footer ? (
-        <ScreenFooterFrame paddingBottom={bottomInset}>
-          {footer}
-        </ScreenFooterFrame>
-      ) : null}
-    </ScreenFrame>
+    </ScreenScrollContext.Provider>
   )
 }

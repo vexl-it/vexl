@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
+import {useScreenScroll} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import React from 'react'
@@ -44,6 +45,7 @@ function renderItem({item}: {item: Atom<ChatListData>}): React.ReactElement {
 function ChatsList(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const {onScroll} = useScreenScroll()
   const elementAtoms = useAtomValue(chatIdAtomsAtom)
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
@@ -77,6 +79,8 @@ function ChatsList(): React.ReactElement | null {
       keyExtractor={atomKeyExtractor}
       renderItem={renderItem}
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
     />
   )
 }

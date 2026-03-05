@@ -215,7 +215,7 @@ function ActionIcon({
     <ActionButton onPress={action.onPress}>
       <Icon
         color={theme.foregroundPrimary.val}
-        size={getTokens().size.$7.val}
+        size={getTokens().size.$8.val}
       />
     </ActionButton>
   )

@@ -1,21 +1,20 @@
+import {Screen} from '@vexl-next/ui'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
-import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import ContainerWithTopBorderRadius from '../ContainerWithTopBorderRadius'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import InsideNavigationBar from '../InsideNavigationBar'
 import ChatsList from './components/ChatsList'
 
 function MessagesScreen(): React.ReactElement {
-  const {t} = useTranslation()
+  const insets = useSafeAreaInsets()
 
   return (
-    <ContainerWithTopBorderRadius>
-      <Stack mx="$4" f={1}>
-        <Text ff="$heading" color="$white" fos={32}>
-          {t('messages.listTitle')}
-        </Text>
-        <ChatsList />
-      </Stack>
-    </ContainerWithTopBorderRadius>
+    <Screen
+      graphicHeader
+      topInset={insets.top}
+      navigationBar={<InsideNavigationBar />}
+    >
+      <ChatsList />
+    </Screen>
   )
 }
 

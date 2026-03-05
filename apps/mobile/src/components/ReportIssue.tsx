@@ -1,7 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {Effect} from 'effect/index'
 import {atom, useSetAtom} from 'jotai'
-import React, {useMemo} from 'react'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {contactSupportActionAtom} from '../utils/contactSupportActionAtom'
@@ -11,10 +11,8 @@ import {
 } from '../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from './AreYouSureDialog'
 import Image from './Image'
-import checkIconSvg from './images/checkIconSvg'
 import emailIconSvg from './images/emailIconSvg'
 import {toastNotificationAtom} from './ToastNotification/atom'
-import {type ToastNotificationState} from './ToastNotification/domain'
 
 // atom needs to be defined here to avoid circular dependencies with MainSectionComponent: ReportIssue used in askAreYouSureActionAtom
 export const reportIssueDialogAtom = atom(
@@ -56,15 +54,6 @@ function ReportIssue({title, subtitle}: Props): React.ReactElement {
   const contactSupport = useSetAtom(contactSupportActionAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
-  const toastContent: ToastNotificationState = useMemo(
-    () => ({
-      visible: true,
-      text: t('common.copied'),
-      icon: checkIconSvg,
-    }),
-    [t]
-  )
-
   return (
     <Stack gap="$2" jc="flex-end">
       <Text
@@ -87,7 +76,7 @@ function ReportIssue({title, subtitle}: Props): React.ReactElement {
         <TouchableOpacity
           onPress={() => {
             Clipboard.setString(supportEmail)
-            setToastNotification(toastContent)
+            setToastNotification(t('common.copied'))
           }}
         >
           <Text fos={18} ff="$body500" col="$black">

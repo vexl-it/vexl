@@ -25,7 +25,6 @@ import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import IconButton from '../../IconButton'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import checkIconSvg from '../../images/checkIconSvg'
 import copySvg from '../../images/copySvg'
 import {chatMolecule} from '../atoms'
 import replyToSvg from '../images/replyToSvg'
@@ -163,11 +162,7 @@ function TextMessage({
   const onCopyPressed = useCallback(() => {
     if (messageItem.type !== 'message') return
     Clipboard.setString(messageItem.message.message.text)
-    setToastNotification({
-      visible: true,
-      text: t('common.copied'),
-      icon: checkIconSvg,
-    })
+    setToastNotification(t('common.copied'))
     hideExtended()
   }, [messageItem, setToastNotification, t, hideExtended])
 

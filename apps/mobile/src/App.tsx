@@ -21,7 +21,6 @@ import VersionMigrations from './components/VersionMigrations'
 import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
-import appConfig from './utils/ThemeProvider/tamagui.config'
 import {useInAppLoadingTasks} from './utils/inAppLoadingTasks/useInAppLoadingTasks'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
@@ -54,19 +53,19 @@ function App(): React.ReactElement {
             },
             fonts: {
               regular: {
-                fontFamily: appConfig.fonts.body400.family,
+                fontFamily: 'TTSatoshi400',
                 fontWeight: '400',
               },
               medium: {
-                fontFamily: appConfig.fonts.body500.family,
+                fontFamily: 'TTSatoshi500',
                 fontWeight: '500',
               },
               bold: {
-                fontFamily: appConfig.fonts.body600.family,
+                fontFamily: 'TTSatoshi600',
                 fontWeight: '600',
               },
               heavy: {
-                fontFamily: appConfig.fonts.body700.family,
+                fontFamily: 'TTSatoshi700',
                 fontWeight: '700',
               },
             },

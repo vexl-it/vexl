@@ -30,6 +30,7 @@ import GoldenAvatarAnimation, {
   showGoldenAvatarAnimationAtom,
 } from '../GoldenAvatar'
 import InsideScreen from '../InsideRouter'
+import SettingsScreen from '../InsideRouter/components/SettingsScreen'
 import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MyDonationsScreen from '../MyDonationsScreen'
@@ -145,6 +146,7 @@ function RootNavigation(): React.ReactElement {
               name="BlogArticlesList"
               component={BlogArticlesListScreen}
             />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
           </Stack.Group>
         )}
         <Stack.Screen

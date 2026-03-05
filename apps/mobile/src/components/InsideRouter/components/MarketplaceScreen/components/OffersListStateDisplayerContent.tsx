@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {useScreenScroll} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -70,6 +71,7 @@ function ListFooterComponent(): React.ReactElement | null {
 
 function OffersListStateDisplayerContent(): React.ReactElement {
   const insets = useSafeAreaInsets()
+  const {onScroll} = useScreenScroll()
   const loading = useAreOffersLoading()
   const error = useOffersLoadingError()
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
@@ -183,6 +185,8 @@ function OffersListStateDisplayerContent(): React.ReactElement {
             Effect.runFork(refreshOffers())
           }}
           refreshing={loading}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
         />
       </Stack>
     </ContainerWithTopBorderRadius>

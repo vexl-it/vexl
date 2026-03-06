@@ -27749,6 +27749,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::locator=vexl-next%40workspace%3A.":
+  version: 1.26.20
+  resolution: "react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::version=1.26.20&hash=a55ca4&locator=vexl-next%40workspace%3A."
+  dependencies:
+    "@types/geojson": ^7946.0.13
+  peerDependencies:
+    react: ">= 18.3.1"
+    react-native: ">= 0.76.0"
+    react-native-web: ">= 0.11"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  checksum: 8afd06995db55c0e50097cf30080f19bcdbe1fb7d9656683ede029ec2da98671e758aee7e39766713f84f94c2dd932cd552442816e793647dc49b10d68ddceff
+  languageName: node
+  linkType: hard
+
 "react-native-markdown-display@npm:^7.0.0-alpha.2":
   version: 7.0.2
   resolution: "react-native-markdown-display@npm:7.0.2"

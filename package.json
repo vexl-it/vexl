@@ -48,6 +48,7 @@
     "react-native-draggable@3.3.0": "patch:react-native-draggable@npm%3A3.3.0#./.yarn/patches/react-native-draggable-npm-3.3.0-af52e9b617.patch",
     "@bam.tech/react-native-image-resizer@^3.0.5": "patch:@bam.tech/react-native-image-resizer@npm%3A3.0.11#./.yarn/patches/@bam.tech-react-native-image-resizer-npm-3.0.11-33fd6eed5e.patch",
     "readable-stream@~2.3.6": "patch:readable-stream@npm%3A2.3.8#./.yarn/patches/readable-stream-npm-2.3.8-67a94c2cb1.patch",
-    "readable-stream@^2.3.8": "patch:readable-stream@npm%3A2.3.8#./.yarn/patches/readable-stream-npm-2.3.8-67a94c2cb1.patch"
+    "readable-stream@^2.3.8": "patch:readable-stream@npm%3A2.3.8#./.yarn/patches/readable-stream-npm-2.3.8-67a94c2cb1.patch",
+    "react-native-maps@1.26.20": "patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch"
   }
 }

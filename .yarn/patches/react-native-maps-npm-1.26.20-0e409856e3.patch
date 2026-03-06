@@ -1,0 +1,13 @@
+diff --git a/plugin/build/ios.js b/plugin/build/ios.js
+index d8cb556cf396692b90b595a658e249cddf47a928..28381fbb3a0761a7a92f10768e1198ea6ed2d082 100644
+--- a/plugin/build/ios.js
++++ b/plugin/build/ios.js
+@@ -78,7 +78,7 @@ function addGoogleMapsAppDelegateImport(src) {
+         tag: 'react-native-maps-import',
+         src: src,
+         newSrc: newSrc.join('\n'),
+-        anchor: /@UIApplicationMain/,
++        anchor: /@main|@UIApplicationMain/,
+         offset: 0,
+         comment: '//',
+     });

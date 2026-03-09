@@ -1,8 +1,10 @@
 import {Option, pipe} from 'effect'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Stack, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {loadingStateAtom} from '../../state/marketplace/atoms/loadingState'
+import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import OffersList from '../OffersList'
 import Screen from '../Screen'
@@ -22,6 +24,8 @@ export function ClubOffersScreen({
 
   const offersAtom = useAtomValue(clubOfferAtomAtoms)
   const club = useAtomValue(singleClubAtom)
+  const loadingOffers = useAtomValue(loadingStateAtom).state === 'inProgress'
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
 
   return (
     <Screen>
@@ -39,7 +43,11 @@ export function ClubOffersScreen({
           </ScreenTitle>
         </Stack>
         <Stack mx="$2" f={1}>
-          <OffersList offersAtoms={offersAtom} />
+          <OffersList
+            offersAtoms={offersAtom}
+            onRefresh={refreshOffers}
+            refreshing={loadingOffers}
+          />
         </Stack>
       </YStack>
     </Screen>

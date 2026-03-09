@@ -29,6 +29,8 @@ export const ServicePanel: React.FC<ServicePanelProps> = ({
         <Box gap={2}>
           <InfraIndicator name="Postgres" status={infrastructure.postgres} />
           <InfraIndicator name="Redis" status={infrastructure.redis} />
+          <InfraIndicator name="Grafana" status={infrastructure.grafana} />
+          <InfraIndicator name="Tempo" status={infrastructure.tempo} />
         </Box>
       </Box>
 

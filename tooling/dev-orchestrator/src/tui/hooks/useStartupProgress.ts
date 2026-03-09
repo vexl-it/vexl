@@ -12,11 +12,13 @@ import type {
 export interface StartupProgress {
   /** Map of service name to current startup event */
   readonly services: Map<string, ServiceStartupEvent>
-  /** Infrastructure phases (docker, postgres, redis) */
+  /** Infrastructure phases (docker, postgres, redis, grafana, tempo) */
   readonly infrastructure: {
     readonly docker: ServiceStartupPhase
     readonly postgres: ServiceStartupPhase
     readonly redis: ServiceStartupPhase
+    readonly grafana: ServiceStartupPhase
+    readonly tempo: ServiceStartupPhase
   }
   /** Number of services that have reached 'ready' phase */
   readonly readyCount: number
@@ -76,10 +78,14 @@ export const useStartupProgress = (
     docker: ServiceStartupPhase
     postgres: ServiceStartupPhase
     redis: ServiceStartupPhase
+    grafana: ServiceStartupPhase
+    tempo: ServiceStartupPhase
   }>({
     docker: 'pending',
     postgres: 'pending',
     redis: 'pending',
+    grafana: 'pending',
+    tempo: 'pending',
   })
 
   // Track if all services have been ready at some point (for notification)

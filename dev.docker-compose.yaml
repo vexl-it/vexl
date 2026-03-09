@@ -31,8 +31,71 @@ services:
       retries: 3
       start_period: 5s
 
+  loki:
+    image: grafana/loki:3.6.0
+    container_name: vexl-loki
+    user: "0"
+    command: ["-config.file=/etc/loki/config.yaml"]
+    volumes:
+      - ./tooling/dev-orchestrator/observability/loki-config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    container_name: vexl-tempo
+    user: "0"
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    ports:
+      - "${TEMPO_PORT:-3200}:3200"
+      - "${TEMPO_OTLP_HTTP_PORT:-4318}:4318"
+    volumes:
+      - ./tooling/dev-orchestrator/observability/tempo-config.yaml:/etc/tempo/config.yaml:ro
+      - tempo_data:/var/tempo
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: vexl-alloy
+    command:
+      [
+        "run",
+        "--storage.path=/var/lib/alloy/data",
+        "/etc/alloy/config.alloy",
+      ]
+    depends_on:
+      - loki
+    volumes:
+      - ./tooling/dev-orchestrator/observability/alloy-config.alloy:/etc/alloy/config.alloy:ro
+      - ./local/dev-orchestrator/logs:/var/log/vexl/backend:ro
+      - alloy_data:/var/lib/alloy/data
+
+  grafana:
+    image: grafana/grafana:12.4.0
+    container_name: vexl-grafana
+    depends_on:
+      - loki
+      - tempo
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "${GRAFANA_PORT:-3030}:3000"
+    volumes:
+      - ./tooling/dev-orchestrator/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  loki_data:
+    driver: local
+  tempo_data:
+    driver: local
+  alloy_data:
+    driver: local
+  grafana_data:
     driver: local

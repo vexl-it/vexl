@@ -31,6 +31,7 @@ export interface CommonEnv {
   readonly LOG_LEVEL?: string
   readonly DISABLE_METRICS?: string
   readonly METRICS_QUEUE_NAME: string
+  readonly OTLP_TRACE_EXPORTER_URL?: string
 }
 
 /**

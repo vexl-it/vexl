@@ -45,6 +45,30 @@ export const printHealthReport = (report: HealthReport): void => {
   console.log(
     `  ${redisIcon} ${'Redis'.padEnd(20)} ${redisStatus.padEnd(15)} ${pc.dim(`(port: ${String(report.infrastructure.redisPort)})`)}`
   )
+
+  const grafanaIcon =
+    report.infrastructure.grafana === 'running'
+      ? pc.green('\u2713')
+      : pc.red('\u2717')
+  const grafanaStatus =
+    report.infrastructure.grafana === 'running'
+      ? pc.green('running')
+      : pc.red('stopped')
+  console.log(
+    `  ${grafanaIcon} ${'Grafana'.padEnd(20)} ${grafanaStatus.padEnd(15)} ${pc.dim(`(port: ${String(report.infrastructure.grafanaPort)})`)}`
+  )
+
+  const tempoIcon =
+    report.infrastructure.tempo === 'running'
+      ? pc.green('\u2713')
+      : pc.red('\u2717')
+  const tempoStatus =
+    report.infrastructure.tempo === 'running'
+      ? pc.green('running')
+      : pc.red('stopped')
+  console.log(
+    `  ${tempoIcon} ${'Tempo'.padEnd(20)} ${tempoStatus.padEnd(15)} ${pc.dim(`(port: ${String(report.infrastructure.tempoPort)})`)}`
+  )
   console.log('')
 
   // Services
@@ -65,7 +89,9 @@ export const printHealthReport = (report: HealthReport): void => {
   if (
     report.summary.stopped === 0 &&
     report.infrastructure.postgres === 'running' &&
-    report.infrastructure.redis === 'running'
+    report.infrastructure.redis === 'running' &&
+    report.infrastructure.grafana === 'running' &&
+    report.infrastructure.tempo === 'running'
   ) {
     console.log(pc.green(pc.bold('\u2713 All systems operational')))
   } else {

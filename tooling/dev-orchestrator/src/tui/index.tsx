@@ -30,6 +30,8 @@ const createInitialState = (): TuiState => {
   const infrastructure: InfraStatus = {
     postgres: 'stopped',
     redis: 'stopped',
+    grafana: 'stopped',
+    tempo: 'stopped',
   }
 
   return {

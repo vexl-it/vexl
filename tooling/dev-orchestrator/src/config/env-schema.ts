@@ -22,6 +22,11 @@ export const orchestratorConfig = Config.all({
   ports: Config.all({
     postgres: Config.number('POSTGRES_PORT').pipe(Config.withDefault(5432)),
     redis: Config.number('REDIS_PORT').pipe(Config.withDefault(6379)),
+    grafana: Config.number('GRAFANA_PORT').pipe(Config.withDefault(3030)),
+    tempo: Config.number('TEMPO_PORT').pipe(Config.withDefault(3200)),
+    tempoOtlpHttp: Config.number('TEMPO_OTLP_HTTP_PORT').pipe(
+      Config.withDefault(4318)
+    ),
     userService: Config.number('USER_SERVICE_PORT').pipe(
       Config.withDefault(3001)
     ),

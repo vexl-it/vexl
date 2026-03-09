@@ -1,0 +1,53 @@
+local.file_match "backend_logs" {
+  path_targets = [
+    {
+      __path__ = "/var/log/vexl/backend/*.log",
+      job      = "vexl-backend",
+      source   = "backend",
+    },
+  ]
+}
+
+loki.source.file "backend_logs" {
+  targets    = local.file_match.backend_logs.targets
+  forward_to = [loki.process.backend_logs.receiver]
+}
+
+loki.process "backend_logs" {
+  stage.json {
+    expressions = {
+      message   = "message",
+      service   = "service",
+      stream    = "stream",
+      timestamp = "timestamp",
+    }
+  }
+
+  stage.labels {
+    values = {
+      service = "service",
+      stream  = "stream",
+    }
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339Nano"
+  }
+
+  stage.output {
+    source = "message"
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+
+  external_labels = {
+    environment = "local",
+  }
+}

@@ -44,6 +44,8 @@ export interface ServiceStatus {
 export interface InfraStatus {
   readonly postgres: 'running' | 'stopped'
   readonly redis: 'running' | 'stopped'
+  readonly grafana: 'running' | 'stopped'
+  readonly tempo: 'running' | 'stopped'
 }
 
 /**

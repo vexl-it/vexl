@@ -1,6 +1,7 @@
 import {Effect, Stream} from 'effect'
 import {formatBadge} from '../ui/colors.js'
 import {getLogBridge} from './log-bridge.js'
+import {writeStructuredServiceLog} from './log-files.js'
 
 /**
  * Check if a log line is tsx internal messaging that should be suppressed.
@@ -46,6 +47,9 @@ export const pipeLogsToConsole = (
       Effect.sync(() => {
         // Check if TUI mode is active (logBridge exists)
         const logBridge = getLogBridge()
+        const streamName = isStderr ? 'stderr' : 'stdout'
+
+        writeStructuredServiceLog(serviceName, streamName, line)
 
         if (logBridge !== null) {
           // TUI mode: emit to log bridge only (TUI manages display)

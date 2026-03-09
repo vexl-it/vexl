@@ -33,7 +33,12 @@ export const useHealthStatus = (
       port: s.port,
       healthPort: s.healthPort,
     })),
-    infrastructure: {postgres: 'stopped', redis: 'stopped'},
+    infrastructure: {
+      postgres: 'stopped',
+      redis: 'stopped',
+      grafana: 'stopped',
+      tempo: 'stopped',
+    },
     isLoading: true,
     lastUpdate: null,
   }))

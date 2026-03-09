@@ -53,6 +53,9 @@ const devConfig = {
     DISABLE_METRICS: process.env.DEV_COMMON_DISABLE_METRICS ?? "true",
     METRICS_QUEUE_NAME:
       process.env.DEV_COMMON_METRICS_QUEUE_NAME ?? "dev-metrics-queue",
+    OTLP_TRACE_EXPORTER_URL:
+      process.env.DEV_COMMON_OTLP_TRACE_EXPORTER_URL ??
+      `http://localhost:${process.env.TEMPO_OTLP_HTTP_PORT ?? "4318"}/v1/traces`,
   },
 
   /**

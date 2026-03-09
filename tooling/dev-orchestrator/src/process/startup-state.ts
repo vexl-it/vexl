@@ -31,7 +31,7 @@ export interface ServiceStartupEvent {
  * Event emitted when infrastructure (Docker containers) transitions phases.
  */
 export interface InfraStartupEvent {
-  readonly name: 'postgres' | 'redis' | 'docker'
+  readonly name: 'postgres' | 'redis' | 'grafana' | 'tempo' | 'docker'
   readonly phase: 'pending' | 'starting' | 'ready' | 'error'
   readonly timestamp: Date
 }

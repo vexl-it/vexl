@@ -16,12 +16,15 @@ export class PortConflictError {
 /**
  * Checks if all required ports are available.
  * Returns success if all ports are free, fails with PortConflictError listing all conflicts.
- * @param skipInfrastructure - If true, skip checking Postgres/Redis ports (useful when Docker is already running)
+ * @param skipInfrastructure - If true, skip infrastructure ports (useful when Docker is already running)
  */
 export const checkPortsAvailable = (
   ports: {
     readonly postgres: number
     readonly redis: number
+    readonly grafana: number
+    readonly tempo: number
+    readonly tempoOtlpHttp: number
     readonly userService: number
     readonly contactService: number
     readonly offerService: number
@@ -47,6 +50,24 @@ export const checkPortsAvailable = (
         name: 'Redis',
         port: ports.redis,
         envVar: 'REDIS_PORT',
+        isInfrastructure: true,
+      },
+      {
+        name: 'Grafana',
+        port: ports.grafana,
+        envVar: 'GRAFANA_PORT',
+        isInfrastructure: true,
+      },
+      {
+        name: 'Tempo',
+        port: ports.tempo,
+        envVar: 'TEMPO_PORT',
+        isInfrastructure: true,
+      },
+      {
+        name: 'Tempo OTLP HTTP',
+        port: ports.tempoOtlpHttp,
+        envVar: 'TEMPO_OTLP_HTTP_PORT',
         isInfrastructure: true,
       },
       {

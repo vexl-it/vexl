@@ -38,6 +38,10 @@ export const scheduleThrottledNotificationProducerLayer = producerLayer
 
 export const EnqueueProcessNotifications = EnqueueTask
 
+export const processThrottledNotificationsJobId = (
+  token: VexlNotificationTokenSecret
+): string => `process-throttled-notifications:${token}`
+
 export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
   Effect.gen(function* (_) {
     // Check if notification was issued
@@ -89,6 +93,7 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
       yield* _(Effect.log('No pending notifications found for token', {token}))
       return
     }
+
     yield* _(
       Effect.log('Found pending notifications. Issuing', {
         count: pendingNotifications.length,

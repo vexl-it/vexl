@@ -37,7 +37,7 @@ export const HealthIndicator: React.FC<HealthIndicatorProps> = ({
 }
 
 /**
- * Infrastructure indicator (Postgres/Redis)
+ * Infrastructure indicator
  */
 interface InfraIndicatorProps {
   name: string

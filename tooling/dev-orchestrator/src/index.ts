@@ -14,11 +14,13 @@ import {checkPortsAvailable, PortConflictError} from './config/port-checker.js'
 import {formatStartupError, type StartupError} from './errors/index.js'
 import {seedDatabases} from './infrastructure/db-seeder.js'
 import {
+  hasExistingInfrastructureContainers,
   isInfrastructureRunning,
   startInfrastructure,
 } from './infrastructure/docker.js'
 import {startExpoDevServer} from './mobile/index.js'
 import {clearLogBridge, createLogBridge} from './process/log-bridge.js'
+import {prepareBackendLogDirectory} from './process/log-files.js'
 import {
   type MutableRunningServices,
   restartService,
@@ -127,10 +129,11 @@ const mainPlain = Effect.gen(function* () {
 
   // Check if infrastructure is already running (skip infra port checks if so)
   const infraAlreadyRunning = yield* isInfrastructureRunning
+  const infraContainersExist = yield* hasExistingInfrastructureContainers
 
   // Check port availability (skip infrastructure ports if Docker containers are running)
   yield* checkPortsAvailable(config.ports, {
-    skipInfrastructure: infraAlreadyRunning,
+    skipInfrastructure: infraAlreadyRunning || infraContainersExist,
   })
 
   logSuccess('orchestrator', 'Environment ready')
@@ -138,6 +141,8 @@ const mainPlain = Effect.gen(function* () {
 
   // ===== Phase 2: Infrastructure =====
   logWithPrefix('orchestrator', 'Step 2: Starting infrastructure')
+
+  yield* prepareBackendLogDirectory
 
   // startInfrastructure already handles the "already running" case
   yield* startInfrastructure
@@ -228,10 +233,11 @@ const mainTui = Effect.gen(function* () {
 
   // Check if infrastructure is already running (skip infra port checks if so)
   const infraAlreadyRunning = yield* isInfrastructureRunning
+  const infraContainersExist = yield* hasExistingInfrastructureContainers
 
   // Check port availability (skip infrastructure ports if Docker containers are running)
   yield* checkPortsAvailable(config.ports, {
-    skipInfrastructure: infraAlreadyRunning,
+    skipInfrastructure: infraAlreadyRunning || infraContainersExist,
   })
 
   // ===== Create event bridges BEFORE rendering TUI =====
@@ -292,6 +298,7 @@ const mainTui = Effect.gen(function* () {
   })
 
   // ===== Phase 2: Infrastructure (events flow to TUI) =====
+  yield* prepareBackendLogDirectory
   yield* startInfrastructure
 
   // ===== Phase 2.2: Database Seeding =====

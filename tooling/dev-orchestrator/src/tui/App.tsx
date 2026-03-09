@@ -229,16 +229,16 @@ export const App: React.FC<AppProps> = ({
   // Build infrastructure status from startup progress or health state
   const infrastructure = useMemo(() => {
     if (!startupProgress.isComplete) {
+      const toInfraStatus = (
+        phase: InfraStartupEvent['phase']
+      ): 'running' | 'stopped' => (phase === 'ready' ? 'running' : 'stopped')
+
       // During startup: convert startup phases to health status
       return {
-        postgres:
-          startupProgress.infrastructure.postgres === 'ready'
-            ? ('running' as const)
-            : ('stopped' as const),
-        redis:
-          startupProgress.infrastructure.redis === 'ready'
-            ? ('running' as const)
-            : ('stopped' as const),
+        postgres: toInfraStatus(startupProgress.infrastructure.postgres),
+        redis: toInfraStatus(startupProgress.infrastructure.redis),
+        grafana: toInfraStatus(startupProgress.infrastructure.grafana),
+        tempo: toInfraStatus(startupProgress.infrastructure.tempo),
       }
     }
     // After startup: use health state

@@ -13,8 +13,12 @@ export interface ServiceHealthStatus {
 export interface InfrastructureStatus {
   readonly postgres: 'running' | 'stopped'
   readonly redis: 'running' | 'stopped'
+  readonly grafana: 'running' | 'stopped'
+  readonly tempo: 'running' | 'stopped'
   readonly postgresPort: number
   readonly redisPort: number
+  readonly grafanaPort: number
+  readonly tempoPort: number
 }
 
 export interface HealthReport {
@@ -49,15 +53,24 @@ const checkServiceHealth = (
 const infraPortsConfig = Config.all({
   postgres: Config.number('POSTGRES_PORT').pipe(Config.withDefault(5432)),
   redis: Config.number('REDIS_PORT').pipe(Config.withDefault(6379)),
+  grafana: Config.number('GRAFANA_PORT').pipe(Config.withDefault(3030)),
+  tempo: Config.number('TEMPO_PORT').pipe(Config.withDefault(3200)),
 })
 
 // Default ports used when environment variables are not set
 const DEFAULT_POSTGRES_PORT = 5432
 const DEFAULT_REDIS_PORT = 6379
+const DEFAULT_GRAFANA_PORT = 3030
+const DEFAULT_TEMPO_PORT = 3200
 
 // Get configured infrastructure ports (falls back to defaults)
 const getInfraPorts = (): Effect.Effect<
-  {readonly postgres: number; readonly redis: number},
+  {
+    readonly postgres: number
+    readonly redis: number
+    readonly grafana: number
+    readonly tempo: number
+  },
   never,
   never
 > =>
@@ -65,6 +78,8 @@ const getInfraPorts = (): Effect.Effect<
     Effect.orElseSucceed(() => ({
       postgres: DEFAULT_POSTGRES_PORT,
       redis: DEFAULT_REDIS_PORT,
+      grafana: DEFAULT_GRAFANA_PORT,
+      tempo: DEFAULT_TEMPO_PORT,
     }))
   )
 
@@ -73,15 +88,22 @@ export const checkInfrastructureHealth =
   (): Effect.Effect<InfrastructureStatus> =>
     Effect.gen(function* () {
       const ports = yield* getInfraPorts()
-      const [postgresInUse, redisInUse] = yield* Effect.all([
-        isPortInUse(ports.postgres),
-        isPortInUse(ports.redis),
-      ])
+      const [postgresInUse, redisInUse, grafanaInUse, tempoInUse] =
+        yield* Effect.all([
+          isPortInUse(ports.postgres),
+          isPortInUse(ports.redis),
+          isPortInUse(ports.grafana),
+          isPortInUse(ports.tempo),
+        ])
       return {
         postgres: postgresInUse ? 'running' : 'stopped',
         redis: redisInUse ? 'running' : 'stopped',
+        grafana: grafanaInUse ? 'running' : 'stopped',
+        tempo: tempoInUse ? 'running' : 'stopped',
         postgresPort: ports.postgres,
         redisPort: ports.redis,
+        grafanaPort: ports.grafana,
+        tempoPort: ports.tempo,
       } satisfies InfrastructureStatus
     })
 

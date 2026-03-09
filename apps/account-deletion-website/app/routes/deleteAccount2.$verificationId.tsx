@@ -72,9 +72,9 @@ export const action: ActionFunction = async ({ request }) => {
             debugData: Schema.optionalWith(Schema.BooleanFromString, {
               default: () => false,
             }),
-          })
-        )(request)
-      )
+          }),
+        )(request),
+      ),
     ),
     TE.bindTo("data"),
     TE.bindW("result", ({ data: { verificationId, code } }) =>
@@ -82,8 +82,8 @@ export const action: ActionFunction = async ({ request }) => {
         createUserPublicApi().verifyAndEraseUser({
           verificationId,
           code,
-        })
-      )
+        }),
+      ),
     ),
     TE.bindW(
       "contactResult",
@@ -91,8 +91,8 @@ export const action: ActionFunction = async ({ request }) => {
         effectToTaskEither(
           createContactsPublicApi().eraseUserFromNetwork({
             token: shortLivedTokenForErasingUserOnContactService,
-          })
-        )
+          }),
+        ),
     ),
     TE.matchW(
       (left) => {
@@ -112,10 +112,10 @@ export const action: ActionFunction = async ({ request }) => {
       ({ result, data }) => {
         return data.debugData
           ? redirect(
-              `/printSession/${result.shortLivedTokenForErasingUserOnContactService}`
+              `/printSession/${result.shortLivedTokenForErasingUserOnContactService}`,
             )
           : redirect(`/deleteAccount4`);
-      }
-    )
+      },
+    ),
   )();
 };

@@ -88,8 +88,8 @@ html {
   --grey: #262626;
   --grey-on-black: #afafaf;
   --red: #ee675e;
-  --font-family-sans: 'TTSatoshi', sans-serif;
-  --font-family-serif: 'PPMonument', serif;
+  --font-family-sans: "TTSatoshi", sans-serif;
+  --font-family-serif: "PPMonument", serif;
 }
 
 html,
@@ -136,32 +136,32 @@ body {
 }
 
 @font-face {
-  font-family: 'TTSatoshi';
-  src: url('/assets/fonts/tt_satoshi_400.otf');
+  font-family: "TTSatoshi";
+  src: url("/assets/fonts/tt_satoshi_400.otf");
   font-weight: 400;
 }
 
 @font-face {
-  font-family: 'TTSatoshi';
-  src: url('/assets/fonts/tt_satoshi_500.otf');
+  font-family: "TTSatoshi";
+  src: url("/assets/fonts/tt_satoshi_500.otf");
   font-weight: 500;
 }
 
 @font-face {
-  font-family: 'TTSatoshi';
-  src: url('/assets/fonts/tt_satoshi_600.otf');
+  font-family: "TTSatoshi";
+  src: url("/assets/fonts/tt_satoshi_600.otf");
   font-weight: 600;
 }
 
 @font-face {
-  font-family: 'TTSatoshi';
-  src: url('/assets/fonts/tt_satoshi_700.otf');
+  font-family: "TTSatoshi";
+  src: url("/assets/fonts/tt_satoshi_700.otf");
   font-weight: 500;
 }
 
 @font-face {
-  font-family: 'PPMonument';
-  src: url('/assets/fonts/pp_monument_700.ttf');
+  font-family: "PPMonument";
+  src: url("/assets/fonts/pp_monument_700.ttf");
   font-weight: 700;
 }
 
@@ -211,10 +211,10 @@ p {
 }
 
 /* Input Field Reset */
-input[type='text'],
-input[type='text']:focus,
-input[type='tel'],
-input[type='tel']:focus {
+input[type="text"],
+input[type="text"]:focus,
+input[type="tel"],
+input[type="tel"]:focus {
   outline: none; /* Removes the default focus outline */
   box-shadow: none;
   border: none;

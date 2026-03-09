@@ -19,6 +19,7 @@ import {LastTimeIssuedForNotificationTokenDb} from './services/LastTimeIssuedFor
 import {NotificationWaitingToBeIssuedForNotificationToken} from './services/NotificationWaitingToBeIssuedForNotificationToken'
 import {
   EnqueueProcessNotifications,
+  processThrottledNotificationsJobId,
   scheduleThrottledNotificationProducerLayer,
 } from './services/ThrottledNotificationMq'
 import {lockOnNotificationToken} from './utils'
@@ -97,13 +98,19 @@ export class ThrottledPushNotificationService extends Context.Tag(
                   )
                 )
               )
-              yield* _(
-                scheduleThrottleSend(
-                  {token: task.notificationToken},
-                  {delay: throttleTtlMs}
-                )
-              )
             }
+
+            yield* _(
+              scheduleThrottleSend(
+                {token: task.notificationToken},
+                {
+                  delay: throttleTtlMs,
+                  jobId: processThrottledNotificationsJobId(
+                    task.notificationToken
+                  ),
+                }
+              )
+            )
           }).pipe(
             lockOnNotificationToken(task.notificationToken),
             Effect.provideService(RedisService, redisService)

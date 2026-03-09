@@ -75,6 +75,52 @@ export class UserNotificationService extends Context.Tag(
       const enqueueUserNotification = yield* _(EnqueueUserNotification)
       const clubMemberDb = yield* _(ClubMembersDbService)
       const clubsDb = yield* _(ClubsDbService)
+      const enqueueUserNotificationWithTrace = ({
+        context,
+        entry,
+      }: {
+        context: string
+        entry:
+          | NewUserNotificationMqEntry
+          | NewClubUserNotificationMqEntry
+          | UserAdmittedToClubNotificationMqEntry
+          | UserInactivityNotificationMqEntry
+          | UserLoginOnDifferentDeviceNotificationMqEntry
+          | ClubFlaggedNotificationMqEntry
+          | ClubExpiredNotificationMqEntry
+          | NewContentNotificationMqEntry
+      }): Effect.Effect<void> =>
+        Effect.gen(function* (_) {
+          yield* _(
+            Effect.log(
+              `Notification Debug Producer: enqueue start [${context}]`,
+              {
+                entry,
+              }
+            )
+          )
+
+          const job = yield* _(enqueueUserNotification(entry, {delay: 0}))
+
+          yield* _(
+            Effect.log(
+              `Notification Debug Producer: enqueue success [${context}]`,
+              {
+                entry,
+                jobId: job.id,
+                queueName: job.queueName,
+              }
+            )
+          )
+        }).pipe(
+          Effect.catchAll((e) =>
+            Effect.logWarning(
+              `Notification Debug Producer: enqueue failed [${context}]`,
+              e,
+              entry
+            )
+          )
+        )
 
       return {
         notifyOthersAboutNewUser: (
@@ -141,6 +187,18 @@ export class UserNotificationService extends Context.Tag(
             )
 
             yield* _(
+              Effect.log(
+                'Notification Debug Producer: prepared new user notifications',
+                {
+                  ownerHash,
+                  firstLevelTokens: firstLevelTokens.length,
+                  secondLevelTokens: secondLevelTokens.length,
+                  dedupedTokens: allTokens.length,
+                }
+              )
+            )
+
+            yield* _(
               allTokens,
               Array.filter(
                 (entry) =>
@@ -148,21 +206,13 @@ export class UserNotificationService extends Context.Tag(
                   Option.isSome(entry.expoToken)
               ),
               Array.map((entry) =>
-                pipe(
-                  enqueueUserNotification(
-                    new NewUserNotificationMqEntry({
-                      token: Option.getOrNull(entry.vexlNotificationToken),
-                      notificationToken: Option.getOrNull(entry.expoToken),
-                    }),
-                    {delay: 0}
-                  ),
-                  Effect.catchAll((e) =>
-                    Effect.logWarning(
-                      'Failed to enqueue new user notification',
-                      e
-                    )
-                  )
-                )
+                enqueueUserNotificationWithTrace({
+                  context: 'notifyOthersAboutNewUser',
+                  entry: new NewUserNotificationMqEntry({
+                    token: Option.getOrNull(entry.vexlNotificationToken),
+                    notificationToken: Option.getOrNull(entry.expoToken),
+                  }),
+                })
               ),
               Effect.allWith({concurrency: 'unbounded'}),
               Effect.withSpan(
@@ -231,17 +281,24 @@ export class UserNotificationService extends Context.Tag(
             if (!Array.isNonEmptyArray(notificationsRecords)) return
 
             yield* _(
+              Effect.log(
+                'Notification Debug Producer: prepared new club user notifications',
+                {
+                  clubUuid,
+                  count: notificationsRecords.length,
+                  triggeringUser,
+                  notificationsRecords,
+                }
+              )
+            )
+
+            yield* _(
               notificationsRecords,
               Array.map((record) =>
-                pipe(
-                  enqueueUserNotification(record, {delay: 0}),
-                  Effect.catchAll((e) =>
-                    Effect.logWarning(
-                      'Failed to enqueue new club user notification',
-                      e
-                    )
-                  )
-                )
+                enqueueUserNotificationWithTrace({
+                  context: 'notifyOthersAboutNewClubUser',
+                  entry: record,
+                })
               ),
               Effect.all,
               Effect.withSpan(
@@ -279,20 +336,14 @@ export class UserNotificationService extends Context.Tag(
             }
 
             yield* _(
-              enqueueUserNotification(
-                new UserAdmittedToClubNotificationMqEntry({
+              enqueueUserNotificationWithTrace({
+                context: 'notifyUserAboutClubAddmission',
+                entry: new UserAdmittedToClubNotificationMqEntry({
                   token: member.vexlNotificationToken,
                   notificationToken: member.notificationToken,
                   publicKey,
                 }),
-                {delay: 0}
-              ),
-              Effect.catchAll((e) =>
-                Effect.logWarning(
-                  'Failed to enqueue new club user notification',
-                  e
-                )
-              )
+              })
             )
           }),
         notifyUsersAboutInactivity: () =>
@@ -360,15 +411,10 @@ export class UserNotificationService extends Context.Tag(
             yield* _(
               inactivityNotifications,
               Array.map((one) =>
-                pipe(
-                  enqueueUserNotification(one, {delay: 0}),
-                  Effect.catchAll((e) =>
-                    Effect.logWarning(
-                      'Failed to enqueue inactivity notification',
-                      e
-                    )
-                  )
-                )
+                enqueueUserNotificationWithTrace({
+                  context: 'notifyUsersAboutInactivity',
+                  entry: one,
+                })
               ),
               Effect.all,
               Effect.withSpan(
@@ -424,15 +470,10 @@ export class UserNotificationService extends Context.Tag(
             yield* _(
               flaggedClubNotifications,
               Array.map((one) =>
-                pipe(
-                  enqueueUserNotification(one, {delay: 0}),
-                  Effect.catchAll((e) =>
-                    Effect.logWarning(
-                      'Failed to enqueue flagged club notification',
-                      e
-                    )
-                  )
-                )
+                enqueueUserNotificationWithTrace({
+                  context: 'notifyUsersAboutFlaggedClub',
+                  entry: one,
+                })
               ),
               Effect.all,
               Effect.withSpan(
@@ -469,15 +510,10 @@ export class UserNotificationService extends Context.Tag(
             yield* _(
               expiredClubNotifications,
               Array.map((one) =>
-                pipe(
-                  enqueueUserNotification(one, {delay: 0}),
-                  Effect.catchAll((e) =>
-                    Effect.logWarning(
-                      'Failed to enqueue expired club notification',
-                      e
-                    )
-                  )
-                )
+                enqueueUserNotificationWithTrace({
+                  context: 'notifyUsersAboutExpiredClub',
+                  entry: one,
+                })
               ),
               Effect.all,
               Effect.withSpan(
@@ -503,19 +539,13 @@ export class UserNotificationService extends Context.Tag(
             }
 
             yield* _(
-              enqueueUserNotification(
-                new UserLoginOnDifferentDeviceNotificationMqEntry({
+              enqueueUserNotificationWithTrace({
+                context: 'notifyUserAboutLoginOnDifferentDevice',
+                entry: new UserLoginOnDifferentDeviceNotificationMqEntry({
                   token,
                   notificationToken,
                 }),
-                {delay: 0}
-              ),
-              Effect.catchAll((e) =>
-                Effect.logWarning(
-                  'Failed to enqueue login on different device notification',
-                  e
-                )
-              )
+              })
             )
           }),
         notifyUsersAboutNewContent: () =>
@@ -548,21 +578,13 @@ export class UserNotificationService extends Context.Tag(
                   Option.isSome(entry.vexlNotificationToken)
               ),
               Array.map((entry) =>
-                pipe(
-                  enqueueUserNotification(
-                    new NewContentNotificationMqEntry({
-                      token: Option.getOrNull(entry.vexlNotificationToken),
-                      notificationToken: Option.getOrNull(entry.expoToken),
-                    }),
-                    {delay: 0}
-                  ),
-                  Effect.catchAll((e) =>
-                    Effect.logWarning(
-                      'Failed to enqueue new content notification',
-                      e
-                    )
-                  )
-                )
+                enqueueUserNotificationWithTrace({
+                  context: 'notifyUsersAboutNewContent',
+                  entry: new NewContentNotificationMqEntry({
+                    token: Option.getOrNull(entry.vexlNotificationToken),
+                    notificationToken: Option.getOrNull(entry.expoToken),
+                  }),
+                })
               ),
               Effect.all,
               Effect.withSpan(

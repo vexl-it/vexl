@@ -75,11 +75,31 @@ export class ThrottledPushNotificationService extends Context.Tag(
               )
             )
 
+            yield* _(
+              Effect.log('Notification Debug: issuePushNotification start', {
+                lastTimeIssued,
+                taskId: task.id,
+                taskTag: task._tag,
+                token: task.notificationToken,
+                throttleTtlMs,
+              })
+            )
+
             // Notification was issued recently, so we throttle it
             if (lastTimeIssued + throttleTtlMs > Date.now()) {
               yield* _(
                 notificationWaitingToBeIssuedForNotificationTokenDb.addNotificationToWaitingList(
                   task
+                ),
+                Effect.tap(() =>
+                  Effect.log(
+                    'Notification Debug: Notification throttled and added to waiting list',
+                    {
+                      taskId: task.id,
+                      taskTag: task._tag,
+                      token: task.notificationToken,
+                    }
+                  )
                 )
               )
             } else {
@@ -88,6 +108,17 @@ export class ThrottledPushNotificationService extends Context.Tag(
                   task.notificationToken
                 ),
                 Effect.map(Array.append(task)),
+                Effect.tap((tasksToSend) =>
+                  Effect.log(
+                    'Notification Debug: Sending push notifications immediately',
+                    {
+                      count: tasksToSend.length,
+                      taskId: task.id,
+                      taskTag: task._tag,
+                      token: task.notificationToken,
+                    }
+                  )
+                ),
                 Effect.flatMap(
                   pushNotificationService.sendNotificationViaExpoNotification
                 ),
@@ -109,6 +140,17 @@ export class ThrottledPushNotificationService extends Context.Tag(
                     task.notificationToken
                   ),
                 }
+              ),
+              Effect.tap((job) =>
+                Effect.log(
+                  'Notification Debug: Scheduled throttle processing job',
+                  {
+                    jobId: job.id,
+                    taskId: task.id,
+                    taskTag: task._tag,
+                    token: task.notificationToken,
+                  }
+                )
               )
             )
           }).pipe(

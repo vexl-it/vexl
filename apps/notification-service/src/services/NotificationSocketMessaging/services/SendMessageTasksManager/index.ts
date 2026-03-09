@@ -191,15 +191,38 @@ export class SendMessageTasksManager extends Context.Tag(
 
         return {
           emitTask: (task, ...managerIds) => {
+            const taskSummary = {
+              managerIds,
+              taskId: task.id,
+              taskTag: task._tag,
+              token: task.notificationToken,
+            }
             const insertTaskAndEnqueueTimeout = Effect.zip(
               insertAsPendingToRedis(task),
               enqueueTimeout(task, {delay: timeoutMs})
+            ).pipe(
+              Effect.tap(() =>
+                Effect.log(
+                  'Notification Debug: Recorded task as pending and enqueued timeout',
+                  taskSummary
+                )
+              )
             )
 
             const publishToManagers = pipe(
               managerIds,
               Array.map((managerId) =>
                 publishTask(task, managerId).pipe(
+                  Effect.tap(() =>
+                    Effect.log(
+                      'Notification Debug: Published task to manager',
+                      {
+                        managerId,
+                        taskId: task.id,
+                        taskTag: task._tag,
+                      }
+                    )
+                  ),
                   Effect.tapError((e) =>
                     Effect.logError(
                       'Error while publishing task to manager',
@@ -221,10 +244,22 @@ export class SendMessageTasksManager extends Context.Tag(
               )
             )
 
-            return Effect.andThen(
-              insertTaskAndEnqueueTimeout,
-              publishToManagers
-            )
+            return Effect.gen(function* (_) {
+              yield* _(
+                Effect.log(
+                  'Notification Debug: Emitting socket task',
+                  taskSummary
+                )
+              )
+              yield* _(insertTaskAndEnqueueTimeout)
+              yield* _(publishToManagers)
+              yield* _(
+                Effect.log(
+                  'Notification Debug: Socket task emitted successfully',
+                  taskSummary
+                )
+              )
+            })
           },
         }
       })

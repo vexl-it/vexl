@@ -3,12 +3,10 @@ import {
   Context,
   Data,
   Effect,
-  flow,
-  identity,
   Layer,
   pipe,
+  Runtime,
   Schema,
-  Stream,
   type ParseResult,
 } from 'effect/index'
 import {RedisConnectionService} from './RedisConnection'
@@ -91,66 +89,125 @@ export const makeMqService = <A, I, R, TAG extends string>(
                     message: `Failed to add job to ${queueName} queue`,
                   }),
               })
-            )
+            ),
+            Effect.withSpan(`Producer/${queueName}`, {
+              attributes: {task, options},
+            })
           )
       )
     )
   )
 
-  const jobsStream = Stream.asyncScoped<
-    unknown,
-    MqServiceError,
-    RedisConnectionService
-  >((emit) =>
-    Effect.gen(function* (_) {
-      const connection = yield* _(RedisConnectionService)
-      const processJob = async (job: Job<unknown, void>): Promise<void> => {
-        await emit.single(job.data)
-      }
-      yield* _(
-        Effect.acquireRelease(
-          Effect.try({
-            try: () =>
-              new Worker(queueName, processJob, {
-                connection,
-              }),
-            catch: (e) =>
-              new MqServiceError({
-                cause: e,
-                message: 'Failed to create pending tasks worker',
-              }),
-          }),
-          (worker) =>
-            Effect.promise(async () => {
-              await worker.close()
-            })
-        )
-      )
-    })
-  ).pipe(
-    Stream.mapEffect(
-      flow(
-        Schema.decodeUnknown(JobPayloadSchema),
-        Effect.tapError((e) =>
-          Effect.logWarning(
-            `${queueName} task worker received invalid job data`
-          )
-        ),
-        Effect.option
-      )
-    ),
-    Stream.filterMap(identity)
-  )
-
   const consumerLayer = <R2>(
     consume: ConsumeJob<A, R2>
   ): Layer.Layer<never, MqServiceError, R | R2 | RedisConnectionService> =>
-    Layer.effectDiscard(
-      Stream.runForEach(jobsStream, (data) =>
-        Effect.withSpan(consume(data), `Consumer/${queueName}`, {
-          attributes: {data},
-        })
-      )
+    Layer.scopedDiscard(
+      Effect.gen(function* (_) {
+        const connection = yield* _(RedisConnectionService)
+        const runtime = yield* _(Effect.runtime<R | R2>())
+        const runFork = Runtime.runFork(runtime)
+
+        yield* _(
+          Effect.log(
+            `[${queueName}]: Creating worker. Redis status: ${connection.status}`
+          )
+        )
+
+        const processJob = async (job: Job<unknown, void>): Promise<void> => {
+          console.log(
+            `[${queueName}]: processJob start`,
+            JSON.stringify({
+              jobId: job.id,
+              name: job.name,
+              attemptsMade: job.attemptsMade,
+              delay: job.delay,
+              timestamp: job.timestamp,
+              data: job.data,
+            })
+          )
+
+          const effect = pipe(
+            job.data,
+            Schema.decodeUnknown(JobPayloadSchema),
+            Effect.tap((data) =>
+              Effect.log(`[${queueName}]: Job payload decoded`, {
+                jobId: job.id,
+                data,
+              })
+            ),
+            Effect.tapError(() =>
+              Effect.logWarning(
+                `[${queueName}]: Worker received invalid job data`
+              )
+            ),
+            Effect.flatMap((data) =>
+              Effect.withSpan(consume(data), `Consumer/${queueName}`, {
+                attributes: {data},
+              })
+            ),
+            Effect.catchAllDefect((defect) =>
+              Effect.logError(
+                `[${queueName}]: Defect in consume callback`,
+                defect
+              )
+            )
+          )
+
+          const fiber = runFork(effect)
+          const exit = await Effect.runPromise(fiber.await)
+
+          if (exit._tag === 'Failure') {
+            await Effect.runPromise(
+              Effect.logError(
+                `[${queueName}]: Job processing failed`,
+                exit.cause
+              )
+            )
+          } else {
+            await Effect.runPromise(
+              Effect.log(`[${queueName}]: Job processing finished`, {
+                jobId: job.id,
+              })
+            )
+          }
+        }
+
+        yield* _(
+          Effect.acquireRelease(
+            Effect.try({
+              try: () => {
+                const worker = new Worker(queueName, processJob, {
+                  connection,
+                })
+                worker.on('ready', () => {
+                  console.log(`[${queueName}]: Worker ready`)
+                })
+                worker.on('error', (err) => {
+                  console.error(`[${queueName}]: Worker error:`, err)
+                })
+                worker.on('stalled', (jobId) => {
+                  console.warn(`[${queueName}]: Job stalled: ${jobId}`)
+                })
+                return worker
+              },
+              catch: (e) =>
+                new MqServiceError({
+                  cause: e,
+                  message: `Failed to create ${queueName} worker`,
+                }),
+            }),
+            (worker) =>
+              Effect.zip(
+                Effect.log(`[${queueName}]: Closing worker`),
+                Effect.promise(async () => {
+                  await worker.close()
+                })
+              )
+          )
+        )
+
+        yield* _(Effect.log(`[${queueName}]: Worker created and registered`))
+      })
     )
 
   return {

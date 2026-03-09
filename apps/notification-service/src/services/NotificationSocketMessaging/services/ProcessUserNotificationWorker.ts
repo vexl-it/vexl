@@ -21,15 +21,28 @@ import {
 export const ProcessUserNotificationsWorker =
   ProcessUserNotificationsConsumerLayer((entry) =>
     Effect.gen(function* (_) {
+      yield* _(
+        Effect.log(
+          'Notification Debug',
+          `Processing user notification entry: ${JSON.stringify(entry)}`
+        )
+      )
+
       const socketMessaging = yield* _(NotificationSocketMessaging)
       const tokenService = yield* _(VexlNotificationTokenService)
       const {issuePushNotification} = yield* _(ThrottledPushNotificationService)
       const vexlNotificationTokenOrExpoToken =
         entry.token ?? entry.notificationToken
 
+      yield* _(
+        Effect.log(
+          `Notification Debug: Resolved token: ${JSON.stringify(vexlNotificationTokenOrExpoToken)}`
+        )
+      )
+
       if (!vexlNotificationTokenOrExpoToken) {
         yield* Effect.logWarning(
-          'No notification token found in the entry, skipping processing',
+          'Notification Debug: No notification token found in the entry, skipping processing',
           entry
         )
 
@@ -44,6 +57,12 @@ export const ProcessUserNotificationsWorker =
         Effect.catchTag(
           'NoSuchElementException',
           () => new SendingNotificationError({tokenInvalid: true})
+        )
+      )
+
+      yield* _(
+        Effect.log(
+          `Notification Debug: Normalized token secret successfully, creating task for entry tag: ${entry._tag}`
         )
       )
 
@@ -130,21 +149,48 @@ export const ProcessUserNotificationsWorker =
       )
 
       yield* _(
+        Effect.log(
+          `Notification Debug: Sending notice via socket: ${JSON.stringify(task)}`
+        )
+      )
+
+      yield* _(
         socketMessaging.sendNotice(task),
+        Effect.tap(() =>
+          Effect.log(
+            `Notification Debug: Successfully sent notification via socket for task: ${JSON.stringify(task)}`
+          )
+        ),
         Effect.catchAll((e) =>
           Effect.zipRight(
             Effect.logWarning(
-              'Unable to send notification via socket, falling back to push notification',
+              'Notification Debug: Unable to send notification via socket, falling back to push notification',
               e
             ),
-            issuePushNotification(task)
+            Effect.gen(function* (_) {
+              yield* _(
+                Effect.log(
+                  `Notification Debug: Starting push notification fallback for task: ${JSON.stringify(task)}`
+                )
+              )
+              yield* _(issuePushNotification(task))
+              yield* _(
+                Effect.log(
+                  `Notification Debug: Successfully sent push notification fallback for task: ${JSON.stringify(task)}`
+                )
+              )
+            })
           )
         )
       )
     }).pipe(
       Effect.catchAll((e) =>
         Effect.zipRight(
-          Effect.logError('Failed to process user notification', e, entry),
+          Effect.logError(
+            'Notification Debug: Failed to process user notification',
+            e,
+            entry
+          ),
           new UnexpectedServerError({
             message: 'Failed to issue push notification',
             cause: e,

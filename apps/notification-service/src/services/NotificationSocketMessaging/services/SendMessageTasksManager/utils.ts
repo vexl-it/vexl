@@ -59,6 +59,15 @@ const createQueue = Effect.flatMap(RedisConnectionService, (redisConnection) =>
                 message: 'Failed to add job to pending tasks queue',
               }),
           })
+        ),
+        Effect.tap((job) =>
+          Effect.log('Notification Debug: Pending timeout job enqueued', {
+            jobId: job.id,
+            queueName: job.queueName,
+            taskId: task.id,
+            taskTag: task._tag,
+            options,
+          })
         )
       )
   )
@@ -82,6 +91,13 @@ const createJobStream = Effect.map(RedisConnectionService, (connection) =>
   >((emit) =>
     Effect.gen(function* (_) {
       const processJob = async (job: Job<unknown, void>): Promise<void> => {
+        console.log(
+          'Notification Debug: Pending timeout worker received BullMQ job',
+          JSON.stringify({
+            jobId: job.id,
+            data: job.data,
+          })
+        )
         await emit.single(job.data)
       }
       yield* _(
@@ -108,6 +124,16 @@ const createJobStream = Effect.map(RedisConnectionService, (connection) =>
     Stream.mapEffect(
       flow(
         Schema.decodeUnknown(SendMessageTask),
+        Effect.tap((task) =>
+          Effect.log(
+            'Notification Debug: Pending timeout worker decoded task',
+            {
+              taskId: task.id,
+              taskTag: task._tag,
+              token: task.notificationToken,
+            }
+          )
+        ),
         Effect.tapError((e) =>
           Effect.log('Pending task worker received invalid job data')
         ),

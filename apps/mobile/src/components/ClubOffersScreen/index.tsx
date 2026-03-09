@@ -1,4 +1,4 @@
-import {Option, pipe} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Stack, Text, YStack} from 'tamagui'
@@ -45,7 +45,9 @@ export function ClubOffersScreen({
         <Stack mx="$2" f={1}>
           <OffersList
             offersAtoms={offersAtom}
-            onRefresh={refreshOffers}
+            onRefresh={() => {
+              Effect.runFork(refreshOffers())
+            }}
             refreshing={loadingOffers}
           />
         </Stack>

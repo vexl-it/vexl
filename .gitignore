@@ -28,7 +28,8 @@ node_modules
 *.local.*
 !*.local.example  
 
-#Claude code
+#Agents code
+.codex/environments/
 
 # Planning docs
 .planning/

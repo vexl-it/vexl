@@ -1,3 +1,4 @@
+import {RedisNamespacePrefixConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {Queue as BullQueue, type Job, type JobsOptions, Worker} from 'bullmq'
 import {
@@ -15,32 +16,51 @@ import {SendMessageTasksManagerError} from './domain'
 
 const PENDING_TASKS_QUEUE_NAME = 'notification-service_pendingTasksQueue'
 
-const createQueue = Effect.flatMap(RedisConnectionService, (redisConnection) =>
-  Effect.acquireRelease(
-    Effect.try({
-      try: () =>
-        new BullQueue(PENDING_TASKS_QUEUE_NAME, {
-          connection: redisConnection,
-          defaultJobOptions: {
-            removeOnComplete: true,
-            removeOnFail: true,
-          },
-        }),
-      catch: (e) =>
-        new SendMessageTasksManagerError({
-          cause: e,
-          message: 'Failed to create pending tasks queue',
-        }),
-    }),
-    (queue) =>
-      Effect.zip(
-        Effect.log('Closing pending tasks queue'),
-        Effect.promise(async () => {
-          await queue.close()
-        })
-      )
+const RedisNamespacePrefixConfigFailWithSendMessageTasksManagerError =
+  Effect.catchTag(
+    RedisNamespacePrefixConfig,
+    'ConfigError',
+    (e) =>
+      new SendMessageTasksManagerError({
+        message: 'Failed to get Redis namespace prefix from config',
+        cause: e,
+      })
   )
-).pipe(
+
+const createQueue = pipe(
+  RedisConnectionService,
+  Effect.bindTo('redisConnection'),
+  Effect.bind(
+    'prefix',
+    () => RedisNamespacePrefixConfigFailWithSendMessageTasksManagerError
+  ),
+  Effect.flatMap(({redisConnection, prefix}) =>
+    Effect.acquireRelease(
+      Effect.try({
+        try: () =>
+          new BullQueue(PENDING_TASKS_QUEUE_NAME, {
+            connection: redisConnection,
+            prefix,
+            defaultJobOptions: {
+              removeOnComplete: true,
+              removeOnFail: true,
+            },
+          }),
+        catch: (e) =>
+          new SendMessageTasksManagerError({
+            cause: e,
+            message: 'Failed to create pending tasks queue',
+          }),
+      }),
+      (queue) =>
+        Effect.zip(
+          Effect.log('Closing pending tasks queue'),
+          Effect.promise(async () => {
+            await queue.close()
+          })
+        )
+    )
+  ),
   Effect.zipLeft(Effect.log('Pending tasks queue created')),
   Effect.map(
     (queue) => (task: SendMessageTask, options?: JobsOptions) =>
@@ -81,6 +101,9 @@ const createJobStream = Effect.map(RedisConnectionService, (connection) =>
     RedisConnectionService
   >((emit) =>
     Effect.gen(function* (_) {
+      const prefix =
+        yield* RedisNamespacePrefixConfigFailWithSendMessageTasksManagerError
+
       const processJob = async (job: Job<unknown, void>): Promise<void> => {
         await emit.single(job.data)
       }
@@ -90,6 +113,7 @@ const createJobStream = Effect.map(RedisConnectionService, (connection) =>
             try: () =>
               new Worker(PENDING_TASKS_QUEUE_NAME, processJob, {
                 connection,
+                prefix,
               }),
             catch: (e) =>
               new SendMessageTasksManagerError({

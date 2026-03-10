@@ -15,6 +15,16 @@ export const nodeEnvConfig = Config.string('NODE_ENV').pipe(
   })
 )
 
+export const RedisNamespacePrefixConfig = Config.string(
+  'REDIS_NAMESPACE_PREFIX'
+).pipe(
+  Config.validate({
+    message:
+      'REDIS_NAMESPACE_PREFIX must only contain letters, numbers, and underscores',
+    validation: (x) => /^[a-zA-Z0-9_]+$/.test(x),
+  })
+)
+
 export const isRunningInDevelopmentConfig = nodeEnvConfig.pipe(
   Config.map((env) => env === 'development')
 )

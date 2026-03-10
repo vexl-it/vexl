@@ -12,6 +12,7 @@ import {
   type ParseResult,
 } from 'effect/index'
 import {RedisConnectionService} from './RedisConnection'
+import {RedisNamespacePrefixConfig} from './commonConfigs'
 
 export class MqServiceError extends Data.TaggedError('MqServiceError')<{
   cause: unknown
@@ -41,14 +42,27 @@ export const makeMqService = <A, I, R, TAG extends string>(
 } => {
   const tag = `mqService/${queueName}` as const
 
+  const RedisNamespacePrefixConfigFailWithMqError = Effect.catchTag(
+    RedisNamespacePrefixConfig,
+    'ConfigError',
+    (e) =>
+      new MqServiceError({
+        message: 'Failed to get Redis namespace prefix from config',
+        cause: e,
+      })
+  )
+
   const queue = pipe(
     RedisConnectionService,
-    Effect.flatMap((redisConnection) =>
+    Effect.bindTo('redisConnection'),
+    Effect.bind('prefix', () => RedisNamespacePrefixConfigFailWithMqError),
+    Effect.flatMap(({redisConnection, prefix}) =>
       Effect.acquireRelease(
         Effect.try({
           try: () =>
             new Queue(queueName, {
               connection: redisConnection,
+              prefix,
               defaultJobOptions: {
                 removeOnComplete: true,
                 removeOnFail: true,
@@ -104,6 +118,7 @@ export const makeMqService = <A, I, R, TAG extends string>(
   >((emit) =>
     Effect.gen(function* (_) {
       const connection = yield* _(RedisConnectionService)
+      const prefix = yield* RedisNamespacePrefixConfigFailWithMqError
       const processJob = async (job: Job<unknown, void>): Promise<void> => {
         await emit.single(job.data)
       }
@@ -113,6 +128,7 @@ export const makeMqService = <A, I, R, TAG extends string>(
             try: () =>
               new Worker(queueName, processJob, {
                 connection,
+                prefix,
               }),
             catch: (e) =>
               new MqServiceError({

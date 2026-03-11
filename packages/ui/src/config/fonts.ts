@@ -87,7 +87,141 @@ export const headingFont = createFont({
     true: -1,
   },
   face: {
-    400: {normal: 'PPMonument700'},
+    400: {normal: 'PPMonument400'},
     700: {normal: 'PPMonument700'},
   },
 })
+
+// Semantic typography styles.
+// These start from the Figma spec, but heading-like variants use practical
+// multiline-safe line heights instead of strict 100% / auto values.
+export const typographyVariantStyles = {
+  heading1: {
+    fontFamily: '$heading',
+    fontSize: '$6',
+    fontWeight: '400',
+    lineHeight: 52,
+    letterSpacing: -1,
+  },
+  presBody: {
+    fontFamily: '$body',
+    fontSize: '$7',
+    fontWeight: '500',
+    lineHeight: 52,
+    letterSpacing: -0.8,
+  },
+  heading2: {
+    fontFamily: '$heading',
+    fontSize: '$5',
+    fontWeight: '400',
+    lineHeight: 40,
+    letterSpacing: -1,
+  },
+  graphPrice: {
+    fontFamily: '$heading',
+    fontSize: '$4',
+    fontWeight: '400',
+    lineHeight: 34,
+    letterSpacing: -1,
+  },
+  heading3: {
+    fontFamily: '$heading',
+    fontSize: '$3',
+    fontWeight: '400',
+    lineHeight: 28,
+    letterSpacing: -1,
+  },
+  titles: {
+    fontFamily: '$body',
+    fontSize: '$6',
+    fontWeight: '600',
+    lineHeight: 30,
+    letterSpacing: -0.48,
+  },
+  titlesSmall: {
+    fontFamily: '$body',
+    fontSize: '$5',
+    fontWeight: '600',
+    lineHeight: 26,
+    letterSpacing: -0.4,
+  },
+  paragraph: {
+    fontFamily: '$body',
+    fontSize: '$4',
+    fontWeight: '500',
+    lineHeight: 24,
+    letterSpacing: 0,
+  },
+  paragraphDemibold: {
+    fontFamily: '$body',
+    fontSize: '$4',
+    fontWeight: '600',
+    lineHeight: 24,
+    letterSpacing: -0.36,
+  },
+  tabLarge: {
+    fontFamily: '$heading',
+    fontSize: '$2',
+    fontWeight: '400',
+    lineHeight: 24,
+    letterSpacing: -0.36,
+  },
+  tabLargeBold: {
+    fontFamily: '$heading',
+    fontSize: '$2',
+    fontWeight: '700',
+    lineHeight: 24,
+    letterSpacing: -0.36,
+  },
+  paragraphSmallBold: {
+    fontFamily: '$body',
+    fontSize: '$3',
+    fontWeight: '600',
+    lineHeight: 16,
+    letterSpacing: -0.64,
+  },
+  paragraphSmall: {
+    fontFamily: '$body',
+    fontSize: '$3',
+    fontWeight: '500',
+    lineHeight: 16,
+    letterSpacing: -0.64,
+  },
+  descriptionBold: {
+    fontFamily: '$body',
+    fontSize: '$2',
+    fontWeight: '600',
+    lineHeight: 14,
+    letterSpacing: -0.42,
+  },
+  description: {
+    fontFamily: '$body',
+    fontSize: '$2',
+    fontWeight: '500',
+    lineHeight: 14,
+    letterSpacing: -0.28,
+  },
+  tabSmallBold: {
+    fontFamily: '$heading',
+    fontSize: '$1',
+    fontWeight: '700',
+    lineHeight: 18,
+    letterSpacing: -0.56,
+  },
+  tabSmall: {
+    fontFamily: '$heading',
+    fontSize: '$1',
+    fontWeight: '400',
+    lineHeight: 18,
+    letterSpacing: -0.56,
+  },
+  micro: {
+    fontFamily: '$body',
+    fontSize: '$1',
+    fontWeight: '500',
+    lineHeight: 12,
+    letterSpacing: -0.36,
+  },
+} as const
+
+export type TypographyVariant = keyof typeof typographyVariantStyles

@@ -27896,11 +27896,7 @@ __metadata:
 
 "react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::locator=vexl-next%40workspace%3A.":
   version: 1.26.20
-<<<<<<< HEAD
   resolution: "react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::version=1.26.20&hash=a55ca4&locator=vexl-next%40workspace%3A."
-=======
-  resolution: "react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::version=1.26.20&hash=478c06&locator=vexl-next%40workspace%3A."
->>>>>>> f447930b0 (Replace old tamagui confign with new one, create legacy values)
   dependencies:
     "@types/geojson": ^7946.0.13
   peerDependencies:

@@ -1,10 +1,7 @@
 import React from 'react'
-import type {TextStyle} from 'react-native'
-import {Text} from 'react-native'
-import {getTokens, styled} from 'tamagui'
+import {styled} from 'tamagui'
 
-import {bodyFont} from '../config/fonts'
-import {Circle} from '../primitives'
+import {Circle, SizableText} from '../primitives'
 
 const DotFrame = styled(Circle, {
   name: 'Dot',
@@ -35,21 +32,22 @@ interface DotProps extends Omit<DotFrameProps, 'variant' | 'children'> {
   readonly count?: number
 }
 
-const labelStyle: TextStyle = {
-  fontFamily: bodyFont.family,
-  fontWeight: bodyFont.weight?.[5] as TextStyle['fontWeight'],
-  fontSize: bodyFont.size[1],
-  letterSpacing: bodyFont.letterSpacing[1],
-  color: getTokens().color.black100.val,
+const DotLabel = styled(SizableText, {
+  name: 'DotLabel',
+  fontFamily: '$body',
+  fontWeight: '500',
+  fontSize: '$1',
+  letterSpacing: '$1',
+  color: '$black100',
   textAlign: 'center',
-}
+})
 
 export function Dot({count, variant, ...rest}: DotProps): React.JSX.Element {
   const resolvedVariant = count !== undefined ? 'number' : (variant ?? 'small')
 
   return (
     <DotFrame variant={resolvedVariant} {...rest}>
-      {count !== undefined ? <Text style={labelStyle}>{count}</Text> : null}
+      {count !== undefined ? <DotLabel>{count}</DotLabel> : null}
     </DotFrame>
   )
 }

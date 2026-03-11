@@ -6,12 +6,22 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import {getTokens, useTheme} from 'tamagui'
+import {getTokens, styled} from 'tamagui'
 
 import {SizableText, Stack, XStack} from '../primitives'
 
 const UNDERLINE_HEIGHT = 3
 const ANIMATION_DURATION = 300
+
+const TabsUnderline = styled(Stack, {
+  name: 'TabsUnderline',
+  position: 'absolute',
+  bottom: 0,
+  height: UNDERLINE_HEIGHT,
+  backgroundColor: '$accentHighlightPrimary',
+})
+
+const AnimatedTabsUnderline = Animated.createAnimatedComponent(TabsUnderline)
 
 interface TabLayout {
   readonly x: number
@@ -36,7 +46,6 @@ export function Tabs<T>({
   onTabPress,
   size = 'large',
 }: TabsProps<T>): React.JSX.Element {
-  const theme = useTheme()
   const spaceTokens = getTokens().space
 
   const scrollViewRef = useRef<RNScrollView>(null)
@@ -66,11 +75,19 @@ export function Tabs<T>({
       const {x, width} = event.nativeEvent.layout
       tabLayouts.current[index] = {x, width}
 
-      if (index === activeIndex && !hasInitialized.current) {
-        underlineLeft.value = x
-        underlineWidth.value = width
-        underlineOpacity.value = withTiming(1, {duration: 150})
-        hasInitialized.current = true
+      if (index === activeIndex) {
+        if (!hasInitialized.current) {
+          underlineLeft.value = x
+          underlineWidth.value = width
+          underlineOpacity.value = withTiming(1, {duration: 150})
+          hasInitialized.current = true
+          return
+        }
+
+        underlineLeft.value = withTiming(x, {duration: ANIMATION_DURATION})
+        underlineWidth.value = withTiming(width, {
+          duration: ANIMATION_DURATION,
+        })
       }
     },
     [activeIndex, underlineLeft, underlineOpacity, underlineWidth]
@@ -153,17 +170,7 @@ export function Tabs<T>({
             </Stack>
           )
         })}
-        <Animated.View
-          style={[
-            {
-              position: 'absolute',
-              bottom: 0,
-              height: UNDERLINE_HEIGHT,
-              backgroundColor: theme.accentHighlightPrimary.val,
-            },
-            animatedUnderlineStyle,
-          ]}
-        />
+        <AnimatedTabsUnderline style={animatedUnderlineStyle} />
       </XStack>
     </ScrollView>
   )

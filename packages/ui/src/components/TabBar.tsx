@@ -60,6 +60,15 @@ const IconPillFrame = styled(Stack, {
   borderRadius: '$11',
 })
 
+const ActivePillFrame = styled(Stack, {
+  name: 'TabBarActivePill',
+  position: 'absolute',
+  backgroundColor: '$navigationBackgroundHighlight',
+  borderRadius: '$11',
+})
+
+const AnimatedActivePill = Animated.createAnimatedComponent(ActivePillFrame)
+
 const ICON_POP_DURATION = 150
 const ICON_SETTLE_DURATION = 200
 const ICON_SCALE_PEAK = 1.2
@@ -124,8 +133,6 @@ export function TabBar<T>({
   onTabPress,
   bottomInset,
 }: TabBarProps<T>): React.JSX.Element {
-  const theme = useTheme()
-
   const pillLeft = useSharedValue(0)
   const pillWidth = useSharedValue(0)
   const pillHeight = useSharedValue(0)
@@ -158,6 +165,15 @@ export function TabBar<T>({
         pillLeft.value = withTiming(targetLeft, {
           duration: ANIMATION_DURATION,
         })
+        pillTop.value = withTiming(pill.y, {
+          duration: ANIMATION_DURATION,
+        })
+        pillWidth.value = withTiming(pill.width, {
+          duration: ANIMATION_DURATION,
+        })
+        pillHeight.value = withTiming(pill.height, {
+          duration: ANIMATION_DURATION,
+        })
       } else {
         pillLeft.value = targetLeft
         pillTop.value = pill.y
@@ -175,12 +191,8 @@ export function TabBar<T>({
       const {x, width} = event.nativeEvent.layout
       tabLayouts.current[index] = {x, width}
 
-      if (
-        index === activeIndex &&
-        !hasInitialized.current &&
-        pillOffset.current
-      ) {
-        positionPill(activeIndex, false)
+      if (index === activeIndex && pillOffset.current) {
+        positionPill(activeIndex, hasInitialized.current)
       }
     },
     [activeIndex, positionPill]
@@ -191,8 +203,8 @@ export function TabBar<T>({
       const {x, y, width, height} = event.nativeEvent.layout
       pillOffset.current = {x, y, width, height}
 
-      if (!hasInitialized.current && tabLayouts.current[activeIndex]) {
-        positionPill(activeIndex, false)
+      if (tabLayouts.current[activeIndex]) {
+        positionPill(activeIndex, hasInitialized.current)
       }
     },
     [activeIndex, positionPill]
@@ -231,16 +243,7 @@ export function TabBar<T>({
 
   return (
     <TabBarFrame paddingBottom={bottomInset ? bottomInset + 16 : '$5'}>
-      <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            backgroundColor: theme.navigationBackgroundHighlight.val,
-            borderRadius: getTokens().radius.$11.val,
-          },
-          animatedPillStyle,
-        ]}
-      />
+      <AnimatedActivePill style={animatedPillStyle} />
       {tabs.map((tab, index) => {
         const isActive = tab.value === activeTab
         return (

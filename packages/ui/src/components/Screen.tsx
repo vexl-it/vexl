@@ -1,4 +1,10 @@
-import React, {createContext, useCallback, useContext, useMemo, useState} from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react'
 import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
@@ -145,9 +151,7 @@ export function Screen({
     <ScreenScrollContext.Provider value={scrollContext}>
       <ScreenFrame paddingTop={topInset}>
         {navigationBar}
-        <YStack flex={1}>
-          {children}
-        </YStack>
+        <YStack flex={1}>{children}</YStack>
         {footer ? (
           <ScreenFooterFrame paddingBottom={bottomInset}>
             {footer}

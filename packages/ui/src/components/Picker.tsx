@@ -6,7 +6,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {styled, useTheme} from 'tamagui'
 
 import {ChevronDown} from '../icons/ChevronDown'
 import type {IconProps} from '../icons/types'
@@ -61,6 +61,23 @@ const PickerItemLabel = styled(SizableText, {
   color: '$foregroundPrimary',
 })
 
+const PickerDropdownFrame = styled(YStack, {
+  name: 'PickerDropdownFrame',
+  marginTop: '$2',
+})
+
+const PickerDropdownContent = styled(YStack, {
+  name: 'PickerDropdownContent',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  top: 0,
+  backgroundColor: '$backgroundSecondary',
+  borderRadius: '$4',
+  padding: '$3',
+  gap: '$3',
+})
+
 export interface PickerItem<T extends string> {
   readonly label: string
   readonly value: T
@@ -85,24 +102,23 @@ function PickerDropdown<T extends string>({
   readonly onCloseComplete: () => void
   readonly closing: boolean
 }): React.JSX.Element {
-  const theme = useTheme()
-  const spaceTokens = getTokens().space
-  const topMargin = spaceTokens.$2.val
-
   const measuredHeight = useSharedValue(0)
   const animatedHeight = useSharedValue(0)
 
   const handleLayout = useCallback(
     (e: LayoutChangeEvent) => {
       const height = e.nativeEvent.layout.height
-      if (height > 0 && measuredHeight.value === 0) {
-        measuredHeight.value = height
+      if (height <= 0 || measuredHeight.value === height) return
+
+      measuredHeight.value = height
+
+      if (!closing) {
         animatedHeight.value = withTiming(height, {
           duration: ANIMATION_DURATION,
         })
       }
     },
-    [animatedHeight, measuredHeight]
+    [animatedHeight, closing, measuredHeight]
   )
 
   useEffect(() => {
@@ -123,32 +139,22 @@ function PickerDropdown<T extends string>({
   }))
 
   return (
-    <Animated.View style={[{marginTop: topMargin}, clipStyle]}>
-      <Animated.View
-        onLayout={handleLayout}
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: 0,
-          backgroundColor: theme.backgroundSecondary.val,
-          borderRadius: 16,
-          padding: 12,
-          gap: 12,
-        }}
-      >
-        {items.map((item) => (
-          <PickerItemFrame
-            key={item.value}
-            onPress={() => {
-              onItemPress(item.value)
-            }}
-          >
-            <PickerItemLabel>{item.label}</PickerItemLabel>
-          </PickerItemFrame>
-        ))}
+    <PickerDropdownFrame>
+      <Animated.View style={clipStyle}>
+        <PickerDropdownContent onLayout={handleLayout}>
+          {items.map((item) => (
+            <PickerItemFrame
+              key={item.value}
+              onPress={() => {
+                onItemPress(item.value)
+              }}
+            >
+              <PickerItemLabel>{item.label}</PickerItemLabel>
+            </PickerItemFrame>
+          ))}
+        </PickerDropdownContent>
       </Animated.View>
-    </Animated.View>
+    </PickerDropdownFrame>
   )
 }
 

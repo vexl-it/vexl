@@ -6,7 +6,7 @@ function ThemeProvider({
 }: {
   children: React.ReactNode
 }): React.ReactElement {
-  return <VexlThemeProvider defaultMode="dark">{children}</VexlThemeProvider>
+  return <VexlThemeProvider defaultMode="system">{children}</VexlThemeProvider>
 }
 
 export default ThemeProvider

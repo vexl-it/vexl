@@ -48,6 +48,7 @@ import {TabsScreen} from './TabsScreen'
 import {TextFieldScreen} from './TextFieldScreen'
 import {TextTagScreen} from './TextTagScreen'
 import {ToastScreen} from './ToastScreen'
+import {TypographyScreen} from './TypographyScreen'
 
 export interface ScreenEntry {
   readonly label: string
@@ -103,4 +104,5 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Text Field', component: TextFieldScreen},
   {label: 'Text Tag', component: TextTagScreen},
   {label: 'Toast', component: ToastScreen},
+  {label: 'Typography', component: TypographyScreen},
 ]

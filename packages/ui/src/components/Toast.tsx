@@ -1,14 +1,49 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
 import {useAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import type {TextStyle, ViewStyle} from 'react-native'
-import {Animated, StyleSheet, Text, View} from 'react-native'
-import {getTokens, useTheme} from 'tamagui'
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
+import {scheduleOnRN} from 'react-native-worklets'
+import {styled} from 'tamagui'
 
-import {bodyFont} from '../config/fonts'
+import {SizableText, Stack} from '../primitives'
 
 const DISPLAY_DURATION = 3000
-const FADE_DURATION = 300
+const ANIMATION_DURATION = 300
+const HIDDEN_TRANSLATE_Y = -10
+
+const ToastViewport = styled(Stack, {
+  name: 'ToastViewport',
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  alignItems: 'center',
+  zIndex: 9999,
+})
+
+const ToastPill = styled(Stack, {
+  name: 'ToastPill',
+  backgroundColor: '$foregroundPrimary',
+  borderRadius: '$4',
+  paddingHorizontal: '$4',
+  paddingVertical: '$3',
+  alignItems: 'center',
+  justifyContent: 'center',
+})
+
+const ToastLabel = styled(SizableText, {
+  name: 'ToastLabel',
+  fontFamily: '$body',
+  fontWeight: '600',
+  fontSize: '$2',
+  letterSpacing: '$2',
+  color: '$backgroundPrimary',
+})
 
 export interface ToastProps {
   readonly messageAtom: WritableAtom<
@@ -25,12 +60,11 @@ export function Toast({
 }: ToastProps): React.JSX.Element {
   const [message, setMessage] = useAtom(messageAtom)
   const [displayedMessage, setDisplayedMessage] = useState<string | null>(null)
-  const [visible, setVisible] = useState(false)
-  const theme = useTheme()
-
-  const opacity = useRef(new Animated.Value(0)).current
-  const translateY = useRef(new Animated.Value(-10)).current
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const animationCycleRef = useRef(0)
+
+  const opacity = useSharedValue(0)
+  const translateY = useSharedValue(HIDDEN_TRANSLATE_Y)
 
   const clearTimer = useCallback(() => {
     if (hideTimerRef.current) {
@@ -39,96 +73,90 @@ export function Toast({
     }
   }, [])
 
+  const clearDisplayedMessage = useCallback((cycle: number) => {
+    if (animationCycleRef.current !== cycle) return
+    setDisplayedMessage(null)
+  }, [])
+
+  const showToast = useCallback(() => {
+    cancelAnimation(opacity)
+    cancelAnimation(translateY)
+    opacity.value = withTiming(1, {
+      duration: ANIMATION_DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+    translateY.value = withTiming(0, {
+      duration: ANIMATION_DURATION,
+      easing: Easing.out(Easing.cubic),
+    })
+  }, [opacity, translateY])
+
+  const hideToast = useCallback(
+    (cycle: number) => {
+      cancelAnimation(opacity)
+      cancelAnimation(translateY)
+      opacity.value = withTiming(
+        0,
+        {
+          duration: ANIMATION_DURATION,
+          easing: Easing.in(Easing.cubic),
+        },
+        (finished) => {
+          if (finished) {
+            scheduleOnRN(clearDisplayedMessage, cycle)
+          }
+        }
+      )
+      translateY.value = withTiming(HIDDEN_TRANSLATE_Y, {
+        duration: ANIMATION_DURATION,
+        easing: Easing.in(Easing.cubic),
+      })
+    },
+    [clearDisplayedMessage, opacity, translateY]
+  )
+
   useEffect(() => {
     if (!message) return
 
     clearTimer()
+    animationCycleRef.current += 1
+    const cycle = animationCycleRef.current
     setDisplayedMessage(message)
-    setVisible(true)
     setMessage(null)
+    showToast()
 
     hideTimerRef.current = setTimeout(() => {
-      setVisible(false)
       hideTimerRef.current = null
+      hideToast(cycle)
     }, DISPLAY_DURATION)
-  }, [message, setMessage, clearTimer])
+  }, [clearTimer, hideToast, message, setMessage, showToast])
 
   useEffect(() => {
-    return clearTimer
-  }, [clearTimer])
-
-  useEffect(() => {
-    if (visible) {
-      opacity.setValue(0)
-      translateY.setValue(-10)
-
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: FADE_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: FADE_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start()
-    } else {
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: FADE_DURATION,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: -10,
-          duration: FADE_DURATION,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setDisplayedMessage(null)
-      })
+    return () => {
+      clearTimer()
+      cancelAnimation(opacity)
+      cancelAnimation(translateY)
     }
-  }, [visible, opacity, translateY])
+  }, [clearTimer, opacity, translateY])
 
-  const spaceTokens = getTokens().space
-  const radiusTokens = getTokens().radius
-
-  const pillStyle: ViewStyle = {
-    backgroundColor: theme.foregroundPrimary.val,
-    borderRadius: radiusTokens.$4.val,
-    paddingHorizontal: spaceTokens.$4.val,
-    paddingVertical: spaceTokens.$3.val,
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-
-  const labelStyle: TextStyle = {
-    fontFamily: bodyFont.family,
-    fontWeight: bodyFont.weight?.[6] as TextStyle['fontWeight'],
-    fontSize: bodyFont.size[2],
-    letterSpacing: bodyFont.letterSpacing[2],
-    color: theme.backgroundPrimary.val,
-  }
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{translateY: translateY.value}],
+  }))
 
   return (
-    <View style={[styles.container, {top: topOffset}]} pointerEvents="none">
-      <Animated.View style={[pillStyle, {opacity, transform: [{translateY}]}]}>
-        {displayedMessage ? (
-          <Text style={labelStyle}>{displayedMessage}</Text>
-        ) : null}
+    <ToastViewport top={topOffset} pointerEvents="none">
+      <Animated.View
+        accessibilityElementsHidden={!displayedMessage}
+        importantForAccessibility={
+          displayedMessage ? 'auto' : 'no-hide-descendants'
+        }
+        style={animatedStyle}
+      >
+        <ToastPill>
+          <ToastLabel>{displayedMessage ?? ''}</ToastLabel>
+        </ToastPill>
       </Animated.View>
-    </View>
+    </ToastViewport>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 9999,
-  },
-})

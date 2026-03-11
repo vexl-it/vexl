@@ -79,6 +79,7 @@ dist/
 
 /credentials/*
 /credentials.json
+.tamagui/
 
 # Maestro
 !.eas/build/build-and-maestro-test.yml

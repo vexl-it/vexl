@@ -1,4 +1,9 @@
-import {DefaultTheme, NavigationContainer} from '@react-navigation/native'
+import {
+  DarkTheme,
+  DefaultTheme,
+  NavigationContainer,
+} from '@react-navigation/native'
+import {useVexlTheme} from '@vexl-next/ui'
 import {StatusBar} from 'expo-status-bar'
 import React from 'react'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
@@ -29,6 +34,9 @@ import {useAppState} from './utils/useAppState'
 
 function App(): React.ReactElement {
   const theme = useTheme()
+  const {resolvedTheme} = useVexlTheme()
+  const isDarkTheme = resolvedTheme === 'dark'
+  const navigationTheme = isDarkTheme ? DarkTheme : DefaultTheme
 
   useAppState(setLastTimeAppWasRunningToNow)
 
@@ -45,9 +53,10 @@ function App(): React.ReactElement {
         <NavigationContainer
           ref={navigationRef}
           theme={{
-            dark: true,
+            ...navigationTheme,
+            dark: isDarkTheme,
             colors: {
-              ...DefaultTheme.colors,
+              ...navigationTheme.colors,
               primary: theme.background?.val,
               background: 'transparent',
               text: theme.color?.val,
@@ -93,10 +102,16 @@ function App(): React.ReactElement {
   )
 }
 
+const ThemeAvareStatusBar = (): React.ReactElement => {
+  const {resolvedTheme} = useVexlTheme()
+  const isDarkTheme = resolvedTheme === 'dark'
+  return <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
+}
+
 export default function _(): React.ReactElement {
   return (
     <ThemeProvider>
-      <StatusBar style="light" />
+      <ThemeAvareStatusBar />
       <AnimatedSplashScreen>
         <App />
       </AnimatedSplashScreen>

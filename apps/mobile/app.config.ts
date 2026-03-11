@@ -73,7 +73,7 @@ export default {
   'version': VERSION,
   'orientation': 'portrait',
   'icon': extra.icon,
-  'userInterfaceStyle': 'light',
+  'userInterfaceStyle': 'automatic',
   'jsEngine': 'hermes',
   'scheme': 'app.vexl.it',
   'platforms': ['ios', 'android'],

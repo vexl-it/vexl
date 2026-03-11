@@ -1,7 +1,7 @@
 import type {WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useEffect, useRef, useState} from 'react'
-import {Dimensions, Modal, Pressable, StyleSheet} from 'react-native'
+import {Dimensions, Modal} from 'react-native'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -44,6 +44,34 @@ export const DialogDescription = styled(SizableText, {
   letterSpacing: '$3',
   color: '$foregroundSecondary',
 })
+
+const DialogBackdrop = styled(Stack, {
+  name: 'DialogBackdrop',
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: '$black100',
+})
+
+const DialogViewport = styled(YStack, {
+  name: 'DialogViewport',
+  paddingTop: '$5',
+  paddingBottom: '$8',
+  paddingHorizontal: '$5',
+  gap: '$3',
+})
+
+const DialogCard = styled(YStack, {
+  name: 'DialogCard',
+  backgroundColor: '$backgroundSecondary',
+  borderRadius: '$5',
+  padding: '$5',
+  gap: '$5',
+})
+
+const AnimatedDialogBackdrop = Animated.createAnimatedComponent(DialogBackdrop)
 
 export interface DialogProps {
   readonly visible: boolean
@@ -118,40 +146,20 @@ export function Dialog({
       onRequestClose={onClose}
     >
       <Stack flex={1} justifyContent="flex-end">
-        <Animated.View style={[StyleSheet.absoluteFill, backdropAnimatedStyle]}>
-          <Pressable
-            style={[StyleSheet.absoluteFill, styles.backdrop]}
-            onPress={onClose}
-          />
-        </Animated.View>
+        <AnimatedDialogBackdrop
+          style={backdropAnimatedStyle}
+          onPress={onClose}
+        />
         <Animated.View style={contentAnimatedStyle}>
-          <YStack
-            paddingTop="$5"
-            paddingBottom="$8"
-            paddingHorizontal="$5"
-            gap="$3"
-          >
-            <YStack
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              padding="$5"
-              gap="$5"
-            >
-              {children}
-            </YStack>
+          <DialogViewport>
+            <DialogCard>{children}</DialogCard>
             {footer != null ? <XStack gap="$3">{footer}</XStack> : null}
-          </YStack>
+          </DialogViewport>
         </Animated.View>
       </Stack>
     </Modal>
   )
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    backgroundColor: 'black',
-  },
-})
 
 export interface DialogAtomConfig {
   readonly title: string

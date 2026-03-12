@@ -188,6 +188,7 @@ export default function updatePrivateParts({
   currentConnections,
   targetConnections,
   commonFriends,
+  verifiedFriends,
   adminId,
   symmetricKey,
   stopProcessingAfter,
@@ -211,6 +212,7 @@ export default function updatePrivateParts({
     >
   }
   commonFriends: CommonConnectionsForUsers
+  verifiedFriends: CommonConnectionsForUsers
   adminId: OfferAdminId
   symmetricKey: SymmetricKey
   stopProcessingAfter?: UnixMilliseconds
@@ -314,6 +316,7 @@ export default function updatePrivateParts({
           firstDegreeConnections: newFirstLevelConnections,
           secondDegreeConnections: newSecondLevelConnections ?? [],
           commonFriends,
+          verifiedFriends,
           clubsConnections: newClubsConnections,
         },
         symmetricKey,

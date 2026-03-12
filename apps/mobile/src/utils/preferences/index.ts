@@ -33,6 +33,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     defaultCurrency: currencies.USD.code,
     runTasksInParallel: true,
     sendReadReceipts: true,
+    showVerifiedContacts: false,
   },
   Preferences
 )
@@ -97,4 +98,8 @@ export const defaultCurrencyAtom = focusAtom(preferencesAtom, (o) =>
 
 export const sendReadReceiptsAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('sendReadReceipts')
+)
+
+export const showVerifiedContactsAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('showVerifiedContacts')
 )

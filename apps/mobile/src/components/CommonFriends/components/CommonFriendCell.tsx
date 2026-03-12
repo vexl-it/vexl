@@ -10,13 +10,21 @@ interface Props {
   contactId: Option.Option<NonUniqueContactId>
   name: string
   variant: 'light' | 'dark'
+  verified?: boolean
 }
 
 function CommonFriendCell({
   contactId,
   name,
   variant,
+  verified,
 }: Props): React.ReactElement {
+  const textColor = verified
+    ? '$yellowAccent1'
+    : variant === 'light'
+      ? '$greyOnWhite'
+      : '$white'
+
   return (
     <XStack ai="center" mr="$3">
       <ContactPictureImage
@@ -31,16 +39,15 @@ function CommonFriendCell({
             width={30}
             borderRadius={8}
             source={picturePlaceholderSvg}
-            fill={getTokens().color.greyOnWhite.val}
+            fill={
+              verified
+                ? getTokens().color.yellowAccent1.val
+                : getTokens().color.greyOnWhite.val
+            }
           />
         }
       />
-      <Text
-        ml="$2"
-        col={variant === 'light' ? '$greyOnWhite' : '$white'}
-        ff="$body500"
-        fos={12}
-      >
+      <Text ml="$2" col={textColor} ff="$body500" fos={12}>
         {name}
       </Text>
     </XStack>

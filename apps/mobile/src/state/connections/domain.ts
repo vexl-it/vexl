@@ -4,13 +4,16 @@ import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {CommonConnectionsForUsers} from '@vexl-next/domain/src/general/contacts'
 import {OfferAdminId, SymmetricKey} from '@vexl-next/domain/src/general/offers'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Schema} from 'effect'
+import {HashMap, Schema} from 'effect'
 
 export const ConnectionsState = Schema.Struct({
   lastUpdate: UnixMilliseconds,
   firstLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
   secondLevel: Schema.Array(Schema.Union(PublicKeyPemBase64, PublicKeyV2)),
   commonFriends: CommonConnectionsForUsers,
+  verifiedFriends: Schema.optionalWith(CommonConnectionsForUsers, {
+    default: () => HashMap.empty(),
+  }),
 })
 export type ConnectionsState = typeof ConnectionsState.Type
 

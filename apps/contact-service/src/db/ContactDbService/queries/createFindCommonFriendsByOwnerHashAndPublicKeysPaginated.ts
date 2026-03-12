@@ -20,6 +20,7 @@ export const FindCommonFriendsPaginatedResult = Schema.Struct({
   publicKey: PublicKeyPemBase64,
   publicKeyV2: Schema.NullOr(PublicKeyV2),
   commonFriends: Schema.Array(ServerHashedNumber),
+  verifiedFriends: Schema.Array(ServerHashedNumber),
   userContactId: Schema.NumberFromString,
 })
 export type FindCommonFriendsPaginatedResult =
@@ -37,11 +38,23 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
           MAX(imported_my_contact.id) AS user_contact_id,
           other_side.public_key AS public_key,
           other_side.public_key_v2 AS public_key_v2,
-          array_agg(DISTINCT imported_my_contact.hash_to) AS common_friends
+          array_agg(DISTINCT imported_my_contact.hash_to) AS common_friends,
+          COALESCE(
+            array_agg(DISTINCT imported_my_contact.hash_to) FILTER (
+              WHERE
+                reverse_to_requester.hash_from IS NOT NULL
+                AND reverse_to_other.hash_from IS NOT NULL
+            ),
+            ARRAY[]::VARCHAR[]
+          ) AS verified_friends
         FROM
           user_contact AS my_contact
           INNER JOIN user_contact AS imported_my_contact ON my_contact.hash_to = imported_my_contact.hash_to
           INNER JOIN users AS other_side ON other_side.hash = imported_my_contact.hash_from
+          LEFT JOIN user_contact AS reverse_to_requester ON reverse_to_requester.hash_from = imported_my_contact.hash_to
+          AND reverse_to_requester.hash_to = ${hash.ownerHash}
+          LEFT JOIN user_contact AS reverse_to_other ON reverse_to_other.hash_from = imported_my_contact.hash_to
+          AND reverse_to_other.hash_to = other_side.hash
         WHERE
           ${sql.and([
           sql`my_contact.hash_from = ${hash.ownerHash}`,

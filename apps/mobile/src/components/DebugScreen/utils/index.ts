@@ -253,6 +253,7 @@ export async function* simulateEncrypting5000Offers() {
     toPublicKey: generatePrivateKey().publicKeyPemBase64,
     payloadPrivate: {
       commonFriends: dummyPhoneNumbers,
+      verifiedCommonFriends: [],
       friendLevel: ['SECOND_DEGREE' as const],
       symmetricKey: 'symmetricKey' as SymmetricKey,
       adminId: 'adminId' as OfferAdminId,

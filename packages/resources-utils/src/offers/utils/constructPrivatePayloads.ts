@@ -52,6 +52,7 @@ export default function constructPrivatePayloads({
     firstDegreeConnections,
     secondDegreeConnections,
     commonFriends,
+    verifiedFriends,
     clubsConnections,
   },
   symmetricKey,
@@ -117,10 +118,19 @@ export default function constructPrivatePayloads({
           )
         })()
 
+        const verifiedFriendsToPayload = (() => {
+          if (isFromClub) return []
+          return Option.getOrElse(
+            HashMap.get(verifiedFriends, toPublicKey),
+            () => []
+          )
+        })()
+
         return {
           toPublicKey,
           payloadPrivate: {
             commonFriends: commonFriendsToPayload,
+            verifiedCommonFriends: verifiedFriendsToPayload,
             friendLevel: Array.fromIterable(friendLevelValue) ?? [],
             symmetricKey,
             clubIds: clubIdForKey,

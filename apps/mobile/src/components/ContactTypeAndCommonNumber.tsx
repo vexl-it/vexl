@@ -16,12 +16,14 @@ function ContactTypeAndCommonNumber({
   center,
   friendLevel,
   contactsHashes,
+  verifiedHashes,
   numberOfCommonFriends,
   clubsIds,
 }: {
   friendLevel: readonly FriendLevel[]
   numberOfCommonFriends: number
   contactsHashes: readonly HashedPhoneNumber[]
+  verifiedHashes?: readonly HashedPhoneNumber[]
   center?: boolean
   clubsIds?: readonly ClubUuid[]
 }): React.ReactElement {
@@ -62,6 +64,7 @@ function ContactTypeAndCommonNumber({
             onPress={() => {
               navigation.navigate('CommonFriends', {
                 contactsHashes,
+                verifiedHashes,
                 clubsIds: clubsIds ?? [],
               })
             }}

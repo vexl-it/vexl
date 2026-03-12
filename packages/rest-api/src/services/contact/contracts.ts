@@ -67,6 +67,7 @@ const CommonConnectionsForUserFromApi = Schema.Struct({
   publicKey: Schema.Union(PublicKeyPemBase64, PublicKeyV2),
   common: Schema.Struct({
     hashes: Schema.Array(ServerToClientHashedNumber),
+    verifiedHashes: Schema.Array(ServerToClientHashedNumber),
   }),
 })
 

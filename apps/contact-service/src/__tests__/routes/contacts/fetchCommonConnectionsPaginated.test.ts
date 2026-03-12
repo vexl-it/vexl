@@ -15,7 +15,9 @@ import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvir
 import {
   commonHeaders,
   createAndImportUsersFromNetwork,
+  createUserOnNetwork,
   generateKeysAndHasheForNumber,
+  importUsersFromNetwork,
   makeTestCommonAndSecurityHeaders,
   type DummyUser,
 } from './utils'
@@ -563,6 +565,187 @@ describe('Common connections paginated', () => {
         expect(firstCall.items).toEqual(secondCall.items)
         expect(firstCall.hasNext).toBe(secondCall.hasNext)
         expect(firstCall.nextPageToken).toBe(secondCall.nextPageToken)
+      })
+    )
+  })
+
+  it('verifiedHashes equals hashes when all contacts are bidirectional', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const me = networkOne[0]
+        const userContacts = Array.filter(
+          networkOne,
+          (u) => u.keys.publicKeyPemBase64 !== me.keys.publicKeyPemBase64
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          me.authHeaders
+        )
+
+        const connections = yield* _(
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload: {
+              publicKeys: Array.map(
+                userContacts,
+                (one) => one.keys.publicKeyPemBase64
+              ),
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        for (const {common} of connections.items) {
+          expect(
+            pipe(
+              common.verifiedHashes,
+              Array.sort(Order.string),
+              Array.join(',')
+            )
+          ).toEqual(
+            pipe(common.hashes, Array.sort(Order.string), Array.join(','))
+          )
+        }
+      })
+    )
+  })
+
+  it('verifiedHashes excludes common contacts that did not import both sides', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        // Create an asymmetric network:
+        // alice, bob, charlie where:
+        // - alice imports bob and charlie
+        // - bob imports alice and charlie
+        // - charlie imports alice only (NOT bob)
+        //
+        // When alice asks for common friends with bob:
+        //   common.hashes should include charlie (both alice and bob imported charlie)
+        //   common.verifiedHashes should NOT include charlie
+        //     because charlie did not import bob (charlie → bob is missing)
+
+        const alice = yield* _(generateKeysAndHasheForNumber('+420733444001'))
+        const bob = yield* _(generateKeysAndHasheForNumber('+420733444002'))
+        const charlie = yield* _(generateKeysAndHasheForNumber('+420733444003'))
+
+        // Create all users
+        yield* _(createUserOnNetwork(alice))
+        yield* _(createUserOnNetwork(bob))
+        yield* _(createUserOnNetwork(charlie))
+
+        // alice imports bob and charlie
+        yield* _(importUsersFromNetwork(alice, [bob, charlie]))
+        // bob imports alice and charlie
+        yield* _(importUsersFromNetwork(bob, [alice, charlie]))
+        // charlie imports alice only
+        yield* _(importUsersFromNetwork(charlie, [alice]))
+
+        yield* _(setAuthHeaders(alice.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          alice.authHeaders
+        )
+
+        const connections = yield* _(
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload: {
+              publicKeys: [bob.keys.publicKeyPemBase64],
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(connections.items.length).toBe(1)
+        const bobResult = connections.items[0]
+
+        // charlie should be in common.hashes (both alice and bob imported charlie)
+        expect(bobResult.common.hashes).toContain(
+          charlie.serverHashedNumberForClient
+        )
+
+        // charlie should NOT be in verifiedHashes
+        // because charlie did not import bob
+        expect(bobResult.common.verifiedHashes).not.toContain(
+          charlie.serverHashedNumberForClient
+        )
+        expect(bobResult.common.verifiedHashes).toEqual([])
+      })
+    )
+  })
+
+  it('verifiedHashes includes only contacts that imported both sides', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        // Network:
+        // alice, bob, charlie, dave where:
+        // - alice imports bob, charlie, dave
+        // - bob imports alice, charlie, dave
+        // - charlie imports alice and bob (bidirectional with both)
+        // - dave imports alice only (NOT bob)
+        //
+        // When alice asks for common friends with bob:
+        //   hashes: charlie, dave (both alice and bob imported them)
+        //   verifiedHashes: charlie only (charlie imported both alice and bob)
+        //   dave is NOT verified (dave did not import bob)
+
+        const alice = yield* _(generateKeysAndHasheForNumber('+420733555001'))
+        const bob = yield* _(generateKeysAndHasheForNumber('+420733555002'))
+        const charlie = yield* _(generateKeysAndHasheForNumber('+420733555003'))
+        const dave = yield* _(generateKeysAndHasheForNumber('+420733555004'))
+
+        yield* _(createUserOnNetwork(alice))
+        yield* _(createUserOnNetwork(bob))
+        yield* _(createUserOnNetwork(charlie))
+        yield* _(createUserOnNetwork(dave))
+
+        yield* _(importUsersFromNetwork(alice, [bob, charlie, dave]))
+        yield* _(importUsersFromNetwork(bob, [alice, charlie, dave]))
+        yield* _(importUsersFromNetwork(charlie, [alice, bob]))
+        yield* _(importUsersFromNetwork(dave, [alice]))
+
+        yield* _(setAuthHeaders(alice.authHeaders))
+        const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+          alice.authHeaders
+        )
+
+        const connections = yield* _(
+          app.Contact.fetchCommonConnectionsPaginated({
+            payload: {
+              publicKeys: [bob.keys.publicKeyPemBase64],
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(connections.items.length).toBe(1)
+        const bobResult = connections.items[0]
+
+        // Both charlie and dave should be in hashes
+        const sortedHashes = pipe(
+          bobResult.common.hashes,
+          Array.sort(Order.string)
+        )
+        const expectedHashes = pipe(
+          [
+            charlie.serverHashedNumberForClient,
+            dave.serverHashedNumberForClient,
+          ],
+          Array.sort(Order.string)
+        )
+        expect(sortedHashes).toEqual(expectedHashes)
+
+        // Only charlie should be in verifiedHashes
+        expect(bobResult.common.verifiedHashes).toEqual([
+          charlie.serverHashedNumberForClient,
+        ])
       })
     )
   })

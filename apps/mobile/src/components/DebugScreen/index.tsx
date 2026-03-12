@@ -773,6 +773,7 @@ function DebugScreen(): React.ReactElement {
                   firstLevel: [],
                   secondLevel: [],
                   commonFriends: HashMap.empty(),
+                  verifiedFriends: HashMap.empty(),
                 })
                 Alert.alert('Done')
               }}

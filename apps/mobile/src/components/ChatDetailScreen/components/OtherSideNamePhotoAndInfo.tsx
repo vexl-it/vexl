@@ -25,6 +25,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
     canSendMessagesAtom,
     commonConnectionsCountAtom,
     commonConnectionsHashesAtom,
+    verifiedConnectionsHashesAtom,
     friendLevelInfoAtom,
     otherSideGoldenAvatarTypeAtom,
     otherSideClubsIdsAtom,
@@ -35,6 +36,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
+  const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
@@ -91,6 +93,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
         />
         <ContactTypeAndCommonNumber
           contactsHashes={commonConnectionsHashes}
+          verifiedHashes={verifiedConnectionsHashes}
           friendLevel={friendLevelInfo}
           numberOfCommonFriends={commonConnectionsCount}
           center={mode === 'photoTop'}

@@ -3,12 +3,13 @@ import {useNavigation} from '@react-navigation/native'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {LinearGradient} from 'expo-linear-gradient'
-import {useStore} from 'jotai'
+import {useAtomValue, useStore} from 'jotai'
 import React, {useMemo} from 'react'
 import {Platform, ScrollView, StyleSheet, TouchableOpacity} from 'react-native'
 import {Stack, XStack, YStack, getTokens} from 'tamagui'
 import chevronRightSvg from '../../images/chevronRightSvg'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
+import {showVerifiedContactsAtom} from '../../utils/preferences'
 import Image from '../Image'
 import CommonClubCell from './components/CommonClubCell'
 import CommonFriendCell from './components/CommonFriendCell'
@@ -21,22 +22,45 @@ const styles = StyleSheet.create({
 
 interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
+  verifiedConnectionsHashes?: readonly HashedPhoneNumber[]
   variant: 'light' | 'dark'
   otherSideClubs: ClubInfo[]
 }
 
 function CommonFriends({
   commonConnectionsHashes,
+  verifiedConnectionsHashes,
   variant,
   otherSideClubs,
 }: Props): React.ReactElement | null {
   const tokens = getTokens()
   const store = useStore()
   const navigation = useNavigation()
+  const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
   const commonFriends = useMemo(
     () =>
       store.get(createImportedContactsForHashesAtom(commonConnectionsHashes)),
     [commonConnectionsHashes, store]
+  )
+
+  const verifiedHashesSet = useMemo(
+    () =>
+      showVerifiedContacts
+        ? new Set(verifiedConnectionsHashes ?? [])
+        : new Set<HashedPhoneNumber>(),
+    [verifiedConnectionsHashes, showVerifiedContacts]
+  )
+
+  const sortedCommonFriends = useMemo(
+    () =>
+      [...commonFriends].sort((a, b) => {
+        const aIsVerified = verifiedHashesSet.has(a.computedValues.hash)
+        const bIsVerified = verifiedHashesSet.has(b.computedValues.hash)
+        if (aIsVerified && !bIsVerified) return -1
+        if (!aIsVerified && bIsVerified) return 1
+        return 0
+      }),
+    [commonFriends, verifiedHashesSet]
   )
 
   if (commonFriends.length === 0) return null
@@ -48,6 +72,7 @@ function CommonFriends({
         onPress={() => {
           navigation.navigate('CommonFriends', {
             contactsHashes: commonConnectionsHashes,
+            verifiedHashes: verifiedConnectionsHashes,
             clubsIds: otherSideClubs.map((club) => club.uuid),
           })
         }}
@@ -82,12 +107,15 @@ function CommonFriends({
                       club={club}
                     />
                   ))}
-                  {commonFriends.slice(0, 5).map((friend) => (
+                  {sortedCommonFriends.slice(0, 5).map((friend) => (
                     <CommonFriendCell
                       key={friend.computedValues.hash}
                       name={friend.info.name}
                       contactId={friend.info.nonUniqueContactId}
                       variant={variant}
+                      verified={verifiedHashesSet.has(
+                        friend.computedValues.hash
+                      )}
                     />
                   ))}
                 </XStack>
@@ -105,12 +133,13 @@ function CommonFriends({
                     club={club}
                   />
                 ))}
-                {commonFriends.slice(0, 5).map((friend) => (
+                {sortedCommonFriends.slice(0, 5).map((friend) => (
                   <CommonFriendCell
                     key={`${friend.computedValues.hash} - ${friend.info.name}`}
                     name={friend.info.name}
                     contactId={friend.info.nonUniqueContactId}
                     variant={variant}
+                    verified={verifiedHashesSet.has(friend.computedValues.hash)}
                   />
                 ))}
               </ScrollView>

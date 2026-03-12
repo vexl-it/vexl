@@ -23,6 +23,7 @@ function ChatRequestPreview({
     offerForChatAtom,
     chatAtom,
     commonConnectionsHashesAtom,
+    verifiedConnectionsHashesAtom,
     requestMessageAtom,
     otherSideClubsIdsAtom,
   } = useMolecule(chatMolecule)
@@ -30,6 +31,7 @@ function ChatRequestPreview({
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
+  const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const requestMessage = useAtomValue(requestMessageAtom)
   const otherSideClubs = useGetAllClubsForIds(
     useAtomValue(otherSideClubsIdsAtom) ?? []
@@ -47,6 +49,7 @@ function ChatRequestPreview({
           <Stack mx="$-4">
             <CommonFriends
               commonConnectionsHashes={commonConnectionsHashes}
+              verifiedConnectionsHashes={verifiedConnectionsHashes}
               variant="light"
               otherSideClubs={otherSideClubs}
             />

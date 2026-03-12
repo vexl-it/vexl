@@ -37,6 +37,7 @@ export function constructPrivatePayloadForOwner({
       ownerKeyPairV2?.publicKey ?? ownerCredentials.publicKeyPemBase64,
     payloadPrivate: {
       commonFriends: [],
+      verifiedCommonFriends: [],
       clubIds: [],
       friendLevel: [],
       symmetricKey,

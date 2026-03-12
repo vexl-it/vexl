@@ -10,7 +10,7 @@ import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {FETCH_CONNECTIONS_PAGE_SIZE} from '@vexl-next/resources-utils/src/offers/utils/fetchContactsForOffer'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, flow, HashMap, Option} from 'effect'
+import {Array, Effect, HashMap, Option} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {atom, type Atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -34,6 +34,7 @@ const connectionStateAtom = atomWithParsedMmkvStorage(
     firstLevel: [],
     secondLevel: [],
     commonFriends: HashMap.empty(),
+    verifiedFriends: HashMap.empty(),
   },
   ConnectionsState
 )
@@ -138,7 +139,7 @@ export const syncConnectionsActionAtom = atom(
         set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
       )
 
-      const commonFriends = yield* _(
+      const commonConnectionsData = yield* _(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
             api.contact.fetchCommonConnectionsPaginated({
@@ -146,25 +147,37 @@ export const syncConnectionsActionAtom = atom(
               limit: FETCH_CONNECTIONS_PAGE_SIZE,
               nextPageToken,
             }),
-        }),
-        Effect.map(
-          flow(
-            Array.map(
-              (one) =>
-                [
-                  one.publicKey,
-                  Array.filterMap(one.common.hashes, (hash) =>
-                    HashMap.get(
-                      serverToClientHashesToHashedPhoneNumbersMap,
-                      hash
-                    )
-                  ),
-                ] as const
-            ),
-            HashMap.fromIterable
-          )
-        )
+        })
       )
+
+      const commonFriends = pipe(
+        commonConnectionsData,
+        Array.map(
+          (one) =>
+            [
+              one.publicKey,
+              Array.filterMap(one.common.hashes, (hash) =>
+                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              ),
+            ] as const
+        ),
+        HashMap.fromIterable
+      )
+
+      const verifiedFriends = pipe(
+        commonConnectionsData,
+        Array.map(
+          (one) =>
+            [
+              one.publicKey,
+              Array.filterMap(one.common.verifiedHashes, (hash) =>
+                HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+              ),
+            ] as const
+        ),
+        HashMap.fromIterable
+      )
+
       const lastUpdate = updateStarted
 
       void showDebugNotificationIfEnabled({
@@ -177,6 +190,7 @@ export const syncConnectionsActionAtom = atom(
         firstLevel,
         secondLevel,
         commonFriends,
+        verifiedFriends,
         lastUpdate,
       })
     }).pipe(

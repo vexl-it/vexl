@@ -847,6 +847,7 @@
   "progressBar.SENDING_OFFER_TO_NETWORK": "Téléchargement de l'offre",
   "progressBar.DONE": "Terminé",
   "commonFriends.commonFriends": "Amis communs",
+  "commonFriends.verifiedFriends": "Amis vérifiés",
   "commonFriends.call": "Appel",
   "reportIssue.openInEmail": "Ouvrir dans un e-mail",
   "reportIssue.somethingWentWrong": "Un problème s'est produit",

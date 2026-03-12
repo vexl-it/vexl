@@ -63,6 +63,8 @@ const sendRequestActionAtom = atom(
           goldenAvatarType,
           forClubsUuids,
           commonFriends: originOffer.offerInfo.privatePart.commonFriends,
+          verifiedCommonFriends:
+            originOffer.offerInfo.privatePart.verifiedCommonFriends,
           friendLevel: originOffer.offerInfo.privatePart.friendLevel,
         })
       )

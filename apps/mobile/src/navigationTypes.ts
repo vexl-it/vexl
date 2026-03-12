@@ -81,6 +81,7 @@ export type RootStackParamsList = {
 
   CommonFriends: {
     contactsHashes: readonly HashedPhoneNumber[]
+    verifiedHashes?: readonly HashedPhoneNumber[]
     clubsIds: readonly ClubUuid[]
   }
 

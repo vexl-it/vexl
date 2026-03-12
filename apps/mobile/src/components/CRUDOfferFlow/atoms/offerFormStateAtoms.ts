@@ -262,6 +262,7 @@ export const offerFormMolecule = molecule(() => {
           Schema.decodeSync(HashedPhoneNumber)('Mike'),
           Schema.decodeSync(HashedPhoneNumber)('John'),
         ],
+        verifiedCommonFriends: [],
         friendLevel: ['FIRST_DEGREE'],
         symmetricKey: Schema.decodeSync(SymmetricKey)('symmetricKey'),
         clubIds: [],

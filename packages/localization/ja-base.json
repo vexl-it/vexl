@@ -847,6 +847,7 @@
   "progressBar.SENDING_OFFER_TO_NETWORK": "オファーをアップロード中",
   "progressBar.DONE": "完了",
   "commonFriends.commonFriends": "共通の友達",
+  "commonFriends.verifiedFriends": "認証済みの友達",
   "commonFriends.call": "通話",
   "reportIssue.openInEmail": "メールで開く",
   "reportIssue.somethingWentWrong": "問題が発生しました?",

@@ -847,6 +847,7 @@
   "progressBar.SENDING_OFFER_TO_NETWORK": "正在上传报价",
   "progressBar.DONE": "完成",
   "commonFriends.commonFriends": "共同好友",
+  "commonFriends.verifiedFriends": "已验证好友",
   "commonFriends.call": "拨号",
   "reportIssue.openInEmail": "在电子邮件中打开",
   "reportIssue.somethingWentWrong": "出了什么问题吗？",

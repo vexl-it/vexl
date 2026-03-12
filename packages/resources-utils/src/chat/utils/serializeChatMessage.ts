@@ -59,6 +59,7 @@ export default function serializeChatMessage(
       lastReceivedFcmCypher: message.lastReceivedFcmCypher,
       senderClubsUuids: message.senderClubsUuids,
       commonFriends: message.commonFriends,
+      verifiedCommonFriends: message.verifiedCommonFriends,
       friendLevel: message.friendLevel,
     } satisfies ChatMessagePayload,
     Schema.decodeUnknownEither(ChatMessagePayload),

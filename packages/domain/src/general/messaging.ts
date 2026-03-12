@@ -100,6 +100,7 @@ export const ChatMessagePayload = Schema.Struct({
   lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessagePayload = typeof ChatMessagePayload.Type
@@ -140,6 +141,7 @@ export const ChatMessage = Schema.Struct({
   lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   senderClubsUuids: Schema.optional(Schema.Array(ClubUuid)),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessage = typeof ChatMessage.Type
@@ -248,6 +250,7 @@ export const ChatMessageRequiringNewerVersion = Schema.Struct({
   myVexlToken: Schema.optional(VexlNotificationToken),
   lastReceivedVexlToken: Schema.optional(VexlNotificationToken),
   commonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
+  verifiedCommonFriends: Schema.optional(Schema.Array(HashedPhoneNumber)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
 })
 export type ChatMessageRequiringNewerVersion =

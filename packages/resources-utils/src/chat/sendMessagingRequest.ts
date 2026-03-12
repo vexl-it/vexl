@@ -41,6 +41,7 @@ function createRequestChatMessage({
   goldenAvatarType,
   senderClubsUuids,
   commonFriends,
+  verifiedCommonFriends,
   friendLevel,
 }: {
   text: string
@@ -51,6 +52,7 @@ function createRequestChatMessage({
   goldenAvatarType?: GoldenAvatarType
   senderClubsUuids: readonly ClubUuid[]
   commonFriends?: readonly HashedPhoneNumber[]
+  verifiedCommonFriends?: readonly HashedPhoneNumber[]
   friendLevel?: readonly FriendLevel[]
 }): ChatMessage {
   return {
@@ -65,6 +67,7 @@ function createRequestChatMessage({
     goldenAvatarType,
     senderClubsUuids,
     commonFriends,
+    verifiedCommonFriends,
     friendLevel,
   }
 }
@@ -87,6 +90,7 @@ export function sendMessagingRequest({
   goldenAvatarType,
   forClubsUuids,
   commonFriends,
+  verifiedCommonFriends,
   friendLevel,
 }: {
   text: string
@@ -102,6 +106,7 @@ export function sendMessagingRequest({
   goldenAvatarType?: GoldenAvatarType
   forClubsUuids: readonly ClubUuid[]
   commonFriends?: readonly HashedPhoneNumber[]
+  verifiedCommonFriends?: readonly HashedPhoneNumber[]
   friendLevel?: readonly FriendLevel[]
 }): Effect.Effect<
   ChatMessage,
@@ -124,6 +129,7 @@ export function sendMessagingRequest({
       goldenAvatarType,
       senderClubsUuids: forClubsUuids,
       commonFriends,
+      verifiedCommonFriends,
       friendLevel,
     })
 

@@ -11,9 +11,10 @@ import picturePlaceholderSvg from '../../images/picturePlaceholderSvg'
 
 interface Props {
   friend: StoredContactWithComputedValues
+  verified?: boolean
 }
 
-function CommonFriendsListItem({friend}: Props): React.ReactElement {
+function CommonFriendsListItem({friend, verified}: Props): React.ReactElement {
   const {t} = useTranslation()
   const dialFriend = useCallback(() => {
     openUrl(`tel:${friend.computedValues.normalizedNumber}`)()
@@ -40,7 +41,12 @@ function CommonFriendsListItem({friend}: Props): React.ReactElement {
         }
       />
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff="$body500" fos={18} mb="$2" col="$black">
+        <Text
+          ff="$body500"
+          fos={18}
+          mb="$2"
+          col={verified ? '$yellowAccent1' : '$black'}
+        >
           {friend.info.name}
         </Text>
         <Text ff="$body600" col="$greyOnBlack" fos={14}>

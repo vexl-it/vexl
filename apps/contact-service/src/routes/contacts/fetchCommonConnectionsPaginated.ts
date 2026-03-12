@@ -85,12 +85,15 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
         toReturn.items,
         Array.map((oneContact) =>
           pipe(
-            hashForClientBatch(oneContact.commonFriends),
-            Effect.map((hashes) => ({
+            Effect.all({
+              hashes: hashForClientBatch(oneContact.commonFriends),
+              verifiedHashes: hashForClientBatch(oneContact.verifiedFriends),
+            }),
+            Effect.map(({hashes, verifiedHashes}) => ({
               publicKey: clientSupportsV2Keys
                 ? (oneContact.publicKeyV2 ?? oneContact.publicKey)
                 : oneContact.publicKey,
-              common: {hashes},
+              common: {hashes, verifiedHashes},
             }))
           )
         ),

@@ -346,6 +346,19 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       : (offer?.offerInfo.privatePart.commonFriends ?? [])
   })
 
+  const verifiedConnectionsHashesAtom = atom((get) => {
+    const offer = get(offerForChatAtom)
+    const verifiedCommonFriendsForMyOffer = pipe(
+      get(requestMessageAtom),
+      Option.map((message) => message.message.verifiedCommonFriends),
+      Option.getOrElse(() => [] as const)
+    )
+
+    return offer?.ownershipInfo
+      ? verifiedCommonFriendsForMyOffer
+      : (offer?.offerInfo.privatePart.verifiedCommonFriends ?? [])
+  })
+
   const commonConnectionsCountAtom = selectAtom(
     commonConnectionsHashesAtom,
     (connections) => connections.length
@@ -1239,6 +1252,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     nameAtom,
     chatWithMessagesAtom,
     commonConnectionsHashesAtom,
+    verifiedConnectionsHashesAtom,
     commonConnectionsCountAtom,
     messagesAtom,
     messageAtomAtoms,

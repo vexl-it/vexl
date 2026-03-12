@@ -164,6 +164,7 @@ export function chatMessagePayloadToChatMessage(
     lastReceivedFcmCypher: payload.lastReceivedFcmCypher,
     senderClubsUuids: payload.senderClubsUuids,
     commonFriends: payload.commonFriends,
+    verifiedCommonFriends: payload.verifiedCommonFriends,
     friendLevel: payload.friendLevel,
   })
 }

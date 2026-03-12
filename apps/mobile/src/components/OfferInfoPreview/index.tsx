@@ -117,6 +117,7 @@ function OfferInfoPreview({
         <Stack py="$2">
           <CommonFriends
             commonConnectionsHashes={offer.privatePart.commonFriends}
+            verifiedConnectionsHashes={offer.privatePart.verifiedCommonFriends}
             variant="light"
             otherSideClubs={clubsForOffer}
           />

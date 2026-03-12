@@ -13,7 +13,7 @@ import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers
 import {type ServerToClientHashedNumber} from '@vexl-next/domain/src/general/ServerToClientHashedNumber'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
-import {Array, Effect, flow, HashMap, pipe, Record} from 'effect'
+import {Array, Effect, HashMap, pipe, Record} from 'effect'
 
 export const FETCH_CONNECTIONS_PAGE_SIZE = 500
 
@@ -21,6 +21,7 @@ export interface ConnectionsInfoForOffer {
   firstDegreeConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
   secondDegreeConnections: Array<PublicKeyPemBase64 | PublicKeyV2>
   commonFriends: CommonConnectionsForUsers
+  verifiedFriends: CommonConnectionsForUsers
   clubsConnections: Record<
     ClubUuid,
     ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>
@@ -76,7 +77,7 @@ export default function fetchContactsForOffer({
             })
           )
 
-    const commonFriends = yield* _(
+    const commonConnectionsData = yield* _(
       fetchAllPaginatedData({
         fetchEffectToRun: (nextPageToken) =>
           contactApi.fetchCommonConnectionsPaginated({
@@ -87,21 +88,35 @@ export default function fetchContactsForOffer({
             nextPageToken,
             limit: FETCH_CONNECTIONS_PAGE_SIZE,
           }),
-      }),
-      Effect.map(
-        flow(
-          Array.map(
-            (one) =>
-              [
-                one.publicKey,
-                Array.filterMap(one.common.hashes, (hash) =>
-                  HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
-                ),
-              ] as const
-          ),
-          HashMap.fromIterable
-        )
-      )
+      })
+    )
+
+    const commonFriends = pipe(
+      commonConnectionsData,
+      Array.map(
+        (one) =>
+          [
+            one.publicKey,
+            Array.filterMap(one.common.hashes, (hash) =>
+              HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+            ),
+          ] as const
+      ),
+      HashMap.fromIterable
+    )
+
+    const verifiedFriends = pipe(
+      commonConnectionsData,
+      Array.map(
+        (one) =>
+          [
+            one.publicKey,
+            Array.filterMap(one.common.verifiedHashes, (hash) =>
+              HashMap.get(serverToClientHashesToHashedPhoneNumbersMap, hash)
+            ),
+          ] as const
+      ),
+      HashMap.fromIterable
     )
 
     const clubsConnections = yield* _(
@@ -128,6 +143,7 @@ export default function fetchContactsForOffer({
       firstDegreeConnections,
       secondDegreeConnections,
       commonFriends,
+      verifiedFriends,
       clubsConnections,
     } satisfies ConnectionsInfoForOffer
   })

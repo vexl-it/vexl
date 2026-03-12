@@ -74,6 +74,9 @@ export const Preferences = Schema.Struct({
   sendReadReceipts: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
+  showVerifiedContacts: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
 })
 
 export type Preferences = typeof Preferences.Type

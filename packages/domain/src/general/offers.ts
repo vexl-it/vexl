@@ -135,6 +135,9 @@ export type PrivatePartRecordId = typeof PrivatePartRecordId.Type
 
 export const OfferPrivatePart = Schema.Struct({
   commonFriends: Schema.Array(HashedPhoneNumber),
+  verifiedCommonFriends: Schema.optionalWith(Schema.Array(HashedPhoneNumber), {
+    default: () => [],
+  }),
   friendLevel: Schema.Array(FriendLevel),
   symmetricKey: SymmetricKey,
   clubIds: Schema.optionalWith(Schema.Array(ClubUuid), {

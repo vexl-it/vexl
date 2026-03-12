@@ -14,6 +14,7 @@ const preferencesToEdit = [
   'isDeveloper',
   'showOfferDetail',
   'runTasksInParallel',
+  'showVerifiedContacts',
 ] as const
 
 function Preferences(): React.ReactElement {

@@ -6,85 +6,20 @@ import {
   SizableText,
   Stack,
   Theme,
-  TuneSettings,
-  UserProfile,
+  useScreenFooterHeight,
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
+import {useAtomValue} from 'jotai'
 import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
 
-const TOP_INSET = 59
-const BOTTOM_INSET = 34
-
 type ActiveExample =
-  | 'main-dark'
-  | 'main-light'
   | 'backFooter-dark'
   | 'backFooter-light'
-  | 'scrolled-dark'
-  | 'scrolled-light'
-  | 'graphicHeader-dark'
-  | 'graphicHeader-light'
+  | 'scrollFooter-dark'
+  | 'scrollFooter-light'
   | null
-
-function MainStyleExample({
-  onBack,
-  theme,
-}: {
-  readonly onBack: () => void
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  return (
-    <Theme name={theme}>
-      <YStack flex={1}>
-        <Screen
-          topInset={TOP_INSET}
-          bottomInset={BOTTOM_INSET}
-          navigationBar={
-            <NavigationBar
-              style="main"
-              title="Marketplace"
-              rightActions={[
-                {icon: TuneSettings, onPress: () => {}},
-                {icon: UserProfile, onPress: onBack},
-              ]}
-            />
-          }
-        >
-          <YStack gap="$5" paddingTop="$5">
-            {Array.from({length: 20}, (_, i) => (
-              <YStack
-                key={i}
-                backgroundColor="$backgroundSecondary"
-                borderRadius="$5"
-                padding="$5"
-                gap="$3"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="600"
-                  fontSize="$2"
-                  color="$foregroundPrimary"
-                >
-                  {`Card item ${i + 1}`}
-                </SizableText>
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize="$2"
-                  color="$foregroundSecondary"
-                >
-                  Scrollable content demo
-                </SizableText>
-              </YStack>
-            ))}
-          </YStack>
-        </Screen>
-      </YStack>
-    </Theme>
-  )
-}
 
 function BackStyleWithFooterExample({
   onBack,
@@ -97,8 +32,6 @@ function BackStyleWithFooterExample({
     <Theme name={theme}>
       <YStack flex={1}>
         <Screen
-          topInset={TOP_INSET}
-          bottomInset={BOTTOM_INSET}
           navigationBar={
             <NavigationBar
               style="back"
@@ -113,7 +46,7 @@ function BackStyleWithFooterExample({
             </Button>
           }
         >
-          <YStack gap="$8" paddingTop="$5">
+          <YStack gap="$8">
             <SizableText
               fontFamily="$body"
               fontWeight="500"
@@ -145,70 +78,45 @@ function BackStyleWithFooterExample({
   )
 }
 
-function ScrolledNavExample({
-  onBack,
-  theme,
-}: {
-  readonly onBack: () => void
-  readonly theme: 'light' | 'dark'
-}): React.JSX.Element {
-  const [scrolled, setScrolled] = useState(false)
+function ScrollWithFooterContent(): React.JSX.Element {
+  const {footerHeightAtom} = useScreenFooterHeight()
+  const footerHeight = useAtomValue(footerHeightAtom)
 
   return (
-    <Theme name={theme}>
-      <YStack flex={1}>
-        <Screen
-          topInset={TOP_INSET}
-          bottomInset={BOTTOM_INSET}
-          navigationBar={
-            <NavigationBar
-              style="main"
-              title="Community"
-              scrolled={scrolled}
-              rightActions={[{icon: UserProfile, onPress: onBack}]}
-            />
-          }
-        >
+    <ScrollView contentContainerStyle={{paddingBottom: footerHeight}}>
+      <YStack gap="$5">
+        {Array.from({length: 20}, (_, i) => (
           <YStack
-            gap="$5"
-            paddingTop="$5"
-            onLayout={() => {
-              setScrolled(false)
-            }}
+            key={i}
+            backgroundColor="$backgroundSecondary"
+            borderRadius="$5"
+            padding="$5"
+            gap="$3"
           >
             <SizableText
               fontFamily="$body"
+              fontWeight="600"
+              fontSize="$2"
+              color="$foregroundPrimary"
+            >
+              {`Option ${i + 1}`}
+            </SizableText>
+            <SizableText
+              fontFamily="$body"
               fontWeight="500"
               fontSize="$2"
               color="$foregroundSecondary"
             >
-              Scroll down to see the navigation bar background change
+              Scrollable content with sticky footer
             </SizableText>
-            {Array.from({length: 20}, (_, i) => (
-              <YStack
-                key={i}
-                backgroundColor="$backgroundSecondary"
-                borderRadius="$5"
-                padding="$5"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize="$2"
-                  color="$foregroundPrimary"
-                >
-                  {`Item ${i + 1}`}
-                </SizableText>
-              </YStack>
-            ))}
           </YStack>
-        </Screen>
+        ))}
       </YStack>
-    </Theme>
+    </ScrollView>
   )
 }
 
-function GraphicHeaderExample({
+function ScrollWithFooterExample({
   onBack,
   theme,
 }: {
@@ -219,58 +127,20 @@ function GraphicHeaderExample({
     <Theme name={theme}>
       <YStack flex={1}>
         <Screen
-          topInset={TOP_INSET}
-          bottomInset={BOTTOM_INSET}
-          graphicHeader
           navigationBar={
             <NavigationBar
-              style="main"
-              title="Chats"
-              scrolled={false}
-              rightActions={[
-                {icon: TuneSettings, onPress: () => {}},
-                {icon: UserProfile, onPress: onBack},
-              ]}
+              style="back"
+              title="Select options"
+              leftAction={{icon: ChevronLeft, onPress: onBack}}
             />
           }
+          footer={
+            <Button variant="primary" size="large">
+              Confirm
+            </Button>
+          }
         >
-          <YStack gap="$5" paddingTop="$5">
-            <SizableText
-              fontFamily="$body"
-              fontWeight="500"
-              fontSize="$2"
-              color="$foregroundSecondary"
-            >
-              Navigation bar floats over content. Scroll to see it get a
-              background.
-            </SizableText>
-            {Array.from({length: 20}, (_, i) => (
-              <YStack
-                key={i}
-                backgroundColor="$backgroundSecondary"
-                borderRadius="$5"
-                padding="$5"
-                gap="$3"
-              >
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="600"
-                  fontSize="$2"
-                  color="$foregroundPrimary"
-                >
-                  {`Chat item ${i + 1}`}
-                </SizableText>
-                <SizableText
-                  fontFamily="$body"
-                  fontWeight="500"
-                  fontSize="$2"
-                  color="$foregroundSecondary"
-                >
-                  Message preview text
-                </SizableText>
-              </YStack>
-            ))}
-          </YStack>
+          <ScrollWithFooterContent />
         </Screen>
       </YStack>
     </Theme>
@@ -281,14 +151,10 @@ const examples: ReadonlyArray<{
   readonly key: ActiveExample & string
   readonly label: string
 }> = [
-  {key: 'main-dark', label: 'Main style (dark)'},
-  {key: 'main-light', label: 'Main style (light)'},
   {key: 'backFooter-dark', label: 'Back style with footer (dark)'},
   {key: 'backFooter-light', label: 'Back style with footer (light)'},
-  {key: 'scrolled-dark', label: 'Scrolled nav background (dark)'},
-  {key: 'scrolled-light', label: 'Scrolled nav background (light)'},
-  {key: 'graphicHeader-dark', label: 'Graphic header (dark)'},
-  {key: 'graphicHeader-light', label: 'Graphic header (light)'},
+  {key: 'scrollFooter-dark', label: 'Scroll with footer (dark)'},
+  {key: 'scrollFooter-light', label: 'Scroll with footer (light)'},
 ]
 
 function ActiveScreen({
@@ -300,13 +166,9 @@ function ActiveScreen({
 }): React.JSX.Element {
   const theme = active.endsWith('-light') ? 'light' : 'dark'
 
-  if (active.startsWith('main'))
-    return <MainStyleExample onBack={onBack} theme={theme} />
-  if (active.startsWith('backFooter'))
-    return <BackStyleWithFooterExample onBack={onBack} theme={theme} />
-  if (active.startsWith('graphicHeader'))
-    return <GraphicHeaderExample onBack={onBack} theme={theme} />
-  return <ScrolledNavExample onBack={onBack} theme={theme} />
+  if (active.startsWith('scrollFooter'))
+    return <ScrollWithFooterExample onBack={onBack} theme={theme} />
+  return <BackStyleWithFooterExample onBack={onBack} theme={theme} />
 }
 
 export function ScreenScreen(): React.JSX.Element {

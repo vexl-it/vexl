@@ -1,19 +1,14 @@
-import {Screen} from '@vexl-next/ui'
 import React from 'react'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import InsideNavigationBar from '../InsideNavigationBar'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {InsideScreen} from '../InsideScreen'
 
 function CommunityScreen(): React.JSX.Element {
-  const insets = useSafeAreaInsets()
+  const {t} = useTranslation()
 
   return (
-    <Screen
-      graphicHeader
-      topInset={insets.top}
-      navigationBar={<InsideNavigationBar />}
-    >
+    <InsideScreen title={t('tabBar.community')}>
       <></>
-    </Screen>
+    </InsideScreen>
   )
 }
 

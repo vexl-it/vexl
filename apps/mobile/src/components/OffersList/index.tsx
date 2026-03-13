@@ -1,6 +1,7 @@
 import {
   FlashList,
   type FlashListProps,
+  type FlashListRef,
   type ListRenderItemInfo,
 } from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
@@ -23,44 +24,52 @@ function renderItem(
   return <OffersListItem isFirst={info.index === 0} offerAtom={info.item} />
 }
 
-function OffersList({
-  onRefresh,
-  refreshing,
-  offersAtoms,
-  ListHeaderComponent,
-  ListFooterComponent,
-  ...props
-}: Props): React.ReactElement {
-  const bottomOffset = usePixelsFromBottomWhereTabsEnd()
+const OffersList = React.forwardRef<FlashListRef<Atom<OneOfferInState>>, Props>(
+  function OffersList(
+    {
+      onRefresh,
+      refreshing,
+      offersAtoms,
+      ListHeaderComponent,
+      ListFooterComponent,
+      contentContainerStyle: externalContentContainerStyle,
+      ...props
+    },
+    ref
+  ) {
+    const bottomOffset = usePixelsFromBottomWhereTabsEnd()
 
-  const contentContainerStyle = useMemo(
-    () => ({
-      paddingBottom: bottomOffset + Number(getTokens().space[5].val),
-    }),
-    [bottomOffset]
-  )
+    const contentContainerStyle = useMemo(
+      () => ({
+        paddingBottom: bottomOffset + Number(getTokens().space[5].val),
+        ...externalContentContainerStyle,
+      }),
+      [bottomOffset, externalContentContainerStyle]
+    )
 
-  return (
-    <FlashList
-      indicatorStyle="white"
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing ?? false}
-          onRefresh={onRefresh ?? (() => {})}
-          tintColor={getTokens().color.greyAccent5.val}
-        />
-      }
-      progressViewOffset={20}
-      ListHeaderComponent={ListHeaderComponent}
-      ListFooterComponent={ListFooterComponent}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={contentContainerStyle}
-      data={offersAtoms}
-      renderItem={renderItem}
-      keyExtractor={atomKeyExtractor}
-      {...props}
-    />
-  )
-}
+    return (
+      <FlashList
+        ref={ref}
+        indicatorStyle="white"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing ?? false}
+            onRefresh={onRefresh ?? (() => {})}
+            tintColor={getTokens().color.greyAccent5.val}
+          />
+        }
+        progressViewOffset={20}
+        ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={ListFooterComponent}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={contentContainerStyle}
+        data={offersAtoms}
+        renderItem={renderItem}
+        keyExtractor={atomKeyExtractor}
+        {...props}
+      />
+    )
+  }
+)
 
 export default OffersList

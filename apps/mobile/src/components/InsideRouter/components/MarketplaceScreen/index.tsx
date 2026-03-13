@@ -1,39 +1,34 @@
-import {Screen} from '@vexl-next/ui'
-import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {refreshOffersActionAtom} from '../../../../state/marketplace/atoms/refreshOffersActionAtom'
-import {useHandleRedirectToContactsScreen} from '../../../../state/useHandleRedirectToContactsScreen'
-import {useAppState} from '../../../../utils/useAppState'
-import InsideNavigationBar from '../InsideNavigationBar'
-import OffersListStateDisplayerContent from './components/OffersListStateDisplayerContent'
+import {type TabItem} from '@vexl-next/ui'
+import React, {useMemo, useState} from 'react'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {InsideScreen} from '../InsideScreen'
+import MarketplaceScreenContent from './components/MarketplaceScreenContent'
+
+export type MarketplaceTab = 'allOffers' | 'myOffers'
+
+function useTabs(): ReadonlyArray<TabItem<MarketplaceTab>> {
+  const {t} = useTranslation()
+  return useMemo(
+    () => [
+      {label: t('common.allOffers'), value: 'allOffers'},
+      {label: t('common.myOffers'), value: 'myOffers'},
+    ],
+    [t]
+  )
+}
 
 function MarketplaceScreen(): React.ReactElement {
-  const insets = useSafeAreaInsets()
-  const refreshOffers = useSetAtom(refreshOffersActionAtom)
-
-  useHandleRedirectToContactsScreen()
-
-  useAppState(
-    useCallback(
-      (state) => {
-        if (state === 'active') {
-          Effect.runFork(refreshOffers())
-        }
-      },
-      [refreshOffers]
-    )
-  )
+  const [activeTab, setActiveTab] = useState<MarketplaceTab>('allOffers')
+  const tabs = useTabs()
+  const title = tabs.find((tab) => tab.value === activeTab)?.label ?? ''
 
   return (
-    <Screen
-      graphicHeader
-      topInset={insets.top}
-      navigationBar={<InsideNavigationBar />}
-    >
-      <OffersListStateDisplayerContent />
-    </Screen>
+    <InsideScreen title={title}>
+      <MarketplaceScreenContent
+        activeTab={activeTab}
+        onActiveTabChange={setActiveTab}
+      />
+    </InsideScreen>
   )
 }
 

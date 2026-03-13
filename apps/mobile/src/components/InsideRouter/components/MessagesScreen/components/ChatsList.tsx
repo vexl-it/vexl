@@ -1,6 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
-import {useScreenScroll} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import React from 'react'
@@ -13,6 +12,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
+import {useInsideScreenScroll} from '../../InsideScreen'
 import ChatListItem, {type ChatListData} from './ChatListItem'
 
 const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
@@ -45,9 +45,9 @@ function renderItem({item}: {item: Atom<ChatListData>}): React.ReactElement {
 function ChatsList(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const {onScroll} = useScreenScroll()
   const elementAtoms = useAtomValue(chatIdAtomsAtom)
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
+  const {onScroll} = useInsideScreenScroll()
 
   if (elementAtoms.length === 0) {
     return (

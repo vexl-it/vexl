@@ -1,20 +1,15 @@
-import {Screen} from '@vexl-next/ui'
 import React from 'react'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import InsideNavigationBar from '../InsideNavigationBar'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {InsideScreen} from '../InsideScreen'
 import ChatsList from './components/ChatsList'
 
 function MessagesScreen(): React.ReactElement {
-  const insets = useSafeAreaInsets()
+  const {t} = useTranslation()
 
   return (
-    <Screen
-      graphicHeader
-      topInset={insets.top}
-      navigationBar={<InsideNavigationBar />}
-    >
+    <InsideScreen title={t('messages.listTitle')}>
       <ChatsList />
-    </Screen>
+    </InsideScreen>
   )
 }
 

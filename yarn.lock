@@ -31693,20 +31693,13 @@ __metadata:
   linkType: hard
 
 "undici@npm:^6.21.2":
-  version: 6.21.3
-  resolution: "undici@npm:6.21.3"
-  checksum: a2af0601deece36acbcc11ef722f36ad3c1e035d3065b9fbb36987487f7b69904046fa95c18f228a872ca45441f156fcaacd948fc920b0a97d0c1ab78ea63c04
+  version: 6.24.0
+  resolution: "undici@npm:6.24.0"
+  checksum: 271ae0d6dc2e9246a6e11227a0b0fbc6b1b94cc50331fc45973a6877ea04fcb75256902f1b866cf2734c0c5e1b19336f42e5d4ea57657a61ac083ccb704fc145
   languageName: node
   linkType: hard
 
-"undici@npm:^7.10.0":
-  version: 7.16.0
-  resolution: "undici@npm:7.16.0"
-  checksum: dca60e323e44c2d408e0d1f5eb540632ad4e75631d5b6fcd7791876bab54e0e263a66e5606eaa717d436b2db5988c2f4af912dfa221ce53e3fc7fcb7d224c9cd
-  languageName: node
-  linkType: hard
-
-"undici@npm:^7.2.0":
+"undici@npm:^7.10.0, undici@npm:^7.2.0":
   version: 7.22.0
   resolution: "undici@npm:7.22.0"
   checksum: 3eaad0283f946ce12d4aa70da49d23870fcab9a3de5ae0b2855710b58fece570b1675913268dfa8b97589385ff4fb706c004a0614c3b193b617475e7d0a34e3a

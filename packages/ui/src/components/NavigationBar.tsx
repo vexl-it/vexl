@@ -14,65 +14,6 @@ export interface NavigationBarAction {
 const NavigationBarFrame = styled(Stack, {
   name: 'NavigationBar',
   alignSelf: 'stretch',
-
-  variants: {
-    scrolled: {
-      true: {
-        backgroundColor: '$backgroundSecondary',
-      },
-      false: {
-        backgroundColor: '$transparent',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    scrolled: false,
-  },
-})
-
-const MainBar = styled(XStack, {
-  name: 'NavigationBarMainBar',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: '$5',
-  alignSelf: 'stretch',
-})
-
-const MainTitleArea = styled(XStack, {
-  name: 'NavigationBarMainTitleArea',
-  flex: 1,
-  alignItems: 'center',
-  paddingVertical: '$1',
-})
-
-const MainTitle = styled(SizableText, {
-  name: 'NavigationBarMainTitle',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$5',
-  letterSpacing: '$5',
-  color: '$foregroundPrimary',
-  flex: 1,
-})
-
-const MainIconsArea = styled(XStack, {
-  name: 'NavigationBarMainIconsArea',
-  alignItems: 'center',
-  gap: '$5',
-})
-
-const ActionButton = styled(Stack, {
-  name: 'NavigationBarActionButton',
-  role: 'button',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '$8',
-  height: '$8',
-
-  pressStyle: {
-    opacity: 0.7,
-  },
 })
 
 const BackBar = styled(XStack, {
@@ -169,24 +110,14 @@ const ChatSubtitleText = styled(SizableText, {
   numberOfLines: 1,
 })
 
-interface NavigationBarBaseProps {
-  readonly scrolled?: boolean
-}
-
-interface NavigationBarMainProps extends NavigationBarBaseProps {
-  readonly style: 'main'
-  readonly title?: string
-  readonly rightActions?: readonly NavigationBarAction[]
-}
-
-interface NavigationBarBackProps extends NavigationBarBaseProps {
+interface NavigationBarBackProps {
   readonly style: 'back'
   readonly title?: string
   readonly leftAction?: NavigationBarAction
   readonly rightActions?: readonly NavigationBarAction[]
 }
 
-interface NavigationBarChatProps extends NavigationBarBaseProps {
+interface NavigationBarChatProps {
   readonly style: 'chat'
   readonly name: string
   readonly subtitle?: string
@@ -196,30 +127,9 @@ interface NavigationBarChatProps extends NavigationBarBaseProps {
   readonly onPress?: () => void
 }
 
-export type NavigationBarProps =
-  | NavigationBarMainProps
-  | NavigationBarBackProps
-  | NavigationBarChatProps
+export type NavigationBarProps = NavigationBarBackProps | NavigationBarChatProps
 
 export type NavigationBarStyle = NavigationBarProps['style']
-
-function ActionIcon({
-  action,
-}: {
-  readonly action: NavigationBarAction
-}): React.JSX.Element {
-  const theme = useTheme()
-  const Icon = action.icon
-
-  return (
-    <ActionButton onPress={action.onPress}>
-      <Icon
-        color={theme.foregroundPrimary.val}
-        size={getTokens().size.$8.val}
-      />
-    </ActionButton>
-  )
-}
 
 function HighlightedNavAction({
   action,
@@ -257,24 +167,9 @@ function ChatSubtitleIcon(): React.JSX.Element {
 }
 
 export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
-  const {scrolled = false} = props
-
   return (
-    <NavigationBarFrame scrolled={scrolled}>
-      {props.style === 'main' ? (
-        <MainBar>
-          <MainTitleArea>
-            {props.title ? <MainTitle>{props.title}</MainTitle> : null}
-          </MainTitleArea>
-          {props.rightActions && props.rightActions.length > 0 ? (
-            <MainIconsArea>
-              {props.rightActions.map((action, i) => (
-                <ActionIcon key={i} action={action} />
-              ))}
-            </MainIconsArea>
-          ) : null}
-        </MainBar>
-      ) : props.style === 'back' ? (
+    <NavigationBarFrame>
+      {props.style === 'back' ? (
         <BackBar>
           <BackSideContainer side="left">
             {props.leftAction ? (

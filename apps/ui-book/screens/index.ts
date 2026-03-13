@@ -1,5 +1,6 @@
 import type React from 'react'
 
+import {AnimatedNavigationBarScreen} from './AnimatedNavigationBarScreen'
 import {AvatarScreen} from './AvatarScreen'
 import {BannerScreen} from './BannerScreen'
 import {BlogCardScreen} from './BlogCardScreen'
@@ -56,6 +57,7 @@ export interface ScreenEntry {
 }
 
 export const screens: readonly ScreenEntry[] = [
+  {label: 'Animated Navigation Bar', component: AnimatedNavigationBarScreen},
   {label: 'Avatar', component: AvatarScreen},
   {label: 'Banner', component: BannerScreen},
   {label: 'Blog Card', component: BlogCardScreen},

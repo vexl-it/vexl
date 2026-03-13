@@ -1,25 +1,24 @@
-import {useFocusEffect, useNavigation} from '@react-navigation/native'
+import {useNavigation} from '@react-navigation/native'
 import {
+  AnimatedNavigationBar,
   BellNotification,
   MathCalculate,
-  NavigationBar,
   UserProfile,
-  useScreenScroll,
-  type NavigationBarAction,
+  type AnimatedNavigationBarAction,
 } from '@vexl-next/ui'
 import React, {useCallback, useMemo} from 'react'
+import {type SharedValue} from 'react-native-reanimated'
 
 const noop = (): void => {}
 
-function InsideNavigationBar(): React.JSX.Element {
+function InsideNavigationBar({
+  title,
+  scrollY,
+}: {
+  readonly title?: string
+  readonly scrollY: SharedValue<number>
+}): React.JSX.Element {
   const navigation = useNavigation()
-  const {scrolled, resetScroll} = useScreenScroll()
-
-  useFocusEffect(
-    useCallback(() => {
-      resetScroll()
-    }, [resetScroll])
-  )
 
   const handleCalculatorPress = useCallback(() => {
     navigation.navigate('TradeCalculatorFlow', {screen: 'TradeCalculator'})
@@ -29,7 +28,7 @@ function InsideNavigationBar(): React.JSX.Element {
     navigation.navigate('Settings')
   }, [navigation])
 
-  const rightActions: readonly NavigationBarAction[] = useMemo(
+  const rightActions: readonly AnimatedNavigationBarAction[] = useMemo(
     () => [
       {icon: BellNotification, onPress: noop},
       {icon: MathCalculate, onPress: handleCalculatorPress},
@@ -39,10 +38,10 @@ function InsideNavigationBar(): React.JSX.Element {
   )
 
   return (
-    <NavigationBar
-      style="main"
-      scrolled={scrolled}
+    <AnimatedNavigationBar
+      title={title}
       rightActions={rightActions}
+      scrollY={scrollY}
     />
   )
 }

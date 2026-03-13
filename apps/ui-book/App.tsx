@@ -13,6 +13,7 @@ import {useFonts} from 'expo-font'
 import {StatusBar} from 'expo-status-bar'
 import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
+import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {toastAtom} from './state/toastAtom'
 
 import {screens} from './screens'
@@ -144,9 +145,11 @@ export default function App(): React.JSX.Element {
   }
 
   return (
-    <VexlThemeProvider>
-      <ScreenNav />
-      <Toast messageAtom={toastAtom} topOffset={60} />
-    </VexlThemeProvider>
+    <SafeAreaProvider>
+      <VexlThemeProvider>
+        <ScreenNav />
+        <Toast messageAtom={toastAtom} topOffset={60} />
+      </VexlThemeProvider>
+    </SafeAreaProvider>
   )
 }

@@ -1,4 +1,5 @@
 import {
+  AnimatedNavigationBar,
   Avatar,
   avatarsSvg,
   BellNotification,
@@ -12,6 +13,7 @@ import {
 } from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
+import {useSharedValue} from 'react-native-reanimated'
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const AnonymousAvatar = avatarsSvg[0]!
@@ -31,6 +33,26 @@ function SectionLabel({
     >
       {children}
     </SizableText>
+  )
+}
+
+function AnimatedNavBarExample({
+  scrollValue,
+}: {
+  readonly scrollValue: number
+}): React.JSX.Element {
+  const scrollY = useSharedValue(scrollValue)
+
+  return (
+    <AnimatedNavigationBar
+      title="Marketplace"
+      scrollY={scrollY}
+      rightActions={[
+        {icon: BellNotification, onPress: () => {}},
+        {icon: TuneSettings, onPress: () => {}},
+        {icon: UserProfile, onPress: () => {}},
+      ]}
+    />
   )
 }
 
@@ -58,30 +80,16 @@ function ThemedColumn({
           {theme.charAt(0).toUpperCase() + theme.slice(1)}
         </SizableText>
 
-        <SectionLabel>{'  Main (not scrolled)'}</SectionLabel>
-        <NavigationBar
-          style="main"
-          title="Marketplace"
-          rightActions={[
-            {icon: BellNotification, onPress: () => {}},
-            {icon: TuneSettings, onPress: () => {}},
-            {icon: UserProfile, onPress: () => {}},
-          ]}
-        />
+        <SectionLabel>{'  Animated (scroll = 0)'}</SectionLabel>
+        <AnimatedNavBarExample scrollValue={0} />
 
-        <SectionLabel>{'  Main (scrolled)'}</SectionLabel>
-        <NavigationBar
-          style="main"
-          title="Marketplace"
-          scrolled
-          rightActions={[
-            {icon: BellNotification, onPress: () => {}},
-            {icon: TuneSettings, onPress: () => {}},
-            {icon: UserProfile, onPress: () => {}},
-          ]}
-        />
+        <SectionLabel>{'  Animated (scroll = 25)'}</SectionLabel>
+        <AnimatedNavBarExample scrollValue={25} />
 
-        <SectionLabel>{'  Back (not scrolled)'}</SectionLabel>
+        <SectionLabel>{'  Animated (scroll = 50)'}</SectionLabel>
+        <AnimatedNavBarExample scrollValue={50} />
+
+        <SectionLabel>{'  Back'}</SectionLabel>
         <NavigationBar
           style="back"
           title="Settings"
@@ -89,21 +97,11 @@ function ThemedColumn({
           rightActions={[{icon: TuneSettings, onPress: () => {}}]}
         />
 
-        <SectionLabel>{'  Back (scrolled)'}</SectionLabel>
-        <NavigationBar
-          style="back"
-          title="Settings"
-          scrolled
-          leftAction={{icon: ChevronLeft, onPress: () => {}}}
-          rightActions={[{icon: TuneSettings, onPress: () => {}}]}
-        />
-
-        <SectionLabel>{'  Chat (scrolled)'}</SectionLabel>
+        <SectionLabel>{'  Chat'}</SectionLabel>
         <NavigationBar
           style="chat"
           name="Friend of friend"
           subtitle="136 in common"
-          scrolled
           onPress={() => {}}
           leftAction={{icon: ChevronLeft, onPress: () => {}}}
           avatar={

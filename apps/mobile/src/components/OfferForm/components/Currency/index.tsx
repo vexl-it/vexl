@@ -10,7 +10,7 @@ import React from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../utils/localization/currency'
-import CurrencySelect from '../../../CurrencySelect'
+import {ChangeCurrency} from '../../../ChangeCurrency'
 import DropdownSelectButton from '../../../DropdownSelectButton'
 
 interface Props {
@@ -71,9 +71,9 @@ function CurrencyComponent({
           </Stack>
         )}
       </DropdownSelectButton>
-      <CurrencySelect
+      <ChangeCurrency
         selectedCurrencyCodeAtom={currencyAtom}
-        onItemPress={(currency) => {
+        onSave={(currency) => {
           updateCurrencyLimits({currency})
         }}
         visibleAtom={currencySelectVisibleAtom}

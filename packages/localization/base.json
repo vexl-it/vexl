@@ -1208,5 +1208,6 @@
   "privacyPolicy.consentOfFutureCahngesRemoved": "Consent for Future Changes Removed: You won't be asked to agree again when the policy updates.",
   "unexpectedReachDrop.title": "Drop in reach detected",
   "unexpectedReachDrop.description": "We’ve detected an unexpected issue that may have affected your reach. To restore full visibility and ensure your offers work as expected, please re-import your contacts and re-encrypt your offers.",
-  "unexpectedReachDrop.actionTitle": "Fix all problems"
+  "unexpectedReachDrop.actionTitle": "Fix all problems",
+  "changeCurrency.trySearchingByCurrencyName": "Try searching by currency name or code."
 }

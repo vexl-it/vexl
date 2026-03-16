@@ -63,4 +63,4 @@ function CommonFriendsListItem({friend, verified}: Props): React.ReactElement {
   )
 }
 
-export default CommonFriendsListItem
+export default React.memo(CommonFriendsListItem)

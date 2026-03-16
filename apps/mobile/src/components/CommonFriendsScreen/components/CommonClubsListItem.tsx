@@ -40,4 +40,4 @@ function CommonClubListItem({club}: Props): React.ReactElement {
   )
 }
 
-export default CommonClubListItem
+export default React.memo(CommonClubListItem)

@@ -14,14 +14,18 @@ const logTextStyle = {
   color: getTokens().color.white.val,
 }
 
-function LogItem({logAtom}: {logAtom: Atom<string>}): React.ReactElement {
+const LogItem = React.memo(function LogItem({
+  logAtom,
+}: {
+  logAtom: Atom<string>
+}): React.ReactElement {
   const log = useAtomValue(logAtom)
   return (
     <RNText selectable style={logTextStyle}>
       {log}
     </RNText>
   )
-}
+})
 
 function renderLogItem({item}: {item: Atom<string>}): React.ReactElement {
   return <LogItem logAtom={item} />

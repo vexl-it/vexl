@@ -9,8 +9,8 @@ import {
 import {Image, Stack, getTokens} from 'tamagui'
 import {selectImageActionAtom} from '../state/selectImageActionAtom'
 import SvgImage from './Image'
-import selectIconSvg from './LoginFlow/components/PhotoScreen/images/selectIconSvg'
 import closeSvg from './images/closeSvg'
+import selectIconSvg from './images/selectIconSvg'
 
 interface Props {
   selectedImageUriAtom: PrimitiveAtom<UriString | undefined>

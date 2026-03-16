@@ -21,7 +21,7 @@ import notEmpty from '../../../../../utils/notEmpty'
 import openUrl from '../../../../../utils/openUrl'
 import {defaultCurrencyAtom} from '../../../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
-import CurrencySelect from '../../../../CurrencySelect'
+import {ChangeCurrency} from '../../../../ChangeCurrency'
 import SvgImage from '../../../../Image'
 import {reportIssueDialogAtom} from '../../../../ReportIssue'
 import editIconSvg from '../../../../images/editIconSvg'
@@ -406,9 +406,9 @@ function ButtonsSection(): React.ReactElement {
           {groupIndex !== data.length - 1 && <Stack h={16} />}
         </Fragment>
       ))}
-      <CurrencySelect
+      <ChangeCurrency
         selectedCurrencyCodeAtom={defaultCurrencyAtom}
-        onItemPress={(currency) => {
+        onSave={(currency) => {
           setDefaultCurrency(currency)
         }}
         visibleAtom={changeCurrencyDialogVisibleAtom}

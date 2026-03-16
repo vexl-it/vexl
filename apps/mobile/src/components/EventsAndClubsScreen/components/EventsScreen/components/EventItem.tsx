@@ -1,7 +1,7 @@
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React from 'react'
 import {Linking, Platform} from 'react-native'
-import {TouchableOpacity} from 'react-native-gesture-handler'
+import {Pressable} from 'react-native-gesture-handler'
 import {Stack, Text, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
@@ -58,11 +58,11 @@ export default function EventItem({
         <Text fs={1} col="$white">
           {t('events.doYouWantToListYourMeetup')}
         </Text>
-        <TouchableOpacity onPress={createEvent}>
+        <Pressable onPress={createEvent}>
           <Text col="$main" ff="$body500" textDecorationLine="underline">
             {t('events.getInTouchWithUs')}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </XStack>
     )
   }

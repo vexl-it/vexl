@@ -3,7 +3,7 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import CurrencySelect from '../../../../CurrencySelect'
+import {ChangeCurrency} from '../../../../ChangeCurrency'
 import CurrencySelectButton from '../../../../CurrencySelectButton'
 import {
   btcPriceCurrencyAtom,
@@ -70,9 +70,9 @@ function FiatOwnPriceInput(): React.ReactElement {
           }}
         />
       </Stack>
-      <CurrencySelect
+      <ChangeCurrency
         selectedCurrencyCodeAtom={btcPriceCurrencyAtom}
-        onItemPress={updateFiatCurrency}
+        onSave={updateFiatCurrency}
         visibleAtom={currencySelectVisibleAtom}
       />
     </AmountInput>

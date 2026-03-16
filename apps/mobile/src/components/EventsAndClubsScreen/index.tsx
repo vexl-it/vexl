@@ -36,7 +36,7 @@ export default function EventsAndClubsScreen({
           icon={closeSvg}
           onPress={() => {
             navigation.navigate('InsideTabs', {
-              screen: 'Settings',
+              screen: 'Community',
             })
           }}
         />

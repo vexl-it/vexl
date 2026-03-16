@@ -2,7 +2,7 @@ import {useAtom, useAtomValue, useSetAtom, type PrimitiveAtom} from 'jotai'
 import React, {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import CurrencySelect from '../../../../CurrencySelect'
+import {ChangeCurrency} from '../../../../ChangeCurrency'
 import CurrencySelectButton from '../../../../CurrencySelectButton'
 import {
   btcPriceCurrencyAtom,
@@ -105,13 +105,13 @@ function FiatAmountInput({
           <CalculatedWithLiveRate />
         )}
       </Stack>
-      <CurrencySelect
+      <ChangeCurrency
         selectedCurrencyCodeAtom={
           tradePriceType !== 'your'
             ? btcPriceCurrencyAtom
             : selectedCurrencyCodeForOwnPriceAtom
         }
-        onItemPress={updateFiatCurrency}
+        onSave={updateFiatCurrency}
         visibleAtom={currencySelectVisibleAtom}
       />
     </AmountInput>

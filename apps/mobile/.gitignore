@@ -1,5 +1,6 @@
 node_modules/
 .expo/
+.tamagui/
 dist/
 npm-debug.*
 *.jks

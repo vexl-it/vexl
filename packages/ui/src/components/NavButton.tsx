@@ -2,7 +2,7 @@ import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, Theme} from '../primitives'
+import {SizableText, Stack} from '../primitives'
 
 export type NavButtonVariant = 'highlighted' | 'destructive' | 'normal'
 
@@ -97,7 +97,7 @@ interface NavButtonTextProps extends NavButtonBaseProps {
 
 export type NavButtonProps = NavButtonIconProps | NavButtonTextProps
 
-function NavButtonContent(props: NavButtonProps): React.JSX.Element {
+export function NavButton(props: NavButtonProps): React.JSX.Element {
   const theme = useTheme()
   const variant = props.variant ?? 'highlighted'
 
@@ -105,7 +105,7 @@ function NavButtonContent(props: NavButtonProps): React.JSX.Element {
     variant === 'highlighted'
       ? theme.accentHighlightSecondary.val
       : variant === 'destructive'
-        ? '#FFFFFF'
+        ? theme.white100.val
         : theme.foregroundPrimary.val
 
   if (props.type === 'text') {
@@ -123,16 +123,4 @@ function NavButtonContent(props: NavButtonProps): React.JSX.Element {
       <Icon color={iconColor} size={24} />
     </NavButtonFrame>
   )
-}
-
-// Normal variant always renders in light mode per Figma design
-export function NavButton(props: NavButtonProps): React.JSX.Element {
-  if ((props.variant ?? 'highlighted') === 'normal') {
-    return (
-      <Theme name="light">
-        <NavButtonContent {...props} />
-      </Theme>
-    )
-  }
-  return <NavButtonContent {...props} />
 }

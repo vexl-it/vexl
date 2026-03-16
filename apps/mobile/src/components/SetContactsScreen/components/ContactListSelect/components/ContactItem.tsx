@@ -77,4 +77,4 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
   )
 }
 
-export default ContactItem
+export default React.memo(ContactItem)

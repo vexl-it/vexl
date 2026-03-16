@@ -60,4 +60,4 @@ function CurrencySelectListItem({
   )
 }
 
-export default CurrencySelectListItem
+export default React.memo(CurrencySelectListItem)

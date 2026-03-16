@@ -226,4 +226,4 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   )
 }
 
-export default OffersListItem
+export default React.memo(OffersListItem)

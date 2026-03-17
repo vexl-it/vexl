@@ -21,5 +21,8 @@ export * from './icons'
 // Anonymous Avatars
 export * from './assets/anonymousAvatars'
 
+// Graphics / Illustrations
+export * from './assets/graphics'
+
 // Fonts
 export {vexlFonts} from './assets/fonts'

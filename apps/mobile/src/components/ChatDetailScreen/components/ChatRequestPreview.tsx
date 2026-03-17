@@ -50,7 +50,6 @@ function ChatRequestPreview({
             <CommonFriends
               commonConnectionsHashes={commonConnectionsHashes}
               verifiedConnectionsHashes={verifiedConnectionsHashes}
-              variant="light"
               otherSideClubs={otherSideClubs}
             />
           </Stack>

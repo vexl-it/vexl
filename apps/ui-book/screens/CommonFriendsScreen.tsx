@@ -1,26 +1,22 @@
 import type {CommonFriend} from '@vexl-next/ui'
-import {Avatar, CommonFriends, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {CommonFriends, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {Alert, ScrollView} from 'react-native'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
 
-function FriendAvatar(): React.JSX.Element {
-  return <Avatar source={vexlAvatarSource} size="small" customSize={16} />
-}
-
 const SAMPLE_FRIENDS: readonly CommonFriend[] = [
-  {id: '1', name: 'Marcel Mrkev', avatar: <FriendAvatar />},
-  {id: '2', name: 'Stepan', avatar: <FriendAvatar />},
-  {id: '3', name: 'Grafon', avatar: <FriendAvatar />},
-  {id: '4', name: 'Alice', avatar: <FriendAvatar />},
-  {id: '5', name: 'Bob', avatar: <FriendAvatar />},
-  {id: '6', name: 'Charlie', avatar: <FriendAvatar />},
+  {id: '1', name: 'Marcel Mrkev', avatarSource: vexlAvatarSource},
+  {id: '2', name: 'Stepan', avatarSource: vexlAvatarSource},
+  {id: '3', name: 'Grafon', avatarSource: vexlAvatarSource},
+  {id: '4', name: 'Alice', avatarSource: vexlAvatarSource},
+  {id: '5', name: 'Bob', avatarSource: vexlAvatarSource},
+  {id: '6', name: 'Charlie', avatarSource: vexlAvatarSource},
 ]
 
 const FEW_FRIENDS: readonly CommonFriend[] = [
-  {id: '1', name: 'Marcel', avatar: <FriendAvatar />},
-  {id: '2', name: 'Stepan', avatar: <FriendAvatar />},
+  {id: '1', name: 'Marcel', avatarSource: vexlAvatarSource},
+  {id: '2', name: 'Stepan', avatarSource: vexlAvatarSource},
 ]
 
 function ThemeGroup({

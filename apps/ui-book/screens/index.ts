@@ -20,6 +20,7 @@ import {ExchangeScreen} from './ExchangeScreen'
 import {FabButtonScreen} from './FabButtonScreen'
 import {FilterBarScreen} from './FilterBarScreen'
 import {FilterTagScreen} from './FilterTagScreen'
+import {GraphicsScreen} from './GraphicsScreen'
 import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
@@ -77,6 +78,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Fab Button', component: FabButtonScreen},
   {label: 'Filter Bar', component: FilterBarScreen},
   {label: 'Filter Tag', component: FilterTagScreen},
+  {label: 'Graphics', component: GraphicsScreen},
   {label: 'Icon Button', component: IconButtonScreen},
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},

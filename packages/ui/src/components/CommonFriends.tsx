@@ -1,4 +1,5 @@
 import React from 'react'
+import type {ImageProps as RNImageProps} from 'react-native'
 import Svg, {
   Defs,
   Rect,
@@ -14,7 +15,7 @@ import {Chip} from './Chip'
 export interface CommonFriend {
   readonly id: string
   readonly name: string
-  readonly avatar: React.ReactNode
+  readonly avatarSource?: RNImageProps['source']
 }
 
 export interface CommonFriendsProps {
@@ -59,7 +60,11 @@ export function CommonFriends({
         </SizableText>
         <XStack gap={gap} alignItems="center" overflow="hidden">
           {friends.map((friend) => (
-            <Chip key={friend.id} name={friend.name} avatar={friend.avatar} />
+            <Chip
+              key={friend.id}
+              name={friend.name}
+              avatarSource={friend.avatarSource}
+            />
           ))}
         </XStack>
       </YStack>

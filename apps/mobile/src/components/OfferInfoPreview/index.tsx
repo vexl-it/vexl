@@ -118,7 +118,6 @@ function OfferInfoPreview({
           <CommonFriends
             commonConnectionsHashes={offer.privatePart.commonFriends}
             verifiedConnectionsHashes={offer.privatePart.verifiedCommonFriends}
-            variant="light"
             otherSideClubs={clubsForOffer}
           />
         </Stack>

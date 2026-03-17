@@ -8,7 +8,7 @@ import {
 import React, {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import CurrencySelect from '../../../../CurrencySelect'
+import {ChangeCurrency} from '../../../../ChangeCurrency'
 import CurrencySelectButton from '../../../../CurrencySelectButton'
 import CalculatorInput from './CalculatorInput'
 
@@ -72,9 +72,9 @@ function FiatInput({
           }}
         />
       </Stack>
-      <CurrencySelect
+      <ChangeCurrency
         selectedCurrencyCodeAtom={currencyAtom}
-        onItemPress={changePriceCurrency}
+        onSave={changePriceCurrency}
         visibleAtom={currencySelectVisibleAtom}
       />
     </CalculatorInput>

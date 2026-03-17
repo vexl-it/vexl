@@ -1,12 +1,8 @@
-import {Avatar, Chip, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
+import {Chip, SizableText, Theme, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
-
-function ChipAvatar(): React.JSX.Element {
-  return <Avatar source={vexlAvatarSource} customSize={16} />
-}
 
 function ThemeGroup({
   theme,
@@ -39,7 +35,18 @@ function ThemeGroup({
         >
           Single chip
         </SizableText>
-        <Chip name="Marcel Mrkev" avatar={<ChipAvatar />} />
+        <Chip name="Marcel Mrkev" avatarSource={vexlAvatarSource} />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+          paddingTop="$3"
+        >
+          No avatar
+        </SizableText>
+        <Chip name="Anonymous User" />
 
         <SizableText
           fontFamily="$body"
@@ -52,7 +59,7 @@ function ThemeGroup({
         </SizableText>
         <Chip
           name="Very Long Username That Should Truncate"
-          avatar={<ChipAvatar />}
+          avatarSource={vexlAvatarSource}
         />
 
         <SizableText
@@ -65,10 +72,10 @@ function ThemeGroup({
           Multiple chips in a row
         </SizableText>
         <XStack gap="$3" flexWrap="wrap">
-          <Chip name="Marcel" avatar={<ChipAvatar />} />
-          <Chip name="Stepan" avatar={<ChipAvatar />} />
-          <Chip name="Grafon" avatar={<ChipAvatar />} />
-          <Chip name="Alice" avatar={<ChipAvatar />} />
+          <Chip name="Marcel" avatarSource={vexlAvatarSource} />
+          <Chip name="Stepan" avatarSource={vexlAvatarSource} />
+          <Chip name="Grafon" avatarSource={vexlAvatarSource} />
+          <Chip name="Alice" avatarSource={vexlAvatarSource} />
         </XStack>
       </YStack>
     </Theme>

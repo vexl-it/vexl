@@ -7,7 +7,6 @@ import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
@@ -78,11 +77,6 @@ export type RootStackParamsList = {
   TradePriceType: undefined
 
   SetContacts: {filter?: ContactsFilter | undefined} | undefined
-
-  CommonFriends: {
-    contactsHashes: readonly HashedPhoneNumber[]
-    clubsIds: readonly ClubUuid[]
-  }
 
   NotificationSettings: undefined
 

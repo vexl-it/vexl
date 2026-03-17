@@ -18,7 +18,7 @@ import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProf
 import ChatDetailScreen from '../ChatDetailScreen'
 import {ClubDetailScreen} from '../ClubDetail'
 import {ClubOffersScreen} from '../ClubOffersScreen'
-import CommonFriendsScreen from '../CommonFriendsScreen'
+import CommonFriendsModal from '../CommonFriends/CommonFriendsModal'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import DonationDetailsScreen from '../DonationDetailsScreen'
@@ -104,10 +104,6 @@ function RootNavigation(): React.ReactElement {
               name="DonationDetails"
               component={DonationDetailsScreen}
             />
-            <Stack.Screen
-              name="CommonFriends"
-              component={CommonFriendsScreen}
-            />
             {/* <Stack.Screen
               name="NotificationPermissionsMissing"
               component={NotificationPermissionsScreen}
@@ -164,6 +160,7 @@ function RootNavigation(): React.ReactElement {
       {!!showTextDebugButton && <DevTranslationFloatingButton />}
       {!!isLoggedIn && <LoggedInHookGroupMemoized />}
       {!!isLoggedIn && !!showGoldenAvatarAnimation && <GoldenAvatarAnimation />}
+      <CommonFriendsModal />
     </>
   )
 }

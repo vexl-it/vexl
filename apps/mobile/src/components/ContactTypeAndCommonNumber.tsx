@@ -1,15 +1,15 @@
-import {useNavigation} from '@react-navigation/native'
-import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {useSetAtom} from 'jotai'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {useGetAllClubsNamesForIds} from '../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../utils/localization/localizedNumbersAtoms'
 import friendsSvg from './ChatDetailScreen/images/friendsSvg'
+import {commonFriendsModalDataAtom} from './CommonFriends/atoms'
 import Image from './Image'
 
 function ContactTypeAndCommonNumber({
@@ -26,11 +26,15 @@ function ContactTypeAndCommonNumber({
   clubsIds?: readonly ClubUuid[]
 }): React.ReactElement {
   const {t} = useTranslation()
-  const navigation = useNavigation()
   const clubsNamesForOffer = useGetAllClubsNamesForIds(clubsIds ?? [])
   const numberOfCommonFriendsLocalized = useSetAtom(
     localizedDecimalNumberActionAtom
   )({number: numberOfCommonFriends})
+  const setModalData = useSetAtom(commonFriendsModalDataAtom)
+
+  const handlePress = useCallback(() => {
+    setModalData(contactsHashes)
+  }, [contactsHashes, setModalData])
 
   return (
     <Stack flexDirection="row" ai={center ? 'center' : 'flex-start'}>
@@ -58,14 +62,7 @@ function ContactTypeAndCommonNumber({
         </Text>
         <XStack gap="$1" ai="center">
           <Image width={14} height={14} source={friendsSvg} />
-          <TouchableWithoutFeedback
-            onPress={() => {
-              navigation.navigate('CommonFriends', {
-                contactsHashes,
-                clubsIds: clubsIds ?? [],
-              })
-            }}
-          >
+          <TouchableWithoutFeedback onPress={handlePress}>
             <Text col="$greyOnBlack">
               {t('offer.numberOfCommon', {
                 number: numberOfCommonFriendsLocalized,

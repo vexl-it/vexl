@@ -1,132 +1,138 @@
-import MaskedView from '@react-native-masked-view/masked-view'
-import {useNavigation} from '@react-navigation/native'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
-import {LinearGradient} from 'expo-linear-gradient'
-import {useStore} from 'jotai'
-import React, {useMemo} from 'react'
-import {Platform, ScrollView, StyleSheet, TouchableOpacity} from 'react-native'
-import {Stack, XStack, YStack, getTokens} from 'tamagui'
-import chevronRightSvg from '../../images/chevronRightSvg'
+import {
+  CommonFriends as CommonFriendsUI,
+  type CommonFriend,
+} from '@vexl-next/ui'
+import {Array, Effect, HashMap, Option, pipe} from 'effect'
+import {getContactByIdAsync} from 'expo-contacts'
+import {useSetAtom, useStore} from 'jotai'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import {Platform} from 'react-native'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
-import Image from '../Image'
-import CommonClubCell from './components/CommonClubCell'
-import CommonFriendCell from './components/CommonFriendCell'
-
-const styles = StyleSheet.create({
-  linearGradient: {
-    flex: 1,
-  },
-})
+import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
+import {useTranslation} from '../../utils/localization/I18nProvider'
+import {commonFriendsModalDataAtom} from './atoms'
 
 interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
-  variant: 'light' | 'dark'
   otherSideClubs: ClubInfo[]
+}
+
+const resolveContactImage = (
+  contact: StoredContactWithComputedValues
+): Effect.Effect<{hash: string; uri: string} | null> =>
+  Option.match(contact.info.nonUniqueContactId, {
+    onNone: () => Effect.succeed(null),
+    onSome: (id) =>
+      pipe(
+        Effect.tryPromise(() => getContactByIdAsync(id)),
+        Effect.map((resolved) => {
+          const uri = resolved?.image?.uri
+
+          // TODO: lets monitor this issue in https://github.com/vexl-it/vexl/issues/1984
+          // and then change back to previous behaviour once fixed
+          if (
+            !uri ||
+            (Platform.OS === 'ios' && resolved.id?.includes(':ABPerson'))
+          )
+            return null
+          return {hash: contact.computedValues.hash, uri}
+        }),
+        Effect.catchAll(() => Effect.succeed(null))
+      ),
+  })
+
+function useContactImageSources(
+  contacts: readonly StoredContactWithComputedValues[]
+): HashMap.HashMap<string, {uri: string}> {
+  const [sources, setSources] = useState<
+    HashMap.HashMap<string, {uri: string}>
+  >(HashMap.empty())
+
+  useEffect(() => {
+    const fiber = pipe(
+      contacts,
+      Effect.forEach(resolveContactImage, {concurrency: 5}),
+      Effect.tap((results) => {
+        setSources(
+          HashMap.fromIterable(
+            Array.getSomes(results.map(Option.fromNullable)).map((r) => [
+              r.hash,
+              {uri: r.uri},
+            ])
+          )
+        )
+      }),
+      Effect.runFork
+    )
+
+    return () => {
+      Effect.runFork(fiber.interruptAsFork(fiber.id()))
+    }
+  }, [contacts])
+
+  return sources
 }
 
 function CommonFriends({
   commonConnectionsHashes,
-  variant,
   otherSideClubs,
 }: Props): React.ReactElement | null {
-  const tokens = getTokens()
+  const {t} = useTranslation()
   const store = useStore()
-  const navigation = useNavigation()
-  const commonFriends = useMemo(
+  const setModalData = useSetAtom(commonFriendsModalDataAtom)
+  const commonFriendsCount = commonConnectionsHashes.length
+
+  const visibleFriendsInPreview = useMemo(
     () =>
-      store.get(createImportedContactsForHashesAtom(commonConnectionsHashes)),
+      store.get(
+        createImportedContactsForHashesAtom(commonConnectionsHashes.slice(0, 5))
+      ),
     [commonConnectionsHashes, store]
   )
 
-  if (commonFriends.length === 0) return null
+  const imageSources = useContactImageSources(visibleFriendsInPreview)
+
+  const handlePress = useCallback(() => {
+    setModalData(commonConnectionsHashes)
+  }, [commonConnectionsHashes, setModalData])
+
+  const clubChips: readonly CommonFriend[] = useMemo(
+    () =>
+      otherSideClubs.map((club) => ({
+        id: club.uuid,
+        name: club.name,
+        avatarSource: {uri: club.clubImageUrl},
+      })),
+    [otherSideClubs]
+  )
+
+  const friendChips: readonly CommonFriend[] = useMemo(
+    () =>
+      visibleFriendsInPreview.map((friend) => ({
+        id: friend.computedValues.hash,
+        name: friend.info.name,
+        avatarSource: Option.getOrUndefined(
+          HashMap.get(imageSources, friend.computedValues.hash)
+        ),
+      })),
+    [visibleFriendsInPreview, imageSources]
+  )
+
+  const friends: readonly CommonFriend[] = useMemo(
+    () => [...clubChips, ...friendChips],
+    [clubChips, friendChips]
+  )
+
+  if (commonFriendsCount === 0) return null
 
   return (
-    <YStack gap="$2">
-      <TouchableOpacity
-        disabled={commonFriends.length === 0}
-        onPress={() => {
-          navigation.navigate('CommonFriends', {
-            contactsHashes: commonConnectionsHashes,
-            clubsIds: otherSideClubs.map((club) => club.uuid),
-          })
-        }}
-      >
-        <XStack
-          pos="relative"
-          ai="center"
-          jc="space-between"
-          bc={variant === 'light' ? '$greyAccent5' : '$grey'}
-          br="$4"
-          px="$4"
-          py="$3"
-        >
-          <Stack fs={1}>
-            {Platform.OS === 'ios' ? (
-              <MaskedView
-                maskElement={
-                  <LinearGradient
-                    style={styles.linearGradient}
-                    colors={['transparent', 'white']}
-                    locations={[1, 0.9]}
-                    start={{x: 0, y: 0}}
-                    end={{x: 1, y: 0}}
-                  />
-                }
-              >
-                <XStack ai="center">
-                  {otherSideClubs.map((club) => (
-                    <CommonClubCell
-                      key={club.uuid}
-                      variant={variant}
-                      club={club}
-                    />
-                  ))}
-                  {commonFriends.slice(0, 5).map((friend) => (
-                    <CommonFriendCell
-                      key={friend.computedValues.hash}
-                      name={friend.info.name}
-                      contactId={friend.info.nonUniqueContactId}
-                      variant={variant}
-                    />
-                  ))}
-                </XStack>
-              </MaskedView>
-            ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                fadingEdgeLength={100}
-              >
-                {otherSideClubs.map((club) => (
-                  <CommonClubCell
-                    key={club.uuid}
-                    variant={variant}
-                    club={club}
-                  />
-                ))}
-                {commonFriends.slice(0, 5).map((friend) => (
-                  <CommonFriendCell
-                    key={`${friend.computedValues.hash} - ${friend.info.name}`}
-                    name={friend.info.name}
-                    contactId={friend.info.nonUniqueContactId}
-                    variant={variant}
-                  />
-                ))}
-              </ScrollView>
-            )}
-          </Stack>
-          {commonFriends.length !== 0 && (
-            <Stack ai="flex-end" jc="center">
-              <Image
-                stroke={tokens.color.greyOnBlack.val}
-                source={chevronRightSvg}
-              />
-            </Stack>
-          )}
-        </XStack>
-      </TouchableOpacity>
-    </YStack>
+    <CommonFriendsUI
+      label={t('offer.numberOfCommon', {number: commonFriendsCount})}
+      friends={friends}
+      onPress={handlePress}
+    />
   )
 }
 

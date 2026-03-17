@@ -1,25 +1,21 @@
-import {Avatar, EventCard, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {EventCard, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {Alert, ScrollView} from 'react-native'
 
 const vexlAvatarSource = require('../assets/vexlAvatar.png') as number
 
-function AttendeeAvatar(): React.JSX.Element {
-  return <Avatar source={vexlAvatarSource} size="small" customSize={16} />
-}
-
 const ATTENDEES = [
-  {id: '1', name: 'Lea', avatar: <AttendeeAvatar />},
-  {id: '2', name: 'Stepan', avatar: <AttendeeAvatar />},
-  {id: '3', name: 'Grafon', avatar: <AttendeeAvatar />},
+  {id: '1', name: 'Lea', avatarSource: vexlAvatarSource},
+  {id: '2', name: 'Stepan', avatarSource: vexlAvatarSource},
+  {id: '3', name: 'Grafon', avatarSource: vexlAvatarSource},
 ]
 
 const MANY_ATTENDEES = [
-  {id: '1', name: 'Lea', avatar: <AttendeeAvatar />},
-  {id: '2', name: 'Stepan', avatar: <AttendeeAvatar />},
-  {id: '3', name: 'Grafon', avatar: <AttendeeAvatar />},
-  {id: '4', name: 'Alice', avatar: <AttendeeAvatar />},
-  {id: '5', name: 'Bob', avatar: <AttendeeAvatar />},
+  {id: '1', name: 'Lea', avatarSource: vexlAvatarSource},
+  {id: '2', name: 'Stepan', avatarSource: vexlAvatarSource},
+  {id: '3', name: 'Grafon', avatarSource: vexlAvatarSource},
+  {id: '4', name: 'Alice', avatarSource: vexlAvatarSource},
+  {id: '5', name: 'Bob', avatarSource: vexlAvatarSource},
 ]
 
 function ThemeGroup({

@@ -47,7 +47,6 @@ function ChatRequestPreview({
           <Stack mx="$-4">
             <CommonFriends
               commonConnectionsHashes={commonConnectionsHashes}
-              variant="light"
               otherSideClubs={otherSideClubs}
             />
           </Stack>

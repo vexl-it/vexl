@@ -1,4 +1,5 @@
 import React from 'react'
+import type {ImageProps as RNImageProps} from 'react-native'
 import Svg, {
   Defs,
   Rect,
@@ -15,7 +16,7 @@ export type EventCardState = 'upcoming' | 'past'
 export interface EventCardAttendee {
   readonly id: string
   readonly name: string
-  readonly avatar: React.ReactNode
+  readonly avatarSource?: RNImageProps['source']
 }
 
 export interface EventCardProps {
@@ -127,7 +128,7 @@ export function EventCard({
                 <Chip
                   key={attendee.id}
                   name={attendee.name}
-                  avatar={attendee.avatar}
+                  avatarSource={attendee.avatarSource}
                 />
               ))}
             </XStack>

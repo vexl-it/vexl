@@ -1,12 +1,16 @@
 import React from 'react'
+import type {ImageProps as RNImageProps} from 'react-native'
 import {styled} from 'tamagui'
 
-import {SizableText, Stack, XStack} from '../primitives'
+import {SizableText, XStack} from '../primitives'
+import {Avatar} from './Avatar'
 
 export interface ChipProps {
   readonly name: string
-  readonly avatar: React.ReactNode
+  readonly avatarSource?: RNImageProps['source']
 }
+
+const AVATAR_SIZE = 16
 
 const ChipFrame = styled(XStack, {
   name: 'Chip',
@@ -20,12 +24,10 @@ const ChipFrame = styled(XStack, {
   flexShrink: 0,
 })
 
-export function Chip({name, avatar}: ChipProps): React.JSX.Element {
+export function Chip({name, avatarSource}: ChipProps): React.JSX.Element {
   return (
     <ChipFrame>
-      <Stack width="$5" height="$5" borderRadius="$2" overflow="hidden">
-        {avatar}
-      </Stack>
+      <Avatar source={avatarSource} customSize={AVATAR_SIZE} />
       <SizableText
         fontFamily="$body"
         fontWeight="500"

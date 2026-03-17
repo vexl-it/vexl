@@ -43,8 +43,7 @@
         "credentialsSource": "remote"
       },
       "ios": {
-        "credentialsSource": "remote",
-        "image": "macos-sequoia-15.3-xcode-16.2"
+        "credentialsSource": "remote"
       },
       "env": {
         "ENV_PRESET": "prod"

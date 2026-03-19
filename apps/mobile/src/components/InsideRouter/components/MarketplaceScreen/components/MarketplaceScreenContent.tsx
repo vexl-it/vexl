@@ -92,22 +92,20 @@ function MarketplaceScreenContent({
 
   return (
     <Stack f={1}>
-      <Stack f={1}>
-        <OffersList
-          ref={flashListRef}
-          ListHeaderComponent={listHeaderComponent}
-          ListEmptyComponent={
-            activeTab === 'myOffers' ? MyOffersEmptyList : undefined
-          }
-          offersAtoms={
-            activeTab === 'allOffers' ? offersAtoms : myOffersSortedAtoms
-          }
-          onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
-          refreshing={activeTab === 'allOffers' ? loading : undefined}
-          onScroll={onScroll}
-          scrollEventThrottle={16}
-        />
-      </Stack>
+      <OffersList
+        ref={flashListRef}
+        ListHeaderComponent={listHeaderComponent}
+        ListEmptyComponent={
+          activeTab === 'myOffers' ? MyOffersEmptyList : undefined
+        }
+        offersAtoms={
+          activeTab === 'allOffers' ? offersAtoms : myOffersSortedAtoms
+        }
+        onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
+        refreshing={activeTab === 'allOffers' ? loading : undefined}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      />
     </Stack>
   )
 }

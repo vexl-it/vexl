@@ -73,6 +73,7 @@ const PressableStyled = styled(Stack, {
       small: {
         h: 38,
         px: '$3',
+        br: '$3',
       },
       medium: {
         h: 48,

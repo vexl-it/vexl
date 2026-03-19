@@ -21,8 +21,7 @@ import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import AddListingTypeToOffersSuggestion from './AddListingTypeToOffersSuggestion'
 import BaseFilterDropdown from './BaseFilterDropdown'
 import CheckUpdatedPrivacyPolicySuggestion from './CheckUpdatedPrivacyPolicySuggestion'
-import EmptyListPlaceholder from './EmptyListPlaceholder'
-import EnableNewOffersNotificationSuggestion from './EnableNewOffersNotificationSuggestion'
+import EmptyList from './EmptyList'
 import FiatSatsDropdown from './FiatSatsDropdown'
 import FilterButton from './FilterButton'
 import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
@@ -115,15 +114,16 @@ function AllOffersListHeader({scrollY}: Props): React.ReactElement {
             </YStack>
           </Stack>
         ) : (
-          <YStack gap="$6" mb="$6">
-            <CheckUpdatedPrivacyPolicySuggestion />
-            <EnableBackgroundFetchSuggestion />
-            <ReencryptOffersSuggestion />
-            <VexlNewsSuggestions />
-            <RemovedClubsSuggestion />
-            <EnableNewOffersNotificationSuggestion />
-            <EmptyListPlaceholder />
-          </YStack>
+          <EmptyList />
+          // <YStack gap="$6" mb="$6">
+          //   <CheckUpdatedPrivacyPolicySuggestion />
+          //   <EnableBackgroundFetchSuggestion />
+          //   <ReencryptOffersSuggestion />
+          //   <VexlNewsSuggestions />
+          //   <RemovedClubsSuggestion />
+          //   <EnableNewOffersNotificationSuggestion />
+          //   <EmptyListPlaceholder />
+          // </YStack>
         )}
       </Stack>
     )

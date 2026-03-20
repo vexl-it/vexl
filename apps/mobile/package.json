@@ -62,7 +62,7 @@
     "crypto-browserify": "^3.12.0",
     "dayjs": "^1.11.11",
     "deep-equal": "^2.2.3",
-    "effect": "^3.19.9",
+    "effect": "^3.20.0",
     "entities": "~2.0.0",
     "expo": "~55.0.4",
     "expo-background-task": "~55.0.9",

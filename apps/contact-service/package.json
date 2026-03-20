@@ -33,7 +33,7 @@
     "@vexl-next/server-utils": "0.0.0",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
-    "effect": "^3.19.9",
+    "effect": "^3.20.0",
     "expo-server-sdk": "^5.0.0",
     "fast-check": "^3.20.0",
     "firebase-admin": "^12.3.1",

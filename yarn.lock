@@ -11294,7 +11294,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     next: ^16.1.5
     postcss: ^8.4.49
@@ -11331,7 +11331,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     axios: ^1.12.0
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11377,7 +11377,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11427,7 +11427,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     expo-server-sdk: ^5.0.0
@@ -11475,7 +11475,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     axios: ^1.12.0
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11508,7 +11508,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     asn1.js: ^5.4.1
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -11558,7 +11558,7 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11602,7 +11602,7 @@ __metadata:
     commander: ^14.0.2
     detect-port: ^2.0.0
     dotenv-mono: ^1.3.14
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     ink: ^6.7.0
     internal-ip: ^8.0.1
@@ -11629,7 +11629,7 @@ __metadata:
     awesome-phonenumber: ^7.4.0
     compare-versions: ^6.1.0
     dayjs: ^1.11.11
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -11700,7 +11700,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11739,7 +11739,7 @@ __metadata:
     "@vitejs/plugin-react": ^4.3.0
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     prettier: ^3.3.2
@@ -11758,7 +11758,7 @@ __metadata:
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -11798,7 +11798,7 @@ __metadata:
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11848,7 +11848,7 @@ __metadata:
     axios: ^1.12.0
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11890,7 +11890,7 @@ __metadata:
     bullmq: ^5.52.1
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -11981,7 +11981,7 @@ __metadata:
     crypto-browserify: ^3.12.0
     dayjs: ^1.11.11
     deep-equal: ^2.2.3
-    effect: ^3.19.9
+    effect: ^3.20.0
     entities: ~2.0.0
     eslint: ^9.20.0
     eslint-config-prettier: ^10.0.0
@@ -12098,7 +12098,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     bullmq: ^5.52.1
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     expo-server-sdk: ^5.0.0
@@ -12137,7 +12137,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     dayjs: ^1.11.11
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -12213,7 +12213,7 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -12242,7 +12242,7 @@ __metadata:
     "@vexl-next/generic-utils": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
     fp-ts: ^2.13.1
@@ -12282,7 +12282,7 @@ __metadata:
     "@vexl-next/tsconfig": 0.0.0
     awesome-phonenumber: ^7.4.0
     bullmq: ^5.52.1
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
     ioredis: ^5.4.1
@@ -12328,7 +12328,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     dotenv: ^16.4.5
-    effect: ^3.19.9
+    effect: ^3.20.0
     esbuild: ^0.25.0
     eslint: ^9.20.0
     fast-check: ^3.20.0
@@ -12480,7 +12480,7 @@ __metadata:
     browserify-zlib: ^0.2.0
     buffer: ^6.0.3
     cross-env: ^7.0.3
-    effect: ^3.19.9
+    effect: ^3.20.0
     eslint: ^9.20.0
     eslint-plugin-jsx-a11y: ^6.10.2
     isbot: ^4.1.0
@@ -16207,13 +16207,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"effect@npm:^3.19.9":
-  version: 3.19.9
-  resolution: "effect@npm:3.19.9"
+"effect@npm:^3.20.0":
+  version: 3.21.0
+  resolution: "effect@npm:3.21.0"
   dependencies:
     "@standard-schema/spec": ^1.0.0
     fast-check: ^3.23.1
-  checksum: a4aec7ea9a9c502622eb99d53d9e3b1d9c7a35b9d9b6ef1c8dff122eb7985aebe8026b4db804e68d3dccf1a05053f028dd3af35e1ff78f2d75b5188e879b17f3
+  checksum: 20eafb7ce0fe0ed692e56f8db0f99919323ba9edd233b444d195ee777052179fa32d9f5824174e88ce38e7ed0e8c622b5a591060eed5ed2432cd06b0bc835500
   languageName: node
   linkType: hard
 

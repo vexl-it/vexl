@@ -7,7 +7,7 @@
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p server/tsconfig.typecheck.json --pretty false && tsc -p client/tsconfig.typecheck.json --pretty false && tsc -p common/tsconfig.typecheck.json --pretty false && tsc -p vite.tsconfig.typecheck.json --pretty false",
     "build": "yarn typecheck && yarn build:server && yarn build:client",
     "build:client": "vite build",
     "build:server": "node esbuild.config.js",

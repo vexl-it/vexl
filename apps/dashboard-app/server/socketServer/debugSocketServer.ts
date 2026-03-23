@@ -18,6 +18,7 @@ import {WebSocket} from 'ws'
 import {
   ConnectionsCountByCountry,
   ConnectionsCountByCountryListMessage,
+  DashboardBootstrappingMessage,
   NewUserWithConnectionsMessage,
   TotalUsersCountMessage,
   UserWithConnections,
@@ -86,6 +87,22 @@ const handleConnection = (
     const totalCountRef = yield* _(SubscriptionRef.make(0))
 
     const sendMessage = encodeAndSendMessage(c)
+
+    yield* _(
+      sendMessage(
+        new DashboardBootstrappingMessage({
+          status: 'ready',
+          message: 'Dashboard data ready',
+        })
+      ).pipe(
+        Effect.catchAll((error) =>
+          Effect.logWarning(
+            'Unable to send initial dashboard bootstrap message',
+            error
+          )
+        )
+      )
+    )
 
     const reportUsersChangeEffect = pipe(
       usersRef.changes,

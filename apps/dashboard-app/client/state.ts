@@ -68,6 +68,22 @@ type ConnectionState =
 
 export const connectionStateAtom = atom<ConnectionState>({_tag: 'Connecting'})
 
+type DashboardBootstrappingState =
+  | {
+      status: 'loading'
+      message: string
+    }
+  | {
+      status: 'ready'
+      message: string
+    }
+
+export const dashboardBootstrappingStateAtom =
+  atom<DashboardBootstrappingState>({
+    status: 'loading',
+    message: 'Loading dashboard data',
+  })
+
 export const listenForChangesActionAtom = atom(null, (get, set) => {
   const processSpecificMessage = Match.type<ServerMessage>().pipe(
     Match.tag('ConnectionsCountByCountryListMessage', (m) =>
@@ -104,6 +120,14 @@ export const listenForChangesActionAtom = atom(null, (get, set) => {
     Match.tag('TotalUsersCountMessage', (m) =>
       Effect.sync(() => {
         set(totalNumberOfUsersAtom, Option.some(m.totalUsersCount))
+      })
+    ),
+    Match.tag('DashboardBootstrappingMessage', (m) =>
+      Effect.sync(() => {
+        set(dashboardBootstrappingStateAtom, {
+          status: m.status,
+          message: m.message,
+        })
       })
     ),
     Match.tag('DebugMessage', (m) =>
@@ -163,7 +187,7 @@ export const showConfettiAtom = atom<Option.Option<UserWithConnections>>(
 )
 export const showConffetiForUserActionAtom = atom(
   null,
-  (get, set, user: UserWithConnections) => {
+  (_get, set, user: UserWithConnections) => {
     set(showConfettiAtom, (v) => {
       if (Option.isSome(v)) return v
 

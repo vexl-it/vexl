@@ -1,4 +1,4 @@
-import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,

@@ -4,31 +4,20 @@ import autoAnimate from '@formkit/auto-animate'
 import {Option} from 'effect'
 import {useAtomValue} from 'jotai'
 import {useEffect, useRef} from 'react'
-import {animated, useSpring} from 'react-spring'
 import {getCountryInfo} from '../../common/countryInfos'
 import mobileMediaQuery from '../mobileMediaQuery'
 import {
   countriesToConnectionCountArrayAtom,
   maxCountryConnectionsCount,
 } from '../state'
+import useAnimatedValue from '../utils/useAnimatedValue'
 import AnimatedNumber from './AnimatedNumber'
 
 const Scroll = styled.div`
   position: relative;
   flex: 1;
   display: block;
-  overflow-y: scroll;
-
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  ${mobileMediaQuery} {
-    overflow-y: hidden;
-  }
+  overflow-y: hidden;
 `
 
 const BottomSpacer = styled.div`
@@ -90,7 +79,7 @@ const BarContainer = styled.div`
   align-items: center;
 `
 
-const Bar = styled(animated.div)<{first: boolean}>`
+const Bar = styled.div<{first: boolean}>`
   background: ${(props) =>
     props.first ? 'var(--color-main)' : 'var(--color-grey)'};
 
@@ -160,15 +149,10 @@ function AnimatedBar({
   first: boolean
   count: number
 }): React.ReactElement {
-  const springProps = useSpring({
-    from: {number: 0},
-    number: 100,
-    delay: 200,
-    config: {mass: 1, tension: 20, friction: 10},
-  })
+  const animatedWidth = useAnimatedValue(100)
 
   return (
-    <Bar first={first} style={{width: springProps.number.to((n) => `${n}%`)}}>
+    <Bar first={first} style={{width: `${animatedWidth}%`}}>
       <Count n={count} />
     </Bar>
   )

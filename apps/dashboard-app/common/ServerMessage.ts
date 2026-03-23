@@ -48,6 +48,13 @@ export class TotalUsersCountMessage extends Schema.TaggedClass<TotalUsersCountMe
   totalUsersCount: Schema.Number,
 }) {}
 
+export class DashboardBootstrappingMessage extends Schema.TaggedClass<DashboardBootstrappingMessage>(
+  'DashboardBootstrappingMessage'
+)('DashboardBootstrappingMessage', {
+  status: Schema.Literal('loading', 'ready'),
+  message: Schema.String,
+}) {}
+
 export class ReceivedUnexpectedMessage extends Schema.TaggedClass<ReceivedUnexpectedMessage>(
   'ReceivedUnexpectedMessage'
 )('ReceivedUnexpectedMessage', {
@@ -61,6 +68,7 @@ export const ServerMessage = Schema.Union(
   ReceivedUnexpectedMessage,
   ConnectionsCountByCountryListMessage,
   NewUserWithConnectionsMessage,
-  TotalUsersCountMessage
+  TotalUsersCountMessage,
+  DashboardBootstrappingMessage
 )
 export type ServerMessage = Schema.Schema.Type<typeof ServerMessage>

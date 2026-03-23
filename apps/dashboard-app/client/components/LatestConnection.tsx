@@ -2,8 +2,7 @@ import styled from '@emotion/styled'
 import autoAnimate from '@formkit/auto-animate'
 import dayjs from 'dayjs'
 import {Option} from 'effect'
-import {useAtomValue} from 'jotai'
-import {type Atom} from 'jotai/experimental'
+import {type PrimitiveAtom, useAtomValue} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {memo, useEffect, useRef} from 'react'
 import {type UserWithConnections} from '../../common/ServerMessage'
@@ -64,12 +63,12 @@ const userAtoms = splitAtom(lastUsersAtom, (v) => v.pubKey)
 function UserRow({
   atom,
 }: {
-  atom: Atom<UserWithConnections>
+  atom: PrimitiveAtom<UserWithConnections>
 }): React.ReactElement | null {
   const user = useAtomValue(atom)
 
-  const country = getCountryInfo(user?.countryPrefix ?? 0)
-  if (!user || Option.isNone(country)) return null
+  const country = getCountryInfo(user.countryPrefix)
+  if (Option.isNone(country)) return null
 
   return (
     <Item key={user.pubKey}>

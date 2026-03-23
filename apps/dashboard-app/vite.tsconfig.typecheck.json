@@ -1,0 +1,6 @@
+{
+  "extends": "./vite.tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

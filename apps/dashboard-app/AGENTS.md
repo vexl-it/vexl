@@ -10,3 +10,4 @@ Gotchas:
 - Use Emotion for styling; do not introduce a second styling system.
 - Server and client share env via `.env`/Config; thread new settings through typed config modules.
 - Keep WebSocket usage aligned with existing setup.
+- `yarn workspace @vexl-next/dashboard-app typecheck` runs dedicated no-emit checks for `server/`, `client/`, `common/`, and `vite.tsconfig.json`, so IDE-visible subproject errors surface in CLI output too.

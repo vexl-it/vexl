@@ -1,7 +1,5 @@
-import {flow} from 'effect'
-import {useEffect} from 'react'
-import {animated, useSpring} from 'react-spring'
 import {formatNumber} from '../utils/formatNumber'
+import useAnimatedValue from '../utils/useAnimatedValue'
 
 export default function AnimatedNumber({
   n,
@@ -10,20 +8,11 @@ export default function AnimatedNumber({
   n: number
   className?: string
 }): React.ReactElement {
-  const [springProps, setSpringProps] = useSpring(() => ({
-    from: {number: 0},
-    number: n,
-    delay: 200,
-    config: {mass: 1, tension: 20, friction: 10},
-  }))
-
-  useEffect(() => {
-    void setSpringProps.start({number: n, delay: 200})
-  }, [n, setSpringProps])
+  const animatedNumber = useAnimatedValue(n)
 
   return (
-    <animated.span className={className}>
-      {springProps.number.to(flow(Math.floor, formatNumber))}
-    </animated.span>
+    <span className={className}>
+      {formatNumber(Math.floor(animatedNumber))}
+    </span>
   )
 }

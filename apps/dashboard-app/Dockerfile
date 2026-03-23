@@ -2,6 +2,8 @@ FROM node:24 as builder
 
 WORKDIR /app
 
+RUN corepack enable && corepack prepare yarn@3.4.1 --activate
+
 COPY . .
 
 WORKDIR /app/apps/dashboard-app
@@ -26,4 +28,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 WORKDIR /app/apps/dashboard-app
 
-CMD ["yarn", "start"]
+CMD ["node", "dist/server/index.cjs"]

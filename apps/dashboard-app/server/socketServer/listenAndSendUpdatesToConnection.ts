@@ -3,10 +3,15 @@ import {type WebSocket} from 'ws'
 import {
   ConnectionsCountByCountry,
   ConnectionsCountByCountryListMessage,
+  DashboardBootstrappingMessage,
   NewUserWithConnectionsMessage,
   TotalUsersCountMessage,
   type ServerMessage,
 } from '../../common/ServerMessage'
+import {
+  dashboardBootstrapMessages,
+  type DashboardBootstrapState,
+} from '../dashboardBootstrapState'
 import {
   countOfUsersChanges,
   type CountOfUsersState,
@@ -25,9 +30,19 @@ const changeMessagesToSendStream = Stream.mergeAll<
   | PubKeyToCountryPrefixState
   | CountriesToConnectionsCountState
   | CountOfUsersState
+  | DashboardBootstrapState
   | HasingSalt
 >(
   [
+    dashboardBootstrapMessages.pipe(
+      Stream.map(
+        (v): ServerMessage =>
+          new DashboardBootstrappingMessage({
+            status: v.status,
+            message: v.message,
+          })
+      )
+    ),
     last10usersChanges.pipe(
       Stream.map(
         (v): ServerMessage =>
@@ -72,6 +87,7 @@ const listenAndSendUpdatesToConnection = (
   | PubKeyToCountryPrefixState
   | CountriesToConnectionsCountState
   | CountOfUsersState
+  | DashboardBootstrapState
   | HasingSalt
 > => {
   const handleMessage = encodeAndSendMessage(connection)

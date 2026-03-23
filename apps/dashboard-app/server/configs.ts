@@ -24,15 +24,6 @@ export const dummyDataConfig = Config.boolean('DUMMY_DATA').pipe(
   Config.withDefault(false)
 )
 
-export const userDatabaseConfig = Config.unwrap<PgClientConfig>({
-  database: Config.string('DB_DATABASE_NAME_USER'),
-  host: Config.string('DB_HOST'),
-  port: Config.number('DB_PORT'),
-  username: Config.string('DB_USER'),
-  password: Config.redacted('DB_PASSWORD'),
-  maxConnections: Config.succeed(1),
-})
-
 export const contactDatabaseConfig = Config.unwrap<PgClientConfig>({
   database: Config.string('DB_DATABASE_NAME_CONTACT'),
   host: Config.string('DB_HOST'),

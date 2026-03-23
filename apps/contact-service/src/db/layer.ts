@@ -24,6 +24,8 @@ import add_public_key_v2_columns from './migrations/0019_add_public_key_v2_colum
 import drop_challenge_table from './migrations/0020_drop_challenge_table'
 import add_public_key_v2_indexes from './migrations/0021_add_public_key_v2_indexes'
 import backfill_refreshed_at_for_existing_users from './migrations/0022_backfill_refreshed_at_for_existing_users'
+import add_user_contact_indexes_for_dashboard from './migrations/0023_add_user_contact_indexes_for_dashboard'
+import drop_redundant_user_contact_indexes from './migrations/0024_drop_redundant_user_contact_indexes'
 
 const migrations = [
   {
@@ -136,6 +138,16 @@ const migrations = [
     id: 22,
     name: 'backfill_refreshed_at_for_existing_users',
     migrationEffect: backfill_refreshed_at_for_existing_users,
+  },
+  {
+    id: 23,
+    name: 'add_user_contact_indexes_for_dashboard',
+    migrationEffect: add_user_contact_indexes_for_dashboard,
+  },
+  {
+    id: 24,
+    name: 'drop_redundant_user_contact_indexes',
+    migrationEffect: drop_redundant_user_contact_indexes,
   },
 ] as const
 

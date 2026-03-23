@@ -3,7 +3,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {Effect, Option, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
-import {PgUserClient} from './layer'
+import {PgContactClient} from './layer'
 
 export const PubKeyToCountryPrefixId = Schema.Number.pipe(
   Schema.brand('PubKeyToCountryPrefixId')
@@ -20,8 +20,8 @@ const decodeUserRows = Schema.decodeUnknown(Schema.Array(UserRow))
 
 export const queryPubkeyToCountryPrefix = (
   lastId: Option.Option<PubKeyToCountryPrefixId>
-): Effect.Effect<readonly UserRow[], ParseError | SqlError, PgUserClient> =>
-  PgUserClient.pipe(
+): Effect.Effect<readonly UserRow[], ParseError | SqlError, PgContactClient> =>
+  PgContactClient.pipe(
     Effect.flatMap(
       (sql) => sql`
         SELECT

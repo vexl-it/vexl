@@ -1,6 +1,6 @@
 import {make as makePgClient, type PgClient} from '@effect/sql-pg/PgClient'
 import {Context, Effect, Layer} from 'effect'
-import {contactDatabaseConfig, userDatabaseConfig} from '../configs'
+import {contactDatabaseConfig} from '../configs'
 
 export interface PgContactClient extends PgClient {}
 export const PgContactClient =
@@ -13,14 +13,4 @@ export const PgContactLive = Layer.scopedContext(
   )
 )
 
-export interface PgUserClient extends PgClient {}
-export const PgUserClient = Context.GenericTag<PgUserClient>('PgUserClient')
-
-export const PgUserLive = Layer.scopedContext(
-  userDatabaseConfig.pipe(
-    Effect.flatMap(makePgClient),
-    Effect.map((client) => Context.make(PgUserClient, client))
-  )
-)
-
-export const DbsLive = Layer.merge(PgUserLive, PgContactLive)
+export const DbsLive = PgContactLive

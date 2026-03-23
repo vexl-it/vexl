@@ -6,6 +6,10 @@ import {
   ReceivedUnexpectedMessage,
   type ServerMessage,
 } from '../../common/ServerMessage'
+import {
+  getDashboardBootstrapMessage,
+  type DashboardBootstrapState,
+} from '../dashboardBootstrapState'
 import {type CountOfUsersState} from '../metrics/countOfUsers'
 import {type PubKeyToCountryPrefixState} from '../metrics/pubKeyToCountry'
 import {type CountriesToConnectionsCountState} from '../metrics/pubKeysToConnectionsCount'
@@ -73,6 +77,7 @@ const handleClientConnection = (
   | PubKeyToCountryPrefixState
   | CountriesToConnectionsCountState
   | CountOfUsersState
+  | DashboardBootstrapState
   | HasingSalt
 > =>
   Effect.gen(function* (_) {
@@ -80,6 +85,19 @@ const handleClientConnection = (
 
     const handleMessage = handleMessagesFromClient(
       encodeAndSendMessage(connection)
+    )
+
+    yield* _(
+      encodeAndSendMessage(connection)(
+        yield* _(getDashboardBootstrapMessage)
+      ).pipe(
+        Effect.catchAll((error) =>
+          Effect.logWarning(
+            'Unable to send initial dashboard bootstrap message',
+            error
+          )
+        )
+      )
     )
 
     const processMessages = pipe(

@@ -8,7 +8,6 @@ import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
-import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {
@@ -43,7 +42,6 @@ export type RootStackParamsList = {
     offerId?: OfferId | undefined
   }
   FilterOffers: undefined
-  MyOffers: undefined
 
   OfferDetail: {offerId: OfferId}
 
@@ -117,9 +115,6 @@ export type RootStackScreenProps<T extends keyof RootStackParamsList> =
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type LoginStackParamsList = {
-  AnonymizationAnimation: {
-    readonly realUserData: RealLifeInfo
-  }
   AnonymizationNotice: undefined
   Intro: undefined
   Name: undefined
@@ -159,7 +154,7 @@ export type PostLoginFlowStackScreenProps<
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InsideTabParamsList = {
-  Marketplace: undefined
+  Marketplace: {initialTab?: 'allOffers' | 'myOffers'} | undefined
   Messages: undefined
   Community: undefined
 }

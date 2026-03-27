@@ -6,7 +6,7 @@ import reportError from '../../../utils/reportError'
 import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
 import {offersAtom} from './offersState'
 
-export function alertAndReportOnlineOffersWithoutLocation(
+export function alertAndReportInPersonOffersWithoutLocation(
   offers: OfferInfo[],
   reportOffersPayload: boolean = false,
   showAlert: boolean = false
@@ -31,14 +31,14 @@ export function alertAndReportOnlineOffersWithoutLocation(
 
   if (inPersonOffersWithoutLocation.length > 0)
     reportError('warn', new Error('Found some offers without location'), {
-      onlineOffersWithoutLocation: reportOffersPayload
+      inPersonOffersWithoutLocation: reportOffersPayload
         ? inPersonOffersWithoutLocation
         : inPersonOffersWithoutLocation.map((one) => one.offerId),
     })
 }
 
 export const reportOffersWithoutLocationActionAtom = atom(null, (get) => {
-  alertAndReportOnlineOffersWithoutLocation(
+  alertAndReportInPersonOffersWithoutLocation(
     get(offersAtom).map((one) => one.offerInfo)
   )
 })
@@ -48,7 +48,9 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   const isDeveloper = get(isDeveloperAtom)
 
   const offers = get(offersAtom)
-  alertAndReportOnlineOffersWithoutLocation(offers.map((one) => one.offerInfo))
+  alertAndReportInPersonOffersWithoutLocation(
+    offers.map((one) => one.offerInfo)
+  )
 
   return offers.filter(
     (oneOffer) =>

@@ -33,7 +33,10 @@ export const myOffersSortedAtom = atom((get) => {
   return sortOffers(myOffers, sortingOptions)
 })
 
-export const myOffersSortedAtomsAtom = splitAtom(myOffersSortedAtom)
+export const myOffersSortedAtomsAtom = splitAtom(
+  myOffersSortedAtom,
+  (offer) => offer.offerInfo.offerId
+)
 
 export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)

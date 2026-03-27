@@ -17,6 +17,7 @@ import Network from '../OfferForm/components/Network'
 import PaymentMethod from '../OfferForm/components/PaymentMethod'
 import SpokenLanguages from '../OfferForm/components/SpokenLanguages'
 import {type Props} from '../Section'
+import {listingTypeAtom} from '../TradeCalculatorRouter/atoms'
 import {
   amountBottomLimitAtom,
   amountTopLimitAtom,
@@ -24,7 +25,6 @@ import {
   createSelectClubInFilterAtom,
   currencyAtom,
   intendedConnectionLevelAtom,
-  listingTypeAtom,
   locationActiveAtom,
   locationArrayOfOneAtom,
   locationStateAtom,

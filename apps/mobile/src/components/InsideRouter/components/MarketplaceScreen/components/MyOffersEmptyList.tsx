@@ -1,27 +1,36 @@
 import {useNavigation} from '@react-navigation/native'
-import React from 'react'
-import {Stack, Text} from 'tamagui'
+import {Button, Typography} from '@vexl-next/ui'
+import React, {useCallback} from 'react'
+import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import EmptyListWrapper from '../../../../EmptyListWrapper'
 
 function MyOffersEmptyList(): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
 
+  const onCreateOfferPress = useCallback(() => {
+    navigation.navigate('CRUDOfferFlow', {screen: 'ListingAndOfferType'})
+  }, [navigation])
+
   return (
-    <Stack f={1} pt="$6">
-      <EmptyListWrapper
-        buttonText={t('myOffers.addNewOffer')}
-        onButtonPress={() => {
-          navigation.navigate('CRUDOfferFlow', {
-            screen: 'ListingAndOfferType',
-          })
-        }}
+    <Stack paddingTop="$10" paddingHorizontal="$5" gap="$7">
+      <Typography
+        variant="heading3"
+        color="$foregroundPrimary"
+        textAlign="center"
       >
-        <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
-          {t('myOffers.youHaveNotPostedAnyOffers')}
-        </Text>
-      </EmptyListWrapper>
+        {t('marketplace.postYourFirstOffer')}
+      </Typography>
+      <Typography
+        variant="description"
+        color="$foregroundSecondary"
+        textAlign="center"
+      >
+        {t('marketplace.createOfferDescription')}
+      </Typography>
+      <Button variant="tertiary" size="small" onPress={onCreateOfferPress}>
+        {t('marketplace.createNewOffer')}
+      </Button>
     </Stack>
   )
 }

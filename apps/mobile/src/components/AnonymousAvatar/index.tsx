@@ -1,92 +1,56 @@
 import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {
+  Avatar,
+  type AvatarSize,
+  resolveSizePx,
+  avatarsSvg as uiAvatars,
+  avatarsGoldenGlassesAndBackgroundSvg as uiAvatarsGolden,
+} from '@vexl-next/ui'
 import React from 'react'
-import {type StyleProp, type ViewStyle} from 'react-native'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
 import {type RandomSeed} from '../../utils/RandomSeed'
-import Image from '../Image'
-import UserAvatar from '../UserAvatar'
-import avatarsGoldenGlassesAndBackgroundSvg from './images/avatarsGoldenGlassesAndBackgroundSvg'
-import avatarsSvg from './images/avatarsSvg'
 
-interface Props {
-  avatarIndex: number
-  style?: StyleProp<ViewStyle>
-}
-
-function AnonymousAvatar({avatarIndex, style}: Props): React.ReactElement {
-  return (
-    <Image
-      source={avatarsSvg[avatarIndex] ?? avatarsSvg[0]}
-      style={style}
-    ></Image>
-  )
-}
-
-export default AnonymousAvatar
-
-export function getAvatarSvg({
-  avatarIndex,
-  goldenAvatarType,
-}: {
-  avatarIndex: number
-  goldenAvatarType?: GoldenAvatarType
-}): SvgString {
-  if (goldenAvatarType === 'BACKGROUND_AND_GLASSES')
-    return (
-      avatarsGoldenGlassesAndBackgroundSvg[avatarIndex] ??
-      avatarsGoldenGlassesAndBackgroundSvg[0]
-    )
-  return avatarsSvg[avatarIndex] ?? avatarsSvg[0]
-}
-
-export function getRandomAvatarSvgFromSeed({
+export function AnonymousAvatarOrClubImage({
   seed,
-  goldenAvatarType,
-}: {
-  seed: RandomSeed
-  goldenAvatarType?: GoldenAvatarType
-}): SvgString {
-  const randomNumber = randomNumberFromSeed(
-    0,
-    goldenAvatarType === 'BACKGROUND_AND_GLASSES'
-      ? avatarsGoldenGlassesAndBackgroundSvg.length - 1
-      : avatarsSvg.length - 1,
-    seed
-  )
-  return getAvatarSvg({avatarIndex: randomNumber, goldenAvatarType})
-}
-
-export function AnonymousAvatarFromSeed({
-  seed,
-  width,
-  height,
+  size = 'medium',
+  customSize,
   grayScale,
   goldenAvatarType,
+  clubImageUrl,
 }: {
   seed: RandomSeed
-  height: number
-  width: number
+  size?: AvatarSize
+  customSize?: number
   grayScale: boolean
   goldenAvatarType?: GoldenAvatarType
+  clubImageUrl?: UriString
 }): React.ReactElement {
-  const avatar =
-    goldenAvatarType === 'BACKGROUND_AND_GLASSES'
-      ? avatarsGoldenGlassesAndBackgroundSvg[
-          randomNumberFromSeed(
-            0,
-            avatarsGoldenGlassesAndBackgroundSvg.length - 1,
-            seed
-          )
-        ]
-      : avatarsSvg[randomNumberFromSeed(0, avatarsSvg.length - 1, seed)]
+  if (clubImageUrl) {
+    return (
+      <Avatar
+        size={size}
+        customSize={customSize}
+        source={{uri: clubImageUrl}}
+        grayscale={grayScale}
+      />
+    )
+  }
+
+  const avatars =
+    goldenAvatarType === 'BACKGROUND_AND_GLASSES' ? uiAvatarsGolden : uiAvatars
+
+  const index = randomNumberFromSeed(0, avatars.length - 1, seed)
+  const AvatarComponent = avatars[index]
+  const px = resolveSizePx(size, customSize)
+
+  if (!AvatarComponent) {
+    return <Avatar size={size} customSize={customSize} />
+  }
 
   return (
-    <UserAvatar
-      userImage={{type: 'svgXml', svgXml: avatar ?? avatarsSvg[0]}}
-      width={width}
-      height={height}
-      grayScale={grayScale}
-    />
+    <Avatar size={size} customSize={customSize}>
+      <AvatarComponent size={px} grayscale={grayScale} />
+    </Avatar>
   )
 }

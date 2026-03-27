@@ -15,7 +15,7 @@ function AddListingTypeToOffersSuggestion(
     <MarketplaceSuggestion
       buttonText={t('suggestion.addListingType')}
       onButtonPress={() => {
-        navigation.navigate('MyOffers')
+        // navigation.navigate('MyOffers')
       }}
       text={t('suggestion.addListingTypeToYourOffers')}
       visibleStateAtom={shouldDisplaySuggestionToAddListingTypeAtom}

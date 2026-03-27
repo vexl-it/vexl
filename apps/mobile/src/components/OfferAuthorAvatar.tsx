@@ -12,7 +12,7 @@ import {goldenAvatarTypeAtom} from '../utils/preferences'
 import randomName from '../utils/randomName'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {setTimezoneOfUser} from '../utils/unixMillisecondsToLocaleDateTime'
-import {AnonymousAvatarFromSeed} from './AnonymousAvatar'
+import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
 import ContactTypeAndCommonNumber from './ContactTypeAndCommonNumber'
 import {showGoldenAvatarInfoModalActionAton} from './GoldenAvatar/atoms'
 import UserAvatar from './UserAvatar'
@@ -61,10 +61,9 @@ function OfferAuthorAvatar({
   if (displayAsPreview) {
     return (
       <>
-        <AnonymousAvatarFromSeed
+        <AnonymousAvatarOrClubImage
           grayScale={negative ?? false}
-          width={48}
-          height={48}
+          size="medium"
           seed={randomSeedFromOfferInfo(offerInfo)}
           goldenAvatarType={goldenAvatarType}
         />
@@ -113,10 +112,9 @@ function OfferAuthorAvatar({
               disabled={!offerInfo.publicPart.goldenAvatarType}
               onPress={showGoldenAvatarInfoModal}
             >
-              <AnonymousAvatarFromSeed
+              <AnonymousAvatarOrClubImage
                 grayScale={negative ?? false}
-                width={48}
-                height={48}
+                size="medium"
                 seed={randomSeedFromOfferInfo(offerInfo)}
                 goldenAvatarType={offerInfo.publicPart.goldenAvatarType}
               />

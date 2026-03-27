@@ -1,60 +1,49 @@
-import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useEffect, useMemo, useState} from 'react'
+import {SearchBar} from '@vexl-next/ui'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
+import React, {useEffect, useMemo} from 'react'
 import {debounce} from 'tamagui'
 import {
   searchTextAtom,
   submitSearchActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Input from '../../../../Input'
-import magnifyingGlass from '../../../../images/magnifyingGlass'
+
+const localSearchTextAtom = atom('')
 
 interface Props {
   postSearchActions?: () => void
 }
 
-function SearchOffers({postSearchActions}: Props): React.ReactElement {
+function SearchOffers({postSearchActions}: Props): React.JSX.Element {
   const {t} = useTranslation()
 
   const searchTextFromStorage = useAtomValue(searchTextAtom)
   const submitSearch = useSetAtom(submitSearchActionAtom)
+  const setLocalSearchText = useSetAtom(localSearchTextAtom)
+  const localSearchText = useAtomValue(localSearchTextAtom)
 
-  const [searchText, setSearchText] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    setLocalSearchText(searchTextFromStorage ?? '')
+  }, [searchTextFromStorage, setLocalSearchText])
 
-  const setSearchTextWithDebounce = useMemo(
+  const debouncedSubmit = useMemo(
     () =>
       debounce((text: string) => {
-        submitSearch(text)
-        if (postSearchActions) postSearchActions()
+        submitSearch(text || undefined)
+        postSearchActions?.()
       }, 400),
     [postSearchActions, submitSearch]
   )
 
-  function onInputValueChange(value: string): void {
-    setSearchText(value)
-    setSearchTextWithDebounce(value.trim())
-  }
-
-  // it re-renders whole component one more time after debounce submitSearch
-  // but maybe this is the most readable solution
   useEffect(() => {
-    setSearchText(searchTextFromStorage)
-  }, [searchTextFromStorage])
+    debouncedSubmit(localSearchText.trim())
+  }, [localSearchText, debouncedSubmit])
 
   return (
-    <Input
-      showClearButton={!!searchText}
-      placeholder={t('filterOffers.searchOffers')}
-      value={searchText}
-      onChangeText={onInputValueChange}
-      onClearPress={() => {
-        onInputValueChange('')
-      }}
-      icon={magnifyingGlass}
-      size="medium"
-      variant="greyOnBlack"
-      textColor="$greyOnBlack"
-      style={{flex: 1}}
+    <SearchBar
+      valueAtom={localSearchTextAtom}
+      placeholder={t('common.search')}
+      flex={1}
     />
   )
 }

@@ -34,7 +34,7 @@ const TextTagFrame = styled(XStack, {
   alignItems: 'center',
   overflow: 'hidden',
   paddingHorizontal: '$3',
-  paddingVertical: '$2',
+  paddingVertical: '$1',
 
   variants: {
     variant: {
@@ -59,7 +59,7 @@ const TextTagLabel = styled(SizableText, {
   name: 'TextTagLabel',
   fontFamily: '$body',
   fontWeight: '500',
-  fontSize: '$1',
+  fontSize: '$2',
   letterSpacing: '$1',
 
   variants: {

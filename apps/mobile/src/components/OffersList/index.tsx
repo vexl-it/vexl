@@ -6,16 +6,22 @@ import {
 } from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type Atom} from 'jotai'
-import React, {useMemo} from 'react'
+import React, {useEffect, useMemo, useRef} from 'react'
 import {RefreshControl} from 'react-native'
-import {getTokens} from 'tamagui'
+import Animated from 'react-native-reanimated'
+import {getTokens, Stack} from 'tamagui'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import OffersListItem from './OffersListItem'
 
+const ItemSeparatorComponent = (): React.ReactElement => <Stack h="$5" />
+const ReanimatedFlashList: React.ComponentType<any> =
+  Animated.createAnimatedComponent(FlashList)
+
 export interface Props
   extends Omit<FlashListProps<Atom<OneOfferInState>>, 'renderItem' | 'data'> {
   readonly offersAtoms: Array<Atom<OneOfferInState>>
+  readonly scrollToTopRef?: React.RefObject<(() => void) | null>
 }
 
 function renderItem(
@@ -24,52 +30,67 @@ function renderItem(
   return <OffersListItem isFirst={info.index === 0} offerAtom={info.item} />
 }
 
-const OffersList = React.forwardRef<FlashListRef<Atom<OneOfferInState>>, Props>(
-  function OffersList(
-    {
-      onRefresh,
-      refreshing,
-      offersAtoms,
-      ListHeaderComponent,
-      ListFooterComponent,
-      contentContainerStyle: externalContentContainerStyle,
-      ...props
-    },
-    ref
-  ) {
-    const bottomOffset = usePixelsFromBottomWhereTabsEnd()
+function OffersList({
+  onRefresh,
+  refreshing,
+  offersAtoms,
+  scrollToTopRef,
+  ListEmptyComponent,
+  ListHeaderComponent,
+  ListFooterComponent,
+  contentContainerStyle: externalContentContainerStyle,
+  ...props
+}: Props): React.JSX.Element {
+  const bottomOffset = usePixelsFromBottomWhereTabsEnd()
+  const animatedFlashListRef = useRef<FlashListRef<Atom<OneOfferInState>>>(null)
 
-    const contentContainerStyle = useMemo(
-      () => ({
-        paddingBottom: bottomOffset + Number(getTokens().space[5].val),
-        ...externalContentContainerStyle,
-      }),
-      [bottomOffset, externalContentContainerStyle]
-    )
+  const contentContainerStyle = useMemo(
+    () => ({
+      paddingBottom: bottomOffset + Number(getTokens().space[5].val),
+      ...externalContentContainerStyle,
+    }),
+    [bottomOffset, externalContentContainerStyle]
+  )
 
-    return (
-      <FlashList
-        ref={ref}
-        indicatorStyle="white"
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing ?? false}
-            onRefresh={onRefresh ?? (() => {})}
-            tintColor={getTokens().color.greyAccent5.val}
-          />
-        }
-        progressViewOffset={20}
-        ListHeaderComponent={ListHeaderComponent}
-        ListFooterComponent={ListFooterComponent}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={contentContainerStyle}
-        data={offersAtoms}
-        renderItem={renderItem}
-        keyExtractor={atomKeyExtractor}
-        {...props}
-      />
-    )
-  }
-)
+  useEffect(() => {
+    if (!scrollToTopRef) return
+
+    scrollToTopRef.current = () => {
+      animatedFlashListRef.current?.scrollToOffset({
+        offset: 0,
+        animated: false,
+      })
+    }
+
+    return () => {
+      scrollToTopRef.current = null
+    }
+  }, [scrollToTopRef])
+
+  return (
+    <ReanimatedFlashList
+      ref={animatedFlashListRef}
+      indicatorStyle="white"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing ?? false}
+          onRefresh={onRefresh ?? (() => {})}
+          tintColor={getTokens().color.greyAccent5.val}
+        />
+      }
+      ItemSeparatorComponent={ItemSeparatorComponent}
+      progressViewOffset={20}
+      ListHeaderComponent={ListHeaderComponent}
+      ListFooterComponent={ListFooterComponent}
+      ListEmptyComponent={ListEmptyComponent}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={contentContainerStyle}
+      data={offersAtoms}
+      renderItem={renderItem}
+      keyExtractor={atomKeyExtractor}
+      {...props}
+    />
+  )
+}
 
 export default OffersList

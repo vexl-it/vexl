@@ -3,7 +3,8 @@ export type {
   AnimatedNavigationBarAction,
   AnimatedNavigationBarProps,
 } from './AnimatedNavigationBar'
-export {Avatar} from './Avatar'
+export {Avatar, resolveSizePx} from './Avatar'
+export type {AvatarSize} from './Avatar'
 export {Banner} from './Banner'
 export type {BannerButton, BannerColor, BannerProps} from './Banner'
 export {BlogCard} from './BlogCard'

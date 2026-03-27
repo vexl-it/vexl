@@ -9,13 +9,10 @@ import {
   getRequestState,
 } from '../../state/chat/utils/offerStates'
 import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
-import {baseFilterAtom} from '../../state/marketplace/atoms/filterAtoms'
-import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {preferencesAtom} from '../../utils/preferences'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
-import Button from '../Button'
-import OfferWithBubbleTip from '../OfferWithBubbleTip'
+import OfferOnMarketplace from '../OfferOnMarketplace'
 import UserFeedback from '../UserFeedback'
 import {generateInitialFeedback} from '../UserFeedback/atoms'
 
@@ -31,7 +28,6 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const preferences = useAtomValue(preferencesAtom)
   const newOfferFeedbackDone = useAtomValue(newOfferFeedbackDoneAtom)
-  const baseFilter = useAtomValue(baseFilterAtom)
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -190,29 +186,8 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   ])
 
   return (
-    <Stack mt={isFirst ? '$0' : '$6'}>
-      <OfferWithBubbleTip
-        isMine={isMine}
-        showListingType={
-          baseFilter === 'ALL_SELLING_BTC' || baseFilter === 'ALL_BUYING_BTC'
-        }
-        reduceDescriptionLength
-        onInfoRectPress={content.onPress}
-        negative={
-          !content.actionableUI ||
-          !offer.offerInfo.publicPart.active ||
-          isOfferExpired(offer.offerInfo.publicPart.expirationDate)
-        }
-        button={
-          <Button
-            size="medium"
-            text={content.buttonText}
-            variant={content.actionableUI ? 'secondary' : 'primary'}
-            onPress={content.onPress}
-          />
-        }
-        offer={offer}
-      />
+    <Stack px="$5">
+      <OfferOnMarketplace offer={offer} onPress={content.onPress} />
       {!!isMine &&
         !!isFirst &&
         !newOfferFeedbackDone &&

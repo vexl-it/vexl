@@ -1,3 +1,5 @@
+import {type ListingType} from '@vexl-next/domain/src/general/offers'
+import {atom} from 'jotai'
 import {useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -24,7 +26,6 @@ import {
   createSelectClubInFilterAtom,
   currencyAtom,
   intendedConnectionLevelAtom,
-  listingTypeAtom,
   locationActiveAtom,
   locationArrayOfOneAtom,
   locationStateAtom,
@@ -72,7 +73,8 @@ export default function useBtcOffersFilterContent(): Props[] {
         title: t('offerForm.location.location'),
         children: (
           <Location
-            listingTypeAtom={listingTypeAtom}
+            listingTypeAtom={atom<ListingType | undefined>('BITCOIN')}
+            // listingTypeAtom={listingTypeAtom}
             randomizeLocation={false}
             locationAtom={locationArrayOfOneAtom}
             locationStateAtom={locationStateAtom}

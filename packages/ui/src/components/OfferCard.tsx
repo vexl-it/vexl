@@ -2,7 +2,8 @@ import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
-import {Circle, SizableText, XStack, YStack} from '../primitives'
+import {Circle, XStack, YStack} from '../primitives'
+import {Typography} from './Typography'
 
 export interface OfferCardProps {
   readonly avatar?: React.ReactNode
@@ -55,50 +56,6 @@ const ContentFrame = styled(YStack, {
   gap: '$3',
 })
 
-const NameText = styled(SizableText, {
-  name: 'OfferCardName',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundPrimary',
-  numberOfLines: 1,
-})
-
-const PremiumText = styled(SizableText, {
-  name: 'OfferCardPremium',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$accentHighlightSecondary',
-  numberOfLines: 1,
-})
-
-const SubtitleText = styled(SizableText, {
-  name: 'OfferCardSubtitle',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundSecondary',
-  numberOfLines: 1,
-})
-
-const DetailText = styled(SizableText, {
-  name: 'OfferCardDetail',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundSecondary',
-  numberOfLines: 1,
-})
-
 export function OfferCard({
   avatar,
   name,
@@ -129,9 +86,21 @@ export function OfferCard({
                   flexShrink={1}
                   minWidth={0}
                 >
-                  <NameText>{name}</NameText>
+                  <Typography
+                    variant="descriptionBold"
+                    color="$foregroundPrimary"
+                    numberOfLines={1}
+                  >
+                    {name}
+                  </Typography>
                   {premiumLabel != null ? (
-                    <PremiumText>{premiumLabel}</PremiumText>
+                    <Typography
+                      variant="descriptionBold"
+                      color="$accentHighlightSecondary"
+                      numberOfLines={1}
+                    >
+                      {premiumLabel}
+                    </Typography>
                   ) : null}
                 </XStack>
                 <XStack gap="$1" alignItems="center">
@@ -142,17 +111,35 @@ export function OfferCard({
               {commonFriends != null ? (
                 clubName != null ? (
                   <XStack gap="$2" alignItems="center">
-                    <SubtitleText>{clubName}</SubtitleText>
+                    <Typography
+                      variant="micro"
+                      color="$foregroundSecondary"
+                      numberOfLines={1}
+                    >
+                      {clubName}
+                    </Typography>
                     <Circle size="$2" backgroundColor={secondaryColor} />
                     <XStack gap="$1" alignItems="center">
                       <PeopleUsers size={16} color={secondaryColor} />
-                      <SubtitleText>{commonFriends}</SubtitleText>
+                      <Typography
+                        variant="micro"
+                        color="$foregroundSecondary"
+                        numberOfLines={1}
+                      >
+                        {commonFriends}
+                      </Typography>
                     </XStack>
                   </XStack>
                 ) : (
                   <XStack gap="$1" alignItems="center">
                     <PeopleUsers size={16} color={secondaryColor} />
-                    <SubtitleText>{commonFriends}</SubtitleText>
+                    <Typography
+                      variant="micro"
+                      color="$foregroundSecondary"
+                      numberOfLines={1}
+                    >
+                      {commonFriends}
+                    </Typography>
                   </XStack>
                 )
               ) : null}
@@ -160,7 +147,13 @@ export function OfferCard({
           </XStack>
         ) : (
           <XStack alignItems="center" justifyContent="space-between">
-            <NameText>{name}</NameText>
+            <Typography
+              variant="descriptionBold"
+              color="$foregroundPrimary"
+              numberOfLines={1}
+            >
+              {name}
+            </Typography>
             <XStack gap="$1" alignItems="center">
               {textTag}
               {iconTag}
@@ -169,36 +162,30 @@ export function OfferCard({
         )}
       </HeaderFrame>
       <ContentFrame>
-        <SizableText
-          fontFamily="$heading"
-          fontWeight="400"
-          fontSize="$1"
-          letterSpacing="$1"
-          lineHeight="$1"
-          color="$foregroundPrimary"
-        >
+        <Typography variant="tabSmall" color="$foregroundPrimary">
           {price}
-        </SizableText>
-        <SizableText
-          fontFamily="$body"
-          fontWeight="500"
-          fontSize="$2"
-          letterSpacing="$2"
-          lineHeight="$2"
+        </Typography>
+        <Typography
+          variant="description"
           color="$foregroundSecondary"
           numberOfLines={2}
         >
           {description}
-        </SizableText>
+        </Typography>
         <XStack gap="$2" alignItems="center">
           {details.map((detail, index) => (
             <React.Fragment key={detail}>
               {index > 0 ? (
                 <Circle size="$2" backgroundColor={secondaryColor} />
               ) : null}
-              <DetailText flex={index === details.length - 1 ? 1 : undefined}>
+              <Typography
+                variant="micro"
+                color="$foregroundSecondary"
+                numberOfLines={1}
+                flex={index === details.length - 1 ? 1 : undefined}
+              >
                 {detail}
-              </DetailText>
+              </Typography>
             </React.Fragment>
           ))}
         </XStack>

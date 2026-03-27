@@ -1,40 +1,23 @@
 import {useNavigation} from '@react-navigation/native'
+import {IconButton, TuneSettings, useTheme} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack} from 'tamagui'
 import {isFilterActiveAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
-import Image from '../../../../Image'
-import filterSvg from '../../../images/filterSvg'
 
-function FilterButton(): React.ReactElement {
+function FilterButton(): React.JSX.Element {
   const navigation = useNavigation()
   const isFilterActive = useAtomValue(isFilterActiveAtom)
+  const theme = useTheme()
 
   return (
-    <TouchableOpacity
+    <IconButton
+      showBadge={isFilterActive}
       onPress={() => {
         navigation.navigate('FilterOffers')
       }}
     >
-      <Stack
-        w={56}
-        h={56}
-        ai="center"
-        jc="center"
-        bc={isFilterActive ? '$main' : '$grey'}
-        br="$6"
-      >
-        <Image
-          stroke={
-            isFilterActive
-              ? getTokens().color.darkBrown.val
-              : getTokens().color.greyOnBlack.val
-          }
-          source={filterSvg}
-        />
-      </Stack>
-    </TouchableOpacity>
+      <TuneSettings size={24} color={theme.foregroundPrimary.val} />
+    </IconButton>
   )
 }
 

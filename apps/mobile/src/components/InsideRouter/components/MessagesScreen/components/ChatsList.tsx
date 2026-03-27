@@ -12,6 +12,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
+import {useInsideScreenScroll} from '../../InsideScreen'
 import ChatListItem, {type ChatListData} from './ChatListItem'
 
 const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
@@ -46,6 +47,7 @@ function ChatsList(): React.ReactElement | null {
   const navigation = useNavigation()
   const elementAtoms = useAtomValue(chatIdAtomsAtom)
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
+  const {onScroll} = useInsideScreenScroll()
 
   if (elementAtoms.length === 0) {
     return (
@@ -77,6 +79,8 @@ function ChatsList(): React.ReactElement | null {
       keyExtractor={atomKeyExtractor}
       renderItem={renderItem}
       contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
     />
   )
 }

@@ -20,7 +20,6 @@ import {
   updateSingleInvoiceStatusTypeRepeatingActionAtom,
 } from '../DonationPrompt/atoms'
 import Image from '../Image'
-import checkIconSvg from '../images/checkIconSvg'
 import copySvg from '../images/copySvg'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
@@ -128,11 +127,7 @@ function DonationDetailsScreen({
                 <TouchableOpacity
                   onPress={() => {
                     Clipboard.setString(mySingleDonation?.invoiceId ?? '')
-                    setToastNotification({
-                      visible: true,
-                      text: t('common.copied'),
-                      icon: checkIconSvg,
-                    })
+                    setToastNotification(t('common.copied'))
                   }}
                 >
                   <Image source={copySvg} fill={getTokens().color.white.val} />
@@ -193,11 +188,7 @@ function DonationDetailsScreen({
                       text={t('donations.copyPaymentLink')}
                       onPress={() => {
                         Clipboard.setString(mySingleDonation?.paymentLink ?? '')
-                        setToastNotification({
-                          visible: true,
-                          text: t('common.copied'),
-                          icon: checkIconSvg,
-                        })
+                        setToastNotification(t('common.copied'))
                       }}
                     />
                   </XStack>

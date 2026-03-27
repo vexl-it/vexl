@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Vexl UI Book",
+    "slug": "vexl-ui-book",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "vexl-ui-book",
+    "platforms": ["ios", "android"],
+    "ios": {
+      "bundleIdentifier": "it.vexl.ui-book"
+    },
+    "android": {
+      "package": "it.vexl.uibook"
+    }
+  }
+}

@@ -20,7 +20,6 @@ import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import SvgImage from '../../Image'
-import checkIconSvg from '../../images/checkIconSvg'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
 import UserAvatar from '../../UserAvatar'
@@ -65,11 +64,7 @@ function RevealedContactMessageItem({
       bottomText={userName}
       onCopyToClipboardPress={() => {
         Clipboard.setString(fullPhoneNumber ?? '')
-        setToastNotification({
-          visible: true,
-          text: t('common.copied'),
-          icon: checkIconSvg,
-        })
+        setToastNotification(t('common.copied'))
       }}
       buttonText={
         !isContactAlreadyInContactsList

@@ -65,8 +65,6 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
               keyPairV2: keyPair.keyPair,
             }),
           storeNextPageToken: (nextPageToken) => {
-            if (!nextPageToken) return
-
             set(
               clubOffersNextPageParamAtom,
               Record.set(clubUuid, nextPageToken)

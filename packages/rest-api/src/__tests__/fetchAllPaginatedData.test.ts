@@ -221,4 +221,26 @@ describe('Fetch all paginated data tests', () => {
     expect(result).toEqual(mockData)
     expect(storedToken).toBe('final-token')
   })
+
+  it('Should not overwrite stored token when fetch returns no items and no next token', async () => {
+    let storedToken = 'keep-existing-token'
+
+    const result = await Effect.runPromise(
+      fetchAllPaginatedData({
+        fetchEffectToRun: () =>
+          Effect.succeed({
+            nextPageToken: null,
+            hasNext: false,
+            limit: 30,
+            items: [],
+          }),
+        storeNextPageToken: (token) => {
+          storedToken = token
+        },
+      })
+    )
+
+    expect(result).toEqual([])
+    expect(storedToken).toBe('keep-existing-token')
+  })
 })

@@ -13,7 +13,7 @@ function fetchAllPaginatedData<R, E>({
     },
     E
   >
-  storeNextPageToken?: (nextPageToken: string | undefined) => void
+  storeNextPageToken?: (nextPageToken: string) => void
 }): Effect.Effect<R[], E> {
   return Effect.gen(function* (_) {
     const allData: R[] = []
@@ -28,7 +28,7 @@ function fetchAllPaginatedData<R, E>({
       nextPageToken = response.nextPageToken ?? undefined
     }
 
-    if (storeNextPageToken) {
+    if (storeNextPageToken && nextPageToken) {
       storeNextPageToken(nextPageToken)
     }
 

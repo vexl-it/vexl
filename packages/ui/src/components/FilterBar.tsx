@@ -1,4 +1,4 @@
-import React, {useCallback, useRef} from 'react'
+import React, {useCallback, useEffect, useRef} from 'react'
 import type {
   LayoutChangeEvent,
   NativeScrollEvent,
@@ -7,6 +7,8 @@ import type {
 } from 'react-native'
 import {ScrollView} from 'react-native'
 import {getTokens} from 'tamagui'
+
+import {type XStackProps} from 'tamagui'
 
 import {XStack} from '../primitives'
 import {FilterTag} from './FilterTag'
@@ -20,6 +22,7 @@ export interface FilterBarProps<T> {
   readonly items: ReadonlyArray<FilterBarItem<T>>
   readonly selectedValues: ReadonlySet<T>
   readonly onSelectedValuesChange: (values: ReadonlySet<T>) => void
+  readonly containerStyle?: XStackProps
 }
 
 interface TagLayout {
@@ -31,6 +34,7 @@ export function FilterBar<T>({
   items,
   selectedValues,
   onSelectedValuesChange,
+  containerStyle,
 }: FilterBarProps<T>): React.JSX.Element {
   const spaceTokens = getTokens().space
 
@@ -44,14 +48,6 @@ export function FilterBar<T>({
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       scrollOffset.current = event.nativeEvent.contentOffset.x
-    },
-    []
-  )
-
-  const handleTagLayout = useCallback(
-    (index: number, event: LayoutChangeEvent) => {
-      const {x, width} = event.nativeEvent.layout
-      tagLayouts.current[index] = {x, width}
     },
     []
   )
@@ -90,6 +86,38 @@ export function FilterBar<T>({
     [gap]
   )
 
+  const layoutsReady = useRef(false)
+  const layoutCount = useRef(0)
+
+  const scrollToRightmostSelected = useCallback(() => {
+    for (let i = items.length - 1; i >= 0; i--) {
+      const item = items[i]
+      if (item && selectedValues.has(item.value)) {
+        scrollToReveal(i)
+        return
+      }
+    }
+  }, [items, selectedValues, scrollToReveal])
+
+  const handleTagLayout = useCallback(
+    (index: number, event: LayoutChangeEvent) => {
+      const {x, width} = event.nativeEvent.layout
+      tagLayouts.current[index] = {x, width}
+
+      layoutCount.current += 1
+      if (!layoutsReady.current && layoutCount.current >= items.length) {
+        layoutsReady.current = true
+        scrollToRightmostSelected()
+      }
+    },
+    [items.length, scrollToRightmostSelected]
+  )
+
+  useEffect(() => {
+    if (!layoutsReady.current) return
+    scrollToRightmostSelected()
+  }, [scrollToRightmostSelected])
+
   const handlePress = useCallback(
     (index: number) => {
       const item = items[index]
@@ -117,7 +145,7 @@ export function FilterBar<T>({
         scrollViewWidth.current = event.nativeEvent.layout.width
       }}
     >
-      <XStack gap={gap} alignItems="center">
+      <XStack gap={gap} alignItems="center" {...containerStyle}>
         {items.map((item, index) => {
           const selected = selectedValues.has(item.value)
           return (

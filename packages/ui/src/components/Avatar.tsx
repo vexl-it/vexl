@@ -18,7 +18,7 @@ const GRAYSCALE_FILTER = [
   {name: 'feColorMatrix', type: 'saturate', values: 0} as const,
 ]
 
-function resolveSizePx(size: AvatarSize, customSize?: number): number {
+export function resolveSizePx(size: AvatarSize, customSize?: number): number {
   if (customSize != null) return customSize
   return getTokens().size[SIZE_TOKEN_MAP[size]].val
 }

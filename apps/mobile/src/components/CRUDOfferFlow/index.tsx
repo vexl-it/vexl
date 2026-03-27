@@ -120,7 +120,10 @@ function CRUDOfferFlow({
               void Effect.runPromise(
                 andThenExpectBooleanNoErrors((success) => {
                   if (success) {
-                    navigation.navigate('MyOffers')
+                    navigation.navigate('InsideTabs', {
+                      screen: 'Marketplace',
+                      params: {initialTab: 'myOffers'},
+                    })
                   }
                 })(params.offerId ? editOffer() : createOffer())
               )

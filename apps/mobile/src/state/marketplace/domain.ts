@@ -3,11 +3,9 @@ import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   BtcNetwork,
   FriendLevel,
-  ListingType,
   LocationState,
   OfferInfo,
   OfferLocation,
-  OfferType,
   OneOfferInState,
   PaymentMethod,
   Sort,
@@ -79,6 +77,16 @@ export type LoadingState =
   | ErrorLoadingState
   | InProgressLoadingState
 
+export const MarketplaceFilterBarOption = Schema.Literal(
+  'BUY_BTC',
+  'SELL_BTC',
+  'BUY_PRODUCT',
+  'SELL_PRODUCT',
+  'PROVIDE_SERVICE',
+  'HIRE_SERVICE'
+)
+export type MarketplaceFilterBarOption = typeof MarketplaceFilterBarOption.Type
+
 export const OffersFilter = Schema.Struct({
   sort: Schema.optional(Sort),
   currency: Schema.optional(CurrencyCode),
@@ -87,8 +95,10 @@ export const OffersFilter = Schema.Struct({
   paymentMethod: Schema.optional(Schema.Array(PaymentMethod)),
   btcNetwork: Schema.optional(Schema.Array(BtcNetwork)),
   friendLevel: Schema.optional(Schema.Array(FriendLevel)),
-  offerType: Schema.optional(OfferType),
-  listingType: Schema.optional(ListingType),
+  filterBarOptions: Schema.optionalWith(
+    Schema.ReadonlySet(MarketplaceFilterBarOption),
+    {default: () => new Set(), nullable: true}
+  ),
   singlePrice: Schema.optional(Schema.Number),
   singlePriceCurrency: Schema.optional(CurrencyCode),
   amountBottomLimit: Schema.optional(Schema.Number),
@@ -104,17 +114,6 @@ export type OffersFilter = typeof OffersFilter.Type
 
 export const OffersFilterEquals = (a: OffersFilter, b: OffersFilter): boolean =>
   fastDeepEqualRemoveUndefineds(a, b)
-
-export const BaseOffersFilter = Schema.Literal(
-  'BTC_TO_CASH',
-  'CASH_TO_BTC',
-  'BTC_TO_PRODUCT',
-  'PRODUCT_TO_BTC',
-  'STH_ELSE',
-  'ALL_SELLING_BTC',
-  'ALL_BUYING_BTC'
-)
-export type BaseOffersFilter = typeof BaseOffersFilter.Type
 
 export const FiatOrSats = Schema.Literal('FIAT', 'SATS')
 export type FiatOrSats = typeof FiatOrSats.Type

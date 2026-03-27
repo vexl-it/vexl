@@ -1,47 +1,50 @@
+import {Map} from '@vexl-next/ui'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React from 'react'
+import React, {useCallback} from 'react'
 import Animated, {
   Extrapolation,
-  type SharedValue,
   interpolate,
   useAnimatedStyle,
+  type SharedValue,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, XStack, YStack} from 'tamagui'
+import {Stack, useTheme, XStack} from 'tamagui'
 import {useOffersLoadingError} from '../../../../../state/marketplace'
-import {baseFilterAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
-import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
-import EnableBackgroundFetchSuggestion from '../../../../EnableBackgroundFetchSuggestion'
+import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import ErrorListHeader from '../../../../ErrorListHeader'
 import {MAP_SIZE} from '../../../../MarketplaceMap'
 import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
-import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
-import AddListingTypeToOffersSuggestion from './AddListingTypeToOffersSuggestion'
-import BaseFilterDropdown from './BaseFilterDropdown'
-import CheckUpdatedPrivacyPolicySuggestion from './CheckUpdatedPrivacyPolicySuggestion'
 import EmptyList from './EmptyList'
-import FiatSatsDropdown from './FiatSatsDropdown'
 import FilterButton from './FilterButton'
-import ImportNewContactsSuggestion from './ImportNewContactsSuggestion'
-import RemovedClubsSuggestion from './RemovedClubsSuggestion'
+import FilterTagBar from './FilterTagBar'
+import MarketplaceInlineButton from './MarketplaceInlineButton'
 import SearchOffers from './SearchOffers'
 import TotalOffersCount from './TotalOffersCount'
-import VexlNewsSuggestions from './VexlNewsSuggestions'
 
 interface Props {
+  readonly filteredOffersCount: number
   readonly scrollY: SharedValue<number>
 }
 
-function AllOffersListHeader({scrollY}: Props): React.ReactElement {
+function AllOffersListHeader({
+  filteredOffersCount,
+  scrollY,
+}: Props): React.ReactElement {
+  const {t} = useTranslation()
+  const theme = useTheme()
   const insets = useSafeAreaInsets()
   const error = useOffersLoadingError()
-  const baseFilter = useAtomValue(baseFilterAtom)
-  const offersAtoms = useAtomValue(
-    filteredOffersIncludingLocationFilterAtomsAtom
+  const areThereOffersToSeeInMarketplaceWithoutFilters = useAtomValue(
+    areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
   const refocusMap = useSetAtom(refocusMapActionAtom)
+
+  const handleRefocusMap = useCallback(() => {
+    refocusMap({focusAllOffers: false})
+  }, [refocusMap])
 
   const opacityAnim = useAnimatedStyle(() => ({
     opacity: interpolate(
@@ -64,18 +67,10 @@ function AllOffersListHeader({scrollY}: Props): React.ReactElement {
   }))
 
   const topControls = (
-    <Stack gap="$4" px="$2" pb="$4">
-      <BaseFilterDropdown
-        postSelectActions={() => {
-          refocusMap({focusAllOffers: false})
-        }}
-      />
-      <XStack gap="$2" pb="$2">
-        <SearchOffers
-          postSearchActions={() => {
-            refocusMap({focusAllOffers: false})
-          }}
-        />
+    <Stack gap="$4" pb="$7">
+      <FilterTagBar postSelectActions={handleRefocusMap} />
+      <XStack gap="$3" paddingHorizontal="$5">
+        <SearchOffers postSearchActions={handleRefocusMap} />
         <FilterButton />
       </XStack>
     </Stack>
@@ -83,27 +78,25 @@ function AllOffersListHeader({scrollY}: Props): React.ReactElement {
 
   if (isNone(error))
     return (
-      <Stack>
-        {topControls}
+      <Stack paddingTop="$7" paddingBottom="$5">
+        {!!areThereOffersToSeeInMarketplaceWithoutFilters && topControls}
         <Animated.View style={[opacityAnim, scaleAnim]}>
           <MarketplaceMapContainer />
         </Animated.View>
-        {offersAtoms.length > 0 ? (
-          <Stack px="$1">
-            <XStack f={1} ai="center" jc="space-between" pb="$2">
-              <Stack f={1}>
-                <TotalOffersCount filteredOffersCount={offersAtoms.length} />
-              </Stack>
-              {baseFilter !== 'BTC_TO_CASH' &&
-                baseFilter !== 'CASH_TO_BTC' &&
-                baseFilter !== 'ALL_SELLING_BTC' &&
-                baseFilter !== 'ALL_BUYING_BTC' && (
-                  <Stack f={1}>
-                    <FiatSatsDropdown />
-                  </Stack>
-                )}
+        {areThereOffersToSeeInMarketplaceWithoutFilters ? (
+          <Stack paddingHorizontal="$5">
+            <XStack ai="center" jc="space-between">
+              <TotalOffersCount filteredOffersCount={filteredOffersCount} />
+              <MarketplaceInlineButton
+                icon={
+                  <Map size={18} color={theme.accentHighlightPrimary.val} />
+                }
+                label={t('marketplace.showOnMap')}
+                color={theme.accentHighlightPrimary.val}
+                onPress={() => {}}
+              />
             </XStack>
-            <YStack gap="$6" mb="$6">
+            {/* <YStack gap="$6">
               <CheckUpdatedPrivacyPolicySuggestion />
               <EnableBackgroundFetchSuggestion />
               <ReencryptOffersSuggestion />
@@ -111,7 +104,7 @@ function AllOffersListHeader({scrollY}: Props): React.ReactElement {
               <RemovedClubsSuggestion />
               <ImportNewContactsSuggestion />
               <AddListingTypeToOffersSuggestion />
-            </YStack>
+            </YStack> */}
           </Stack>
         ) : (
           <EmptyList />

@@ -116,7 +116,7 @@ function EmptyList(): React.ReactElement {
   const emptyListVariant = useEmptyListVariants()
 
   return (
-    <YStack gap="$6" ai="center" px="$4">
+    <YStack gap="$6" ai="center" paddingHorizontal="$5">
       <Stack ai="center" jc="center">
         <FaqStayAnonymous variant="dark" width={253} height={179} />
       </Stack>
@@ -129,7 +129,7 @@ function EmptyList(): React.ReactElement {
       >
         {emptyListVariant.title}
       </Typography>
-      <YStack gap="$4" ai="center" px="$4" w="100%">
+      <YStack gap="$4" ai="center" w="100%">
         <Typography variant="description" col="$greyOnWhite" ta="center">
           {emptyListVariant.primaryAction.description}
         </Typography>
@@ -143,14 +143,14 @@ function EmptyList(): React.ReactElement {
       </YStack>
       {!!emptyListVariant.secondaryAction && (
         <>
-          <XStack ai="center" gap="$2" w="100%" px="$4">
+          <XStack ai="center" gap="$2" w="100%">
             <Stack f={1} h={1} bc="$greyOnWhite" />
             <Typography variant="description" col="$greyOnWhite">
               {t('common.or')}
             </Typography>
             <Stack f={1} h={1} bc="$greyOnWhite" />
           </XStack>
-          <YStack gap="$4" ai="center" px="$4" w="100%">
+          <YStack gap="$4" ai="center" w="100%">
             <Typography variant="description" col="$greyOnWhite" ta="center">
               {emptyListVariant.secondaryAction.description}
             </Typography>

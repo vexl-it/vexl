@@ -3,7 +3,7 @@ import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
 import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import OfferWithBubbleTip from '../../OfferWithBubbleTip'
+import OfferOnMarketplace from '../../OfferOnMarketplace'
 import Section from '../../Section'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import summarySvg from '../images/summarySvg'
@@ -40,11 +40,7 @@ function SummaryScreen(): React.ReactElement {
           <Text ff="$body500" col="$white" fos={16}>
             {t('offerForm.summaryDescription')}
           </Text>
-          <OfferWithBubbleTip
-            displayAsPreview
-            reduceDescriptionLength
-            offer={offerToDisplay}
-          />
+          <OfferOnMarketplace offer={offerToDisplay} />
         </Stack>
       </Section>
     </ScreenWrapper>

@@ -49,14 +49,22 @@ export const clubsWithMembersAtomsAtom = splitAtom(
   focusAtom(clubsWithMembersStorageAtom, (optic) => optic.prop('data'))
 )
 
+export const clubsWithMembersByUuidAtom = atom((get) => {
+  const clubsWithMembers = get(clubsWithMembersAtom)
+
+  return new Map(
+    Array.map(
+      clubsWithMembers,
+      (club): readonly [ClubUuid, ClubWithMembers] => [club.club.uuid, club]
+    )
+  )
+})
+
 export const singleClubAtom = (
   clubUuid: ClubUuid
 ): Atom<Option.Option<ClubWithMembers>> =>
   atom((get) =>
-    Array.findFirst(
-      get(clubsWithMembersAtom),
-      (club) => club.club.uuid === clubUuid
-    )
+    Option.fromNullable(get(clubsWithMembersByUuidAtom).get(clubUuid))
   )
 
 export const upsertClubWithMembersActionAtom = atom(
@@ -182,3 +190,30 @@ export function useGetAllClubsForIds(
     Array.map((club) => club.club)
   )
 }
+
+export const smallestClubForIdsAtom = (
+  clubsIds: readonly ClubUuid[]
+): Atom<Option.Option<ClubWithMembers>> =>
+  atom((get): Option.Option<ClubWithMembers> => {
+    const clubsWithMembersByUuid = get(clubsWithMembersByUuidAtom)
+
+    return pipe(
+      clubsIds,
+      Array.reduce(Option.none<ClubWithMembers>(), (smallestClub, clubId) => {
+        const club = clubsWithMembersByUuid.get(clubId)
+
+        if (!club) {
+          return smallestClub
+        }
+
+        if (
+          Option.isNone(smallestClub) ||
+          club.members.length < smallestClub.value.members.length
+        ) {
+          return Option.some(club)
+        }
+
+        return smallestClub
+      })
+    )
+  })

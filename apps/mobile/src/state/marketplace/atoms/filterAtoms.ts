@@ -1,15 +1,16 @@
-import {Record, Schema} from 'effect'
+import {type FilterBarItem} from '@vexl-next/ui'
+import {Array, Record, Schema} from 'effect'
+import {type ReadonlyArray} from 'effect/Array'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {type DropdownItemProps} from '../../../components/Dropdown'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
+  MarketplaceFilterBarOption,
   OffersFilter,
   OffersFilterEquals,
-  type BaseOffersFilter,
 } from '../domain'
 
 export const offersFilterInitialState = {
@@ -23,8 +24,7 @@ export const offersFilterInitialState = {
   spokenLanguages: [],
   amountBottomLimit: undefined,
   amountTopLimit: undefined,
-  offerType: 'BUY',
-  listingType: 'BITCOIN',
+  filterBarOptions: new Set<MarketplaceFilterBarOption>(),
   singlePrice: undefined,
   text: undefined,
   singlePriceCurrency: getDefaultCurrency(),
@@ -42,13 +42,9 @@ export const offersFilterFromStorageAtom = focusAtom(
   (o) => o.prop('filter')
 )
 
-export const listingTypeFilterAtom = focusAtom(
+export const filterBarOptionsAtom = focusAtom(
   offersFilterFromStorageAtom,
-  (o) => o.prop('listingType')
-)
-
-export const offerTypeFilterAtom = focusAtom(offersFilterFromStorageAtom, (o) =>
-  o.prop('offerType')
+  (o) => o.prop('filterBarOptions')
 )
 
 export const locationFilterAtom = focusAtom(offersFilterFromStorageAtom, (o) =>
@@ -81,9 +77,8 @@ export const isFilterActiveAtom = atom((get) => {
     singlePriceCurrency,
     singlePrice,
     text,
-    // listingType and offerType are ignored as they are part of the main filter on marketplace
-    listingType,
-    offerType,
+    // filterBarOptions is ignored since it is part of the main filter on marketplace
+    filterBarOptions,
     location,
     ...offersFilterFromStorage
   } = get(offersFilterFromStorageAtom)
@@ -91,15 +86,24 @@ export const isFilterActiveAtom = atom((get) => {
   const {
     singlePriceCurrency: spc,
     text: t,
-    listingType: lt,
-    offerType: ot,
+    filterBarOptions: fbo,
     ...filterInitialState
   } = offersFilterInitialState
 
   return !OffersFilterEquals(
     {
       ...offersFilterFromStorage,
-      singlePrice: listingType !== 'BITCOIN' ? singlePrice : undefined,
+      filterBarOptions: fbo,
+      singlePrice: Array.isNonEmptyArray(
+        Array.intersection(Array.fromIterable(filterBarOptions), [
+          'BUY_PRODUCT',
+          'SELL_PRODUCT',
+          'HIRE_SERVICE',
+          'PROVIDE_SERVICE',
+        ])
+      )
+        ? singlePrice
+        : undefined,
       location: location?.length === 0 ? undefined : location,
       clubsUuids:
         offersFilterFromStorage.clubsUuids?.length ===
@@ -107,7 +111,7 @@ export const isFilterActiveAtom = atom((get) => {
           ? undefined
           : offersFilterFromStorage.clubsUuids,
     } satisfies OffersFilter,
-    filterInitialState
+    {...filterInitialState, filterBarOptions: fbo}
   )
 })
 
@@ -116,7 +120,7 @@ export const isTextFilterActiveAtom = atom(
 )
 
 export const resetFilterInStorageActionAtom = atom(null, (get, set) => {
-  const {offerType, listingType, ...restOfOffersFilterInitialState} =
+  const {filterBarOptions, ...restOfOffersFilterInitialState} =
     offersFilterInitialState
 
   set(offersFilterFromStorageAtom, (prev) => ({
@@ -125,87 +129,21 @@ export const resetFilterInStorageActionAtom = atom(null, (get, set) => {
   }))
 })
 
-export const baseFilterDropdownDataAtom: Atom<
-  Array<DropdownItemProps<BaseOffersFilter>>
+export const marketplaceFilterBarFieldsAtom: Atom<
+  ReadonlyArray<FilterBarItem<MarketplaceFilterBarOption>>
 > = atom((get) => {
   const {t} = get(translationAtom)
-  const baseFilterOptions: BaseOffersFilter[] = [
-    'BTC_TO_CASH',
-    'CASH_TO_BTC',
-    'BTC_TO_PRODUCT',
-    'PRODUCT_TO_BTC',
-    'STH_ELSE',
-    'ALL_SELLING_BTC',
-    'ALL_BUYING_BTC',
-  ]
+  const baseFilterOptions = MarketplaceFilterBarOption.literals
 
   return baseFilterOptions.map((option) => ({
-    label: t(`filterOffers.${option}`),
+    label: t(`marketplaceFilter.${option}`),
     value: option,
   }))
 })
 
-export const baseFilterAtom = atom(
-  (get): BaseOffersFilter | undefined => {
-    const listingTypeFilter = get(listingTypeFilterAtom)
-    const offerTypeFilter = get(offerTypeFilterAtom)
-    if (listingTypeFilter === 'BITCOIN') {
-      if (offerTypeFilter === 'BUY') return 'BTC_TO_CASH'
-      return 'CASH_TO_BTC'
-    }
-
-    if (listingTypeFilter === 'PRODUCT') {
-      if (offerTypeFilter === 'SELL') return 'PRODUCT_TO_BTC'
-      return 'BTC_TO_PRODUCT'
-    }
-
-    if (listingTypeFilter === 'OTHER') {
-      return 'STH_ELSE'
-    }
-
-    if (listingTypeFilter === undefined) {
-      if (offerTypeFilter === 'SELL') return 'ALL_SELLING_BTC'
-      return 'ALL_BUYING_BTC'
-    }
-
-    return undefined
-  },
-  (_, set, baseFilterValue: BaseOffersFilter | undefined) => {
-    if (baseFilterValue === 'BTC_TO_CASH') {
-      set(offerTypeFilterAtom, 'BUY')
-      set(listingTypeFilterAtom, 'BITCOIN')
-    }
-
-    if (baseFilterValue === 'CASH_TO_BTC') {
-      set(offerTypeFilterAtom, 'SELL')
-      set(listingTypeFilterAtom, 'BITCOIN')
-    }
-
-    if (baseFilterValue === 'BTC_TO_PRODUCT') {
-      set(offerTypeFilterAtom, 'BUY')
-      set(listingTypeFilterAtom, 'PRODUCT')
-    }
-
-    if (baseFilterValue === 'PRODUCT_TO_BTC') {
-      set(offerTypeFilterAtom, 'SELL')
-      set(listingTypeFilterAtom, 'PRODUCT')
-    }
-
-    if (baseFilterValue === 'STH_ELSE') {
-      set(offerTypeFilterAtom, undefined)
-      set(listingTypeFilterAtom, 'OTHER')
-    }
-
-    if (baseFilterValue === 'ALL_SELLING_BTC') {
-      set(offerTypeFilterAtom, 'SELL')
-      set(listingTypeFilterAtom, undefined)
-    }
-
-    if (baseFilterValue === 'ALL_BUYING_BTC') {
-      set(offerTypeFilterAtom, 'BUY')
-      set(listingTypeFilterAtom, undefined)
-    }
-  }
+export const marketplaceFilterBarSelectedFieldAtom = focusAtom(
+  offersFilterFromStorageAtom,
+  (o) => o.prop('filterBarOptions')
 )
 
 export const submitSearchActionAtom = atom(

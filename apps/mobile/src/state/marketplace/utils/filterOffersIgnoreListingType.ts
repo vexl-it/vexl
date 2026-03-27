@@ -41,8 +41,8 @@ export const filterOffersIgnoreListingType = ({
               offer.offerInfo.privatePart.friendLevel
             )
           : true)) &&
-      (!filter.offerType ||
-        offer.offerInfo.publicPart.offerType === filter.offerType) &&
+      // (!filter.offerType ||
+      //   offer.offerInfo.publicPart.offerType === filter.offerType) &&
       (!filter.amountTopLimit ||
         offer.offerInfo.publicPart.amountBottomLimit <=
           filter.amountTopLimit) &&

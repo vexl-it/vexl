@@ -1,33 +1,24 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {ScrollView, StyleSheet} from 'react-native'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {Stack, XStack, getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
-import SvgImage from '../Image'
 import FilterForm from '../OfferForm'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import Section from '../Section'
-import infoSvg from '../images/infoSvg'
 import sortingSvg from '../images/sortingSvg'
-import userSvg from '../images/userSvg'
 import {
   initializeOffersFilterOnDisplayActionAtom,
-  listingTypeAtom,
-  offerTypeAtom,
   resetFilterOmitTextFilterActionAtom,
   saveFilterActionAtom,
   sortingAtom,
 } from './atom'
-import BaseFilter from './components/BaseFilter'
 import Sorting from './components/Sorting'
-import useAllOffersFilterContent from './useAllOffersFilterContent'
 import useBtcOffersFilterContent from './useBtcOffersFilterContent'
-import useOtherOffersFilterContent from './useOtherOffersFilterContent'
-import useProductOffersFilterContent from './useProductOffersFilterContent'
 
 const styles = StyleSheet.create({
   contentStyles: {
@@ -40,11 +31,10 @@ function FilterOffersScreen(): React.ReactElement {
   const tokens = getTokens()
   const safeGoBack = useSafeGoBack()
   const btcOffersFilterContent = useBtcOffersFilterContent()
-  const productOffersFilterContent = useProductOffersFilterContent()
-  const otherOffersFilterContent = useOtherOffersFilterContent()
-  const allOffersFilterContent = useAllOffersFilterContent()
-  const listingType = useAtomValue(listingTypeAtom)
-  const offerType = useAtomValue(offerTypeAtom)
+  // const productOffersFilterContent = useProductOffersFilterContent()
+  // const otherOffersFilterContent = useOtherOffersFilterContent()
+  // const allOffersFilterContent = useAllOffersFilterContent()
+  // const filterBarOptions = useAtomValue(filterBarOptionsAtom)
   const saveFilter = useSetAtom(saveFilterActionAtom)
   const resetFilterOmitTextFilter = useSetAtom(
     resetFilterOmitTextFilterActionAtom
@@ -85,32 +75,10 @@ function FilterOffersScreen(): React.ReactElement {
         contentContainerStyle={styles.contentStyles}
         showsVerticalScrollIndicator={false}
       >
-        <Section title={t('filterOffers.whatIsTheGoal')} image={userSvg}>
-          <BaseFilter />
-        </Section>
         <Section title={t('filterOffers.sorting')} image={sortingSvg}>
           <Sorting sortingAtom={sortingAtom} />
         </Section>
-        {!listingType && !offerType ? (
-          <XStack ai="center" jc="center" gap="$1">
-            <SvgImage source={infoSvg} fill={tokens.color.white.val} />
-            <Text col="white">
-              {t('filterOffers.pleaseSelectListingTypeFirst')}
-            </Text>
-          </XStack>
-        ) : (
-          <FilterForm
-            content={
-              !listingType
-                ? allOffersFilterContent
-                : listingType === 'OTHER'
-                  ? otherOffersFilterContent
-                  : listingType === 'PRODUCT'
-                    ? productOffersFilterContent
-                    : btcOffersFilterContent
-            }
-          />
-        )}
+        <FilterForm content={btcOffersFilterContent} />
       </ScrollView>
       <Stack px="$4" py="$4" bc="transparent">
         <Button

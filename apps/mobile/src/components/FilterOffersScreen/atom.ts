@@ -3,10 +3,8 @@ import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type BtcNetwork,
   type IntendedConnectionLevel,
-  type ListingType,
   type LocationState,
   type OfferLocation,
-  type OfferType,
   type PaymentMethod,
   type Sort,
   type SpokenLanguage,
@@ -23,7 +21,6 @@ import {
   refreshBtcPriceActionAtom,
 } from '../../state/currentBtcPriceAtoms'
 import {
-  offerTypeFilterAtom,
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/marketplace/atoms/filterAtoms'
@@ -31,7 +28,7 @@ import {clearRegionAndRefocusActionAtom} from '../../state/marketplace/atoms/map
 import {animateToCoordinateActionAtom} from '../../state/marketplace/atoms/map/mapViewAtoms'
 import marketplaceLayoutModeAtom from '../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {
-  type BaseOffersFilter,
+  type MarketplaceFilterBarOption,
   type OffersFilter,
 } from '../../state/marketplace/domain'
 import getOfferLocationBorderPoints from '../../state/marketplace/utils/getOfferLocationBorderPoints'
@@ -42,13 +39,9 @@ import {currencies} from '../../utils/localization/currency'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
 
-export const listingTypeAtom = atom<ListingType | undefined>(
-  offersFilterInitialState.listingType
-)
-
-export const offerTypeAtom = atom<OfferType | undefined>(
-  offersFilterInitialState.offerType
-)
+export const filterBarOptionsAtom = atom<
+  ReadonlySet<MarketplaceFilterBarOption>
+>(offersFilterInitialState.filterBarOptions)
 
 export const currencyAtom = atom<CurrencyCode | undefined>(
   offersFilterInitialState.currency
@@ -353,8 +346,7 @@ const setConditionallyRenderedFilterElementsActionAtom = atom(
 const setFilterAtomsActionAtom = atom(
   null,
   (get, set, filterValue: OffersFilter) => {
-    set(listingTypeAtom, filterValue.listingType)
-    set(offerTypeAtom, filterValue.offerType)
+    set(filterBarOptionsAtom, filterValue.filterBarOptions)
     set(sortingAtom, filterValue.sort)
     set(setClubsInFilterActionAtom, filterValue.clubsUuids)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
@@ -375,86 +367,18 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
 )
 
 export const resetFilterOmitTextFilterActionAtom = atom(null, (get, set) => {
-  const {offerType, listingType, text, ...restOfOffersFilterInitialState} =
-    offersFilterInitialState
+  const {text, ...restOfOffersFilterInitialState} = offersFilterInitialState
 
-  set(setFilterAtomsActionAtom, {
-    listingType: get(listingTypeAtom),
-    offerType: get(offerTypeAtom),
-    ...restOfOffersFilterInitialState,
-  })
+  set(setFilterAtomsActionAtom, restOfOffersFilterInitialState)
 })
-
-export const baseFilterTempAtom = atom(
-  (get): BaseOffersFilter => {
-    const listingType = get(listingTypeAtom)
-    const offerType = get(offerTypeAtom) ?? get(offerTypeFilterAtom)
-
-    if (listingType === 'BITCOIN') {
-      if (offerType === 'SELL') return 'CASH_TO_BTC'
-      return 'BTC_TO_CASH'
-    }
-
-    if (listingType === 'PRODUCT') {
-      if (offerType === 'SELL') return 'PRODUCT_TO_BTC'
-      return 'BTC_TO_PRODUCT'
-    }
-
-    if (listingType === 'OTHER') return 'STH_ELSE'
-
-    if (!listingType) {
-      if (offerType === 'SELL') return 'ALL_SELLING_BTC'
-      return 'ALL_BUYING_BTC'
-    }
-
-    return 'BTC_TO_CASH'
-  },
-  (_, set, filterValue: BaseOffersFilter) => {
-    if (filterValue === 'BTC_TO_CASH') {
-      set(listingTypeAtom, 'BITCOIN')
-      set(offerTypeAtom, 'SELL')
-    }
-
-    if (filterValue === 'CASH_TO_BTC') {
-      set(listingTypeAtom, 'BITCOIN')
-      set(offerTypeAtom, 'BUY')
-    }
-
-    if (filterValue === 'BTC_TO_PRODUCT') {
-      set(listingTypeAtom, 'PRODUCT')
-      set(offerTypeAtom, 'BUY')
-    }
-
-    if (filterValue === 'PRODUCT_TO_BTC') {
-      set(listingTypeAtom, 'PRODUCT')
-      set(offerTypeAtom, 'SELL')
-    }
-
-    if (filterValue === 'STH_ELSE') {
-      set(listingTypeAtom, 'OTHER')
-      set(offerTypeAtom, undefined)
-    }
-
-    if (filterValue === 'ALL_SELLING_BTC') {
-      set(listingTypeAtom, undefined)
-      set(offerTypeAtom, 'SELL')
-    }
-
-    if (filterValue === 'ALL_BUYING_BTC') {
-      set(listingTypeAtom, undefined)
-      set(offerTypeAtom, 'BUY')
-    }
-  }
-)
 
 export const saveFilterActionAtom = atom(null, (get, set) => {
   const marketplaceLayoutMode = get(marketplaceLayoutModeAtom)
   const {text} = get(offersFilterFromStorageAtom)
 
-  const newFilterValue: OffersFilter = {
+  set(offersFilterFromStorageAtom, {
     sort: get(sortingAtom),
-    listingType: get(listingTypeAtom),
-    offerType: get(offerTypeAtom),
+    filterBarOptions: get(filterBarOptionsAtom),
     currency: get(currencyAtom),
     location: get(locationAtom),
     locationState: get(locationStateAtom),
@@ -470,10 +394,6 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
     clubsUuids: get(clubsUuidsFilterAtom),
-  }
-
-  set(offersFilterFromStorageAtom, {
-    ...newFilterValue,
     text,
   } satisfies OffersFilter)
 

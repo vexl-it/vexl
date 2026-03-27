@@ -53,7 +53,7 @@ import {
   offersStateAtom,
 } from '../../state/marketplace/atoms/offersState'
 import {
-  alertAndReportOnlineOffersWithoutLocation,
+  alertAndReportInPersonOffersWithoutLocation,
   reportOffersWithoutLocationActionAtom,
 } from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
@@ -316,7 +316,7 @@ function DebugScreen(): React.ReactElement {
                           {
                             text: 'Check and copy to clipboard',
                             onPress: () => {
-                              alertAndReportOnlineOffersWithoutLocation(
+                              alertAndReportInPersonOffersWithoutLocation(
                                 success,
                                 true,
                                 true

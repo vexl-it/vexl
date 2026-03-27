@@ -7,7 +7,6 @@ import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import areIncluded from '../utils/areIncluded'
 import filterOffersByText from '../utils/filterOffersByText'
-import {filterOffersIgnoreListingType} from '../utils/filterOffersIgnoreListingType'
 import isOfferInsideViewPort from '../utils/isOfferInsideViewport'
 import sortOffers from '../utils/sortOffers'
 import {deltasToViewport, radiusToViewport} from '../utils/toViewport'
@@ -18,73 +17,17 @@ import {
 } from './filterAtoms'
 import marketplaceLayoutModeAtom from './map/marketplaceLayoutModeAtom'
 import {mapRegionAtom} from './mapRegionAtom'
-import {offersToSeeInMarketplaceAtom} from './offersToSeeInMarketplace'
-
-const filterBtcOffersAtom = atom((get) => {
-  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
-  const filter = get(offersFilterFromStorageAtom)
-  const layoutMode = get(marketplaceLayoutModeAtom)
-
-  return offersToSeeInMarketplace.filter(
-    (offer) =>
-      (!offer.offerInfo.publicPart.listingType ||
-        offer.offerInfo.publicPart.listingType === 'BITCOIN') &&
-      (!filter.currency ||
-        filter.currency.includes(offer.offerInfo.publicPart.currency)) &&
-      (layoutMode === 'list' ||
-        offer.offerInfo.publicPart.location.length > 0) &&
-      (!filter.locationState ||
-        areIncluded(
-          filter.locationState,
-          offer.offerInfo.publicPart.locationState
-        )) &&
-      (!filter.paymentMethod ||
-        areIncluded(
-          filter.paymentMethod,
-          offer.offerInfo.publicPart.paymentMethod
-        )) &&
-      (!filter.btcNetwork ||
-        areIncluded(
-          filter.btcNetwork,
-          offer.offerInfo.publicPart.btcNetwork
-        )) &&
-      (!filter.friendLevel ||
-        (filter.friendLevel.includes('FIRST_DEGREE') &&
-        !filter.friendLevel.includes('SECOND_DEGREE')
-          ? areIncluded(
-              filter.friendLevel,
-              offer.offerInfo.privatePart.friendLevel
-            )
-          : true)) &&
-      (!filter.offerType ||
-        offer.offerInfo.publicPart.offerType === filter.offerType) &&
-      (!filter.amountTopLimit ||
-        offer.offerInfo.publicPart.amountBottomLimit <=
-          filter.amountTopLimit) &&
-      (!filter.amountBottomLimit ||
-        offer.offerInfo.publicPart.amountTopLimit >=
-          filter.amountBottomLimit) &&
-      (filter.spokenLanguages.length === 0 ||
-        filter.spokenLanguages.some((item) =>
-          offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        )) &&
-      (!filter.clubsUuids ||
-        offer.offerInfo.privatePart.clubIds.length === 0 ||
-        Array.isNonEmptyArray(
-          Array.intersection(
-            offer.offerInfo.privatePart.clubIds,
-            filter.clubsUuids
-          )
-        ))
-  )
-})
+import {
+  isBtcOffer,
+  offersSelectedByMarketplaceFilterBarOptionsAtom,
+} from './offersByMarketplaceFilterBarOptions'
 
 const btcPriceWithStateForFilterCurrencyAtom = createBtcPriceForCurrencyAtom(
   singlePriceCurrencyAtom
 )
 
-const filterProductAndOtherOffersAtom = atom((get) => {
-  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
+const filterMarketplaceOffersAtom = atom((get) => {
+  const offers = get(offersSelectedByMarketplaceFilterBarOptionsAtom)
   const filter = get(offersFilterFromStorageAtom)
   const layoutMode = get(marketplaceLayoutModeAtom)
   const btcPriceWithStateForFilterCurrency = get(
@@ -102,66 +45,104 @@ const filterProductAndOtherOffersAtom = atom((get) => {
         })
       : null
 
-  return offersToSeeInMarketplace.filter(
-    (offer) =>
-      (!filter.listingType ||
-        offer.offerInfo.publicPart.listingType === filter.listingType) &&
-      (layoutMode === 'list' ||
-        offer.offerInfo.publicPart.location.length > 0) &&
-      (!filter.locationState ||
-        areIncluded(
-          filter.locationState,
-          offer.offerInfo.publicPart.locationState
-        )) &&
-      (!filter.btcNetwork ||
-        areIncluded(
-          filter.btcNetwork,
-          offer.offerInfo.publicPart.btcNetwork
-        )) &&
-      (!filter.friendLevel ||
-        (filter.friendLevel.includes('FIRST_DEGREE') &&
-        !filter.friendLevel.includes('SECOND_DEGREE')
-          ? areIncluded(
-              filter.friendLevel,
-              offer.offerInfo.privatePart.friendLevel
-            )
-          : true)) &&
-      (!filter.offerType ||
-        offer.offerInfo.publicPart.offerType === filter.offerType) &&
-      (!filterPriceInSats ||
-        (offer.offerInfo.publicPart.amountBottomLimit === 0 &&
-          offer.offerInfo.publicPart.amountTopLimit === 0) ||
-        (calculatePriceInSats({
-          price: offer.offerInfo.publicPart.amountBottomLimit,
-          currentBtcPrice:
-            get(
-              createBtcPriceForCurrencyAtom(offer.offerInfo.publicPart.currency)
-            )?.btcPrice?.BTC ?? 0,
-        }) ?? 0) <= filterPriceInSats) &&
-      (filter.spokenLanguages.length === 0 ||
-        filter.spokenLanguages.some((item) =>
-          offer.offerInfo.publicPart.spokenLanguages.includes(item)
-        )) &&
-      (!filter.clubsUuids ||
-        offer.offerInfo.privatePart.clubIds.length === 0 ||
-        Array.isNonEmptyArray(
-          Array.intersection(
-            offer.offerInfo.privatePart.clubIds,
-            filter.clubsUuids
-          )
-        ))
-  )
-})
+  return offers.filter((offer) => {
+    if (
+      layoutMode !== 'list' &&
+      offer.offerInfo.publicPart.location.length === 0
+    )
+      return false
 
-const filterOffersIgnoreListingTypeAtom = atom((get) => {
-  const offersToSeeInMarketplace = get(offersToSeeInMarketplaceAtom)
-  const filter = get(offersFilterFromStorageAtom)
-  const layoutMode = get(marketplaceLayoutModeAtom)
+    if (
+      filter.locationState &&
+      !areIncluded(
+        filter.locationState,
+        offer.offerInfo.publicPart.locationState
+      )
+    )
+      return false
 
-  return filterOffersIgnoreListingType({
-    filter,
-    layoutMode,
-    allOffersToFilter: offersToSeeInMarketplace,
+    if (
+      filter.btcNetwork &&
+      !areIncluded(filter.btcNetwork, offer.offerInfo.publicPart.btcNetwork)
+    )
+      return false
+
+    if (
+      filter.friendLevel &&
+      filter.friendLevel.includes('FIRST_DEGREE') &&
+      !filter.friendLevel.includes('SECOND_DEGREE') &&
+      !areIncluded(filter.friendLevel, offer.offerInfo.privatePart.friendLevel)
+    )
+      return false
+
+    if (
+      filter.spokenLanguages.length > 0 &&
+      !filter.spokenLanguages.some((item) =>
+        offer.offerInfo.publicPart.spokenLanguages.includes(item)
+      )
+    )
+      return false
+
+    if (
+      filter.clubsUuids &&
+      offer.offerInfo.privatePart.clubIds.length > 0 &&
+      !Array.isNonEmptyArray(
+        Array.intersection(
+          offer.offerInfo.privatePart.clubIds,
+          filter.clubsUuids
+        )
+      )
+    )
+      return false
+
+    if (isBtcOffer(offer)) {
+      if (
+        filter.currency &&
+        filter.currency !== offer.offerInfo.publicPart.currency
+      )
+        return false
+
+      if (
+        filter.paymentMethod &&
+        !areIncluded(
+          filter.paymentMethod,
+          offer.offerInfo.publicPart.paymentMethod
+        )
+      )
+        return false
+
+      if (
+        filter.amountTopLimit &&
+        offer.offerInfo.publicPart.amountBottomLimit > filter.amountTopLimit
+      )
+        return false
+
+      if (
+        filter.amountBottomLimit &&
+        offer.offerInfo.publicPart.amountTopLimit < filter.amountBottomLimit
+      )
+        return false
+
+      return true
+    }
+
+    if (!filterPriceInSats) return true
+
+    if (
+      offer.offerInfo.publicPart.amountBottomLimit === 0 &&
+      offer.offerInfo.publicPart.amountTopLimit === 0
+    )
+      return true
+
+    return (
+      (calculatePriceInSats({
+        price: offer.offerInfo.publicPart.amountBottomLimit,
+        currentBtcPrice:
+          get(
+            createBtcPriceForCurrencyAtom(offer.offerInfo.publicPart.currency)
+          )?.btcPrice?.BTC ?? 0,
+      }) ?? 0) <= filterPriceInSats
+    )
   })
 })
 
@@ -172,11 +153,7 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)
   const textFilter = filter.text
 
-  const filtered = !filter.listingType
-    ? get(filterOffersIgnoreListingTypeAtom)
-    : filter.listingType === 'BITCOIN'
-      ? get(filterBtcOffersAtom)
-      : get(filterProductAndOtherOffersAtom)
+  const filtered = get(filterMarketplaceOffersAtom)
 
   // This could be rewritten with pipe, i know, i know...
   const filteredByText = textFilter
@@ -240,5 +217,6 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
 })
 
 export const filteredOffersIncludingLocationFilterAtomsAtom = splitAtom(
-  filteredOffersIncludingLocationFilterAtom
+  filteredOffersIncludingLocationFilterAtom,
+  (offer) => offer.offerInfo.offerId
 )

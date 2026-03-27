@@ -15,7 +15,6 @@ import {
   isTextFilterActiveAtom,
   resetFilterInStorageActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
-import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/filteredOffersCountAtoms'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {
@@ -23,6 +22,7 @@ import {
   createOfferSuggestionVisibleAtom,
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/offersByMarketplaceFilterBarOptions'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'

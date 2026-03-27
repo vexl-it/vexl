@@ -2,7 +2,6 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import React from 'react'
 import {type LoginStackParamsList} from '../../navigationTypes'
 import PageWithButtonAndProgressHeader from '../PageWithButtonAndProgressHeader'
-import AnonymizationAnimationScreen from './components/AnonymizationAnimationScreen'
 import AnonymizationNoticeScreen from './components/AnonymizationNoticeScreen'
 import IntroScreen from './components/IntroScreen'
 import NameScreen from './components/NameScreen'
@@ -23,10 +22,6 @@ function LoginFlow(): React.ReactElement {
         }}
         initialRouteName="Intro"
       >
-        <LoginStack.Screen
-          name="AnonymizationAnimation"
-          component={AnonymizationAnimationScreen}
-        />
         <LoginStack.Screen
           name="AnonymizationNotice"
           component={AnonymizationNoticeScreen}

@@ -1,15 +1,18 @@
 import {navBarHeightAtom} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
-import React, {createContext, useCallback, useContext, useMemo} from 'react'
-import {type NativeScrollEvent, type NativeSyntheticEvent} from 'react-native'
-import {type SharedValue, useSharedValue} from 'react-native-reanimated'
+import React, {createContext, useContext, useMemo} from 'react'
+import {
+  type SharedValue,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import {GraphicHeaderDecoration} from '../../GraphicHeaderDecoration'
 import InsideNavigationBar from './InsideNavigationBar'
 
 interface InsideScreenScrollContextValue {
   readonly scrollY: SharedValue<number>
-  readonly onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+  readonly onScroll: ReturnType<typeof useAnimatedScrollHandler>
 }
 
 const InsideScreenScrollContext =
@@ -48,12 +51,11 @@ export function InsideScreen({
 }): React.JSX.Element {
   const scrollY = useSharedValue(0)
 
-  const onScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      scrollY.value = event.nativeEvent.contentOffset.y
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y
     },
-    [scrollY]
-  )
+  })
 
   const contextValue = useMemo(() => ({scrollY, onScroll}), [scrollY, onScroll])
 

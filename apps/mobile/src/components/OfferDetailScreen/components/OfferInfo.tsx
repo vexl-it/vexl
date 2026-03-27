@@ -33,8 +33,8 @@ import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import Button from '../../Button'
 import ButtonWithPressTimeout from '../../ButtonWithPressTimeout'
 import Info from '../../Info'
+import OfferOnMarketplace from '../../OfferOnMarketplace'
 import OfferRequestTextInput from '../../OfferRequestTextInput'
-import OfferWithBubbleTip from '../../OfferWithBubbleTip'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {showCommonFriendsExplanationActionAtom} from '../atoms'
 import RerequestInfo from './RerequestInfo'
@@ -153,12 +153,7 @@ function OfferInfo({
       <ContentContainer bottomOffset={BOTTOM_SCROLL_OFFSET}>
         <YStack gap="$2" mb="$2">
           <Stack mb="$2">
-            <OfferWithBubbleTip
-              showCommonFriends
-              showListingType
-              negative={!requestPossibleInfo.canBeRerequested}
-              offer={offer}
-            />
+            <OfferOnMarketplace offer={offer} />
           </Stack>
           {!isOnlyClubOffer && (
             <Info

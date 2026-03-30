@@ -1,9 +1,10 @@
 import {useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
+import {SearchBar, Typography} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
+import {Stack} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../../../../state/chat/domain'
 import chatShouldBeVisible from '../../../../../state/chat/utils/isChatActive'
@@ -11,6 +12,7 @@ import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import notEmpty from '../../../../../utils/notEmpty'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
+import Screen from '../../../../Screen'
 import usePixelsFromBottomWhereTabsEnd from '../../../utils'
 import {useInsideScreenScroll} from '../../InsideScreen'
 import ChatListItem, {type ChatListData} from './ChatListItem'
@@ -51,7 +53,7 @@ function ChatsList(): React.ReactElement | null {
 
   if (elementAtoms.length === 0) {
     return (
-      <Stack f={1} pb={tabBarEndsAt}>
+      <Screen>
         <EmptyListWrapper
           buttonText={t('messages.seeMarketplace')}
           onButtonPress={() => {
@@ -60,28 +62,51 @@ function ChatsList(): React.ReactElement | null {
             })
           }}
         >
-          <Stack gap="$2">
-            <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+          <Stack gap="$5">
+            <Typography
+              color="$foregroundPrimary"
+              variant="heading3"
+              textAlign="center"
+            >
               {t('messages.youDontHaveAnyOpenChats')}
-            </Text>
-            <Text textAlign="center" fos={14} ta="center" col="$greyOnWhite">
+            </Typography>
+            <Typography
+              color="$foregroundSecondary"
+              variant="description"
+              textAlign="center"
+              ta="center"
+            >
               {t('messages.startConversationByReactingToOffer')}
-            </Text>
+            </Typography>
           </Stack>
         </EmptyListWrapper>
-      </Stack>
+      </Screen>
     )
   }
 
   return (
-    <FlashList
-      data={elementAtoms}
-      keyExtractor={atomKeyExtractor}
-      renderItem={renderItem}
-      contentContainerStyle={{paddingBottom: tabBarEndsAt + 25}}
-      onScroll={onScroll}
-      scrollEventThrottle={16}
-    />
+    <Screen>
+      <Stack marginHorizontal="$5">
+        <SearchBar
+          placeholder={t('messages.search.placeholder')}
+          variant="dummy"
+          onPress={() => {
+            navigation.navigate('ChatSearch')
+          }}
+        />
+      </Stack>
+      <FlashList
+        data={elementAtoms}
+        keyExtractor={atomKeyExtractor}
+        renderItem={renderItem}
+        contentContainerStyle={{
+          paddingBottom: tabBarEndsAt + 25,
+          paddingTop: 24,
+        }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      />
+    </Screen>
   )
 }
 

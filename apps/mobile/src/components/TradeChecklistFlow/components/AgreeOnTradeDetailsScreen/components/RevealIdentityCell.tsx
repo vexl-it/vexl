@@ -1,3 +1,4 @@
+import {ChecklistCell, EyeShut} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {
@@ -8,7 +9,7 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
-import ChecklistCell from './ChecklistCell'
+import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function RevealIdentityCell(): React.ReactElement {
   const {t} = useTranslation()
@@ -37,15 +38,19 @@ function RevealIdentityCell(): React.ReactElement {
     tradeChecklistIdentityData.sent,
   ])
 
+  if (identityRevealed || identityRevealTriggeredFromChat) return <></>
+
   return (
     <ChecklistCell
-      isDisabled={disabled}
-      hidden={identityRevealed || identityRevealTriggeredFromChat}
+      icon={EyeShut}
+      disabled={disabled}
+      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
+      pressable
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
-      item="REVEAL_IDENTITY"
       onPress={() => {
         void revealIdentity()()
       }}
+      headline="Reveal identity"
     />
   )
 }

@@ -1,3 +1,4 @@
+import {CellPhoneMobileDevice, ChecklistCell} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {
@@ -7,7 +8,7 @@ import {
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtoms'
-import ChecklistCell from './ChecklistCell'
+import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function RevealPhoneNumberCell(): React.ReactElement {
   const identityRevealed = useAtomValue(identityRevealedAtom)
@@ -33,14 +34,18 @@ function RevealPhoneNumberCell(): React.ReactElement {
     tradeChecklistContactData.sent,
   ])
 
+  if (!identityRevealed || contactRevealTriggeredFromChat) return <></>
+
   return (
     <ChecklistCell
-      isDisabled={disabled}
-      hidden={!identityRevealed || contactRevealTriggeredFromChat}
-      item="REVEAL_PHONE_NUMBER"
+      icon={CellPhoneMobileDevice}
+      disabled={disabled}
+      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
+      pressable
       onPress={() => {
         void revealContact()()
       }}
+      headline="Reveal phone number"
     />
   )
 }

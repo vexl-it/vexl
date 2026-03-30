@@ -1,5 +1,12 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  Copy,
+  Typography,
+  IconButton as UiIconButton,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {
   atom,
@@ -18,16 +25,13 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native'
 import Autolink from 'react-native-autolink'
-import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {Stack, Text, useTheme} from 'tamagui'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import IconButton from '../../IconButton'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import copySvg from '../../images/copySvg'
 import {chatMolecule} from '../atoms'
-import replyToSvg from '../images/replyToSvg'
 import formatChatTime from '../utils/formatChatTime'
 import {type MessagesListItem} from './MessageItem'
 
@@ -121,6 +125,7 @@ function TextMessage({
 }: {
   messageAtom: Atom<MessagesListItem>
 }): React.ReactElement | null {
+  const theme = useTheme()
   const messageItem = useAtomValue(messageAtom)
   const {
     sendMessageAtom,
@@ -178,6 +183,10 @@ function TextMessage({
   if (message.state === 'receivedButRequiresNewerVersion') return null
 
   const isMine = message.state !== 'received'
+  const messageTextColor = isMine ? '#000000' : theme.foregroundPrimary.val
+  const messageBackgroundColor = isMine
+    ? theme.accentYellowPrimary.val
+    : theme.backgroundTertiary.val
 
   const {messageText, italic} = (() => {
     if (shouldHaveItalicPrefix(message.message?.messageType)) {
@@ -197,26 +206,27 @@ function TextMessage({
 
   return (
     <TouchableWithoutFeedback onPress={hideExtended}>
-      <Stack mx="$4" mt="$1" flex={1} alignItems="stretch">
+      <Stack mx="$5" mt="$2" flex={1} alignItems="stretch">
         <XStack
           flex={1}
           flexDirection={!isMine ? 'row' : 'row-reverse'}
           gap="$2"
-          alignItems="center"
+          alignItems="flex-end"
         >
           <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
             <Stack
               width={message.message.image ? '80%' : undefined}
               maxWidth="80%"
-              br="$6"
-              backgroundColor={isMine ? '$main' : '$grey'}
-              p="$3"
+              borderRadius="$6"
+              backgroundColor={messageBackgroundColor}
+              p="$4"
             >
               {!!message.message.repliedTo && (
                 <YStack
-                  borderRadius="$5"
+                  borderRadius="$4"
                   padding="$3"
-                  backgroundColor="$yellowAccent2"
+                  marginBottom="$2"
+                  backgroundColor="$backgroundTertiary"
                 >
                   {!!message.message.repliedTo.image && (
                     <Image
@@ -227,24 +237,36 @@ function TextMessage({
                       }}
                     />
                   )}
-                  <Text fontSize={12} color="$main">
+                  <Typography
+                    color={
+                      isMine
+                        ? '$accentHighlightSecondary'
+                        : '$foregroundSecondary'
+                    }
+                    variant="micro"
+                  >
                     {(message.state === 'received' &&
                       message.message.repliedTo.messageAuthor === 'them') ||
                     (message.state === 'sent' &&
                       message.message.repliedTo.messageAuthor === 'me')
                       ? t('common.you')
                       : (otherSideData?.userName ?? 'them')}
-                  </Text>
-                  <Text marginTop="$1" color="$main">
+                  </Typography>
+                  <Typography
+                    color="$foregroundPrimary"
+                    variant="description"
+                    marginTop="$1"
+                  >
                     {message.message.repliedTo.text}
-                  </Text>
+                  </Typography>
                 </YStack>
               )}
               {!!message.message.image && (
                 <YStack
-                  borderRadius="$5"
+                  borderRadius="$4"
                   padding="$3"
-                  backgroundColor="$yellowAccent2"
+                  marginBottom="$2"
+                  backgroundColor="$backgroundTertiary"
                 >
                   <TouchableWithoutFeedback onPress={onImagePressed}>
                     <Image
@@ -261,38 +283,40 @@ function TextMessage({
                 linkStyle={[
                   style.link,
                   {
-                    color: isMine
-                      ? getTokens().color.black.val
-                      : getTokens().color.main.val,
+                    color: messageTextColor,
                     fontStyle: italic ? 'italic' : undefined,
-                    fontSize: 16,
-                    fontFamily: italic ? undefined : '$body500',
+                    fontSize: 18,
+                    fontFamily: italic ? undefined : 'TTSatoshi500',
                   },
                 ]}
                 style={{
-                  color: isMine
-                    ? getTokens().color.black.val
-                    : getTokens().color.white.val,
-                  fontSize: 16,
-                  fontFamily: italic ? undefined : '$body500',
+                  color: messageTextColor,
+                  fontSize: 18,
+                  lineHeight: 24,
+                  fontFamily: italic ? undefined : 'TTSatoshi500',
                   fontStyle: italic ? 'italic' : undefined,
                 }}
               />
             </Stack>
           </TouchableWithoutFeedback>
           {!!isExtended && (
-            <XStack>
-              <IconButton
-                icon={replyToSvg}
+            <XStack gap="$2" marginBottom="$1">
+              <UiIconButton
+                width="$9"
+                height="$9"
+                backgroundColor="$backgroundSecondary"
                 onPress={onReplyPressed}
-                variant="plain"
-              />
-              <IconButton
-                icon={copySvg}
+              >
+                <Text color="$foregroundPrimary">↩</Text>
+              </UiIconButton>
+              <UiIconButton
+                width="$9"
+                height="$9"
+                backgroundColor="$backgroundSecondary"
                 onPress={onCopyPressed}
-                variant="plain"
-                iconFill={getTokens().color.white.val}
-              />
+              >
+                <Copy size={18} color={theme.foregroundPrimary.val} />
+              </UiIconButton>
             </XStack>
           )}
           {message.state === 'sendingError' && (
@@ -314,12 +338,14 @@ function TextMessage({
           )}
         </XStack>
         {!!isLatest && (
-          <Text
-            userSelect="auto"
+          <Typography
+            color={
+              message.state === 'sendingError' ? '$red' : '$foregroundTertiary'
+            }
+            variant="micro"
             textAlign={isMine ? 'right' : 'left'}
-            mt="$1"
-            mb="$2"
-            color={message.state === 'sendingError' ? '$red' : '$greyOnBlack'}
+            marginTop="$3"
+            marginBottom="$3"
           >
             {message.state === 'sending' && t('messages.sending')}
             {message.state === 'sent' &&
@@ -333,7 +359,7 @@ function TextMessage({
               !lastMessageReadByOtherSideAt &&
               formatChatTime(time)}
             {message.state === 'received' && formatChatTime(time)}
-          </Text>
+          </Typography>
         )}
       </Stack>
     </TouchableWithoutFeedback>

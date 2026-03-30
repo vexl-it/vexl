@@ -118,13 +118,13 @@ function ChangeCurrencyContent({
         />
       ) : (
         <Stack ai="center" gap="$4" p="$6">
-          <Typography variant="heading3" ta="center" col="$foregroundPrimary">
+          <Typography variant="heading3" ta="center" color="$foregroundPrimary">
             {t('common.nothingFound')}
           </Typography>
           <Typography
             variant="description"
             ta="center"
-            col="$foregroundSecondary"
+            color="$foregroundSecondary"
           >
             {t('changeCurrency.trySearchingByCurrencyName')}
           </Typography>

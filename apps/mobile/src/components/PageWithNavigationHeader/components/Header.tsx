@@ -1,7 +1,7 @@
+import {ChevronLeft, NavButton, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, Text, XStack} from 'tamagui'
-import backButtonSvg from '../../../images/backButtonSvg'
+import {Stack, XStack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import IconButton from '../../IconButton'
 import closeSvg from '../../images/closeSvg'
@@ -25,19 +25,19 @@ function Header(): React.ReactElement | null {
   }, [headerState])
 
   return !headerState.hidden && !headerState.hiddenAllTheWay ? (
-    <XStack ai="center" jc="space-between" pb="$2">
+    <XStack ai="center" jc="space-between" pb="$4">
       {headerState.goBack ? (
-        <IconButton
-          variant="primary"
-          icon={backButtonSvg}
+        <NavButton
+          icon={ChevronLeft}
           onPress={onBackButtonPress}
+          variant="highlighted"
         />
       ) : (
         <Stack w={40} />
       )}
-      <Text fos={20} ff="$body600" col="$white">
+      <Typography color="$foregroundPrimary" variant="titlesSmall">
         {headerState.title}
-      </Text>
+      </Typography>
       {headerState.onClose ? (
         <IconButton icon={closeSvg} onPress={onCloseButtonPress} />
       ) : (

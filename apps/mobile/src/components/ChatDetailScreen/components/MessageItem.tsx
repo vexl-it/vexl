@@ -1,9 +1,11 @@
+import {DotTypingIndicator, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import {type DateTime} from 'luxon'
-import React from 'react'
-import {Stack, Text} from 'tamagui'
+import React, {useMemo} from 'react'
+import {Stack, XStack} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
+import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
@@ -50,6 +52,36 @@ export type MessagesListItem =
       data: TradingChecklistSuggestion
       isLast?: boolean
     }
+  | {
+      type: 'typingIndicator'
+      key: string
+    }
+
+function TypingIndication(): React.ReactElement | null {
+  const {chatIdAtom} = useMolecule(chatMolecule)
+  const chatId = useAtomValue(chatIdAtom)
+
+  const isTyping = useAtomValue(
+    useMemo(() => createIsOtherSideTypingAtom(chatId), [chatId])
+  )
+
+  if (!isTyping) return null
+
+  return (
+    <XStack
+      alignSelf="flex-start"
+      mx="$5"
+      mt="$2"
+      padding="$5"
+      flex={1}
+      alignItems="stretch"
+      borderRadius="$6"
+      backgroundColor="$backgroundTertiary"
+    >
+      <DotTypingIndicator />
+    </XStack>
+  )
+}
 
 function MessageItem({
   itemAtom,
@@ -67,6 +99,10 @@ function MessageItem({
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
+
+  if (item.type === 'typingIndicator') {
+    return <TypingIndication />
+  }
 
   if (item.type === 'message') {
     if (item.message.state === 'receivedButRequiresNewerVersion') {
@@ -233,11 +269,13 @@ function MessageItem({
 
   if (item.type === 'time')
     return (
-      <Stack ai="center">
-        <Text color="$greyOnBlack">{formatChatTime(item.time)}</Text>
+      <Stack alignItems="center" my="$5">
+        <Typography color="$foregroundTertiary" variant="micro">
+          {formatChatTime(item.time)}
+        </Typography>
       </Stack>
     )
-  if (item.type === 'space') return <Stack h="$3" />
+  if (item.type === 'space') return <Stack h="$5" />
   return null
 }
 

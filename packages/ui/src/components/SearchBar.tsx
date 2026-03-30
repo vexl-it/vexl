@@ -1,6 +1,6 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
-import {useAtom} from 'jotai'
-import React from 'react'
+import {atom, useAtom} from 'jotai'
+import React, {useMemo} from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import {SearchMagnifyGlass} from '../icons/SearchMagnifyGlass'
@@ -31,33 +31,75 @@ const SearchBarInput = styled(Input, {
 
 type SearchBarFrameProps = React.ComponentProps<typeof SearchBarFrame>
 
-export interface SearchBarProps extends Omit<SearchBarFrameProps, 'children'> {
-  readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
+interface SharedSearchBarProps extends Omit<SearchBarFrameProps, 'children'> {
   readonly placeholder?: string
+  variant?: 'dummy' | 'normal'
+}
+interface DummySearchBarProps {
+  variant: 'dummy'
+  onPress: () => void
+}
+
+interface NormalSearchBarProps {
+  readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
   readonly autoFocus?: boolean
 }
 
-export function SearchBar({
-  valueAtom,
-  placeholder = 'Search',
-  autoFocus,
-  ...rest
-}: SearchBarProps): React.JSX.Element {
+export type SearchBarProps = SharedSearchBarProps &
+  (DummySearchBarProps | NormalSearchBarProps)
+
+export function SearchBar(props: SearchBarProps): React.JSX.Element {
+  const {variant, placeholder, autoFocus, onPress, valueAtom, ...rest} =
+    useMemo(() => {
+      if (props.variant === 'dummy') {
+        return {
+          ...props,
+          variant: 'dummy',
+          onPress: props.onPress,
+          placeholder: props.placeholder,
+          valueAtom: atom(
+            () => '',
+            () => {}
+          ),
+          autoFocus: false,
+        }
+      }
+
+      return {
+        ...props,
+        variant: 'normal',
+        onPress: undefined,
+        placeholder: props.placeholder,
+        valueAtom: props.valueAtom,
+        autoFocus: props.autoFocus,
+      }
+    }, [props])
+
   const [text, setText] = useAtom(valueAtom)
   const theme = useTheme()
+  const isDummy = variant === 'dummy'
   const iconColor = theme.foregroundPrimary.val
-  const hasText = text.length > 0
+  const hasText = !isDummy && text.length > 0
 
   return (
-    <SearchBarFrame {...rest}>
+    <SearchBarFrame
+      {...rest}
+      role={isDummy ? 'button' : undefined}
+      onPress={isDummy ? onPress : undefined}
+      pressStyle={isDummy ? {opacity: 0.7} : undefined}
+      cursor={isDummy ? 'pointer' : undefined}
+    >
       <SearchMagnifyGlass size={24} color={iconColor} />
       <SearchBarInput
-        value={text}
-        onChangeText={setText}
+        value={isDummy ? '' : text}
+        onChangeText={isDummy ? undefined : setText}
+        focusable={!isDummy}
+        editable={!isDummy}
+        pointerEvents={isDummy ? 'none' : undefined}
         placeholder={placeholder}
         placeholderTextColor={theme.foregroundPrimary.val}
         selectionColor={theme.accentYellowPrimary.val}
-        autoFocus={autoFocus}
+        autoFocus={isDummy ? false : autoFocus}
       />
       {hasText ? (
         <Stack

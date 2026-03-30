@@ -3,79 +3,65 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  Send,
+  Share,
+  Stack,
+  Typography,
+  IconButton as UiIconButton,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
 import React, {useCallback, useMemo, useState} from 'react'
-import {Dimensions, StyleSheet} from 'react-native'
+import {TextInput as RNTextInput} from 'react-native'
 import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated'
-import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {useTheme} from 'tamagui'
 import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import {preferencesAtom} from '../../../utils/preferences'
-import IconButton from '../../IconButton'
 import Image from '../../Image'
-import TextInput from '../../Input'
 import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
 import {chatMolecule} from '../atoms'
 import CancelSvg from '../images/cancelSvg'
-import sendSvg from '../images/sendSvg'
-import SendImageButton from './SendImageButton'
 import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
-
-const styles = StyleSheet.create({
-  textInput: {
-    minHeight: 55,
-    maxHeight: 110,
-    paddingVertical: getTokens().size[2].val,
-  },
-})
 
 const responseImagePreviewLimits = {width: 200, height: 100}
 
 function ChatTextInput(): React.ReactElement | null {
-  const tokens = getTokens()
+  const theme = useTheme()
   const [value, setValue] = useState('')
-  const {
-    sendMessageAtom,
-    replyToMessageAtom,
-    otherSideDataAtom,
-    selectedImageAtom,
-    clearExtraToSendActionAtom,
-  } = useMolecule(chatMolecule)
+  const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
+    useMolecule(chatMolecule)
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const sendMessage = useSetAtom(sendMessageAtom)
-  const [selectedImage, setSelectedImage] = useAtom(selectedImageAtom)
-  const clearExtraToSend = useSetAtom(clearExtraToSendActionAtom)
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
   const checkNotificationsAndAskIfPossible = useSetAtom(
     checkNotificationPermissionsAndAskIfPossibleTEActionAtom
   )
 
-  const preferences = useAtomValue(preferencesAtom)
-
   usePeriodicTypingIndication(!!value.trim())
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       marginRight: 5,
-      opacity: withSpring(value || selectedImage ? 1 : 0),
+      opacity: withSpring(value ? 1 : 0),
     }
-  }, [value, selectedImage])
+  }, [value])
 
   const sendText = useCallback(() => {
-    if (!value.trim() && !selectedImage) return
+    if (!value.trim()) return
 
     const message: ChatMessage = {
       text: value,
       myVersion: version,
       time: unixMillisecondsNow(),
       uuid: generateChatMessageId(),
-      image: selectedImage?.uri ?? undefined,
       repliedTo: replyToMessage
         ? {
             text: truncate(replyToMessage.message.text, 100, '...'),
@@ -88,115 +74,111 @@ function ChatTextInput(): React.ReactElement | null {
     }
     setValue('')
     setReplyToMessage(undefined)
-    setSelectedImage(undefined)
 
     void sendMessage(message)
     void checkNotificationsAndAskIfPossible()()
   }, [
     value,
-    selectedImage,
     replyToMessage,
     session.privateKey.publicKeyPemBase64,
     setReplyToMessage,
-    setSelectedImage,
     sendMessage,
     checkNotificationsAndAskIfPossible,
   ])
 
-  const imagePreviewLimits = useMemo(
+  const inputStyles = useMemo(
     () => ({
-      height: 150,
-      width: Dimensions.get('screen').width * 0.7,
+      minHeight: 21,
+      maxHeight: 110,
+      paddingVertical: 0,
+      paddingHorizontal: 0,
+      color: theme.foregroundPrimary.val,
+      fontFamily: 'TTSatoshi500',
+      fontSize: 16,
     }),
-    []
+    [theme]
   )
 
-  const onExtraClearPressed = useCallback(() => {
-    clearExtraToSend()
-  }, [clearExtraToSend])
-
   return (
-    <XStack gap="$2" alignItems="center">
-      {!!preferences.allowSendingImages && <SendImageButton />}
-      <Stack f={1}>
+    <XStack
+      backgroundColor="$backgroundSecondary"
+      gap="$3"
+      alignItems="flex-end"
+    >
+      <Stack flex={1}>
         {!!replyToMessage && (
           <XStack
-            borderRadius="$5"
-            margin="$3"
-            padding="$3"
-            backgroundColor="$yellowAccent2"
+            marginBottom="$2"
+            pt="$5"
+            pb="$3"
+            px="$6"
             justifyContent="space-between"
+            alignItems="center"
+            gap="$3"
           >
-            <YStack f={1}>
+            <Share size={12} color={theme.foregroundSecondary.val} />
+            <YStack flex={1}>
               {!!replyToMessage.message.image && (
                 <UriImageWithSizeLimits
                   uri={replyToMessage.message.image}
                   limits={responseImagePreviewLimits}
                 />
               )}
-              <Text fontSize={12} color="$main">
+              <Typography color="$accentHighlightSecondary" variant="micro">
                 {replyToMessage.state === 'received'
                   ? otherSideData.userName
                   : t('common.you')}
-              </Text>
-              <Text fos={14} marginTop="$1" color="$main">
+              </Typography>
+              <Typography
+                color="$foregroundPrimary"
+                variant="description"
+                marginTop="$1"
+              >
                 {truncate(replyToMessage.message.text, 100, '...')}
-              </Text>
+              </Typography>
             </YStack>
             <Image
               source={CancelSvg}
-              stroke={getTokens().color.main.val}
-              onPress={onExtraClearPressed}
+              stroke={theme.foregroundSecondary.val}
+              onPress={() => {
+                setReplyToMessage(undefined)
+              }}
             />
           </XStack>
         )}
-        {!!selectedImage && (
-          <YStack
-            borderRadius="$5"
-            margin="$3"
-            padding="$3"
-            backgroundColor="$yellowAccent2"
-            gap="$2"
-            alignItems="flex-start"
-          >
-            <XStack alignSelf="stretch" justifyContent="space-between">
-              <Text color="$main">{t('messages.imageToSend')}</Text>
-              <Image
-                stroke={getTokens().color.main.val}
-                source={CancelSvg}
-                onPress={onExtraClearPressed}
-              />
-            </XStack>
-            <UriImageWithSizeLimits
-              uri={selectedImage.uri}
-              limits={imagePreviewLimits}
+        <XStack
+          alignItems="center"
+          gap="$3"
+          my="$3"
+          mx="$4"
+          px="$6"
+          py="$3"
+          borderRadius="$9"
+          backgroundColor="$backgroundOnBar"
+        >
+          <Stack flex={1} justifyContent="center">
+            <RNTextInput
+              multiline
+              value={value}
+              onChangeText={setValue}
+              style={inputStyles}
+              placeholder={t('messages.typeSomething')}
+              placeholderTextColor={theme.foregroundTertiary.val}
+              selectionColor={theme.accentHighlightPrimary.val}
             />
-          </YStack>
-        )}
-        <Stack pt="$1">
-          <TextInput
-            tag="textarea"
-            value={value}
-            onChangeText={setValue}
-            style={styles.textInput}
-            textColor="$white"
-            variant="greyOnBlack"
-            placeholder={t('messages.typeSomething')}
-            placeholderTextColor={getTokens().color.greyOnBlack.val}
-            multiline
-            rightElement={
-              <Animated.View style={animatedStyle}>
-                <IconButton
-                  oval
-                  variant="secondary"
-                  icon={sendSvg}
-                  iconFill={tokens.color.black.val}
-                  onPress={sendText}
-                />
-              </Animated.View>
-            }
-          />
-        </Stack>
+          </Stack>
+          <Animated.View style={animatedStyle}>
+            <UiIconButton
+              width="$9"
+              height="$9"
+              borderRadius="$3"
+              backgroundColor="$accentYellowSecondary"
+              onPress={sendText}
+            >
+              <Send size={20} color={theme.accentHighlightPrimary.val} />
+            </UiIconButton>
+          </Animated.View>
+        </XStack>
       </Stack>
     </XStack>
   )

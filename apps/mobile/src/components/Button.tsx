@@ -236,6 +236,7 @@ function Button({
             numberOfLines={adjustTextToFitOneLine ? 1 : numberOfLines}
             adjustsFontSizeToFit={adjustTextToFitOneLine}
             ff="$body600"
+            color="white"
             size={size}
             variant={variant}
             disabled={disabled}

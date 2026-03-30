@@ -16,6 +16,7 @@ import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
+import ChatSearchScreen from '../ChatSearchScreen'
 import {ClubDetailScreen} from '../ClubDetail'
 import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsModal from '../CommonFriends/CommonFriendsModal'
@@ -94,6 +95,7 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
+            <Stack.Screen name="ChatSearch" component={ChatSearchScreen} />
             <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
             <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />

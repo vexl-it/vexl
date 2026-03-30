@@ -123,14 +123,14 @@ function EmptyList(): React.ReactElement {
       <Typography
         variant="heading3"
         fontWeight="700"
-        col="$white"
+        color="$white"
         ta="center"
         py="$2"
       >
         {emptyListVariant.title}
       </Typography>
       <YStack gap="$4" ai="center" w="100%">
-        <Typography variant="description" col="$greyOnWhite" ta="center">
+        <Typography variant="description" color="$greyOnWhite" ta="center">
           {emptyListVariant.primaryAction.description}
         </Typography>
         <Button
@@ -145,13 +145,13 @@ function EmptyList(): React.ReactElement {
         <>
           <XStack ai="center" gap="$2" w="100%">
             <Stack f={1} h={1} bc="$greyOnWhite" />
-            <Typography variant="description" col="$greyOnWhite">
+            <Typography variant="description" color="$greyOnWhite">
               {t('common.or')}
             </Typography>
             <Stack f={1} h={1} bc="$greyOnWhite" />
           </XStack>
           <YStack gap="$4" ai="center" w="100%">
-            <Typography variant="description" col="$greyOnWhite" ta="center">
+            <Typography variant="description" color="$greyOnWhite" ta="center">
               {emptyListVariant.secondaryAction.description}
             </Typography>
             <Button

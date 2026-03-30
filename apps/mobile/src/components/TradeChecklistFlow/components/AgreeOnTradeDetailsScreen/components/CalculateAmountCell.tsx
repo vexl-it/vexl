@@ -1,5 +1,6 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type AmountData} from '@vexl-next/domain/src/general/tradeChecklist'
+import {ChecklistCell, MoneyBankNotes} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
@@ -11,7 +12,7 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {amountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
-import ChecklistCell from './ChecklistCell'
+import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function CalculateAmountCell(): React.ReactElement {
   const {t} = useTranslation()
@@ -125,10 +126,12 @@ function CalculateAmountCell(): React.ReactElement {
 
   return (
     <ChecklistCell
-      item="CALCULATE_AMOUNT"
+      icon={MoneyBankNotes}
+      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
+      pressable
       onPress={onPress}
-      subtitle={subtitle}
-      sideNote={sideNote}
+      subtitle={subtitle ?? sideNote}
+      headline="Set trade amount"
     />
   )
 }

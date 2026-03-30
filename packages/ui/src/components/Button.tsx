@@ -129,9 +129,11 @@ export function Button({
   size = 'large',
   ...rest
 }: ButtonProps): React.JSX.Element {
+  const variantOrDisabled = rest.disabled ? ('disabled' as const) : variant
+
   return (
-    <ButtonFrame variant={variant} size={size} {...rest}>
-      <ButtonLabel variant={variant} size={size}>
+    <ButtonFrame variant={variantOrDisabled} size={size} {...rest}>
+      <ButtonLabel variant={variantOrDisabled} size={size}>
         {children}
       </ButtonLabel>
     </ButtonFrame>

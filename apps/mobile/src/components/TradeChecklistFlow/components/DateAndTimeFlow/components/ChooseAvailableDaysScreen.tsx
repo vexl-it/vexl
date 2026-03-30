@@ -1,5 +1,6 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Typography} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useEffect, useMemo} from 'react'
@@ -21,7 +22,6 @@ import {
 } from '../../../../PageWithNavigationHeader'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
 import Content from '../../Content'
-import Header from '../../Header'
 import {
   handleAvailableDaysChangeActionAtom,
   setAvailableDateTimesActionAtom,
@@ -77,15 +77,16 @@ function ChooseAvailableDaysScreen({
     <>
       <HeaderProxy title={t('tradeChecklist.dateAndTime.screenTitle')} />
       <Content scrollable>
-        <Header
-          title={t('tradeChecklist.dateAndTime.chooseAvailableDays')}
-          subtitle={t('tradeChecklist.dateAndTime.addTimeOptionsLater')}
-        />
-        <Stack f={1} my="$6">
-          <Calendar
-            markedDates={markedDates}
-            onDayPress={handleAvailableDaysChange}
-          />
+        <Stack f={1} mt="$5" mb="$7">
+          <Typography color="$foregroundSecondary" variant="description">
+            {t('tradeChecklist.dateAndTime.selectDates.description')}
+          </Typography>
+          <Stack mt="$7">
+            <Calendar
+              markedDates={markedDates}
+              onDayPress={handleAvailableDaysChange}
+            />
+          </Stack>
         </Stack>
       </Content>
       <PrimaryFooterButtonProxy hidden />

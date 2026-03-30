@@ -1,4 +1,3 @@
-import {UnixMilliseconds0} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Array, pipe} from 'effect'
 import {type DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
@@ -49,29 +48,7 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
       key: `message-${getUniqueKey(message)}`,
     })
   }
-
-  const vexlBotTradingChecklistMessage: MessagesListItem = {
-    type: 'vexlBot',
-    key: 'vexlBot-tradeChecklistReminder',
-    data: {
-      type: 'tradeChecklistSuggestion',
-      date: UnixMilliseconds0,
-    },
-  }
-
-  // Vexl bot should be displayed after the approve message
-  const acceptMessageIndex = result.findIndex(
-    (one) =>
-      one.type === 'message' &&
-      one.message.message.messageType === 'APPROVE_MESSAGING'
-  )
-
-  if (acceptMessageIndex === -1) return result
-  return [
-    ...result.slice(0, acceptMessageIndex),
-    vexlBotTradingChecklistMessage,
-    ...result.slice(acceptMessageIndex),
-  ]
+  return [...result, {type: 'typingIndicator', key: 'typingIndicator'}]
 }
 
 export default function buildMessagesListData(

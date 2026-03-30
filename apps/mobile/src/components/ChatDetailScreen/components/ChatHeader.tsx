@@ -1,21 +1,26 @@
 import {useNavigation} from '@react-navigation/native'
+import {
+  ChevronLeft,
+  FlagReport,
+  ListWriteDocument,
+  NavButton,
+  PhoneCall,
+  Stack,
+  IconButton as UiIconButton,
+  UserProfile,
+  XStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Alert, Keyboard, TouchableOpacity} from 'react-native'
-import {Stack, XStack, getTokens} from 'tamagui'
-import backButtonSvg from '../../../images/backButtonSvg'
-import blockIconSvg from '../../../images/blockIconSvg'
-import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
+import {useTheme} from 'tamagui'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import IconButton from '../../IconButton'
-import identityIconSvg from '../../images/identityIconSvg'
 import {chatMolecule} from '../atoms'
-import phoneSvg from '../images/phoneSvg'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
 
 type ButtonType =
@@ -32,6 +37,7 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const safeGoBack = useSafeGoBack()
   const navigation = useNavigation()
   const {t} = useTranslation()
+  const theme = useTheme()
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
@@ -73,19 +79,12 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   }, [forceShowHistory, safeGoBack, setForceShowHistory])
 
   if (type === 'back')
-    return (
-      <IconButton
-        icon={backButtonSvg}
-        variant="primary"
-        onPress={onGoBackPressed}
-      />
-    )
+    return <NavButton icon={ChevronLeft} onPress={onGoBackPressed} />
 
   if (type === 'closeModal')
     return (
-      <IconButton
-        icon={backButtonSvg}
-        variant="primary"
+      <NavButton
+        icon={ChevronLeft}
         onPress={() => {
           Keyboard.dismiss()
           setModal(false)
@@ -95,9 +94,9 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
 
   if (type === 'block')
     return (
-      <IconButton
-        icon={blockIconSvg}
-        variant="negative"
+      <NavButton
+        icon={FlagReport}
+        variant="destructive"
         onPress={() => {
           Keyboard.dismiss()
           void blockChat().then((success) => {
@@ -109,9 +108,9 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
 
   if (type === 'deleteChat')
     return (
-      <IconButton
-        icon={require('./images/trashIconRed.png')}
-        variant="negative"
+      <NavButton
+        icon={FlagReport}
+        variant="destructive"
         onPress={() => {
           Keyboard.dismiss()
           void Effect.runPromise(
@@ -127,14 +126,14 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
 
   if (type === 'identityReveal' && identityRevealStatus === 'notStarted')
     return (
-      <IconButton
-        icon={identityIconSvg}
-        variant="primary"
+      <UiIconButton
         onPress={() => {
           Keyboard.dismiss()
           void revealIdentity('REQUEST_REVEAL')
         }}
-      />
+      >
+        <UserProfile size={22} color={theme.accentHighlightSecondary.val} />
+      </UiIconButton>
     )
 
   if (
@@ -143,46 +142,42 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
     contactRevealStatus === 'notStarted'
   )
     return (
-      <IconButton
-        icon={phoneSvg}
-        iconFill={getTokens().color.main.val}
-        variant="primary"
+      <UiIconButton
         onPress={() => {
           Keyboard.dismiss()
           void revealContact('REQUEST_REVEAL')
         }}
-      />
+      >
+        <PhoneCall size={22} color={theme.accentHighlightSecondary.val} />
+      </UiIconButton>
     )
 
   if (type === 'tradeChecklist')
     return (
       <XStack gap="$1">
         {identityRevealStatus === 'notStarted' && (
-          <IconButton
-            icon={identityIconSvg}
-            variant="primary"
+          <UiIconButton
             onPress={() => {
               Keyboard.dismiss()
               void revealIdentity('REQUEST_REVEAL')
             }}
-          />
+          >
+            <UserProfile size={22} color={theme.accentHighlightSecondary.val} />
+          </UiIconButton>
         )}
         {identityRevealStatus === 'shared' &&
           contactRevealStatus === 'notStarted' && (
-            <IconButton
-              icon={phoneSvg}
-              iconFill={getTokens().color.main.val}
-              variant="primary"
+            <UiIconButton
               onPress={() => {
                 Keyboard.dismiss()
                 void revealContact('REQUEST_REVEAL')
               }}
-            />
+            >
+              <PhoneCall size={22} color={theme.accentHighlightSecondary.val} />
+            </UiIconButton>
           )}
         {!!otherSideSupportsTradingChecklist && !listingTypeIsOther && (
-          <IconButton
-            icon={tradeChecklistSvg}
-            variant="primary"
+          <UiIconButton
             onPress={() => {
               if (!otherSideSupportsTradingChecklist) {
                 Alert.alert(
@@ -199,18 +194,20 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
                 inboxKey,
               })
             }}
-            iconFill={getTokens().color.main.val}
-            iconHeight={24}
-            iconWidth={24}
-          />
+          >
+            <ListWriteDocument
+              size={22}
+              color={theme.accentHighlightSecondary.val}
+            />
+          </UiIconButton>
         )}
       </XStack>
     )
 
-  return <Stack w={40} h={40} />
+  return <Stack width="$9" height="$9" />
 }
 
-function ChatHeader({
+export default function ChatHeader({
   leftButton,
   rightButton,
   mode,
@@ -226,10 +223,17 @@ function ChatHeader({
     onPressMiddle()
   }, [onPressMiddle])
   return (
-    <XStack mx="$1" mt="$4">
+    <XStack
+      px="$4"
+      pt="$4"
+      pb="$3"
+      alignItems="center"
+      borderBottomWidth={1}
+      borderBottomColor="$backgroundPrimary"
+      backgroundColor="$backgroundSecondary"
+    >
       <Button type={leftButton} />
-
-      <Stack f={1} mx={mode === 'photoLeft' ? '$2' : 0}>
+      <Stack flex={1} mx={mode === 'photoLeft' ? '$3' : 0}>
         <TouchableOpacity onPress={handleMiddlePress}>
           <OtherSideNamePhotoAndInfo mode={mode} />
         </TouchableOpacity>
@@ -239,5 +243,3 @@ function ChatHeader({
     </XStack>
   )
 }
-
-export default ChatHeader

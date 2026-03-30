@@ -9,7 +9,7 @@ interface Props {
 
 function Content({children, scrollable}: Props): React.ReactElement {
   return (
-    <Stack f={1} bc="$black" pb="$1">
+    <Stack f={1} pb="$1">
       {scrollable ? (
         <ScrollView showsVerticalScrollIndicator={false}>{children}</ScrollView>
       ) : (

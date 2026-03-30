@@ -1,6 +1,13 @@
 import {useNavigation} from '@react-navigation/native'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
-import {Array, pipe} from 'effect'
+import {
+  Dot,
+  DotTypingIndicator,
+  Stack,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import React, {useMemo, useRef} from 'react'
@@ -8,15 +15,14 @@ import {TouchableOpacity} from 'react-native'
 import Swipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
-import {Stack, Text, XStack, YStack} from 'tamagui'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import {createIsOtherSideTypingAtom} from '../../../../../state/chat/atoms/typingIndication'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
-import {clubsWithMembersAtom} from '../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
+import {realUserNameAtom} from '../../../../../state/session/userDataAtoms'
+import {getChatDisplayName} from '../../../../../utils/chat/getChatDisplayName'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import UserAvatar from '../../../../UserAvatar'
-import UserNameWithSellingBuying from '../../../../UserNameWithSellingBuying'
 import {deleteChatFromListActionAtom} from '../atoms'
 import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
 import LastMessageDateView from './LastMessageDateView'
@@ -35,7 +41,6 @@ function ChatListItem({
   const {t} = useTranslation()
   const swipeableRef = useRef<SwipeableMethods>(null)
   const navigation = useNavigation()
-  const clubsWithMembers = useAtomValue(clubsWithMembersAtom)
 
   const {
     chatInfoAtom,
@@ -43,7 +48,6 @@ function ChatListItem({
     isUnreadAtom,
     otherSideInfoAtom,
     otherSideLeftAtom,
-    otherSideClubsNamesAtom,
   } = useMemo(() => {
     const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat)
     const lastMessageAtom = selectAtom(dataAtom, (data) => data.lastMessage)
@@ -54,15 +58,6 @@ function ChatListItem({
         lastMessage.message.messageType
       )
     )
-    const otherSideClubsNamesAtom = selectAtom(dataAtom, (data) =>
-      pipe(
-        clubsWithMembers,
-        Array.filter((club) =>
-          Array.contains(club.club.uuid)(data.chat.otherSide.clubsIds ?? [])
-        ),
-        Array.map((club) => club.club.name)
-      )
-    )
 
     return {
       chatInfoAtom,
@@ -70,9 +65,8 @@ function ChatListItem({
       isUnreadAtom,
       otherSideLeftAtom,
       otherSideInfoAtom,
-      otherSideClubsNamesAtom,
     }
-  }, [clubsWithMembers, dataAtom])
+  }, [dataAtom])
 
   const chatInfo = useAtomValue(chatInfoAtom)
   const isTyping = useAtomValue(
@@ -80,10 +74,15 @@ function ChatListItem({
   )
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
+  const realUserName = useAtomValue(realUserNameAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
   const deleteChatFromList = useSetAtom(deleteChatFromListActionAtom)
-  const otherSideClubsNames = useAtomValue(otherSideClubsNamesAtom)
+  const displayName = getChatDisplayName({
+    offerInfo: offer?.offerInfo,
+    userName: realUserName,
+    t,
+  })
 
   return (
     <TouchableOpacity
@@ -94,7 +93,7 @@ function ChatListItem({
         })
       }}
     >
-      <Stack mt="$6" br="$2">
+      <Stack>
         <Swipeable
           ref={swipeableRef}
           renderRightActions={() => (
@@ -110,76 +109,58 @@ function ChatListItem({
             />
           )}
         >
-          <XStack gap="$2" ai="center" bc="$black">
-            <Stack h={48} w={48}>
+          <XStack
+            paddingVertical="$4"
+            paddingHorizontal="$5"
+            gap="$5"
+            ai="center"
+            backgroundColor="$backgroundPrimary"
+          >
+            <Stack h="$9" w="$9">
               <UserAvatar
                 grayScale={otherSideLeft}
                 userImage={userAvatar}
-                width={48}
-                height={48}
+                width={40}
+                height={40}
               />
             </Stack>
             <YStack jc="space-between" alignSelf="stretch" f={1} py="$1">
-              <XStack jc="space-between">
-                <UserNameWithSellingBuying
-                  userName={userName}
-                  center={false}
-                  offerInfo={
-                    chatInfo.origin.type !== 'unknown' && offer
-                      ? offer.offerInfo
-                      : undefined
-                  }
-                />
-                <XStack ai="center" gap="$2" ml="$2" fs={1}>
-                  <Text
-                    numberOfLines={2}
-                    ellipsizeMode="tail"
-                    color="$greyOnBlack"
-                    ff="$body500"
-                    mr="$1"
+              <XStack jc="flex-start" gap="$2" alignItems="flex-start">
+                {!!displayName && (
+                  <Typography
+                    color="$foregroundPrimary"
+                    variant="paragraphSmall"
                   >
-                    {otherSideClubsNames.length > 1
-                      ? t('clubs.multipleClubs')
-                      : otherSideClubsNames.map((clubName) => clubName)}
-                  </Text>
-
-                  {!!isUnread && (
-                    <Stack
-                      w={12}
-                      h={12}
-                      borderRadius={6}
-                      backgroundColor="$main"
-                    />
-                  )}
-                </XStack>
+                    {displayName}
+                  </Typography>
+                )}
+                {!!isUnread && (
+                  <Dot
+                    mt={3}
+                    variant="small"
+                    backgroundColor="$accentHighlightSecondary"
+                  />
+                )}
               </XStack>
               <XStack jc="space-between">
-                <Text
-                  f={1}
-                  numberOfLines={1}
-                  color="$greyOnBlack"
-                  fos={16}
-                  ellipsizeMode="tail"
-                  mr="$3"
-                >
-                  {isTyping ? (
-                    <Text color="$greyOnBlack" fs={14} ff="$body600">
-                      {t('messages.typing')}
-                    </Text>
-                  ) : (
-                    <MessagePreview
-                      lastMessageAtom={lastMessageAtom}
-                      name={userName}
-                      unread={isUnread}
-                    />
-                  )}
-                </Text>
-                <Text color="$greyOnBlack">
+                {isTyping ? (
+                  <DotTypingIndicator />
+                ) : (
+                  <MessagePreview
+                    lastMessageAtom={lastMessageAtom}
+                    name={userName}
+                    unread={isUnread}
+                    f={1}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                    mr="$3"
+                  />
+                )}
+                <Typography color="$foregroundSecondary" variant="description">
                   <LastMessageDateView lastMessageAtom={lastMessageAtom} />
-                </Text>
+                </Typography>
               </XStack>
             </YStack>
-            <Stack jc="flex-end" alignSelf="stretch"></Stack>
           </XStack>
         </Swipeable>
       </Stack>

@@ -1,19 +1,19 @@
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Camera, IconButton as UiIconButton} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Alert} from 'react-native'
-import {getTokens} from 'tamagui'
+import {useTheme} from 'tamagui'
 import {getImageFromGalleryResolvePermissionsAndMoveItToInternalDirectory} from '../../../utils/imagePickers'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showErrorAlert} from '../../ErrorAlert'
-import IconButton from '../../IconButton'
 import {chatMolecule} from '../atoms'
-import cameraSvg from '../images/cameraSvg'
 
 function SendImageButton(): React.ReactElement {
+  const theme = useTheme()
   const {selectedImageAtom} = useMolecule(chatMolecule)
   const setSelectedImage = useSetAtom(selectedImageAtom)
   const {t} = useTranslation()
@@ -48,16 +48,17 @@ function SendImageButton(): React.ReactElement {
   )
 
   return (
-    <IconButton
-      width={getTokens().space[10].val}
-      height={getTokens().space[10].val}
-      borderRadius={Math.round(getTokens().space[10].val / 2)}
-      oval={true}
-      icon={cameraSvg}
+    <UiIconButton
+      width="$10"
+      height="$10"
+      borderRadius="$3"
+      backgroundColor="$backgroundSecondary"
       onPress={() => {
         void selectImage()()
       }}
-    />
+    >
+      <Camera size={20} color={theme.foregroundPrimary.val} />
+    </UiIconButton>
   )
 }
 

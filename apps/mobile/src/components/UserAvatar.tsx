@@ -3,7 +3,7 @@ import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringO
 import React from 'react'
 import {SvgXml} from 'react-native-svg'
 import {FilterImage} from 'react-native-svg/filter-image'
-import {getTokens, Image} from 'tamagui'
+import {Image, View} from 'tamagui'
 import resolveLocalUri from '../utils/resolveLocalUri'
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
   width: number
   height: number
 }
+
+const AVATAR_BORDER_RADIUS = 8
 
 // I know this is not the best approach, but I was undable to find a way to apply the filter any other way and
 // I don't want to have to define each user svg twice... Let's go this way!
@@ -42,34 +44,64 @@ function UserAvatar({
   if (userImage.type === 'svgXml') {
     if (grayScale) {
       return (
-        <SvgXml
+        <View
           width={width}
           height={height}
-          xml={makeSvgIntoGrayscale(userImage.svgXml).xml}
-        />
+          borderRadius={AVATAR_BORDER_RADIUS}
+          overflow="hidden"
+        >
+          <SvgXml
+            width={width}
+            height={height}
+            xml={makeSvgIntoGrayscale(userImage.svgXml).xml}
+          />
+        </View>
       )
     } else {
-      return <SvgXml width={width} height={height} xml={userImage.svgXml.xml} />
+      return (
+        <View
+          width={width}
+          height={height}
+          borderRadius={AVATAR_BORDER_RADIUS}
+          overflow="hidden"
+        >
+          <SvgXml width={width} height={height} xml={userImage.svgXml.xml} />
+        </View>
+      )
     }
   } else {
     if (grayScale) {
       return (
-        <FilterImage
+        <View
           width={width}
           height={height}
-          style={{borderRadius: getTokens().radius[3].val}}
-          filters={[{name: 'feColorMatrix', type: 'saturate', values: '0.0'}]}
-          source={{uri: resolveLocalUri(userImage.imageUri)}}
-        ></FilterImage>
+          borderRadius={AVATAR_BORDER_RADIUS}
+          overflow="hidden"
+        >
+          <FilterImage
+            width={width}
+            height={height}
+            style={{borderRadius: AVATAR_BORDER_RADIUS}}
+            filters={[{name: 'feColorMatrix', type: 'saturate', values: '0.0'}]}
+            source={{uri: resolveLocalUri(userImage.imageUri)}}
+          ></FilterImage>
+        </View>
       )
     }
     return (
-      <Image
+      <View
         width={width}
         height={height}
-        borderRadius="$3"
-        source={{uri: resolveLocalUri(userImage.imageUri)}}
-      ></Image>
+        borderRadius={AVATAR_BORDER_RADIUS}
+        overflow="hidden"
+      >
+        <Image
+          width={width}
+          height={height}
+          borderRadius={AVATAR_BORDER_RADIUS}
+          source={{uri: resolveLocalUri(userImage.imageUri)}}
+        ></Image>
+      </View>
     )
   }
 }

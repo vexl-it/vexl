@@ -18,6 +18,7 @@ type TypographyFrameProps = React.ComponentProps<typeof TypographyFrame>
 
 export interface TypographyProps extends TypographyFrameProps {
   readonly children: React.ReactNode
+  readonly color: TypographyFrameProps['color']
   readonly variant: TypographyVariant
 }
 

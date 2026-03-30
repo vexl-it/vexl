@@ -1,7 +1,8 @@
+import {Typography} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList, TouchableWithoutFeedback} from 'react-native'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
+import {getTokens, Stack, XStack} from 'tamagui'
 
 import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
@@ -56,26 +57,28 @@ function Item<T>({
         br="$4"
       >
         <Stack fs={1} gap="$2">
-          <Text
+          <Typography
+            variant="paragraphSmallBold"
             mih={24}
             color={
-              selected ? '$main' : item.outdated ? '$greyAccent1' : '$white'
+              selected
+                ? '$accentHighlightPrimary'
+                : item.outdated
+                  ? '$foregroundTertiary'
+                  : '$foregroundPrimary'
             }
-            fos={16}
-            ff="$body600"
           >
             {item.title}
-          </Text>
+          </Typography>
           {!!item.rightText && (
-            <Text
-              fos={12}
-              ff="$body500"
-              color="$greyOnBlack"
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {item.rightText}
-            </Text>
+            </Typography>
           )}
         </Stack>
         {!!showChevron && <Image stroke="#AFAFAF" source={chevronRightSvg} />}
@@ -88,9 +91,9 @@ function Item<T>({
               source={closeSvg}
               stroke={getTokens().color.yellow100.val}
             />
-            <Text fos={12} col="$main">
+            <Typography variant="micro" color="$accentHighlightPrimary">
               {t('common.outdated')}
-            </Text>
+            </Typography>
           </XStack>
         )}
       </XStack>

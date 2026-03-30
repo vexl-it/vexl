@@ -65,6 +65,8 @@ export interface ChecklistCellProps {
   readonly headline: string
   readonly subtitle?: string
   readonly icon?: React.ComponentType<IconProps>
+  readonly disabled?: boolean
+  readonly pressable?: boolean
   readonly onPress?: () => void
 }
 
@@ -73,10 +75,12 @@ export function ChecklistCell({
   headline,
   subtitle,
   icon: Icon,
+  disabled = false,
+  pressable,
   onPress,
 }: ChecklistCellProps): React.JSX.Element {
   const theme = useTheme()
-  const isPressable = state !== 'completed'
+  const isPressable = !disabled && (pressable ?? state !== 'completed')
 
   const iconBoxBg = (() => {
     switch (state) {
@@ -113,6 +117,7 @@ export function ChecklistCell({
     <ChecklistCellFrame
       pressable={isPressable}
       onPress={isPressable ? onPress : undefined}
+      opacity={disabled ? 0.7 : 1}
     >
       <IconBox backgroundColor={iconBoxBg}>{renderIcon()}</IconBox>
       <YStack flex={1} gap="$2">

@@ -203,6 +203,14 @@ export default {
     './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [
+      'expo-navigation-bar',
+      {
+        enforceContrast: false,
+        barStyle: 'light',
+        visibility: 'visible',
+      },
+    ],
+    [
       'expo-notifications',
       {
         icon: './assets/notification_icon.png',

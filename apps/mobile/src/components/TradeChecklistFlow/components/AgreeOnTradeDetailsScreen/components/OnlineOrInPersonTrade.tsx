@@ -1,14 +1,10 @@
+import {Button, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
+import {Stack} from 'tamagui'
 import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../../utils/openUrl'
-import {goldenAvatarTypeAtom} from '../../../../../utils/preferences'
-import Image from '../../../../Image'
-import Info from '../../../../Info'
-import anonymousAvatarHappyGoldenGlassesNoBackgroundSvg from '../../../../images/anonymousAvatarHappyGoldenGlassesNoBackgroundSvg'
-import anonymousAvatarHappyNoBackgroundSvg from '../../../../images/anonymousAvatarHappyNoBackgroundSvg'
 import AnonymizationNotice from '../../AnonymizationNotice'
 import CalculateAmountCell from './CalculateAmountCell'
 import DateAndTimeCell from './DateAndTimeCell'
@@ -17,72 +13,111 @@ import RevealIdentityCell from './RevealIdentityCell'
 import RevealPhoneNumberCell from './RevealPhoneNumberCell'
 import SetNetworkCell from './SetNetworkCell'
 import TradeRule from './TradeRule'
+function SectionTitle({
+  children,
+}: {
+  children: React.ReactNode
+}): React.ReactElement {
+  return (
+    <Typography variant="paragraphSmall" color="$foregroundPrimary">
+      {children}
+    </Typography>
+  )
+}
 
 function OnlineOrInPersonTrade(): React.ReactElement {
   const {t} = useTranslation()
   const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
-  const goldenAvatarType = useAtomValue(goldenAvatarTypeAtom)
-  const anonymousAvatar =
-    goldenAvatarType === 'BACKGROUND_AND_GLASSES'
-      ? anonymousAvatarHappyGoldenGlassesNoBackgroundSvg
-      : anonymousAvatarHappyNoBackgroundSvg
+
+  const top = (
+    <Stack gap="$3">
+      <Typography variant="heading3" color="$foregroundPrimary">
+        Trade checklist
+      </Typography>
+      <Typography variant="description" color="$foregroundSecondary">
+        Agree on key trade details to avoid confusion later. Everything is
+        optional.
+      </Typography>
+    </Stack>
+  )
+
+  if (
+    !offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
+      'IN_PERSON'
+    )
+  ) {
+    return (
+      <Stack gap="$6">
+        {top}
+        <CalculateAmountCell />
+
+        <Stack p="$4" gap="$4" br="$5" bc="$backgroundSecondary">
+          <Typography
+            variant="description"
+            color="$accentHighlightPrimary"
+            lineHeight={20}
+          >
+            {t('tradeChecklist.thisDealIsFullyOnline')}
+          </Typography>
+          <Button
+            onPress={() => {
+              openUrl(t('tradeChecklist.vexlBlogUrl'))()
+            }}
+            variant="primary"
+            size="medium"
+          >
+            {t('tradeChecklist.readMoreInFullArticle')}
+          </Button>
+        </Stack>
+
+        <Stack gap="$3">
+          <TradeRule
+            ruleNumber={1}
+            title={t('tradeChecklist.tradeOnlyWithPeopleYouKnow')}
+          />
+          <TradeRule
+            ruleNumber={2}
+            title={t('tradeChecklist.alwaysMoneyBeforeBtc')}
+          />
+          <TradeRule
+            ruleNumber={3}
+            title={t('tradeChecklist.watchOutForSuspiciousBehaviour')}
+          />
+        </Stack>
+
+        <AnonymizationNotice />
+      </Stack>
+    )
+  }
 
   return (
-    <>
+    <Stack gap="$6">
+      {top}
+
       <Stack gap="$3">
-        <Stack als="center">
-          <Image height={90} width={90} source={anonymousAvatar} />
+        <SectionTitle>Meeting detail</SectionTitle>
+        <Stack gap="$2">
+          <DateAndTimeCell />
+          <MeetingLocationCell />
         </Stack>
-        <Text textAlign="center" ff="$heading" fos={18}>
-          {t('tradeChecklist.agreeOnTradeDetails')}
-        </Text>
-        <Text als="center" fos={14} ff="$body400" ml="$2" col="$greyOnWhite">
-          {t('tradeChecklist.youCanPickWhatYouFill')}
-        </Text>
-        {!offerForTradeChecklist?.offerInfo.publicPart.locationState.includes(
-          'IN_PERSON'
-        ) ? (
-          <>
-            <Stack mb="$4">
-              <CalculateAmountCell />
-            </Stack>
-            <Info
-              actionButtonText={t('tradeChecklist.readMoreInFullArticle')}
-              hideCloseButton
-              text={t('tradeChecklist.thisDealIsFullyOnline')}
-              onActionPress={() => {
-                openUrl(t('tradeChecklist.vexlBlogUrl'))()
-              }}
-              variant="yellow"
-            />
-            <Stack my="$4" gap="$2">
-              <TradeRule
-                ruleNumber={1}
-                title={t('tradeChecklist.tradeOnlyWithPeopleYouKnow')}
-              />
-              <TradeRule
-                ruleNumber={2}
-                title={t('tradeChecklist.alwaysMoneyBeforeBtc')}
-              />
-              <TradeRule
-                ruleNumber={3}
-                title={t('tradeChecklist.watchOutForSuspiciousBehaviour')}
-              />
-            </Stack>
-          </>
-        ) : (
-          <Stack my="$4" gap="$2">
-            <DateAndTimeCell />
-            <MeetingLocationCell />
-            <CalculateAmountCell />
-            <SetNetworkCell />
-            <RevealIdentityCell />
-            <RevealPhoneNumberCell />
-          </Stack>
-        )}
       </Stack>
-      <AnonymizationNotice />
-    </>
+
+      <Stack gap="$3">
+        <SectionTitle>Payment detail</SectionTitle>
+        <Stack gap="$2">
+          <CalculateAmountCell />
+          <SetNetworkCell />
+        </Stack>
+      </Stack>
+
+      <Stack gap="$3">
+        <SectionTitle>Privacy</SectionTitle>
+        <Stack gap="$2">
+          <RevealIdentityCell />
+          <RevealPhoneNumberCell />
+        </Stack>
+      </Stack>
+    </Stack>
   )
 }
 

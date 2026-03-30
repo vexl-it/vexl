@@ -4,11 +4,17 @@ import {
   NavigationContainer,
 } from '@react-navigation/native'
 import {useVexlTheme} from '@vexl-next/ui'
+import * as NavigationBar from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
+import {useAtomValue} from 'jotai'
 import React from 'react'
+import {Platform, View} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
-import {SafeAreaProvider} from 'react-native-safe-area-context'
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
 import AreYouSureDialog from './components/AreYouSureDialog'
@@ -24,6 +30,7 @@ import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import VersionMigrations from './components/VersionMigrations'
+import {StatusBarStyleAtom} from './state/statusBarStyleAtom'
 import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
@@ -50,6 +57,7 @@ function App(): React.ReactElement {
         <BadgeCountManager />
         <PreventScreenshots />
         <DisableLogBoxForTests />
+        <AppStatusBar />
         <NavigationContainer
           ref={navigationRef}
           theme={{
@@ -58,7 +66,7 @@ function App(): React.ReactElement {
             colors: {
               ...navigationTheme.colors,
               primary: theme.background?.val,
-              background: 'transparent',
+              background: theme.backgroundPrimary.val,
               text: theme.color?.val,
             },
             fonts: {
@@ -84,7 +92,12 @@ function App(): React.ReactElement {
           <LoadingOverlayProvider>
             <VersionMigrations>
               <OverlayInfoScreen>
-                <GestureHandlerRootView style={{flex: 1}}>
+                <GestureHandlerRootView
+                  style={{
+                    flex: 1,
+                    backgroundColor: theme.backgroundPrimary.val,
+                  }}
+                >
                   <RootNavigation />
                   <InAppLoadingTasksIndicator />
                 </GestureHandlerRootView>
@@ -102,16 +115,58 @@ function App(): React.ReactElement {
   )
 }
 
-const ThemeAvareStatusBar = (): React.ReactElement => {
+const AppStatusBar = (): React.ReactElement => {
   const {resolvedTheme} = useVexlTheme()
+  const statusBarStyle = useAtomValue(StatusBarStyleAtom)
+  const insets = useSafeAreaInsets()
+  const theme = useTheme()
   const isDarkTheme = resolvedTheme === 'dark'
-  return <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
+  const backgroundColor =
+    statusBarStyle === 'secondary'
+      ? theme.backgroundSecondary.val
+      : theme.backgroundPrimary.val
+  const navigationBarStyle = isDarkTheme ? 'dark' : 'light'
+
+  React.useEffect(() => {
+    if (Platform.OS !== 'android') return
+
+    NavigationBar.setStyle(navigationBarStyle)
+  }, [navigationBarStyle])
+
+  return (
+    <>
+      <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: insets.top,
+          backgroundColor,
+          zIndex: 1,
+        }}
+      />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: insets.bottom,
+          backgroundColor,
+          zIndex: 1,
+        }}
+      />
+    </>
+  )
 }
 
 export default function _(): React.ReactElement {
   return (
     <ThemeProvider>
-      <ThemeAvareStatusBar />
       <AnimatedSplashScreen>
         <App />
       </AnimatedSplashScreen>

@@ -14,25 +14,19 @@ import {useSetHeaderState, type HeaderState} from './state/headerStateAtom'
 
 interface Props {
   children: ReactNode
-  fullScreen?: boolean
 }
 
-function PageWithNavigationHeader({
-  children,
-  fullScreen,
-}: Props): React.ReactElement {
-  const {bottom} = useSafeAreaInsets()
+function PageWithNavigationHeader({children}: Props): React.ReactElement {
+  const {bottom, top} = useSafeAreaInsets()
 
   return (
     <KeyboardAvoidingView>
       <Stack
+        backgroundColor="$backgroundPrimary"
         f={1}
-        bc="$black"
-        pt={fullScreen ? 0 : '$2'}
-        px={fullScreen ? 0 : '$2'}
-        btlr={fullScreen ? 0 : '$7'}
-        btrr={fullScreen ? 0 : '$7'}
-        pb={fullScreen ? 0 : bottom}
+        pt={top}
+        pb={bottom}
+        px="$5"
       >
         <Header />
         {children}

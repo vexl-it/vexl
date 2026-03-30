@@ -1,14 +1,16 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {BoltElectric, ChecklistCell} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
-import React, {useCallback} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
   originOfferAtom,
   tradeChecklistNetworkDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {networkUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
-import ChecklistCell from './ChecklistCell'
+import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function SetNetworkCell(): React.ReactElement {
   const {t} = useTranslation()
@@ -17,6 +19,9 @@ function SetNetworkCell(): React.ReactElement {
   const originOffer = useAtomValue(originOfferAtom)
   const networkUpdateToBeSent = useAtomValue(networkUpdateToBeSentAtom)
   const tradeChecklistNetworkData = useAtomValue(tradeChecklistNetworkDataAtom)
+  const itemStatus = useAtomValue(
+    useMemo(() => createChecklistItemStatusAtom('SET_NETWORK'), [])
+  )
 
   const btcNetworkInState = (
     tradeChecklistNetworkData?.received ?? tradeChecklistNetworkData?.sent
@@ -50,17 +55,19 @@ function SetNetworkCell(): React.ReactElement {
 
   return (
     <ChecklistCell
-      isDisabled={isDisabled}
+      icon={BoltElectric}
+      disabled={isDisabled}
+      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
+      pressable
       subtitle={
         isDisabled
           ? tradeChecklistNetworkData?.received?.btcNetwork
             ? t('tradeChecklist.network.btcNetworkWasSetByReceiver')
             : t('tradeChecklist.network.btcNetworkWillBeSetByReceiver')
-          : undefined
+          : sideNote
       }
-      item="SET_NETWORK"
       onPress={onPress}
-      sideNote={sideNote}
+      headline="Set network"
     />
   )
 }

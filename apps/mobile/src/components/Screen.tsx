@@ -18,7 +18,7 @@ function Screen({
   return (
     <Stack
       f={1}
-      bc={props.backgroundColor ?? '$black'}
+      bc={props.backgroundColor ?? '$backgroundPrimary'}
       pr={Math.max(insets.right, customHorizontalPadding)}
       pl={Math.max(insets.left, customHorizontalPadding)}
       pt={Math.max(insets.top, customVerticalPadding)}

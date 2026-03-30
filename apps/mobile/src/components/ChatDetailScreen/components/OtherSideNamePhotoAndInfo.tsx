@@ -1,8 +1,9 @@
+import {XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, YStack} from 'tamagui'
+import {Stack, useTheme} from 'tamagui'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
@@ -17,10 +18,12 @@ interface Props {
 export const PHOTO_AND_INFO_PHOTO_TOP_HEIGHT = 81 + 16
 
 function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
+  const theme = useTheme()
   const {
     offerForChatAtom,
     openedImageUriAtom,
     otherSideDataAtom,
+    otherSideClubsIdsAtom,
     otherSideLeftAtom,
     canSendMessagesAtom,
     commonConnectionsCountAtom,
@@ -28,18 +31,18 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
     verifiedConnectionsHashesAtom,
     friendLevelInfoAtom,
     otherSideGoldenAvatarTypeAtom,
-    otherSideClubsIdsAtom,
   } = useMolecule(chatMolecule)
 
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
-  const canSendMessages = useAtomValue(canSendMessagesAtom)
+
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
+  const canSendMessages = useAtomValue(canSendMessagesAtom)
+  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
-  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
 
   const setOpenedImageUri = useSetAtom(openedImageUriAtom)
   const showGoldenAvatarInfoModal = useSetAtom(
@@ -53,16 +56,28 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
     !otherSideGoldenAvatarType ||
     (!offer?.ownershipInfo && !offer?.offerInfo.publicPart.goldenAvatarType)
 
+  const connectionLabel = friendLevelInfo.includes('FIRST_DEGREE')
+    ? 'Direct friend'
+    : friendLevelInfo.includes('SECOND_DEGREE')
+      ? 'Friend of friend'
+      : otherSideData.userName
+
+  const commonLabel =
+    commonConnectionsCount > 0
+      ? `${commonConnectionsCount} in common`
+      : 'No shared connections'
+
   return (
-    <Stack
-      height={mode === 'photoTop' ? PHOTO_AND_INFO_PHOTO_TOP_HEIGHT : 'auto'}
-      fd={mode === 'photoLeft' ? 'row' : 'column'}
-      alignItems={mode === 'photoTop' ? 'center' : 'flex-start'}
+    <XStack
+      alignItems="center"
+      gap={mode === 'photoTop' ? '$0' : '$3'}
+      justifyContent={mode === 'photoTop' ? 'center' : 'flex-start'}
     >
       <Stack
-        w={40}
-        h={40}
-        {...(mode === 'photoTop' ? {marginBottom: '$1'} : {marginRight: '$2'})}
+        width={40}
+        height={40}
+        marginBottom={mode === 'photoTop' ? '$2' : '$0'}
+        marginRight={mode === 'photoTop' ? '$0' : '$0'}
       >
         <TouchableOpacity
           disabled={noImageUri || noGoldenAvatarType}
@@ -100,7 +115,7 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
           clubsIds={otherSideClubsIds}
         />
       </YStack>
-    </Stack>
+    </XStack>
   )
 }
 

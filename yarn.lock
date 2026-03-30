@@ -12093,6 +12093,7 @@ __metadata:
     expo-linking: ~55.0.7
     expo-localization: ~55.0.8
     expo-mcp: ~0.2.1
+    expo-navigation-bar: ^55.0.9
     expo-notifications: ~55.0.10
     expo-secure-store: ~55.0.8
     expo-sharing: ~55.0.11
@@ -18304,6 +18305,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 266467256f397f35d242ace9ab33ac59d224e2b5c4f9ef0d7dcbdbe03752663ac3bf7dd4698f36e56c7c65286f003399f3811d0447fc3c530bc2b906ef72de8c
+  languageName: node
+  linkType: hard
+
+"expo-navigation-bar@npm:^55.0.9":
+  version: 55.0.9
+  resolution: "expo-navigation-bar@npm:55.0.9"
+  dependencies:
+    debug: ^4.3.2
+    react-native-is-edge-to-edge: ^1.2.1
+  peerDependencies:
+    expo: "*"
+    react: "*"
+    react-native: "*"
+  checksum: ad0eecacde3447e8637fca921da409f58a1d962ecb3567256b6fbdde833db3d2d3ccac2304ff24e72d1fbf2b118491ae4b497b7a7588ab0cf0506027a691ee68
   languageName: node
   linkType: hard
 

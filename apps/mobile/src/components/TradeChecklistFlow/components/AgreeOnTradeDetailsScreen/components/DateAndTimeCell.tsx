@@ -1,5 +1,6 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {Calendar, ChecklistCell} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo} from 'react'
@@ -11,11 +12,12 @@ import {
 import * as DateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
+import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {
   dateAndTimePickUpdateToBeSentAtom,
   tradeChecklistWithUpdatesMergedAtom,
 } from '../../../atoms/updatesToBeSentAtom'
-import ChecklistCell from './ChecklistCell'
+import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function formatDateTime(millis: UnixMilliseconds): string {
   return unixMillisecondsToLocaleDateTime(millis).toLocaleString(
@@ -34,11 +36,14 @@ function DateAndTimeCell(): React.ReactElement {
   const tradeChecklistDateAndTimeData = useAtomValue(
     tradeChecklistDateAndTimeDataAtom
   )
+  const itemStatus = useAtomValue(
+    useMemo(() => createChecklistItemStatusAtom('DATE_AND_TIME'), [])
+  )
   const dateAndTimePickUpdateToBeSent = useAtomValue(
     dateAndTimePickUpdateToBeSentAtom
   )
 
-  const sideNote = tradeChecklistDateAndTimeData.received?.picks?.dateTime
+  const subtitle = tradeChecklistDateAndTimeData.received?.picks?.dateTime
     ? formatDateTime(tradeChecklistDateAndTimeData.received.picks.dateTime)
     : tradeChecklistDateAndTimeData.sent?.picks?.dateTime
       ? formatDateTime(tradeChecklistDateAndTimeData.sent.picks.dateTime)
@@ -67,7 +72,7 @@ function DateAndTimeCell(): React.ReactElement {
     }
   }, [navigation, tradeChecklistDateAndTimeData])
 
-  const subtitle = useMemo(() => {
+  const suggestionsSubtitle = useMemo(() => {
     const suggestions = DateAndTime.getSuggestions(
       nextChecklistData.dateAndTime
     )
@@ -86,10 +91,12 @@ function DateAndTimeCell(): React.ReactElement {
 
   return (
     <ChecklistCell
-      item="DATE_AND_TIME"
+      icon={Calendar}
+      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
+      pressable
       onPress={onPress}
-      subtitle={subtitle}
-      sideNote={sideNote}
+      subtitle={subtitle ?? suggestionsSubtitle}
+      headline="Select date and time"
     />
   )
 }

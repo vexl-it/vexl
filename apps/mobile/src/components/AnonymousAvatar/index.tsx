@@ -10,6 +10,23 @@ import {
 import React from 'react'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
 import {type RandomSeed} from '../../utils/RandomSeed'
+import avatarsGoldenGlassesAndBackgroundSvg from './images/avatarsGoldenGlassesAndBackgroundSvg'
+import avatarsSvg from './images/avatarsSvg'
+
+export function getAvatarSvg({
+  avatarIndex,
+  goldenAvatarType,
+}: {
+  avatarIndex: number
+  goldenAvatarType?: GoldenAvatarType
+}): (typeof avatarsSvg)[number] {
+  const avatars =
+    goldenAvatarType === 'BACKGROUND_AND_GLASSES'
+      ? avatarsGoldenGlassesAndBackgroundSvg
+      : avatarsSvg
+
+  return avatars[avatarIndex] ?? avatars[0]
+}
 
 export function AnonymousAvatarOrClubImage({
   seed,

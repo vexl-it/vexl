@@ -1,6 +1,7 @@
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {Typography} from '@vexl-next/ui'
 import React from 'react'
-import {getTokens, Text, XStack, type XStackProps} from 'tamagui'
+import {getTokens, XStack, type XStackProps} from 'tamagui'
 import Image from '../../../../../../Image'
 
 interface Props extends XStackProps {
@@ -17,9 +18,9 @@ function SectionTitle({icon, text, ...props}: Props): React.ReactElement {
         height={24}
         color={getTokens().color.white.val}
       />
-      <Text fos={24} ff="$body600" col="$white">
+      <Typography variant="titlesSmall" color="$foregroundPrimary">
         {text}
-      </Text>
+      </Typography>
     </XStack>
   )
 }

@@ -194,7 +194,7 @@ function OfferInfo({
             <ButtonWithPressTimeout
               disabled={!text.trim()}
               onPress={onRequestPressed}
-              variant="secondary"
+              variant="primary"
               text={t('offer.sendRequest')}
             />
           ) : requestState !== 'cancelled' && requestState !== 'deleted' ? (

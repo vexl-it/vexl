@@ -1,25 +1,64 @@
+import {InfoCircle, NavButton, Typography, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
-import {TouchableWithoutFeedback} from 'react-native'
-import {Stack, Text, XStack, YStack, getTokens} from 'tamagui'
+import {Stack, useTheme} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
-import SvgImage from '../../Image'
-import closeSvg from '../../images/closeSvg'
 import {chatMolecule} from '../atoms'
 
-function Bullet(): React.ReactElement {
-  return <Stack bg="$greyOnWhite" w="$1" h="$1" br="$1" mx="$2" />
+const languageToFlagMap: Record<string, string> = {
+  BG: 'BG',
+  CZE: 'CZ',
+  DEU: 'DE',
+  ENG: 'GB',
+  ESP: 'ES',
+  FAS: 'IR',
+  FRA: 'FR',
+  ITA: 'IT',
+  PRT: 'PT',
+  SVK: 'SK',
+}
+
+function countryCodeToFlagEmoji(countryCode: string): string {
+  return String.fromCodePoint(
+    ...countryCode
+      .toUpperCase()
+      .split('')
+      .map((char) => 127397 + char.charCodeAt(0))
+  )
 }
 
 function StickyHeader(): React.ReactElement | null {
   const {t} = useTranslation()
-  const {offerForChatAtom, otherSideDataAtom, showInfoBarAtom} =
+  const theme = useTheme()
+  const {chatAtom, offerForChatAtom, showInfoBarAtom} =
     useMolecule(chatMolecule)
+  const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const [showInfoBar, setShowInfoBar] = useAtom(showInfoBarAtom)
+
+  const offerTitle = useMemo(() => {
+    if (!offer || chat.origin.type === 'unknown') return null
+
+    const actionText =
+      offer.offerInfo.publicPart.offerType === 'BUY'
+        ? t('common.wants')
+        : t('common.sells')
+    const listingType = offer.offerInfo.publicPart.listingType ?? 'BITCOIN'
+    const listingTypeText =
+      listingType === 'PRODUCT'
+        ? t('common.product')
+        : listingType === 'OTHER'
+          ? t('common.other')
+          : t('common.bitcoin')
+
+    return {
+      actionText,
+      isMineOffer: !!offer.ownershipInfo?.adminId,
+      listingTypeText,
+    }
+  }, [chat.origin.type, offer, t])
 
   const offerAmount = useMemo(() => {
     if (!offer) return null
@@ -30,74 +69,101 @@ function StickyHeader(): React.ReactElement | null {
     )
   }, [offer])
 
-  const paymentMethodsText = useMemo(() => {
+  const offerLocationTypeText = useMemo(() => {
+    if (!offer) return null
+
+    return offer.offerInfo.publicPart.locationState.includes('IN_PERSON')
+      ? t('offer.cash')
+      : t('offer.online')
+  }, [offer, t])
+
+  const offerCity = useMemo(() => {
+    if (!offer) return null
+
+    return offer.offerInfo.publicPart.location[0]?.shortAddress ?? null
+  }, [offer])
+
+  const offerLanguageFlags = useMemo(() => {
     if (!offer) return null
 
     const result: string[] = []
-    if (offer.offerInfo.publicPart.paymentMethod.includes('CASH')) {
-      result.push(t('offerForm.paymentMethod.cash'))
+
+    for (const language of offer.offerInfo.publicPart.spokenLanguages) {
+      const countryCode = languageToFlagMap[language]
+
+      if (countryCode) {
+        result.push(countryCodeToFlagEmoji(countryCode))
+      }
     }
-    if (offer.offerInfo.publicPart.paymentMethod.includes('BANK')) {
-      result.push(t('offerForm.paymentMethod.bank'))
+
+    return result.length > 0 ? result.join(' ') : null
+  }, [offer])
+
+  const offerMetadata = useMemo(() => {
+    const result: Array<{key: string; text: string}> = []
+
+    if (offerAmount) {
+      result.push({key: 'amount', text: `${t('offer.upTo')} ${offerAmount}`})
     }
-    if (offer.offerInfo.publicPart.paymentMethod.includes('REVOLUT')) {
-      result.push(t('offerForm.paymentMethod.revolut'))
+    if (offerLocationTypeText) {
+      result.push({key: 'locationType', text: offerLocationTypeText})
     }
-    return result.join(', ')
-  }, [offer, t])
+    if (offerCity) {
+      result.push({key: 'city', text: offerCity})
+    }
+    if (offerLanguageFlags) {
+      result.push({key: 'languages', text: offerLanguageFlags})
+    }
+
+    return result
+  }, [offerAmount, offerCity, offerLanguageFlags, offerLocationTypeText, t])
 
   if (!offer || !showInfoBar) return null
   return (
     <XStack
       justifyContent="space-between"
-      py="$2"
-      px="$4"
-      mt="$4"
-      borderColor="$grey"
-      borderTopWidth={1}
-      borderBottomWidth={1}
+      alignItems="center"
+      py="$4"
+      px="$5"
+      backgroundColor="$backgroundSecondary"
     >
-      <YStack f={1}>
-        <Text color="$white" fontFamily="$body500" fos={16} numberOfLines={1}>
-          <Text color="$main">
-            {offer.ownershipInfo?.adminId
-              ? t('common.me')
-              : otherSideData.userName}
-            :{' '}
-          </Text>
-          {offer.offerInfo.publicPart.offerDescription}
-        </Text>
-        <XStack alignItems="center">
-          <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
-            {t('offer.upTo')}: {offerAmount}
-          </Text>
-          <Bullet />
-          <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
-            {paymentMethodsText}
-          </Text>
-          {offer.offerInfo.publicPart.paymentMethod.includes('CASH') && (
-            <XStack f={1} ai="center">
-              <Bullet />
-              <Text fontFamily="$body500" fos={14} color="$greyOnWhite">
-                {offer.offerInfo.publicPart.location
-                  .map((one) => one.address)
-                  .join(', ')}
-              </Text>
+      <YStack flex={1} gap="$2">
+        {offerTitle ? (
+          <XStack alignItems="center" flexWrap="wrap">
+            {offerTitle.isMineOffer ? (
+              <Typography
+                color="$foregroundPrimary"
+                variant="paragraphSmallBold"
+              >
+                {t('common.me')}{' '}
+              </Typography>
+            ) : null}
+            <Typography color="$greenForeground" variant="paragraphSmallBold">
+              {offerTitle.actionText}
+            </Typography>
+            <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
+              {' '}
+              {offerTitle.listingTypeText}
+            </Typography>
+          </XStack>
+        ) : null}
+        <XStack alignItems="center" gap="$2" flexWrap="wrap">
+          {offerMetadata.map((item, index) => (
+            <XStack key={item.key} alignItems="center" gap="$2" flexShrink={1}>
+              {index > 0 ? (
+                <Typography color="$foregroundSecondary" variant="description">
+                  •
+                </Typography>
+              ) : null}
+              <Typography color="$foregroundSecondary" variant="description">
+                {item.text}
+              </Typography>
             </XStack>
-          )}
+          ))}
         </XStack>
       </YStack>
       <Stack>
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setShowInfoBar(false)
-          }}
-        >
-          <SvgImage
-            stroke={getTokens().color.greyOnWhite.val}
-            source={closeSvg}
-          />
-        </TouchableWithoutFeedback>
+        <NavButton variant="tetriary" icon={InfoCircle} />
       </Stack>
     </XStack>
   )

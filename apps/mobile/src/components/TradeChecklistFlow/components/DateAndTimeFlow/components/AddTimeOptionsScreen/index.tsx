@@ -2,10 +2,12 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, pipe} from 'effect'
+import {Typography, lightTheme, tokens} from '@vexl-next/ui'
+import {Array as ArrayE, Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import React, {useCallback} from 'react'
+import React, {useCallback, useEffect} from 'react'
+import {LayoutAnimation, Platform, UIManager} from 'react-native'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -26,7 +28,6 @@ import {
   useWasOpenFromAgreeOnTradeDetailsScreen,
 } from '../../../../utils'
 import Content from '../../../Content'
-import Header from '../../../Header'
 import {
   isThereAnyAvailableDateTimeSelectedAtom,
   isThereAnyOutdatedDateTimeAtom,
@@ -61,6 +62,41 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   const store = useStore()
 
   const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
+  const [expandedDate, setExpandedDate] = React.useState<
+    (typeof uniqueAvailableDates)[number] | null
+  >(null)
+
+  useEffect(() => {
+    if (
+      Platform.OS === 'android' &&
+      UIManager.setLayoutAnimationEnabledExperimental
+    ) {
+      UIManager.setLayoutAnimationEnabledExperimental(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (uniqueAvailableDates.length === 0) {
+      setExpandedDate(null)
+      return
+    }
+
+    if (expandedDate && !uniqueAvailableDates.includes(expandedDate)) {
+      setExpandedDate(null)
+    }
+  }, [expandedDate, uniqueAvailableDates])
+
+  const animateExpandedDateChange = useCallback(
+    (
+      nextExpandedDate:
+        | ((currentExpandedDate: typeof expandedDate) => typeof expandedDate)
+        | typeof expandedDate
+    ) => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+      setExpandedDate(nextExpandedDate)
+    },
+    []
+  )
 
   const onSavePress = useCallback(() => {
     if (!isThereAnyAvailableDateTimeSelected) {
@@ -138,23 +174,48 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
         }}
       />
       <Content scrollable>
-        <Header title={t('tradeChecklist.dateAndTime.addYourTimeOptions')} />
-        <Stack f={1} mt="$4">
-          {uniqueAvailableDates.map((date) => (
-            <TimeOptionsPerDate key={date} date={date} />
-          ))}
+        <Stack
+          pt={tokens.space[4].val}
+          pb={tokens.space[13].val}
+          gap={tokens.space[5].val}
+        >
+          <Stack gap={tokens.space[3].val}>
+            <Typography variant="description" color="$foregroundSecondary">
+              Pick when you&apos;re free. Use the toggle below to apply times to
+              all days.
+            </Typography>
+          </Stack>
+          <Stack
+            gap={tokens.space[3].val}
+            backgroundColor={lightTheme.backgroundPrimary}
+          >
+            {pipe(
+              uniqueAvailableDates,
+              ArrayE.map((date) => (
+                <TimeOptionsPerDate
+                  key={date}
+                  date={date}
+                  expanded={expandedDate === date}
+                  onExpand={() => {
+                    animateExpandedDateChange((currentExpandedDate) =>
+                      currentExpandedDate === date ? null : date
+                    )
+                  }}
+                  onCollapse={() => {
+                    animateExpandedDateChange(null)
+                  }}
+                />
+              ))
+            )}
+          </Stack>
         </Stack>
       </Content>
-      <PrimaryFooterButtonProxy
-        text={t('tradeChecklist.addMoreDates')}
-        onPress={() => {
-          navigation.goBack()
-        }}
-      />
+      <PrimaryFooterButtonProxy hidden />
       <SecondaryFooterButtonProxy
-        text={t('common.save')}
+        text={t('common.continue')}
         disabled={
-          uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD
+          uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD ||
+          !isThereAnyAvailableDateTimeSelected
         }
         onPress={onSavePress}
       />

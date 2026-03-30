@@ -20,7 +20,6 @@ import {
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../atoms/updatesToBeSentAtom'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
-import {useSetFullscreen} from '../../TradeChecklistFlowPageContainer'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapPreview'>
 export default function LocationMapPreview({
@@ -34,8 +33,6 @@ export default function LocationMapPreview({
   const {t} = useTranslation()
   const submitUpdateOnPick = !useWasOpenFromAgreeOnTradeDetailsScreen()
   const store = useStore()
-
-  useSetFullscreen()
 
   const submitTradeChecklistUpdates = useSetAtom(
     submitTradeChecklistUpdatesActionAtom

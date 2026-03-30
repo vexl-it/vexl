@@ -1,9 +1,10 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
+import {Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
+import {Stack, XStack, getTokens} from 'tamagui'
 import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import Image from '../../../../../../Image'
@@ -34,15 +35,14 @@ function BtcAddress(): React.ReactElement | null {
         }}
       >
         <XStack ai="center" jc="space-between" p="$4" bc="$grey" br="$5">
-          <Text
+          <Typography
+            variant="paragraph"
             fs={1}
             mr="$2"
-            col={btcAddress ? '$white' : '$greyOnWhite'}
-            fos={18}
-            ff="$body500"
+            color={btcAddress ? '$foregroundPrimary' : '$foregroundTertiary'}
           >
             {btcAddress ?? t('tradeChecklist.network.pasteBtcAddress')}
-          </Text>
+          </Typography>
           {!!btcAddress && (
             <TouchableOpacity
               onPress={() => {

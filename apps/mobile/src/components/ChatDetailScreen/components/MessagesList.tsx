@@ -1,7 +1,7 @@
-import {FlashList} from '@shopify/flash-list'
+import {FlashList, type FlashListRef} from '@shopify/flash-list'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
-import React from 'react'
+import React, {useCallback, useRef} from 'react'
 import {StyleSheet, type ViewabilityConfig} from 'react-native'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {chatMolecule} from '../atoms'
@@ -37,16 +37,40 @@ function MessagesList(): React.ReactElement {
   const handleIsRevealIdentityOrContactRevealMessageVisible = useSetAtom(
     handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom
   )
+  const listRef = useRef<FlashListRef<Atom<MessagesListItem>>>(null)
+  const viewportHeightRef = useRef(0)
+  const contentHeightRef = useRef(0)
+  const didInitialScrollToBottomRef = useRef(false)
+
+  const tryInitialScrollToBottom = useCallback(() => {
+    if (didInitialScrollToBottomRef.current) return
+    if (viewportHeightRef.current === 0) return
+    if (contentHeightRef.current <= viewportHeightRef.current) return
+
+    didInitialScrollToBottomRef.current = true
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToEnd({animated: false})
+    })
+  }, [])
 
   return (
     <FlashList
+      ref={listRef}
       data={dataAtoms}
       contentContainerStyle={contentStyle.contentContainerStyle}
       keyExtractor={atomKeyExtractor}
       maintainVisibleContentPosition={{
-        startRenderingFromBottom: true,
         autoscrollToBottomThreshold: 0.2,
       }}
+      onContentSizeChange={(_, height) => {
+        contentHeightRef.current = height
+        tryInitialScrollToBottom()
+      }}
+      onLayout={(event) => {
+        viewportHeightRef.current = event.nativeEvent.layout.height
+        tryInitialScrollToBottom()
+      }}
+      onLoad={tryInitialScrollToBottom}
       renderItem={renderItem}
       onViewableItemsChanged={
         handleIsRevealIdentityOrContactRevealMessageVisible

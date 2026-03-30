@@ -1,22 +1,36 @@
+import {Stack, Typography, useTheme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Image from '../../../../Image'
 import trashIconSvg from '../../SettingsScreen/images/trashIconSvg'
 
 function ChatListItemRightSwipeActions(
   props: TouchableOpacityProps
 ): React.ReactElement {
+  const {t} = useTranslation()
+  const theme = useTheme()
+
   return (
     <TouchableOpacity {...props}>
-      <Stack w={80} h={48} bc="$grey" als="center" ai="center" jc="center">
-        <Image
-          width={32}
-          height={32}
-          stroke={getTokens().color.white.val}
-          fill={getTokens().color.white.val}
-          source={trashIconSvg}
-        />
+      <Stack
+        w={88}
+        h="100%"
+        backgroundColor="$redBackground"
+        als="center"
+        jc="center"
+      >
+        <YStack ai="center" gap="$1">
+          <Image
+            width={24}
+            height={24}
+            fill={theme.foregroundPrimary.val}
+            source={trashIconSvg}
+          />
+          <Typography color="$foregroundPrimary" variant="micro">
+            {t('common.delete')}
+          </Typography>
+        </YStack>
       </Stack>
     </TouchableOpacity>
   )

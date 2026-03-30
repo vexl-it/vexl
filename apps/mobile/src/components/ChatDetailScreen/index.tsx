@@ -21,12 +21,13 @@ type Props = RootStackScreenProps<'ChatDetail'>
 
 export default function ChatDetailScreen({
   route: {
-    params: {otherSideKey, inboxKey},
+    params: {otherSideKey, inboxKey, targetMessageId},
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const store = useStore()
+  void targetMessageId
 
   const {nonNullChatWithMessagesAtom, chatExistsAtom} = useMemo(() => {
     const chatWithMessagesAtom = focusChatWithMessagesByKeysAtom({

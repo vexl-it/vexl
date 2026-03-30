@@ -4,7 +4,7 @@ import React, {useEffect} from 'react'
 import Animated, {FadeIn} from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import {type TradeCalculatorStackParamsList} from '../../navigationTypes'
-import {backdropStyles} from '../../utils/backdropStyles'
+import {useBackgroundStyle} from '../../utils/backdropStyles'
 import GoBackOnSwipeDown from '../GoBackOnSwipeDown'
 import PageWithNavigationHeader from '../PageWithNavigationHeader'
 import {resetTradeCalculatorStateActionAtom} from './atoms'
@@ -19,6 +19,7 @@ export default function TradeCalculatorFlow(): React.ReactElement {
   const resetTradeCalculatorState = useSetAtom(
     resetTradeCalculatorStateActionAtom
   )
+  const backdropStyle = useBackgroundStyle()
 
   useEffect(() => {
     void resetTradeCalculatorState()()
@@ -27,10 +28,7 @@ export default function TradeCalculatorFlow(): React.ReactElement {
   return (
     <Stack f={1}>
       <Stack>
-        <Animated.View
-          entering={FadeIn.delay(200)}
-          style={backdropStyles.backdrop}
-        />
+        <Animated.View entering={FadeIn.delay(200)} style={backdropStyle} />
         <Stack h={100} />
         <GoBackOnSwipeDown>
           <Stack bc="$black" pt="$2">

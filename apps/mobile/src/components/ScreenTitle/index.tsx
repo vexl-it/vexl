@@ -1,15 +1,13 @@
+import {ArrowLeft, NavButton, Typography} from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
 import {
   Stack,
-  Text,
   XStack,
   YStack,
   type ColorTokens,
   type YStackProps,
 } from 'tamagui'
-import chevronLeftSvg from '../../images/chevronLeftSvg'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import IconButton from '../IconButton'
 
 interface Props extends YStackProps {
   children?: ReactNode
@@ -34,13 +32,13 @@ function ScreenTitle({
   const safeGoBack = useSafeGoBack()
 
   return (
-    <YStack bc="transparent" gap="$4" pb="$1" {...props}>
-      <XStack ai="flex-start" gap="$4">
+    <YStack bc="transparent" gap="$4" mt="$5" pb="$1" {...props}>
+      <XStack ai="center" gap="$4">
         {!!withBackButton && (
-          <IconButton
+          <NavButton
+            variant="highlighted"
+            icon={ArrowLeft}
             testID="@screenTitle/backButton"
-            variant="primary"
-            icon={chevronLeftSvg}
             onPress={() => {
               if (onBackButtonPress) onBackButtonPress()
               else safeGoBack()
@@ -48,23 +46,26 @@ function ScreenTitle({
           />
         )}
         <Stack f={1}>
-          <Text
+          <Typography
             adjustsFontSizeToFit={!allowMultipleLines}
             numberOfLines={allowMultipleLines ? undefined : 1}
-            col={textColor ?? '$white'}
-            fontSize={32}
-            ff="$heading"
+            color={textColor ?? '$foregroundPrimary'}
+            variant="titlesSmall"
+            textAlign="center"
           >
             {text}
-          </Text>
+          </Typography>
         </Stack>
         {!!children && (
           <XStack ai="center" jc="flex-end">
             {children}
           </XStack>
         )}
+        <Stack w={24} />
       </XStack>
-      {!!withBottomBorder && <Stack h={0.5} mx="$-4" bg="$grey" />}
+      {!!withBottomBorder && (
+        <Stack h={0.5} mx="$-4" bg="$backgroundTertiary" />
+      )}
     </YStack>
   )
 }

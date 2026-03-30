@@ -4,7 +4,11 @@ import {styled, useTheme} from 'tamagui'
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack} from '../primitives'
 
-export type NavButtonVariant = 'highlighted' | 'destructive' | 'normal'
+export type NavButtonVariant =
+  | 'highlighted'
+  | 'destructive'
+  | 'normal'
+  | 'tetriary'
 
 const NavButtonFrame = styled(Stack, {
   name: 'NavButton',
@@ -41,6 +45,9 @@ const NavButtonFrame = styled(Stack, {
       normal: {
         backgroundColor: '$backgroundTertiary',
       },
+      tetriary: {
+        backgroundColor: '$backgroundTertiary',
+      },
     },
   } as const,
 
@@ -66,6 +73,9 @@ const NavButtonLabel = styled(SizableText, {
         color: '$white100',
       },
       normal: {
+        color: '$foregroundPrimary',
+      },
+      tetriary: {
         color: '$foregroundPrimary',
       },
     },

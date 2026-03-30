@@ -1,5 +1,6 @@
+import {Typography} from '@vexl-next/ui'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
+import {Stack} from 'tamagui'
 
 interface Props {
   title: string
@@ -9,13 +10,13 @@ interface Props {
 function Header({title, subtitle}: Props): React.ReactElement {
   return (
     <Stack gap="$2" mt="$4" maw="80%">
-      <Text fos={24} ff="$heading" col="$white">
+      <Typography variant="heading2" color="$foregroundPrimary">
         {title}
-      </Text>
+      </Typography>
       {!!subtitle && (
-        <Text fos={16} ff="$body500" col="$greyOnBlack">
+        <Typography variant="paragraphSmall" color="$foregroundSecondary">
           {subtitle}
-        </Text>
+        </Typography>
       )}
     </Stack>
   )

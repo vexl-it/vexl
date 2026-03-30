@@ -1,4 +1,5 @@
 import {
+  SearchBar,
   SizableText,
   Stack,
   Toast,
@@ -9,65 +10,86 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useFonts} from 'expo-font'
+import {atom} from 'jotai'
 
 import {StatusBar} from 'expo-status-bar'
-import React, {useState} from 'react'
+import React, {useMemo, useState} from 'react'
 import {ScrollView} from 'react-native'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {toastAtom} from './state/toastAtom'
 
-import {screens} from './screens'
+import {screens, type ScreenEntry} from './screens'
 
 function ScreenNav(): React.JSX.Element {
   const {resolvedTheme, toggle} = useVexlTheme()
-  const [activeScreen, setActiveScreen] = useState<number | null>(null)
+  const [activeScreen, setActiveScreen] = useState<ScreenEntry | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const searchAtom = useMemo(
+    () =>
+      atom(
+        () => searchQuery,
+        (_get, _set, update: React.SetStateAction<string>) => {
+          setSearchQuery((previousValue) =>
+            typeof update === 'function' ? update(previousValue) : update
+          )
+        }
+      ),
+    [searchQuery]
+  )
+
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase()
+  const filteredScreens = useMemo(
+    () =>
+      screens.filter((entry) =>
+        entry.label.toLowerCase().includes(normalizedSearchQuery)
+      ),
+    [normalizedSearchQuery]
+  )
 
   if (activeScreen !== null) {
-    const entry = screens[activeScreen]
-    if (entry) {
-      const Screen = entry.component
-      return (
-        <YStack flex={1} backgroundColor="$backgroundPrimary">
-          <XStack
-            paddingTop="$12"
-            paddingHorizontal="$5"
-            paddingBottom="$4"
-            backgroundColor="$backgroundSecondary"
-            alignItems="center"
-            gap="$3"
+    const Screen = activeScreen.component
+    return (
+      <YStack flex={1} backgroundColor="$backgroundPrimary">
+        <XStack
+          paddingTop="$12"
+          paddingHorizontal="$5"
+          paddingBottom="$4"
+          backgroundColor="$backgroundSecondary"
+          alignItems="center"
+          gap="$3"
+        >
+          <Stack
+            onPress={() => {
+              setActiveScreen(null)
+            }}
+            paddingVertical="$2"
+            paddingHorizontal="$3"
+            backgroundColor="$backgroundTertiary"
+            borderRadius="$2.5"
           >
-            <Stack
-              onPress={() => {
-                setActiveScreen(null)
-              }}
-              paddingVertical="$2"
-              paddingHorizontal="$3"
-              backgroundColor="$backgroundTertiary"
-              borderRadius="$2.5"
-            >
-              <SizableText
-                fontFamily="$body"
-                fontWeight="600"
-                fontSize={14}
-                color="$foregroundPrimary"
-              >
-                Back
-              </SizableText>
-            </Stack>
             <SizableText
-              fontFamily="$heading"
-              fontWeight="700"
-              fontSize={18}
+              fontFamily="$body"
+              fontWeight="600"
+              fontSize={14}
               color="$foregroundPrimary"
             >
-              {entry.label}
+              Back
             </SizableText>
-          </XStack>
-          <Screen />
-          <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
-        </YStack>
-      )
-    }
+          </Stack>
+          <SizableText
+            fontFamily="$heading"
+            fontWeight="700"
+            fontSize={18}
+            color="$foregroundPrimary"
+          >
+            {activeScreen.label}
+          </SizableText>
+        </XStack>
+        <Screen />
+        <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+      </YStack>
+    )
   }
 
   return (
@@ -104,15 +126,20 @@ function ScreenNav(): React.JSX.Element {
             Toggle theme ({resolvedTheme})
           </SizableText>
         </Stack>
+        <SearchBar
+          valueAtom={searchAtom}
+          placeholder="Search components"
+          autoFocus={false}
+        />
       </YStack>
 
       <ScrollView style={{flex: 1}}>
         <YStack padding="$5" gap="$3">
-          {screens.map((entry, i) => (
+          {filteredScreens.map((entry) => (
             <Stack
               key={entry.label}
               onPress={() => {
-                setActiveScreen(i)
+                setActiveScreen(entry)
               }}
               backgroundColor="$backgroundSecondary"
               paddingVertical="$5"
@@ -129,6 +156,31 @@ function ScreenNav(): React.JSX.Element {
               </SizableText>
             </Stack>
           ))}
+          {filteredScreens.length === 0 ? (
+            <YStack
+              backgroundColor="$backgroundSecondary"
+              paddingVertical="$6"
+              paddingHorizontal="$5"
+              borderRadius="$4"
+            >
+              <SizableText
+                fontFamily="$body"
+                fontWeight="600"
+                fontSize={16}
+                color="$foregroundPrimary"
+              >
+                No components found
+              </SizableText>
+              <SizableText
+                fontFamily="$body"
+                fontWeight="500"
+                fontSize={14}
+                color="$foregroundSecondary"
+              >
+                Try a different search term.
+              </SizableText>
+            </YStack>
+          ) : null}
         </YStack>
       </ScrollView>
 

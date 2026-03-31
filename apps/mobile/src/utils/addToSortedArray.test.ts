@@ -58,7 +58,7 @@ it('Adds to correct position when the item is duplicate', () => {
       (a, b) => a.order - b.order,
       (a, b) => a.equal === b.equal
     )({order: 10, equal: 3})
-  ).toBe([
+  ).toEqual([
     {order: 1, equal: 4},
     {order: 3, equal: 2},
     {order: 4, equal: 1},

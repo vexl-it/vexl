@@ -6,8 +6,8 @@ import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
+  PublicPayloadEncrypted,
   type PrivatePayloadEncrypted,
-  type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
@@ -534,6 +534,92 @@ describe('Get club offers for me modified or created after paginated', () => {
         `)
 
         expect(response.items.map((o) => o.offerId)).toEqual([offer1.offerId])
+      })
+    )
+  })
+
+  it('Returns club offer again after a public-only update past the stored cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = CURRENT_DATE,
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            ${sql.in('offer_id', [
+            offer1.offerId,
+            offer2.offerId,
+            offer3.offerId,
+          ])}
+        `)
+
+        const firstRequestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const initialResponse = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfterPaginated({
+            payload: {
+              limit: 3,
+              publicKey: firstRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
+              signedChallenge: firstRequestWithChallenge.signedChallenge,
+            },
+          })
+        )
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+
+        const updatedPayloadPublic = Schema.decodeSync(PublicPayloadEncrypted)(
+          'updatedClubPayloadPublic'
+        )
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: updatedPayloadPublic,
+              offerPrivateList: [],
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const secondRequestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const incrementalResponse = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfterPaginated({
+            payload: {
+              limit: 3,
+              nextPageToken: initialResponse.nextPageToken!,
+              publicKey: secondRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
+              signedChallenge: secondRequestWithChallenge.signedChallenge,
+            },
+          })
+        )
+
+        expect(incrementalResponse.items.map((o) => o.offerId)).toEqual([
+          offer1.offerId,
+          offer2.offerId,
+          offer3.offerId,
+        ])
+
+        expect(
+          incrementalResponse.items.find((o) => o.offerId === offer1.offerId)
+            ?.publicPayload
+        ).toEqual(updatedPayloadPublic)
       })
     )
   })

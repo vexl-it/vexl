@@ -283,7 +283,7 @@ function DebugScreen(): React.ReactElement {
                       keyPair: session.privateKey,
                       keyPairV2: session.keyPairV2,
                       offersApi: store.get(apiAtom).offer,
-                      lastPrivatePartIdBase64: undefined,
+                      storedNextPageToken: undefined,
                     })
                   ),
                   TE.matchW(

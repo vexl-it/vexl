@@ -134,6 +134,64 @@ describe('Create private part', () => {
     )
   })
 
+  it('Updates offer modified_at when creating private part', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+        const payloadPrivate = Schema.decodeSync(PrivatePayloadEncrypted)(
+          '0addedPrivatePayloadWithModifiedAt'
+        )
+        const userPublicKey = generatePrivateKey().publicKeyPemBase64
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = CURRENT_DATE - INTERVAL '2 day'
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
+            )
+          )
+        )
+
+        yield* _(
+          client.createPrivatePart({
+            payload: {
+              adminId: offer1.adminId,
+              offerPrivateList: [
+                {
+                  payloadPrivate,
+                  userPublicKey,
+                },
+              ],
+            },
+          })
+        )
+
+        const modifiedAtResult = yield* _(sql`
+          SELECT
+            modified_at = CURRENT_DATE AS "isCurrentDate"
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
+        expect(modifiedAtResult.at(0)?.isCurrentDate).toBe(true)
+      })
+    )
+  })
+
   it('Returns proper error when trying to create with duplicates', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

@@ -5,9 +5,11 @@ import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
+  PrivatePartRecordId,
+  PublicPayloadEncrypted,
   type PrivatePayloadEncrypted,
-  type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {objectToBase64UrlEncoded} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type CreateNewOfferRequest,
@@ -35,6 +37,10 @@ let offer3: CreateNewOfferResponse
 let commonAndSecurityHeaders: ReturnType<
   typeof makeTestCommonAndSecurityHeaders
 >
+
+const LegacyGetOffersForMeNextPageToken = Schema.Struct({
+  lastPrivatePartId: PrivatePartRecordId,
+})
 
 beforeAll(async () => {
   await runPromiseInMockedEnvironment(
@@ -472,6 +478,401 @@ describe('Get offers for me modified or created after paginated', () => {
         `)
 
         expect(response.items.map((o) => o.offerId)).toEqual([offer1.offerId])
+      })
+    )
+  })
+
+  it('Returns public-only updated offer again after the stored cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '3 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer1.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer2.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '1 day',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer3.offerId};
+        `)
+
+        const initialResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const updatedPayloadPublic = Schema.decodeSync(PublicPayloadEncrypted)(
+          'updatedPayloadPublic'
+        )
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: updatedPayloadPublic,
+              offerPrivateList: [],
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const incrementalResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+              nextPageToken: initialResponse.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(incrementalResponse.items.map((o) => o.offerId)).toEqual([
+          offer1.offerId,
+        ])
+        expect(incrementalResponse.items.at(0)?.publicPayload).toEqual(
+          updatedPayloadPublic
+        )
+      })
+    )
+  })
+
+  it('Replays current-date offers once and then paginates normally', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = CURRENT_DATE,
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            ${sql.in('offer_id', [
+            offer1.offerId,
+            offer2.offerId,
+            offer3.offerId,
+          ])}
+        `)
+
+        const completedSyncResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const replayPage1 = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: completedSyncResponse.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        const replayPage2 = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: replayPage1.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        const replayPage3 = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: replayPage2.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(replayPage1.items.length).toEqual(1)
+        expect(replayPage2.items.length).toEqual(1)
+        expect(replayPage3.items.length).toEqual(1)
+        expect(
+          [
+            replayPage1.items[0]?.offerId,
+            replayPage2.items[0]?.offerId,
+            replayPage3.items[0]?.offerId,
+          ].sort()
+        ).toEqual([offer1.offerId, offer2.offerId, offer3.offerId].sort())
+      })
+    )
+  })
+
+  it('Pages correctly when multiple offers share the same modified_at', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            ${sql.in('offer_id', [offer1.offerId, offer2.offerId])};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '1 day',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer3.offerId};
+        `)
+
+        const response1 = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        const response2 = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: response1.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        const response3 = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: response2.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(
+          [response1.items[0]?.offerId, response2.items[0]?.offerId].sort()
+        ).toEqual([offer1.offerId, offer2.offerId].sort())
+        expect(response3.items.map((o) => o.offerId)).toEqual([offer3.offerId])
+      })
+    )
+  })
+
+  it('Accepts old-format nextPageToken and falls back to a full resync cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '3 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer1.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer2.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '1 day',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer3.offerId};
+        `)
+
+        const legacyNextPageToken = yield* _(
+          objectToBase64UrlEncoded({
+            object: {
+              lastPrivatePartId:
+                Schema.decodeSync(PrivatePartRecordId)('999999'),
+            },
+            schema: LegacyGetOffersForMeNextPageToken,
+          })
+        )
+
+        const response = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 2,
+              nextPageToken: legacyNextPageToken,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(response.items.map((o) => o.offerId)).toEqual([
+          offer1.offerId,
+          offer2.offerId,
+        ])
+      })
+    )
+  })
+
+  it('Returns no new offers when nothing changed after the stored cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '3 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer1.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer2.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '1 day',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer3.offerId};
+        `)
+
+        const initialResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const secondResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+              nextPageToken: initialResponse.nextPageToken!,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(secondResponse.items).toEqual([])
+        expect(secondResponse.hasNext).toBe(false)
+        expect(secondResponse.nextPageToken).toBeNull()
+      })
+    )
+  })
+
+  it('Orders offers by modified_at and then private-part id', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '1 day',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer1.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = CURRENT_DATE,
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer2.offerId};
+        `)
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = NOW() - INTERVAL '2 days',
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            offer_id = ${offer3.offerId};
+        `)
+
+        const response = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(response.items.map((o) => o.offerId)).toEqual([
+          offer3.offerId,
+          offer1.offerId,
+          offer2.offerId,
+        ])
       })
     )
   })

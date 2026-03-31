@@ -8,6 +8,7 @@ import extractOwnerInfoFromOwnerPrivatePayload from '@vexl-next/resources-utils/
 import {Array, Option} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {offerWithoutSourceOrNone} from '../../../utils/offerWithoutSourceOrNone'
+import {combineIncomingOffers} from './combineIncomingOffers'
 
 export const mergeIncomingOffersToState = ({
   incomingOffers,
@@ -48,10 +49,16 @@ export const mergeIncomingOffersToState = ({
       }
 
       if (Option.isSome(offerInStateO) && Option.isSome(newOfferO)) {
-        return Option.some({
-          ...offerInStateO.value,
-          offerInfo: newOfferO.value,
-        } satisfies OneOfferInState)
+        return pipe(
+          combineIncomingOffers([
+            newOfferO.value,
+            offerInStateO.value.offerInfo,
+          ]),
+          Option.map((combinedOfferInfo) => ({
+            ...offerInStateO.value,
+            offerInfo: combinedOfferInfo,
+          }))
+        )
       }
 
       if (Option.isSome(newOfferO)) {
@@ -60,7 +67,7 @@ export const mergeIncomingOffersToState = ({
           flags: {
             reported: false,
           },
-        } as OneOfferInState)
+        } satisfies OneOfferInState)
       }
 
       return offerInStateO

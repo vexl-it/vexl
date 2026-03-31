@@ -7,7 +7,7 @@
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
     "web": "npx expo --web",
-    "//test": "yarn jest",
+    "test": "yarn jest",
     "lint": "eslint src",
     "typecheck": "tsc --noemit",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",

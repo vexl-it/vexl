@@ -38,7 +38,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
       offersApi,
       keyPair,
       keyPairV2,
-      lastPrivatePartIdBase64,
+      storedNextPageToken,
     }: {
       /**
        * Offers API instance. Already handles auth for us.
@@ -50,9 +50,10 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
       keyPair: PrivateKeyHolder
       keyPairV2: KeyPairV2
       /**
-       * Only offers with ids that were not previously fetched will be fetched.
+       * Persisted opaque cursor from a previous sync. The offer service owns
+       * cursor decoding and any replay semantics for same-day updates.
        */
-      lastPrivatePartIdBase64?: Base64String
+      storedNextPageToken?: Base64String
     }
   ) => {
     return Effect.gen(function* (_) {
@@ -60,7 +61,7 @@ export const getNewContactNetworkOffersAndDecryptPaginatedActionAtom = atom(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
             offersApi.getOffersForMeModifiedOrCreatedAfterPaginated({
-              nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
+              nextPageToken: nextPageToken ?? storedNextPageToken,
               limit: OFFERS_PAGE_LIMIT,
             }),
           storeNextPageToken: (nextPageToken) => {

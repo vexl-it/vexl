@@ -19,7 +19,7 @@ export const createUpdateRefreshOffer = Effect.gen(function* (_) {
         return sql`
           UPDATE offer_public
           SET
-            refreshed_at = now()
+            refreshed_at = CURRENT_DATE
           WHERE
             ${sql.in('admin_id', adminIds)}
           RETURNING

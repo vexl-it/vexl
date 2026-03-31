@@ -18,30 +18,35 @@ export function combineIncomingOffers([
     })
     return Option.none()
   }
+
+  const [newestOffer, olderOffer] =
+    offerA.modifiedAt >= offerB.modifiedAt ? [offerA, offerB] : [offerB, offerA]
+
   const combinedPrivateParts: OfferPrivatePart = {
-    ...offerA.privatePart,
+    ...newestOffer.privatePart,
     commonFriends: Array.union(
-      offerA.privatePart.commonFriends,
-      offerB.privatePart.commonFriends
+      newestOffer.privatePart.commonFriends,
+      olderOffer.privatePart.commonFriends
     ),
     friendLevel: Array.union(
-      offerA.privatePart.friendLevel,
-      offerB.privatePart.friendLevel
+      newestOffer.privatePart.friendLevel,
+      olderOffer.privatePart.friendLevel
     ),
     clubIds: Array.union(
-      offerA.privatePart.clubIds,
-      offerB.privatePart.clubIds
+      newestOffer.privatePart.clubIds,
+      olderOffer.privatePart.clubIds
     ),
-    adminId: offerA.privatePart.adminId ?? offerB.privatePart.adminId,
+    adminId: newestOffer.privatePart.adminId ?? olderOffer.privatePart.adminId,
     intendedClubs:
-      offerA.privatePart.intendedClubs ?? offerB.privatePart.intendedClubs,
+      newestOffer.privatePart.intendedClubs ??
+      olderOffer.privatePart.intendedClubs,
     intendedConnectionLevel:
-      offerA.privatePart.intendedConnectionLevel ??
-      offerB.privatePart.intendedConnectionLevel,
+      newestOffer.privatePart.intendedConnectionLevel ??
+      olderOffer.privatePart.intendedConnectionLevel,
   }
 
   const combinedOffer: OfferInfo = {
-    ...offerA,
+    ...newestOffer,
     privatePart: combinedPrivateParts,
   }
   return combineIncomingOffers([combinedOffer, ...rest])

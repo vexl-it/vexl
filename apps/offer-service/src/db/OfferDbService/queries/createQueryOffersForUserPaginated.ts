@@ -4,6 +4,7 @@ import {PublicKeyV2} from '@vexl-next/cryptography'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {PrivatePartRecordId} from '@vexl-next/domain/src/general/offers'
+import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Effect, flow, Schema} from 'effect'
 import {
   expirationPeriodDaysConfig,
@@ -19,6 +20,7 @@ import {
 export const QueryOffersPaginatedRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
   userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  lastModifiedAt: IsoDatetimeString,
   lastPrivatePartId: PrivatePartRecordId,
   limit: Schema.Int,
 })
@@ -52,11 +54,18 @@ export const createQueryOffersForUserPaginated = Effect.gen(function* (_) {
             'no-key'}
           `,
         ]),
-        sql`offer_private.id > ${params.lastPrivatePartId}`,
+        sql.or([
+          sql`offer_public.modified_at > ${params.lastModifiedAt}::date`,
+          sql.and([
+            sql`offer_public.modified_at = ${params.lastModifiedAt}::date`,
+            sql`offer_private.id > ${params.lastPrivatePartId}`,
+          ]),
+        ]),
         offerNotExpired(sql, expirationPeriodDays),
         offerNotFlagged(sql, offerReportFilter),
       ])}
       ORDER BY
+        offer_public.modified_at ASC,
         offer_private.id ASC
       LIMIT
         ${params.limit}

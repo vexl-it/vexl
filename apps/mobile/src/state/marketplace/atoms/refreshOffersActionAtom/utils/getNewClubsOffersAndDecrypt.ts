@@ -46,12 +46,16 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
       offersApi,
       keyPair,
       clubUuid,
-      lastPrivatePartIdBase64,
+      storedNextPageToken,
     }: {
       offersApi: OfferApi
       keyPair: ClubKeys
       clubUuid: ClubUuid
-      lastPrivatePartIdBase64?: Base64String
+      /**
+       * Persisted opaque cursor from a previous sync. The offer service owns
+       * cursor decoding and any replay semantics for same-day updates.
+       */
+      storedNextPageToken?: Base64String
     }
   ) => {
     return Effect.gen(function* (_) {
@@ -59,7 +63,7 @@ export const getNewClubsOffersAndDecryptPaginatedActionAtom = atom(
         fetchAllPaginatedData({
           fetchEffectToRun: (nextPageToken) =>
             offersApi.getClubOffersForMeModifiedOrCreatedAfterPaginated({
-              nextPageToken: nextPageToken ?? lastPrivatePartIdBase64,
+              nextPageToken: nextPageToken ?? storedNextPageToken,
               limit: OFFERS_PAGE_LIMIT,
               keyPair: keyPair.oldKeyPair,
               keyPairV2: keyPair.keyPair,

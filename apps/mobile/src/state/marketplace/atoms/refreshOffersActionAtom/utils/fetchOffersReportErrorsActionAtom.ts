@@ -99,7 +99,7 @@ export const fetchOffersReportErrorsActionAtom = atom(
           offersApi,
           keyPair: contactNetworkKeyPair,
           keyPairV2: contactNetworkKeyPairV2,
-          lastPrivatePartIdBase64: contactOffersNextPageParam,
+          storedNextPageToken: contactOffersNextPageParam,
         }),
         Effect.map(filterAndReportDecryptionErrors)
       ),
@@ -111,7 +111,7 @@ export const fetchOffersReportErrorsActionAtom = atom(
             offersApi,
             keyPair,
             clubUuid,
-            lastPrivatePartIdBase64: pipe(
+            storedNextPageToken: pipe(
               Record.get(clubOffersNextPageParam, clubUuid),
               Option.getOrUndefined
             ),

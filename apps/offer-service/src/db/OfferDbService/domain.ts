@@ -21,6 +21,13 @@ export const PublicPartId = Schema.NumberFromString.pipe(
 
 export type PublicPartId = Schema.Schema.Type<typeof PublicPartId>
 
+export const OfferChangeCounter = Schema.NumberFromString.pipe(
+  Schema.brand('OfferChangeCounter'),
+  Schema.greaterThanOrEqualTo(0)
+)
+
+export type OfferChangeCounter = Schema.Schema.Type<typeof OfferChangeCounter>
+
 export class PublicPartRecord extends Schema.Class<PublicPartRecord>(
   'PublicPartRecord'
 )({
@@ -50,3 +57,12 @@ export const OfferParts = Schema.Struct({
   privatePart: PrivatePartRecord,
 })
 export type OfferParts = Schema.Schema.Type<typeof OfferParts>
+
+export const OfferPartsWithOfferForUserUpdateCounter = Schema.Struct({
+  publicPart: PublicPartRecord,
+  privatePart: PrivatePartRecord,
+  offerForUserUpdateCounter: OfferChangeCounter,
+})
+export type OfferPartsWithOfferForUserUpdateCounter = Schema.Schema.Type<
+  typeof OfferPartsWithOfferForUserUpdateCounter
+>

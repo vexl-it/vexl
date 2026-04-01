@@ -23,7 +23,8 @@ export const createUpdateOfferPublicPayload = Effect.gen(function* (_) {
       UPDATE offer_public
       SET
         payload_public = ${req.payloadPublic},
-        modified_at = now()
+        modified_at = now(),
+        update_counter = nextval('offer_change_counter_seq')
       WHERE
         ${sql.and([
         sql`offer_id = ${req.offerId}`,
@@ -32,7 +33,7 @@ export const createUpdateOfferPublicPayload = Effect.gen(function* (_) {
     `.pipe(
       Effect.catchAll((e) =>
         Effect.zipRight(
-          Effect.logError('Error updaing public payload', e),
+          Effect.logError('Error updating public payload', e),
           Effect.fail(new UnexpectedServerError({status: 500}))
         )
       )

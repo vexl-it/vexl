@@ -8,6 +8,7 @@ import addCreatedAtOnOfferPrivate from './migrations/0003_add_created_at_on_offe
 import createChallengeTableAndAddIndex from './migrations/0004_create_challenge_table_and_add_index'
 import removeUnusedTables from './migrations/0005_remove_unused_tables'
 import dropChallengeTable from './migrations/0006_drop_challenge_table'
+import addOfferChangeCounter from './migrations/0007_add_offer_change_counter'
 
 const migrations = [
   {
@@ -39,6 +40,11 @@ const migrations = [
     id: 6,
     name: 'Drop challenge table',
     migrationEffect: dropChallengeTable,
+  },
+  {
+    id: 7,
+    name: 'Add offer change counter',
+    migrationEffect: addOfferChangeCounter,
   },
 ] as const
 

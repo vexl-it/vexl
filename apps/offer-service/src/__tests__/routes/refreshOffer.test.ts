@@ -91,6 +91,14 @@ describe('Refresh offer', () => {
           WHERE
             id = ${offer1.id}
         `)
+        const offerBeforeRefresh = yield* _(sql`
+          SELECT
+            *
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
 
         const client = yield* _(NodeTestingApp)
 
@@ -124,6 +132,9 @@ describe('Refresh offer', () => {
             AND refreshed_at = now()::date
         `)
         expect(refreshsedOffers.length).toBe(1)
+        expect(Number(refreshsedOffers.at(0)?.updateCounter)).toBe(
+          Number(offerBeforeRefresh.at(0)?.updateCounter)
+        )
       })
     )
   })

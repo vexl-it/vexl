@@ -2,7 +2,7 @@ import {type PgClient} from '@effect/sql-pg'
 import {type Fragment} from '@effect/sql/Statement'
 import {OfferType} from '@vexl-next/domain/src/general/offers'
 import {Schema} from 'effect'
-import {OfferParts} from './domain'
+import {OfferParts, OfferPartsWithOfferForUserUpdateCounter} from './domain'
 
 export const offerSelect = (sql: PgClient.PgClient): Fragment => sql`
   offer_public.id AS "offer_public.id",
@@ -80,6 +80,58 @@ export const OfferSelectToOfferParts = Schema.transform(
     }),
   }
 )
+
+export const OfferSelectWithOfferForUserUpdateCounterRecord = Schema.Struct({
+  ...OfferSelectRecord.fields,
+  offerForUserUpdateCounter: Schema.String,
+})
+
+export const OfferSelectWithOfferForUserUpdateCounterToOfferParts =
+  Schema.transform(
+    OfferSelectWithOfferForUserUpdateCounterRecord,
+    OfferPartsWithOfferForUserUpdateCounter,
+    {
+      strict: true,
+      decode: (v) => ({
+        privatePart: {
+          id: v['offerPrivate.id'],
+          offerId: v['offerPrivate.offerId'],
+          userPublicKey: v['offerPrivate.userPublicKey'],
+          payloadPrivate: v['offerPrivate.payloadPrivate'],
+        },
+        publicPart: {
+          id: v['offerPublic.id'],
+          adminId: v['offerPublic.adminId'],
+          offerId: v['offerPublic.offerId'],
+          createdAt: v['offerPublic.createdAt'],
+          modifiedAt: v['offerPublic.modifiedAt'],
+          offerType: v['offerPublic.offerType'],
+          report: v['offerPublic.report'],
+          payloadPublic: v['offerPublic.payloadPublic'],
+          refreshedAt: v['offerPublic.refreshedAt'],
+          countryPrefix: v['offerPublic.countryPrefix'],
+        },
+        offerForUserUpdateCounter: v.offerForUserUpdateCounter,
+      }),
+      encode: (v) => ({
+        'offerPrivate.id': v.privatePart.id,
+        'offerPrivate.offerId': v.privatePart.offerId,
+        'offerPrivate.userPublicKey': v.privatePart.userPublicKey,
+        'offerPrivate.payloadPrivate': v.privatePart.payloadPrivate,
+        'offerPublic.id': v.publicPart.id,
+        'offerPublic.adminId': v.publicPart.adminId,
+        'offerPublic.offerId': v.publicPart.offerId,
+        'offerPublic.createdAt': v.publicPart.createdAt,
+        'offerPublic.modifiedAt': v.publicPart.modifiedAt,
+        'offerPublic.offerType': v.publicPart.offerType,
+        'offerPublic.report': v.publicPart.report,
+        'offerPublic.payloadPublic': v.publicPart.payloadPublic,
+        'offerPublic.refreshedAt': v.publicPart.refreshedAt,
+        'offerPublic.countryPrefix': v.publicPart.countryPrefix,
+        offerForUserUpdateCounter: v.offerForUserUpdateCounter,
+      }),
+    }
+  )
 
 export const offerNotExpired = (
   sql: PgClient.PgClient,

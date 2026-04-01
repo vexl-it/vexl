@@ -5,6 +5,7 @@ import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {
   type OfferParts,
+  type OfferPartsWithOfferForUserUpdateCounter,
   type PrivatePartRecord,
   type PublicPartId,
   type PublicPartRecord,
@@ -68,7 +69,10 @@ import {
 export interface OfferDbOperations {
   queryOffersForUserPaginated: (
     args: QueryOffersPaginatedRequest
-  ) => Effect.Effect<readonly OfferParts[], UnexpectedServerError>
+  ) => Effect.Effect<
+    readonly OfferPartsWithOfferForUserUpdateCounter[],
+    UnexpectedServerError
+  >
 
   queryOfferByPublicKeyAndOfferId: (
     args: QueryOfferByPublicKeyAndOfferIdRequest

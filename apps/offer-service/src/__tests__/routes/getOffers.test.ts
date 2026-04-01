@@ -5,9 +5,11 @@ import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
-  type PrivatePayloadEncrypted,
-  type PublicPayloadEncrypted,
+  PrivatePartRecordId,
+  PrivatePayloadEncrypted,
+  PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {objectToBase64UrlEncoded} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type CreateNewOfferRequest,
@@ -15,7 +17,8 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
+import {LegacyPaginatedOfferNextPageToken} from '../../routes/utils/paginatedOfferNextPageToken'
 import {
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
@@ -496,6 +499,324 @@ describe('Get offers for me modified or created after paginated', () => {
         )
 
         expectErrorResponse(InvalidNextPageTokenError)(result)
+      })
+    )
+  })
+
+  it('Accepts old nextPageToken format by refetching from the zero cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const firstPageWithoutToken = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 2,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+        const lastItemOfFirstPage = Array.last(firstPageWithoutToken.items)
+        if (Option.isNone(lastItemOfFirstPage)) {
+          throw new Error(
+            'Expected the first page to contain at least one item'
+          )
+        }
+
+        const legacyNextPageToken = yield* _(
+          objectToBase64UrlEncoded({
+            object: {
+              lastPrivatePartId: Schema.decodeSync(PrivatePartRecordId)(
+                lastItemOfFirstPage.value.id.toString()
+              ),
+            },
+            schema: LegacyPaginatedOfferNextPageToken,
+          })
+        )
+
+        const responseFromLegacyToken = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 2,
+              nextPageToken: legacyNextPageToken,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(responseFromLegacyToken.items.map((item) => item.id)).toEqual(
+          firstPageWithoutToken.items.map((item) => item.id)
+        )
+      })
+    )
+  })
+
+  it('Returns a public-only updated offer again after a stored new-format token', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const firstFetch = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+                'publicPayloadAfterCursor'
+              ),
+              offerPrivateList: [],
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const secondFetch = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 20,
+              nextPageToken: firstFetch.nextPageToken ?? undefined,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(secondFetch.items).toHaveLength(1)
+        expect(secondFetch.items.at(0)?.offerId).toEqual(offer1.offerId)
+        expect(secondFetch.items.at(0)?.publicPayload).toEqual(
+          'publicPayloadAfterCursor'
+        )
+      })
+    )
+  })
+
+  it('Returns a replaced private part again for the affected recipient after a stored new-format token', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const user1Headers = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+
+        const firstFetch = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 20,
+            },
+            headers: user1Headers,
+          })
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        yield* _(
+          client.createPrivatePart({
+            payload: {
+              adminId: offer1.adminId,
+              offerPrivateList: [
+                {
+                  userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncrypted
+                  )('0privatePayloadAfterCursor'),
+                },
+              ],
+            },
+          })
+        )
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+        const secondFetch = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 20,
+              nextPageToken: firstFetch.nextPageToken ?? undefined,
+            },
+            headers: user1Headers,
+          })
+        )
+
+        expect(secondFetch.items).toHaveLength(1)
+        expect(secondFetch.items.at(0)?.offerId).toEqual(offer1.offerId)
+        expect(secondFetch.items.at(0)?.privatePayload).toEqual(
+          '0privatePayloadAfterCursor'
+        )
+      })
+    )
+  })
+
+  it('Does not return offers again after refreshOffer when only refreshed_at changes', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const firstFetch = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 20,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        yield* _(
+          client.refreshOffer({
+            payload: {
+              adminIds: [offer2.adminId],
+            },
+          })
+        )
+
+        const secondFetch = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 20,
+              nextPageToken: firstFetch.nextPageToken ?? undefined,
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(secondFetch.items).toHaveLength(0)
+      })
+    )
+  })
+
+  it('Paginates stably when a requester matches two private rows with the same effective change counter', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const requester = yield* _(createMockedUser('+420733333334'))
+        const requesterPublicKeyV2 = yield* _(generateV2KeyPair())
+        const sql = yield* _(SqlClient.SqlClient)
+        const client = yield* _(NodeTestingApp)
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+        const ownerHeaders = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
+        const createdOffer = yield* _(
+          client.createNewOffer({
+            payload: {
+              adminId: generateAdminId(),
+              countryPrefix: Schema.decodeSync(CountryPrefix)(420),
+              offerPrivateList: [
+                {
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncrypted
+                  )('0ownerPrivatePayloadForSharedCounter'),
+                  userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                },
+                {
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncrypted
+                  )('0requesterPrivatePayloadV1'),
+                  userPublicKey: requester.mainKeyPair.publicKeyPemBase64,
+                },
+                {
+                  payloadPrivate: Schema.decodeUnknownSync(
+                    PrivatePayloadEncrypted
+                  )('0requesterPrivatePayloadV2'),
+                  userPublicKey: requesterPublicKeyV2.publicKey,
+                },
+              ],
+              offerType: 'BUY',
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+                'payloadPublicSharedCounterBeforeUpdate'
+              ),
+              offerId: newOfferId(),
+            },
+            headers: ownerHeaders,
+          })
+        )
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: createdOffer.adminId,
+              payloadPublic: Schema.decodeUnknownSync(PublicPayloadEncrypted)(
+                'payloadPublicSharedCounterAfterUpdate'
+              ),
+              offerPrivateList: [],
+            },
+            headers: ownerHeaders,
+          })
+        )
+
+        const requesterHeaders = yield* _(
+          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+            authHeaders: requester.authHeaders,
+            publicKeyV2: requesterPublicKeyV2.publicKey,
+          })
+        )
+        yield* _(setAuthHeaders(requester.authHeaders))
+
+        const firstPage = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+            },
+            headers: requesterHeaders,
+          })
+        )
+
+        const secondPage = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: firstPage.nextPageToken ?? undefined,
+            },
+            headers: requesterHeaders,
+          })
+        )
+
+        const publicRecord = yield* _(sql`
+          SELECT
+            id
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${createdOffer.offerId}
+        `)
+        const expectedPrivateParts = yield* _(sql`
+          SELECT
+            id
+          FROM
+            offer_private
+          WHERE
+            ${sql.and([
+            sql`offer_id = ${publicRecord.at(0)?.id}`,
+            sql.in('user_public_key', [
+              requester.mainKeyPair.publicKeyPemBase64,
+              requesterPublicKeyV2.publicKey,
+            ]),
+          ])}
+          ORDER BY
+            id ASC
+        `)
+
+        expect(firstPage.items).toHaveLength(1)
+        expect(firstPage.hasNext).toBe(true)
+        expect(secondPage.items).toHaveLength(1)
+        expect(secondPage.hasNext).toBe(false)
+        expect(firstPage.items.at(0)?.offerId).toEqual(createdOffer.offerId)
+        expect(secondPage.items.at(0)?.offerId).toEqual(createdOffer.offerId)
+        expect(firstPage.items.at(0)?.id).toEqual(
+          Number(expectedPrivateParts.at(0)?.id)
+        )
+        expect(secondPage.items.at(0)?.id).toEqual(
+          Number(expectedPrivateParts.at(1)?.id)
+        )
       })
     )
   })

@@ -1,24 +1,14 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErrors'
-import {PrivatePartRecordId} from '@vexl-next/domain/src/general/offers'
-import {
-  base64UrlStringToDecoded,
-  objectToBase64UrlEncoded,
-} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
 import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'
-
-const DEFAULT_LAST_PRIVATE_PART_ID = Schema.decodeSync(PrivatePartRecordId)('0')
-
-export const GetOffersForMeNextPageToken = Schema.Struct({
-  lastPrivatePartId: PrivatePartRecordId,
-})
-export type GetOffersForMeNextPageToken =
-  typeof GetOffersForMeNextPageToken.Type
+import {
+  decodePaginatedOfferNextPageToken,
+  encodePaginatedOfferNextPageToken,
+} from './utils/paginatedOfferNextPageToken'
 
 export const getOffersForMeModifiedOrCreatedAfterPaginated =
   HttpApiBuilder.handler(
@@ -32,23 +22,20 @@ export const getOffersForMeModifiedOrCreatedAfterPaginated =
 
         // + 1 so we know if there is a next page
         const increasedLimit = req.urlParams.limit + 1
-        const {lastPrivatePartId} = req.urlParams.nextPageToken
-          ? yield* _(
-              base64UrlStringToDecoded({
-                base64UrlString: req.urlParams.nextPageToken,
-                decodeSchema: GetOffersForMeNextPageToken,
-              })
-            )
-          : {lastPrivatePartId: DEFAULT_LAST_PRIVATE_PART_ID}
+        const {lastOfferChangeCounter, lastPrivatePartId} = yield* _(
+          decodePaginatedOfferNextPageToken({
+            nextPageToken: req.urlParams.nextPageToken,
+          })
+        )
 
         const offers = yield* _(
           offerDbService.queryOffersForUserPaginated({
             userPublicKey: security.publicKey,
             userPublicKeyV2: security.publicKeyV2,
+            lastOfferChangeCounter,
             lastPrivatePartId,
             limit: increasedLimit,
-          }),
-          Effect.map(Array.map(offerPartsToServerOffer))
+          })
         )
 
         const isThereNextPage = offers.length === increasedLimit
@@ -56,13 +43,8 @@ export const getOffersForMeModifiedOrCreatedAfterPaginated =
         const lastElementOfThisPage = Array.last(offersToReturn)
         const nextPageToken = Option.isSome(lastElementOfThisPage)
           ? yield* _(
-              objectToBase64UrlEncoded({
-                object: {
-                  lastPrivatePartId: Schema.decodeSync(PrivatePartRecordId)(
-                    lastElementOfThisPage.value.id.toString()
-                  ),
-                },
-                schema: GetOffersForMeNextPageToken,
+              encodePaginatedOfferNextPageToken({
+                offer: lastElementOfThisPage.value,
               })
             )
           : null
@@ -71,16 +53,7 @@ export const getOffersForMeModifiedOrCreatedAfterPaginated =
           nextPageToken,
           hasNext: isThereNextPage,
           limit: req.urlParams.limit,
-          items: offersToReturn,
+          items: Array.map(offerPartsToServerOffer)(offersToReturn),
         }
-      }).pipe(
-        Effect.catchTag('ParseError', (e) =>
-          Effect.fail(
-            new InvalidNextPageTokenError({
-              cause: e,
-            })
-          )
-        ),
-        makeEndpointEffect
-      )
+      }).pipe(makeEndpointEffect)
   )

@@ -6,9 +6,11 @@ import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   generateAdminId,
   newOfferId,
+  PrivatePartRecordId,
   type PrivatePayloadEncrypted,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {objectToBase64UrlEncoded} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type CreateNewOfferRequest,
@@ -16,7 +18,8 @@ import {
 } from '@vexl-next/rest-api/src/services/offer/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
+import {LegacyPaginatedOfferNextPageToken} from '../../routes/utils/paginatedOfferNextPageToken'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
   createMockedUser,
@@ -564,6 +567,66 @@ describe('Get club offers for me modified or created after paginated', () => {
         )
 
         expectErrorResponse(InvalidNextPageTokenError)(result)
+      })
+    )
+  })
+
+  it('Accepts old nextPageToken format for club offers by refetching from the zero cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const firstRequestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        const firstPageWithoutToken = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfterPaginated({
+            payload: {
+              limit: 2,
+              publicKey: firstRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
+              signedChallenge: firstRequestWithChallenge.signedChallenge,
+            },
+          })
+        )
+        const lastItemOfFirstPage = Array.last(firstPageWithoutToken.items)
+        if (Option.isNone(lastItemOfFirstPage)) {
+          throw new Error(
+            'Expected the first page to contain at least one item'
+          )
+        }
+
+        const legacyNextPageToken = yield* _(
+          objectToBase64UrlEncoded({
+            object: {
+              lastPrivatePartId: Schema.decodeSync(PrivatePartRecordId)(
+                lastItemOfFirstPage.value.id.toString()
+              ),
+            },
+            schema: LegacyPaginatedOfferNextPageToken,
+          })
+        )
+
+        const secondRequestWithChallenge = yield* _(
+          addChallengeForKey(clubKeypairForMe, me.authHeaders)({})
+        )
+        const responseFromLegacyToken = yield* _(
+          client.getClubOffersForMeModifiedOrCreatedAfterPaginated({
+            payload: {
+              limit: 2,
+              nextPageToken: legacyNextPageToken,
+              publicKey: secondRequestWithChallenge.publicKey,
+              publicKeyV2: Option.none(),
+              signedChallenge: secondRequestWithChallenge.signedChallenge,
+            },
+          })
+        )
+
+        expect(responseFromLegacyToken.items.map((item) => item.id)).toEqual(
+          firstPageWithoutToken.items.map((item) => item.id)
+        )
       })
     )
   })

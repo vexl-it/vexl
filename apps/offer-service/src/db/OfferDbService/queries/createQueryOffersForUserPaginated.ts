@@ -9,16 +9,18 @@ import {
   expirationPeriodDaysConfig,
   offerReportFilterConfig,
 } from '../../../configs'
+import {OfferChangeCounter} from '../domain'
 import {
   offerNotExpired,
   offerNotFlagged,
   offerSelect,
-  OfferSelectToOfferParts,
+  OfferSelectWithOfferForUserUpdateCounterToOfferParts,
 } from '../utils'
 
 export const QueryOffersPaginatedRequest = Schema.Struct({
   userPublicKey: PublicKeyPemBase64,
   userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  lastOfferChangeCounter: OfferChangeCounter,
   lastPrivatePartId: PrivatePartRecordId,
   limit: Schema.Int,
 })
@@ -33,15 +35,23 @@ export const createQueryOffersForUserPaginated = Effect.gen(function* (_) {
 
   const query = SqlSchema.findAll({
     Request: QueryOffersPaginatedRequest,
-    Result: OfferSelectToOfferParts,
+    Result: OfferSelectWithOfferForUserUpdateCounterToOfferParts,
     execute: (params) => sql`
       SELECT
-        ${offerSelect(sql)}
+        *
       FROM
-        offer_public
-        INNER JOIN offer_private ON offer_public.id = offer_private.offer_id
-      WHERE
-        ${sql.and([
+        (
+          SELECT
+            ${offerSelect(sql)},
+            GREATEST(
+              offer_public.update_counter,
+              offer_private.update_counter
+            ) AS offer_for_user_update_counter
+          FROM
+            offer_public
+            INNER JOIN offer_private ON offer_public.id = offer_private.offer_id
+          WHERE
+            ${sql.and([
         sql.or([
           sql`offer_private.user_public_key = ${params.userPublicKey}`,
           sql`
@@ -52,12 +62,23 @@ export const createQueryOffersForUserPaginated = Effect.gen(function* (_) {
             'no-key'}
           `,
         ]),
-        sql`offer_private.id > ${params.lastPrivatePartId}`,
         offerNotExpired(sql, expirationPeriodDays),
         offerNotFlagged(sql, offerReportFilter),
       ])}
+        ) offers_for_user
+      WHERE
+        ${sql.or([
+        sql` offer_for_user_update_counter > ${params.lastOfferChangeCounter} `,
+        sql.and([
+          sql`
+            offer_for_user_update_counter = ${params.lastOfferChangeCounter}
+          `,
+          sql`"offer_private.id" > ${params.lastPrivatePartId}`,
+        ]),
+      ])}
       ORDER BY
-        offer_private.id ASC
+        offer_for_user_update_counter ASC,
+        "offer_private.id" ASC
       LIMIT
         ${params.limit}
     `,

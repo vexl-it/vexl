@@ -104,6 +104,16 @@ describe('Update offer', () => {
         const commonAndSecurityHeaders =
           makeTestCommonAndSecurityHeaders(authHeaders)
 
+        const sql = yield* _(SqlClient.SqlClient)
+        const initialOfferPublicPayload = yield* _(sql`
+          SELECT
+            *
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
         yield* _(
           client.updateOffer({
             payload: {
@@ -117,7 +127,6 @@ describe('Update offer', () => {
           })
         )
 
-        const sql = yield* _(SqlClient.SqlClient)
         const updatedOfferPublicPayload = yield* _(sql`
           SELECT
             *
@@ -129,6 +138,11 @@ describe('Update offer', () => {
         expect(updatedOfferPublicPayload.at(0)).toHaveProperty(
           'payloadPublic',
           'newPayloadPublic'
+        )
+        expect(
+          Number(updatedOfferPublicPayload.at(0)?.updateCounter)
+        ).toBeGreaterThan(
+          Number(initialOfferPublicPayload.at(0)?.updateCounter)
         )
       })
     )

@@ -21,6 +21,12 @@ export const PublicPartId = Schema.NumberFromString.pipe(
 
 export type PublicPartId = Schema.Schema.Type<typeof PublicPartId>
 
+export const PublicPartVersion = Schema.NumberFromString.pipe(
+  Schema.brand('PublicPartVersion')
+)
+
+export type PublicPartVersion = typeof PublicPartVersion.Type
+
 export class PublicPartRecord extends Schema.Class<PublicPartRecord>(
   'PublicPartRecord'
 )({
@@ -34,6 +40,7 @@ export class PublicPartRecord extends Schema.Class<PublicPartRecord>(
   payloadPublic: PublicPayloadEncrypted,
   refreshedAt: Schema.DateFromSelf,
   countryPrefix: CountryPrefix,
+  publicPartVersion: PublicPartVersion,
 }) {}
 
 export class PrivatePartRecord extends Schema.Class<PrivatePartRecord>(

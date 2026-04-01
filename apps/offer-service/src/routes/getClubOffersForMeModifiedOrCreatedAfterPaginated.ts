@@ -3,13 +3,13 @@ import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErr
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
-import {Array, Effect, Option} from 'effect'
+import {Array, Effect} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
 import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'
+import {mergeOffersPaginationPage} from './utils/mergeOffersPaginationPage'
 import {
+  decodeOffersPaginationNextPageToken,
   encodeOffersPaginationNextPageToken,
-  getOffersPaginationCursorForQuery,
-  shouldReplaySameDateOnNextUse,
 } from './utils/offersPaginationCursor'
 
 export const getClubOffersForMeModifiedOrCreatedAfterPaginated =
@@ -22,43 +22,48 @@ export const getClubOffersForMeModifiedOrCreatedAfterPaginated =
         yield* _(validateChallengeInBody(req.payload))
 
         const offerDbService = yield* _(OfferDbService)
-        const {lastModifiedAt, lastPrivatePartId} = yield* _(
-          getOffersPaginationCursorForQuery(req.payload.nextPageToken)
+        const currentCursor = yield* _(
+          decodeOffersPaginationNextPageToken(req.payload.nextPageToken)
         )
 
         // + 1 so we know if there is a next page
-        const limit = req.payload.limit + 1
-        const offers = yield* _(
-          offerDbService.queryOffersForUserPaginated({
-            userPublicKey: req.payload.publicKey,
-            userPublicKeyV2: req.payload.publicKeyV2,
-            lastModifiedAt,
-            lastPrivatePartId,
-            limit,
-          }),
-          Effect.map(Array.map(offerPartsToServerOffer))
-        )
-
-        const isThereNextPage = offers.length === limit
-        const offersToReturn = Array.take(req.payload.limit)(offers)
-        const lastElementOfThisPage = Array.last(offersToReturn)
-        const nextPageToken = Option.isSome(lastElementOfThisPage)
-          ? yield* _(
-              encodeOffersPaginationNextPageToken({
-                offer: lastElementOfThisPage.value,
-                replaySameDateOnNextUse: shouldReplaySameDateOnNextUse({
-                  hasNext: isThereNextPage,
-                  offer: lastElementOfThisPage.value,
+        const increasedLimit = req.payload.limit + 1
+        const {offersFetchedByPublicPartVersion, offersFetchedByPrivatePartId} =
+          yield* _(
+            Effect.all({
+              offersFetchedByPublicPartVersion:
+                offerDbService.queryOffersForUserByPublicPartVersionPaginated({
+                  userPublicKey: req.payload.publicKey,
+                  userPublicKeyV2: req.payload.publicKeyV2,
+                  lastPublicPartVersion: currentCursor.lastPublicPartVersion,
+                  limit: increasedLimit,
                 }),
-              })
-            )
+              offersFetchedByPrivatePartId:
+                offerDbService.queryOffersForUserByPrivatePartIdPaginated({
+                  userPublicKey: req.payload.publicKey,
+                  userPublicKeyV2: req.payload.publicKeyV2,
+                  lastPrivatePartId: currentCursor.lastPrivatePartId,
+                  limit: increasedLimit,
+                }),
+            })
+          )
+
+        const {hasNext, items, nextCursor} = mergeOffersPaginationPage({
+          offersFetchedByPublicPartVersion,
+          offersFetchedByPrivatePartId,
+          limit: req.payload.limit,
+          currentCursor,
+        })
+
+        const nextPageToken = nextCursor
+          ? yield* _(encodeOffersPaginationNextPageToken(nextCursor))
           : null
 
         return {
           nextPageToken,
-          hasNext: isThereNextPage,
+          hasNext,
           limit: req.payload.limit,
-          items: offersToReturn,
+          items: Array.map(items, offerPartsToServerOffer),
         }
       }).pipe(
         Effect.catchTag('ParseError', (e) =>

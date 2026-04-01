@@ -8,6 +8,7 @@ import {
   newOfferId,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   CanNotDeletePrivatePartOfAuthor,
   DuplicatedPublicKeyError,
@@ -134,7 +135,7 @@ describe('Create private part', () => {
     )
   })
 
-  it('Updates offer modified_at when creating private part', async () => {
+  it('Does not update offer modified_at or public_part_version when creating private part', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
@@ -142,7 +143,7 @@ describe('Create private part', () => {
         const payloadPrivate = Schema.decodeSync(PrivatePayloadEncrypted)(
           '0addedPrivatePayloadWithModifiedAt'
         )
-        const userPublicKey = generatePrivateKey().publicKeyPemBase64
+        const userPublicKey = (yield* _(generateV2KeyPair())).publicKey
 
         yield* _(sql`
           UPDATE offer_public
@@ -151,6 +152,16 @@ describe('Create private part', () => {
           WHERE
             offer_id = ${offer1.offerId}
         `)
+        const initialStateResult = yield* _(sql`
+          SELECT
+            modified_at = CURRENT_DATE - INTERVAL '2 day' AS "isOriginalDate",
+            public_part_version AS "publicPartVersion"
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+        const initialVersion = initialStateResult.at(0)?.publicPartVersion
 
         yield* _(
           setAuthHeaders(
@@ -180,14 +191,17 @@ describe('Create private part', () => {
 
         const modifiedAtResult = yield* _(sql`
           SELECT
-            modified_at = CURRENT_DATE AS "isCurrentDate"
+            modified_at = CURRENT_DATE - INTERVAL '2 day' AS "isOriginalDate",
+            public_part_version = ${initialVersion} AS "isVersionUnchanged"
           FROM
             offer_public
           WHERE
             offer_id = ${offer1.offerId}
         `)
 
-        expect(modifiedAtResult.at(0)?.isCurrentDate).toBe(true)
+        expect(initialStateResult.at(0)?.isOriginalDate).toBe(true)
+        expect(modifiedAtResult.at(0)?.isOriginalDate).toBe(true)
+        expect(modifiedAtResult.at(0)?.isVersionUnchanged).toBe(true)
       })
     )
   })
@@ -370,6 +384,70 @@ describe('Delete private part', () => {
             AND payload_private = 'offer1payloadPrivate'
         `)
         expect(result.at(0)).toBeFalsy()
+      })
+    )
+  })
+
+  it('Does not update offer modified_at or public_part_version when deleting private part', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            modified_at = CURRENT_DATE - INTERVAL '2 day'
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
+        const initialStateResult = yield* _(sql`
+          SELECT
+            modified_at = CURRENT_DATE - INTERVAL '2 day' AS "isOriginalDate",
+            public_part_version AS "publicPartVersion"
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+        const initialVersion = initialStateResult.at(0)?.publicPartVersion
+
+        yield* _(
+          setAuthHeaders(
+            yield* _(
+              createDummyAuthHeadersForUser({
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+                publicKey: me.publicKeyPemBase64,
+              })
+            )
+          )
+        )
+
+        yield* _(
+          client.deletePrivatePart({
+            payload: {
+              adminIds: [offer1.adminId],
+              publicKeys: [user2.publicKeyPemBase64],
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        const updatedResult = yield* _(sql`
+          SELECT
+            modified_at = CURRENT_DATE - INTERVAL '2 day' AS "isOriginalDate",
+            public_part_version = ${initialVersion} AS "isVersionUnchanged"
+          FROM
+            offer_public
+          WHERE
+            offer_id = ${offer1.offerId}
+        `)
+
+        expect(initialStateResult.at(0)?.isOriginalDate).toBe(true)
+        expect(updatedResult.at(0)?.isOriginalDate).toBe(true)
+        expect(updatedResult.at(0)?.isVersionUnchanged).toBe(true)
       })
     )
   })

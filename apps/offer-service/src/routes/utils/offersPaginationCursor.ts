@@ -1,25 +1,19 @@
 import {PrivatePartRecordId} from '@vexl-next/domain/src/general/offers'
 import {
-  IsoDatetimeString,
-  MINIMAL_DATE,
-} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {
   base64UrlStringToDecoded,
   objectToBase64UrlEncoded,
 } from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
-import {type ServerOffer} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {Effect, Schema} from 'effect'
 import {type ParseError} from 'effect/ParseResult'
-import {DateTime} from 'luxon'
+import {PublicPartVersion} from '../../db/OfferDbService/domain'
 
 const DEFAULT_LAST_PRIVATE_PART_ID = Schema.decodeSync(PrivatePartRecordId)('0')
+const DEFAULT_LAST_PUBLIC_PART_VERSION =
+  Schema.decodeSync(PublicPartVersion)('0')
 
 export const OffersPaginationNextPageToken = Schema.Struct({
-  lastModifiedAt: IsoDatetimeString,
+  lastPublicPartVersion: PublicPartVersion,
   lastPrivatePartId: PrivatePartRecordId,
-  replaySameDateOnNextUse: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
 })
 export type OffersPaginationNextPageToken =
   typeof OffersPaginationNextPageToken.Type
@@ -29,27 +23,9 @@ const LegacyOffersPaginationNextPageToken = Schema.Struct({
 })
 
 const defaultOffersPaginationNextPageToken: OffersPaginationNextPageToken = {
-  lastModifiedAt: MINIMAL_DATE,
+  lastPublicPartVersion: DEFAULT_LAST_PUBLIC_PART_VERSION,
   lastPrivatePartId: DEFAULT_LAST_PRIVATE_PART_ID,
-  replaySameDateOnNextUse: false,
 }
-
-const resolveOffersPaginationNextPageToken = (
-  token: OffersPaginationNextPageToken
-): OffersPaginationNextPageToken => {
-  if (!token.replaySameDateOnNextUse) {
-    return token
-  }
-
-  return {
-    ...token,
-    lastPrivatePartId: DEFAULT_LAST_PRIVATE_PART_ID,
-    replaySameDateOnNextUse: false,
-  }
-}
-
-const isCurrentDate = (isoDatetime: IsoDatetimeString): boolean =>
-  DateTime.fromISO(isoDatetime).toISODate() === DateTime.now().toISODate()
 
 export const decodeOffersPaginationNextPageToken = (
   nextPageToken: string | undefined
@@ -82,34 +58,16 @@ export const decodeOffersPaginationNextPageToken = (
 }
 
 export const encodeOffersPaginationNextPageToken = ({
-  offer,
-  replaySameDateOnNextUse,
+  lastPublicPartVersion,
+  lastPrivatePartId,
 }: {
-  offer: ServerOffer
-  replaySameDateOnNextUse: boolean
+  lastPublicPartVersion: PublicPartVersion
+  lastPrivatePartId: PrivatePartRecordId
 }): Effect.Effect<string, ParseError> =>
   objectToBase64UrlEncoded({
     object: {
-      lastModifiedAt: offer.modifiedAt,
-      lastPrivatePartId: Schema.decodeSync(PrivatePartRecordId)(
-        offer.id.toString()
-      ),
-      replaySameDateOnNextUse,
+      lastPublicPartVersion,
+      lastPrivatePartId,
     },
     schema: OffersPaginationNextPageToken,
   })
-
-export const getOffersPaginationCursorForQuery = (
-  nextPageToken: string | undefined
-): Effect.Effect<OffersPaginationNextPageToken, ParseError> =>
-  decodeOffersPaginationNextPageToken(nextPageToken).pipe(
-    Effect.map(resolveOffersPaginationNextPageToken)
-  )
-
-export const shouldReplaySameDateOnNextUse = ({
-  hasNext,
-  offer,
-}: {
-  hasNext: boolean
-  offer: ServerOffer
-}): boolean => !hasNext && isCurrentDate(offer.modifiedAt)

@@ -15,6 +15,7 @@ export const offerSelect = (sql: PgClient.PgClient): Fragment => sql`
   offer_public.payload_public AS "offer_public.payload_public",
   offer_public.refreshed_at AS "offer_public.refreshed_at",
   offer_public.country_prefix AS "offer_public.country_prefix",
+  offer_public.public_part_version AS "offer_public.public_part_version",
   offer_private.id AS "offer_private.id",
   offer_private.offer_id AS "offer_private.offer_id",
   offer_private.user_public_key AS "offer_private.user_public_key",
@@ -31,6 +32,7 @@ export const OfferSelectRecord = Schema.Struct({
   'offerPublic.payloadPublic': Schema.String,
   'offerPublic.refreshedAt': Schema.DateFromSelf,
   'offerPublic.countryPrefix': Schema.Number,
+  'offerPublic.publicPartVersion': Schema.String,
   'offerPrivate.id': Schema.String,
   'offerPrivate.offerId': Schema.String,
   'offerPrivate.userPublicKey': Schema.String,
@@ -60,6 +62,7 @@ export const OfferSelectToOfferParts = Schema.transform(
         payloadPublic: v['offerPublic.payloadPublic'],
         refreshedAt: v['offerPublic.refreshedAt'],
         countryPrefix: v['offerPublic.countryPrefix'],
+        publicPartVersion: v['offerPublic.publicPartVersion'],
       },
     }),
     encode: (v) => ({
@@ -77,6 +80,7 @@ export const OfferSelectToOfferParts = Schema.transform(
       'offerPublic.payloadPublic': v.publicPart.payloadPublic,
       'offerPublic.refreshedAt': v.publicPart.refreshedAt,
       'offerPublic.countryPrefix': v.publicPart.countryPrefix,
+      'offerPublic.publicPartVersion': v.publicPart.publicPartVersion,
     }),
   }
 )

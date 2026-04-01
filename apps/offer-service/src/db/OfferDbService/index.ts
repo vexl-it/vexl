@@ -45,9 +45,13 @@ import {
   type QueryOfferIdsForUserRequest,
 } from './queries/createQueryOfferIdsForUser'
 import {
-  createQueryOffersForUserPaginated,
-  type QueryOffersPaginatedRequest,
-} from './queries/createQueryOffersForUserPaginated'
+  createQueryOffersForUserByPrivatePartIdPaginated,
+  type QueryOffersByPrivatePartIdPaginatedRequest,
+} from './queries/createQueryOffersForUserByPrivatePartIdPaginated'
+import {
+  createQueryOffersForUserByPublicPartVersionPaginated,
+  type QueryOffersByPublicPartVersionPaginatedRequest,
+} from './queries/createQueryOffersForUserByPublicPartVersionPaginated'
 import {
   createQueryPublicPartByAdminId,
   type QueryOfferByAdminIdRequest,
@@ -66,8 +70,12 @@ import {
 } from './queries/createUpdateReportOffer'
 
 export interface OfferDbOperations {
-  queryOffersForUserPaginated: (
-    args: QueryOffersPaginatedRequest
+  queryOffersForUserByPublicPartVersionPaginated: (
+    args: QueryOffersByPublicPartVersionPaginatedRequest
+  ) => Effect.Effect<readonly OfferParts[], UnexpectedServerError>
+
+  queryOffersForUserByPrivatePartIdPaginated: (
+    args: QueryOffersByPrivatePartIdPaginatedRequest
   ) => Effect.Effect<readonly OfferParts[], UnexpectedServerError>
 
   queryOfferByPublicKeyAndOfferId: (
@@ -139,8 +147,11 @@ export class OfferDbService extends Context.Tag('OfferDbService')<
     OfferDbService,
     Effect.gen(function* (_) {
       return {
-        queryOffersForUserPaginated: yield* _(
-          createQueryOffersForUserPaginated
+        queryOffersForUserByPublicPartVersionPaginated: yield* _(
+          createQueryOffersForUserByPublicPartVersionPaginated
+        ),
+        queryOffersForUserByPrivatePartIdPaginated: yield* _(
+          createQueryOffersForUserByPrivatePartIdPaginated
         ),
         queryOfferByPublicKeyAndOfferId: yield* _(
           createQueryOfferByPublicKeyAndOfferId

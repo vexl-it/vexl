@@ -83,14 +83,6 @@ export const createPrivatePart = HttpApiBuilder.handler(
           {batching: true}
         )
       )
-      // public payload update to trigger modified_at update and make sure the offer goes back to the top of the list for the users that can see it
-      yield* _(
-        offerDbService.updateOfferPublicPayload({
-          adminId: adminIdHashed,
-          offerId: offer.value.offerId,
-          payloadPublic: offer.value.payloadPublic,
-        })
-      )
       return {}
     }).pipe(
       withDbTransaction,

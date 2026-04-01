@@ -3,13 +3,13 @@ import {InvalidNextPageTokenError} from '@vexl-next/domain/src/general/commonErr
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Array, Effect, Option} from 'effect'
+import {Array, Effect} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
 import {offerPartsToServerOffer} from '../utils/offerPartsToServerOffer'
+import {mergeOffersPaginationPage} from './utils/mergeOffersPaginationPage'
 import {
+  decodeOffersPaginationNextPageToken,
   encodeOffersPaginationNextPageToken,
-  getOffersPaginationCursorForQuery,
-  shouldReplaySameDateOnNextUse,
 } from './utils/offersPaginationCursor'
 
 export const getOffersForMeModifiedOrCreatedAfterPaginated =
@@ -24,41 +24,46 @@ export const getOffersForMeModifiedOrCreatedAfterPaginated =
 
         // + 1 so we know if there is a next page
         const increasedLimit = req.urlParams.limit + 1
-        const {lastModifiedAt, lastPrivatePartId} = yield* _(
-          getOffersPaginationCursorForQuery(req.urlParams.nextPageToken)
+        const currentCursor = yield* _(
+          decodeOffersPaginationNextPageToken(req.urlParams.nextPageToken)
         )
 
-        const offers = yield* _(
-          offerDbService.queryOffersForUserPaginated({
-            userPublicKey: security.publicKey,
-            userPublicKeyV2: security.publicKeyV2,
-            lastModifiedAt,
-            lastPrivatePartId,
-            limit: increasedLimit,
-          }),
-          Effect.map(Array.map(offerPartsToServerOffer))
-        )
-
-        const isThereNextPage = offers.length === increasedLimit
-        const offersToReturn = Array.take(req.urlParams.limit)(offers)
-        const lastElementOfThisPage = Array.last(offersToReturn)
-        const nextPageToken = Option.isSome(lastElementOfThisPage)
-          ? yield* _(
-              encodeOffersPaginationNextPageToken({
-                offer: lastElementOfThisPage.value,
-                replaySameDateOnNextUse: shouldReplaySameDateOnNextUse({
-                  hasNext: isThereNextPage,
-                  offer: lastElementOfThisPage.value,
+        const {offersFetchedByPublicPartVersion, offersFetchedByPrivatePartId} =
+          yield* _(
+            Effect.all({
+              offersFetchedByPublicPartVersion:
+                offerDbService.queryOffersForUserByPublicPartVersionPaginated({
+                  userPublicKey: security.publicKey,
+                  userPublicKeyV2: security.publicKeyV2,
+                  lastPublicPartVersion: currentCursor.lastPublicPartVersion,
+                  limit: increasedLimit,
                 }),
-              })
-            )
+              offersFetchedByPrivatePartId:
+                offerDbService.queryOffersForUserByPrivatePartIdPaginated({
+                  userPublicKey: security.publicKey,
+                  userPublicKeyV2: security.publicKeyV2,
+                  lastPrivatePartId: currentCursor.lastPrivatePartId,
+                  limit: increasedLimit,
+                }),
+            })
+          )
+
+        const {hasNext, items, nextCursor} = mergeOffersPaginationPage({
+          offersFetchedByPublicPartVersion,
+          offersFetchedByPrivatePartId,
+          limit: req.urlParams.limit,
+          currentCursor,
+        })
+
+        const nextPageToken = nextCursor
+          ? yield* _(encodeOffersPaginationNextPageToken(nextCursor))
           : null
 
         return {
           nextPageToken,
-          hasNext: isThereNextPage,
+          hasNext,
           limit: req.urlParams.limit,
-          items: offersToReturn,
+          items: Array.map(items, offerPartsToServerOffer),
         }
       }).pipe(
         Effect.catchTag('ParseError', (e) =>

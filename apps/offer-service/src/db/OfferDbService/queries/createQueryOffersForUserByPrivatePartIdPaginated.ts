@@ -1,0 +1,77 @@
+import {SqlSchema} from '@effect/sql'
+import {PgClient} from '@effect/sql-pg'
+import {PublicKeyV2} from '@vexl-next/cryptography'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
+import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {PrivatePartRecordId} from '@vexl-next/domain/src/general/offers'
+import {Effect, flow, Schema} from 'effect'
+import {
+  expirationPeriodDaysConfig,
+  offerReportFilterConfig,
+} from '../../../configs'
+import {
+  offerNotExpired,
+  offerNotFlagged,
+  offerSelect,
+  OfferSelectToOfferParts,
+} from '../utils'
+
+export const QueryOffersByPrivatePartIdPaginatedRequest = Schema.Struct({
+  userPublicKey: PublicKeyPemBase64,
+  userPublicKeyV2: Schema.optionalWith(PublicKeyV2, {as: 'Option'}),
+  lastPrivatePartId: PrivatePartRecordId,
+  limit: Schema.Int,
+})
+export type QueryOffersByPrivatePartIdPaginatedRequest = Schema.Schema.Type<
+  typeof QueryOffersByPrivatePartIdPaginatedRequest
+>
+
+export const createQueryOffersForUserByPrivatePartIdPaginated = Effect.gen(
+  function* (_) {
+    const sql = yield* _(PgClient.PgClient)
+    const expirationPeriodDays = yield* _(expirationPeriodDaysConfig)
+    const offerReportFilter = yield* _(offerReportFilterConfig)
+
+    const query = SqlSchema.findAll({
+      Request: QueryOffersByPrivatePartIdPaginatedRequest,
+      Result: OfferSelectToOfferParts,
+      execute: (params) => sql`
+        SELECT
+          ${offerSelect(sql)}
+        FROM
+          offer_public
+          INNER JOIN offer_private ON offer_public.id = offer_private.offer_id
+        WHERE
+          ${sql.and([
+          sql.or([
+            sql`offer_private.user_public_key = ${params.userPublicKey}`,
+            sql`
+              offer_private.user_public_key = ${params.userPublicKeyV2 ??
+              'no-key'}
+            `,
+          ]),
+          sql`offer_private.id > ${params.lastPrivatePartId}`,
+          offerNotExpired(sql, expirationPeriodDays),
+          offerNotFlagged(sql, offerReportFilter),
+        ])}
+        ORDER BY
+          offer_private.id ASC
+        LIMIT
+          ${params.limit}
+      `,
+    })
+
+    return flow(
+      query,
+      Effect.catchAll((e) =>
+        Effect.zipRight(
+          Effect.logError(
+            'Error querying offers by private-part id (paginated)',
+            e
+          ),
+          Effect.fail(new UnexpectedServerError({status: 500}))
+        )
+      )
+    )
+  }
+)

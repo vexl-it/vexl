@@ -6,8 +6,8 @@ import {
   generateAdminId,
   newOfferId,
   PrivatePartRecordId,
+  PrivatePayloadEncrypted,
   PublicPayloadEncrypted,
-  type PrivatePayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {objectToBase64UrlEncoded} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
@@ -18,6 +18,7 @@ import {
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
+import {decodeOffersPaginationNextPageToken} from '../../routes/utils/offersPaginationCursor'
 import {
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
@@ -487,6 +488,13 @@ describe('Get offers for me modified or created after paginated', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const sql = yield* _(SqlClient.SqlClient)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+        const testHeaders = yield* _(
+          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+            authHeaders: me.authHeaders,
+            publicKeyV2: publicKeyV2.publicKey,
+          })
+        )
 
         yield* _(setAuthHeaders(me.authHeaders))
 
@@ -523,8 +531,11 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit: 3,
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
+        )
+        const initialCursor = yield* _(
+          decodeOffersPaginationNextPageToken(initialResponse.nextPageToken!)
         )
 
         const updatedPayloadPublic = Schema.decodeSync(PublicPayloadEncrypted)(
@@ -538,7 +549,7 @@ describe('Get offers for me modified or created after paginated', () => {
               payloadPublic: updatedPayloadPublic,
               offerPrivateList: [],
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
         )
 
@@ -548,8 +559,13 @@ describe('Get offers for me modified or created after paginated', () => {
               limit: 3,
               nextPageToken: initialResponse.nextPageToken!,
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
+        )
+        const incrementalCursor = yield* _(
+          decodeOffersPaginationNextPageToken(
+            incrementalResponse.nextPageToken!
+          )
         )
 
         expect(incrementalResponse.items.map((o) => o.offerId)).toEqual([
@@ -558,15 +574,28 @@ describe('Get offers for me modified or created after paginated', () => {
         expect(incrementalResponse.items.at(0)?.publicPayload).toEqual(
           updatedPayloadPublic
         )
+        expect(incrementalCursor.lastPublicPartVersion).toBeGreaterThan(
+          initialCursor.lastPublicPartVersion
+        )
+        expect(incrementalCursor.lastPrivatePartId).toEqual(
+          initialCursor.lastPrivatePartId
+        )
       })
     )
   })
 
-  it('Replays current-date offers once and then paginates normally', async () => {
+  it('Does not replay current-date offers after a completed sync', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const sql = yield* _(SqlClient.SqlClient)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+        const testHeaders = yield* _(
+          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+            authHeaders: me.authHeaders,
+            publicKeyV2: publicKeyV2.publicKey,
+          })
+        )
 
         yield* _(setAuthHeaders(me.authHeaders))
 
@@ -589,119 +618,220 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit: 3,
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
         )
 
-        const replayPage1 = yield* _(
+        const incrementalResponse = yield* _(
           client.getOffersForMeModifiedOrCreatedAfterPaginated({
             urlParams: {
-              limit: 1,
+              limit: 3,
               nextPageToken: completedSyncResponse.nextPageToken!,
             },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        const replayPage2 = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfterPaginated({
-            urlParams: {
-              limit: 1,
-              nextPageToken: replayPage1.nextPageToken!,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        const replayPage3 = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfterPaginated({
-            urlParams: {
-              limit: 1,
-              nextPageToken: replayPage2.nextPageToken!,
-            },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
         )
 
-        expect(replayPage1.items.length).toEqual(1)
-        expect(replayPage2.items.length).toEqual(1)
-        expect(replayPage3.items.length).toEqual(1)
-        expect(
-          [
-            replayPage1.items[0]?.offerId,
-            replayPage2.items[0]?.offerId,
-            replayPage3.items[0]?.offerId,
-          ].sort()
-        ).toEqual([offer1.offerId, offer2.offerId, offer3.offerId].sort())
+        expect(incrementalResponse.items).toEqual([])
+        expect(incrementalResponse.hasNext).toBe(false)
+        expect(incrementalResponse.nextPageToken).toBeNull()
       })
     )
   })
 
-  it('Pages correctly when multiple offers share the same modified_at', async () => {
+  it('Returns private-only updated offer past the stored cursor', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const sql = yield* _(SqlClient.SqlClient)
+        const user1Headers = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            ${sql.in('offer_id', [
+            offer1.offerId,
+            offer2.offerId,
+            offer3.offerId,
+          ])};
+        `)
+
+        const initialResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+            },
+            headers: user1Headers,
+          })
+        )
+        const initialCursor = yield* _(
+          decodeOffersPaginationNextPageToken(initialResponse.nextPageToken!)
+        )
+
+        const updatedPrivatePayload = Schema.decodeSync(
+          PrivatePayloadEncrypted
+        )('0updatedPrivatePayloadForUser1')
 
         yield* _(setAuthHeaders(me.authHeaders))
 
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '2 days',
-            refreshed_at = NOW(),
-            report = 0
-          WHERE
-            ${sql.in('offer_id', [offer1.offerId, offer2.offerId])};
-        `)
-        yield* _(sql`
-          UPDATE offer_public
-          SET
-            modified_at = NOW() - INTERVAL '1 day',
-            refreshed_at = NOW(),
-            report = 0
-          WHERE
-            offer_id = ${offer3.offerId};
-        `)
-
-        const response1 = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfterPaginated({
-            urlParams: {
-              limit: 1,
+        yield* _(
+          client.createPrivatePart({
+            payload: {
+              adminId: offer1.adminId,
+              offerPrivateList: [
+                {
+                  payloadPrivate: updatedPrivatePayload,
+                  userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                },
+              ],
             },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        const response2 = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfterPaginated({
-            urlParams: {
-              limit: 1,
-              nextPageToken: response1.nextPageToken!,
-            },
-            headers: commonAndSecurityHeaders,
-          })
-        )
-        const response3 = yield* _(
-          client.getOffersForMeModifiedOrCreatedAfterPaginated({
-            urlParams: {
-              limit: 1,
-              nextPageToken: response2.nextPageToken!,
-            },
-            headers: commonAndSecurityHeaders,
           })
         )
 
-        expect(
-          [response1.items[0]?.offerId, response2.items[0]?.offerId].sort()
-        ).toEqual([offer1.offerId, offer2.offerId].sort())
-        expect(response3.items.map((o) => o.offerId)).toEqual([offer3.offerId])
+        yield* _(setAuthHeaders(user1.authHeaders))
+
+        const incrementalResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+              nextPageToken: initialResponse.nextPageToken!,
+            },
+            headers: user1Headers,
+          })
+        )
+        const incrementalCursor = yield* _(
+          decodeOffersPaginationNextPageToken(
+            incrementalResponse.nextPageToken!
+          )
+        )
+
+        expect(incrementalResponse.items.map((o) => o.offerId)).toEqual([
+          offer1.offerId,
+        ])
+        expect(incrementalResponse.items.at(0)?.privatePayload).toEqual(
+          updatedPrivatePayload
+        )
+        expect(incrementalCursor.lastPublicPartVersion).toEqual(
+          initialCursor.lastPublicPartVersion
+        )
+        expect(incrementalCursor.lastPrivatePartId).toBeGreaterThan(
+          initialCursor.lastPrivatePartId
+        )
       })
     )
   })
 
-  it('Accepts old-format nextPageToken and falls back to a full resync cursor', async () => {
+  it('Can return both public-only and private-only deltas in one merged page', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const sql = yield* _(SqlClient.SqlClient)
+        const user1Headers = makeTestCommonAndSecurityHeaders(user1.authHeaders)
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+
+        yield* _(sql`
+          UPDATE offer_public
+          SET
+            refreshed_at = NOW(),
+            report = 0
+          WHERE
+            ${sql.in('offer_id', [
+            offer1.offerId,
+            offer2.offerId,
+            offer3.offerId,
+          ])};
+        `)
+
+        const initialResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 3,
+            },
+            headers: user1Headers,
+          })
+        )
+        const initialCursor = yield* _(
+          decodeOffersPaginationNextPageToken(initialResponse.nextPageToken!)
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+
+        yield* _(
+          client.updateOffer({
+            payload: {
+              adminId: offer1.adminId,
+              payloadPublic: Schema.decodeSync(PublicPayloadEncrypted)(
+                'mergedPublicDelta'
+              ),
+              offerPrivateList: [],
+            },
+            headers: commonAndSecurityHeaders,
+          })
+        )
+
+        yield* _(
+          client.createPrivatePart({
+            payload: {
+              adminId: offer2.adminId,
+              offerPrivateList: [
+                {
+                  payloadPrivate: Schema.decodeSync(PrivatePayloadEncrypted)(
+                    '0mergedPrivateDelta'
+                  ),
+                  userPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                },
+              ],
+            },
+          })
+        )
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+
+        const mergedResponse = yield* _(
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: {
+              limit: 1,
+              nextPageToken: initialResponse.nextPageToken!,
+            },
+            headers: user1Headers,
+          })
+        )
+        const mergedCursor = yield* _(
+          decodeOffersPaginationNextPageToken(mergedResponse.nextPageToken!)
+        )
+
+        expect(mergedResponse.items.map((o) => o.offerId).sort()).toEqual(
+          [offer1.offerId, offer2.offerId].sort()
+        )
+        expect(mergedResponse.hasNext).toBe(false)
+        expect(mergedCursor.lastPublicPartVersion).toBeGreaterThan(
+          initialCursor.lastPublicPartVersion
+        )
+        expect(mergedCursor.lastPrivatePartId).toBeGreaterThan(
+          initialCursor.lastPrivatePartId
+        )
+      })
+    )
+  })
+
+  it('Accepts legacy nextPageToken and falls back to a full resync cursor', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+        const sql = yield* _(SqlClient.SqlClient)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+        const testHeaders = yield* _(
+          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+            authHeaders: me.authHeaders,
+            publicKeyV2: publicKeyV2.publicKey,
+          })
+        )
 
         yield* _(setAuthHeaders(me.authHeaders))
 
@@ -749,14 +879,13 @@ describe('Get offers for me modified or created after paginated', () => {
               limit: 2,
               nextPageToken: legacyNextPageToken,
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
         )
 
-        expect(response.items.map((o) => o.offerId)).toEqual([
-          offer1.offerId,
-          offer2.offerId,
-        ])
+        expect(response.items.map((o) => o.offerId).sort()).toEqual(
+          [offer1.offerId, offer2.offerId, offer3.offerId].sort()
+        )
       })
     )
   })
@@ -766,6 +895,13 @@ describe('Get offers for me modified or created after paginated', () => {
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
         const sql = yield* _(SqlClient.SqlClient)
+        const publicKeyV2 = yield* _(generateV2KeyPair())
+        const testHeaders = yield* _(
+          makeTestCommonAndSecurityHeadersWithPublicKeyV2({
+            authHeaders: me.authHeaders,
+            publicKeyV2: publicKeyV2.publicKey,
+          })
+        )
 
         yield* _(setAuthHeaders(me.authHeaders))
 
@@ -802,7 +938,7 @@ describe('Get offers for me modified or created after paginated', () => {
             urlParams: {
               limit: 3,
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
         )
 
@@ -812,7 +948,7 @@ describe('Get offers for me modified or created after paginated', () => {
               limit: 3,
               nextPageToken: initialResponse.nextPageToken!,
             },
-            headers: commonAndSecurityHeaders,
+            headers: testHeaders,
           })
         )
 
@@ -823,7 +959,7 @@ describe('Get offers for me modified or created after paginated', () => {
     )
   })
 
-  it('Orders offers by modified_at and then private-part id', async () => {
+  it('Orders overlapping merged pages by public_part_version', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
@@ -834,7 +970,7 @@ describe('Get offers for me modified or created after paginated', () => {
         yield* _(sql`
           UPDATE offer_public
           SET
-            modified_at = NOW() - INTERVAL '1 day',
+            public_part_version = 2,
             refreshed_at = NOW(),
             report = 0
           WHERE
@@ -843,7 +979,7 @@ describe('Get offers for me modified or created after paginated', () => {
         yield* _(sql`
           UPDATE offer_public
           SET
-            modified_at = CURRENT_DATE,
+            public_part_version = 3,
             refreshed_at = NOW(),
             report = 0
           WHERE
@@ -852,7 +988,7 @@ describe('Get offers for me modified or created after paginated', () => {
         yield* _(sql`
           UPDATE offer_public
           SET
-            modified_at = NOW() - INTERVAL '2 days',
+            public_part_version = 1,
             refreshed_at = NOW(),
             report = 0
           WHERE

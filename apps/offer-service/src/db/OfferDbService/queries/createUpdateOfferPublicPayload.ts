@@ -23,7 +23,8 @@ export const createUpdateOfferPublicPayload = Effect.gen(function* (_) {
       UPDATE offer_public
       SET
         payload_public = ${req.payloadPublic},
-        modified_at = CURRENT_DATE
+        modified_at = CURRENT_DATE,
+        public_part_version = DEFAULT
       WHERE
         ${sql.and([
         sql`offer_id = ${req.offerId}`,

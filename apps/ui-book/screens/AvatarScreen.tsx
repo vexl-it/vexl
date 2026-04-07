@@ -4,6 +4,7 @@ import {
   avatarsSvg,
   SizableText,
   Theme,
+  UserImagePlaceholder,
   UserProfile,
   useTheme,
   XStack,
@@ -133,6 +134,19 @@ function ThemedColumn({
           </Avatar>
           <Avatar size="medium">
             <GoldenAvatar size={48} grayscale />
+          </Avatar>
+        </XStack>
+
+        <SectionLabel>Placeholder (no image)</SectionLabel>
+        <XStack gap="$3" alignItems="center">
+          <Avatar size="small">
+            <UserImagePlaceholder size={32} />
+          </Avatar>
+          <Avatar size="medium">
+            <UserImagePlaceholder size={48} />
+          </Avatar>
+          <Avatar size="large">
+            <UserImagePlaceholder size={64} />
           </Avatar>
         </XStack>
 

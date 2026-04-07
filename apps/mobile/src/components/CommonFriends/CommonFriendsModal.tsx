@@ -6,6 +6,7 @@ import {
   NavigationBar,
   Screen,
   Typography,
+  UserImagePlaceholder,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
@@ -14,17 +15,13 @@ import {useAtom, useAtomValue, useStore} from 'jotai'
 import React, {memo, useCallback, useMemo} from 'react'
 import {Modal} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack} from 'tamagui'
+import {Stack} from 'tamagui'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showVerifiedContactsAtom} from '../../utils/preferences'
 import ContactPictureImage from '../ContactPictureImage'
-import SvgImage from '../Image'
-import picturePlaceholderSvg from '../images/picturePlaceholderSvg'
 import {commonFriendsModalDataAtom} from './atoms'
-
-const GREY_COLOR = getTokens().color.grey.val
 
 function FriendListItem({
   friend,
@@ -48,14 +45,7 @@ function FriendListItem({
             height={40}
             objectFit="cover"
             contactId={friend.info.nonUniqueContactId}
-            fallback={
-              <SvgImage
-                width={40}
-                height={40}
-                source={picturePlaceholderSvg}
-                fill={GREY_COLOR}
-              />
-            }
+            fallback={<UserImagePlaceholder size={40} />}
           />
         ),
       }}

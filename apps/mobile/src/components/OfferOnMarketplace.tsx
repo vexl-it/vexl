@@ -1,5 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {IconTag, type IconTagVariant, OfferCard, TextTag} from '@vexl-next/ui'
+import {IconTag, OfferCard, TextTag} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
@@ -8,24 +8,9 @@ import {bigNumberToString} from '../utils/bigNumberToString'
 import {formatCurrencyAmount} from '../utils/localization/currency'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
+import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
-
-function getIconTagVariant(listingType: string | undefined): IconTagVariant {
-  if (listingType === 'PRODUCT') return 'product'
-  if (listingType === 'OTHER') return 'service'
-  return 'bitcoin'
-}
-
-function getIsOffering(
-  listingType: string | undefined,
-  offerType: string
-): boolean {
-  if (!listingType || listingType === 'BITCOIN') {
-    return offerType === 'SELL'
-  }
-  return offerType === 'BUY'
-}
 
 export default function OfferOnMarketplace({
   offer,
@@ -48,11 +33,11 @@ export default function OfferOnMarketplace({
     )
   )
 
-  const otherSideIsOffering = getIsOffering(
+  const isOffering = getIsOffering(
     publicPart.listingType,
-    publicPart.offerType
+    publicPart.offerType,
+    isMine
   )
-  const isOffering = isMine ? !otherSideIsOffering : otherSideIsOffering
   const iconTagVariant = getIconTagVariant(publicPart.listingType)
 
   const name = isMine
@@ -62,10 +47,9 @@ export default function OfferOnMarketplace({
       : t('offer.friendOfFriend')
 
   const commonFriendsCount = privatePart.commonFriends.length
-  const commonFriendsText =
-    !isMine && commonFriendsCount > 0
-      ? t('marketplace.commonFriends', {count: commonFriendsCount})
-      : undefined
+  const commonFriendsText = !isMine
+    ? t('marketplace.commonFriends', {count: commonFriendsCount})
+    : undefined
 
   const clubName = Option.isSome(smallestClub)
     ? smallestClub.value.club.name

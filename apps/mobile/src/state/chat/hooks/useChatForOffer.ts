@@ -57,12 +57,17 @@ export function useChatWithMessagesForOffer({
   isMyOffer,
 }: {
   offerId: OfferId
-  otherSidePublicKey: PublicKeyPemBase64
+  otherSidePublicKey: Option.Option<PublicKeyPemBase64>
   isMyOffer: boolean
 }): ChatWithMessages | undefined {
   return useAtomValue(
     useMemo(() => {
       return atom((get) => {
+        if (Option.isNone(otherSidePublicKey)) {
+          return undefined
+        }
+
+        const publicKey = otherSidePublicKey.value
         const messagingState = get(messagingStateAtom)
 
         if (isMyOffer) {
@@ -73,7 +78,7 @@ export function useChatWithMessagesForOffer({
             Option.flatMap((inbox) =>
               Array.findFirst(
                 inbox.chats,
-                (chat) => chat.chat.otherSide.publicKey === otherSidePublicKey
+                (chat) => chat.chat.otherSide.publicKey === publicKey
               )
             ),
             Option.getOrUndefined
@@ -94,7 +99,7 @@ export function useChatWithMessagesForOffer({
               Option.flatMap((inbox) =>
                 Array.findFirst(
                   inbox.chats,
-                  (chat) => chat.chat.otherSide.publicKey === otherSidePublicKey
+                  (chat) => chat.chat.otherSide.publicKey === publicKey
                 )
               )
             )
@@ -107,7 +112,7 @@ export function useChatWithMessagesForOffer({
             Option.flatMap((inbox) =>
               Array.findFirst(
                 inbox.chats,
-                (chat) => chat.chat.otherSide.publicKey === otherSidePublicKey
+                (chat) => chat.chat.otherSide.publicKey === publicKey
               )
             )
           )

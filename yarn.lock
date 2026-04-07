@@ -12459,11 +12459,13 @@ __metadata:
     "@vexl-next/eslint-config": 0.0.0
     "@vexl-next/prettier-config": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
+    effect: ^3.19.9
     eslint: ^9.20.0
     jotai: ^2.15.0
     prettier: ^3.3.2
     react: 19.2.0
     react-native: 0.83.2
+    react-native-keyboard-controller: 1.20.7
     react-native-reanimated: ~4.2.0
     react-native-safe-area-context: ~5.6.2
     react-native-svg: 15.15.3
@@ -12472,9 +12474,11 @@ __metadata:
     tamagui: ^1.137.0
     typescript: ~5.9.2
   peerDependencies:
+    effect: ">=3"
     jotai: ">=2"
     react: ">=18"
     react-native: ">=0.81"
+    react-native-keyboard-controller: ">=1"
     react-native-reanimated: ">=4"
     react-native-safe-area-context: ">=5"
     react-native-svg: ">=13"

@@ -1,3 +1,4 @@
+import {Effect} from 'effect'
 import type {WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useEffect, useRef, useState} from 'react'
@@ -12,12 +13,12 @@ import {scheduleOnRN} from 'react-native-worklets'
 import {styled} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
-import {Button} from './Button'
+import {Button, type ButtonVariant} from './Button'
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
 const BACKDROP_OPACITY = 0.5
-const AUTO_DISMISS_MS = 3000
+const AUTO_DISMISS_MS = 2000
 
 export const DialogLabel = styled(SizableText, {
   name: 'DialogLabel',
@@ -32,7 +33,8 @@ export const DialogTitle = styled(SizableText, {
   name: 'DialogTitle',
   fontFamily: '$heading',
   fontSize: '$5',
-  fontWeight: '400',
+  fontWeight: '700',
+  lineHeight: 44,
   color: '$foregroundPrimary',
 })
 
@@ -166,6 +168,7 @@ export interface DialogAtomConfig {
   readonly subtitle?: string
   readonly children?: React.ReactNode
   readonly positiveButtonText: string
+  readonly positiveButtonVariant?: ButtonVariant
   readonly negativeButtonText?: string
 }
 
@@ -176,7 +179,7 @@ interface DialogAtomInternalState extends DialogAtomConfig {
 export type DialogAtom = WritableAtom<
   DialogAtomInternalState | null,
   [config: DialogAtomConfig],
-  Promise<boolean>
+  Effect.Effect<boolean>
 >
 
 export function createDialogAtom(): DialogAtom {
@@ -184,19 +187,16 @@ export function createDialogAtom(): DialogAtom {
 
   return atom(
     (get) => get(stateAtom),
-    (get, set, config: DialogAtomConfig): Promise<boolean> => {
+    (get, set, config: DialogAtomConfig): Effect.Effect<boolean> => {
       const existing = get(stateAtom)
       existing?.onResult(false)
 
-      return new Promise<boolean>((resolve) => {
-        let resolved = false
+      return Effect.async<boolean>((resolve) => {
         set(stateAtom, {
           ...config,
           onResult: (confirmed: boolean) => {
-            if (resolved) return
-            resolved = true
             set(stateAtom, null)
-            resolve(confirmed)
+            resolve(Effect.succeed(confirmed))
           },
         })
       })
@@ -239,7 +239,7 @@ export function DialogFromAtom({
               </Button>
             ) : null}
             <Button
-              variant="primary"
+              variant={displayState.positiveButtonVariant ?? 'primary'}
               size="large"
               flex={1}
               onPress={() => state?.onResult(true)}

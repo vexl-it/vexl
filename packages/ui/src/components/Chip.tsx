@@ -2,6 +2,7 @@ import React from 'react'
 import type {ImageProps as RNImageProps} from 'react-native'
 import {styled} from 'tamagui'
 
+import {UserImagePlaceholder} from '../assets/UserImagePlaceholder'
 import {SizableText, XStack} from '../primitives'
 import {Avatar} from './Avatar'
 
@@ -27,7 +28,9 @@ const ChipFrame = styled(XStack, {
 export function Chip({name, avatarSource}: ChipProps): React.JSX.Element {
   return (
     <ChipFrame>
-      <Avatar source={avatarSource} customSize={AVATAR_SIZE} />
+      <Avatar source={avatarSource} customSize={AVATAR_SIZE}>
+        <UserImagePlaceholder size={AVATAR_SIZE} />
+      </Avatar>
       <SizableText
         fontFamily="$body"
         fontWeight="500"

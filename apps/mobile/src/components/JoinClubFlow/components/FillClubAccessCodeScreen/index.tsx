@@ -1,4 +1,5 @@
 import {ClubCode} from '@vexl-next/domain/src/general/clubs'
+import {KeyboardAvoidingView} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
@@ -15,7 +16,6 @@ import {
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useIsKeyboardShown from '../../../../utils/useIsKeyboardShown'
 import Button from '../../../Button'
-import KeyboardAvoidingView from '../../../KeyboardAvoidingView'
 import {useShowLoadingOverlay} from '../../../LoadingOverlayProvider'
 import Screen from '../../../Screen'
 import WhiteContainer from '../../../WhiteContainer'

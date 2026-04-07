@@ -45,6 +45,8 @@ export type RootStackParamsList = {
 
   OfferDetail: {offerId: OfferId}
 
+  SendMessage: {offerId: OfferId}
+
   ChatDetail: {otherSideKey: PublicKeyPemBase64; inboxKey: PublicKeyPemBase64}
 
   ClubDetail: {clubUuid: ClubUuid}

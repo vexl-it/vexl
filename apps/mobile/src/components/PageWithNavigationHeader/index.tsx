@@ -1,8 +1,8 @@
+import {KeyboardAvoidingView} from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import FooterButtons from './components/FooterButtons'
 import Header from './components/Header'
 import {

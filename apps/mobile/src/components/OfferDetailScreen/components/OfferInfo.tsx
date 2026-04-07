@@ -1,7 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -69,7 +69,7 @@ function OfferInfo({
   const chatForOffer = useChatWithMessagesForOffer({
     offerId: offer.offerInfo.offerId,
     isMyOffer: !!offer.ownershipInfo,
-    otherSidePublicKey: offer.offerInfo.publicPart.offerPublicKey,
+    otherSidePublicKey: Option.some(offer.offerInfo.publicPart.offerPublicKey),
   })
   const preferences = useAtomValue(preferencesAtom)
 

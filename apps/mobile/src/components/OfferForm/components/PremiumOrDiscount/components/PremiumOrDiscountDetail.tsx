@@ -1,4 +1,5 @@
 import {type OfferType} from '@vexl-next/domain/src/general/offers'
+import {KeyboardAvoidingView} from '@vexl-next/ui'
 import {
   useAtom,
   useAtomValue,
@@ -11,7 +12,6 @@ import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import Input from '../../../../Input'
-import KeyboardAvoidingView from '../../../../KeyboardAvoidingView'
 import {SLIDER_THRESHOLD} from '../../../../PremiumOrDiscountSlider'
 import Screen from '../../../../Screen'
 import ScreenTitle from '../../../../ScreenTitle'

@@ -1,4 +1,5 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {KeyboardAvoidingView} from '@vexl-next/ui'
 import {Option, Schema} from 'effect/index'
 import {useAtom, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
@@ -11,7 +12,6 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Button from '../Button'
 import Input from '../Input'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 

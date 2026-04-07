@@ -11,6 +11,7 @@ import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
 import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
+import {GlobalDialog} from './components/GlobalDialog'
 import InAppLoadingTasksIndicator from './components/InAppLoadingTasksIndicator'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import PreventScreenshots from './components/PreventScreenshots'
@@ -83,6 +84,7 @@ function App(): React.ReactElement {
             <UploadingOfferProgressModal />
           </LoadingOverlayProvider>
           <AreYouSureDialog />
+          <GlobalDialog />
           <ErrorAlert />
           <ToastNotification />
         </NavigationContainer>

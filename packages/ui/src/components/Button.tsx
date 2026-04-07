@@ -3,7 +3,7 @@ import {styled} from 'tamagui'
 
 import {SizableText, Stack} from '../primitives'
 
-type ButtonVariant =
+export type ButtonVariant =
   | 'primary'
   | 'secondary'
   | 'destructive'

@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Option} from 'effect'
 import {atom, useAtomValue, type Atom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack} from 'tamagui'
@@ -38,7 +39,7 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const chatForOffer = useChatWithMessagesForOffer({
     offerId: offer.offerInfo.offerId,
     isMyOffer: !!offer.ownershipInfo,
-    otherSidePublicKey: offer.offerInfo.publicPart.offerPublicKey,
+    otherSidePublicKey: Option.some(offer.offerInfo.publicPart.offerPublicKey),
   })
 
   const canBeRequested = useMemo(() => {

@@ -21,6 +21,9 @@ export * from './icons'
 // Anonymous Avatars
 export * from './assets/anonymousAvatars'
 
+// Placeholders
+export {UserImagePlaceholder} from './assets/UserImagePlaceholder'
+
 // Graphics / Illustrations
 export * from './assets/graphics'
 

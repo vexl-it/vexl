@@ -1,4 +1,5 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import {KeyboardAvoidingView} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -12,7 +13,6 @@ import {
 import {andThenExpectBooleanNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import KeyboardAvoidingView from '../KeyboardAvoidingView'
 import ProgressJourney from '../ProgressJourney'
 import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'

@@ -1,10 +1,10 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {KeyboardAvoidingView} from '@vexl-next/ui'
 import React from 'react'
 import {BackHandler, StyleSheet} from 'react-native'
 import Animated, {FadeIn, SlideInDown} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, YStack} from 'tamagui'
-import KeyboardAvoidingView from './KeyboardAvoidingView'
 
 const styles = StyleSheet.create({
   backdrop: {

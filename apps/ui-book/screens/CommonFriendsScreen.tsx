@@ -19,6 +19,14 @@ const FEW_FRIENDS: readonly CommonFriend[] = [
   {id: '2', name: 'Stepan', avatarSource: vexlAvatarSource},
 ]
 
+const FRIENDS_WITHOUT_AVATAR: readonly CommonFriend[] = [
+  {id: '1', name: 'Anonymous'},
+  {id: '2', name: 'Marcel', avatarSource: vexlAvatarSource},
+  {id: '3', name: 'Unknown'},
+  {id: '4', name: 'Grafon', avatarSource: vexlAvatarSource},
+  {id: '5', name: 'No image'},
+]
+
 function ThemeGroup({
   theme,
 }: {
@@ -72,6 +80,23 @@ function ThemeGroup({
           friends={FEW_FRIENDS}
           onPress={() => {
             Alert.alert('Pressed', 'Few friends')
+          }}
+        />
+
+        <SizableText
+          fontFamily="$body"
+          fontWeight="600"
+          fontSize="$2"
+          color="$foregroundSecondary"
+          paddingTop="$3"
+        >
+          Without avatar (default placeholder)
+        </SizableText>
+        <CommonFriends
+          label="5 common friends"
+          friends={FRIENDS_WITHOUT_AVATAR}
+          onPress={() => {
+            Alert.alert('Pressed', 'Friends without avatar')
           }}
         />
 

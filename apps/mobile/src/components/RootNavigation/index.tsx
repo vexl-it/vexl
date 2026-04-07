@@ -37,6 +37,7 @@ import MyDonationsScreen from '../MyDonationsScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
+import SendMessageScreen from '../SendMessageScreen'
 import SetContactsScreen from '../SetContactsScreen'
 import TaskRegistryOverviewScreen from '../TaskRegistryOverviewScreen'
 import TodoScreen from '../TodoScreen'
@@ -88,6 +89,7 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="TodoScreen" component={TodoScreen} />
             <Stack.Screen name="PostLoginFlow" component={PostLoginFlow} />
             <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
+            <Stack.Screen name="SendMessage" component={SendMessageScreen} />
             <Stack.Screen name="CRUDOfferFlow" component={CRUDOfferFlow} />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />

@@ -13,6 +13,7 @@ import reportError from '../../utils/reportError'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {showErrorAlert} from '../ErrorAlert'
+import {globalDialogAtom} from '../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 
 export const showCommonFriendsExplanationActionAtom = atom(
@@ -58,33 +59,52 @@ export const showCommonFriendsExplanationActionAtom = atom(
   }
 )
 
+export const showNoCommonFriendsExplanationActionAtom = atom(
+  null,
+  (get, set, offer: OneOfferInState) => {
+    const {t} = get(translationAtom)
+    const isClubOffer =
+      offer.offerInfo.privatePart.friendLevel.length === 1 &&
+      offer.offerInfo.privatePart.friendLevel[0] === 'CLUB'
+
+    Effect.runFork(
+      set(globalDialogAtom, {
+        title: isClubOffer
+          ? t('offer.clubOffer.title')
+          : t('offer.noCommonFriends.title'),
+        subtitle: isClubOffer
+          ? t('offer.clubOffer.description')
+          : t('offer.noCommonFriends.description'),
+        positiveButtonText: t('common.gotIt'),
+      })
+    )
+  }
+)
+
 export const reportOfferActionAtom = atom(
   null,
   (get, set, offer: OneOfferInState) => {
     const {t} = get(translationAtom)
 
     return Effect.gen(function* (_) {
+      const confirmed = yield* _(
+        set(globalDialogAtom, {
+          title: t('offer.report.areYouSureTitle'),
+          subtitle: t('offer.report.areYouSureText'),
+          positiveButtonText: t('offer.report.yes'),
+          positiveButtonVariant: 'destructive',
+          negativeButtonText: t('common.cancel'),
+        })
+      )
+
+      if (!confirmed) return false
+
       const api = get(apiAtom)
       const isClubOffer =
         !!offer.offerInfo.privatePart.clubIds &&
         offer.offerInfo.privatePart.clubIds.length > 0
       const reportedFlagAtom = createSingleOfferReportedFlagAtom(
         offer.offerInfo.offerId
-      )
-
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'danger',
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('offer.report.areYouSureTitle'),
-              description: t('offer.report.areYouSureText'),
-              positiveButtonText: t('offer.report.yes'),
-              negativeButtonText: t('common.nope'),
-            },
-          ],
-        })
       )
 
       set(loadingOverlayDisplayedAtom, true)
@@ -152,18 +172,11 @@ export const reportOfferActionAtom = atom(
       set(loadingOverlayDisplayedAtom, false)
 
       yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('offer.report.thankYou'),
-              description: t('offer.report.inappropriateContentWasReported'),
-              positiveButtonText: t('common.continue'),
-            },
-          ],
-        }),
-        Effect.ignore
+        set(globalDialogAtom, {
+          title: t('offer.report.thankYou'),
+          subtitle: t('offer.report.inappropriateContentWasReported'),
+          positiveButtonText: t('common.continue'),
+        })
       )
 
       return true
@@ -186,7 +199,7 @@ export const reportOfferActionAtom = atom(
 
         if (e._tag === 'ReportOfferLimitReachedError') {
           Alert.alert(t('offer.report.reportLimitReached'))
-        } else if (e._tag !== 'UserDeclinedError') {
+        } else {
           showErrorAlert({
             title: t('common.somethingWentWrong'),
             description:

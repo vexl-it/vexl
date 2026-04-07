@@ -31,7 +31,7 @@ const ScreenFooterFrame = styled(Stack, {
   right: 0,
   paddingHorizontal: '$5',
   paddingTop: '$5',
-  paddingBottom: '$8',
+  paddingBottom: '$10',
 })
 
 const OverlayNavigationBarFrame = styled(Stack, {

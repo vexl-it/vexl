@@ -1,15 +1,16 @@
 'use server'
 
 import {decodeFormData} from '@/src/server/formData'
-import {createUserPublicApi} from '@/src/server/userApi'
 import {type ErrorFormState} from '@/src/shared/formState'
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Effect, Either, Schema} from 'effect'
 import {isRedirectError} from 'next/dist/client/components/redirect-error'
 import {redirect} from 'next/navigation'
 
 const deleteAccount1FormSchema = Schema.Struct({
-  phoneNumber: E164PhoneNumber,
+  phoneNumber: Schema.String,
+  turnstileToken: Schema.optionalWith(Schema.String, {
+    default: () => '',
+  }),
 })
 
 async function handleResponseError(error: {
@@ -52,10 +53,20 @@ export async function submitDeleteAccount1(
   formData: FormData
 ): Promise<ErrorFormState> {
   try {
-    const {phoneNumber} = decodeFormData(deleteAccount1FormSchema, formData)
+    const {phoneNumber: rawPhoneNumber, turnstileToken} = decodeFormData(
+      deleteAccount1FormSchema,
+      formData
+    )
+    const [{createUserPublicApi}, {E164PhoneNumber}] = await Promise.all([
+      import('@/src/server/userApi'),
+      import('@vexl-next/domain/src/general/E164PhoneNumber.brand'),
+    ])
+    const phoneNumber = Effect.runSync(
+      Schema.decodeUnknown(E164PhoneNumber)(rawPhoneNumber)
+    )
     const userApi = await createUserPublicApi()
     const result = await Effect.runPromise(
-      Effect.either(userApi.initEraseUser({phoneNumber}))
+      Effect.either(userApi.initEraseUser({phoneNumber, turnstileToken}))
     )
 
     if (Either.isLeft(result)) {
@@ -71,6 +82,12 @@ export async function submitDeleteAccount1(
       if (result.left._tag === 'PreviousCodeNotExpiredError') {
         return {
           error: 'A code was already sent recently. Please wait a bit.',
+        }
+      }
+
+      if (result.left._tag === 'TurnstileVerificationError') {
+        return {
+          error: 'Human verification failed. Please try again.',
         }
       }
 

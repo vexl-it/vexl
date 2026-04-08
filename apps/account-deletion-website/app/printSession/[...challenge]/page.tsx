@@ -1,7 +1,9 @@
 import PrintSessionForm from './PrintSessionForm'
 
 function normalizeRouteParam(value: string | string[]): string {
-  return Array.isArray(value) ? value.join('/') : value
+  const routeParam = Array.isArray(value) ? value.join('/') : value
+
+  return decodeURIComponent(routeParam)
 }
 
 export default async function PrintSessionPage({

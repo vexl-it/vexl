@@ -32,6 +32,7 @@ import {
   PreviousCodeNotExpiredError,
   SubmitUpgradeAuthRequest,
   SubmitUpgradeAuthResponse,
+  TurnstileVerificationError,
   UnableToGenerateChallengeError,
   UnableToGenerateSignatureError,
   UnableToSendVerificationSmsError,
@@ -107,6 +108,7 @@ export const InitEraseUserEndpoint = HttpApiEndpoint.post(
   .setHeaders(CommonHeaders)
   .setPayload(InitEraseUserRequest)
   .addSuccess(InitEraseUserResponse)
+  .addError(TurnstileVerificationError, {status: 400})
   .addError(UnableToSendVerificationSmsError, {status: 400})
   .addError(PreviousCodeNotExpiredError, {status: 400})
   .addError(UnsupportedVersionToLoginError, {status: 400})

@@ -1,11 +1,13 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {DELETE_ACCOUNT_INIT_TURNSTILE_ACTION} from '@vexl-next/rest-api/src/services/user/contracts'
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option} from 'effect'
 import {loginCodeDummyForAll} from '../../../configs'
 import {createVerification} from '../../../utils/smsVerificationUtils'
+import {TurnstileService} from '../../../utils/turnstile'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../../login/constants'
 import {createVerificationId, dummySid} from '../utils'
 
@@ -16,6 +18,14 @@ export const initEraseUserEndpoint = HttpApiBuilder.handler(
   (req) =>
     Effect.gen(function* (_) {
       const dummyCodeForAll = yield* _(loginCodeDummyForAll)
+      const turnstileService = yield* _(TurnstileService)
+
+      yield* _(
+        turnstileService.verifyToken({
+          expectedAction: DELETE_ACCOUNT_INIT_TURNSTILE_ACTION,
+          token: req.payload.turnstileToken,
+        })
+      )
 
       let sid
       if (Option.isSome(dummyCodeForAll)) sid = dummySid

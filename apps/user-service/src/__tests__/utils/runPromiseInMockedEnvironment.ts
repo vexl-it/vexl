@@ -17,6 +17,7 @@ import {type LoggedInUsersDbService} from '../../db/loggedInUsersDb'
 import {UserApiLive} from '../../httpServer'
 import {VerificationStateDbService} from '../../routes/login/db/verificationStateDb'
 import {mockedPreludeClient} from './mockedPreludeClient'
+import {mockedTurnstileClient} from './mockedTurnstileClient'
 import {mockedUsersDbService} from './mockedUsersDbService'
 
 export type MockedContexts =
@@ -48,6 +49,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(VerificationStateDbService.Live),
   Layer.provideMerge(mockedDashboardReportsService),
   Layer.provideMerge(mockedPreludeClient),
+  Layer.provideMerge(mockedTurnstileClient),
   Layer.provideMerge(universalContext)
 )
 

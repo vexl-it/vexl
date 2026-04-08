@@ -50,6 +50,14 @@ export const oldHmacKeyUsedForHashingNumbersConfig =
 
 export const preludeApiTokenConfig = Config.string('PRELUDE_API_TOKEN')
 
+export const turnstileSecretKeyConfig = Config.option(
+  Config.string('TURNSTILE_SECRET_KEY')
+)
+
+export const turnstileExpectedHostnameConfig = Config.option(
+  Config.string('TURNSTILE_EXPECTED_HOSTNAME')
+)
+
 export const verificationProviderConfig = Config.string(
   'VERIFICATION_PROVIDER'
 ).pipe(

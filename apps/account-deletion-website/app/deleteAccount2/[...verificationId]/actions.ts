@@ -1,17 +1,14 @@
 'use server'
 
-import {createContactsPublicApi} from '@/src/server/contactApi'
 import {decodeFormData} from '@/src/server/formData'
-import {createUserPublicApi} from '@/src/server/userApi'
 import {type ErrorFormState} from '@/src/shared/formState'
-import {EraseUserVerificationId} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Either, Schema} from 'effect'
 import {isRedirectError} from 'next/dist/client/components/redirect-error'
 import {redirect} from 'next/navigation'
 
 const deleteAccount2FormSchema = Schema.Struct({
   code: Schema.String,
-  verificationId: EraseUserVerificationId,
+  verificationId: Schema.String,
   debugData: Schema.optionalWith(Schema.BooleanFromString, {
     default: () => false,
   }),
@@ -22,9 +19,22 @@ export async function submitDeleteAccount2(
   formData: FormData
 ): Promise<ErrorFormState> {
   try {
-    const {code, debugData, verificationId} = decodeFormData(
-      deleteAccount2FormSchema,
-      formData
+    const {
+      code,
+      debugData,
+      verificationId: rawVerificationId,
+    } = decodeFormData(deleteAccount2FormSchema, formData)
+    const [
+      {createUserPublicApi},
+      {createContactsPublicApi},
+      {EraseUserVerificationId},
+    ] = await Promise.all([
+      import('@/src/server/userApi'),
+      import('@/src/server/contactApi'),
+      import('@vexl-next/rest-api/src/services/user/contracts'),
+    ])
+    const verificationId = Effect.runSync(
+      Schema.decodeUnknown(EraseUserVerificationId)(rawVerificationId)
     )
     const userApi = await createUserPublicApi()
     const contactsApi = await createContactsPublicApi()
@@ -38,6 +48,26 @@ export async function submitDeleteAccount2(
     )
 
     if (Either.isLeft(verificationResult)) {
+      if (verificationResult.left._tag === 'UnableToVerifySmsCodeError') {
+        if (verificationResult.left.reason === 'BadCode') {
+          return {
+            error: 'Wrong code provided.',
+          }
+        }
+
+        if (verificationResult.left.reason === 'Expired') {
+          return {
+            error: 'Verification expired. Please resend the code.',
+          }
+        }
+
+        if (verificationResult.left.reason === 'MaxAttemptsReached') {
+          return {
+            error: 'Too many attempts. Please resend the code and try again.',
+          }
+        }
+      }
+
       if (
         verificationResult.left._tag === 'VerificationNotFoundError' ||
         verificationResult.left._tag === 'InvalidVerificationError'

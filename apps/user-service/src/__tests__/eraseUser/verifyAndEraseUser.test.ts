@@ -32,6 +32,7 @@ const initVerification = Effect.gen(function* (_) {
       }),
       payload: {
         phoneNumber: phoneNumberToTest,
+        turnstileToken: 'valid-turnstile-token',
       },
     })
   )

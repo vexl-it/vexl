@@ -38,6 +38,7 @@ import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimit
 import {LoggedInUsersDbService} from './db/loggedInUsersDb'
 import {VerificationStateDbService} from './routes/login/db/verificationStateDb'
 import {PreludeService} from './utils/prelude'
+import {TurnstileService} from './utils/turnstile'
 
 const LoginApiGroupLive = HttpApiBuilder.group(
   UserApiSpecification,
@@ -101,6 +102,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(PreludeService.Live),
+  Layer.provideMerge(TurnstileService.Live),
   Layer.provideMerge(MetricsClientService.Live),
   Layer.provideMerge(
     DashboardReportsService.make({

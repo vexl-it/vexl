@@ -18,3 +18,9 @@ yarn workspace account-deletion-website build
 ```
 
 `BE_ENV` is resolved at runtime by the Next.js server and defaults to `stage` unless `BE_ENV=prod` is set.
+
+Turnstile protection for SMS initiation uses:
+
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `account-deletion-website`
+- `TURNSTILE_SECRET_KEY` in `user-service`
+- optional `TURNSTILE_EXPECTED_HOSTNAME` in `user-service` for hostname pinning

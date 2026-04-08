@@ -111,6 +111,18 @@ export class UnableToVerifySmsCodeError extends Schema.TaggedError<UnableToVerif
   status: Schema.Literal(400),
 }) {}
 
+export class TurnstileVerificationError extends Schema.TaggedError<TurnstileVerificationError>(
+  'TurnstileVerificationError'
+)('TurnstileVerificationError', {
+  reason: Schema.Literal(
+    'MissingToken',
+    'InvalidToken',
+    'HostnameMismatch',
+    'ActionMismatch'
+  ),
+  status: Schema.Literal(400),
+}) {}
+
 export class UnableToGenerateChallengeError extends Schema.TaggedError<UnableToGenerateChallengeError>(
   'UnableToGenerateChallengeError'
 )('UnableToGenerateChallengeError', {
@@ -250,8 +262,12 @@ export const EraseUserVerificationId = Schema.String.pipe(
 )
 export type EraseUserVerificationId = typeof EraseUserVerificationId.Type
 
+export const DELETE_ACCOUNT_INIT_TURNSTILE_ACTION =
+  'delete-account-init' as const
+
 export const InitEraseUserRequest = Schema.Struct({
   phoneNumber: E164PhoneNumber,
+  turnstileToken: Schema.String,
 })
 export type InitEraseUserRequest = typeof InitEraseUserRequest.Type
 

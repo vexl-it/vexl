@@ -506,6 +506,11 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
       calculateSatsValueOnFiatValueChangeActionAtom,
       String(filterFromStorage.singlePrice)
     )
+
+    if (!filterFromStorage.currency) {
+      const currency = get(defaultCurrencyAtom)
+      set(updateCurrencyLimitsAtom, {currency})
+    }
   }
 )
 

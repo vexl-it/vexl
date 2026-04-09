@@ -1,14 +1,14 @@
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
+import {Avatar, Loader, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
 import {userDataRealOrAnonymizedAtom} from '../../../../../state/session/userDataAtoms'
+import resolveLocalUri from '../../../../../utils/resolveLocalUri'
 import SvgImage from '../../../../Image'
 import checkmarkInCircleSvg from '../../../../images/checkmarkInCircleSvg'
-import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
-import UserAvatar from '../../../../UserAvatar'
 
 interface FriendLevelCellContentProps {
   loading?: boolean
@@ -58,37 +58,35 @@ function FriendLevelCell({
             </Stack>
             <SvgImage source={image} />
             <Stack pos="absolute" zi={100} top={16}>
-              <UserAvatar
-                height={type === 'FIRST' ? 50 : 25}
-                width={type === 'FIRST' ? 50 : 25}
-                userImage={userData.image}
-              />
+              {userData.image.type === 'imageUri' ? (
+                <Avatar
+                  customSize={type === 'FIRST' ? 50 : 25}
+                  source={{uri: resolveLocalUri(userData.image.imageUri)}}
+                />
+              ) : (
+                <Avatar customSize={type === 'FIRST' ? 50 : 25}>
+                  <SvgImage source={userData.image.svgXml} />
+                </Avatar>
+              )}
             </Stack>
           </Stack>
-          <Text
-            mt="$2"
-            mb="$1"
-            col={selected ? '$main' : '$greyOnBlack'}
-            ff="$body600"
-            fos={18}
+          <Typography
+            variant="paragraphDemibold"
+            marginTop="$2"
+            marginBottom="$1"
+            color={selected ? '$main' : '$greyOnBlack'}
           >
             {title}
-          </Text>
+          </Typography>
           <XStack ai="center" gap="$2">
-            {!!loading && (
-              <VexlActivityIndicator
-                size="xsmall"
-                bc={selected ? '$main' : '$greyOnBlack'}
-              />
-            )}
-            <Text
+            {!!loading && <Loader size="small" />}
+            <Typography
+              variant="description"
               textAlign="center"
-              col={selected ? '$main' : '$greyOnBlack'}
-              ff="$body500"
-              fos={14}
+              color={selected ? '$main' : '$greyOnBlack'}
             >
               {subtitle}
-            </Text>
+            </Typography>
           </XStack>
         </Stack>
       </TouchableOpacity>

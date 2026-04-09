@@ -8,6 +8,7 @@ import {
   OfferLocation,
   OneOfferInState,
   PaymentMethod,
+  ProductCategory,
   Sort,
   SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
@@ -109,6 +110,7 @@ export const OffersFilter = Schema.Struct({
   ),
   text: Schema.optional(Schema.String),
   clubsUuids: Schema.optional(Schema.Array(ClubUuid)),
+  productCategories: Schema.optional(Schema.Array(ProductCategory)),
 })
 export type OffersFilter = typeof OffersFilter.Type
 

@@ -15,7 +15,7 @@ import {
 
 export const offersFilterInitialState = {
   sort: undefined,
-  friendLevel: ['FIRST_DEGREE', 'SECOND_DEGREE'],
+  friendLevel: undefined,
   currency: undefined,
   location: undefined,
   locationState: undefined,
@@ -29,6 +29,7 @@ export const offersFilterInitialState = {
   text: undefined,
   singlePriceCurrency: getDefaultCurrency(),
   clubsUuids: undefined,
+  productCategories: undefined,
 } satisfies OffersFilter
 
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(

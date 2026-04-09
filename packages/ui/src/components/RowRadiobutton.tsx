@@ -1,9 +1,10 @@
 import React from 'react'
-import {RadioGroup, styled, useTheme} from 'tamagui'
+import {RadioGroup as TamaguiRadioGroup, styled, useTheme} from 'tamagui'
 
 import {RadiobuttonCircleEmpty} from '../icons/RadiobuttonCircleEmpty'
 import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import {SizableText, XStack, YStack} from '../primitives'
+import {useRadioGroupValue} from './RadioGroup'
 
 const RowRadiobuttonLabel = styled(SizableText, {
   name: 'RowRadiobuttonLabel',
@@ -47,28 +48,28 @@ const RowRadiobuttonDescription = styled(SizableText, {
   },
 })
 
-export interface RowRadiobuttonProps {
-  readonly value: string
-  readonly selected?: boolean
+export interface RowRadiobuttonProps<T extends string = string> {
+  readonly value: T
   readonly label: string
   readonly description?: string
   readonly disabled?: boolean
 }
 
-export function RowRadiobutton({
+export function RowRadiobutton<T extends string>({
   value,
-  selected = false,
   label,
   description,
   disabled,
-}: RowRadiobuttonProps): React.JSX.Element {
+}: RowRadiobuttonProps<T>): React.JSX.Element {
+  const radioGroupValue = useRadioGroupValue()
+  const selected = radioGroupValue === value
   const theme = useTheme()
   const iconColor = selected
     ? theme.accentHighlightPrimary.val
     : theme.foregroundPrimary.val
 
   return (
-    <RadioGroup.Item
+    <TamaguiRadioGroup.Item
       value={value}
       disabled={disabled}
       unstyled
@@ -97,6 +98,6 @@ export function RowRadiobutton({
           </RowRadiobuttonDescription>
         </YStack>
       ) : null}
-    </RadioGroup.Item>
+    </TamaguiRadioGroup.Item>
   )
 }

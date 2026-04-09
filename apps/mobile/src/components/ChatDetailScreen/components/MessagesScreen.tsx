@@ -1,6 +1,6 @@
 import {Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
@@ -20,7 +20,6 @@ function MessagesScreen(): React.ReactElement {
     publicKeyPemBase64Atom,
   } = useMolecule(chatMolecule)
   useStatusBarStyleForScreen('secondary')
-  const [showModal, setShowModal] = useAtom(showModalAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)

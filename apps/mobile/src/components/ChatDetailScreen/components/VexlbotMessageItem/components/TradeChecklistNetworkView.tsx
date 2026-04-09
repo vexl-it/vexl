@@ -11,7 +11,7 @@ import Button from '../../../../Button'
 import copySvg from '../../../../images/copySvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
 interface Props {
@@ -43,46 +43,43 @@ function TradeChecklistNetworkView({
     const isMessageOutdated =
       message.message.tradeChecklistUpdate.network.timestamp !==
       latestNetworkDataMessage?.networkData.timestamp
+    const description =
+      message.message.tradeChecklistUpdate.network.btcNetwork === 'LIGHTING'
+        ? t(
+            message.state === 'sent'
+              ? 'vexlbot.setNetworkToLightningByMe'
+              : 'vexlbot.setNetworkToLightningByThem',
+            {
+              username: otherSideData.userName,
+            }
+          )
+        : message.message.tradeChecklistUpdate.network.btcAddress
+          ? t('vexlbot.setNetworkToOnChainWithBtcAddress', {
+              btcAddress:
+                message.message.tradeChecklistUpdate.network.btcAddress,
+              username:
+                message.state === 'sent'
+                  ? t('common.you')
+                  : otherSideData.userName,
+            })
+          : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
+              username:
+                message.state === 'sent'
+                  ? `${t('common.you')}`
+                  : otherSideData.userName,
+            })} ${
+              message.state === 'sent'
+                ? t('vexlbot.dontForgetToGenerateAddress')
+                : t('vexlbot.btcAddressWillBeProvided')
+            }`
 
     return (
       <>
-        <VexlbotBubble
-          messageState={message.state}
-          username={otherSideData.userName}
-          status={
-            isMessageOutdated ? ('outdated' as const) : ('noStatus' as const)
-          }
-          text={
-            message.message.tradeChecklistUpdate.network.btcNetwork ===
-            'LIGHTING'
-              ? t(
-                  message.state === 'sent'
-                    ? 'vexlbot.setNetworkToLightningByMe'
-                    : 'vexlbot.setNetworkToLightningByThem',
-                  {
-                    username: otherSideData.userName,
-                  }
-                )
-              : message.message.tradeChecklistUpdate.network.btcAddress
-                ? t('vexlbot.setNetworkToOnChainWithBtcAddress', {
-                    btcAddress:
-                      message.message.tradeChecklistUpdate.network.btcAddress,
-                    username:
-                      message.state === 'sent'
-                        ? t('common.you')
-                        : otherSideData.userName,
-                  })
-                : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
-                    username:
-                      message.state === 'sent'
-                        ? `${t('common.you')}`
-                        : otherSideData.userName,
-                  })} ${
-                    message.state === 'sent'
-                      ? t('vexlbot.dontForgetToGenerateAddress')
-                      : t('vexlbot.btcAddressWillBeProvided')
-                  }`
-          }
+        <VexlbotActionCard
+          description={description}
+          statusLabel={isMessageOutdated ? t('common.outdated') : undefined}
+          statusVariant="outdated"
+          title={t('tradeChecklist.options.SET_NETWORK')}
         >
           {message.message.tradeChecklistUpdate.network.btcNetwork ===
             'ON_CHAIN' &&
@@ -102,7 +99,7 @@ function TradeChecklistNetworkView({
                 iconFill={getTokens().color.main.val}
               />
             )}
-        </VexlbotBubble>
+        </VexlbotActionCard>
         {Option.isSome(lastTradeChecklistMessage) &&
           lastTradeChecklistMessage.value.message.uuid ===
             message.message.uuid && <VexlbotNextActionSuggestion />}

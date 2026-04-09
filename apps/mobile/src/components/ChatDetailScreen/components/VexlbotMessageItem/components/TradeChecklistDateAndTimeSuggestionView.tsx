@@ -4,9 +4,8 @@ import {useAtomValue} from 'jotai'
 import React from 'react'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 
 function TradeChecklistDateAndTimeSuggestionView(): React.ReactElement | null {
   const {t} = useTranslation()
@@ -25,23 +24,21 @@ function TradeChecklistDateAndTimeSuggestionView(): React.ReactElement | null {
   if (dateAndTimePending) return null
 
   return (
-    <VexlbotBubble text={t('vexlbot.agreeOnPreferredDateAndTime')}>
-      <Button
-        onPress={() => {
-          navigation.navigate('TradeChecklistFlow', {
-            screen: 'ChooseAvailableDays',
-            chatId,
-            inboxKey,
-            params: {
-              chosenDateTimes: tradeChecklistDateAndTimeData.sent?.suggestions,
-            },
-          })
-        }}
-        size="medium"
-        variant="secondary"
-        text={t('vexlbot.setDateAndTime')}
-      />
-    </VexlbotBubble>
+    <VexlbotActionCard
+      buttonText={t('vexlbot.setDateAndTime')}
+      description={t('vexlbot.agreeOnPreferredDateAndTime')}
+      onPress={() => {
+        navigation.navigate('TradeChecklistFlow', {
+          screen: 'ChooseAvailableDays',
+          chatId,
+          inboxKey,
+          params: {
+            chosenDateTimes: tradeChecklistDateAndTimeData.sent?.suggestions,
+          },
+        })
+      }}
+      title={t('tradeChecklist.options.DATE_AND_TIME')}
+    />
   )
 }
 

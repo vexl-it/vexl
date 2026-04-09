@@ -4,9 +4,8 @@ import {useAtomValue} from 'jotai'
 import React from 'react'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 
 function TradeChecklistNetworkSuggestionView(): React.ReactElement | null {
   const {t} = useTranslation()
@@ -28,21 +27,19 @@ function TradeChecklistNetworkSuggestionView(): React.ReactElement | null {
   if (agreedOnNetwork || shouldHideNetworkCellForTradeChecklist) return null
 
   return (
-    <VexlbotBubble text={t('vexlbot.agreeOnPreferredNetwork')}>
-      <Button
-        onPress={() => {
-          navigation.navigate('TradeChecklistFlow', {
-            screen: 'Network',
-            chatId,
-            inboxKey,
-            params: {networkData: undefined},
-          })
-        }}
-        size="medium"
-        variant="secondary"
-        text={t('tradeChecklist.options.SET_NETWORK')}
-      />
-    </VexlbotBubble>
+    <VexlbotActionCard
+      buttonText={t('tradeChecklist.options.SET_NETWORK')}
+      description={t('vexlbot.agreeOnPreferredNetwork')}
+      onPress={() => {
+        navigation.navigate('TradeChecklistFlow', {
+          screen: 'Network',
+          chatId,
+          inboxKey,
+          params: {networkData: undefined},
+        })
+      }}
+      title={t('tradeChecklist.options.SET_NETWORK')}
+    />
   )
 }
 

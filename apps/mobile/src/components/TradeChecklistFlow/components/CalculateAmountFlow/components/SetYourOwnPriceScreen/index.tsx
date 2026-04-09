@@ -4,16 +4,11 @@ import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/d
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
 import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
-import {
   ownPriceSaveButtonDisabledAtom,
   saveYourPriceActionAtom,
 } from '../../../../../TradeCalculator/atoms'
 import SetYourOwnPrice from '../../../../../TradeCalculator/components/SetYourOwnPrice'
-import Content from '../../../Content'
+import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 
 function SetYourOwnPriceScreen(): React.ReactElement {
   const {t} = useTranslation()
@@ -25,25 +20,24 @@ function SetYourOwnPriceScreen(): React.ReactElement {
   const saveYourPrice = useSetAtom(saveYourPriceActionAtom)
 
   return (
-    <>
-      <HeaderProxy
-        title={t('tradeChecklist.calculateAmount.setYourOwnPrice')}
-      />
-      <Content scrollable>
-        <SetYourOwnPrice />
-      </Content>
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy
-        disabled={ownPriceSaveButtonDisabled}
-        onPress={() => {
+    <TradeChecklistItemPageLayout
+      header={{
+        title: t('tradeChecklist.calculateAmount.setYourOwnPrice'),
+      }}
+      bottomButton={{
+        disabled: ownPriceSaveButtonDisabled,
+        onPress: () => {
           void dismissKeyboardAndResolveOnLayoutUpdate().then(() => {
             saveYourPrice()
             goBack()
           })
-        }}
-        text={t('common.save')}
-      />
-    </>
+        },
+        text: t('common.save'),
+        variant: 'secondary',
+      }}
+    >
+      <SetYourOwnPrice />
+    </TradeChecklistItemPageLayout>
   )
 }
 

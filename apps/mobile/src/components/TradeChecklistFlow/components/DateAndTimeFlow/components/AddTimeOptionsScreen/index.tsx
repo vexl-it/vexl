@@ -2,7 +2,7 @@ import {
   effectToTask,
   effectToTaskEither,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Typography, lightTheme, tokens} from '@vexl-next/ui'
+import {Typography, lightTheme} from '@vexl-next/ui'
 import {Array as ArrayE, Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
@@ -15,11 +15,6 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../../../../AreYouSureDialog'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
-import {
   addDateAndTimeSuggestionsActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../atoms/updatesToBeSentAtom'
@@ -27,7 +22,7 @@ import {
   MINIMUM_AVAILABLE_DAYS_THRESHOLD,
   useWasOpenFromAgreeOnTradeDetailsScreen,
 } from '../../../../utils'
-import Content from '../../../Content'
+import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   isThereAnyAvailableDateTimeSelectedAtom,
   isThereAnyOutdatedDateTimeAtom,
@@ -162,64 +157,48 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   ])
 
   return (
-    <>
-      <HeaderProxy
-        title={t('tradeChecklist.dateAndTime.screenTitle')}
-        onClose={() => {
-          if (shouldSendOnSubmit) {
-            navigation.navigate('ChatDetail', store.get(chatWithMessagesKeys))
-          } else {
-            navigation.navigate('AgreeOnTradeDetails')
-          }
-        }}
-      />
-      <Content scrollable>
-        <Stack
-          pt={tokens.space[4].val}
-          pb={tokens.space[13].val}
-          gap={tokens.space[5].val}
-        >
-          <Stack gap={tokens.space[3].val}>
-            <Typography variant="description" color="$foregroundSecondary">
-              Pick when you&apos;re free. Use the toggle below to apply times to
-              all days.
-            </Typography>
-          </Stack>
-          <Stack
-            gap={tokens.space[3].val}
-            backgroundColor={lightTheme.backgroundPrimary}
-          >
-            {pipe(
-              uniqueAvailableDates,
-              ArrayE.map((date) => (
-                <TimeOptionsPerDate
-                  key={date}
-                  date={date}
-                  expanded={expandedDate === date}
-                  onExpand={() => {
-                    animateExpandedDateChange((currentExpandedDate) =>
-                      currentExpandedDate === date ? null : date
-                    )
-                  }}
-                  onCollapse={() => {
-                    animateExpandedDateChange(null)
-                  }}
-                />
-              ))
-            )}
-          </Stack>
-        </Stack>
-      </Content>
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy
-        text={t('common.continue')}
-        disabled={
+    <TradeChecklistItemPageLayout
+      header={{
+        title: t('tradeChecklist.dateAndTime.screenTitle'),
+      }}
+      bottomButton={{
+        disabled:
           uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD ||
-          !isThereAnyAvailableDateTimeSelected
-        }
-        onPress={onSavePress}
-      />
-    </>
+          !isThereAnyAvailableDateTimeSelected,
+        text: t('common.continue'),
+        onPress: onSavePress,
+      }}
+    >
+      <Stack pt="$4" pb="$13" gap="$5">
+        <Stack gap="$3">
+          <Typography variant="description" color="$foregroundSecondary">
+            {isThereAnyAvailableDateTimeSelected ? 'true' : 'false'}
+            Pick when you&apos;re free. Use the toggle below to apply times to
+            all days.
+          </Typography>
+        </Stack>
+        <Stack gap="$3" backgroundColor={lightTheme.backgroundPrimary}>
+          {pipe(
+            uniqueAvailableDates,
+            ArrayE.map((date) => (
+              <TimeOptionsPerDate
+                key={date}
+                date={date}
+                expanded={expandedDate === date}
+                onExpand={() => {
+                  animateExpandedDateChange((currentExpandedDate) =>
+                    currentExpandedDate === date ? null : date
+                  )
+                }}
+                onCollapse={() => {
+                  animateExpandedDateChange(null)
+                }}
+              />
+            ))
+          )}
+        </Stack>
+      </Stack>
+    </TradeChecklistItemPageLayout>
   )
 }
 

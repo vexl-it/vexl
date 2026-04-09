@@ -15,13 +15,8 @@ import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMilliseco
 import Calendar, {
   REACT_NATIVE_CALENDARS_DATE_FORMAT,
 } from '../../../../Calendar'
-import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../PageWithNavigationHeader'
 import {MINIMUM_AVAILABLE_DAYS_THRESHOLD} from '../../../utils'
-import Content from '../../Content'
+import {TradeChecklistItemPageLayout} from '../../TradeChecklistItemPageLayout'
 import {
   handleAvailableDaysChangeActionAtom,
   setAvailableDateTimesActionAtom,
@@ -74,32 +69,31 @@ function ChooseAvailableDaysScreen({
   }, [chosenDateTimes, setAvailableDateTimes])
 
   return (
-    <>
-      <HeaderProxy title={t('tradeChecklist.dateAndTime.screenTitle')} />
-      <Content scrollable>
-        <Stack f={1} mt="$5" mb="$7">
-          <Typography color="$foregroundSecondary" variant="description">
-            {t('tradeChecklist.dateAndTime.selectDates.description')}
-          </Typography>
-          <Stack mt="$7">
-            <Calendar
-              markedDates={markedDates}
-              onDayPress={handleAvailableDaysChange}
-            />
-          </Stack>
-        </Stack>
-      </Content>
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy
-        disabled={
-          uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD
-        }
-        text={t('common.continue')}
-        onPress={() => {
+    <TradeChecklistItemPageLayout
+      header={{
+        title: t('tradeChecklist.dateAndTime.screenTitle'),
+      }}
+      bottomButton={{
+        disabled:
+          uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD,
+        text: t('common.continue'),
+        onPress: () => {
           navigation.navigate('AddTimeOptions')
-        }}
-      />
-    </>
+        },
+      }}
+    >
+      <Stack f={1} mt="$5" mb="$7">
+        <Typography color="$foregroundSecondary" variant="description">
+          {t('tradeChecklist.dateAndTime.selectDates.description')}
+        </Typography>
+        <Stack mt="$7">
+          <Calendar
+            markedDates={markedDates}
+            onDayPress={handleAvailableDaysChange}
+          />
+        </Stack>
+      </Stack>
+    </TradeChecklistItemPageLayout>
   )
 }
 

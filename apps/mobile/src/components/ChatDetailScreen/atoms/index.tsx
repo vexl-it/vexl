@@ -1247,7 +1247,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   return {
-    showModalAtom: atom<boolean>(false),
     chatAtom,
     nameAtom,
     chatWithMessagesAtom,

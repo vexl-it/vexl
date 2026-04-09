@@ -330,6 +330,26 @@ export const offerFormMolecule = molecule(() => {
     'amountTopLimit'
   )
 
+  const amountBottomLimitForRangeInputAtom = atom(
+    (get): number => get(amountBottomLimitAtom) ?? 0,
+    (get, set, update: SetStateAction<number>) => {
+      const value = getValueFromSetStateActionOfAtom(update)(
+        () => get(amountBottomLimitAtom) ?? 0
+      )
+      set(amountBottomLimitAtom, value)
+    }
+  )
+
+  const amountTopLimitForRangeInputAtom = atom(
+    (get): number => get(amountTopLimitAtom) ?? 0,
+    (get, set, update: SetStateAction<number>) => {
+      const value = getValueFromSetStateActionOfAtom(update)(
+        () => get(amountTopLimitAtom) ?? 0
+      )
+      set(amountTopLimitAtom, value)
+    }
+  )
+
   const updateCurrencyLimitsAtom = atom<
     null,
     [{currency: CurrencyCode | undefined}],
@@ -1367,7 +1387,9 @@ export const offerFormMolecule = molecule(() => {
     createOfferActionAtom,
     currencyAtom,
     amountBottomLimitAtom,
+    amountBottomLimitForRangeInputAtom,
     amountTopLimitAtom,
+    amountTopLimitForRangeInputAtom,
     listingTypeAtom,
     offerTypeAtom,
     feeAmountAtom,

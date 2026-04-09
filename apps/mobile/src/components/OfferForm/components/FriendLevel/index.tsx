@@ -31,16 +31,16 @@ const friendLevelSubtitleAtom = atom((get) => {
     })
 
     return {
-      firstFriendLevelText: t('offerForm.friendLevel.noVexlers'),
-      secondFriendLevelText: t('offerForm.friendLevel.noVexlers'),
+      firstFriendLevelText: t('offerForm.friendLevel.noPeople'),
+      secondFriendLevelText: t('offerForm.friendLevel.noPeople'),
     }
   }
 
   return {
-    firstFriendLevelText: t('offerForm.friendLevel.reachVexlers', {
+    firstFriendLevelText: t('offerForm.friendLevel.reachPeople', {
       count: numberOfFriends.firstLevelFriendsCount,
     }),
-    secondFriendLevelText: t('offerForm.friendLevel.reachVexlers', {
+    secondFriendLevelText: t('offerForm.friendLevel.reachPeople', {
       count: numberOfFriends.firstAndSecondLevelFriendsCount,
     }),
   }
@@ -48,11 +48,13 @@ const friendLevelSubtitleAtom = atom((get) => {
 
 interface Props {
   hideSubtitle?: boolean
+  subtitles?: {first: string; second: string}
   intendedConnectionLevelAtom: Atom<IntendedConnectionLevel | undefined>
 }
 
 function FriendLevel({
   hideSubtitle,
+  subtitles: customSubtitles,
   intendedConnectionLevelAtom,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -71,7 +73,10 @@ function FriendLevel({
         type="FIRST"
         onPress={setIntendedConnectionLevel}
         title={t('offerForm.friendLevel.firstDegree')}
-        subtitle={!hideSubtitle ? subtitle.firstFriendLevelText : undefined}
+        subtitle={
+          customSubtitles?.first ??
+          (!hideSubtitle ? subtitle.firstFriendLevelText : undefined)
+        }
       />
       <FriendLevelCell
         loading={numberOfFriends.state === 'loading'}
@@ -80,7 +85,10 @@ function FriendLevel({
         type="ALL"
         onPress={setIntendedConnectionLevel}
         title={t('offerForm.friendLevel.secondDegree')}
-        subtitle={!hideSubtitle ? subtitle.secondFriendLevelText : undefined}
+        subtitle={
+          customSubtitles?.second ??
+          (!hideSubtitle ? subtitle.secondFriendLevelText : undefined)
+        }
       />
     </XStack>
   )

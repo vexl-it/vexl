@@ -18,6 +18,16 @@ export interface FilterBarItem<T> {
   readonly value: T
 }
 
+export function toggleValueInSet<T>(set: ReadonlySet<T>, value: T): Set<T> {
+  const next = new Set(set)
+  if (next.has(value)) {
+    next.delete(value)
+  } else {
+    next.add(value)
+  }
+  return next
+}
+
 export interface FilterBarProps<T> {
   readonly items: ReadonlyArray<FilterBarItem<T>>
   readonly selectedValues: ReadonlySet<T>
@@ -122,13 +132,7 @@ export function FilterBar<T>({
     (index: number) => {
       const item = items[index]
       if (!item) return
-      const next = new Set(selectedValues)
-      if (next.has(item.value)) {
-        next.delete(item.value)
-      } else {
-        next.add(item.value)
-      }
-      onSelectedValuesChange(next)
+      onSelectedValuesChange(toggleValueInSet(selectedValues, item.value))
       scrollToReveal(index)
     },
     [items, selectedValues, onSelectedValuesChange, scrollToReveal]

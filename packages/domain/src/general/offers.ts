@@ -55,6 +55,23 @@ export type OfferType = typeof OfferType.Type
 export const ListingType = Schema.Literal('BITCOIN', 'PRODUCT', 'OTHER')
 export type ListingType = typeof ListingType.Type
 
+export const ProductCategory = Schema.Literal(
+  'PRECIOUS_METALS',
+  'PRODUCE',
+  'ELECTRONICS',
+  'ASSETS',
+  'OTHERS'
+)
+export type ProductCategory = typeof ProductCategory.Type
+
+export const productCategoryOptions: ProductCategory[] = [
+  'PRECIOUS_METALS',
+  'PRODUCE',
+  'ELECTRONICS',
+  'ASSETS',
+  'OTHERS',
+]
+
 export const DeliveryMethod = Schema.Literal('PICKUP', 'DELIVERY')
 export type DeliveryMethod = typeof DeliveryMethod.Type
 
@@ -179,6 +196,7 @@ export const OfferPublicPart = Schema.Struct({
   active: Schema.Boolean,
   groupUuids: Schema.Array(Schema.String),
   listingType: Schema.optional(ListingType),
+  productCategory: Schema.optional(ProductCategory),
   // Accepts both NotificationCypher (legacy encrypted) and VexlNotificationToken (new system)
   // For backwards compatibility, vexlNotificationToken is also stored here
   fcmCypher: Schema.optional(

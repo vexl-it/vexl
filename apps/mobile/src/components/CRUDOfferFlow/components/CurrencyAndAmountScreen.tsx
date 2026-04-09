@@ -16,8 +16,8 @@ function CurrencyAndAmountScreen(): React.ReactElement {
   const {
     currencyAtom,
     updateCurrencyLimitsAtom,
-    amountTopLimitAtom,
-    amountBottomLimitAtom,
+    amountTopLimitForRangeInputAtom,
+    amountBottomLimitForRangeInputAtom,
     offerTypeOrDummyValueAtom,
     expirationDateAtom,
     offerExpirationModalVisibleAtom,
@@ -38,8 +38,8 @@ function CurrencyAndAmountScreen(): React.ReactElement {
         image={amountOfTransactionSvg}
       >
         <AmountOfTransaction
-          amountTopLimitAtom={amountTopLimitAtom}
-          amountBottomLimitAtom={amountBottomLimitAtom}
+          amountTopLimitAtom={amountTopLimitForRangeInputAtom}
+          amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
           currencyAtom={currencyAtom}
         />
       </Section>

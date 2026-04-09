@@ -1,17 +1,13 @@
 import {useNavigation} from '@react-navigation/native'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {
-  Dot,
-  DotTypingIndicator,
+  ChatMessageItem,
   Stack,
-  Typography,
-  XStack,
-  YStack,
+  type ChatMessageItemVariant,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import React, {useMemo, useRef} from 'react'
-import {TouchableOpacity} from 'react-native'
 import Swipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
@@ -22,15 +18,29 @@ import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import {realUserNameAtom} from '../../../../../state/session/userDataAtoms'
 import {getChatDisplayName} from '../../../../../utils/chat/getChatDisplayName'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
+import formatChatTime from '../../../../ChatDetailScreen/utils/formatChatTime'
 import UserAvatar from '../../../../UserAvatar'
 import {deleteChatFromListActionAtom} from '../atoms'
+import {getMessagePreviewText} from '../utils/getMessagePreviewText'
 import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
-import LastMessageDateView from './LastMessageDateView'
-import MessagePreview from './LastMessagePreview'
 
 export interface ChatListData {
   chat: Chat
   lastMessage: ChatMessageWithState
+}
+
+function getPreviewVariant(color?: string): ChatMessageItemVariant {
+  switch (color) {
+    case '$green':
+      return 'success'
+    case '$red':
+      return 'destructive'
+    case '$main':
+      return 'highlighted'
+    default:
+      return 'default'
+  }
 }
 
 function ChatListItem({
@@ -72,6 +82,7 @@ function ChatListItem({
   const isTyping = useAtomValue(
     useMemo(() => createIsOtherSideTypingAtom(chatInfo.id), [chatInfo.id])
   )
+  const lastMessage = useAtomValue(lastMessageAtom)
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
   const realUserName = useAtomValue(realUserNameAtom)
@@ -83,88 +94,60 @@ function ChatListItem({
     userName: realUserName,
     t,
   })
+  const preview = getMessagePreviewText({
+    messageWithState: lastMessage,
+    name: userName,
+    t,
+  })
+  const time = formatChatTime(
+    unixMillisecondsToLocaleDateTime(lastMessage.message.time)
+  )
 
   return (
-    <TouchableOpacity
-      onPress={() => {
-        navigation.navigate('ChatDetail', {
-          otherSideKey: chatInfo.otherSide.publicKey,
-          inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
-        })
-      }}
-    >
-      <Stack>
-        <Swipeable
-          ref={swipeableRef}
-          renderRightActions={() => (
-            <ChatListItemRightSwipeActions
-              onPress={() => {
-                void deleteChatFromList({
-                  otherSideKey: chatInfo.otherSide.publicKey,
-                  inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
-                  skipAsk: otherSideLeft,
-                })
-                swipeableRef.current?.close()
-              }}
-            />
-          )}
-        >
-          <XStack
-            paddingVertical="$4"
-            paddingHorizontal="$5"
-            gap="$5"
-            ai="center"
-            backgroundColor="$backgroundPrimary"
-          >
-            <Stack h="$9" w="$9">
-              <UserAvatar
-                grayScale={otherSideLeft}
-                userImage={userAvatar}
-                width={40}
-                height={40}
-              />
-            </Stack>
-            <YStack jc="space-between" alignSelf="stretch" f={1} py="$1">
-              <XStack jc="flex-start" gap="$2" alignItems="flex-start">
-                {!!displayName && (
-                  <Typography
-                    color="$foregroundPrimary"
-                    variant="paragraphSmall"
-                  >
-                    {displayName}
-                  </Typography>
-                )}
-                {!!isUnread && (
-                  <Dot
-                    mt={3}
-                    variant="small"
-                    backgroundColor="$accentHighlightSecondary"
-                  />
-                )}
-              </XStack>
-              <XStack jc="space-between">
-                {isTyping ? (
-                  <DotTypingIndicator />
-                ) : (
-                  <MessagePreview
-                    lastMessageAtom={lastMessageAtom}
-                    name={userName}
-                    unread={isUnread}
-                    f={1}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                    mr="$3"
-                  />
-                )}
-                <Typography color="$foregroundSecondary" variant="description">
-                  <LastMessageDateView lastMessageAtom={lastMessageAtom} />
-                </Typography>
-              </XStack>
-            </YStack>
-          </XStack>
-        </Swipeable>
-      </Stack>
-    </TouchableOpacity>
+    <Stack>
+      <Swipeable
+        ref={swipeableRef}
+        renderRightActions={() => (
+          <ChatListItemRightSwipeActions
+            onPress={() => {
+              void deleteChatFromList({
+                otherSideKey: chatInfo.otherSide.publicKey,
+                inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
+                skipAsk: otherSideLeft,
+              })
+              swipeableRef.current?.close()
+            }}
+          />
+        )}
+      >
+        <Stack paddingHorizontal="$5" backgroundColor="$backgroundPrimary">
+          <ChatMessageItem
+            avatar={
+              <Stack h="$9" w="$9">
+                <UserAvatar
+                  grayScale={otherSideLeft}
+                  userImage={userAvatar}
+                  width={40}
+                  height={40}
+                />
+              </Stack>
+            }
+            name={displayName ?? ''}
+            message={preview.text}
+            time={time}
+            unread={isUnread}
+            variant={getPreviewVariant(preview.color)}
+            isTyping={isTyping}
+            onPress={() => {
+              navigation.navigate('ChatDetail', {
+                otherSideKey: chatInfo.otherSide.publicKey,
+                inboxKey: chatInfo.inbox.privateKey.publicKeyPemBase64,
+              })
+            }}
+          />
+        </Stack>
+      </Swipeable>
+    </Stack>
   )
 }
 

@@ -3,7 +3,7 @@ import {ScrollView} from 'react-native'
 import {Stack} from 'tamagui'
 
 interface Props {
-  children: React.ReactElement | React.ReactElement[]
+  children: React.ReactNode
   scrollable?: boolean
 }
 
@@ -13,7 +13,9 @@ function Content({children, scrollable}: Props): React.ReactElement {
       {scrollable ? (
         <ScrollView showsVerticalScrollIndicator={false}>{children}</ScrollView>
       ) : (
-        <Stack f={1}>{children}</Stack>
+        <Stack f={1} p="$5">
+          {children}
+        </Stack>
       )}
     </Stack>
   )

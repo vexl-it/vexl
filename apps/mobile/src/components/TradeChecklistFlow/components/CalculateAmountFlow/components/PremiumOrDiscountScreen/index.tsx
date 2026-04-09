@@ -4,14 +4,9 @@ import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
-import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
 import {feeAmountAtom} from '../../../../../TradeCalculator/atoms'
 import PremiumOrDiscount from '../../../../../TradeCalculator/components/PremiumOrDiscount'
-import Content from '../../../Content'
+import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   applyFeeOnFeeChangeActionAtom,
   isMineOfferAtom,
@@ -41,35 +36,35 @@ function PremiumOrDiscountScreen(): React.ReactElement {
   )
 
   return (
-    <>
-      <HeaderProxy
-        title={t('tradeChecklist.calculateAmount.premiumOrDiscount')}
-      />
-      <Content scrollable>
-        <Typography
-          variant="paragraphSmall"
-          color="$foregroundSecondary"
-          mt="$2"
-          mb="$4"
-        >
-          {iAmTheBuyer
-            ? t('offerForm.buyCheaperByUsingDiscount')
-            : t('offerForm.sellFasterWithDiscount')}
-        </Typography>
-        <PremiumOrDiscount
-          iAmTheBuyer={iAmTheBuyer}
-          tempFeeAmountAtom={tempFeeAmountAtom}
-        />
-      </Content>
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy
-        onPress={() => {
+    <TradeChecklistItemPageLayout
+      header={{
+        title: t('tradeChecklist.calculateAmount.premiumOrDiscount'),
+      }}
+      bottomButton={{
+        onPress: () => {
           applyFeeOnFeeChange(tempFeeAmount)
           goBack()
-        }}
-        text={t('common.save')}
+        },
+        text: t('common.save'),
+        disabled: false,
+        variant: 'secondary',
+      }}
+    >
+      <Typography
+        variant="paragraphSmall"
+        color="$foregroundSecondary"
+        mt="$2"
+        mb="$4"
+      >
+        {iAmTheBuyer
+          ? t('offerForm.buyCheaperByUsingDiscount')
+          : t('offerForm.sellFasterWithDiscount')}
+      </Typography>
+      <PremiumOrDiscount
+        iAmTheBuyer={iAmTheBuyer}
+        tempFeeAmountAtom={tempFeeAmountAtom}
       />
-    </>
+    </TradeChecklistItemPageLayout>
   )
 }
 

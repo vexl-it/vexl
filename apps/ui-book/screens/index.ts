@@ -25,6 +25,7 @@ import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
 import {InputHintScreen} from './InputHintScreen'
+import {LoaderScreen} from './LoaderScreen'
 import {MenuItemScreen} from './MenuItemScreen'
 import {MenuScreen} from './MenuScreen'
 import {NavButtonScreen} from './NavButtonScreen'
@@ -33,6 +34,7 @@ import {NoteScreen} from './NoteScreen'
 import {NotificationCardScreen} from './NotificationCardScreen'
 import {OfferCardScreen} from './OfferCardScreen'
 import {PickerScreen} from './PickerScreen'
+import {PriceRangeInputScreen} from './PriceRangeInputScreen'
 import {ReachStatsScreen} from './ReachStatsScreen'
 import {RowButtonScreen} from './RowButtonScreen'
 import {RowCheckboxScreen} from './RowCheckboxScreen'
@@ -83,6 +85,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},
   {label: 'Input Hint', component: InputHintScreen},
+  {label: 'Loader', component: LoaderScreen},
   {label: 'Menu', component: MenuScreen},
   {label: 'Menu Item', component: MenuItemScreen},
   {label: 'Nav Button', component: NavButtonScreen},
@@ -91,6 +94,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Notification Card', component: NotificationCardScreen},
   {label: 'Offer Card', component: OfferCardScreen},
   {label: 'Picker', component: PickerScreen},
+  {label: 'Price Range Input', component: PriceRangeInputScreen},
   {label: 'Reach Stats', component: ReachStatsScreen},
   {label: 'Row Button', component: RowButtonScreen},
   {label: 'Row Checkbox', component: RowCheckboxScreen},

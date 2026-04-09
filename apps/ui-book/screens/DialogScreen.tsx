@@ -9,6 +9,7 @@ import {
   Theme,
   YStack,
 } from '@vexl-next/ui'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useMemo, useState} from 'react'
 
@@ -29,12 +30,14 @@ function DialogDemos({
         variant="primary"
         size="medium"
         onPress={() => {
-          void showDialog({
-            title: 'Market unlocked!',
-            subtitle:
-              'Browse offers for Bitcoin, products, and services. Use filters to find what you need.',
-            positiveButtonText: 'Okay',
-          })
+          void Effect.runPromise(
+            showDialog({
+              title: 'Market unlocked!',
+              subtitle:
+                'Browse offers for Bitcoin, products, and services. Use filters to find what you need.',
+              positiveButtonText: 'Okay',
+            })
+          )
         }}
       >
         Single button
@@ -44,12 +47,14 @@ function DialogDemos({
         variant="secondary"
         size="medium"
         onPress={() => {
-          void showDialog({
-            title: 'Nice number',
-            subtitle: `We've got your number as 773 777 888. If that's not right, you can change it below.`,
-            positiveButtonText: 'Confirm',
-            negativeButtonText: 'Not now',
-          }).then((confirmed) => {
+          void Effect.runPromise(
+            showDialog({
+              title: 'Nice number',
+              subtitle: `We've got your number as 773 777 888. If that's not right, you can change it below.`,
+              positiveButtonText: 'Confirm',
+              negativeButtonText: 'Not now',
+            })
+          ).then((confirmed: boolean) => {
             console.log('Confirmed:', confirmed)
           })
         }}
@@ -61,13 +66,15 @@ function DialogDemos({
         variant="destructive"
         size="medium"
         onPress={() => {
-          void showDialog({
-            title: 'Delete offer?',
-            subtitle:
-              'This action cannot be undone. Your offer will be removed permanently.',
-            positiveButtonText: 'Delete',
-            negativeButtonText: 'Cancel',
-          }).then((confirmed) => {
+          void Effect.runPromise(
+            showDialog({
+              title: 'Delete offer?',
+              subtitle:
+                'This action cannot be undone. Your offer will be removed permanently.',
+              positiveButtonText: 'Delete',
+              negativeButtonText: 'Cancel',
+            })
+          ).then((confirmed: boolean) => {
             console.log('Delete confirmed:', confirmed)
           })
         }}
@@ -79,22 +86,24 @@ function DialogDemos({
         variant="secondary"
         size="medium"
         onPress={() => {
-          void showDialog({
-            title: 'Set your own price',
-            positiveButtonText: 'Save',
-            children: (
-              <Exchange
-                btcValue={btcValue}
-                btcUnit={btcUnit}
-                onBtcValueChange={setBtcValue}
-                onBtcUnitChange={setBtcUnit}
-                fiatValue={fiatValue}
-                fiatCurrency="CZK"
-                onFiatValueChange={setFiatValue}
-                onFiatCurrencyPress={() => {}}
-              />
-            ),
-          })
+          void Effect.runPromise(
+            showDialog({
+              title: 'Set your own price',
+              positiveButtonText: 'Save',
+              children: (
+                <Exchange
+                  btcValue={btcValue}
+                  btcUnit={btcUnit}
+                  onBtcValueChange={setBtcValue}
+                  onBtcUnitChange={setBtcUnit}
+                  fiatValue={fiatValue}
+                  fiatCurrency="CZK"
+                  onFiatValueChange={setFiatValue}
+                  onFiatCurrencyPress={() => {}}
+                />
+              ),
+            })
+          )
         }}
       >
         With children (Exchange)

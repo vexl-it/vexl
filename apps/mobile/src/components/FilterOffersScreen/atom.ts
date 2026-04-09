@@ -6,14 +6,22 @@ import {
   type LocationState,
   type OfferLocation,
   type PaymentMethod,
+  type ProductCategory,
   type Sort,
   type SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {Array} from 'effect'
-import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
-import {splitAtom} from 'jotai/utils'
+import {toggleValueInSet} from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
+import {
+  atom,
+  type Atom,
+  type Getter,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
+import {atomFamily, splitAtom} from 'jotai/utils'
 import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../state/clubs/domain'
 import {
@@ -27,21 +35,37 @@ import {
 import {clearRegionAndRefocusActionAtom} from '../../state/marketplace/atoms/map/focusedOffer'
 import {animateToCoordinateActionAtom} from '../../state/marketplace/atoms/map/mapViewAtoms'
 import marketplaceLayoutModeAtom from '../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
+import {offersToSeeInMarketplaceAtom} from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {
   type MarketplaceFilterBarOption,
   type OffersFilter,
 } from '../../state/marketplace/domain'
+import {
+  filterMarketplaceOffers,
+  filterOffersByViewport,
+  selectOffersByMarketplaceFilterBarOptions,
+  shouldCombineOnlineOffersWithLocationFilter,
+} from '../../state/marketplace/utils/filterMarketplaceOffers'
 import getOfferLocationBorderPoints from '../../state/marketplace/utils/getOfferLocationBorderPoints'
+import {radiusToViewport} from '../../state/marketplace/utils/toViewport'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
 import {currencies} from '../../utils/localization/currency'
+import {defaultCurrencyAtom} from '../../utils/preferences'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
 
 export const filterBarOptionsAtom = atom<
   ReadonlySet<MarketplaceFilterBarOption>
 >(offersFilterInitialState.filterBarOptions)
+
+export const toggleFilterBarOptionActionAtom = atom(
+  null,
+  (get, set, value: MarketplaceFilterBarOption) => {
+    set(filterBarOptionsAtom, (prev) => toggleValueInSet(prev, value))
+  }
+)
 
 export const currencyAtom = atom<CurrencyCode | undefined>(
   offersFilterInitialState.currency
@@ -54,18 +78,84 @@ export const spokenLanguagesAtomsAtom = splitAtom(spokenLanguagesAtom)
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
 
-export const intendedConnectionLevelAtom = atom<IntendedConnectionLevel>('ALL')
+export const intendedConnectionLevelAtom = atom<
+  IntendedConnectionLevel | undefined
+>(undefined)
 
 export const locationStateAtom = atom<readonly LocationState[] | undefined>(
   offersFilterInitialState.locationState
 )
 
+export const isOnlineFilterAtom = atom(
+  (get) => get(locationStateAtom)?.includes('ONLINE') ?? false
+)
+
+export const isOnlineFilterVisibleAtom = atom((get) => {
+  const options = get(filterBarOptionsAtom)
+  if (options.size === 0) return true
+  return !pipe(
+    Array.fromIterable(options),
+    Array.every(
+      (option) => option === 'PROVIDE_SERVICE' || option === 'HIRE_SERVICE'
+    )
+  )
+})
+
 export const locationAtom = atom<readonly OfferLocation[] | undefined>(
   offersFilterInitialState.location
 )
 
+const clubsFilterEnabledBaseAtom = atom<boolean>(false)
+
+export const clubsFilterEnabledAtom = atom(
+  (get) => get(clubsFilterEnabledBaseAtom),
+  (get, set, action: SetStateAction<boolean>) => {
+    const enabled = getValueFromSetStateActionOfAtom(action)(() =>
+      get(clubsFilterEnabledBaseAtom)
+    )
+    set(clubsFilterEnabledBaseAtom, enabled)
+    if (enabled) {
+      const allClubUuids = get(clubsWithMembersAtom).map(
+        (club) => club.club.uuid
+      )
+      set(clubsUuidsFilterAtom, allClubUuids)
+    }
+  }
+)
+
 export const clubsUuidsFilterAtom = atom<readonly ClubUuid[] | undefined>(
   offersFilterInitialState.clubsUuids
+)
+
+export const productCategoriesAtom = atom<
+  readonly ProductCategory[] | undefined
+>(offersFilterInitialState.productCategories)
+
+export const isProductFilterActiveAtom = atom((get) => {
+  const options = get(filterBarOptionsAtom)
+  return options.has('BUY_PRODUCT') || options.has('SELL_PRODUCT')
+})
+
+export const isThisProductCategorySelectedAtomFamily = atomFamily(
+  (
+    category: ProductCategory
+  ): WritableAtom<boolean, [SetStateAction<boolean>], void> =>
+    atom(
+      (get) => get(productCategoriesAtom)?.includes(category) ?? false,
+      (get, set, isSelected: SetStateAction<boolean>) => {
+        const selected = getValueFromSetStateActionOfAtom(isSelected)(
+          () => get(productCategoriesAtom)?.includes(category) ?? false
+        )
+
+        if (selected) {
+          set(productCategoriesAtom, (prev) => [...(prev ?? []), category])
+        } else {
+          set(productCategoriesAtom, (prev) =>
+            prev?.filter((c) => c !== category)
+          )
+        }
+      }
+    )
 )
 
 export const locationArrayOfOneAtom = atom(
@@ -79,6 +169,17 @@ export const locationArrayOfOneAtom = atom(
   }
 )
 
+export const removeOfferLocationActionAtom = atom(
+  null,
+  (get, set, locationToRemove: OfferLocation) => {
+    const location = get(locationAtom)
+    const filtered = location?.filter(
+      (loc) => loc.placeId !== locationToRemove.placeId
+    )
+    set(locationAtom, filtered && filtered.length > 0 ? filtered : undefined)
+  }
+)
+
 export const btcNetworkAtom = atom<readonly BtcNetwork[] | undefined>(
   offersFilterInitialState.btcNetwork
 )
@@ -87,12 +188,62 @@ export const paymentMethodAtom = atom<readonly PaymentMethod[] | undefined>(
   offersFilterInitialState.paymentMethod
 )
 
+const amountFilterEnabledBaseAtom = atom<boolean>(false)
+
+export const amountFilterEnabledAtom = atom(
+  (get) => get(amountFilterEnabledBaseAtom),
+  (get, set, action: SetStateAction<boolean>) => {
+    const enabled = getValueFromSetStateActionOfAtom(action)(() =>
+      get(amountFilterEnabledBaseAtom)
+    )
+    set(amountFilterEnabledBaseAtom, enabled)
+    if (enabled) {
+      if (!get(currencyAtom)) {
+        const currency = get(defaultCurrencyAtom)
+        set(updateCurrencyLimitsAtom, {currency})
+      }
+    } else {
+      set(currencyAtom, undefined)
+    }
+  }
+)
+
 export const amountBottomLimitAtom = atom<number | undefined>(
   offersFilterInitialState.amountBottomLimit
 )
 
 export const amountTopLimitAtom = atom<number | undefined>(
   offersFilterInitialState.amountTopLimit
+)
+
+export const amountBottomLimitForRangeInputAtom = atom(
+  (get): number => get(amountBottomLimitAtom) ?? 0,
+  (get, set, update: SetStateAction<number>) => {
+    const value = getValueFromSetStateActionOfAtom(update)(
+      () => get(amountBottomLimitAtom) ?? 0
+    )
+    set(amountBottomLimitAtom, value)
+  }
+)
+
+export const amountTopLimitForRangeInputAtom = atom(
+  (get): number => {
+    const amountTopLimit = get(amountTopLimitAtom)
+    if (amountTopLimit !== undefined) return amountTopLimit
+
+    const currency = get(currencyAtom)
+    return currency ? currencies[currency].maxAmount : 0
+  },
+  (get, set, update: SetStateAction<number>) => {
+    const value = getValueFromSetStateActionOfAtom(update)(() => {
+      const currentAmountTopLimit = get(amountTopLimitAtom)
+      if (currentAmountTopLimit !== undefined) return currentAmountTopLimit
+
+      const currency = get(currencyAtom)
+      return currency ? currencies[currency].maxAmount : 0
+    })
+    set(amountTopLimitAtom, value)
+  }
 )
 
 export const singlePriceActiveAtom = atom<boolean>(true)
@@ -108,6 +259,9 @@ export const singlePriceCurrencyAtom = atom<CurrencyCode | undefined>(
 export const btcPriceForOfferWithCurrencyAtom = createBtcPriceForCurrencyAtom(
   singlePriceCurrencyAtom
 )
+
+export const btcPriceForFilterCurrencyAtom =
+  createBtcPriceForCurrencyAtom(currencyAtom)
 
 export const locationActiveAtom = atom<boolean | undefined>(true)
 
@@ -159,11 +313,8 @@ export const updateLocationStateAndPaymentMethodAtom = atom(
       prev?.includes(locationState) ? [] : [locationState]
     )
 
-    if (locationState === 'ONLINE') set(locationAtom, undefined)
-
     if (locationStateFromAtom?.includes(locationState)) {
       set(paymentMethodAtom, undefined)
-      set(locationAtom, undefined)
     } else {
       set(
         paymentMethodAtom,
@@ -226,61 +377,41 @@ export const calculateFiatValueOnSatsValueChangeActionAtom = atom(
   }
 )
 
-export const selectedSpokenLanguagesAtom = atom<SpokenLanguage[]>([])
-
 export const removeSpokenLanguageActionAtom = atom(
   null,
   (get, set, spokenLanguage: SpokenLanguage) => {
     const spokenLanguages = get(spokenLanguagesAtom)
-    const selectedSpokenLanguages = get(selectedSpokenLanguagesAtom)
 
     set(
       spokenLanguagesAtom,
       spokenLanguages.filter((language) => language !== spokenLanguage)
     )
-    set(
-      selectedSpokenLanguagesAtom,
-      selectedSpokenLanguages.filter((language) => language !== spokenLanguage)
-    )
   }
 )
 
-export function createIsThisLanguageSelectedAtom(
-  spokenLanguage: SpokenLanguage
-): WritableAtom<boolean, [SetStateAction<boolean>], void> {
-  return atom(
-    (get) => get(selectedSpokenLanguagesAtom).includes(spokenLanguage),
-    (get, set, isSelected: SetStateAction<boolean>) => {
-      const selectedSpokenLanguages = get(selectedSpokenLanguagesAtom)
-      const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
-        get(selectedSpokenLanguagesAtom).includes(spokenLanguage)
-      )
-
-      if (selected) {
-        set(selectedSpokenLanguagesAtom, [
-          ...selectedSpokenLanguages,
-          spokenLanguage,
-        ])
-      } else {
-        set(
-          selectedSpokenLanguagesAtom,
-          selectedSpokenLanguages.filter((lang) => lang !== spokenLanguage)
+export const isThisLanguageSelectedAtomFamily = atomFamily(
+  (
+    spokenLanguage: SpokenLanguage
+  ): WritableAtom<boolean, [SetStateAction<boolean>], void> =>
+    atom(
+      (get) => get(spokenLanguagesAtom).includes(spokenLanguage),
+      (get, set, isSelected: SetStateAction<boolean>) => {
+        const spokenLanguages = get(spokenLanguagesAtom)
+        const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
+          get(spokenLanguagesAtom).includes(spokenLanguage)
         )
+
+        if (selected) {
+          set(spokenLanguagesAtom, [...spokenLanguages, spokenLanguage])
+        } else {
+          set(
+            spokenLanguagesAtom,
+            spokenLanguages.filter((lang) => lang !== spokenLanguage)
+          )
+        }
       }
-    }
-  )
-}
-
-export const resetSpokenLanguagesToInitialStateActionAtom = atom(
-  null,
-  (get, set) => {
-    set(selectedSpokenLanguagesAtom, get(spokenLanguagesAtom))
-  }
+    )
 )
-
-export const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
-  set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
-})
 
 export const setOfferLocationActionAtom = atom(
   null,
@@ -314,9 +445,7 @@ export const setClubsInFilterActionAtom = atom(
       set(clubsUuidsFilterAtom, () =>
         filterClubsUuids.filter((uuid) => myClubsUuids.includes(uuid))
       )
-    } else if (!filterClubsUuids && myClubsUuids.length > 0) {
-      set(clubsUuidsFilterAtom, myClubsUuids)
-    } else if (!filterClubsUuids) {
+    } else {
       set(clubsUuidsFilterAtom, undefined)
     }
   }
@@ -330,6 +459,11 @@ const setConditionallyRenderedFilterElementsActionAtom = atom(
     set(locationStateAtom, filterValue.locationState)
     set(paymentMethodAtom, filterValue.paymentMethod)
     set(btcNetworkAtom, filterValue.btcNetwork)
+    set(
+      amountFilterEnabledBaseAtom,
+      filterValue.amountBottomLimit !== undefined ||
+        filterValue.amountTopLimit !== undefined
+    )
     set(amountBottomLimitAtom, filterValue.amountBottomLimit)
     set(amountTopLimitAtom, filterValue.amountTopLimit)
     set(spokenLanguagesAtom, filterValue.spokenLanguages)
@@ -337,8 +471,13 @@ const setConditionallyRenderedFilterElementsActionAtom = atom(
     set(singlePriceCurrencyAtom, filterValue.singlePriceCurrency)
     set(
       intendedConnectionLevelAtom,
-      filterValue.friendLevel?.includes('SECOND_DEGREE') ? 'ALL' : 'FIRST'
+      filterValue.friendLevel
+        ? filterValue.friendLevel.includes('SECOND_DEGREE')
+          ? 'ALL'
+          : 'FIRST'
+        : undefined
     )
+    set(productCategoriesAtom, filterValue.productCategories)
     set(satsValueAtom, 0)
   }
 )
@@ -348,6 +487,10 @@ const setFilterAtomsActionAtom = atom(
   (get, set, filterValue: OffersFilter) => {
     set(filterBarOptionsAtom, filterValue.filterBarOptions)
     set(sortingAtom, filterValue.sort)
+    set(
+      clubsFilterEnabledBaseAtom,
+      filterValue.clubsUuids !== undefined && filterValue.clubsUuids.length > 0
+    )
     set(setClubsInFilterActionAtom, filterValue.clubsUuids)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
@@ -372,11 +515,10 @@ export const resetFilterOmitTextFilterActionAtom = atom(null, (get, set) => {
   set(setFilterAtomsActionAtom, restOfOffersFilterInitialState)
 })
 
-export const saveFilterActionAtom = atom(null, (get, set) => {
-  const marketplaceLayoutMode = get(marketplaceLayoutModeAtom)
+function getDraftOffersFilter(get: Getter): OffersFilter {
   const {text} = get(offersFilterFromStorageAtom)
 
-  set(offersFilterFromStorageAtom, {
+  return {
     sort: get(sortingAtom),
     filterBarOptions: get(filterBarOptionsAtom),
     currency: get(currencyAtom),
@@ -387,15 +529,30 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
     friendLevel:
       get(intendedConnectionLevelAtom) === 'FIRST'
         ? ['FIRST_DEGREE']
-        : ['FIRST_DEGREE', 'SECOND_DEGREE'],
+        : get(intendedConnectionLevelAtom) === 'ALL'
+          ? ['FIRST_DEGREE', 'SECOND_DEGREE']
+          : undefined,
     spokenLanguages: get(spokenLanguagesAtom),
-    amountBottomLimit: get(amountBottomLimitAtom),
-    amountTopLimit: get(amountTopLimitAtom),
+    amountBottomLimit: get(amountFilterEnabledAtom)
+      ? get(amountBottomLimitAtom)
+      : undefined,
+    amountTopLimit: get(amountFilterEnabledAtom)
+      ? get(amountTopLimitAtom)
+      : undefined,
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
-    clubsUuids: get(clubsUuidsFilterAtom),
+    clubsUuids: get(clubsFilterEnabledAtom)
+      ? get(clubsUuidsFilterAtom)
+      : undefined,
+    productCategories: get(productCategoriesAtom),
     text,
-  } satisfies OffersFilter)
+  }
+}
+
+export const saveFilterActionAtom = atom(null, (get, set) => {
+  const marketplaceLayoutMode = get(marketplaceLayoutModeAtom)
+
+  set(offersFilterFromStorageAtom, getDraftOffersFilter(get))
 
   if (marketplaceLayoutMode === 'map') {
     const location = get(locationAtom)
@@ -418,6 +575,54 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
       }
     } else set(clearRegionAndRefocusActionAtom)
   }
+})
+
+export const filteredOffersPreviewCountAtom = atom((get) => {
+  const draftFilter = getDraftOffersFilter(get)
+  const btcPriceWithState = get(btcPriceForOfferWithCurrencyAtom)
+
+  const filterPriceInSats =
+    draftFilter.singlePrice &&
+    btcPriceWithState &&
+    btcPriceWithState.state !== 'loading'
+      ? calculatePriceInSats({
+          price: draftFilter.singlePrice,
+          currentBtcPrice: btcPriceWithState.btcPrice?.BTC ?? 0,
+        })
+      : null
+
+  const offersAfterBarFilter = selectOffersByMarketplaceFilterBarOptions({
+    offers: get(offersToSeeInMarketplaceAtom),
+    selectedOptions: draftFilter.filterBarOptions,
+  })
+
+  const filteredOffers = filterMarketplaceOffers({
+    offers: offersAfterBarFilter,
+    filter: draftFilter,
+    layoutMode: get(marketplaceLayoutModeAtom),
+    filterPriceInSats,
+    getBtcPriceForCurrency: (currency) =>
+      get(createBtcPriceForCurrencyAtom(currency))?.btcPrice?.BTC,
+  })
+
+  const viewportToFilterBy = draftFilter.location
+    ? radiusToViewport(
+        pipe(
+          draftFilter.location,
+          Array.map((one) => ({
+            point: {latitude: one.latitude, longitude: one.longitude},
+            radius: one.radius,
+          }))
+        )
+      )
+    : undefined
+
+  return filterOffersByViewport({
+    offers: filteredOffers,
+    viewport: viewportToFilterBy,
+    includeOnlineOffers:
+      shouldCombineOnlineOffersWithLocationFilter(draftFilter),
+  }).length
 })
 
 export function createSelectClubInFilterAtom(

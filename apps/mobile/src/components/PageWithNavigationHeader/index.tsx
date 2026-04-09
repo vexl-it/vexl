@@ -21,13 +21,7 @@ function PageWithNavigationHeader({children}: Props): React.ReactElement {
 
   return (
     <KeyboardAvoidingView>
-      <Stack
-        backgroundColor="$backgroundPrimary"
-        f={1}
-        pt={top}
-        pb={bottom}
-        px="$5"
-      >
+      <Stack backgroundColor="$backgroundPrimary" f={1} pt={top} pb={bottom}>
         <Header />
         {children}
         <FooterButtons />

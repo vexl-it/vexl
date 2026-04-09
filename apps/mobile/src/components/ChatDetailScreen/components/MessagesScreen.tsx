@@ -13,12 +13,8 @@ import QuickActionBanner from './QuickActionBanner'
 import StickyHeader from './StickyHeader'
 
 function MessagesScreen(): React.ReactElement {
-  const {
-    showModalAtom,
-    canSendMessagesAtom,
-    chatIdAtom,
-    publicKeyPemBase64Atom,
-  } = useMolecule(chatMolecule)
+  const {canSendMessagesAtom, chatIdAtom, publicKeyPemBase64Atom} =
+    useMolecule(chatMolecule)
   useStatusBarStyleForScreen('secondary')
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const chatId = useAtomValue(chatIdAtom)
@@ -34,14 +30,6 @@ function MessagesScreen(): React.ReactElement {
   return (
     <Stack flex={1}>
       <MessagesScreenChatHeader />
-      {/* <ChatHeader
-        mode={showModal ? 'photoTop' : 'photoLeft'}
-        leftButton={showModal ? 'closeModal' : 'back'}
-        rightButton={canSendMessages ? 'tradeChecklist' : null}
-        onPressMiddle={() => {
-          setShowModal((v) => !v)
-        }}
-      /> */}
       <StickyHeader />
       <Stack f={1}>
         <MessagesList />

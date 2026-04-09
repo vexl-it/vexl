@@ -7,7 +7,6 @@ import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../
 import {useAppState} from '../../../utils/useAppState'
 import Screen from '../../Screen'
 import {chatMolecule} from '../atoms'
-import ChatInfoModal from './ChatInfoModal'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
 import MessagesScreen from './MessagesScreen'
 import RequestScreen from './RequestScreen'
@@ -41,7 +40,6 @@ export default function MessagesListOrApprovalPreview(): React.ReactElement {
     <>
       <MarkAsReadWhenRendered />
       <Screen>{toRender}</Screen>
-      <ChatInfoModal />
     </>
   )
 }

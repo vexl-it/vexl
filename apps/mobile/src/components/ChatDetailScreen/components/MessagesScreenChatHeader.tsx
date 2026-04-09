@@ -18,6 +18,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
 
   const {
     canSendMessagesAtom,
+    chatAtom,
     chatIdAtom,
     commonConnectionsCountAtom,
     offerForChatAtom,
@@ -27,6 +28,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     otherSideLeftAtom,
     publicKeyPemBase64Atom,
   } = useMolecule(chatMolecule)
+  const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
@@ -86,7 +88,10 @@ export function MessagesScreenChatHeader(): React.ReactElement {
           </TouchableOpacity>
         }
         onPress={() => {
-          // TODO
+          navigation.navigate('ChatInfo', {
+            inboxKey,
+            otherSideKey: chat.otherSide.publicKey,
+          })
         }}
         rightActions={[
           {

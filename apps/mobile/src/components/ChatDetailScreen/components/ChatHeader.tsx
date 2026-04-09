@@ -41,7 +41,6 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
-    showModalAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     forceShowHistoryAtom,
@@ -58,7 +57,6 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
-  const setModal = useSetAtom(showModalAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
@@ -87,7 +85,6 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
         icon={ChevronLeft}
         onPress={() => {
           Keyboard.dismiss()
-          setModal(false)
         }}
       />
     )
@@ -187,7 +184,6 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
                 return
               }
               Keyboard.dismiss()
-              setModal(false)
               navigation.navigate('TradeChecklistFlow', {
                 screen: 'AgreeOnTradeDetails',
                 chatId,

@@ -163,7 +163,13 @@ function StickyHeader(): React.ReactElement | null {
         </XStack>
       </YStack>
       <Stack>
-        <NavButton variant="tetriary" icon={InfoCircle} />
+        <NavButton
+          variant="tetriary"
+          icon={InfoCircle}
+          onPress={() => {
+            // TODO open offer detail
+          }}
+        />
       </Stack>
     </XStack>
   )

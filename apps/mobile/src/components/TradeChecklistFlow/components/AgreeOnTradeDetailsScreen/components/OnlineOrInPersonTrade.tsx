@@ -1,7 +1,7 @@
 import {Button, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack} from 'tamagui'
+import {Stack, YStack} from 'tamagui'
 import * as fromChatAtoms from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import openUrl from '../../../../../utils/openUrl'
@@ -47,7 +47,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
     )
   ) {
     return (
-      <Stack gap="$6">
+      <YStack gap="$6" f={1}>
         {top}
         <CalculateAmountCell />
 
@@ -86,12 +86,12 @@ function OnlineOrInPersonTrade(): React.ReactElement {
         </Stack>
 
         <AnonymizationNotice />
-      </Stack>
+      </YStack>
     )
   }
 
   return (
-    <Stack gap="$6">
+    <YStack gap="$6" f={1}>
       {top}
 
       <Stack gap="$3">
@@ -117,7 +117,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
           <RevealPhoneNumberCell />
         </Stack>
       </Stack>
-    </Stack>
+    </YStack>
   )
 }
 

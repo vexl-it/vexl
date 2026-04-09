@@ -11,11 +11,6 @@ import IconButton from '../../../../IconButton'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapSingleLocationDisplay from '../../../../Map/components/MapSingleLocationDisplay'
 import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../PageWithNavigationHeader'
-import {
   addMeetingLocationActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../atoms/updatesToBeSentAtom'
@@ -56,41 +51,36 @@ export default function LocationMapPreview({
   }
 
   return (
-    <>
-      <HeaderProxy hidden hiddenAllTheWay />
-      <MapSingleLocationDisplay
-        mapPadding={{top: 40, bottom: 40, left: 0, right: 0}}
-        topChildren={
-          <YStack marginVertical="$2" marginHorizontal="$4" gap="$4">
-            <IconButton
-              variant="primary"
-              icon={backButtonSvg}
-              onPress={navigation.goBack}
-            />
-          </YStack>
-        }
-        bottomChildren={
-          <XStack gap="$2" marginHorizontal="$2" mb="$2">
-            <Button
-              fullSize
-              text={t('map.location.suggestDifferent')}
-              variant="primary"
-              onPress={() => {
-                navigation.navigate('LocationSearch')
-              }}
-            />
-            <Button
-              fullSize
-              text={t('common.accept')}
-              variant="secondary"
-              onPress={submit}
-            />
-          </XStack>
-        }
-        value={selectedLocation}
-      />
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy hidden />
-    </>
+    <MapSingleLocationDisplay
+      mapPadding={{top: 40, bottom: 40, left: 0, right: 0}}
+      topChildren={
+        <YStack marginVertical="$2" marginHorizontal="$4" gap="$4">
+          <IconButton
+            variant="primary"
+            icon={backButtonSvg}
+            onPress={navigation.goBack}
+          />
+        </YStack>
+      }
+      bottomChildren={
+        <XStack gap="$2" marginHorizontal="$2" mb="$2">
+          <Button
+            fullSize
+            text={t('map.location.suggestDifferent')}
+            variant="primary"
+            onPress={() => {
+              navigation.navigate('LocationSearch')
+            }}
+          />
+          <Button
+            fullSize
+            text={t('common.accept')}
+            variant="secondary"
+            onPress={submit}
+          />
+        </XStack>
+      }
+      value={selectedLocation}
+    />
   )
 }

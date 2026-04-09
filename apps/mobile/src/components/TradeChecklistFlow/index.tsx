@@ -19,7 +19,6 @@ import LocationMapSelect from './components/MeetingLocation/components/LocationM
 import LocationSearch from './components/MeetingLocation/components/LocationSearch'
 import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
 import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
-import TradeChecklistFlowPageContainer from './components/TradeChecklistFlowPageContainer'
 
 const StackNavigator =
   createNativeStackNavigator<TradeChecklistStackParamsList>()
@@ -39,63 +38,58 @@ export default function TradeChecklistFlow({
 
   return (
     <>
-      <TradeChecklistFlowPageContainer>
-        <StackNavigator.Navigator
-          screenOptions={{headerShown: false}}
-          initialRouteName="AgreeOnTradeDetails"
-        >
-          <StackNavigator.Screen
-            name="AgreeOnTradeDetails"
-            component={AgreeOnTradeDetailsScreen}
-          />
-          <StackNavigator.Screen
-            name="ChooseAvailableDays"
-            component={ChooseAvailableDaysScreen}
-          />
-          <StackNavigator.Screen
-            name="AddTimeOptions"
-            component={AddTimeOptionsScreen}
-          />
-          <StackNavigator.Screen
-            name="PickDateFromSuggestions"
-            component={PickDateFromSuggestionsScreen}
-          />
-          <StackNavigator.Screen
-            name="PickTimeFromSuggestions"
-            component={PickTimeFromSuggestions}
-          />
+      <StackNavigator.Navigator
+        screenOptions={{headerShown: false}}
+        initialRouteName="AgreeOnTradeDetails"
+      >
+        <StackNavigator.Screen
+          name="AgreeOnTradeDetails"
+          component={AgreeOnTradeDetailsScreen}
+        />
+        <StackNavigator.Screen
+          name="ChooseAvailableDays"
+          component={ChooseAvailableDaysScreen}
+        />
+        <StackNavigator.Screen
+          name="AddTimeOptions"
+          component={AddTimeOptionsScreen}
+        />
+        <StackNavigator.Screen
+          name="PickDateFromSuggestions"
+          component={PickDateFromSuggestionsScreen}
+        />
+        <StackNavigator.Screen
+          name="PickTimeFromSuggestions"
+          component={PickTimeFromSuggestions}
+        />
 
-          <StackNavigator.Screen
-            name="CalculateAmount"
-            component={CalculateAmountScreen}
-          />
-          <StackNavigator.Screen
-            name="SetYourOwnPrice"
-            component={SetYourOwnPriceScreen}
-          />
-          <StackNavigator.Screen
-            name="PremiumOrDiscount"
-            component={PremiumOrDiscountScreen}
-          />
-          <StackNavigator.Screen name="Network" component={NetworkScreen} />
-          <StackNavigator.Screen
-            name="BtcAddress"
-            component={BtcAddressScreen}
-          />
-          <StackNavigator.Screen
-            name="LocationSearch"
-            component={LocationSearch}
-          />
-          <StackNavigator.Screen
-            name="LocationMapPreview"
-            component={LocationMapPreview}
-          />
-          <StackNavigator.Screen
-            name="LocationMapSelect"
-            component={LocationMapSelect}
-          />
-        </StackNavigator.Navigator>
-      </TradeChecklistFlowPageContainer>
+        <StackNavigator.Screen
+          name="CalculateAmount"
+          component={CalculateAmountScreen}
+        />
+        <StackNavigator.Screen
+          name="SetYourOwnPrice"
+          component={SetYourOwnPriceScreen}
+        />
+        <StackNavigator.Screen
+          name="PremiumOrDiscount"
+          component={PremiumOrDiscountScreen}
+        />
+        <StackNavigator.Screen name="Network" component={NetworkScreen} />
+        <StackNavigator.Screen name="BtcAddress" component={BtcAddressScreen} />
+        <StackNavigator.Screen
+          name="LocationSearch"
+          component={LocationSearch}
+        />
+        <StackNavigator.Screen
+          name="LocationMapPreview"
+          component={LocationMapPreview}
+        />
+        <StackNavigator.Screen
+          name="LocationMapSelect"
+          component={LocationMapSelect}
+        />
+      </StackNavigator.Navigator>
     </>
   )
 }

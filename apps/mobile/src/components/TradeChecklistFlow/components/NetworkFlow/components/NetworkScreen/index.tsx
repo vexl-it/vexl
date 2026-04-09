@@ -6,15 +6,10 @@ import {type TradeChecklistStackScreenProps} from '../../../../../../navigationT
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
 import networkSvg from '../../../../../images/networkSvg'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
-import Content from '../../../Content'
+import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   btcAddressAtom,
   btcNetworkAtom,
@@ -82,26 +77,28 @@ function NetworkScreen({
   ])
 
   return (
-    <>
-      <HeaderProxy title={t('tradeChecklist.network.network')} />
-      <Content scrollable>
-        <SectionTitle
-          text={t('tradeChecklist.network.network')}
-          icon={networkSvg}
-          mt="$4"
-        />
-        <Stack gap="$6">
-          <LightningOrOnChain />
-          <BtcAddress />
-        </Stack>
-      </Content>
-      <NetworkInfo />
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy
-        onPress={onFooterButtonPress}
-        text={t('common.confirm')}
+    <TradeChecklistItemPageLayout
+      header={{
+        title: t('tradeChecklist.network.network'),
+      }}
+      footer={<NetworkInfo />}
+      bottomButton={{
+        disabled: false,
+        onPress: onFooterButtonPress,
+        text: t('common.confirm'),
+        variant: 'secondary',
+      }}
+    >
+      <SectionTitle
+        text={t('tradeChecklist.network.network')}
+        icon={networkSvg}
+        mt="$4"
       />
-    </>
+      <Stack gap="$6">
+        <LightningOrOnChain />
+        <BtcAddress />
+      </Stack>
+    </TradeChecklistItemPageLayout>
   )
 }
 

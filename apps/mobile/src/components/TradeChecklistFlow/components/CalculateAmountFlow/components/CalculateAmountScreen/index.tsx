@@ -12,18 +12,13 @@ import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../../../PageWithNavigationHeader'
-import {
   btcPriceForOfferWithStateAtom,
   tradePriceTypeAtom,
 } from '../../../../../TradeCalculator/atoms'
 import TradeCalculator from '../../../../../TradeCalculator/components/TradeCalculator'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
-import Content from '../../../Content'
+import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   isOtherSideAmountDataNewerThanMineAtom,
   saveButtonDisabledAtom,
@@ -103,44 +98,41 @@ function CalculateAmountScreen({
   }, [amountData, syncDataWithChatState])
 
   return (
-    <>
-      <HeaderProxy
-        title={t('tradeChecklist.calculateAmount.calculateAmount')}
-      />
-      <Content scrollable>
-        <TradeCalculator
-          onPremiumOrDiscountPress={() => {
-            navigation.navigate('PremiumOrDiscount')
-          }}
-        >
-          <Info
-            hideCloseButton
-            variant="yellow"
-            text={`${t(
-              'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
-              {
-                username: otherSideData.userName,
-                percentage: btcPricePercentageDifference,
-              }
-            )} ${
-              btcPricePercentageDifference >= 0
-                ? t('vexlbot.higherThanLivePrice')
-                : t('vexlbot.lowerThanLivePrice')
-            }`}
-          />
-        </TradeCalculator>
-      </Content>
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy
-        disabled={saveButtonDisabled}
-        onPress={onFooterButtonPress}
-        text={
-          isOtherSideAmountDataNewerThanMine
-            ? t('common.accept')
-            : t('common.save')
-        }
-      />
-    </>
+    <TradeChecklistItemPageLayout
+      header={{
+        title: t('tradeChecklist.calculateAmount.calculateAmount'),
+      }}
+      bottomButton={{
+        disabled: saveButtonDisabled,
+        onPress: onFooterButtonPress,
+        text: isOtherSideAmountDataNewerThanMine
+          ? t('common.accept')
+          : t('common.save'),
+        variant: 'secondary',
+      }}
+    >
+      <TradeCalculator
+        onPremiumOrDiscountPress={() => {
+          navigation.navigate('PremiumOrDiscount')
+        }}
+      >
+        <Info
+          hideCloseButton
+          variant="yellow"
+          text={`${t(
+            'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
+            {
+              username: otherSideData.userName,
+              percentage: btcPricePercentageDifference,
+            }
+          )} ${
+            btcPricePercentageDifference >= 0
+              ? t('vexlbot.higherThanLivePrice')
+              : t('vexlbot.lowerThanLivePrice')
+          }`}
+        />
+      </TradeCalculator>
+    </TradeChecklistItemPageLayout>
   )
 }
 

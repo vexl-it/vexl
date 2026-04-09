@@ -1,6 +1,6 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Button, lightTheme, Switch, tokens, Typography} from '@vexl-next/ui'
+import {Button, lightTheme, Switch, Typography} from '@vexl-next/ui'
 import {Array as ArrayE, pipe, Schema} from 'effect'
 import {atom, useAtom, useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
@@ -126,9 +126,9 @@ function TimeSlotChip({
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <Stack
         minWidth={72}
-        paddingHorizontal={tokens.space[5].val}
-        paddingVertical={tokens.space[4].val}
-        borderRadius={tokens.radius[3].val}
+        paddingHorizontal="$5"
+        paddingVertical="$4"
+        borderRadius="$3"
         backgroundColor={
           selected
             ? lightTheme.accentYellowPrimary
@@ -278,10 +278,10 @@ function TimeOptionsPerDate({
   return (
     <Stack
       backgroundColor="$backgroundSecondary"
-      borderRadius={tokens.radius[5].val}
-      paddingHorizontal={tokens.space[4].val}
-      paddingVertical={tokens.space[4].val}
-      gap={tokens.space[4].val}
+      borderRadius="$5"
+      paddingHorizontal="$4"
+      paddingVertical="$4"
+      gap="$4"
     >
       <TouchableOpacity
         onPress={expanded ? undefined : onExpand}
@@ -328,8 +328,8 @@ function TimeOptionsPerDate({
       {shouldRenderExpandedContent ? (
         <Animated.View style={animatedExpandedStyle}>
           <Stack
-            gap={tokens.space[5].val}
-            paddingTop={tokens.space[5].val}
+            gap="$5"
+            paddingTop="$5"
             onLayout={(event) => {
               const nextHeight = Math.ceil(event.nativeEvent.layout.height)
               if (nextHeight !== expandedContentHeight) {
@@ -347,11 +347,7 @@ function TimeOptionsPerDate({
                   >
                     {section.title}
                   </Typography>
-                  <XStack
-                    flexWrap="wrap"
-                    gap={tokens.space[3].val}
-                    rowGap={tokens.space[3].val}
-                  >
+                  <XStack flexWrap="wrap" gap="$3" rowGap="$3">
                     {pipe(
                       section.slots,
                       ArrayE.map((slot) => (

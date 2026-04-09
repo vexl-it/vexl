@@ -1,10 +1,13 @@
-import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {
+  type OfferId,
+  type OneOfferInState,
+} from '@vexl-next/domain/src/general/offers'
 import {type LatLong} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {atom} from 'jotai'
 import europeRegion from '../../../../components/Map/utils/europeRegion'
 import getOfferLocationBorderPoints from '../../utils/getOfferLocationBorderPoints'
 import {locationFilterAtom, resetLocationFilterActionAtom} from '../filterAtoms'
-import {filteredOffersIgnoreLocationAtom} from '../filteredOffers'
+import {filteredOffersForMapAtom} from '../filteredOffers'
 import {mapRegionAtom} from '../mapRegionAtom'
 import {offersAtom} from '../offersState'
 import {
@@ -31,9 +34,9 @@ export const refocusMapActionAtom = atom(
     if (focusAllOffers) {
       set(mapRegionAtom, null)
       set(resetLocationFilterActionAtom)
-      const offers = get(filteredOffersIgnoreLocationAtom)
+      const offers = get(filteredOffersForMapAtom)
       if (offers.length > 0) {
-        const borderPoints = offers.flatMap((one) =>
+        const borderPoints = offers.flatMap((one: OneOfferInState) =>
           one.offerInfo.publicPart.location.flatMap(
             getOfferLocationBorderPoints
           )
@@ -70,10 +73,10 @@ export const refocusMapActionAtom = atom(
       return
     }
 
-    const offers = get(filteredOffersIgnoreLocationAtom)
+    const offers = get(filteredOffersForMapAtom)
 
     if (offers.length > 0) {
-      const borderPoints = offers.flatMap((one) =>
+      const borderPoints = offers.flatMap((one: OneOfferInState) =>
         one.offerInfo.publicPart.location.flatMap(getOfferLocationBorderPoints)
       )
       set(animateToCoordinateActionAtom, borderPoints)

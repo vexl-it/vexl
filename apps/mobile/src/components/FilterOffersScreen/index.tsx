@@ -1,40 +1,52 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
-import {ScrollView, StyleSheet} from 'react-native'
-import {Stack, XStack, getTokens} from 'tamagui'
+import {spokenLanguagesOptions} from '@vexl-next/domain/src/general/offers'
+import {Button, NavButton, Switch, Typography} from '@vexl-next/ui'
+import {ChevronLeft} from '@vexl-next/ui/src/icons'
+import {
+  ScrollView,
+  Separator,
+  XStack,
+  YStack,
+} from '@vexl-next/ui/src/primitives'
+import {atom, useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useMemo} from 'react'
+import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import Button from '../Button'
-import FilterForm from '../OfferForm'
+import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
+import {ChangeCurrency} from '../ChangeCurrency'
+import DeferredContent from '../DeferredContent'
+import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
+import FriendLevel from '../OfferForm/components/FriendLevel'
 import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import Section from '../Section'
-import sortingSvg from '../images/sortingSvg'
 import {
+  amountBottomLimitForRangeInputAtom,
+  amountFilterEnabledAtom,
+  amountTopLimitForRangeInputAtom,
+  clubsFilterEnabledAtom,
+  currencyAtom,
+  filteredOffersPreviewCountAtom,
   initializeOffersFilterOnDisplayActionAtom,
+  intendedConnectionLevelAtom,
   resetFilterOmitTextFilterActionAtom,
   saveFilterActionAtom,
-  sortingAtom,
+  updateCurrencyLimitsAtom,
 } from './atom'
+import AnimatedCollapse from './components/AnimatedCollapse'
+import BtcPriceInfo from './components/BtcPriceInfo'
+import ClubsSection from './components/ClubsSection'
+import LocationSection from './components/LocationSection'
+import LookingToSection from './components/LookingToSection'
+import NetworkSection from './components/NetworkSection'
+import ProductCategorySection from './components/ProductCategorySection'
 import Sorting from './components/Sorting'
-import useBtcOffersFilterContent from './useBtcOffersFilterContent'
+import SpokenLanguageTag from './components/SpokenLanguageTag'
 
-const styles = StyleSheet.create({
-  contentStyles: {
-    paddingBottom: 16,
-  },
-})
+const currencySelectVisibleAtom = atom(false)
 
 function FilterOffersScreen(): React.ReactElement {
   const {t} = useTranslation()
-  const tokens = getTokens()
   const safeGoBack = useSafeGoBack()
-  const btcOffersFilterContent = useBtcOffersFilterContent()
-  // const productOffersFilterContent = useProductOffersFilterContent()
-  // const otherOffersFilterContent = useOtherOffersFilterContent()
-  // const allOffersFilterContent = useAllOffersFilterContent()
-  // const filterBarOptions = useAtomValue(filterBarOptionsAtom)
   const saveFilter = useSetAtom(saveFilterActionAtom)
   const resetFilterOmitTextFilter = useSetAtom(
     resetFilterOmitTextFilterActionAtom
@@ -42,12 +54,36 @@ function FilterOffersScreen(): React.ReactElement {
   const initializeOffersFilterOnDisplay = useSetAtom(
     initializeOffersFilterOnDisplayActionAtom
   )
+  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
+  const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
+  const amountFilterEnabled = useAtomValue(amountFilterEnabledAtom)
+  const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
+  const numberOfFriends = useAtomValue(numberOfFriendsAtom)
+  const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
+
+  const connectionSubtitles = useMemo(() => {
+    if (numberOfFriends.state !== 'success') return undefined
+    const fmt = Intl.NumberFormat()
+    return {
+      first: t('filterOffers.reachPeople', {
+        connectionsCount: fmt.format(numberOfFriends.firstLevelFriendsCount),
+      }),
+      second: t('filterOffers.reachPeople', {
+        connectionsCount: fmt.format(
+          numberOfFriends.firstAndSecondLevelFriendsCount
+        ),
+      }),
+    }
+  }, [numberOfFriends, t])
 
   const resetOfferForm = useCallback(() => {
     resetFilterOmitTextFilter()
+  }, [resetFilterOmitTextFilter])
+
+  const handleSave = useCallback(() => {
     saveFilter()
     safeGoBack()
-  }, [resetFilterOmitTextFilter, safeGoBack, saveFilter])
+  }, [saveFilter, safeGoBack])
 
   useFocusEffect(
     useCallback(() => {
@@ -56,40 +92,172 @@ function FilterOffersScreen(): React.ReactElement {
   )
 
   return (
-    <Screen customHorizontalPadding={tokens.size[2].val}>
-      <ScreenTitle
-        text={t('filterOffers.filterResults')}
-        withBottomBorder
-        withBackButton
+    <Screen>
+      <XStack
+        alignItems="center"
+        justifyContent="space-between"
+        paddingHorizontal="$5"
+        paddingVertical="$4"
       >
-        <XStack ai="center" gap="$2">
-          <Button
-            onPress={resetOfferForm}
-            size="small"
-            variant="primary"
-            text={t('common.reset')}
+        <XStack flex={1} alignItems="center">
+          <NavButton
+            variant="highlighted"
+            icon={ChevronLeft}
+            onPress={safeGoBack}
           />
         </XStack>
-      </ScreenTitle>
-      <ScrollView
-        contentContainerStyle={styles.contentStyles}
-        showsVerticalScrollIndicator={false}
-      >
-        <Section title={t('filterOffers.sorting')} image={sortingSvg}>
-          <Sorting sortingAtom={sortingAtom} />
-        </Section>
-        <FilterForm content={btcOffersFilterContent} />
-      </ScrollView>
-      <Stack px="$4" py="$4" bc="transparent">
-        <Button
-          text={t('common.save')}
-          onPress={() => {
-            saveFilter()
-            safeGoBack()
-          }}
-          variant="secondary"
-        />
-      </Stack>
+        <Typography
+          variant="titlesSmall"
+          color="$foregroundPrimary"
+          textAlign="center"
+        >
+          {t('filterOffers.filters')}
+        </Typography>
+        <XStack flex={1} justifyContent="flex-end">
+          <NavButton type="text" variant="normal" onPress={resetOfferForm}>
+            {t('filterOffers.clearAll')}
+          </NavButton>
+        </XStack>
+      </XStack>
+
+      <DeferredContent>
+        <ScrollView
+          contentContainerStyle={{paddingBottom: getTokens().space.$4.val}}
+          showsVerticalScrollIndicator={false}
+        >
+          <YStack paddingHorizontal="$5" gap="$3">
+            <LookingToSection />
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Sort by */}
+            <Typography
+              variant="titlesSmall"
+              color="$foregroundPrimary"
+              paddingVertical="$3"
+            >
+              {t('filterOffers.sortBy')}
+            </Typography>
+            <Sorting />
+
+            <ProductCategorySection />
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Amount */}
+            <XStack alignItems="center" gap="$4" paddingVertical="$3">
+              <YStack flex={1} gap="$1">
+                <Typography variant="titlesSmall" color="$foregroundPrimary">
+                  {t('offerForm.amountOfTransaction.amountOfTransaction')}
+                </Typography>
+                <Typography variant="description" color="$foregroundSecondary">
+                  {t('filterOffers.amountDescription')}
+                </Typography>
+              </YStack>
+              <Switch valueAtom={amountFilterEnabledAtom} />
+            </XStack>
+            <AnimatedCollapse expanded={amountFilterEnabled}>
+              <YStack gap="$3">
+                <AmountOfTransaction
+                  amountTopLimitAtom={amountTopLimitForRangeInputAtom}
+                  amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
+                  currencyAtom={currencyAtom}
+                  onCurrencyPress={() => {
+                    setCurrencySelectVisible(true)
+                  }}
+                />
+                <ChangeCurrency
+                  selectedCurrencyCodeAtom={currencyAtom}
+                  onSave={(currency) => {
+                    updateCurrencyLimits({currency})
+                  }}
+                  visibleAtom={currencySelectVisibleAtom}
+                />
+                <BtcPriceInfo />
+              </YStack>
+            </AnimatedCollapse>
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Location */}
+            <Typography
+              variant="titlesSmall"
+              color="$foregroundPrimary"
+              paddingVertical="$3"
+            >
+              {t('offerForm.location.location')}
+            </Typography>
+            <LocationSection />
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Preferred language */}
+            <Typography
+              variant="titlesSmall"
+              color="$foregroundPrimary"
+              paddingVertical="$3"
+            >
+              {t('filterOffers.preferredLanguage')}
+            </Typography>
+            <XStack flexWrap="wrap" gap="$3">
+              {spokenLanguagesOptions.map((language) => (
+                <SpokenLanguageTag key={language} language={language} />
+              ))}
+            </XStack>
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Network */}
+            <Typography
+              variant="titlesSmall"
+              color="$foregroundPrimary"
+              paddingVertical="$3"
+            >
+              {t('offerForm.network.network')}
+            </Typography>
+            <NetworkSection />
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Connection */}
+            <Typography
+              variant="titlesSmall"
+              color="$foregroundPrimary"
+              paddingVertical="$3"
+            >
+              {t('filterOffers.connection')}
+            </Typography>
+            <FriendLevel
+              subtitles={connectionSubtitles}
+              intendedConnectionLevelAtom={intendedConnectionLevelAtom}
+            />
+
+            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+            {/* Show club offers */}
+            <XStack alignItems="center" gap="$4" paddingVertical="$3">
+              <YStack flex={1} gap="$1">
+                <Typography variant="titlesSmall" color="$foregroundPrimary">
+                  {t('filterOffers.showClubOffers')}
+                </Typography>
+                <Typography variant="description" color="$foregroundSecondary">
+                  {t('filterOffers.clubsDescription')}
+                </Typography>
+              </YStack>
+              <Switch valueAtom={clubsFilterEnabledAtom} />
+            </XStack>
+            <AnimatedCollapse expanded={clubsFilterEnabled}>
+              <ClubsSection />
+            </AnimatedCollapse>
+          </YStack>
+        </ScrollView>
+      </DeferredContent>
+
+      <YStack paddingHorizontal="$5" paddingVertical="$4">
+        <Button variant="primary" size="large" onPress={handleSave}>
+          {t('filterOffers.seeOffers', {count: filteredOffersCount})}
+        </Button>
+      </YStack>
     </Screen>
   )
 }

@@ -1,11 +1,19 @@
-import {RowRadiobutton, SizableText, YStack} from '@vexl-next/ui'
+import {RadioGroup, RowRadiobutton, SizableText, YStack} from '@vexl-next/ui'
 import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
-import {RadioGroup, Theme} from 'tamagui'
+import {Theme} from 'tamagui'
+
+type RowRadiobuttonDemoValue = 'option1' | 'option2' | 'option3'
+
+const rowRadiobuttonDemoValues: readonly RowRadiobuttonDemoValue[] = [
+  'option1',
+  'option2',
+  'option3',
+]
 
 export function RowRadiobuttonScreen(): React.JSX.Element {
-  const [value, setValue] = useState('option1')
-  const [darkValue, setDarkValue] = useState('option1')
+  const [value, setValue] = useState<RowRadiobuttonDemoValue>('option1')
+  const [darkValue, setDarkValue] = useState<RowRadiobuttonDemoValue>('option1')
 
   return (
     <ScrollView
@@ -16,24 +24,23 @@ export function RowRadiobuttonScreen(): React.JSX.Element {
         Row Radiobutton
       </SizableText>
 
-      <RadioGroup value={value} onValueChange={setValue} gap="$3">
+      <RadioGroup
+        allowedValues={rowRadiobuttonDemoValues}
+        value={value}
+        onValueChange={setValue}
+        gap="$3"
+      >
         <RowRadiobutton
           value="option1"
-          selected={value === 'option1'}
           label="Option 1"
           description="Description for the first option"
         />
         <RowRadiobutton
           value="option2"
-          selected={value === 'option2'}
           label="Option 2"
           description="Description for the second option"
         />
-        <RowRadiobutton
-          value="option3"
-          selected={value === 'option3'}
-          label="Option 3 (no description)"
-        />
+        <RowRadiobutton value="option3" label="Option 3 (no description)" />
       </RadioGroup>
 
       <Theme name="dark">
@@ -47,24 +54,23 @@ export function RowRadiobuttonScreen(): React.JSX.Element {
             Dark Mode
           </SizableText>
 
-          <RadioGroup value={darkValue} onValueChange={setDarkValue} gap="$3">
+          <RadioGroup
+            allowedValues={rowRadiobuttonDemoValues}
+            value={darkValue}
+            onValueChange={setDarkValue}
+            gap="$3"
+          >
             <RowRadiobutton
               value="option1"
-              selected={darkValue === 'option1'}
               label="Option 1"
               description="Description for the first option"
             />
             <RowRadiobutton
               value="option2"
-              selected={darkValue === 'option2'}
               label="Option 2"
               description="Description for the second option"
             />
-            <RowRadiobutton
-              value="option3"
-              selected={darkValue === 'option3'}
-              label="Option 3 (no description)"
-            />
+            <RowRadiobutton value="option3" label="Option 3 (no description)" />
           </RadioGroup>
         </YStack>
       </Theme>

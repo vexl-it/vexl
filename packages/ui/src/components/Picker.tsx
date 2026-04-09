@@ -86,7 +86,7 @@ export interface PickerItem<T extends string> {
 
 export interface PickerProps<T extends string> {
   readonly items: ReadonlyArray<PickerItem<T>>
-  readonly value: T
+  readonly value?: T
   readonly onValueChange: (value: T) => void
   readonly placeholder?: string
 }

@@ -6,10 +6,9 @@ import {TouchableOpacity} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
 import Checkbox from '../../../../Checkbox'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 
 function TradeChecklistReminder(): React.ReactElement | null {
   const {t} = useTranslation()
@@ -52,35 +51,31 @@ function TradeChecklistReminder(): React.ReactElement | null {
     offerForChat?.offerInfo.publicPart.locationState.includes('IN_PERSON')
 
   return (
-    <VexlbotBubble
-      onCancelPress={() => {
-        setShowVexlbotInitialMessageForCurrentChat(false)
-        if (dontShowSwitchValue) setShowVexlbotInitialMessageForAllChats(false)
-      }}
-      text={t(
+    <VexlbotActionCard
+      buttonText={
+        offerIsInPerson
+          ? t('vexlbot.openTradeChecklist')
+          : t('vexlbot.openTradeChecklistOnline')
+      }
+      description={t(
         offerIsInPerson
           ? 'vexlbot.initialWelcomeMessage'
           : 'vexlbot.initialWelcomeMessageOnline',
         {name: otherSideData.userName}
       )}
+      onClosePress={() => {
+        setShowVexlbotInitialMessageForCurrentChat(false)
+        if (dontShowSwitchValue) setShowVexlbotInitialMessageForAllChats(false)
+      }}
+      onPress={() => {
+        navigation.navigate('TradeChecklistFlow', {
+          screen: 'AgreeOnTradeDetails',
+          chatId,
+          inboxKey,
+        })
+      }}
     >
       <Stack gap="$4">
-        <Button
-          onPress={() => {
-            navigation.navigate('TradeChecklistFlow', {
-              screen: 'AgreeOnTradeDetails',
-              chatId,
-              inboxKey,
-            })
-          }}
-          variant="secondary"
-          size="medium"
-          text={
-            offerIsInPerson
-              ? t('vexlbot.openTradeChecklist')
-              : t('vexlbot.openTradeChecklistOnline')
-          }
-        />
         <TouchableOpacity
           onPress={() => {
             setDontShowSwitchValue(!dontShowSwitchValue)
@@ -100,7 +95,7 @@ function TradeChecklistReminder(): React.ReactElement | null {
           </XStack>
         </TouchableOpacity>
       </Stack>
-    </VexlbotBubble>
+    </VexlbotActionCard>
   )
 }
 

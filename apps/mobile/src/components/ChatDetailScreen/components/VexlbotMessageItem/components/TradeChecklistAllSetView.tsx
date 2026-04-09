@@ -1,11 +1,11 @@
 import React from 'react'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 
 function TradeChecklistAllSetView(): React.ReactElement | null {
   const {t} = useTranslation()
 
-  return <VexlbotBubble text={t('vexlbot.allSetForTheMeeting')} />
+  return <VexlbotActionCard title={t('vexlbot.allSetForTheMeeting')} />
 }
 
 export default TradeChecklistAllSetView

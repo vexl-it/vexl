@@ -28,7 +28,7 @@ import {
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import copySvg from '../../../../images/copySvg'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
 interface Props {
@@ -146,53 +146,64 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     const isMessageOutdated =
       message.message.tradeChecklistUpdate.amount.timestamp !==
       latestAmountDataMessage.amountData.timestamp
+    const introText =
+      latestAmountDataMessage.status === 'pending' &&
+      latestAmountDataMessage.by === 'them' &&
+      (latestAmountDataMessage.amountData.tradePriceType === 'custom' ||
+        latestAmountDataMessage.amountData.tradePriceType === 'your' ||
+        latestAmountDataMessage.amountData.tradePriceType === 'frozen')
+        ? `${t(
+            'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
+            {
+              username: otherSideData.userName,
+              percentage: Math.abs(btcPricePercentageDifference),
+            }
+          )} ${
+            btcPricePercentageDifference >= 0
+              ? t('vexlbot.higherThanLivePrice')
+              : t('vexlbot.lowerThanLivePrice')
+          }`
+        : undefined
+    const amountDescription = t(
+      // vexlbot.settledAmountOfTheDeal and vexlbot.suggestedAmountOfTheDeal are accidentally swapped in translation file
+      latestAmountDataMessage.status === 'pending' || isMessageOutdated
+        ? 'vexlbot.settledAmountOfTheDeal'
+        : 'vexlbot.suggestedAmountOfTheDeal',
+      {
+        username:
+          message.state === 'sent' ? t('common.you') : otherSideData.userName,
+        btcAmount,
+        fiatAmount: fiatAmount?.toLocaleString(currentLocale),
+        fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
+        feeAmount,
+        btcTradePrice,
+      }
+    )
+    const pendingLabel =
+      message.state === 'received'
+        ? t('vexlbot.reactionRequired')
+        : otherSideData.userName
+          ? t('vexlbot.waitingFor', {username: otherSideData.userName})
+          : t('vexlbot.waitingForCounterParty')
+    const statusLabel = isMessageOutdated
+      ? t('common.outdated')
+      : latestAmountDataMessage.status === 'accepted'
+        ? t('common.accepted')
+        : pendingLabel
+    const statusVariant = isMessageOutdated
+      ? 'outdated'
+      : latestAmountDataMessage.status === 'accepted'
+        ? 'waiting'
+        : 'waitingForConfirmation'
 
     return (
       <>
-        <VexlbotBubble
-          messageState={message.state}
-          username={otherSideData.userName}
-          status={
-            isMessageOutdated
-              ? ('outdated' as const)
-              : latestAmountDataMessage.status
-          }
-          introText={
-            latestAmountDataMessage.status === 'pending' &&
-            latestAmountDataMessage.by === 'them' &&
-            (latestAmountDataMessage.amountData.tradePriceType === 'custom' ||
-              latestAmountDataMessage.amountData.tradePriceType === 'your' ||
-              latestAmountDataMessage.amountData.tradePriceType === 'frozen')
-              ? `${t(
-                  'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
-                  {
-                    username: otherSideData.userName,
-                    percentage: Math.abs(btcPricePercentageDifference),
-                  }
-                )} ${
-                  btcPricePercentageDifference >= 0
-                    ? t('vexlbot.higherThanLivePrice')
-                    : t('vexlbot.lowerThanLivePrice')
-                }`
-              : undefined
-          }
-          text={t(
-            // vexlbot.settledAmountOfTheDeal and vexlbot.suggestedAmountOfTheDeal are accidentally swapped in translation file
-            latestAmountDataMessage.status === 'pending' || isMessageOutdated
-              ? 'vexlbot.settledAmountOfTheDeal'
-              : 'vexlbot.suggestedAmountOfTheDeal',
-            {
-              username:
-                message.state === 'sent'
-                  ? t('common.you')
-                  : otherSideData.userName,
-              btcAmount,
-              fiatAmount: fiatAmount?.toLocaleString(currentLocale),
-              fiatCurrency: currencies[tradeOrOriginOfferCurrency].code,
-              feeAmount,
-              btcTradePrice,
-            }
-          )}
+        <VexlbotActionCard
+          description={introText ?? amountDescription}
+          details={introText ? [amountDescription] : undefined}
+          statusLabel={statusLabel}
+          statusVariant={statusVariant}
+          title={t('tradeChecklist.options.CALCULATE_AMOUNT')}
         >
           <Stack f={1} gap="$2">
             <XStack ai="center" jc="space-between">
@@ -263,7 +274,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
                 </XStack>
               )}
           </Stack>
-        </VexlbotBubble>
+        </VexlbotActionCard>
         {!isMessageOutdated &&
           latestAmountDataMessage.status === 'accepted' &&
           Option.isSome(lastTradeChecklistMessage) &&

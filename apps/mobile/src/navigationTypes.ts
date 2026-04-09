@@ -55,6 +55,16 @@ export type RootStackParamsList = {
     targetMessageId?: ChatMessageId | undefined
   }
 
+  ChatInfo: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
+  }
+
+  ChatOfferDetail: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
+  }
+
   ChatSearch: undefined
 
   ClubDetail: {clubUuid: ClubUuid}

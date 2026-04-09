@@ -1,8 +1,10 @@
+import {useNavigation} from '@react-navigation/native'
 import {InfoCircle, NavButton, Typography, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtom, useAtomValue} from 'jotai'
+import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
-import {Stack, useTheme} from 'tamagui'
+import {Stack} from 'tamagui'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
 import {chatMolecule} from '../atoms'
@@ -31,12 +33,14 @@ function countryCodeToFlagEmoji(countryCode: string): string {
 
 function StickyHeader(): React.ReactElement | null {
   const {t} = useTranslation()
-  const theme = useTheme()
-  const {chatAtom, offerForChatAtom, showInfoBarAtom} =
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
+  const {chatAtom, offerForChatAtom, publicKeyPemBase64Atom, showInfoBarAtom} =
     useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
-  const [showInfoBar, setShowInfoBar] = useAtom(showInfoBarAtom)
+  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
+  const showInfoBar = useAtomValue(showInfoBarAtom)
 
   const offerTitle = useMemo(() => {
     if (!offer || chat.origin.type === 'unknown') return null
@@ -167,7 +171,10 @@ function StickyHeader(): React.ReactElement | null {
           variant="tetriary"
           icon={InfoCircle}
           onPress={() => {
-            // TODO open offer detail
+            navigation.navigate('ChatOfferDetail', {
+              inboxKey,
+              otherSideKey: chat.otherSide.publicKey,
+            })
           }}
         />
       </Stack>

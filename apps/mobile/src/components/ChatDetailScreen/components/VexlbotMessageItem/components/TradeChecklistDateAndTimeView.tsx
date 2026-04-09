@@ -10,7 +10,7 @@ import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
 interface Props {
@@ -51,13 +51,11 @@ export default function TradeChecklistDateAndTimeView({
     if (!!pick && !isMessageOutdated) {
       return (
         <>
-          <VexlbotBubble
-            username={otherSideData.userName}
-            messageState={message.state}
-            status="accepted"
-            text={`${t('vexlbot.yourMeetingIsOn')}\n${dateAndTime.toStringWithTime(
-              pick.dateTime
-            )}`}
+          <VexlbotActionCard
+            details={[dateAndTime.toStringWithTime(pick.dateTime)]}
+            statusLabel={t('common.accepted')}
+            statusVariant="waiting"
+            title={t('vexlbot.yourMeetingIsOn')}
           >
             <Button
               onPress={() => {
@@ -68,7 +66,7 @@ export default function TradeChecklistDateAndTimeView({
               variant="primary"
               text={t('vexlbot.addEventToCalendar')}
             />
-          </VexlbotBubble>
+          </VexlbotActionCard>
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
               message.message.uuid && <VexlbotNextActionSuggestion />}
@@ -79,14 +77,30 @@ export default function TradeChecklistDateAndTimeView({
     const suggestions =
       message.message.tradeChecklistUpdate.dateAndTime.suggestions
     if (suggestions && suggestions.length > 0) {
+      const detailLines = suggestions.map((one) =>
+        // TODO: remove this in future once everybody
+        // updates to new DateTime checklist system
+        // use toStringWithTime(one.to)
+        DateTime.fromMillis(one.to).diff(DateTime.fromMillis(one.from), 'hours')
+          .hours >= 1
+          ? dateAndTime.toStringWithRange(one)
+          : dateAndTime.toStringWithTime(one.to)
+      )
+      const pendingLabel =
+        message.state === 'received'
+          ? t('vexlbot.reactionRequired')
+          : otherSideData.userName
+            ? t('vexlbot.waitingFor', {username: otherSideData.userName})
+            : t('vexlbot.waitingForCounterParty')
+
       return (
-        <VexlbotBubble
-          username={otherSideData.userName}
-          messageState={message.state}
-          status={
-            isMessageOutdated ? ('outdated' as const) : ('pending' as const)
+        <VexlbotActionCard
+          buttonText={
+            message.state === 'received' && !isMessageOutdated
+              ? t('common.respond')
+              : undefined
           }
-          text={`${t(
+          description={t(
             message.state === 'sent'
               ? 'vexlbot.youAddedTimeOptions'
               : 'vexlbot.themAddedTimeOptions',
@@ -94,39 +108,29 @@ export default function TradeChecklistDateAndTimeView({
               them: otherSideData.userName,
               number: suggestions.length,
             }
-          )}\n${suggestions
-            .map((one) =>
-              // TODO: remove this in future once everybody
-              // updates to new DateTime checklist system
-              // use toStringWithTime(one.to)
-              DateTime.fromMillis(one.to).diff(
-                DateTime.fromMillis(one.from),
-                'hours'
-              ).hours >= 1
-                ? dateAndTime.toStringWithRange(one)
-                : dateAndTime.toStringWithTime(one.to)
-            )
-            .join('\n')}`}
-        >
-          {message.state === 'received' && !isMessageOutdated && (
-            <Button
-              onPress={() => {
-                const chat = store.get(chatAtom)
-                navigation.navigate('TradeChecklistFlow', {
-                  chatId: chat.id,
-                  inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-                  screen: 'PickDateFromSuggestions',
-                  params: {
-                    chosenDateTimes: suggestions,
-                  },
-                })
-              }}
-              variant="secondary"
-              size="small"
-              text={t('common.respond')}
-            />
           )}
-        </VexlbotBubble>
+          details={detailLines}
+          onPress={
+            message.state === 'received' && !isMessageOutdated
+              ? () => {
+                  const chat = store.get(chatAtom)
+                  navigation.navigate('TradeChecklistFlow', {
+                    chatId: chat.id,
+                    inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+                    screen: 'PickDateFromSuggestions',
+                    params: {
+                      chosenDateTimes: suggestions,
+                    },
+                  })
+                }
+              : undefined
+          }
+          statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
+          statusVariant={
+            isMessageOutdated ? 'outdated' : 'waitingForConfirmation'
+          }
+          title={t('tradeChecklist.options.DATE_AND_TIME')}
+        />
       )
     }
   }

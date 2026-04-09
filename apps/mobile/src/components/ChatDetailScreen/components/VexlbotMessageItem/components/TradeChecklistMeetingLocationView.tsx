@@ -16,7 +16,7 @@ import copySvg from '../../../../images/copySvg'
 import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {chatMolecule} from '../../../atoms'
-import VexlbotBubble from './VexlbotBubble'
+import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 
 function getTextForVexlbot({
@@ -49,6 +49,18 @@ function getTextForVexlbot({
               them: otherSideUsername,
             })
       } \n${address}${note ? `\n${note}` : ''}`
+}
+
+function splitCardText(text: string): {
+  readonly description: string
+  readonly details: readonly string[]
+} {
+  const [description, ...details] = text.split('\n').filter((item) => item)
+
+  return {
+    description: description ?? '',
+    details,
+  }
 }
 
 interface Props {
@@ -95,21 +107,25 @@ export default function TradeChecklistMeetingLocationView({
       latestMeetingLocationDataMessage?.status === 'accepted' &&
       !isMessageOutdated
     ) {
+      const cardText = splitCardText(
+        getTextForVexlbot({
+          agreed: true,
+          by: message.state === 'sent' ? 'me' : 'them',
+          address: message.message.tradeChecklistUpdate.location.data.address,
+          note: message.message.tradeChecklistUpdate.location.data.note,
+          otherSideUsername: otherSideData.userName,
+          t,
+        })
+      )
+
       return (
         <>
-          <VexlbotBubble
-            messageState={message.state}
-            username={otherSideData.userName}
-            status="accepted"
-            text={getTextForVexlbot({
-              agreed: true,
-              by: message.state === 'sent' ? 'me' : 'them',
-              address:
-                message.message.tradeChecklistUpdate.location.data.address,
-              note: message.message.tradeChecklistUpdate.location.data.note,
-              otherSideUsername: otherSideData.userName,
-              t,
-            })}
+          <VexlbotActionCard
+            description={cardText.description}
+            details={cardText.details}
+            statusLabel={t('common.accepted')}
+            statusVariant="waiting"
+            title={t('tradeChecklist.options.MEETING_LOCATION')}
           >
             <Stack gap="$2">
               <Button
@@ -141,7 +157,7 @@ export default function TradeChecklistMeetingLocationView({
                 />
               )}
             </Stack>
-          </VexlbotBubble>
+          </VexlbotActionCard>
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
               message.message.uuid && <VexlbotNextActionSuggestion />}
@@ -149,21 +165,32 @@ export default function TradeChecklistMeetingLocationView({
       )
     }
 
+    const cardText = splitCardText(
+      getTextForVexlbot({
+        agreed: false,
+        by: message.state === 'sent' ? 'me' : 'them',
+        address: message.message.tradeChecklistUpdate.location.data.address,
+        note: message.message.tradeChecklistUpdate.location.data.note,
+        otherSideUsername: otherSideData.userName,
+        t,
+      })
+    )
+    const pendingLabel =
+      message.state === 'received'
+        ? t('vexlbot.reactionRequired')
+        : otherSideData.userName
+          ? t('vexlbot.waitingFor', {username: otherSideData.userName})
+          : t('vexlbot.waitingForCounterParty')
+
     return (
-      <VexlbotBubble
-        messageState={message.state}
-        username={otherSideData.userName}
-        status={
-          isMessageOutdated ? ('outdated' as const) : ('pending' as const)
+      <VexlbotActionCard
+        description={cardText.description}
+        details={cardText.details}
+        statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
+        statusVariant={
+          isMessageOutdated ? 'outdated' : 'waitingForConfirmation'
         }
-        text={getTextForVexlbot({
-          agreed: false,
-          by: message.state === 'sent' ? 'me' : 'them',
-          address: message.message.tradeChecklistUpdate.location.data.address,
-          note: message.message.tradeChecklistUpdate.location.data.note,
-          otherSideUsername: otherSideData.userName,
-          t,
-        })}
+        title={t('tradeChecklist.options.MEETING_LOCATION')}
       >
         {!isMessageOutdated && (
           <Stack gap="$2">
@@ -205,7 +232,7 @@ export default function TradeChecklistMeetingLocationView({
             )}
           </Stack>
         )}
-      </VexlbotBubble>
+      </VexlbotActionCard>
     )
   }
 

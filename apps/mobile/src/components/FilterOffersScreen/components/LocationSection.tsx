@@ -1,14 +1,10 @@
+import {useNavigation} from '@react-navigation/native'
 import {RowButton, RowCheckbox} from '@vexl-next/ui'
 import {PlusAdd} from '@vexl-next/ui/src/icons'
 import {YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useState} from 'react'
+import React, {useCallback} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {
-  newLocationSessionId,
-  type LocationSessionId,
-} from '../../LocationSearch/molecule'
-import SelectLocationFlowModal from '../../OfferForm/components/Location/components/SelectLocationFlowModal'
 import LocationsList from '../../OfferForm/components/LocationsList'
 import {
   isOnlineFilterAtom,
@@ -20,6 +16,7 @@ import {
 
 function LocationSection(): React.ReactElement {
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const location = useAtomValue(locationArrayOfOneAtom)
   const isOnline = useAtomValue(isOnlineFilterAtom)
   const isOnlineVisible = useAtomValue(isOnlineFilterVisibleAtom)
@@ -28,8 +25,9 @@ function LocationSection(): React.ReactElement {
     updateLocationStateAndPaymentMethodAtom
   )
 
-  const [locationSearchVisible, setLocationSearchVisible] =
-    useState<LocationSessionId | null>(null)
+  const handleAddLocation = useCallback(() => {
+    navigation.navigate('SelectLocationSearch', {randomizeLocation: false})
+  }, [navigation])
 
   return (
     <YStack gap="$3">
@@ -37,9 +35,7 @@ function LocationSection(): React.ReactElement {
         <RowButton
           icon={PlusAdd}
           label={t('filterOffers.addLocation')}
-          onPress={() => {
-            setLocationSearchVisible(newLocationSessionId())
-          }}
+          onPress={handleAddLocation}
         />
       ) : null}
       <LocationsList locations={location} onLocationRemove={removeLocation} />
@@ -52,16 +48,6 @@ function LocationSection(): React.ReactElement {
           }}
         />
       ) : null}
-      <SelectLocationFlowModal
-        randomizeLocation={false}
-        locationSessionId={locationSearchVisible ?? newLocationSessionId()}
-        locationAtom={locationArrayOfOneAtom}
-        onSetVisible={(visible) => {
-          if (visible) setLocationSearchVisible(newLocationSessionId())
-          else setLocationSearchVisible(null)
-        }}
-        visible={!!locationSearchVisible}
-      />
     </YStack>
   )
 }

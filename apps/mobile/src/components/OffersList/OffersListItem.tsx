@@ -53,9 +53,8 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
 
   const navigateToOffer = useCallback(() => {
     if (isMine) {
-      navigation.navigate('CRUDOfferFlow', {
+      navigation.navigate('MyOfferDetail', {
         offerId: offer.offerInfo.offerId,
-        screen: 'ListingAndOfferType',
       })
     } else {
       navigation.navigate('OfferDetail', {offerId: offer.offerInfo.offerId})

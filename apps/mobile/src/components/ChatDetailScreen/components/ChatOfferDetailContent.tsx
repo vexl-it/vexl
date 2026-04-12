@@ -19,35 +19,19 @@ import {getTokens, Stack, useTheme} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
-import {bigNumberToString} from '../../../utils/bigNumberToString'
 import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
-import {formatCurrencyAmount} from '../../../utils/localization/currency'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import spokenLanguageToFlagEmoji from '../../../utils/localization/spokenLanguageToFlagEmoji'
+import {
+  getAmountLabel,
+  getIconTagVariant,
+  getIsOffering,
+} from '../../../utils/offerHelpers'
 import CommonFriends from '../../CommonFriends'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import {chatMolecule} from '../atoms'
 import ChatConnectionHeader from './ChatConnectionHeader'
-
-function getIconTagVariant(
-  listingType: 'BITCOIN' | 'OTHER' | 'PRODUCT' | undefined
-): 'bitcoin' | 'product' | 'service' {
-  if (listingType === 'PRODUCT') return 'product'
-  if (listingType === 'OTHER') return 'service'
-  return 'bitcoin'
-}
-
-function getIsOffering(
-  listingType: 'BITCOIN' | 'OTHER' | 'PRODUCT' | undefined,
-  offerType: 'BUY' | 'SELL'
-): boolean {
-  if (!listingType || listingType === 'BITCOIN') {
-    return offerType === 'SELL'
-  }
-
-  return offerType === 'BUY'
-}
 
 function getTradeTagVariant(isOffering: boolean): 'offer' | 'request' {
   return isOffering ? 'offer' : 'request'
@@ -132,13 +116,7 @@ export default function ChatOfferDetailContent({
 
     const {publicPart} = offer.offerInfo
 
-    const amount =
-      publicPart.amountBottomLimit > 0
-        ? `${bigNumberToString(publicPart.amountBottomLimit)} - ${formatCurrencyAmount(
-            publicPart.currency,
-            publicPart.amountTopLimit
-          )}`
-        : formatCurrencyAmount(publicPart.currency, publicPart.amountTopLimit)
+    const amount = getAmountLabel(offer)
 
     const location =
       publicPart.location[0]?.shortAddress ??

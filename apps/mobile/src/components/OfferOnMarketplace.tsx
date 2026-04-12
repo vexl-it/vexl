@@ -3,9 +3,11 @@ import {IconTag, OfferCard, TextTag} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
-import {smallestClubForIdsAtom} from '../state/clubs/atom/clubsWithMembersAtom'
-import {bigNumberToString} from '../utils/bigNumberToString'
-import {formatCurrencyAmount} from '../utils/localization/currency'
+import {
+  smallestClubForIdsAtom,
+  useGetAllClubsNamesForIds,
+} from '../state/clubs/atom/clubsWithMembersAtom'
+import {formatFullCurrencyAmount} from '../utils/localization/currency'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
@@ -21,16 +23,18 @@ export default function OfferOnMarketplace({
 }): React.ReactElement {
   const {t} = useTranslation()
   const {publicPart, privatePart} = offer.offerInfo
-  const isMine = !!offer.ownershipInfo
+  const {ownershipInfo} = offer
+  const isMine = !!ownershipInfo
 
   const smallestClub = useAtomValue(
     useMemo(
-      () =>
-        isMine
-          ? smallestClubForIdsAtom([])
-          : smallestClubForIdsAtom(privatePart.clubIds ?? []),
-      [privatePart.clubIds, isMine]
+      () => smallestClubForIdsAtom(privatePart.clubIds ?? []),
+      [privatePart.clubIds]
     )
+  )
+
+  const myClubNames = useGetAllClubsNamesForIds(
+    ownershipInfo?.intendedClubs ?? []
   )
 
   const isOffering = getIsOffering(publicPart.listingType, publicPart.offerType)
@@ -47,9 +51,11 @@ export default function OfferOnMarketplace({
     ? t('marketplace.commonFriends', {count: commonFriendsCount})
     : undefined
 
-  const clubName = Option.isSome(smallestClub)
-    ? smallestClub.value.club.name
-    : undefined
+  const clubNames = isMine
+    ? myClubNames
+    : Option.isSome(smallestClub)
+      ? [smallestClub.value.club.name]
+      : undefined
 
   const clubImageUrl = Option.isSome(smallestClub)
     ? smallestClub.value.club.clubImageUrl
@@ -57,18 +63,21 @@ export default function OfferOnMarketplace({
 
   const price = useMemo(() => {
     if (!publicPart.listingType || publicPart.listingType === 'BITCOIN') {
-      const top = formatCurrencyAmount(
+      const top = formatFullCurrencyAmount(
         publicPart.currency,
         publicPart.amountTopLimit
       )
       if (publicPart.amountBottomLimit > 0) {
-        const bottom = bigNumberToString(publicPart.amountBottomLimit)
+        const bottom = formatFullCurrencyAmount(
+          publicPart.currency,
+          publicPart.amountBottomLimit
+        )
         return `${bottom} \u2013 ${top}`
       }
-      return top
+      return `${t('offer.upTo')} ${top}`
     }
     if (publicPart.amountBottomLimit !== 0) {
-      return formatCurrencyAmount(
+      return formatFullCurrencyAmount(
         publicPart.currency,
         publicPart.amountBottomLimit
       )
@@ -79,6 +88,7 @@ export default function OfferOnMarketplace({
     publicPart.amountBottomLimit,
     publicPart.amountTopLimit,
     publicPart.listingType,
+    t,
   ])
 
   const details = useMemo(() => {
@@ -152,7 +162,7 @@ export default function OfferOnMarketplace({
       }
       iconTag={<IconTag variant={iconTagVariant} />}
       commonFriends={commonFriendsText}
-      clubName={clubName}
+      clubNames={clubNames}
       price={price}
       description={publicPart.offerDescription}
       details={details}

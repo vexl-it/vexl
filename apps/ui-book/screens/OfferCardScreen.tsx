@@ -94,7 +94,7 @@ function Demos(): React.JSX.Element {
         textTag={<TextTag variant="request" label="Request" />}
         iconTag={<IconTag variant="bitcoin" />}
         commonFriends="10 common friends"
-        clubName="btc prague"
+        clubNames={['btc prague']}
         price="10 - 100 Kc"
         description="Looking to buy 0.02 BTC, instant transfer."
         details={[

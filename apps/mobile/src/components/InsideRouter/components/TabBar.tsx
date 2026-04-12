@@ -12,13 +12,13 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {areThereUnreadMessagesAtom} from '../../../state/chat/atoms/unreadChatsCountAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 
-export const TAB_BAR_HEIGHT_PX = 72
+export const TAB_BAR_HEIGHT_PX = 60
 
 const TABS: ReadonlyArray<
   Omit<TabBarItem<string>, 'badge' | 'label'> & {
     readonly translationKey:
       | 'tabBar.marketplace'
-      | 'tabBar.messages'
+      | 'tabBar.chats'
       | 'tabBar.community'
   }
 > = [
@@ -28,7 +28,7 @@ const TABS: ReadonlyArray<
     icon: ArrowsHorizontal,
   },
   {
-    translationKey: 'tabBar.messages',
+    translationKey: 'tabBar.chats',
     value: 'Messages',
     icon: ChatBubbles,
   },

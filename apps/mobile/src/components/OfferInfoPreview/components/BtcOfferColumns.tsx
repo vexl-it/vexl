@@ -1,8 +1,7 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import React, {useMemo} from 'react'
 import {getTokens, Stack, XStack} from 'tamagui'
-import {bigNumberToString} from '../../../utils/bigNumberToString'
-import {formatCurrencyAmount} from '../../../utils/localization/currency'
+import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SvgImage from '../../Image'
 import spokenLanguagesSvg from '../../images/spokenLanguagesSvg'
@@ -26,15 +25,18 @@ function BtcOfferColumns({offer}: Props): React.ReactElement {
   const {t} = useTranslation()
 
   const offerAmountTopLimit = useMemo(() => {
-    return formatCurrencyAmount(
+    return formatFullCurrencyAmount(
       offer.publicPart.currency,
       offer.publicPart.amountTopLimit
     )
   }, [offer.publicPart.amountTopLimit, offer.publicPart.currency])
 
   const offerAmountBottomLimit = useMemo(() => {
-    return bigNumberToString(offer.publicPart.amountBottomLimit)
-  }, [offer.publicPart.amountBottomLimit])
+    return formatFullCurrencyAmount(
+      offer.publicPart.currency,
+      offer.publicPart.amountBottomLimit
+    )
+  }, [offer.publicPart.amountBottomLimit, offer.publicPart.currency])
 
   return (
     <XStack f={1} gap="$1">

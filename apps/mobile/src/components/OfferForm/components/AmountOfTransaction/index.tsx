@@ -6,7 +6,8 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import React from 'react'
+import React, {useMemo} from 'react'
+import {createMaxAmountForCurrencyAtom} from '../../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../../utils/localization/currency'
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
   amountBottomLimitAtom: WritableAtom<number, [SetStateAction<number>], void>
   currencyAtom: Atom<CurrencyCode | undefined>
   onCurrencyPress?: () => void
+  maxLabel?: string
 }
 
 function AmountOfTransaction({
@@ -21,12 +23,16 @@ function AmountOfTransaction({
   amountBottomLimitAtom,
   currencyAtom,
   onCurrencyPress,
+  maxLabel,
 }: Props): React.ReactElement | null {
   const currency = useAtomValue(currencyAtom)
+  const maxAmountAtom = useMemo(
+    () => createMaxAmountForCurrencyAtom(currencyAtom),
+    [currencyAtom]
+  )
+  const maxLimit = useAtomValue(maxAmountAtom)
 
   if (!currency) return null
-
-  const maxLimit = currencies[currency].maxAmount
 
   return (
     <PriceRangeInput
@@ -35,6 +41,7 @@ function AmountOfTransaction({
       currency={currencies[currency].code}
       onCurrencyPress={onCurrencyPress ?? (() => {})}
       maxLimit={maxLimit}
+      maxLabel={maxLabel}
     />
   )
 }

@@ -11,14 +11,27 @@ const ANIMATION_DURATION = 250
 
 function AnimatedCollapse({
   expanded,
+  animateOnMount = false,
   children,
 }: {
   readonly expanded: boolean
+  readonly animateOnMount?: boolean
   readonly children: React.ReactNode
 }): React.JSX.Element {
   const measuredHeight = useSharedValue(0)
   const animatedHeight = useSharedValue(0)
-  const isFirstRender = useRef(true)
+  const animationEnabled = useRef(animateOnMount)
+
+  useEffect(() => {
+    if (animateOnMount) return
+
+    const timer = setTimeout(() => {
+      animationEnabled.current = true
+    }, ANIMATION_DURATION)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [animateOnMount])
 
   const handleLayout = useCallback(
     (e: LayoutChangeEvent) => {
@@ -26,13 +39,12 @@ function AnimatedCollapse({
       if (height <= 0 || measuredHeight.value === height) return
       measuredHeight.value = height
       if (expanded) {
-        if (isFirstRender.current) {
-          animatedHeight.value = height
-          isFirstRender.current = false
-        } else {
+        if (animationEnabled.current) {
           animatedHeight.value = withTiming(height, {
             duration: ANIMATION_DURATION,
           })
+        } else {
+          animatedHeight.value = height
         }
       }
     },
@@ -40,18 +52,22 @@ function AnimatedCollapse({
   )
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
     if (expanded) {
       if (measuredHeight.value > 0) {
-        animatedHeight.value = withTiming(measuredHeight.value, {
-          duration: ANIMATION_DURATION,
-        })
+        if (animationEnabled.current) {
+          animatedHeight.value = withTiming(measuredHeight.value, {
+            duration: ANIMATION_DURATION,
+          })
+        } else {
+          animatedHeight.value = measuredHeight.value
+        }
       }
     } else {
-      animatedHeight.value = withTiming(0, {duration: ANIMATION_DURATION})
+      if (animationEnabled.current) {
+        animatedHeight.value = withTiming(0, {duration: ANIMATION_DURATION})
+      } else {
+        animatedHeight.value = 0
+      }
     }
   }, [expanded, animatedHeight, measuredHeight])
 

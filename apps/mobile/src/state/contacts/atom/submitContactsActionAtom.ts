@@ -212,7 +212,7 @@ export const submitContactsActionAtom = atom(
                       set(offerProgressModalActionAtoms.show, {
                         title: t('contacts.refreshingOffers.title'),
                         bottomText: t(
-                          'offerForm.offerEncryption.dontShutDownTheApp'
+                          'offerForm.offerEncryption.dontCloseTheApp'
                         ),
                         indicateProgress: {type: 'intermediate'},
                       })
@@ -236,7 +236,7 @@ export const submitContactsActionAtom = atom(
                                       }
                                     ),
                                     bottomText: t(
-                                      'offerForm.offerEncryption.dontShutDownTheApp'
+                                      'offerForm.offerEncryption.dontCloseTheApp'
                                     ),
                                   },
                                 })

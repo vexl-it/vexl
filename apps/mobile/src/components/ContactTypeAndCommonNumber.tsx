@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
@@ -5,11 +6,11 @@ import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {Stack, Text, XStack} from 'tamagui'
+import {type RootStackScreenProps} from '../navigationTypes'
 import {useGetAllClubsNamesForIds} from '../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../utils/localization/localizedNumbersAtoms'
 import friendsSvg from './ChatDetailScreen/images/friendsSvg'
-import {commonFriendsModalDataAtom} from './CommonFriends/atoms'
 import Image from './Image'
 
 function ContactTypeAndCommonNumber({
@@ -28,15 +29,16 @@ function ContactTypeAndCommonNumber({
   clubsIds?: readonly ClubUuid[]
 }): React.ReactElement {
   const {t} = useTranslation()
+  const navigation =
+    useNavigation<RootStackScreenProps<'CommonFriends'>['navigation']>()
   const clubsNamesForOffer = useGetAllClubsNamesForIds(clubsIds ?? [])
   const numberOfCommonFriendsLocalized = useSetAtom(
     localizedDecimalNumberActionAtom
   )({number: numberOfCommonFriends})
-  const setModalData = useSetAtom(commonFriendsModalDataAtom)
 
   const handlePress = useCallback(() => {
-    setModalData({contactsHashes, verifiedHashes})
-  }, [contactsHashes, setModalData, verifiedHashes])
+    navigation.navigate('CommonFriends', {contactsHashes, verifiedHashes})
+  }, [contactsHashes, navigation, verifiedHashes])
 
   return (
     <Stack flexDirection="row" ai={center ? 'center' : 'flex-start'}>

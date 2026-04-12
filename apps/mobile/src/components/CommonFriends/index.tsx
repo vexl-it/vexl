@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {
@@ -6,14 +7,14 @@ import {
 } from '@vexl-next/ui'
 import {Array, Effect, HashMap, Option, pipe} from 'effect'
 import {getContactByIdAsync} from 'expo-contacts'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Platform} from 'react-native'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showVerifiedContactsAtom} from '../../utils/preferences'
-import {commonFriendsModalDataAtom} from './atoms'
 
 interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
@@ -84,8 +85,9 @@ function CommonFriends({
   otherSideClubs,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
+  const navigation =
+    useNavigation<RootStackScreenProps<'CommonFriends'>['navigation']>()
   const store = useStore()
-  const setModalData = useSetAtom(commonFriendsModalDataAtom)
   const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
   const commonFriendsCount = commonConnectionsHashes.length
 
@@ -130,11 +132,11 @@ function CommonFriends({
   const imageSources = useContactImageSources(visibleFriendsInPreview)
 
   const handlePress = useCallback(() => {
-    setModalData({
+    navigation.navigate('CommonFriends', {
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
     })
-  }, [commonConnectionsHashes, setModalData, verifiedConnectionsHashes])
+  }, [commonConnectionsHashes, navigation, verifiedConnectionsHashes])
 
   const clubChips: readonly CommonFriend[] = useMemo(
     () =>

@@ -9,8 +9,9 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
-import {styled} from 'tamagui'
+import {getTokens, styled} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
@@ -60,7 +61,6 @@ const DialogBackdrop = styled(Stack, {
 const DialogViewport = styled(YStack, {
   name: 'DialogViewport',
   paddingTop: '$5',
-  paddingBottom: '$8',
   paddingHorizontal: '$5',
   gap: '$3',
 })
@@ -92,6 +92,8 @@ export function Dialog({
 
   const backdropOpacity = useSharedValue(0)
   const translateY = useSharedValue(SCREEN_HEIGHT)
+  const {bottom} = useSafeAreaInsets()
+  const bottomOffset = bottom + getTokens().space.$8.val
 
   const hasFooter = footer != null
 
@@ -153,7 +155,7 @@ export function Dialog({
           onPress={onClose}
         />
         <Animated.View style={contentAnimatedStyle}>
-          <DialogViewport>
+          <DialogViewport paddingBottom={bottomOffset}>
             <DialogCard>{children}</DialogCard>
             {footer != null ? <XStack gap="$3">{footer}</XStack> : null}
           </DialogViewport>

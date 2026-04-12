@@ -1,10 +1,11 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {spokenLanguagesOptions} from '@vexl-next/domain/src/general/offers'
-import {Button, NavButton, Switch, Typography} from '@vexl-next/ui'
+import {Button, Loader, NavButton, Switch, Typography} from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {
   ScrollView,
   Separator,
+  Stack,
   XStack,
   YStack,
 } from '@vexl-next/ui/src/primitives'
@@ -23,6 +24,7 @@ import {
   amountBottomLimitForRangeInputAtom,
   amountFilterEnabledAtom,
   amountTopLimitForRangeInputAtom,
+  btcPricesReadyForFilterAtom,
   clubsFilterEnabledAtom,
   currencyAtom,
   filteredOffersPreviewCountAtom,
@@ -57,6 +59,7 @@ function FilterOffersScreen(): React.ReactElement {
   const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
   const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
   const amountFilterEnabled = useAtomValue(amountFilterEnabledAtom)
+  const amountPricesReady = useAtomValue(btcPricesReadyForFilterAtom)
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
@@ -158,14 +161,31 @@ function FilterOffersScreen(): React.ReactElement {
             </XStack>
             <AnimatedCollapse expanded={amountFilterEnabled}>
               <YStack gap="$3">
-                <AmountOfTransaction
-                  amountTopLimitAtom={amountTopLimitForRangeInputAtom}
-                  amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
-                  currencyAtom={currencyAtom}
-                  onCurrencyPress={() => {
-                    setCurrencySelectVisible(true)
-                  }}
-                />
+                {!amountPricesReady ? (
+                  <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
+                    <Loader size="small" />
+                    <Typography
+                      variant="description"
+                      color="$foregroundSecondary"
+                    >
+                      {t('offerForm.loadingExchangeRate')}
+                    </Typography>
+                  </XStack>
+                ) : null}
+                <Stack
+                  opacity={amountPricesReady ? 1 : 0.5}
+                  pointerEvents={amountPricesReady ? 'auto' : 'none'}
+                >
+                  <AmountOfTransaction
+                    amountTopLimitAtom={amountTopLimitForRangeInputAtom}
+                    amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
+                    currencyAtom={currencyAtom}
+                    onCurrencyPress={() => {
+                      setCurrencySelectVisible(true)
+                    }}
+                    maxLabel={t('offerForm.max')}
+                  />
+                </Stack>
                 <ChangeCurrency
                   selectedCurrencyCodeAtom={currencyAtom}
                   onSave={(currency) => {

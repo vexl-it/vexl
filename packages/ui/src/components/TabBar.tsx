@@ -242,7 +242,11 @@ export function TabBar<T>({
   }))
 
   return (
-    <TabBarFrame paddingBottom={bottomInset ? bottomInset + 16 : '$5'}>
+    <TabBarFrame
+      paddingBottom={
+        bottomInset ? bottomInset + getTokens().space.$2.val : '$2'
+      }
+    >
       <AnimatedActivePill style={animatedPillStyle} />
       {tabs.map((tab, index) => {
         const isActive = tab.value === activeTab

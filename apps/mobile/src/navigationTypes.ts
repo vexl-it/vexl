@@ -7,6 +7,7 @@ import {type NativeStackScreenProps} from '@react-navigation/native-stack'
 import {type KeyHolder} from '@vexl-next/cryptography'
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
@@ -23,6 +24,7 @@ import {
   type InitPhoneVerificationResponse,
   type VerifyPhoneNumberResponse,
 } from '@vexl-next/rest-api/src/services/user/contracts'
+import {type EditableOfferField} from './components/CRUDOfferFlow/offerSetupSteps'
 import {type FaqType} from './components/FaqScreen/useContent'
 import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
@@ -39,9 +41,15 @@ export type RootStackParamsList = {
   TradeChecklistFlow: NavigatorScreenParams<TradeChecklistStackParamsList> &
     ChatIds
 
-  CRUDOfferFlow: NavigatorScreenParams<CRUDOfferStackParamsList> & {
-    offerId?: OfferId | undefined
+  CRUDOfferFlow: undefined
+  MyOfferDetail: {offerId: OfferId}
+  EditOfferField: {
+    offerId: OfferId
+    field: EditableOfferField
   }
+  OfferExpirationDate: undefined
+  SelectLocationSearch: {randomizeLocation?: boolean} | undefined
+  SelectLocationRadius: {randomizeLocation?: boolean} | undefined
   FilterOffers: undefined
 
   OfferDetail: {offerId: OfferId}
@@ -65,6 +73,11 @@ export type RootStackParamsList = {
   }
 
   ChatSearch: undefined
+
+  CommonFriends: {
+    readonly contactsHashes: readonly HashedPhoneNumber[]
+    readonly verifiedHashes?: readonly HashedPhoneNumber[]
+  }
 
   ClubDetail: {clubUuid: ClubUuid}
 
@@ -180,25 +193,6 @@ export type InsideTabParamsList = {
   Messages: undefined
   Community: undefined
 }
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type CRUDOfferStackParamsList = {
-  ListingAndOfferType: undefined
-  CurrencyAndAmount: undefined
-  OfferDescriptionAndSpokenLanguagesScreen: undefined
-  LocationPaymentMethodAndNetworkScreen: undefined
-  FriendLevelScreen: undefined
-  DeliveryMethodAndNetworkScreen: undefined
-  PriceScreen: undefined
-  SummaryScreen: undefined
-}
-
-export type CRUDOfferStackScreenProps<
-  T extends keyof CRUDOfferStackParamsList,
-> = CompositeScreenProps<
-  NativeStackScreenProps<CRUDOfferStackParamsList, T>,
-  RootStackScreenProps<keyof RootStackParamsList>
->
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ContactsTabParamsList = {

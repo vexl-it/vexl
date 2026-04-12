@@ -134,9 +134,7 @@ function EmptyListPlaceholder({
             onRefresh={onRefresh}
             buttonText={t('myOffers.addNewOffer')}
             onButtonPress={() => {
-              navigation.navigate('CRUDOfferFlow', {
-                screen: 'ListingAndOfferType',
-              })
+              navigation.navigate('CRUDOfferFlow')
             }}
           >
             <Text
@@ -189,9 +187,7 @@ function EmptyListPlaceholder({
           onRefresh={onRefresh}
           buttonText={t('offer.emptyAction')}
           onButtonPress={() => {
-            navigation.navigate('CRUDOfferFlow', {
-              screen: 'ListingAndOfferType',
-            })
+            navigation.navigate('CRUDOfferFlow')
           }}
         >
           <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">

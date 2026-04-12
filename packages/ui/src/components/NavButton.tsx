@@ -93,6 +93,7 @@ type NavButtonBaseProps = Omit<
   'children' | 'type' | 'variant'
 > & {
   readonly variant?: NavButtonVariant
+  readonly disabled?: boolean
 }
 
 interface NavButtonIconProps extends NavButtonBaseProps {
@@ -110,6 +111,7 @@ export type NavButtonProps = NavButtonIconProps | NavButtonTextProps
 export function NavButton(props: NavButtonProps): React.JSX.Element {
   const theme = useTheme()
   const variant = props.variant ?? 'highlighted'
+  const disabled = props.disabled ?? false
 
   const iconColor =
     variant === 'highlighted'
@@ -119,17 +121,41 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
         : theme.foregroundPrimary.val
 
   if (props.type === 'text') {
-    const {type: _, variant: __, children, ...rest} = props
+    const {
+      type: _type,
+      variant: _variant,
+      disabled: _disabled,
+      children,
+      ...rest
+    } = props
     return (
-      <NavButtonFrame variant={variant} type="text" {...rest}>
+      <NavButtonFrame
+        variant={variant}
+        type="text"
+        disabled={disabled}
+        opacity={disabled ? 0.4 : 1}
+        {...rest}
+      >
         <NavButtonLabel variant={variant}>{children}</NavButtonLabel>
       </NavButtonFrame>
     )
   }
 
-  const {type: _, variant: __, icon: Icon, ...rest} = props
+  const {
+    type: _type,
+    variant: _variant,
+    disabled: _disabled,
+    icon: Icon,
+    ...rest
+  } = props
   return (
-    <NavButtonFrame variant={variant} type="icon" {...rest}>
+    <NavButtonFrame
+      variant={variant}
+      type="icon"
+      disabled={disabled}
+      opacity={disabled ? 0.4 : 1}
+      {...rest}
+    >
       <Icon color={iconColor} size={24} />
     </NavButtonFrame>
   )

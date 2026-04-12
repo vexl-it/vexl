@@ -72,50 +72,44 @@ function InteractiveGroup({
           <RowButton
             label="Home"
             icon={HomeHomemade}
+            value="home"
             selected={selected.has('home')}
-            onPress={() => {
-              toggle('home')
-            }}
+            onPress={toggle}
           />
           <RowButton
             label="Profile"
             icon={UserProfile}
+            value="profile"
             selected={selected.has('profile')}
-            onPress={() => {
-              toggle('profile')
-            }}
+            onPress={toggle}
           />
           <RowButton
             label="Notifications"
             icon={BellNotification}
+            value="notif"
             selected={selected.has('notif')}
-            onPress={() => {
-              toggle('notif')
-            }}
+            onPress={toggle}
           />
           <RowButton
             label="Bitcoin"
             icon={CurrencyBitcoinCircle}
+            value="btc"
             selected={selected.has('btc')}
-            onPress={() => {
-              toggle('btc')
-            }}
+            onPress={toggle}
           />
           <RowButton
             label="Location"
             icon={PinGeolocation}
+            value="loc"
             selected={selected.has('loc')}
-            onPress={() => {
-              toggle('loc')
-            }}
+            onPress={toggle}
           />
           <RowButton
             label="Security"
             icon={Lock}
+            value="lock"
             selected={selected.has('lock')}
-            onPress={() => {
-              toggle('lock')
-            }}
+            onPress={toggle}
           />
         </YStack>
       </YStack>

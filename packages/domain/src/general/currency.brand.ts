@@ -155,7 +155,6 @@ export const CurrencyInfo = Schema.Struct({
   flag: CurrencyFlag,
   name: CurrencyName,
   symbol: CurrencySymbol,
-  maxAmount: Schema.Number,
   position: Schema.Literal('before', 'after'),
   countryCode: Schema.Array(Schema.Number),
 })

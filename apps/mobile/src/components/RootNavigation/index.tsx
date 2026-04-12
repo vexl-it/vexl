@@ -14,6 +14,9 @@ import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AppLogsScreen from '../AppLogsScreen'
 import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
+import OfferExpirationDateScreen from '../CRUDOfferFlow/components/OfferExpirationDateScreen'
+import SelectLocationRadiusScreen from '../CRUDOfferFlow/components/SelectLocationRadiusScreen'
+import SelectLocationSearchScreen from '../CRUDOfferFlow/components/SelectLocationSearchScreen'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import ChatInfoScreen from '../ChatDetailScreen/ChatInfoScreen'
@@ -21,11 +24,12 @@ import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
 import {ClubDetailScreen} from '../ClubDetail'
 import {ClubOffersScreen} from '../ClubOffersScreen'
-import CommonFriendsModal from '../CommonFriends/CommonFriendsModal'
+import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import DonationDetailsScreen from '../DonationDetailsScreen'
 import EditNameScreen from '../EditNameScreen'
+import EditOfferFieldScreen from '../EditOfferFieldScreen'
 import EventsAndClubsScreen from '../EventsAndClubsScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
@@ -37,6 +41,7 @@ import SettingsScreen from '../InsideRouter/components/SettingsScreen'
 import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MyDonationsScreen from '../MyDonationsScreen'
+import MyOfferDetailScreen from '../MyOfferDetailScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
@@ -92,8 +97,28 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="TodoScreen" component={TodoScreen} />
             <Stack.Screen name="PostLoginFlow" component={PostLoginFlow} />
             <Stack.Screen name="OfferDetail" component={OfferDetailScreen} />
+            <Stack.Screen
+              name="MyOfferDetail"
+              component={MyOfferDetailScreen}
+            />
+            <Stack.Screen
+              name="EditOfferField"
+              component={EditOfferFieldScreen}
+            />
             <Stack.Screen name="SendMessage" component={SendMessageScreen} />
             <Stack.Screen name="CRUDOfferFlow" component={CRUDOfferFlow} />
+            <Stack.Screen
+              name="OfferExpirationDate"
+              component={OfferExpirationDateScreen}
+            />
+            <Stack.Screen
+              name="SelectLocationSearch"
+              component={SelectLocationSearchScreen}
+            />
+            <Stack.Screen
+              name="SelectLocationRadius"
+              component={SelectLocationRadiusScreen}
+            />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
@@ -114,6 +139,14 @@ function RootNavigation(): React.ReactElement {
               component={ChatOfferDetailScreen}
             />
             <Stack.Screen name="ChatSearch" component={ChatSearchScreen} />
+            <Stack.Screen
+              name="CommonFriends"
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'modal',
+              }}
+              component={CommonFriendsScreen}
+            />
             <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
             <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
             <Stack.Screen name="SetContacts" component={SetContactsScreen} />
@@ -182,7 +215,6 @@ function RootNavigation(): React.ReactElement {
       {!!showTextDebugButton && <DevTranslationFloatingButton />}
       {!!isLoggedIn && <LoggedInHookGroupMemoized />}
       {!!isLoggedIn && !!showGoldenAvatarAnimation && <GoldenAvatarAnimation />}
-      <CommonFriendsModal />
     </>
   )
 }

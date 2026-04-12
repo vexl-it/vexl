@@ -19,6 +19,7 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native'
+import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {toastAtom} from './state/toastAtom'
 
@@ -233,10 +234,12 @@ export default function App(): React.JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <VexlThemeProvider>
-        <ScreenNav />
-        <Toast messageAtom={toastAtom} topOffset={60} />
-      </VexlThemeProvider>
+      <GestureHandlerRootView style={{flex: 1}}>
+        <VexlThemeProvider>
+          <ScreenNav />
+          <Toast messageAtom={toastAtom} topOffset={60} />
+        </VexlThemeProvider>
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   )
 }

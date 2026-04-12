@@ -27,30 +27,12 @@ import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors
 import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
+import {getIconTagVariant, getIsOffering} from '../../../utils/offerHelpers'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import {chatMolecule} from '../atoms'
 import ChatConnectionHeader, {type TradeTagData} from './ChatConnectionHeader'
-
-function getIconTagVariant(
-  listingType: 'BITCOIN' | 'OTHER' | 'PRODUCT' | undefined
-): 'bitcoin' | 'product' | 'service' {
-  if (listingType === 'PRODUCT') return 'product'
-  if (listingType === 'OTHER') return 'service'
-  return 'bitcoin'
-}
-
-function getIsOffering(
-  listingType: 'BITCOIN' | 'OTHER' | 'PRODUCT' | undefined,
-  offerType: 'BUY' | 'SELL'
-): boolean {
-  if (!listingType || listingType === 'BITCOIN') {
-    return offerType === 'SELL'
-  }
-
-  return offerType === 'BUY'
-}
 
 function SectionSeparator(): React.ReactElement {
   return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />

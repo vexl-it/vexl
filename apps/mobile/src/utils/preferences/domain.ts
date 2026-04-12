@@ -1,5 +1,8 @@
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
-import {GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
+import {
+  GoldenAvatarType,
+  SpokenLanguage,
+} from '@vexl-next/domain/src/general/offers'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Schema} from 'effect'
 import {FiatOrSats} from '../../state/marketplace/domain'
@@ -77,6 +80,7 @@ export const Preferences = Schema.Struct({
   showVerifiedContacts: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  lastUsedOfferSpokenLanguages: Schema.optional(Schema.Array(SpokenLanguage)),
 })
 
 export type Preferences = typeof Preferences.Type

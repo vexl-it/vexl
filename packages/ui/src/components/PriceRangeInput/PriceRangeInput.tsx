@@ -1,6 +1,7 @@
 import type {SetStateAction, WritableAtom} from 'jotai'
 import {useAtom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
+import type {TextInput} from 'react-native'
 import {styled, useTheme} from 'tamagui'
 
 import {ChevronDown} from '../../icons/ChevronDown'
@@ -76,6 +77,7 @@ export interface PriceRangeInputProps {
   readonly currency: string
   readonly onCurrencyPress: () => void
   readonly maxLimit: number
+  readonly maxLabel?: string
 }
 
 export function PriceRangeInput({
@@ -84,13 +86,19 @@ export function PriceRangeInput({
   currency,
   onCurrencyPress,
   maxLimit,
+  maxLabel,
 }: PriceRangeInputProps): React.JSX.Element {
   const [minValue, setMinValue] = useAtom(minValueAtom)
   const [maxValue, setMaxValue] = useAtom(maxValueAtom)
   const theme = useTheme()
 
+  const maxValueAtLimit = maxLabel != null && maxValue >= maxLimit
   const [minText, setMinText] = useState(String(minValue))
-  const [maxText, setMaxText] = useState(String(maxValue))
+  const [maxText, setMaxText] = useState(
+    maxValueAtLimit ? maxLabel : String(maxValue)
+  )
+  const minInputRef = useRef<TextInput>(null)
+  const maxInputRef = useRef<TextInput>(null)
   const minFocusRef = useRef(false)
   const maxFocusRef = useRef(false)
 
@@ -102,9 +110,11 @@ export function PriceRangeInput({
 
   useEffect(() => {
     if (!maxFocusRef.current) {
-      setMaxText(String(maxValue))
+      setMaxText(
+        maxLabel != null && maxValue >= maxLimit ? maxLabel : String(maxValue)
+      )
     }
-  }, [maxValue])
+  }, [maxValue, maxLimit, maxLabel])
 
   useEffect(() => {
     const clampedMinValue = Math.max(0, Math.min(minValue, maxValue, maxLimit))
@@ -148,7 +158,8 @@ export function PriceRangeInput({
 
   const handleMaxFocus = useCallback(() => {
     maxFocusRef.current = true
-  }, [])
+    setMaxText(String(maxValue))
+  }, [maxValue])
 
   const handleMaxBlur = useCallback(() => {
     maxFocusRef.current = false
@@ -156,19 +167,32 @@ export function PriceRangeInput({
     if (!isNaN(num)) {
       const clamped = Math.min(maxLimit, Math.max(num, minValue, 0))
       setMaxValue(clamped)
-      setMaxText(String(clamped))
+      setMaxText(
+        maxLabel != null && clamped >= maxLimit ? maxLabel : String(clamped)
+      )
     } else {
-      setMaxText(String(maxValue))
+      setMaxText(
+        maxLabel != null && maxValue >= maxLimit ? maxLabel : String(maxValue)
+      )
     }
-  }, [maxText, minValue, maxValue, maxLimit, setMaxValue])
+  }, [maxText, minValue, maxValue, maxLimit, maxLabel, setMaxValue])
 
   const chevronColor = theme.accentHighlightPrimary.val
+
+  // Commit any in-flight text edit and drop focus so the slider can take over
+  // cleanly — otherwise the blur handler fires later and overwrites the
+  // slider's value with the pre-drag text.
+  const handleSliderInteractionStart = useCallback(() => {
+    minInputRef.current?.blur()
+    maxInputRef.current?.blur()
+  }, [])
 
   return (
     <YStack gap="$3">
       <XStack gap="$3">
         <InputFrame>
           <NumberInput
+            ref={minInputRef}
             value={minText}
             onChangeText={handleMinChange}
             keyboardType="numeric"
@@ -182,6 +206,7 @@ export function PriceRangeInput({
         </SeparatorFrame>
         <InputFrame>
           <NumberInput
+            ref={maxInputRef}
             value={maxText}
             onChangeText={handleMaxChange}
             keyboardType="numeric"
@@ -196,6 +221,7 @@ export function PriceRangeInput({
         <ChevronDown color={chevronColor} size={24} />
       </CurrencyButton>
       <RangeSlider
+        onInteractionStart={handleSliderInteractionStart}
         minValueAtom={minValueAtom}
         maxValueAtom={maxValueAtom}
         maxLimit={maxLimit}

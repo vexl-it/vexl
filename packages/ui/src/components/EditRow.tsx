@@ -5,9 +5,10 @@ import {PencilWriteEdit} from '../icons/PencilWriteEdit'
 import {QuestionmarkCircle} from '../icons/QuestionmarkCircle'
 import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import type {IconProps} from '../icons/types'
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
 import type {AvatarProps} from './Avatar'
 import {Avatar} from './Avatar'
+import {Typography} from './Typography'
 
 export type EditRowState = 'initial' | 'editing' | 'completed' | 'profile'
 
@@ -15,6 +16,7 @@ const EditRowFrame = styled(XStack, {
   name: 'EditRow',
   alignItems: 'center',
   borderRadius: '$5',
+  overflow: 'hidden',
   gap: '$4',
 
   variants: {
@@ -58,40 +60,9 @@ const OptionalTag = styled(XStack, {
   justifyContent: 'center',
 })
 
-const OverlineText = styled(SizableText, {
-  name: 'EditRowOverline',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundSecondary',
-  numberOfLines: 1,
-})
-
-const HeadlineText = styled(SizableText, {
-  name: 'EditRowHeadline',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundPrimary',
-  numberOfLines: 2,
-})
-
-const OptionalLabelText = styled(SizableText, {
-  name: 'EditRowOptionalLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundPrimary',
-})
-
 interface EditRowBaseProps {
   readonly headline: string
+  readonly headlineSuffix?: string
   readonly overline?: string
   readonly optionalLabel?: string
   readonly showEditButton?: boolean
@@ -112,9 +83,56 @@ interface EditRowProfileProps extends EditRowBaseProps {
 
 export type EditRowProps = EditRowIconProps | EditRowProfileProps
 
+function HeadlineWithSuffix({
+  headline,
+  suffix,
+}: {
+  readonly headline: string
+  readonly suffix: string
+}): React.JSX.Element {
+  const lines = headline.split('\n')
+  const lastIndex = lines.length - 1
+
+  return (
+    <YStack>
+      {lines.map((line, i) =>
+        i === lastIndex ? (
+          <XStack key={i} gap="$2" alignItems="center">
+            <Typography
+              variant="descriptionBold"
+              color="$foregroundPrimary"
+              numberOfLines={1}
+              flex={1}
+            >
+              {line}
+            </Typography>
+            <Typography
+              variant="descriptionBold"
+              color="$foregroundPrimary"
+              flexShrink={0}
+            >
+              {suffix}
+            </Typography>
+          </XStack>
+        ) : (
+          <Typography
+            key={i}
+            variant="descriptionBold"
+            color="$foregroundPrimary"
+            numberOfLines={1}
+          >
+            {line}
+          </Typography>
+        )
+      )}
+    </YStack>
+  )
+}
+
 export function EditRow({
   state,
   headline,
+  headlineSuffix,
   overline,
   optionalLabel,
   showEditButton = state !== 'initial',
@@ -173,12 +191,32 @@ export function EditRow({
         <IconBox backgroundColor={iconBoxBg}>{leadingIcon}</IconBox>
       )}
       <YStack flex={1} gap={overline ? '$2' : undefined}>
-        {overline ? <OverlineText>{overline}</OverlineText> : null}
-        <HeadlineText>{headline}</HeadlineText>
+        {overline ? (
+          <Typography
+            variant="micro"
+            color="$foregroundSecondary"
+            numberOfLines={1}
+          >
+            {overline}
+          </Typography>
+        ) : null}
+        {headlineSuffix ? (
+          <HeadlineWithSuffix headline={headline} suffix={headlineSuffix} />
+        ) : (
+          <Typography
+            variant={isInitial ? 'paragraphDemibold' : 'descriptionBold'}
+            color="$foregroundPrimary"
+            numberOfLines={2}
+          >
+            {headline}
+          </Typography>
+        )}
       </YStack>
       {optionalLabel ? (
         <OptionalTag>
-          <OptionalLabelText>{optionalLabel}</OptionalLabelText>
+          <Typography variant="micro" color="$foregroundPrimary">
+            {optionalLabel}
+          </Typography>
         </OptionalTag>
       ) : null}
       {showEditButton ? (

@@ -103,3 +103,8 @@ export const sendReadReceiptsAtom = focusAtom(preferencesAtom, (o) =>
 export const showVerifiedContactsAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('showVerifiedContacts')
 )
+
+export const lastUsedOfferSpokenLanguagesAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('lastUsedOfferSpokenLanguages')
+)

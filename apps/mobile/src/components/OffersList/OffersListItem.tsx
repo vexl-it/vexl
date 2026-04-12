@@ -55,7 +55,6 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
     if (isMine) {
       navigation.navigate('CRUDOfferFlow', {
         offerId: offer.offerInfo.offerId,
-        screen: 'ListingAndOfferType',
       })
     } else {
       navigation.navigate('OfferDetail', {offerId: offer.offerInfo.offerId})

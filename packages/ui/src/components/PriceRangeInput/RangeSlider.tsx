@@ -73,12 +73,14 @@ export interface RangeSliderProps {
   readonly minValueAtom: WritableAtom<number, [SetStateAction<number>], void>
   readonly maxValueAtom: WritableAtom<number, [SetStateAction<number>], void>
   readonly maxLimit: number
+  readonly onInteractionStart?: () => void
 }
 
 export function RangeSlider({
   minValueAtom,
   maxValueAtom,
   maxLimit,
+  onInteractionStart,
 }: RangeSliderProps): React.JSX.Element {
   const [minValue, setMinValue] = useAtom(minValueAtom)
   const [maxValue, setMaxValue] = useAtom(maxValueAtom)
@@ -118,6 +120,8 @@ export function RangeSlider({
         onPanResponderGrant: (evt) => {
           const width = containerWidthRef.current - thumbSize
           if (width <= 0) return
+
+          onInteractionStart?.()
 
           viewRef.current?.measureInWindow((pageX) => {
             containerPageXRef.current = pageX
@@ -167,7 +171,7 @@ export function RangeSlider({
           activeThumb.current = null
         },
       }),
-    [thumbSize, maxLimit, setMinValue, setMaxValue]
+    [thumbSize, maxLimit, setMinValue, setMaxValue, onInteractionStart]
   )
 
   const minPos =

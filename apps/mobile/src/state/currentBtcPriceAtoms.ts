@@ -2,15 +2,18 @@ import {BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice'
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Schema} from 'effect'
+import {Effect, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {atom, type Atom, type PrimitiveAtom} from 'jotai'
+import {atom, type Atom, type PrimitiveAtom, type Setter} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../api'
 import {atomWithParsedMmkvStorage} from '../utils/atomUtils/atomWithParsedMmkvStorage'
-import {currencies} from '../utils/localization/currency'
+import {
+  computeMaxAmountForCurrency,
+  currencies,
+} from '../utils/localization/currency'
 import {defaultCurrencyAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
 
@@ -60,6 +63,40 @@ export function createBtcPriceForCurrencyAtom(
 
 export const btcPriceForSelectedCurrencyAtom =
   createBtcPriceForCurrencyAtom(defaultCurrencyAtom)
+
+export function createBtcPricesReadyAtom(
+  currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
+): Atom<boolean> {
+  return atom((get): boolean => {
+    const btcPriceData = get(btcPriceDataAtom)
+    const currency =
+      typeof currencyStringOrAtom === 'string'
+        ? currencyStringOrAtom
+        : get(currencyStringOrAtom)
+    if (!currency) return false
+    const currencyReady = btcPriceData[currency]?.state === 'success'
+    const eurReady = currency === 'EUR' || btcPriceData.EUR?.state === 'success'
+    return currencyReady && eurReady
+  })
+}
+
+export function createMaxAmountForCurrencyAtom(
+  currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
+): Atom<number> {
+  return atom((get): number => {
+    const btcPriceData = get(btcPriceDataAtom)
+    const currency =
+      typeof currencyStringOrAtom === 'string'
+        ? currencyStringOrAtom
+        : get(currencyStringOrAtom)
+    return computeMaxAmountForCurrency({
+      btcPriceInCurrency: currency
+        ? btcPriceData[currency]?.btcPrice?.BTC
+        : undefined,
+      btcPriceInEur: btcPriceData.EUR?.btcPrice?.BTC,
+    })
+  })
+}
 
 export const refreshBtcPriceActionAtom = atom(
   undefined,
@@ -129,3 +166,23 @@ export const refreshBtcPriceActionAtom = atom(
     )
   }
 )
+
+// Refresh the selected currency's BTC price plus EUR (needed as the anchor for
+// the per-currency max-amount cap). The returned Effect resolves with the
+// selected currency's fetch result — true on success, false on failure.
+export function refreshBtcPriceWithEurEffect(
+  set: Setter,
+  currency: CurrencyCode
+): Effect.Effect<boolean> {
+  const refreshCurrent = Effect.promise(
+    set(refreshBtcPriceActionAtom, currency)
+  )
+  const refreshEur =
+    currency !== 'EUR'
+      ? Effect.promise(set(refreshBtcPriceActionAtom, 'EUR'))
+      : Effect.succeed(true)
+  return Effect.map(
+    Effect.all([refreshCurrent, refreshEur], {concurrency: 'unbounded'}),
+    ([current]) => current
+  )
+}

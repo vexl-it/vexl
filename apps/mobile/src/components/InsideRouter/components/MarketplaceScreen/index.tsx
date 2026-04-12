@@ -38,7 +38,7 @@ function NewOfferFab({
     activeTab === 'allOffers' ? areThereOffersFromOthers : areThereMyOffers
 
   const navigateToNewOffer = useCallback(() => {
-    navigation.navigate('CRUDOfferFlow', {screen: 'ListingAndOfferType'})
+    navigation.navigate('CRUDOfferFlow', {})
   }, [navigation])
 
   if (!showFab) return null

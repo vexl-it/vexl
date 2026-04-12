@@ -60,13 +60,15 @@ Also use Context7 MCP tools (`resolve-library-id` then `query-docs`) to check li
 
 #### UI Components — use `@vexl-next/ui` first
 
-For every visual element, check whether `@vexl-next/ui` already exports a matching component. Read `packages/ui/src/components/index.ts` for the full list. Always prefer these over:
+For every visual element, check whether `@vexl-next/ui` already exports a matching component. Read `packages/ui/src/components/index.ts` for the full list of higher-level components **and** `packages/ui/src/primitives/index.ts` for lower-level Tamagui primitives (`TextArea`, `Input`, `ScrollView`, `Image`, etc.). Always prefer UI package exports over:
 
 - Custom styled components built inline
-- Raw React Native primitives (`View`, `Text`, `TouchableOpacity`)
+- Raw React Native primitives (`View`, `Text`, `TouchableOpacity`, `TextInput`)
 - Third-party component libraries
 
-If `@vexl-next/ui` has a component that is close but not exact, use it and adapt with props/variants. Only build custom styled primitives when no UI package component covers the need.
+For example, use `TextArea` from `@vexl-next/ui/src/primitives` (or `tamagui`) instead of `TextInput` from `react-native` for multiline text inputs. The Tamagui primitives accept style props with token support (`fontFamily="$body"`, `color="$foregroundPrimary"`, etc.) which keeps styling consistent with the design system.
+
+If `@vexl-next/ui` has a component that is close but not exact, use it and adapt with props/variants. Only build custom styled primitives when no UI package component or primitive covers the need.
 
 Use `Typography` for all text (not raw `SizableText` or `Text`). Use semantic variants from the Typography component.
 
@@ -109,6 +111,10 @@ Before defining any new type, interface, or variable type, search `packages/doma
 - Use `ReadonlyArray` in type signatures when the array should not be mutated
 - Define explicit interface/type for component props with `readonly` modifiers
 
+#### Translations / Localization
+
+When the redesign requires different text than existing translation keys, **always create new translation keys** rather than modifying existing ones. Existing keys may still be used by pre-redesign screens or other parts of the codebase. Add the new keys in `packages/localization/base.json` alongside the originals.
+
 #### What NOT to change
 
 - Business logic (validation, calculations, data transformations) — unless it's broken
@@ -117,6 +123,7 @@ Before defining any new type, interface, or variable type, search `packages/doma
 - Side effects (analytics, logging, error reporting)
 - Test files — unless your UI changes break existing tests
 - Atom definitions that drive business logic — only change atoms if the new design requires new UI state
+- Existing translation keys — create new keys instead of overwriting
 
 ### 5. Verify
 
@@ -138,3 +145,9 @@ Do NOT consider work done until all three pass cleanly.
 - Using `String()` or `Number()` constructors on values from font configs or `getTokens()`
 - Adding media queries or `@tamagui/react-native-media-driver` — native only
 - Using `as const satisfies` or other assertion patterns as workarounds for proper typing
+- **Overusing `useCallback` and `useMemo`** — do not reflexively wrap every function in `useCallback` or every derived value in `useMemo`. Before adding either, ask: does this actually prevent a meaningful re-render or expensive recomputation? Specifically:
+  - **Inline arrow functions** in `onPress`, `onTabPress`, etc. are fine when the handler is a simple one-liner (e.g. a navigation call or a state setter). Only use `useCallback` when the function is passed as a prop to a memoized child component that would re-render otherwise, or when it is a dependency of another hook.
+  - **`useMemo`** is only warranted for genuinely expensive computations (iterating large arrays, complex object construction). Simple derivations like ternaries, string concatenation, or reading a theme value do not need memoization.
+  - **Do not wrap atom setters in `useCallback`** just to pass them as props. If a jotai setter (from `useSetAtom` or `useAtom()[1]`) has the same signature as the callback prop, pass it directly — e.g. `onTabPress={updateLocationState}` instead of `onTabPress={useCallback((v) => updateLocationState(v), [updateLocationState])}`. The setter reference is already stable.
+  - **Move derived write logic into action atoms** instead of defining `useCallback` handlers that call `set(atom, prev => ...)` inline in components. Define a write-only atom in the molecule (e.g. `const removeLocationActionAtom = atom(null, (get, set, placeId: string) => { set(locationAtom, prev => prev?.filter(...)) })`) and consume it in the component with `useSetAtom`. This keeps mutation logic colocated with state and out of the UI layer.
+  - When in doubt, prefer the simpler version without memoization. Unnecessary `useCallback`/`useMemo` adds indirection and dependency arrays that can themselves become a source of bugs.

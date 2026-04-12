@@ -2,7 +2,8 @@ import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
-import {SizableText, XStack} from '../primitives'
+import {XStack} from '../primitives'
+import {Typography} from './Typography'
 
 const RowButtonFrame = styled(XStack, {
   name: 'RowButton',
@@ -27,51 +28,61 @@ const RowButtonFrame = styled(XStack, {
   },
 })
 
-const RowButtonLabel = styled(SizableText, {
-  name: 'RowButtonLabel',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$4',
-  letterSpacing: '$4',
-  color: '$accentHighlightPrimary',
-  flex: 1,
-
-  variants: {
-    selected: {
-      true: {
-        color: '$accentHighlightSecondary',
-      },
-    },
-  } as const,
-
-  defaultVariants: {
-    selected: false,
-  },
-})
-
 type RowButtonFrameProps = React.ComponentProps<typeof RowButtonFrame>
 
-export interface RowButtonProps extends Omit<RowButtonFrameProps, 'children'> {
+interface RowButtonBaseProps
+  extends Omit<RowButtonFrameProps, 'children' | 'onPress'> {
   readonly label: string
   readonly selected?: boolean
   readonly icon?: React.ComponentType<IconProps>
 }
 
-export function RowButton({
-  label,
-  selected = false,
-  icon: Icon,
-  ...rest
-}: RowButtonProps): React.JSX.Element {
+interface RowButtonWithValueProps<T> extends RowButtonBaseProps {
+  readonly value: T
+  readonly onPress: (value: T) => void
+}
+
+interface RowButtonWithoutValueProps extends RowButtonBaseProps {
+  readonly onPress: () => void
+}
+
+export type RowButtonProps<T = never> =
+  | RowButtonWithValueProps<T>
+  | RowButtonWithoutValueProps
+
+function hasValue<T>(
+  props: RowButtonProps<T>
+): props is RowButtonWithValueProps<T> {
+  return 'value' in props
+}
+
+export function RowButton<T>(props: RowButtonProps<T>): React.JSX.Element {
+  const {label, selected = false, icon: Icon} = props
   const theme = useTheme()
   const iconColor = selected
     ? theme.accentHighlightSecondary.val
     : theme.accentHighlightPrimary.val
 
+  const handlePress = (): void => {
+    if (hasValue(props)) {
+      props.onPress(props.value)
+    } else {
+      props.onPress()
+    }
+  }
+
   return (
-    <RowButtonFrame selected={selected} {...rest}>
+    <RowButtonFrame selected={selected} onPress={handlePress}>
       {Icon ? <Icon color={iconColor} size={24} /> : null}
-      <RowButtonLabel selected={selected}>{label}</RowButtonLabel>
+      <Typography
+        variant="paragraph"
+        color={
+          selected ? '$accentHighlightSecondary' : '$accentHighlightPrimary'
+        }
+        flex={1}
+      >
+        {label}
+      </Typography>
     </RowButtonFrame>
   )
 }

@@ -1,6 +1,3 @@
-import {LocationPlaceId} from '@vexl-next/domain/src/general/offers'
-import {type MeetingLocationData} from '@vexl-next/domain/src/general/tradeChecklist'
-import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type GetGeocodedCoordinatesResponse} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   Button,
@@ -11,7 +8,7 @@ import {
   Typography,
   lightTheme,
 } from '@vexl-next/ui'
-import {Effect, Schema} from 'effect'
+import {Effect} from 'effect'
 import {LinearGradient} from 'expo-linear-gradient'
 import {atom, useAtom, useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
@@ -22,6 +19,7 @@ import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fr
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import MapLocationSelect from '../../../../Map/components/MapLocationSelect'
+import {pragueCenterLocation} from '../../../../Map/utils/pragueCenterLocation'
 import {
   addMeetingLocationActionAtom,
   submitTradeChecklistUpdatesActionAtom,
@@ -29,23 +27,6 @@ import {
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../utils'
 
 type Props = TradeChecklistStackScreenProps<'LocationMapSelect'>
-
-const pragueCenterLocation: MeetingLocationData = {
-  placeId: Schema.decodeSync(LocationPlaceId)('prague-default-location'),
-  address: 'Prague',
-  latitude: Schema.decodeSync(Latitude)(50.0755),
-  longitude: Schema.decodeSync(Longitude)(14.4378),
-  viewport: {
-    northeast: {
-      latitude: Schema.decodeSync(Latitude)(50.0955),
-      longitude: Schema.decodeSync(Longitude)(14.4578),
-    },
-    southwest: {
-      latitude: Schema.decodeSync(Latitude)(50.0555),
-      longitude: Schema.decodeSync(Longitude)(14.4178),
-    },
-  },
-}
 
 const searchBarHeight = 48
 

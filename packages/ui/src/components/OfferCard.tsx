@@ -12,7 +12,7 @@ export interface OfferCardProps {
   readonly textTag: React.ReactNode
   readonly iconTag: React.ReactNode
   readonly commonFriends?: string
-  readonly clubName?: string
+  readonly clubNames?: readonly string[]
   readonly price: string
   readonly description: string
   readonly details: readonly string[]
@@ -63,7 +63,7 @@ export function OfferCard({
   textTag,
   iconTag,
   commonFriends,
-  clubName,
+  clubNames,
   price,
   description,
   details,
@@ -71,6 +71,43 @@ export function OfferCard({
 }: OfferCardProps): React.JSX.Element {
   const theme = useTheme()
   const secondaryColor = theme.foregroundSecondary.val
+
+  const hasClubs = clubNames != null && clubNames.length > 0
+  const hasFriends = commonFriends != null
+  const subRow =
+    hasClubs || hasFriends ? (
+      <XStack gap="$2" alignItems="center" flexShrink={1} minWidth={0}>
+        {clubNames?.map((cn, idx) => (
+          <React.Fragment key={cn}>
+            {idx > 0 ? (
+              <Circle size="$2" backgroundColor={secondaryColor} />
+            ) : null}
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
+              numberOfLines={1}
+            >
+              {cn}
+            </Typography>
+          </React.Fragment>
+        ))}
+        {hasClubs && hasFriends ? (
+          <Circle size="$2" backgroundColor={secondaryColor} />
+        ) : null}
+        {hasFriends ? (
+          <XStack gap="$1" alignItems="center">
+            <PeopleUsers size={16} color={secondaryColor} />
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
+              numberOfLines={1}
+            >
+              {commonFriends}
+            </Typography>
+          </XStack>
+        ) : null}
+      </XStack>
+    ) : null
 
   return (
     <CardFrame pressable={!!onPress} onPress={onPress}>
@@ -108,52 +145,21 @@ export function OfferCard({
                   {iconTag}
                 </XStack>
               </XStack>
-              {commonFriends != null ? (
-                clubName != null ? (
-                  <XStack gap="$2" alignItems="center">
-                    <Typography
-                      variant="micro"
-                      color="$foregroundSecondary"
-                      numberOfLines={1}
-                    >
-                      {clubName}
-                    </Typography>
-                    <Circle size="$2" backgroundColor={secondaryColor} />
-                    <XStack gap="$1" alignItems="center">
-                      <PeopleUsers size={16} color={secondaryColor} />
-                      <Typography
-                        variant="micro"
-                        color="$foregroundSecondary"
-                        numberOfLines={1}
-                      >
-                        {commonFriends}
-                      </Typography>
-                    </XStack>
-                  </XStack>
-                ) : (
-                  <XStack gap="$1" alignItems="center">
-                    <PeopleUsers size={16} color={secondaryColor} />
-                    <Typography
-                      variant="micro"
-                      color="$foregroundSecondary"
-                      numberOfLines={1}
-                    >
-                      {commonFriends}
-                    </Typography>
-                  </XStack>
-                )
-              ) : null}
+              {subRow}
             </YStack>
           </XStack>
         ) : (
-          <XStack alignItems="center" justifyContent="space-between">
-            <Typography
-              variant="descriptionBold"
-              color="$foregroundPrimary"
-              numberOfLines={1}
-            >
-              {name}
-            </Typography>
+          <XStack gap="$2" alignItems="center" justifyContent="space-between">
+            <YStack gap="$1" flexShrink={1} minWidth={0}>
+              <Typography
+                variant="descriptionBold"
+                color="$foregroundPrimary"
+                numberOfLines={1}
+              >
+                {name}
+              </Typography>
+              {subRow}
+            </YStack>
             <XStack gap="$1" alignItems="center">
               {textTag}
               {iconTag}

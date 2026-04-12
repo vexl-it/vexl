@@ -17,7 +17,7 @@ export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
           progress: offerEncryptionProgress,
           textData: {
             title: t('reuploadOffers.progress.title'),
-            bottomText: t('offerForm.offerEncryption.dontShutDownTheApp'),
+            bottomText: t('offerForm.offerEncryption.dontCloseTheApp'),
             belowProgressLeft: t('reuploadOffers.progress.status', {
               processingIndex: String(processingIndex + 1),
               totalToProcess: String(totalToProcess),

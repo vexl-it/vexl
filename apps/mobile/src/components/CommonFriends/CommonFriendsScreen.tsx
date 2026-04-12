@@ -11,17 +11,16 @@ import {
 } from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Array, pipe} from 'effect'
-import {useAtom, useAtomValue, useStore} from 'jotai'
+import {useAtomValue, useStore} from 'jotai'
 import React, {memo, useCallback, useMemo} from 'react'
-import {Modal} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showVerifiedContactsAtom} from '../../utils/preferences'
 import ContactPictureImage from '../ContactPictureImage'
-import {commonFriendsModalDataAtom} from './atoms'
 
 function FriendListItem({
   friend,
@@ -105,19 +104,18 @@ function ListHeader(): React.ReactElement {
   )
 }
 
-function CommonFriendsModalContent({
-  contactsHashes,
-  verifiedHashes,
-  onClose,
-}: {
-  readonly contactsHashes: readonly HashedPhoneNumber[]
-  readonly verifiedHashes?: readonly HashedPhoneNumber[]
-  readonly onClose: () => void
-}): React.ReactElement {
+function CommonFriendsScreen({
+  navigation,
+  route,
+}: RootStackScreenProps<'CommonFriends'>): React.ReactElement {
   const {t} = useTranslation()
   const {bottom} = useSafeAreaInsets()
   const store = useStore()
   const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
+  const {contactsHashes, verifiedHashes} = route.params
+  const handleGoBack = useCallback(() => {
+    navigation.goBack()
+  }, [navigation])
 
   const commonFriends = useMemo(
     () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
@@ -156,20 +154,18 @@ function CommonFriendsModalContent({
       Array.map(createFriendListItem)
     )
 
-    const verifiedSection =
-      verifiedItems.length > 0
-        ? Array.appendAll(
-            [createSectionListItem(t('commonFriends.verifiedFriends'))],
-            verifiedItems
-          )
-        : []
-    const commonSection =
-      commonItems.length > 0
-        ? Array.appendAll(
-            [createSectionListItem(t('commonFriends.commonFriends'))],
-            commonItems
-          )
-        : []
+    const verifiedSection = Array.isNonEmptyArray(verifiedItems)
+      ? Array.appendAll(
+          [createSectionListItem(t('commonFriends.verifiedFriends'))],
+          verifiedItems
+        )
+      : []
+    const commonSection = Array.isNonEmptyArray(commonItems)
+      ? Array.appendAll(
+          [createSectionListItem(t('commonFriends.commonFriends'))],
+          commonItems
+        )
+      : []
 
     return Array.appendAll(verifiedSection, commonSection)
   }, [commonFriends, showVerifiedContacts, t, verifiedHashesSet])
@@ -196,8 +192,8 @@ function CommonFriendsModalContent({
         <NavigationBar
           style="back"
           title={t('commonFriends.commonFriends')}
-          leftAction={{icon: ChevronLeft, onPress: onClose}}
-          rightActions={[{icon: XmarkCancelClose, onPress: onClose}]}
+          leftAction={{icon: ChevronLeft, onPress: handleGoBack}}
+          rightActions={[{icon: XmarkCancelClose, onPress: handleGoBack}]}
         />
       }
     >
@@ -214,28 +210,4 @@ function CommonFriendsModalContent({
   )
 }
 
-function CommonFriendsModal(): React.ReactElement | null {
-  const [data, setData] = useAtom(commonFriendsModalDataAtom)
-
-  const handleClose = useCallback(() => {
-    setData(null)
-  }, [setData])
-
-  return (
-    <Modal
-      visible={data != null}
-      animationType="slide"
-      onRequestClose={handleClose}
-    >
-      {data != null && (
-        <CommonFriendsModalContent
-          contactsHashes={data.contactsHashes}
-          verifiedHashes={data.verifiedHashes}
-          onClose={handleClose}
-        />
-      )}
-    </Modal>
-  )
-}
-
-export default CommonFriendsModal
+export default CommonFriendsScreen

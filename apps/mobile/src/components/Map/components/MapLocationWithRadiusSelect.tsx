@@ -4,16 +4,16 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {useVexlTheme} from '@vexl-next/ui'
+import {Typography, useVexlTheme} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useMemo, useRef} from 'react'
+import React, {useMemo} from 'react'
 import {Dimensions} from 'react-native'
 import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, getTokens, useTheme} from 'tamagui'
+import {Stack, getTokens, useTheme} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
@@ -34,6 +34,8 @@ type Props = React.ComponentProps<typeof Stack> & {
   bottomChildren?: React.ReactNode
   initialValue: MapValue
   onPick: (place: MapValueWithRadius | null) => void
+  hideSlider?: boolean
+  mapRef: React.RefObject<MapView | null>
 }
 
 const mapPaddings = {
@@ -128,11 +130,14 @@ function PickedLocationText({
   const radius = useAtomValue(selectedRegionRadiusAtom)
 
   return geocodingState.state !== 'done' ? (
-    <Text>{t('common.loading')}...</Text>
+    <Typography variant="micro" color="$white">
+      {t('common.loading')}...
+    </Typography>
   ) : (
     <React.Fragment>
-      <Text
-        ta="center"
+      <Typography
+        variant="micro"
+        textAlign="center"
         color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
       >
         {pipe(
@@ -143,20 +148,21 @@ function PickedLocationText({
             (data) => data?.address ?? t('map.locationSelect.hint')
           )
         )}
-      </Text>
-      <Text
-        ta="center"
+      </Typography>
+      <Typography
+        variant="micro"
+        textAlign="center"
         color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
       >
         {t('map.locationSelect.radius', {
           radius,
         })}
-      </Text>
+      </Typography>
     </React.Fragment>
   )
 }
 
-function calculateZoom(
+export function calculateZoom(
   latitude: number,
   latitudeDelta: number,
   longitudeDelta: number,
@@ -184,12 +190,13 @@ export default function MapLocationWithRadiusSelect({
   initialValue,
   topChildren,
   bottomChildren,
+  hideSlider,
+  mapRef,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
   const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
-  const mapRef = useRef<MapView>(null)
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
@@ -305,19 +312,21 @@ export default function MapLocationWithRadiusSelect({
           <Stack>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
           <Stack>
-            <Stack mb="$4" mx="$4">
-              <Slider
-                value={initialZoom}
-                step={0.2}
-                onValueChange={(v) => {
-                  mapRef.current?.setCamera({
-                    zoom: v[0],
-                  })
-                }}
-                maximumValue={16}
-                minimumValue={7}
-              />
-            </Stack>
+            {hideSlider !== true ? (
+              <Stack mb="$4" mx="$4">
+                <Slider
+                  value={initialZoom}
+                  step={0.2}
+                  onValueChange={(v) => {
+                    mapRef.current?.setCamera({
+                      zoom: v[0],
+                    })
+                  }}
+                  maximumValue={16}
+                  minimumValue={7}
+                />
+              </Stack>
+            ) : null}
             {bottomChildren}
           </Stack>
         </Stack>

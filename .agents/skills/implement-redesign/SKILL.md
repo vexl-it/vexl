@@ -58,15 +58,29 @@ Also use Context7 MCP tools (`resolve-library-id` then `query-docs`) to check li
 
 ### 4. Implement the Redesign
 
+#### Reuse before creating — check for existing implementations first
+
+Before you write any component, helper, action atom, or utility that looks like "render a selectable club row", "toggle a value with a confirmation dialog", "deep equal two offer shapes", etc., **first search the codebase for something that already does it**. Concretely:
+
+- **Components**: grep for a likely name in `apps/mobile/src/components/` and `packages/ui/src/components/` before defining a new styled primitive or sub-component (`ClubItem`, `OfferCard`, `FriendLevel`, etc.). The same row/cell/card is often already built in one of the step components or the UI package.
+- **Action atoms / hooks**: grep the relevant molecule file (e.g. `offerFormStateAtoms.ts`) and nearby `atoms/` directories before adding a new `*ActionAtom`. A simple wrapper that calls a dialog then an existing atom probably already exists under a slightly different name.
+- **Utilities**: check `apps/mobile/src/utils/` and package utilities (e.g. `fast-equals`, `effect/Array`) before inlining ad-hoc helpers like `JSON.stringify(a) !== JSON.stringify(b)` — the repo already uses `deepEqual` from `fast-equals`.
+
+If you find a duplicate that was inlined in one place, **extract it to a shared module** and import from both sites instead of copy-pasting. Put shared step/row components next to the originals (e.g. alongside the existing `ClubsStep.tsx` in `CRUDOfferFlow/components/`) and export it for the new consumer.
+
+**Caveat — don't over-abstract.** Only extract or reuse when the match is a natural fit. If bending an existing component to a new use case requires threading 3+ new props, branching on a mode flag, or leaking unrelated dependencies, it's cleaner to create a small new component and leave the original alone. The bar for extraction is "same shape, same responsibility" — not "vaguely similar".
+
 #### UI Components — use `@vexl-next/ui` first
 
-For every visual element, check whether `@vexl-next/ui` already exports a matching component. Read `packages/ui/src/components/index.ts` for the full list. Always prefer these over:
+For every visual element, check whether `@vexl-next/ui` already exports a matching component. Read `packages/ui/src/components/index.ts` for the full list of higher-level components **and** `packages/ui/src/primitives/index.ts` for lower-level Tamagui primitives (`TextArea`, `Input`, `ScrollView`, `Image`, etc.). Always prefer UI package exports over:
 
 - Custom styled components built inline
-- Raw React Native primitives (`View`, `Text`, `TouchableOpacity`)
+- Raw React Native primitives (`View`, `Text`, `TouchableOpacity`, `TextInput`)
 - Third-party component libraries
 
-If `@vexl-next/ui` has a component that is close but not exact, use it and adapt with props/variants. Only build custom styled primitives when no UI package component covers the need.
+For example, use `TextArea` from `@vexl-next/ui/src/primitives` (or `tamagui`) instead of `TextInput` from `react-native` for multiline text inputs. The Tamagui primitives accept style props with token support (`fontFamily="$body"`, `color="$foregroundPrimary"`, etc.) which keeps styling consistent with the design system.
+
+If `@vexl-next/ui` has a component that is close but not exact, use it and adapt with props/variants. Only build custom styled primitives when no UI package component or primitive covers the need.
 
 Use `Typography` for all text (not raw `SizableText` or `Text`). Use semantic variants from the Typography component.
 
@@ -109,6 +123,33 @@ Before defining any new type, interface, or variable type, search `packages/doma
 - Use `ReadonlyArray` in type signatures when the array should not be mutated
 - Define explicit interface/type for component props with `readonly` modifiers
 
+#### Translations / Localization
+
+When the redesign requires different text than existing translation keys, **always create new translation keys** rather than modifying existing ones. Existing keys may still be used by pre-redesign screens or other parts of the codebase. Add the new keys in `packages/localization/base.json` alongside the originals.
+
+**Always `t(...)` with an inline string literal — never a variable holding a key.** A helper like `function getTitleKey(): 'a' | 'b' { ... }` followed by `t(titleKey)` is a trap: the return-type annotation is what declares the union, so a typo inside the function body (e.g. a returned `'editOffer.title.wantBttc'`) passes typecheck as long as the annotation matches the typo. The i18n types only verify keys at the `t('...')` call site with a string literal argument — not against union-typed variables.
+
+If the key depends on runtime state (offer type, listing type, some flag), resolve to the translated **string** inside a derived jotai atom (or a small helper) that does the `t('...')` calls internally with literals:
+
+```ts
+// bad — returns a key union; typos in the body slip past typecheck
+function getOfferTitleKey(...): 'editOffer.title.wantBtc' | ... {
+  if (isOffering) return 'editOffer.title.offeringBitcoin'
+  return 'editOffer.title.wantBtc' // typo here would compile fine
+}
+const title = t(getOfferTitleKey(...))
+
+// good — t() is called with literals, each one typechecked
+const offerTitleAtom = atom((get) => {
+  const {t} = get(translationAtom)
+  if (isOffering) return t('editOffer.title.offeringBitcoin')
+  return t('editOffer.title.wantBtc')
+})
+const title = useAtomValue(offerTitleAtom)
+```
+
+This pattern has come up repeatedly. Return translated strings, not translation keys.
+
 #### What NOT to change
 
 - Business logic (validation, calculations, data transformations) — unless it's broken
@@ -117,6 +158,7 @@ Before defining any new type, interface, or variable type, search `packages/doma
 - Side effects (analytics, logging, error reporting)
 - Test files — unless your UI changes break existing tests
 - Atom definitions that drive business logic — only change atoms if the new design requires new UI state
+- Existing translation keys — create new keys instead of overwriting
 
 ### 5. Verify
 
@@ -138,3 +180,9 @@ Do NOT consider work done until all three pass cleanly.
 - Using `String()` or `Number()` constructors on values from font configs or `getTokens()`
 - Adding media queries or `@tamagui/react-native-media-driver` — native only
 - Using `as const satisfies` or other assertion patterns as workarounds for proper typing
+- **Overusing `useCallback` and `useMemo`** — do not reflexively wrap every function in `useCallback` or every derived value in `useMemo`. Before adding either, ask: does this actually prevent a meaningful re-render or expensive recomputation? Specifically:
+  - **Inline arrow functions** in `onPress`, `onTabPress`, etc. are fine when the handler is a simple one-liner (e.g. a navigation call or a state setter). Only use `useCallback` when the function is passed as a prop to a memoized child component that would re-render otherwise, or when it is a dependency of another hook.
+  - **`useMemo`** is only warranted for genuinely expensive computations (iterating large arrays, complex object construction). Simple derivations like ternaries, string concatenation, or reading a theme value do not need memoization.
+  - **Do not wrap atom setters in `useCallback`** just to pass them as props. If a jotai setter (from `useSetAtom` or `useAtom()[1]`) has the same signature as the callback prop, pass it directly — e.g. `onTabPress={updateLocationState}` instead of `onTabPress={useCallback((v) => updateLocationState(v), [updateLocationState])}`. The setter reference is already stable.
+  - **Move derived write logic into action atoms** instead of defining `useCallback` handlers that call `set(atom, prev => ...)` inline in components. Define a write-only atom in the molecule (e.g. `const removeLocationActionAtom = atom(null, (get, set, placeId: string) => { set(locationAtom, prev => prev?.filter(...)) })`) and consume it in the component with `useSetAtom`. This keeps mutation logic colocated with state and out of the UI layer.
+  - When in doubt, prefer the simpler version without memoization. Unnecessary `useCallback`/`useMemo` adds indirection and dependency arrays that can themselves become a source of bugs.

@@ -8,14 +8,21 @@ const maxValueAtomLight = atom(15000)
 const minValueAtomDark = atom(800)
 const maxValueAtomDark = atom(15000)
 
+const minValueMaxLabelAtomLight = atom(800)
+const maxValueMaxLabelAtomLight = atom(15000)
+const minValueMaxLabelAtomDark = atom(800)
+const maxValueMaxLabelAtomDark = atom(15000)
+
 function ThemedColumn({
   themeVariant,
   minValueAtom,
   maxValueAtom,
+  maxLabel,
 }: {
   readonly themeVariant: 'light' | 'dark'
   readonly minValueAtom: typeof minValueAtomLight
   readonly maxValueAtom: typeof maxValueAtomLight
+  readonly maxLabel?: string
 }): React.JSX.Element {
   const handleCurrencyPress = useCallback(() => {
     Alert.alert('Currency', 'Navigate to currency selection screen')
@@ -44,6 +51,7 @@ function ThemedColumn({
           currency="EUR"
           onCurrencyPress={handleCurrencyPress}
           maxLimit={15000}
+          maxLabel={maxLabel}
         />
       </YStack>
     </Theme>
@@ -71,6 +79,26 @@ export function PriceRangeInputScreen(): React.JSX.Element {
           themeVariant="dark"
           minValueAtom={minValueAtomDark}
           maxValueAtom={maxValueAtomDark}
+        />
+        <SizableText
+          fontFamily="$heading"
+          fontWeight="700"
+          fontSize="$3"
+          color="$foregroundPrimary"
+        >
+          With &quot;Max&quot; label at cap
+        </SizableText>
+        <ThemedColumn
+          themeVariant="light"
+          minValueAtom={minValueMaxLabelAtomLight}
+          maxValueAtom={maxValueMaxLabelAtomLight}
+          maxLabel="Max"
+        />
+        <ThemedColumn
+          themeVariant="dark"
+          minValueAtom={minValueMaxLabelAtomDark}
+          maxValueAtom={maxValueMaxLabelAtomDark}
+          maxLabel="Max"
         />
       </YStack>
     </ScrollView>

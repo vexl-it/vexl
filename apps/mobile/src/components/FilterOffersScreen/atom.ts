@@ -13,7 +13,7 @@ import {
 import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {toggleValueInSet} from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
+import {Array, Effect, pipe} from 'effect'
 import {
   atom,
   type Atom,
@@ -26,7 +26,10 @@ import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../state/clubs/domain'
 import {
   createBtcPriceForCurrencyAtom,
+  createBtcPricesReadyAtom,
+  createMaxAmountForCurrencyAtom,
   refreshBtcPriceActionAtom,
+  refreshBtcPriceWithEurEffect,
 } from '../../state/currentBtcPriceAtoms'
 import {
   offersFilterFromStorageAtom,
@@ -51,7 +54,6 @@ import {radiusToViewport} from '../../state/marketplace/utils/toViewport'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
-import {currencies} from '../../utils/localization/currency'
 import {defaultCurrencyAtom} from '../../utils/preferences'
 
 export const currencySelectVisibleAtom = atom<boolean>(false)
@@ -226,21 +228,25 @@ export const amountBottomLimitForRangeInputAtom = atom(
   }
 )
 
+export const maxAmountForFilterCurrencyAtom =
+  createMaxAmountForCurrencyAtom(currencyAtom)
+
+export const btcPricesReadyForFilterAtom =
+  createBtcPricesReadyAtom(currencyAtom)
+
 export const amountTopLimitForRangeInputAtom = atom(
   (get): number => {
     const amountTopLimit = get(amountTopLimitAtom)
     if (amountTopLimit !== undefined) return amountTopLimit
 
-    const currency = get(currencyAtom)
-    return currency ? currencies[currency].maxAmount : 0
+    return get(currencyAtom) ? get(maxAmountForFilterCurrencyAtom) : 0
   },
   (get, set, update: SetStateAction<number>) => {
     const value = getValueFromSetStateActionOfAtom(update)(() => {
       const currentAmountTopLimit = get(amountTopLimitAtom)
       if (currentAmountTopLimit !== undefined) return currentAmountTopLimit
 
-      const currency = get(currencyAtom)
-      return currency ? currencies[currency].maxAmount : 0
+      return get(currencyAtom) ? get(maxAmountForFilterCurrencyAtom) : 0
     })
     set(amountTopLimitAtom, value)
   }
@@ -285,13 +291,23 @@ export const updateCurrencyLimitsAtom = atom<
 >(null, (get, set, params) => {
   const {currency} = params
 
-  if (currency) {
-    void set(refreshBtcPriceActionAtom, currency)()
-  }
-
   set(currencyAtom, currency)
   set(amountBottomLimitAtom, 0)
-  set(amountTopLimitAtom, currency ? currencies[currency].maxAmount : 0)
+  set(amountTopLimitAtom, currency ? get(maxAmountForFilterCurrencyAtom) : 0)
+
+  if (currency) {
+    // Realign the top limit to the fresh cap once prices resolve — otherwise
+    // after a currency switch the slider stays pinned at the prior cap number
+    // (e.g. 10 000 EUR becoming 10 000 HUF when HUF's cap is ~4 000 000).
+    void Effect.runPromise(
+      Effect.gen(function* (_) {
+        yield* _(refreshBtcPriceWithEurEffect(set, currency))
+        if (get(currencyAtom) === currency) {
+          set(amountTopLimitAtom, get(maxAmountForFilterCurrencyAtom))
+        }
+      })
+    )
+  }
 
   return true
 })
@@ -541,9 +557,19 @@ function getDraftOffersFilter(get: Getter): OffersFilter {
     amountBottomLimit: get(amountFilterEnabledAtom)
       ? get(amountBottomLimitAtom)
       : undefined,
-    amountTopLimit: get(amountFilterEnabledAtom)
-      ? get(amountTopLimitAtom)
-      : undefined,
+    amountTopLimit: (() => {
+      if (!get(amountFilterEnabledAtom)) return undefined
+      const topLimit = get(amountTopLimitAtom)
+      // Treat "at max" as unbounded so cross-currency offers created at their
+      // currency's cap aren't filtered out after FX drift.
+      if (
+        topLimit === undefined ||
+        topLimit >= get(maxAmountForFilterCurrencyAtom)
+      ) {
+        return undefined
+      }
+      return topLimit
+    })(),
     singlePrice: get(singlePriceAtom),
     singlePriceCurrency: get(singlePriceCurrencyAtom),
     clubsUuids: get(clubsFilterEnabledAtom)

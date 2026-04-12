@@ -1,32 +1,28 @@
+import {Dialog, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Modal} from 'react-native'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text} from 'tamagui'
 import {uploadingProgressDataForRootElement} from './atoms'
 import ProgressIndicator from './components/ProgressIndicator'
 
-function UploadingOfferProgressModal(): React.ReactElement {
-  const {bottom} = useSafeAreaInsets()
-
+function UploadingOfferProgressModal(): React.JSX.Element {
   const data = useAtomValue(uploadingProgressDataForRootElement)
 
   return (
-    <Modal animationType="fade" transparent visible={data.isVisible}>
-      <Stack f={1} pb={bottom} jc="flex-end" bc="rgba(0,0,0,0.6)">
-        <Stack mb="$3" p="$4" backgroundColor="$white" br="$4">
-          <Text col="$black" mb="$4" fos={24} ff="$heading">
-            {data.title}
-          </Text>
-          <ProgressIndicator />
-          {!!data.bottomText && (
-            <Text pt="$4" fos={18} col="$greyOnWhite">
-              {data.bottomText}
-            </Text>
-          )}
-        </Stack>
-      </Stack>
-    </Modal>
+    <Dialog visible={data.isVisible}>
+      <Typography
+        variant="heading2"
+        fontWeight="700"
+        color="$foregroundPrimary"
+      >
+        {data.title}
+      </Typography>
+      <ProgressIndicator />
+      {!!data.bottomText && (
+        <Typography variant="paragraphSmall" color="$foregroundSecondary">
+          {data.bottomText}
+        </Typography>
+      )}
+    </Dialog>
   )
 }
 

@@ -4,11 +4,13 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {PeopleUsers} from '../icons/PeopleUsers'
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
-import {NavButton} from './NavButton'
+import {NavButton, type NavButtonVariant} from './NavButton'
 
 export interface NavigationBarAction {
   readonly icon: React.ComponentType<IconProps>
   readonly onPress: () => void
+  readonly variant?: NavButtonVariant
+  readonly disabled?: boolean
 }
 
 const NavigationBarFrame = styled(Stack, {
@@ -141,17 +143,23 @@ function HighlightedNavAction({
       variant="highlighted"
       icon={action.icon}
       onPress={action.onPress}
+      disabled={action.disabled}
     />
   )
 }
 
-function NormalNavAction({
+function RightNavAction({
   action,
 }: {
   readonly action: NavigationBarAction
 }): React.JSX.Element {
   return (
-    <NavButton variant="normal" icon={action.icon} onPress={action.onPress} />
+    <NavButton
+      variant={action.variant ?? 'normal'}
+      icon={action.icon}
+      onPress={action.onPress}
+      disabled={action.disabled}
+    />
   )
 }
 
@@ -181,7 +189,7 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
           </BackCenterContainer>
           <BackSideContainer side="right">
             {props.rightActions?.map((action, i) => (
-              <NormalNavAction key={i} action={action} />
+              <RightNavAction key={i} action={action} />
             ))}
           </BackSideContainer>
         </BackBar>
@@ -203,7 +211,7 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
             </ChatInfoColumn>
           </ChatPressableArea>
           {props.rightActions?.map((action, i) => (
-            <NormalNavAction key={i} action={action} />
+            <RightNavAction key={i} action={action} />
           ))}
         </ChatBar>
       )}

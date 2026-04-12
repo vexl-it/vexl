@@ -1,5 +1,6 @@
 import {type IntendedConnectionLevel} from '@vexl-next/domain/src/general/offers'
-import {atom, useAtom, useAtomValue, type Atom} from 'jotai'
+import {FriendLevel as UIFriendLevel} from '@vexl-next/ui'
+import {atom, useAtom, useAtomValue, type WritableAtom} from 'jotai'
 import React from 'react'
 import {XStack} from 'tamagui'
 import {
@@ -8,9 +9,6 @@ import {
 } from '../../../../utils/localization/I18nProvider'
 import numberOfFriendsAtom from '../../../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {showErrorAlert} from '../../../ErrorAlert'
-import firstDegreeFriendsSvg from '../../../images/firstDegreeFriendsSvg'
-import secondDegreeFriendsSvg from '../../../images/secondDegreeFriendsSvg'
-import FriendLevelCell from './components/FriendLevelCell'
 
 const friendLevelSubtitleAtom = atom((get) => {
   const {t} = get(translationAtom)
@@ -49,7 +47,11 @@ const friendLevelSubtitleAtom = atom((get) => {
 interface Props {
   hideSubtitle?: boolean
   subtitles?: {first: string; second: string}
-  intendedConnectionLevelAtom: Atom<IntendedConnectionLevel | undefined>
+  intendedConnectionLevelAtom: WritableAtom<
+    IntendedConnectionLevel | undefined,
+    [IntendedConnectionLevel],
+    void
+  >
 }
 
 function FriendLevel({
@@ -65,25 +67,27 @@ function FriendLevel({
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
 
   return (
-    <XStack jc="space-evenly">
-      <FriendLevelCell
+    <XStack flexWrap="wrap" justifyContent="center" gap="$3">
+      <UIFriendLevel
+        degree="FIRST"
         loading={numberOfFriends.state === 'loading'}
-        image={firstDegreeFriendsSvg}
         selected={intendedConnectionLevel === 'FIRST'}
-        type="FIRST"
-        onPress={setIntendedConnectionLevel}
+        onPress={() => {
+          setIntendedConnectionLevel('FIRST')
+        }}
         title={t('offerForm.friendLevel.firstDegree')}
         subtitle={
           customSubtitles?.first ??
           (!hideSubtitle ? subtitle.firstFriendLevelText : undefined)
         }
       />
-      <FriendLevelCell
+      <UIFriendLevel
+        degree="ALL"
         loading={numberOfFriends.state === 'loading'}
-        image={secondDegreeFriendsSvg}
         selected={intendedConnectionLevel === 'ALL'}
-        type="ALL"
-        onPress={setIntendedConnectionLevel}
+        onPress={() => {
+          setIntendedConnectionLevel('ALL')
+        }}
         title={t('offerForm.friendLevel.secondDegree')}
         subtitle={
           customSubtitles?.second ??

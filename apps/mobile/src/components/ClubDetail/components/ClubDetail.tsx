@@ -100,9 +100,7 @@ export function ClubDetail({
           variant="secondary"
           text={t('common.createOffer')}
           onPress={() => {
-            navigation.navigate('CRUDOfferFlow', {
-              screen: 'ListingAndOfferType',
-            })
+            navigation.navigate('CRUDOfferFlow')
           }}
         />
         <Button

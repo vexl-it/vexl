@@ -4,7 +4,10 @@ import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
-import {SATOSHIS_IN_BTC} from '../../../../state/currentBtcPriceAtoms'
+import {
+  btcPriceDataAtom,
+  SATOSHIS_IN_BTC,
+} from '../../../../state/currentBtcPriceAtoms'
 import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {
   tradeChecklistAmountDataAtom,
@@ -16,7 +19,7 @@ import {
   formatBtcPrice,
 } from '../../../../state/tradeChecklist/utils/amount'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {currencies} from '../../../../utils/localization/currency'
+import {computeMaxAmountForCurrency} from '../../../../utils/localization/currency'
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {
   btcInputValueAtom,
@@ -157,7 +160,14 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
       cancelFeeOnNumberValue(fiatAmount, feeAmount)
     )
 
-    if (currency && fiatAmount > currencies[currency].maxAmount) {
+    const btcPriceData = get(btcPriceDataAtom)
+    const maxAmount = computeMaxAmountForCurrency({
+      btcPriceInCurrency: currency
+        ? btcPriceData[currency]?.btcPrice?.BTC
+        : undefined,
+      btcPriceInEur: btcPriceData.EUR?.btcPrice?.BTC,
+    })
+    if (currency && fiatAmount > maxAmount) {
       return pipe(
         TE.Do,
         TE.chainW(() =>
@@ -170,7 +180,7 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
                 ),
                 description: t(
                   'tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency',
-                  {amount: currencies[currency].maxAmount, currency}
+                  {amount: maxAmount, currency}
                 ),
                 positiveButtonText: t('common.close'),
               },

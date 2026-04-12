@@ -1,179 +1,371 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {KeyboardAvoidingView} from '@vexl-next/ui'
+import {Button, EditRow, Loader, NavigationBar, Screen} from '@vexl-next/ui'
+import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useState} from 'react'
-import {StatusBar} from 'react-native'
-import {Stack} from 'tamagui'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
+import {type LayoutChangeEvent} from 'react-native'
 import {
-  type CRUDOfferStackParamsList,
-  type RootStackScreenProps,
-} from '../../navigationTypes'
-import {andThenExpectBooleanNoErrors} from '../../utils/andThenExpectNoErrors'
+  KeyboardAwareScrollView,
+  type KeyboardAwareScrollViewRef,
+} from 'react-native-keyboard-controller'
+import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {getTokens, Stack, YStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import ProgressJourney from '../ProgressJourney'
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import EditOfferHeader from './EditOfferHeader'
+import {globalDialogAtom} from '../GlobalDialog'
+import FriendLevel from '../OfferForm/components/FriendLevel'
+import numberOfFriendsAtom from './atoms/numberOfFriendsAtom'
 import {offerFormMolecule} from './atoms/offerFormStateAtoms'
-import CurrencyAndAmountScreen from './components/CurrencyAndAmountScreen'
-import DeliveryMethodAndNetworkScreen from './components/DeliveryMethodAndNetworkScreen'
-import FriendLevelScreen from './components/FriendLevelScreen'
-import ListingAndOfferTypeScreen from './components/ListingAndOfferTypeScreen'
-import LocationPaymentMethodAndNetworkScreen from './components/LocationPaymentMethodAndNetworkScreen'
-import OfferDescriptionAndSpokenLanguagesScreen from './components/OfferDescriptionAndSpokenLanguagesScreen'
-import PriceScreen from './components/PriceScreen'
-import SummaryScreen from './components/SummaryScreen'
+import AmountStep from './components/AmountStep'
+import ClubsStep from './components/ClubsStep'
+import DescribeStep from './components/DescribeStep'
+import LanguageStep from './components/LanguageStep'
+import ListingTypeStep from './components/ListingTypeStep'
+import LocationStep from './components/LocationStep'
+import NetworkStep from './components/NetworkStep'
+import OfferTypeStep from './components/OfferTypeStep'
+import PriceUpToStep from './components/PriceUpToStep'
+import ProductCategoryStep from './components/ProductCategoryStep'
+import {type OfferSetupStep} from './offerSetupSteps'
 
-const CRUDOfferStack = createNativeStackNavigator<CRUDOfferStackParamsList>()
-
-type Props = RootStackScreenProps<'CRUDOfferFlow'>
-
-function CRUDOfferFlow({
-  route: {params},
-  navigation,
-}: Props): React.ReactElement {
+function CRUDOfferFlow(): React.ReactElement {
   const {t} = useTranslation()
-  const [page, setPage] = useState(0)
   const safeGoBack = useSafeGoBack()
   const {
-    screensBasedOnListingTypeAtom,
-    editOfferActionAtom,
-    createOfferActionAtom,
-    currentStepInOfferCreationAtom,
-    emitAlertBasedOnCurrentStepIfAnyAtom,
-    dontAllowNavigationToNextStepAndReturnReasonAtom,
+    offerTypeAtom,
+    listingTypeAtom,
+    initializeValuesForOfferFormActionAtom,
+    intendedConnectionLevelAtom,
+    resetOfferFormActionAtom,
   } = useMolecule(offerFormMolecule)
+  const offerType = useAtomValue(offerTypeAtom)
+  const listingType = useAtomValue(listingTypeAtom)
+  const intendedConnectionLevel = useAtomValue(intendedConnectionLevelAtom)
+  const numberOfFriends = useAtomValue(numberOfFriendsAtom)
+  const showDialog = useSetAtom(globalDialogAtom)
+  const initializeValuesForOfferForm = useSetAtom(
+    initializeValuesForOfferFormActionAtom
+  )
+  const resetOfferForm = useSetAtom(resetOfferFormActionAtom)
+  const insets = useSafeAreaInsets()
 
-  const screensBasedOnListingType = useAtomValue(screensBasedOnListingTypeAtom)
-  const emitAlertBasedOnCurrentStepIfAny = useSetAtom(
-    emitAlertBasedOnCurrentStepIfAnyAtom
-  )
-  const dontAllowNavigationToNextStepAndReturnReason = useAtomValue(
-    dontAllowNavigationToNextStepAndReturnReasonAtom
-  )
-  const createOffer = useSetAtom(createOfferActionAtom)
-  const editOffer = useSetAtom(editOfferActionAtom)
-  const setCurrentStepInOfferCreation = useSetAtom(
-    currentStepInOfferCreationAtom
-  )
+  const [activeStep, setActiveStep] = useState<OfferSetupStep>('offerType')
+  useEffect(() => {
+    resetOfferForm()
+    setActiveStep('offerType')
+    void Effect.runPromise(initializeValuesForOfferForm())
+  }, [initializeValuesForOfferForm, resetOfferForm])
 
-  const onPageChange = useCallback(
-    (prevOrNextPageIndex: number) => {
-      const currentPage =
-        screensBasedOnListingType[prevOrNextPageIndex] ?? 'ListingAndOfferType'
-      if (
-        prevOrNextPageIndex < page ||
-        !dontAllowNavigationToNextStepAndReturnReason
-      ) {
-        setCurrentStepInOfferCreation(currentPage)
-        navigation.navigate('CRUDOfferFlow', {
-          screen: currentPage,
-          offerId: params.offerId,
-        })
-        setPage(prevOrNextPageIndex)
-      } else {
-        emitAlertBasedOnCurrentStepIfAny()
-      }
-    },
-    [
-      dontAllowNavigationToNextStepAndReturnReason,
-      emitAlertBasedOnCurrentStepIfAny,
-      navigation,
-      page,
-      params.offerId,
-      screensBasedOnListingType,
-      setCurrentStepInOfferCreation,
-    ]
+  const scrollRef = useRef<KeyboardAwareScrollViewRef>(null)
+  const stepYsRef = useRef<Partial<Record<OfferSetupStep, number>>>({})
+
+  const isHeavyStep = (step: OfferSetupStep): boolean =>
+    step === 'friendLevel' || step === 'clubs'
+
+  const [heavyContentReady, setHeavyContentReady] = useState(false)
+  useEffect(() => {
+    if (!isHeavyStep(activeStep)) {
+      setHeavyContentReady(false)
+      return
+    }
+    const id = setTimeout(() => {
+      setHeavyContentReady(true)
+    }, 0)
+    return () => {
+      clearTimeout(id)
+    }
+  }, [activeStep])
+
+  const scrollToActiveStep = (): void => {
+    if (isHeavyStep(activeStep) && !heavyContentReady) return
+    const y = stepYsRef.current[activeStep]
+    if (y === undefined) return
+    scrollRef.current?.scrollTo({
+      y: Math.max(0, y - getTokens().space.$2.val),
+      animated: true,
+    })
+  }
+
+  useEffect(() => {
+    scrollToActiveStep()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeStep, heavyContentReady])
+
+  const handleStepLayout =
+    (step: OfferSetupStep) =>
+    (e: LayoutChangeEvent): void => {
+      stepYsRef.current[step] = e.nativeEvent.layout.y
+      if (step === activeStep) scrollToActiveStep()
+    }
+
+  const friendLevelReachLabel = (() => {
+    const effectiveConnectionLevel = intendedConnectionLevel ?? 'FIRST'
+    const friendLevelLabel =
+      effectiveConnectionLevel === 'FIRST'
+        ? t('offerForm.friendLevel.firstDegree')
+        : t('offerForm.friendLevel.secondDegree')
+
+    if (numberOfFriends.state === 'loading') {
+      return `${friendLevelLabel} (${t('common.loading')})`
+    }
+
+    if (numberOfFriends.state === 'error') {
+      return `${friendLevelLabel} (${t('offerForm.friendLevel.noVexlers')})`
+    }
+
+    const reachCount =
+      effectiveConnectionLevel === 'FIRST'
+        ? numberOfFriends.firstLevelFriendsCount
+        : numberOfFriends.firstAndSecondLevelFriendsCount
+
+    return `${friendLevelLabel} (${t('offerForm.friendLevel.reachPeopleInline', {count: reachCount})})`
+  })()
+  const areFriendLevelCountsLoading = numberOfFriends.state === 'loading'
+
+  const closeAction = useMemo(
+    () => ({
+      icon: XmarkCancelClose,
+      onPress: () => {
+        if (!offerType) {
+          safeGoBack()
+          return
+        }
+        void Effect.runPromise(
+          Effect.gen(function* (_) {
+            const confirmed = yield* _(
+              showDialog({
+                title: t('offerForm.discardNewOffer'),
+                subtitle: t('offerForm.discardNewOfferDescription'),
+                positiveButtonText: t('common.discard'),
+                positiveButtonVariant: 'destructive',
+                negativeButtonText: t('common.goBack'),
+              })
+            )
+            if (confirmed) {
+              safeGoBack()
+            }
+          })
+        )
+      },
+    }),
+    [offerType, safeGoBack, showDialog, t]
   )
 
   return (
-    <Screen>
-      <KeyboardAvoidingView>
-        <Stack style={{height: StatusBar.currentHeight ?? 0}} />
-        <Stack f={1} px="$2" pb="$2">
-          {!params.offerId ? (
-            <ScreenTitle
-              text={t('offerForm.myNewOffer')}
-              withBottomBorder
-              withBackButton
-            />
-          ) : (
-            <EditOfferHeader offerId={params.offerId} />
-          )}
-          <ProgressJourney
-            withBackButton
-            currentPage={page}
-            numberOfPages={screensBasedOnListingType.length}
-            onPageChange={(nextPageIndex) => {
-              if (
-                screensBasedOnListingType.length === 0 ||
-                nextPageIndex < screensBasedOnListingType.length
-              ) {
-                onPageChange(nextPageIndex)
-              }
-            }}
-            onSkip={safeGoBack}
-            onFinish={() => {
-              void Effect.runPromise(
-                andThenExpectBooleanNoErrors((success) => {
-                  if (success) {
-                    navigation.navigate('InsideTabs', {
-                      screen: 'Marketplace',
-                      params: {initialTab: 'myOffers'},
-                    })
-                  }
-                })(params.offerId ? editOffer() : createOffer())
-              )
-            }}
-            background="black"
-            touchableOverlayDisabled
-          >
-            <CRUDOfferStack.Navigator
-              screenOptions={{
-                headerShown: false,
-                presentation: 'card',
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('offerForm.myNewOffer')}
+          rightActions={[closeAction]}
+        />
+      }
+    >
+      <KeyboardAwareScrollView
+        ref={scrollRef}
+        bottomOffset={getTokens().space.$5.val}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + getTokens().space.$5.val,
+        }}
+      >
+        <YStack gap="$5">
+          <Stack onLayout={handleStepLayout('offerType')}>
+            <OfferTypeStep
+              active={activeStep === 'offerType'}
+              onEdit={() => {
+                setActiveStep('offerType')
               }}
-              initialRouteName="ListingAndOfferType"
+              onComplete={() => {
+                setActiveStep('listingType')
+              }}
+            />
+          </Stack>
+          {activeStep !== 'offerType' ? (
+            <Stack onLayout={handleStepLayout('listingType')}>
+              <ListingTypeStep
+                active={activeStep === 'listingType'}
+                onEdit={() => {
+                  setActiveStep('listingType')
+                }}
+                onComplete={(type) => {
+                  setActiveStep(
+                    type === 'PRODUCT' ? 'productCategory' : 'amount'
+                  )
+                }}
+              />
+            </Stack>
+          ) : null}
+          {activeStep !== 'offerType' &&
+          activeStep !== 'listingType' &&
+          listingType === 'PRODUCT' ? (
+            <Stack onLayout={handleStepLayout('productCategory')}>
+              <ProductCategoryStep
+                active={activeStep === 'productCategory'}
+                onEdit={() => {
+                  setActiveStep('productCategory')
+                }}
+                onComplete={() => {
+                  setActiveStep('amount')
+                }}
+              />
+            </Stack>
+          ) : null}
+          {activeStep !== 'offerType' &&
+          activeStep !== 'listingType' &&
+          activeStep !== 'productCategory' ? (
+            <Stack onLayout={handleStepLayout('amount')}>
+              {listingType === 'BITCOIN' ? (
+                <AmountStep
+                  active={activeStep === 'amount'}
+                  onEdit={() => {
+                    setActiveStep('amount')
+                  }}
+                  onComplete={() => {
+                    setActiveStep('location')
+                  }}
+                />
+              ) : (
+                <PriceUpToStep
+                  active={activeStep === 'amount'}
+                  onEdit={() => {
+                    setActiveStep('amount')
+                  }}
+                  onComplete={() => {
+                    setActiveStep('location')
+                  }}
+                />
+              )}
+            </Stack>
+          ) : null}
+          {activeStep === 'location' ||
+          activeStep === 'network' ||
+          activeStep === 'describe' ||
+          activeStep === 'language' ||
+          activeStep === 'friendLevel' ||
+          activeStep === 'clubs' ? (
+            <Stack onLayout={handleStepLayout('location')}>
+              <LocationStep
+                active={activeStep === 'location'}
+                onEdit={() => {
+                  setActiveStep('location')
+                }}
+                onComplete={() => {
+                  setActiveStep('network')
+                }}
+              />
+            </Stack>
+          ) : null}
+          {activeStep === 'network' ||
+          activeStep === 'describe' ||
+          activeStep === 'language' ||
+          activeStep === 'friendLevel' ||
+          activeStep === 'clubs' ? (
+            <Stack onLayout={handleStepLayout('network')}>
+              <NetworkStep
+                active={activeStep === 'network'}
+                onEdit={() => {
+                  setActiveStep('network')
+                }}
+                onComplete={() => {
+                  setActiveStep('describe')
+                }}
+              />
+            </Stack>
+          ) : null}
+          {activeStep === 'describe' ||
+          activeStep === 'language' ||
+          activeStep === 'friendLevel' ||
+          activeStep === 'clubs' ? (
+            <Stack onLayout={handleStepLayout('describe')}>
+              <DescribeStep
+                active={activeStep === 'describe'}
+                onEdit={() => {
+                  setActiveStep('describe')
+                }}
+                onComplete={() => {
+                  setActiveStep('language')
+                }}
+              />
+            </Stack>
+          ) : null}
+          {activeStep === 'language' ||
+          activeStep === 'friendLevel' ||
+          activeStep === 'clubs' ? (
+            <Stack onLayout={handleStepLayout('language')}>
+              <LanguageStep
+                active={activeStep === 'language'}
+                onEdit={() => {
+                  setActiveStep('language')
+                }}
+                onComplete={() => {
+                  setActiveStep('friendLevel')
+                }}
+              />
+            </Stack>
+          ) : null}
+          {activeStep === 'friendLevel' || activeStep === 'clubs' ? (
+            <Stack
+              onLayout={(e) => {
+                const y = e.nativeEvent.layout.y
+                stepYsRef.current.friendLevel = y
+                stepYsRef.current.clubs = y
+                scrollToActiveStep()
+              }}
             >
-              <CRUDOfferStack.Screen
-                name="ListingAndOfferType"
-                component={ListingAndOfferTypeScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="CurrencyAndAmount"
-                component={CurrencyAndAmountScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="LocationPaymentMethodAndNetworkScreen"
-                component={LocationPaymentMethodAndNetworkScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="OfferDescriptionAndSpokenLanguagesScreen"
-                component={OfferDescriptionAndSpokenLanguagesScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="FriendLevelScreen"
-                component={FriendLevelScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="DeliveryMethodAndNetworkScreen"
-                component={DeliveryMethodAndNetworkScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="SummaryScreen"
-                component={SummaryScreen}
-              />
-              <CRUDOfferStack.Screen
-                name="PriceScreen"
-                component={PriceScreen}
-              />
-            </CRUDOfferStack.Navigator>
-          </ProgressJourney>
-        </Stack>
-      </KeyboardAvoidingView>
+              <Animated.View entering={FadeIn} exiting={FadeOut}>
+                <YStack>
+                  {activeStep === 'friendLevel' ? (
+                    <EditRow
+                      state="initial"
+                      headline={t('offerForm.whoCanSeeYourOffer')}
+                    />
+                  ) : (
+                    <EditRow
+                      state="completed"
+                      overline={t('offerForm.whoCanSeeYourOffer')}
+                      headline={friendLevelReachLabel}
+                      onPress={() => {
+                        setActiveStep('friendLevel')
+                      }}
+                    />
+                  )}
+                  {!heavyContentReady ? (
+                    <YStack paddingVertical="$5" alignItems="center">
+                      <Loader size="large" />
+                    </YStack>
+                  ) : activeStep === 'friendLevel' ? (
+                    <YStack gap="$5" paddingVertical="$5">
+                      <FriendLevel
+                        intendedConnectionLevelAtom={
+                          intendedConnectionLevelAtom
+                        }
+                      />
+                      <Button
+                        variant="primary"
+                        size="large"
+                        disabled={areFriendLevelCountsLoading}
+                        onPress={() => {
+                          setActiveStep('clubs')
+                        }}
+                      >
+                        {t('offerForm.next')}
+                      </Button>
+                    </YStack>
+                  ) : (
+                    <YStack gap="$5" paddingTop="$5">
+                      <ClubsStep />
+                    </YStack>
+                  )}
+                </YStack>
+              </Animated.View>
+            </Stack>
+          ) : null}
+        </YStack>
+      </KeyboardAwareScrollView>
     </Screen>
   )
 }

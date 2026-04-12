@@ -9,7 +9,7 @@ function MyOffersEmptyList(): React.ReactElement {
   const navigation = useNavigation()
 
   const onCreateOfferPress = useCallback(() => {
-    navigation.navigate('CRUDOfferFlow', {screen: 'ListingAndOfferType'})
+    navigation.navigate('CRUDOfferFlow')
   }, [navigation])
 
   return (

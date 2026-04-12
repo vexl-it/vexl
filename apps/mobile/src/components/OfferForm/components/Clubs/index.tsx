@@ -6,7 +6,7 @@ import {
 } from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {getTokens, Text, XStack, YStack} from 'tamagui'
-import {type CRUDOfferStackScreenProps} from '../../../../navigationTypes'
+import {type RootStackScreenProps} from '../../../../navigationTypes'
 import {clubsWithMembersAtomsAtom} from '../../../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../utils/atomUtils/atomKeyExtractor'
@@ -19,7 +19,7 @@ import ClubItem from './components/ClubItem'
 
 interface OfferFormProps {
   form: 'OfferForm'
-  navigation: CRUDOfferStackScreenProps<'FriendLevelScreen'>['navigation']
+  navigation: RootStackScreenProps<'CRUDOfferFlow'>['navigation']
   createSelectClubAtom: (
     clubWithMembersAtom: Atom<ClubWithMembers>
   ) => WritableAtom<boolean, [SetStateAction<boolean>], void>

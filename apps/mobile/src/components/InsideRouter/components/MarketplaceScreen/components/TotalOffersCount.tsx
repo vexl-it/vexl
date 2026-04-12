@@ -12,7 +12,7 @@ function TotalOffersCount({filteredOffersCount}: Props): React.ReactElement {
 
   return (
     <Stack als="flex-start" my="$2">
-      <Typography variant="description" color="$greyOnBlack">
+      <Typography variant="description" color="$foregroundSecondary">
         {t('marketplace.offersCount', {count: filteredOffersCount})}
       </Typography>
     </Stack>

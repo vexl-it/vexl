@@ -2,7 +2,7 @@ import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {formatCurrencyAmount} from '../../../utils/localization/currency'
+import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {marketplaceFiatOrSatsCurrencyAtom} from '../../../utils/preferences'
 import {
   InfoDivider,
@@ -29,7 +29,7 @@ function FiatOrSats({offer}: Props): React.ReactElement | null {
   )
 
   const offerAmountBottomLimit = useMemo(() => {
-    return formatCurrencyAmount(
+    return formatFullCurrencyAmount(
       offer.publicPart.currency,
       offer.publicPart.amountBottomLimit
     )

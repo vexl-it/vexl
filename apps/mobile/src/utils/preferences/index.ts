@@ -1,6 +1,7 @@
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {currencies} from '../localization/currency'
+import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 import {Preferences} from './domain'
 
 export const preferencesAtom = atomWithParsedMmkvStorage(
@@ -34,6 +35,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     runTasksInParallel: true,
     sendReadReceipts: true,
     showVerifiedContacts: false,
+    lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(),
   },
   Preferences
 )
@@ -102,4 +104,9 @@ export const sendReadReceiptsAtom = focusAtom(preferencesAtom, (o) =>
 
 export const showVerifiedContactsAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('showVerifiedContacts')
+)
+
+export const lastUsedOfferSpokenLanguagesAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('lastUsedOfferSpokenLanguages')
 )

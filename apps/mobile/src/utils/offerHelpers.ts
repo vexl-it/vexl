@@ -5,17 +5,15 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type IconTagVariant} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
-import {currencies} from './localization/currency'
+import {formatFullCurrencyAmount} from './localization/currency'
+import {i18n} from './localization/I18nProvider'
 import spokenLanguageToFlagEmoji from './localization/spokenLanguageToFlagEmoji'
 
 export function getIsOffering(
-  listingType: ListingType | undefined,
+  _listingType: ListingType | undefined,
   offerType: OfferType
 ): boolean {
-  if (!listingType || listingType === 'BITCOIN') {
-    return offerType === 'SELL'
-  }
-  return offerType !== 'SELL'
+  return offerType === 'SELL'
 }
 
 export function getIconTagVariant(
@@ -28,21 +26,16 @@ export function getIconTagVariant(
 
 export function getAmountLabel(offer: OneOfferInState): string {
   const {publicPart} = offer.offerInfo
-  const currency = currencies[publicPart.currency]
 
-  const formatAmount = (amount: number): string => {
-    const formatted = amount.toLocaleString()
-    return currency.position === 'before'
-      ? `${currency.symbol}${formatted}`
-      : `${formatted} ${currency.symbol}`
-  }
+  const formatAmount = (amount: number): string =>
+    formatFullCurrencyAmount(publicPart.currency, amount)
 
   if (!publicPart.listingType || publicPart.listingType === 'BITCOIN') {
     if (publicPart.amountBottomLimit > 0) {
       return `${formatAmount(publicPart.amountBottomLimit)} \u2013 ${formatAmount(publicPart.amountTopLimit)}`
     }
 
-    return formatAmount(publicPart.amountTopLimit)
+    return `${i18n.t('offer.upTo')} ${formatAmount(publicPart.amountTopLimit)}`
   }
 
   if (publicPart.amountBottomLimit !== 0) {

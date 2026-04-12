@@ -1,5 +1,5 @@
 import React, {createContext, useContext, type ReactNode} from 'react'
-import {TamaguiProvider} from 'tamagui'
+import {TamaguiProvider, Theme} from 'tamagui'
 import {config} from '../config/tamagui.config'
 import {useThemeMode, type ThemeMode} from './useThemeMode'
 
@@ -25,8 +25,8 @@ export function VexlThemeProvider({
 
   return (
     <VexlThemeContext.Provider value={themeMode}>
-      <TamaguiProvider config={config} defaultTheme={themeMode.resolvedTheme}>
-        {children}
+      <TamaguiProvider config={config}>
+        <Theme name={themeMode.resolvedTheme}>{children}</Theme>
       </TamaguiProvider>
     </VexlThemeContext.Provider>
   )

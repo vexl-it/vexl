@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {
   type LocationState,
   type OfferLocation,
@@ -9,17 +10,12 @@ import {
   type PrimitiveAtom,
   type WritableAtom,
 } from 'jotai'
-import {useState} from 'react'
+import {useCallback} from 'react'
 import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Info from '../../Info'
-import {
-  newLocationSessionId,
-  type LocationSessionId,
-} from '../../LocationSearch/molecule'
 import SelectableCell from '../../SelectableCell'
 import AddCityOrDistrict from './AddCityOrDistrict'
-import SelectLocationFlowModal from './Location/components/SelectLocationFlowModal'
 import LocationsList from './LocationsList'
 
 interface Props {
@@ -40,14 +36,16 @@ function DeliveryMethodComponent({
   updateLocationStateAndPaymentMethodAtom,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const navigation = useNavigation()
   const [locations, setLocations] = useAtom(locationAtom)
   const locationState = useAtomValue(locationStateAtom)
   const updateLocationStateAndPaymentMethod = useSetAtom(
     updateLocationStateAndPaymentMethodAtom
   )
 
-  const [locationSearchVisible, setLocationSearchVisible] =
-    useState<LocationSessionId | null>(null)
+  const handleAddLocation = useCallback(() => {
+    navigation.navigate('SelectLocationSearch', {randomizeLocation})
+  }, [navigation, randomizeLocation])
 
   const onLocationRemove = (locationToRemove: OfferLocation): void => {
     const filteredLocation = locations?.filter(
@@ -71,11 +69,7 @@ function DeliveryMethodComponent({
         {!!locationState?.includes('IN_PERSON') && (
           <YStack gap="$1">
             {!!(!locations || (locations && locations.length < 3)) && (
-              <AddCityOrDistrict
-                onPress={() => {
-                  setLocationSearchVisible(newLocationSessionId())
-                }}
-              />
+              <AddCityOrDistrict onPress={handleAddLocation} />
             )}
             <LocationsList
               locations={locations}
@@ -98,16 +92,6 @@ function DeliveryMethodComponent({
           <Info text={t('offerForm.pickupDeliveryIsSafer')} />
         )}
       </YStack>
-      <SelectLocationFlowModal
-        randomizeLocation={randomizeLocation}
-        locationSessionId={locationSearchVisible ?? newLocationSessionId()}
-        locationAtom={locationAtom}
-        onSetVisible={(visible) => {
-          if (visible) setLocationSearchVisible(newLocationSessionId())
-          else setLocationSearchVisible(null)
-        }}
-        visible={!!locationSearchVisible}
-      />
     </YStack>
   )
 }

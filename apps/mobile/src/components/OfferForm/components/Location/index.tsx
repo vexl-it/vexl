@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {
   type ListingType,
   type LocationState,
@@ -17,17 +18,12 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import Help from '../../../Help'
 import SvgImage from '../../../Image'
 import Info from '../../../Info'
-import {
-  newLocationSessionId,
-  type LocationSessionId,
-} from '../../../LocationSearch/molecule'
 import Switch from '../../../Switch'
 import Tabs from '../../../Tabs'
 import anonymousCounterpartSvg from '../../../images/anonymousCounterpartSvg'
 import locationSvg from '../../../images/locationSvg'
 import AddCityOrDistrict from '../AddCityOrDistrict'
 import LocationsList from '../LocationsList'
-import SelectLocationFlowModal from './components/SelectLocationFlowModal'
 import useContent from './useContent'
 
 interface Props {
@@ -61,6 +57,7 @@ function LocationComponent({
   const tokens = getTokens()
   const {t} = useTranslation()
   const content = useContent()
+  const navigation = useNavigation()
 
   const listingType = useAtomValue(listingTypeAtom)
   const [location, setLocation] = useAtom(locationAtom)
@@ -70,9 +67,6 @@ function LocationComponent({
     updateLocationStateAndPaymentMethodAtom
   )
   const [helpVisible, setHelpVisible] = useState<boolean>(false)
-
-  const [locationSearchVisible, setLocationSearchVisible] =
-    useState<LocationSessionId | null>(null)
   const switchIsVisible = useMemo(
     () => listingType === 'OTHER' && !inFilter,
     [inFilter, listingType]
@@ -137,7 +131,7 @@ function LocationComponent({
           {!!(!location || (location && location.length < 3)) && (
             <AddCityOrDistrict
               onPress={() => {
-                setLocationSearchVisible(newLocationSessionId())
+                navigation.navigate('SelectLocationSearch', {randomizeLocation})
               }}
             />
           )}
@@ -157,17 +151,6 @@ function LocationComponent({
             }}
           />
         )}
-      <SelectLocationFlowModal
-        randomizeLocation={randomizeLocation}
-        locationSessionId={locationSearchVisible ?? newLocationSessionId()}
-        locationAtom={locationAtom}
-        onSetVisible={(visible) => {
-          if (visible) setLocationSearchVisible(newLocationSessionId())
-          else setLocationSearchVisible(null)
-        }}
-        visible={!!locationSearchVisible}
-      />
-
       {!!helpVisible && (
         <Help
           visible={helpVisible}

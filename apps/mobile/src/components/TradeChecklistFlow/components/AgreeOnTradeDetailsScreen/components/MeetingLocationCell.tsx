@@ -34,7 +34,7 @@ function MeetingLocationCell(): React.ReactElement {
         selectedLocation: lastLocationDataMessage.locationData.data,
       })
     } else {
-      navigation.navigate('LocationSearch')
+      navigation.navigate('LocationMapSelect')
     }
   }, [navigation, tradeChecklistLocationData])
 

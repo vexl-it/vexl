@@ -1,16 +1,17 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {useVexlTheme} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useMemo} from 'react'
+import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
+import React, {useEffect, useMemo, useState} from 'react'
 import MapView, {
   PROVIDER_GOOGLE,
   type EdgePadding,
   type Region,
 } from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text} from 'tamagui'
+import {Stack, Text, useTheme} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
@@ -20,16 +21,18 @@ import {
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import Image from '../../Image'
 import {type MapValue} from '../brands'
-import pinSvg from '../img/pinSvg'
-import mapTheme from '../utils/mapStyle'
+import {createPinSvg} from '../img/pinSvg'
+import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
+  middleChildren?: React.ReactNode
   bottomChildren?: React.ReactNode
   initialValue: MapValue
   mapPadding?: EdgePadding
   onPick: (place: MapValue | null) => void
+  onMapMoved?: () => void
 }
 
 const mapStyle = {
@@ -74,12 +77,15 @@ function useAtoms({
   }, [initialRegion, onPick])
 }
 
+type AtomValue<T> = T extends Atom<infer Value> ? Value : never
+
 function PickedLocationText({
-  atom,
+  geocodingState,
 }: {
-  atom: ReturnType<typeof useAtoms>['getGeocodedRegionAtom']
+  geocodingState: AtomValue<
+    ReturnType<typeof useAtoms>['getGeocodedRegionAtom']
+  >
 }): React.ReactElement {
-  const geocodingState = useAtomValue(atom)
   const {t} = useTranslation()
 
   if (geocodingState.state !== 'done')
@@ -103,24 +109,38 @@ function PickedLocationText({
 
 export default function MapLocationSelect({
   onPick,
+  onMapMoved,
   initialValue,
   topChildren,
+  middleChildren,
   bottomChildren,
   mapPadding,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
+  const {resolvedTheme} = useVexlTheme()
+  const theme = useTheme()
 
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
   )
+  const pinSvg = useMemo(
+    () => createPinSvg(theme.accentHighlightSecondary.val),
+    [theme.accentHighlightSecondary.val]
+  )
+  const [currentRegion, setCurrentRegion] = useState(initialRegion)
 
   const atoms = useAtoms({
     initialRegion,
     onPick,
   })
+  const geocodingState = useAtomValue(atoms.getGeocodedRegionAtom)
   const setRegion = useSetAtom(atoms.selectedRegionAtom)
+
+  useEffect(() => {
+    setCurrentRegion(initialRegion)
+  }, [initialRegion])
 
   return (
     <Stack position="relative" {...restProps} backgroundColor="$black">
@@ -128,14 +148,16 @@ export default function MapLocationSelect({
         mapPadding={mapPadding}
         provider={PROVIDER_GOOGLE}
         toolbarEnabled={false}
-        customMapStyle={mapTheme}
+        customMapStyle={getMapTheme(resolvedTheme)}
         style={mapStyle}
         onRegionChangeComplete={(region, {isGesture}) => {
           if (isGesture) {
+            onMapMoved?.()
+            setCurrentRegion(region)
             setRegion(region)
           }
         }}
-        region={initialRegion}
+        region={currentRegion}
       />
       <Stack
         pointerEvents="none"
@@ -159,15 +181,17 @@ export default function MapLocationSelect({
       >
         <Stack flex={3}></Stack>
         <Stack flex={2} p="$2">
-          <Stack
-            paddingHorizontal="$4"
-            paddingVertical="$2"
-            borderRadius="$6"
-            alignSelf="center"
-            backgroundColor="rgba(0, 0, 0,0.8)"
-          >
-            <PickedLocationText atom={atoms.getGeocodedRegionAtom} />
-          </Stack>
+          {middleChildren ?? (
+            <Stack
+              paddingHorizontal="$4"
+              paddingVertical="$2"
+              borderRadius="$6"
+              alignSelf="center"
+              backgroundColor="rgba(0, 0, 0,0.8)"
+            >
+              <PickedLocationText geocodingState={geocodingState} />
+            </Stack>
+          )}
         </Stack>
       </Stack>
       <Stack

@@ -1,34 +1,30 @@
+import {ChevronDown} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {Stack, XStack, getTokens} from 'tamagui'
-import chevronDownSvg from '../../../../../images/chevronDownSvg'
-import Image from '../../../../Image'
+import {XStack, useTheme} from 'tamagui'
 import {tradePriceTypeAtom} from '../../../atoms'
 import PriceTypeIndicator from '../../PriceTypeIndicator'
 
 function SwitchTradePriceTypeButton(
   props: TouchableOpacityProps
 ): React.ReactElement {
+  const theme = useTheme()
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   return (
-    <TouchableOpacity {...props}>
-      <XStack ai="center">
-        <PriceTypeIndicator />
-        <Stack ml="$1">
-          <Image
-            width={16}
-            height={16}
-            source={chevronDownSvg}
-            stroke={
-              !tradePriceType || tradePriceType === 'live'
-                ? getTokens().color.main.val
-                : tradePriceType === 'frozen'
-                  ? getTokens().color.pink.val
-                  : getTokens().color.green.val
-            }
-          />
-        </Stack>
+    <TouchableOpacity activeOpacity={0.7} {...props}>
+      <XStack ai="center" gap="$2">
+        <PriceTypeIndicator neutralTextColor />
+        <ChevronDown
+          color={
+            !tradePriceType || tradePriceType === 'live'
+              ? theme.foregroundPrimary.val
+              : tradePriceType === 'frozen'
+                ? theme.pinkForeground.val
+                : theme.greenForeground.val
+          }
+          size={20}
+        />
       </XStack>
     </TouchableOpacity>
   )

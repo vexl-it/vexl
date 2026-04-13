@@ -13,8 +13,12 @@ import {useFonts} from 'expo-font'
 import {atom} from 'jotai'
 
 import {StatusBar} from 'expo-status-bar'
-import React, {useMemo, useState} from 'react'
-import {ScrollView} from 'react-native'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
+import {
+  ScrollView,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {toastAtom} from './state/toastAtom'
 
@@ -24,6 +28,9 @@ function ScreenNav(): React.JSX.Element {
   const {resolvedTheme, toggle} = useVexlTheme()
   const [activeScreen, setActiveScreen] = useState<ScreenEntry | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const catalogScrollViewRef = useRef<ScrollView | null>(null)
+  const catalogScrollOffsetRef = useRef(0)
+  const shouldRestoreCatalogScrollRef = useRef(false)
 
   const searchAtom = useMemo(
     () =>
@@ -47,6 +54,28 @@ function ScreenNav(): React.JSX.Element {
     [normalizedSearchQuery]
   )
 
+  useEffect(() => {
+    if (!shouldRestoreCatalogScrollRef.current || activeScreen !== null) return
+
+    const restoreScrollTimeout = setTimeout(() => {
+      catalogScrollViewRef.current?.scrollTo({
+        animated: false,
+        y: catalogScrollOffsetRef.current,
+      })
+      shouldRestoreCatalogScrollRef.current = false
+    }, 0)
+
+    return () => {
+      clearTimeout(restoreScrollTimeout)
+    }
+  }, [activeScreen])
+
+  const handleCatalogScroll = (
+    event: NativeSyntheticEvent<NativeScrollEvent>
+  ): void => {
+    catalogScrollOffsetRef.current = event.nativeEvent.contentOffset.y
+  }
+
   if (activeScreen !== null) {
     const Screen = activeScreen.component
     return (
@@ -61,6 +90,7 @@ function ScreenNav(): React.JSX.Element {
         >
           <Stack
             onPress={() => {
+              shouldRestoreCatalogScrollRef.current = true
               setActiveScreen(null)
             }}
             paddingVertical="$2"
@@ -133,7 +163,12 @@ function ScreenNav(): React.JSX.Element {
         />
       </YStack>
 
-      <ScrollView style={{flex: 1}}>
+      <ScrollView
+        ref={catalogScrollViewRef}
+        style={{flex: 1}}
+        onScroll={handleCatalogScroll}
+        scrollEventThrottle={16}
+      >
         <YStack padding="$5" gap="$3">
           {filteredScreens.map((entry) => (
             <Stack

@@ -1,11 +1,10 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {ChevronDown, Typography} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {Text, XStack, getTokens} from 'tamagui'
-import chevronDownSvg from '../images/chevronDownSvg'
+import {XStack, useTheme} from 'tamagui'
 import {currencies} from '../utils/localization/currency'
-import Image from './Image'
 
 interface Props extends TouchableOpacityProps {
   currencyAtom: Atom<CurrencyCode | undefined>
@@ -16,17 +15,15 @@ function CurrencySelectButton({
   ...props
 }: Props): React.ReactElement {
   const currency = useAtomValue(currencyAtom)
+  const theme = useTheme()
 
   return (
-    <TouchableOpacity style={{width: 65}} {...props}>
-      <XStack gap="$2">
-        <Text fontSize={18} color="$white" fontFamily="$body500">
+    <TouchableOpacity activeOpacity={0.7} style={{width: 72}} {...props}>
+      <XStack ai="center" gap="$2">
+        <Typography variant="paragraphSmall" color="$foregroundPrimary">
           {currency ?? currencies.USD.code}
-        </Text>
-        <Image
-          source={chevronDownSvg}
-          stroke={getTokens().color.greyOnBlack.val}
-        />
+        </Typography>
+        <ChevronDown color={theme.foregroundPrimary.val} size={20} />
       </XStack>
     </TouchableOpacity>
   )

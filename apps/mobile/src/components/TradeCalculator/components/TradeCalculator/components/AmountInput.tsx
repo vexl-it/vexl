@@ -7,25 +7,17 @@ import {
 } from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
-import {Input, Stack, XStack, getTokens, styled, type InputProps} from 'tamagui'
+import {Input, Stack, XStack, styled, useTheme, type InputProps} from 'tamagui'
 import VexlActivityIndicator from '../../../../LoadingOverlayProvider/VexlActivityIndicator'
 import PremiumIncluded from './PremiumIncluded'
 
 const InputStyled = styled(Input, {
   f: 1,
+  backgroundColor: 'transparent',
   borderWidth: 0,
   height: '100%',
   ff: '$body500',
   fos: 18,
-  variants: {
-    textColor: {
-      '...color': (color) => {
-        return {
-          color,
-        }
-      },
-    },
-  } as const,
 })
 
 interface Props extends InputProps {
@@ -48,50 +40,51 @@ function AmountInput(
   ref: Ref<Input>
 ): React.ReactElement {
   const fontScale = getFontScaleSync()
+  const theme = useTheme()
   const inputRef: Ref<Input> = useRef(null)
   useImperativeHandle<Input | null, Input | null>(ref, () => inputRef.current)
+  const hasValue =
+    props.value !== undefined &&
+    props.value !== null &&
+    String(props.value).trim().length > 0
 
   return (
     <TouchableWithoutFeedback onPress={onWrapperPress}>
       <Stack>
         <XStack
-          h={65 * fontScale}
+          minHeight={64 * fontScale}
           ai="center"
           jc="space-between"
-          bc="$grey"
-          boc={isFocused ? '$yellowAccent2' : 'transparent'}
-          bw={2}
-          px="$4"
-          py="$3"
-          br="$4"
+          backgroundColor="$backgroundSecondary"
+          borderColor={isFocused ? '$accentHighlightSecondary' : 'transparent'}
+          borderWidth={1}
+          px="$5"
+          py="$4"
+          br="$5"
+          gap="$3"
         >
           {children}
-          <Stack flex={1} my="$-3">
+          <Stack flex={1} my="$-2">
             {loading ? (
-              <Stack als="flex-end">
+              <Stack als="flex-end" py="$2">
                 <VexlActivityIndicator
                   size="small"
-                  bc={getTokens().color.greyAccent2.val}
+                  bc={theme.foregroundTertiary.val}
                 />
               </Stack>
             ) : (
               <InputStyled
                 ref={inputRef}
-                placeholderTextColor={getTokens().color.greyAccent1.val}
+                color={
+                  isFocused || hasValue
+                    ? theme.foregroundPrimary.val
+                    : theme.foregroundTertiary.val
+                }
+                placeholderTextColor={theme.foregroundTertiary.val}
                 keyboardType="decimal-pad"
-                rows={1}
-                bc="$grey"
                 textAlign="right"
                 selectTextOnFocus
-                textColor={isFocused ? '$main' : '$white'}
-                selectionColor={
-                  isFocused
-                    ? getTokens().color.yellowAccent1.val
-                    : getTokens().color.white.val
-                }
-                focusStyle={{
-                  textColor: '$main',
-                }}
+                selectionColor={theme.accentHighlightSecondary.val}
                 {...props}
               />
             )}

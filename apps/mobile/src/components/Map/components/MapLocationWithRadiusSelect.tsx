@@ -4,6 +4,7 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
+import {useVexlTheme} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
@@ -12,7 +13,7 @@ import React, {useMemo, useRef} from 'react'
 import {Dimensions} from 'react-native'
 import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, getTokens} from 'tamagui'
+import {Stack, Text, getTokens, useTheme} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
@@ -23,9 +24,9 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import Image from '../../Image'
 import Slider from '../../Slider'
 import {type MapValue, type MapValueWithRadius} from '../brands'
-import pinSvg from '../img/pinSvg'
+import {createPinSvg} from '../img/pinSvg'
 import radiusRingSvg from '../img/radiusRingSvg'
-import mapTheme from '../utils/mapStyle'
+import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
 
 type Props = React.ComponentProps<typeof Stack> & {
@@ -186,10 +187,16 @@ export default function MapLocationWithRadiusSelect({
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
+  const {resolvedTheme} = useVexlTheme()
+  const theme = useTheme()
   const mapRef = useRef<MapView>(null)
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
+  )
+  const pinSvg = useMemo(
+    () => createPinSvg(theme.accentHighlightSecondary.val),
+    [theme.accentHighlightSecondary.val]
   )
 
   const initialZoom = useMemo(
@@ -215,7 +222,7 @@ export default function MapLocationWithRadiusSelect({
         ref={mapRef}
         mapPadding={mapPaddings}
         provider={PROVIDER_GOOGLE}
-        customMapStyle={mapTheme}
+        customMapStyle={getMapTheme(resolvedTheme)}
         style={mapStyle}
         toolbarEnabled={false}
         onRegionChangeComplete={(region) => {

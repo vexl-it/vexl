@@ -19,7 +19,6 @@ import {
   type NetworkData,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {type InvoiceId} from '@vexl-next/rest-api/src/services/content/contracts'
-import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {
   type InitPhoneVerificationResponse,
   type VerifyPhoneNumberResponse,
@@ -256,10 +255,11 @@ export type TradeChecklistStackParamsList = {
   LocationMapPreview: {
     readonly selectedLocation: MeetingLocationData
   }
-  LocationMapSelect: {
-    readonly selectedLocation: LocationSuggestion
-    readonly searchQuery: string
-  }
+  LocationMapSelect:
+    | {
+        readonly selectedLocation?: MeetingLocationData
+      }
+    | undefined
   LocationSearch: undefined
 }
 

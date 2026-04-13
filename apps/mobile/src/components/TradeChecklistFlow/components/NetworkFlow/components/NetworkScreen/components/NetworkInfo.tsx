@@ -1,8 +1,8 @@
+import {InfoCircle, Typography, lightTheme} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack} from 'tamagui'
+import {Stack, XStack} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import Info from '../../../../../../Info'
 import {btcNetworkAtom} from '../../../atoms'
 
 function NetworkInfo(): React.ReactElement {
@@ -10,17 +10,24 @@ function NetworkInfo(): React.ReactElement {
   const btcNetwork = useAtomValue(btcNetworkAtom)
 
   return (
-    <Stack mb="$4">
-      <Info
-        hideCloseButton
-        variant="yellow"
-        text={
-          btcNetwork === 'LIGHTING'
-            ? t('tradeChecklist.network.youWillGenerateQrCode')
-            : t('tradeChecklist.network.itsOkIfYouDontHaveBtcAddressNow')
-        }
-      />
-    </Stack>
+    <XStack
+      alignItems="flex-start"
+      gap="$3"
+      backgroundColor="$backgroundSecondary"
+      borderRadius="$5"
+      mx="$5"
+      mb="$1"
+      p="$5"
+    >
+      <Stack pt="$0.5">
+        <InfoCircle size={18} color={lightTheme.foregroundSecondary} />
+      </Stack>
+      <Typography variant="description" color="$foregroundSecondary" flex={1}>
+        {btcNetwork === 'LIGHTING'
+          ? t('tradeChecklist.network.youWillGenerateQrCode')
+          : t('tradeChecklist.network.itsOkIfYouDontHaveBtcAddressNow')}
+      </Typography>
+    </XStack>
   )
 }
 

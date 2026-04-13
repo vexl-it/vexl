@@ -1,66 +1,39 @@
-import Clipboard from '@react-native-clipboard/clipboard'
-import {useNavigation, type NavigationProp} from '@react-navigation/native'
-import {Typography} from '@vexl-next/ui'
+import {InputHint, TextField, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {Stack, XStack, getTokens} from 'tamagui'
-import {type TradeChecklistStackParamsList} from '../../../../../../../navigationTypes'
+import {YStack} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import Image from '../../../../../../Image'
-import copySvg from '../../../../../../images/copySvg'
 import AnonymizationNotice from '../../../../AnonymizationNotice'
-import {btcAddressAtom, btcNetworkAtom} from '../../../atoms'
-import btcSvg from '../images/btcSvg'
-import SectionTitle from './SectionTitle'
+import {
+  btcAddressInputAtom,
+  btcNetworkAtom,
+  displayParsingErrorAtom,
+} from '../../../atoms'
 
 function BtcAddress(): React.ReactElement | null {
   const {t} = useTranslation()
-  const navigation: NavigationProp<TradeChecklistStackParamsList> =
-    useNavigation()
   const btcNetwork = useAtomValue(btcNetworkAtom)
-  const btcAddress = useAtomValue(btcAddressAtom)
+  const displayParsingError = useAtomValue(displayParsingErrorAtom)
 
   if (btcNetwork === 'LIGHTING') return null
 
   return (
-    <Stack>
-      <SectionTitle
-        text={t('tradeChecklist.btcAddress.btcAddress')}
-        icon={btcSvg}
+    <YStack gap="$3">
+      <Typography variant="paragraphSmall" color="$foregroundPrimary">
+        {t('tradeChecklist.btcAddress.btcAddress')}
+      </Typography>
+      <TextField
+        valueAtom={btcAddressInputAtom}
+        placeholder={t('tradeChecklist.network.pasteBtcAddress')}
+        showClear
       />
-      <TouchableOpacity
-        onPress={() => {
-          navigation.navigate('BtcAddress')
-        }}
-      >
-        <XStack ai="center" jc="space-between" p="$4" bc="$grey" br="$5">
-          <Typography
-            variant="paragraph"
-            fs={1}
-            mr="$2"
-            color={btcAddress ? '$foregroundPrimary' : '$foregroundTertiary'}
-          >
-            {btcAddress ?? t('tradeChecklist.network.pasteBtcAddress')}
-          </Typography>
-          {!!btcAddress && (
-            <TouchableOpacity
-              onPress={() => {
-                Clipboard.setString(btcAddress)
-              }}
-            >
-              <Image
-                height={24}
-                width={24}
-                source={copySvg}
-                fill={getTokens().color.white.val}
-              />
-            </TouchableOpacity>
-          )}
-        </XStack>
-      </TouchableOpacity>
-      <AnonymizationNotice als="flex-start" mt="$2" />
-    </Stack>
+      {!!displayParsingError && (
+        <InputHint variant="error">
+          {t('tradeChecklist.network.invalidBtcAddress')}
+        </InputHint>
+      )}
+      <AnonymizationNotice als="flex-start" mt="$1" mb="$0" />
+    </YStack>
   )
 }
 

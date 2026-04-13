@@ -10,4 +10,15 @@ Gotchas:
 - Reuse existing native modules (`packages/ecdh-platform-native-utils`, `fix-brorand-for-expo`) instead of adding new native code paths.
 - When using Expo-related packages and functions, use expo/expo documentation from context7.
 
-IMPORTANT: When creating or modifying UI, always use components from @vexl-next/ui package. Don't use svg icons from this package but use icons from @vexl-next/io package! When specifying colors, use collor tokens from @vexl-next/ui/src/config/themes.ts!
+IMPORTANT: When creating or modifying UI, always use components from `@vexl-next/ui` where possible. Do not use SVG icons from this package; use icons from `@vexl-next/io`. When specifying colors, use color tokens from `@vexl-next/ui/src/config/themes.ts`.
+
+Redesign guidance:
+
+- The codebase currently contains both pre-redesign UI and redesigned UI. For any UI/UX work inside `apps/mobile`, prefer the redesigned conventions and `packages/ui` building blocks instead of copying legacy patterns from older mobile screens.
+- Reuse components from `@vexl-next/ui` wherever possible before creating ad-hoc mobile-only UI. Prefer `@vexl-next/ui/src/components/Typography.tsx` for text styling instead of reintroducing old text conventions.
+- Keep visual styling aligned with the new UI package.
+- Use colors from `@vexl-next/ui/src/config/themes.ts`.
+- Use spacing, padding, gaps, border radiuses, and similar sizing values from `@vexl-next/ui/src/config/tokens.ts`.
+- On Tamagui components, prefer Tamagui shorthand props that resolve to the shared tokens.
+- On non-Tamagui components, read from the shared theme/tokens objects instead of hardcoding values.
+- Continue using icons from `@vexl-next/io` rather than SVG icons from `@vexl-next/ui`.

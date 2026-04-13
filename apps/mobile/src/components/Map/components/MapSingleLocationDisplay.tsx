@@ -1,3 +1,4 @@
+import {useVexlTheme} from '@vexl-next/ui'
 import React, {useMemo} from 'react'
 import MapView, {
   Marker,
@@ -7,7 +8,7 @@ import MapView, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack} from 'tamagui'
 import {type MapValue} from '../brands'
-import mapTheme from '../utils/mapStyle'
+import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
 
 const markerImage = require('../img/pin.png')
@@ -32,6 +33,7 @@ export default function MapSingleLocationDisplay({
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
+  const {resolvedTheme} = useVexlTheme()
 
   return (
     <Stack position="relative" {...restProps} backgroundColor="$black">
@@ -41,7 +43,7 @@ export default function MapSingleLocationDisplay({
         toolbarEnabled={false}
         provider={PROVIDER_GOOGLE}
         region={useMemo(() => mapValueToRegion(value), [value])}
-        customMapStyle={mapTheme}
+        customMapStyle={getMapTheme(resolvedTheme)}
       >
         <Marker image={markerImage} coordinate={value} />
       </MapView>

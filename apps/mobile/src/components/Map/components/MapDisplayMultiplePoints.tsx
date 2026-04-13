@@ -5,6 +5,7 @@ import {
   type Longitude,
   type Radius,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
+import {useVexlTheme} from '@vexl-next/ui'
 import {
   atom,
   useAtomValue,
@@ -25,7 +26,7 @@ import {
 } from 'react-native-maps'
 import {Stack, getTokens, useDebounce} from 'tamagui'
 import europeRegion from '../utils/europeRegion'
-import mapTheme from '../utils/mapStyle'
+import {getMapTheme} from '../utils/mapStyle'
 
 const markerImage = require('../img/pin.png')
 
@@ -101,6 +102,7 @@ function MMapView({
   onMapReady?: () => void
   onRegionChangeComplete?: (region: Region, d: Details) => void
 }): React.ReactElement {
+  const {resolvedTheme} = useVexlTheme()
   const ref = useRef<MapView>(null)
   // TODO: remove after update of react-native-map-clustering
   const dummySuperClusterRefFnc = useRef(null)
@@ -140,12 +142,12 @@ function MMapView({
           ? getTokens().color.greyAccent1.val
           : getTokens().color.main.val
       }
-      customMapStyle={mapTheme}
+      customMapStyle={getMapTheme(resolvedTheme)}
       onMapLoaded={onMapLoaded}
       layoutAnimationConf={{duration: 150}}
       minZoom={0}
       maxZoom={20}
-      loadingBackgroundColor="#000000"
+      loadingBackgroundColor={resolvedTheme === 'dark' ? '#000000' : '#FFFFFF'}
       loadingIndicatorColor={
         inFocusMode
           ? getTokens().color.greyAccent1.val

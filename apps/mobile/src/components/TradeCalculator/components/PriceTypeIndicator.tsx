@@ -1,6 +1,7 @@
+import {Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {getTokens, Text, XStack, type XStackProps} from 'tamagui'
+import {useTheme, XStack, type XStackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
 import Image from '../../Image'
@@ -10,57 +11,54 @@ import snowflakeSvg from '../images/snowflakeSvg'
 
 interface Props extends XStackProps {
   displayInGrayColor?: boolean
+  neutralTextColor?: boolean
 }
 
 function PriceTypeIndicator({
   displayInGrayColor,
+  neutralTextColor,
   ...props
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
+  const iconColor = displayInGrayColor
+    ? theme.foregroundSecondary.val
+    : !tradePriceType || tradePriceType === 'live'
+      ? neutralTextColor
+        ? theme.accentHighlightSecondary.val
+        : theme.accentYellowPrimary.val
+      : tradePriceType === 'frozen'
+        ? theme.pinkForeground.val
+        : theme.greenForeground.val
+  const textColor = displayInGrayColor
+    ? '$foregroundSecondary'
+    : neutralTextColor
+      ? '$foregroundPrimary'
+      : !tradePriceType || tradePriceType === 'live'
+        ? '$accentHighlightSecondary'
+        : tradePriceType === 'frozen'
+          ? '$pinkForeground'
+          : '$greenForeground'
 
   return (
     <XStack ai="center" gap="$2" {...props}>
       {!tradePriceType || tradePriceType === 'live' ? (
         <AnimatedLiveIndicator
-          color={displayInGrayColor ? '$greyOnBlack' : '$main'}
+          color={
+            displayInGrayColor
+              ? '$foregroundSecondary'
+              : neutralTextColor
+                ? '$accentHighlightSecondary'
+                : '$accentYellowPrimary'
+          }
         />
       ) : tradePriceType === 'frozen' ? (
-        <Image
-          height={16}
-          width={16}
-          source={snowflakeSvg}
-          fill={
-            displayInGrayColor
-              ? getTokens().color.greyOnBlack.val
-              : getTokens().color.pink.val
-          }
-        />
+        <Image height={16} width={16} source={snowflakeSvg} fill={iconColor} />
       ) : (
-        <Image
-          height={16}
-          width={16}
-          source={userSvg}
-          stroke={
-            displayInGrayColor
-              ? getTokens().color.greyOnBlack.val
-              : getTokens().color.green.val
-          }
-        />
+        <Image height={16} width={16} source={userSvg} stroke={iconColor} />
       )}
-      <Text
-        fos={16}
-        ff="$body500"
-        col={
-          displayInGrayColor
-            ? '$greyOnBlack'
-            : !tradePriceType || tradePriceType === 'live'
-              ? '$main'
-              : tradePriceType === 'frozen'
-                ? '$pink'
-                : '$green'
-        }
-      >
+      <Typography variant="paragraphSmall" color={textColor}>
         {!tradePriceType || tradePriceType === 'live'
           ? t('tradeChecklist.calculateAmount.livePrice')
           : tradePriceType === 'frozen'
@@ -68,7 +66,7 @@ function PriceTypeIndicator({
             : tradePriceType === 'custom'
               ? t('tradeChecklist.calculateAmount.customPrice')
               : t('tradeChecklist.calculateAmount.yourPrice')}
-      </Text>
+      </Typography>
     </XStack>
   )
 }

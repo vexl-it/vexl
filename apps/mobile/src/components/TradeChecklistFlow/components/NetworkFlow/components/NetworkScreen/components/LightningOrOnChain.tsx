@@ -1,32 +1,39 @@
-import {type BtcNetwork} from '@vexl-next/domain/src/general/offers'
+import {RowRadiobutton} from '@vexl-next/ui'
 import {useAtom} from 'jotai'
-import React from 'react'
-import {Stack} from 'tamagui'
+import React, {useCallback} from 'react'
+import {RadioGroup, YStack} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
-import SelectableCell from '../../../../../../SelectableCell'
 import {btcNetworkAtom} from '../../../atoms'
 
 function LightningOrOnChain(): React.ReactElement {
   const {t} = useTranslation()
   const [btcNetwork, setBtcNetwork] = useAtom(btcNetworkAtom)
+  const onValueChange = useCallback(
+    (value: string) => {
+      if (value === 'LIGHTING' || value === 'ON_CHAIN') {
+        setBtcNetwork(value)
+      }
+    },
+    [setBtcNetwork]
+  )
 
   return (
-    <Stack gap="$2">
-      <SelectableCell<BtcNetwork>
-        selected={btcNetwork === 'LIGHTING'}
-        onPress={setBtcNetwork}
-        title={t('tradeChecklist.network.lightning')}
-        subtitle={t('tradeChecklist.network.bestOptionForSmallAmounts')}
-        type="LIGHTING"
-      />
-      <SelectableCell<BtcNetwork>
-        selected={btcNetwork === 'ON_CHAIN'}
-        onPress={setBtcNetwork}
-        title={t('tradeChecklist.network.onChain')}
-        subtitle={t('tradeChecklist.network.bestOptionForHugeAmounts')}
-        type="ON_CHAIN"
-      />
-    </Stack>
+    <YStack gap="$4">
+      <RadioGroup value={btcNetwork} onValueChange={onValueChange} gap="$2">
+        <RowRadiobutton
+          value="LIGHTING"
+          selected={btcNetwork === 'LIGHTING'}
+          label={t('tradeChecklist.network.lightning')}
+          description={t('tradeChecklist.network.bestOptionForSmallAmounts')}
+        />
+        <RowRadiobutton
+          value="ON_CHAIN"
+          selected={btcNetwork === 'ON_CHAIN'}
+          label={t('tradeChecklist.network.onChain')}
+          description={t('tradeChecklist.network.bestOptionForHugeAmounts')}
+        />
+      </RadioGroup>
+    </YStack>
   )
 }
 

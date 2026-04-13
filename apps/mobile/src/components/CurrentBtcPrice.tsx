@@ -9,7 +9,7 @@ import {
 } from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Text, XStack, YStack, getTokens, type TextProps} from 'tamagui'
+import {Text, XStack, YStack, useTheme, type TextProps} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -28,6 +28,7 @@ interface Props extends TextProps {
   currencyAtom: Atom<CurrencyCode | undefined>
   disabled?: boolean
   postRefreshActions?: () => void
+  showLastUpdatedAt?: boolean
 }
 
 const emptyAtom = atom<number | undefined>(undefined)
@@ -37,9 +38,11 @@ function CurrentBtcPrice({
   currencyAtom,
   disabled,
   postRefreshActions,
+  showLastUpdatedAt = true,
   ...props
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const currency = useAtomValue(currencyAtom) ?? currencies.USD.code
   const customBtcPrice = useAtomValue(customBtcPriceAtom ?? emptyAtom)
   const refreshBtcPrice = useSetAtom(refreshBtcPriceActionAtom)
@@ -83,6 +86,7 @@ function CurrentBtcPrice({
   return (
     <TouchableOpacity
       disabled={disabled}
+      activeOpacity={disabled ? 1 : 0.7}
       onPress={() => {
         void refreshBtcPrice(currency)().then(postRefreshActions)
       }}
@@ -91,11 +95,11 @@ function CurrentBtcPrice({
         {btcPriceWithState?.state === 'loading' ? (
           <VexlActivityIndicator
             size="small"
-            bc={getTokens().color.greyOnBlack.val}
+            bc={theme.foregroundSecondary.val}
           />
         ) : (
           <YStack>
-            <Text fos={16} ff="$body500" col="$white" {...props}>
+            <Text fos={16} ff="$body500" col="$foregroundPrimary" {...props}>
               {`1 BTC = ${
                 customBtcPrice
                   ? customBtcPrice.toLocaleString(currentLocale)
@@ -106,11 +110,11 @@ function CurrentBtcPrice({
                       )
               } ${currency}`}
             </Text>
-            {!!lastUpdatedAtFormattedValue && (
-              <Text fos={12}>
+            {showLastUpdatedAt && lastUpdatedAtFormattedValue !== null ? (
+              <Text fos={12} col="$foregroundTertiary">
                 {t('common.lastUpdated')}: {lastUpdatedAtFormattedValue}
               </Text>
-            )}
+            ) : null}
           </YStack>
         )}
       </XStack>

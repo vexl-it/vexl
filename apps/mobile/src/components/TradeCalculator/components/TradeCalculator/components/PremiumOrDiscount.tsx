@@ -1,10 +1,9 @@
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {ChevronRight, Switch, Typography} from '@vexl-next/ui'
+import {atom, useAtomValue, type SetStateAction} from 'jotai'
+import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
-import chevronRightSvg from '../../../../../images/chevronRightSvg'
+import {XStack, YStack, useTheme} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Image from '../../../../Image'
-import Switch from '../../../../Switch'
 import {
   applyFeeOnFeeChangeActionAtom,
   feeAmountAtom,
@@ -19,49 +18,59 @@ function PremiumOrDiscount({
   onPremiumOrDiscountPress,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const [premiumOrDiscountEnabled, setPremiumOrDiscountEnabled] = useAtom(
-    premiumOrDiscountEnabledAtom
-  )
+  const theme = useTheme()
+  const premiumOrDiscountEnabled = useAtomValue(premiumOrDiscountEnabledAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
-  const applyFeeOnFeeChange = useSetAtom(applyFeeOnFeeChangeActionAtom)
+  const premiumOrDiscountSwitchAtom = useMemo(
+    () =>
+      atom(
+        (get) => get(premiumOrDiscountEnabledAtom),
+        (get, set, nextValue: SetStateAction<boolean>) => {
+          const currentValue = get(premiumOrDiscountEnabledAtom)
+          const next =
+            typeof nextValue === 'function'
+              ? nextValue(currentValue)
+              : nextValue
+
+          set(premiumOrDiscountEnabledAtom, next)
+          set(applyFeeOnFeeChangeActionAtom, 0)
+        }
+      ),
+    []
+  )
 
   return (
-    <Stack>
-      <XStack ai="center" jc="space-between" mb="$4">
-        <Text fos={20} ff="$body600" col="$white">{`% ${t(
-          'tradeChecklist.calculateAmount.premiumOrDiscount'
-        )}`}</Text>
-        <Switch
-          value={premiumOrDiscountEnabled}
-          onChange={() => {
-            setPremiumOrDiscountEnabled(!premiumOrDiscountEnabled)
-            applyFeeOnFeeChange(0)
-          }}
-        />
+    <YStack gap="$4">
+      <XStack ai="center" jc="space-between">
+        <Typography variant="paragraphSmall" color="$foregroundPrimary">
+          {t('tradeChecklist.calculateAmount.premiumOrDiscount')}
+        </Typography>
+        <Switch valueAtom={premiumOrDiscountSwitchAtom} />
       </XStack>
       {!!premiumOrDiscountEnabled && (
-        <TouchableOpacity onPress={onPremiumOrDiscountPress}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={onPremiumOrDiscountPress}
+        >
           <XStack
-            h={56}
+            minHeight="$11"
             ai="center"
             jc="space-between"
-            bc="$grey"
-            p="$4"
-            br="$4"
+            backgroundColor="$backgroundSecondary"
+            px="$5"
+            py="$4"
+            br="$5"
           >
-            <Text col="$greyOnBlack" fos={16} ff="$body500">
+            <Typography variant="paragraphSmall" color="$foregroundPrimary">
               {`${feeAmount > 0 ? '+' : feeAmount < 0 ? '-' : ''} ${Math.abs(
                 feeAmount
               )} %`}
-            </Text>
-            <Image
-              source={chevronRightSvg}
-              stroke={getTokens().color.greyOnBlack.val}
-            />
+            </Typography>
+            <ChevronRight color={theme.foregroundPrimary.val} size={24} />
           </XStack>
         </TouchableOpacity>
       )}
-    </Stack>
+    </YStack>
   )
 }
 

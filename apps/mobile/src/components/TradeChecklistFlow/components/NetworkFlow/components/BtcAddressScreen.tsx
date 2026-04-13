@@ -1,21 +1,18 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {Typography} from '@vexl-next/ui'
-import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {InputHint, TextField} from '@vexl-next/ui'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
-import {Stack, XStack, getTokens} from 'tamagui'
+import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
-import Image from '../../../../Image'
-import TextInput from '../../../../Input'
-import infoSvg from '../../../../images/infoSvg'
 import {TradeChecklistItemPageLayout} from '../../TradeChecklistItemPageLayout'
 import {
   btcAddressAtom,
+  btcAddressInputAtom,
+  btcAddressTempAtom,
   displayParsingErrorAtom,
   saveBtcAddressActionAtom,
 } from '../atoms'
-
-const btcAddressTempAtom = atom<string>('')
 
 function BtcAddressScreen(): React.ReactElement {
   const {t} = useTranslation()
@@ -53,33 +50,15 @@ function BtcAddressScreen(): React.ReactElement {
       }}
     >
       <Stack mt="$6">
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          style={{backgroundColor: getTokens().color.grey.val}}
-          textAlign="left"
-          value={btcAddressTemp}
-          onChangeText={(text) => {
-            if (displayParsingError) {
-              setDisplayParsingError(false)
-            }
-            setBtcAddressTemp(text)
-          }}
-          selectionColor={getTokens().color.main.val}
-          textColor="$main"
+        <TextField
+          valueAtom={btcAddressInputAtom}
           placeholder={t('tradeChecklist.btcAddress.btcAddress')}
-          showClearButton={!!btcAddressTemp}
-          onClearPress={() => {
-            setBtcAddressTemp('')
-          }}
+          showClear
         />
         {!!displayParsingError && (
-          <XStack ai="center" gap="$2" mt="$2" ml="$2">
-            <Image source={infoSvg} fill={getTokens().color.red.val} />
-            <Typography variant="description" color="$redForeground">
-              {t('tradeChecklist.network.invalidBtcAddress')}
-            </Typography>
-          </XStack>
+          <InputHint variant="error">
+            {t('tradeChecklist.network.invalidBtcAddress')}
+          </InputHint>
         )}
       </Stack>
     </TradeChecklistItemPageLayout>

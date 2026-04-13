@@ -1,24 +1,25 @@
 import {Effect} from 'effect/index'
-import {useSetAtom, useStore} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
-import {Stack} from 'tamagui'
+import {YStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
-import networkSvg from '../../../../../images/networkSvg'
 import {submitTradeChecklistUpdatesActionAtom} from '../../../../atoms/updatesToBeSentAtom'
 import {useWasOpenFromAgreeOnTradeDetailsScreen} from '../../../../utils'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
   btcAddressAtom,
+  btcAddressTempAtom,
   btcNetworkAtom,
+  displayParsingErrorAtom,
+  saveBtcAddressActionAtom,
   saveLocalNetworkStateToMainStateActionAtom,
 } from '../../atoms'
 import BtcAddress from './components/BtcAddress'
 import LightningOrOnChain from './components/LightningOrOnChain'
 import NetworkInfo from './components/NetworkInfo'
-import SectionTitle from './components/SectionTitle'
 
 type Props = TradeChecklistStackScreenProps<'Network'>
 
@@ -30,19 +31,30 @@ function NetworkScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
+  const btcAddressTemp = useAtomValue(btcAddressTempAtom)
+  const btcNetwork = useAtomValue(btcNetworkAtom)
   const saveLocalNetworkStateToMainState = useSetAtom(
     saveLocalNetworkStateToMainStateActionAtom
   )
+  const saveBtcAddress = useSetAtom(saveBtcAddressActionAtom)
   const submitTradeChecklistUpdates = useSetAtom(
     submitTradeChecklistUpdatesActionAtom
   )
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const setBtcNetwork = useSetAtom(btcNetworkAtom)
   const setBtcAddress = useSetAtom(btcAddressAtom)
+  const setBtcAddressTemp = useSetAtom(btcAddressTempAtom)
+  const setDisplayParsingError = useSetAtom(displayParsingErrorAtom)
   const shouldNavigateBackToChatOnSave =
     !useWasOpenFromAgreeOnTradeDetailsScreen()
 
   const onFooterButtonPress = useCallback(() => {
+    const isBtcAddressSaved = saveBtcAddress(
+      btcNetwork === 'ON_CHAIN' ? btcAddressTemp : ''
+    )
+
+    if (!isBtcAddressSaved) return
+
     saveLocalNetworkStateToMainState()
     if (shouldNavigateBackToChatOnSave) {
       showLoadingOverlay(true)
@@ -58,6 +70,9 @@ function NetworkScreen({
       navigation.popTo('AgreeOnTradeDetails')
     }
   }, [
+    btcAddressTemp,
+    btcNetwork,
+    saveBtcAddress,
     saveLocalNetworkStateToMainState,
     shouldNavigateBackToChatOnSave,
     showLoadingOverlay,
@@ -69,11 +84,15 @@ function NetworkScreen({
   useEffect(() => {
     setBtcNetwork(networkData?.btcNetwork ?? 'LIGHTING')
     setBtcAddress(networkData?.btcAddress)
+    setBtcAddressTemp(networkData?.btcAddress ?? '')
+    setDisplayParsingError(false)
   }, [
     networkData?.btcAddress,
     networkData?.btcNetwork,
     setBtcAddress,
+    setBtcAddressTemp,
     setBtcNetwork,
+    setDisplayParsingError,
   ])
 
   return (
@@ -85,19 +104,15 @@ function NetworkScreen({
       bottomButton={{
         disabled: false,
         onPress: onFooterButtonPress,
-        text: t('common.confirm'),
-        variant: 'secondary',
+        text: t('common.save'),
+        variant: 'primary',
       }}
+      scrollable={false}
     >
-      <SectionTitle
-        text={t('tradeChecklist.network.network')}
-        icon={networkSvg}
-        mt="$4"
-      />
-      <Stack gap="$6">
+      <YStack flex={1} gap="$6" pt="$4">
         <LightningOrOnChain />
         <BtcAddress />
-      </Stack>
+      </YStack>
     </TradeChecklistItemPageLayout>
   )
 }

@@ -69,7 +69,9 @@ export default function LocationMapPreview({
             text={t('map.location.suggestDifferent')}
             variant="primary"
             onPress={() => {
-              navigation.navigate('LocationSearch')
+              navigation.navigate('LocationMapSelect', {
+                selectedLocation,
+              })
             }}
           />
           <Button

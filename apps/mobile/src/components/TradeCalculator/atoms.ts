@@ -38,6 +38,7 @@ export const selectedCurrencyCodeForOwnPriceAtom = atom<
   CurrencyCode | undefined
 >(undefined)
 export const premiumOrDiscountEnabledAtom = atom<boolean>(false)
+export const amountInputsSwappedAtom = atom<boolean>(false)
 export const btcInputValueAtom = atom<string>('')
 export const fiatInputValueAtom = atom<string>('')
 
@@ -357,17 +358,16 @@ export const refreshCurrentBtcPriceActionAtom = atom(null, (get, set) => {
 })
 
 export const switchBtcOrSatValueActionAtom = atom(null, (get, set) => {
+  const currentUnit = get(btcOrSatAtom)
   const btcNumberValue = get(btcValueNumberAtom)
 
   set(btcOrSatAtom, (prev) => (prev === 'BTC' ? 'SAT' : 'BTC'))
   if (btcNumberValue) {
     set(
       btcInputValueAtom,
-      addThousandsSeparatorSpacesToNumberInput(
-        get(btcOrSatAtom) === 'BTC'
-          ? `${btcNumberValue / SATOSHIS_IN_BTC}`
-          : `${Math.round(btcNumberValue * SATOSHIS_IN_BTC)}`
-      )
+      currentUnit === 'BTC'
+        ? `${Math.round(btcNumberValue * SATOSHIS_IN_BTC)}`
+        : formatBtcPrice(btcNumberValue / SATOSHIS_IN_BTC)
     )
   }
 })

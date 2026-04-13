@@ -1,6 +1,7 @@
+import {Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
+import {Stack} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {feeAmountAtom} from '../../../atoms'
 
@@ -10,13 +11,13 @@ function PremiumIncluded(): React.ReactElement | null {
 
   return feeAmount !== 0 ? (
     <Stack ai="flex-end" marginTop="$2">
-      <Text fos={12} ff="$body500" col="$greyOnBlack">
+      <Typography variant="micro" color="$foregroundSecondary">
         {`* ${t('tradeChecklist.calculateAmount.premiumIncluded', {
           value: `${feeAmount > 0 ? '+' : feeAmount < 0 ? '-' : ''} ${Math.abs(
             feeAmount
           )} %`,
         })}`}
-      </Text>
+      </Typography>
     </Stack>
   ) : null
 }

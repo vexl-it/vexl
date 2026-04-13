@@ -1,6 +1,6 @@
+import {Typography} from '@vexl-next/ui'
 import React, {useRef} from 'react'
 import {type TextInput} from 'react-native'
-import {Text} from 'tamagui'
 import AmountInput from '../../TradeCalculator/components/AmountInput'
 
 function BtcOwnPriceInput(): React.ReactElement {
@@ -8,9 +8,9 @@ function BtcOwnPriceInput(): React.ReactElement {
 
   return (
     <AmountInput ref={ref} editable={false} value="1">
-      <Text col="$white" ff="$body500" fos={18}>
+      <Typography variant="paragraphSmall" color="$foregroundPrimary">
         BTC
-      </Text>
+      </Typography>
     </AmountInput>
   )
 }

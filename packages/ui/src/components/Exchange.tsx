@@ -16,6 +16,8 @@ export interface ExchangeProps {
   readonly onBtcValueChange?: (value: string) => void
   /** Called when user toggles between BTC and SATS */
   readonly onBtcUnitChange: (unit: BtcUnit) => void
+  /** Optional external handler for BTC/SATS toggle when conversion is controlled by the consumer */
+  readonly onToggleBtcUnit?: () => void
   /** Whether the BTC/SATS input is editable (default true) */
   readonly btcEditable?: boolean
 
@@ -27,6 +29,12 @@ export interface ExchangeProps {
   readonly onFiatValueChange: (value: string) => void
   /** Called when user taps the fiat currency label (to open currency picker) */
   readonly onFiatCurrencyPress: () => void
+  /** Whether the fiat field should be auto-focused */
+  readonly fiatAutoFocus?: boolean
+  /** Whether fiat should render above BTC/SATS */
+  readonly swapped?: boolean
+  /** Called when user taps the center swap control */
+  readonly onSwapPress?: () => void
 
   /** BCP 47 locale for Intl number formatting (default "en-US") */
   readonly locale?: string
@@ -92,11 +100,15 @@ export function Exchange({
   btcUnit,
   onBtcValueChange,
   onBtcUnitChange,
+  onToggleBtcUnit,
   btcEditable = true,
   fiatValue,
   fiatCurrency,
   onFiatValueChange,
   onFiatCurrencyPress,
+  fiatAutoFocus = false,
+  swapped = false,
+  onSwapPress,
   locale = 'en-US',
 }: ExchangeProps): React.JSX.Element {
   const theme = useTheme()
@@ -106,6 +118,11 @@ export function Exchange({
   const arrowsIconColor = getTokens().color.black100.val
 
   const toggleBtcUnit = useCallback(() => {
+    if (onToggleBtcUnit) {
+      onToggleBtcUnit()
+      return
+    }
+
     const newUnit = btcUnit === 'BTC' ? 'SATS' : 'BTC'
 
     if (btcValue !== '' && onBtcValueChange) {
@@ -120,7 +137,7 @@ export function Exchange({
     }
 
     onBtcUnitChange(newUnit)
-  }, [btcUnit, btcValue, onBtcValueChange, onBtcUnitChange])
+  }, [btcUnit, btcValue, onBtcValueChange, onBtcUnitChange, onToggleBtcUnit])
 
   const btcDisplayValue = useMemo(
     () => (btcFocused ? btcValue : formatNumber(btcValue, locale)),
@@ -148,86 +165,90 @@ export function Exchange({
     setFiatFocused(false)
   }, [])
 
+  const btcField = (
+    <FieldFrame highlighted={(btcFocused && btcEditable) || undefined}>
+      {btcEditable ? (
+        <CurrencyButton onPress={toggleBtcUnit}>
+          <SizableText
+            fontFamily="$body"
+            fontSize="$4"
+            fontWeight="500"
+            color="$foregroundPrimary"
+          >
+            {btcUnit}
+          </SizableText>
+          <ChevronDown size={24} color={theme.foregroundPrimary.val} />
+        </CurrencyButton>
+      ) : (
+        <SizableText
+          fontFamily="$body"
+          fontSize="$4"
+          fontWeight="500"
+          color="$foregroundTertiary"
+        >
+          BTC
+        </SizableText>
+      )}
+      {btcEditable ? (
+        <FieldInput
+          value={btcDisplayValue}
+          onChangeText={onBtcValueChange}
+          placeholder="0.00"
+          placeholderTextColor={theme.foregroundTertiary.val}
+          selectionColor={theme.accentYellowPrimary.val}
+          keyboardType={btcUnit === 'SATS' ? 'number-pad' : 'decimal-pad'}
+          onFocus={handleBtcFocus}
+          onBlur={handleBtcBlur}
+        />
+      ) : (
+        <SizableText
+          flex={1}
+          fontFamily="$body"
+          fontSize="$4"
+          fontWeight="500"
+          color="$foregroundTertiary"
+          textAlign="right"
+        >
+          1
+        </SizableText>
+      )}
+    </FieldFrame>
+  )
+
+  const fiatField = (
+    <FieldFrame highlighted={fiatFocused || undefined}>
+      <CurrencyButton onPress={onFiatCurrencyPress}>
+        <SizableText
+          fontFamily="$body"
+          fontSize="$4"
+          fontWeight="500"
+          color="$foregroundPrimary"
+        >
+          {fiatCurrency}
+        </SizableText>
+        <ChevronDown size={24} color={theme.foregroundPrimary.val} />
+      </CurrencyButton>
+      <FieldInput
+        autoFocus={fiatAutoFocus}
+        value={fiatDisplayValue}
+        onChangeText={onFiatValueChange}
+        placeholder="0.00"
+        placeholderTextColor={theme.foregroundTertiary.val}
+        selectionColor={theme.accentYellowPrimary.val}
+        keyboardType="decimal-pad"
+        onFocus={handleFiatFocus}
+        onBlur={handleFiatBlur}
+      />
+    </FieldFrame>
+  )
+
   return (
     <Stack position="relative" alignSelf="stretch">
       <YStack gap="$3" alignSelf="stretch">
-        {/* BTC / SATS field */}
-        <FieldFrame highlighted={(btcFocused && btcEditable) || undefined}>
-          {btcEditable ? (
-            <CurrencyButton onPress={toggleBtcUnit}>
-              <SizableText
-                fontFamily="$body"
-                fontSize="$4"
-                fontWeight="500"
-                color="$foregroundPrimary"
-              >
-                {btcUnit}
-              </SizableText>
-              <ChevronDown size={24} color={theme.foregroundPrimary.val} />
-            </CurrencyButton>
-          ) : (
-            <SizableText
-              fontFamily="$body"
-              fontSize="$4"
-              fontWeight="500"
-              color="$foregroundTertiary"
-            >
-              BTC
-            </SizableText>
-          )}
-          {btcEditable ? (
-            <FieldInput
-              value={btcDisplayValue}
-              onChangeText={onBtcValueChange}
-              placeholder="0.00"
-              placeholderTextColor={theme.foregroundTertiary.val}
-              selectionColor={theme.accentYellowPrimary.val}
-              keyboardType={btcUnit === 'SATS' ? 'number-pad' : 'decimal-pad'}
-              onFocus={handleBtcFocus}
-              onBlur={handleBtcBlur}
-            />
-          ) : (
-            <SizableText
-              flex={1}
-              fontFamily="$body"
-              fontSize="$4"
-              fontWeight="500"
-              color="$foregroundTertiary"
-              textAlign="right"
-            >
-              1
-            </SizableText>
-          )}
-        </FieldFrame>
-
-        {/* Fiat field */}
-        <FieldFrame highlighted={fiatFocused || undefined}>
-          <CurrencyButton onPress={onFiatCurrencyPress}>
-            <SizableText
-              fontFamily="$body"
-              fontSize="$4"
-              fontWeight="500"
-              color="$foregroundPrimary"
-            >
-              {fiatCurrency}
-            </SizableText>
-            <ChevronDown size={24} color={theme.foregroundPrimary.val} />
-          </CurrencyButton>
-          <FieldInput
-            autoFocus
-            value={fiatDisplayValue}
-            onChangeText={onFiatValueChange}
-            placeholder="0.00"
-            placeholderTextColor={theme.foregroundTertiary.val}
-            selectionColor={theme.accentYellowPrimary.val}
-            keyboardType="decimal-pad"
-            onFocus={handleFiatFocus}
-            onBlur={handleFiatBlur}
-          />
-        </FieldFrame>
+        {swapped ? fiatField : btcField}
+        {swapped ? btcField : fiatField}
       </YStack>
 
-      {/* Center arrows badge — decorative, non-interactive */}
       <Stack
         position="absolute"
         top={0}
@@ -236,7 +257,7 @@ export function Exchange({
         bottom={0}
         alignItems="center"
         justifyContent="center"
-        pointerEvents="none"
+        pointerEvents={onSwapPress ? 'auto' : 'none'}
       >
         <Stack
           width="$10"
@@ -245,6 +266,8 @@ export function Exchange({
           backgroundColor="$accentYellowPrimary"
           alignItems="center"
           justifyContent="center"
+          role={onSwapPress ? 'button' : undefined}
+          onPress={onSwapPress}
         >
           <ArrowsVerticalSort size={24} color={arrowsIconColor} />
         </Stack>

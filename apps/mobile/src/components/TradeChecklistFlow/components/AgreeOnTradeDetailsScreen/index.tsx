@@ -59,7 +59,7 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
         >
           <OnlineOrInPersonTrade />
         </ScrollView>
-        <Stack pt="$4" pb="$2">
+        <Stack pt="$4">
           <Button
             disabled={!areThereUpdatesToBeSent}
             size="large"

@@ -52,7 +52,6 @@ import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
-import {invalidUsernameUIFeedbackAtom} from '../../../state/session/userDataAtoms'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
@@ -75,7 +74,6 @@ import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {showErrorAlert} from '../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
 import {type MessagesListItem} from '../components/MessageItem'
 import buildMessagesListData from '../utils/buildMessagesListData'
@@ -563,53 +561,24 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
   const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
 
-  const revealIdentityUsernameAtom = atom<string>('')
-  const usernameSavedForFutureUseAtom = atom<boolean>(false)
-  const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
-  const imageSavedForFutureUseAtom = atom<boolean>(false)
-
   const openedImageUriAtom = atom<UriString | undefined>(undefined)
 
-  const revealIdentityWithUiFeedbackAtom = atom(
+  const disapproveIdentityRevealWithUiFeedbackAtom = atom(
     null,
-    async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
+    async (get, set) => {
       const {t} = get(translationAtom)
 
+      set(loadingOverlayDisplayedAtom, true)
+
       return await pipe(
-        set(revealIdentityDialogUIAtom, {
-          type,
-          revealIdentityUsernameAtom,
-          usernameSavedForFutureUseAtom,
-          revealIdentityImageUriAtom,
-          imageSavedForFutureUseAtom,
-          commonConnectionsCountAtom,
-          friendLevelInfoAtom,
+        set(revealIdentityAtom, {
+          type: 'DISAPPROVE_REVEAL',
+          username: undefined,
         }),
-        TE.chainW(({type, username, imageUri}) =>
-          set(revealIdentityAtom, {type, username, imageUri})
-        ),
         TE.match(
           (e) => {
             set(loadingOverlayDisplayedAtom, false)
-            if (e._tag === 'UserDeclinedError') {
-              return false
-            }
-
-            if (e._tag === 'UsernameEmptyError') {
-              void set(invalidUsernameUIFeedbackAtom)
-
-              return false
-            }
-
-            if (e._tag === 'IdentityRequestAlreadySentError') {
-              showErrorAlert({
-                title: t('messages.identityAlreadyRequested'),
-                error: e,
-              })
-
-              return false
-            }
-            reportError('error', new Error('Error sending identityReveal'), {
+            reportError('error', new Error('Error declining identityReveal'), {
               e,
             })
             showErrorAlert({
@@ -1267,7 +1236,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
     identityRevealStatusAtom,
     contactRevealStatusAtom,
-    revealIdentityWithUiFeedbackAtom,
+    disapproveIdentityRevealWithUiFeedbackAtom,
     revealContactWithUiFeedbackAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,

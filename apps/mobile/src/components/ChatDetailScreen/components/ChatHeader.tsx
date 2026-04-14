@@ -16,10 +16,12 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Alert, Keyboard, TouchableOpacity} from 'react-native'
 import {useTheme} from 'tamagui'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import {chatMolecule} from '../atoms'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
 
@@ -36,6 +38,8 @@ type ButtonType =
 function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const safeGoBack = useSafeGoBack()
   const navigation = useNavigation()
+  const rootNavigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {t} = useTranslation()
   const theme = useTheme()
   const {
@@ -45,7 +49,6 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
     blockChatWithUiFeedbackAtom,
     forceShowHistoryAtom,
     identityRevealStatusAtom,
-    revealIdentityWithUiFeedbackAtom,
     revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
     otherSideSupportsTradingChecklistAtom,
@@ -55,8 +58,10 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
-  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
+  const shouldOpenRevealIdentitySummary = useAtomValue(
+    shouldOpenRevealIdentitySummaryAtom
+  )
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
@@ -126,7 +131,13 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
       <UiIconButton
         onPress={() => {
           Keyboard.dismiss()
-          void revealIdentity('REQUEST_REVEAL')
+          rootNavigation.navigate('TradeChecklistFlow', {
+            screen: shouldOpenRevealIdentitySummary
+              ? 'RevealIdentitySummary'
+              : 'RevealIdentityPhoto',
+            chatId,
+            inboxKey,
+          })
         }}
       >
         <UserProfile size={22} color={theme.accentHighlightSecondary.val} />
@@ -156,7 +167,13 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
           <UiIconButton
             onPress={() => {
               Keyboard.dismiss()
-              void revealIdentity('REQUEST_REVEAL')
+              rootNavigation.navigate('TradeChecklistFlow', {
+                screen: shouldOpenRevealIdentitySummary
+                  ? 'RevealIdentitySummary'
+                  : 'RevealIdentityPhoto',
+                chatId,
+                inboxKey,
+              })
             }}
           >
             <UserProfile size={22} color={theme.accentHighlightSecondary.val} />

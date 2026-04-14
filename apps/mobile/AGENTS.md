@@ -10,7 +10,7 @@ Gotchas:
 - Reuse existing native modules (`packages/ecdh-platform-native-utils`, `fix-brorand-for-expo`) instead of adding new native code paths.
 - When using Expo-related packages and functions, use expo/expo documentation from context7.
 
-IMPORTANT: When creating or modifying UI, always use components from `@vexl-next/ui` where possible. Do not use SVG icons from this package; use icons from `@vexl-next/io`. When specifying colors, use color tokens from `@vexl-next/ui/src/config/themes.ts`.
+IMPORTANT: When creating or modifying UI, always use components from `@vexl-next/ui` where possible. For icons, do not render SVG assets via `Image` or `svg` sources; use icon components from `@vexl-next/ui` / `packages/ui` instead. When specifying colors, use color tokens from `@vexl-next/ui/src/config/themes.ts`.
 
 Redesign guidance:
 
@@ -21,4 +21,4 @@ Redesign guidance:
 - Use spacing, padding, gaps, border radiuses, and similar sizing values from `@vexl-next/ui/src/config/tokens.ts`.
 - On Tamagui components, prefer Tamagui shorthand props that resolve to the shared tokens.
 - On non-Tamagui components, read from the shared theme/tokens objects instead of hardcoding values.
-- Continue using icons from `@vexl-next/io` rather than SVG icons from `@vexl-next/ui`.
+- Use icon components from `@vexl-next/ui` / `packages/ui` instead of loading icon artwork through `Image` or external SVG sources.

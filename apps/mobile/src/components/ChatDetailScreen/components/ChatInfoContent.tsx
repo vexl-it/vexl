@@ -29,6 +29,7 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
+import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import {chatMolecule} from '../atoms'
 import ChatConnectionHeader, {type TradeTagData} from './ChatConnectionHeader'
 
@@ -134,7 +135,6 @@ export default function ChatInfoContent({
     otherSideLeftAtom,
     otherSideSupportsTradingChecklistAtom,
     publicKeyPemBase64Atom,
-    revealIdentityWithUiFeedbackAtom,
     theirOfferAndNotReportedAtom,
   } = useMolecule(chatMolecule)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
@@ -151,8 +151,10 @@ export default function ChatInfoContent({
     otherSideSupportsTradingChecklistAtom
   )
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const requestReveal = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
+  const shouldOpenRevealIdentitySummary = useAtomValue(
+    shouldOpenRevealIdentitySummaryAtom
+  )
 
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
@@ -318,8 +320,12 @@ export default function ChatInfoContent({
                     icon={EyeShut}
                     label={t('messages.askToReveal')}
                     onPress={() => {
-                      void requestReveal('REQUEST_REVEAL').then((success) => {
-                        if (success) navigation.goBack()
+                      navigation.navigate('TradeChecklistFlow', {
+                        screen: shouldOpenRevealIdentitySummary
+                          ? 'RevealIdentitySummary'
+                          : 'RevealIdentityPhoto',
+                        chatId,
+                        inboxKey,
                       })
                     }}
                   />

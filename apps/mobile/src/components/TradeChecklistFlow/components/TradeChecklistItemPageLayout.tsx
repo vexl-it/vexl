@@ -1,6 +1,7 @@
 import {
   Button,
   ChevronLeft,
+  KeyboardAvoidingView,
   NavigationBar,
   type NavigationBarAction,
 } from '@vexl-next/ui'
@@ -9,7 +10,6 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {ScrollView, Stack, YStack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import KeyboardAvoidingView from '../../KeyboardAvoidingView'
 
 export function TradeChecklistItemPageLayout({
   header,

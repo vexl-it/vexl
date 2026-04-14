@@ -19,7 +19,7 @@
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
-    "effect": "^3.19.9",
+    "effect": "^3.20.0",
     "eslint": "^9.20.0",
     "jotai": "^2.15.0",
     "prettier": "^3.3.2",

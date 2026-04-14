@@ -19,6 +19,9 @@ import LocationMapSelect from './components/MeetingLocation/components/LocationM
 import LocationSearch from './components/MeetingLocation/components/LocationSearch'
 import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
 import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
+import RevealIdentityNicknameScreen from './components/RevealIdentityFlow/RevealIdentityNicknameScreen'
+import RevealIdentityPhotoScreen from './components/RevealIdentityFlow/RevealIdentityPhotoScreen'
+import RevealIdentitySummaryScreen from './components/RevealIdentityFlow/RevealIdentitySummaryScreen'
 
 const StackNavigator =
   createNativeStackNavigator<TradeChecklistStackParamsList>()
@@ -45,6 +48,18 @@ export default function TradeChecklistFlow({
         <StackNavigator.Screen
           name="AgreeOnTradeDetails"
           component={AgreeOnTradeDetailsScreen}
+        />
+        <StackNavigator.Screen
+          name="RevealIdentityPhoto"
+          component={RevealIdentityPhotoScreen}
+        />
+        <StackNavigator.Screen
+          name="RevealIdentityNickname"
+          component={RevealIdentityNicknameScreen}
+        />
+        <StackNavigator.Screen
+          name="RevealIdentitySummary"
+          component={RevealIdentitySummaryScreen}
         />
         <StackNavigator.Screen
           name="ChooseAvailableDays"

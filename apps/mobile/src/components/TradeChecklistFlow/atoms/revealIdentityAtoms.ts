@@ -1,87 +1,145 @@
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
+import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Array, HashMap, Option} from 'effect/index'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Option, Schema} from 'effect/index'
 import {atom} from 'jotai'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
-import connectionStateAtom, {
-  createFriendLevelInfoAtom,
-} from '../../../state/connections/atom/connectionStateAtom'
 import {sessionDataOrDummyAtom} from '../../../state/session'
-import {anonymizedUserDataAtom} from '../../../state/session/userDataAtoms'
+import {
+  anonymizedUserDataAtom,
+  invalidUsernameUIFeedbackAtom,
+  realUserImageAtom,
+  realUserNameAtom,
+} from '../../../state/session/userDataAtoms'
 import {
   chatWithMessagesAtom,
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
-import {revealIdentityActionAtom} from './updatesToBeSentAtom'
+import updatesToBeSentAtom from './updatesToBeSentAtom'
 
-const revealIdentityUsernameAtom = atom<string>('')
-const usernameSavedForFutureUseAtom = atom<boolean>(false)
-const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
-const imageSavedForFutureUseAtom = atom<boolean>(false)
+export const revealIdentityUsernameAtom = atom<string>('')
+export const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
+export const revealIdentityPhoneNumberAtom = atom<boolean>(false)
 
-const commonConnectionsCountAtom = atom((get) => {
-  const chat = get(chatWithMessagesAtom)
-  const connectionState = get(connectionStateAtom)
-
-  if (chat.chat.origin.type === 'myOffer')
-    return HashMap.get(
-      connectionState.commonFriends,
-      chat.chat.otherSide.publicKey
-    ).pipe(
-      Option.getOrElse(() => []),
-      Array.length
-    )
-
-  if (chat.chat.origin.type === 'theirOffer')
-    return (chat.chat.origin?.offer?.offerInfo.privatePart.commonFriends ?? [])
-      .length
-
-  return 0
-})
-
-const friendLevelInfoAtom = atom((get) => {
-  const chat = get(chatWithMessagesAtom)
-  return get(createFriendLevelInfoAtom(chat.chat.otherSide))
-})
-
-export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
-  const {phoneNumber} = get(sessionDataOrDummyAtom)
-  const anonymizedUserData = get(anonymizedUserDataAtom)
-  const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)
+export const revealIdentityFlowTypeAtom = atom((get) => {
   const tradeChecklistData = get(tradeChecklistDataAtom)
-  const type =
-    !tradeChecklistData.identity.sent && tradeChecklistData.identity.received
-      ? 'RESPOND_REVEAL'
-      : 'REQUEST_REVEAL'
-
-  return pipe(
-    set(revealIdentityDialogUIAtom, {
-      type,
-      revealIdentityUsernameAtom,
-      usernameSavedForFutureUseAtom,
-      revealIdentityImageUriAtom,
-      imageSavedForFutureUseAtom,
-      commonConnectionsCountAtom,
-      friendLevelInfoAtom,
-    }),
-    TE.map(({type, username, imageUri}) => {
-      const identityData =
-        type === 'DISAPPROVE_REVEAL'
-          ? {
-              status: type,
-            }
-          : {
-              status: type,
-              deanonymizedUser: {
-                name: username ?? anonymizedUserData.userName,
-                partialPhoneNumber: anonymizedPhoneNumber,
-              },
-              image: imageUri,
-            }
-
-      set(revealIdentityActionAtom, identityData)
-    })
+  const requestMessage = get(chatWithMessagesAtom).messages.find(
+    (one) => one.message.messageType === 'REQUEST_REVEAL'
   )
+
+  return !tradeChecklistData.identity.sent &&
+    (tradeChecklistData.identity.received ||
+      requestMessage?.state === 'received')
+    ? 'RESPOND_REVEAL'
+    : 'REQUEST_REVEAL'
+})
+
+export const shouldOpenRevealIdentitySummaryAtom = atom((get) => {
+  const updates = get(updatesToBeSentAtom)
+  const realUserName = get(realUserNameAtom)
+  const realUserImage = get(realUserImageAtom)
+
+  return (
+    Boolean(updates.identity) ||
+    Boolean(realUserName && realUserImage?.type === 'imageUri')
+  )
+})
+
+export const revealIdentityPreviewImageAtom = atom((get) => {
+  const revealIdentityImageUri = get(revealIdentityImageUriAtom)
+
+  if (revealIdentityImageUri) {
+    return {
+      type: 'imageUri',
+      imageUri: revealIdentityImageUri,
+    } as const
+  }
+
+  return get(anonymizedUserDataAtom).image
+})
+
+export const prepareRevealIdentityDraftActionAtom = atom(null, (get, set) => {
+  const updates = get(updatesToBeSentAtom)
+  const realUserName = get(realUserNameAtom)
+  const realUserImage = get(realUserImageAtom)
+
+  const draftedImage =
+    updates.identity?.status === 'DISAPPROVE_REVEAL'
+      ? undefined
+      : updates.identity?.image
+
+  set(
+    revealIdentityUsernameAtom,
+    updates.identity?.deanonymizedUser?.name ?? realUserName ?? ''
+  )
+  set(
+    revealIdentityImageUriAtom,
+    draftedImage ??
+      (realUserImage?.type === 'imageUri' ? realUserImage.imageUri : undefined)
+  )
+  set(revealIdentityPhoneNumberAtom, Boolean(updates.contact))
+})
+
+export const discardRevealIdentityDraftActionAtom = atom(null, (_get, set) => {
+  set(revealIdentityUsernameAtom, '')
+  set(revealIdentityImageUriAtom, undefined)
+  set(revealIdentityPhoneNumberAtom, false)
+})
+
+export const saveRevealIdentityDraftActionAtom = atom(null, (get, set) => {
+  const parsedUserName = Schema.decodeUnknownOption(UserName)(
+    get(revealIdentityUsernameAtom).trim()
+  )
+
+  if (Option.isNone(parsedUserName)) {
+    void set(invalidUsernameUIFeedbackAtom)
+    return false
+  }
+
+  const {phoneNumber} = get(sessionDataOrDummyAtom)
+  const revealIdentityImageUri = get(revealIdentityImageUriAtom)
+  const shouldRevealPhoneNumber = get(revealIdentityPhoneNumberAtom)
+  const revealIdentityType = get(revealIdentityFlowTypeAtom)
+  const status =
+    revealIdentityType === 'RESPOND_REVEAL'
+      ? 'APPROVE_REVEAL'
+      : 'REQUEST_REVEAL'
+  const timestamp = unixMillisecondsNow()
+
+  set(realUserNameAtom, parsedUserName.value)
+  set(
+    realUserImageAtom,
+    revealIdentityImageUri
+      ? {
+          type: 'imageUri',
+          imageUri: revealIdentityImageUri,
+        }
+      : undefined
+  )
+
+  set(updatesToBeSentAtom, ({contact: _contact, ...updates}) => ({
+    ...updates,
+    identity: {
+      status,
+      deanonymizedUser: {
+        name: parsedUserName.value,
+        partialPhoneNumber: anonymizePhoneNumber(phoneNumber),
+      },
+      image: revealIdentityImageUri,
+      timestamp,
+    },
+    ...(shouldRevealPhoneNumber
+      ? {
+          contact: {
+            status,
+            fullPhoneNumber: phoneNumber,
+            timestamp,
+          },
+        }
+      : {}),
+  }))
+
+  set(discardRevealIdentityDraftActionAtom)
+
+  return true
 })

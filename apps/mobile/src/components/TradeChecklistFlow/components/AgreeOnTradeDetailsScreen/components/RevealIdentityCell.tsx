@@ -1,6 +1,8 @@
+import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {ChecklistCell, EyeShut} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
+import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
   identityRevealTriggeredFromChatAtom,
   identityRevealedAtom,
@@ -8,11 +10,16 @@ import {
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
-import {revealIdentityWithUiFeedbackAtom} from '../../../atoms/revealIdentityAtoms'
+import {
+  prepareRevealIdentityDraftActionAtom,
+  shouldOpenRevealIdentitySummaryAtom,
+} from '../../../atoms/revealIdentityAtoms'
 import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function RevealIdentityCell(): React.ReactElement {
   const {t} = useTranslation()
+  const navigation: NavigationProp<TradeChecklistStackParamsList> =
+    useNavigation()
   const identityRevealed = useAtomValue(identityRevealedAtom)
   const itemStatus = useAtomValue(
     useMemo(() => createChecklistItemStatusAtom('REVEAL_IDENTITY'), [])
@@ -23,7 +30,12 @@ function RevealIdentityCell(): React.ReactElement {
   const tradeChecklistIdentityData = useAtomValue(
     tradeChecklistIdentityDataAtom
   )
-  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const shouldOpenRevealIdentitySummary = useAtomValue(
+    shouldOpenRevealIdentitySummaryAtom
+  )
+  const prepareRevealIdentityDraft = useSetAtom(
+    prepareRevealIdentityDraftActionAtom
+  )
 
   const disabled = useMemo(() => {
     const revealIdentityAlreadySent =
@@ -48,7 +60,12 @@ function RevealIdentityCell(): React.ReactElement {
       pressable
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
       onPress={() => {
-        void revealIdentity()()
+        prepareRevealIdentityDraft()
+        navigation.navigate(
+          shouldOpenRevealIdentitySummary
+            ? 'RevealIdentitySummary'
+            : 'RevealIdentityPhoto'
+        )
       }}
       headline="Reveal identity"
     />

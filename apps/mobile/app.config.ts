@@ -226,6 +226,24 @@ export default {
         'cameraPermission':
           'Vexl wants to access your camera in order to take a photo for your avatar or scan QR code to add other users to your Vexl network.',
         'microphonePermission': false,
+        // Keep these values inline because Expo evaluates app config in Node,
+        // and it does not reliably resolve nested TypeScript workspace imports.
+        'colors': {
+          cropToolbarColor: '#FFFFFF',
+          cropToolbarIconColor: '#000000',
+          cropToolbarActionTextColor: '#000000',
+          cropBackButtonIconColor: '#000000',
+          cropBackgroundColor: '#FFFFFF',
+        },
+        'dark': {
+          'colors': {
+            cropToolbarColor: '#000000',
+            cropToolbarIconColor: '#FFFFFF',
+            cropToolbarActionTextColor: '#FFFFFF',
+            cropBackButtonIconColor: '#FFFFFF',
+            cropBackgroundColor: '#000000',
+          },
+        },
       },
     ],
     [

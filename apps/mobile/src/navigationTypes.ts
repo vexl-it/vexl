@@ -231,6 +231,9 @@ export type TradeCalculatorStackScreenProps<
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {
   AgreeOnTradeDetails: undefined
+  RevealIdentityPhoto: undefined
+  RevealIdentityNickname: undefined
+  RevealIdentitySummary: undefined
   ChooseAvailableDays: {
     readonly chosenDateTimes: AvailableDateTimeOption[] | undefined
   }

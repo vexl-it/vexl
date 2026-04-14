@@ -60,14 +60,14 @@ export function useChatWithMessagesForOffer({
   otherSidePublicKey: Option.Option<PublicKeyPemBase64>
   isMyOffer: boolean
 }): ChatWithMessages | undefined {
+  const publicKeyOrUndefined = Option.getOrUndefined(otherSidePublicKey)
+
   return useAtomValue(
     useMemo(() => {
       return atom((get) => {
-        if (Option.isNone(otherSidePublicKey)) {
+        if (!publicKeyOrUndefined) {
           return undefined
         }
-
-        const publicKey = otherSidePublicKey.value
         const messagingState = get(messagingStateAtom)
 
         if (isMyOffer) {
@@ -78,7 +78,7 @@ export function useChatWithMessagesForOffer({
             Option.flatMap((inbox) =>
               Array.findFirst(
                 inbox.chats,
-                (chat) => chat.chat.otherSide.publicKey === publicKey
+                (chat) => chat.chat.otherSide.publicKey === publicKeyOrUndefined
               )
             ),
             Option.getOrUndefined
@@ -99,7 +99,8 @@ export function useChatWithMessagesForOffer({
               Option.flatMap((inbox) =>
                 Array.findFirst(
                   inbox.chats,
-                  (chat) => chat.chat.otherSide.publicKey === publicKey
+                  (chat) =>
+                    chat.chat.otherSide.publicKey === publicKeyOrUndefined
                 )
               )
             )
@@ -112,7 +113,7 @@ export function useChatWithMessagesForOffer({
             Option.flatMap((inbox) =>
               Array.findFirst(
                 inbox.chats,
-                (chat) => chat.chat.otherSide.publicKey === publicKey
+                (chat) => chat.chat.otherSide.publicKey === publicKeyOrUndefined
               )
             )
           )
@@ -123,7 +124,7 @@ export function useChatWithMessagesForOffer({
           Option.getOrUndefined
         )
       })
-    }, [offerId, otherSidePublicKey, isMyOffer])
+    }, [offerId, publicKeyOrUndefined, isMyOffer])
   )
 }
 

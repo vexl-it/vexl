@@ -9,7 +9,6 @@ import ChatTextInput from './ChatTextInput'
 import ImageZoomOverlay from './ImageZoomOverlay'
 import MessagesList from './MessagesList'
 import {MessagesScreenChatHeader} from './MessagesScreenChatHeader'
-import QuickActionBanner from './QuickActionBanner'
 import StickyHeader from './StickyHeader'
 
 function MessagesScreen(): React.ReactElement {
@@ -33,9 +32,6 @@ function MessagesScreen(): React.ReactElement {
       <StickyHeader />
       <Stack f={1}>
         <MessagesList />
-        <Stack position="absolute" b={0} l={0} r={0}>
-          <QuickActionBanner />
-        </Stack>
       </Stack>
       {!!canSendMessages && (
         <Stack>

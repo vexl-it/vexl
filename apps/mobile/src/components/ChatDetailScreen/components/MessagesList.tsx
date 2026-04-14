@@ -6,15 +6,10 @@ import {StyleSheet, type ViewabilityConfig} from 'react-native'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {chatMolecule} from '../atoms'
 import MessageItem, {type MessagesListItem} from './MessageItem'
-import {QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING} from './QuickActionBanner'
 
 const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
 
-const contentStyle = StyleSheet.create({
-  contentContainerStyle: {
-    paddingTop: QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING,
-  },
-})
+const contentStyle = StyleSheet.create({})
 
 const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD,
@@ -57,7 +52,7 @@ function MessagesList(): React.ReactElement {
     <FlashList
       ref={listRef}
       data={dataAtoms}
-      contentContainerStyle={contentStyle.contentContainerStyle}
+      contentContainerStyle={contentStyle}
       keyExtractor={atomKeyExtractor}
       maintainVisibleContentPosition={{
         autoscrollToBottomThreshold: 0.2,

@@ -29,6 +29,10 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const preferences = useAtomValue(preferencesAtom)
   const newOfferFeedbackDone = useAtomValue(newOfferFeedbackDoneAtom)
+  const offerFeedbackAtom = useMemo(
+    () => atom(generateInitialFeedback('OFFER_RATING')),
+    []
+  )
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -195,7 +199,7 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
         !!preferences.offerFeedbackEnabled && (
           <UserFeedback
             autoCloseWhenFinished
-            feedbackAtom={atom(generateInitialFeedback('OFFER_RATING'))}
+            feedbackAtom={offerFeedbackAtom}
           />
         )}
     </Stack>

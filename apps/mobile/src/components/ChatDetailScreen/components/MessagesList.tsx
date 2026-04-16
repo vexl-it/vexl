@@ -1,15 +1,18 @@
 import {FlashList, type FlashListRef} from '@shopify/flash-list'
+import {tokens} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useCallback, useRef} from 'react'
-import {StyleSheet, type ViewabilityConfig} from 'react-native'
+import {type ViewabilityConfig} from 'react-native'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {chatMolecule} from '../atoms'
 import MessageItem, {type MessagesListItem} from './MessageItem'
 
 const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
 
-const contentStyle = StyleSheet.create({})
+const contentStyle = {
+  paddingBottom: tokens.size[4].val,
+} as const
 
 const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD,

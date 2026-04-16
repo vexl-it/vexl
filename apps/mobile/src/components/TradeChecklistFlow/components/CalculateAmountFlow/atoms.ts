@@ -20,7 +20,7 @@ import {
 } from '../../../../state/tradeChecklist/utils/amount'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {computeMaxAmountForCurrency} from '../../../../utils/localization/currency'
-import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
+import {globalDialogAtom} from '../../../GlobalDialog'
 import {
   btcInputValueAtom,
   btcOrSatAtom,
@@ -169,25 +169,14 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
     })
     if (currency && fiatAmount > maxAmount) {
       return pipe(
-        TE.Do,
-        TE.chainW(() =>
-          set(askAreYouSureActionAtom, {
-            steps: [
-              {
-                type: 'StepWithText',
-                title: t(
-                  'tradeChecklist.calculateAmount.exceededTransactionLimit'
-                ),
-                description: t(
-                  'tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency',
-                  {amount: maxAmount, currency}
-                ),
-                positiveButtonText: t('common.close'),
-              },
-            ],
-            variant: 'info',
-          }).pipe(effectToTaskEither)
-        ),
+        set(globalDialogAtom, {
+          title: t('tradeChecklist.calculateAmount.exceededTransactionLimit'),
+          subtitle: t(
+            'tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency',
+            {amount: maxAmount, currency}
+          ),
+          positiveButtonText: t('common.close'),
+        }).pipe(effectToTaskEither),
         TE.match(
           () => {
             return false

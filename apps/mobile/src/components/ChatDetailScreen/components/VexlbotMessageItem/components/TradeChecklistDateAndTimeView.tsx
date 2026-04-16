@@ -1,14 +1,25 @@
 import {useNavigation} from '@react-navigation/native'
+import {
+  Button,
+  Calendar,
+  ClockTime,
+  darkTheme,
+  lightTheme,
+  tokens,
+  Typography,
+  useTheme,
+  XStack,
+  YStack,
+  type IconProps,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Array as ArrayE, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
-import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
@@ -17,11 +28,46 @@ interface Props {
   message: ChatMessageWithState
 }
 
+function DateTimeDetails({
+  details,
+  icon: Icon,
+  iconColor,
+  textColor,
+}: {
+  readonly details: readonly string[]
+  readonly icon: React.ComponentType<IconProps>
+  readonly iconColor: string
+  readonly textColor: '$foregroundSecondary' | '$foregroundTertiary'
+}): React.JSX.Element {
+  const detailIconSize = tokens.size[6].val
+
+  return (
+    <YStack gap="$2">
+      {pipe(
+        details,
+        ArrayE.map((detail, index) => (
+          <XStack
+            key={`${detail}-${String(index)}`}
+            alignItems="center"
+            gap="$2"
+          >
+            <Icon color={iconColor} size={detailIconSize} />
+            <Typography color={textColor} flex={1} variant="description">
+              {detail}
+            </Typography>
+          </XStack>
+        ))
+      )}
+    </YStack>
+  )
+}
+
 export default function TradeChecklistDateAndTimeView({
   message,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const theme = useTheme()
   const {
     addEventToCalendarActionAtom,
     tradeChecklistDateAndTimeAtom,
@@ -36,6 +82,15 @@ export default function TradeChecklistDateAndTimeView({
     dateAndTime.getLatestMessageTimestamp(dateAndTimeData)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
+  const actionIconSize = tokens.size[6].val
+  const isDarkTheme =
+    theme.backgroundPrimary.val === darkTheme.backgroundPrimary
+  const activeDetailIconColor = isDarkTheme
+    ? darkTheme.foregroundSecondary
+    : lightTheme.foregroundSecondary
+  const outdatedDetailIconColor = isDarkTheme
+    ? darkTheme.foregroundTertiary
+    : lightTheme.foregroundTertiary
 
   if (
     (message.state === 'sent' || message.state === 'received') &&
@@ -49,23 +104,39 @@ export default function TradeChecklistDateAndTimeView({
     const pick = message.message.tradeChecklistUpdate.dateAndTime.picks
 
     if (!!pick && !isMessageOutdated) {
+      const acceptedDetails = [dateAndTime.toStringWithTime(pick.dateTime)]
+
       return (
         <>
           <VexlbotActionCard
-            details={[dateAndTime.toStringWithTime(pick.dateTime)]}
             statusLabel={t('common.accepted')}
             statusVariant="waiting"
             title={t('vexlbot.yourMeetingIsOn')}
           >
-            <Button
-              onPress={() => {
-                void addEventToCalendar()()
-              }}
-              beforeIcon={termsIconSvg}
-              size="small"
-              variant="primary"
-              text={t('vexlbot.addEventToCalendar')}
-            />
+            <YStack gap="$3">
+              <DateTimeDetails
+                details={acceptedDetails}
+                icon={Calendar}
+                iconColor={activeDetailIconColor}
+                textColor="$foregroundSecondary"
+              />
+              <Button
+                icon={
+                  <Calendar
+                    color={tokens.color.black100.val}
+                    size={actionIconSize}
+                  />
+                }
+                onPress={() => {
+                  void addEventToCalendar()()
+                }}
+                size="small"
+                variant="secondary"
+                width="100%"
+              >
+                {t('vexlbot.addEventToCalendar')}
+              </Button>
+            </YStack>
           </VexlbotActionCard>
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
@@ -77,14 +148,19 @@ export default function TradeChecklistDateAndTimeView({
     const suggestions =
       message.message.tradeChecklistUpdate.dateAndTime.suggestions
     if (suggestions && suggestions.length > 0) {
-      const detailLines = suggestions.map((one) =>
-        // TODO: remove this in future once everybody
-        // updates to new DateTime checklist system
-        // use toStringWithTime(one.to)
-        DateTime.fromMillis(one.to).diff(DateTime.fromMillis(one.from), 'hours')
-          .hours >= 1
-          ? dateAndTime.toStringWithRange(one)
-          : dateAndTime.toStringWithTime(one.to)
+      const detailLines = pipe(
+        suggestions,
+        ArrayE.map((one) =>
+          // TODO: remove this in future once everybody
+          // updates to new DateTime checklist system
+          // use toStringWithTime(one.to)
+          DateTime.fromMillis(one.to).diff(
+            DateTime.fromMillis(one.from),
+            'hours'
+          ).hours >= 1
+            ? dateAndTime.toStringWithRange(one)
+            : dateAndTime.toStringWithTime(one.to)
+        )
       )
       const pendingLabel =
         message.state === 'received'
@@ -95,11 +171,6 @@ export default function TradeChecklistDateAndTimeView({
 
       return (
         <VexlbotActionCard
-          buttonText={
-            message.state === 'received' && !isMessageOutdated
-              ? t('common.respond')
-              : undefined
-          }
           description={t(
             message.state === 'sent'
               ? 'vexlbot.youAddedTimeOptions'
@@ -109,10 +180,36 @@ export default function TradeChecklistDateAndTimeView({
               number: suggestions.length,
             }
           )}
-          details={detailLines}
-          onPress={
-            message.state === 'received' && !isMessageOutdated
-              ? () => {
+          statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
+          statusVariant={
+            isMessageOutdated ? 'outdated' : 'waitingForConfirmation'
+          }
+          title={t('tradeChecklist.options.DATE_AND_TIME')}
+        >
+          <YStack gap="$3">
+            <DateTimeDetails
+              details={detailLines}
+              icon={ClockTime}
+              iconColor={
+                isMessageOutdated
+                  ? outdatedDetailIconColor
+                  : activeDetailIconColor
+              }
+              textColor={
+                isMessageOutdated
+                  ? '$foregroundTertiary'
+                  : '$foregroundSecondary'
+              }
+            />
+            {message.state === 'received' && !isMessageOutdated ? (
+              <Button
+                icon={
+                  <ClockTime
+                    color={tokens.color.black100.val}
+                    size={actionIconSize}
+                  />
+                }
+                onPress={() => {
                   const chat = store.get(chatAtom)
                   navigation.navigate('TradeChecklistFlow', {
                     chatId: chat.id,
@@ -122,15 +219,16 @@ export default function TradeChecklistDateAndTimeView({
                       chosenDateTimes: suggestions,
                     },
                   })
-                }
-              : undefined
-          }
-          statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
-          statusVariant={
-            isMessageOutdated ? 'outdated' : 'waitingForConfirmation'
-          }
-          title={t('tradeChecklist.options.DATE_AND_TIME')}
-        />
+                }}
+                size="small"
+                variant="secondary"
+                width="100%"
+              >
+                {t('common.respond')}
+              </Button>
+            ) : null}
+          </YStack>
+        </VexlbotActionCard>
       )
     }
   }

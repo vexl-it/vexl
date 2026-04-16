@@ -32,11 +32,10 @@ function OnlineOrInPersonTrade(): React.ReactElement {
   const top = (
     <Stack gap="$3">
       <Typography variant="heading3" color="$foregroundPrimary">
-        Trade checklist
+        {t('tradeChecklist.tradeChecklist')}
       </Typography>
       <Typography variant="description" color="$foregroundSecondary">
-        Agree on key trade details to avoid confusion later. Everything is
-        optional.
+        {t('tradeChecklist.agreeOnTradeDetailsSubtitle')}
       </Typography>
     </Stack>
   )
@@ -95,7 +94,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
       {top}
 
       <Stack gap="$3">
-        <SectionTitle>Meeting detail</SectionTitle>
+        <SectionTitle>{t('tradeChecklist.meetingDetail')}</SectionTitle>
         <Stack gap="$2">
           <DateAndTimeCell />
           <MeetingLocationCell />
@@ -103,7 +102,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
       </Stack>
 
       <Stack gap="$3">
-        <SectionTitle>Payment detail</SectionTitle>
+        <SectionTitle>{t('tradeChecklist.paymentDetail')}</SectionTitle>
         <Stack gap="$2">
           <CalculateAmountCell />
           <SetNetworkCell />
@@ -111,7 +110,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
       </Stack>
 
       <Stack gap="$3">
-        <SectionTitle>Privacy</SectionTitle>
+        <SectionTitle>{t('tradeChecklist.privacy')}</SectionTitle>
         <Stack gap="$2">
           <RevealIdentityCell />
           <RevealPhoneNumberCell />

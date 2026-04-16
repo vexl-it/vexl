@@ -119,12 +119,14 @@ type ButtonFrameProps = React.ComponentProps<typeof ButtonFrame>
 
 interface ButtonProps extends Omit<ButtonFrameProps, 'children'> {
   readonly children: string
+  readonly icon?: React.ReactElement
   readonly variant?: ButtonVariant
   readonly size?: ButtonSize
 }
 
 export function Button({
   children,
+  icon,
   variant = 'primary',
   size = 'large',
   ...rest
@@ -133,6 +135,7 @@ export function Button({
 
   return (
     <ButtonFrame variant={variantOrDisabled} size={size} {...rest}>
+      {icon}
       <ButtonLabel variant={variantOrDisabled} size={size}>
         {children}
       </ButtonLabel>

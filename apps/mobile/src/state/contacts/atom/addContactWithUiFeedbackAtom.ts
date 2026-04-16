@@ -1,13 +1,12 @@
-import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {parsePhoneNumber} from 'awesome-phonenumber'
+import {type SvgStringOrImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {Array, Effect, Option} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
-import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import {showErrorAlert} from '../../../components/ErrorAlert'
+import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
-import userSvg from '../../../components/images/userSvg'
+import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {
   getActiveRouteNameOutsideOfReact,
@@ -20,92 +19,40 @@ import {
   type StoredContactWithComputedValues,
 } from '../domain'
 import {areContactsPermissionsGranted} from '../utils'
-import {addContactToPhoneWithUIFeedbackActionAtom} from './addContactToPhoneWithUIFeedbackAtom'
+import {addContactToPhoneActionAtom} from './addContactToPhoneWithUIFeedbackAtom'
 import {importedContactsAtom, storedContactsAtom} from './contactsStore'
+import {showUpsertContactDialogAtom} from './showUpsertContactDialogAtom'
 
-function safeParsePhoneNumber(contactNumber: E164PhoneNumber): string {
-  try {
-    return parsePhoneNumber(contactNumber).number?.international ?? ''
-  } catch (err) {
-    return ''
-  }
-}
-
-const showCreateOrEditDialogAtom = atom(
+const editExistingContactActionAtom: ActionAtomType<
+  [
+    existingContact: StoredContactWithComputedValues & {
+      avatar?: SvgStringOrImageUri
+    },
+  ],
+  Effect.Effect<boolean, never>
+> = atom(
   null,
   (
     get,
     set,
-    params: {
-      type: 'create' | 'edit'
-      contactName?: string
-      contactNumber: E164PhoneNumber
+    existingContact: StoredContactWithComputedValues & {
+      avatar?: SvgStringOrImageUri
     }
   ) => {
-    const {t} = get(translationAtom)
-    const {type, contactName, contactNumber} = params
-    const subtitle = safeParsePhoneNumber(contactNumber)
-
-    return set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          title:
-            type === 'edit'
-              ? t('addContactDialog.contactAlreadyInContactList')
-              : t('addContactDialog.addContact'),
-          description:
-            type === 'edit'
-              ? t('addContactDialog.wouldYouLikeToChangeTheName', {
-                  name: contactName,
-                })
-              : t('addContactDialog.addThisPhoneNumber'),
-          subtitle,
-          negativeButtonText:
-            type === 'edit'
-              ? t('addContactDialog.keepCurrent')
-              : t('common.notNow'),
-          positiveButtonText:
-            type === 'edit'
-              ? t('common.change')
-              : t('addContactDialog.addContact'),
-          type: 'StepWithInput',
-          defaultValue: contactName,
-          textInputProps: {
-            autoCorrect: false,
-            placeholder:
-              type === 'edit'
-                ? contactName
-                : t('addContactDialog.addContactName'),
-            variant: 'greyOnWhite',
-            icon: userSvg,
-          },
-        },
-      ],
-    })
-  }
-)
-
-const editExistingContactActionAtom = atom(
-  null,
-  (get, set, existingContact: StoredContactWithComputedValues) => {
     const {t} = get(translationAtom)
 
     return Effect.gen(function* (_) {
       const importedContacts = get(importedContactsAtom)
 
-      const dialogActionResult = yield* _(
-        set(showCreateOrEditDialogAtom, {
+      const {contactName, saveToPhone} = yield* _(
+        set(showUpsertContactDialogAtom, {
           type: 'edit',
           contactName: existingContact.info.name,
           contactNumber: existingContact.computedValues.normalizedNumber,
+          phoneContactId: existingContact.info.nonUniqueContactId,
+          profileImage: existingContact.avatar,
         })
       )
-
-      const contactName =
-        dialogActionResult[0]?.type === 'inputResult'
-          ? dialogActionResult[0].value
-          : existingContact.info.name
 
       set(
         storedContactsAtom,
@@ -120,22 +67,56 @@ const editExistingContactActionAtom = atom(
         )
       )
 
+      if (saveToPhone) {
+        yield* _(
+          areContactsPermissionsGranted(),
+          Effect.flatMap((contactsPermissionsGranted) =>
+            contactsPermissionsGranted
+              ? set(addContactToPhoneActionAtom, {
+                  customName: contactName,
+                  number: existingContact.computedValues.normalizedNumber,
+                })
+              : Effect.succeed(false)
+          )
+        )
+      }
+
       yield* _(
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('addContactDialog.contactUpdated'),
-              description: t(
-                'addContactDialog.youHaveSuccessfullyUpdatedContact'
-              ),
-              positiveButtonText: t('common.niceWithExclamationMark'),
-            },
-          ],
-          variant: 'info',
+        set(globalDialogAtom, {
+          title: t('addContactDialog.contactUpdated'),
+          subtitle: t('addContactDialog.youHaveSuccessfullyUpdatedContact'),
+          positiveButtonText: t('common.niceWithExclamationMark'),
         })
       )
-    }).pipe(Effect.ignore)
+      return true
+    }).pipe(
+      Effect.match({
+        onSuccess: (success) => success,
+        onFailure(e) {
+          if (e._tag === 'ErrorAddingContactToPhoneContacts') {
+            showErrorAlert({
+              title: t('contacts.errorAddingContactToYourPhoneContacts'),
+              error: e,
+            })
+            return false
+          }
+
+          if (e._tag === 'UserDeclinedError') {
+            return false
+          }
+
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, get(translationAtom).t) ??
+              t('common.somethingWentWrongDescription'),
+            error: e,
+          })
+
+          return false
+        },
+      })
+    )
   }
 )
 
@@ -180,24 +161,32 @@ const importContactActionAtom = atom(
   }
 )
 
-const createContactWithUiFeedbackActionAtom = atom(
+const createContactWithUiFeedbackActionAtom: ActionAtomType<
+  [
+    newContact: StoredContactWithComputedValues & {
+      avatar?: SvgStringOrImageUri
+    },
+  ],
+  Effect.Effect<boolean, never>
+> = atom(
   null,
-  (get, set, newContact: StoredContactWithComputedValues) => {
+  (
+    get,
+    set,
+    newContact: StoredContactWithComputedValues & {avatar?: SvgStringOrImageUri}
+  ) => {
     const {t} = get(translationAtom)
 
     return Effect.gen(function* (_) {
-      const result = yield* _(
-        set(showCreateOrEditDialogAtom, {
+      const {contactName: customName, saveToPhone} = yield* _(
+        set(showUpsertContactDialogAtom, {
           type: 'create',
           contactNumber: newContact.computedValues.normalizedNumber,
           contactName: newContact.info.name,
+          phoneContactId: newContact.info.nonUniqueContactId,
+          profileImage: newContact.avatar,
         })
       )
-
-      const customName =
-        result[0]?.type === 'inputResult'
-          ? result[0].value
-          : newContact.computedValues.normalizedNumber
 
       const importedContact = yield* _(
         set(importContactActionAtom, {
@@ -206,17 +195,17 @@ const createContactWithUiFeedbackActionAtom = atom(
         })
       )
 
-      const contactsPermissionsGranted = yield* _(
-        areContactsPermissionsGranted()
-      )
-
-      const addContactToPhoneSuccess = contactsPermissionsGranted
+      const addContactToPhoneSuccess = saveToPhone
         ? yield* _(
-            set(addContactToPhoneWithUIFeedbackActionAtom, {
-              customName,
-              number: importedContact.computedValues.normalizedNumber,
-            }),
-            Effect.catchTag('UserDeclinedError', () => Effect.succeed(false)),
+            areContactsPermissionsGranted(),
+            Effect.flatMap((contactsPermissionsGranted) =>
+              contactsPermissionsGranted
+                ? set(addContactToPhoneActionAtom, {
+                    customName,
+                    number: importedContact.computedValues.normalizedNumber,
+                  })
+                : Effect.succeed(false)
+            ),
             Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
               showErrorAlert({
                 title: t('contacts.errorAddingContactToYourPhoneContacts'),
@@ -229,37 +218,31 @@ const createContactWithUiFeedbackActionAtom = atom(
         : false
 
       yield* _(
-        set(askAreYouSureActionAtom, {
-          steps: [
+        set(globalDialogAtom, {
+          title: t('addContactDialog.contactAdded'),
+          subtitle: t(
+            addContactToPhoneSuccess
+              ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+              : 'addContactDialog.youHaveAddedContactToVexlContacts',
             {
-              type: 'StepWithText',
-              title: t('addContactDialog.contactAdded'),
-              description: t(
-                addContactToPhoneSuccess
-                  ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
-                  : 'addContactDialog.youHaveAddedContactToVexlContacts',
-                {
-                  contactName: customName,
-                }
-              ),
-              positiveButtonText: t('common.niceWithExclamationMark'),
-            },
-          ],
-          variant: 'info',
+              contactName: customName,
+            }
+          ),
+          positiveButtonText: t('common.niceWithExclamationMark'),
         })
       )
+      return true
     }).pipe(
       Effect.match({
-        onSuccess: () => {},
+        onSuccess: (success) => success,
         onFailure(e) {
           if (e._tag === 'UserDeclinedError') {
-            // ignore user closed the dialog
-            return Effect.succeed(Effect.void)
+            return false
           }
 
           if (e._tag === 'ImportContactsQuotaReachedError') {
             Alert.alert(t('contacts.importContactsQuotaReachedError'))
-            return Effect.succeed(Effect.void)
+            return false
           }
 
           showErrorAlert({
@@ -270,19 +253,32 @@ const createContactWithUiFeedbackActionAtom = atom(
             error: e,
           })
 
-          return Effect.void
+          return false
         },
       })
     )
   }
 )
 
-export const addContactWithUiFeedbackActionAtom = atom(
+export const addContactWithUiFeedbackActionAtom: ActionAtomType<
+  [
+    newContact: {
+      info: ContactInfo
+      computedValues: ContactComputedValues
+      avatar?: SvgStringOrImageUri
+    },
+  ],
+  Effect.Effect<boolean, never>
+> = atom(
   null,
   (
     get,
     set,
-    newContact: {info: ContactInfo; computedValues: ContactComputedValues}
+    newContact: {
+      info: ContactInfo
+      computedValues: ContactComputedValues
+      avatar?: SvgStringOrImageUri
+    }
   ) => {
     // if we are on the SetContacts screen, we should navigate back to the previous screen
     // to avoid not showing added contact in the list
@@ -301,6 +297,7 @@ export const addContactWithUiFeedbackActionAtom = atom(
       ? set(editExistingContactActionAtom, {
           ...existingContact.value,
           computedValues: existingContact.value.computedValues,
+          avatar: newContact.avatar,
         })
       : set(createContactWithUiFeedbackActionAtom, {
           ...newContact,

@@ -8,6 +8,7 @@ import {
   getUniqueKey,
   type MessageWithState,
 } from './VexlBotMessageOrMessageWithState'
+import filterIrrelevantIdentityOrContactMessages from './filterIrrelevantIdentityOrContactMessages'
 
 function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
   const result = [] as MessagesListItem[]
@@ -20,6 +21,14 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
     const messageTime = unixMillisecondsToLocaleDateTime(
       getMessageTime(message)
     )
+
+    if (i === messages.length - 1) {
+      result.push({
+        type: 'time',
+        time: messageTime,
+        key: `time-${getUniqueKey(message)}`,
+      })
+    }
 
     const minutesDiff = prevMessageTime
       ? messageTime.diff(prevMessageTime, 'minutes').minutes
@@ -48,6 +57,7 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
       key: `message-${getUniqueKey(message)}`,
     })
   }
+
   return [...result, {type: 'typingIndicator', key: 'typingIndicator'}]
 }
 
@@ -56,6 +66,7 @@ export default function buildMessagesListData(
 ): MessagesListItem[] {
   return pipe(
     messages,
+    Array.filter(filterIrrelevantIdentityOrContactMessages(messages)),
     Array.map(
       (message): MessageWithState => ({
         type: 'message',

@@ -117,7 +117,7 @@ export function ChecklistCell({
     <ChecklistCellFrame
       pressable={isPressable}
       onPress={isPressable ? onPress : undefined}
-      opacity={disabled ? 0.7 : 1}
+      opacity={1}
     >
       <IconBox backgroundColor={iconBoxBg}>{renderIcon()}</IconBox>
       <YStack flex={1} gap="$2">

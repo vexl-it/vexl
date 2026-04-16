@@ -1,19 +1,26 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
+import {
+  Button,
+  Calendar,
+  Copy,
+  darkTheme,
+  lightTheme,
+  Map,
+  tokens,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option} from 'effect'
+import {Array as ArrayE, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React from 'react'
-import {getTokens, Stack} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
 import {
   useTranslation,
   type TFunction,
 } from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
-import copySvg from '../../../../images/copySvg'
-import termsIconSvg from '../../../../InsideRouter/components/SettingsScreen/images/termsIconSvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
@@ -55,12 +62,25 @@ function splitCardText(text: string): {
   readonly description: string
   readonly details: readonly string[]
 } {
-  const [description, ...details] = text.split('\n').filter((item) => item)
+  const [description, ...details] = pipe(
+    text.split('\n'),
+    ArrayE.filter((item) => item.length > 0)
+  )
 
   return {
     description: description ?? '',
     details,
   }
+}
+
+function getMeetingLocationClipboardText({
+  address,
+  note,
+}: {
+  readonly address: string
+  readonly note?: string
+}): string {
+  return note ? `${note}, ${address}` : address
 }
 
 interface Props {
@@ -71,6 +91,7 @@ export default function TradeChecklistMeetingLocationView({
   message,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
+  const theme = useTheme()
   const {
     addEventToCalendarActionAtom,
     isDateAndTimePickedAtom,
@@ -93,6 +114,12 @@ export default function TradeChecklistMeetingLocationView({
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const toastContent = t('common.copied')
+  const actionIconSize = tokens.size[6].val
+  const actionGap = tokens.space[2].val
+  const secondaryActionIconColor =
+    theme.backgroundPrimary.val === darkTheme.backgroundPrimary
+      ? darkTheme.accentHighlightPrimary
+      : lightTheme.accentHighlightPrimary
 
   if (
     (message.state === 'sent' || message.state === 'received') &&
@@ -121,42 +148,59 @@ export default function TradeChecklistMeetingLocationView({
       return (
         <>
           <VexlbotActionCard
+            title={t('tradeChecklist.options.MEETING_LOCATION')}
             description={cardText.description}
             details={cardText.details}
             statusLabel={t('common.accepted')}
             statusVariant="waiting"
-            title={t('tradeChecklist.options.MEETING_LOCATION')}
           >
-            <Stack gap="$2">
+            <XStack gap={actionGap}>
               <Button
-                text={t('vexlbot.copyAddressInfo')}
-                beforeIcon={copySvg}
+                f={1}
                 onPress={() => {
                   Clipboard.setString(
-                    `${message.message.tradeChecklistUpdate?.location?.data.note}, ${message.message.tradeChecklistUpdate?.location?.data.address}`
+                    getMeetingLocationClipboardText({
+                      address:
+                        message.message.tradeChecklistUpdate?.location?.data
+                          .address ?? '',
+                      note: message.message.tradeChecklistUpdate?.location?.data
+                        .note,
+                    })
                   )
                   setToastNotification(toastContent)
                 }}
+                icon={
+                  <Copy
+                    color={tokens.color.black100.val}
+                    size={actionIconSize}
+                  />
+                }
                 size="small"
-                variant="primary"
-                iconFill={getTokens().color.main.val}
-              />
+                variant="secondary"
+              >
+                {t('vexlbot.copyAddressInfo')}
+              </Button>
               {!!isDateAndTimePicked && (
                 <Button
+                  f={1}
                   onPress={() => {
                     void addEventToCalendar()()
                   }}
-                  beforeIcon={termsIconSvg}
-                  size="small"
-                  variant="primary"
-                  text={
-                    calendarEventId
-                      ? t('vexlbot.updateCalendarEventLocation')
-                      : t('vexlbot.addEventToCalendar')
+                  icon={
+                    <Calendar
+                      color={tokens.color.black100.val}
+                      size={actionIconSize}
+                    />
                   }
-                />
+                  size="small"
+                  variant="secondary"
+                >
+                  {calendarEventId
+                    ? t('vexlbot.updateCalendarEventLocation')
+                    : t('vexlbot.addEventToCalendar')}
+                </Button>
               )}
-            </Stack>
+            </XStack>
           </VexlbotActionCard>
           {Option.isSome(lastTradeChecklistMessage) &&
             lastTradeChecklistMessage.value.message.uuid ===
@@ -193,20 +237,29 @@ export default function TradeChecklistMeetingLocationView({
         title={t('tradeChecklist.options.MEETING_LOCATION')}
       >
         {!isMessageOutdated && (
-          <Stack gap="$2">
+          <XStack gap={actionGap}>
             <Button
-              text={t('vexlbot.copyAddressInfo')}
-              beforeIcon={copySvg}
+              f={1}
               onPress={() => {
                 Clipboard.setString(
-                  `${message.message.tradeChecklistUpdate?.location?.data.note}, ${message.message.tradeChecklistUpdate?.location?.data.address}`
+                  getMeetingLocationClipboardText({
+                    address:
+                      message.message.tradeChecklistUpdate?.location?.data
+                        .address ?? '',
+                    note: message.message.tradeChecklistUpdate?.location?.data
+                      .note,
+                  })
                 )
                 setToastNotification(toastContent)
               }}
+              icon={
+                <Copy color={tokens.color.black100.val} size={actionIconSize} />
+              }
               size="small"
-              variant="primary"
-              iconFill={getTokens().color.main.val}
-            />
+              variant="secondary"
+            >
+              {t('vexlbot.copyAddressInfo')}
+            </Button>
             {message.state === 'received' && (
               <Button
                 onPress={() => {
@@ -225,12 +278,16 @@ export default function TradeChecklistMeetingLocationView({
                     })
                   }
                 }}
+                icon={
+                  <Map color={secondaryActionIconColor} size={actionIconSize} />
+                }
                 variant="secondary"
                 size="small"
-                text={t('common.respond')}
-              />
+              >
+                {t('common.respond')}
+              </Button>
             )}
-          </Stack>
+          </XStack>
         )}
       </VexlbotActionCard>
     )

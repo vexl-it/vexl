@@ -6,7 +6,6 @@ import Image from '../../Image'
 import copySvg from '../../images/copySvg'
 
 interface Props {
-  isLatest: boolean
   smallerText: string
   biggerText?: string
   bottomText?: string
@@ -17,7 +16,6 @@ interface Props {
 }
 
 export default function BigIconMessage({
-  isLatest,
   smallerText,
   bottomText,
   biggerText,
@@ -27,7 +25,7 @@ export default function BigIconMessage({
   onButtonPress,
 }: Props): React.ReactElement | null {
   return (
-    <Stack mb={isLatest ? '$10' : '$4'}>
+    <Stack>
       <YStack my="$5" gap="$4" alignItems="center">
         {!!icon && icon}
         <YStack ai="center">

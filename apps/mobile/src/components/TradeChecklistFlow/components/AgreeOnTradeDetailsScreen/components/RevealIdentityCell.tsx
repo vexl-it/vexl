@@ -40,6 +40,7 @@ function RevealIdentityCell(): React.ReactElement {
   const disabled = useMemo(() => {
     const revealIdentityAlreadySent =
       tradeChecklistIdentityData.sent && !tradeChecklistIdentityData.received
+
     const identityRevealDeclined =
       tradeChecklistIdentityData.sent && itemStatus === 'declined'
 
@@ -50,13 +51,17 @@ function RevealIdentityCell(): React.ReactElement {
     tradeChecklistIdentityData.sent,
   ])
 
-  if (identityRevealed || identityRevealTriggeredFromChat) return <></>
-
   return (
     <ChecklistCell
       icon={EyeShut}
       disabled={disabled}
-      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
+      state={
+        identityRevealed
+          ? ('completed' as const)
+          : identityRevealTriggeredFromChat
+            ? ('pending' as const)
+            : mapTradeChecklistItemStatusToUiState(itemStatus)
+      }
       pressable
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
       onPress={() => {
@@ -67,7 +72,7 @@ function RevealIdentityCell(): React.ReactElement {
             : 'RevealIdentityPhoto'
         )
       }}
-      headline="Reveal identity"
+      headline={t('tradeChecklist.revealIdentity')}
     />
   )
 }

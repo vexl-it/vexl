@@ -50,7 +50,6 @@ export type MessagesListItem =
       type: 'vexlBot'
       key: string
       data: TradingChecklistSuggestion
-      isLast?: boolean
     }
   | {
       type: 'typingIndicator'
@@ -95,7 +94,7 @@ function MessageItem({
     otherSideSupportsTradingChecklistAtom,
   } = useMolecule(chatMolecule)
   const {t} = useTranslation()
-  const {userName, image} = useAtomValue(otherSideDataAtom)
+  const {userName, image, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
@@ -115,7 +114,6 @@ function MessageItem({
     ) {
       return (
         <BigIconMessage
-          isLatest={item.isLatest}
           smallerText={t('messages.messagePreviews.incoming.INBOX_DELETED', {
             them: userName,
           })}
@@ -142,7 +140,6 @@ function MessageItem({
       return (
         <>
           <BigIconMessage
-            isLatest={direction !== 'incoming' && item.isLatest}
             smallerText={t(
               `messages.messagePreviews.${direction}.DELETE_CHAT`,
               {
@@ -171,7 +168,6 @@ function MessageItem({
     if (item.message.message.messageType === 'BLOCK_CHAT')
       return (
         <BigIconMessage
-          isLatest={item.isLatest}
           smallerText={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
             them: userName,
           })}
@@ -189,7 +185,6 @@ function MessageItem({
     if (item.message.message.messageType === 'INBOX_DELETED')
       return (
         <BigIconMessage
-          isLatest={item.isLatest}
           smallerText={t(
             `messages.messagePreviews.${direction}.INBOX_DELETED`,
             {
@@ -212,7 +207,8 @@ function MessageItem({
       item.message.message.messageType === 'APPROVE_REVEAL' ||
       item.message.message.messageType === 'DISAPPROVE_REVEAL' ||
       (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-        item.message.message.tradeChecklistUpdate?.identity)
+        item.message.message.tradeChecklistUpdate?.identity &&
+        !fullPhoneNumber)
     ) {
       return (
         <IdentityRevealMessageItem
@@ -229,12 +225,7 @@ function MessageItem({
       (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
         item.message.message.tradeChecklistUpdate?.contact)
     ) {
-      return (
-        <ContactRevealMessageItem
-          message={item.message}
-          isLatest={item.isLatest}
-        />
-      )
+      return <ContactRevealMessageItem message={item.message} />
     }
 
     if (

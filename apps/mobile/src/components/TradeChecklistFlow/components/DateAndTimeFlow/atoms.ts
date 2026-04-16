@@ -3,13 +3,13 @@ import {
   fromDateTime,
   UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array as ArrayE, Effect, pipe, Schema} from 'effect'
+import {Array as ArrayE, Schema} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import {DateTime, type DateTimeUnit} from 'luxon'
 import {type DateData} from 'react-native-calendars'
 import addToSortedArray from '../../../../utils/addToSortedArray'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
+import {globalDialogAtom} from '../../../GlobalDialog'
 import {
   checkIsOldDateTimeMessage,
   convertDateTimesToNewFormat,
@@ -264,23 +264,9 @@ export const isThereAnyAvailableDateTimeSelectedAtom = atom(
 export const noDateTimeSelectedActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
-  return pipe(
-    set(askAreYouSureActionAtom, {
-      variant: 'info',
-      steps: [
-        {
-          type: 'StepWithText',
-          title: t('tradeChecklist.dateAndTime.noTimeOptionSelected'),
-          description: t(
-            'tradeChecklist.dateAndTime.pleaseSelectAtLeastOneTime'
-          ),
-          positiveButtonText: t('common.close'),
-        },
-      ],
-    }),
-    Effect.match({
-      onSuccess: () => true,
-      onFailure: () => false,
-    })
-  )
+  return set(globalDialogAtom, {
+    title: t('tradeChecklist.dateAndTime.noTimeOptionSelected'),
+    subtitle: t('tradeChecklist.dateAndTime.pleaseSelectAtLeastOneTime'),
+    positiveButtonText: t('common.close'),
+  })
 })

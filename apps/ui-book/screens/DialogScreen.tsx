@@ -54,7 +54,7 @@ function DialogDemos({
               positiveButtonText: 'Confirm',
               negativeButtonText: 'Not now',
             })
-          ).then((confirmed: boolean) => {
+          ).then((confirmed) => {
             console.log('Confirmed:', confirmed)
           })
         }}
@@ -74,7 +74,7 @@ function DialogDemos({
               positiveButtonText: 'Delete',
               negativeButtonText: 'Cancel',
             })
-          ).then((confirmed: boolean) => {
+          ).then((confirmed) => {
             console.log('Delete confirmed:', confirmed)
           })
         }}

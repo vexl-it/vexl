@@ -1,4 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
+import {useNavigation} from '@react-navigation/native'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
   Copy,
@@ -26,6 +27,7 @@ import {
 } from 'react-native'
 import Autolink from 'react-native-autolink'
 import {Stack, Text, useTheme} from 'tamagui'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -131,9 +133,10 @@ function TextMessage({
     sendMessageAtom,
     replyToMessageAtom,
     otherSideDataAtom,
-    openedImageUriAtom,
     lastMessageReadByOtherSideAtAtom,
   } = useMolecule(chatMolecule)
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const sendMessage = useSetAtom(sendMessageAtom)
   const lastMessageReadByOtherSideAt = useAtomValue(
     lastMessageReadByOtherSideAtAtom
@@ -143,7 +146,6 @@ function TextMessage({
   const {isExtended, hideExtended, toggleExtended} = useIsExtended(messageItem)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const openImage = useSetAtom(openedImageUriAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const onPressResend = useCallback(() => {
@@ -173,8 +175,11 @@ function TextMessage({
 
   const onImagePressed = useCallback(() => {
     if (messageItem.type !== 'message') return
-    openImage(messageItem.message.message.image)
-  }, [messageItem, openImage])
+    if (!messageItem.message.message.image) return
+    navigation.navigate('ChatImagePreview', {
+      imageUri: resolveLocalUri(messageItem.message.message.image),
+    })
+  }, [messageItem, navigation])
 
   if (messageItem.type !== 'message') return null
   const {message, isLatest, time} = messageItem
@@ -188,21 +193,7 @@ function TextMessage({
     ? theme.accentYellowPrimary.val
     : theme.backgroundTertiary.val
 
-  const {messageText, italic} = (() => {
-    if (shouldHaveItalicPrefix(message.message?.messageType)) {
-      return {
-        messageText: t(
-          `messages.textMessageTypes.${message.message.messageType}`,
-          {
-            message: message.message.text,
-            version: message.message.myVersion,
-          }
-        ),
-        italic: true,
-      }
-    }
-    return {messageText: message.message.text, italic: false}
-  })()
+  const messageText = message.message.text
 
   return (
     <TouchableWithoutFeedback onPress={hideExtended}>
@@ -284,17 +275,15 @@ function TextMessage({
                   style.link,
                   {
                     color: messageTextColor,
-                    fontStyle: italic ? 'italic' : undefined,
                     fontSize: 18,
-                    fontFamily: italic ? undefined : 'TTSatoshi500',
+                    fontFamily: 'TTSatoshi500',
                   },
                 ]}
                 style={{
                   color: messageTextColor,
                   fontSize: 18,
                   lineHeight: 24,
-                  fontFamily: italic ? undefined : 'TTSatoshi500',
-                  fontStyle: italic ? 'italic' : undefined,
+                  fontFamily: 'TTSatoshi500',
                 }}
               />
             </Stack>
@@ -345,7 +334,6 @@ function TextMessage({
             variant="micro"
             textAlign={isMine ? 'right' : 'left'}
             marginTop="$3"
-            marginBottom="$3"
           >
             {message.state === 'sending' && t('messages.sending')}
             {message.state === 'sent' &&

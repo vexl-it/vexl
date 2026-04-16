@@ -1,7 +1,7 @@
 import {type ViewToken} from '@shopify/flash-list'
 import {type MessageType} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
-import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
   effectToTaskEither,
   taskEitherToEffect,
@@ -70,9 +70,9 @@ import {
 } from '../../../utils/navigation'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {showErrorAlert} from '../../ErrorAlert'
+import {globalDialogAtom} from '../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
 import {type MessagesListItem} from '../components/MessageItem'
@@ -379,28 +379,31 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
         const feedbackFinished = get(chatFeedbackAtom).finished
 
-        if (!skipAsk)
-          yield* _(
-            set(askAreYouSureActionAtom, {
-              steps: [
-                {
-                  type: 'StepWithText',
-                  title: t('messages.deleteChatQuestion'),
-                  description: t('messages.deleteChatExplanation1'),
-                  negativeButtonText: t('common.back'),
-                  positiveButtonText: t('common.yesDelete'),
-                },
-                {
-                  type: 'StepWithText',
-                  title: t('common.youSure'),
-                  description: t('messages.deleteChatExplanation2'),
-                  negativeButtonText: t('common.nope'),
-                  positiveButtonText: t('messages.deleteChat'),
-                },
-              ],
-              variant: 'info',
+        if (!skipAsk) {
+          const confirmedDelete = yield* _(
+            set(globalDialogAtom, {
+              title: t('messages.deleteChatQuestion'),
+              subtitle: t('messages.deleteChatExplanation1'),
+              negativeButtonText: t('common.back'),
+              positiveButtonText: t('common.yesDelete'),
+              positiveButtonVariant: 'destructive',
             })
           )
+
+          if (!confirmedDelete) return false
+
+          const confirmedDeleteAgain = yield* _(
+            set(globalDialogAtom, {
+              title: t('common.youSure'),
+              subtitle: t('messages.deleteChatExplanation2'),
+              negativeButtonText: t('common.nope'),
+              positiveButtonText: t('messages.deleteChat'),
+              positiveButtonVariant: 'destructive',
+            })
+          )
+
+          if (!confirmedDeleteAgain) return false
+        }
 
         set(loadingOverlayDisplayedAtom, true)
 
@@ -429,14 +432,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         Effect.catchAll((e) => {
           set(loadingOverlayDisplayedAtom, false)
 
-          if (e._tag !== 'UserDeclinedError')
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(e, t) ??
+              t('common.somethingWentWrongDescription'),
+            error: e,
+          })
 
           return Effect.succeed(false)
         })
@@ -452,16 +454,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     const {t} = get(translationAtom)
 
     return pipe(
-      set(askAreYouSureActionAtom, {
-        steps: [
-          {
-            type: 'StepWithChildren',
-            MainSectionComponent: ChatFeedbackDialogContent,
-            positiveButtonText: t('common.close'),
-            backgroundColor: '$grey',
-          },
-        ],
-        variant: 'info',
+      set(globalDialogAtom, {
+        title: ' ',
+        positiveButtonText: t('common.close'),
+        children: <ChatFeedbackDialogContent />,
       }),
       Effect.ignore
     )
@@ -471,39 +467,37 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const blockChatWithUiFeedbackAtom = atom(null, async (get, set) => {
     const {t} = get(translationAtom)
 
+    const confirmedBlock = await Effect.runPromise(
+      set(globalDialogAtom, {
+        title: t('messages.blockForewerQuestion'),
+        subtitle: t('messages.blockChatExplanation1'),
+        negativeButtonText: t('common.nope'),
+        positiveButtonText: t('messages.yesBlock'),
+        positiveButtonVariant: 'destructive',
+      })
+    )
+
+    if (!confirmedBlock) return false
+
+    const confirmedBlockAgain = await Effect.runPromise(
+      set(globalDialogAtom, {
+        title: t('common.youSure'),
+        subtitle: t('messages.blockChatExplanation2'),
+        negativeButtonText: t('common.nope'),
+        positiveButtonText: t('messages.yesBlock'),
+        positiveButtonVariant: 'destructive',
+      })
+    )
+
+    if (!confirmedBlockAgain) return false
+
+    set(loadingOverlayDisplayedAtom, true)
+
     return await pipe(
-      set(askAreYouSureActionAtom, {
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('messages.blockForewerQuestion'),
-            description: t('messages.blockChatExplanation1'),
-            negativeButtonText: t('common.nope'),
-            positiveButtonText: t('messages.yesBlock'),
-          },
-          {
-            type: 'StepWithText',
-            title: t('common.youSure'),
-            description: t('messages.blockChatExplanation2'),
-            negativeButtonText: t('common.nope'),
-            positiveButtonText: t('messages.yesBlock'),
-          },
-        ],
-        variant: 'danger',
-      }),
-      effectToTaskEither,
-      TE.map((val) => {
-        set(loadingOverlayDisplayedAtom, true)
-        return val
-      }),
-      TE.chainW(() => set(blockChatAtom, {text: 'Blocking chat'})),
+      set(blockChatAtom, {text: 'Blocking chat'}),
       TE.match(
         (e) => {
           set(loadingOverlayDisplayedAtom, false)
-          if (e._tag === 'UserDeclinedError') {
-            return false
-          }
-
           showErrorAlert({
             title: t('common.somethingWentWrong'),
             description:
@@ -560,8 +554,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
   const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
-
-  const openedImageUriAtom = atom<UriString | undefined>(undefined)
 
   const disapproveIdentityRevealWithUiFeedbackAtom = atom(
     null,
@@ -620,34 +612,40 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           positiveButtonText: t('common.yes'),
         }
       })()
+      const userDeclinedError = toBasicError('UserDeclinedError')(
+        new Error('Declined')
+      )
 
       return await pipe(
-        set(askAreYouSureActionAtom, {
-          steps: [{...modalContent, type: 'StepWithText'}],
-          variant: 'info',
+        set(globalDialogAtom, {
+          title: modalContent.title,
+          subtitle: modalContent.description,
+          negativeButtonText: modalContent.negativeButtonText,
+          positiveButtonText: modalContent.positiveButtonText,
         }),
         effectToTaskEither,
-        TE.map((val) => {
-          set(loadingOverlayDisplayedAtom, true)
-          return val
-        }),
-        TE.match(
-          (e) => {
-            if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
+        TE.chainEitherK((confirmed) => {
+          if (!confirmed) {
+            if (type === 'RESPOND_REVEAL') {
               return E.right(
                 'DISAPPROVE_CONTACT_REVEAL' as RevealContactMessageType
               )
             }
-            return E.left(e)
-          },
-          () =>
-            E.right(
-              type === 'RESPOND_REVEAL'
-                ? ('APPROVE_CONTACT_REVEAL' as RevealContactMessageType)
-                : ('REQUEST_CONTACT_REVEAL' as RevealContactMessageType)
-            )
-        ),
-        TE.chainW((type) => set(revealContactAtom, {type})),
+
+            return E.left(userDeclinedError)
+          }
+
+          return E.right(
+            type === 'RESPOND_REVEAL'
+              ? ('APPROVE_CONTACT_REVEAL' as RevealContactMessageType)
+              : ('REQUEST_CONTACT_REVEAL' as RevealContactMessageType)
+          )
+        }),
+        TE.map((revealType) => {
+          set(loadingOverlayDisplayedAtom, true)
+          return revealType
+        }),
+        TE.chainW((revealType) => set(revealContactAtom, {type: revealType})),
         TE.match(
           (e) => {
             set(loadingOverlayDisplayedAtom, false)
@@ -1047,25 +1045,28 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             event,
           })
         ),
-        TE.chainFirstW(({createEventActionResult: {action}}) =>
-          set(askAreYouSureActionAtom, {
-            steps: [
-              {
-                type: 'StepWithText',
-                title:
-                  action === 'created'
-                    ? t('tradeChecklist.eventAddedSuccess')
-                    : t('tradeChecklist.eventEditSuccess'),
-                description:
-                  action === 'created'
-                    ? t('tradeChecklist.eventAddedSuccessDescription')
-                    : t('tradeChecklist.eventEditSuccessDescription'),
-                positiveButtonText: t('common.close'),
-              },
-            ],
-            variant: 'info',
-          }).pipe(effectToTaskEither)
-        ),
+        TE.chainFirstW(({createEventActionResult: {action}}) => {
+          const userDeclinedError = toBasicError('UserDeclinedError')(
+            new Error('Declined')
+          )
+
+          return set(globalDialogAtom, {
+            title:
+              action === 'created'
+                ? t('tradeChecklist.eventAddedSuccess')
+                : t('tradeChecklist.eventEditSuccess'),
+            subtitle:
+              action === 'created'
+                ? t('tradeChecklist.eventAddedSuccessDescription')
+                : t('tradeChecklist.eventEditSuccessDescription'),
+            positiveButtonText: t('common.close'),
+          }).pipe(
+            effectToTaskEither,
+            TE.chainW((confirmed) =>
+              confirmed ? TE.right(undefined) : TE.left(userDeclinedError)
+            )
+          )
+        }),
         TE.match(
           (e) => {
             set(loadingOverlayDisplayedAtom, false)
@@ -1148,20 +1149,16 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             result.left._tag === 'RequestCancelledError' ||
             result.left._tag === 'SenderInboxDoesNotExistError'
           ) {
-            yield* _(
-              set(askAreYouSureActionAtom, {
-                variant: 'info',
-                steps: [
-                  {
-                    type: 'StepWithText',
-                    title: t('common.somethingWentWrong'),
-                    description: t('offer.requestWasCancelledOrAccountDeleted'),
-                    positiveButtonText: t('common.yesDelete'),
-                    negativeButtonText: t('common.back'),
-                  },
-                ],
+            const shouldDeleteChat = yield* _(
+              set(globalDialogAtom, {
+                title: t('common.somethingWentWrong'),
+                subtitle: t('offer.requestWasCancelledOrAccountDeleted'),
+                positiveButtonText: t('common.yesDelete'),
+                negativeButtonText: t('common.back'),
               })
             )
+
+            if (!shouldDeleteChat) return false
 
             yield* _(
               set(deleteChatWithUiFeedbackAtom, {
@@ -1206,12 +1203,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         }
 
         return true
-      }).pipe(
-        Effect.catchTag('UserDeclinedError', () => {
-          set(loadingOverlayDisplayedAtom, false)
-          return Effect.succeed(false)
-        })
-      )
+      })
     }
   )
 
@@ -1247,7 +1239,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     replyToMessageAtom,
     messageOptionsExtendedAtom,
     theirOfferAndNotReportedAtom,
-    openedImageUriAtom,
     forceShowHistoryAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
     canBeRerequestedAtom: createCanChatBeRerequestedAtom(chatWithMessagesAtom),

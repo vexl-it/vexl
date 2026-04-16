@@ -8,8 +8,10 @@ import {
 import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
-import {addContactToPhoneWithUIFeedbackActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
+import {globalDialogAtom} from '../../../../components/GlobalDialog'
+import {addContactToPhoneActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
 import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
+import {showUpsertContactDialogAtom} from '../../../../state/contacts/atom/showUpsertContactDialogAtom'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
   StoredContactWithComputedValues,
@@ -23,10 +25,8 @@ import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getVal
 import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
-import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
-import userSvg from '../../../images/userSvg'
 
 export const ContactsSelectScope = createScope<{
   normalizedContacts: StoredContactWithComputedValues[]
@@ -296,33 +296,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       const {t} = get(translationAtom)
 
       return Effect.gen(function* (_) {
-        const result = yield* _(
-          set(askAreYouSureActionAtom, {
-            variant: 'info',
-            steps: [
-              {
-                title: t('addContactDialog.addContact'),
-                description: t('addContactDialog.addThisPhoneNumber'),
-                subtitle: contact.computedValues.normalizedNumber,
-                negativeButtonText: t('common.notNow'),
-                positiveButtonText: t('addContactDialog.addContact'),
-                type: 'StepWithInput',
-                textInputProps: {
-                  autoFocus: true,
-                  autoCorrect: false,
-                  placeholder: t('addContactDialog.addContactName'),
-                  variant: 'greyOnWhite',
-                  icon: userSvg,
-                },
-              },
-            ],
+        const {contactName: customName, saveToPhone} = yield* _(
+          set(showUpsertContactDialogAtom, {
+            type: 'create',
+            contactName: contact.info.name,
+            contactNumber: contact.computedValues.normalizedNumber,
+            phoneContactId: contact.info.nonUniqueContactId,
           })
         )
-
-        const customName =
-          result[0]?.type === 'inputResult'
-            ? result[0].value
-            : contact.info.name
 
         set(storedContactsAtom, (prev) => [
           ...prev,
@@ -333,17 +314,17 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           },
         ])
 
-        const contactsPermissionsGranted = yield* _(
-          areContactsPermissionsGranted()
-        )
-
-        const addToPhoneSuccess = contactsPermissionsGranted
+        const addToPhoneSuccess = saveToPhone
           ? yield* _(
-              set(addContactToPhoneWithUIFeedbackActionAtom, {
-                customName,
-                number: contact.computedValues.normalizedNumber,
-              }),
-              Effect.catchTag('UserDeclinedError', () => Effect.succeed(false)),
+              areContactsPermissionsGranted(),
+              Effect.flatMap((contactsPermissionsGranted) =>
+                contactsPermissionsGranted
+                  ? set(addContactToPhoneActionAtom, {
+                      customName,
+                      number: contact.computedValues.normalizedNumber,
+                    })
+                  : Effect.succeed(false)
+              ),
               Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
                 showErrorAlert({
                   title: t('contacts.errorAddingContactToYourPhoneContacts'),
@@ -371,23 +352,17 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
         if (submitContactsSuccess) {
           yield* _(
-            set(askAreYouSureActionAtom, {
-              steps: [
+            set(globalDialogAtom, {
+              title: t('addContactDialog.contactAdded'),
+              subtitle: t(
+                addToPhoneSuccess
+                  ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
+                  : 'addContactDialog.youHaveAddedContactToVexlContacts',
                 {
-                  type: 'StepWithText',
-                  title: t('addContactDialog.contactAdded'),
-                  description: t(
-                    addToPhoneSuccess
-                      ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
-                      : 'addContactDialog.youHaveAddedContactToVexlContacts',
-                    {
-                      contactName: customName,
-                    }
-                  ),
-                  positiveButtonText: t('common.niceWithExclamationMark'),
-                },
-              ],
-              variant: 'info',
+                  contactName: customName,
+                }
+              ),
+              positiveButtonText: t('common.niceWithExclamationMark'),
             })
           )
         }
@@ -402,33 +377,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         const {t} = get(translationAtom)
         const contacts = get(storedContactsAtom)
 
-        const result = yield* _(
-          set(askAreYouSureActionAtom, {
-            variant: 'info',
-            steps: [
-              {
-                title: t('updateContactDialog.updateContact'),
-                description: t('updateContactDialog.description'),
-                subtitle: contact.computedValues.normalizedNumber,
-                negativeButtonText: t('common.cancel'),
-                positiveButtonText: t('common.save'),
-                type: 'StepWithInput',
-                textInputProps: {
-                  autoFocus: true,
-                  autoCorrect: false,
-                  variant: 'greyOnWhite',
-                  icon: userSvg,
-                  placeholder: contact.info.name,
-                },
-              },
-            ],
+        const {contactName: customName, saveToPhone} = yield* _(
+          set(showUpsertContactDialogAtom, {
+            type: 'edit',
+            contactName: contact.info.name,
+            contactNumber: contact.computedValues.normalizedNumber,
+            phoneContactId: contact.info.nonUniqueContactId,
           })
         )
-
-        const customName =
-          result[0]?.type === 'inputResult'
-            ? result[0].value
-            : contact.info.name
 
         const updatedContacts = pipe(
           contacts,
@@ -448,21 +404,35 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
         set(storedContactsAtom, updatedContacts)
 
+        if (saveToPhone) {
+          yield* _(
+            areContactsPermissionsGranted(),
+            Effect.flatMap((contactsPermissionsGranted) =>
+              contactsPermissionsGranted
+                ? set(addContactToPhoneActionAtom, {
+                    customName,
+                    number: contact.computedValues.normalizedNumber,
+                  })
+                : Effect.succeed(false)
+            ),
+            Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
+              showErrorAlert({
+                title: t('contacts.errorAddingContactToYourPhoneContacts'),
+                error: e,
+              })
+
+              return Effect.succeed(false)
+            })
+          )
+        }
+
         reloadContacts()
 
         yield* _(
-          set(askAreYouSureActionAtom, {
-            steps: [
-              {
-                type: 'StepWithText',
-                title: t('common.success'),
-                description: t(
-                  'updateContactDialog.contactSuccessfullyUpdated'
-                ),
-                positiveButtonText: t('common.close'),
-              },
-            ],
-            variant: 'info',
+          set(globalDialogAtom, {
+            title: t('addContactDialog.contactUpdated'),
+            subtitle: t('addContactDialog.youHaveSuccessfullyUpdatedContact'),
+            positiveButtonText: t('common.niceWithExclamationMark'),
           })
         )
       }).pipe(Effect.ignore)

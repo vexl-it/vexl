@@ -3,7 +3,6 @@ import {
   PencilWriteEdit,
   RowCheckbox,
   Typography,
-  XmarkCancelClose,
 } from '@vexl-next/ui'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
@@ -52,12 +51,6 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
     <TradeChecklistItemPageLayout
       header={{
         title: t('tradeChecklist.revealIdentity.summaryTitle'),
-        rightActions: [
-          {
-            icon: XmarkCancelClose,
-            onPress: closeFlow,
-          },
-        ],
       }}
       bottomButton={{
         disabled: !revealIdentityUsername.trim(),

@@ -1,7 +1,4 @@
-import {
-  effectToTask,
-  effectToTaskEither,
-} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Typography, lightTheme} from '@vexl-next/ui'
 import {Array as ArrayE, Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
@@ -12,7 +9,7 @@ import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import {askAreYouSureActionAtom} from '../../../../../AreYouSureDialog'
+import {globalDialogAtom} from '../../../../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   addDateAndTimeSuggestionsActionAtom,
@@ -38,7 +35,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   const isThereAnyOutdatedDateTime = useAtomValue(
     isThereAnyOutdatedDateTimeAtom
   )
-  const setInfoModal = useSetAtom(askAreYouSureActionAtom)
+  const setInfoModal = useSetAtom(globalDialogAtom)
   const setNoDateTimeSelected = useSetAtom(noDateTimeSelectedActionAtom)
 
   const uniqueAvailableDates = useAtomValue(uniqueAvailableDatesAtom)
@@ -100,21 +97,15 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
     }
 
     if (isThereAnyOutdatedDateTime) {
-      void pipe(
+      void Effect.runFork(
         setInfoModal({
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('tradeChecklist.dateAndTime.pastDatesAndTimesFound'),
-              description: t(
-                'tradeChecklist.dateAndTime.pleaseRemovePastDatesAndTimes'
-              ),
-              positiveButtonText: t('common.ok'),
-            },
-          ],
-        }).pipe(effectToTaskEither)
-      )()
+          title: t('tradeChecklist.dateAndTime.pastDatesAndTimesFound'),
+          subtitle: t(
+            'tradeChecklist.dateAndTime.pleaseRemovePastDatesAndTimes'
+          ),
+          positiveButtonText: t('common.ok'),
+        })
+      )
     } else {
       addDateAndTimeSuggestions()
 
@@ -172,9 +163,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
       <Stack pt="$4" pb="$13" gap="$5">
         <Stack gap="$3">
           <Typography variant="description" color="$foregroundSecondary">
-            {isThereAnyAvailableDateTimeSelected ? 'true' : 'false'}
-            Pick when you&apos;re free. Use the toggle below to apply times to
-            all days.
+            {t('tradeChecklist.time.description')}
           </Typography>
         </Stack>
         <Stack gap="$3" backgroundColor={lightTheme.backgroundPrimary}>

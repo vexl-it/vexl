@@ -1,157 +1,97 @@
-import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {effectToEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {useNavigation} from '@react-navigation/native'
 import {
-  AddUserPersonContact,
-  ArrowsHorizontal,
-  Avatar,
   Button,
+  CellPhoneDisabled,
+  Stack,
   Typography,
   XStack,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Option, Schema} from 'effect'
-import * as E from 'fp-ts/Either'
-import {pipe} from 'fp-ts/function'
-import {useAtomValue, useSetAtom} from 'jotai'
-import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {SvgXml} from 'react-native-svg'
-import {useTheme} from 'tamagui'
+import {Effect} from 'effect/index'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import React, {useCallback} from 'react'
 import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
-import {addContactWithUiFeedbackActionAtom} from '../../../state/contacts/atom/addContactWithUiFeedbackAtom'
-import {hashPhoneNumber} from '../../../state/contacts/utils'
 import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
 } from '../../../state/session/userDataAtoms'
 import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import reportError from '../../../utils/reportError'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
+import {
+  revealContactActionAtom,
+  submitTradeChecklistUpdatesActionAtom,
+} from '../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
+import RevealedInfoCard from './RevealedInfoCard'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
-const contactRevealAvatarSize = 80
 const declinedPhoneSvg = blockPhoneNumberRevealSvg.xml.replace(
   '#EE675E',
   '#FFFFFF'
 )
 
-function ContactRevealAvatar({
-  image,
-  onPress,
-}: {
-  image: RealLifeInfo['image']
-  onPress?: () => void
-}): React.JSX.Element {
-  const avatar =
-    image.type === 'imageUri' ? (
-      <Avatar
-        customSize={contactRevealAvatarSize}
-        source={{uri: resolveLocalUri(image.imageUri)}}
-      />
-    ) : (
-      <Avatar customSize={contactRevealAvatarSize}>
-        <SvgXml
-          width={contactRevealAvatarSize}
-          height={contactRevealAvatarSize}
-          xml={image.svgXml.xml}
-        />
-      </Avatar>
-    )
+function isIdentityRevealApprovalMessage(
+  message?: ChatMessageWithState
+): boolean {
+  if (!message) return false
 
-  return onPress ? (
-    <TouchableOpacity onPress={onPress}>{avatar}</TouchableOpacity>
-  ) : (
-    avatar
-  )
-}
-
-function ContactRevealSide({
-  image,
-  name,
-  phoneNumber,
-  onAvatarPress,
-}: {
-  image: RealLifeInfo['image']
-  name: string
-  phoneNumber?: string
-  onAvatarPress?: () => void
-}): React.JSX.Element {
   return (
-    <YStack alignItems="center" flex={1} gap="$2">
-      <ContactRevealAvatar image={image} onPress={onAvatarPress} />
-      <YStack alignItems="center" gap="$1">
-        <Typography
-          color="$foregroundPrimary"
-          textAlign="center"
-          variant="titlesSmall"
-        >
-          {name}
-        </Typography>
-        {phoneNumber ? (
-          <Typography
-            color="$foregroundSecondary"
-            textAlign="center"
-            variant="paragraph"
-          >
-            {phoneNumber}
-          </Typography>
-        ) : null}
-      </YStack>
-    </YStack>
+    message.message.messageType === 'APPROVE_REVEAL' ||
+    ((message.state === 'sent' || message.state === 'received') &&
+      message.message.tradeChecklistUpdate?.identity?.status ===
+        'APPROVE_REVEAL')
   )
 }
 
 function ContactRevealMessageItem({
   message,
-  isLatest,
 }: {
   message: ChatMessageWithState
-  isLatest: boolean
 }): React.ReactElement | null {
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {t} = useTranslation()
   const {
-    openedImageUriAtom,
     otherSideDataAtom,
     contactRevealStatusAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
     revealContactWithUiFeedbackAtom,
-    isContactAlreadyInContactsListAtom,
     contactRevealRequestMessageIdAtom,
   } = useMolecule(chatMolecule)
+
+  const store = useStore()
   const {image, userName, partialPhoneNumber, fullPhoneNumber} =
     useAtomValue(otherSideDataAtom)
-  const chatId = useAtomValue(chatIdAtom)
-  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
+  const revealContact = useSetAtom(revealContactActionAtom)
   const myRealLifeInfo = useAtomValue(userDataRealOrAnonymizedAtom)
   const myPhoneNumber = useAtomValue(userPhoneNumberAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
-  const contactRevealTriggeredFromTradeChecklist = useAtomValue(
-    contactRevealTriggeredFromTradeChecklistAtom
-  )
-  const isContactAlreadyInContactsList = useAtomValue(
-    isContactAlreadyInContactsListAtom
-  )
+
   const contactRevealRequestMessageId = useAtomValue(
     contactRevealRequestMessageIdAtom
   )
-  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
-  const revealContactFromQuickActionBanner = useSetAtom(
-    revealContactFromQuickActionBannerAtom
+
+  const onReveal = useCallback(
+    (type: 'approve' | 'deny') => {
+      revealContact({
+        status: type === 'approve' ? 'APPROVE_REVEAL' : 'DISAPPROVE_REVEAL',
+        fullPhoneNumber: myRealLifeInfo.fullPhoneNumber,
+      })
+
+      Effect.runFork(store.set(submitTradeChecklistUpdatesActionAtom))
+    },
+    [revealContact, myRealLifeInfo.fullPhoneNumber, store]
   )
-  const addRevealedContact = useSetAtom(addContactWithUiFeedbackActionAtom)
-  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
+
   const [contactRevealRequestHidden, hideContactRevealRequest] =
     useHideActionForMessage(contactRevealRequestMessageId)
-  const theme = useTheme()
 
   const isContactRevealRequest =
     message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
@@ -163,25 +103,35 @@ function ContactRevealMessageItem({
     ? getInternationalPhoneNumber(fullPhoneNumber)
     : partialPhoneNumber
 
-  const onRespondToReveal = (): void => {
-    if (contactRevealTriggeredFromTradeChecklist) {
-      void revealContactFromQuickActionBanner({chatId, inboxKey})
-      return
-    }
-
-    void revealContact('RESPOND_REVEAL')
-  }
-
   if (isContactRevealRequest && contactRevealStatus === 'theyAsked') {
     return (
       <VexlbotActionCard
-        description="The other person wants to exchange phone numbers"
+        description={t('vexlBot.phoneNumber.doYouWantToShare')}
         statusLabel={t('vexlbot.reactionRequired')}
-        title="Do you want to share your phone number?"
+        title={t('vexlBot.phoneNumber.requested', {them: userName})}
       >
-        <Button onPress={onRespondToReveal} size="medium" variant="primary">
-          {t('common.respond')}
-        </Button>
+        <XStack f={1} gap="$2">
+          <Button
+            f={1}
+            onPress={() => {
+              onReveal('deny')
+            }}
+            size="medium"
+            variant="secondary"
+          >
+            {t('common.noThanks')}
+          </Button>
+          <Button
+            f={1}
+            onPress={() => {
+              onReveal('approve')
+            }}
+            size="medium"
+            variant="primary"
+          >
+            {t('common.letsdothis')}
+          </Button>
+        </XStack>
       </VexlbotActionCard>
     )
   }
@@ -193,18 +143,11 @@ function ContactRevealMessageItem({
   ) {
     return (
       <VexlbotActionCard
-        description="You asked to exchange phone numbers"
-        onClosePress={hideContactRevealRequest}
-        title="Phone number request sent"
-      >
-        <Typography
-          color="$foregroundSecondary"
-          textAlign="center"
-          variant="paragraph"
-        >
-          We&apos;ll share phone numbers once the other person agrees.
-        </Typography>
-      </VexlbotActionCard>
+        title={t('vexlBot.phoneNumber.requestSent', {them: userName})}
+        statusLabel={t('common.pending')}
+        statusVariant="waitingForConfirmation"
+        description={t('vexlBot.phoneNumber.requested', {them: userName})}
+      ></VexlbotActionCard>
     )
   }
 
@@ -216,103 +159,29 @@ function ContactRevealMessageItem({
         'APPROVE_REVEAL')
   ) {
     return (
-      <YStack mb={isLatest ? '$10' : '$4'} mt="$4" mx="$4">
-        <YStack
-          alignItems="center"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$6"
-          gap="$5"
-          padding="$5"
-          width="100%"
-        >
-          <Typography
-            color="$foregroundPrimary"
-            textAlign="center"
-            variant="titlesSmall"
-          >
-            {t('messages.phoneNumberRevealed')}
-          </Typography>
-          <XStack alignItems="center" gap="$4" width="100%">
-            <ContactRevealSide
-              image={myRealLifeInfo.image}
-              name={myRealLifeInfo.userName}
-              phoneNumber={getInternationalPhoneNumber(myPhoneNumber)}
-            />
-            <ArrowsHorizontal color={theme.foregroundPrimary.val} size={28} />
-            <ContactRevealSide
-              image={image}
-              name={userName}
-              onAvatarPress={
-                image.type === 'imageUri'
-                  ? () => {
-                      setOpenedImageUri(resolveLocalUri(image.imageUri))
-                    }
-                  : undefined
-              }
-              phoneNumber={otherSidePhoneNumberText}
-            />
-          </XStack>
-          {!isContactAlreadyInContactsList && fullPhoneNumber ? (
-            <TouchableOpacity
-              onPress={() => {
-                pipe(
-                  fullPhoneNumber,
-                  Schema.decodeUnknownEither(E164PhoneNumber),
-                  E.bindTo('normalizedNumber'),
-                  E.bindW('hash', ({normalizedNumber}) =>
-                    hashPhoneNumber(normalizedNumber)
-                  ),
-                  E.map(({normalizedNumber, hash}) => {
-                    void addRevealedContact({
-                      info: {
-                        name: userName,
-                        numberToDisplay: fullPhoneNumber,
-                        rawNumber: fullPhoneNumber,
-                        label: Option.none(),
-                        nonUniqueContactId: Option.none(),
-                      },
-                      computedValues: {
-                        hash,
-                        normalizedNumber,
-                      },
-                    }).pipe(effectToEither)
-                  }),
-                  E.mapLeft((error) => {
-                    reportError(
-                      'warn',
-                      new Error(
-                        'Error while adding revealed contact from chat message'
-                      ),
-                      {
-                        error,
-                      }
-                    )
+      <RevealedInfoCard
+        contactName={userName}
+        fullPhoneNumber={fullPhoneNumber}
+        leftSide={{
+          image: myRealLifeInfo.image,
+          name: myRealLifeInfo.userName,
+          phoneNumber: getInternationalPhoneNumber(myPhoneNumber),
+        }}
+        rightSide={{
+          image,
+          name: userName,
+          onAvatarPress:
+            image.type === 'imageUri'
+              ? () => {
+                  navigation.navigate('ChatImagePreview', {
+                    imageUri: resolveLocalUri(image.imageUri),
                   })
-                )
-              }}
-            >
-              <XStack
-                alignItems="center"
-                backgroundColor="$foregroundPrimary"
-                borderRadius="$5"
-                gap="$2"
-                height="$10"
-                justifyContent="center"
-                paddingHorizontal="$4"
-                width="100%"
-              >
-                <AddUserPersonContact
-                  color={theme.backgroundPrimary.val}
-                  size={18}
-                />
-                <Typography color="$backgroundPrimary" variant="paragraph">
-                  Add to contacts
-                </Typography>
-              </XStack>
-            </TouchableOpacity>
-          ) : null}
-        </YStack>
-      </YStack>
+                }
+              : undefined,
+          phoneNumber: otherSidePhoneNumberText,
+        }}
+        title={t('messages.phoneNumberRevealed')}
+      />
     )
   }
 
@@ -324,26 +193,21 @@ function ContactRevealMessageItem({
           'DISAPPROVE_REVEAL'))
   ) {
     return (
-      <YStack mb="$4" mt="$4" mx="$4" maxWidth="84%">
+      <YStack mx="$4" mt="$4">
         <YStack
           alignItems="center"
           backgroundColor="$backgroundSecondary"
           borderRadius="$6"
-          gap="$1"
+          gap="$2"
           paddingHorizontal="$5"
           paddingVertical="$4"
           width="100%"
         >
-          <YStack
-            alignItems="center"
-            height={56}
-            justifyContent="center"
-            width={56}
-          >
-            <SvgXml height={32} width={32} xml={declinedPhoneSvg} />
-          </YStack>
+          <Stack mb="$3">
+            <CellPhoneDisabled size={32} color="$foregroundPrimary" />
+          </Stack>
           <Typography color="$foregroundPrimary" variant="paragraphDemibold">
-            Unknown phone number
+            {t('common.unknownPhoneNumber')}
           </Typography>
           <Typography
             color="$foregroundSecondary"
@@ -351,8 +215,8 @@ function ContactRevealMessageItem({
             variant="paragraphSmall"
           >
             {message.state === 'received'
-              ? 'The other person declined'
-              : 'You declined'}
+              ? t('common.theOtherPersonDeclined')
+              : t('common.youDeclined')}
           </Typography>
         </YStack>
       </YStack>

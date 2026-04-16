@@ -25,9 +25,11 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
+import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 import {getIconTagVariant, getIsOffering} from '../../../utils/offerHelpers'
+import {isDeveloperAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
@@ -99,11 +101,11 @@ export default function ChatInfoContent({
   const navigation =
     useNavigation<RootStackScreenProps<'ChatInfo'>['navigation']>()
   const {bottom} = useSafeAreaInsets()
-  const theme = useTheme()
   const {t} = useTranslation()
   const localizeNumber = useSetAtom(localizedDecimalNumberActionAtom)
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const reportOffer = useSetAtom(reportOfferActionAtom)
+  const isDeveloper = useAtomValue(isDeveloperAtom)
   const {
     canSendMessagesAtom,
     chatAtom,
@@ -146,6 +148,7 @@ export default function ChatInfoContent({
   const showRevealIdentityAction =
     canSendMessages && identityRevealStatus === 'notStarted'
   const showOfferDetailAction = !!offer
+  const showReceivedMessagesDebugAction = !!enableHiddenFeatures || isDeveloper
 
   const connectionTitle = useMemo(() => {
     if (!offer) return otherSideData.userName ?? t('offer.title')
@@ -329,6 +332,27 @@ export default function ChatInfoContent({
                   }}
                 />
               ) : null}
+            </YStack>
+          ) : null}
+
+          {showReceivedMessagesDebugAction ? (
+            <YStack
+              backgroundColor="$backgroundSecondary"
+              borderRadius="$5"
+              px="$5"
+            >
+              <ActionRow
+                showChevron
+                color="foregroundPrimary"
+                icon={DocumentsFiles}
+                label="Messages JSON"
+                onPress={() => {
+                  navigation.navigate('ChatReceivedMessagesDebug', {
+                    inboxKey,
+                    otherSideKey: chat.otherSide.publicKey,
+                  })
+                }}
+              />
             </YStack>
           ) : null}
 

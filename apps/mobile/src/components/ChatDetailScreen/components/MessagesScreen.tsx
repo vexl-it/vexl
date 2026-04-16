@@ -6,7 +6,6 @@ import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {chatMolecule} from '../atoms'
 import ChatTextInput from './ChatTextInput'
-import ImageZoomOverlay from './ImageZoomOverlay'
 import MessagesList from './MessagesList'
 import {MessagesScreenChatHeader} from './MessagesScreenChatHeader'
 import StickyHeader from './StickyHeader'
@@ -38,7 +37,6 @@ function MessagesScreen(): React.ReactElement {
           <ChatTextInput />
         </Stack>
       )}
-      <ImageZoomOverlay />
     </Stack>
   )
 }

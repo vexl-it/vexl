@@ -2,7 +2,7 @@ import {
   Avatar,
   avatarsSvg,
   Button,
-  IconButton,
+  Stack,
   TextTag,
   Typography,
   useTheme,
@@ -11,6 +11,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import React from 'react'
+import {TouchableOpacity} from 'react-native'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 type TextTagVariant = React.ComponentProps<typeof TextTag>['variant']
@@ -45,7 +46,7 @@ export default function VexlbotActionCard({
     title || description || (details && details.length > 0)
 
   return (
-    <YStack m="$4" maxWidth="84%" gap="$1" width="100%">
+    <YStack gap="$1" mt="$4" mx="$4">
       <XStack
         alignItems="center"
         backgroundColor="$backgroundTertiary"
@@ -79,9 +80,14 @@ export default function VexlbotActionCard({
             variant={statusVariant}
           />
         ) : onClosePress ? (
-          <IconButton onPress={onClosePress}>
-            <XmarkCancelClose color={theme.foregroundSecondary.val} size={24} />
-          </IconButton>
+          <TouchableOpacity onPress={onClosePress}>
+            <Stack>
+              <XmarkCancelClose
+                color={theme.foregroundSecondary.val}
+                size={24}
+              />
+            </Stack>
+          </TouchableOpacity>
         ) : null}
       </XStack>
 

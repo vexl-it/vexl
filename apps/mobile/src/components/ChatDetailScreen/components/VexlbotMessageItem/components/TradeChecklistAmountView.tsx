@@ -1,10 +1,19 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
+import {
+  Button,
+  Copy,
+  darkTheme,
+  lightTheme,
+  tokens,
+  useTheme,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, XStack, getTokens} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
@@ -19,14 +28,12 @@ import {
   localizedPercentActionAtom,
 } from '../../../../../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../../../../../utils/preferences'
-import Button from '../../../../Button'
 import {loadingOverlayDisplayedAtom} from '../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
-import copySvg from '../../../../images/copySvg'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
@@ -38,6 +45,7 @@ interface Props {
 function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const theme = useTheme()
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
@@ -95,6 +103,14 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   })
 
   const toastContent = t('common.copied')
+  const copyActionIconSize = tokens.size[6].val
+  const copyActionGap = tokens.space[2].val
+  const copyActionMinWidth = tokens.size[13].val
+  const isDarkTheme =
+    theme.backgroundPrimary.val === darkTheme.backgroundPrimary
+  const copyActionIconColor = isDarkTheme
+    ? darkTheme.accentHighlightPrimary
+    : lightTheme.accentHighlightPrimary
 
   const onAcceptButtonPress = useCallback(() => {
     if (amountData.received) {
@@ -130,6 +146,14 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
       inboxKey,
     })
   }, [amountData.received, chatId, inboxKey, navigation])
+
+  const copyValueToClipboard = useCallback(
+    (value: string) => {
+      Clipboard.setString(value)
+      setToastNotification(toastContent)
+    },
+    [setToastNotification, toastContent]
+  )
 
   if (!latestAmountDataMessage?.amountData.btcAmount) return null
 
@@ -205,75 +229,95 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
           statusVariant={statusVariant}
           title={t('tradeChecklist.options.CALCULATE_AMOUNT')}
         >
-          <Stack f={1} gap="$2">
-            <XStack ai="center" jc="space-between">
+          <YStack gap="$3">
+            <XStack flexWrap="wrap" gap={copyActionGap}>
               {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
                 <Button
-                  text="BTC"
-                  beforeIcon={copySvg}
+                  f={1}
+                  icon={
+                    <Copy
+                      color={copyActionIconColor}
+                      size={copyActionIconSize}
+                    />
+                  }
+                  minWidth={copyActionMinWidth}
                   onPress={() => {
-                    Clipboard.setString(
+                    copyValueToClipboard(
                       `${message.message.tradeChecklistUpdate?.amount?.btcAmount}`
                     )
-                    setToastNotification(toastContent)
                   }}
                   size="small"
-                  variant="primary"
-                  iconFill={getTokens().color.main.val}
-                />
+                  variant="secondary"
+                >
+                  BTC
+                </Button>
               )}
               {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
                 <Button
-                  text="SAT"
-                  beforeIcon={copySvg}
+                  f={1}
+                  icon={
+                    <Copy
+                      color={copyActionIconColor}
+                      size={copyActionIconSize}
+                    />
+                  }
+                  minWidth={copyActionMinWidth}
                   onPress={() => {
-                    Clipboard.setString(
+                    copyValueToClipboard(
                       `${Math.round(Number(message.message.tradeChecklistUpdate?.amount?.btcAmount) * SATOSHIS_IN_BTC)}`
                     )
-                    setToastNotification(toastContent)
                   }}
                   size="small"
-                  variant="primary"
-                  iconFill={getTokens().color.main.val}
-                />
+                  variant="secondary"
+                >
+                  SAT
+                </Button>
               )}
               {!!fiatAmount && (
                 <Button
-                  text={currencies[tradeOrOriginOfferCurrency].code}
-                  beforeIcon={copySvg}
+                  f={1}
+                  icon={
+                    <Copy
+                      color={copyActionIconColor}
+                      size={copyActionIconSize}
+                    />
+                  }
+                  minWidth={copyActionMinWidth}
                   onPress={() => {
-                    Clipboard.setString(`${fiatAmount}`)
-                    setToastNotification(toastContent)
+                    copyValueToClipboard(`${fiatAmount}`)
                   }}
                   size="small"
-                  variant="primary"
-                  iconFill={getTokens().color.main.val}
-                />
+                  variant="secondary"
+                >
+                  {currencies[tradeOrOriginOfferCurrency].code}
+                </Button>
               )}
             </XStack>
             {!isMessageOutdated &&
               latestAmountDataMessage.by === 'them' &&
               latestAmountDataMessage.status === 'pending' && (
-                <XStack ai="center" jc="space-between" gap="$2">
+                <XStack gap={copyActionGap}>
                   <Button
-                    fullSize
                     disabled={!amountData?.received}
+                    f={1}
                     onPress={onEditPress}
+                    size="small"
                     variant="primary"
-                    size="small"
-                    text={t('common.change')}
-                  />
+                  >
+                    {t('common.change')}
+                  </Button>
                   <Button
-                    fullSize
                     disabled={!amountData?.received}
+                    f={1}
                     onPress={onAcceptButtonPress}
-                    variant="secondary"
                     size="small"
-                    text={t('common.accept')}
-                  />
+                    variant="secondary"
+                  >
+                    {t('common.accept')}
+                  </Button>
                 </XStack>
               )}
-          </Stack>
+          </YStack>
         </VexlbotActionCard>
         {!isMessageOutdated &&
           latestAmountDataMessage.status === 'accepted' &&

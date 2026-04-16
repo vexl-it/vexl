@@ -3,6 +3,7 @@ import {Checklist, ChevronLeft, NavigationBar, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -13,7 +14,8 @@ import {chatMolecule} from '../atoms'
 
 export function MessagesScreenChatHeader(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
-  const navigation = useNavigation()
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {t} = useTranslation()
 
   const {
@@ -22,7 +24,6 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     chatIdAtom,
     commonConnectionsCountAtom,
     offerForChatAtom,
-    openedImageUriAtom,
     otherSideDataAtom,
     otherSideGoldenAvatarTypeAtom,
     otherSideLeftAtom,
@@ -37,7 +38,6 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideGoldenAvatarType = useAtomValue(otherSideGoldenAvatarTypeAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
-  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
   const showGoldenAvatarInfoModal = useSetAtom(
     showGoldenAvatarInfoModalActionAton
   )
@@ -70,7 +70,9 @@ export function MessagesScreenChatHeader(): React.ReactElement {
             disabled={noImageUri || noGoldenAvatarType}
             onPress={() => {
               if (otherSideData.image.type === 'imageUri')
-                setOpenedImageUri(resolveLocalUri(otherSideData.image.imageUri))
+                navigation.navigate('ChatImagePreview', {
+                  imageUri: resolveLocalUri(otherSideData.image.imageUri),
+                })
               else if (
                 !!otherSideGoldenAvatarType ||
                 (!offer?.ownershipInfo &&

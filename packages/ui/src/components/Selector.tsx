@@ -44,9 +44,13 @@ const SelectorLabel = styled(SizableText, {
   flex: 1,
 })
 
+type SelectorActionFrameProps = React.ComponentProps<typeof SelectorActionFrame>
+type SelectorSwitchFrameProps = React.ComponentProps<typeof SelectorSwitchFrame>
+
 interface SelectorBaseProps {
   readonly label: string
   readonly icon?: React.ComponentType<IconProps>
+  readonly backgroundColor?: SelectorActionFrameProps['backgroundColor']
 }
 
 export interface SelectorActionProps extends SelectorBaseProps {
@@ -69,6 +73,7 @@ export function Selector(props: SelectorProps): React.JSX.Element {
       <SelectorSwitch
         label={props.label}
         icon={props.icon}
+        backgroundColor={props.backgroundColor}
         valueAtom={props.valueAtom}
       />
     )
@@ -78,6 +83,7 @@ export function Selector(props: SelectorProps): React.JSX.Element {
     <SelectorAction
       label={props.label}
       icon={props.icon}
+      backgroundColor={props.backgroundColor}
       onPress={props.onPress}
     />
   )
@@ -86,16 +92,18 @@ export function Selector(props: SelectorProps): React.JSX.Element {
 function SelectorAction({
   label,
   icon: Icon,
+  backgroundColor = '$backgroundSecondary',
   onPress,
 }: {
   readonly label: string
   readonly icon?: React.ComponentType<IconProps>
+  readonly backgroundColor?: SelectorActionFrameProps['backgroundColor']
   readonly onPress: () => void
 }): React.JSX.Element {
   const theme = useTheme()
 
   return (
-    <SelectorActionFrame onPress={onPress}>
+    <SelectorActionFrame backgroundColor={backgroundColor} onPress={onPress}>
       {Icon ? <Icon color={theme.foregroundPrimary.val} size={24} /> : null}
       <SelectorLabel>{label}</SelectorLabel>
       <ChevronRight color={theme.foregroundSecondary.val} size={24} />
@@ -106,10 +114,12 @@ function SelectorAction({
 function SelectorSwitch({
   label,
   icon: Icon,
+  backgroundColor = '$backgroundSecondary',
   valueAtom,
 }: {
   readonly label: string
   readonly icon?: React.ComponentType<IconProps>
+  readonly backgroundColor?: SelectorSwitchFrameProps['backgroundColor']
   readonly valueAtom: WritableAtom<boolean, [SetStateAction<boolean>], void>
 }): React.JSX.Element {
   const theme = useTheme()
@@ -117,6 +127,7 @@ function SelectorSwitch({
 
   return (
     <SelectorSwitchFrame
+      backgroundColor={backgroundColor}
       onPress={() => {
         setIsOn((prev) => !prev)
       }}

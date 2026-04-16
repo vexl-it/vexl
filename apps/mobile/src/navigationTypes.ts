@@ -19,6 +19,7 @@ import {
   type MeetingLocationData,
   type NetworkData,
 } from '@vexl-next/domain/src/general/tradeChecklist'
+import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {type InvoiceId} from '@vexl-next/rest-api/src/services/content/contracts'
 import {
   type InitPhoneVerificationResponse,
@@ -63,6 +64,20 @@ export type RootStackParamsList = {
   }
 
   ChatInfo: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
+  }
+
+  ChatImagePreview: {
+    imageUri: UriString
+  }
+
+  ChatReceivedMessagesDebug: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
+  }
+
+  ChatInfoJsonDebug: {
     otherSideKey: PublicKeyPemBase64
     inboxKey: PublicKeyPemBase64
   }

@@ -113,6 +113,38 @@ function createReplicatedEntries(
   )
 }
 
+function replaceEntriesForDates({
+  affectedDates,
+  availableDateTimes,
+  selectedSlots,
+}: {
+  affectedDates: UnixMilliseconds[]
+  availableDateTimes: AvailableDateTimeOption[]
+  selectedSlots: UnixMilliseconds[]
+}): AvailableDateTimeOption[] {
+  const unchangedEntries = pipe(
+    availableDateTimes,
+    ArrayE.filter(
+      (entry) =>
+        !pipe(
+          affectedDates,
+          ArrayE.some((affectedDate) => isSameDay(entry.date, affectedDate))
+        )
+    )
+  )
+
+  const replicatedEntries = pipe(
+    affectedDates,
+    ArrayE.flatMap((affectedDate) =>
+      createReplicatedEntries(affectedDate, selectedSlots)
+    )
+  )
+
+  return [...unchangedEntries, ...replicatedEntries].sort(
+    (firstEntry, secondEntry) => firstEntry.to - secondEntry.to
+  )
+}
+
 function TimeSlotChip({
   label,
   selected,
@@ -217,40 +249,33 @@ function TimeOptionsPerDate({
   )
 
   const onSlotPress = (slot: UnixMilliseconds): void => {
-    setDraftSlots((previousSlots) =>
-      previousSlots.includes(slot)
+    setDraftSlots((previousSlots) => {
+      const nextDraftSlots = previousSlots.includes(slot)
         ? previousSlots.filter((previousSlot) => previousSlot !== slot)
         : [...previousSlots, slot].sort(
             (firstSlot, secondSlot) => firstSlot - secondSlot
           )
-    )
+
+      setAvailableDateTimes((previousAvailableDateTimes) =>
+        replaceEntriesForDates({
+          affectedDates: [date],
+          availableDateTimes: previousAvailableDateTimes,
+          selectedSlots: nextDraftSlots,
+        })
+      )
+
+      return nextDraftSlots
+    })
   }
 
   const onSavePress = (): void => {
     const affectedDates = applyToAllDates ? uniqueAvailableDates : [date]
-
-    const unchangedEntries = pipe(
-      availableDateTimes,
-      ArrayE.filter(
-        (entry) =>
-          !pipe(
-            affectedDates,
-            ArrayE.some((affectedDate) => isSameDay(entry.date, affectedDate))
-          )
-      )
-    )
-
-    const replicatedEntries = pipe(
-      affectedDates,
-      ArrayE.flatMap((affectedDate) =>
-        createReplicatedEntries(affectedDate, draftSlots)
-      )
-    )
-
-    setAvailableDateTimes(
-      [...unchangedEntries, ...replicatedEntries].sort(
-        (firstEntry, secondEntry) => firstEntry.to - secondEntry.to
-      )
+    setAvailableDateTimes((previousAvailableDateTimes) =>
+      replaceEntriesForDates({
+        affectedDates,
+        availableDateTimes: previousAvailableDateTimes,
+        selectedSlots: draftSlots,
+      })
     )
     onCollapse()
   }

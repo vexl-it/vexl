@@ -1,9 +1,11 @@
+import {useNavigation} from '@react-navigation/native'
 import {XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, useTheme} from 'tamagui'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import ContactTypeAndCommonNumber from '../../ContactTypeAndCommonNumber'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
@@ -19,9 +21,10 @@ export const PHOTO_AND_INFO_PHOTO_TOP_HEIGHT = 81 + 16
 
 function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
   const theme = useTheme()
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {
     offerForChatAtom,
-    openedImageUriAtom,
     otherSideDataAtom,
     otherSideClubsIdsAtom,
     otherSideLeftAtom,
@@ -44,7 +47,6 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
 
-  const setOpenedImageUri = useSetAtom(openedImageUriAtom)
   const showGoldenAvatarInfoModal = useSetAtom(
     showGoldenAvatarInfoModalActionAton
   )
@@ -83,7 +85,9 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
           disabled={noImageUri || noGoldenAvatarType}
           onPress={() => {
             if (otherSideData.image.type === 'imageUri')
-              setOpenedImageUri(resolveLocalUri(otherSideData.image.imageUri))
+              navigation.navigate('ChatImagePreview', {
+                imageUri: resolveLocalUri(otherSideData.image.imageUri),
+              })
             else if (
               !!otherSideGoldenAvatarType ||
               (!offer?.ownershipInfo &&

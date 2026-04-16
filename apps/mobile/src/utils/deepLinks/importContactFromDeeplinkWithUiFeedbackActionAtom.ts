@@ -1,3 +1,4 @@
+import {fromImageUri} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {Effect, Option} from 'effect'
 import {atom} from 'jotai'
 import {addContactWithUiFeedbackActionAtom} from '../../state/contacts/atom/addContactWithUiFeedbackAtom'
@@ -12,6 +13,9 @@ export const handleImportContactFromDeepLinkActionAtom = atom(
 
       yield* _(
         set(addContactWithUiFeedbackActionAtom, {
+          avatar: contactData.imageUri
+            ? fromImageUri(contactData.imageUri)
+            : undefined,
           info: {
             name: contactData.name,
             label: Option.some(contactData.label),

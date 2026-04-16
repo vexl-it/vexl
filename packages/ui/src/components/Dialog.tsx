@@ -1,5 +1,5 @@
 import {Effect} from 'effect'
-import type {WritableAtom} from 'jotai'
+import type {Atom, WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useEffect, useRef, useState} from 'react'
 import {Dimensions, Modal} from 'react-native'
@@ -20,6 +20,7 @@ const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
 const BACKDROP_OPACITY = 0.5
 const AUTO_DISMISS_MS = 2000
+const falseAtom = atom(false)
 
 export const DialogLabel = styled(SizableText, {
   name: 'DialogLabel',
@@ -170,6 +171,7 @@ export interface DialogAtomConfig {
   readonly subtitle?: string
   readonly children?: React.ReactNode
   readonly positiveButtonText: string
+  readonly positiveButtonDisabledAtom?: Atom<boolean>
   readonly positiveButtonVariant?: ButtonVariant
   readonly negativeButtonText?: string
 }
@@ -215,6 +217,11 @@ export function DialogFromAtom({
 }: DialogFromAtomProps): React.JSX.Element {
   const state = useAtomValue(dialogAtom)
   const lastStateRef = useRef<DialogAtomInternalState | null>(null)
+  const positiveButtonDisabled = useAtomValue(
+    state?.positiveButtonDisabledAtom ??
+      lastStateRef.current?.positiveButtonDisabledAtom ??
+      falseAtom
+  )
 
   if (state != null) {
     lastStateRef.current = state
@@ -244,6 +251,7 @@ export function DialogFromAtom({
               variant={displayState.positiveButtonVariant ?? 'primary'}
               size="large"
               flex={1}
+              disabled={positiveButtonDisabled}
               onPress={() => state?.onResult(true)}
             >
               {displayState.positiveButtonText}

@@ -20,6 +20,7 @@ export interface Props {
 
   testID?: string
   disabled?: boolean
+  icon?: React.ReactElement
   afterIcon?: SvgString
   beforeIcon?: SvgString
   iconSize?: number
@@ -156,6 +157,7 @@ function Button({
   style,
   afterIcon,
   beforeIcon,
+  icon,
   iconSize,
   iconFill,
   fullWidth = false,
@@ -220,7 +222,11 @@ function Button({
         fullSize={fullSize}
         disabled={disabled}
       >
-        {!!beforeIcon && (
+        {icon ? (
+          <Stack ai="center" jc="center" mr={text ? '$2' : undefined}>
+            {icon}
+          </Stack>
+        ) : beforeIcon ? (
           <Stack mr="$2">
             <Image
               height={iconSize ?? 18}
@@ -230,7 +236,7 @@ function Button({
               source={beforeIcon}
             />
           </Stack>
-        )}
+        ) : null}
         {!!text && (
           <TextStyled
             numberOfLines={adjustTextToFitOneLine ? 1 : numberOfLines}

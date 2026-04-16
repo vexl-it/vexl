@@ -1,12 +1,14 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {Effect, Schema} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import * as Contacts from 'expo-contacts'
-import {type Contact} from 'expo-contacts'
+import {type Contact, type ExistingContact} from 'expo-contacts'
 import {atom} from 'jotai'
+import {Platform} from 'react-native'
 import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import userSvg from '../../../components/images/userSvg'
 import getCountryCode from '../../../utils/getCountryCode'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export class ErrorAddingContactToPhoneContacts extends Schema.TaggedError<ErrorAddingContactToPhoneContacts>(
   'ErrorAddingContactToPhoneContacts'
@@ -27,6 +29,23 @@ function addContactsToPhoneContacts({
   })
 }
 
+function updateContactInPhoneContacts({
+  contact,
+}: {
+  contact: {id: string} & Partial<Contact>
+}): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
+  return Effect.tryPromise({
+    try: async () => {
+      if (Platform.OS === 'android') {
+        await Contacts.presentFormAsync(contact.id)
+      } else {
+        await Contacts.updateContactAsync(contact)
+      }
+    },
+    catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
+  })
+}
+
 function parseFirstAndLastName(customName: string): {
   firstName: string
   lastName?: string | undefined
@@ -41,6 +60,74 @@ function parseFirstAndLastName(customName: string): {
   }
 
   return {firstName: customName}
+}
+
+function findPhoneContactByNumber({
+  number,
+}: {
+  number: E164PhoneNumber
+}): Effect.Effect<
+  Option.Option<ExistingContact>,
+  ErrorAddingContactToPhoneContacts
+> {
+  return Effect.tryPromise({
+    try: async () => {
+      const contacts = await Contacts.getContactsAsync({
+        fields: [Contacts.Fields.PhoneNumbers],
+      })
+
+      return pipe(
+        contacts.data,
+        Array.findFirst((contact) =>
+          pipe(
+            Option.fromNullable(contact.phoneNumbers),
+            Option.match({
+              onNone: () => false,
+              onSome: (phoneNumbers) =>
+                Array.some(phoneNumbers, (phoneNumber) =>
+                  pipe(
+                    Option.fromNullable(phoneNumber.number),
+                    Option.flatMap((rawNumber) =>
+                      toE164PhoneNumberWithDefaultCountryCode(rawNumber)
+                    ),
+                    Option.match({
+                      onNone: () => false,
+                      onSome: (normalizedNumber) => normalizedNumber === number,
+                    })
+                  )
+                ),
+            })
+          )
+        )
+      )
+    },
+    catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
+  })
+}
+
+function createContactPayload({
+  customName,
+  number,
+}: {
+  customName: string
+  number: E164PhoneNumber
+}): Contact {
+  const {firstName, lastName} = parseFirstAndLastName(customName)
+
+  return {
+    name: firstName,
+    firstName,
+    ...(lastName && {lastName}),
+    phoneNumbers: [
+      {
+        countryCode: getCountryCode(number).toString(),
+        number,
+        isPrimary: true,
+        label: 'main',
+      },
+    ],
+    contactType: 'person',
+  }
 }
 
 export const addContactToPhoneWithUIFeedbackActionAtom = atom(
@@ -108,6 +195,37 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
       } satisfies Contact
 
       yield* _(addContactsToPhoneContacts({contact}))
+
+      return true
+    })
+  }
+)
+
+export const addContactToPhoneActionAtom = atom(
+  null,
+  (
+    _get,
+    _set,
+    {customName, number}: {customName: string; number: E164PhoneNumber}
+  ) => {
+    return Effect.gen(function* (_) {
+      const contact = createContactPayload({customName, number})
+      const existingContact = yield* _(findPhoneContactByNumber({number}))
+
+      if (Option.isSome(existingContact) && existingContact.value.id) {
+        yield* _(
+          updateContactInPhoneContacts({
+            contact: {
+              id: existingContact.value.id,
+              name: contact.name,
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+            },
+          })
+        )
+      } else {
+        yield* _(addContactsToPhoneContacts({contact}))
+      }
 
       return true
     })

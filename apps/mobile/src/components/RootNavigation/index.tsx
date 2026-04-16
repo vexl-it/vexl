@@ -19,7 +19,10 @@ import SelectLocationRadiusScreen from '../CRUDOfferFlow/components/SelectLocati
 import SelectLocationSearchScreen from '../CRUDOfferFlow/components/SelectLocationSearchScreen'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
+import ChatImagePreviewScreen from '../ChatDetailScreen/ChatImagePreviewScreen'
+import ChatInfoJsonDebugScreen from '../ChatDetailScreen/ChatInfoJsonDebugScreen'
 import ChatInfoScreen from '../ChatDetailScreen/ChatInfoScreen'
+import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMessagesDebugScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
 import {ClubDetailScreen} from '../ClubDetail'
@@ -123,6 +126,14 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
             <Stack.Screen
+              name="ChatImagePreview"
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'modal',
+              }}
+              component={ChatImagePreviewScreen}
+            />
+            <Stack.Screen
               name="ChatInfo"
               options={{
                 animation: 'slide_from_bottom',
@@ -137,6 +148,22 @@ function RootNavigation(): React.ReactElement {
                 presentation: 'modal',
               }}
               component={ChatOfferDetailScreen}
+            />
+            <Stack.Screen
+              name="ChatReceivedMessagesDebug"
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'modal',
+              }}
+              component={ChatReceivedMessagesDebugScreen}
+            />
+            <Stack.Screen
+              name="ChatInfoJsonDebug"
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'modal',
+              }}
+              component={ChatInfoJsonDebugScreen}
             />
             <Stack.Screen name="ChatSearch" component={ChatSearchScreen} />
             <Stack.Screen

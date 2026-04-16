@@ -9,12 +9,10 @@ import {
   type TradeChecklistUpdate,
 } from '@vexl-next/domain/src/general/tradeChecklist'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {mergeToBoolean} from '@vexl-next/generic-utils/src/effect-helpers/mergeToBoolean'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, pipe} from 'effect'
 import {deepEqual} from 'fast-equals'
 import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {Alert} from 'react-native'
@@ -27,7 +25,7 @@ import {
 import {updateTradeChecklistState} from '../../../state/tradeChecklist/utils'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {globalDialogAtom} from '../../GlobalDialog'
 import {withLoadingOverlayAtom} from '../../LoadingOverlayProvider'
 import {availableDateTimesAtom} from '../components/DateAndTimeFlow/atoms'
 
@@ -56,28 +54,20 @@ export const askAreYouSureAndClearUpdatesToBeSentActionAtom = atom(
     if (!areThereUpdatesToBeSent) return T.of(true)
 
     return pipe(
-      set(askAreYouSureActionAtom, {
-        variant: 'danger',
-        steps: [
-          {
-            type: 'StepWithText',
-            title: t('tradeChecklist.discardChanges'),
-            description: t('tradeChecklist.allChangesWillBeLost'),
-            positiveButtonText: t('common.discard'),
-            negativeButtonText: t('common.back'),
-          },
-        ],
+      set(globalDialogAtom, {
+        title: t('tradeChecklist.discardChanges'),
+        subtitle: t('tradeChecklist.allChangesWillBeLost'),
+        positiveButtonText: t('common.discard'),
+        positiveButtonVariant: 'destructive',
+        negativeButtonText: t('common.back'),
       }),
-      effectToTaskEither,
-      TE.match(
-        () => {
-          return false
-        },
-        () => {
-          set(clearUpdatesToBeSentActionAtom)
-          return true
-        }
-      )
+      effectToTask,
+      T.map((confirmed) => {
+        if (!confirmed) return false
+
+        set(clearUpdatesToBeSentActionAtom)
+        return true
+      })
     )
   }
 )
@@ -229,25 +219,17 @@ export const submitTradeChecklistUpdatesActionAtom = atom(null, (get, set) => {
         {e}
       )
 
-      return Effect.zipRight(
-        set(askAreYouSureActionAtom, {
-          variant: 'danger',
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('common.somethingWentWrong'),
-              description: t('common.somethingWentWrongDescription'),
-              positiveButtonText: t('common.copyErrorToClipboard'),
-              negativeButtonText: t('common.close'),
-            },
-          ],
-        }).pipe(
-          mergeToBoolean,
-          Effect.tap((shouldCopyError) => {
-            if (shouldCopyError) Clipboard.setString(JSON.stringify(e, null, 2))
-          })
-        ),
-        Effect.succeed(false)
+      return set(globalDialogAtom, {
+        title: t('common.somethingWentWrong'),
+        subtitle: t('common.somethingWentWrongDescription'),
+        positiveButtonText: t('common.copyErrorToClipboard'),
+        positiveButtonVariant: 'destructive',
+        negativeButtonText: t('common.close'),
+      }).pipe(
+        Effect.tap((shouldCopyError) => {
+          if (shouldCopyError) Clipboard.setString(JSON.stringify(e, null, 2))
+        }),
+        Effect.as(false)
       )
     })
   )

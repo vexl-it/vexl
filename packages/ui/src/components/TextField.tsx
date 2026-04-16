@@ -86,10 +86,14 @@ const IconPressable = styled(Stack, {
 type TextFieldFrameProps = React.ComponentProps<typeof TextFieldFrame>
 
 export interface TextFieldProps
-  extends Omit<TextFieldFrameProps, 'children' | 'layout' | 'highlighted'> {
+  extends Omit<
+    TextFieldFrameProps,
+    'children' | 'layout' | 'highlighted' | 'backgroundColor'
+  > {
   readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
   readonly placeholder?: string
   readonly autoFocus?: boolean
+  readonly backgroundColor?: TextFieldFrameProps['backgroundColor']
   readonly showClear?: boolean
   readonly onCheckmarkPress?: () => void
   readonly buttonLabel?: string
@@ -102,6 +106,7 @@ export function TextField({
   valueAtom,
   placeholder = 'Input',
   autoFocus,
+  backgroundColor = '$backgroundSecondary',
   showClear,
   onCheckmarkPress,
   buttonLabel,
@@ -134,6 +139,7 @@ export function TextField({
   return (
     <TextFieldFrame
       layout={isCompact ? 'compact' : 'standard'}
+      backgroundColor={backgroundColor}
       highlighted={showBorder || undefined}
       {...rest}
     >

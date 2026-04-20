@@ -21,8 +21,8 @@ import OfferRequestTextInput from '../../OfferRequestTextInput'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {ApprovalStatusMessage, chatMolecule} from '../atoms'
 import AcceptDeclineButtons from './AcceptDeclineButtons'
-import ChatHeader from './ChatHeader'
 import ChatRequestPreview from './ChatRequestPreview'
+import RequestScreenChatHeader from './RequestScreenChatHeader'
 import RerequestOrCancelButton from './RerequestOrCancelButton'
 
 const SCROLL_EXTRA_OFFSET = 250
@@ -148,13 +148,7 @@ function RequestScreen(): React.ReactElement {
 
   return (
     <>
-      <ChatHeader
-        mode="photoTop"
-        leftButton="back"
-        rightButton={
-          requestIsClosed ? 'deleteChat' : requestedByMe ? null : 'block'
-        }
-      />
+      <RequestScreenChatHeader />
       <ContentContainer
         style={{flex: 1}}
         bounces={false}

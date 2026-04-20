@@ -74,6 +74,8 @@
   "common.errorPressToRetry": "Error occured. Press to retry",
   "common.chatNotFoundError": "Chat not found!",
   "common.send": "Send",
+  "common.reply": "Reply",
+  "common.copy": "Copy",
   "common.loading": "Loading",
   "common.loadingTasks": "Loading tasks ({{count}})",
   "common.processingNotifications": "Processing notifications ({{count}})",

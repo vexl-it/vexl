@@ -1,7 +1,8 @@
+import {BubbleTip} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
-import {getTokens, Stack, Text, XStack, YStack} from 'tamagui'
+import {getTokens, Stack, Text, useTheme, XStack, YStack} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import CommonFriends from '../../CommonFriends'
@@ -9,7 +10,6 @@ import Image from '../../Image'
 import flagSvg from '../../OfferDetailScreen/images/flagSvg'
 import OfferInfoPreview from '../../OfferInfoPreview'
 import {chatMolecule} from '../atoms'
-import bubbleTypTopSvg from '../images/bubbleTypTopSvg'
 
 function ChatRequestPreview({
   mode,
@@ -19,6 +19,7 @@ function ChatRequestPreview({
   showRequestMessage?: boolean
 }): React.ReactElement {
   const tokens = getTokens()
+  const theme = useTheme()
   const {
     offerForChatAtom,
     chatAtom,
@@ -113,12 +114,12 @@ function ChatRequestPreview({
 
   return (
     <Stack>
-      <Stack pos="absolute" t={-8} l={0} r={0} alignItems="center">
-        <Image source={bubbleTypTopSvg} />
+      <Stack pos="absolute" t={-15} l={0} r={0} alignItems="center">
+        <BubbleTip size={24} color={theme.backgroundSecondary.val} />
       </Stack>
       <YStack
         pos="relative"
-        backgroundColor="$white"
+        backgroundColor="$backgroundSecondary"
         borderRadius="$7"
         pt="$6"
         pb="$2"

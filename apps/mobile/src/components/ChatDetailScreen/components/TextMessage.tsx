@@ -2,33 +2,28 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
-  Copy,
+  Stack,
+  tokens,
   Typography,
-  IconButton as UiIconButton,
+  useTheme,
   XStack,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {
-  atom,
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-  type Atom,
-  type SetStateAction,
-} from 'jotai'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {DateTime} from 'luxon'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {
+  Animated,
   Image,
   Pressable,
   StyleSheet,
   TouchableWithoutFeedback,
+  View,
 } from 'react-native'
 import Autolink from 'react-native-autolink'
-import {Stack, Text, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
-import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
@@ -36,15 +31,23 @@ import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {chatMolecule} from '../atoms'
 import formatChatTime from '../utils/formatChatTime'
 import {type MessagesListItem} from './MessageItem'
+import TextMessageActionMenu, {
+  type MessageBubbleLayout,
+} from './TextMessageActionMenu'
+
+const imageHeight = 300
+const replyImageHeight = 50
+const messagePopScale = 1.04
+const messagePopAnimationDuration = 120
 
 const style = StyleSheet.create({
   image: {
     width: '100%',
-    height: 300,
+    height: imageHeight,
   },
   replyImage: {
     width: '100%',
-    height: 50,
+    height: replyImageHeight,
   },
   link: {
     fontSize: 16,
@@ -52,74 +55,111 @@ const style = StyleSheet.create({
   },
 })
 
-// const textInputHitSlop = {top: 15, bottom: 15, left: 10, right: 10}
+function MessageBubble({
+  isMine,
+  messageAuthorName,
+  message,
+  messageBackgroundColor,
+  messageTextColor,
+  onImagePressed,
+}: {
+  isMine: boolean
+  messageAuthorName: string
+  message: ChatMessageWithState
+  messageBackgroundColor: string
+  messageTextColor: string
+  onImagePressed?: () => void
+}): React.ReactElement {
+  const {t} = useTranslation()
+  const repliedToMessage =
+    'repliedTo' in message.message ? message.message.repliedTo : undefined
 
-function useIsExtended(messageItem: MessagesListItem): {
-  isExtended: boolean
-  showExtended: () => void
-  hideExtended: () => void
-  toggleExtended: () => void
-} {
-  const {messageOptionsExtendedAtom} = useMolecule(chatMolecule)
-
-  const thisMessageOptionsExtendedAtom = useMemo(
-    () =>
-      atom(
-        (get) => {
-          if (messageItem.type !== 'message') return false
-          return (
-            get(messageOptionsExtendedAtom)?.message?.uuid ===
-            messageItem.message.message.uuid
-          )
-        },
-        (get, set, setExtended?: SetStateAction<boolean>) => {
-          if (messageItem.type !== 'message') return
-          const nextState =
-            setExtended !== undefined
-              ? getValueFromSetStateActionOfAtom(setExtended)(() =>
-                  get(thisMessageOptionsExtendedAtom)
-                )
-              : !get(thisMessageOptionsExtendedAtom)
-          set(
-            messageOptionsExtendedAtom,
-            nextState ? messageItem.message : null
-          )
-        }
-      ),
-    [messageOptionsExtendedAtom, messageItem]
+  return (
+    <Stack>
+      {!!repliedToMessage && (
+        <XStack
+          borderRadius="$5"
+          marginBottom="$0.5"
+          borderBottomLeftRadius="$2"
+          borderBottomRightRadius="$2"
+          backgroundColor={
+            isMine ? '$accentYellowSecondary' : '$backgroundSecondary'
+          }
+          padding="$4"
+          gap="$2"
+        >
+          <YStack gap="$1">
+            {!!repliedToMessage.image && (
+              <Image
+                style={style.replyImage}
+                resizeMode="contain"
+                source={{
+                  uri: resolveLocalUri(repliedToMessage.image),
+                }}
+              />
+            )}
+            <Typography color="$foregroundSecondary" variant="micro">
+              {t('common.replyTo')}
+            </Typography>
+            <Typography
+              color="$foregroundPrimary"
+              variant="micro"
+              marginTop="$1"
+            >
+              {repliedToMessage.text}
+            </Typography>
+          </YStack>
+        </XStack>
+      )}
+      {!!message.message.image && (
+        <YStack
+          borderRadius="$4"
+          padding="$3"
+          marginBottom="$2"
+          backgroundColor="$backgroundTertiary"
+        >
+          <TouchableWithoutFeedback
+            disabled={!onImagePressed}
+            onPress={onImagePressed}
+          >
+            <Image
+              style={style.image}
+              resizeMode="contain"
+              source={{uri: resolveLocalUri(message.message.image)}}
+            />
+          </TouchableWithoutFeedback>
+        </YStack>
+      )}
+      <Stack
+        borderRadius="$6"
+        borderTopLeftRadius={repliedToMessage ? '$2' : '$6'}
+        borderTopRightRadius={repliedToMessage ? '$2' : '$6'}
+        backgroundColor={messageBackgroundColor}
+        px="$4"
+        pb="$4"
+        pt="$4"
+      >
+        <Autolink
+          text={message.message.text}
+          url
+          linkStyle={[
+            style.link,
+            {
+              color: messageTextColor,
+              fontSize: 18,
+              fontFamily: 'TTSatoshi500',
+            },
+          ]}
+          style={{
+            color: messageTextColor,
+            fontSize: 18,
+            lineHeight: 24,
+            fontFamily: 'TTSatoshi500',
+          }}
+        />
+      </Stack>
+    </Stack>
   )
-  const [isExtended, setIsExtended] = useAtom(thisMessageOptionsExtendedAtom)
-  return {
-    isExtended,
-    showExtended: useCallback(() => {
-      setIsExtended(true)
-    }, [setIsExtended]),
-    hideExtended: useCallback(() => {
-      setIsExtended(false)
-    }, [setIsExtended]),
-    toggleExtended: useCallback(() => {
-      setIsExtended()
-    }, [setIsExtended]),
-  }
-}
-
-type messageTypesWithItalicPrefix =
-  | 'REQUEST_MESSAGING'
-  | 'CANCEL_REQUEST_MESSAGING'
-  | 'DISAPPROVE_MESSAGING'
-  | 'APPROVE_MESSAGING'
-  | 'VERSION_UPDATE'
-
-function shouldHaveItalicPrefix(
-  messageType: string
-): messageType is messageTypesWithItalicPrefix {
-  return [
-    'REQUEST_MESSAGING',
-    'CANCEL_REQUEST_MESSAGING',
-    'DISAPPROVE_MESSAGING',
-    'APPROVE_MESSAGING',
-    'VERSION_UPDATE',
-  ].includes(messageType)
 }
 
 function TextMessage({
@@ -137,16 +177,59 @@ function TextMessage({
   } = useMolecule(chatMolecule)
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
+  const bubbleRef = useRef<View>(null)
+  const messageBubbleScale = useRef(new Animated.Value(1)).current
+  const openActionMenuTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
+  const pendingActionAfterCloseRef = useRef<(() => void) | null>(null)
   const sendMessage = useSetAtom(sendMessageAtom)
   const lastMessageReadByOtherSideAt = useAtomValue(
     lastMessageReadByOtherSideAtAtom
   )
   const {t} = useTranslation()
-
-  const {isExtended, hideExtended, toggleExtended} = useIsExtended(messageItem)
+  const [messageBubbleLayout, setMessageBubbleLayout] =
+    useState<MessageBubbleLayout | null>(null)
+  const [isClosingActionMenu, setIsClosingActionMenu] = useState(false)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
+
+  useEffect(() => {
+    return () => {
+      if (openActionMenuTimeoutRef.current !== null) {
+        clearTimeout(openActionMenuTimeoutRef.current)
+      }
+      pendingActionAfterCloseRef.current = null
+    }
+  }, [])
+
+  const finishCloseMessageActionMenu = useCallback(() => {
+    const pendingAction = pendingActionAfterCloseRef.current
+    pendingActionAfterCloseRef.current = null
+    if (openActionMenuTimeoutRef.current !== null) {
+      clearTimeout(openActionMenuTimeoutRef.current)
+      openActionMenuTimeoutRef.current = null
+    }
+    setIsClosingActionMenu(false)
+    setMessageBubbleLayout(null)
+    Animated.spring(messageBubbleScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 4,
+    }).start()
+    pendingAction?.()
+  }, [messageBubbleScale])
+
+  const requestCloseMessageActionMenu = useCallback(() => {
+    if (openActionMenuTimeoutRef.current !== null) {
+      clearTimeout(openActionMenuTimeoutRef.current)
+      openActionMenuTimeoutRef.current = null
+    }
+    if (messageBubbleLayout === null || isClosingActionMenu) return
+    setIsClosingActionMenu(true)
+  }, [isClosingActionMenu, messageBubbleLayout])
 
   const onPressResend = useCallback(() => {
     if (
@@ -162,16 +245,18 @@ function TextMessage({
 
   const onReplyPressed = useCallback(() => {
     if (messageItem.type !== 'message') return
-    setReplyToMessage(messageItem.message)
-    hideExtended()
-  }, [messageItem, setReplyToMessage, hideExtended])
+    pendingActionAfterCloseRef.current = () => {
+      setReplyToMessage(messageItem.message)
+    }
+    requestCloseMessageActionMenu()
+  }, [messageItem, requestCloseMessageActionMenu, setReplyToMessage])
 
   const onCopyPressed = useCallback(() => {
     if (messageItem.type !== 'message') return
     Clipboard.setString(messageItem.message.message.text)
     setToastNotification(t('common.copied'))
-    hideExtended()
-  }, [messageItem, setToastNotification, t, hideExtended])
+    requestCloseMessageActionMenu()
+  }, [messageItem, requestCloseMessageActionMenu, setToastNotification, t])
 
   const onImagePressed = useCallback(() => {
     if (messageItem.type !== 'message') return
@@ -181,6 +266,25 @@ function TextMessage({
     })
   }, [messageItem, navigation])
 
+  const onLongPressMessage = useCallback(() => {
+    if (messageBubbleLayout !== null) return
+
+    Animated.spring(messageBubbleScale, {
+      toValue: messagePopScale,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 6,
+    }).start()
+    bubbleRef.current?.measureInWindow((x, y, width, height) => {
+      if (width === 0 || height === 0) return
+      openActionMenuTimeoutRef.current = setTimeout(() => {
+        setIsClosingActionMenu(false)
+        setMessageBubbleLayout({x, y, width, height})
+        openActionMenuTimeoutRef.current = null
+      }, messagePopAnimationDuration)
+    })
+  }, [messageBubbleLayout, messageBubbleScale])
+
   if (messageItem.type !== 'message') return null
   const {message, isLatest, time} = messageItem
 
@@ -188,15 +292,33 @@ function TextMessage({
   if (message.state === 'receivedButRequiresNewerVersion') return null
 
   const isMine = message.state !== 'received'
-  const messageTextColor = isMine ? '#000000' : theme.foregroundPrimary.val
+  const messageTextColor = isMine
+    ? tokens.color.black100.val
+    : theme.foregroundPrimary.val
   const messageBackgroundColor = isMine
     ? theme.accentYellowPrimary.val
     : theme.backgroundTertiary.val
-
-  const messageText = message.message.text
+  const repliedToMessage =
+    'repliedTo' in message.message ? message.message.repliedTo : undefined
+  const repliedMessageAuthorName =
+    (message.state === 'received' &&
+      repliedToMessage?.messageAuthor === 'them') ||
+    (message.state === 'sent' && repliedToMessage?.messageAuthor === 'me')
+      ? t('common.you')
+      : (otherSideData?.userName ?? 'them')
+  const messageBubble = (
+    <MessageBubble
+      isMine={isMine}
+      messageAuthorName={repliedMessageAuthorName}
+      message={message}
+      messageBackgroundColor={messageBackgroundColor}
+      messageTextColor={messageTextColor}
+      onImagePressed={onImagePressed}
+    />
+  )
 
   return (
-    <TouchableWithoutFeedback onPress={hideExtended}>
+    <>
       <Stack mx="$5" mt="$2" flex={1} alignItems="stretch">
         <XStack
           flex={1}
@@ -204,125 +326,38 @@ function TextMessage({
           gap="$2"
           alignItems="flex-end"
         >
-          <TouchableWithoutFeedback style={{flex: 1}} onPress={toggleExtended}>
-            <Stack
-              width={message.message.image ? '80%' : undefined}
-              maxWidth="80%"
-              borderRadius="$6"
-              backgroundColor={messageBackgroundColor}
-              p="$4"
-            >
-              {!!message.message.repliedTo && (
-                <YStack
-                  borderRadius="$4"
-                  padding="$3"
-                  marginBottom="$2"
-                  backgroundColor="$backgroundTertiary"
-                >
-                  {!!message.message.repliedTo.image && (
-                    <Image
-                      style={style.replyImage}
-                      resizeMode="contain"
-                      source={{
-                        uri: resolveLocalUri(message.message.repliedTo.image),
-                      }}
-                    />
-                  )}
-                  <Typography
-                    color={
-                      isMine
-                        ? '$accentHighlightSecondary'
-                        : '$foregroundSecondary'
-                    }
-                    variant="micro"
-                  >
-                    {(message.state === 'received' &&
-                      message.message.repliedTo.messageAuthor === 'them') ||
-                    (message.state === 'sent' &&
-                      message.message.repliedTo.messageAuthor === 'me')
-                      ? t('common.you')
-                      : (otherSideData?.userName ?? 'them')}
-                  </Typography>
-                  <Typography
-                    color="$foregroundPrimary"
-                    variant="description"
-                    marginTop="$1"
-                  >
-                    {message.message.repliedTo.text}
-                  </Typography>
-                </YStack>
-              )}
-              {!!message.message.image && (
-                <YStack
-                  borderRadius="$4"
-                  padding="$3"
-                  marginBottom="$2"
-                  backgroundColor="$backgroundTertiary"
-                >
-                  <TouchableWithoutFeedback onPress={onImagePressed}>
-                    <Image
-                      style={style.image}
-                      resizeMode="contain"
-                      source={{uri: resolveLocalUri(message.message.image)}}
-                    />
-                  </TouchableWithoutFeedback>
-                </YStack>
-              )}
-              <Autolink
-                text={messageText}
-                url
-                linkStyle={[
-                  style.link,
-                  {
-                    color: messageTextColor,
-                    fontSize: 18,
-                    fontFamily: 'TTSatoshi500',
-                  },
-                ]}
+          <View
+            ref={bubbleRef}
+            style={{
+              width: message.message.image ? '80%' : undefined,
+              maxWidth: '80%',
+            }}
+          >
+            <Pressable delayLongPress={250} onLongPress={onLongPressMessage}>
+              <Animated.View
                 style={{
-                  color: messageTextColor,
-                  fontSize: 18,
-                  lineHeight: 24,
-                  fontFamily: 'TTSatoshi500',
+                  transform: [{scale: messageBubbleScale}],
                 }}
-              />
-            </Stack>
-          </TouchableWithoutFeedback>
-          {!!isExtended && (
-            <XStack gap="$2" marginBottom="$1">
-              <UiIconButton
-                width="$9"
-                height="$9"
-                backgroundColor="$backgroundSecondary"
-                onPress={onReplyPressed}
               >
-                <Text color="$foregroundPrimary">↩</Text>
-              </UiIconButton>
-              <UiIconButton
-                width="$9"
-                height="$9"
-                backgroundColor="$backgroundSecondary"
-                onPress={onCopyPressed}
-              >
-                <Copy size={18} color={theme.foregroundPrimary.val} />
-              </UiIconButton>
-            </XStack>
-          )}
+                {messageBubble}
+              </Animated.View>
+            </Pressable>
+          </View>
           {message.state === 'sendingError' && (
             <Pressable onPress={onPressResend}>
-              <Text
-                userSelect="auto"
-                textAlign={isMine ? 'right' : 'left'}
-                mt="$1"
-                mb="$2"
+              <Typography
                 color={
                   message.state === 'sendingError' ? '$red' : '$greyOnBlack'
                 }
+                variant="description"
+                textAlign={isMine ? 'right' : 'left'}
+                marginTop="$1"
+                marginBottom="$2"
               >
                 {toCommonErrorMessage(message.error, t) ??
                   t('common.somethingWentWrong')}{' '}
                 {t('messages.tapToResent')}
-              </Text>
+              </Typography>
             </Pressable>
           )}
         </XStack>
@@ -350,7 +385,19 @@ function TextMessage({
           </Typography>
         )}
       </Stack>
-    </TouchableWithoutFeedback>
+      <TextMessageActionMenu
+        bubble={messageBubble}
+        bubbleLayout={messageBubbleLayout}
+        copyLabel={t('common.copy')}
+        isClosing={isClosingActionMenu}
+        isMine={isMine}
+        onClose={requestCloseMessageActionMenu}
+        onCloseComplete={finishCloseMessageActionMenu}
+        onCopy={onCopyPressed}
+        onReply={onReplyPressed}
+        replyLabel={t('common.reply')}
+      />
+    </>
   )
 }
 

@@ -74,6 +74,8 @@
   "common.errorPressToRetry": "Došlo k chybě. Stisknutím opakuj akci",
   "common.chatNotFoundError": "Chat nebyl nalezen!",
   "common.send": "Odeslat",
+  "common.reply": "Odpovědět",
+  "common.copy": "Kopírovat",
   "common.loading": "Načítání",
   "common.loadingTasks": "Loading tasks ({{count}})",
   "common.processingNotifications": "Processing notifications ({{count}})",

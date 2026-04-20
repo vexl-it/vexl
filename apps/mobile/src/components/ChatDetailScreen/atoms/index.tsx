@@ -790,9 +790,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     return originOffer?.offerInfo.privatePart?.friendLevel ?? []
   })
 
-  // const replyToMessageAtom = atom<ChatMessageWithState | null>(null)
-  const messageOptionsExtendedAtom = atom<ChatMessageWithState | null>(null)
-
   const theirOfferAndNotReportedAtom = selectAtom(
     offerForChatAtom,
     (offer) => !offer?.ownershipInfo && !offer?.flags.reported
@@ -1237,7 +1234,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     canSendMessagesAtom,
     friendLevelInfoAtom,
     replyToMessageAtom,
-    messageOptionsExtendedAtom,
     theirOfferAndNotReportedAtom,
     forceShowHistoryAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),

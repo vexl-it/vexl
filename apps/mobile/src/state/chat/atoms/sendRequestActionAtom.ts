@@ -46,6 +46,7 @@ const sendRequestActionAtom = atom(
           keyHolder: inbox.privateKey,
         })
       )
+
       const message = yield* _(
         sendMessagingRequest({
           text,

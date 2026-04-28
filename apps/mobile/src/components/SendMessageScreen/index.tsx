@@ -19,13 +19,13 @@ import {useSingleOffer} from '../../state/marketplace'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
-import OfferHeader from '../OfferDetailScreen/components/OfferHeader'
+import OfferAuthorBanner from '../OfferAuthorBanner'
 
 type Props = RootStackScreenProps<'SendMessage'>
 
 function SendMessageScreen({
   route: {
-    params: {offerId},
+    params: {offerId, mode = 'request'},
   },
   navigation,
 }: Props): React.ReactElement {
@@ -49,6 +49,10 @@ function SendMessageScreen({
       Effect.gen(function* (_) {
         const chat = yield* _(submitRequest({text, originOffer: offer.value}))
 
+        if (mode === 'rerequest') {
+          safeGoBack()
+          return
+        }
         const showSuccess = yield* _(
           showDialog({
             title: t('offer.messageSentTitle'),
@@ -70,21 +74,41 @@ function SendMessageScreen({
         Effect.catchAll((e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('common.error'), t('offer.offerNotFound'), [
-              {text: t('common.close'), onPress: handleClose},
+              {text: t('common.close')},
             ])
+            return Effect.void
           }
+
+          Alert.alert(t('common.error'), 'error', [
+            {text: t('common.close'), onPress: handleClose},
+          ])
+          console.log(e)
+
           return Effect.void
         })
       )
     )
-  }, [offer, submitRequest, showDialog, t, handleClose, navigation])
+  }, [
+    offer,
+    submitRequest,
+    showDialog,
+    t,
+    safeGoBack,
+    handleClose,
+    navigation,
+    mode,
+  ])
 
   const navigationBar = (
     <NavigationBar
       style="back"
       title={t('common.sendAMessage')}
       leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
-      rightActions={[{icon: XmarkCancelClose, onPress: handleClose}]}
+      rightActions={
+        mode === 'request'
+          ? [{icon: XmarkCancelClose, onPress: handleClose}]
+          : []
+      }
     />
   )
 
@@ -123,7 +147,7 @@ function SendMessageScreen({
       >
         <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
           <YStack gap="$5">
-            <OfferHeader offer={offer.value} />
+            <OfferAuthorBanner offer={offer.value} />
             <TextArea
               height={Dimensions.get('window').height * 0.3}
               backgroundColor="$backgroundTertiary"

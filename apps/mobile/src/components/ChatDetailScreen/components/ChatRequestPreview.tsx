@@ -1,24 +1,28 @@
-import {BubbleTip} from '@vexl-next/ui'
+import {
+  BubbleTip,
+  FlagReport,
+  Stack,
+  tokens,
+  Typography,
+  useTheme,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
-import {getTokens, Stack, Text, useTheme, XStack, YStack} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import CommonFriends from '../../CommonFriends'
-import Image from '../../Image'
-import flagSvg from '../../OfferDetailScreen/images/flagSvg'
-import OfferInfoPreview from '../../OfferInfoPreview'
+import OfferAuthorBanner from '../../OfferAuthorBanner'
+import OfferPropertiesCard from '../../OfferPropertiesCard'
 import {chatMolecule} from '../atoms'
 
-function ChatRequestPreview({
-  mode,
-  showRequestMessage,
-}: {
-  mode: 'commonFirst' | 'offerFirst'
-  showRequestMessage?: boolean
-}): React.ReactElement {
-  const tokens = getTokens()
+const bubbleTipSize = tokens.size[7].val
+const bubbleTipOffset = tokens.space[5].val
+const reportedIconSize = tokens.size[5].val
+
+function ChatRequestPreview(): React.ReactElement {
   const theme = useTheme()
   const {
     offerForChatAtom,
@@ -47,7 +51,7 @@ function ChatRequestPreview({
       {!!commonConnectionsHashes &&
         !!offer &&
         commonConnectionsHashes.length > 0 && (
-          <Stack mx="$-4">
+          <Stack>
             <CommonFriends
               commonConnectionsHashes={commonConnectionsHashes}
               verifiedConnectionsHashes={verifiedConnectionsHashes}
@@ -59,102 +63,73 @@ function ChatRequestPreview({
   )
 
   const requestMessageSection = (
-    <>
+    <Stack
+      backgroundColor="$backgroundSecondary"
+      px="$7"
+      py="$6"
+      borderRadius="$3"
+    >
+      <Stack
+        pos="absolute"
+        top={-bubbleTipOffset}
+        left={0}
+        right={0}
+        alignItems="center"
+      >
+        <BubbleTip size={bubbleTipSize} color={theme.backgroundSecondary.val} />
+      </Stack>
       {requestMessage?.message.text ? (
-        <Text fos={20} color="$black" fontFamily="$body500">
+        <Typography color="$foregroundPrimary" variant="titlesSmall">
           {requestMessage?.message.text}
-        </Text>
+        </Typography>
       ) : (
-        <Text fos={20} color="$greyOnWhite" fontFamily="$body500">
+        <Typography color="$foregroundSecondary" variant="titlesSmall">
           {t('messages.requestMessageWasDeleted')}
-        </Text>
+        </Typography>
       )}
-    </>
+    </Stack>
+  )
+
+  const reportedOfferSection = (
+    <XStack
+      borderRadius="$true"
+      px="$4"
+      py="$4"
+      bg="$redBackground"
+      gap="$2"
+      ai="center"
+    >
+      <FlagReport color={theme.redForeground.val} size={reportedIconSize} />
+      <Typography color="$redForeground" variant="paragraphSmall">
+        {t('messages.offerWasReported')}
+      </Typography>
+    </XStack>
   )
 
   const offerInfoPreviewSection = (
     <>
-      {!!offer?.flags.reported && (
-        <XStack
-          borderRadius="$true"
-          mx="$-4"
-          px="$4"
+      {!!offer && (
+        <YStack
+          backgroundColor="$backgroundSecondary"
+          borderRadius="$5"
           py="$4"
-          bg="$darkRed"
-          gap="$2"
+          px="$6"
+          gap="$5"
         >
-          <Image source={flagSvg} stroke={tokens.color.red.val} />
-          <Text fos={16} col="$red">
-            {t('messages.offerWasReported')}
-          </Text>
-        </XStack>
+          <OfferAuthorBanner offer={offer} />
+          <OfferPropertiesCard minimalContainer offer={offer} />
+        </YStack>
       )}
-      <Stack
-        borderRadius="$true"
-        mx="$-4"
-        px="$4"
-        py="$4"
-        backgroundColor="$greyAccent5"
-      >
-        <Text fontFamily="$body600" mb="$2" fos={14} col="$greyOnWhite">
-          {chat.origin.type === 'myOffer'
-            ? t('messages.yourOffer')
-            : t('messages.theirOffer')}
-        </Text>
-        {!!offer && (
-          <OfferInfoPreview
-            onGrayBackground
-            isMine={isMineOffer}
-            offer={offer.offerInfo}
-          />
-        )}
-      </Stack>
     </>
   )
 
   return (
-    <Stack>
-      <Stack pos="absolute" t={-15} l={0} r={0} alignItems="center">
-        <BubbleTip size={24} color={theme.backgroundSecondary.val} />
-      </Stack>
-      <YStack
-        pos="relative"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$7"
-        pt="$6"
-        pb="$2"
-        px="$6"
-        gap="$4"
-      >
-        {!!offer?.flags.reported && (
-          <XStack
-            borderRadius="$true"
-            mx="$-4"
-            px="$4"
-            py="$4"
-            bg="$darkRed"
-            gap="$2"
-          >
-            <Image source={flagSvg} stroke={tokens.color.red.val} />
-            <Text fos={16} col="$red">
-              {t('messages.offerWasReported')}
-            </Text>
-          </XStack>
-        )}
-        {!!showRequestMessage && requestMessageSection}
-        {mode === 'commonFirst' ? (
-          <YStack gap="$4">
-            {commonFriendsSection}
-            {offerInfoPreviewSection}
-          </YStack>
-        ) : (
-          <Stack gap="$4">
-            {offerInfoPreviewSection}
-            {commonFriendsSection}
-          </Stack>
-        )}
-      </YStack>
-    </Stack>
+    <YStack gap="$5">
+      {!!offer?.flags.reported && reportedOfferSection}
+      {requestMessageSection}
+      {offerInfoPreviewSection}
+      {commonFriendsSection}
+    </YStack>
   )
 }
 

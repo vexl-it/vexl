@@ -1,5 +1,8 @@
 import {type ViewToken} from '@shopify/flash-list'
-import {type MessageType} from '@vexl-next/domain/src/general/messaging'
+import {
+  type ChatMessageId,
+  type MessageType,
+} from '@vexl-next/domain/src/general/messaging'
 import {type FriendLevel} from '@vexl-next/domain/src/general/offers'
 import {toBasicError} from '@vexl-next/domain/src/utility/errors'
 import {
@@ -7,7 +10,7 @@ import {
   taskEitherToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Array, Effect, Either, Option, pipe} from 'effect'
+import {Array, Effect, Either, HashSet, Option, pipe} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -42,12 +45,13 @@ import revealContactActionAtom, {
 import revealIdentityActionAtom from '../../../state/chat/atoms/revealIdentityActionAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
-import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {
   dummyChatWithMessages,
   type ChatMessageWithState,
+  type ChatTransientMessageId,
   type ChatWithMessages,
 } from '../../../state/chat/domain'
+import {getChatState} from '../../../state/chat/utils/offerStates'
 import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
@@ -119,8 +123,27 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     o.prop('tradeChecklist')
   )
 
+  const hiddenMessagesIdsAtom = focusAtom(chatWithMessagesAtom, (o) =>
+    o.prop('hiddenMessagesIds')
+  )
+
+  const createHideMessageAtom = (
+    messageId: ChatMessageId | ChatTransientMessageId
+  ): WritableAtom<boolean, [SetStateAction<boolean>], void> =>
+    atom(
+      (get) => HashSet.has(get(hiddenMessagesIdsAtom), messageId),
+      (get, set, action: SetStateAction<boolean>) => {
+        const value = getValueFromSetStateActionOfAtom(action)(() =>
+          HashSet.has(get(hiddenMessagesIdsAtom), messageId)
+        )
+        set(hiddenMessagesIdsAtom, (prev) =>
+          value ? HashSet.add(prev, messageId) : HashSet.remove(prev, messageId)
+        )
+      }
+    )
+
   const messagesListDataAtom = atom((get) =>
-    buildMessagesListData(get(messagesAtom))
+    buildMessagesListData(get(messagesAtom), get(hiddenMessagesIdsAtom))
   )
 
   const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
@@ -824,25 +847,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const rerequestOfferActionAtom = atom(
-    null,
-    (get, set, {text}: {text: string}) => {
-      const offer = get(offerForChatAtom)
-      if (!offer) {
-        set(showOfferDeletedWithOptionToDeleteActionAtom)
-        return Effect.succeed(false)
-      }
-
-      return pipe(
-        set(sendRequestHandleUIActionAtom, {text, originOffer: offer}),
-        Effect.mapBoth({
-          onFailure: () => false,
-          onSuccess: () => true,
-        })
-      )
-    }
-  )
-
   const hasPreviousCommunicationAtom = selectAtom(
     messagesAtom,
     (
@@ -868,20 +872,20 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const cancelRequestActionAtom = atom(null, (get, set) => {
     const offerInfo = get(offerForChatAtom)?.offerInfo
     if (!offerInfo) {
-      set(showOfferDeletedWithOptionToDeleteActionAtom)
-      return
+      return Effect.sync(() => {
+        set(showOfferDeletedWithOptionToDeleteActionAtom)
+      }).pipe(Effect.as(false))
     }
 
-    return pipe(
-      set(cancelRequestActionAtomHandleUI, {
-        text: '',
-        originOffer: offerInfo,
-      }),
-      TE.match(
-        () => false,
-        () => true
-      )
-    )()
+    return set(cancelRequestActionAtomHandleUI, {
+      text: '',
+      originOffer: offerInfo,
+    }).pipe(
+      Effect.match({
+        onFailure: () => false,
+        onSuccess: () => true,
+      })
+    )
   })
 
   const selectedExtraToSendAtom = atom<ExtraToSend | undefined>(undefined)
@@ -1237,10 +1241,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     theirOfferAndNotReportedAtom,
     forceShowHistoryAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
+    chatStateAtom: selectAtom(chatWithMessagesAtom, getChatState),
     canBeRerequestedAtom: createCanChatBeRerequestedAtom(chatWithMessagesAtom),
+    showOfferDeletedWithOptionToDeleteActionAtom,
     otherSideSupportsTradingChecklistAtom:
       createOtherSideSupportsTradingChecklistAtom(chatAtom),
-    rerequestOfferActionAtom,
     hasPreviousCommunicationAtom,
     cancelRequestActionAtom,
     selectedImageAtom,
@@ -1285,5 +1290,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     approveChatRequestActionAtom,
     lastTradeChecklistMessageAtom,
     lastMessageReadByOtherSideAtAtom,
+    createHideMessageAtom,
   }
 })

@@ -1,4 +1,4 @@
-import {Button, SizableText, Theme, YStack} from '@vexl-next/ui'
+import {Button, PlusAdd, SizableText, Theme, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {ScrollView} from 'react-native'
 
@@ -33,6 +33,10 @@ function ButtonVariants({
 
       <Button variant="primary" size={size} onPress={() => {}}>
         Primary
+      </Button>
+
+      <Button icon={PlusAdd} variant="primary" size={size} onPress={() => {}}>
+        Primary with icon
       </Button>
 
       <Button variant="secondary" size={size} onPress={() => {}}>

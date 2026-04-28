@@ -23,6 +23,7 @@ import ChatImagePreviewScreen from '../ChatDetailScreen/ChatImagePreviewScreen'
 import ChatInfoJsonDebugScreen from '../ChatDetailScreen/ChatInfoJsonDebugScreen'
 import ChatInfoScreen from '../ChatDetailScreen/ChatInfoScreen'
 import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMessagesDebugScreen'
+import DeclineChatRequestScreen from '../ChatDetailScreen/DeclineChatRequestScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
 import {ClubDetailScreen} from '../ClubDetail'
@@ -125,6 +126,10 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
+            <Stack.Screen
+              name="DeclineChatRequest"
+              component={DeclineChatRequestScreen}
+            />
             <Stack.Screen
               name="ChatImagePreview"
               options={{

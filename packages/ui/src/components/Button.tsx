@@ -1,6 +1,7 @@
 import React from 'react'
-import {styled} from 'tamagui'
+import {styled, useTheme} from 'tamagui'
 
+import type {IconProps} from '../icons/types'
 import {SizableText, Stack} from '../primitives'
 
 export type ButtonVariant =
@@ -119,23 +120,35 @@ type ButtonFrameProps = React.ComponentProps<typeof ButtonFrame>
 
 interface ButtonProps extends Omit<ButtonFrameProps, 'children'> {
   readonly children: string
-  readonly icon?: React.ReactElement
+  readonly icon?: React.ComponentType<IconProps>
   readonly variant?: ButtonVariant
   readonly size?: ButtonSize
 }
 
 export function Button({
   children,
-  icon,
+  icon: Icon,
   variant = 'primary',
   size = 'large',
   ...rest
 }: ButtonProps): React.JSX.Element {
-  const variantOrDisabled = rest.disabled ? ('disabled' as const) : variant
+  const theme = useTheme()
+  const variantOrDisabled: ButtonVariant = rest.disabled ? 'disabled' : variant
+  const iconColor =
+    variantOrDisabled === 'primary'
+      ? theme.black100.val
+      : variantOrDisabled === 'secondary'
+        ? theme.accentHighlightPrimary.val
+        : variantOrDisabled === 'destructive'
+          ? theme.white100.val
+          : variantOrDisabled === 'tertiary'
+            ? theme.backgroundPrimary.val
+            : theme.foregroundTertiary.val
+  const iconSize = size === 'large' ? 24 : size === 'medium' ? 20 : 18
 
   return (
     <ButtonFrame variant={variantOrDisabled} size={size} {...rest}>
-      {icon}
+      {Icon ? <Icon color={iconColor} size={iconSize} /> : null}
       <ButtonLabel variant={variantOrDisabled} size={size}>
         {children}
       </ButtonLabel>

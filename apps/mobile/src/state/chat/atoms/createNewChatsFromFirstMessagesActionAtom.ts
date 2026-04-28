@@ -4,7 +4,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {keys} from '@vexl-next/resources-utils/src/utils/keys'
-import {Array} from 'effect'
+import {Array, HashSet} from 'effect'
 import {pipe} from 'fp-ts/function'
 import {group} from 'group-items'
 import {atom} from 'jotai'
@@ -109,6 +109,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
             tradeChecklist: {
               ...createEmptyTradeChecklistInState(),
             },
+            hiddenMessagesIds: HashSet.empty(),
             messages: [...messages],
           } satisfies ChatWithMessages
 

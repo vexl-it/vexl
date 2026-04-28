@@ -29,12 +29,14 @@ const RowButtonFrame = styled(XStack, {
 })
 
 type RowButtonFrameProps = React.ComponentProps<typeof RowButtonFrame>
+export type RowButtonVariant = 'default' | 'red'
 
 interface RowButtonBaseProps
   extends Omit<RowButtonFrameProps, 'children' | 'onPress'> {
   readonly label: string
   readonly selected?: boolean
   readonly icon?: React.ComponentType<IconProps>
+  readonly variant?: RowButtonVariant
 }
 
 interface RowButtonWithValueProps<T> extends RowButtonBaseProps {
@@ -57,11 +59,15 @@ function hasValue<T>(
 }
 
 export function RowButton<T>(props: RowButtonProps<T>): React.JSX.Element {
-  const {label, selected = false, icon: Icon} = props
+  const {label, selected = false, icon: Icon, variant = 'default'} = props
   const theme = useTheme()
-  const iconColor = selected
-    ? theme.accentHighlightSecondary.val
-    : theme.accentHighlightPrimary.val
+  const iconColor =
+    variant === 'red'
+      ? theme.redForeground.val
+      : selected
+        ? theme.accentHighlightSecondary.val
+        : theme.accentHighlightPrimary.val
+  const labelSelected = variant === 'red' ? false : selected
 
   const handlePress = (): void => {
     if (hasValue(props)) {
@@ -71,18 +77,37 @@ export function RowButton<T>(props: RowButtonProps<T>): React.JSX.Element {
     }
   }
 
+  const frameProps = getFrameProps(props)
+
   return (
-    <RowButtonFrame selected={selected} onPress={handlePress}>
+    <RowButtonFrame {...frameProps} selected={selected} onPress={handlePress}>
       {Icon ? <Icon color={iconColor} size={24} /> : null}
       <Typography
         variant="paragraph"
-        color={
-          selected ? '$accentHighlightSecondary' : '$accentHighlightPrimary'
-        }
+        color={getLabelColor(variant, labelSelected)}
         flex={1}
       >
         {label}
       </Typography>
     </RowButtonFrame>
   )
+}
+
+function getLabelColor(
+  variant: RowButtonVariant,
+  selected: boolean
+): '$redForeground' | '$accentHighlightSecondary' | '$accentHighlightPrimary' {
+  if (variant === 'red') return '$redForeground'
+
+  return selected ? '$accentHighlightSecondary' : '$accentHighlightPrimary'
+}
+
+function getFrameProps<T>(props: RowButtonProps<T>): RowButtonFrameProps {
+  if (hasValue(props)) {
+    const {label, selected, icon, variant, value, onPress, ...rest} = props
+    return rest
+  }
+
+  const {label, selected, icon, variant, onPress, ...rest} = props
+  return rest
 }

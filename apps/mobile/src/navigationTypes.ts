@@ -55,12 +55,17 @@ export type RootStackParamsList = {
 
   OfferDetail: {offerId: OfferId}
 
-  SendMessage: {offerId: OfferId}
+  SendMessage: {offerId: OfferId; mode?: 'request' | 'rerequest'}
 
   ChatDetail: {
     otherSideKey: PublicKeyPemBase64
     inboxKey: PublicKeyPemBase64
     targetMessageId?: ChatMessageId | undefined
+  }
+
+  DeclineChatRequest: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
   }
 
   ChatInfo: {

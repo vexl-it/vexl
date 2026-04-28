@@ -58,16 +58,6 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
     !otherSideGoldenAvatarType ||
     (!offer?.ownershipInfo && !offer?.offerInfo.publicPart.goldenAvatarType)
 
-  const connectionLabel = friendLevelInfo.includes('FIRST_DEGREE')
-    ? 'Direct friend'
-    : friendLevelInfo.includes('SECOND_DEGREE')
-      ? 'Friend of friend'
-      : otherSideData.userName
-
-  const commonLabel =
-    commonConnectionsCount > 0
-      ? `${commonConnectionsCount} in common`
-      : 'No shared connections'
 
   return (
     <XStack

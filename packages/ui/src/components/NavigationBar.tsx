@@ -5,6 +5,7 @@ import {PeopleUsers} from '../icons/PeopleUsers'
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {NavButton, type NavButtonVariant} from './NavButton'
+import {Typography} from './Typography'
 
 export interface NavigationBarAction {
   readonly icon: React.ComponentType<IconProps>
@@ -81,35 +82,16 @@ const ChatPressableArea = styled(XStack, {
 
 const ChatInfoColumn = styled(YStack, {
   name: 'NavigationBarChatInfo',
+  alignSelf: 'stretch',
   flex: 1,
   gap: '$1',
-})
-
-const ChatName = styled(SizableText, {
-  name: 'NavigationBarChatName',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$3',
-  letterSpacing: '$3',
-  color: '$foregroundPrimary',
-  numberOfLines: 1,
+  justifyContent: 'flex-end',
 })
 
 const ChatSubtitleRow = styled(XStack, {
   name: 'NavigationBarChatSubtitle',
-  alignItems: 'center',
+  alignItems: 'flex-end',
   gap: '$1',
-})
-
-const ChatSubtitleText = styled(SizableText, {
-  name: 'NavigationBarChatSubtitleText',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  color: '$foregroundSecondary',
-  flex: 1,
-  numberOfLines: 1,
 })
 
 interface NavigationBarBackProps {
@@ -163,18 +145,8 @@ function RightNavAction({
   )
 }
 
-function ChatSubtitleIcon(): React.JSX.Element {
-  const theme = useTheme()
-
-  return (
-    <PeopleUsers
-      color={theme.foregroundSecondary.val}
-      size={getTokens().size.$5.val}
-    />
-  )
-}
-
 export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
+  const theme = useTheme()
   return (
     <NavigationBarFrame>
       {props.style === 'back' ? (
@@ -201,11 +173,18 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
           <ChatPressableArea onPress={props.onPress}>
             {props.avatar}
             <ChatInfoColumn>
-              <ChatName>{props.name}</ChatName>
+              <Typography variant="paragraphSmall" color="$foregroundPrimary">
+                {props.name}
+              </Typography>
               {props.subtitle ? (
                 <ChatSubtitleRow>
-                  <ChatSubtitleIcon />
-                  <ChatSubtitleText>{props.subtitle}</ChatSubtitleText>
+                  <PeopleUsers
+                    color={theme.foregroundSecondary.get()}
+                    size={getTokens().size.$5.val}
+                  />
+                  <Typography variant="micro" color="$foregroundSecondary">
+                    {props.subtitle}
+                  </Typography>
                 </ChatSubtitleRow>
               ) : null}
             </ChatInfoColumn>

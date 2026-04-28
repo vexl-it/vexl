@@ -5,7 +5,7 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Array, pipe} from 'effect'
+import {Array, HashSet, pipe} from 'effect'
 import {flow} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import * as O from 'optics-ts'
@@ -83,6 +83,7 @@ function createNewChat({
     tradeChecklist: {
       ...createEmptyTradeChecklistInState(),
     },
+    hiddenMessagesIds: HashSet.empty(),
     messages: [initialMessage],
   } satisfies ChatWithMessages
 }

@@ -8,15 +8,17 @@ interface ContentProps {
   buttonText?: string | undefined
   children: React.ReactNode
   onButtonPress?: () => void
+  horizontalPadding?: boolean
 }
 
 function EmptyListContent({
   children,
   buttonText,
+  horizontalPadding,
   onButtonPress,
 }: ContentProps): React.ReactElement {
   return (
-    <YStack jc="center" gap="$5">
+    <YStack px={horizontalPadding ? '$5' : 0} jc="center" gap="$5">
       {children}
       {!!buttonText && !!onButtonPress && (
         <Button variant="tertiary" size="small" onPress={onButtonPress}>
@@ -31,6 +33,7 @@ interface Props extends ContentProps {
   inScrollView?: boolean
   refreshing?: boolean | undefined
   onRefresh?: () => void
+  horizontalPadding?: boolean
 }
 
 function EmptyListWrapper({
@@ -40,6 +43,7 @@ function EmptyListWrapper({
   onButtonPress,
   refreshing = false,
   onRefresh,
+  horizontalPadding = false,
 }: Props): React.ReactElement {
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
 
@@ -61,7 +65,11 @@ function EmptyListWrapper({
         paddingBottom: tabBarEndsAt,
       }}
     >
-      <EmptyListContent buttonText={buttonText} onButtonPress={onButtonPress}>
+      <EmptyListContent
+        horizontalPadding={horizontalPadding}
+        buttonText={buttonText}
+        onButtonPress={onButtonPress}
+      >
         {children}
       </EmptyListContent>
     </ScrollView>

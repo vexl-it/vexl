@@ -3,13 +3,14 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, Schema} from 'effect'
 import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
+import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
 import * as E from 'fp-ts/Either'
 import type * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {getDefaultStore} from 'jotai'
 import {useEffect, useState} from 'react'
-import {Alert} from 'react-native'
+import {Alert, Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {useTranslation} from '../localization/I18nProvider'
 import reportError from '../reportError'
@@ -76,6 +77,11 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
 
 export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | null> {
   const getExpoNotificationToken = Effect.promise(async () => {
+    if (Platform.OS === 'ios' && !Device.isDevice) {
+      // Expo push token fetching is not supported on iOS Simulator.
+      return null
+    }
+
     try {
       const token = await Notifications.getExpoPushTokenAsync({
         projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
@@ -86,6 +92,11 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
       }
       return Schema.decodeSync(ExpoNotificationToken)(token.data)
     } catch (e) {
+      reportError(
+        'warn',
+        new Error('Error fetching Expo push token', {cause: e}),
+        {e}
+      )
       return null
     }
   })

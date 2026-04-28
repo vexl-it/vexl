@@ -26,6 +26,7 @@ import {GraphicsScreen} from './GraphicsScreen'
 import {IconButtonScreen} from './IconButtonScreen'
 import {IconsScreen} from './IconsScreen'
 import {IconTagScreen} from './IconTagScreen'
+import {InfoBoxScreen} from './InfoBoxScreen'
 import {InputHintScreen} from './InputHintScreen'
 import {LoaderScreen} from './LoaderScreen'
 import {MenuItemScreen} from './MenuItemScreen'
@@ -89,6 +90,7 @@ export const screens: readonly ScreenEntry[] = [
   {label: 'Icon Button', component: IconButtonScreen},
   {label: 'Icon Tag', component: IconTagScreen},
   {label: 'Icons', component: IconsScreen},
+  {label: 'Info Box', component: InfoBoxScreen},
   {label: 'Input Hint', component: InputHintScreen},
   {label: 'Loader', component: LoaderScreen},
   {label: 'Menu', component: MenuScreen},

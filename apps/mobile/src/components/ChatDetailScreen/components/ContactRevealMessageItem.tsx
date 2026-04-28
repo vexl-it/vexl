@@ -11,7 +11,6 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
-import blockPhoneNumberRevealSvg from '../../../images/blockPhoneNumberRevealSvg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {
@@ -29,11 +28,6 @@ import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import RevealedInfoCard from './RevealedInfoCard'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
-
-const declinedPhoneSvg = blockPhoneNumberRevealSvg.xml.replace(
-  '#EE675E',
-  '#FFFFFF'
-)
 
 function isIdentityRevealApprovalMessage(
   message?: ChatMessageWithState

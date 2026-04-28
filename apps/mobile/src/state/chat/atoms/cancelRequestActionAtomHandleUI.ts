@@ -1,9 +1,11 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {type BasicError} from '@vexl-next/domain/src/utility/errors'
+import {
+  toBasicError,
+  type BasicError,
+} from '@vexl-next/domain/src/utility/errors'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
 import {
   type ErrorSigningChallenge,
@@ -11,18 +13,12 @@ import {
 } from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
-import {type Effect, type ParseResult} from 'effect'
-import * as T from 'fp-ts/Task'
-import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
+import {Effect, type ParseResult} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../api'
-import {
-  askAreYouSureActionAtom,
-  type UserDeclinedError,
-} from '../../../components/AreYouSureDialog'
 import {showErrorAlert} from '../../../components/ErrorAlert'
+import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -34,6 +30,7 @@ import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
+type UserDeclinedError = BasicError<'UserDeclinedError'>
 type CancelRequestApprovalErrors = Effect.Effect.Error<
   ReturnType<ChatApi['cancelRequestApproval']>
 >
@@ -44,7 +41,8 @@ const cancelRequestActionAtomHandleUI = atom(
     get,
     set,
     {text, originOffer}: {text: string; originOffer: OfferInfo}
-  ): TE.TaskEither<
+  ): Effect.Effect<
+    ChatMessageWithState,
     | ChatNotFoundError
     | CancelRequestApprovalErrors
     | UserDeclinedError
@@ -54,8 +52,7 @@ const cancelRequestActionAtomHandleUI = atom(
     | InvalidChallengeError
     | ErrorGeneratingChallenge
     | ErrorSigningChallenge
-    | CryptoError,
-    ChatMessageWithState
+    | CryptoError
   > => {
     const session = get(sessionDataOrDummyAtom)
     const chatAtom = focusChatByInboxKeyAndSenderKey({
@@ -65,7 +62,7 @@ const cancelRequestActionAtomHandleUI = atom(
 
     const chatWithMessages = get(chatAtom)
     if (!chatWithMessages)
-      return TE.left({
+      return Effect.fail({
         _tag: 'ChatNotFoundError',
         error: new Error('Chat not found'),
       })
@@ -77,78 +74,83 @@ const cancelRequestActionAtomHandleUI = atom(
         : undefined
     const api = get(apiAtom)
     const {t} = get(translationAtom)
+    const userDeclinedError = toBasicError('UserDeclinedError')(
+      new Error('Declined')
+    )
 
-    return pipe(
-      TE.Do,
-      TE.chainW(() =>
-        set(askAreYouSureActionAtom, {
-          steps: [
-            {
-              type: 'StepWithText',
-              title: t('messages.cancelRequestDialog.title'),
-              description: t('messages.cancelRequestDialog.description'),
-              negativeButtonText: t('common.back'),
-              positiveButtonText: t('messages.cancelRequestDialog.yes'),
-            },
-          ],
-          variant: 'danger',
-        }).pipe(effectToTaskEither)
-      ),
-      TE.chainW(() => {
-        set(loadingOverlayDisplayedAtom, true)
-
-        return effectToTaskEither(
-          sendCancelMessagingRequest({
-            api: api.chat,
-            text,
-            fromKeypair: chat.inbox.privateKey,
-            toPublicKey: chat.otherSide.publicKey,
-            myVersion: version,
-            theirNotificationCypher: offer?.fcmCypher,
-            notificationApi: api.notification,
-            otherSideVersion: offer?.authorClientVersion,
-          })
-        )
-      }),
-      TE.map((sentMessage): ChatMessageWithState => {
-        const successMessage = {
-          message: sentMessage,
-          state: 'sent',
-        } as const
-        set(chatAtom, addMessageToChat(successMessage))
-        return successMessage
-      }),
-      TE.mapLeft((error) => {
-        if (error._tag === 'UserDeclinedError') {
-          return error
-        }
-        if (error._tag === 'ReceiverInboxDoesNotExistError') {
-          set(
-            chatAtom,
-            addMessageToChat(
-              createAccountDeletedMessage({
-                senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
-              })
-            )
-          )
-          Alert.alert(t('offer.otherSideAccountDeleted'))
-
-          return error
-        }
-
-        showErrorAlert({
-          title: t('common.somethingWentWrong'),
-          description:
-            toCommonErrorMessage(error, t) ??
-            t('common.somethingWentWrongDescription'),
-          error,
+    return Effect.gen(function* (_) {
+      const confirmed = yield* _(
+        set(globalDialogAtom, {
+          title: t('messages.cancelRequestDialog.title'),
+          subtitle: t('messages.cancelRequestDialog.description'),
+          negativeButtonText: t('common.back'),
+          positiveButtonText: t('messages.cancelRequestDialog.yes'),
+          positiveButtonVariant: 'destructive',
         })
-        return error
-      }),
-      T.map((result) => {
-        set(loadingOverlayDisplayedAtom, false)
-        return result
-      })
+      )
+
+      if (!confirmed) {
+        return yield* _(Effect.fail(userDeclinedError))
+      }
+
+      set(loadingOverlayDisplayedAtom, true)
+
+      const sentMessage = yield* _(
+        sendCancelMessagingRequest({
+          api: api.chat,
+          text,
+          fromKeypair: chat.inbox.privateKey,
+          toPublicKey: chat.otherSide.publicKey,
+          myVersion: version,
+          theirNotificationCypher: offer?.fcmCypher,
+          notificationApi: api.notification,
+          otherSideVersion: offer?.authorClientVersion,
+        })
+      )
+
+      const successMessage: ChatMessageWithState = {
+        message: sentMessage,
+        state: 'sent',
+      }
+
+      set(chatAtom, addMessageToChat(successMessage))
+
+      return successMessage
+    }).pipe(
+      Effect.tapError((error) =>
+        Effect.sync(() => {
+          if (error._tag === 'UserDeclinedError') {
+            return
+          }
+
+          if (error._tag === 'ReceiverInboxDoesNotExistError') {
+            set(
+              chatAtom,
+              addMessageToChat(
+                createAccountDeletedMessage({
+                  senderPublicKey: chat.inbox.privateKey.publicKeyPemBase64,
+                })
+              )
+            )
+            Alert.alert(t('offer.otherSideAccountDeleted'))
+
+            return
+          }
+
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            description:
+              toCommonErrorMessage(error, t) ??
+              t('common.somethingWentWrongDescription'),
+            error,
+          })
+        })
+      ),
+      Effect.ensuring(
+        Effect.sync(() => {
+          set(loadingOverlayDisplayedAtom, false)
+        })
+      )
     )
   }
 )

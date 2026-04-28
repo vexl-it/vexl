@@ -14,16 +14,21 @@ import React from 'react'
 import {
   useGetAllClubsForIds,
   useGetAllClubsNamesForIds,
-} from '../../../state/clubs/atom/clubsWithMembersAtom'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {getIconTagVariant, getIsOffering} from '../../../utils/offerHelpers'
-import {randomSeedFromOfferInfo} from '../../../utils/RandomSeed'
-import {AnonymousAvatarOrClubImage} from '../../AnonymousAvatar'
+} from '../state/clubs/atom/clubsWithMembersAtom'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
+import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
+import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
+import UserAvatar from './UserAvatar'
 
-function OfferHeader({
+function OfferAuthorBanner({
   offer,
+  userImage,
+  grayAvatar,
 }: {
   readonly offer: OneOfferInState
+  readonly userImage?: React.ComponentProps<typeof UserAvatar>['userImage']
+  readonly grayAvatar?: boolean
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -60,12 +65,21 @@ function OfferHeader({
   return (
     <XStack alignItems="center" justifyContent="space-between" gap="$3">
       <XStack alignItems="center" gap="$3" flex={1} minWidth={0}>
-        <AnonymousAvatarOrClubImage
-          grayScale={false}
-          customSize={36}
-          seed={randomSeedFromOfferInfo(offer.offerInfo)}
-          clubImageUrl={clubImageUrl}
-        />
+        {userImage ? (
+          <UserAvatar
+            grayScale={grayAvatar}
+            userImage={userImage}
+            width={40}
+            height={40}
+          />
+        ) : (
+          <AnonymousAvatarOrClubImage
+            grayScale={grayAvatar ?? false}
+            customSize={40}
+            seed={randomSeedFromOfferInfo(offer.offerInfo)}
+            clubImageUrl={clubImageUrl}
+          />
+        )}
         <YStack gap="$2" flex={1} minWidth={0}>
           <Typography
             variant="descriptionBold"
@@ -87,18 +101,23 @@ function OfferHeader({
                 size="$2"
                 backgroundColor={theme.foregroundSecondary.val}
               />
-              <XStack gap="$1" alignItems="center">
-                <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
-                <Typography
-                  variant="micro"
-                  color="$foregroundSecondary"
-                  numberOfLines={1}
-                >
-                  {t('offer.numberOfCommon', {number: commonFriendsCount})}
-                </Typography>
-              </XStack>
+              {!isMine && (
+                <XStack gap="$1" alignItems="center">
+                  <PeopleUsers
+                    size={16}
+                    color={theme.foregroundSecondary.val}
+                  />
+                  <Typography
+                    variant="micro"
+                    color="$foregroundSecondary"
+                    numberOfLines={1}
+                  >
+                    {t('offer.numberOfCommon', {number: commonFriendsCount})}
+                  </Typography>
+                </XStack>
+              )}
             </XStack>
-          ) : (
+          ) : !isMine ? (
             <XStack alignItems="center" gap="$1">
               <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
               <Typography
@@ -109,7 +128,7 @@ function OfferHeader({
                 {t('offer.numberOfCommon', {number: commonFriendsCount})}
               </Typography>
             </XStack>
-          )}
+          ) : null}
         </YStack>
       </XStack>
       <XStack alignItems="center" gap="$1">
@@ -133,4 +152,4 @@ function OfferHeader({
   )
 }
 
-export default OfferHeader
+export default OfferAuthorBanner

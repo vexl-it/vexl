@@ -115,15 +115,16 @@ export function api({
         ),
       createInbox: (
         createInboxRequest: RequestWithGeneratableChallenge<CreateInboxRequest>
-      ) =>
-        addChallenge(createInboxRequest).pipe(
+      ) => {
+        return addChallenge(createInboxRequest).pipe(
           Effect.flatMap((body) =>
             client.Inboxes.createInbox({
               payload: body,
               headers: commonHeaders,
             })
           )
-        ),
+        )
+      },
       deleteInbox: (
         deleteInboxRequest: RequestWithGeneratableChallenge<DeleteInboxRequest>
       ) =>

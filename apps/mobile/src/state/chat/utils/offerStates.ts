@@ -59,3 +59,64 @@ export function canChatBeRequested(
 
   return {canBeRerequested: false}
 }
+
+export type ChatState =
+  | 'requestedByMe'
+  | 'requestedByThem'
+  | 'requestDeniedByThem'
+  | 'requestDeniedByMe'
+  | 'requestCancelledByMe'
+  | 'requestCancelledByThem'
+  | 'chatOpen' // Chat was opened and is currently open
+  | 'chatClosed' // Chat was opened and then got closed
+
+function isMessageFromMe(
+  message: ChatWithMessages['messages'][number]
+): boolean {
+  return (
+    message.state === 'sent' ||
+    message.state === 'sending' ||
+    message.state === 'sendingError'
+  )
+}
+
+export function getChatState(chat?: ChatWithMessages): ChatState {
+  for (let index = chat?.messages.length ?? 0; index > 0; index -= 1) {
+    const messageWithState = chat?.messages[index - 1]
+    if (!messageWithState) continue
+
+    const messageType = messageWithState.message.messageType
+
+    if (messageType === 'APPROVE_MESSAGING') {
+      return 'chatOpen'
+    }
+
+    if (
+      messageType === 'DELETE_CHAT' ||
+      messageType === 'BLOCK_CHAT' ||
+      messageType === 'INBOX_DELETED'
+    ) {
+      return 'chatClosed'
+    }
+
+    if (messageType === 'REQUEST_MESSAGING') {
+      return isMessageFromMe(messageWithState)
+        ? 'requestedByMe'
+        : 'requestedByThem'
+    }
+
+    if (messageType === 'DISAPPROVE_MESSAGING') {
+      return isMessageFromMe(messageWithState)
+        ? 'requestDeniedByMe'
+        : 'requestDeniedByThem'
+    }
+
+    if (messageType === 'CANCEL_REQUEST_MESSAGING') {
+      return isMessageFromMe(messageWithState)
+        ? 'requestCancelledByMe'
+        : 'requestCancelledByThem'
+    }
+  }
+
+  return 'chatClosed'
+}

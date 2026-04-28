@@ -1,39 +1,51 @@
+import {useNavigation} from '@react-navigation/native'
+import {Button, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {XStack, type XStackProps} from 'tamagui'
+import type {XStackProps} from 'tamagui'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Button from '../../Button'
 import {chatMolecule} from '../atoms'
 
-interface Props extends XStackProps {
-  message: string
-}
-
-function AcceptDeclineButtons({message, ...props}: Props): React.ReactElement {
+function AcceptDeclineButtons(props: XStackProps): React.ReactElement {
   const {t} = useTranslation()
-  const {approveChatRequestActionAtom} = useMolecule(chatMolecule)
+  const {approveChatRequestActionAtom, chatAtom} = useMolecule(chatMolecule)
   const approveChat = useSetAtom(approveChatRequestActionAtom)
+  const navigation =
+    useNavigation<RootStackScreenProps<'DeclineChatRequest'>['navigation']>()
+  const chat = useAtomValue(chatAtom)
+
+  const onDeclinePress = (): void => {
+    if (!chat) return
+
+    navigation.navigate('DeclineChatRequest', {
+      otherSideKey: chat.otherSide.publicKey,
+      inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+    })
+  }
 
   return (
-    <XStack gap="$4" px="$4" mb="$2" {...props}>
+    <XStack width="100%" gap="$3" {...props}>
       <Button
-        onPress={() => {
-          Effect.runFork(approveChat({approve: false, message}))
-        }}
-        fullSize
-        variant="primary"
-        text={t('common.decline')}
-      />
-      <Button
-        onPress={() => {
-          Effect.runFork(approveChat({approve: true, message}))
-        }}
+        size="large"
+        onPress={onDeclinePress}
+        flex={1}
         variant="secondary"
-        fullSize
-        text={t('common.accept')}
-      />
+      >
+        {t('common.decline')}
+      </Button>
+      <Button
+        size="large"
+        onPress={() => {
+          Effect.runFork(approveChat({approve: true, message: 'TODO'}))
+        }}
+        variant="primary"
+        flex={1}
+      >
+        {t('common.accept')}
+      </Button>
     </XStack>
   )
 }

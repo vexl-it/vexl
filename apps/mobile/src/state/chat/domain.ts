@@ -6,6 +6,7 @@ import {
   Chat,
   ChatId,
   ChatMessage,
+  ChatMessageId,
   ChatMessageRequiringNewerVersion,
   generateChatId,
   Inbox,
@@ -24,7 +25,7 @@ import {
   NotPermittedToSendMessageToTargetInboxError,
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
-import {Schema} from 'effect/index'
+import {HashSet, Schema} from 'effect/index'
 import {
   createEmptyTradeChecklistInState,
   TradeChecklistInState,
@@ -89,9 +90,23 @@ export const ChatMessageWithState = Schema.Union(
 )
 export type ChatMessageWithState = typeof ChatMessageWithState.Type
 
+// Used for messages that are grouped to another messages...
+// Usually that includes chat messages for example
+export const ChatTransientMessageId = Schema.String.pipe(
+  Schema.brand('ChatTransientMessageId')
+)
+export type ChatTransientMessageId = typeof ChatTransientMessageId.Type
+
 export const ChatWithMessages = Schema.Struct({
   chat: Chat,
   messages: Schema.Array(ChatMessageWithState).pipe(Schema.mutable),
+  hiddenMessagesIds: Schema.HashSet(
+    Schema.Union(ChatMessageId, ChatTransientMessageId)
+  ).pipe(
+    Schema.optionalWith({
+      default: () => HashSet.empty<ChatMessageId | ChatTransientMessageId>(),
+    })
+  ),
   tradeChecklist: Schema.optionalWith(TradeChecklistInState, {
     default: () => ({
       dateAndTime: {},
@@ -142,6 +157,7 @@ export const dummyChatWithMessages: ChatWithMessages = {
     showVexlbotInitialMessage: true,
     showVexlbotNotifications: true,
   },
+  hiddenMessagesIds: HashSet.empty(),
   tradeChecklist: {
     ...createEmptyTradeChecklistInState(),
   },

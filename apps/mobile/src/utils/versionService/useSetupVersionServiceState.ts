@@ -28,6 +28,7 @@ export default function useSetupVersionServiceState(): void {
             )
             return Effect.void
           }),
+          Effect.ignore,
           Effect.runPromise
         )
       },

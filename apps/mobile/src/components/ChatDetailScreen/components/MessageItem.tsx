@@ -1,20 +1,20 @@
 import {DotTypingIndicator, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
-import {type DateTime} from 'luxon'
 import React, {useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'
 import BlockIconSvg from '../../../images/blockIconSvg'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
-import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import UserAvatar from '../../UserAvatar'
 import UserFeedback from '../../UserFeedback'
 import {chatMolecule} from '../atoms'
+import {type MessagesListItem} from '../utils/buildMessagesListData'
 import formatChatTime from '../utils/formatChatTime'
 import BigIconMessage from './BigIconMessage'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
+import {DisapproveMessagingMessage} from './DisapproveMessagingMessage'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
 import TextMessage from './TextMessage'
@@ -23,38 +23,9 @@ import TradeChecklistAmountView from './VexlbotMessageItem/components/TradeCheck
 import TradeChecklistDateAndTimeView from './VexlbotMessageItem/components/TradeChecklistDateAndTimeView'
 import TradeChecklistMeetingLocationView from './VexlbotMessageItem/components/TradeChecklistMeetingLocationView'
 import TradeChecklistNetworkView from './VexlbotMessageItem/components/TradeChecklistNetworkView'
-import {type TradingChecklistSuggestion} from './VexlbotMessageItem/domain'
+import {VexlBotRequestHelp} from './VexlBotRequestHelp'
 
-export type MessagesListItem =
-  | {
-      type: 'time'
-      time: DateTime
-      key: string
-    }
-  | {
-      type: 'message'
-      time: DateTime
-      message: ChatMessageWithState
-      isLatest: boolean
-      key: string
-    }
-  | {
-      type: 'space'
-      key: string
-    }
-  | {
-      type: 'originInfo'
-      key: string
-    }
-  | {
-      type: 'vexlBot'
-      key: string
-      data: TradingChecklistSuggestion
-    }
-  | {
-      type: 'typingIndicator'
-      key: string
-    }
+export type {MessagesListItem} from '../utils/buildMessagesListData'
 
 function TypingIndication(): React.ReactElement | null {
   const {chatIdAtom} = useMolecule(chatMolecule)
@@ -135,6 +106,10 @@ function MessageItem({
 
     const direction =
       item.message.state === 'received' ? 'incoming' : 'outgoing'
+
+    if (item.message.message.messageType === 'DISAPPROVE_MESSAGING') {
+      return <DisapproveMessagingMessage itemAtom={itemAtom} />
+    }
 
     if (item.message.message.messageType === 'DELETE_CHAT') {
       return (
@@ -247,7 +222,16 @@ function MessageItem({
       return null
     }
 
-    return <TextMessage messageAtom={itemAtom} />
+    if (item.message.message.messageType === 'APPROVE_MESSAGING') {
+      return <VexlBotRequestHelp message={item.message} />
+    }
+
+    return (
+      <>
+        <TextMessage messageAtom={itemAtom} />
+        {!!item.isLatest && <VexlBotRequestHelp message={item.message} />}
+      </>
+    )
   }
 
   if (item.type === 'vexlBot') {

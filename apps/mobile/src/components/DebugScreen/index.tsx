@@ -17,7 +17,6 @@ import {
 } from 'effect'
 import * as BackgroundTask from 'expo-background-task'
 import {getInstallationSource} from 'expo-installation-source'
-import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {isTestFlight} from 'expo-testflight'
 import * as T from 'fp-ts/Task'
@@ -619,11 +618,8 @@ function DebugScreen(): React.ReactElement {
               // eslint-disable-next-line @typescript-eslint/no-misused-promises
               onPress={async () => {
                 Clipboard.setString(
-                  (
-                    await Notifications.getExpoPushTokenAsync({
-                      projectId: 'dbcc5b47-6c4a-4faf-a345-e9cd8a680c32',
-                    })
-                  ).data || 'No token'
+                  (await Effect.runPromise(getNotificationTokenE())) ??
+                    'No token'
                 )
               }}
             />

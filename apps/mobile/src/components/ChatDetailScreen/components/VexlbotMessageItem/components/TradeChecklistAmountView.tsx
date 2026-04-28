@@ -234,12 +234,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
               {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
                 <Button
                   f={1}
-                  icon={
-                    <Copy
-                      color={copyActionIconColor}
-                      size={copyActionIconSize}
-                    />
-                  }
+                  icon={Copy}
                   minWidth={copyActionMinWidth}
                   onPress={() => {
                     copyValueToClipboard(
@@ -255,12 +250,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
               {!!message.message.tradeChecklistUpdate.amount.btcAmount && (
                 <Button
                   f={1}
-                  icon={
-                    <Copy
-                      color={copyActionIconColor}
-                      size={copyActionIconSize}
-                    />
-                  }
+                  icon={Copy}
                   minWidth={copyActionMinWidth}
                   onPress={() => {
                     copyValueToClipboard(
@@ -276,12 +266,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
               {!!fiatAmount && (
                 <Button
                   f={1}
-                  icon={
-                    <Copy
-                      color={copyActionIconColor}
-                      size={copyActionIconSize}
-                    />
-                  }
+                  icon={Copy}
                   minWidth={copyActionMinWidth}
                   onPress={() => {
                     copyValueToClipboard(`${fiatAmount}`)

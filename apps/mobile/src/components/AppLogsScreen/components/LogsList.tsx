@@ -44,7 +44,7 @@ function LogsList(): React.ReactElement {
           Alert.alert('You are now in a developer mode!')
         }}
       >
-        <Text color="white">{t('AppLogs.noLogs')}</Text>
+        <Text color="orange">{t('AppLogs.noLogs')}</Text>
       </SecretDoor>
     )
 

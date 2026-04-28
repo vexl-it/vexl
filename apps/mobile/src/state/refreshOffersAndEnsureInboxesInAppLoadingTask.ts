@@ -170,7 +170,6 @@ export const refreshOffersAndEnsureInboxesTaskId = registerInAppLoadingTask({
           refreshOffers,
           Effect.andThen(checkOfferInboxesExistAndRecreateIfNot),
           Effect.mapError((e) => {
-            console.log('Error asdf', JSON.stringify(e, null, 2))
             return new InAppLoadingTaskError({cause: e})
           })
         )

@@ -1,14 +1,48 @@
-import {Array, pipe} from 'effect'
+import {Array, HashSet, pipe} from 'effect'
 import {type DateTime} from 'luxon'
-import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {
+  type ChatMessageWithState,
+  type ChatWithMessages,
+} from '../../../state/chat/domain'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
-import {type MessagesListItem} from '../components/MessageItem'
+import {type TradingChecklistSuggestion} from '../components/VexlbotMessageItem/domain'
 import {
   getMessageTime,
   getUniqueKey,
   type MessageWithState,
 } from './VexlBotMessageOrMessageWithState'
 import filterIrrelevantIdentityOrContactMessages from './filterIrrelevantIdentityOrContactMessages'
+
+export type MessagesListItem =
+  | {
+      type: 'time'
+      time: DateTime
+      key: string
+    }
+  | {
+      type: 'message'
+      time: DateTime
+      message: ChatMessageWithState
+      isLatest: boolean
+      key: string
+    }
+  | {
+      type: 'space'
+      key: string
+    }
+  | {
+      type: 'originInfo'
+      key: string
+    }
+  | {
+      type: 'vexlBot'
+      key: string
+      data: TradingChecklistSuggestion
+    }
+  | {
+      type: 'typingIndicator'
+      key: string
+    }
 
 function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
   const result = [] as MessagesListItem[]
@@ -37,7 +71,7 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
     if (prevMessageTime && minutesDiff > 10) {
       result.push({
         type: 'time',
-        time: prevMessageTime,
+        time: messageTime,
         key: `time-${getUniqueKey(message)}`,
       })
       prevMessageTime = messageTime
@@ -61,11 +95,19 @@ function messagesToListData(messages: MessageWithState[]): MessagesListItem[] {
   return [...result, {type: 'typingIndicator', key: 'typingIndicator'}]
 }
 
+const filterHiddenMessagesIds =
+  (hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds']) =>
+  (message: ChatMessageWithState) => {
+    return !HashSet.has(hiddenMessagesIds, message.message.uuid)
+  }
+
 export default function buildMessagesListData(
-  messages: ChatMessageWithState[]
+  messages: ChatMessageWithState[],
+  hiddenMessagesIds: ChatWithMessages['hiddenMessagesIds']
 ): MessagesListItem[] {
   return pipe(
     messages,
+    Array.filter(filterHiddenMessagesIds(hiddenMessagesIds)),
     Array.filter(filterIrrelevantIdentityOrContactMessages(messages)),
     Array.map(
       (message): MessageWithState => ({

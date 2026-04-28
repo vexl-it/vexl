@@ -1,7 +1,6 @@
 import {FlashList} from '@shopify/flash-list'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
-  ChevronLeft,
   EditRow,
   NavigationBar,
   Screen,
@@ -20,6 +19,7 @@ import createImportedContactsForHashesAtom from '../../state/contacts/atom/creat
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {showVerifiedContactsAtom} from '../../utils/preferences'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 import ContactPictureImage from '../ContactPictureImage'
 
 function FriendListItem({
@@ -104,18 +104,16 @@ function ListHeader(): React.ReactElement {
   )
 }
 
-function CommonFriendsScreen({
-  navigation,
-  route,
-}: RootStackScreenProps<'CommonFriends'>): React.ReactElement {
+function useCommonFriendsListData({
+  contactsHashes,
+  verifiedHashes,
+}: {
+  readonly contactsHashes: readonly HashedPhoneNumber[]
+  readonly verifiedHashes?: readonly HashedPhoneNumber[]
+}): readonly ListItem[] {
   const {t} = useTranslation()
-  const {bottom} = useSafeAreaInsets()
   const store = useStore()
   const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
-  const {contactsHashes, verifiedHashes} = route.params
-  const handleGoBack = useCallback(() => {
-    navigation.goBack()
-  }, [navigation])
 
   const commonFriends = useMemo(
     () => store.get(createImportedContactsForHashesAtom(contactsHashes)),
@@ -130,7 +128,7 @@ function CommonFriendsScreen({
     [showVerifiedContacts, verifiedHashes]
   )
 
-  const data = useMemo((): readonly ListItem[] => {
+  return useMemo((): readonly ListItem[] => {
     if (!showVerifiedContacts) {
       return pipe(commonFriends, Array.map(createFriendListItem))
     }
@@ -169,6 +167,19 @@ function CommonFriendsScreen({
 
     return Array.appendAll(verifiedSection, commonSection)
   }, [commonFriends, showVerifiedContacts, t, verifiedHashesSet])
+}
+
+type Props = RootStackScreenProps<'CommonFriends'>
+
+function CommonFriendsScreen({
+  route: {
+    params: {contactsHashes, verifiedHashes},
+  },
+}: Props): React.ReactElement {
+  const {t} = useTranslation()
+  const {bottom} = useSafeAreaInsets()
+  const safeGoBack = useSafeGoBack()
+  const data = useCommonFriendsListData({contactsHashes, verifiedHashes})
 
   const renderItem = useCallback(
     ({item}: {item: ListItem}) =>
@@ -192,8 +203,7 @@ function CommonFriendsScreen({
         <NavigationBar
           style="back"
           title={t('commonFriends.commonFriends')}
-          leftAction={{icon: ChevronLeft, onPress: handleGoBack}}
-          rightActions={[{icon: XmarkCancelClose, onPress: handleGoBack}]}
+          rightActions={[{icon: XmarkCancelClose, onPress: safeGoBack}]}
         />
       }
     >

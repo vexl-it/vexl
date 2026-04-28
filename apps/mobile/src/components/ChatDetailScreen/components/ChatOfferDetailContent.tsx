@@ -29,9 +29,10 @@ import {
   getIsOffering,
 } from '../../../utils/offerHelpers'
 import CommonFriends from '../../CommonFriends'
+import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
+import OfferPropertiesCard from '../../OfferPropertiesCard'
 import {chatMolecule} from '../atoms'
-import ChatConnectionHeader from './ChatConnectionHeader'
 
 function getTradeTagVariant(isOffering: boolean): 'offer' | 'request' {
   return isOffering ? 'offer' : 'request'
@@ -241,48 +242,17 @@ export default function ChatOfferDetailContent({
         }}
       >
         <YStack gap="$5">
-          <ChatConnectionHeader
-            canSendMessages={canSendMessages}
-            commonConnectionsLabel={t('offer.numberOfCommon', {
-              number: localizedCommonConnectionsCount,
-            })}
-            connectionTitle={connectionTitle}
-            otherSideLeft={otherSideLeft}
-            tradeTag={tradeTag}
+          <OfferAuthorBanner
+            offer={offer}
             userImage={otherSideData.image}
+            grayAvatar={otherSideLeft || !canSendMessages}
           />
 
           <Typography color="$foregroundPrimary" variant="description">
             {offer.offerInfo.publicPart.offerDescription}
           </Typography>
 
-          <YStack
-            backgroundColor="$backgroundSecondary"
-            borderRadius="$5"
-            p="$4"
-            gap="$6"
-          >
-            {detailRows.map((row) => (
-              <XStack
-                key={row.key}
-                alignItems="flex-start"
-                justifyContent="space-between"
-                gap="$4"
-              >
-                <Typography color="$foregroundSecondary" variant="micro">
-                  {row.label}
-                </Typography>
-                <Typography
-                  color="$foregroundPrimary"
-                  flex={1}
-                  textAlign="right"
-                  variant="descriptionBold"
-                >
-                  {row.value}
-                </Typography>
-              </XStack>
-            ))}
-          </YStack>
+          <OfferPropertiesCard offer={offer} />
 
           <CommonFriends
             commonConnectionsHashes={commonConnectionsHashes}

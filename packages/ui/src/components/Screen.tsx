@@ -31,7 +31,6 @@ const ScreenFooterFrame = styled(Stack, {
   right: 0,
   paddingHorizontal: '$5',
   paddingTop: '$5',
-  paddingBottom: '$10',
 })
 
 const OverlayNavigationBarFrame = styled(Stack, {
@@ -62,7 +61,10 @@ export function Screen({
 
   return (
     <FooterHeightAtomContext.Provider value={{footerHeightAtom}}>
-      <ScreenFrame paddingTop={overlayNavigationBar ? 0 : insets.top}>
+      <ScreenFrame
+        paddingTop={overlayNavigationBar ? 0 : insets.top}
+        marginBottom={insets.bottom}
+      >
         {overlayNavigationBar ? (
           <OverlayNavigationBarFrame paddingTop={insets.top}>
             {navigationBar}

@@ -1,4 +1,5 @@
 import {atom} from 'jotai'
+import {preferencesAtom} from '../preferences'
 import {
   VERSION_SERVICE_STATE_DEFAULT_VALUE,
   type VersionServiceState,
@@ -9,5 +10,9 @@ export const versionServiceAtom = atom<VersionServiceState>(
 )
 
 export const offerRerequestLimitDaysAtom = atom((get) => {
-  return get(versionServiceAtom).offerRerequestLimitDays
+  const disableRerequestLimit = get(preferencesAtom).disableOfferRerequestLimit
+
+  return disableRerequestLimit
+    ? 0
+    : get(versionServiceAtom).offerRerequestLimitDays
 })

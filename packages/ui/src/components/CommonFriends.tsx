@@ -49,7 +49,7 @@ export function CommonFriends({
 
   return (
     <CommonFriendsFrame onPress={onPress}>
-      <YStack paddingLeft="$5" paddingVertical="$4" gap="$3">
+      <YStack px="$5" py="$4" gap="$3">
         <SizableText
           fontFamily="$body"
           fontSize="$1"

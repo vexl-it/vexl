@@ -15,7 +15,7 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {Array, Effect, Option, pipe} from 'effect'
+import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {ScrollView} from 'react-native'
@@ -28,136 +28,17 @@ import {
 import {useSingleOffer} from '../../state/marketplace'
 import {focusOfferActionAtom} from '../../state/marketplace/atoms/map/focusedOffer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {
-  getAmountLabel,
-  getLanguagesLabel,
-  getLocationLabels,
-  getPaymentMethodLabel,
-} from '../../utils/offerHelpers'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import CommonFriends from '../CommonFriends'
+import OfferAuthorBanner from '../OfferAuthorBanner'
+import OfferPropertiesCard from '../OfferPropertiesCard'
 import {
   reportOfferActionAtom,
   showNoCommonFriendsExplanationActionAtom,
 } from './atoms'
-import OfferHeader from './components/OfferHeader'
 
 type Props = RootStackScreenProps<'OfferDetail'>
-
-function DetailRow({
-  label,
-  value,
-  numberOfLines,
-}: {
-  readonly label: string
-  readonly value: string | readonly string[]
-  readonly numberOfLines?: number
-}): React.ReactElement {
-  return (
-    <XStack alignItems="flex-start" gap="$5">
-      <Typography
-        variant="micro"
-        color="$foregroundSecondary"
-        flexShrink={0}
-        numberOfLines={1}
-      >
-        {label}
-      </Typography>
-      {typeof value === 'string' ? (
-        <Typography
-          variant="descriptionBold"
-          color="$foregroundPrimary"
-          textAlign="right"
-          flex={1}
-          numberOfLines={numberOfLines}
-        >
-          {value}
-        </Typography>
-      ) : (
-        <YStack flex={1} gap="$2">
-          {pipe(
-            value,
-            Array.map((line, i) => (
-              <Typography
-                key={i}
-                variant="descriptionBold"
-                color="$foregroundPrimary"
-                textAlign="right"
-              >
-                {i < value.length - 1 ? `${line},` : line}
-              </Typography>
-            ))
-          )}
-        </YStack>
-      )}
-    </XStack>
-  )
-}
-
-function OfferPropertiesCard({
-  offer,
-}: {
-  offer: OneOfferInState
-}): React.ReactElement | null {
-  const {t} = useTranslation()
-
-  const rows = useMemo(
-    () =>
-      pipe(
-        [
-          {
-            label: t('offerForm.amountOfTransaction.amountOfTransaction'),
-            value: getAmountLabel(offer),
-          },
-          {
-            label: t('offerForm.location.location'),
-            value: getLocationLabels(offer),
-          },
-          {
-            label: t('offerForm.paymentMethod.paymentMethod'),
-            value: getPaymentMethodLabel(offer, {
-              cash: t('offerForm.paymentMethod.cash'),
-              bank: t('offerForm.paymentMethod.bank'),
-              revolut: t('offerForm.paymentMethod.revolut'),
-              lightning: t('offerForm.network.lightning'),
-              onChain: t('offerForm.network.onChain'),
-            }),
-            numberOfLines: 1,
-          },
-          {
-            label: t('offerForm.spokenLanguages.preferredLanguages'),
-            value: getLanguagesLabel(offer),
-          },
-        ],
-        Array.filter((row) => row.value.length > 0)
-      ),
-    [offer, t]
-  )
-
-  if (!Array.isNonEmptyArray(rows)) return null
-
-  return (
-    <YStack
-      backgroundColor="$backgroundSecondary"
-      borderRadius="$5"
-      padding="$4"
-      gap="$5"
-    >
-      {pipe(
-        rows,
-        Array.map((row) => (
-          <DetailRow
-            key={row.label}
-            label={row.label}
-            value={row.value}
-            numberOfLines={row.numberOfLines}
-          />
-        ))
-      )}
-    </YStack>
-  )
-}
 
 type FooterState =
   | {readonly type: 'canSend'; readonly noteText: string}
@@ -268,7 +149,7 @@ function OfferDetailScrollContent({
       contentContainerStyle={{paddingBottom: footerHeight}}
     >
       <YStack gap="$4">
-        <OfferHeader offer={offer} />
+        <OfferAuthorBanner offer={offer} />
 
         <Typography
           variant="description"

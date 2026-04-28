@@ -31,10 +31,10 @@ import {localizedDecimalNumberActionAtom} from '../../../utils/localization/loca
 import {getIconTagVariant, getIsOffering} from '../../../utils/offerHelpers'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
+import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import {chatMolecule} from '../atoms'
-import ChatConnectionHeader, {type TradeTagData} from './ChatConnectionHeader'
 
 function SectionSeparator(): React.ReactElement {
   return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />
@@ -170,21 +170,6 @@ export default function ChatInfoContent({
     )
   }, [offer, otherSideData.userName, t])
 
-  const tradeTag = useMemo((): TradeTagData | null => {
-    if (!offer) return null
-
-    const listingType = offer.offerInfo.publicPart.listingType
-    const isOffering = offer.ownershipInfo
-      ? !getIsOffering(listingType, offer.offerInfo.publicPart.offerType)
-      : getIsOffering(listingType, offer.offerInfo.publicPart.offerType)
-
-    return {
-      iconVariant: getIconTagVariant(listingType),
-      label: isOffering ? t('offer.title') : t('common.request'),
-      variant: isOffering ? 'offer' : 'request',
-    }
-  }, [offer, t])
-
   if (!chatExists) {
     return (
       <Screen
@@ -249,16 +234,13 @@ export default function ChatInfoContent({
         }}
       >
         <YStack gap="$8">
-          <ChatConnectionHeader
-            canSendMessages={canSendMessages}
-            commonConnectionsLabel={t('offer.numberOfCommon', {
-              number: localizedCommonConnectionsCount,
-            })}
-            connectionTitle={connectionTitle}
-            otherSideLeft={otherSideLeft}
-            tradeTag={tradeTag}
-            userImage={otherSideData.image}
-          />
+          {!!offer && (
+            <OfferAuthorBanner
+              offer={offer}
+              userImage={otherSideData.image}
+              grayAvatar={otherSideLeft || !canSendMessages}
+            />
+          )}
 
           {showTradeChecklistAction ||
           showRevealIdentityAction ||

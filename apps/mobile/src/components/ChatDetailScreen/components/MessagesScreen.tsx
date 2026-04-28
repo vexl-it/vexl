@@ -5,6 +5,7 @@ import React, {useEffect} from 'react'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {chatMolecule} from '../atoms'
+import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
 import MessagesList from './MessagesList'
 import {MessagesScreenChatHeader} from './MessagesScreenChatHeader'
@@ -32,10 +33,12 @@ function MessagesScreen(): React.ReactElement {
       <Stack f={1}>
         <MessagesList />
       </Stack>
-      {!!canSendMessages && (
+      {canSendMessages ? (
         <Stack>
           <ChatTextInput />
         </Stack>
+      ) : (
+        <ChatActionButtons />
       )}
     </Stack>
   )

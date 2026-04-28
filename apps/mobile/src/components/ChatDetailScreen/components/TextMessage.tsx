@@ -11,7 +11,6 @@ import {
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
-import {DateTime} from 'luxon'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {
   Animated,
@@ -29,7 +28,7 @@ import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {chatMolecule} from '../atoms'
-import formatChatTime from '../utils/formatChatTime'
+import {LastMessageTime} from './LastMessageTime'
 import {type MessagesListItem} from './MessageItem'
 import TextMessageActionMenu, {
   type MessageBubbleLayout,
@@ -74,6 +73,10 @@ function MessageBubble({
   const repliedToMessage =
     'repliedTo' in message.message ? message.message.repliedTo : undefined
 
+  const isSpecialMessage =
+    message.message.messageType === 'REQUEST_MESSAGING' ||
+    message.message.messageType === 'DISAPPROVE_MESSAGING'
+
   return (
     <Stack>
       {!!repliedToMessage && (
@@ -86,6 +89,8 @@ function MessageBubble({
             isMine ? '$accentYellowSecondary' : '$backgroundSecondary'
           }
           padding="$4"
+          paddingBottom="$3"
+          paddingTop="$4"
           gap="$2"
         >
           <YStack gap="$1">
@@ -111,6 +116,27 @@ function MessageBubble({
           </YStack>
         </XStack>
       )}
+      {!!isSpecialMessage && (
+        <XStack
+          borderRadius="$5"
+          marginBottom="$0.5"
+          borderBottomLeftRadius="$2"
+          borderBottomRightRadius="$2"
+          backgroundColor={
+            isMine ? '$accentYellowSecondary' : '$backgroundSecondary'
+          }
+          padding="$4"
+          paddingBottom="$3"
+          paddingTop="$4"
+          gap="$2"
+        >
+          <Typography color="$foregroundSecondary" variant="micro">
+            {message.message.messageType === 'REQUEST_MESSAGING'
+              ? t('messages.requestedWith')
+              : t('messages.declinedWith')}
+          </Typography>
+        </XStack>
+      )}
       {!!message.message.image && (
         <YStack
           borderRadius="$4"
@@ -132,8 +158,10 @@ function MessageBubble({
       )}
       <Stack
         borderRadius="$6"
-        borderTopLeftRadius={repliedToMessage ? '$2' : '$6'}
-        borderTopRightRadius={repliedToMessage ? '$2' : '$6'}
+        borderTopLeftRadius={repliedToMessage || isSpecialMessage ? '$2' : '$6'}
+        borderTopRightRadius={
+          repliedToMessage || isSpecialMessage ? '$2' : '$6'
+        }
         backgroundColor={messageBackgroundColor}
         px="$4"
         pb="$4"
@@ -164,8 +192,10 @@ function MessageBubble({
 
 function TextMessage({
   messageAtom,
+  hideLastMessageTime,
 }: {
   messageAtom: Atom<MessagesListItem>
+  hideLastMessageTime?: boolean
 }): React.ReactElement | null {
   const theme = useTheme()
   const messageItem = useAtomValue(messageAtom)
@@ -361,30 +391,10 @@ function TextMessage({
             </Pressable>
           )}
         </XStack>
-        {!!isLatest && (
-          <Typography
-            color={
-              message.state === 'sendingError' ? '$red' : '$foregroundTertiary'
-            }
-            variant="micro"
-            textAlign={isMine ? 'right' : 'left'}
-            marginTop="$3"
-          >
-            {message.state === 'sending' && t('messages.sending')}
-            {message.state === 'sent' &&
-              !!lastMessageReadByOtherSideAt &&
-              t('messages.readAt', {
-                time: formatChatTime(
-                  DateTime.fromMillis(lastMessageReadByOtherSideAt)
-                ),
-              })}
-            {message.state === 'sent' &&
-              !lastMessageReadByOtherSideAt &&
-              formatChatTime(time)}
-            {message.state === 'received' && formatChatTime(time)}
-          </Typography>
-        )}
       </Stack>
+      {!!isLatest && hideLastMessageTime !== true && (
+        <LastMessageTime message={message} />
+      )}
       <TextMessageActionMenu
         bubble={messageBubble}
         bubbleLayout={messageBubbleLayout}

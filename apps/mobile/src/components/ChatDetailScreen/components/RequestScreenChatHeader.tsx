@@ -26,12 +26,17 @@ function RequestScreenChatHeader(): React.ReactElement {
     forceShowHistoryAtom,
     friendLevelInfoAtom,
     otherSideDataAtom,
+    wasDeniedAtom,
+    wasCancelledAtom,
     otherSideLeftAtom,
   } = useMolecule(chatMolecule)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const [forceShowHistory, setForceShowHistory] = useAtom(forceShowHistoryAtom)
+
+  const wasDenied = useAtomValue(wasDeniedAtom)
+  const wasCancelled = useAtomValue(wasCancelledAtom)
 
   const onClosePress = useCallback(() => {
     if (forceShowHistory) {
@@ -53,13 +58,18 @@ function RequestScreenChatHeader(): React.ReactElement {
       zIndex={1}
       px="$4"
       pt="$4"
-      pb="$6"
+      pb="$7"
       backgroundColor="$backgroundPrimary"
     >
       <XStack alignItems="flex-start" justifyContent="space-between">
         <Stack w="$9" h="$9" />
         <YStack alignItems="center" gap="$2" mt="$2">
-          <UserAvatar userImage={otherSideData.image} width={36} height={36} />
+          <UserAvatar
+            grayScale={wasDenied || wasCancelled}
+            userImage={otherSideData.image}
+            width={36}
+            height={36}
+          />
           <Typography
             variant="paragraphDemibold"
             color="$foregroundPrimary"

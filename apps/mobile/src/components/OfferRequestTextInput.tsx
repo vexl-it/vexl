@@ -1,15 +1,9 @@
+import {TextArea, tokens} from '@vexl-next/ui'
 import React from 'react'
-import {StyleSheet} from 'react-native'
-import {getTokens} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
-import TextInput from './Input'
 
-const style = StyleSheet.create({
-  textInput: {
-    minHeight: 130,
-    alignItems: 'flex-start',
-  },
-})
+const textAreaMinHeight =
+  tokens.size[13].val + tokens.size[10].val + tokens.size[1].val
 
 function OfferRequestTextInput({
   text,
@@ -23,18 +17,23 @@ function OfferRequestTextInput({
   const {t} = useTranslation()
 
   return (
-    <TextInput
-      py="$4"
+    <TextArea
+      minHeight={textAreaMinHeight}
+      backgroundColor="$backgroundTertiary"
+      borderRadius="$5"
+      padding="$4"
       multiline
-      tag="textarea"
       verticalAlign="top"
-      style={style.textInput}
       value={text}
       onChangeText={onChange}
-      rows={5}
-      variant="greyOnBlack"
+      borderWidth={0}
+      color="$foregroundPrimary"
+      fontFamily="$body"
+      fontSize="$4"
+      fontWeight="500"
+      lineHeight={24}
       placeholder={placeholder ?? t('offer.inputPlaceholder')}
-      placeholderTextColor={getTokens().color.greyOnBlack.val}
+      placeholderTextColor="$foregroundSecondary"
     />
   )
 }

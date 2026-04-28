@@ -1,50 +1,81 @@
+import {useNavigation} from '@react-navigation/native'
+import {Button, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {YStack} from 'tamagui'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
-import Button from '../../Button'
 import {chatMolecule} from '../atoms'
 
-function RerequestOrCancelButton({
-  onRerequestPressed,
-  rerequestButtonDisabled,
-}: {
-  onRerequestPressed: () => void
-  rerequestButtonDisabled: boolean
-}): React.ReactElement | null {
-  const {canBeRerequestedAtom, cancelRequestActionAtom, requestStateAtom} =
-    useMolecule(chatMolecule)
+function RerequestOrCancelButton(
+  props: React.ComponentProps<typeof XStack>
+): React.ReactElement | null {
+  const {
+    canBeRerequestedAtom,
+    cancelRequestActionAtom,
+    offerForChatAtom,
+    requestStateAtom,
+    showOfferDeletedWithOptionToDeleteActionAtom,
+  } = useMolecule(chatMolecule)
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
 
+  const offer = useAtomValue(offerForChatAtom)
   const rerequestInfo = useAtomValue(canBeRerequestedAtom)
   const requestState = useAtomValue(requestStateAtom)
   const cancelRequest = useSetAtom(cancelRequestActionAtom)
+  const showOfferDeletedWithOptionToDelete = useSetAtom(
+    showOfferDeletedWithOptionToDeleteActionAtom
+  )
 
   return (
-    <YStack gap="$2" pt="$2">
-      {!!rerequestInfo.canBeRerequested && (
-        <Button
-          disabled={rerequestButtonDisabled}
-          onPress={onRerequestPressed}
-          variant="secondary"
-          text={t('offer.rerequest')}
-        />
-      )}
+    <XStack gap="$3" width="100%" {...props}>
       {requestState === 'requested' && (
         <Button
-          text={t('offer.cancelRequest')}
-          variant="redDark"
+          f={1}
+          size="large"
+          variant="destructive"
           onPress={() => {
-            void cancelRequest()?.then((success) => {
-              if (success) safeGoBack()
+            Effect.runFork(
+              cancelRequest().pipe(
+                Effect.tap((success) =>
+                  Effect.sync(() => {
+                    if (success) safeGoBack()
+                  })
+                ),
+                Effect.asVoid
+              )
+            )
+          }}
+        >
+          {t('offer.cancelRequest')}
+        </Button>
+      )}
+      {!!rerequestInfo.canBeRerequested && (
+        <Button
+          f={1}
+          size="large"
+          onPress={() => {
+            if (!offer) {
+              showOfferDeletedWithOptionToDelete()
+              return
+            }
+
+            navigation.navigate('SendMessage', {
+              offerId: offer.offerInfo.offerId,
+              mode: 'rerequest',
             })
           }}
-        />
+          variant="primary"
+        >
+          {t('common.sendAMessage')}
+        </Button>
       )}
-    </YStack>
+    </XStack>
   )
 }
 

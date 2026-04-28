@@ -19,7 +19,6 @@ import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
 import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
 import {GlobalDialog} from './components/GlobalDialog'
-import InAppLoadingTasksIndicator from './components/InAppLoadingTasksIndicator'
 import LoadingOverlayProvider from './components/LoadingOverlayProvider'
 import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
@@ -94,7 +93,7 @@ function App(): React.ReactElement {
                   }}
                 >
                   <RootNavigation />
-                  <InAppLoadingTasksIndicator />
+                  {/* <InAppLoadingTasksIndicator /> */}
                 </GestureHandlerRootView>
               </OverlayInfoScreen>
             </VersionMigrations>

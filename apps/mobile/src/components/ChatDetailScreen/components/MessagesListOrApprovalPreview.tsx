@@ -9,7 +9,6 @@ import Screen from '../../Screen'
 import {chatMolecule} from '../atoms'
 import MarkAsReadWhenRendered from './MarkAsReadWhenRendered'
 import MessagesScreen from './MessagesScreen'
-import RequestScreen from './RequestScreen'
 
 export default function MessagesListOrApprovalPreview(): React.ReactElement {
   const {chatUiModeAtom, publicKeyPemBase64Atom} = useMolecule(chatMolecule)
@@ -27,19 +26,26 @@ export default function MessagesListOrApprovalPreview(): React.ReactElement {
     }, [fetchAndStoreMessagesForInbox, publicKeyPemBase64])
   )
 
-  const toRender =
-    chatUiMode === 'approval' ? (
-      <RequestScreen />
-    ) : (
-      <KeyboardAvoidingView>
-        <MessagesScreen />
-      </KeyboardAvoidingView>
-    )
+  // const toRender =
+  //   chatUiMode === 'approval' ? (
+  //     <RequestScreen />
+  //   ) : (
+  //     <KeyboardAvoidingView>
+  //       <MessagesScreen />
+  //     </KeyboardAvoidingView>
+  //   )
 
   return (
     <>
       <MarkAsReadWhenRendered />
-      <Screen>{toRender}</Screen>
+      <Screen
+        insetsColor="$backgroundSecondary"
+        backgroundColor="$backgroundPrimary"
+      >
+        <KeyboardAvoidingView>
+          <MessagesScreen />
+        </KeyboardAvoidingView>
+      </Screen>
     </>
   )
 }

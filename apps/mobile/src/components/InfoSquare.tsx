@@ -1,8 +1,5 @@
+import {InfoCircle, Typography, useTheme, XStack} from '@vexl-next/ui'
 import React from 'react'
-import {TouchableWithoutFeedback} from 'react-native'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
-import infoSvg from './ChatDetailScreen/images/infoSvg'
-import Image from './Image'
 
 function InfoSquare({
   children,
@@ -13,29 +10,31 @@ function InfoSquare({
   negative?: boolean
   onPress?: () => void
 }): React.ReactElement {
+  const theme = useTheme()
+  const foregroundColor = negative
+    ? theme.redForeground.val
+    : theme.foregroundPrimary.val
+
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
-      <XStack
-        bc={negative ? '$darkRed' : '$grey'}
-        p="$3"
-        br="$true"
-        alignItems="center"
+    <XStack
+      role={onPress ? 'button' : undefined}
+      onPress={onPress}
+      pressStyle={onPress ? {opacity: 0.8} : undefined}
+      backgroundColor={negative ? '$redBackground' : '$backgroundTertiary'}
+      padding="$3"
+      borderRadius="$true"
+      gap="$3"
+      alignItems="center"
+    >
+      <InfoCircle size={16} color={foregroundColor} />
+      <Typography
+        flex={1}
+        color={negative ? '$redForeground' : '$foregroundPrimary'}
+        variant="paragraphSmall"
       >
-        <Stack w={16} h={16} mr="$3">
-          <Image
-            fill={
-              negative
-                ? getTokens().color.$red.val
-                : getTokens().color.$greyOnBlack.val
-            }
-            source={infoSvg}
-          />
-        </Stack>
-        <Text flex={1} color={negative ? '$red' : '$white'}>
-          {children}
-        </Text>
-      </XStack>
-    </TouchableWithoutFeedback>
+        {children}
+      </Typography>
+    </XStack>
   )
 }
 

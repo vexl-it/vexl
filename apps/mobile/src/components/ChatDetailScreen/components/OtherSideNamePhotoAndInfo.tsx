@@ -58,7 +58,6 @@ function OtherSideNamePhotoAndInfo({mode}: Props): React.ReactElement {
     !otherSideGoldenAvatarType ||
     (!offer?.ownershipInfo && !offer?.offerInfo.publicPart.goldenAvatarType)
 
-
   return (
     <XStack
       alignItems="center"

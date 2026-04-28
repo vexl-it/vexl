@@ -32,7 +32,7 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
       const lastMessage = one.messages.at(-1)
       if (!lastMessage) return null
 
-      return {chat: one.chat, lastMessage}
+      return {chat: one, lastMessage}
     })
     .filter(notEmpty)
     .sort(

@@ -159,16 +159,7 @@ function AddToContactsButton({
 
   return (
     <Button
-      icon={
-        <AddUserPersonContact
-          color={
-            contactAdded
-              ? theme.foregroundTertiary.val
-              : theme.backgroundPrimary.val
-          }
-          size={18}
-        />
-      }
+      icon={AddUserPersonContact}
       disabled={contactAdded}
       onPress={handlePress}
       size="small"

@@ -11,8 +11,7 @@ import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../state/chat/domain'
 import chatShouldBeVisible from '../../state/chat/utils/isChatActive'
 import {offersAtom} from '../../state/marketplace/atoms/offersState'
-import {realUserNameAtom} from '../../state/session/userDataAtoms'
-import {getChatDisplayName} from '../../utils/chat/getChatDisplayName'
+import {getOtherSideRealNameOrFriendLevel} from '../../utils/chat/getOtherSideFriendLevel'
 import {type TFunction} from '../../utils/localization/I18nProvider'
 import {getMessagePreviewText} from '../InsideRouter/components/MessagesScreen/utils/getMessagePreviewText'
 
@@ -60,7 +59,6 @@ export function useChatSearchResults({
 } {
   const messagingState = useAtomValue(messagingStateAtom)
   const offers = useAtomValue(offersAtom)
-  const realUserName = useAtomValue(realUserNameAtom)
 
   const searchableChats = useMemo(() => {
     return messagingState
@@ -75,9 +73,9 @@ export function useChatSearchResults({
         const otherSideData = getOtherSideData(chat.chat)
         const offer = getOfferForChat({chat: chat.chat, offers})
         const displayName =
-          getChatDisplayName({
+          getOtherSideRealNameOrFriendLevel({
             offerInfo: offer?.offerInfo,
-            userName: realUserName,
+            chat,
             t,
           }) ?? ''
 
@@ -98,7 +96,7 @@ export function useChatSearchResults({
         ]
       })
       .sort((a, b) => b.lastMessage.message.time - a.lastMessage.message.time)
-  }, [messagingState, offers, realUserName, t])
+  }, [messagingState, offers, t])
 
   return useMemo(() => {
     const trimmedQuery = query.trim()

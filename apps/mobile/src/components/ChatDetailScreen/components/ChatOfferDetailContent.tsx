@@ -10,33 +10,21 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Array, Effect, pipe} from 'effect'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useMemo} from 'react'
+import React from 'react'
 import {ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, useTheme} from 'tamagui'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
-import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
-import spokenLanguageToFlagEmoji from '../../../utils/localization/spokenLanguageToFlagEmoji'
-import {
-  getAmountLabel,
-  getIconTagVariant,
-  getIsOffering,
-} from '../../../utils/offerHelpers'
 import CommonFriends from '../../CommonFriends'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import OfferPropertiesCard from '../../OfferPropertiesCard'
 import {chatMolecule} from '../atoms'
-
-function getTradeTagVariant(isOffering: boolean): 'offer' | 'request' {
-  return isOffering ? 'offer' : 'request'
-}
 
 export default function ChatOfferDetailContent({
   chatExists,
@@ -48,11 +36,10 @@ export default function ChatOfferDetailContent({
   const theme = useTheme()
   const {bottom} = useSafeAreaInsets()
   const {t} = useTranslation()
-  const localizeNumber = useSetAtom(localizedDecimalNumberActionAtom)
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const {
     canSendMessagesAtom,
-    commonConnectionsCountAtom,
+    chatAtom,
     commonConnectionsHashesAtom,
     offerForChatAtom,
     otherSideClubsIdsAtom,
@@ -62,122 +49,16 @@ export default function ChatOfferDetailContent({
     verifiedConnectionsHashesAtom,
   } = useMolecule(chatMolecule)
 
+  const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
-  const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
   const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
-
-  const localizedCommonConnectionsCount = localizeNumber({
-    number: commonConnectionsCount,
-  })
-
-  const connectionTitle = useMemo(() => {
-    if (!offer) return otherSideData.userName ?? t('offer.title')
-
-    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
-      return t('offer.directFriend')
-    }
-
-    if (offer.offerInfo.privatePart.friendLevel.includes('SECOND_DEGREE')) {
-      return t('offer.friendOfFriend')
-    }
-
-    return (
-      getChatDisplayName({
-        offerInfo: offer.offerInfo,
-        userName: otherSideData.userName,
-        t,
-      }) ?? t('offer.title')
-    )
-  }, [offer, otherSideData.userName, t])
-
-  const tradeTag = useMemo(() => {
-    if (!offer) return null
-
-    const listingType = offer.offerInfo.publicPart.listingType
-    const isOffering = offer.ownershipInfo
-      ? !getIsOffering(listingType, offer.offerInfo.publicPart.offerType)
-      : getIsOffering(listingType, offer.offerInfo.publicPart.offerType)
-
-    return {
-      iconVariant: getIconTagVariant(listingType),
-      label: isOffering ? t('offer.title') : t('common.request'),
-      variant: getTradeTagVariant(isOffering),
-    }
-  }, [offer, t])
-
-  const detailRows = useMemo(() => {
-    if (!offer) return []
-
-    const {publicPart} = offer.offerInfo
-
-    const amount = getAmountLabel(offer)
-
-    const location =
-      publicPart.location[0]?.shortAddress ??
-      publicPart.location[0]?.address ??
-      t('offer.online')
-
-    const paymentMethod = pipe(
-      [
-        ...pipe(
-          publicPart.paymentMethod,
-          Array.map((method) => {
-            if (method === 'CASH') return t('offerForm.paymentMethod.cash')
-            if (method === 'BANK') return t('offerForm.paymentMethod.bank')
-            return t('offerForm.paymentMethod.revolut')
-          })
-        ),
-        ...pipe(
-          publicPart.btcNetwork,
-          Array.map((network) =>
-            network === 'ON_CHAIN'
-              ? t('offerForm.network.onChain')
-              : t('offerForm.network.lightning')
-          )
-        ),
-      ],
-      Array.join(' • ')
-    )
-
-    const languages = pipe(
-      publicPart.spokenLanguages,
-      Array.map(spokenLanguageToFlagEmoji),
-      Array.join(' ')
-    )
-
-    return pipe(
-      [
-        {
-          key: 'amount',
-          label: t('offerForm.amountOfTransaction.amountOfTransaction'),
-          value: amount,
-        },
-        {
-          key: 'location',
-          label: t('offerForm.location.location'),
-          value: location,
-        },
-        {
-          key: 'paymentMethod',
-          label: t('offerForm.paymentMethod.paymentMethod'),
-          value: paymentMethod,
-        },
-        {
-          key: 'languages',
-          label: t('offerForm.spokenLanguages.preferredLanguages'),
-          value: languages,
-        },
-      ],
-      Array.filter((row) => row.value.length > 0)
-    )
-  }, [offer, t])
 
   if (!chatExists || !offer) {
     return (
@@ -244,6 +125,7 @@ export default function ChatOfferDetailContent({
         <YStack gap="$5">
           <OfferAuthorBanner
             offer={offer}
+            realUserName={chat.otherSide.realLifeInfo?.userName}
             userImage={otherSideData.image}
             grayAvatar={otherSideLeft || !canSendMessages}
           />

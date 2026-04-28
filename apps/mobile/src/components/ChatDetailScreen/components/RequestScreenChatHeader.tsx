@@ -11,6 +11,7 @@ import {
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
+import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import UserAvatar from '../../UserAvatar'
@@ -22,6 +23,7 @@ function RequestScreenChatHeader(): React.ReactElement {
   const {t} = useTranslation()
   const {
     canSendMessagesAtom,
+    chatAtom,
     commonConnectionsCountAtom,
     forceShowHistoryAtom,
     friendLevelInfoAtom,
@@ -30,6 +32,7 @@ function RequestScreenChatHeader(): React.ReactElement {
     wasCancelledAtom,
     otherSideLeftAtom,
   } = useMolecule(chatMolecule)
+  const chat = useAtomValue(chatAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
@@ -46,11 +49,11 @@ function RequestScreenChatHeader(): React.ReactElement {
     }
   }, [forceShowHistory, safeGoBack, setForceShowHistory])
 
-  const connectionTitle = friendLevelInfo.includes('FIRST_DEGREE')
-    ? t('offer.directFriend')
-    : friendLevelInfo.includes('SECOND_DEGREE')
-      ? t('offer.friendOfFriend')
-      : otherSideData.userName
+  const connectionTitle = getOtherSideRealNameOrFriendLevel({
+    friendLevel: friendLevelInfo,
+    chat,
+    t,
+  })
 
   return (
     <Stack

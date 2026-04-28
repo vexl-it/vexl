@@ -7,6 +7,7 @@ import {
   EyeShut,
   FlagReport,
   NavigationBar,
+  PeopleUsers,
   Screen,
   TrashBin,
   Typography,
@@ -24,20 +25,65 @@ import {Stack, Text, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
-import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
+import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
-import {getIconTagVariant, getIsOffering} from '../../../utils/offerHelpers'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
 import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
+import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 
 function SectionSeparator(): React.ReactElement {
   return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />
+}
+
+function OtherSideInfoBanner({
+  title,
+  userImage,
+  grayAvatar,
+  commonConnectionsCount,
+}: {
+  readonly title: string
+  readonly userImage: React.ComponentProps<typeof UserAvatar>['userImage']
+  readonly grayAvatar: boolean
+  readonly commonConnectionsCount: string | number
+}): React.ReactElement {
+  const {t} = useTranslation()
+  const theme = useTheme()
+
+  return (
+    <XStack alignItems="center" gap="$3">
+      <UserAvatar
+        grayScale={grayAvatar}
+        userImage={userImage}
+        width={40}
+        height={40}
+      />
+      <YStack gap="$2" flex={1} minWidth={0}>
+        <Typography
+          variant="descriptionBold"
+          color="$foregroundPrimary"
+          numberOfLines={1}
+        >
+          {title}
+        </Typography>
+        <XStack gap="$1" alignItems="center">
+          <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
+          <Typography
+            variant="micro"
+            color="$foregroundSecondary"
+            numberOfLines={1}
+          >
+            {t('offer.numberOfCommon', {number: commonConnectionsCount})}
+          </Typography>
+        </XStack>
+      </YStack>
+    </XStack>
+  )
 }
 
 function ActionRow({
@@ -112,6 +158,7 @@ export default function ChatInfoContent({
     chatIdAtom,
     commonConnectionsCountAtom,
     deleteChatWithUiFeedbackAtom,
+    friendLevelInfoAtom,
     identityRevealStatusAtom,
     listingTypeIsOtherAtom,
     offerForChatAtom,
@@ -125,6 +172,7 @@ export default function ChatInfoContent({
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
+  const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
@@ -149,26 +197,23 @@ export default function ChatInfoContent({
     canSendMessages && identityRevealStatus === 'notStarted'
   const showOfferDetailAction = !!offer
   const showReceivedMessagesDebugAction = !!enableHiddenFeatures || isDeveloper
+  const otherSideIsOfferCreator =
+    offer != null &&
+    chat.otherSide.publicKey === offer.offerInfo.publicPart.offerPublicKey
+  const otherSideRealUserName = chat.otherSide.realLifeInfo?.userName
 
   const connectionTitle = useMemo(() => {
     if (!offer) return otherSideData.userName ?? t('offer.title')
 
-    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE')) {
-      return t('offer.directFriend')
-    }
-
-    if (offer.offerInfo.privatePart.friendLevel.includes('SECOND_DEGREE')) {
-      return t('offer.friendOfFriend')
-    }
-
     return (
-      getChatDisplayName({
+      getOtherSideRealNameOrFriendLevel({
+        friendLevel: friendLevelInfo,
         offerInfo: offer.offerInfo,
-        userName: otherSideData.userName,
+        chat,
         t,
       }) ?? t('offer.title')
     )
-  }, [offer, otherSideData.userName, t])
+  }, [chat, friendLevelInfo, offer, otherSideData.userName, t])
 
   if (!chatExists) {
     return (
@@ -234,11 +279,19 @@ export default function ChatInfoContent({
         }}
       >
         <YStack gap="$8">
-          {!!offer && (
+          {offer != null && otherSideIsOfferCreator ? (
             <OfferAuthorBanner
               offer={offer}
+              realUserName={otherSideRealUserName}
               userImage={otherSideData.image}
               grayAvatar={otherSideLeft || !canSendMessages}
+            />
+          ) : (
+            <OtherSideInfoBanner
+              title={connectionTitle}
+              userImage={otherSideData.image}
+              grayAvatar={otherSideLeft || !canSendMessages}
+              commonConnectionsCount={localizedCommonConnectionsCount}
             />
           )}
 

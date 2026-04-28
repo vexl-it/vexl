@@ -82,7 +82,6 @@ export default function TradeChecklistDateAndTimeView({
     dateAndTime.getLatestMessageTimestamp(dateAndTimeData)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
-  const actionIconSize = tokens.size[6].val
   const isDarkTheme =
     theme.backgroundPrimary.val === darkTheme.backgroundPrimary
   const activeDetailIconColor = isDarkTheme
@@ -121,12 +120,7 @@ export default function TradeChecklistDateAndTimeView({
                 textColor="$foregroundSecondary"
               />
               <Button
-                icon={
-                  <Calendar
-                    color={tokens.color.black100.val}
-                    size={actionIconSize}
-                  />
-                }
+                icon={Calendar}
                 onPress={() => {
                   void addEventToCalendar()()
                 }}
@@ -203,12 +197,7 @@ export default function TradeChecklistDateAndTimeView({
             />
             {message.state === 'received' && !isMessageOutdated ? (
               <Button
-                icon={
-                  <ClockTime
-                    color={tokens.color.black100.val}
-                    size={actionIconSize}
-                  />
-                }
+                icon={ClockTime}
                 onPress={() => {
                   const chat = store.get(chatAtom)
                   navigation.navigate('TradeChecklistFlow', {

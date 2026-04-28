@@ -1,5 +1,4 @@
 import {useNavigation} from '@react-navigation/native'
-import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {
   ChatMessageItem,
   Stack,
@@ -13,10 +12,12 @@ import Swipeable, {
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
 import selectOtherSideDataAtom from '../../../../../state/chat/atoms/selectOtherSideDataAtom'
 import {createIsOtherSideTypingAtom} from '../../../../../state/chat/atoms/typingIndication'
-import {type ChatMessageWithState} from '../../../../../state/chat/domain'
+import {
+  type ChatMessageWithState,
+  type ChatWithMessages,
+} from '../../../../../state/chat/domain'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
-import {realUserNameAtom} from '../../../../../state/session/userDataAtoms'
-import {getChatDisplayName} from '../../../../../utils/chat/getChatDisplayName'
+import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import formatChatTime from '../../../../ChatDetailScreen/utils/formatChatTime'
@@ -26,7 +27,7 @@ import {getMessagePreviewText} from '../utils/getMessagePreviewText'
 import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
 
 export interface ChatListData {
-  chat: Chat
+  chat: ChatWithMessages
   lastMessage: ChatMessageWithState
 }
 
@@ -54,14 +55,16 @@ function ChatListItem({
 
   const {
     chatInfoAtom,
+    chatWithMessagesAtom,
     lastMessageAtom,
     isUnreadAtom,
     otherSideInfoAtom,
     otherSideLeftAtom,
   } = useMemo(() => {
-    const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat)
+    const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat.chat)
+    const chatWithMessagesAtom = selectAtom(dataAtom, (data) => data.chat)
     const lastMessageAtom = selectAtom(dataAtom, (data) => data.lastMessage)
-    const isUnreadAtom = selectAtom(dataAtom, (data) => data.chat.isUnread)
+    const isUnreadAtom = selectAtom(dataAtom, (data) => data.chat.chat.isUnread)
     const otherSideInfoAtom = selectOtherSideDataAtom(chatInfoAtom)
     const otherSideLeftAtom = selectAtom(dataAtom, ({lastMessage}) =>
       ['DELETE_CHAT', 'BLOCK_CHAT', 'INBOX_DELETED'].includes(
@@ -71,6 +74,7 @@ function ChatListItem({
 
     return {
       chatInfoAtom,
+      chatWithMessagesAtom,
       lastMessageAtom,
       isUnreadAtom,
       otherSideLeftAtom,
@@ -79,19 +83,19 @@ function ChatListItem({
   }, [dataAtom])
 
   const chatInfo = useAtomValue(chatInfoAtom)
+  const chat = useAtomValue(chatWithMessagesAtom)
   const isTyping = useAtomValue(
     useMemo(() => createIsOtherSideTypingAtom(chatInfo.id), [chatInfo.id])
   )
   const lastMessage = useAtomValue(lastMessageAtom)
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
-  const realUserName = useAtomValue(realUserNameAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
   const deleteChatFromList = useSetAtom(deleteChatFromListActionAtom)
-  const displayName = getChatDisplayName({
+  const displayName = getOtherSideRealNameOrFriendLevel({
     offerInfo: offer?.offerInfo,
-    userName: realUserName,
+    chat,
     t,
   })
   const preview = getMessagePreviewText({

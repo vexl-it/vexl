@@ -116,7 +116,10 @@ function ChatRequestPreview(): React.ReactElement {
           px="$6"
           gap="$5"
         >
-          <OfferAuthorBanner offer={offer} />
+          <OfferAuthorBanner
+            offer={offer}
+            realUserName={chat.otherSide.realLifeInfo?.userName}
+          />
           <OfferPropertiesCard minimalContainer offer={offer} />
         </YStack>
       )}

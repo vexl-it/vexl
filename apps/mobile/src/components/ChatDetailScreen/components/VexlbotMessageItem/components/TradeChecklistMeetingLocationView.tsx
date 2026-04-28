@@ -1,16 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {
-  Button,
-  Calendar,
-  Copy,
-  darkTheme,
-  lightTheme,
-  Map,
-  tokens,
-  useTheme,
-  XStack,
-} from '@vexl-next/ui'
+import {Button, Calendar, Copy, Map, tokens, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array as ArrayE, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
@@ -91,7 +81,6 @@ export default function TradeChecklistMeetingLocationView({
   message,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
-  const theme = useTheme()
   const {
     addEventToCalendarActionAtom,
     isDateAndTimePickedAtom,
@@ -114,12 +103,7 @@ export default function TradeChecklistMeetingLocationView({
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const toastContent = t('common.copied')
-  const actionIconSize = tokens.size[6].val
   const actionGap = tokens.space[2].val
-  const secondaryActionIconColor =
-    theme.backgroundPrimary.val === darkTheme.backgroundPrimary
-      ? darkTheme.accentHighlightPrimary
-      : lightTheme.accentHighlightPrimary
 
   if (
     (message.state === 'sent' || message.state === 'received') &&
@@ -169,12 +153,7 @@ export default function TradeChecklistMeetingLocationView({
                   )
                   setToastNotification(toastContent)
                 }}
-                icon={
-                  <Copy
-                    color={tokens.color.black100.val}
-                    size={actionIconSize}
-                  />
-                }
+                icon={Copy}
                 size="small"
                 variant="secondary"
               >
@@ -186,12 +165,7 @@ export default function TradeChecklistMeetingLocationView({
                   onPress={() => {
                     void addEventToCalendar()()
                   }}
-                  icon={
-                    <Calendar
-                      color={tokens.color.black100.val}
-                      size={actionIconSize}
-                    />
-                  }
+                  icon={Calendar}
                   size="small"
                   variant="secondary"
                 >
@@ -252,9 +226,7 @@ export default function TradeChecklistMeetingLocationView({
                 )
                 setToastNotification(toastContent)
               }}
-              icon={
-                <Copy color={tokens.color.black100.val} size={actionIconSize} />
-              }
+              icon={Copy}
               size="small"
               variant="secondary"
             >
@@ -278,9 +250,7 @@ export default function TradeChecklistMeetingLocationView({
                     })
                   }
                 }}
-                icon={
-                  <Map color={secondaryActionIconColor} size={actionIconSize} />
-                }
+                icon={Map}
                 variant="secondary"
                 size="small"
               >

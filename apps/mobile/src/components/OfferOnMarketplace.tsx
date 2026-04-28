@@ -7,6 +7,7 @@ import {
   smallestClubForIdsAtom,
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
+import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {formatFullCurrencyAmount} from '../utils/localization/currency'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
@@ -42,9 +43,8 @@ export default function OfferOnMarketplace({
 
   const name = isMine
     ? t('common.me')
-    : privatePart.friendLevel.includes('FIRST_DEGREE')
-      ? t('offer.directFriend')
-      : t('offer.friendOfFriend')
+    : (getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
+      t('offer.friendOfFriend'))
 
   const commonFriendsCount = privatePart.commonFriends.length
   const commonFriendsText = !isMine

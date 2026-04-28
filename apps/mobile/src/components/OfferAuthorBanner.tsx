@@ -1,4 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
   Circle,
   IconTag,
@@ -15,6 +16,7 @@ import {
   useGetAllClubsForIds,
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
+import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
@@ -23,10 +25,12 @@ import UserAvatar from './UserAvatar'
 
 function OfferAuthorBanner({
   offer,
+  realUserName,
   userImage,
   grayAvatar,
 }: {
   readonly offer: OneOfferInState
+  readonly realUserName?: UserName
   readonly userImage?: React.ComponentProps<typeof UserAvatar>['userImage']
   readonly grayAvatar?: boolean
 }): React.ReactElement {
@@ -44,11 +48,10 @@ function OfferAuthorBanner({
     offer.offerInfo.publicPart.listingType,
     offer.offerInfo.publicPart.offerType
   )
-  const friendLevelText = offer.offerInfo.privatePart.friendLevel.includes(
-    'FIRST_DEGREE'
-  )
-    ? t('offer.directFriend')
-    : t('offer.friendOfFriend')
+  const friendLevelText =
+    realUserName ??
+    getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
+    t('offer.friendOfFriend')
   const clubImageUrl = pipe(
     clubsForOffer,
     Array.head,

@@ -4,7 +4,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
-import {getChatDisplayName} from '../../../utils/chat/getChatDisplayName'
+import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -23,6 +23,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     chatAtom,
     chatIdAtom,
     commonConnectionsCountAtom,
+    friendLevelInfoAtom,
     offerForChatAtom,
     otherSideDataAtom,
     otherSideGoldenAvatarTypeAtom,
@@ -33,6 +34,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const chatId = useAtomValue(chatIdAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
+  const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
@@ -57,9 +59,10 @@ export function MessagesScreenChatHeader(): React.ReactElement {
       <NavigationBar
         style="chat"
         name={
-          getChatDisplayName({
+          getOtherSideRealNameOrFriendLevel({
+            friendLevel: friendLevelInfo,
             offerInfo: offer?.offerInfo,
-            userName: otherSideData.userName,
+            chat,
             t,
           }) ?? otherSideData.userName
         }

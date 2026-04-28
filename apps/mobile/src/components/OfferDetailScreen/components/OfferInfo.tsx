@@ -22,6 +22,7 @@ import {
   getRequestState,
 } from '../../../state/chat/utils/offerStates'
 import {createSingleOfferReportedFlagAtom} from '../../../state/marketplace/atoms/offersState'
+import {getOtherSideFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {
@@ -86,11 +87,9 @@ function OfferInfo({
     return canChatBeRequested(chatForOffer, offerRerequestLimitDays)
   }, [chatForOffer, offerRerequestLimitDays])
 
-  const friendLevel = (() => {
-    if (offer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE'))
-      return t('offer.directFriend')
-    return t('offer.friendOfFriend')
-  })()
+  const friendLevel =
+    getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
+    t('offer.friendOfFriend')
 
   const onRequestPressed = useCallback(() => {
     if (!text.trim()) return

@@ -130,7 +130,16 @@ function RequestScreen(): React.ReactElement {
                   variant="red"
                   icon={TrashBin}
                   label={t('messages.deleteConversation')}
-                ></RowButton>
+                  onPress={() => {
+                    void Effect.runPromise(
+                      andThenExpectBooleanNoErrors((success) => {
+                        if (success) {
+                          safeGoBack()
+                        }
+                      })(deleteChatWithUiFeedback({skipAsk: false}))
+                    )
+                  }}
+                />
 
                 <TouchableOpacity
                   onPress={() => {

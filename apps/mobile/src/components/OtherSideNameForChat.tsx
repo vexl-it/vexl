@@ -1,7 +1,7 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {Typography} from '@vexl-next/ui'
-import {getChatDisplayName} from '../utils/chat/getChatDisplayName'
+import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../utils/localization/I18nProvider'
 
 export function OtherSideNameForChat({
@@ -12,7 +12,7 @@ export function OtherSideNameForChat({
   userName?: UserName
 }): React.ReactElement {
   const {t} = useTranslation()
-  const toShow = getChatDisplayName({offerInfo, userName, t})
+  const toShow = userName ?? getOtherSideFriendLevel({offerInfo, t})
 
   return (
     <Typography color="$foregroundPrimary" variant="paragraphSmall">

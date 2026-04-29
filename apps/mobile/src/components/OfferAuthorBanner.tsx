@@ -1,3 +1,4 @@
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
@@ -11,8 +12,10 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {
+  smallestClubForIdsAtom,
   useGetAllClubsForIds,
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
@@ -28,11 +31,13 @@ function OfferAuthorBanner({
   realUserName,
   userImage,
   grayAvatar,
+  clubIdsForAvatar,
 }: {
   readonly offer: OneOfferInState
   readonly realUserName?: UserName
   readonly userImage?: React.ComponentProps<typeof UserAvatar>['userImage']
   readonly grayAvatar?: boolean
+  readonly clubIdsForAvatar?: readonly ClubUuid[]
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -43,6 +48,15 @@ function OfferAuthorBanner({
   const clubsNames = useGetAllClubsNamesForIds(
     offer.offerInfo.privatePart.clubIds
   )
+  const avatarClub = useAtomValue(
+    React.useMemo(
+      () =>
+        smallestClubForIdsAtom(
+          clubIdsForAvatar ?? offer.offerInfo.privatePart.clubIds
+        ),
+      [clubIdsForAvatar, offer.offerInfo.privatePart.clubIds]
+    )
+  )
   const isMine = !!offer.ownershipInfo
   const isOffering = getIsOffering(
     offer.offerInfo.publicPart.listingType,
@@ -52,12 +66,14 @@ function OfferAuthorBanner({
     realUserName ??
     getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
     t('offer.friendOfFriend')
-  const clubImageUrl = pipe(
-    clubsForOffer,
-    Array.head,
-    Option.map((club) => club.clubImageUrl),
-    Option.getOrUndefined
-  )
+  const clubImageUrl = Option.isSome(avatarClub)
+    ? avatarClub.value.club.clubImageUrl
+    : pipe(
+        clubsForOffer,
+        Array.head,
+        Option.map((club) => club.clubImageUrl),
+        Option.getOrUndefined
+      )
   const clubLabel =
     clubsNames.length === 1
       ? clubsNames[0]
@@ -65,10 +81,19 @@ function OfferAuthorBanner({
         ? t('clubs.multipleClubs')
         : undefined
 
+  const shouldDisplayClubImage = clubImageUrl && userImage?.type !== 'imageUri'
+
   return (
     <XStack alignItems="center" justifyContent="space-between" gap="$3">
       <XStack alignItems="center" gap="$3" flex={1} minWidth={0}>
-        {userImage ? (
+        {shouldDisplayClubImage ? (
+          <AnonymousAvatarOrClubImage
+            grayScale={grayAvatar ?? false}
+            customSize={40}
+            seed={randomSeedFromOfferInfo(offer.offerInfo)}
+            clubImageUrl={clubImageUrl}
+          />
+        ) : userImage ? (
           <UserAvatar
             grayScale={grayAvatar}
             userImage={userImage}

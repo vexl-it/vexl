@@ -3,6 +3,7 @@ import {
   BulletListMenu,
   Button,
   ChevronRight,
+  Circle,
   DocumentsFiles,
   EyeShut,
   FlagReport,
@@ -23,6 +24,7 @@ import {Alert, ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, Text, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import {useGetAllClubsNamesForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
 import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
@@ -46,11 +48,13 @@ function OtherSideInfoBanner({
   userImage,
   grayAvatar,
   commonConnectionsCount,
+  clubLabel,
 }: {
   readonly title: string
   readonly userImage: React.ComponentProps<typeof UserAvatar>['userImage']
   readonly grayAvatar: boolean
   readonly commonConnectionsCount: string | number
+  readonly clubLabel?: string
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -71,15 +75,32 @@ function OtherSideInfoBanner({
         >
           {title}
         </Typography>
-        <XStack gap="$1" alignItems="center">
-          <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
-          <Typography
-            variant="micro"
-            color="$foregroundSecondary"
-            numberOfLines={1}
-          >
-            {t('offer.numberOfCommon', {number: commonConnectionsCount})}
-          </Typography>
+        <XStack gap="$2" alignItems="center">
+          {clubLabel != null ? (
+            <>
+              <Typography
+                variant="micro"
+                color="$foregroundSecondary"
+                numberOfLines={1}
+              >
+                {clubLabel}
+              </Typography>
+              <Circle
+                size="$2"
+                backgroundColor={theme.foregroundSecondary.val}
+              />
+            </>
+          ) : null}
+          <XStack gap="$1" alignItems="center">
+            <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
+            <Typography
+              variant="micro"
+              color="$foregroundSecondary"
+              numberOfLines={1}
+            >
+              {t('offer.numberOfCommon', {number: commonConnectionsCount})}
+            </Typography>
+          </XStack>
         </XStack>
       </YStack>
     </XStack>
@@ -162,10 +183,11 @@ export default function ChatInfoContent({
     identityRevealStatusAtom,
     listingTypeIsOtherAtom,
     offerForChatAtom,
+    otherSideClubsIdsAtom,
     otherSideDataAtom,
-    otherSideLeftAtom,
     otherSideSupportsTradingChecklistAtom,
     publicKeyPemBase64Atom,
+    shouldGrayScaleAvatarAtom,
     theirOfferAndNotReportedAtom,
   } = useMolecule(chatMolecule)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
@@ -177,17 +199,17 @@ export default function ChatInfoContent({
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
   const offer = useAtomValue(offerForChatAtom)
+  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
+  const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
   const shouldOpenRevealIdentitySummary = useAtomValue(
     shouldOpenRevealIdentitySummaryAtom
   )
-
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
   })
@@ -201,6 +223,13 @@ export default function ChatInfoContent({
     offer != null &&
     chat.otherSide.publicKey === offer.offerInfo.publicPart.offerPublicKey
   const otherSideRealUserName = chat.otherSide.realLifeInfo?.userName
+  const otherSideClubNames = useGetAllClubsNamesForIds(otherSideClubsIds ?? [])
+  const otherSideClubLabel =
+    otherSideClubNames.length === 1
+      ? otherSideClubNames[0]
+      : otherSideClubNames.length > 1
+        ? t('clubs.multipleClubs')
+        : undefined
 
   const connectionTitle = useMemo(() => {
     if (!offer) return otherSideData.userName ?? t('offer.title')
@@ -284,14 +313,15 @@ export default function ChatInfoContent({
               offer={offer}
               realUserName={otherSideRealUserName}
               userImage={otherSideData.image}
-              grayAvatar={otherSideLeft || !canSendMessages}
+              grayAvatar={shouldGrayScaleAvatar}
             />
           ) : (
             <OtherSideInfoBanner
               title={connectionTitle}
               userImage={otherSideData.image}
-              grayAvatar={otherSideLeft || !canSendMessages}
+              grayAvatar={shouldGrayScaleAvatar}
               commonConnectionsCount={localizedCommonConnectionsCount}
+              clubLabel={otherSideClubLabel}
             />
           )}
 

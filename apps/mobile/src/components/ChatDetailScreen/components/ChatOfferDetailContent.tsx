@@ -38,13 +38,12 @@ export default function ChatOfferDetailContent({
   const {t} = useTranslation()
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const {
-    canSendMessagesAtom,
     chatAtom,
     commonConnectionsHashesAtom,
     offerForChatAtom,
     otherSideClubsIdsAtom,
     otherSideDataAtom,
-    otherSideLeftAtom,
+    shouldGrayScaleAvatarAtom,
     theirOfferAndNotReportedAtom,
     verifiedConnectionsHashesAtom,
   } = useMolecule(chatMolecule)
@@ -52,13 +51,12 @@ export default function ChatOfferDetailContent({
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
-  const canSendMessages = useAtomValue(canSendMessagesAtom)
-  const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
   const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
   const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
+  const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
 
   if (!chatExists || !offer) {
     return (
@@ -127,7 +125,8 @@ export default function ChatOfferDetailContent({
             offer={offer}
             realUserName={chat.otherSide.realLifeInfo?.userName}
             userImage={otherSideData.image}
-            grayAvatar={otherSideLeft || !canSendMessages}
+            grayAvatar={shouldGrayScaleAvatar}
+            clubIdsForAvatar={otherSideClubsIds ?? []}
           />
 
           <Typography color="$foregroundPrimary" variant="description">

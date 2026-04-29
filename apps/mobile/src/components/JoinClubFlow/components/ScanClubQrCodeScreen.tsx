@@ -51,7 +51,7 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
   return (
     <Stack f={1}>
       <YStack f={1} pos="relative">
-        <Header pos="absolute" t={top} l={10} zIndex="$10" />
+        <Header pos="absolute" t={top} l={10} zIndex="1000" />
         <Text
           pos="absolute"
           top={height * 0.2}
@@ -123,9 +123,9 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
           height="100%"
           fill="none"
           style={{
+            zIndex: 0,
             position: 'absolute',
             paddingHorizontal: getTokens().space[2].val,
-            zIndex: getTokens().zIndex[1].val,
           }}
         >
           <Mask id="mask">

@@ -574,6 +574,20 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   })
 
   const canSendMessagesAtom = createCanSendMessagesAtom(messagesAtom)
+  const chatStateAtom = selectAtom(chatWithMessagesAtom, getChatState)
+  const otherSideLeftAtom = focusOtherSideLeftAtom(chatWithMessagesAtom)
+  const shouldGrayScaleAvatarAtom = atom((get) => {
+    const chatState = get(chatStateAtom)
+    const canSendMessages = get(canSendMessagesAtom)
+    const otherSideLeft = get(otherSideLeftAtom)
+
+    return (
+      otherSideLeft ||
+      (!canSendMessages &&
+        chatState !== 'requestedByMe' &&
+        chatState !== 'requestedByThem')
+    )
+  })
 
   const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
   const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
@@ -1226,7 +1240,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     wasDeniedAtom: focusWasDeniedAtom(chatWithMessagesAtom),
     wasCancelledAtom: createIsCancelledAtom(chatWithMessagesAtom),
     otherSideDataAtom,
-    otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
+    otherSideLeftAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
     disapproveIdentityRevealWithUiFeedbackAtom,
@@ -1241,7 +1255,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     theirOfferAndNotReportedAtom,
     forceShowHistoryAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
-    chatStateAtom: selectAtom(chatWithMessagesAtom, getChatState),
+    chatStateAtom,
+    shouldGrayScaleAvatarAtom,
     canBeRerequestedAtom: createCanChatBeRerequestedAtom(chatWithMessagesAtom),
     showOfferDeletedWithOptionToDeleteActionAtom,
     otherSideSupportsTradingChecklistAtom:

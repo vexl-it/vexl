@@ -19,7 +19,6 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const {t} = useTranslation()
 
   const {
-    canSendMessagesAtom,
     chatAtom,
     chatIdAtom,
     commonConnectionsCountAtom,
@@ -27,19 +26,18 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     offerForChatAtom,
     otherSideDataAtom,
     otherSideGoldenAvatarTypeAtom,
-    otherSideLeftAtom,
     publicKeyPemBase64Atom,
+    shouldGrayScaleAvatarAtom,
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const chatId = useAtomValue(chatIdAtom)
-  const canSendMessages = useAtomValue(canSendMessagesAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const offer = useAtomValue(offerForChatAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideGoldenAvatarType = useAtomValue(otherSideGoldenAvatarTypeAtom)
-  const otherSideLeft = useAtomValue(otherSideLeftAtom)
+  const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
   const showGoldenAvatarInfoModal = useSetAtom(
     showGoldenAvatarInfoModalActionAton
   )
@@ -85,7 +83,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
             }}
           >
             <UserAvatar
-              grayScale={otherSideLeft || !canSendMessages}
+              grayScale={shouldGrayScaleAvatar}
               userImage={otherSideData.image}
               width={40}
               height={40}

@@ -18,7 +18,6 @@ import {sendRequestHandleUIActionAtom} from '../../state/chat/atoms/sendRequestA
 import {useSingleOffer} from '../../state/marketplace'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import {globalDialogAtom} from '../GlobalDialog'
 import OfferAuthorBanner from '../OfferAuthorBanner'
 
 type Props = RootStackScreenProps<'SendMessage'>
@@ -33,7 +32,6 @@ function SendMessageScreen({
   const {t} = useTranslation()
   const offer = useSingleOffer(offerId)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
-  const showDialog = useSetAtom(globalDialogAtom)
   const textRef = useRef('')
   const [hasText, setHasText] = useState(false)
 
@@ -53,23 +51,11 @@ function SendMessageScreen({
           safeGoBack()
           return
         }
-        const showSuccess = yield* _(
-          showDialog({
-            title: t('offer.messageSentTitle'),
-            subtitle: t('offer.messageSentDescription'),
-            positiveButtonText: t('offer.showChat'),
-            negativeButtonText: t('common.close'),
-          })
-        )
 
-        if (showSuccess) {
-          navigation.replace('ChatDetail', {
-            otherSideKey: chat.otherSide.publicKey,
-            inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-          })
-        } else {
-          navigation.popToTop()
-        }
+        navigation.replace('ChatDetail', {
+          otherSideKey: chat.otherSide.publicKey,
+          inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
+        })
       }).pipe(
         Effect.catchAll((e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {
@@ -88,16 +74,7 @@ function SendMessageScreen({
         })
       )
     )
-  }, [
-    offer,
-    submitRequest,
-    showDialog,
-    t,
-    safeGoBack,
-    handleClose,
-    navigation,
-    mode,
-  ])
+  }, [offer, submitRequest, t, safeGoBack, handleClose, navigation, mode])
 
   const navigationBar = (
     <NavigationBar

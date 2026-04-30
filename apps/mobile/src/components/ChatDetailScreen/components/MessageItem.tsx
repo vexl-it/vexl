@@ -12,7 +12,7 @@ import UserFeedback from '../../UserFeedback'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import formatChatTime from '../utils/formatChatTime'
-import BigIconMessage from './BigIconMessage'
+import {BigImageMessage} from './BigImageMessage'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
 import {DisapproveMessagingMessage} from './DisapproveMessagingMessage'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
@@ -84,11 +84,11 @@ function MessageItem({
       item.message.message.messageType === 'INBOX_DELETED'
     ) {
       return (
-        <BigIconMessage
-          smallerText={t('messages.messagePreviews.incoming.INBOX_DELETED', {
+        <BigImageMessage
+          title={t('messages.messagePreviews.incoming.INBOX_DELETED', {
             them: userName,
           })}
-          icon={
+          image={
             <Stack
               width={80}
               height={80}
@@ -114,17 +114,14 @@ function MessageItem({
     if (item.message.message.messageType === 'DELETE_CHAT') {
       return (
         <>
-          <BigIconMessage
-            smallerText={t(
-              `messages.messagePreviews.${direction}.DELETE_CHAT`,
-              {
-                them: userName,
-              }
-            )}
-            icon={
+          <BigImageMessage
+            title={t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
+              them: userName,
+            })}
+            image={
               <UserAvatar
-                height={80}
-                width={80}
+                height={56}
+                width={56}
                 userImage={image}
                 grayScale={true}
               />
@@ -142,14 +139,14 @@ function MessageItem({
 
     if (item.message.message.messageType === 'BLOCK_CHAT')
       return (
-        <BigIconMessage
-          smallerText={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
+        <BigImageMessage
+          title={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
             them: userName,
           })}
-          icon={
+          image={
             <UserAvatar
-              height={80}
-              width={80}
+              height={56}
+              width={56}
               userImage={image}
               grayScale={true}
             />
@@ -159,14 +156,11 @@ function MessageItem({
 
     if (item.message.message.messageType === 'INBOX_DELETED')
       return (
-        <BigIconMessage
-          smallerText={t(
-            `messages.messagePreviews.${direction}.INBOX_DELETED`,
-            {
-              them: userName,
-            }
-          )}
-          icon={
+        <BigImageMessage
+          title={t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
+            them: userName,
+          })}
+          image={
             <UserAvatar
               height={80}
               width={80}

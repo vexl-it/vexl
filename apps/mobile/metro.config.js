@@ -41,6 +41,10 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     return context.resolveRequest(context, 'stream-browserify', platform)
   }
 
+  if (moduleName === 'bunshi/react') {
+    return context.resolveRequest(context, 'bunshi/dist/react', platform)
+  }
+
   // if (moduleName === 'buffer' || moduleName === 'node:buffer') {
   //   return context.resolveRequest(
   //     context,

@@ -44,9 +44,6 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const currentFeedbackPageAtom = focusAtom(feedbackAtom, (o) =>
     o.prop('currentPage')
   )
-  const chatFeedbackFinishedAtom = focusAtom(feedbackAtom, (o) =>
-    o.prop('finished')
-  )
   const feedbackFlowFinishedAtom = atom<boolean>(false)
 
   function createIsStarSelectedAtom(
@@ -172,7 +169,6 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   return {
     starRatingAtom,
     createIsStarSelectedAtom,
-    chatFeedbackFinishedAtom,
     selectedObjectionsAtom,
     createIsObjectionSelectedAtom,
     formIdAtom,

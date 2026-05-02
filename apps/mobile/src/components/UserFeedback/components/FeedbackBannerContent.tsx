@@ -1,39 +1,35 @@
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
+import {
+  Button,
+  EyeShut,
+  Stack,
+  Typography,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useEffect, useMemo} from 'react'
-import {Stack, Text} from 'tamagui'
-import {newOfferFeedbackDoneAtom} from '../../../state/feedback/atoms'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Button from '../../Button'
 import {feedbackMolecule} from '../atoms'
 import Objections from './Objections'
 import StarRating from './StarRating'
 import TextComment from './TextComment'
 
-interface Props {
-  autoCloseWhenFinished?: boolean
-}
-
-function FeedbackBannerContent({
-  autoCloseWhenFinished,
-}: Props): React.ReactElement {
+function FeedbackBannerContent({onFinishClose}: {onFinishClose: () => void}): React.ReactElement {
   const {t} = useTranslation()
   const {
-    formIdAtom,
-    chatFeedbackFinishedAtom,
     starRatingAtom,
     currentFeedbackPageAtom,
     submitChatFeedbackAndHandleUIActionAtom,
     feedbackFlowFinishedAtom,
   } = useMolecule(feedbackMolecule)
   const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)
-  const currentPage = useAtomValue(currentFeedbackPageAtom)
+  const [currentPage, setCurrentPage] = useAtom(currentFeedbackPageAtom)
   const starRating = useAtomValue(starRatingAtom)
-  const setChatFeedbackFinished = useSetAtom(chatFeedbackFinishedAtom)
   const submitChatFeedback = useSetAtom(submitChatFeedbackAndHandleUIActionAtom)
-  const setNewOfferFeedbackDone = useSetAtom(newOfferFeedbackDoneAtom)
+  const theme = useTheme()
 
   const title = useMemo(() => {
     return !feedbackFlowFinished
@@ -48,38 +44,26 @@ function FeedbackBannerContent({
             : starRating >= POSITIVE_STAR_RATING_THRESHOLD
               ? t('messages.whatWorkedWellExactly')
               : t('messages.whatWasWrongExactly')
-      : t('common.thanks')
+      : t('feedback.thanks')
   }, [feedbackFlowFinished, currentPage, starRating, t])
 
-  useEffect(() => {
-    if (feedbackFlowFinished && autoCloseWhenFinished) {
-      const timeout = setTimeout(() => {
-        setChatFeedbackFinished(true)
-
-        if (currentPage === 'OFFER_RATING') {
-          setNewOfferFeedbackDone(true)
-        }
-      }, 2000)
-
-      return () => {
-        clearTimeout(timeout)
-      }
-    }
-  }, [
-    autoCloseWhenFinished,
-    currentPage,
-    formIdAtom,
-    feedbackFlowFinished,
-    setChatFeedbackFinished,
-    setNewOfferFeedbackDone,
-  ])
+  const showBackButton = currentPage !== 'CHAT_RATING' && !feedbackFlowFinished
+  const showNextButton =
+    !feedbackFlowFinished &&
+    currentPage !== 'CHAT_RATING' &&
+    currentPage !== 'OFFER_RATING'
+  const showCloseButton = feedbackFlowFinished
 
   return (
-    <Stack gap="$4">
+    <Stack gap="$5">
       <Stack ai="center" gap="$4">
-        <Text fos={18} ff="$body700" col="$white">
+        <Typography
+          variant="paragraphDemibold"
+          color="$foregroundPrimary"
+          textAlign="center"
+        >
           {title}
-        </Text>
+        </Typography>
         {!feedbackFlowFinished ? (
           currentPage === 'CHAT_RATING' || currentPage === 'OFFER_RATING' ? (
             <StarRating />
@@ -92,19 +76,56 @@ function FeedbackBannerContent({
           <></>
         )}
       </Stack>
-      {!feedbackFlowFinished &&
-        currentPage !== 'CHAT_RATING' &&
-        currentPage !== 'OFFER_RATING' && (
-          <Button
-            onPress={() => Effect.runFork(submitChatFeedback())}
-            variant="primary"
-            text={
-              currentPage === 'TEXT_COMMENT'
+      {!feedbackFlowFinished && (
+        <XStack ai="center" jc="center" gap="$1">
+          <EyeShut size={24} color={theme.foregroundSecondary.val} />
+          <Typography variant="description" color="$foregroundSecondary">
+            {t('messages.yourAnswerIsAnonymous')}
+          </Typography>
+        </XStack>
+      )}
+      {!!(showBackButton || showNextButton || feedbackFlowFinished) && (
+        <XStack f={1} gap="$3">
+          {!!showBackButton && (
+            <Button
+              f={1}
+              size="medium"
+              variant="secondary"
+              onPress={() => {
+                setCurrentPage(
+                  currentPage === 'OBJECTIONS' ? 'CHAT_RATING' : 'OBJECTIONS'
+                )
+              }}
+            >
+              {t('common.back')}
+            </Button>
+          )}
+
+          {!!showNextButton && (
+            <Button
+              f={1}
+              size="medium"
+              onPress={() => Effect.runFork(submitChatFeedback())}
+              variant="primary"
+            >
+              {currentPage === 'TEXT_COMMENT'
                 ? t('common.send')
-                : t('common.next')
-            }
-          />
-        )}
+                : t('common.next')}
+            </Button>
+          )}
+
+          {!!showCloseButton && (
+            <Button
+              f={1}
+              size="medium"
+              onPress={() => onFinishClose()}
+              variant="primary"
+            >
+              {t('common.close')}
+            </Button>
+          )}
+        </XStack>
+      )}
     </Stack>
   )
 }

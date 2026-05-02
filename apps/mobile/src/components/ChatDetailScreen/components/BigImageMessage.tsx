@@ -22,7 +22,7 @@ export function BigImageMessage({
       alignItems="center"
       px="$4"
       gap="$3"
-      mx="$5"
+      mx="$4"
     >
       {!!image && <Stack mb="$3">{image}</Stack>}
       {!!title && (

@@ -83,6 +83,7 @@ function createNewChat({
     tradeChecklist: {
       ...createEmptyTradeChecklistInState(),
     },
+    feedbackSubmitted: false,
     hiddenMessagesIds: HashSet.empty(),
     messages: [initialMessage],
   } satisfies ChatWithMessages

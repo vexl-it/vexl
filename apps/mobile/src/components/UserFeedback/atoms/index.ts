@@ -9,7 +9,7 @@ import {
 } from '@vexl-next/domain/src/general/feedback'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {createScope, molecule} from 'bunshi/dist/react'
-import {Effect, Schema} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
@@ -44,7 +44,9 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   const currentFeedbackPageAtom = focusAtom(feedbackAtom, (o) =>
     o.prop('currentPage')
   )
-  const feedbackFlowFinishedAtom = atom<boolean>(false)
+  const feedbackFlowFinishedAtom = focusAtom(feedbackAtom, (o) =>
+    o.prop('finished')
+  )
 
   function createIsStarSelectedAtom(
     starOrderNumber: number
@@ -104,7 +106,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
           type: type === 'CHAT_RATING' ? 'trade' : 'create',
           ...(stars !== 0 && {stars}),
           ...(!isOfferCreationFeedback &&
-            objections.length !== 0 && {
+            Array.isNonEmptyReadonlyArray(objections) && {
               objections: objections?.join(','),
             }),
           ...(!isOfferCreationFeedback &&
@@ -167,6 +169,7 @@ export const feedbackMolecule = molecule((getMolecule, getScope) => {
   })
 
   return {
+    feedbackAtom,
     starRatingAtom,
     createIsStarSelectedAtom,
     selectedObjectionsAtom,

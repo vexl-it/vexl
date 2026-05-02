@@ -1,18 +1,16 @@
+import {Stack, StarFilled, StarOutline, useTheme} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {TouchableOpacity} from 'react-native'
-import {getTokens} from 'tamagui'
-import SvgImage from '../../Image'
 import {feedbackMolecule} from '../atoms'
-import starSvg from '../images/starSvg'
 
 interface Props {
   starOrderNumber: number
 }
 
 function TouchableStar({starOrderNumber}: Props): React.ReactElement {
+  const theme = useTheme()
   const {
     createIsStarSelectedAtom,
     currentFeedbackPageAtom,
@@ -34,7 +32,12 @@ function TouchableStar({starOrderNumber}: Props): React.ReactElement {
   )
 
   return (
-    <TouchableOpacity
+    <Stack
+      ai="center"
+      jc="center"
+      width="$8"
+      height="$8"
+      borderRadius="$4"
       onPress={() => {
         select(!isSelected)
         if (currentPage === 'OFFER_RATING') {
@@ -44,11 +47,12 @@ function TouchableStar({starOrderNumber}: Props): React.ReactElement {
         }
       }}
     >
-      <SvgImage
-        fill={isSelected ? getTokens().color.main.val : 'none'}
-        source={starSvg}
-      />
-    </TouchableOpacity>
+      {isSelected ? (
+        <StarFilled size={32} color={theme.accentYellowPrimary.val} />
+      ) : (
+        <StarOutline size={32} color={theme.foregroundSecondary.val} />
+      )}
+    </Stack>
   )
 }
 

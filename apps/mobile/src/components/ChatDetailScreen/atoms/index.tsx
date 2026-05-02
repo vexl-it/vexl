@@ -54,7 +54,6 @@ import {
 import {getChatState} from '../../../state/chat/utils/offerStates'
 import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
-import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
@@ -78,7 +77,7 @@ import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/sho
 import {showErrorAlert} from '../../ErrorAlert'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
+import UserFeedback from '../../UserFeedback'
 import {type MessagesListItem} from '../components/MessageItem'
 import buildMessagesListData from '../utils/buildMessagesListData'
 
@@ -400,7 +399,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
       return Effect.gen(function* (_) {
         const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
-        const feedbackFinished = get(chatFeedbackAtom).finished
 
         if (!skipAsk) {
           const confirmedDelete = yield* _(
@@ -439,13 +437,13 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         if (deniedMessaging) return true
 
         if (skipDonation) {
-          if (!feedbackFinished && !skipFeedback)
+          if (!skipFeedback)
             void Effect.runFork(set(giveFeedbackForDeletedChatAtom))
         } else {
           void Effect.runPromise(
             set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: true})
           ).then(() => {
-            if (!feedbackFinished && !skipFeedback)
+            if (!skipFeedback)
               void Effect.runFork(set(giveFeedbackForDeletedChatAtom))
           })
         }
@@ -469,10 +467,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const chatFeedbackAtom = createFeedbackForChatAtom(
-    atom((get) => get(chatAtom).id)
-  )
-
   const giveFeedbackForDeletedChatAtom = atom(null, (get, set) => {
     const {t} = get(translationAtom)
 
@@ -480,7 +474,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       set(globalDialogAtom, {
         title: ' ',
         positiveButtonText: t('common.close'),
-        children: <ChatFeedbackDialogContent />,
+        children: <UserFeedback feedbackType="CHAT_RATING" hideCloseButton />,
       }),
       Effect.ignore
     )
@@ -1266,7 +1260,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     selectedImageAtom,
     clearExtraToSendActionAtom,
     showInfoBarAtom,
-    chatFeedbackAtom,
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
     publicKeyPemBase64Atom,

@@ -3,7 +3,7 @@ import {styled} from 'tamagui'
 
 import {SizableText, Stack} from '../primitives'
 
-type CardButtonType = 'filled' | 'text'
+type CardButtonType = 'filled' | 'outlined' | 'text'
 
 const CardButtonFrame = styled(Stack, {
   name: 'CardButton',
@@ -23,9 +23,23 @@ const CardButtonFrame = styled(Stack, {
     variant: {
       filled: {
         backgroundColor: '$black100',
+        borderWidth: 1,
+        borderColor: 'transparent',
       },
       filledContrast: {
         backgroundColor: '$foregroundPrimary',
+        borderWidth: 1,
+        borderColor: 'transparent',
+      },
+      outlined: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '$foregroundPrimary',
+      },
+      outlinedContrast: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: '$backgroundPrimary',
       },
       text: {
         backgroundColor: 'transparent',
@@ -53,6 +67,12 @@ const CardButtonLabel = styled(SizableText, {
       filledContrast: {
         color: '$backgroundPrimary',
       },
+      outlined: {
+        color: '$foregroundPrimary',
+      },
+      outlinedContrast: {
+        color: '$backgroundPrimary',
+      },
       text: {
         color: '$foregroundPrimary',
       },
@@ -64,13 +84,19 @@ const CardButtonLabel = styled(SizableText, {
   },
 })
 
-type InternalVariant = 'filled' | 'filledContrast' | 'text'
+type InternalVariant =
+  | 'filled'
+  | 'filledContrast'
+  | 'outlined'
+  | 'outlinedContrast'
+  | 'text'
 
 function resolveVariant(
   type: CardButtonType,
   contrast: boolean
 ): InternalVariant {
   if (type === 'text') return 'text'
+  if (type === 'outlined') return contrast ? 'outlinedContrast' : 'outlined'
   return contrast ? 'filledContrast' : 'filled'
 }
 

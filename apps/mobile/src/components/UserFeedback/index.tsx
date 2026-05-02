@@ -1,31 +1,26 @@
-import {type Feedback} from '@vexl-next/domain/src/general/feedback'
+import {
+  type Feedback,
+  type FeedbackType,
+} from '@vexl-next/domain/src/general/feedback'
 import {ScopeProvider} from 'bunshi/dist/react'
-import {type SetStateAction, type WritableAtom} from 'jotai'
-import React from 'react'
-import {FeedbackScope} from './atoms'
-import FeedbackBanner from './components/FeedbackBanner'
+import {atom} from 'jotai'
+import React, {useMemo} from 'react'
+import {FeedbackScope, generateInitialFeedback} from './atoms'
+import FeedbackBannerContent from './components/FeedbackBannerContent'
 
 interface Props {
-  autoCloseWhenFinished?: boolean
-  feedbackAtom: WritableAtom<
-    Feedback | undefined,
-    [SetStateAction<Feedback>],
-    void
-  >
-  hideCloseButton?: boolean
+  feedbackType: FeedbackType
+  onFinishClose: () => void
 }
 
-function UserFeedback({
-  autoCloseWhenFinished,
-  feedbackAtom,
-  hideCloseButton,
-}: Props): React.ReactElement | null {
+function UserFeedback({feedbackType, onFinishClose}: Props): React.ReactElement | null {
+  const feedbackAtom = useMemo(() => {
+    return atom<Feedback>(generateInitialFeedback(feedbackType))
+  }, [feedbackType])
+
   return (
     <ScopeProvider scope={FeedbackScope} value={feedbackAtom}>
-      <FeedbackBanner
-        autoCloseWhenFinished={autoCloseWhenFinished}
-        hideCloseButton={hideCloseButton}
-      />
+      <FeedbackBannerContent onFinishClose={onFinishClose} />
     </ScopeProvider>
   )
 }

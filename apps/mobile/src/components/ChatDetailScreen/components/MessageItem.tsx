@@ -8,7 +8,6 @@ import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndic
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import Image from '../../Image'
 import UserAvatar from '../../UserAvatar'
-import UserFeedback from '../../UserFeedback'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
 import formatChatTime from '../utils/formatChatTime'
@@ -17,6 +16,7 @@ import ContactRevealMessageItem from './ContactRevealMessageItem'
 import {DisapproveMessagingMessage} from './DisapproveMessagingMessage'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
+import {OtherSideLeftVexlBot} from './OtherSideLeftVexlBot'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
 import TradeChecklistAmountView from './VexlbotMessageItem/components/TradeChecklistAmountView'
@@ -59,11 +59,8 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): React.ReactElement | null {
   const item = useAtomValue(itemAtom)
-  const {
-    chatFeedbackAtom,
-    otherSideDataAtom,
-    otherSideSupportsTradingChecklistAtom,
-  } = useMolecule(chatMolecule)
+  const {otherSideDataAtom, otherSideSupportsTradingChecklistAtom} =
+    useMolecule(chatMolecule)
   const {t} = useTranslation()
   const {userName, image, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
@@ -127,12 +124,7 @@ function MessageItem({
               />
             }
           />
-          {direction === 'incoming' && (
-            <UserFeedback
-              autoCloseWhenFinished
-              feedbackAtom={chatFeedbackAtom}
-            />
-          )}
+          {direction === 'incoming' && <OtherSideLeftVexlBot />}
         </>
       )
     }

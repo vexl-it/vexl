@@ -1,10 +1,7 @@
+import {Stack, useTheme, XmarkCancelClose} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
-import SvgImage from '../../Image'
-import closeSvg from '../../images/closeSvg'
 import {feedbackMolecule} from '../atoms'
 
 interface Props {
@@ -14,24 +11,21 @@ interface Props {
 function BannerCloseButton({
   hideCloseButton,
 }: Props): React.ReactElement | null {
-  const {currentFeedbackPageAtom, chatFeedbackFinishedAtom} =
-    useMolecule(feedbackMolecule)
+  const theme = useTheme()
+  const {currentFeedbackPageAtom} = useMolecule(feedbackMolecule)
   const currentPage = useAtomValue(currentFeedbackPageAtom)
-  const setFeedbackDone = useSetAtom(chatFeedbackFinishedAtom)
 
   return currentPage !== 'OFFER_RATING' && !hideCloseButton ? (
-    <TouchableOpacity
-      onPress={() => {
-        setFeedbackDone(true)
-      }}
+    <Stack
+      ai="center"
+      jc="center"
+      width="$7"
+      height="$7"
+      borderRadius="$4"
+      onPress={() => {}}
     >
-      <SvgImage
-        height={24}
-        width={24}
-        source={closeSvg}
-        stroke={getTokens().color.greyOnBlack.val}
-      />
-    </TouchableOpacity>
+      <XmarkCancelClose size={24} color={theme.foregroundSecondary.val} />
+    </Stack>
   ) : (
     <Stack width={24} />
   )

@@ -36,9 +36,6 @@ export const Preferences = Schema.Struct({
   showFriendLevelBanner: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
-  offerFeedbackEnabled: Schema.optionalWith(Schema.Boolean, {
-    default: () => false,
-  }),
   showTextDebugButton: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),

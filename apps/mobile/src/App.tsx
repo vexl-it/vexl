@@ -24,6 +24,7 @@ import PreventScreenshots from './components/PreventScreenshots'
 import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
+import {UserFeedbackDialog} from './components/UserFeedback/UserFeedbackDialog'
 import VersionMigrations from './components/VersionMigrations'
 import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
@@ -101,6 +102,7 @@ function App(): React.ReactElement {
           </LoadingOverlayProvider>
           <AreYouSureDialog />
           <GlobalDialog />
+          <UserFeedbackDialog />
           <ErrorAlert />
           <ToastNotification />
         </NavigationContainer>

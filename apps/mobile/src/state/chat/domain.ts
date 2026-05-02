@@ -117,6 +117,9 @@ export const ChatWithMessages = Schema.Struct({
       contact: {},
     }),
   }),
+  feedbackSubmitted: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
 })
 export type ChatWithMessages = typeof ChatWithMessages.Type
 
@@ -161,5 +164,6 @@ export const dummyChatWithMessages: ChatWithMessages = {
   tradeChecklist: {
     ...createEmptyTradeChecklistInState(),
   },
+  feedbackSubmitted: false,
   messages: [],
 }

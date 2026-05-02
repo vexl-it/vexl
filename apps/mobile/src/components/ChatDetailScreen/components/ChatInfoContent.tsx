@@ -18,7 +18,7 @@ import {
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Alert, ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -189,6 +189,7 @@ export default function ChatInfoContent({
     publicKeyPemBase64Atom,
     shouldGrayScaleAvatarAtom,
     theirOfferAndNotReportedAtom,
+    feedbackSubmittedAtom,
   } = useMolecule(chatMolecule)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const chat = useAtomValue(chatAtom)
@@ -203,6 +204,9 @@ export default function ChatInfoContent({
   const otherSideData = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
+  )
+  const [feedbackSubmitted, setFeedbackSubmitted] = useAtom(
+    feedbackSubmittedAtom
   )
   const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -416,6 +420,19 @@ export default function ChatInfoContent({
                     inboxKey,
                     otherSideKey: chat.otherSide.publicKey,
                   })
+                }}
+              />
+              <ActionRow
+                showChevron
+                color="foregroundPrimary"
+                icon={DocumentsFiles}
+                label={
+                  feedbackSubmitted
+                    ? 'set feedback not submitted'
+                    : 'set feedback submitted'
+                }
+                onPress={() => {
+                  setFeedbackSubmitted((prev) => !prev)
                 }}
               />
             </YStack>

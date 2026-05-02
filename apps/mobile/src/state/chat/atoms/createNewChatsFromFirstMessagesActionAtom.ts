@@ -109,6 +109,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
             tradeChecklist: {
               ...createEmptyTradeChecklistInState(),
             },
+            feedbackSubmitted: false,
             hiddenMessagesIds: HashSet.empty(),
             messages: [...messages],
           } satisfies ChatWithMessages

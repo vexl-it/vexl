@@ -77,7 +77,7 @@ import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/sho
 import {showErrorAlert} from '../../ErrorAlert'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import UserFeedback from '../../UserFeedback'
+import {showUserFeedbackDialogAtom} from '../../UserFeedback'
 import {type MessagesListItem} from '../components/MessageItem'
 import buildMessagesListData from '../utils/buildMessagesListData'
 
@@ -398,7 +398,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       const {t} = get(translationAtom)
 
       return Effect.gen(function* (_) {
+        const chatWithMessages = get(chatWithMessagesAtom)
         const deniedMessaging = get(focusWasDeniedAtom(chatWithMessagesAtom))
+        const feedbackSubmitted = chatWithMessages.feedbackSubmitted
 
         if (!skipAsk) {
           const confirmedDelete = yield* _(
@@ -437,14 +439,22 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         if (deniedMessaging) return true
 
         if (skipDonation) {
-          if (!skipFeedback)
-            void Effect.runFork(set(giveFeedbackForDeletedChatAtom))
+          if (!skipFeedback && !feedbackSubmitted)
+            void Effect.runFork(
+              set(showUserFeedbackDialogAtom, {
+                feedbackType: 'CHAT_RATING',
+              })
+            )
         } else {
           void Effect.runPromise(
             set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: true})
           ).then(() => {
-            if (!skipFeedback)
-              void Effect.runFork(set(giveFeedbackForDeletedChatAtom))
+            if (!skipFeedback && !feedbackSubmitted)
+              void Effect.runFork(
+                set(showUserFeedbackDialogAtom, {
+                  feedbackType: 'CHAT_RATING',
+                })
+              )
           })
         }
 
@@ -466,19 +476,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       )
     }
   )
-
-  const giveFeedbackForDeletedChatAtom = atom(null, (get, set) => {
-    const {t} = get(translationAtom)
-
-    return pipe(
-      set(globalDialogAtom, {
-        title: ' ',
-        positiveButtonText: t('common.close'),
-        children: <UserFeedback feedbackType="CHAT_RATING" hideCloseButton />,
-      }),
-      Effect.ignore
-    )
-  })
 
   const blockChatAtom = blockChatActionAtom(chatWithMessagesAtom)
   const blockChatWithUiFeedbackAtom = atom(null, async (get, set) => {
@@ -1127,6 +1124,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
+  const feedbackSubmittedAtom = focusAtom(chatAtom, (o) => o.prop('feedbackSubmitted'))
+
   const approveChatRequestActionAtom = atom(
     null,
     (get, set, {approve, message}: {approve: boolean; message: string}) => {
@@ -1291,7 +1290,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     identityRevealRequestMessageIdAtom,
     contactRevealRequestMessageIdAtom,
     contactRevealApproveMessageIdAtom,
-    // fiatValueToDisplayInVexlbotMessageAtom,
+    feedbackSubmittedAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
     otherSideGoldenAvatarTypeAtom,
     otherSideClubsIdsAtom,

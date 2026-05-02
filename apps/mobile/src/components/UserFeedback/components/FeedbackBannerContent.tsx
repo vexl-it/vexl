@@ -1,15 +1,7 @@
 import {POSITIVE_STAR_RATING_THRESHOLD} from '@vexl-next/domain/src/general/feedback'
-import {
-  Button,
-  EyeShut,
-  Stack,
-  Typography,
-  useTheme,
-  XStack,
-} from '@vexl-next/ui'
+import {EyeShut, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect'
-import {useAtom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {feedbackMolecule} from '../atoms'
@@ -17,18 +9,13 @@ import Objections from './Objections'
 import StarRating from './StarRating'
 import TextComment from './TextComment'
 
-function FeedbackBannerContent({onFinishClose}: {onFinishClose: () => void}): React.ReactElement {
+function FeedbackBannerContent(): React.ReactElement {
   const {t} = useTranslation()
-  const {
-    starRatingAtom,
-    currentFeedbackPageAtom,
-    submitChatFeedbackAndHandleUIActionAtom,
-    feedbackFlowFinishedAtom,
-  } = useMolecule(feedbackMolecule)
+  const {starRatingAtom, currentFeedbackPageAtom, feedbackFlowFinishedAtom} =
+    useMolecule(feedbackMolecule)
   const feedbackFlowFinished = useAtomValue(feedbackFlowFinishedAtom)
-  const [currentPage, setCurrentPage] = useAtom(currentFeedbackPageAtom)
+  const currentPage = useAtomValue(currentFeedbackPageAtom)
   const starRating = useAtomValue(starRatingAtom)
-  const submitChatFeedback = useSetAtom(submitChatFeedbackAndHandleUIActionAtom)
   const theme = useTheme()
 
   const title = useMemo(() => {
@@ -46,13 +33,6 @@ function FeedbackBannerContent({onFinishClose}: {onFinishClose: () => void}): Re
               : t('messages.whatWasWrongExactly')
       : t('feedback.thanks')
   }, [feedbackFlowFinished, currentPage, starRating, t])
-
-  const showBackButton = currentPage !== 'CHAT_RATING' && !feedbackFlowFinished
-  const showNextButton =
-    !feedbackFlowFinished &&
-    currentPage !== 'CHAT_RATING' &&
-    currentPage !== 'OFFER_RATING'
-  const showCloseButton = feedbackFlowFinished
 
   return (
     <Stack gap="$5">
@@ -82,48 +62,6 @@ function FeedbackBannerContent({onFinishClose}: {onFinishClose: () => void}): Re
           <Typography variant="description" color="$foregroundSecondary">
             {t('messages.yourAnswerIsAnonymous')}
           </Typography>
-        </XStack>
-      )}
-      {!!(showBackButton || showNextButton || feedbackFlowFinished) && (
-        <XStack f={1} gap="$3">
-          {!!showBackButton && (
-            <Button
-              f={1}
-              size="medium"
-              variant="secondary"
-              onPress={() => {
-                setCurrentPage(
-                  currentPage === 'OBJECTIONS' ? 'CHAT_RATING' : 'OBJECTIONS'
-                )
-              }}
-            >
-              {t('common.back')}
-            </Button>
-          )}
-
-          {!!showNextButton && (
-            <Button
-              f={1}
-              size="medium"
-              onPress={() => Effect.runFork(submitChatFeedback())}
-              variant="primary"
-            >
-              {currentPage === 'TEXT_COMMENT'
-                ? t('common.send')
-                : t('common.next')}
-            </Button>
-          )}
-
-          {!!showCloseButton && (
-            <Button
-              f={1}
-              size="medium"
-              onPress={() => onFinishClose()}
-              variant="primary"
-            >
-              {t('common.close')}
-            </Button>
-          )}
         </XStack>
       )}
     </Stack>

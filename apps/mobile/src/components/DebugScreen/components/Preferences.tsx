@@ -9,7 +9,6 @@ const preferencesToEdit = [
   'allowSendingImages',
   'enableNewOffersNotificationDevMode',
   'showFriendLevelBanner',
-  'offerFeedbackEnabled',
   'showTextDebugButton',
   'isDeveloper',
   'showOfferDetail',

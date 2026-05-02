@@ -1,12 +1,14 @@
+import {Stack, TextArea, tokens, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom} from 'jotai'
 import React from 'react'
-import {getTokens, Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Input from '../../Input'
 import {feedbackMolecule} from '../atoms'
 
 const MAX_INPUT_LENGTH = 200
+const TEXT_AREA_HEIGHT =
+  tokens.size[10].val + tokens.size[10].val + tokens.size[2].val
+
 function TextComment(): React.ReactElement {
   const {t} = useTranslation()
   const {textCommentAtom} = useMolecule(feedbackMolecule)
@@ -14,27 +16,30 @@ function TextComment(): React.ReactElement {
   const [textComment, setTextComment] = useAtom(textCommentAtom)
 
   return (
-    <Stack w="100%" height={150} px="$2" pb="$2" br="$4" bc="$grey">
-      <Stack f={1}>
-        <Input
-          tag="textarea"
-          multiline
-          verticalAlign="top"
-          placeholder={t('messages.typeSomething')}
-          placeholderTextColor={getTokens().color.greyOnBlack.val}
-          maxLength={MAX_INPUT_LENGTH}
-          rows={10}
-          variant="transparentOnGrey"
-          value={textComment}
-          onChangeText={setTextComment}
-        />
-      </Stack>
+    <Stack w="100%" gap="$3">
+      <TextArea
+        height={TEXT_AREA_HEIGHT}
+        backgroundColor="$backgroundTertiary"
+        borderRadius="$5"
+        borderWidth={0}
+        color="$foregroundPrimary"
+        fontFamily="$body"
+        fontSize="$4"
+        fontWeight="500"
+        lineHeight={24}
+        maxLength={MAX_INPUT_LENGTH}
+        multiline
+        onChangeText={setTextComment}
+        padding="$5"
+        placeholder={t('messages.typeSomething')}
+        placeholderTextColor="$foregroundSecondary"
+        value={textComment}
+        verticalAlign="top"
+      />
       <Stack als="flex-end">
-        <Text
-          col="$white"
-          fos={16}
-          ff="$body600"
-        >{`${textComment.length}/${MAX_INPUT_LENGTH}`}</Text>
+        <Typography variant="micro" color="$foregroundSecondary">
+          {`${textComment.length}/${MAX_INPUT_LENGTH}`}
+        </Typography>
       </Stack>
     </Stack>
   )

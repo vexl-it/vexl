@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Option} from 'effect'
-import {atom, useAtomValue, type Atom} from 'jotai'
+import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack} from 'tamagui'
 import {useChatWithMessagesForOffer} from '../../state/chat/hooks/useChatForOffer'
@@ -9,13 +9,9 @@ import {
   canChatBeRequested,
   getRequestState,
 } from '../../state/chat/utils/offerStates'
-import {newOfferFeedbackDoneAtom} from '../../state/feedback/atoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {preferencesAtom} from '../../utils/preferences'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import OfferOnMarketplace from '../OfferOnMarketplace'
-import UserFeedback from '../UserFeedback'
-import {generateInitialFeedback} from '../UserFeedback/atoms'
 
 interface Props {
   readonly isFirst: boolean
@@ -27,12 +23,6 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const navigation = useNavigation()
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
-  const preferences = useAtomValue(preferencesAtom)
-  const newOfferFeedbackDone = useAtomValue(newOfferFeedbackDoneAtom)
-  const offerFeedbackAtom = useMemo(
-    () => atom(generateInitialFeedback('OFFER_RATING')),
-    []
-  )
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -192,15 +182,6 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   return (
     <Stack px="$5">
       <OfferOnMarketplace offer={offer} onPress={content.onPress} />
-      {!!isMine &&
-        !!isFirst &&
-        !newOfferFeedbackDone &&
-        !!preferences.offerFeedbackEnabled && (
-          <UserFeedback
-            autoCloseWhenFinished
-            feedbackAtom={offerFeedbackAtom}
-          />
-        )}
     </Stack>
   )
 }

@@ -72,15 +72,20 @@ export default function VexlbotActionCard({
         justifyContent="space-between"
         padding="$4"
       >
-        <XStack alignItems="center" flex={1} gap="$1">
+        <XStack alignItems="center" flex={1} gap="$2">
           <Avatar customSize={24}>
             {BasicAvatar ? <BasicAvatar size={24} /> : null}
           </Avatar>
-          <XStack alignItems="baseline" gap="$0.5">
-            <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
+          <XStack alignItems="center" gap="$0">
+            <Typography
+              lineHeight="100%"
+              color="$foregroundPrimary"
+              variant="paragraphSmallBold"
+            >
               {t('common.vexl')}
             </Typography>
             <Typography
+              lineHeight="100%"
               color="$accentHighlightSecondary"
               variant="paragraphSmallBold"
             >

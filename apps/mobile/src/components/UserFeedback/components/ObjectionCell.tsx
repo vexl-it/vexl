@@ -1,17 +1,16 @@
 import {type ObjectionType} from '@vexl-next/domain/src/general/feedback'
+import {Stack, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {TouchableOpacity, type TouchableOpacityProps} from 'react-native'
-import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {feedbackMolecule} from '../atoms'
 
-interface Props extends TouchableOpacityProps {
+interface Props {
   objection: ObjectionType
 }
 
-function ObjectionCell({objection, ...props}: Props): React.ReactElement {
+function ObjectionCell({objection}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {createIsObjectionSelectedAtom} = useMolecule(feedbackMolecule)
 
@@ -23,26 +22,23 @@ function ObjectionCell({objection, ...props}: Props): React.ReactElement {
   )
 
   return (
-    <TouchableOpacity
+    <Stack
       onPress={() => {
         select(!isSelected)
       }}
-      {...props}
+      p="$4"
+      py="$3"
+      br="$5"
+      bc={isSelected ? '$accentYellowSecondary' : '$backgroundTertiary'}
     >
-      <Stack
-        ai="center"
-        jc="center"
-        px="$4"
-        py="$2"
-        br="$4"
-        bc={isSelected ? '$yellowAccent2' : '$greyAccent1'}
-        mb="$2"
+      <Typography
+        lineHeight="100%"
+        variant="descriptionBold"
+        color={isSelected ? '$accentHighlightPrimary' : '$foregroundPrimary'}
       >
-        <Text fos={16} ff="$body500" col={isSelected ? '$main' : '$white'}>
-          {t(`feedback.objection.${objection}`)}
-        </Text>
-      </Stack>
-    </TouchableOpacity>
+        {t(`feedback.objection.${objection}`)}
+      </Typography>
+    </Stack>
   )
 }
 

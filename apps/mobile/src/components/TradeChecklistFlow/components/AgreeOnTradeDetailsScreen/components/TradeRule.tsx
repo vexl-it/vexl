@@ -10,8 +10,15 @@ interface Props {
 function TradeRule({ruleNumber, title}: Props): React.ReactElement {
   return (
     <XStack ai="center" gap="$4">
-      <Stack ai="center" jc="center" h={40} w={40} bc="$grey" br="$3">
-        <Typography variant="paragraph" color="$foregroundSecondary">
+      <Stack
+        ai="center"
+        jc="center"
+        h={40}
+        w={40}
+        bc="$backgroundSecondary"
+        br="$3"
+      >
+        <Typography variant="paragraph" color="$foregroundPrimary">
           {ruleNumber}
         </Typography>
       </Stack>

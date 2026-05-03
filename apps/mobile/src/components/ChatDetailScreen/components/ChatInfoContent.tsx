@@ -35,7 +35,10 @@ import {isDeveloperAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
-import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
+import {
+  prepareRevealIdentityDraftActionAtom,
+  shouldOpenRevealIdentitySummaryAtom,
+} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 
@@ -214,6 +217,9 @@ export default function ChatInfoContent({
   const shouldOpenRevealIdentitySummary = useAtomValue(
     shouldOpenRevealIdentitySummaryAtom
   )
+  const prepareRevealIdentityDraft = useSetAtom(
+    prepareRevealIdentityDraftActionAtom
+  )
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
   })
@@ -374,6 +380,7 @@ export default function ChatInfoContent({
                     icon={EyeShut}
                     label={t('messages.askToReveal')}
                     onPress={() => {
+                      prepareRevealIdentityDraft()
                       navigation.navigate('TradeChecklistFlow', {
                         screen: shouldOpenRevealIdentitySummary
                           ? 'RevealIdentitySummary'

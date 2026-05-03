@@ -72,7 +72,7 @@ function RevealIdentityCell(): React.ReactElement {
             : 'RevealIdentityPhoto'
         )
       }}
-      headline={t('tradeChecklist.revealIdentity')}
+      headline={t('tradeChecklist.revealIdentitySimple')}
     />
   )
 }

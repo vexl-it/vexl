@@ -48,7 +48,6 @@ function OnlineOrInPersonTrade(): React.ReactElement {
     return (
       <YStack gap="$6" f={1}>
         {top}
-        <CalculateAmountCell />
 
         <Stack p="$4" gap="$4" br="$5" bc="$backgroundSecondary">
           <Typography
@@ -83,7 +82,10 @@ function OnlineOrInPersonTrade(): React.ReactElement {
             title={t('tradeChecklist.watchOutForSuspiciousBehaviour')}
           />
         </Stack>
-
+        <Stack gap="$2">
+          <CalculateAmountCell />
+          <RevealIdentityCell />
+        </Stack>
         <AnonymizationNotice />
       </YStack>
     )

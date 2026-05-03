@@ -1,3 +1,4 @@
+import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {KeyboardAvoidingView, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
@@ -16,7 +17,11 @@ import MessagesList from './MessagesList'
 import {MessagesScreenChatHeader} from './MessagesScreenChatHeader'
 import StickyHeader from './StickyHeader'
 
-function MessagesScreen(): React.ReactElement {
+function MessagesScreen({
+  targetMessageId,
+}: {
+  targetMessageId?: ChatMessageId | undefined
+}): React.ReactElement {
   const {canSendMessagesAtom, chatIdAtom, publicKeyPemBase64Atom} =
     useMolecule(chatMolecule)
   useStatusBarStyleForScreen('secondary')
@@ -53,7 +58,7 @@ function MessagesScreen(): React.ReactElement {
             <MessagesScreenChatHeader />
             <StickyHeader />
             <Stack f={1}>
-              <MessagesList />
+              <MessagesList targetMessageId={targetMessageId} />
             </Stack>
             {canSendMessages ? (
               <Stack>

@@ -55,6 +55,7 @@ export default function createChecklistItemStatusAtom(
       if (tsSent && !tsReceived) return 'pending'
       if (!tsSent && tsReceived) return 'pending'
       if (tsSent && tsReceived && tsSent > tsReceived) return 'pending'
+      if (tsSent && tsReceived && tsReceived > tsSent) return 'pending'
 
       // other side sent another suggestion without accepting mine
       if (amount.sent?.btcAmount && amount.received?.btcAmount) return 'warning'

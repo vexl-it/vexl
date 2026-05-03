@@ -17,9 +17,11 @@ function ActionsToRender(): React.ReactElement {
     deleteChatWithUiFeedbackAtom,
     showOfferDeletedWithOptionToDeleteActionAtom,
     offerForChatAtom,
+    canBeRerequestedAtom,
   } = useMolecule(chatMolecule)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const {t} = useTranslation()
+  const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const safeGoBack = useSafeGoBack()
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
@@ -99,24 +101,26 @@ function ActionsToRender(): React.ReactElement {
         >
           {t('messages.deleteChat')}
         </Button>
-        <Button
-          f={1}
-          size="large"
-          variant="primary"
-          onPress={() => {
-            if (!offer) {
-              showOfferDeletedWithOptionToDelete()
-              return
-            }
+        {!!canBeRerequested.canBeRerequested && (
+          <Button
+            f={1}
+            size="large"
+            variant="primary"
+            onPress={() => {
+              if (!offer) {
+                showOfferDeletedWithOptionToDelete()
+                return
+              }
 
-            navigation.navigate('SendMessage', {
-              offerId: offer.offerInfo.offerId,
-              mode: 'rerequest',
-            })
-          }}
-        >
-          {t('common.rerequest')}
-        </Button>
+              navigation.navigate('SendMessage', {
+                offerId: offer.offerInfo.offerId,
+                mode: 'rerequest',
+              })
+            }}
+          >
+            {t('common.rerequest')}
+          </Button>
+        )}
       </XStack>
     )
   }

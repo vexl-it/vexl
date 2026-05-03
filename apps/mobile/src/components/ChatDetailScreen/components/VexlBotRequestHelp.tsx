@@ -112,7 +112,7 @@ export function VexlBotRequestHelp({
       const description = t(
         'messages.vexlBot.welcomeToTheTradeChat.senderDescriptionFirst'
       )
-      const rerequestIn = canBeRerequested
+      const rerequestIn = canBeRerequested.canBeRerequested
         ? t(
             'messages.vexlBot.welcomeToTheTradeChat.senderDescriptionRerequestTimeout'
           )

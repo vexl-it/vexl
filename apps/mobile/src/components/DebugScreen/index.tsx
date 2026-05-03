@@ -1,5 +1,7 @@
 import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
+import {useNavigation} from '@react-navigation/native'
+import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -28,6 +30,7 @@ import React from 'react'
 import {Alert, Platform, ScrollView} from 'react-native'
 import {Spacer, Text, YStack} from 'tamagui'
 import {apiAtom, apiEnv} from '../../api'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import allChatsAtom from '../../state/chat/atoms/allChatsAtom'
 import {sendUpdateNoticeMessageActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
@@ -107,6 +110,8 @@ import {
 
 function DebugScreen(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const store = useStore()
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
@@ -445,6 +450,19 @@ function DebugScreen(): React.ReactElement {
                   }),
                   Effect.runFork
                 )
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Open missing chat detail"
+              onPress={() => {
+                navigation.navigate('ChatDetail', {
+                  inboxKey: session.privateKey.publicKeyPemBase64,
+                  otherSideKey: Schema.decodeSync(PublicKeyPemBase64)(
+                    'debug-chat-detail-that-does-not-exist'
+                  ),
+                })
               }}
             />
             <Button

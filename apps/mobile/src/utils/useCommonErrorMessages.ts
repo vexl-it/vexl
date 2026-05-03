@@ -19,7 +19,8 @@ export default function useCommonErrorMessages(
 // TODO extend to include HttpClientErrors
 export function toCommonErrorMessage(
   error: SomeError | undefined,
-  t: TFunction
+  t: TFunction,
+  fallbackToNull?: boolean
 ): string | null {
   if (!error) return null
 
@@ -36,5 +37,5 @@ export function toCommonErrorMessage(
     return t(`common.${error._tag}`)
   }
 
-  return t('common.somethingWentWrongDescription')
+  return fallbackToNull ? null : t('common.somethingWentWrongDescription')
 }

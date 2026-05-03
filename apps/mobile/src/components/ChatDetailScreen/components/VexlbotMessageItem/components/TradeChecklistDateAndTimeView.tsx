@@ -53,7 +53,6 @@ export default function TradeChecklistDateAndTimeView({
   const {
     addEventToCalendarActionAtom,
     tradeChecklistDateAndTimeAtom,
-    otherSideDataAtom,
     chatAtom,
     lastTradeChecklistMessageAtom,
   } = useMolecule(chatMolecule)
@@ -62,7 +61,6 @@ export default function TradeChecklistDateAndTimeView({
   const dateAndTimeData = useAtomValue(tradeChecklistDateAndTimeAtom)
   const latestDateAndTimeDataMessageTimestamp =
     dateAndTime.getLatestMessageTimestamp(dateAndTimeData)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
 
   if (
@@ -132,9 +130,7 @@ export default function TradeChecklistDateAndTimeView({
       const pendingLabel =
         message.state === 'received'
           ? t('vexlbot.reactionRequired')
-          : otherSideData.userName
-            ? t('vexlbot.waitingFor', {username: otherSideData.userName})
-            : t('vexlbot.waitingForCounterParty')
+          : t('vexlbot.waitingFor', {username: t('common.otherSide')})
 
       return (
         <VexlbotActionCard

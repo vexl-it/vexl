@@ -102,7 +102,9 @@ function ContactRevealMessageItem({
       <VexlbotActionCard
         description={t('vexlBot.phoneNumber.doYouWantToShare')}
         statusLabel={t('vexlbot.reactionRequired')}
-        title={t('vexlBot.phoneNumber.requested', {them: userName})}
+        title={t('vexlBot.phoneNumber.requested', {
+          them: t('common.otherSide'),
+        })}
       >
         <XStack f={1} gap="$2">
           <Button
@@ -137,10 +139,14 @@ function ContactRevealMessageItem({
   ) {
     return (
       <VexlbotActionCard
-        title={t('vexlBot.phoneNumber.requestSent', {them: userName})}
+        title={t('vexlBot.phoneNumber.requestSent', {
+          them: t('common.otherSide'),
+        })}
         statusLabel={t('common.pending')}
         statusVariant="waitingForConfirmation"
-        description={t('vexlBot.phoneNumber.requested', {them: userName})}
+        description={t('vexlBot.phoneNumber.requested', {
+          them: t('common.otherSide'),
+        })}
       ></VexlbotActionCard>
     )
   }

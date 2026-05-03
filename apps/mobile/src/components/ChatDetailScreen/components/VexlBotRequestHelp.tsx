@@ -52,6 +52,7 @@ export function VexlBotRequestHelp({
   ) {
     return (
       <VexlbotActionCard
+        mt="$2"
         managedHidingId={message.message.uuid}
         description={t('messages.vexlBot.chatOpened')}
       >

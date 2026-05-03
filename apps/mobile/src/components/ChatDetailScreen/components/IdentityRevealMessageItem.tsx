@@ -13,7 +13,10 @@ import {
 import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneNumber'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import {shouldOpenRevealIdentitySummaryAtom} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
+import {
+  prepareRevealIdentityDraftActionAtom,
+  shouldOpenRevealIdentitySummaryAtom,
+} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import RevealedInfoCard from './RevealedInfoCard'
@@ -53,6 +56,9 @@ function IdentityRevealMessageItem({
   const disapproveIdentityReveal = useSetAtom(
     disapproveIdentityRevealWithUiFeedbackAtom
   )
+  const prepareRevealIdentityDraft = useSetAtom(
+    prepareRevealIdentityDraftActionAtom
+  )
   const shouldOpenRevealIdentitySummary = useAtomValue(
     shouldOpenRevealIdentitySummaryAtom
   )
@@ -77,9 +83,10 @@ function IdentityRevealMessageItem({
   if (isIdentityRevealRequest && identityRevealStatus === 'theyAsked') {
     return (
       <VexlbotActionCard
-        description="Other side want's to reveal identities"
+        mt="$2"
+        description={t('messages.otherSideWantsToRevealIdentities')}
         statusLabel={t('vexlbot.reactionRequired')}
-        title="Do you want to reveal your identity?"
+        title={t('messages.identityRevealRespondModal.title')}
       >
         <XStack gap="$3" width="100%">
           <Button
@@ -95,6 +102,7 @@ function IdentityRevealMessageItem({
           <Button
             flex={1}
             onPress={() => {
+              prepareRevealIdentityDraft()
               navigation.navigate('TradeChecklistFlow', {
                 screen: shouldOpenRevealIdentitySummary
                   ? 'RevealIdentitySummary'

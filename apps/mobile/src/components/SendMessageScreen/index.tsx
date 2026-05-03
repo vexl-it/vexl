@@ -1,3 +1,4 @@
+import {CommonActions} from '@react-navigation/native'
 import {
   Button,
   ChevronLeft,
@@ -9,7 +10,7 @@ import {
   XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
-import {Effect, Option} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useRef, useState} from 'react'
 import {Alert, Dimensions, Keyboard, Pressable} from 'react-native'
@@ -39,6 +40,27 @@ function SendMessageScreen({
     navigation.popToTop()
   }, [navigation])
 
+  const openChatDetailReplacingRequestFlow = useCallback(
+    (params: RootStackScreenProps<'ChatDetail'>['route']['params']) => {
+      navigation.dispatch((state) => {
+        const routesWithoutSendMessage = Array.dropRight(state.routes, 1)
+        const previousRoute =
+          routesWithoutSendMessage[routesWithoutSendMessage.length - 1]
+        const routesToKeep =
+          previousRoute?.name === 'OfferDetail'
+            ? Array.dropRight(routesWithoutSendMessage, 1)
+            : routesWithoutSendMessage
+
+        return CommonActions.reset({
+          ...state,
+          routes: [...routesToKeep, {name: 'ChatDetail', params}],
+          index: routesToKeep.length,
+        })
+      })
+    },
+    [navigation]
+  )
+
   const handleSend = useCallback(() => {
     const text = textRef.current
     if (!text.trim() || Option.isNone(offer)) return
@@ -52,7 +74,7 @@ function SendMessageScreen({
           return
         }
 
-        navigation.replace('ChatDetail', {
+        openChatDetailReplacingRequestFlow({
           otherSideKey: chat.otherSide.publicKey,
           inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
         })
@@ -74,7 +96,15 @@ function SendMessageScreen({
         })
       )
     )
-  }, [offer, submitRequest, t, safeGoBack, handleClose, navigation, mode])
+  }, [
+    offer,
+    submitRequest,
+    t,
+    safeGoBack,
+    handleClose,
+    mode,
+    openChatDetailReplacingRequestFlow,
+  ])
 
   const navigationBar = (
     <NavigationBar

@@ -178,6 +178,7 @@ export interface DialogAtomConfig {
 
 interface DialogAtomInternalState extends DialogAtomConfig {
   readonly onResult: (confirmed: boolean) => void
+  readonly createdStack?: string
 }
 
 export type DialogAtom = WritableAtom<

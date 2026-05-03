@@ -46,7 +46,10 @@ export function VexlBotRequestHelp({
     })
   }, [commonConnectionsHashes, navigation, verifiedConnectionsHashes])
 
-  if (message.message.messageType === 'APPROVE_MESSAGING') {
+  if (
+    message.message.messageType === 'APPROVE_MESSAGING' &&
+    chatState === 'chatOpen'
+  ) {
     return (
       <VexlbotActionCard
         managedHidingId={message.message.uuid}

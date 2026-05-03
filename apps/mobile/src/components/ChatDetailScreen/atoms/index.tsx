@@ -884,8 +884,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
     return set(cancelRequestActionAtomHandleUI, {
       text: '',
-      originOffer: offerInfo,
+      chatAtom: chatWithMessagesAtom,
     }).pipe(
+      Effect.tapError((e) => Effect.log(e)),
       Effect.match({
         onFailure: () => false,
         onSuccess: () => true,
@@ -1124,7 +1125,9 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const feedbackSubmittedAtom = focusAtom(chatAtom, (o) => o.prop('feedbackSubmitted'))
+  const feedbackSubmittedAtom = focusAtom(chatWithMessagesAtom, (o) =>
+    o.prop('feedbackSubmitted')
+  )
 
   const approveChatRequestActionAtom = atom(
     null,

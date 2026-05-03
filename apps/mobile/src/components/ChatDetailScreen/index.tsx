@@ -1,8 +1,8 @@
+import {Button, Typography} from '@vexl-next/ui'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {Stack, Text} from 'tamagui'
-import backButtonSvg from '../../images/backButtonSvg'
+import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
@@ -12,7 +12,6 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {hideNotificationsForChat} from '../../utils/notifications/chatNotifications'
 import {useOnFocusAndAppState} from '../../utils/useFocusAndAppState'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import IconButton from '../IconButton'
 import Screen from '../Screen'
 import {ChatScope} from './atoms'
 import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
@@ -55,14 +54,23 @@ export default function ChatDetailScreen({
 
   if (!chatExists)
     return (
-      <Screen>
-        <Stack>
-          <IconButton icon={backButtonSvg} onPress={safeGoBack} />
-        </Stack>
-        <Stack f={1} ai="center" mt="$6">
-          <Text ff="$heading" fos={16} col="$white">
+      <Screen
+        insetsColor="$backgroundSecondary"
+        backgroundColor="$backgroundPrimary"
+      >
+        <Stack gap="$5" f={1} ai="center" jc="center" mt="$6">
+          <Typography color="$foregroundPrimary" variant="heading3">
             {t('common.chatNotFoundError')}
-          </Text>
+          </Typography>
+          <Button
+            variant="primary"
+            size="large"
+            onPress={() => {
+              safeGoBack()
+            }}
+          >
+            {t('common.goBack')}
+          </Button>
         </Stack>
       </Screen>
     )

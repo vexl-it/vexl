@@ -262,6 +262,9 @@ export type TradeChecklistStackParamsList = {
   CalculateAmount: {
     readonly amountData: AmountData | undefined
   }
+  ConfirmAmount: {
+    readonly amountData: AmountData | undefined
+  }
   SetYourOwnPrice: undefined
   PremiumOrDiscount: undefined
   Network: {

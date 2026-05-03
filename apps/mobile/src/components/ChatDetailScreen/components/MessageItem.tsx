@@ -225,7 +225,12 @@ function MessageItem({
     }
 
     if (item.message.message.messageType === 'APPROVE_MESSAGING') {
-      return <VexlBotRequestHelp message={item.message} />
+      return (
+        <>
+          <VexlBotRequestHelp message={item.message} />
+          {!!item.isLatest && <LastMessageTime message={item.message} />}
+        </>
+      )
     }
 
     if (item.message.message.messageType === 'CANCEL_REQUEST_MESSAGING') {

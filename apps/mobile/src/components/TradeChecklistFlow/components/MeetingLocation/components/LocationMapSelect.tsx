@@ -43,21 +43,30 @@ export default function LocationMapSelect({
   const store = useStore()
   const stageMeetingLocation = useSetAtom(addMeetingLocationActionAtom)
 
-  const initialValue = route.params?.selectedLocation ?? pragueCenterLocation
+  const initialValue =
+    route.params?.selectedLocation ??
+    route.params?.initialLocation ??
+    pragueCenterLocation
   const noteAtom = useMemo(() => atom(''), [])
   const [note, setNote] = useAtom(noteAtom)
   const [pickedValue, setPickedValue] =
-    useState<GetGeocodedCoordinatesResponse | null>(null)
+    useState<GetGeocodedCoordinatesResponse | null>(
+      route.params?.selectedLocation ?? null
+    )
   const [hasMapMoved, setHasMapMoved] = useState(false)
 
   useEffect(() => {
     setNote(route.params?.selectedLocation?.note ?? '')
-  }, [route.params?.selectedLocation?.note, setNote])
+  }, [
+    route.params?.initialLocation,
+    route.params?.selectedLocation?.note,
+    setNote,
+  ])
 
   useEffect(() => {
-    setPickedValue(null)
+    setPickedValue(route.params?.selectedLocation ?? null)
     setHasMapMoved(false)
-  }, [initialValue])
+  }, [route.params?.selectedLocation, route.params?.initialLocation])
 
   function onSubmit(): void {
     if (!pickedValue) return

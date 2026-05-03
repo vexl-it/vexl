@@ -5,10 +5,7 @@ import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
-import {
-  otherSideDataAtom,
-  tradeChecklistDateAndTimeDataAtom,
-} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {tradeChecklistDateAndTimeDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
@@ -31,7 +28,6 @@ function DateAndTimeCell(): React.ReactElement {
     useNavigation()
 
   const nextChecklistData = useAtomValue(tradeChecklistWithUpdatesMergedAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
 
   const tradeChecklistDateAndTimeData = useAtomValue(
     tradeChecklistDateAndTimeDataAtom
@@ -83,11 +79,11 @@ function DateAndTimeCell(): React.ReactElement {
           ? 'tradeChecklist.optionsDetail.DATE_AND_TIME.youAddedTimeOptions'
           : 'tradeChecklist.optionsDetail.DATE_AND_TIME.themAddedTimeOptions',
         {
-          them: otherSideData.userName,
+          them: t('common.otherSide'),
           number: suggestions.suggestions.length,
         }
       )}`
-  }, [nextChecklistData.dateAndTime, otherSideData.userName, t])
+  }, [nextChecklistData.dateAndTime, t])
 
   return (
     <ChecklistCell

@@ -1030,7 +1030,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         startDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
         endDate: DateTime.fromMillis(pick.pick.dateTime).toJSDate(),
         title: t('tradeChecklist.vexlMeetingEventTitle', {
-          name: get(otherSideDataAtom).userName,
+          name: t('common.otherSide'),
         }),
         location: agreedData?.locationData.data?.address,
         notes: agreedData?.locationData.data.note ?? '',

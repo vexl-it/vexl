@@ -20,10 +20,8 @@ function TradeChecklistReminder(): React.ReactElement | null {
     publicKeyPemBase64Atom,
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
-    otherSideDataAtom,
     offerForChatAtom,
   } = useMolecule(chatMolecule)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const chatId = useAtomValue(chatIdAtom)
   const offerForChat = useAtomValue(offerForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -61,7 +59,7 @@ function TradeChecklistReminder(): React.ReactElement | null {
         offerIsInPerson
           ? 'vexlbot.initialWelcomeMessage'
           : 'vexlbot.initialWelcomeMessageOnline',
-        {name: otherSideData.userName}
+        {name: t('common.otherSide')}
       )}
       onClosePress={() => {
         setShowVexlbotInitialMessageForCurrentChat(false)

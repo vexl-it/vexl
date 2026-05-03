@@ -202,7 +202,6 @@ function TextMessage({
   const {
     sendMessageAtom,
     replyToMessageAtom,
-    otherSideDataAtom,
     lastMessageReadByOtherSideAtAtom,
   } = useMolecule(chatMolecule)
   const navigation =
@@ -222,7 +221,6 @@ function TextMessage({
     useState<MessageBubbleLayout | null>(null)
   const [isClosingActionMenu, setIsClosingActionMenu] = useState(false)
   const setReplyToMessage = useSetAtom(replyToMessageAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   useEffect(() => {
@@ -335,7 +333,7 @@ function TextMessage({
       repliedToMessage?.messageAuthor === 'them') ||
     (message.state === 'sent' && repliedToMessage?.messageAuthor === 'me')
       ? t('common.you')
-      : (otherSideData?.userName ?? 'them')
+      : t('common.otherSide')
   const messageBubble = (
     <MessageBubble
       isMine={isMine}

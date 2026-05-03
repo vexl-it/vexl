@@ -22,14 +22,10 @@ function TradeChecklistNetworkView({
   message,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
-  const {
-    otherSideDataAtom,
-    tradeChecklistNetworkAtom,
-    lastTradeChecklistMessageAtom,
-  } = useMolecule(chatMolecule)
+  const {tradeChecklistNetworkAtom, lastTradeChecklistMessageAtom} =
+    useMolecule(chatMolecule)
   const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
   const networkData = useAtomValue(tradeChecklistNetworkAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const latestNetworkDataMessage = network.getNetworkData(networkData)
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
@@ -50,7 +46,7 @@ function TradeChecklistNetworkView({
               ? 'vexlbot.setNetworkToLightningByMe'
               : 'vexlbot.setNetworkToLightningByThem',
             {
-              username: otherSideData.userName,
+              username: t('common.otherSide'),
             }
           )
         : message.message.tradeChecklistUpdate.network.btcAddress
@@ -60,13 +56,13 @@ function TradeChecklistNetworkView({
               username:
                 message.state === 'sent'
                   ? t('common.you')
-                  : otherSideData.userName,
+                  : t('common.otherSide'),
             })
           : `${t('vexlbot.setNetworkToOnChainNoBtcAddress', {
               username:
                 message.state === 'sent'
                   ? `${t('common.you')}`
-                  : otherSideData.userName,
+                  : t('common.otherSide'),
             })} ${
               message.state === 'sent'
                 ? t('vexlbot.dontForgetToGenerateAddress')

@@ -67,7 +67,7 @@ function MessageItem({
   } = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const chatState = useAtomValue(chatStateAtom)
-  const {userName, image, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
+  const {image, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
@@ -88,7 +88,7 @@ function MessageItem({
       return (
         <BigImageMessage
           title={t('messages.messagePreviews.incoming.INBOX_DELETED', {
-            them: userName,
+            them: t('common.otherSide'),
           })}
           image={
             <Stack
@@ -118,7 +118,7 @@ function MessageItem({
         <>
           <BigImageMessage
             title={t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
-              them: userName,
+              them: t('common.otherSide'),
             })}
             description={
               chatState === 'requestedByMe' || chatState === 'requestedByThem'
@@ -144,7 +144,7 @@ function MessageItem({
         <>
           <BigImageMessage
             title={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
-              them: userName,
+              them: t('common.otherSide'),
             })}
             image={
               <UserAvatar
@@ -164,7 +164,7 @@ function MessageItem({
         <>
           <BigImageMessage
             title={t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
-              them: userName,
+              them: t('common.otherSide'),
             })}
             image={
               <UserAvatar

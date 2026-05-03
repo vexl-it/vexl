@@ -33,7 +33,6 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
-    otherSideDataAtom,
     tradeChecklistAmountAtom,
     tradeOrOriginOfferCurrencyAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
@@ -46,7 +45,6 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   const preferences = useAtomValue(preferencesAtom)
   const currentLocale = preferences.appLanguage ?? getCurrentLocale()
   const amountData = useAtomValue(tradeChecklistAmountAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const latestAmountDataMessage = amount.getLatestAmountDataMessage(amountData)
   const chatId = useAtomValue(chatIdAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -135,7 +133,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
         ? `${t(
             'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
             {
-              username: otherSideData.userName,
+              username: t('common.otherSide'),
               percentage: Math.abs(btcPricePercentageDifference),
             }
           )} ${
@@ -153,9 +151,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     const pendingLabel =
       message.state === 'received'
         ? t('vexlbot.reactionRequired')
-        : otherSideData.userName
-          ? t('vexlbot.waitingFor', {username: otherSideData.userName})
-          : t('vexlbot.waitingForCounterParty')
+        : t('vexlbot.waitingFor', {username: t('common.otherSide')})
     const statusLabel = isMessageOutdated
       ? t('common.outdated')
       : latestAmountDataMessage.status === 'accepted'

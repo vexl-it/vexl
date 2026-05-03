@@ -19,14 +19,12 @@ import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
 function getTextForVexlbot({
   agreed,
   by,
-  otherSideUsername,
   note,
   address,
   t,
 }: {
   agreed: boolean
   by: 'me' | 'them'
-  otherSideUsername: string
   address: string
   note?: string
   t: TFunction
@@ -74,13 +72,11 @@ export default function TradeChecklistMeetingLocationView({
     isDateAndTimePickedAtom,
     calendarEventIdAtom,
     tradeChecklistMeetingLocationAtom,
-    otherSideDataAtom,
     chatAtom,
     lastTradeChecklistMessageAtom,
   } = useMolecule(chatMolecule)
   const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
   const meetingLocationData = useAtomValue(tradeChecklistMeetingLocationAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
   const store = useStore()
   const navigation = useNavigation()
   const latestMeetingLocationDataMessage =
@@ -111,7 +107,6 @@ export default function TradeChecklistMeetingLocationView({
           by: message.state === 'sent' ? 'me' : 'them',
           address: message.message.tradeChecklistUpdate.location.data.address,
           note: message.message.tradeChecklistUpdate.location.data.note,
-          otherSideUsername: otherSideData.userName,
           t,
         })
       )
@@ -177,16 +172,13 @@ export default function TradeChecklistMeetingLocationView({
         by: message.state === 'sent' ? 'me' : 'them',
         address: message.message.tradeChecklistUpdate.location.data.address,
         note: message.message.tradeChecklistUpdate.location.data.note,
-        otherSideUsername: otherSideData.userName,
         t,
       })
     )
     const pendingLabel =
       message.state === 'received'
         ? t('vexlbot.reactionRequired')
-        : otherSideData.userName
-          ? t('vexlbot.waitingFor', {username: otherSideData.userName})
-          : t('vexlbot.waitingForCounterParty')
+        : t('vexlbot.waitingFor', {username: t('common.otherSide')})
 
     const title =
       message.state === 'sent'

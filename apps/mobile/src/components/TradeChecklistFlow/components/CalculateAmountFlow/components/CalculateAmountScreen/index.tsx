@@ -2,10 +2,7 @@ import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {
-  chatWithMessagesKeys,
-  otherSideDataAtom,
-} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
@@ -41,7 +38,6 @@ function CalculateAmountScreen({
   )
   const saveButtonDisabled = useAtomValue(saveButtonDisabledAtom)
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
-  const otherSideData = useAtomValue(otherSideDataAtom)
 
   const store = useStore()
   const shouldNavigateBackToChatOnSave =
@@ -122,7 +118,7 @@ function CalculateAmountScreen({
           text={`${t(
             'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
             {
-              username: otherSideData.userName,
+              username: t('common.otherSide'),
               percentage: btcPricePercentageDifference,
             }
           )} ${

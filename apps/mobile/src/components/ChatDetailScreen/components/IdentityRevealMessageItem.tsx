@@ -199,7 +199,7 @@ function IdentityRevealMessageItem({
             variant="paragraphSmall"
           >
             {message.state === 'received'
-              ? t('messages.themDeclined', {name: userName})
+              ? t('messages.themDeclined', {name: t('common.otherSide')})
               : t('messages.youDeclined')}
           </Typography>
         </YStack>

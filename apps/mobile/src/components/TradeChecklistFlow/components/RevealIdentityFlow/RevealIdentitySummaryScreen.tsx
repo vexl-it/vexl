@@ -71,13 +71,20 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
           <XStack
             px="$4"
             gap="$3"
-            ai="center"
             py="$3"
+            pt="$4"
+            ai="center"
             borderRadius="$4"
             backgroundColor="$backgroundSecondary"
           >
             <InfoCircle size={23} color={theme.foregroundSecondary.val} />
-            <Typography variant="description" color="$foregroundSecondary">
+            <Typography
+              flex={1}
+              flexShrink={1}
+              minWidth={0}
+              variant="description"
+              color="$foregroundSecondary"
+            >
               {t('tradeChecklist.revealIdentity.summaryNote')}
             </Typography>
           </XStack>

@@ -14,7 +14,7 @@ import {useOnFocusAndAppState} from '../../utils/useFocusAndAppState'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import Screen from '../Screen'
 import {ChatScope} from './atoms'
-import MessagesListOrApprovalPreview from './components/MessagesListOrApprovalPreview'
+import MessagesScreen from './components/MessagesScreen'
 
 type Props = RootStackScreenProps<'ChatDetail'>
 
@@ -77,7 +77,7 @@ export default function ChatDetailScreen({
 
   return (
     <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
-      <MessagesListOrApprovalPreview />
+      <MessagesScreen />
     </ScopeProvider>
   )
 }

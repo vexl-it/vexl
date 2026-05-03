@@ -94,6 +94,7 @@
   "common.reply": "Reply",
   "common.replyTo": "Reply to",
   "common.copy": "Copy",
+
   "common.loading": "Loading",
   "common.loadingTasks": "Loading tasks ({{count}})",
   "common.processingNotifications": "Processing notifications ({{count}})",
@@ -1016,6 +1017,10 @@
   "messages.cancelRequestDialog.yes": "Yes, cancel",
   "messages.contactRevealRespondModal.title": "Are you sure you want to share your phone number?",
   "messages.contactRevealRespondModal.text": "This will reveal your phone number to the counterparty.",
+  "messages.errorSendingMessage.title": "Error sending message",
+  "messages.errorSendingMessage.description": "Try to resend the message or copy the error and contact support.",
+  "messages.errorSendingMessage.resend": "Resend",
+  "messages.errorSendingMessage.copyError": "Resend",
   "messages.contactRevealRequestModal.title": "Request phone number",
   "messages.contactRevealRequestModal.text": "By requesting a phone number, you agree to share yours as well.",
   "messages.contactAlreadyRequested": "A phone number request was already sent.",

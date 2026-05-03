@@ -2,6 +2,8 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
+  Button,
+  Rejected,
   Stack,
   tokens,
   Typography,
@@ -10,6 +12,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {
@@ -26,6 +29,7 @@ import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {globalDialogAtom} from '../../GlobalDialog'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 import {chatMolecule} from '../atoms'
 import {LastMessageTime} from './LastMessageTime'
@@ -216,6 +220,7 @@ function TextMessage({
   const lastMessageReadByOtherSideAt = useAtomValue(
     lastMessageReadByOtherSideAtAtom
   )
+  const showGlobalDialog = useSetAtom(globalDialogAtom)
   const {t} = useTranslation()
   const [messageBubbleLayout, setMessageBubbleLayout] =
     useState<MessageBubbleLayout | null>(null)
@@ -259,7 +264,7 @@ function TextMessage({
     setIsClosingActionMenu(true)
   }, [isClosingActionMenu, messageBubbleLayout])
 
-  const onPressResend = useCallback(() => {
+  const resendMessage = useCallback(() => {
     if (
       messageItem.type === 'message' &&
       messageItem.message.state === 'sendingError'
@@ -313,6 +318,49 @@ function TextMessage({
     })
   }, [messageBubbleLayout, messageBubbleScale])
 
+  const onPressResend = useCallback(() => {
+    if (messageItem.type !== 'message') return
+    if (messageItem.message.state !== 'sendingError') return
+    const message = messageItem.message
+
+    const errorMessage = toCommonErrorMessage(message.error, t, true)
+
+    Effect.runFork(
+      showGlobalDialog({
+        title: t('messages.errorSendingMessage.title'),
+        children: (
+          <YStack gap="$5">
+            <Typography color="$foregroundPrimary" variant="description">
+              {t('messages.errorSendingMessage.description')}
+            </Typography>
+            {!!errorMessage && (
+              <Typography color="$foregroundPrimary" variant="description">
+                {errorMessage}
+              </Typography>
+            )}
+            <Button
+              variant="secondary"
+              size="small"
+              onPress={() => {
+                Clipboard.setString(JSON.stringify(message.error, null, 2))
+                setToastNotification(t('common.copied'))
+              }}
+            >
+              {t('common.copyErrorToClipboard')}
+            </Button>
+          </YStack>
+        ),
+        positiveButtonText: t('messages.errorSendingMessage.resend'),
+        negativeButtonText: t('common.cancel'),
+      }).pipe(
+        Effect.flatMap((a) => {
+          if (a) resendMessage()
+          return Effect.void
+        })
+      )
+    )
+  }, [messageItem, showGlobalDialog, setToastNotification, t, resendMessage])
+
   if (messageItem.type !== 'message') return null
   const {message, isLatest, time} = messageItem
 
@@ -354,6 +402,26 @@ function TextMessage({
           gap="$2"
           alignItems="flex-end"
         >
+          {message.state === 'sendingError' && (
+            <Pressable style={{alignSelf: 'flex-end'}} onPress={onPressResend}>
+              <Rejected color={theme.redForeground.get()} size={24} />
+              {!!false && (
+                <Typography
+                  color={
+                    message.state === 'sendingError' ? '$red' : '$greyOnBlack'
+                  }
+                  variant="description"
+                  textAlign={isMine ? 'right' : 'left'}
+                  marginTop="$1"
+                  marginBottom="$2"
+                >
+                  {toCommonErrorMessage(message.error, t) ??
+                    t('common.somethingWentWrong')}{' '}
+                  {t('messages.tapToResent')}
+                </Typography>
+              )}
+            </Pressable>
+          )}
           <View
             ref={bubbleRef}
             style={{
@@ -371,23 +439,6 @@ function TextMessage({
               </Animated.View>
             </Pressable>
           </View>
-          {message.state === 'sendingError' && (
-            <Pressable onPress={onPressResend}>
-              <Typography
-                color={
-                  message.state === 'sendingError' ? '$red' : '$greyOnBlack'
-                }
-                variant="description"
-                textAlign={isMine ? 'right' : 'left'}
-                marginTop="$1"
-                marginBottom="$2"
-              >
-                {toCommonErrorMessage(message.error, t) ??
-                  t('common.somethingWentWrong')}{' '}
-                {t('messages.tapToResent')}
-              </Typography>
-            </Pressable>
-          )}
         </XStack>
       </Stack>
       {!!isLatest && hideLastMessageTime !== true && (

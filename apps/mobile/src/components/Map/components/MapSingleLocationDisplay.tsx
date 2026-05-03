@@ -15,9 +15,11 @@ const markerImage = require('../img/pin.png')
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
+  middleChildren?: React.ReactNode
   bottomChildren?: React.ReactNode
   value: MapValue
   mapPadding?: EdgePadding
+  interactive?: boolean
 }
 
 const mapStyle = {
@@ -27,9 +29,11 @@ const mapStyle = {
 
 export default function MapSingleLocationDisplay({
   topChildren,
+  middleChildren,
   bottomChildren,
   value,
   mapPadding,
+  interactive = true,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
@@ -41,12 +45,34 @@ export default function MapSingleLocationDisplay({
         mapPadding={mapPadding}
         style={mapStyle}
         toolbarEnabled={false}
+        scrollEnabled={interactive}
+        zoomEnabled={interactive}
+        zoomTapEnabled={interactive}
+        rotateEnabled={interactive}
+        pitchEnabled={interactive}
         provider={PROVIDER_GOOGLE}
         region={useMemo(() => mapValueToRegion(value), [value])}
         customMapStyle={getMapTheme(resolvedTheme)}
       >
         <Marker image={markerImage} coordinate={value} />
       </MapView>
+      {middleChildren ? (
+        <Stack
+          pointerEvents="none"
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          h="100%"
+          w="100%"
+        >
+          <Stack flex={3}></Stack>
+          <Stack flex={2} p="$2">
+            {middleChildren}
+          </Stack>
+        </Stack>
+      ) : null}
       <Stack
         pointerEvents="box-none"
         position="absolute"
@@ -60,14 +86,20 @@ export default function MapSingleLocationDisplay({
         <Stack
           pointerEvents="box-none"
           flex={1}
-          paddingTop={safeAreaInsets.top}
-          paddingBottom={safeAreaInsets.bottom}
           paddingLeft={safeAreaInsets.left}
           paddingRight={safeAreaInsets.right}
         >
+          <Stack
+            backgroundColor="$backgroundPrimary"
+            height={safeAreaInsets.top}
+          ></Stack>
           <Stack>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
           <Stack>{bottomChildren}</Stack>
+          <Stack
+            backgroundColor="$backgroundPrimary"
+            height={safeAreaInsets.bottom}
+          ></Stack>
         </Stack>
       </Stack>
     </Stack>

@@ -22,6 +22,7 @@ function MeetingLocationCell(): React.ReactElement {
   )
 
   const onPress = useCallback(() => {
+    const existingOwnLocation = nextChecklistData.location.sent?.data
     const lastLocationDataMessage =
       MeetingLocation.getLatestMeetingLocationDataMessage(
         tradeChecklistLocationData
@@ -33,10 +34,18 @@ function MeetingLocationCell(): React.ReactElement {
       navigation.navigate('LocationMapPreview', {
         selectedLocation: lastLocationDataMessage.locationData.data,
       })
+    } else if (existingOwnLocation) {
+      navigation.navigate('LocationMapSelect', {
+        selectedLocation: existingOwnLocation,
+      })
     } else {
       navigation.navigate('LocationMapSelect')
     }
-  }, [navigation, tradeChecklistLocationData])
+  }, [
+    navigation,
+    nextChecklistData.location.sent?.data,
+    tradeChecklistLocationData,
+  ])
 
   return (
     <ChecklistCell

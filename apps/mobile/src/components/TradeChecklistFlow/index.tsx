@@ -8,6 +8,7 @@ import {
 import * as fromChatAtoms from '../../state/tradeChecklist/atoms/fromChatAtoms'
 import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
+import ConfirmAmountScreen from './components/CalculateAmountFlow/components/ConfirmAmountScreen'
 import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
 import SetYourOwnPriceScreen from './components/CalculateAmountFlow/components/SetYourOwnPriceScreen'
 import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
@@ -81,6 +82,10 @@ export default function TradeChecklistFlow({
         <StackNavigator.Screen
           name="CalculateAmount"
           component={CalculateAmountScreen}
+        />
+        <StackNavigator.Screen
+          name="ConfirmAmount"
+          component={ConfirmAmountScreen}
         />
         <StackNavigator.Screen
           name="SetYourOwnPrice"

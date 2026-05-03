@@ -9,6 +9,7 @@ import {
   tradeChecklistAmountDataAtom,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {getLatestAmountDataMessage} from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {amountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
@@ -96,6 +97,27 @@ function CalculateAmountCell(): React.ReactElement {
   ])
 
   const onPress = useCallback(() => {
+    if (amountUpdateToBeSent) {
+      navigation.navigate('CalculateAmount', {
+        amountData: amountUpdateToBeSent,
+      })
+      return
+    }
+
+    const latestAmountDataMessage = getLatestAmountDataMessage(
+      tradeChecklistAmountData
+    )
+
+    if (
+      latestAmountDataMessage?.by === 'them' &&
+      latestAmountDataMessage.status === 'pending'
+    ) {
+      navigation.navigate('ConfirmAmount', {
+        amountData: latestAmountDataMessage.amountData,
+      })
+      return
+    }
+
     const initialDataToSet: AmountData | undefined =
       (tradeChecklistAmountData.received?.timestamp ?? 0) >
       (tradeChecklistAmountData.sent?.timestamp ?? 0)
@@ -119,9 +141,9 @@ function CalculateAmountCell(): React.ReactElement {
       },
     })
   }, [
+    amountUpdateToBeSent,
     navigation,
-    tradeChecklistAmountData.received,
-    tradeChecklistAmountData.sent,
+    tradeChecklistAmountData,
   ])
 
   return (

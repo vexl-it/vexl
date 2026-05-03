@@ -26,19 +26,14 @@ import {selectAtom, splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {Alert} from 'react-native'
 import acceptMessagingRequestAtom from '../../../state/chat/atoms/acceptMessagingRequestAtom'
-import blockChatActionAtom from '../../../state/chat/atoms/blockChatActionAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
 import {createCanSendMessagesAtom} from '../../../state/chat/atoms/createCanSendMessagesAtom'
-import createIsCancelledAtom from '../../../state/chat/atoms/createIsCancelledAtom'
 import {createOtherSideSupportsTradingChecklistAtom} from '../../../state/chat/atoms/createOtherSideSupportTradingChecklistAtom'
 import {createRequestStateAtom} from '../../../state/chat/atoms/createRequestStateAtom'
 import deleteChatActionAtom from '../../../state/chat/atoms/deleteChatActionAtom'
-import focusDenyRequestMessageAtom, {
-  focusWasDeniedAtom,
-} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
+import {focusWasDeniedAtom} from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
-import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
 import revealContactActionAtom, {
   type RevealContactMessageType,
 } from '../../../state/chat/atoms/revealContactActionAtom'
@@ -52,7 +47,6 @@ import {
   type ChatWithMessages,
 } from '../../../state/chat/domain'
 import {getChatState} from '../../../state/chat/utils/offerStates'
-import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
@@ -81,7 +75,6 @@ import {showUserFeedbackDialogAtom} from '../../UserFeedback'
 import {type MessagesListItem} from '../components/MessageItem'
 import buildMessagesListData from '../utils/buildMessagesListData'
 
-type ChatUIMode = 'approval' | 'messages'
 export const ApprovalStatusMessage = {
   approved: 'approved',
   disapproved: 'disapproved',
@@ -100,22 +93,14 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const chatAtom = focusAtom(chatWithMessagesAtom, (o) => o.prop('chat'))
 
-  const chatIsReadAtom = selectAtom(chatAtom, (chat) => !chat?.isUnread)
-
   const messagesAtom = selectAtom(
     chatWithMessagesAtom,
     (o) => o?.messages ?? []
   )
-  const messageAtomAtoms = splitAtom(messagesAtom)
 
   const offerForChatAtom = atom((get) => {
     const origin = get(chatAtom)?.origin
     return origin ? get(offerForChatOriginAtom(origin)) : null
-  })
-
-  const offerCurrencyAtom = atom((get) => {
-    const offerForChat = get(offerForChatAtom)
-    return offerForChat?.offerInfo?.publicPart?.currency ?? 'USD'
   })
 
   const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
@@ -274,17 +259,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const isContactAlreadyInContactsListAtom = atom((get) => {
-    const normalizedContacts = get(normalizedContactsAtom)
-    const otherSideData = get(otherSideDataAtom)
-
-    return normalizedContacts.some(
-      (contact) =>
-        contact.computedValues.normalizedNumber ===
-        otherSideData.fullPhoneNumber
-    )
-  })
-
   const identityRevealRequestMessageIdAtom = atom((get) => {
     const messages = get(messagesAtom)
 
@@ -311,23 +285,10 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )?.message.uuid
   })
 
-  const contactRevealApproveMessageIdAtom = atom((get) => {
-    const messages = get(messagesAtom)
-
-    return messages.find(
-      (message) =>
-        message.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
-        (message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-          message.message.tradeChecklistUpdate?.contact?.status ===
-            'APPROVE_REVEAL')
-    )?.message.uuid
-  })
-
   const messagesListAtomAtoms = splitAtom(messagesListDataAtom)
 
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
 
-  const nameAtom = atom((get) => get(otherSideDataAtom).userName)
   const chatIdAtom = focusAtom(chatAtom, (o) => o.prop('id'))
   const publicKeyPemBase64Atom = focusAtom(chatAtom, (o) =>
     o.prop('inbox').prop('privateKey').prop('publicKeyPemBase64')
@@ -477,57 +438,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const blockChatAtom = blockChatActionAtom(chatWithMessagesAtom)
-  const blockChatWithUiFeedbackAtom = atom(null, async (get, set) => {
-    const {t} = get(translationAtom)
-
-    const confirmedBlock = await Effect.runPromise(
-      set(globalDialogAtom, {
-        title: t('messages.blockForewerQuestion'),
-        subtitle: t('messages.blockChatExplanation1'),
-        negativeButtonText: t('common.nope'),
-        positiveButtonText: t('messages.yesBlock'),
-        positiveButtonVariant: 'destructive',
-      })
-    )
-
-    if (!confirmedBlock) return false
-
-    const confirmedBlockAgain = await Effect.runPromise(
-      set(globalDialogAtom, {
-        title: t('common.youSure'),
-        subtitle: t('messages.blockChatExplanation2'),
-        negativeButtonText: t('common.nope'),
-        positiveButtonText: t('messages.yesBlock'),
-        positiveButtonVariant: 'destructive',
-      })
-    )
-
-    if (!confirmedBlockAgain) return false
-
-    set(loadingOverlayDisplayedAtom, true)
-
-    return await pipe(
-      set(blockChatAtom, {text: 'Blocking chat'}),
-      TE.match(
-        (e) => {
-          set(loadingOverlayDisplayedAtom, false)
-          showErrorAlert({
-            title: t('common.somethingWentWrong'),
-            description:
-              toCommonErrorMessage(e, t) ??
-              t('common.somethingWentWrongDescription'),
-            error: e,
-          })
-          return false
-        },
-        () => {
-          set(loadingOverlayDisplayedAtom, false)
-          return true
-        }
-      )
-    )()
-  })
   const lastMessageAtom = selectAtom(messagesAtom, (o) => o.at(-1))
   const lastTradeChecklistMessageAtom = selectAtom(
     messagesAtom,
@@ -535,34 +445,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       (message) => message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
     )
   )
-
-  const forceShowHistoryAtom = atom(false)
-
-  const chatUiModeAtom = atom<ChatUIMode>((get) => {
-    const forceShowHistory = get(forceShowHistoryAtom)
-    if (forceShowHistory) return 'messages'
-
-    const messages = get(messagesAtom)
-
-    const lastMessage = messages.at(-1)
-
-    if (
-      [
-        'CANCEL_REQUEST_MESSAGING',
-        'REQUEST_MESSAGING',
-        'DISAPPROVE_MESSAGING',
-      ].includes(lastMessage?.message.messageType ?? '')
-    )
-      return 'approval'
-
-    if (
-      lastMessage?.message.messageType === 'DELETE_CHAT' &&
-      lastMessage.state === 'sent'
-    )
-      return 'approval'
-
-    return 'messages'
-  })
 
   const canSendMessagesAtom = createCanSendMessagesAtom(messagesAtom)
   const chatStateAtom = selectAtom(chatWithMessagesAtom, getChatState)
@@ -852,28 +734,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     }
   )
 
-  const hasPreviousCommunicationAtom = selectAtom(
-    messagesAtom,
-    (
-      messages
-    ):
-      | 'firstInteraction'
-      | 'anotherInteractionWithHistory'
-      | 'interactionAfterDelete' => {
-      if (messages.length === 0) return 'firstInteraction'
-
-      const hasOnlyOneRequest =
-        messages.filter(
-          (one) => one.message.messageType === 'REQUEST_MESSAGING'
-        ).length === 1
-      const wasDeleted = messages.at(0)?.message.messageType === 'DELETE_CHAT'
-
-      if (hasOnlyOneRequest)
-        return wasDeleted ? 'interactionAfterDelete' : 'firstInteraction'
-      return 'anotherInteractionWithHistory'
-    }
-  )
-
   const cancelRequestActionAtom = atom(null, (get, set) => {
     const offerInfo = get(offerForChatAtom)?.offerInfo
     if (!offerInfo) {
@@ -895,26 +755,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   })
 
   const selectedExtraToSendAtom = atom<ExtraToSend | undefined>(undefined)
-  const selectedImageAtom: PrimitiveAtom<SelectedImage | undefined> = atom(
-    (get) => {
-      const extra = get(selectedExtraToSendAtom)
-      if (extra?.type === 'image') return extra.image
-      return undefined
-    },
-    (
-      get,
-      set,
-      imageSetStateAction: SetStateAction<SelectedImage | undefined>
-    ) => {
-      const newValue = getValueFromSetStateActionOfAtom(imageSetStateAction)(
-        () => get(selectedImageAtom)
-      )
-      set(
-        selectedExtraToSendAtom,
-        newValue ? {type: 'image', image: newValue} : undefined
-      )
-    }
-  )
   const replyToMessageAtom: PrimitiveAtom<ChatMessageWithState | undefined> =
     atom(
       (get) => {
@@ -936,10 +776,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         )
       }
     )
-
-  const clearExtraToSendActionAtom = atom(null, (get, set) => {
-    set(selectedExtraToSendAtom, undefined)
-  })
 
   const showInfoBarAtom = focusAtom(chatAtom, (o) => o.prop('showInfoBar'))
 
@@ -964,10 +800,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const tradeChecklistAmountAtom = focusAtom(tradeChecklistAtom, (o) =>
     o.prop('amount')
-  )
-
-  const tradeChecklistIdentityRevealAtom = focusAtom(tradeChecklistAtom, (o) =>
-    o.prop('identity')
   )
 
   const tradeChecklistContactRevealAtom = focusAtom(tradeChecklistAtom, (o) =>
@@ -1220,36 +1052,25 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   return {
     chatAtom,
-    nameAtom,
     chatWithMessagesAtom,
     commonConnectionsHashesAtom,
     verifiedConnectionsHashesAtom,
     commonConnectionsCountAtom,
     messagesAtom,
-    messageAtomAtoms,
     offerForChatAtom,
-    chatUiModeAtom,
-    chatIsReadAtom,
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
-    requestMessageAtom: focusRequestMessageAtom(chatWithMessagesAtom),
-    deniedMessageAtom: focusDenyRequestMessageAtom(chatWithMessagesAtom),
-    wasDeniedAtom: focusWasDeniedAtom(chatWithMessagesAtom),
-    wasCancelledAtom: createIsCancelledAtom(chatWithMessagesAtom),
     otherSideDataAtom,
-    otherSideLeftAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
     disapproveIdentityRevealWithUiFeedbackAtom,
     revealContactWithUiFeedbackAtom,
     deleteChatWithUiFeedbackAtom,
-    blockChatWithUiFeedbackAtom,
     messagesListAtomAtoms,
     lastMessageAtom,
     canSendMessagesAtom,
     friendLevelInfoAtom,
     replyToMessageAtom,
     theirOfferAndNotReportedAtom,
-    forceShowHistoryAtom,
     requestStateAtom: createRequestStateAtom(chatWithMessagesAtom),
     chatStateAtom,
     shouldGrayScaleAvatarAtom,
@@ -1257,42 +1078,27 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     showOfferDeletedWithOptionToDeleteActionAtom,
     otherSideSupportsTradingChecklistAtom:
       createOtherSideSupportsTradingChecklistAtom(chatAtom),
-    hasPreviousCommunicationAtom,
     cancelRequestActionAtom,
-    selectedImageAtom,
-    clearExtraToSendActionAtom,
     showInfoBarAtom,
     showVexlbotNotificationsForCurrentChatAtom,
     showVexlbotInitialMessageForCurrentChatAtom,
     publicKeyPemBase64Atom,
     chatIdAtom,
-    tradeChecklistAtom,
     tradeChecklistDateAndTimeAtom,
     tradeChecklistNetworkAtom,
     tradeChecklistAmountAtom,
-    offerCurrencyAtom,
-    tradeChecklistIdentityRevealAtom,
     tradeChecklistContactRevealAtom,
     contactRevealTriggeredFromTradeChecklistAtom,
     tradeChecklistMeetingLocationAtom,
     shouldHideNetworkCellForTradeChecklistAtom,
     tradeOrOriginOfferCurrencyAtom,
-    btcPriceForTradeCurrencyAtom,
     calendarEventIdAtom,
     isDateAndTimePickedAtom,
     addEventToCalendarActionAtom,
     listingTypeIsOtherAtom,
-    revealIdentityRequestReceivedMessageIndexAtom,
-    revealIdentityRequestSentMessageIndexAtom,
-    isRevealIdentityRequestReceivedMessageHiddenAtom,
-    isRevealIdentityRequestSentMessageHiddenAtom,
-    isContactRevealRequestReceivedMessageHiddenAtom,
-    isContactRevealRequestSentMessageHiddenAtom,
     handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,
-    isContactAlreadyInContactsListAtom,
     identityRevealRequestMessageIdAtom,
     contactRevealRequestMessageIdAtom,
-    contactRevealApproveMessageIdAtom,
     feedbackSubmittedAtom,
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom,
     otherSideGoldenAvatarTypeAtom,

@@ -1,11 +1,11 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
-import {Typography, XmarkCancelClose, lightTheme, tokens} from '@vexl-next/ui'
+import {Button, Typography, XmarkCancelClose} from '@vexl-next/ui'
 import {atom, useAtomValue, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import React, {useCallback} from 'react'
-import {FlatList, TouchableOpacity} from 'react-native'
-import {Stack, XStack, YStack} from 'tamagui'
+import {TouchableOpacity} from 'react-native'
+import {XStack, YStack, useTheme} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -82,13 +82,14 @@ function DateSuggestionCard({
 }): React.ReactElement {
   const {t} = useTranslation()
   const item = useAtomValue(itemAtom)
+  const theme = useTheme()
   const {label, weekday} = getDateLabels(item.data.date)
   const primaryTextColor = item.outdated
-    ? lightTheme.foregroundTertiary
-    : lightTheme.foregroundPrimary
+    ? theme.foregroundTertiary.val
+    : theme.foregroundPrimary.val
   const secondaryTextColor = item.outdated
-    ? lightTheme.foregroundTertiary
-    : lightTheme.foregroundSecondary
+    ? theme.foregroundTertiary.val
+    : theme.foregroundSecondary.val
 
   return (
     <TouchableOpacity
@@ -101,7 +102,7 @@ function DateSuggestionCard({
       <XStack
         alignItems="center"
         justifyContent="space-between"
-        backgroundColor={lightTheme.backgroundSecondary}
+        backgroundColor={theme.backgroundSecondary.val}
         borderRadius="$5"
         paddingHorizontal="$5"
         paddingVertical="$5"
@@ -128,8 +129,8 @@ function DateSuggestionCard({
               variant="description"
               color={
                 item.outdated
-                  ? lightTheme.foregroundTertiary
-                  : lightTheme.accentHighlightSecondary
+                  ? theme.foregroundTertiary.val
+                  : theme.accentHighlightSecondary.val
               }
               textAlign="right"
               numberOfLines={2}
@@ -150,6 +151,7 @@ export default function PickDateFromSuggestionsScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(
     useCallback(
@@ -167,51 +169,42 @@ export default function PickDateFromSuggestionsScreen({
 
   return (
     <TradeChecklistItemPageLayout
+      hideLeftChevron
       header={{
-        title: t('tradeChecklist.dateAndTime.screenTitle'),
+        title: t('tradeChecklist.dateAndTime.chooseTheDay'),
         rightActions: [
           {
             icon: XmarkCancelClose,
             onPress: () => {
-              navigation.popTo('AgreeOnTradeDetails')
+              navigation.goBack()
             },
           },
         ],
       }}
-      bottomButton={{
-        disabled: false,
-        onPress: () => {
-          navigation.navigate('ChooseAvailableDays', {
-            chosenDateTimes,
-          })
-        },
-        text: t('tradeChecklist.dateAndTime.addDifferentTime'),
-        variant: 'primary',
-      }}
-      scrollable={false}
+      scrollable={true}
     >
-      <Stack flex={1} gap="$7">
-        <Typography
-          variant="heading2"
-          color={lightTheme.foregroundPrimary}
-          textAlign="center"
-          marginTop="$4"
-        >
-          {t('tradeChecklist.dateAndTime.chooseTheDay')}
-        </Typography>
-        <FlatList
-          data={itemsToShowAtoms}
-          keyExtractor={atomKeyExtractor}
-          renderItem={({item}) => (
-            <DateSuggestionCard itemAtom={item} onPress={onItemPress} />
-          )}
-          ItemSeparatorComponent={() => <Stack h="$4" />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: tokens.space[4].val,
+      <YStack gap="$7">
+        <YStack flex={1} gap="$3">
+          {itemsToShowAtoms.map((itemAtom) => (
+            <DateSuggestionCard
+              key={atomKeyExtractor(itemAtom)}
+              itemAtom={itemAtom}
+              onPress={onItemPress}
+            />
+          ))}
+        </YStack>
+        <Button
+          size="medium"
+          onPress={() => {
+            navigation.navigate('ChooseAvailableDays', {
+              chosenDateTimes,
+            })
           }}
-        />
-      </Stack>
+          variant="secondary"
+        >
+          {t('tradeChecklist.dateAndTime.addDifferentTime')}
+        </Button>
+      </YStack>
     </TradeChecklistItemPageLayout>
   )
 }

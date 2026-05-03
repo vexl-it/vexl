@@ -15,6 +15,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {atom, useAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
+import {type YStackProps} from 'tamagui'
 import {type ChatTransientMessageId} from '../../../../../state/chat/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {chatMolecule} from '../../../atoms'
@@ -22,7 +23,7 @@ import {chatMolecule} from '../../../atoms'
 type TextTagVariant = React.ComponentProps<typeof TextTag>['variant']
 const BasicAvatar = avatarsSvg[0]
 
-interface Props {
+interface Props extends YStackProps {
   readonly buttonText?: string
   readonly children?: React.ReactNode
   readonly description?: string
@@ -46,6 +47,7 @@ export default function VexlbotActionCard({
   statusLabel,
   statusVariant = 'waitingForConfirmation',
   title,
+  ...rest
 }: Props): React.JSX.Element | null {
   const {t} = useTranslation()
   const {createHideMessageAtom} = useMolecule(chatMolecule)
@@ -61,7 +63,7 @@ export default function VexlbotActionCard({
 
   if (isHidden) return null
   return (
-    <YStack gap="$1" mt="$4" mx="$4">
+    <YStack {...rest} gap="$1" mx="$4">
       <XStack
         alignItems="center"
         backgroundColor="$backgroundTertiary"

@@ -7,8 +7,8 @@ import {
   XStack,
   XmarkCancelClose,
   YStack,
-  lightTheme,
   tokens,
+  useTheme,
 } from '@vexl-next/ui'
 import {Effect, Schema} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
@@ -49,11 +49,12 @@ function TimeSuggestionCard({
   onPress: (item: DateTime) => void
 }): React.ReactElement {
   const item = useAtomValue(itemAtom)
+  const theme = useTheme()
   const itemColor = item.outdated
-    ? lightTheme.foregroundTertiary
+    ? theme.foregroundTertiary.val
     : item.selected
-      ? lightTheme.accentHighlightPrimary
-      : lightTheme.foregroundPrimary
+      ? theme.accentHighlightPrimary.val
+      : theme.foregroundPrimary.val
 
   return (
     <TouchableOpacity
@@ -68,8 +69,8 @@ function TimeSuggestionCard({
         gap="$4"
         backgroundColor={
           item.selected
-            ? lightTheme.accentYellowSecondary
-            : lightTheme.backgroundSecondary
+            ? theme.accentYellowSecondary.val
+            : theme.backgroundSecondary.val
         }
         borderRadius="$5"
         paddingHorizontal="$5"
@@ -99,6 +100,7 @@ function PickTimeFromSuggestions({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const store = useStore()
 
   const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
@@ -176,7 +178,7 @@ function PickTimeFromSuggestions({
       <YStack flex={1} gap="$7">
         <Typography
           variant="titlesSmall"
-          color={lightTheme.foregroundPrimary}
+          color={theme.foregroundPrimary.val}
           textAlign="center"
           marginTop="$4"
         >

@@ -6,14 +6,13 @@ import {
   SearchBar,
   TextField,
   Typography,
-  lightTheme,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {LinearGradient} from 'expo-linear-gradient'
 import {atom, useAtom, useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
 import Animated, {FadeOut} from 'react-native-reanimated'
-import {Stack, XStack, YStack} from 'tamagui'
+import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -35,6 +34,7 @@ export default function LocationMapSelect({
   route,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
   const submitTradeChecklistUpdates = useSetAtom(
     submitTradeChecklistUpdatesActionAtom
@@ -101,7 +101,7 @@ export default function LocationMapSelect({
               >
                 <ChevronLeft
                   size={24}
-                  color={lightTheme.accentHighlightSecondary}
+                  color={theme.accentHighlightSecondary.val}
                 />
               </IconButton>
               <Stack f={1} ai="center">
@@ -126,10 +126,7 @@ export default function LocationMapSelect({
               pointerEvents="none"
             >
               <LinearGradient
-                colors={[
-                  lightTheme.backgroundPrimary,
-                  lightTheme.gradientHelper,
-                ]}
+                colors={[theme.backgroundPrimary.val, theme.gradientHelper.val]}
                 style={{flex: 1}}
               />
             </Stack>
@@ -160,6 +157,7 @@ export default function LocationMapSelect({
                   variant="description"
                   color="$backgroundPrimary"
                   textAlign="center"
+                  lineHeight="100%"
                 >
                   {t('map.locationSelect.hint')}
                 </Typography>
@@ -177,6 +175,7 @@ export default function LocationMapSelect({
               variant="description"
               color="$backgroundPrimary"
               textAlign="center"
+              lineHeight="100%"
             >
               {pickedValue?.address ?? initialValue.address}
             </Typography>

@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
-import {Button, Calendar, Copy, Map, tokens, XStack} from '@vexl-next/ui'
+import {Button, Calendar, Copy, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Array as ArrayE, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
@@ -32,20 +32,8 @@ function getTextForVexlbot({
   t: TFunction
 }): string {
   return agreed
-    ? `${
-        by === 'me'
-          ? t('tradeChecklist.location.youAgreedToMeetingLocation')
-          : t('tradeChecklist.location.themAgreedToMeetingLocation', {
-              them: otherSideUsername,
-            })
-      } \n${address}${note ? `\n${note}` : ''}`
-    : `${
-        by === 'me'
-          ? t('tradeChecklist.location.youSetMeetingLocation')
-          : t('tradeChecklist.location.themSetMeetingLocation', {
-              them: otherSideUsername,
-            })
-      } \n${address}${note ? `\n${note}` : ''}`
+    ? `${t('messages.vexlBot.locationIsSet')} ${address}${note ? ` ${note}` : ''}`
+    : `${by === 'me' ? t('messages.vexlBot.meeting') : t('messages.vexlBot.doesThisWork')} ${address}${note ? ` ${note}` : ''}`
 }
 
 function splitCardText(text: string): {
@@ -103,7 +91,6 @@ export default function TradeChecklistMeetingLocationView({
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
   const toastContent = t('common.copied')
-  const actionGap = tokens.space[2].val
 
   if (
     (message.state === 'sent' || message.state === 'received') &&
@@ -132,13 +119,14 @@ export default function TradeChecklistMeetingLocationView({
       return (
         <>
           <VexlbotActionCard
+            mb="$2"
             title={t('tradeChecklist.options.MEETING_LOCATION')}
             description={cardText.description}
             details={cardText.details}
             statusLabel={t('common.accepted')}
             statusVariant="waiting"
           >
-            <XStack gap={actionGap}>
+            <XStack gap="$3">
               <Button
                 f={1}
                 onPress={() => {
@@ -200,18 +188,24 @@ export default function TradeChecklistMeetingLocationView({
           ? t('vexlbot.waitingFor', {username: otherSideData.userName})
           : t('vexlbot.waitingForCounterParty')
 
+    const title =
+      message.state === 'sent'
+        ? t('messages.vexlBot.locationIsSet')
+        : t('messages.vexlBot.letsAgreeOnLocation')
+
     return (
       <VexlbotActionCard
+        mb="$2"
         description={cardText.description}
         details={cardText.details}
         statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
         statusVariant={
           isMessageOutdated ? 'outdated' : 'waitingForConfirmation'
         }
-        title={t('tradeChecklist.options.MEETING_LOCATION')}
+        title={title}
       >
         {!isMessageOutdated && (
-          <XStack gap={actionGap}>
+          <YStack gap="$3">
             <Button
               f={1}
               onPress={() => {
@@ -250,14 +244,13 @@ export default function TradeChecklistMeetingLocationView({
                     })
                   }
                 }}
-                icon={Map}
-                variant="secondary"
-                size="small"
+                variant="primary"
+                size="medium"
               >
                 {t('common.respond')}
               </Button>
             )}
-          </XStack>
+          </YStack>
         )}
       </VexlbotActionCard>
     )

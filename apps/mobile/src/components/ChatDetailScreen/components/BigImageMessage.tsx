@@ -21,17 +21,25 @@ export function BigImageMessage({
       py="$5"
       alignItems="center"
       px="$4"
-      gap="$3"
+      gap="$2"
       mx="$4"
     >
       {!!image && <Stack mb="$3">{image}</Stack>}
       {!!title && (
-        <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+        <Typography
+          textAlign="center"
+          variant="paragraphSmallBold"
+          color="$foregroundPrimary"
+        >
           {title}
         </Typography>
       )}
       {!!description && (
-        <Typography variant="micro" color="$foregroundSecondary">
+        <Typography
+          textAlign="center"
+          variant="micro"
+          color="$foregroundSecondary"
+        >
           {description}
         </Typography>
       )}

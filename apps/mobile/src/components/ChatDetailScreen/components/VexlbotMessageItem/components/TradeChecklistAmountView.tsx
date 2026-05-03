@@ -223,6 +223,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     return (
       <>
         <VexlbotActionCard
+          mb="$2"
           description={introText ?? amountDescription}
           details={introText ? [amountDescription] : undefined}
           statusLabel={statusLabel}

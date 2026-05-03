@@ -1,12 +1,13 @@
-import {InfoCircle, Typography, lightTheme} from '@vexl-next/ui'
+import {InfoCircle, Typography} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack, XStack} from 'tamagui'
+import {Stack, XStack, useTheme} from 'tamagui'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {btcNetworkAtom} from '../../../atoms'
 
 function NetworkInfo(): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const btcNetwork = useAtomValue(btcNetworkAtom)
 
   return (
@@ -20,7 +21,7 @@ function NetworkInfo(): React.ReactElement {
       p="$5"
     >
       <Stack pt="$0.5">
-        <InfoCircle size={18} color={lightTheme.foregroundSecondary} />
+        <InfoCircle size={18} color={theme.foregroundSecondary.val} />
       </Stack>
       <Typography variant="description" color="$foregroundSecondary" flex={1}>
         {btcNetwork === 'LIGHTING'

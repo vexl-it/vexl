@@ -6,7 +6,6 @@ import {
   PinGeolocation,
   SearchBar,
   Typography,
-  lightTheme,
 } from '@vexl-next/ui'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {type Atom, atom, useAtomValue, useSetAtom} from 'jotai'
@@ -86,6 +85,7 @@ function SearchScreenContent({
   navigation,
 }: SearchScreenContentProps): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const safeAreaInsets = useSafeAreaInsets()
   const localSearchTextAtom = useMemo(() => atom(''), [])
   const localSearchText = useAtomValue(localSearchTextAtom)
@@ -122,10 +122,7 @@ function SearchScreenContent({
             backgroundColor="$accentYellowSecondary"
             onPress={navigation.goBack}
           >
-            <ChevronLeft
-              size={24}
-              color={lightTheme.accentHighlightSecondary}
-            />
+            <ChevronLeft size={24} color={theme.accentHighlightSecondary.val} />
           </IconButton>
           <Stack f={1} ai="center">
             <Typography

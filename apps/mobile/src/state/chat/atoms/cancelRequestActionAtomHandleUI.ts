@@ -1,4 +1,3 @@
-import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {
   toBasicError,
   type BasicError,
@@ -23,11 +22,10 @@ import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayPro
 import {version} from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {sessionDataOrDummyAtom} from '../../session'
 import {type ChatMessageWithState} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import createAccountDeletedMessage from '../utils/createAccountDeletedMessage'
-import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
+import {type ChatWithMessagesAtom} from './focusChatWithMessagesAtom'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type UserDeclinedError = BasicError<'UserDeclinedError'>
@@ -40,7 +38,7 @@ const cancelRequestActionAtomHandleUI = atom(
   (
     get,
     set,
-    {text, originOffer}: {text: string; originOffer: OfferInfo}
+    {text, chatAtom}: {text: string; chatAtom: ChatWithMessagesAtom}
   ): Effect.Effect<
     ChatMessageWithState,
     | ChatNotFoundError
@@ -54,12 +52,6 @@ const cancelRequestActionAtomHandleUI = atom(
     | ErrorSigningChallenge
     | CryptoError
   > => {
-    const session = get(sessionDataOrDummyAtom)
-    const chatAtom = focusChatByInboxKeyAndSenderKey({
-      inboxKey: session.privateKey.publicKeyPemBase64,
-      senderKey: originOffer.publicPart.offerPublicKey,
-    })
-
     const chatWithMessages = get(chatAtom)
     if (!chatWithMessages)
       return Effect.fail({

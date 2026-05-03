@@ -15,6 +15,7 @@ import {BigImageMessage} from './BigImageMessage'
 import ContactRevealMessageItem from './ContactRevealMessageItem'
 import {DisapproveMessagingMessage} from './DisapproveMessagingMessage'
 import IdentityRevealMessageItem from './IdentityRevealMessageItem'
+import {LastMessageTime} from './LastMessageTime'
 import MessageIncompatibleItem from './MessageIncompatibleItem'
 import {OtherSideLeftVexlBot} from './OtherSideLeftVexlBot'
 import TextMessage from './TextMessage'
@@ -59,9 +60,13 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): React.ReactElement | null {
   const item = useAtomValue(itemAtom)
-  const {otherSideDataAtom, otherSideSupportsTradingChecklistAtom} =
-    useMolecule(chatMolecule)
+  const {
+    otherSideDataAtom,
+    otherSideSupportsTradingChecklistAtom,
+    chatStateAtom,
+  } = useMolecule(chatMolecule)
   const {t} = useTranslation()
+  const chatState = useAtomValue(chatStateAtom)
   const {userName, image, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
@@ -115,6 +120,11 @@ function MessageItem({
             title={t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
               them: userName,
             })}
+            description={
+              chatState === 'requestedByMe' || chatState === 'requestedByThem'
+                ? t('messages.youHaveChattedWithThisPartyBefore')
+                : undefined
+            }
             image={
               <UserAvatar
                 height={56}
@@ -131,36 +141,42 @@ function MessageItem({
 
     if (item.message.message.messageType === 'BLOCK_CHAT')
       return (
-        <BigImageMessage
-          title={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
-            them: userName,
-          })}
-          image={
-            <UserAvatar
-              height={56}
-              width={56}
-              userImage={image}
-              grayScale={true}
-            />
-          }
-        />
+        <>
+          <BigImageMessage
+            title={t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {
+              them: userName,
+            })}
+            image={
+              <UserAvatar
+                height={56}
+                width={56}
+                userImage={image}
+                grayScale={true}
+              />
+            }
+          />
+          <LastMessageTime message={item.message} />
+        </>
       )
 
     if (item.message.message.messageType === 'INBOX_DELETED')
       return (
-        <BigImageMessage
-          title={t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
-            them: userName,
-          })}
-          image={
-            <UserAvatar
-              height={80}
-              width={80}
-              userImage={image}
-              grayScale={true}
-            />
-          }
-        />
+        <>
+          <BigImageMessage
+            title={t(`messages.messagePreviews.${direction}.INBOX_DELETED`, {
+              them: userName,
+            })}
+            image={
+              <UserAvatar
+                height={80}
+                width={80}
+                userImage={image}
+                grayScale={true}
+              />
+            }
+          />
+          <LastMessageTime message={item.message} />
+        </>
       )
 
     if (
@@ -210,6 +226,25 @@ function MessageItem({
 
     if (item.message.message.messageType === 'APPROVE_MESSAGING') {
       return <VexlBotRequestHelp message={item.message} />
+    }
+
+    if (item.message.message.messageType === 'CANCEL_REQUEST_MESSAGING') {
+      return (
+        <>
+          <BigImageMessage
+            title={t('messages.otherPartyCanceled')}
+            image={
+              <UserAvatar
+                height={56}
+                width={56}
+                userImage={image}
+                grayScale={true}
+              />
+            }
+          />
+          <LastMessageTime message={item.message} />
+        </>
+      )
     }
 
     return (

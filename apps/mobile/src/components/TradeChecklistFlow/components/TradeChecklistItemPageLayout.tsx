@@ -17,6 +17,7 @@ export function TradeChecklistItemPageLayout({
   footer,
   scrollable = true,
   contentPadding = true,
+  hideLeftChevron = false,
   children,
 }: {
   header?: {
@@ -24,6 +25,7 @@ export function TradeChecklistItemPageLayout({
     onBackPress?: () => void
     rightActions?: readonly NavigationBarAction[]
   }
+  hideLeftChevron?: boolean
   bottomButton?: {
     disabled: boolean
     text: string
@@ -52,14 +54,18 @@ export function TradeChecklistItemPageLayout({
           <NavigationBar
             style="back"
             title={header.title}
-            leftAction={{
-              icon: ChevronLeft,
-              onPress: () => {
-                void dismissKeyboardAndResolveOnLayoutUpdate().then(
-                  header.onBackPress ?? goBack
-                )
-              },
-            }}
+            leftAction={
+              !hideLeftChevron
+                ? {
+                    icon: ChevronLeft,
+                    onPress: () => {
+                      void dismissKeyboardAndResolveOnLayoutUpdate().then(
+                        header.onBackPress ?? goBack
+                      )
+                    },
+                  }
+                : undefined
+            }
             rightActions={header.rightActions?.map((action) => ({
               ...action,
               onPress: () => {

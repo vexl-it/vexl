@@ -274,6 +274,7 @@ export type TradeChecklistStackParamsList = {
   }
   LocationMapSelect:
     | {
+        readonly initialLocation?: MeetingLocationData
         readonly selectedLocation?: MeetingLocationData
       }
     | undefined

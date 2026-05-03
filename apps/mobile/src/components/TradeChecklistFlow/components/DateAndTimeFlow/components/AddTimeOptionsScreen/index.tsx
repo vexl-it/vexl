@@ -1,11 +1,11 @@
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Typography, lightTheme} from '@vexl-next/ui'
+import {Typography} from '@vexl-next/ui'
 import {Array as ArrayE, Effect, pipe} from 'effect'
 import * as T from 'fp-ts/Task'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {LayoutAnimation, Platform, UIManager} from 'react-native'
-import {Stack} from 'tamagui'
+import {Stack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
@@ -32,6 +32,7 @@ type Props = TradeChecklistStackScreenProps<'AddTimeOptions'>
 
 function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const isThereAnyOutdatedDateTime = useAtomValue(
     isThereAnyOutdatedDateTimeAtom
   )
@@ -166,7 +167,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
             {t('tradeChecklist.time.description')}
           </Typography>
         </Stack>
-        <Stack gap="$3" backgroundColor={lightTheme.backgroundPrimary}>
+        <Stack gap="$3" backgroundColor={theme.backgroundPrimary.val}>
           {pipe(
             uniqueAvailableDates,
             ArrayE.map((date) => (

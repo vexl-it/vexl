@@ -1,9 +1,9 @@
 import {Slider as RNSlider} from '@miblanchard/react-native-slider'
 import {useFocusEffect} from '@react-navigation/native'
-import {InfoCircle, Typography, lightTheme, tokens} from '@vexl-next/ui'
+import {InfoCircle, Typography, tokens} from '@vexl-next/ui'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, XStack, YStack} from 'tamagui'
+import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {iosHapticFeedback} from '../../../../../../utils/iosHapticFeedback'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
@@ -20,6 +20,7 @@ const tempFeeAmountAtom = atom<number>(0)
 
 function PremiumOrDiscountScreen(): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const goBack = useSafeGoBack()
 
   const isMineOffer = useAtomValue(isMineOfferAtom)
@@ -149,9 +150,9 @@ function PremiumOrDiscountScreen(): React.ReactElement {
           <Stack px="$2">
             <RNSlider
               trackClickable
-              maximumTrackTintColor={lightTheme.backgroundHighlight}
+              maximumTrackTintColor={theme.backgroundHighlight.val}
               maximumValue={SLIDER_THRESHOLD}
-              minimumTrackTintColor={lightTheme.backgroundHighlight}
+              minimumTrackTintColor={theme.backgroundHighlight.val}
               minimumValue={-SLIDER_THRESHOLD}
               step={1}
               thumbTouchSize={{
@@ -168,9 +169,9 @@ function PremiumOrDiscountScreen(): React.ReactElement {
                   width={tokens.size[8].val}
                   height={tokens.size[8].val}
                   borderRadius={tokens.radius[8].val}
-                  backgroundColor={lightTheme.backgroundPrimary}
+                  backgroundColor={theme.backgroundPrimary.val}
                   borderWidth={tokens.space[1].val}
-                  borderColor={lightTheme.accentYellowPrimary}
+                  borderColor={theme.accentYellowPrimary.val}
                   alignItems="center"
                   justifyContent="center"
                 >
@@ -178,7 +179,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
                     width={tokens.size[5].val}
                     height={tokens.size[5].val}
                     borderRadius={tokens.radius[7].val}
-                    backgroundColor={lightTheme.accentYellowPrimary}
+                    backgroundColor={theme.accentYellowPrimary.val}
                   />
                 </Stack>
               )}
@@ -201,7 +202,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
           p="$5"
         >
           <Stack pt="$0.5">
-            <InfoCircle size={18} color={lightTheme.foregroundSecondary} />
+            <InfoCircle size={18} color={theme.foregroundSecondary.val} />
           </Stack>
           <Typography
             variant="description"

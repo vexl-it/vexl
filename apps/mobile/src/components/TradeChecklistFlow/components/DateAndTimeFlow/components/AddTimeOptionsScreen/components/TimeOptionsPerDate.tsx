@@ -1,12 +1,12 @@
 import {type AvailableDateTimeOption} from '@vexl-next/domain/src/general/tradeChecklist'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Button, lightTheme, Switch, Typography} from '@vexl-next/ui'
+import {Button, Switch, Typography} from '@vexl-next/ui'
 import {Array as ArrayE, pipe, Schema} from 'effect'
 import {atom, useAtom, useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useEffect, useMemo, useState} from 'react'
 import {Animated, Easing, TouchableOpacity} from 'react-native'
-import {Stack, XStack, YStack} from 'tamagui'
+import {Stack, useTheme, XStack, YStack} from 'tamagui'
 import {
   getCurrentLocale,
   useTranslation,
@@ -154,6 +154,8 @@ function TimeSlotChip({
   selected: boolean
   onPress: () => void
 }): React.ReactElement {
+  const theme = useTheme()
+
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <Stack
@@ -163,8 +165,8 @@ function TimeSlotChip({
         borderRadius="$3"
         backgroundColor={
           selected
-            ? lightTheme.accentYellowPrimary
-            : lightTheme.backgroundTertiary
+            ? theme.accentYellowPrimary.val
+            : theme.backgroundTertiary.val
         }
         alignItems="center"
         justifyContent="center"

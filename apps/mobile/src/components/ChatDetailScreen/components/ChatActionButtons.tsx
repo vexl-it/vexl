@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, InfoBox, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Button, InfoBox, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {pipe} from 'effect/Function'
 import {Effect} from 'effect/index'
@@ -122,31 +122,60 @@ function ActionsToRender(): React.ReactElement {
   }
 
   if (chatState === 'chatClosed') {
-    return <Button
-      width={"100%"}
-      size="large"
-      variant="destructive"
-      onPress={() => {
-        void pipe(
-          deleteChat({
-            skipAsk: true,
-          }),
-          Effect.zipLeft(
-            Effect.sync(() => {
-              safeGoBack()
-            })
-          ),
-          Effect.runPromise
-        )
-      }}
-    >
-      {t('messages.deleteChat')}
-    </Button>
+    return (
+      <Button
+        width="100%"
+        size="large"
+        variant="destructive"
+        onPress={() => {
+          void pipe(
+            deleteChat({
+              skipAsk: true,
+            }),
+            Effect.zipLeft(
+              Effect.sync(() => {
+                safeGoBack()
+              })
+            ),
+            Effect.runPromise
+          )
+        }}
+      >
+        {t('messages.deleteChat')}
+      </Button>
+    )
   }
 
-  return <>
-    <Typography variant="description" color="orange">{chatState} wtf</Typography>
-  </>
+  if (chatState === 'requestCancelledByThem') {
+    return (
+      <>
+        <Button
+          width="100%"
+          size="large"
+          variant="destructive"
+          onPress={() => {
+            void pipe(
+              deleteChat({
+                skipAsk: true,
+                skipDonation: true,
+                skipFeedback: true,
+              }),
+              Effect.zipLeft(
+                Effect.sync(() => {
+                  safeGoBack()
+                })
+              ),
+              Effect.runPromise
+            )
+          }}
+        >
+          {t('messages.deleteChat')}
+        </Button>
+      </>
+    )
+  }
+
+  return <></>
 }
 
 export function ChatActionButtons(): React.ReactElement {

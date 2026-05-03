@@ -11,7 +11,7 @@ import MapView, {
   type Region,
 } from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, useTheme} from 'tamagui'
+import {Stack, Text, useTheme, YStack} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
@@ -207,14 +207,26 @@ export default function MapLocationSelect({
         <Stack
           pointerEvents="box-none"
           flex={1}
-          paddingTop={safeAreaInsets.top}
-          paddingBottom={safeAreaInsets.bottom}
           paddingLeft={safeAreaInsets.left}
           paddingRight={safeAreaInsets.right}
         >
-          <Stack>{topChildren}</Stack>
+          <YStack>
+            <Stack
+              width="100%"
+              height={safeAreaInsets.top}
+              backgroundColor="$backgroundPrimary"
+            />
+            {topChildren}
+          </YStack>
           <Stack pointerEvents="none" flex={1}></Stack>
-          <Stack>{bottomChildren}</Stack>
+          <Stack>
+            {bottomChildren}
+            <Stack
+              width="100%"
+              height={safeAreaInsets.bottom}
+              backgroundColor="$backgroundPrimary"
+            />
+          </Stack>
         </Stack>
       </Stack>
     </Stack>

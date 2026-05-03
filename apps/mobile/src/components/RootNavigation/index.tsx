@@ -142,7 +142,7 @@ function RootNavigation(): React.ReactElement {
               name="ChatInfo"
               options={{
                 animation: 'slide_from_bottom',
-                presentation: 'modal',
+                presentation: 'card',
               }}
               component={ChatInfoScreen}
             />
@@ -150,7 +150,7 @@ function RootNavigation(): React.ReactElement {
               name="ChatOfferDetail"
               options={{
                 animation: 'slide_from_bottom',
-                presentation: 'modal',
+                presentation: 'card',
               }}
               component={ChatOfferDetailScreen}
             />
@@ -158,7 +158,7 @@ function RootNavigation(): React.ReactElement {
               name="ChatReceivedMessagesDebug"
               options={{
                 animation: 'slide_from_bottom',
-                presentation: 'modal',
+                presentation: 'card',
               }}
               component={ChatReceivedMessagesDebugScreen}
             />
@@ -166,7 +166,7 @@ function RootNavigation(): React.ReactElement {
               name="ChatInfoJsonDebug"
               options={{
                 animation: 'slide_from_bottom',
-                presentation: 'modal',
+                presentation: 'card',
               }}
               component={ChatInfoJsonDebugScreen}
             />

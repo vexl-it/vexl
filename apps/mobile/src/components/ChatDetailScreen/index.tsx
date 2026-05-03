@@ -26,7 +26,6 @@ export default function ChatDetailScreen({
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const store = useStore()
-  void targetMessageId
 
   const {nonNullChatWithMessagesAtom, chatExistsAtom} = useMemo(() => {
     const chatWithMessagesAtom = focusChatWithMessagesByKeysAtom({
@@ -77,7 +76,7 @@ export default function ChatDetailScreen({
 
   return (
     <ScopeProvider scope={ChatScope} value={nonNullChatWithMessagesAtom}>
-      <MessagesScreen />
+      <MessagesScreen targetMessageId={targetMessageId} />
     </ScopeProvider>
   )
 }

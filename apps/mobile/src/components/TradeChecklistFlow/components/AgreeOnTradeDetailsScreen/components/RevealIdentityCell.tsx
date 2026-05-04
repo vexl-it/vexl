@@ -62,7 +62,7 @@ function RevealIdentityCell(): React.ReactElement {
             ? ('pending' as const)
             : mapTradeChecklistItemStatusToUiState(itemStatus)
       }
-      pressable
+      pressable={!identityRevealed}
       subtitle={t('tradeChecklist.shareRecognitionSignInChat')}
       onPress={() => {
         prepareRevealIdentityDraft()

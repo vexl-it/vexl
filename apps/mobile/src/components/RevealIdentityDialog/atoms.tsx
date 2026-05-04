@@ -8,7 +8,6 @@ import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/function'
 import * as TE from 'fp-ts/TaskEither'
 import {atom, type Atom, type PrimitiveAtom} from 'jotai'
-import {type RevealMessageType} from '../../state/chat/atoms/revealIdentityActionAtom'
 import {
   realUserImageAtom,
   realUserNameAtom,
@@ -19,6 +18,7 @@ import {
   type StepWithChildren,
   type StepWithText,
 } from '../AreYouSureDialog'
+import {type RevealMessageType} from '../TradeChecklistFlow/domain'
 import ClubsRevealIdentityDialogContent from './ClubsRevealIdentityDialogContent'
 import {
   ImageDialogContent,
@@ -34,6 +34,10 @@ interface RevealIdentityActionParams {
   commonConnectionsCountAtom: Atom<number>
   friendLevelInfoAtom: Atom<readonly FriendLevel[]>
 }
+
+const DISAPPROVE_REVEAL: RevealMessageType = 'DISAPPROVE_REVEAL'
+const APPROVE_REVEAL: RevealMessageType = 'APPROVE_REVEAL'
+const REQUEST_REVEAL: RevealMessageType = 'REQUEST_REVEAL'
 
 export const revealIdentityDialogUIAtom = atom(
   null,
@@ -122,17 +126,13 @@ export const revealIdentityDialogUIAtom = atom(
           }
 
           if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
-            return E.right('DISAPPROVE_REVEAL' as RevealMessageType)
+            return E.right(DISAPPROVE_REVEAL)
           }
 
           return E.left(e)
         },
         () =>
-          E.right(
-            type === 'RESPOND_REVEAL'
-              ? ('APPROVE_REVEAL' as RevealMessageType)
-              : ('REQUEST_REVEAL' as RevealMessageType)
-          )
+          E.right(type === 'RESPOND_REVEAL' ? APPROVE_REVEAL : REQUEST_REVEAL)
       ),
       TE.bindTo('type'),
       TE.bindW('username', ({type}) => {

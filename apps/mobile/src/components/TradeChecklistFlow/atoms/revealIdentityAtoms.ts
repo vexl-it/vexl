@@ -1,6 +1,6 @@
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Array, HashMap, Option} from 'effect/index'
-import * as TE from 'fp-ts/TaskEither'
+import {map} from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
 import {atom} from 'jotai'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
@@ -14,7 +14,12 @@ import {
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
+import {type TradeChecklistRevealIntent} from '../domain'
 import {revealIdentityActionAtom} from './updatesToBeSentAtom'
+
+interface RevealIdentityWithUiFeedbackParams {
+  readonly intent?: TradeChecklistRevealIntent
+}
 
 const revealIdentityUsernameAtom = atom<string>('')
 const usernameSavedForFutureUseAtom = atom<boolean>(false)
@@ -46,42 +51,49 @@ const friendLevelInfoAtom = atom((get) => {
   return get(createFriendLevelInfoAtom(chat.chat.otherSide))
 })
 
-export const revealIdentityWithUiFeedbackAtom = atom(null, (get, set) => {
-  const {phoneNumber} = get(sessionDataOrDummyAtom)
-  const anonymizedUserData = get(anonymizedUserDataAtom)
-  const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)
-  const tradeChecklistData = get(tradeChecklistDataAtom)
-  const type =
-    !tradeChecklistData.identity.sent && tradeChecklistData.identity.received
-      ? 'RESPOND_REVEAL'
-      : 'REQUEST_REVEAL'
+export const revealIdentityWithUiFeedbackAtom = atom(
+  null,
+  (get, set, params?: RevealIdentityWithUiFeedbackParams) => {
+    const {phoneNumber} = get(sessionDataOrDummyAtom)
+    const anonymizedUserData = get(anonymizedUserDataAtom)
+    const anonymizedPhoneNumber = anonymizePhoneNumber(phoneNumber)
+    const tradeChecklistData = get(tradeChecklistDataAtom)
+    const type = params?.intent
+      ? params.intent === 'respond'
+        ? 'RESPOND_REVEAL'
+        : 'REQUEST_REVEAL'
+      : !tradeChecklistData.identity.sent &&
+          tradeChecklistData.identity.received
+        ? 'RESPOND_REVEAL'
+        : 'REQUEST_REVEAL'
 
-  return pipe(
-    set(revealIdentityDialogUIAtom, {
-      type,
-      revealIdentityUsernameAtom,
-      usernameSavedForFutureUseAtom,
-      revealIdentityImageUriAtom,
-      imageSavedForFutureUseAtom,
-      commonConnectionsCountAtom,
-      friendLevelInfoAtom,
-    }),
-    TE.map(({type, username, imageUri}) => {
-      const identityData =
-        type === 'DISAPPROVE_REVEAL'
-          ? {
-              status: type,
-            }
-          : {
-              status: type,
-              deanonymizedUser: {
-                name: username ?? anonymizedUserData.userName,
-                partialPhoneNumber: anonymizedPhoneNumber,
-              },
-              image: imageUri,
-            }
+    return pipe(
+      set(revealIdentityDialogUIAtom, {
+        type,
+        revealIdentityUsernameAtom,
+        usernameSavedForFutureUseAtom,
+        revealIdentityImageUriAtom,
+        imageSavedForFutureUseAtom,
+        commonConnectionsCountAtom,
+        friendLevelInfoAtom,
+      }),
+      map(({type, username, imageUri}) => {
+        const identityData =
+          type === 'DISAPPROVE_REVEAL'
+            ? {
+                status: type,
+              }
+            : {
+                status: type,
+                deanonymizedUser: {
+                  name: username ?? anonymizedUserData.userName,
+                  partialPhoneNumber: anonymizedPhoneNumber,
+                },
+                image: imageUri,
+              }
 
-      set(revealIdentityActionAtom, identityData)
-    })
-  )
-})
+        set(revealIdentityActionAtom, identityData)
+      })
+    )
+  }
+)

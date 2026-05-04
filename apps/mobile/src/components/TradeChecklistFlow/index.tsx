@@ -1,6 +1,6 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
 import {useSetAtom} from 'jotai'
-import React, {useEffect} from 'react'
+import React, {useLayoutEffect} from 'react'
 import {
   type RootStackScreenProps,
   type TradeChecklistStackParamsList,
@@ -33,7 +33,7 @@ export default function TradeChecklistFlow({
 }: Props): React.ReactElement {
   const setParentChat = useSetAtom(fromChatAtoms.setParentChatActionAtom)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setParentChat({chatId, inboxKey})
   }, [chatId, setParentChat, inboxKey])
 

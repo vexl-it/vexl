@@ -26,6 +26,7 @@ import {
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {type FaqType} from './components/FaqScreen/useContent'
 import {type TabType} from './components/TosScreen/useContent'
+import {type AutoOpenTradeChecklistReveal} from './components/TradeChecklistFlow/domain'
 import {type ChatIds} from './state/chat/domain'
 import {type ContactsFilter} from './state/contacts/domain'
 
@@ -219,7 +220,11 @@ export type TradeCalculatorStackScreenProps<
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {
-  AgreeOnTradeDetails: undefined
+  AgreeOnTradeDetails:
+    | {
+        readonly autoOpenReveal?: AutoOpenTradeChecklistReveal | undefined
+      }
+    | undefined
   ChooseAvailableDays: {
     readonly chosenDateTimes: AvailableDateTimeOption[] | undefined
   }

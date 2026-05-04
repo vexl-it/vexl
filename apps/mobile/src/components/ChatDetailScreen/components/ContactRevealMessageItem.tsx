@@ -76,12 +76,12 @@ function ContactRevealMessageItem({
     (type: 'approve' | 'deny') => {
       revealContact({
         status: type === 'approve' ? 'APPROVE_REVEAL' : 'DISAPPROVE_REVEAL',
-        fullPhoneNumber: myRealLifeInfo.fullPhoneNumber,
+        fullPhoneNumber: type === 'approve' ? myPhoneNumber : undefined,
       })
 
       Effect.runFork(store.set(submitTradeChecklistUpdatesActionAtom))
     },
-    [revealContact, myRealLifeInfo.fullPhoneNumber, store]
+    [revealContact, myPhoneNumber, store]
   )
 
   const [contactRevealRequestHidden, hideContactRevealRequest] =
@@ -100,6 +100,7 @@ function ContactRevealMessageItem({
   if (isContactRevealRequest && contactRevealStatus === 'theyAsked') {
     return (
       <VexlbotActionCard
+        mt="$2"
         description={t('vexlBot.phoneNumber.doYouWantToShare')}
         statusLabel={t('vexlbot.reactionRequired')}
         title={t('vexlBot.phoneNumber.requested', {
@@ -139,6 +140,7 @@ function ContactRevealMessageItem({
   ) {
     return (
       <VexlbotActionCard
+        mt="$2"
         title={t('vexlBot.phoneNumber.requestSent', {
           them: t('common.otherSide'),
         })}

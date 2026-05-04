@@ -235,7 +235,7 @@ export type VerifyChallengeInput = typeof VerifyChallengeInput.Type
 
 export const GetVersionServiceInfoResponse = Schema.Struct({
   requestForceUpdate: Schema.Boolean,
-  offerRerequestLimitDays: Schema.Int.pipe(Schema.positive()),
+  offerRerequestLimitDays: Schema.Int.pipe(Schema.greaterThanOrEqualTo(0)),
   maintenanceUntil: Schema.optionalWith(
     Schema.Struct({
       start: UnixMilliseconds,

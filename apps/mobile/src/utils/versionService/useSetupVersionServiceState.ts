@@ -1,4 +1,4 @@
-import {Effect, Option} from 'effect'
+import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom} from '../../api'
@@ -16,13 +16,7 @@ export default function useSetupVersionServiceState(): void {
         console.log('Fetching version service info')
         void api.user.getVersionServiceInfo().pipe(
           Effect.andThen((info) => {
-            setVersionServiceState({
-              offerRerequestLimitDays: info.offerRerequestLimitDays,
-              requestForceUpdate: info.requestForceUpdate,
-              maintenanceUntil: info.maintenanceUntil.pipe(
-                Option.getOrElse(() => undefined)
-              ),
-            })
+            setVersionServiceState(info)
             console.log('Version service info fetched', JSON.stringify(info))
           }),
           Effect.mapError((e) => {

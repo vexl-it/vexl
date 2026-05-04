@@ -63,3 +63,13 @@ export const verificationProviderConfig = Config.string(
 export const lowestSupportVersionToLoginConfig = Config.number(
   'LOWEST_SUPPORT_VERSION_TO_LOGIN'
 ).pipe(Config.withDefault(0), Effect.flatMap(Schema.decode(VersionCode)))
+
+export const rerequestLimitDaysConfig = Config.number(
+  'REREQUEST_LIMIT_DAYS'
+).pipe(
+  Config.withDefault(1),
+  Config.validate({
+    message: 'REREQUEST_LIMIT_DAYS must be a positive integer or 0',
+    validation: (v) => Number.isInteger(v) && v >= 0,
+  })
+)

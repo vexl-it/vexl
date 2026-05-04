@@ -1,8 +1,9 @@
 import {useNavigation} from '@react-navigation/native'
 import {Avatar, Button, Typography, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue, useSetAtom} from 'jotai'
-import React from 'react'
+import {Effect} from 'effect/index'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import React, {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
@@ -17,6 +18,10 @@ import {
   prepareRevealIdentityDraftActionAtom,
   shouldOpenRevealIdentitySummaryAtom,
 } from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
+import {
+  revealContactActionAtom,
+  submitTradeChecklistUpdatesActionAtom,
+} from '../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import RevealedInfoCard from './RevealedInfoCard'
@@ -46,6 +51,7 @@ function IdentityRevealMessageItem({
   const {image, userName, partialPhoneNumber, fullPhoneNumber} =
     useAtomValue(otherSideDataAtom)
   const chat = useAtomValue(chatAtom)
+  const store = useStore()
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const identityRevealRequestMessageId = useAtomValue(
@@ -62,6 +68,7 @@ function IdentityRevealMessageItem({
   const shouldOpenRevealIdentitySummary = useAtomValue(
     shouldOpenRevealIdentitySummaryAtom
   )
+  const revealContact = useSetAtom(revealContactActionAtom)
   const [identityRevealRequestHidden, hideIdentityRevealRequest] =
     useHideActionForMessage(identityRevealRequestMessageId)
 
@@ -79,6 +86,15 @@ function IdentityRevealMessageItem({
     ((message.state === 'sent' || message.state === 'received') &&
       message.message.tradeChecklistUpdate?.identity?.status ===
         'REQUEST_REVEAL')
+
+  const requestPhoneNumberReveal = useCallback(() => {
+    revealContact({
+      status: 'REQUEST_REVEAL',
+      fullPhoneNumber: myPhoneNumber,
+    })
+
+    Effect.runFork(store.set(submitTradeChecklistUpdatesActionAtom))
+  }, [myPhoneNumber, revealContact, store])
 
   if (isIdentityRevealRequest && identityRevealStatus === 'theyAsked') {
     return (
@@ -152,30 +168,51 @@ function IdentityRevealMessageItem({
       message.message.tradeChecklistUpdate?.identity?.status ===
         'APPROVE_REVEAL')
   ) {
+    const shouldPromptForPhoneNumber =
+      contactRevealStatus === 'notStarted' && !fullPhoneNumber
+
     return (
-      <RevealedInfoCard
-        contactName={userName}
-        fullPhoneNumber={fullPhoneNumber}
-        leftSide={{
-          image: myRealLifeInfo.image,
-          name: myRealLifeInfo.userName,
-          phoneNumber: myPhoneNumberText,
-        }}
-        rightSide={{
-          image,
-          name: userName,
-          onAvatarPress:
-            image.type === 'imageUri'
-              ? () => {
-                  navigation.navigate('ChatImagePreview', {
-                    imageUri: resolveLocalUri(image.imageUri),
-                  })
-                }
-              : undefined,
-          phoneNumber: otherSidePhoneNumberText,
-        }}
-        title={t('messages.identityRequestRevealed')}
-      />
+      <>
+        <RevealedInfoCard
+          contactName={userName}
+          fullPhoneNumber={fullPhoneNumber}
+          leftSide={{
+            image: myRealLifeInfo.image,
+            name: myRealLifeInfo.userName,
+            phoneNumber: myPhoneNumberText,
+          }}
+          rightSide={{
+            image,
+            name: userName,
+            onAvatarPress:
+              image.type === 'imageUri'
+                ? () => {
+                    navigation.navigate('ChatImagePreview', {
+                      imageUri: resolveLocalUri(image.imageUri),
+                    })
+                  }
+                : undefined,
+            phoneNumber: otherSidePhoneNumberText,
+          }}
+          title={t('messages.identityRequestRevealed')}
+        />
+        {!!shouldPromptForPhoneNumber && (
+          <VexlbotActionCard
+            mt="$2"
+            description={t('vexlBot.phoneNumber.identitiesRevealedDescription')}
+            title={t('vexlBot.phoneNumber.identitiesRevealedTitle')}
+          >
+            <Button
+              onPress={requestPhoneNumberReveal}
+              size="medium"
+              variant="primary"
+              width="100%"
+            >
+              {t('tradeChecklist.options.REVEAL_PHONE_NUMBER')}
+            </Button>
+          </VexlbotActionCard>
+        )}
+      </>
     )
   }
 

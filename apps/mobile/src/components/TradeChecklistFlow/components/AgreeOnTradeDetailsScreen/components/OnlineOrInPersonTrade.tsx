@@ -85,6 +85,7 @@ function OnlineOrInPersonTrade(): React.ReactElement {
         <Stack gap="$2">
           <CalculateAmountCell />
           <RevealIdentityCell />
+          <RevealPhoneNumberCell />
         </Stack>
         <AnonymizationNotice />
       </YStack>

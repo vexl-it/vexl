@@ -127,7 +127,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )
 
   const messagesListDataAtom = atom((get) =>
-    buildMessagesListData(get(messagesAtom), get(hiddenMessagesIdsAtom))
+    buildMessagesListData(
+      get(messagesAtom),
+      get(hiddenMessagesIdsAtom),
+      get(tradeChecklistAtom)
+    )
   )
 
   const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
@@ -651,27 +655,40 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       messages,
       tradeChecklist,
     }): 'shared' | 'denied' | 'iAsked' | 'theyAsked' | 'notStarted' => {
+      const iSharedPhone = !!tradeChecklist.contact.sent?.fullPhoneNumber
+      const theySharedPhone = !!tradeChecklist.contact.received?.fullPhoneNumber
+      const bothSharedPhones = iSharedPhone && theySharedPhone
+
       const response = messages.find(
         (one) =>
           one.message.messageType === 'DISAPPROVE_CONTACT_REVEAL' ||
           one.message.messageType === 'APPROVE_CONTACT_REVEAL'
       )
-      if (response)
-        return response.message.messageType === 'APPROVE_CONTACT_REVEAL'
-          ? 'shared'
-          : 'denied' // no need to search further
+      if (response?.message.messageType === 'DISAPPROVE_CONTACT_REVEAL')
+        return 'denied'
+
+      if (bothSharedPhones) {
+        if (response)
+          return response.message.messageType === 'APPROVE_CONTACT_REVEAL'
+            ? 'shared'
+            : 'denied' // no need to search further
+
+        if (
+          tradeChecklist.contact.received?.status === 'APPROVE_REVEAL' ||
+          tradeChecklist.contact.sent?.status === 'APPROVE_REVEAL'
+        )
+          return 'shared'
+      }
 
       // check also tradeChecklist for contact reveal messages
-      if (
-        tradeChecklist.contact.received?.status === 'APPROVE_REVEAL' ||
-        tradeChecklist.contact.sent?.status === 'APPROVE_REVEAL'
-      )
-        return 'shared'
       if (
         tradeChecklist.contact.received?.status === 'DISAPPROVE_REVEAL' ||
         tradeChecklist.contact.sent?.status === 'DISAPPROVE_REVEAL'
       )
         return 'denied'
+
+      if (theySharedPhone) return 'theyAsked'
+      if (iSharedPhone) return 'iAsked'
 
       const requestMessage = messages.find(
         (one) => one.message.messageType === 'REQUEST_CONTACT_REVEAL'
@@ -684,6 +701,20 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       if (tradeChecklist.contact.received?.status === 'REQUEST_REVEAL')
         return 'theyAsked'
       if (tradeChecklist.contact.sent?.status === 'REQUEST_REVEAL')
+        return 'iAsked'
+
+      if (response)
+        return response.state === 'received' ? 'theyAsked' : 'iAsked'
+
+      if (
+        theySharedPhone ||
+        tradeChecklist.contact.received?.status === 'APPROVE_REVEAL'
+      )
+        return 'theyAsked'
+      if (
+        iSharedPhone ||
+        tradeChecklist.contact.sent?.status === 'APPROVE_REVEAL'
+      )
         return 'iAsked'
 
       return 'notStarted'

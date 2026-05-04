@@ -93,11 +93,18 @@ function ContactRevealMessageItem({
       message.message.tradeChecklistUpdate?.contact?.status ===
         'REQUEST_REVEAL')
 
+  const isContactRevealMessage =
+    isContactRevealRequest ||
+    message.message.messageType === 'APPROVE_CONTACT_REVEAL' ||
+    ((message.state === 'sent' || message.state === 'received') &&
+      message.message.tradeChecklistUpdate?.contact?.status ===
+        'APPROVE_REVEAL')
+
   const otherSidePhoneNumberText = fullPhoneNumber
     ? getInternationalPhoneNumber(fullPhoneNumber)
     : partialPhoneNumber
 
-  if (isContactRevealRequest && contactRevealStatus === 'theyAsked') {
+  if (isContactRevealMessage && contactRevealStatus === 'theyAsked') {
     return (
       <VexlbotActionCard
         mt="$2"
@@ -134,7 +141,7 @@ function ContactRevealMessageItem({
   }
 
   if (
-    isContactRevealRequest &&
+    isContactRevealMessage &&
     contactRevealStatus === 'iAsked' &&
     !contactRevealRequestHidden
   ) {

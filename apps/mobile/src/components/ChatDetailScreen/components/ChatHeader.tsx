@@ -3,19 +3,19 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Keyboard, TouchableOpacity} from 'react-native'
+import {Alert, Keyboard, TouchableOpacity} from 'react-native'
 import {Stack, XStack, getTokens} from 'tamagui'
 import backButtonSvg from '../../../images/backButtonSvg'
 import blockIconSvg from '../../../images/blockIconSvg'
 import tradeChecklistSvg from '../../../images/tradeChecklistSvg'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import IconButton from '../../IconButton'
 import identityIconSvg from '../../images/identityIconSvg'
 import {chatMolecule} from '../atoms'
 import phoneSvg from '../images/phoneSvg'
-import useOpenTradeChecklistReveal from '../utils/useOpenTradeChecklistReveal'
 import OtherSideNamePhotoAndInfo from './OtherSideNamePhotoAndInfo'
 
 type ButtonType =
@@ -31,6 +31,7 @@ type ButtonType =
 function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const safeGoBack = useSafeGoBack()
   const navigation = useNavigation()
+  const {t} = useTranslation()
   const {
     chatIdAtom,
     publicKeyPemBase64Atom,
@@ -39,6 +40,8 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
     blockChatWithUiFeedbackAtom,
     forceShowHistoryAtom,
     identityRevealStatusAtom,
+    revealIdentityWithUiFeedbackAtom,
+    revealContactWithUiFeedbackAtom,
     contactRevealStatusAtom,
     otherSideSupportsTradingChecklistAtom,
     listingTypeIsOtherAtom,
@@ -47,15 +50,14 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const setModal = useSetAtom(showModalAtom)
-  const openTradeChecklistReveal = useOpenTradeChecklistReveal()
   const resetNavigationToMessagingScreen = useResetNavigationToMessagingScreen()
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
-  const canUseTradingChecklist =
-    !!otherSideSupportsTradingChecklist && !listingTypeIsOther
 
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
@@ -123,20 +125,14 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
       />
     )
 
-  if (
-    type === 'identityReveal' &&
-    identityRevealStatus === 'notStarted' &&
-    canUseTradingChecklist
-  )
+  if (type === 'identityReveal' && identityRevealStatus === 'notStarted')
     return (
       <IconButton
         icon={identityIconSvg}
         variant="primary"
         onPress={() => {
-          openTradeChecklistReveal({
-            item: 'REVEAL_IDENTITY',
-            intent: 'request',
-          })
+          Keyboard.dismiss()
+          void revealIdentity('REQUEST_REVEAL')
         }}
       />
     )
@@ -144,8 +140,7 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
   if (
     type === 'contactReveal' &&
     identityRevealStatus === 'shared' &&
-    contactRevealStatus === 'notStarted' &&
-    canUseTradingChecklist
+    contactRevealStatus === 'notStarted'
   )
     return (
       <IconButton
@@ -153,64 +148,64 @@ function Button({type}: {type: ButtonType}): React.ReactElement | null {
         iconFill={getTokens().color.main.val}
         variant="primary"
         onPress={() => {
-          openTradeChecklistReveal({
-            item: 'REVEAL_PHONE_NUMBER',
-            intent: 'request',
-          })
+          Keyboard.dismiss()
+          void revealContact('REQUEST_REVEAL')
         }}
       />
     )
 
-  if (type === 'tradeChecklist') {
-    if (!canUseTradingChecklist) return <Stack w={40} h={40} />
-
+  if (type === 'tradeChecklist')
     return (
       <XStack gap="$1">
-        {identityRevealStatus === 'notStarted' ? (
+        {identityRevealStatus === 'notStarted' && (
           <IconButton
             icon={identityIconSvg}
             variant="primary"
             onPress={() => {
-              openTradeChecklistReveal({
-                item: 'REVEAL_IDENTITY',
-                intent: 'request',
-              })
+              Keyboard.dismiss()
+              void revealIdentity('REQUEST_REVEAL')
             }}
           />
-        ) : null}
+        )}
         {identityRevealStatus === 'shared' &&
-        contactRevealStatus === 'notStarted' ? (
+          contactRevealStatus === 'notStarted' && (
+            <IconButton
+              icon={phoneSvg}
+              iconFill={getTokens().color.main.val}
+              variant="primary"
+              onPress={() => {
+                Keyboard.dismiss()
+                void revealContact('REQUEST_REVEAL')
+              }}
+            />
+          )}
+        {!!otherSideSupportsTradingChecklist && !listingTypeIsOther && (
           <IconButton
-            icon={phoneSvg}
-            iconFill={getTokens().color.main.val}
+            icon={tradeChecklistSvg}
             variant="primary"
             onPress={() => {
-              openTradeChecklistReveal({
-                item: 'REVEAL_PHONE_NUMBER',
-                intent: 'request',
+              if (!otherSideSupportsTradingChecklist) {
+                Alert.alert(
+                  t('tradeChecklist.notSupportedByOtherSide.title'),
+                  t('tradeChecklist.notSupportedByOtherSide.body')
+                )
+                return
+              }
+              Keyboard.dismiss()
+              setModal(false)
+              navigation.navigate('TradeChecklistFlow', {
+                screen: 'AgreeOnTradeDetails',
+                chatId,
+                inboxKey,
               })
             }}
+            iconFill={getTokens().color.main.val}
+            iconHeight={24}
+            iconWidth={24}
           />
-        ) : null}
-        <IconButton
-          icon={tradeChecklistSvg}
-          variant="primary"
-          onPress={() => {
-            Keyboard.dismiss()
-            setModal(false)
-            navigation.navigate('TradeChecklistFlow', {
-              screen: 'AgreeOnTradeDetails',
-              chatId,
-              inboxKey,
-            })
-          }}
-          iconFill={getTokens().color.main.val}
-          iconHeight={24}
-          iconWidth={24}
-        />
+        )}
       </XStack>
     )
-  }
 
   return <Stack w={40} h={40} />
 }

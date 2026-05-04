@@ -74,7 +74,10 @@ export const anonymizedUserDataAtom = atom((get) => {
   })
 })
 
-export const userDataRealOrAnonymizedAtom = atom<RealLifeInfo>((get) => {
+export const userDataRealOrAnonymizedAtom = atom<{
+  userName: RealLifeInfo['userName']
+  image: RealLifeInfo['image']
+}>((get) => {
   const real = get(realUserDataAtom)
   const anonymized = get(anonymizedUserDataAtom)
 

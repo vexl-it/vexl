@@ -1162,6 +1162,8 @@
   "vexlBot.phoneNumber.youAsked": "You asked to share your phone number.",
   "vexlBot.phoneNumber.requestSent": "You requested to share your phone number.",
   "vexlBot.phoneNumber.requested": "Request pending. Waiting for {{them}} to respond.",
+  "vexlBot.phoneNumber.identitiesRevealedTitle": "Share phone numbers too?",
+  "vexlBot.phoneNumber.identitiesRevealedDescription": "You can exchange phone numbers now that identities are revealed.",
   "vexlbot.updateCalendarEventLocation": "Update calendar event location",
   "vexlbot.copyAddressInfo": "Copy address",
   "vexlbot.waitingFor": "Pending",

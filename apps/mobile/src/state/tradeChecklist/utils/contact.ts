@@ -34,7 +34,9 @@ export function getContactData(data: ContactInState):
 
 export function contactRevealed(data: ContactInState): boolean {
   return (
-    data.sent?.status === 'APPROVE_REVEAL' ||
-    data.received?.status === 'APPROVE_REVEAL'
+    !!data.sent?.fullPhoneNumber &&
+    !!data.received?.fullPhoneNumber &&
+    (data.sent?.status === 'APPROVE_REVEAL' ||
+      data.received?.status === 'APPROVE_REVEAL')
   )
 }

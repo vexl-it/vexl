@@ -64,10 +64,12 @@ function MessageItem({
     otherSideDataAtom,
     otherSideSupportsTradingChecklistAtom,
     chatStateAtom,
+    contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const chatState = useAtomValue(chatStateAtom)
-  const {image, fullPhoneNumber} = useAtomValue(otherSideDataAtom)
+  const {image} = useAtomValue(otherSideDataAtom)
+  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
@@ -185,7 +187,7 @@ function MessageItem({
       item.message.message.messageType === 'DISAPPROVE_REVEAL' ||
       (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
         item.message.message.tradeChecklistUpdate?.identity &&
-        !fullPhoneNumber)
+        contactRevealStatus !== 'shared')
     ) {
       return (
         <IdentityRevealMessageItem

@@ -1,5 +1,12 @@
 import {Array, Option, pipe} from 'effect'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
+
+const bothSidesSharedPhoneNumbers = (
+  contact: TradeChecklistInState['contact']
+): boolean => {
+  return !!contact.sent?.fullPhoneNumber && !!contact.received?.fullPhoneNumber
+}
 
 const isContactApproveRevealMessage = (
   message: ChatMessageWithState
@@ -59,7 +66,8 @@ const isIdentityOrContactRevealMessage = (
 }
 
 export default function filterIrrelevantIdentityOrContactMessages(
-  messages: ChatMessageWithState[]
+  messages: ChatMessageWithState[],
+  tradeChecklist: TradeChecklistInState
 ): (message: ChatMessageWithState) => boolean {
   const latestIdentityMessage = pipe(
     messages,
@@ -74,7 +82,10 @@ export default function filterIrrelevantIdentityOrContactMessages(
   )
 
   if (latestContactMessage) {
-    if (isContactApproveRevealMessage(latestContactMessage))
+    if (
+      isContactApproveRevealMessage(latestContactMessage) &&
+      bothSidesSharedPhoneNumbers(tradeChecklist.contact)
+    )
       // Show only last contact approve reveal message. This is because once contact is revealed, previous messages related to contact reveal become irrelevant
       return (message: ChatMessageWithState) =>
         !isIdentityOrContactRevealMessage(message) ||

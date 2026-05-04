@@ -22,9 +22,9 @@ import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import SvgImage from '../../Image'
 import checkIconSvg from '../../images/checkIconSvg'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
-import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
+import useOpenTradeChecklistReveal from '../utils/useOpenTradeChecklistReveal'
 import BigIconMessage from './BigIconMessage'
 
 function RevealedContactMessageItem({
@@ -155,23 +155,18 @@ function ContactRevealMessageItem({
     openedImageUriAtom,
     otherSideDataAtom,
     contactRevealStatusAtom,
-    contactRevealTriggeredFromTradeChecklistAtom,
-    publicKeyPemBase64Atom,
-    chatIdAtom,
-    revealContactWithUiFeedbackAtom,
+    otherSideSupportsTradingChecklistAtom,
+    listingTypeIsOtherAtom,
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
-  const chatId = useAtomValue(chatIdAtom)
-  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
-  const contactRevealTriggeredFromTradeChecklist = useAtomValue(
-    contactRevealTriggeredFromTradeChecklistAtom
+  const openTradeChecklistReveal = useOpenTradeChecklistReveal()
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
   )
-
-  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
-  const revealContactFromQuickActionBanner = useSetAtom(
-    revealContactFromQuickActionBannerAtom
-  )
+  const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
+  const canUseTradingChecklist =
+    !!otherSideSupportsTradingChecklist && !listingTypeIsOther
   const setOpenedImageUri = useSetAtom(openedImageUriAtom)
 
   if (
@@ -206,15 +201,20 @@ function ContactRevealMessageItem({
           )
         }
         buttonText={
-          contactRevealStatus === 'theyAsked' ? t('common.respond') : undefined
+          contactRevealStatus === 'theyAsked' && canUseTradingChecklist
+            ? t('common.respond')
+            : undefined
         }
-        onButtonPress={() => {
-          if (contactRevealTriggeredFromTradeChecklist) {
-            void revealContactFromQuickActionBanner({chatId, inboxKey})
-          } else {
-            void revealContact('RESPOND_REVEAL')
-          }
-        }}
+        onButtonPress={
+          contactRevealStatus === 'theyAsked' && canUseTradingChecklist
+            ? () => {
+                openTradeChecklistReveal({
+                  item: 'REVEAL_PHONE_NUMBER',
+                  intent: 'respond',
+                })
+              }
+            : undefined
+        }
       />
     )
   }

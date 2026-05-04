@@ -1,10 +1,14 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {Effect} from 'effect'
+import {isLeft} from 'fp-ts/Either'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
-import React, {useCallback} from 'react'
+import React, {useCallback, useEffect, useRef} from 'react'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
-import * as fromChatAtoms from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {
+  chatWithMessagesKeys,
+  originOfferAtom,
+} from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
@@ -12,34 +16,80 @@ import {
   SecondaryFooterButtonProxy,
 } from '../../../PageWithNavigationHeader'
 import headerStateAtom from '../../../PageWithNavigationHeader/state/headerStateAtom'
+import {revealContactWithUiFeedbackAtom} from '../../atoms/revealContactAtoms'
+import {revealIdentityWithUiFeedbackAtom} from '../../atoms/revealIdentityAtoms'
 import {
   areThereUpdatesToBeSentAtom,
   askAreYouSureAndClearUpdatesToBeSentActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../atoms/updatesToBeSentAtom'
+import {type AutoOpenTradeChecklistReveal} from '../../domain'
 import Content from '../Content'
 import OnlineOrInPersonTrade from './components/OnlineOrInPersonTrade'
 
 type Props = TradeChecklistStackScreenProps<'AgreeOnTradeDetails'>
 
-function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
+function AgreeOnTradeDetailsScreen({
+  navigation,
+  route,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const offerForTradeChecklist = useAtomValue(fromChatAtoms.originOfferAtom)
+  const offerForTradeChecklist = useAtomValue(originOfferAtom)
   const areThereUpdatesToBeSent = useAtomValue(areThereUpdatesToBeSentAtom)
   const submitChangesAndSendMessage = useSetAtom(
     submitTradeChecklistUpdatesActionAtom
   )
+  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
+  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const store = useStore()
   const askAreYouSureAndClearUpdatesToBeSent = useSetAtom(
     askAreYouSureAndClearUpdatesToBeSentActionAtom
   )
   const setHeaderState = useSetAtom(headerStateAtom)
+  const autoOpenReveal = route.params?.autoOpenReveal
+  const handledAutoOpenRevealRef = useRef<
+    AutoOpenTradeChecklistReveal | undefined
+  >(undefined)
 
   useFocusEffect(
     useCallback(() => {
       setHeaderState((prev) => ({...prev, hidden: true}))
     }, [setHeaderState])
   )
+
+  useEffect(() => {
+    if (!autoOpenReveal || handledAutoOpenRevealRef.current === autoOpenReveal)
+      return
+
+    handledAutoOpenRevealRef.current = autoOpenReveal
+    const revealToOpen = autoOpenReveal
+
+    async function handleAutoOpenReveal(): Promise<void> {
+      const revealResult =
+        revealToOpen.item === 'REVEAL_IDENTITY'
+          ? await revealIdentity({intent: revealToOpen.intent})()
+          : await revealContact({intent: revealToOpen.intent})()
+
+      if (isLeft(revealResult)) return
+
+      await Effect.runPromise(
+        andThenExpectBooleanNoErrors((success) => {
+          if (success) {
+            navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
+          }
+        })(submitChangesAndSendMessage())
+      )
+    }
+
+    void handleAutoOpenReveal()
+  }, [
+    autoOpenReveal,
+    navigation,
+    revealContact,
+    revealIdentity,
+    store,
+    submitChangesAndSendMessage,
+  ])
 
   return (
     <Stack f={1}>
@@ -56,10 +106,7 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
         onPress={() => {
           void askAreYouSureAndClearUpdatesToBeSent()().then((success) => {
             if (success) {
-              navigation.popTo(
-                'ChatDetail',
-                store.get(fromChatAtoms.chatWithMessagesKeys)
-              )
+              navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
             }
           })
         }}
@@ -81,10 +128,7 @@ function AgreeOnTradeDetailsScreen({navigation}: Props): React.ReactElement {
           void Effect.runPromise(
             andThenExpectBooleanNoErrors((success) => {
               if (success) {
-                navigation.popTo(
-                  'ChatDetail',
-                  store.get(fromChatAtoms.chatWithMessagesKeys)
-                )
+                navigation.popTo('ChatDetail', store.get(chatWithMessagesKeys))
               }
             })(submitChangesAndSendMessage())
           )

@@ -8,7 +8,6 @@ import {
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {createScope, molecule} from 'bunshi/dist/react'
 import {Array, Effect, Either, Option, pipe} from 'effect'
-import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {
@@ -36,10 +35,6 @@ import focusDenyRequestMessageAtom, {
 } from '../../../state/chat/atoms/focusDenyRequestMessageAtom'
 import focusOtherSideLeftAtom from '../../../state/chat/atoms/focusOtherSideLeftAtom'
 import focusRequestMessageAtom from '../../../state/chat/atoms/focusRequestMessageAtom'
-import revealContactActionAtom, {
-  type RevealContactMessageType,
-} from '../../../state/chat/atoms/revealContactActionAtom'
-import revealIdentityActionAtom from '../../../state/chat/atoms/revealIdentityActionAtom'
 import selectOtherSideDataAtom from '../../../state/chat/atoms/selectOtherSideDataAtom'
 import sendMessageActionAtom from '../../../state/chat/atoms/sendMessageActionAtom'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
@@ -52,7 +47,6 @@ import {normalizedContactsAtom} from '../../../state/contacts/atom/contactsStore
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {createFeedbackForChatAtom} from '../../../state/feedback/atoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
-import {invalidUsernameUIFeedbackAtom} from '../../../state/session/userDataAtoms'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
@@ -75,7 +69,6 @@ import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import showDonationPromptGiveLoveActionAtom from '../../DonationPrompt/atoms/showDonationPromptGiveLoveActionAtom'
 import {showErrorAlert} from '../../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import {revealIdentityDialogUIAtom} from '../../RevealIdentityDialog/atoms'
 import ChatFeedbackDialogContent from '../components/ChatFeedbackDialogContent'
 import {type MessagesListItem} from '../components/MessageItem'
 import buildMessagesListData from '../utils/buildMessagesListData'
@@ -560,159 +553,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const canSendMessagesAtom = createCanSendMessagesAtom(messagesAtom)
 
-  const revealIdentityAtom = revealIdentityActionAtom(chatWithMessagesAtom)
-  const revealContactAtom = revealContactActionAtom(chatWithMessagesAtom)
-
-  const revealIdentityUsernameAtom = atom<string>('')
-  const usernameSavedForFutureUseAtom = atom<boolean>(false)
-  const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
-  const imageSavedForFutureUseAtom = atom<boolean>(false)
-
   const openedImageUriAtom = atom<UriString | undefined>(undefined)
-
-  const revealIdentityWithUiFeedbackAtom = atom(
-    null,
-    async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
-      const {t} = get(translationAtom)
-
-      return await pipe(
-        set(revealIdentityDialogUIAtom, {
-          type,
-          revealIdentityUsernameAtom,
-          usernameSavedForFutureUseAtom,
-          revealIdentityImageUriAtom,
-          imageSavedForFutureUseAtom,
-          commonConnectionsCountAtom,
-          friendLevelInfoAtom,
-        }),
-        TE.chainW(({type, username, imageUri}) =>
-          set(revealIdentityAtom, {type, username, imageUri})
-        ),
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
-            if (e._tag === 'UserDeclinedError') {
-              return false
-            }
-
-            if (e._tag === 'UsernameEmptyError') {
-              void set(invalidUsernameUIFeedbackAtom)
-
-              return false
-            }
-
-            if (e._tag === 'IdentityRequestAlreadySentError') {
-              showErrorAlert({
-                title: t('messages.identityAlreadyRequested'),
-                error: e,
-              })
-
-              return false
-            }
-            reportError('error', new Error('Error sending identityReveal'), {
-              e,
-            })
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-            return false
-          },
-          () => {
-            set(loadingOverlayDisplayedAtom, false)
-            return true
-          }
-        )
-      )()
-    }
-  )
-
-  const revealContactWithUiFeedbackAtom = atom(
-    null,
-    async (get, set, type: 'REQUEST_REVEAL' | 'RESPOND_REVEAL') => {
-      const {t} = get(translationAtom)
-
-      const modalContent = (() => {
-        if (type === 'REQUEST_REVEAL') {
-          return {
-            title: t('messages.contactRevealRequestModal.title'),
-            description: t('messages.contactRevealRequestModal.text'),
-            negativeButtonText: t('common.back'),
-            positiveButtonText: t('common.sendRequest'),
-          }
-        }
-        return {
-          title: t('messages.contactRevealRespondModal.title'),
-          description: t('messages.contactRevealRespondModal.text'),
-          negativeButtonText: t('common.no'),
-          positiveButtonText: t('common.yes'),
-        }
-      })()
-
-      return await pipe(
-        set(askAreYouSureActionAtom, {
-          steps: [{...modalContent, type: 'StepWithText'}],
-          variant: 'info',
-        }),
-        effectToTaskEither,
-        TE.map((val) => {
-          set(loadingOverlayDisplayedAtom, true)
-          return val
-        }),
-        TE.match(
-          (e) => {
-            if (e._tag === 'UserDeclinedError' && type === 'RESPOND_REVEAL') {
-              return E.right(
-                'DISAPPROVE_CONTACT_REVEAL' as RevealContactMessageType
-              )
-            }
-            return E.left(e)
-          },
-          () =>
-            E.right(
-              type === 'RESPOND_REVEAL'
-                ? ('APPROVE_CONTACT_REVEAL' as RevealContactMessageType)
-                : ('REQUEST_CONTACT_REVEAL' as RevealContactMessageType)
-            )
-        ),
-        TE.chainW((type) => set(revealContactAtom, {type})),
-        TE.match(
-          (e) => {
-            set(loadingOverlayDisplayedAtom, false)
-
-            if (e._tag === 'UserDeclinedError') {
-              return false
-            }
-            if (e._tag === 'ContactRevealRequestAlreadySentError') {
-              showErrorAlert({
-                title: t('messages.contactAlreadyRequested'),
-                error: e,
-              })
-              return false
-            }
-            reportError('error', new Error('Error sending contact reveal'), {
-              e,
-            })
-            showErrorAlert({
-              title: t('common.somethingWentWrong'),
-              description:
-                toCommonErrorMessage(e, t) ??
-                t('common.somethingWentWrongDescription'),
-              error: e,
-            })
-            return false
-          },
-          () => {
-            set(loadingOverlayDisplayedAtom, false)
-            return true
-          }
-        )
-      )()
-    }
-  )
 
   const identityRevealStatusAtom = selectAtom(
     chatWithMessagesAtom,
@@ -1268,8 +1109,6 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     otherSideLeftAtom: focusOtherSideLeftAtom(chatWithMessagesAtom),
     identityRevealStatusAtom,
     contactRevealStatusAtom,
-    revealIdentityWithUiFeedbackAtom,
-    revealContactWithUiFeedbackAtom,
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     messagesListAtomAtoms,

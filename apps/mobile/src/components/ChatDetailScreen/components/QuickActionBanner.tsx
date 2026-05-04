@@ -13,11 +13,11 @@ import reportError from '../../../utils/reportError'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import Button from '../../Button'
 import IconButton from '../../IconButton'
-import {revealContactFromQuickActionBannerAtom} from '../../TradeChecklistFlow/atoms/revealContactAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import phoneSvg from '../images/phoneSvg'
+import useOpenTradeChecklistReveal from '../utils/useOpenTradeChecklistReveal'
 
 export const QUICK_ACTION_BANNER_HEIGHT_WITH_PADDING = 70
 
@@ -93,13 +93,8 @@ function QuickActionBanner(): React.ReactElement | null {
     deleteChatWithUiFeedbackAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
-    revealIdentityWithUiFeedbackAtom,
-    revealContactWithUiFeedbackAtom,
     requestStateAtom,
     forceShowHistoryAtom,
-    contactRevealTriggeredFromTradeChecklistAtom,
-    publicKeyPemBase64Atom,
-    chatIdAtom,
     isRevealIdentityRequestReceivedMessageHiddenAtom,
     isRevealIdentityRequestSentMessageHiddenAtom,
     isContactRevealRequestReceivedMessageHiddenAtom,
@@ -108,26 +103,25 @@ function QuickActionBanner(): React.ReactElement | null {
     identityRevealRequestMessageIdAtom,
     contactRevealRequestMessageIdAtom,
     contactRevealApproveMessageIdAtom,
+    otherSideSupportsTradingChecklistAtom,
+    listingTypeIsOtherAtom,
   } = useMolecule(chatMolecule)
 
   const lastMessage = useAtomValue(lastMessageAtom)
   const otherSideData = useAtomValue(otherSideDataAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
-  const contactRevealTriggeredFromTradeChecklist = useAtomValue(
-    contactRevealTriggeredFromTradeChecklistAtom
-  )
+  const openTradeChecklistReveal = useOpenTradeChecklistReveal()
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
-  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
-  const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const requestState = useAtomValue(requestStateAtom)
   const setShowHistory = useSetAtom(forceShowHistoryAtom)
   const addRevealedContact = useSetAtom(addContactWithUiFeedbackActionAtom)
-  const chatId = useAtomValue(chatIdAtom)
-  const inboxKey = useAtomValue(publicKeyPemBase64Atom)
-  const revealContactFromQuickActionBanner = useSetAtom(
-    revealContactFromQuickActionBannerAtom
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
   )
+  const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
+  const canUseTradingChecklist =
+    !!otherSideSupportsTradingChecklist && !listingTypeIsOther
   const isRevealIdentityRequestSentMessageHidden = useAtomValue(
     isRevealIdentityRequestSentMessageHiddenAtom
   )
@@ -287,7 +281,8 @@ function QuickActionBanner(): React.ReactElement | null {
 
   if (
     identityRevealStatus === 'theyAsked' &&
-    isRevealIdentityRequestReceivedMessageHidden
+    isRevealIdentityRequestReceivedMessageHidden &&
+    canUseTradingChecklist
   ) {
     return (
       <QuickActionBannerUi
@@ -299,7 +294,10 @@ function QuickActionBanner(): React.ReactElement | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          void revealIdentity('RESPOND_REVEAL')
+          openTradeChecklistReveal({
+            item: 'REVEAL_IDENTITY',
+            intent: 'respond',
+          })
         }}
       />
     )
@@ -349,7 +347,8 @@ function QuickActionBanner(): React.ReactElement | null {
 
   if (
     contactRevealStatus === 'theyAsked' &&
-    isContactRevealRequestReceivedMessageHidden
+    isContactRevealRequestReceivedMessageHidden &&
+    canUseTradingChecklist
   ) {
     return (
       <QuickActionBannerUi
@@ -361,11 +360,10 @@ function QuickActionBanner(): React.ReactElement | null {
           <UserAvatar width={48} height={48} userImage={otherSideData.image} />
         }
         onButtonPress={() => {
-          if (contactRevealTriggeredFromTradeChecklist) {
-            void revealContactFromQuickActionBanner({chatId, inboxKey})
-          } else {
-            void revealContact('RESPOND_REVEAL')
-          }
+          openTradeChecklistReveal({
+            item: 'REVEAL_PHONE_NUMBER',
+            intent: 'respond',
+          })
         }}
       />
     )

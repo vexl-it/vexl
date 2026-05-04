@@ -14,6 +14,7 @@ import avatarsSvg from '../../AnonymousAvatar/images/avatarsSvg'
 import SvgImage from '../../Image'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
+import useOpenTradeChecklistReveal from '../utils/useOpenTradeChecklistReveal'
 import BigIconMessage from './BigIconMessage'
 
 function IdentityRevealMessageItem({
@@ -28,16 +29,23 @@ function IdentityRevealMessageItem({
     chatAtom,
     identityRevealStatusAtom,
     otherSideDataAtom,
-    revealIdentityWithUiFeedbackAtom,
     offerForChatAtom,
     openedImageUriAtom,
+    otherSideSupportsTradingChecklistAtom,
+    listingTypeIsOtherAtom,
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber} = useAtomValue(otherSideDataAtom)
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
-  const revealIdentity = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const setOpenedImageUri = useSetAtom(openedImageUriAtom)
+  const openTradeChecklistReveal = useOpenTradeChecklistReveal()
+  const otherSideSupportsTradingChecklist = useAtomValue(
+    otherSideSupportsTradingChecklistAtom
+  )
+  const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
+  const canUseTradingChecklist =
+    !!otherSideSupportsTradingChecklist && !listingTypeIsOther
 
   const anonymousAvatars =
     (offer?.offerInfo.publicPart.goldenAvatarType ===
@@ -80,12 +88,17 @@ function IdentityRevealMessageItem({
           />
         }
         buttonText={
-          identityRevealStatus === 'theyAsked' ? t('common.respond') : undefined
+          identityRevealStatus === 'theyAsked' && canUseTradingChecklist
+            ? t('common.respond')
+            : undefined
         }
         onButtonPress={
-          identityRevealStatus === 'theyAsked'
+          identityRevealStatus === 'theyAsked' && canUseTradingChecklist
             ? () => {
-                void revealIdentity('RESPOND_REVEAL')
+                openTradeChecklistReveal({
+                  item: 'REVEAL_IDENTITY',
+                  intent: 'respond',
+                })
               }
             : undefined
         }

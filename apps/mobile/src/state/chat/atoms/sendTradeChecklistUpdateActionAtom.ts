@@ -24,8 +24,6 @@ import {tradeChecklistDataAtom} from '../../tradeChecklist/atoms/fromChatAtoms'
 import {updateTradeChecklistState} from '../../tradeChecklist/utils'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {addMessagesToChat} from '../utils/addMessageToChat'
-import processContactRevealMessageIfAny from '../utils/processContactRevealMessageIfAny'
-import processIdentityRevealMessageIfAny from '../utils/processIdentityRevealMessageIfAny'
 import processTradeChecklistContactRevealMessageIfAny from '../utils/processTradeChecklistContactRevealMessageIfAny'
 import processTradeChecklistIdentityRevealMessageIfAny from '../utils/processTradeChecklistIdentityRevealMessageIfAny'
 import {replaceIdentityImageFileUriWithBase64} from '../utils/replaceImageFileUrisWithBase64'
@@ -53,13 +51,6 @@ export default function createSubmitChecklistUpdateActionAtom(
       const updateKeys = Object.keys(update) as Array<
         keyof TradeChecklistUpdate
       >
-      const keepChat = (chat: ChatWithMessages): ChatWithMessages => chat
-      const legacyIdentityRevealMessage = chatWithMessages.messages.find(
-        (one) => one.message.messageType === 'REQUEST_REVEAL'
-      )
-      const legacyContactRevealMessage = chatWithMessages.messages.find(
-        (one) => one.message.messageType === 'REQUEST_CONTACT_REVEAL'
-      )
 
       const identityRevealChatMessageOrUndefined = yield* _(
         taskToEffect(replaceIdentityImageFileUriWithBase64(update.identity))
@@ -120,15 +111,12 @@ export default function createSubmitChecklistUpdateActionAtom(
         })
       )
 
-      const identityImageToRemove =
-        tradeChecklistData.identity.received?.image ??
-        legacyIdentityRevealMessage?.message.image
-
       if (
         update.identity?.status === 'DISAPPROVE_REVEAL' &&
-        identityImageToRemove
-      )
-        void removeFile(identityImageToRemove)()
+        tradeChecklistData.identity.received?.image
+      ) {
+        void removeFile(tradeChecklistData.identity.received.image)()
+      }
 
       const realLifeInfo = (
         update.identity?.status === 'APPROVE_REVEAL'
@@ -143,16 +131,6 @@ export default function createSubmitChecklistUpdateActionAtom(
               )
             : undefined
       ) satisfies RealLifeInfo | undefined
-      const processLegacyIdentityReveal =
-        update.identity?.status === 'APPROVE_REVEAL' &&
-        !tradeChecklistData.identity.received
-          ? processIdentityRevealMessageIfAny(legacyIdentityRevealMessage)
-          : keepChat
-      const processLegacyContactReveal =
-        update.contact?.status === 'APPROVE_REVEAL' &&
-        !tradeChecklistData.contact.received
-          ? processContactRevealMessageIfAny(legacyContactRevealMessage)
-          : keepChat
 
       set(
         chatWithMessagesAtom,
@@ -172,9 +150,7 @@ export default function createSubmitChecklistUpdateActionAtom(
                 direction: 'sent',
               }),
             }) satisfies ChatWithMessages,
-          addMessagesToChat(successMessages),
-          processLegacyIdentityReveal,
-          processLegacyContactReveal
+          addMessagesToChat(successMessages)
         )
       )
 

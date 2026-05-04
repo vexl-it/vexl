@@ -4,7 +4,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {ScrollView} from 'react-native'
+import {Alert, ScrollView} from 'react-native'
 import {getFontScaleSync} from 'react-native-device-info'
 import {SlideInDown, SlideOutDown} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -24,7 +24,6 @@ import IdentityIconSvg from '../../images/identityIconSvg'
 import {chatMolecule} from '../atoms'
 import vexlbotNotificationsSvg from '../images/vexlbotNotificationsSvg'
 import WarningSvg from '../images/warningSvg'
-import useOpenTradeChecklistReveal from '../utils/useOpenTradeChecklistReveal'
 import ButtonStack from './ButtonStack'
 import ChatRequestPreview from './ChatRequestPreview'
 import {PHOTO_AND_INFO_PHOTO_TOP_HEIGHT} from './OtherSideNamePhotoAndInfo'
@@ -52,6 +51,7 @@ function ChatInfoModal(): React.ReactElement | null {
     deleteChatWithUiFeedbackAtom,
     blockChatWithUiFeedbackAtom,
     canSendMessagesAtom,
+    revealIdentityWithUiFeedbackAtom,
     identityRevealStatusAtom,
     showVexlbotNotificationsForCurrentChatAtom,
     otherSideSupportsTradingChecklistAtom,
@@ -69,7 +69,7 @@ function ChatInfoModal(): React.ReactElement | null {
 
   const deleteChatWithUiFeedback = useSetAtom(deleteChatWithUiFeedbackAtom)
   const blockChat = useSetAtom(blockChatWithUiFeedbackAtom)
-  const openTradeChecklistReveal = useOpenTradeChecklistReveal()
+  const requestReveal = useSetAtom(revealIdentityWithUiFeedbackAtom)
   const canSendMessages = useAtomValue(canSendMessagesAtom)
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const offerForChat = useAtomValue(offerForChatAtom)
@@ -85,8 +85,6 @@ function ChatInfoModal(): React.ReactElement | null {
   )
   const listingTypeIsOther = useAtomValue(listingTypeIsOtherAtom)
   const {showOfferDetail} = useAtomValue(preferencesAtom)
-  const canUseTradingChecklist =
-    !!otherSideSupportsTradingChecklist && !listingTypeIsOther
 
   if (!showModal) return null
 
@@ -119,24 +117,16 @@ function ChatInfoModal(): React.ReactElement | null {
             )}
           <ButtonStack
             buttons={[
-              ...(canSendMessages &&
-              identityRevealStatus === 'notStarted' &&
-              canUseTradingChecklist
+              ...(canSendMessages && identityRevealStatus === 'notStarted'
                 ? [
                     {
                       icon: IdentityIconSvg,
                       isNegative: false,
                       text: t('messages.askToReveal'),
                       onPress: () => {
-                        openTradeChecklistReveal(
-                          {
-                            item: 'REVEAL_IDENTITY',
-                            intent: 'request',
-                          },
-                          {
-                            closeModal: true,
-                          }
-                        )
+                        void requestReveal('REQUEST_REVEAL').then((success) => {
+                          if (success) setShowModal(false)
+                        })
                       },
                     },
                   ]
@@ -166,6 +156,13 @@ function ChatInfoModal(): React.ReactElement | null {
                       text: t('messages.tradeChecklist'),
                       iconFill: getTokens().color.greyOnBlack.val,
                       onPress: () => {
+                        if (!otherSideSupportsTradingChecklist) {
+                          Alert.alert(
+                            t('tradeChecklist.notSupportedByOtherSide.title'),
+                            t('tradeChecklist.notSupportedByOtherSide.body')
+                          )
+                          return
+                        }
                         setShowModal(false)
                         navigation.navigate('TradeChecklistFlow', {
                           screen: 'AgreeOnTradeDetails',

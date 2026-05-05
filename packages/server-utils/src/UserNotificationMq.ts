@@ -96,6 +96,13 @@ export class NewContentNotificationMqEntry extends Schema.TaggedClass<NewContent
   token: Schema.NullOr(VexlNotificationToken),
 }) {}
 
+export class VexlProductNotificationMqEntry extends Schema.TaggedClass<VexlProductNotificationMqEntry>(
+  'VexlProductNotificationMqEntry'
+)('VexlProductNotificationMqEntry', {
+  token: VexlNotificationToken,
+  uuid: Schema.UUID,
+}) {}
+
 export const UserNotificationMqEntry = Schema.Union(
   NewUserNotificationMqEntry,
   NewClubUserNotificationMqEntry,

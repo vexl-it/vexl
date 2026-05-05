@@ -15,10 +15,14 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig} from './configs'
+import DbLayer from './db/layer'
+import {VexlProductNotificationsDbService} from './db/VexlProductNotificationsDbService'
 import {getBlogsHandler} from './handlers/blog'
 import {clearCacheHandler} from './handlers/clearCache'
 import {createInvoiceHandler} from './handlers/donations/createInvoice'
 import {getInvoiceHandler} from './handlers/donations/getInvoice'
+import {createVexlProductNotificationHandler} from './handlers/vexlProductNotifications/createVexlProductNotification'
+import {getVexlProductNotificationsHandler} from './handlers/vexlProductNotifications/getVexlProductNotifications'
 
 import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatusType'
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
@@ -45,6 +49,18 @@ const NewsAndAnnouncementsApiGroupLive = HttpApiBuilder.group(
   (h) => h.handle('getNewsAndAnnouncements', newsAndAnonouncementsHandler)
 )
 
+const VexlProductNotificationsApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'VexlProductNotifications',
+  (h) =>
+    h
+      .handle(
+        'createVexlProductNotification',
+        createVexlProductNotificationHandler
+      )
+      .handle('getVexlProductNotifications', getVexlProductNotificationsHandler)
+)
+
 const DonationsApiGroupLive = HttpApiBuilder.group(
   ContentApiSpecification,
   'Donations',
@@ -59,6 +75,8 @@ const DonationsApiGroupLive = HttpApiBuilder.group(
 export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(NewsAndAnnouncementsApiGroupLive),
+  Layer.provide(VexlProductNotificationsApiGroupLive),
+  Layer.provide(VexlProductNotificationsDbService.Live),
   Layer.provide(DonationsApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(ContentApiSpecification))
 )
@@ -78,6 +96,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provideMerge(WebflowCmsService.Live),
   Layer.provideMerge(CacheService.Live),
+  Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
   Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(BtcPayServerService.Live),

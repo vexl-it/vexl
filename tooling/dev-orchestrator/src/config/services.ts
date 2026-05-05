@@ -1,4 +1,4 @@
-import {Array as A, Option} from 'effect'
+import {Array, Option} from 'effect'
 
 export interface ServiceConfig {
   readonly name: string
@@ -83,7 +83,7 @@ export const SERVICES: readonly ServiceConfig[] = [
     port: 3009,
     healthPort: 8009,
     tier: 1,
-    needsDatabase: false, // Uses Webflow CMS
+    needsDatabase: true,
   },
   {
     name: 'location-service',
@@ -123,16 +123,16 @@ export const SERVICES: readonly ServiceConfig[] = [
 export const getServicesByTier = (): ReadonlyArray<
   readonly ServiceConfig[]
 > => {
-  const grouped = A.groupBy(SERVICES, (s) => String(s.tier))
+  const grouped = Array.groupBy(SERVICES, (s) => String(s.tier))
   const tiers = Object.keys(grouped).sort((a, b) => Number(a) - Number(b))
-  return A.map(tiers, (tier) => grouped[tier] ?? [])
+  return Array.map(tiers, (tier) => grouped[tier] ?? [])
 }
 
 /**
  * Get a service by name
  */
 export const getServiceByName = (name: string): ServiceConfig | undefined => {
-  const result = A.findFirst(SERVICES, (s) => s.name === name)
+  const result = Array.findFirst(SERVICES, (s) => s.name === name)
   return Option.isSome(result) ? result.value : undefined
 }
 
@@ -141,7 +141,7 @@ export const getServiceByName = (name: string): ServiceConfig | undefined => {
  * Database naming convention: vexl_{service_name} with hyphens replaced by underscores.
  */
 export const getDatabaseNames = (): readonly string[] =>
-  A.filterMap(SERVICES, (s) =>
+  Array.filterMap(SERVICES, (s) =>
     s.needsDatabase
       ? Option.some(`vexl_${s.name.replace(/-/g, '_')}`)
       : Option.none()

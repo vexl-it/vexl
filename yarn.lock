@@ -11329,7 +11329,7 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.15.0
+    axios: ^1.15.2
     dotenv: ^16.4.5
     effect: ^3.20.0
     esbuild: ^0.25.0
@@ -11473,7 +11473,7 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.15.0
+    axios: ^1.15.2
     dotenv: ^16.4.5
     effect: ^3.20.0
     esbuild: ^0.25.0
@@ -11554,7 +11554,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     "@vitejs/plugin-react": ^4.3.0
-    axios: ^1.15.0
+    axios: ^1.15.2
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
@@ -11794,7 +11794,7 @@ __metadata:
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
     "@vitejs/plugin-react": ^4.3.0
-    axios: ^1.15.0
+    axios: ^1.15.2
     dayjs: ^1.11.11
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
@@ -11845,7 +11845,7 @@ __metadata:
     "@vexl-next/rest-api": 0.0.0
     "@vexl-next/server-utils": 0.0.0
     "@vexl-next/tsconfig": 0.0.0
-    axios: ^1.15.0
+    axios: ^1.15.2
     dotenv: ^16.4.5
     dynamic-import-polyfill: ^0.1.1
     effect: ^3.20.0
@@ -13105,7 +13105,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.12.0, axios@npm:^1.15.0":
+"axios@npm:^1.12.0":
   version: 1.15.1
   resolution: "axios@npm:1.15.1"
   dependencies:
@@ -13113,6 +13113,17 @@ __metadata:
     form-data: ^4.0.5
     proxy-from-env: ^2.1.0
   checksum: 5195540056a14b54cb85aa0d22aa672afda6317dd36d4d04f4e257da935c9f27404fb5abc6dd07c9c5fd6489b9763b5623e2b2da926999015e82321119da71eb
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.15.2":
+  version: 1.16.0
+  resolution: "axios@npm:1.16.0"
+  dependencies:
+    follow-redirects: ^1.16.0
+    form-data: ^4.0.5
+    proxy-from-env: ^2.1.0
+  checksum: 93e810968167fea59750d28f458e6860973a573c14bd60fe57ee07b5241f4c16991b149ae9ce65d79765081e3004743c9e158c438edba75af6f4612197e6834b
   languageName: node
   linkType: hard
 
@@ -18925,7 +18936,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.15.11":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.15.11, follow-redirects@npm:^1.16.0":
   version: 1.16.0
   resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:

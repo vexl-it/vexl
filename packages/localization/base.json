@@ -679,6 +679,7 @@
   "notifications.permissionsNotGranted.title": "Notifications are turned off",
   "notifications.permissionsNotGranted.message": "You can turn them on in Settings.",
   "notifications.permissionsNotGranted.openSettings": "Open settings",
+  "notifications.center.screenTitle": "Notifications",
   "notifications.errorWhileOpening": "Error while opening notification",
   "notifications.MESSAGE.title": "New message",
   "notifications.MESSAGE.body": "Tap to read it.",

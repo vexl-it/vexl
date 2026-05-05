@@ -46,6 +46,7 @@ import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MyDonationsScreen from '../MyDonationsScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
+import NotificationCenterScreen from '../NotificationCenterScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
@@ -228,6 +229,10 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="BlogArticlesList"
               component={BlogArticlesListScreen}
+            />
+            <Stack.Screen
+              name="NotificationCenter"
+              component={NotificationCenterScreen}
             />
             <Stack.Screen name="Settings" component={SettingsScreen} />
           </Stack.Group>

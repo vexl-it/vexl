@@ -9,8 +9,6 @@ import {
 import React, {useCallback, useMemo} from 'react'
 import {type SharedValue} from 'react-native-reanimated'
 
-const noop = (): void => {}
-
 function InsideNavigationBar({
   title,
   scrollY,
@@ -28,13 +26,17 @@ function InsideNavigationBar({
     navigation.navigate('Settings')
   }, [navigation])
 
+  const handleNotificationCenterPress = useCallback(() => {
+    navigation.navigate('NotificationCenter')
+  }, [navigation])
+
   const rightActions: readonly AnimatedNavigationBarAction[] = useMemo(
     () => [
-      {icon: BellNotification, onPress: noop},
+      {icon: BellNotification, onPress: handleNotificationCenterPress},
       {icon: MathCalculate, onPress: handleCalculatorPress},
       {icon: UserProfile, onPress: handleSettingsPress},
     ],
-    [handleCalculatorPress, handleSettingsPress]
+    [handleCalculatorPress, handleNotificationCenterPress, handleSettingsPress]
   )
 
   return (

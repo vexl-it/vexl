@@ -10,8 +10,10 @@ import {type AppSource, makeCommonHeaders} from '../../commonHeaders'
 import {type LoggingFunction} from '../../utils'
 import {
   type CreateInvoiceRequest,
+  type CreateVexlProductNotificationRequest,
   type GetInvoiceRequest,
   type GetInvoiceStatusTypeRequest,
+  type GetVexlProductNotificationsRequest,
 } from './contracts'
 import {ContentApiSpecification} from './specification'
 
@@ -78,6 +80,21 @@ export function api({
       getBlogArticles: () => client.Cms.getBlogArticles({}),
       getNewsAndAnnoucements: () =>
         client.NewsAndAnnouncements.getNewsAndAnnouncements({
+          headers: commonHeaders,
+        }),
+      createVexlProductNotification: (
+        adminToken: string,
+        request: CreateVexlProductNotificationRequest
+      ) =>
+        client.VexlProductNotifications.createVexlProductNotification({
+          urlParams: {adminToken},
+          payload: request,
+        }),
+      getVexlProductNotifications: (
+        request: GetVexlProductNotificationsRequest
+      ) =>
+        client.VexlProductNotifications.getVexlProductNotifications({
+          urlParams: request,
           headers: commonHeaders,
         }),
       createInvoice: (createInvoiceRequest: CreateInvoiceRequest) =>

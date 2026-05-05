@@ -14,6 +14,7 @@ import {Rpcs} from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
+import {ScheduleUserNotificationProducerLayer} from '@vexl-next/server-utils/src/UserNotificationMq'
 import {
   cryptoConfig,
   healthServerPortConfig,
@@ -110,7 +111,8 @@ const workers = Layer.mergeAll(
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
   healthServerLayer({port: healthServerPortConfig}),
-  workers
+  workers,
+  ScheduleUserNotificationProducerLayer
 ).pipe(
   Layer.provide(NotificationSocketMessaging.Live),
   Layer.provide(ThrottledPushNotificationService.Live),

@@ -1,3 +1,7 @@
+import {
+  VexlProductNotification,
+  VexlProductNotificationUuid,
+} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
@@ -59,9 +63,54 @@ export class InvalidTokenError extends Schema.TaggedError<InvalidTokenError>(
   status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
 }) {}
 
+export class InvalidContentAdminTokenError extends Schema.TaggedError<InvalidContentAdminTokenError>(
+  'InvalidContentAdminTokenError'
+)('InvalidContentAdminTokenError', {
+  status: Schema.optionalWith(Schema.Literal(401), {default: () => 401}),
+}) {}
+
+export class DuplicateVexlProductNotificationUuidError extends Schema.TaggedError<DuplicateVexlProductNotificationUuidError>(
+  'DuplicateVexlProductNotificationUuidError'
+)('DuplicateVexlProductNotificationUuidError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+}) {}
+
 export const ClearEventsCacheRequest = Schema.Struct({
   token: Schema.String,
 })
+
+export const CreateVexlProductNotificationAdminParams = Schema.Struct({
+  adminToken: Schema.String,
+})
+export type CreateVexlProductNotificationAdminParams =
+  typeof CreateVexlProductNotificationAdminParams.Type
+
+export const CreateVexlProductNotificationRequest = Schema.Struct({
+  vexlProductNotification: VexlProductNotification,
+})
+export type CreateVexlProductNotificationRequest =
+  typeof CreateVexlProductNotificationRequest.Type
+
+export const VexlProductNotificationResponse = Schema.Struct({
+  vexlProductNotification: VexlProductNotification,
+})
+export type VexlProductNotificationResponse =
+  typeof VexlProductNotificationResponse.Type
+
+export const GetVexlProductNotificationsRequest = Schema.Struct({
+  newerThan: Schema.DateFromString,
+  lastVexlProductNotificationUuidFetched: Schema.optional(
+    VexlProductNotificationUuid
+  ),
+})
+export type GetVexlProductNotificationsRequest =
+  typeof GetVexlProductNotificationsRequest.Type
+
+export const GetVexlProductNotificationsResponse = Schema.Struct({
+  vexlProductNotifications: Schema.Array(VexlProductNotification),
+})
+export type GetVexlProductNotificationsResponse =
+  typeof GetVexlProductNotificationsResponse.Type
 
 export const VexlBotNews = Schema.Struct({
   id: Uuid,

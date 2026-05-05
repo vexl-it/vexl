@@ -186,9 +186,10 @@ const devConfig = {
   },
 
   /**
-   * Content Service - serves app content from Webflow CMS.
+   * Content Service - serves app content from Webflow CMS and Postgres.
    */
   contentService: {
+    ADMIN_TOKEN_HASH: process.env.DEV_CONTENT_SERVICE_ADMIN_TOKEN_HASH ?? "",
     CLEAR_CACHE_TOKEN_HASH:
       process.env.DEV_CONTENT_SERVICE_CLEAR_CACHE_TOKEN_HASH ?? "",
     FORCE_UPDATE_FOR_VERSION_AND_LOWER:

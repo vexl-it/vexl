@@ -1,6 +1,7 @@
 import {NodeContext, NodeHttpServer} from '@effect/platform-node/index'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type SqlClient} from '@effect/sql/SqlClient'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
@@ -9,8 +10,14 @@ import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mock
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
 import {TestRequestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  disposeTestDatabase,
+  setupTestDatabase,
+} from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
+import DbLayer from '../../db/layer'
 import {UpdateInvoiceStateWebhookService} from '../../handlers/donations/UpdateInvoiceStateWebhookService'
 import {ContentApiLive} from '../../httpServer'
 import {type CacheService} from '../../utils/cache'
@@ -23,6 +30,8 @@ import {mockedWebflowCmsService} from './mockedWebflowCmsService'
 export type MockedContexts =
   | RedisService
   | ServerCrypto
+  | SqlClient
+  | VexlProductNotificationsDbService
   | MetricsClientService
   | UpdateInvoiceStateWebhookService
   | CacheService
@@ -43,6 +52,8 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
+  Layer.provideMerge(VexlProductNotificationsDbService.Live),
+  Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
   Layer.provideMerge(mockedRedisLayer),
   Layer.provideMerge(mockedMetricsClientService),
@@ -56,6 +67,7 @@ const runtime = ManagedRuntime.make(context)
 let runtimeReady = false
 
 export const startRuntime = async (): Promise<void> => {
+  await Effect.runPromise(setupTestDatabase)
   await runtime.runPromise(Console.log('Initialized the test environment'))
   runtimeReady = true
 }
@@ -66,6 +78,7 @@ export const disposeRuntime = async (): Promise<void> => {
       Console.log('Disposed test environment')
     )
   )
+  await Effect.runPromise(disposeTestDatabase)
   runtimeReady = false
 }
 

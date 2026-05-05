@@ -2,6 +2,7 @@ import {Config} from 'effect'
 
 export {
   cryptoConfig,
+  databaseConfig,
   healthServerPortConfig,
   isRunningInTestConfig,
   nodeEnvConfig,
@@ -22,6 +23,8 @@ export const webflowBlogCollectionIdConfig = Config.string(
 export const vexlBlogUrlTemplateConfig = Config.string('VEXL_BLOG_URL_TEMPLATE')
 
 export const clearCacheTokenHashConfig = Config.string('CLEAR_CACHE_TOKEN_HASH')
+
+export const adminTokenConfigHash = Config.string('ADMIN_TOKEN_HASH')
 
 export const btcPayServerUrlConfig = Config.string('BTC_PAY_SERVER_URL')
 export const btcPayServerApiKeyConfig = Config.string('BTC_PAY_SERVER_API_KEY')

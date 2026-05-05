@@ -15,6 +15,9 @@ import {
   CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
+  CreateVexlProductNotificationAdminParams,
+  CreateVexlProductNotificationRequest,
+  DuplicateVexlProductNotificationUuidError,
   EventsResponse,
   GetInvoiceGeneralError,
   GetInvoicePaymentMethodsGeneralError,
@@ -22,10 +25,14 @@ import {
   GetInvoiceResponse,
   GetInvoiceStatusTypeRequest,
   GetInvoiceStatusTypeResponse,
+  GetVexlProductNotificationsRequest,
+  GetVexlProductNotificationsResponse,
+  InvalidContentAdminTokenError,
   InvalidTokenError,
   InvoiceNotFoundError,
   NewsAndAnnouncementsResponse,
   UpdateInvoiceWebhookError,
+  VexlProductNotificationResponse,
 } from './contracts'
 
 export const GetEventsEndpoint = HttpApiEndpoint.get(
@@ -67,6 +74,32 @@ export const NewsAndAnonouncementsEndpoint = HttpApiEndpoint.get(
 const NewsAndAnnouncementsApiGroup = HttpApiGroup.make(
   'NewsAndAnnouncements'
 ).add(NewsAndAnonouncementsEndpoint)
+
+export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
+  'createVexlProductNotification',
+  '/content/vexl-product-notifications/admin'
+)
+  .setUrlParams(CreateVexlProductNotificationAdminParams)
+  .setPayload(CreateVexlProductNotificationRequest)
+  .addSuccess(VexlProductNotificationResponse)
+  .addError(InvalidContentAdminTokenError, {status: 401})
+  .addError(DuplicateVexlProductNotificationUuidError, {status: 400})
+  .annotate(MaxExpectedDailyCall, 100)
+
+export const GetVexlProductNotificationsEndpoint = HttpApiEndpoint.get(
+  'getVexlProductNotifications',
+  '/content/vexl-product-notifications'
+)
+  .setHeaders(CommonHeaders)
+  .setUrlParams(GetVexlProductNotificationsRequest)
+  .addSuccess(GetVexlProductNotificationsResponse)
+  .annotate(MaxExpectedDailyCall, 10000)
+
+const VexlProductNotificationsApiGroup = HttpApiGroup.make(
+  'VexlProductNotifications'
+)
+  .add(CreateVexlProductNotificationEndpoint)
+  .add(GetVexlProductNotificationsEndpoint)
 
 export const CreateInvoiceEndpoint = HttpApiEndpoint.post(
   'createInvoice',
@@ -119,6 +152,7 @@ const DonationsApiGroup = HttpApiGroup.make('Donations')
 export const ContentApiSpecification = HttpApi.make('Content API')
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
+  .add(VexlProductNotificationsApiGroup)
   .add(DonationsApiGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

@@ -6,6 +6,7 @@ import {
 } from '@effect/platform/index'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {redisUrl} from '@vexl-next/server-utils/src/commonConfigs'
+import {VexlProductNotificationProducerLayer} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
 import {healthServerLayer} from '@vexl-next/server-utils/src/HealthServer'
 import {NodeHttpServerLiveWithPortFromEnv} from '@vexl-next/server-utils/src/NodeHttpServerLiveWithPortFromEnv'
 import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
@@ -98,6 +99,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(CacheService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
+  Layer.provideMerge(VexlProductNotificationProducerLayer),
   Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(BtcPayServerService.Live),
   Layer.provideMerge(RedisConnectionService.layer(redisUrl))

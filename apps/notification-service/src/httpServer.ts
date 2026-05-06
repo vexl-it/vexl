@@ -41,10 +41,13 @@ import {
   TimeoutWorkerLayer,
 } from './services/NotificationSocketMessaging/services/SendMessageTasksManager'
 import {NotificationTokensDb} from './services/NotificationTokensDb'
+import {PendingBatchedNotificationsDb} from './services/PendingBatchedNotificationsDb'
 import {PosgressDbLive} from './services/PostgressDb'
+import {ProcessVexlProductNotificationWorker} from './services/ProcessVexlProductNotificationWorker'
 import {ThrottledPushNotificationService} from './services/ThrottledPushNotificationService'
 import {processThrottledNotificationsWorker} from './services/ThrottledPushNotificationService/services/ThrottledNotificationMq'
 import {VexlNotificationTokenService} from './services/VexlNotificationTokenService'
+import {VexlProductNotificationBatchWorkerLayer} from './services/VexlProductNotificationBatchWorker'
 
 const RootGroupLive = HttpApiBuilder.group(
   NotificationApiSpecification,
@@ -105,20 +108,23 @@ const workers = Layer.mergeAll(
   TaskWorkerLayer,
   TimeoutWorkerLayer,
   processThrottledNotificationsWorker,
-  ProcessUserNotificationsWorker
+  ProcessUserNotificationsWorker,
+  ProcessVexlProductNotificationWorker,
+  VexlProductNotificationBatchWorkerLayer
 )
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
   healthServerLayer({port: healthServerPortConfig}),
-  workers,
-  ScheduleUserNotificationProducerLayer
+  workers
 ).pipe(
+  Layer.provide(ScheduleUserNotificationProducerLayer),
   Layer.provide(NotificationSocketMessaging.Live),
   Layer.provide(ThrottledPushNotificationService.Live),
   Layer.provide(VexlNotificationTokenService.Live),
   Layer.provide(NotificationMetricsService.Live),
   Layer.provide(NotificationTokensDb.Live),
+  Layer.provide(PendingBatchedNotificationsDb.Live),
   Layer.provide(PosgressDbLive),
   Layer.provide(RateLimitingService.Live),
   Layer.provide(MetricsClientService.Live),

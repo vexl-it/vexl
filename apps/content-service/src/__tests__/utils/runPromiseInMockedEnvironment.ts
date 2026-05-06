@@ -2,10 +2,13 @@ import {NodeContext, NodeHttpServer} from '@effect/platform-node/index'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {type VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
+import {EnqueueVexlProductNotification} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {type RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {MqServiceError} from '@vexl-next/server-utils/src/mqService'
 import {mockedMetricsClientService} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {mockedRateLimitingLayer} from '@vexl-next/server-utils/src/tests/mockedRateLimitingLayer'
 import {mockedRedisLayer} from '@vexl-next/server-utils/src/tests/mockedRedisLayer'
@@ -14,6 +17,7 @@ import {
   disposeTestDatabase,
   setupTestDatabase,
 } from '@vexl-next/server-utils/src/tests/testDb'
+import {type Job} from 'bullmq'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {VexlProductNotificationsDbService} from '../../db/VexlProductNotificationsDbService'
@@ -41,7 +45,34 @@ export type MockedContexts =
   | TestRequestHeaders
   | RateLimitingService
 
+export const enqueuedVexlProductNotifications: VexlProductNotification[] = []
+export let shouldFailVexlProductNotificationEnqueue = false
+
+export const setShouldFailVexlProductNotificationEnqueue = (
+  value: boolean
+): void => {
+  shouldFailVexlProductNotificationEnqueue = value
+}
+
 const universalContext = Layer.mergeAll(ServerCrypto.layer(cryptoConfig))
+const mockJob: Job = Object.create(null)
+
+const mockedEnqueueVexlProductNotificationLayer = Layer.succeed(
+  EnqueueVexlProductNotification,
+  (task) => {
+    if (shouldFailVexlProductNotificationEnqueue) {
+      return Effect.fail(
+        new MqServiceError({
+          cause: 'test failure',
+          message: 'Test enqueue failure',
+        })
+      )
+    }
+
+    enqueuedVexlProductNotifications.push(task)
+    return Effect.succeed(mockJob)
+  }
+)
 
 const TestServerLive = HttpApiBuilder.serve().pipe(
   Layer.provide(ContentApiLive),
@@ -53,6 +84,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(VexlProductNotificationsDbService.Live),
+  Layer.provideMerge(mockedEnqueueVexlProductNotificationLayer),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(UpdateInvoiceStateWebhookService.Live),
   Layer.provideMerge(mockedRedisLayer),
@@ -98,3 +130,8 @@ export const runPromiseInMockedEnvironment = async (
     )
   )
 }
+
+beforeEach(() => {
+  enqueuedVexlProductNotifications.length = 0
+  shouldFailVexlProductNotificationEnqueue = false
+})

@@ -14,11 +14,13 @@ import {
   createFindAllTokensForSecret,
   createFindSecretByNotificationToken,
   createFindSecretBySecretValue,
-  type CreateNotificationTokenParams,
   createSaveNotificationToken,
   createSaveNotificationTokenSecret,
+  createSelectVexlTokens,
   createUpdateClientInfo,
+  type CreateNotificationTokenParams,
   type SaveNotificationTokenParams,
+  type SelectVexlTokensParams,
   type UpdateClientInfoParams,
 } from './queries'
 
@@ -34,6 +36,10 @@ export interface NotificationTokensDbOperations {
   updateClientInfo: (
     params: UpdateClientInfoParams
   ) => Effect.Effect<NotificationSecretRecord, UnexpectedServerError>
+
+  selectVexlTokens: (
+    params: SelectVexlTokensParams
+  ) => Effect.Effect<readonly VexlNotificationToken[], UnexpectedServerError>
 
   findSecretByNotificationToken: (
     Notification: VexlNotificationToken
@@ -73,6 +79,7 @@ export class NotificationTokensDb extends Context.Tag('NotificationTokensDb')<
         yield* createSaveNotificationTokenSecret
       const saveNotificationToken = yield* createSaveNotificationToken
       const updateClientInfo = yield* createUpdateClientInfo
+      const selectVexlTokens = yield* createSelectVexlTokens
       const findSecretByNotificationToken =
         yield* createFindSecretByNotificationToken
       const findAllTokensForSecret = yield* createFindAllTokensForSecret
@@ -84,6 +91,7 @@ export class NotificationTokensDb extends Context.Tag('NotificationTokensDb')<
         saveNotificationTokenSecret,
         saveNotificationToken,
         updateClientInfo,
+        selectVexlTokens,
         findSecretByNotificationToken,
         findAllTokensForSecret,
         findSecretBySecretValue,

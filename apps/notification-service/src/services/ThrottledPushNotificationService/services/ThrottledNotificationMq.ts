@@ -29,14 +29,20 @@ export interface ProcessThrottledNotificationsOperations {
 const THROTTLED_NOTIFICATIONS_PROCESSING_QUEUE_KEY =
   'notification-service_throttled-notifications-processing-queue'
 
-const {EnqueueTask, producerLayer, consumerLayer} = makeMqService(
-  THROTTLED_NOTIFICATIONS_PROCESSING_QUEUE_KEY,
-  Schema.Struct({token: VexlNotificationTokenSecret})
-)
+const {EnqueueTask, EnqueueTaskContext, producerLayer, consumerLayer} =
+  makeMqService(
+    THROTTLED_NOTIFICATIONS_PROCESSING_QUEUE_KEY,
+    Schema.Struct({token: VexlNotificationTokenSecret})
+  )
 
 export const scheduleThrottledNotificationProducerLayer = producerLayer
 
 export const EnqueueProcessNotifications = EnqueueTask
+
+export const EnqueueProcessNotificationsContext = EnqueueTaskContext
+
+export type EnqueueProcessNotificationsContext =
+  typeof EnqueueProcessNotificationsContext
 
 export const processThrottledNotificationsJobId = (
   token: VexlNotificationTokenSecret

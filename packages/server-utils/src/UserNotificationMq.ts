@@ -119,13 +119,19 @@ export const UserNotificationMqEntry = Schema.Union(
   VexlProductNotificationMqEntry
 )
 
-const {EnqueueTask, producerLayer, consumerLayer} = makeMqService(
-  NEW_USER_NOTIFICATIONS_PROCESSING_QUEUE_KEY,
-  UserNotificationMqEntry
-)
+const {EnqueueTask, EnqueueTaskContext, producerLayer, consumerLayer} =
+  makeMqService(
+    NEW_USER_NOTIFICATIONS_PROCESSING_QUEUE_KEY,
+    UserNotificationMqEntry
+  )
 
 export const ScheduleUserNotificationProducerLayer = producerLayer
 
 export const EnqueueUserNotification = EnqueueTask
+
+export const EnqueueUserNotificationContext = EnqueueTaskContext
+
+export type EnqueueUserNotificationContext =
+  typeof EnqueueUserNotificationContext
 
 export const ProcessUserNotificationsConsumerLayer = consumerLayer

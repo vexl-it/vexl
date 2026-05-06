@@ -152,6 +152,7 @@ export class VexlProductNotificationData extends Schema.TaggedClass<VexlProductN
   'VexlProductNotificationData'
 )('VexlProductNotificationData', {
   ...VexlProductNotification.fields,
+  issuePushNotification: Schema.BooleanFromString,
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
 }) {
   toData = (): typeof VexlProductNotificationData.Encoded =>

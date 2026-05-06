@@ -10,7 +10,7 @@ export const VexlProductNotification = Schema.Struct({
   uuid: VexlProductNotificationUuid,
   title: Schema.String,
   description: Schema.String,
-  issuePushNotification: Schema.BooleanFromString,
+  issuePushNotification: Schema.Boolean,
   date: Schema.DateFromString,
   actionLink: Schema.optional(Schema.String),
   actionText: Schema.optional(Schema.String),

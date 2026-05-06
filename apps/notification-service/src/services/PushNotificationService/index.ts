@@ -99,6 +99,16 @@ export class PushNotificationService extends Context.Tag(
                     generatePushNotificationFromVexlProductNotificationNoticeSendTask
                   ),
                   Match.exhaustive,
+                  // Filter out notifications that do not meet the minimal client version requirement (if any)
+                  Effect.filterOrFail((a) => {
+                    if (!task.minimalClientVersion) return true
+                    if (Option.isNone(a.metadata)) return false
+
+                    return (
+                      a.metadata.value.clientVersion >=
+                      task.minimalClientVersion
+                    )
+                  }),
                   Effect.option
                 )
               ),
@@ -114,6 +124,10 @@ export class PushNotificationService extends Context.Tag(
                   : [d.notificationToSend]
               )
             )
+
+            if (Array.isEmptyArray(notificationsToSend)) {
+              return
+            }
 
             // TODO check if notifications were delivered successfully and deactivate tokens
             yield* _(expoClient.sendNotification(notificationsToSend))

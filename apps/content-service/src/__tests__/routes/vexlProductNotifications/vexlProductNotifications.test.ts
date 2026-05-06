@@ -433,7 +433,7 @@ describe('Vexl product notifications', () => {
     )
   })
 
-  it('returns an empty list for an unknown cursor UUID', async () => {
+  it('returns all Vexl product notifications for an unknown cursor UUID', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
@@ -466,7 +466,10 @@ describe('Vexl product notifications', () => {
         expect(Either.isRight(resp)).toBe(true)
         if (Either.isLeft(resp)) return
 
-        expect(resp.right.vexlProductNotifications).toHaveLength(0)
+        expect(resp.right.vexlProductNotifications).toHaveLength(1)
+        expect(resp.right.vexlProductNotifications[0]?.uuid).toEqual(
+          vexlProductNotification.uuid
+        )
       })
     )
   })

@@ -7,6 +7,7 @@ import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import {
   filterMarketplaceOffers,
+  filterOffersByPinViewport,
   filterOffersByTextSearch,
   filterOffersByViewport,
   shouldCombineOnlineOffersWithLocationFilter,
@@ -18,7 +19,6 @@ import {
   offersFilterFromStorageAtom,
   singlePriceCurrencyAtom,
 } from './filterAtoms'
-import marketplaceLayoutModeAtom from './map/marketplaceLayoutModeAtom'
 import {mapRegionAtom} from './mapRegionAtom'
 import {offersSelectedByMarketplaceFilterBarOptionsAtom} from './offersByMarketplaceFilterBarOptions'
 
@@ -29,7 +29,6 @@ const btcPriceWithStateForFilterCurrencyAtom = createBtcPriceForCurrencyAtom(
 const filterMarketplaceOffersAtom = atom((get) => {
   const offers = get(offersSelectedByMarketplaceFilterBarOptionsAtom)
   const filter = get(offersFilterFromStorageAtom)
-  const layoutMode = get(marketplaceLayoutModeAtom)
   const btcPriceWithStateForFilterCurrency = get(
     btcPriceWithStateForFilterCurrencyAtom
   )
@@ -48,7 +47,6 @@ const filterMarketplaceOffersAtom = atom((get) => {
   return filterMarketplaceOffers({
     offers,
     filter,
-    layoutMode,
     filterPriceInSats,
     getBtcPriceForCurrency: (currency) =>
       get(createBtcPriceForCurrencyAtom(currency))?.btcPrice?.BTC,
@@ -82,6 +80,31 @@ export const filteredOffersForMapAtom = atom((get) =>
   )
 )
 
+const mapViewViewportToFilterByAtom = atom((get) => {
+  const selectedRegion = get(mapRegionAtom)
+
+  if (selectedRegion) {
+    return deltasToViewport({
+      point: {
+        ...selectedRegion,
+        latitude: Schema.decodeSync(Latitude)(selectedRegion.latitude),
+        longitude: Schema.decodeSync(Longitude)(selectedRegion.longitude),
+      },
+      latitudeDelta: selectedRegion.latitudeDelta,
+      longitudeDelta: selectedRegion.longitudeDelta,
+    })
+  }
+
+  return undefined
+})
+
+export const filteredOffersForVisibleMapRegionAtom = atom((get) =>
+  filterOffersByPinViewport({
+    offers: get(filteredOffersForMapAtom),
+    viewport: get(mapViewViewportToFilterByAtom),
+  })
+)
+
 const viewportToFilterByAtom = atom((get) => {
   const locationFilter = get(locationFilterAtom)
 
@@ -97,25 +120,6 @@ const viewportToFilterByAtom = atom((get) => {
   return undefined
 })
 
-const mapViewportToFilterByAtom = atom((get) => {
-  const selectedRegion = get(mapRegionAtom)
-  const marketplaceLayout = get(marketplaceLayoutModeAtom)
-
-  if (selectedRegion && marketplaceLayout === 'map') {
-    return deltasToViewport({
-      point: {
-        ...selectedRegion,
-        latitude: Schema.decodeSync(Latitude)(selectedRegion.latitude),
-        longitude: Schema.decodeSync(Longitude)(selectedRegion.longitude),
-      },
-      latitudeDelta: selectedRegion.latitudeDelta,
-      longitudeDelta: selectedRegion.longitudeDelta,
-    })
-  }
-
-  return undefined
-})
-
 export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)
   const filteredOffers = get(filteredOffersIgnoreLocationAtom)
@@ -126,10 +130,7 @@ export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
     includeOnlineOffers: shouldCombineOnlineOffersWithLocationFilter(filter),
   })
 
-  return filterOffersByViewport({
-    offers: offersFilteredBySelectedLocation,
-    viewport: get(mapViewportToFilterByAtom),
-  })
+  return offersFilteredBySelectedLocation
 })
 
 export const filteredOffersIncludingLocationFilterAtomsAtom = splitAtom(

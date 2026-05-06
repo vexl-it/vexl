@@ -1,22 +1,14 @@
+import {useNavigation} from '@react-navigation/native'
 import {Map} from '@vexl-next/ui'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-  type SharedValue,
-} from 'react-native-reanimated'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, useTheme, XStack} from 'tamagui'
 import {useOffersLoadingError} from '../../../../../state/marketplace'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import ErrorListHeader from '../../../../ErrorListHeader'
-import {MAP_SIZE} from '../../../../MarketplaceMap'
-import MarketplaceMapContainer from '../../../../MarketplaceMapContainer'
 import EmptyList from './EmptyList'
 import FilterButton from './FilterButton'
 import FilterTagBar from './FilterTagBar'
@@ -26,51 +18,36 @@ import TotalOffersCount from './TotalOffersCount'
 
 interface Props {
   readonly filteredOffersCount: number
-  readonly scrollY: SharedValue<number>
+  readonly onFilterChange: () => void
 }
 
 function AllOffersListHeader({
   filteredOffersCount,
-  scrollY,
+  onFilterChange,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
+  const navigation = useNavigation()
   const error = useOffersLoadingError()
   const areThereOffersToSeeInMarketplaceWithoutFilters = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
   const refocusMap = useSetAtom(refocusMapActionAtom)
 
-  const handleRefocusMap = useCallback(() => {
+  const handleFilterChange = useCallback(() => {
+    onFilterChange()
     refocusMap({focusAllOffers: false})
-  }, [refocusMap])
+  }, [onFilterChange, refocusMap])
 
-  const opacityAnim = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      scrollY.value,
-      [0, MAP_SIZE - insets.top / 0.9],
-      [1, 0],
-      Extrapolation.CLAMP
-    ),
-  }))
-
-  const scaleAnim = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: interpolate(scrollY.value, [-50, 0], [1.3, 1], {
-          extrapolateLeft: 'extend',
-          extrapolateRight: 'clamp',
-        }),
-      },
-    ],
-  }))
+  const handleShowOnMap = useCallback(() => {
+    navigation.navigate('MapView')
+  }, [navigation])
 
   const topControls = (
     <Stack gap="$4" pb="$7">
-      <FilterTagBar postSelectActions={handleRefocusMap} />
+      <FilterTagBar postSelectActions={handleFilterChange} />
       <XStack gap="$3" paddingHorizontal="$5">
-        <SearchOffers postSearchActions={handleRefocusMap} />
+        <SearchOffers postSearchActions={handleFilterChange} />
         <FilterButton />
       </XStack>
     </Stack>
@@ -80,9 +57,6 @@ function AllOffersListHeader({
     return (
       <Stack paddingTop="$7" paddingBottom="$5">
         {!!areThereOffersToSeeInMarketplaceWithoutFilters && topControls}
-        <Animated.View style={[opacityAnim, scaleAnim]}>
-          <MarketplaceMapContainer />
-        </Animated.View>
         {areThereOffersToSeeInMarketplaceWithoutFilters ? (
           <Stack paddingHorizontal="$5">
             <XStack ai="center" jc="space-between">
@@ -93,7 +67,7 @@ function AllOffersListHeader({
                 }
                 label={t('marketplace.showOnMap')}
                 color={theme.accentHighlightPrimary.val}
-                onPress={() => {}}
+                onPress={handleShowOnMap}
               />
             </XStack>
             {/* <YStack gap="$6">

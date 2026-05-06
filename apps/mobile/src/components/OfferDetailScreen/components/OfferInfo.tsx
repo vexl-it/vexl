@@ -16,7 +16,7 @@ import {Stack, Text, YStack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {sendRequestHandleUIActionAtom} from '../../../state/chat/atoms/sendRequestActionAtom'
 import {type RequestState} from '../../../state/chat/domain'
-import {useChatWithMessagesForOffer} from '../../../state/chat/hooks/useChatForOffer'
+import {chatWithMessagesForOfferAtom} from '../../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
   getRequestState,
@@ -67,11 +67,22 @@ function OfferInfo({
   const setToastNotification = useSetAtom(toastNotificationAtom)
   const [text, setText] = useState('')
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
-  const chatForOffer = useChatWithMessagesForOffer({
-    offerId: offer.offerInfo.offerId,
-    isMyOffer: !!offer.ownershipInfo,
-    otherSidePublicKey: Option.some(offer.offerInfo.publicPart.offerPublicKey),
-  })
+  const chatForOfferAtom = useMemo(
+    () =>
+      chatWithMessagesForOfferAtom({
+        offerId: offer.offerInfo.offerId,
+        isMyOffer: !!offer.ownershipInfo,
+        otherSidePublicKey: Option.some(
+          offer.offerInfo.publicPart.offerPublicKey
+        ),
+      }),
+    [
+      offer.offerInfo.offerId,
+      offer.offerInfo.publicPart.offerPublicKey,
+      offer.ownershipInfo,
+    ]
+  )
+  const chatForOffer = useAtomValue(chatForOfferAtom)
   const preferences = useAtomValue(preferencesAtom)
 
   const requestState: RequestState = useMemo(

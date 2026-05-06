@@ -87,11 +87,6 @@ export const refocusMapActionAtom = atom(
   }
 )
 
-export const clearRegionAndRefocusActionAtom = atom(null, (get, set) => {
-  set(mapRegionAtom, null)
-  set(refocusMapActionAtom, {focusAllOffers: false})
-})
-
 export const focusOfferActionAtom = atom(
   null,
   (get, set, offerId: OfferId | null) => {

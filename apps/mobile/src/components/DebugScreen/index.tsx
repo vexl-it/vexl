@@ -3,6 +3,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
+import {newOfferId, OfferPublicPart} from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
@@ -37,6 +38,7 @@ import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesA
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from '../../state/chat/atoms/focusChatByInboxKeyAndSenderKey'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
+import {upsertInboxOnBeAndLocallyActionAtom} from '../../state/chat/hooks/useCreateInbox'
 import connectionStateAtom, {
   syncConnectionsActionAtom,
 } from '../../state/connections/atom/connectionStateAtom'
@@ -47,6 +49,7 @@ import offerToConnectionsAtom, {
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
 import {StoredContact} from '../../state/contacts/domain'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
+import {createOfferActionAtom} from '../../state/marketplace/atoms/createOfferActionAtom'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
 import {
   clubOffersNextPageParamAtom,
@@ -69,6 +72,7 @@ import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {
   commitHash,
   enableHiddenFeatures,
+  packageName,
   platform,
   version,
   versionCode,
@@ -100,6 +104,92 @@ import {
   generateTestContacts,
   NUMBER_OF_TEST_CONTACTS,
 } from './utils/generateTestContacts'
+
+const DEBUG_EUROPE_OFFERS_PREFIX = 'debug-europe-offer-'
+
+const DEFAULT_EUROPE_DEBUG_LOCATION = {
+  name: 'Prague',
+  latitude: 50.0755,
+  longitude: 14.4378,
+}
+
+const EUROPE_DEBUG_LOCATIONS = [
+  {name: 'Lisbon', latitude: 38.7223, longitude: -9.1393},
+  {name: 'Madrid', latitude: 40.4168, longitude: -3.7038},
+  {name: 'Barcelona', latitude: 41.3874, longitude: 2.1686},
+  {name: 'Paris', latitude: 48.8566, longitude: 2.3522},
+  {name: 'Brussels', latitude: 50.8503, longitude: 4.3517},
+  {name: 'Amsterdam', latitude: 52.3676, longitude: 4.9041},
+  {name: 'London', latitude: 51.5072, longitude: -0.1276},
+  {name: 'Dublin', latitude: 53.3498, longitude: -6.2603},
+  {name: 'Oslo', latitude: 59.9139, longitude: 10.7522},
+  {name: 'Stockholm', latitude: 59.3293, longitude: 18.0686},
+  {name: 'Copenhagen', latitude: 55.6761, longitude: 12.5683},
+  {name: 'Berlin', latitude: 52.52, longitude: 13.405},
+  {name: 'Munich', latitude: 48.1351, longitude: 11.582},
+  {name: 'Zurich', latitude: 47.3769, longitude: 8.5417},
+  {name: 'Milan', latitude: 45.4642, longitude: 9.19},
+  {name: 'Rome', latitude: 41.9028, longitude: 12.4964},
+  {name: 'Vienna', latitude: 48.2082, longitude: 16.3738},
+  {name: 'Prague', latitude: 50.0755, longitude: 14.4378},
+  {name: 'Warsaw', latitude: 52.2297, longitude: 21.0122},
+  {name: 'Budapest', latitude: 47.4979, longitude: 19.0402},
+  {name: 'Bratislava', latitude: 48.1486, longitude: 17.1077},
+  {name: 'Ljubljana', latitude: 46.0569, longitude: 14.5058},
+  {name: 'Zagreb', latitude: 45.815, longitude: 15.9819},
+  {name: 'Athens', latitude: 37.9838, longitude: 23.7275},
+  {name: 'Bucharest', latitude: 44.4268, longitude: 26.1025},
+]
+
+function createDebugEuropeOfferPublicPart({
+  index,
+  offerPublicKey,
+}: {
+  index: number
+  offerPublicKey: PublicKeyPemBase64
+}): OfferPublicPart {
+  const city =
+    EUROPE_DEBUG_LOCATIONS[index % EUROPE_DEBUG_LOCATIONS.length] ??
+    DEFAULT_EUROPE_DEBUG_LOCATION
+  const groupIndex = Math.floor(index / EUROPE_DEBUG_LOCATIONS.length)
+  const latitudeOffset = ((groupIndex % 4) - 1.5) * 0.18
+  const longitudeOffset = (((index + groupIndex) % 5) - 2) * 0.22
+
+  return Schema.decodeSync(OfferPublicPart)({
+    offerPublicKey,
+    location: [
+      {
+        placeId: `${DEBUG_EUROPE_OFFERS_PREFIX}place-${index}`,
+        latitude: city.latitude + latitudeOffset,
+        longitude: city.longitude + longitudeOffset,
+        radius: 0.15,
+        address: `${city.name} debug location ${index + 1}`,
+        shortAddress: city.name,
+      },
+    ],
+    offerDescription: `Debug Europe offer ${index + 1}`,
+    amountBottomLimit: 10_000,
+    amountTopLimit: 100_000,
+    feeState: 'WITHOUT_FEE',
+    feeAmount: 0,
+    locationState: ['IN_PERSON'],
+    paymentMethod: ['CASH'],
+    btcNetwork: ['LIGHTING', 'ON_CHAIN'],
+    currency: 'EUR',
+    spokenLanguages: ['ENG'],
+    expirationDate: new Date(
+      Date.now() + 30 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    offerType: index % 2 === 0 ? 'SELL' : 'BUY',
+    activePriceState: 'NONE',
+    activePriceValue: 0,
+    activePriceCurrency: 'EUR',
+    active: true,
+    groupUuids: [],
+    listingType: 'BITCOIN',
+    authorClientVersion: version,
+  })
+}
 
 // const ContentScroll = styled(ScrollView, {
 //   marginBottom: '$2',
@@ -274,6 +364,78 @@ function DebugScreen(): React.ReactElement {
                   clubOffersNextPageParam: {},
                 })
                 Alert.alert('Done')
+              }}
+            />
+            <Button
+              variant="primary"
+              size="small"
+              text="Create 100 server debug offers around Europe"
+              onPress={() => {
+                if (packageName === 'it.vexl.next') {
+                  Alert.alert('Not available in production')
+                  return
+                }
+
+                Alert.alert(
+                  'Started',
+                  'Creating 100 offers on the server. This can take a while.'
+                )
+
+                pipe(
+                  Effect.forEach(
+                    Array.range(0, 99),
+                    (index) =>
+                      Effect.gen(function* (_) {
+                        const offerId = newOfferId()
+                        const inbox = yield* _(
+                          store.set(upsertInboxOnBeAndLocallyActionAtom, {
+                            for: 'myOffer',
+                            offerId,
+                          })
+                        )
+
+                        return yield* _(
+                          store.set(createOfferActionAtom, {
+                            offerId,
+                            payloadPublic: createDebugEuropeOfferPublicPart({
+                              index,
+                              offerPublicKey:
+                                inbox.inbox.privateKey.publicKeyPemBase64,
+                            }),
+                            intendedConnectionLevel: 'ALL',
+                            intendedClubs: [],
+                            offerKey: inbox.inbox.privateKey,
+                            onProgress: (progress) => {
+                              console.log(
+                                `Creating debug Europe offer ${
+                                  index + 1
+                                }/100: ${JSON.stringify(progress)}`
+                              )
+                            },
+                          })
+                        )
+                      }),
+                    {concurrency: 1}
+                  ),
+                  Effect.tap((createdOffers) =>
+                    Effect.sync(() => {
+                      Alert.alert(
+                        'Done',
+                        `Created ${createdOffers.length} all-friends offers around Europe`
+                      )
+                    })
+                  ),
+                  Effect.tapError((error) =>
+                    Effect.sync(() => {
+                      console.error('Error creating debug Europe offers', error)
+                      Alert.alert(
+                        'Error',
+                        JSON.stringify(error, null, 2).slice(0, 1000)
+                      )
+                    })
+                  ),
+                  Effect.runFork
+                )
               }}
             />
             <Button

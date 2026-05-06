@@ -44,6 +44,7 @@ import InsideScreen from '../InsideRouter'
 import SettingsScreen from '../InsideRouter/components/SettingsScreen'
 import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
+import MapViewScreen from '../MapViewScreen'
 import MyDonationsScreen from '../MyDonationsScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
@@ -124,6 +125,7 @@ function RootNavigation(): React.ReactElement {
               component={SelectLocationRadiusScreen}
             />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
+            <Stack.Screen name="MapView" component={MapViewScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
             <Stack.Screen

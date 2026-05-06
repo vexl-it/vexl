@@ -54,7 +54,7 @@ export default function EditClubPage() {
       try {
         const client = await runEffect(makeClubsAdminClient())
         const result = await runEffect(
-          client.listClubs({urlParams: {adminToken}})
+          client.listClubs({headers: {'x-admin-token': adminToken}})
         )
         const club = result.clubs.find((c) => c.uuid === clubUuid)
 
@@ -91,7 +91,7 @@ export default function EditClubPage() {
       const client = await runEffect(makeClubsAdminClient())
       await runEffect(
         client.modifyClub({
-          urlParams: {adminToken},
+          headers: {'x-admin-token': adminToken},
           payload: {clubInfo: formData as any},
         })
       )

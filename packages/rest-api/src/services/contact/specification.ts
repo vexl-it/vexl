@@ -5,6 +5,7 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {BadShortLivedTokenForErasingUserOnContactServiceError} from '@vexl-next/domain/src/general/ShortLivedTokenForErasingUserOnContactService'
+import {AdminTokenHeaders} from '../../adminTokenHeaders'
 import {
   CommonAndSecurityHeaders,
   ServerSecurityMiddleware,
@@ -22,7 +23,6 @@ import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   AddUserToTheClubRequest,
   AddUserToTheClubResponse,
-  AdminTokenParams,
   CheckUserExistsRequest,
   ClubAlreadyExistsError,
   ClubUserLimitExceededError,
@@ -187,7 +187,7 @@ export const CreateClubEndpoint = HttpApiEndpoint.post(
   'createClub',
   '/api/v1/clubs/admin'
 )
-  .setUrlParams(AdminTokenParams)
+  .setHeaders(AdminTokenHeaders)
   .setPayload(CreateClubRequest)
   .addSuccess(CreateClubResponse)
   .addError(ClubAlreadyExistsError, {status: 400})
@@ -198,7 +198,7 @@ export const ModfiyClubEndpoint = HttpApiEndpoint.put(
   'modifyClub',
   '/api/v1/clubs/admin'
 )
-  .setUrlParams(AdminTokenParams)
+  .setHeaders(AdminTokenHeaders)
   .setPayload(ModifyClubRequest)
   .addSuccess(ModifyClubResponse)
   .addError(InvalidAdminTokenError, {status: 401})
@@ -208,7 +208,7 @@ export const GenerateClubInviteLinkForAdminEndpoint = HttpApiEndpoint.put(
   'generateClubInviteLinkForAdmin',
   '/api/v1/clubs/admin/generate-admin-link'
 )
-  .setUrlParams(AdminTokenParams)
+  .setHeaders(AdminTokenHeaders)
   .setPayload(GenerateInviteLinkForAdminRequest)
   .addSuccess(GenerateInviteLinkForAdminResponse)
   .addError(InvalidAdminTokenError, {status: 401})
@@ -218,7 +218,7 @@ export const ListClubsEndpoint = HttpApiEndpoint.get(
   'listClubs',
   '/api/v1/clubs/admin'
 )
-  .setUrlParams(AdminTokenParams)
+  .setHeaders(AdminTokenHeaders)
   .addSuccess(ListClubsResponse)
   .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
@@ -227,7 +227,7 @@ export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
   'requestClubImageUpload',
   '/api/v1/clubs/admin/request-image-upload'
 )
-  .setUrlParams(AdminTokenParams)
+  .setHeaders(AdminTokenHeaders)
   .setPayload(RequestClubImageUploadRequest)
   .addSuccess(RequestClubImageUploadResponse)
   .addError(InvalidAdminTokenError, {status: 401})

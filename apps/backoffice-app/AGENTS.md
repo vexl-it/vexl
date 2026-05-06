@@ -7,7 +7,7 @@ Stack: Next.js 15 App Router + React 19 + TypeScript + Tailwind CSS v4 + Effect 
 Conventions:
 
 - All backend requests go through the `/api/proxy/*` Next.js route; never call the backend directly from client code.
-- Admin token lives in localStorage (`src/services/adminTokenService.ts`) and is passed via query params (`urlParams: {adminToken}`) on every API call.
+- Admin token lives in localStorage (`src/services/adminTokenService.ts`) and is passed via the canonical `x-admin-token` header (`headers: {'x-admin-token': adminToken}`) on admin API calls.
 - Effect HttpClient base URL points to `/api/proxy`; typed schemas come from `@vexl-next/rest-api`.
 - All pages are `'use client'` (Effect hooks + localStorage require it).
 - Use `@/` path alias for imports.

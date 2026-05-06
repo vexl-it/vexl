@@ -39,7 +39,7 @@ export default function GenerateLinkPage() {
     try {
       const client = await runEffect(makeClubsAdminClient())
       const result = await runEffect(
-        client.listClubs({urlParams: {adminToken}})
+        client.listClubs({headers: {'x-admin-token': adminToken}})
       )
       setClubs(result.clubs)
       if (result.clubs.length > 0) {
@@ -78,7 +78,7 @@ export default function GenerateLinkPage() {
       const client = await runEffect(makeClubsAdminClient())
       const result = await runEffect(
         client.generateClubInviteLinkForAdmin({
-          urlParams: {adminToken},
+          headers: {'x-admin-token': adminToken},
           payload: {clubUuid: selectedClubUuid},
         })
       )

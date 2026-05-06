@@ -56,12 +56,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         app.ClubsAdmin.createClub({
-          urlParams: {
-            adminToken: ADMIN_TOKEN,
-          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club: firstClub,
           },
@@ -69,9 +67,7 @@ beforeEach(async () => {
       )
       yield* _(
         app.ClubsAdmin.createClub({
-          urlParams: {
-            adminToken: ADMIN_TOKEN,
-          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club: secondClub,
           },

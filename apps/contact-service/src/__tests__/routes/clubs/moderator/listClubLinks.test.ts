@@ -45,12 +45,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         app.ClubsAdmin.createClub({
-          urlParams: {
-            adminToken: ADMIN_TOKEN,
-          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
           },
@@ -254,12 +252,10 @@ describe('List club links', () => {
           validUntil: new Date(),
           reportLimit: 10,
         }
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: club2,
             },
@@ -267,9 +263,7 @@ describe('List club links', () => {
         )
         const adminInviteCodeForClub2 = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: club2.uuid,
             },

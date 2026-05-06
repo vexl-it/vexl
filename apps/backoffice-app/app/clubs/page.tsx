@@ -46,7 +46,7 @@ export default function ClubsListPage() {
       try {
         const client = await runEffect(makeClubsAdminClient())
         const result = await runEffect(
-          client.listClubs({urlParams: {adminToken}})
+          client.listClubs({headers: {'x-admin-token': adminToken}})
         )
         setClubs(result.clubs)
       } catch (err) {

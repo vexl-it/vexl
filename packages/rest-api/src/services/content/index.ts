@@ -87,7 +87,7 @@ export function api({
         request: CreateVexlProductNotificationRequest
       ) =>
         client.VexlProductNotifications.createVexlProductNotification({
-          urlParams: {adminToken},
+          headers: {'x-admin-token': adminToken},
           payload: request,
         }),
       getVexlProductNotifications: (

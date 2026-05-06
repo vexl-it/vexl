@@ -1,6 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {hashSha256} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {InvalidTokenError} from '@vexl-next/rest-api/src/services/content/contracts'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -25,7 +26,7 @@ export const clearCacheHandler = HttpApiBuilder.handler(
   'clearCache',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.urlParams.token))
+      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
 
       yield* _(
         CacheService,

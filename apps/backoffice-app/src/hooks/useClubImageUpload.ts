@@ -80,7 +80,7 @@ export function useClubImageUpload(): UseClubImageUploadResult {
       const client = await runEffect(makeClubsAdminClient())
       const result = await runEffect(
         client.requestClubImageUpload({
-          urlParams: {adminToken},
+          headers: {'x-admin-token': adminToken},
           payload: {fileExtension},
         })
       )

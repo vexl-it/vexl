@@ -116,7 +116,7 @@ export default function ProductNotificationPage() {
       const client = await runEffect(makeContentAdminClient())
       await runEffect(
         client.createVexlProductNotification({
-          urlParams: {adminToken},
+          headers: {'x-admin-token': adminToken},
           payload: {
             vexlProductNotification,
             issuePushNotification,

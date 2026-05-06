@@ -52,12 +52,10 @@ describe('Generate club invite link', () => {
         yield* _(sql`DELETE FROM club`)
 
         const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[0],
             },
@@ -65,9 +63,7 @@ describe('Generate club invite link', () => {
         )
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[1],
             },
@@ -75,9 +71,7 @@ describe('Generate club invite link', () => {
         )
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[2],
             },
@@ -93,9 +87,7 @@ describe('Generate club invite link', () => {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: 'aha',
-            },
+            headers: {'x-admin-token': 'aha'},
             payload: {
               clubUuid: clubsToSave[0].uuid,
             },
@@ -113,12 +105,10 @@ describe('Generate club invite link', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const forClub = clubsToSave[0].uuid
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClub,
             },
@@ -135,12 +125,10 @@ describe('Generate club invite link', () => {
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
         const forClub = generateClubUuid()
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const errorResponse = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClub,
             },

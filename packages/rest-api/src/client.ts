@@ -21,13 +21,19 @@ import {
   type AppSource,
   type VexlAppMetaHeader,
 } from './commonHeaders'
-import {HEADER_HASH, HEADER_PUBLIC_KEY, HEADER_SIGNATURE} from './constants'
+import {
+  HEADER_ADMIN_TOKEN,
+  HEADER_HASH,
+  HEADER_PUBLIC_KEY,
+  HEADER_SIGNATURE,
+} from './constants'
 import {type LoggingFunction} from './utils'
 
 function stripSensitiveHeaders(headers: Headers.Headers): Headers.Headers {
   if (!headers) return headers
 
   const {
+    [HEADER_ADMIN_TOKEN]: adminToken,
     [HEADER_HASH]: h,
     [HEADER_PUBLIC_KEY]: pk,
     [HEADER_SIGNATURE]: sig,
@@ -35,10 +41,24 @@ function stripSensitiveHeaders(headers: Headers.Headers): Headers.Headers {
   } = headers
   return {
     ...rest,
+    [HEADER_ADMIN_TOKEN]: adminToken != null ? '[stripped]' : 'undefined',
     [HEADER_HASH]: h != null ? '[stripped]' : 'undefined',
     [HEADER_PUBLIC_KEY]: pk != null ? '[stripped]' : 'undefined',
     [HEADER_SIGNATURE]: sig != null ? '[stripped]' : 'undefined',
   }
+}
+
+function stripSensitiveUrlParams(params: unknown): string {
+  return String(params ?? '').replace(
+    /([?&]?(?:adminToken|token)=)[^&]*/g,
+    '$1[stripped]'
+  )
+}
+
+function stripSensitiveUrl(url: string | undefined): string | undefined {
+  if (url === undefined) return undefined
+
+  return url.replace(/([?&](?:adminToken|token)=)[^&]*/g, '$1[stripped]')
 }
 
 export interface ClientProps<
@@ -74,16 +94,17 @@ const makeClient =
       HttpClient.mapRequest((request) => {
         if (loggingFunction) {
           const {headers, url, urlParams: params, method, body} = request
+          const strippedUrl = stripSensitiveUrl(url)
 
           loggingFunction(
             `🌐 ⬆️ Sending request: ${
               method?.toUpperCase() ?? '[unknown method]'
-            } ${url ?? '[unknown url]'}`,
+            } ${strippedUrl ?? '[unknown url]'}`,
             {
               headers: stripSensitiveHeaders(headers),
               data: body,
-              params,
-              url,
+              params: stripSensitiveUrlParams(params),
+              url: strippedUrl,
             }
           )
         }
@@ -114,7 +135,9 @@ const makeClient =
                   loggingFunction(
                     `🌐 ✅ Response received: ${
                       request.method?.toUpperCase() ?? '[unknown method]'
-                    } "${request.url ?? ''}". Status: ${status}`,
+                    } "${
+                      stripSensitiveUrl(request.url) ?? ''
+                    }". Status: ${status}`,
                     {status}
                   )
                 } catch (e) {
@@ -137,7 +160,9 @@ const makeClient =
                   loggingFunction(
                     `🌐 ➡️ Redirect received: ${
                       request.method?.toUpperCase() ?? 'unknown method'
-                    } "${request.url ?? '[unknown url]'}" "params: ${request.urlParams.toString() ?? '[unknown params]'}".`,
+                    } "${
+                      stripSensitiveUrl(request.url) ?? '[unknown url]'
+                    }" "params: ${stripSensitiveUrlParams(request.urlParams)}".`,
                     {
                       status,
                     }
@@ -162,7 +187,9 @@ const makeClient =
                   loggingFunction(
                     `🌐 ❌ Error client response received ${
                       request.method?.toUpperCase() ?? 'unknown method'
-                    } "${request.url ?? '[unknown url]'}" "params: ${request.urlParams.toString() ?? '[unknown params]'}".`,
+                    } "${
+                      stripSensitiveUrl(request.url) ?? '[unknown url]'
+                    }" "params: ${stripSensitiveUrlParams(request.urlParams)}".`,
                     {
                       status,
                     }
@@ -187,7 +214,9 @@ const makeClient =
                   loggingFunction(
                     `🌐 ❌ Error server response received ${
                       request.method?.toUpperCase() ?? 'unknown method'
-                    } "${request.url ?? '[unknown url]'}" "params: ${request.urlParams.toString()} ?? '[unknown params]'".`,
+                    } "${
+                      stripSensitiveUrl(request.url) ?? '[unknown url]'
+                    }" "params: ${stripSensitiveUrlParams(request.urlParams)}".`,
                     {
                       status,
                     }

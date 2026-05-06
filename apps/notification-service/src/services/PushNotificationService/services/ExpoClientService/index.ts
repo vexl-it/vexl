@@ -39,12 +39,14 @@ export class ExpoClientService extends Context.Tag('ExpoClientService')<
                   title: notification.title,
                   body: notification.body,
                   priority: 'high' as const,
+                  mutableContent: true,
                   _contentAvailable: true,
                 }
               : {
                   to: notification.token,
                   data: notification.data,
                   priority: 'high' as const,
+                  mutableContent: true,
                   _contentAvailable: true,
                 }
           ),

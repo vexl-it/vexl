@@ -1,5 +1,6 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {createNotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {SendingNotificationError} from '@vexl-next/rest-api/src/services/notification/contract'
 import {ProcessUserNotificationsConsumerLayer} from '@vexl-next/server-utils/src/UserNotificationMq'
 import {Effect, Match} from 'effect/index'
@@ -16,7 +17,11 @@ import {
   UserAdmittedToClubNoticeSendTask,
   UserInactivityNoticeSendTask,
   UserLoginOnDifferentDeviceNoticeSendTask,
+  VexlProductNotificationSendTask,
 } from '../domain'
+
+const MINIMAL_CLIENT_VERSION_FOR_VEXL_PRODUCT_NOTIFICATION =
+  VersionCode.make(740)
 
 export const ProcessUserNotificationsWorker =
   ProcessUserNotificationsConsumerLayer((entry) =>
@@ -126,6 +131,18 @@ export const ProcessUserNotificationsWorker =
               trackingId,
             })
         ),
+        Match.tag(
+          'VexlProductNotificationMqEntry',
+          ({token, vexlProductNotification}) =>
+            new VexlProductNotificationSendTask({
+              notificationToken: secret,
+              targetToken: token,
+              trackingId,
+              vexlProductNotification,
+              minimalClientVersion:
+                MINIMAL_CLIENT_VERSION_FOR_VEXL_PRODUCT_NOTIFICATION,
+            })
+        ),
         Match.exhaustive
       )
 
@@ -151,7 +168,6 @@ export const ProcessUserNotificationsWorker =
           })
         )
       ),
-      // TODO:
       Effect.ignore
     )
   )

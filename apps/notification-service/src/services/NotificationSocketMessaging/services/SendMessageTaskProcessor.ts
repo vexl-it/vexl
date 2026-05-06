@@ -77,6 +77,9 @@ export class TimeoutProcessor extends Context.Tag('TimeoutProcessor')<
           Match.tag('NewContentNoticeSendTask', (t) =>
             pipe(issuePushNotification(t), Effect.ignore)
           ),
+          Match.tag('VexlProductNotificationSendTask', (t) =>
+            pipe(issuePushNotification(t), Effect.ignore)
+          ),
           Match.tag('StreamOnlyChatMessageSendTask', () => Effect.void),
           Match.exhaustive
         )

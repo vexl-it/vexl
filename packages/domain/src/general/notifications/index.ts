@@ -5,6 +5,7 @@ import {BooleanFromString} from 'effect/Schema'
 import {UnixMilliseconds} from '../../utility/UnixMilliseconds.brand'
 import {ClubUuid} from '../clubs'
 import {NotificationTrackingId} from '../NotificationTrackingId.brand'
+import {VexlProductNotification} from '../vexlProductNotification'
 import {NotificationCypher} from './NotificationCypher.brand'
 import {VexlNotificationToken} from './VexlNotificationToken'
 
@@ -145,4 +146,14 @@ export class OpenBrowserLinkNotificationData extends Schema.TaggedClass<OpenBrow
 }) {
   toData = (): typeof OpenBrowserLinkNotificationData.Encoded =>
     Schema.encodeSync(OpenBrowserLinkNotificationData)(this)
+}
+
+export class VexlProductNotificationData extends Schema.TaggedClass<VexlProductNotificationData>(
+  'VexlProductNotificationData'
+)('VexlProductNotificationData', {
+  ...VexlProductNotification.fields,
+  trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+}) {
+  toData = (): typeof VexlProductNotificationData.Encoded =>
+    Schema.encodeSync(VexlProductNotificationData)(this)
 }

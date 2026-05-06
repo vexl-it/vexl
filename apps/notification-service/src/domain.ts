@@ -9,6 +9,7 @@ import {
   UserAdmittedToClubNoticeSendTask,
   UserInactivityNoticeSendTask,
   UserLoginOnDifferentDeviceNoticeSendTask,
+  VexlProductNotificationSendTask,
 } from './services/NotificationSocketMessaging/domain'
 
 // TODO later we can handle more notifications not just chat :)
@@ -21,7 +22,8 @@ export const SupportedPushNotificationTask = Schema.Union(
   UserLoginOnDifferentDeviceNoticeSendTask,
   ClubFlaggedNoticeSendTask,
   ClubExpiredNoticeSendTask,
-  NewContentNoticeSendTask
+  NewContentNoticeSendTask,
+  VexlProductNotificationSendTask
 )
 export type SupportedPushNotificationTask =
   typeof SupportedPushNotificationTask.Type

@@ -10,6 +10,7 @@ import {
   VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
+import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
@@ -121,6 +122,14 @@ export class NewContentNoticeMessage extends Schema.TaggedClass<NewContentNotice
   trackingId: NotificationTrackingId,
 }) {}
 
+export class VexlProductNotificationMessage extends Schema.TaggedClass<VexlProductNotificationMessage>(
+  'VexlProductNotificationMessage'
+)('VexlProductNotificationMessage', {
+  sentAt: UnixMilliseconds,
+  trackingId: NotificationTrackingId,
+  vexlProductNotification: VexlProductNotification,
+}) {}
+
 export class DebugMessage extends Schema.TaggedClass<DebugMessage>(
   'DebugMessage'
 )('DebugMessage', {
@@ -138,7 +147,8 @@ export const NotificationStreamMessage = Schema.Union(
   ClubFlaggedNoticeMessage,
   ClubExpiredNoticeMessage,
   NewContentNoticeMessage,
-  DebugMessage
+  DebugMessage,
+  VexlProductNotificationMessage
 )
 export type NotificationStreamMessage = typeof NotificationStreamMessage.Type
 

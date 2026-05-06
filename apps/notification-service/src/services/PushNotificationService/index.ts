@@ -17,6 +17,7 @@ import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
 import {ExpoClientService} from './services/ExpoClientService'
 import {type ExpoSdkError} from './services/ExpoClientService/utils'
 import {
+  generatePushNotificationFromVexlProductNotificationNoticeSendTask,
   generatePushNotificationsFromClubExpiredNoticeSendTask,
   generatePushNotificationsFromClubFlaggedNoticeSendTask,
   generatePushNotificationsFromNewChatMessageNoticeSendTask,
@@ -92,6 +93,10 @@ export class PushNotificationService extends Context.Tag(
                   Match.tag(
                     'NewContentNoticeSendTask',
                     generatePushNotificationsFromNewContentNoticeSendTask
+                  ),
+                  Match.tag(
+                    'VexlProductNotificationSendTask',
+                    generatePushNotificationFromVexlProductNotificationNoticeSendTask
                   ),
                   Match.exhaustive,
                   Effect.option

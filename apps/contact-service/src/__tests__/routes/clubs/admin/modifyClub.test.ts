@@ -51,12 +51,10 @@ describe('Modify club', () => {
         yield* _(sql`DELETE FROM club`)
 
         const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[0],
             },
@@ -64,9 +62,7 @@ describe('Modify club', () => {
         )
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[1],
             },
@@ -74,9 +70,7 @@ describe('Modify club', () => {
         )
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[2],
             },
@@ -102,9 +96,7 @@ describe('Modify club', () => {
         }
         const errorResponse = yield* _(
           app.ClubsAdmin.modifyClub({
-            urlParams: {
-              adminToken: 'aha',
-            },
+            headers: {'x-admin-token': 'aha'},
             payload: {
               clubInfo: clubData,
             },
@@ -132,12 +124,10 @@ describe('Modify club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const modifiedClub = yield* _(
           app.ClubsAdmin.modifyClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubInfo: clubData,
             },
@@ -148,9 +138,7 @@ describe('Modify club', () => {
 
         const clubsInDb = yield* _(
           app.ClubsAdmin.listClubs({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -177,12 +165,10 @@ describe('Modify club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const errorResponse = yield* _(
           app.ClubsAdmin.modifyClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubInfo: clubData,
             },

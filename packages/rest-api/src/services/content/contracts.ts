@@ -75,16 +75,6 @@ export class DuplicateVexlProductNotificationUuidError extends Schema.TaggedErro
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
-export const ClearEventsCacheRequest = Schema.Struct({
-  token: Schema.String,
-})
-
-export const CreateVexlProductNotificationAdminParams = Schema.Struct({
-  adminToken: Schema.String,
-})
-export type CreateVexlProductNotificationAdminParams =
-  typeof CreateVexlProductNotificationAdminParams.Type
-
 export const CreateVexlProductNotificationRequest = Schema.Struct({
   vexlProductNotification: VexlProductNotification,
   issuePushNotification: Schema.Boolean,

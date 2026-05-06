@@ -51,12 +51,10 @@ describe('List clubs', () => {
         yield* _(sql`DELETE FROM club`)
 
         const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[0],
             },
@@ -64,9 +62,7 @@ describe('List clubs', () => {
         )
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[1],
             },
@@ -74,9 +70,7 @@ describe('List clubs', () => {
         )
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubsToSave[2],
             },
@@ -92,9 +86,7 @@ describe('List clubs', () => {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
           app.ClubsAdmin.listClubs({
-            urlParams: {
-              adminToken: 'aha',
-            },
+            headers: {'x-admin-token': 'aha'},
           }),
           Effect.either
         )
@@ -108,9 +100,9 @@ describe('List clubs', () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubs = yield* _(
-          app.ClubsAdmin.listClubs({urlParams: {adminToken: ADMIN_TOKEN}}),
+          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}}),
           Effect.map((o) => o.clubs),
           Effect.map(
             Array.sortBy((a, b) => String.localeCompare(a.uuid)(b.uuid))

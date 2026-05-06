@@ -1,5 +1,6 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect} from 'effect'
@@ -12,7 +13,7 @@ export const modifyClub = HttpApiBuilder.handler(
   'modifyClub',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.urlParams.adminToken))
+      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
 
       const clubsDb = yield* _(ClubsDbService)
 

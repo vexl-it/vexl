@@ -5,4 +5,5 @@ export const HEADER_PLATFORM = 'X-Platform'
 export const HEADER_CLIENT_VERSION = 'client-version'
 
 export const HEADER_AUTHORIZATION = 'authorization'
+export const HEADER_ADMIN_TOKEN = 'x-admin-token'
 export const AUTHORIZATION_PREFIX = 'VexlAuth '

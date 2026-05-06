@@ -43,12 +43,10 @@ beforeEach(async () => {
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
-      yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+      yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
       yield* _(
         app.ClubsAdmin.createClub({
-          urlParams: {
-            adminToken: ADMIN_TOKEN,
-          },
+          headers: {'x-admin-token': ADMIN_TOKEN},
           payload: {
             club,
           },
@@ -107,12 +105,10 @@ describe('Get club info by access code', () => {
 
         const challengeForUser = yield* _(generateAndSignChallenge(userKey))
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
@@ -167,12 +163,10 @@ describe('Get club info by access code', () => {
         const signedChallenge = yield* _(generateAndSignChallenge(userKey))
         const invalidKey = generatePrivateKey()
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const inviteLink = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },

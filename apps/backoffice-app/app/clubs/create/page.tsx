@@ -61,7 +61,7 @@ export default function CreateClubPage() {
       const client = await runEffect(makeClubsAdminClient())
       await runEffect(
         client.createClub({
-          urlParams: {adminToken},
+          headers: {'x-admin-token': adminToken},
           payload: {
             club: {
               uuid: formData.uuid as any,

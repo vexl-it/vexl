@@ -7,7 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Either, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -42,9 +42,7 @@ describe('Create club', () => {
         }
         const errorResponse = yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: 'aha',
-            },
+            headers: {'x-admin-token': 'aha'},
             payload: {
               club: clubData,
             },
@@ -53,6 +51,38 @@ describe('Create club', () => {
         )
 
         expectErrorResponse(InvalidAdminTokenError)(errorResponse)
+      })
+    )
+  })
+
+  it('Should not accept legacy admin token URL params', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+
+        const clubData = {
+          clubImageUrl: SOME_URL,
+          name: 'someName',
+          description: Option.some('someDescription'),
+          membersCountLimit: 100,
+          uuid: generateClubUuid(),
+          validUntil: new Date(),
+          reportLimit: 10,
+        }
+        const errorResponse = yield* _(
+          app.ClubsAdmin.createClub({
+            // @ts-expect-error Legacy URL admin-token transport is unsupported.
+            urlParams: {
+              adminToken: ADMIN_TOKEN,
+            },
+            payload: {
+              club: clubData,
+            },
+          }),
+          Effect.either
+        )
+
+        expect(Either.isLeft(errorResponse)).toBe(true)
       })
     )
   })
@@ -72,12 +102,10 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const createdClub = yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },
@@ -86,12 +114,10 @@ describe('Create club', () => {
 
         expect(createdClub.clubInfo).toMatchObject(clubData)
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubsInDb = yield* _(
           app.ClubsAdmin.listClubs({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -116,12 +142,10 @@ describe('Create club', () => {
           reportLimit: 10,
         }
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },
@@ -130,9 +154,7 @@ describe('Create club', () => {
 
         const errorResponse = yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: clubData,
             },

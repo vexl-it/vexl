@@ -212,10 +212,6 @@ export class ClubUserLimitExceededError extends Schema.TaggedError<ClubUserLimit
   status: Schema.optionalWith(Schema.Literal(429), {default: () => 429}),
 }) {}
 
-export const AdminTokenParams = Schema.Struct({
-  adminToken: Schema.String,
-})
-
 export const CreateClubRequest = Schema.Struct({
   club: ClubInfo,
 })

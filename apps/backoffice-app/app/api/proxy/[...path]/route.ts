@@ -20,8 +20,9 @@ async function proxyRequest(request: NextRequest, method: string) {
     // Build the backend URL
     const backendUrl = new URL(`${path}`, getBackendUrl(path))
 
-    // Copy over all query params from the original request (including adminToken)
+    // Copy non-admin query params from the original request.
     request.nextUrl.searchParams.forEach((value, key) => {
+      if (key === 'adminToken' || key === 'token') return
       backendUrl.searchParams.set(key, value)
     })
 
@@ -47,6 +48,11 @@ async function proxyRequest(request: NextRequest, method: string) {
     const cfConnectingIp = request.headers.get('cf-connecting-ip')
     if (cfConnectingIp) {
       headersToForward['cf-connecting-ip'] = cfConnectingIp
+    }
+
+    const adminToken = request.headers.get('x-admin-token')
+    if (adminToken) {
+      headersToForward['x-admin-token'] = adminToken
     }
 
     // Forward the request to the backend

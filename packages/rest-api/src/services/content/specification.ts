@@ -5,17 +5,19 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 import {Schema} from 'effect'
+import {
+  AdminTokenHeaders,
+  ClearCacheTokenHeaders,
+} from '../../adminTokenHeaders'
 import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {
   BlogsArticlesResponse,
-  ClearEventsCacheRequest,
   CreateInvoiceError,
   CreateInvoiceRequest,
   CreateInvoiceResponse,
-  CreateVexlProductNotificationAdminParams,
   CreateVexlProductNotificationRequest,
   DuplicateVexlProductNotificationUuidError,
   EventsResponse,
@@ -46,7 +48,7 @@ export const ClearEventsCacheEndpoint = HttpApiEndpoint.post(
   'clearCache',
   '/content/clear-cache'
 )
-  .setUrlParams(ClearEventsCacheRequest)
+  .setHeaders(ClearCacheTokenHeaders)
   .addError(InvalidTokenError)
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 10)
@@ -79,7 +81,7 @@ export const CreateVexlProductNotificationEndpoint = HttpApiEndpoint.post(
   'createVexlProductNotification',
   '/content/vexl-product-notifications/admin'
 )
-  .setUrlParams(CreateVexlProductNotificationAdminParams)
+  .setHeaders(AdminTokenHeaders)
   .setPayload(CreateVexlProductNotificationRequest)
   .addSuccess(VexlProductNotificationResponse)
   .addError(InvalidContentAdminTokenError, {status: 401})

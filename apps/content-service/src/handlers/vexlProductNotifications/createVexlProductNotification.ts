@@ -1,5 +1,6 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {HEADER_ADMIN_TOKEN} from '@vexl-next/rest-api/src/constants'
 import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {EnqueueVexlProductNotification} from '@vexl-next/server-utils/src/ContentServiceVexlProductNotificationMq'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
@@ -14,7 +15,7 @@ export const createVexlProductNotificationHandler = HttpApiBuilder.handler(
   'createVexlProductNotification',
   (req) =>
     Effect.gen(function* (_) {
-      yield* _(validateAdminToken(req.urlParams.adminToken))
+      yield* _(validateAdminToken(req.headers[HEADER_ADMIN_TOKEN]))
 
       const db = yield* _(VexlProductNotificationsDbService)
       const enqueueVexlProductNotification = yield* _(

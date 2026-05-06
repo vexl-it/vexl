@@ -49,12 +49,10 @@ describe('Get club contacts', () => {
         const app = yield* _(NodeTestingApp)
         const forClubUuid = generateClubUuid()
 
-        yield* _(addTestHeaders({adminToken: ADMIN_TOKEN}))
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         yield* _(
           app.ClubsAdmin.createClub({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               club: {
                 clubImageUrl: SOME_URL,
@@ -79,9 +77,7 @@ describe('Get club contacts', () => {
 
         const inviteLink1 = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
@@ -109,9 +105,7 @@ describe('Get club contacts', () => {
 
         const inviteLink2 = yield* _(
           app.ClubsAdmin.generateClubInviteLinkForAdmin({
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
             payload: {
               clubUuid: forClubUuid,
             },
@@ -185,9 +179,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -200,9 +192,7 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid,
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -266,9 +256,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -281,9 +269,7 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid1,
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -319,9 +305,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -334,9 +318,7 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid2,
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -400,9 +382,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -415,9 +395,7 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid,
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -481,9 +459,7 @@ describe('Get club contacts', () => {
                 reportLimit: 10,
               },
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 
@@ -492,9 +468,7 @@ describe('Get club contacts', () => {
             payload: {
               clubUuid: forClubUuid,
             },
-            urlParams: {
-              adminToken: ADMIN_TOKEN,
-            },
+            headers: {'x-admin-token': ADMIN_TOKEN},
           })
         )
 

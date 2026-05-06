@@ -136,7 +136,9 @@ const devConfig = {
       "7",
 
     // Admin and push
-    ADMIN_TOKEN_HASH: process.env.DEV_CONTACT_SERVICE_ADMIN_TOKEN_HASH ?? "",
+    ADMIN_TOKEN_HASH:
+      process.env.DEV_CONTACT_SERVICE_ADMIN_TOKEN_HASH ??
+      "7yYOmqPGc68kDReiZgSANhqOCB0f/soqXtDjIZ/BhWc=",
     EXPO_ACCESS_TOKEN: process.env.EXPO_ACCESS_TOKEN ?? "",
 
     // Clubs

@@ -32,6 +32,8 @@ export const updateNotificationInfoHandler = HttpApiBuilder.handler(
         yield* db.updateClientInfo({
           secretToken: payload.secret,
           expoNotificationToken: payload.expoNotificationToken ?? null,
+          systemVexlToken: payload.systemVexlToken ?? null,
+          marketingVexlToken: payload.marketingVexlToken ?? null,
           clientLanguage: language,
           clientPlatform,
           clientVersion,

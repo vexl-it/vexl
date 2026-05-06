@@ -36,6 +36,8 @@ export type SaveNotificationTokenParams =
 export const UpdateClientInfoParams = Schema.Struct({
   secretToken: VexlNotificationTokenSecret,
   expoNotificationToken: Schema.NullOr(ExpoNotificationToken),
+  systemVexlToken: Schema.NullOr(VexlNotificationToken),
+  marketingVexlToken: Schema.NullOr(VexlNotificationToken),
   clientPlatform: PlatformName,
   clientVersion: VersionCode,
   clientAppSource: AppSource,
@@ -110,6 +112,8 @@ export const createUpdateClientInfo = Effect.gen(function* () {
       SET
         ${sql.update({
         expoNotificationToken: params.expoNotificationToken,
+        systemVexlToken: params.systemVexlToken,
+        marketingVexlToken: params.marketingVexlToken,
         clientPlatform: params.clientPlatform,
         clientVersion: params.clientVersion,
         clientAppSource: params.clientAppSource,

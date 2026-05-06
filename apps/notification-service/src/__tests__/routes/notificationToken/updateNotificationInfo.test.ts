@@ -1,4 +1,5 @@
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
@@ -20,6 +21,12 @@ const validExpoToken = Schema.decodeSync(ExpoNotificationToken)(
 )
 const validExpoTokenUpdate = Schema.decodeSync(ExpoNotificationToken)(
   'ExponentPushToken[zzzzzzzzzzzzzzzzzzzz]'
+)
+const validSystemVexlToken = Schema.decodeSync(VexlNotificationToken)(
+  'vexl_nt_system'
+)
+const validMarketingVexlToken = Schema.decodeSync(VexlNotificationToken)(
+  'vexl_nt_marketing'
 )
 
 const validPrefix = Schema.decodeSync(CountryPrefix)(420)
@@ -147,6 +154,167 @@ describe('UpdateNotificationInfo', () => {
         expect(Option.isSome(updatedRecord)).toBe(true)
         if (Option.isNone(updatedRecord)) return
         expect(updatedRecord.value.clientPrefix).toEqual(updatedPrefix)
+      })
+    )
+  })
+
+  it('Should update system and marketing vexl tokens', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const createResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: validExpoToken,
+            },
+            headers: validHeaders,
+          }),
+          Effect.either
+        )
+
+        expect(createResp._tag).toEqual('Right')
+        if (createResp._tag !== 'Right') return
+
+        const updateResp = yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.right.secret,
+              expoNotificationToken: validExpoTokenUpdate,
+              systemVexlToken: validSystemVexlToken,
+              marketingVexlToken: validMarketingVexlToken,
+            },
+            headers: validHeaders,
+          }),
+          Effect.either
+        )
+
+        expect(updateResp._tag).toEqual('Right')
+
+        const updatedRecord = yield* _(
+          db.findSecretBySecretValue(createResp.right.secret)
+        )
+        expect(Option.isSome(updatedRecord)).toBe(true)
+        if (Option.isNone(updatedRecord)) return
+        expect(updatedRecord.value.systemVexlToken).toEqual(
+          validSystemVexlToken
+        )
+        expect(updatedRecord.value.marketingVexlToken).toEqual(
+          validMarketingVexlToken
+        )
+      })
+    )
+  })
+
+  it('Should clear marketing vexl token when omitted', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const createResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: validExpoToken,
+            },
+            headers: validHeaders,
+          }),
+          Effect.either
+        )
+
+        expect(createResp._tag).toEqual('Right')
+        if (createResp._tag !== 'Right') return
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.right.secret,
+              systemVexlToken: validSystemVexlToken,
+              marketingVexlToken: validMarketingVexlToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const updateResp = yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.right.secret,
+              systemVexlToken: validSystemVexlToken,
+            },
+            headers: validHeaders,
+          }),
+          Effect.either
+        )
+
+        expect(updateResp._tag).toEqual('Right')
+
+        const updatedRecord = yield* _(
+          db.findSecretBySecretValue(createResp.right.secret)
+        )
+        expect(Option.isSome(updatedRecord)).toBe(true)
+        if (Option.isNone(updatedRecord)) return
+        expect(updatedRecord.value.systemVexlToken).toEqual(
+          validSystemVexlToken
+        )
+        expect(updatedRecord.value.marketingVexlToken).toBeNull()
+      })
+    )
+  })
+
+  it('Should clear system vexl token when omitted', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const createResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: validExpoToken,
+            },
+            headers: validHeaders,
+          }),
+          Effect.either
+        )
+
+        expect(createResp._tag).toEqual('Right')
+        if (createResp._tag !== 'Right') return
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.right.secret,
+              systemVexlToken: validSystemVexlToken,
+              marketingVexlToken: validMarketingVexlToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const updateResp = yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.right.secret,
+              marketingVexlToken: validMarketingVexlToken,
+            },
+            headers: validHeaders,
+          }),
+          Effect.either
+        )
+
+        expect(updateResp._tag).toEqual('Right')
+
+        const updatedRecord = yield* _(
+          db.findSecretBySecretValue(createResp.right.secret)
+        )
+        expect(Option.isSome(updatedRecord)).toBe(true)
+        if (Option.isNone(updatedRecord)) return
+        expect(updatedRecord.value.systemVexlToken).toBeNull()
+        expect(updatedRecord.value.marketingVexlToken).toEqual(
+          validMarketingVexlToken
+        )
       })
     )
   })

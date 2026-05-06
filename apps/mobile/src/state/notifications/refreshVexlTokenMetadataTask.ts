@@ -5,7 +5,7 @@ import {
 } from '../../utils/inAppLoadingTasks'
 import {getNotificationTokenE} from '../../utils/notifications'
 import {reportErrorE} from '../../utils/reportError'
-import {updateNotificationMetadataActionAtom} from './actions/updateNotificationMetadataActionAtom'
+import {syncVexlNotificationTokensActionAtom} from './actions/syncVexlNotificationTokensActionAtom'
 import {ensureVexlSecretExistsTaskId} from './ensureVexlSecretExistsTask'
 import {vexlNotificationTokenAtom} from './vexlNotificationTokenAtom'
 
@@ -30,8 +30,8 @@ export const refreshVexlTokenMetadataTaskId = registerInAppLoadingTask({
 
       yield* Effect.either(
         store
-          .set(updateNotificationMetadataActionAtom, {
-            expoNotificationToken: expoToken ?? undefined,
+          .set(syncVexlNotificationTokensActionAtom, {
+            expoNotificationToken: expoToken,
           })
           .pipe(
             Effect.tapError((e) =>

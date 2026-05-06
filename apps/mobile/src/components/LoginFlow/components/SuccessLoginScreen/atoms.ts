@@ -16,6 +16,7 @@ import {type Session, type SessionV2} from '../../../../brands/Session.brand'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
 import {createVexlSecretActionAtom} from '../../../../state/notifications/actions/createVexlSecretActionAtom'
 import {generateVexlTokenActionAtom} from '../../../../state/notifications/actions/generateVexlTokenActionAtom'
+import {syncVexlNotificationTokensActionAtom} from '../../../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
 import {vexlNotificationTokenAtom} from '../../../../state/notifications/vexlNotificationTokenAtom'
 import {sessionAtom} from '../../../../state/session'
 import {upgradeSession} from '../../../../state/session/upgradeSession'
@@ -135,6 +136,8 @@ const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
 
         set(vexlNotificationTokenAtom, {
           secret: null,
+          systemVexlToken: null,
+          marketingVexlToken: null,
           lastUpdatedMetadata: null,
         })
       }
@@ -150,6 +153,10 @@ const handleSecretTokenAndSessionTokenCreationActionAtom = atom(
       )
 
       console.log('Vexl notification secret created successfully')
+
+      yield* set(syncVexlNotificationTokensActionAtom, {
+        expoNotificationToken: expoToken,
+      })
 
       const sessionNotificationToken = yield* _(
         set(generateVexlTokenActionAtom),

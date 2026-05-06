@@ -7,6 +7,7 @@ import {
   NewSocialNetworkConnectionNotificationData,
   UserInactivityNotificationData,
   UserLoginOnDifferentDeviceNotificationData,
+  VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {type NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
@@ -34,6 +35,7 @@ import type {
   UserAdmittedToClubNoticeSendTask,
   UserInactivityNoticeSendTask,
   UserLoginOnDifferentDeviceNoticeSendTask,
+  VexlProductNotificationSendTask,
 } from '../NotificationSocketMessaging/domain'
 import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
 import {type NotificationToSend} from './services/ExpoClientService'
@@ -406,3 +408,30 @@ export const generatePushNotificationsFromNewContentNoticeSendTask = (
 
     return {notificationToSend: [notification], trackingId, metadata}
   })
+
+export const generatePushNotificationFromVexlProductNotificationNoticeSendTask =
+  (
+    task: VexlProductNotificationSendTask
+  ): Effect.Effect<
+    PushNotificationGeneratorResult,
+    NoExpoTokenError | InvalidFcmCypherError,
+    VexlNotificationTokenService
+  > =>
+    Effect.gen(function* (_) {
+      const {token, metadata} = yield* _(
+        resolveTokenAndMetadata(task.notificationToken)
+      )
+      const trackingId = task.trackingId ?? createNotificationTrackingId()
+
+      const notification: NotificationToSend = {
+        token,
+        title: task.vexlProductNotification.title,
+        body: task.vexlProductNotification.description,
+        data: new VexlProductNotificationData({
+          trackingId: Option.some(trackingId),
+          ...task.vexlProductNotification,
+        }).toData(),
+      }
+
+      return {notificationToSend: [notification], trackingId, metadata}
+    })

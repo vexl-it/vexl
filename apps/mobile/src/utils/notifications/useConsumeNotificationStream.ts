@@ -352,6 +352,10 @@ const processNewStreamNotificationActionAtom = atom(
           Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
             set(processUserLoginOnDifferentDeviceNotificationActionAtom)
           ),
+          Match.tag(
+            'VexlProductNotificationMessage',
+            (v) => Effect.log('Got vexl product notification', v) // TODO process properly
+          ),
           Match.tag('NewContentNoticeMessage', () => Effect.void),
           Match.exhaustive
         )

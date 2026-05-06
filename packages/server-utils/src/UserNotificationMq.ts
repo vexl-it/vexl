@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {makeMqService} from '@vexl-next/server-utils/src/mqService'
@@ -99,8 +100,11 @@ export class NewContentNotificationMqEntry extends Schema.TaggedClass<NewContent
 export class VexlProductNotificationMqEntry extends Schema.TaggedClass<VexlProductNotificationMqEntry>(
   'VexlProductNotificationMqEntry'
 )('VexlProductNotificationMqEntry', {
-  token: VexlNotificationToken,
-  uuid: Schema.UUID,
+  // todo #2142: remove after moving to vexlNotificationToken
+  notificationToken: Schema.NullOr(ExpoNotificationToken),
+  // todo #2142: remove nullability after moving to vexlNotificationToken
+  token: Schema.NullOr(VexlNotificationToken),
+  vexlProductNotification: VexlProductNotification,
 }) {}
 
 export const UserNotificationMqEntry = Schema.Union(
@@ -111,7 +115,8 @@ export const UserNotificationMqEntry = Schema.Union(
   UserLoginOnDifferentDeviceNotificationMqEntry,
   ClubFlaggedNotificationMqEntry,
   ClubExpiredNotificationMqEntry,
-  NewContentNotificationMqEntry
+  NewContentNotificationMqEntry,
+  VexlProductNotificationMqEntry
 )
 
 const {EnqueueTask, producerLayer, consumerLayer} = makeMqService(

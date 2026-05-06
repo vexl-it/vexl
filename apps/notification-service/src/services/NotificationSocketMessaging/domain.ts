@@ -6,6 +6,7 @@ import {
   VexlNotificationToken,
   VexlNotificationTokenSecret,
 } from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
+import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 
 import {
   createNotificationTrackingId,
@@ -30,6 +31,7 @@ import {
   UserAdmittedToClubNoticeMessage,
   UserInactivityNoticeMessage,
   UserLoginOnDifferentDeviceNoticeMessage,
+  VexlProductNotificationMessage,
   type NotificationsStreamClientInfo,
   type NotificationStreamError,
   type NotificationStreamMessage,
@@ -409,6 +411,37 @@ export class NewContentNoticeSendTask extends Schema.TaggedClass<NewContentNotic
   }
 }
 
+export class VexlProductNotificationSendTask extends Schema.TaggedClass<VexlProductNotificationSendTask>(
+  'VexlProductNotificationSendTask'
+)('VexlProductNotificationSendTask', {
+  id: Schema.optionalWith(SendMessageTaskId, {
+    default: () => newSendMessageTaskId(),
+  }),
+  notificationToken: VexlNotificationTokenSecret,
+  // todo #2124 - Remove
+  targetCypher: Schema.optional(
+    Schema.Union(NotificationCypher, VexlNotificationToken)
+  ),
+  // todo #2124 - Remove nullOr
+  targetToken: Schema.NullOr(VexlNotificationToken),
+  sentAt: Schema.optionalWith(UnixMilliseconds, {
+    default: () => unixMillisecondsNow(),
+  }),
+  trackingId: Schema.optionalWith(NotificationTrackingId, {
+    default: () => createNotificationTrackingId(),
+  }),
+  vexlProductNotification: VexlProductNotification,
+  minimalClientVersion: Schema.optional(VersionCode),
+}) {
+  get socketMessage(): VexlProductNotificationMessage {
+    return new VexlProductNotificationMessage({
+      sentAt: this.sentAt,
+      vexlProductNotification: this.vexlProductNotification,
+      trackingId: this.trackingId,
+    })
+  }
+}
+
 export const SendMessageTask = Schema.Union(
   NewChatMessageNoticeSendTask,
   NewUserNoticeSendTask,
@@ -419,6 +452,7 @@ export const SendMessageTask = Schema.Union(
   UserLoginOnDifferentDeviceNoticeSendTask,
   ClubFlaggedNoticeSendTask,
   ClubExpiredNoticeSendTask,
-  NewContentNoticeSendTask
+  NewContentNoticeSendTask,
+  VexlProductNotificationSendTask
 )
 export type SendMessageTask = typeof SendMessageTask.Type

@@ -74,6 +74,7 @@ export interface DevConfig {
   readonly feedbackService?: ServiceEnv
   readonly contentService?: ServiceEnv
   readonly metricsService?: ServiceEnv
+  readonly backofficeApp?: ServiceEnv
 
   /** Mobile app configuration (optional - enables Expo dev server startup) */
   readonly mobile?: MobileConfig

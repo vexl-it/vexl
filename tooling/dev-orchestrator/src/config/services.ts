@@ -8,6 +8,8 @@ export interface ServiceConfig {
   readonly healthPort: number
   readonly tier: number // 0 = no deps, 1 = depends on tier 0, etc.
   readonly needsDatabase: boolean
+  readonly runner?: 'tsx-watch' | 'workspace-dev'
+  readonly portEnvVar?: string
 }
 
 /**
@@ -113,6 +115,19 @@ export const SERVICES: readonly ServiceConfig[] = [
     healthPort: 8004,
     tier: 2,
     needsDatabase: true,
+  },
+
+  // Tier 3: Backend-adjacent apps that need services to be ready first
+  {
+    name: 'backoffice-app',
+    displayName: 'Backoffice',
+    workspaceName: '@vexl-next/backoffice-app',
+    port: 3011,
+    healthPort: 3011,
+    tier: 3,
+    needsDatabase: false,
+    runner: 'workspace-dev',
+    portEnvVar: 'BACKOFFICE_APP_PORT',
   },
 ]
 

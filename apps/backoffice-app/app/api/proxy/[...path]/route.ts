@@ -1,6 +1,6 @@
 import {type NextRequest, NextResponse} from 'next/server'
 
-const API_BACKEND_URL = process.env.API_INTERNAL_URL ?? 'http://localhost:3003'
+const API_BACKEND_URL = process.env.API_INTERNAL_URL ?? 'http://localhost:3002'
 
 async function proxyRequest(request: NextRequest, method: string) {
   try {

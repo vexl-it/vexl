@@ -57,6 +57,9 @@ export const orchestratorConfig = Config.all({
     metricsService: Config.number('METRICS_SERVICE_PORT').pipe(
       Config.withDefault(3010)
     ),
+    backofficeApp: Config.number('BACKOFFICE_APP_PORT').pipe(
+      Config.withDefault(3011)
+    ),
   }),
 
   // Security keys (required)

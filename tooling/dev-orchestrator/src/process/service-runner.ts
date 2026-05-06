@@ -28,6 +28,22 @@ const generateServiceDbUrl = (baseUrl: string, serviceName: string): string => {
   return url.toString()
 }
 
+const applyRuntimePortConfig = (config: ServiceConfig): ServiceConfig => {
+  if (config.portEnvVar === undefined) return config
+
+  const configuredPort = process.env[config.portEnvVar]
+  if (configuredPort === undefined) return config
+
+  const port = Number(configuredPort)
+  if (!Number.isFinite(port)) return config
+
+  return {
+    ...config,
+    port,
+    healthPort: config.healthPort === config.port ? port : config.healthPort,
+  }
+}
+
 /**
  * Error when loading devConfig.ts fails.
  */
@@ -153,38 +169,46 @@ export const spawnService = (
   CommandExecutor.CommandExecutor | Scope.Scope
 > =>
   Effect.gen(function* () {
+    const runtimeConfig = applyRuntimePortConfig(config)
     const projectRoot = findProjectRoot()
-    const servicePath = `apps/${config.name}`
+    const servicePath = `apps/${runtimeConfig.name}`
 
     // Emit 'starting' phase to TUI (if active)
     const startupState = getStartupState()
     startupState?.emitServicePhase({
-      serviceName: config.name,
-      displayName: config.displayName,
+      serviceName: runtimeConfig.name,
+      displayName: runtimeConfig.displayName,
       phase: 'starting',
       timestamp: new Date(),
-      port: config.port,
+      port: runtimeConfig.port,
     })
 
-    logWithPrefix(config.name, 'Starting...')
+    logWithPrefix(runtimeConfig.name, 'Starting...')
 
     // Load devConfig and build environment for the service
     const devConfig = yield* loadDevConfig()
-    const env = buildServiceEnv(config, devConfig)
+    const env = buildServiceEnv(runtimeConfig, devConfig)
 
-    // Use tsx watch for hot reload
-    // Per RESEARCH.md: tsx watch instead of yarn dev for proper signal handling
-    const command = Command.make(
-      'npx',
-      'tsx',
-      'watch',
-      '-r',
-      'dotenv/config',
-      'src/index.ts'
-    ).pipe(
-      Command.workingDirectory(`${projectRoot}/${servicePath}`),
-      Command.env(env)
-    )
+    // Use tsx watch for services, but let frontend apps use their workspace dev script.
+    const command =
+      runtimeConfig.runner === 'workspace-dev'
+        ? Command.make(
+            'yarn',
+            'workspace',
+            runtimeConfig.workspaceName,
+            'dev'
+          ).pipe(Command.workingDirectory(projectRoot), Command.env(env))
+        : Command.make(
+            'npx',
+            'tsx',
+            'watch',
+            '-r',
+            'dotenv/config',
+            'src/index.ts'
+          ).pipe(
+            Command.workingDirectory(`${projectRoot}/${servicePath}`),
+            Command.env(env)
+          )
 
     // Start the process
     const serviceProcess = yield* Command.start(command)
@@ -197,9 +221,9 @@ export const spawnService = (
           code !== 0
             ? Effect.fail(
                 new ServiceStartupFailure({
-                  serviceName: config.name,
+                  serviceName: runtimeConfig.name,
                   exitCode: code,
-                  remediation: `Check ${config.name} logs above for compilation or runtime errors`,
+                  remediation: `Check ${runtimeConfig.name} logs above for compilation or runtime errors`,
                 })
               )
             : Effect.void
@@ -210,35 +234,35 @@ export const spawnService = (
     // Fork stdout/stderr log piping (DO NOT await - must run in background)
     // CRITICAL: Log piping is forked so race starts immediately
     yield* Effect.fork(
-      pipeLogsToConsole(serviceProcess.stdout, config.name, false)
+      pipeLogsToConsole(serviceProcess.stdout, runtimeConfig.name, false)
     )
     yield* Effect.fork(
-      pipeLogsToConsole(serviceProcess.stderr, config.name, true)
+      pipeLogsToConsole(serviceProcess.stderr, runtimeConfig.name, true)
     )
 
     // Race health wait vs exit monitor - fail-fast on early process exit
     yield* Effect.race(
-      waitForServiceReady(config.name, config.healthPort),
+      waitForServiceReady(runtimeConfig.name, runtimeConfig.healthPort),
       Fiber.join(exitMonitorFiber)
     )
 
     // Emit 'ready' phase to TUI (if active)
     startupState?.emitServicePhase({
-      serviceName: config.name,
-      displayName: config.displayName,
+      serviceName: runtimeConfig.name,
+      displayName: runtimeConfig.displayName,
       phase: 'ready',
       timestamp: new Date(),
-      port: config.port,
+      port: runtimeConfig.port,
     })
 
-    logSuccess(config.name, `Ready on port ${config.port}`)
+    logSuccess(runtimeConfig.name, `Ready on port ${runtimeConfig.port}`)
 
     // Return process handle
     return {
-      config,
+      config: runtimeConfig,
       exitCode: serviceProcess.exitCode,
       kill: Effect.gen(function* () {
-        logWithPrefix(config.name, 'Stopping...')
+        logWithPrefix(runtimeConfig.name, 'Stopping...')
         // Send SIGTERM via the process handle's kill method
         // Effect's Command.start returns a Process with a kill method
         // Wrap in catchAll to handle "Failed to kill process" errors
@@ -249,7 +273,7 @@ export const spawnService = (
           Effect.timeout('5 seconds'),
           Effect.catchAll(() => Effect.void)
         )
-        logSuccess(config.name, 'Stopped')
+        logSuccess(runtimeConfig.name, 'Stopped')
       }).pipe(Effect.asVoid),
     } satisfies ServiceProcess
   })

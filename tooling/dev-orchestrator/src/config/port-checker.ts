@@ -35,6 +35,7 @@ export const checkPortsAvailable = (
     readonly feedbackService: number
     readonly contentService: number
     readonly metricsService: number
+    readonly backofficeApp: number
   },
   options?: {skipInfrastructure?: boolean}
 ): Effect.Effect<{readonly success: true}, PortConflictError, never> =>
@@ -119,6 +120,11 @@ export const checkPortsAvailable = (
         name: 'Metrics Service',
         port: ports.metricsService,
         envVar: 'METRICS_SERVICE_PORT',
+      },
+      {
+        name: 'Backoffice',
+        port: ports.backofficeApp,
+        envVar: 'BACKOFFICE_APP_PORT',
       },
     ]
 

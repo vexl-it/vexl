@@ -191,7 +191,9 @@ const devConfig = {
    * Content Service - serves app content from Webflow CMS and Postgres.
    */
   contentService: {
-    ADMIN_TOKEN_HASH: process.env.DEV_CONTENT_SERVICE_ADMIN_TOKEN_HASH ?? "",
+    ADMIN_TOKEN_HASH:
+      process.env.DEV_CONTENT_SERVICE_ADMIN_TOKEN_HASH ??
+      "7yYOmqPGc68kDReiZgSANhqOCB0f/soqXtDjIZ/BhWc=",
     CLEAR_CACHE_TOKEN_HASH:
       process.env.DEV_CONTENT_SERVICE_CLEAR_CACHE_TOKEN_HASH ?? "",
     FORCE_UPDATE_FOR_VERSION_AND_LOWER:
@@ -233,6 +235,15 @@ const devConfig = {
    * Only requires common vars.
    */
   metricsService: {},
+
+  /**
+   * Backoffice App - proxies admin club management requests to Contact Service.
+   */
+  backofficeApp: {
+    API_INTERNAL_URL:
+      process.env.DEV_BACKOFFICE_APP_API_INTERNAL_URL ??
+      `http://localhost:${process.env.CONTACT_SERVICE_PORT ?? "3002"}`,
+  },
 
   /**
    * Mobile App Configuration

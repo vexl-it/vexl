@@ -19,16 +19,9 @@ interface FormData {
   title: string
   description: string
   issuePushNotification: boolean
-  date: string
   actionLink: string
   actionText: string
   type: VexlProductNotification['type']
-}
-
-const toDateTimeLocalValue = (date: Date): string => {
-  const offsetMs = date.getTimezoneOffset() * 60 * 1000
-  const localDate = new Date(date.getTime() - offsetMs)
-  return localDate.toISOString().slice(0, 16)
 }
 
 const formatNotificationDate = (date: Date): string =>
@@ -42,7 +35,6 @@ const initialFormData = (): FormData => ({
   title: '',
   description: '',
   issuePushNotification: false,
-  date: toDateTimeLocalValue(new Date()),
   actionLink: '',
   actionText: '',
   type: 'GENERAL',
@@ -115,7 +107,7 @@ export default function ProductNotificationPage() {
         title: formData.title.trim(),
         description: formData.description.trim(),
         issuePushNotification,
-        date: new Date(formData.date),
+        date: new Date(),
         type: formData.type,
         ...(actionLink.length === 0 ? {} : {actionLink}),
         ...(actionText.length === 0 ? {} : {actionText}),
@@ -217,51 +209,28 @@ export default function ProductNotificationPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="type"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Type *
-                </label>
-                <select
-                  id="type"
-                  value={formData.type}
-                  onChange={(e) => {
-                    setFormData({
-                      ...formData,
-                      type:
-                        e.target.value === 'MARKETING'
-                          ? 'MARKETING'
-                          : 'GENERAL',
-                    })
-                  }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white"
-                >
-                  <option value="GENERAL">General</option>
-                  <option value="MARKETING">Marketing</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="date"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Date *
-                </label>
-                <input
-                  id="date"
-                  type="datetime-local"
-                  value={formData.date}
-                  onChange={(e) => {
-                    setFormData({...formData, date: e.target.value})
-                  }}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                  required
-                />
-              </div>
+            <div>
+              <label
+                htmlFor="type"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Type *
+              </label>
+              <select
+                id="type"
+                value={formData.type}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    type:
+                      e.target.value === 'MARKETING' ? 'MARKETING' : 'GENERAL',
+                  })
+                }}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border bg-white"
+              >
+                <option value="GENERAL">General</option>
+                <option value="MARKETING">Marketing</option>
+              </select>
             </div>
 
             <div>

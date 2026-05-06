@@ -1,4 +1,4 @@
-import {Array as A, Effect, pipe} from 'effect'
+import {Array as A, Effect, Option, pipe} from 'effect'
 import {internalIpV4} from 'internal-ip'
 import {SERVICES} from '../config/services.js'
 import {LanIpDetectionError} from '../errors/startup-errors.js'
@@ -93,15 +93,16 @@ export const generateLocalEnvPreset = (
     Effect.map((host) =>
       pipe(
         SERVICES,
-        A.map((service) => {
+        A.filterMap((service) => {
           const presetField = SERVICE_TO_PRESET_FIELD[service.name]
           if (presetField === undefined) {
-            // This should never happen if SERVICE_TO_PRESET_FIELD is kept in sync with SERVICES
-            throw new Error(
-              `No preset field mapping for service: ${service.name}`
-            )
+            return Option.none()
           }
-          return [presetField, `http://${host}:${service.port}`] as const
+          const entry: readonly [string, string] = [
+            presetField,
+            `http://${host}:${service.port}`,
+          ]
+          return Option.some(entry)
         }),
         (entries) => Object.fromEntries(entries)
       )

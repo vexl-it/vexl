@@ -54,6 +54,12 @@ export const createQueryVexlProductNotifications = Effect.gen(function* (_) {
         AND (
           CAST(${params.lastVexlProductNotificationUuidFetched ??
       null} AS uuid) IS NULL
+          OR NOT EXISTS (
+            SELECT
+              1
+            FROM
+              cursor_row
+          )
           OR (
             EXISTS (
               SELECT

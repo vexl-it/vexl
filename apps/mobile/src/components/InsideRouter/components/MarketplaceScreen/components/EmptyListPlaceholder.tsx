@@ -15,14 +15,11 @@ import {
   isTextFilterActiveAtom,
   resetFilterInStorageActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
-import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
-import marketplaceLayoutModeAtom from '../../../../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {
   addMoreContactsSuggestionVisibleAtom,
   createOfferSuggestionVisibleAtom,
   resetFilterSuggestionVisibleAtom,
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
-import {offersToSeeInMarketplaceCountAtom} from '../../../../../state/marketplace/atoms/offersByMarketplaceFilterBarOptions'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -47,10 +44,6 @@ function EmptyListPlaceholder({
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
   const isTextFilterActive = useAtomValue(isTextFilterActiveAtom)
-  const marketplaceLayout = useAtomValue(marketplaceLayoutModeAtom)
-  const offersToSeeInMarketplaceCount = useAtomValue(
-    offersToSeeInMarketplaceCountAtom
-  )
   const reachNumber = useAtomValue(reachNumberAtom)
   const createOfferSuggestionVisible = useAtomValue(
     createOfferSuggestionVisibleAtom
@@ -62,7 +55,6 @@ function EmptyListPlaceholder({
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
 
-  const refocusMap = useSetAtom(refocusMapActionAtom)
   const initializeMinutesTillOffersDisplayed = useSetAtom(
     initializeMinutesTillOffersDisplayedActionAtom
   )
@@ -103,19 +95,6 @@ function EmptyListPlaceholder({
   useEffect(() => {
     initializeMinutesTillOffersDisplayed()
   }, [initializeMinutesTillOffersDisplayed])
-
-  if (marketplaceLayout === 'map' && offersToSeeInMarketplaceCount > 0) {
-    return (
-      <MarketplaceSuggestion
-        mt="$4"
-        buttonText={t('map.showOffersOnMap')}
-        onButtonPress={() => {
-          refocusMap({focusAllOffers: true})
-        }}
-        text={t('map.noOffersInSelectedRegion')}
-      />
-    )
-  }
 
   if (filterActive || isTextFilterActive) {
     return (

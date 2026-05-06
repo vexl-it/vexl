@@ -7,7 +7,15 @@ import {type StoredContactWithComputedValues} from '../../contacts/domain'
 import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
 import areIncluded from './areIncluded'
 import filterOffersByText from './filterOffersByText'
-import isOfferInsideViewPort from './isOfferInsideViewport'
+import isOfferInsideViewPort, {
+  isOfferPinInsideViewPort,
+} from './isOfferInsideViewport'
+
+function isViewportTooWide(viewport: Viewport): boolean {
+  return (
+    Math.abs(viewport.northeast.longitude - viewport.southwest.longitude) > 60
+  )
+}
 
 export function shouldCombineOnlineOffersWithLocationFilter(
   filter: Pick<OffersFilter, 'location' | 'locationState'>
@@ -84,13 +92,11 @@ export function selectOffersByMarketplaceFilterBarOptions({
 export function filterMarketplaceOffers({
   offers,
   filter,
-  layoutMode,
   filterPriceInSats,
   getBtcPriceForCurrency,
 }: {
   offers: OneOfferInState[]
   filter: OffersFilter
-  layoutMode: 'map' | 'list'
   filterPriceInSats: number | null
   getBtcPriceForCurrency: (currency: CurrencyCode) => number | undefined
 }): OneOfferInState[] {
@@ -100,12 +106,6 @@ export function filterMarketplaceOffers({
   return pipe(
     offers,
     Array.filter((offer) => {
-      if (
-        layoutMode !== 'list' &&
-        offer.offerInfo.publicPart.location.length === 0
-      )
-        return false
-
       if (
         filter.locationState &&
         !shouldCombineOnlineWithLocation &&
@@ -253,10 +253,7 @@ export function filterOffersByViewport({
 }): OneOfferInState[] {
   if (!viewport) return offers
 
-  if (
-    Math.abs(viewport.northeast.longitude - viewport.southwest.longitude) > 60
-  )
-    return offers
+  if (isViewportTooWide(viewport)) return offers
 
   return pipe(
     offers,
@@ -270,5 +267,22 @@ export function filterOffersByViewport({
 
       return isOfferInsideViewPort(viewport, offer)
     })
+  )
+}
+
+export function filterOffersByPinViewport({
+  offers,
+  viewport,
+}: {
+  offers: OneOfferInState[]
+  viewport: Viewport | undefined
+}): OneOfferInState[] {
+  if (!viewport) return offers
+
+  if (isViewportTooWide(viewport)) return offers
+
+  return pipe(
+    offers,
+    Array.filter((offer) => isOfferPinInsideViewPort(viewport, offer))
   )
 }

@@ -53,6 +53,8 @@ export type RootStackParamsList = {
   SelectLocationRadius: {randomizeLocation?: boolean} | undefined
   FilterOffers: undefined
 
+  MapView: undefined
+
   OfferDetail: {offerId: OfferId}
 
   SendMessage: {offerId: OfferId; mode?: 'request' | 'rerequest'}

@@ -4,7 +4,7 @@ import {Option} from 'effect'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack} from 'tamagui'
-import {useChatWithMessagesForOffer} from '../../state/chat/hooks/useChatForOffer'
+import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
   getRequestState,
@@ -29,12 +29,18 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
     [offer.ownershipInfo?.adminId]
   )
 
-  // TODO make this more performant
-  const chatForOffer = useChatWithMessagesForOffer({
-    offerId: offer.offerInfo.offerId,
-    isMyOffer: !!offer.ownershipInfo,
-    otherSidePublicKey: Option.some(offer.offerInfo.publicPart.offerPublicKey),
-  })
+  const chatForOfferAtom = useMemo(
+    () =>
+      chatWithMessagesForOfferAtom({
+        offerId: offer.offerInfo.offerId,
+        isMyOffer: isMine,
+        otherSidePublicKey: Option.some(
+          offer.offerInfo.publicPart.offerPublicKey
+        ),
+      }),
+    [isMine, offer.offerInfo.offerId, offer.offerInfo.publicPart.offerPublicKey]
+  )
+  const chatForOffer = useAtomValue(chatForOfferAtom)
 
   const canBeRequested = useMemo(() => {
     if (!chatForOffer) return true

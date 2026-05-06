@@ -17,6 +17,7 @@ export interface CommonEnv {
   readonly DB_PASSWORD: string
   readonly DB_NAME?: string
   readonly REDIS_URL: string
+  readonly REDIS_NAMESPACE_PREFIX: string
 
   // Security - crypto keys used for signing/verification
   readonly SECRET_PUBLIC_KEY: string

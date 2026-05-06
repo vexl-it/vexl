@@ -39,6 +39,8 @@ const devConfig = {
     DB_USER: process.env.DB_USER!!,
     DB_PASSWORD: process.env.DB_PASSWORD!!,
     REDIS_URL: process.env.REDIS_URL!!,
+    REDIS_NAMESPACE_PREFIX:
+      process.env.DEV_COMMON_REDIS_NAMESPACE_PREFIX ?? "vexl_dev",
 
     // Security - pull from .env.local (required for most services)
     SECRET_PUBLIC_KEY: process.env.SECRET_PUBLIC_KEY ?? "",

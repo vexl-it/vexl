@@ -354,10 +354,7 @@ const processNewStreamNotificationActionAtom = atom(
           ),
           Match.tag(
             'VexlProductNotificationMessage',
-            (v) => {
-              alert('aha')
-              return Effect.log('Got vexl product notification', v) // TODO process properly}
-            }
+  (v) => Effect.log('Got vexl product notification', v) // TODO process properly}
           ),
           Match.tag('NewContentNoticeMessage', () => Effect.void),
           Match.exhaustive

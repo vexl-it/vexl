@@ -1,5 +1,5 @@
-import {detect} from 'detect-port'
 import {Effect} from 'effect'
+import {createServer} from 'node:net'
 import {MetroPortExhaustedError} from '../errors/startup-errors.js'
 
 const METRO_PORT_START = 8081
@@ -15,17 +15,29 @@ const METRO_PORT_END = 8090
  *
  * @returns Effect that resolves to available port number
  */
+const canBindPort = (port: number): Effect.Effect<boolean> =>
+  Effect.async((resume) => {
+    const server = createServer()
+
+    server.once('error', () => {
+      resume(Effect.succeed(false))
+    })
+
+    server.listen(port, () => {
+      server.close(() => {
+        resume(Effect.succeed(true))
+      })
+    })
+  })
+
 export const findAvailableMetroPort = (): Effect.Effect<
   number,
   MetroPortExhaustedError
 > =>
   Effect.gen(function* () {
     for (let port = METRO_PORT_START; port <= METRO_PORT_END; port++) {
-      // detect-port returns the same port if available, or next available if not
-      const availablePort = yield* Effect.promise(
-        async () => await detect(port)
-      )
-      if (availablePort === port) {
+      const available = yield* canBindPort(port)
+      if (available) {
         return port
       }
     }

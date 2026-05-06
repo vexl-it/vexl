@@ -5,6 +5,7 @@ import {Effect, Layer, String} from 'effect/index'
 import {createNotificationTokens} from './migrations/001_createNotificationTokens'
 import {addClientPrefix} from './migrations/002_addClientPrefix'
 import {addSystemAndMarketingVexlTokens} from './migrations/003_addSystemAndMarketingVexlTokens'
+import {createPendingBatchedNotifications} from './migrations/004_createPendingBatchedNotifications'
 
 const migrations = [
   {
@@ -21,6 +22,11 @@ const migrations = [
     id: 3,
     name: 'add_system_and_marketing_vexl_tokens',
     migrationEffect: addSystemAndMarketingVexlTokens,
+  },
+  {
+    id: 4,
+    name: 'create_pending_batched_notifications',
+    migrationEffect: createPendingBatchedNotifications,
   },
 ] as const
 

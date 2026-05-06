@@ -87,6 +87,7 @@ export type CreateVexlProductNotificationAdminParams =
 
 export const CreateVexlProductNotificationRequest = Schema.Struct({
   vexlProductNotification: VexlProductNotification,
+  issuePushNotification: Schema.Boolean,
 })
 export type CreateVexlProductNotificationRequest =
   typeof CreateVexlProductNotificationRequest.Type

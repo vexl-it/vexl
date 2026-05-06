@@ -9,7 +9,7 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
-import {Effect, flow, Schema} from 'effect'
+import {Array, Effect, flow, pipe, Schema} from 'effect'
 import {NotificationSecretRecord, NotificationTokenRecord} from './domain'
 
 const CreateNotificationTokenParams = Schema.Struct({
@@ -45,6 +45,13 @@ export const UpdateClientInfoParams = Schema.Struct({
   clientPrefix: Schema.NullOr(CountryPrefix),
 })
 export type UpdateClientInfoParams = typeof UpdateClientInfoParams.Type
+
+export const SelectVexlTokensParams = Schema.Literal('general', 'marketing')
+export type SelectVexlTokensParams = typeof SelectVexlTokensParams.Type
+
+const SelectedVexlTokenRecord = Schema.Struct({
+  token: VexlNotificationToken,
+})
 
 // --- Save Notification Token Secret ---
 export const createSaveNotificationTokenSecret = Effect.gen(function* () {
@@ -137,6 +144,49 @@ export const createUpdateClientInfo = Effect.gen(function* () {
       )
     ),
     Effect.withSpan('updateClientInfo query')
+  )
+})
+
+// --- Select Vexl Tokens ---
+export const createSelectVexlTokens = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient
+
+  const query = SqlSchema.findAll({
+    Request: SelectVexlTokensParams,
+    Result: SelectedVexlTokenRecord,
+    execute: (type) =>
+      type === 'marketing'
+        ? sql`
+            SELECT
+              marketing_vexl_token AS token
+            FROM
+              notification_token_secrets
+            WHERE
+              marketing_vexl_token IS NOT NULL
+          `
+        : sql`
+            SELECT
+              system_vexl_token AS token
+            FROM
+              notification_token_secrets
+            WHERE
+              system_vexl_token IS NOT NULL
+          `,
+  })
+
+  return flow(
+    (params: SelectVexlTokensParams) =>
+      pipe(
+        query(params),
+        Effect.map((records) => Array.map(records, (record) => record.token))
+      ),
+    Effect.catchAll((e) =>
+      Effect.zipRight(
+        Effect.logError('Error in selectVexlTokens', e),
+        Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
+      )
+    ),
+    Effect.withSpan('selectVexlTokens query')
   )
 })
 

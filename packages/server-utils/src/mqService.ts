@@ -19,18 +19,27 @@ export class MqServiceError extends Data.TaggedError('MqServiceError')<{
   message: string
 }> {}
 
-type EnqueueTask<A, R> = (
+export type EnqueueTask<A, R> = (
   task: A,
   options?: JobsOptions
 ) => Effect.Effect<Job, MqServiceError | ParseResult.ParseError, R>
 
 type ConsumeJob<A, R> = (payload: A) => Effect.Effect<void, never, R>
 
+export type MqProducerContext<
+  MqService extends {EnqueueTask: Context.Tag<any, any>},
+> = Context.Tag.Identifier<MqService['EnqueueTask']>
+
+export type MqProducerService<
+  MqService extends {EnqueueTask: Context.Tag<any, any>},
+> = Context.Tag.Service<MqService['EnqueueTask']>
+
 export const makeMqService = <A, I, R, TAG extends string>(
   queueName: TAG,
   JobPayloadSchema: Schema.Schema<A, I, R>
 ): {
   EnqueueTask: Context.Tag<`mqService/${TAG}`, EnqueueTask<A, R>>
+  EnqueueTaskContext: `mqService/${TAG}`
   producerLayer: Layer.Layer<
     `mqService/${TAG}`,
     MqServiceError,
@@ -40,7 +49,7 @@ export const makeMqService = <A, I, R, TAG extends string>(
     consume: ConsumeJob<A, R2>
   ) => Layer.Layer<never, MqServiceError, R2 | R | RedisConnectionService>
 } => {
-  const tag = `mqService/${queueName}` as const
+  const tag: `mqService/${TAG}` = `mqService/${queueName}`
 
   const RedisNamespacePrefixConfigFailWithMqError = Effect.catchTag(
     RedisNamespacePrefixConfig,
@@ -171,6 +180,7 @@ export const makeMqService = <A, I, R, TAG extends string>(
 
   return {
     EnqueueTask: EnqueueTaskTag,
+    EnqueueTaskContext: tag,
     producerLayer,
     consumerLayer,
   }

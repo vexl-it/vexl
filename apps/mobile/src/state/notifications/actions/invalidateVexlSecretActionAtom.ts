@@ -23,6 +23,8 @@ export const invalidateVexlSecretActionAtom = atom(null, (get, set) => {
 
     set(vexlNotificationTokenAtom, {
       secret: null,
+      systemVexlToken: null,
+      marketingVexlToken: null,
       lastUpdatedMetadata: null,
     })
 

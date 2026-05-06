@@ -33,6 +33,8 @@ export class NotificationSecretRecord extends Schema.Class<NotificationSecretRec
   id: NotificationSecretRecordId,
   secret: VexlNotificationTokenSecretNotTemporary,
   expoNotificationToken: Schema.NullOr(ExpoNotificationToken),
+  systemVexlToken: Schema.NullOr(VexlNotificationToken),
+  marketingVexlToken: Schema.NullOr(VexlNotificationToken),
   clientPlatform: PlatformName,
   clientVersion: VersionCode,
   clientAppSource: AppSource,

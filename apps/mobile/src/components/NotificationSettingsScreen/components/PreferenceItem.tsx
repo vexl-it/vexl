@@ -1,4 +1,4 @@
-import {useAtom, type PrimitiveAtom} from 'jotai'
+import {useAtom, type SetStateAction, type WritableAtom} from 'jotai'
 import React from 'react'
 import {Text, XStack, YStack} from 'tamagui'
 import Switch from '../../Switch'
@@ -6,7 +6,7 @@ import Switch from '../../Switch'
 interface Props {
   title: string
   description: string
-  atom: PrimitiveAtom<boolean>
+  atom: WritableAtom<boolean, [SetStateAction<boolean>], void>
 }
 
 function PreferenceItem({title, description, atom}: Props): React.ReactElement {

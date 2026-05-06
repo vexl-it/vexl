@@ -4,6 +4,7 @@ import {loadMigrationsFromEffect} from '@vexl-next/server-utils/src/loadMigratio
 import {Effect, Layer, String} from 'effect/index'
 import {createNotificationTokens} from './migrations/001_createNotificationTokens'
 import {addClientPrefix} from './migrations/002_addClientPrefix'
+import {addSystemAndMarketingVexlTokens} from './migrations/003_addSystemAndMarketingVexlTokens'
 
 const migrations = [
   {
@@ -15,6 +16,11 @@ const migrations = [
     id: 2,
     name: 'add_client_prefix',
     migrationEffect: addClientPrefix,
+  },
+  {
+    id: 3,
+    name: 'add_system_and_marketing_vexl_tokens',
+    migrationEffect: addSystemAndMarketingVexlTokens,
   },
 ] as const
 

@@ -1,7 +1,6 @@
 import {SearchBar} from '@vexl-next/ui'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useEffect, useMemo} from 'react'
-import {debounce} from 'tamagui'
+import React, {useCallback, useEffect, useRef} from 'react'
 import {
   searchTextAtom,
   submitSearchActionAtom,
@@ -9,35 +8,72 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 
 const localSearchTextAtom = atom('')
+const SEARCH_DEBOUNCE_MS = 400
+
+function normalizeSearchText(text: string): string | undefined {
+  return text.trim() || undefined
+}
 
 interface Props {
+  onSearchStart?: () => void
   postSearchActions?: () => void
 }
 
-function SearchOffers({postSearchActions}: Props): React.JSX.Element {
+function SearchOffers({
+  onSearchStart,
+  postSearchActions,
+}: Props): React.JSX.Element {
   const {t} = useTranslation()
 
   const searchTextFromStorage = useAtomValue(searchTextAtom)
   const submitSearch = useSetAtom(submitSearchActionAtom)
   const setLocalSearchText = useSetAtom(localSearchTextAtom)
   const localSearchText = useAtomValue(localSearchTextAtom)
+  const lastSubmittedSearchTextRef = useRef<string | undefined>(
+    searchTextFromStorage ?? undefined
+  )
+  const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => {
-    setLocalSearchText(searchTextFromStorage ?? '')
-  }, [searchTextFromStorage, setLocalSearchText])
+  const clearPendingSubmit = useCallback(() => {
+    if (submitTimeoutRef.current !== null) {
+      clearTimeout(submitTimeoutRef.current)
+      submitTimeoutRef.current = null
+    }
+  }, [])
 
-  const debouncedSubmit = useMemo(
-    () =>
-      debounce((text: string) => {
-        submitSearch(text || undefined)
-        postSearchActions?.()
-      }, 400),
-    [postSearchActions, submitSearch]
+  const scheduleSubmit = useCallback(
+    (searchText: string | undefined) => {
+      onSearchStart?.()
+      lastSubmittedSearchTextRef.current = searchText
+      submitSearch(searchText)
+      postSearchActions?.()
+    },
+    [onSearchStart, postSearchActions, submitSearch]
   )
 
   useEffect(() => {
-    debouncedSubmit(localSearchText.trim())
-  }, [localSearchText, debouncedSubmit])
+    lastSubmittedSearchTextRef.current = searchTextFromStorage ?? undefined
+    setLocalSearchText(searchTextFromStorage ?? '')
+  }, [searchTextFromStorage, setLocalSearchText])
+
+  useEffect(() => {
+    const nextSearchText = normalizeSearchText(localSearchText)
+
+    if (lastSubmittedSearchTextRef.current === nextSearchText) return
+
+    clearPendingSubmit()
+
+    if (nextSearchText === undefined) {
+      scheduleSubmit(undefined)
+    } else {
+      submitTimeoutRef.current = setTimeout(() => {
+        submitTimeoutRef.current = null
+        scheduleSubmit(nextSearchText)
+      }, SEARCH_DEBOUNCE_MS)
+    }
+
+    return clearPendingSubmit
+  }, [clearPendingSubmit, localSearchText, scheduleSubmit])
 
   return (
     <SearchBar

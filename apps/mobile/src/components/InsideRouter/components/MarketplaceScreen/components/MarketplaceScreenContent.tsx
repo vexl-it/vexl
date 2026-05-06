@@ -30,93 +30,33 @@ function useTabs(): ReadonlyArray<TabItem<MarketplaceTab>> {
   )
 }
 
-function AllOffersTabContent({
+function MarketplaceListHeader({
+  activeTab,
+  filteredOffersCount,
+  onFilterChange,
   onTabPress,
-  scrollToTopRef,
   tabs,
 }: {
+  readonly activeTab: MarketplaceTab
+  readonly filteredOffersCount: number
+  readonly onFilterChange: () => void
   readonly onTabPress: (tab: MarketplaceTab) => void
-  readonly scrollToTopRef: React.RefObject<(() => void) | null>
   readonly tabs: ReadonlyArray<TabItem<MarketplaceTab>>
 }): React.ReactElement {
-  const offersAtoms = useAtomValue(
-    filteredOffersIncludingLocationFilterAtomsAtom
-  )
-  const areThereOffersWithoutFilters = useAtomValue(
-    areThereOffersToSeeInMarketplaceWithoutFiltersAtom
-  )
-  const loading = useAreOffersLoading()
-  const refreshOffers = useSetAtom(refreshOffersActionAtom)
-  const {scrollY, onScroll} = useInsideScreenScroll()
-
-  const handleRefresh = useCallback(() => {
-    Effect.runFork(refreshOffers())
-  }, [refreshOffers])
-
-  const listHeaderComponent = useMemo(
-    () => (
-      <InsideScreenListHeader>
-        <Stack paddingLeft="$5">
-          <Tabs tabs={tabs} activeTab="allOffers" onTabPress={onTabPress} />
-        </Stack>
+  return (
+    <InsideScreenListHeader>
+      <Stack paddingLeft="$5">
+        <Tabs tabs={tabs} activeTab={activeTab} onTabPress={onTabPress} />
+      </Stack>
+      {activeTab === 'allOffers' ? (
         <AllOffersListHeader
-          filteredOffersCount={offersAtoms.length}
-          scrollY={scrollY}
+          filteredOffersCount={filteredOffersCount}
+          onFilterChange={onFilterChange}
         />
-      </InsideScreenListHeader>
-    ),
-    [offersAtoms.length, onTabPress, scrollY, tabs]
-  )
-
-  return (
-    <OffersList
-      scrollToTopRef={scrollToTopRef}
-      ListHeaderComponent={listHeaderComponent}
-      ListEmptyComponent={
-        areThereOffersWithoutFilters ? FilteredOffersEmptyState : undefined
-      }
-      offersAtoms={offersAtoms}
-      onRefresh={handleRefresh}
-      refreshing={loading}
-      onScroll={onScroll}
-      scrollEventThrottle={16}
-    />
-  )
-}
-
-function MyOffersTabContent({
-  onTabPress,
-  scrollToTopRef,
-  tabs,
-}: {
-  readonly onTabPress: (tab: MarketplaceTab) => void
-  readonly scrollToTopRef: React.RefObject<(() => void) | null>
-  readonly tabs: ReadonlyArray<TabItem<MarketplaceTab>>
-}): React.ReactElement {
-  const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
-  const {onScroll} = useInsideScreenScroll()
-
-  const listHeaderComponent = useMemo(
-    () => (
-      <InsideScreenListHeader>
-        <Stack paddingLeft="$5">
-          <Tabs tabs={tabs} activeTab="myOffers" onTabPress={onTabPress} />
-        </Stack>
+      ) : (
         <MyOffersListHeader />
-      </InsideScreenListHeader>
-    ),
-    [onTabPress, tabs]
-  )
-
-  return (
-    <OffersList
-      scrollToTopRef={scrollToTopRef}
-      ListHeaderComponent={listHeaderComponent}
-      ListEmptyComponent={MyOffersEmptyList}
-      offersAtoms={myOffersSortedAtoms}
-      onScroll={onScroll}
-      scrollEventThrottle={16}
-    />
+      )}
+    </InsideScreenListHeader>
   )
 }
 
@@ -128,20 +68,59 @@ function MarketplaceScreenContent({
   readonly onActiveTabChange: (tab: MarketplaceTab) => void
 }): React.ReactElement {
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
-  const {scrollY} = useInsideScreenScroll()
+  const {scrollY, onScroll} = useInsideScreenScroll()
   const scrollToTopRef = useRef<(() => void) | null>(null)
   const tabs = useTabs()
+  const allOffersAtoms = useAtomValue(
+    filteredOffersIncludingLocationFilterAtomsAtom
+  )
+  const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
+  const areThereOffersWithoutFilters = useAtomValue(
+    areThereOffersToSeeInMarketplaceWithoutFiltersAtom
+  )
+  const loading = useAreOffersLoading()
 
   useHandleRedirectToContactsScreen()
+
+  const scrollListToTop = useCallback(() => {
+    scrollY.value = 0
+    scrollToTopRef.current?.()
+  }, [scrollY])
 
   const handleTabPress = useCallback(
     (tab: MarketplaceTab) => {
       onActiveTabChange(tab)
-      scrollY.value = 0
-      scrollToTopRef.current?.()
+      scrollListToTop()
     },
-    [onActiveTabChange, scrollY]
+    [onActiveTabChange, scrollListToTop]
   )
+
+  const handleRefresh = useCallback(() => {
+    Effect.runFork(refreshOffers())
+  }, [refreshOffers])
+
+  const listHeaderComponent = useMemo(
+    () => (
+      <MarketplaceListHeader
+        activeTab={activeTab}
+        filteredOffersCount={allOffersAtoms.length}
+        onFilterChange={scrollListToTop}
+        onTabPress={handleTabPress}
+        tabs={tabs}
+      />
+    ),
+    [activeTab, allOffersAtoms.length, handleTabPress, scrollListToTop, tabs]
+  )
+
+  const offersAtoms =
+    activeTab === 'allOffers' ? allOffersAtoms : myOffersSortedAtoms
+
+  const listEmptyComponent =
+    activeTab === 'allOffers'
+      ? areThereOffersWithoutFilters
+        ? FilteredOffersEmptyState
+        : undefined
+      : MyOffersEmptyList
 
   useAppState(
     useCallback(
@@ -156,19 +135,17 @@ function MarketplaceScreenContent({
 
   return (
     <Stack f={1}>
-      {activeTab === 'allOffers' ? (
-        <AllOffersTabContent
-          onTabPress={handleTabPress}
-          scrollToTopRef={scrollToTopRef}
-          tabs={tabs}
-        />
-      ) : (
-        <MyOffersTabContent
-          onTabPress={handleTabPress}
-          scrollToTopRef={scrollToTopRef}
-          tabs={tabs}
-        />
-      )}
+      <OffersList
+        scrollToTopRef={scrollToTopRef}
+        ListHeaderComponent={listHeaderComponent}
+        ListEmptyComponent={listEmptyComponent}
+        offersAtoms={offersAtoms}
+        onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
+        refreshing={activeTab === 'allOffers' ? loading : false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        maintainVisibleContentPosition={{disabled: true}}
+      />
     </Stack>
   )
 }

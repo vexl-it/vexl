@@ -35,9 +35,6 @@ import {
   offersFilterFromStorageAtom,
   offersFilterInitialState,
 } from '../../state/marketplace/atoms/filterAtoms'
-import {clearRegionAndRefocusActionAtom} from '../../state/marketplace/atoms/map/focusedOffer'
-import {animateToCoordinateActionAtom} from '../../state/marketplace/atoms/map/mapViewAtoms'
-import marketplaceLayoutModeAtom from '../../state/marketplace/atoms/map/marketplaceLayoutModeAtom'
 import {offersToSeeInMarketplaceAtom} from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {
   type MarketplaceFilterBarOption,
@@ -49,7 +46,6 @@ import {
   selectOffersByMarketplaceFilterBarOptions,
   shouldCombineOnlineOffersWithLocationFilter,
 } from '../../state/marketplace/utils/filterMarketplaceOffers'
-import getOfferLocationBorderPoints from '../../state/marketplace/utils/getOfferLocationBorderPoints'
 import {radiusToViewport} from '../../state/marketplace/utils/toViewport'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
@@ -581,31 +577,7 @@ function getDraftOffersFilter(get: Getter): OffersFilter {
 }
 
 export const saveFilterActionAtom = atom(null, (get, set) => {
-  const marketplaceLayoutMode = get(marketplaceLayoutModeAtom)
-
   set(offersFilterFromStorageAtom, getDraftOffersFilter(get))
-
-  if (marketplaceLayoutMode === 'map') {
-    const location = get(locationAtom)
-
-    if (location) {
-      const oneLocation = location[0]
-      const coordinates = location.map((one) => ({
-        latitude: one.latitude,
-        longitude: one.longitude,
-      }))
-
-      if (coordinates.length === 1 && oneLocation) {
-        // this should avoid zooming too much on filtered location if there is only one
-        set(
-          animateToCoordinateActionAtom,
-          getOfferLocationBorderPoints(oneLocation)
-        )
-      } else {
-        set(animateToCoordinateActionAtom, coordinates)
-      }
-    } else set(clearRegionAndRefocusActionAtom)
-  }
 })
 
 export const filteredOffersPreviewCountAtom = atom((get) => {
@@ -630,7 +602,6 @@ export const filteredOffersPreviewCountAtom = atom((get) => {
   const filteredOffers = filterMarketplaceOffers({
     offers: offersAfterBarFilter,
     filter: draftFilter,
-    layoutMode: get(marketplaceLayoutModeAtom),
     filterPriceInSats,
     getBtcPriceForCurrency: (currency) =>
       get(createBtcPriceForCurrencyAtom(currency))?.btcPrice?.BTC,

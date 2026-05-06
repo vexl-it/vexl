@@ -46,6 +46,12 @@ import SpokenLanguageTag from './components/SpokenLanguageTag'
 
 const currencySelectVisibleAtom = atom(false)
 
+function runAfterTwoAnimationFrames(callback: () => void): void {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(callback)
+  })
+}
+
 function FilterOffersScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
@@ -84,9 +90,9 @@ function FilterOffersScreen(): React.ReactElement {
   }, [resetFilterOmitTextFilter])
 
   const handleSave = useCallback(() => {
-    saveFilter()
     safeGoBack()
-  }, [saveFilter, safeGoBack])
+    runAfterTwoAnimationFrames(saveFilter)
+  }, [safeGoBack, saveFilter])
 
   useFocusEffect(
     useCallback(() => {

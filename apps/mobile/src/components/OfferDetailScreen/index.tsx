@@ -20,7 +20,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {ScrollView} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {useChatWithMessagesForOffer} from '../../state/chat/hooks/useChatForOffer'
+import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
   getRequestState,
@@ -220,18 +220,25 @@ function OfferDetailScreen({
   )
   const offer = useSingleOffer(offerId)
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
-
-  const chatForOffer = useChatWithMessagesForOffer({
-    offerId,
-    isMyOffer: Option.match(offer, {
-      onNone: () => false,
-      onSome: (o) => !!o.ownershipInfo,
-    }),
-    otherSidePublicKey: Option.map(
-      offer,
-      (o) => o.offerInfo.publicPart.offerPublicKey
-    ),
+  const isMyOffer = Option.match(offer, {
+    onNone: () => false,
+    onSome: (o) => !!o.ownershipInfo,
   })
+  const otherSidePublicKey = Option.match(offer, {
+    onNone: () => undefined,
+    onSome: (o) => o.offerInfo.publicPart.offerPublicKey,
+  })
+
+  const chatForOfferAtom = useMemo(
+    () =>
+      chatWithMessagesForOfferAtom({
+        offerId,
+        isMyOffer,
+        otherSidePublicKey: Option.fromNullable(otherSidePublicKey),
+      }),
+    [isMyOffer, offerId, otherSidePublicKey]
+  )
+  const chatForOffer = useAtomValue(chatForOfferAtom)
 
   const requestState = useMemo(
     () => getRequestState(chatForOffer),

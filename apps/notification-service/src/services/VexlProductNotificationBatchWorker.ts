@@ -68,6 +68,7 @@ export const issueNotificationBatch = Effect.gen(function* (_) {
   const batchSize = yield* _(vexlProductNotificationBatchSizeConfig)
   const rows = yield* _(db.findOldestPendingRows(batchSize))
 
+  yield Effect.log('Issuing notifications batch' {count: rows.count})
   const idsToDelete = yield* _(
     pipe(
       rows,
@@ -76,6 +77,7 @@ export const issueNotificationBatch = Effect.gen(function* (_) {
     )
   )
 
+  yield Effect.log('Notifications issued' {count: rows.count})
   yield* _(db.deletePendingRows(idsToDelete))
 }).pipe(
   Effect.catchAll((e) =>

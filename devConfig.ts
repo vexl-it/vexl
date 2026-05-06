@@ -239,12 +239,16 @@ const devConfig = {
   metricsService: {},
 
   /**
-   * Backoffice App - proxies admin club management requests to Contact Service.
+   * Backoffice App - proxies admin requests to backend services.
    */
   backofficeApp: {
-    API_INTERNAL_URL:
+    CONTACT_API_INTERNAL_URL:
+      process.env.DEV_BACKOFFICE_APP_CONTACT_API_INTERNAL_URL ??
       process.env.DEV_BACKOFFICE_APP_API_INTERNAL_URL ??
       `http://localhost:${process.env.CONTACT_SERVICE_PORT ?? "3002"}`,
+    CONTENT_API_INTERNAL_URL:
+      process.env.DEV_BACKOFFICE_APP_CONTENT_API_INTERNAL_URL ??
+      `http://localhost:${process.env.CONTENT_SERVICE_PORT ?? "3009"}`,
   },
 
   /**

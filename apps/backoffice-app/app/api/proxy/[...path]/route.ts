@@ -1,6 +1,16 @@
 import {type NextRequest, NextResponse} from 'next/server'
 
-const API_BACKEND_URL = process.env.API_INTERNAL_URL ?? 'http://localhost:3002'
+const CONTACT_API_INTERNAL_URL =
+  process.env.CONTACT_API_INTERNAL_URL ??
+  process.env.API_INTERNAL_URL ??
+  'http://localhost:3002'
+const CONTENT_API_INTERNAL_URL =
+  process.env.CONTENT_API_INTERNAL_URL ?? 'http://localhost:3009'
+
+const getBackendUrl = (path: string): string =>
+  path.startsWith('content/')
+    ? CONTENT_API_INTERNAL_URL
+    : CONTACT_API_INTERNAL_URL
 
 async function proxyRequest(request: NextRequest, method: string) {
   try {
@@ -8,7 +18,7 @@ async function proxyRequest(request: NextRequest, method: string) {
     const path = request.nextUrl.pathname.replace('/api/proxy/', '')
 
     // Build the backend URL
-    const backendUrl = new URL(`${path}`, API_BACKEND_URL)
+    const backendUrl = new URL(`${path}`, getBackendUrl(path))
 
     // Copy over all query params from the original request (including adminToken)
     request.nextUrl.searchParams.forEach((value, key) => {

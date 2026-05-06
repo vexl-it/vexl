@@ -15,5 +15,5 @@ Conventions:
 Notes for agents:
 
 - Image uploads are two-step: first request a presigned S3 URL, then PUT the file to it.
-- `API_INTERNAL_URL` env var (server-side only, local default `http://localhost:3002`) controls where the proxy forwards requests.
+- `CONTACT_API_INTERNAL_URL` and `CONTENT_API_INTERNAL_URL` env vars (server-side only, local defaults `http://localhost:3002` and `http://localhost:3009`) control where the proxy forwards requests. `API_INTERNAL_URL` remains a legacy fallback for contact-service.
 - When adding new backend endpoints, ensure the catch-all proxy route (`app/api/proxy/[...path]/route.ts`) handles them.

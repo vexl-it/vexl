@@ -433,7 +433,7 @@ describe('Vexl product notifications', () => {
     )
   })
 
-  it('returns all Vexl product notifications for an unknown cursor UUID', async () => {
+  it('returns all Vexl product notifications newer than the provided date for an unknown cursor UUID', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
@@ -454,7 +454,7 @@ describe('Vexl product notifications', () => {
           app.VexlProductNotifications.getVexlProductNotifications({
             headers: commonHeaders,
             urlParams: {
-              newerThan: date('2026-01-01T00:00:00.000Z'),
+              newerThan: date('2026-04-01T00:00:00.000Z'),
               lastVexlProductNotificationUuidFetched: uuid(
                 '9cb98d07-fba8-4cae-97b1-ff47936f6a29'
               ),

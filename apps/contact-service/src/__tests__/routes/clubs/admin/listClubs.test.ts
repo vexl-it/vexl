@@ -3,7 +3,10 @@ import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  addTestHeaders,
+  clearTestAuthHeaders,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Array, Effect, Option, Schema, String} from 'effect'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -76,6 +79,7 @@ describe('List clubs', () => {
             },
           })
         )
+        yield* _(clearTestAuthHeaders)
       })
     )
   })

@@ -4,7 +4,10 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidAdminTokenError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {addTestHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
+import {
+  addTestHeaders,
+  clearTestAuthHeaders,
+} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Option, Schema} from 'effect'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
@@ -77,6 +80,7 @@ describe('Generate club invite link', () => {
             },
           })
         )
+        yield* _(clearTestAuthHeaders)
       })
     )
   })

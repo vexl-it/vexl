@@ -1,14 +1,16 @@
 import {SqlClient, SqlResolver, SqlSchema} from '@effect/sql'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {UserNotificationMqEntry} from '@vexl-next/server-utils/src/UserNotificationMq'
-import {Effect, flow, pipe, Schema} from 'effect'
+import {Effect, flow, pipe, RequestResolver, Schema} from 'effect'
 import {
   PendingBatchedNotificationRecordId,
   RawPendingBatchedNotificationDbRecord,
 } from './domain'
 
+const INSERT_PENDING_ENTRIES_BATCH_SIZE = 500
+
 const InsertPendingNotificationParams = Schema.Struct({
-  notificationData: Schema.String,
+  notificationData: Schema.parseJson(UserNotificationMqEntry),
 })
 
 const BatchSize = Schema.Number
@@ -16,29 +18,36 @@ const BatchSize = Schema.Number
 export const createInsertPendingEntries = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient
 
-  const insertPendingNotificationQuery = SqlSchema.void({
-    Request: InsertPendingNotificationParams,
-    execute: (params) => sql`
-      INSERT INTO
-        pending_batched_notifications (notification_data)
-      VALUES
-        (${params.notificationData}::jsonb)
-    `,
-  })
+  const insertPendingNotificationResolver = yield* SqlResolver.void(
+    'insertPendingBatchedNotifications',
+    {
+      Request: InsertPendingNotificationParams,
+      execute: (params) => sql`
+        INSERT INTO
+          pending_batched_notifications ${sql.insert(params)}
+      `,
+    }
+  )
+  const insertPendingNotification =
+    insertPendingNotificationResolver.makeExecute(
+      RequestResolver.batchN(
+        insertPendingNotificationResolver,
+        INSERT_PENDING_ENTRIES_BATCH_SIZE
+      )
+    )
 
   return (
     entries: ReadonlyArray<typeof UserNotificationMqEntry.Type>
   ): Effect.Effect<void, UnexpectedServerError> =>
     pipe(
       entries,
-      Effect.forEach((entry) =>
-        pipe(
-          entry,
-          Schema.encode(Schema.parseJson(UserNotificationMqEntry)),
-          Effect.flatMap((notificationData) =>
-            insertPendingNotificationQuery({notificationData})
-          )
-        )
+      Effect.forEach(
+        (entry) => insertPendingNotification({notificationData: entry}),
+        {
+          batching: true,
+          concurrency: 'unbounded',
+          discard: true,
+        }
       ),
       Effect.asVoid,
       Effect.catchAll((e) =>

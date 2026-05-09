@@ -1,0 +1,58 @@
+diff --git a/esm/vanilla/utils/splitAtom.d.mts b/esm/vanilla/utils/splitAtom.d.mts
+index 37899b8674072f4fbda2d1d8d61f539efb01ab03..cf6d023d780a9ebe2b2ec5701f13feaa2c38db86 100644
+--- a/esm/vanilla/utils/splitAtom.d.mts
++++ b/esm/vanilla/utils/splitAtom.d.mts
+@@ -12,5 +12,6 @@ type SplitAtomAction<Item> = {
+     before?: PrimitiveAtom<Item>;
+ };
+ export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<Item[], [Item[]], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [SplitAtomAction<Item>], void>;
+-export declare function splitAtom<Item, Key>(arrAtom: Atom<Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
++export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<readonly Item[], [readonly Item[]], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [SplitAtomAction<Item>], void>;
++export declare function splitAtom<Item, Key>(arrAtom: Atom<readonly Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
+ export {};
+diff --git a/ts3.8/esm/vanilla/utils/splitAtom.d.ts b/ts3.8/esm/vanilla/utils/splitAtom.d.ts
+index 534e00fef70b30d51cd7c46295dbdd75294311d6..cef2ff11ebe72843cd313792942e6cac0469d214 100644
+--- a/ts3.8/esm/vanilla/utils/splitAtom.d.ts
++++ b/ts3.8/esm/vanilla/utils/splitAtom.d.ts
+@@ -16,6 +16,11 @@ export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<Item[], [
+ ], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [
+     SplitAtomAction<Item>
+ ], void>;
+-export declare function splitAtom<Item, Key>(arrAtom: Atom<Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
++export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<readonly Item[], [
++    readonly Item[]
++], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [
++    SplitAtomAction<Item>
++], void>;
++export declare function splitAtom<Item, Key>(arrAtom: Atom<readonly Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
+ export {};
+ declare type Awaited<T> = T extends Promise<infer V> ? V : T;
+diff --git a/ts3.8/vanilla/utils/splitAtom.d.ts b/ts3.8/vanilla/utils/splitAtom.d.ts
+index 534e00fef70b30d51cd7c46295dbdd75294311d6..cef2ff11ebe72843cd313792942e6cac0469d214 100644
+--- a/ts3.8/vanilla/utils/splitAtom.d.ts
++++ b/ts3.8/vanilla/utils/splitAtom.d.ts
+@@ -16,6 +16,11 @@ export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<Item[], [
+ ], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [
+     SplitAtomAction<Item>
+ ], void>;
+-export declare function splitAtom<Item, Key>(arrAtom: Atom<Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
++export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<readonly Item[], [
++    readonly Item[]
++], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [
++    SplitAtomAction<Item>
++], void>;
++export declare function splitAtom<Item, Key>(arrAtom: Atom<readonly Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
+ export {};
+ declare type Awaited<T> = T extends Promise<infer V> ? V : T;
+diff --git a/vanilla/utils/splitAtom.d.ts b/vanilla/utils/splitAtom.d.ts
+index 37899b8674072f4fbda2d1d8d61f539efb01ab03..cf6d023d780a9ebe2b2ec5701f13feaa2c38db86 100644
+--- a/vanilla/utils/splitAtom.d.ts
++++ b/vanilla/utils/splitAtom.d.ts
+@@ -12,5 +12,6 @@ type SplitAtomAction<Item> = {
+     before?: PrimitiveAtom<Item>;
+ };
+ export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<Item[], [Item[]], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [SplitAtomAction<Item>], void>;
+-export declare function splitAtom<Item, Key>(arrAtom: Atom<Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
++export declare function splitAtom<Item, Key>(arrAtom: WritableAtom<readonly Item[], [readonly Item[]], void>, keyExtractor?: (item: Item) => Key): WritableAtom<PrimitiveAtom<Item>[], [SplitAtomAction<Item>], void>;
++export declare function splitAtom<Item, Key>(arrAtom: Atom<readonly Item[]>, keyExtractor?: (item: Item) => Key): Atom<Atom<Item>[]>;
+ export {};

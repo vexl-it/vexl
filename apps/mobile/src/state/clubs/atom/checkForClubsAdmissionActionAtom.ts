@@ -1,6 +1,7 @@
 import {Array, Effect, Option, Record} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
+import {addNotificationToCenterActionAtom} from '../../../components/NotificationsScreen/state'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {showInternalNotificationForClubAdmission} from '../../../utils/notifications/clubNotifications'
@@ -97,6 +98,11 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
               clubWithMembers.club
             )
           )
+          set(addNotificationToCenterActionAtom, {
+            _tag: 'ClubAdmissionNotificationData',
+            pubKey: key.keyPair.publicKey,
+            clubInfo: clubWithMembers.club,
+          })
         }).pipe(
           Effect.catchTag('ClubNotFoundError', () => Effect.void),
           Effect.ignore

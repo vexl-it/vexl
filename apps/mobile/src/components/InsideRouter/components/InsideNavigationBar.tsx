@@ -6,10 +6,10 @@ import {
   UserProfile,
   type AnimatedNavigationBarAction,
 } from '@vexl-next/ui'
+import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type SharedValue} from 'react-native-reanimated'
-
-const noop = (): void => {}
+import {areThereNotSeenNotificationsAtom} from '../../NotificationsScreen/state'
 
 function InsideNavigationBar({
   title,
@@ -19,6 +19,9 @@ function InsideNavigationBar({
   readonly scrollY: SharedValue<number>
 }): React.JSX.Element {
   const navigation = useNavigation()
+  const areThereNotSeenNotifications = useAtomValue(
+    areThereNotSeenNotificationsAtom
+  )
 
   const handleCalculatorPress = useCallback(() => {
     navigation.navigate('TradeCalculatorFlow', {screen: 'TradeCalculator'})
@@ -28,13 +31,26 @@ function InsideNavigationBar({
     navigation.navigate('Settings')
   }, [navigation])
 
+  const handleNotificationsPress = useCallback(() => {
+    navigation.navigate('Notifications')
+  }, [navigation])
+
   const rightActions: readonly AnimatedNavigationBarAction[] = useMemo(
     () => [
-      {icon: BellNotification, onPress: noop},
+      {
+        icon: BellNotification,
+        onPress: handleNotificationsPress,
+        badge: areThereNotSeenNotifications,
+      },
       {icon: MathCalculate, onPress: handleCalculatorPress},
       {icon: UserProfile, onPress: handleSettingsPress},
     ],
-    [handleCalculatorPress, handleSettingsPress]
+    [
+      areThereNotSeenNotifications,
+      handleCalculatorPress,
+      handleNotificationsPress,
+      handleSettingsPress,
+    ]
   )
 
   return (

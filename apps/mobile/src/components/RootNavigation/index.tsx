@@ -49,6 +49,7 @@ import MapViewScreen from '../MapViewScreen'
 import MyDonationsScreen from '../MyDonationsScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
+import NotificationsScreen from '../NotificationsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
 import SendMessageScreen from '../SendMessageScreen'
@@ -228,6 +229,10 @@ function RootNavigation(): React.ReactElement {
               component={BlogArticlesListScreen}
             />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+            />
           </Stack.Group>
         )}
         <Stack.Screen

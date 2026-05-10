@@ -45,6 +45,7 @@ const OverlayNavigationBarFrame = styled(Stack, {
 export interface ScreenProps {
   readonly navigationBar: React.ReactNode
   readonly overlayNavigationBar?: boolean
+  noHorizontalPadding?: boolean
   readonly footer?: React.ReactNode
   readonly children: React.ReactNode
 }
@@ -52,6 +53,7 @@ export interface ScreenProps {
 export function Screen({
   navigationBar,
   overlayNavigationBar,
+  noHorizontalPadding,
   children,
   footer,
 }: ScreenProps): React.JSX.Element {
@@ -75,7 +77,11 @@ export function Screen({
         {overlayNavigationBar ? (
           <YStack flex={1}>{children}</YStack>
         ) : (
-          <YStack flex={1} paddingTop="$3" paddingHorizontal="$5">
+          <YStack
+            flex={1}
+            paddingTop="$3"
+            paddingHorizontal={noHorizontalPadding ? undefined : '$5'}
+          >
             {children}
           </YStack>
         )}

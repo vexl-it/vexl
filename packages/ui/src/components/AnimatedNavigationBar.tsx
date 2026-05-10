@@ -11,6 +11,7 @@ import {getTokens, styled, useTheme} from 'tamagui'
 
 import type {IconProps} from '../icons/types'
 import {SizableText, Stack, XStack} from '../primitives'
+import {Dot} from './Dot'
 
 export const navBarHeightAtom = atom(0)
 
@@ -19,6 +20,7 @@ const SCROLL_THRESHOLD = 100
 export interface AnimatedNavigationBarAction {
   readonly icon: React.ComponentType<IconProps>
   readonly onPress: () => void
+  readonly badge?: boolean
 }
 
 export interface AnimatedNavigationBarProps {
@@ -85,6 +87,9 @@ function ActionIcon({
         color={theme.foregroundPrimary.val}
         size={getTokens().size.$8.val}
       />
+      {action.badge ? (
+        <Dot position="absolute" top="$1" right="$1" variant="small" />
+      ) : null}
     </ActionButton>
   )
 }

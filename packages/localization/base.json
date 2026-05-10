@@ -1,5 +1,6 @@
 {
   "common.next": "Next",
+  "common.new": "new",
   "common.skip": "Skip",
   "common.finish": "Finish",
   "common.confirm": "Confirm",
@@ -94,7 +95,6 @@
   "common.reply": "Reply",
   "common.replyTo": "Reply to",
   "common.copy": "Copy",
-
   "common.loading": "Loading",
   "common.loadingTasks": "Loading tasks ({{count}})",
   "common.processingNotifications": "Processing notifications ({{count}})",
@@ -1493,5 +1493,11 @@
   "marketplace.postYourFirstOffer": "Post your first offer",
   "marketplace.createOfferDescription": "Create an offer and bring your market to life.",
   "marketplace.createNewOffer": "Create new offer",
-  "offerDetail.offerDetail": "Offer detail"
+  "offerDetail.offerDetail": "Offer detail",
+  "notificationsScreen.title": "Notifications",
+  "notificationsScreen.system": "System",
+  "notificationsScreen.important": "Important",
+  "notificationsScreen.noNotifications.title": "No notifications yet",
+  "notificationsScreen.noNotifications.description": "We'll let you know when something happens.",
+  "notificationsScreen.addmitedToClub.text": "You have been admitted to {{name}} club. You can now see offers and create offer for this club!"
 }

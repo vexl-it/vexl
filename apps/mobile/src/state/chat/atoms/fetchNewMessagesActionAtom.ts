@@ -1,4 +1,3 @@
-import notifee from '@notifee/react-native'
 import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
@@ -30,6 +29,7 @@ import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {apiAtom} from '../../../api'
+import {refreshNotificationBadgeCountActionAtom} from '../../../components/BadgeCountManager'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
 import {isOnSpecificChat} from '../../../utils/navigation'
@@ -53,7 +53,6 @@ import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionT
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
 import {reportMessagesReceivedActionAtom} from './reportMessagesReceivedActionAtom'
-import {unreadChatsCountAtom} from './unreadChatsCountAtom'
 
 const handleOtherSideUpdatedActionAtom = atom(
   null,
@@ -512,9 +511,7 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
       })
     })
 
-    notifee.setBadgeCount(get(unreadChatsCountAtom)).catch((e: unknown) => {
-      reportError('warn', new Error('Unable to set badge count'), {e})
-    })
+    set(refreshNotificationBadgeCountActionAtom)
     return updates
   })
 )

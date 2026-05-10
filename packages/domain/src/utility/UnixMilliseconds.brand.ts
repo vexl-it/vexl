@@ -33,6 +33,10 @@ export function fromDateTime(dateTime: DateTime): UnixMilliseconds {
   return Schema.decodeSync(UnixMilliseconds)(dateTime.valueOf())
 }
 
+export function fromDate(dateTime: Date): UnixMilliseconds {
+  return Schema.decodeSync(UnixMilliseconds)(dateTime.valueOf())
+}
+
 export function getNextMidnightOnSelectedDate(date: Date): UnixMilliseconds {
   return Schema.decodeSync(UnixMilliseconds)(
     DateTime.fromJSDate(date).endOf('day').toMillis()

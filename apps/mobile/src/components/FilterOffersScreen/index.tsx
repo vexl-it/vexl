@@ -9,13 +9,13 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui/src/primitives'
-import {atom, useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
-import {ChangeCurrency} from '../ChangeCurrency'
+import {useOpenChangeCurrency} from '../ChangeCurrency'
 import DeferredContent from '../DeferredContent'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
 import FriendLevel from '../OfferForm/components/FriendLevel'
@@ -44,8 +44,6 @@ import ProductCategorySection from './components/ProductCategorySection'
 import Sorting from './components/Sorting'
 import SpokenLanguageTag from './components/SpokenLanguageTag'
 
-const currencySelectVisibleAtom = atom(false)
-
 function runAfterTwoAnimationFrames(callback: () => void): void {
   requestAnimationFrame(() => {
     requestAnimationFrame(callback)
@@ -62,8 +60,9 @@ function FilterOffersScreen(): React.ReactElement {
   const initializeOffersFilterOnDisplay = useSetAtom(
     initializeOffersFilterOnDisplayActionAtom
   )
-  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
   const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
+  const openChangeCurrency = useOpenChangeCurrency()
+  const currency = useAtomValue(currencyAtom)
   const amountFilterEnabled = useAtomValue(amountFilterEnabledAtom)
   const amountPricesReady = useAtomValue(btcPricesReadyForFilterAtom)
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
@@ -187,18 +186,16 @@ function FilterOffersScreen(): React.ReactElement {
                     amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
                     currencyAtom={currencyAtom}
                     onCurrencyPress={() => {
-                      setCurrencySelectVisible(true)
+                      openChangeCurrency({
+                        selectedCurrencyCode: currency,
+                        onSave: (currency) => {
+                          updateCurrencyLimits({currency})
+                        },
+                      })
                     }}
                     maxLabel={t('offerForm.max')}
                   />
                 </Stack>
-                <ChangeCurrency
-                  selectedCurrencyCodeAtom={currencyAtom}
-                  onSave={(currency) => {
-                    updateCurrencyLimits({currency})
-                  }}
-                  visibleAtom={currencySelectVisibleAtom}
-                />
                 <BtcPriceInfo />
               </YStack>
             </AnimatedCollapse>

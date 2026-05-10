@@ -1,4 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
+import {Loader} from '@vexl-next/ui'
 import {Option} from 'effect/index'
 import {
   atom,
@@ -21,14 +22,15 @@ import {
 import {currencies} from '../utils/localization/currency'
 import {localizedDateTimeActionAtom} from '../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../utils/preferences'
-import VexlActivityIndicator from './LoadingOverlayProvider/VexlActivityIndicator'
 
 interface Props extends TextProps {
   customBtcPriceAtom?: PrimitiveAtom<number> | undefined
   currencyAtom: Atom<CurrencyCode | undefined>
   disabled?: boolean
+  onPricePress?: () => void
   postRefreshActions?: () => void
   showLastUpdatedAt?: boolean
+  trailingElement?: React.ReactNode
 }
 
 const emptyAtom = atom<number | undefined>(undefined)
@@ -37,8 +39,10 @@ function CurrentBtcPrice({
   customBtcPriceAtom,
   currencyAtom,
   disabled,
+  onPricePress,
   postRefreshActions,
   showLastUpdatedAt = true,
+  trailingElement,
   ...props
 }: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -83,30 +87,37 @@ function CurrentBtcPrice({
     refreshBtcPrice,
   ])
 
+  const pressDisabled = Boolean(disabled) && !onPricePress
+
   return (
     <TouchableOpacity
-      disabled={disabled}
-      activeOpacity={disabled ? 1 : 0.7}
+      disabled={pressDisabled}
+      activeOpacity={pressDisabled ? 1 : 0.7}
       onPress={() => {
+        if (onPricePress) {
+          onPricePress()
+          return
+        }
+
         void refreshBtcPrice(currency)().then(postRefreshActions)
       }}
     >
-      <XStack ai="center">
+      <XStack ai="center" gap="$2">
         {btcPriceWithState?.state === 'loading' ? (
-          <VexlActivityIndicator
-            size="small"
-            bc={theme.foregroundSecondary.val}
-          />
+          <Loader size="small" color={theme.foregroundSecondary.val} />
         ) : (
           <YStack>
             <Text fos={16} ff="$body500" col="$foregroundPrimary" {...props}>
               {`1 BTC = ${
                 customBtcPrice
-                  ? customBtcPrice.toLocaleString(currentLocale)
+                  ? customBtcPrice.toLocaleString(currentLocale, {
+                      maximumFractionDigits: 0,
+                    })
                   : btcPriceWithState?.state === 'error'
                     ? '-'
                     : btcPriceWithState?.btcPrice.BTC.toLocaleString(
-                        currentLocale
+                        currentLocale,
+                        {maximumFractionDigits: 0}
                       )
               } ${currency}`}
             </Text>
@@ -117,6 +128,7 @@ function CurrentBtcPrice({
             ) : null}
           </YStack>
         )}
+        {trailingElement}
       </XStack>
     </TouchableOpacity>
   )

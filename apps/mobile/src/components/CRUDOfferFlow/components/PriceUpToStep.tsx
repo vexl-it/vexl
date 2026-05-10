@@ -19,7 +19,7 @@ import {
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
 import BtcPriceInfo from '../../BtcPriceInfo'
-import {ChangeCurrency} from '../../ChangeCurrency'
+import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import PremiumAndExpiration from './PremiumAndExpiration'
 
@@ -76,7 +76,6 @@ function PriceUpToStep({
     satsValueAtom,
     btcPriceForOfferWithCurrencyAtom,
     btcPricesReadyAtom,
-    currencySelectVisibleAtom,
     changePriceCurrencyActionAtom,
     calculateSatsValueOnFiatValueChangeActionAtom,
     calculateFiatValueOnSatsValueChangeActionAtom,
@@ -88,8 +87,8 @@ function PriceUpToStep({
   const amountBottomLimit = useAtomValue(amountBottomLimitAtom) ?? 0
   const satsValue = useAtomValue(satsValueAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
-  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
+  const openChangeCurrency = useOpenChangeCurrency()
   const calculateSatsOnFiatChange = useSetAtom(
     calculateSatsValueOnFiatValueChangeActionAtom
   )
@@ -154,7 +153,10 @@ function PriceUpToStep({
           fiatCurrency={currencyCode}
           onFiatValueChange={calculateSatsOnFiatChange}
           onFiatCurrencyPress={() => {
-            setCurrencySelectVisible(true)
+            openChangeCurrency({
+              selectedCurrencyCode: currency,
+              onSave: changePriceCurrency,
+            })
           }}
           locale={locale}
         />
@@ -191,12 +193,6 @@ function PriceUpToStep({
           {ctaLabel ?? t('offerForm.next')}
         </Button>
       </YStack>
-
-      <ChangeCurrency
-        selectedCurrencyCodeAtom={currencyAtom}
-        onSave={changePriceCurrency}
-        visibleAtom={currencySelectVisibleAtom}
-      />
     </YStack>
   )
 }

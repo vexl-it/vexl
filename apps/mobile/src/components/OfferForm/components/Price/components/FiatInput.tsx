@@ -8,7 +8,7 @@ import {
 import React, {useRef, useState} from 'react'
 import {type TextInput} from 'react-native'
 import {Stack} from 'tamagui'
-import {ChangeCurrency} from '../../../../ChangeCurrency'
+import {useOpenChangeCurrency} from '../../../../ChangeCurrency'
 import CurrencySelectButton from '../../../../CurrencySelectButton'
 import CalculatorInput from './CalculatorInput'
 
@@ -25,7 +25,6 @@ interface Props {
     [currencyCode: CurrencyCode],
     void
   >
-  currencySelectVisibleAtom: PrimitiveAtom<boolean>
 }
 
 function FiatInput({
@@ -33,18 +32,18 @@ function FiatInput({
   calculateSatsValueOnFiatValueChangeActionAtom,
   currencyAtom,
   changePriceCurrencyActionAtom,
-  currencySelectVisibleAtom,
 }: Props): React.ReactElement {
   const ref = useRef<TextInput>(null)
 
   const [isFocused, setIsFocused] = useState<boolean>(false)
 
   const price = useAtomValue(priceAtom)
-  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
+  const currency = useAtomValue(currencyAtom)
   const calculateSatsValueOnFiatValueChange = useSetAtom(
     calculateSatsValueOnFiatValueChangeActionAtom
   )
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
+  const openChangeCurrency = useOpenChangeCurrency()
 
   return (
     <CalculatorInput
@@ -68,15 +67,13 @@ function FiatInput({
         <CurrencySelectButton
           currencyAtom={currencyAtom}
           onPress={() => {
-            setCurrencySelectVisible(true)
+            openChangeCurrency({
+              selectedCurrencyCode: currency,
+              onSave: changePriceCurrency,
+            })
           }}
         />
       </Stack>
-      <ChangeCurrency
-        selectedCurrencyCodeAtom={currencyAtom}
-        onSave={changePriceCurrency}
-        visibleAtom={currencySelectVisibleAtom}
-      />
     </CalculatorInput>
   )
 }

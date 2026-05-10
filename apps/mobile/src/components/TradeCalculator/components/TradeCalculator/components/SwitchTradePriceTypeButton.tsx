@@ -14,11 +14,11 @@ function SwitchTradePriceTypeButton(
   return (
     <TouchableOpacity activeOpacity={0.7} {...props}>
       <XStack ai="center" gap="$2">
-        <PriceTypeIndicator neutralTextColor />
+        <PriceTypeIndicator />
         <ChevronDown
           color={
             !tradePriceType || tradePriceType === 'live'
-              ? theme.foregroundPrimary.val
+              ? theme.accentHighlightSecondary.val
               : tradePriceType === 'frozen'
                 ? theme.pinkForeground.val
                 : theme.greenForeground.val

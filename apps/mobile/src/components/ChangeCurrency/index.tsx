@@ -1,3 +1,4 @@
+import {useFocusEffect, useNavigation} from '@react-navigation/native'
 import {FlashList} from '@shopify/flash-list'
 import {
   type CurrencyCode,
@@ -9,20 +10,15 @@ import {
   Screen,
   SearchBar,
   SelectableItem,
+  Stack,
   Typography,
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {Array} from 'effect'
-import {
-  useAtom,
-  useAtomValue,
-  useSetAtom,
-  type Atom,
-  type PrimitiveAtom,
-} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Modal} from 'react-native'
-import {Stack} from 'tamagui'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useMemo, useState} from 'react'
+import {getTokens} from 'tamagui'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {
   changeCurrenciesToDisplayAtom,
@@ -30,9 +26,8 @@ import {
 } from './atoms'
 
 interface ChangeCurrencyProps {
-  readonly selectedCurrencyCodeAtom: Atom<CurrencyCode | undefined>
+  readonly selectedCurrencyCode: CurrencyCode | undefined
   readonly onSave: (currency: CurrencyCode) => void
-  readonly visibleAtom: PrimitiveAtom<boolean>
 }
 
 const CurrencyItem = React.memo(function CurrencyItem({
@@ -61,18 +56,17 @@ const CurrencyItem = React.memo(function CurrencyItem({
 })
 
 function ChangeCurrencyContent({
-  selectedCurrencyCodeAtom,
+  selectedCurrencyCode,
   onSave,
   onClose,
 }: {
-  readonly selectedCurrencyCodeAtom: Atom<CurrencyCode | undefined>
+  readonly selectedCurrencyCode: CurrencyCode | undefined
   readonly onSave: (currency: CurrencyCode) => void
   readonly onClose: () => void
 }): React.JSX.Element {
   const {t} = useTranslation()
-  const currentCurrency = useAtomValue(selectedCurrencyCodeAtom)
   const currenciesToDisplay = useAtomValue(changeCurrenciesToDisplayAtom)
-  const [tempSelection, setTempSelection] = useState(currentCurrency)
+  const [tempSelection, setTempSelection] = useState(selectedCurrencyCode)
 
   const handleSave = useCallback(() => {
     if (tempSelection) {
@@ -101,7 +95,13 @@ function ChangeCurrencyContent({
 
   return (
     <Screen
-      navigationBar={<NavigationBar style="back" rightActions={rightActions} />}
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('offerForm.selectCurrency')}
+          rightActions={rightActions}
+        />
+      }
       footer={<Button onPress={handleSave}>{t('common.save')}</Button>}
     >
       <SearchBar
@@ -115,6 +115,9 @@ function ChangeCurrencyContent({
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: getTokens().space.$13.val,
+          }}
         />
       ) : (
         <Stack ai="center" gap="$4" p="$6">
@@ -134,33 +137,41 @@ function ChangeCurrencyContent({
   )
 }
 
-export function ChangeCurrency({
-  selectedCurrencyCodeAtom,
-  onSave,
-  visibleAtom,
-}: ChangeCurrencyProps): React.JSX.Element | null {
-  const [visible, setVisible] = useAtom(visibleAtom)
+export function useOpenChangeCurrency(): (config: ChangeCurrencyProps) => void {
+  const setSearchText = useSetAtom(changeCurrencySearchTextAtom)
+  const navigation =
+    useNavigation<RootStackScreenProps<'ChangeCurrency'>['navigation']>()
+
+  return useCallback(
+    (config: ChangeCurrencyProps) => {
+      setSearchText('')
+      navigation.navigate('ChangeCurrency', config)
+    },
+    [navigation, setSearchText]
+  )
+}
+
+export function ChangeCurrencyScreen({
+  navigation,
+  route,
+}: RootStackScreenProps<'ChangeCurrency'>): React.JSX.Element {
   const setSearchText = useSetAtom(changeCurrencySearchTextAtom)
 
-  useEffect(() => {
-    if (visible) {
-      setSearchText('')
-    }
-  }, [visible, setSearchText])
-
   const handleClose = useCallback(() => {
-    setVisible(false)
-  }, [setVisible])
+    navigation.goBack()
+  }, [navigation])
 
-  if (!visible) return null
+  useFocusEffect(
+    useCallback(() => {
+      setSearchText('')
+    }, [setSearchText])
+  )
 
   return (
-    <Modal animationType="slide" transparent visible={visible}>
-      <ChangeCurrencyContent
-        selectedCurrencyCodeAtom={selectedCurrencyCodeAtom}
-        onSave={onSave}
-        onClose={handleClose}
-      />
-    </Modal>
+    <ChangeCurrencyContent
+      selectedCurrencyCode={route.params.selectedCurrencyCode}
+      onSave={route.params.onSave}
+      onClose={handleClose}
+    />
   )
 }

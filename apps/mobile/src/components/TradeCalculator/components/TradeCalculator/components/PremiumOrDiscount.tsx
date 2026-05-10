@@ -1,17 +1,17 @@
 import {ChevronRight, Switch, Typography} from '@vexl-next/ui'
-import {atom, useAtomValue, type SetStateAction} from 'jotai'
-import React, {useMemo} from 'react'
+import {useAtomValue} from 'jotai'
+import React from 'react'
 import {TouchableOpacity} from 'react-native'
 import {XStack, YStack, useTheme} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
-  applyFeeOnFeeChangeActionAtom,
   feeAmountAtom,
   premiumOrDiscountEnabledAtom,
+  premiumOrDiscountSwitchActionAtom,
 } from '../../../atoms'
 
 interface Props {
-  onPremiumOrDiscountPress: () => void
+  readonly onPremiumOrDiscountPress: () => void
 }
 
 function PremiumOrDiscount({
@@ -21,23 +21,6 @@ function PremiumOrDiscount({
   const theme = useTheme()
   const premiumOrDiscountEnabled = useAtomValue(premiumOrDiscountEnabledAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
-  const premiumOrDiscountSwitchAtom = useMemo(
-    () =>
-      atom(
-        (get) => get(premiumOrDiscountEnabledAtom),
-        (get, set, nextValue: SetStateAction<boolean>) => {
-          const currentValue = get(premiumOrDiscountEnabledAtom)
-          const next =
-            typeof nextValue === 'function'
-              ? nextValue(currentValue)
-              : nextValue
-
-          set(premiumOrDiscountEnabledAtom, next)
-          set(applyFeeOnFeeChangeActionAtom, 0)
-        }
-      ),
-    []
-  )
 
   return (
     <YStack gap="$4">
@@ -45,7 +28,7 @@ function PremiumOrDiscount({
         <Typography variant="paragraphSmall" color="$foregroundPrimary">
           {t('tradeChecklist.calculateAmount.premiumOrDiscount')}
         </Typography>
-        <Switch valueAtom={premiumOrDiscountSwitchAtom} />
+        <Switch valueAtom={premiumOrDiscountSwitchActionAtom} />
       </XStack>
       {!!premiumOrDiscountEnabled && (
         <TouchableOpacity
@@ -61,12 +44,15 @@ function PremiumOrDiscount({
             py="$4"
             br="$5"
           >
-            <Typography variant="paragraphSmall" color="$foregroundPrimary">
+            <Typography
+              variant="paragraphSmall"
+              color="$accentHighlightPrimary"
+            >
               {`${feeAmount > 0 ? '+' : feeAmount < 0 ? '-' : ''} ${Math.abs(
                 feeAmount
               )} %`}
             </Typography>
-            <ChevronRight color={theme.foregroundPrimary.val} size={24} />
+            <ChevronRight color={theme.accentHighlightPrimary.val} size={24} />
           </XStack>
         </TouchableOpacity>
       )}

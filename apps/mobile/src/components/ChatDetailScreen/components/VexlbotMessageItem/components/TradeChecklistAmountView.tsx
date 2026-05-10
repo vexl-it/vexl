@@ -19,6 +19,7 @@ import {
 } from '../../../../../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../../../../../utils/preferences'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
+import {applyFee} from '../../../../TradeCalculator/helpers'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
@@ -116,7 +117,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
     message.message.tradeChecklistUpdate?.amount
   ) {
-    const fiatAmount = amount.applyFeeOnNumberValue(
+    const fiatAmount = applyFee(
       message.message.tradeChecklistUpdate.amount.fiatAmount ?? 0,
       message.message.tradeChecklistUpdate.amount.feeAmount ?? 0
     )

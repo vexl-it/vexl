@@ -21,8 +21,6 @@ import {localizedDecimalNumberActionAtom} from '../../../../utils/localization/l
 import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
 import QrScanner from './components/QrScanner'
 
-export const changeCurrencyDialogVisibleAtom = atom<boolean>(false)
-
 export const selectedLanguageAtom = atom<string>('en')
 
 export function createIsLanguageSelectedAtom(

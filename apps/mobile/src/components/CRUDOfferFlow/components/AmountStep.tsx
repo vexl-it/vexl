@@ -16,7 +16,7 @@ import {
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
 import BtcPriceInfo from '../../BtcPriceInfo'
-import {ChangeCurrency} from '../../ChangeCurrency'
+import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import PremiumAndExpiration from './PremiumAndExpiration'
 
@@ -46,22 +46,24 @@ function AmountStep({
     amountTopLimitForRangeInputAtom,
     amountBottomLimitForRangeInputAtom,
     btcPriceForOfferWithCurrencyAtom,
-    currencySelectVisibleAtom,
     changePriceCurrencyActionAtom,
   } = useMolecule(offerFormMolecule)
 
   const currency = useAtomValue(currencyAtom)
   const btcPriceData = useAtomValue(btcPriceForOfferWithCurrencyAtom)
-  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
+  const openChangeCurrency = useOpenChangeCurrency()
   const amountMin = useAtomValue(amountBottomLimitForRangeInputAtom)
   const amountMax = useAtomValue(amountTopLimitForRangeInputAtom)
   const maxLimit = useAtomValue(maxAmountForCurrencyAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
 
   const handleCurrencyPress = useCallback(() => {
-    setCurrencySelectVisible(true)
-  }, [setCurrencySelectVisible])
+    openChangeCurrency({
+      selectedCurrencyCode: currency,
+      onSave: changePriceCurrency,
+    })
+  }, [changePriceCurrency, currency, openChangeCurrency])
 
   const amountLabel = useMemo(() => {
     if (!currency) return ''
@@ -122,12 +124,6 @@ function AmountStep({
           {ctaLabel ?? t('offerForm.next')}
         </Button>
       </YStack>
-
-      <ChangeCurrency
-        selectedCurrencyCodeAtom={currencyAtom}
-        onSave={changePriceCurrency}
-        visibleAtom={currencySelectVisibleAtom}
-      />
     </YStack>
   )
 }

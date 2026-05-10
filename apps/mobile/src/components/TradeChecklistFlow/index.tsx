@@ -10,7 +10,6 @@ import AgreeOnTradeDetailsScreen from './components/AgreeOnTradeDetailsScreen'
 import CalculateAmountScreen from './components/CalculateAmountFlow/components/CalculateAmountScreen'
 import ConfirmAmountScreen from './components/CalculateAmountFlow/components/ConfirmAmountScreen'
 import PremiumOrDiscountScreen from './components/CalculateAmountFlow/components/PremiumOrDiscountScreen'
-import SetYourOwnPriceScreen from './components/CalculateAmountFlow/components/SetYourOwnPriceScreen'
 import AddTimeOptionsScreen from './components/DateAndTimeFlow/components/AddTimeOptionsScreen'
 import ChooseAvailableDaysScreen from './components/DateAndTimeFlow/components/ChooseAvailableDaysScreen'
 import PickDateFromSuggestionsScreen from './components/DateAndTimeFlow/components/PickDateFromSuggestionsScreen'
@@ -86,10 +85,6 @@ export default function TradeChecklistFlow({
         <StackNavigator.Screen
           name="ConfirmAmount"
           component={ConfirmAmountScreen}
-        />
-        <StackNavigator.Screen
-          name="SetYourOwnPrice"
-          component={SetYourOwnPriceScreen}
         />
         <StackNavigator.Screen
           name="PremiumOrDiscount"

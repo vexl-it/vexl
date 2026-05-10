@@ -1,6 +1,5 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {
-  atom,
   useAtomValue,
   useSetAtom,
   type PrimitiveAtom,
@@ -10,7 +9,7 @@ import React from 'react'
 import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../utils/localization/currency'
-import {ChangeCurrency} from '../../../ChangeCurrency'
+import {useOpenChangeCurrency} from '../../../ChangeCurrency'
 import DropdownSelectButton from '../../../DropdownSelectButton'
 
 interface Props {
@@ -27,8 +26,6 @@ interface Props {
   >
 }
 
-const currencySelectVisibleAtom = atom<boolean>(false)
-
 function CurrencyComponent({
   currencyAtom,
   hideInFilter,
@@ -36,8 +33,8 @@ function CurrencyComponent({
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const currency = useAtomValue(currencyAtom)
-  const setCurrencySelectVisible = useSetAtom(currencySelectVisibleAtom)
   const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
+  const openChangeCurrency = useOpenChangeCurrency()
 
   return (
     <Stack>
@@ -48,7 +45,12 @@ function CurrencyComponent({
       )}
       <DropdownSelectButton
         onPress={() => {
-          setCurrencySelectVisible(true)
+          openChangeCurrency({
+            selectedCurrencyCode: currency,
+            onSave: (currency) => {
+              updateCurrencyLimits({currency})
+            },
+          })
         }}
       >
         {currency ? (
@@ -71,13 +73,6 @@ function CurrencyComponent({
           </Stack>
         )}
       </DropdownSelectButton>
-      <ChangeCurrency
-        selectedCurrencyCodeAtom={currencyAtom}
-        onSave={(currency) => {
-          updateCurrencyLimits({currency})
-        }}
-        visibleAtom={currencySelectVisibleAtom}
-      />
     </Stack>
   )
 }

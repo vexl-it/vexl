@@ -4,6 +4,7 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {ArrowsVerticalSort} from '../icons/ArrowsVerticalSort'
 import {ChevronDown} from '../icons/ChevronDown'
 import {Input, SizableText, Stack, XStack, YStack} from '../primitives'
+import {Loader} from './Loader'
 
 export type BtcUnit = 'BTC' | 'SATS'
 
@@ -29,8 +30,18 @@ export interface ExchangeProps {
   readonly onFiatValueChange: (value: string) => void
   /** Called when user taps the fiat currency label (to open currency picker) */
   readonly onFiatCurrencyPress: () => void
+  /** Whether the fiat currency selector is editable (default true) */
+  readonly fiatCurrencyEditable?: boolean
+  /** Optional fiat input placeholder */
+  readonly fiatPlaceholder?: string
+  /** Whether the fiat field should show a loading indicator */
+  readonly fiatLoading?: boolean
   /** Whether the fiat field should be auto-focused */
   readonly fiatAutoFocus?: boolean
+  /** Called when fiat input receives focus */
+  readonly onFiatFocus?: () => void
+  /** Called when fiat input loses focus */
+  readonly onFiatBlur?: () => void
   /** Whether fiat should render above BTC/SATS */
   readonly swapped?: boolean
   /** Called when user taps the center swap control */
@@ -106,7 +117,12 @@ export function Exchange({
   fiatCurrency,
   onFiatValueChange,
   onFiatCurrencyPress,
+  fiatCurrencyEditable = true,
+  fiatPlaceholder = '0.00',
+  fiatLoading,
   fiatAutoFocus = false,
+  onFiatFocus,
+  onFiatBlur,
   swapped = false,
   onSwapPress,
   locale = 'en-US',
@@ -159,11 +175,13 @@ export function Exchange({
 
   const handleFiatFocus = useCallback(() => {
     setFiatFocused(true)
-  }, [])
+    onFiatFocus?.()
+  }, [onFiatFocus])
 
   const handleFiatBlur = useCallback(() => {
     setFiatFocused(false)
-  }, [])
+    onFiatBlur?.()
+  }, [onFiatBlur])
 
   const btcField = (
     <FieldFrame highlighted={(btcFocused && btcEditable) || undefined}>
@@ -184,7 +202,7 @@ export function Exchange({
           fontFamily="$body"
           fontSize="$4"
           fontWeight="500"
-          color="$foregroundTertiary"
+          color="$foregroundPrimary"
         >
           BTC
         </SizableText>
@@ -209,7 +227,7 @@ export function Exchange({
           color="$foregroundTertiary"
           textAlign="right"
         >
-          1
+          {btcDisplayValue || '0.00'}
         </SizableText>
       )}
     </FieldFrame>
@@ -217,7 +235,10 @@ export function Exchange({
 
   const fiatField = (
     <FieldFrame highlighted={fiatFocused || undefined}>
-      <CurrencyButton onPress={onFiatCurrencyPress}>
+      <CurrencyButton
+        onPress={fiatCurrencyEditable ? onFiatCurrencyPress : undefined}
+        role={fiatCurrencyEditable ? 'button' : undefined}
+      >
         <SizableText
           fontFamily="$body"
           fontSize="$4"
@@ -226,19 +247,27 @@ export function Exchange({
         >
           {fiatCurrency}
         </SizableText>
-        <ChevronDown size={24} color={theme.foregroundPrimary.val} />
+        {fiatCurrencyEditable ? (
+          <ChevronDown size={24} color={theme.foregroundPrimary.val} />
+        ) : null}
       </CurrencyButton>
-      <FieldInput
-        autoFocus={fiatAutoFocus}
-        value={fiatDisplayValue}
-        onChangeText={onFiatValueChange}
-        placeholder="0.00"
-        placeholderTextColor={theme.foregroundTertiary.val}
-        selectionColor={theme.accentYellowPrimary.val}
-        keyboardType="decimal-pad"
-        onFocus={handleFiatFocus}
-        onBlur={handleFiatBlur}
-      />
+      {fiatLoading ? (
+        <Stack flex={1} alignItems="flex-end">
+          <Loader size="small" color={theme.foregroundTertiary.val} />
+        </Stack>
+      ) : (
+        <FieldInput
+          autoFocus={fiatAutoFocus}
+          value={fiatDisplayValue}
+          onChangeText={onFiatValueChange}
+          placeholder={fiatPlaceholder}
+          placeholderTextColor={theme.foregroundTertiary.val}
+          selectionColor={theme.accentYellowPrimary.val}
+          keyboardType="decimal-pad"
+          onFocus={handleFiatFocus}
+          onBlur={handleFiatBlur}
+        />
+      )}
     </FieldFrame>
   )
 

@@ -255,11 +255,13 @@ export function BuySellRangeSlider({
             ) : null}
           </Stack>
         </GestureDetector>
-        <XStack justifyContent="center" padding="$4">
-          <Typography variant="micro" color="$foregroundSecondary">
-            {amountText}
-          </Typography>
-        </XStack>
+        {amountText.length > 0 ? (
+          <XStack justifyContent="center" padding="$4">
+            <Typography variant="micro" color="$foregroundSecondary">
+              {amountText}
+            </Typography>
+          </XStack>
+        ) : null}
       </Stack>
       <InfoBanner variant={bannerVariant}>
         <InfoCircle size={24} color={infoColor} />

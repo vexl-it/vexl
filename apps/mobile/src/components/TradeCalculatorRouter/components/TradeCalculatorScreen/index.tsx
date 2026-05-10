@@ -1,14 +1,9 @@
+import {Button, ChevronLeft, NavigationBar, Screen} from '@vexl-next/ui'
+import {ScrollView, Stack} from '@vexl-next/ui/src/primitives'
 import React from 'react'
-import {ScrollView} from 'react-native'
-import {Stack} from 'tamagui'
 import {type TradeCalculatorStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
-import {
-  HeaderProxy,
-  PrimaryFooterButtonProxy,
-  SecondaryFooterButtonProxy,
-} from '../../../PageWithNavigationHeader'
 import TradeCalculator from '../../../TradeCalculator/components/TradeCalculator'
 
 type Props = TradeCalculatorStackScreenProps<'TradeCalculator'>
@@ -18,20 +13,33 @@ function TradeCalculatorScreen({navigation}: Props): React.ReactElement {
   const goBack = useSafeGoBack()
 
   return (
-    <>
-      <HeaderProxy title={t('tradeCalculator.title')} />
-      <Stack f={1} bc="$black" pb="$1">
-        <ScrollView showsVerticalScrollIndicator={false}>
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('tradeCalculator.title')}
+          leftAction={{
+            icon: ChevronLeft,
+            onPress: goBack,
+          }}
+        />
+      }
+      footer={
+        <Button onPress={goBack} variant="secondary">
+          {t('common.close')}
+        </Button>
+      }
+    >
+      <ScrollView f={1} showsVerticalScrollIndicator={false}>
+        <Stack pt="$3">
           <TradeCalculator
             onPremiumOrDiscountPress={() => {
               navigation.navigate('PremiumOrDiscount')
             }}
           />
-        </ScrollView>
-      </Stack>
-      <PrimaryFooterButtonProxy hidden />
-      <SecondaryFooterButtonProxy onPress={goBack} text={t('common.close')} />
-    </>
+        </Stack>
+      </ScrollView>
+    </Screen>
   )
 }
 

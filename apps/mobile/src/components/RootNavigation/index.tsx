@@ -17,6 +17,7 @@ import CRUDOfferFlow from '../CRUDOfferFlow'
 import OfferExpirationDateScreen from '../CRUDOfferFlow/components/OfferExpirationDateScreen'
 import SelectLocationRadiusScreen from '../CRUDOfferFlow/components/SelectLocationRadiusScreen'
 import SelectLocationSearchScreen from '../CRUDOfferFlow/components/SelectLocationSearchScreen'
+import {ChangeCurrencyScreen} from '../ChangeCurrency'
 import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import ChatImagePreviewScreen from '../ChatDetailScreen/ChatImagePreviewScreen'
@@ -57,7 +58,6 @@ import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeCalculatorRouter from '../TradeCalculatorRouter'
 import TradeChecklistFlow from '../TradeChecklistFlow'
-import TradePriceTypeDialog from '../TradePriceTypeDialogScreen'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
@@ -125,6 +125,10 @@ function RootNavigation(): React.ReactElement {
               component={SelectLocationRadiusScreen}
             />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
+            <Stack.Screen
+              name="ChangeCurrency"
+              component={ChangeCurrencyScreen}
+            />
             <Stack.Screen name="MapView" component={MapViewScreen} />
             <Stack.Screen name="AppLogs" component={AppLogsScreen} />
             <Stack.Screen name="ChatDetail" component={ChatDetailScreen} />
@@ -205,14 +209,6 @@ function RootNavigation(): React.ReactElement {
                 presentation: 'containedTransparentModal',
               }}
               component={TradeCalculatorRouter}
-            />
-            <Stack.Screen
-              name="TradePriceType"
-              options={{
-                presentation: 'transparentModal',
-                animation: 'slide_from_bottom',
-              }}
-              component={TradePriceTypeDialog}
             />
             <Stack.Screen
               name="ChangeProfilePicture"

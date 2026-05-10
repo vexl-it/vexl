@@ -10,6 +10,7 @@ export interface NotificationCardProps {
   readonly category: string
   readonly message: string
   readonly tag?: React.ReactNode
+  readonly children?: React.ReactNode
   readonly onPress?: () => void
 }
 
@@ -88,6 +89,7 @@ export function NotificationCard({
   category,
   message,
   tag,
+  children,
   onPress,
 }: NotificationCardProps): React.JSX.Element {
   const theme = useTheme()
@@ -114,6 +116,7 @@ export function NotificationCard({
       </HeaderFrame>
       <ContentFrame>
         <MessageText>{message}</MessageText>
+        {children}
       </ContentFrame>
     </CardFrame>
   )

@@ -7,18 +7,21 @@ import {
   NewSocialNetworkConnectionNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, Record, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
 import {AppState, Platform} from 'react-native'
 import {apiAtom} from '../../api'
+import {addNotificationToCenterActionAtom} from '../../components/NotificationsScreen/state'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 import {
   syncAllClubsHandleStateWhenNotFoundActionAtom,
   syncSingleClubHandleStateWhenNotFoundActionAtom,
 } from '../../state/clubs/atom/refreshClubsActionAtom'
 import {
   addReasonToRemovedClubActionAtom,
+  createSingleRemovedClubAtom,
   markRemovedClubAsNotifiedActionAtom,
 } from '../../state/clubs/atom/removedClubsAtom'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
@@ -183,14 +186,33 @@ export async function processBackgroundMessage(
       ClubDeactivatedNotificationData
     )(payload)
     if (Option.isSome(ClubDeactivatedNotificationDataO)) {
-      const {t} = getDefaultStore().get(translationAtom)
+      const store = getDefaultStore()
+      const {t} = store.get(translationAtom)
+      const publicKeyO = Record.get(
+        store.get(clubsToKeyHolderAtom),
+        ClubDeactivatedNotificationDataO.value.clubUuid
+      ).pipe(Option.map((k) => k.keyPair.publicKey))
+
       await Effect.runPromise(
-        getDefaultStore().set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
-          clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
-        })
+        store
+          .set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
+            clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+          })
+          .pipe(
+            Effect.catchAll((e) => {
+              if (
+                e._tag === 'ClubNotFoundError' ||
+                e._tag === 'FetchingClubError' ||
+                e._tag === 'NoSuchElementException'
+              )
+                return Effect.succeed(Effect.void)
+
+              return Effect.fail(e)
+            })
+          )
       )
 
-      getDefaultStore().set(addReasonToRemovedClubActionAtom, {
+      store.set(addReasonToRemovedClubActionAtom, {
         clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
         reason: ClubDeactivatedNotificationDataO.value.reason,
       })
@@ -198,25 +220,43 @@ export async function processBackgroundMessage(
       console.info(
         `📳 Received notification about club deactivation ${ClubDeactivatedNotificationDataO.value.clubUuid}`
       )
-      await notifee.displayNotification({
-        title: t(
-          `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
-        ),
-        body: t(
-          `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`
-        ),
-        android: {
-          smallIcon: 'notification_icon',
-          channelId: await getDefaultChannel(),
-          pressAction: {
-            id: 'default',
-          },
-        },
-      })
 
-      getDefaultStore().set(markRemovedClubAsNotifiedActionAtom, {
-        clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
-      })
+      const clubInfo = store.get(
+        createSingleRemovedClubAtom(
+          ClubDeactivatedNotificationDataO.value.clubUuid
+        )
+      )
+
+      if (clubInfo) {
+        await notifee.displayNotification({
+          title: t(
+            `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
+          ),
+          body: t(
+            `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
+            {name: clubInfo.clubInfo.name}
+          ),
+          android: {
+            smallIcon: 'notification_icon',
+            channelId: await getDefaultChannel(),
+            pressAction: {
+              id: 'default',
+            },
+          },
+        })
+
+        if (Option.isSome(publicKeyO))
+          store.set(addNotificationToCenterActionAtom, {
+            _tag: 'ClubDeactivationNotificationData',
+            pubKey: publicKeyO.value,
+            reason: ClubDeactivatedNotificationDataO.value.reason,
+            clubInfo: clubInfo.clubInfo,
+          })
+
+        store.set(markRemovedClubAsNotifiedActionAtom, {
+          clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,
+        })
+      }
 
       return
     }

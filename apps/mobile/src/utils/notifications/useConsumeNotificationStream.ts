@@ -1,6 +1,7 @@
 import {Socket} from '@effect/platform'
 import {RpcClient, RpcSerialization} from '@effect/rpc'
 import notifee, {AndroidImportance} from '@notifee/react-native'
+import {VexlProductNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
   type ClubExpiredNoticeMessage,
@@ -20,16 +21,19 @@ import {
   Layer,
   Match,
   Option,
+  Record,
   Schedule,
   Stream,
 } from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom, getApiPreset} from '../../api'
+import {addNotificationToCenterActionAtom} from '../../components/NotificationsScreen/state'
 import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {processStreamOnlyNotificationActionAtom} from '../../state/chat/atoms/processStreamOnlyChatMessage'
 import {checkForClubsAdmissionActionAtom} from '../../state/clubs/atom/checkForClubsAdmissionActionAtom'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 import {
   syncAllClubsHandleStateWhenNotFoundActionAtom,
   syncSingleClubHandleStateWhenNotFoundActionAtom,
@@ -50,6 +54,7 @@ import {notificationPreferencesAtom} from '../preferences'
 import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
 import {getDefaultChannel} from './notificationChannels'
+import {processVexlProductNotificationActionAtom} from './processVexlProductNotification'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 
 const WebSocketConstructorLive = Layer.succeed(
@@ -181,6 +186,11 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
     Effect.gen(function* (_) {
       const {t} = get(translationAtom)
 
+      const publicKeyO = Record.get(
+        get(clubsToKeyHolderAtom),
+        message.clubUuid
+      ).pipe(Option.map((k) => k.keyPair.publicKey))
+
       yield* _(
         set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
           clubUuid: message.clubUuid,
@@ -232,6 +242,14 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
             })
           })
         )
+
+        if (Option.isSome(publicKeyO))
+          set(addNotificationToCenterActionAtom, {
+            _tag: 'ClubDeactivationNotificationData',
+            pubKey: publicKeyO.value,
+            reason,
+            clubInfo: clubInfo.clubInfo,
+          })
 
         set(markRemovedClubAsNotifiedActionAtom, {
           clubUuid: message.clubUuid,
@@ -352,9 +370,14 @@ const processNewStreamNotificationActionAtom = atom(
           Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
             set(processUserLoginOnDifferentDeviceNotificationActionAtom)
           ),
-          Match.tag(
-            'VexlProductNotificationMessage',
-            (v) => Effect.log('Got vexl product notification', v) // TODO process properly}
+          Match.tag('VexlProductNotificationMessage', (v) =>
+            set(
+              processVexlProductNotificationActionAtom,
+              new VexlProductNotificationData({
+                ...v.vexlProductNotification,
+                trackingId: Option.some(v.trackingId),
+              })
+            )
           ),
           Match.tag('NewContentNoticeMessage', () => Effect.void),
           Match.exhaustive

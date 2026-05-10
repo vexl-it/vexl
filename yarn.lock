@@ -22295,7 +22295,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jotai@npm:^2.15.0":
+"jotai@npm:2.15.0":
   version: 2.15.0
   resolution: "jotai@npm:2.15.0"
   peerDependencies:
@@ -22313,6 +22313,27 @@ __metadata:
     react:
       optional: true
   checksum: bcf674db85030772984ca907ca137535d6ad88e0b88e26d025b518cb783675bb80e0295979dcd2145653708e07ad9235c309b98b2f07d25bae9ddbf10ef4677a
+  languageName: node
+  linkType: hard
+
+"jotai@patch:jotai@npm%3A2.15.0#./.yarn/patches/jotai-npm-2.15.0-960bc8cd61.patch::locator=vexl-next%40workspace%3A.":
+  version: 2.15.0
+  resolution: "jotai@patch:jotai@npm%3A2.15.0#./.yarn/patches/jotai-npm-2.15.0-960bc8cd61.patch::version=2.15.0&hash=e4ebe5&locator=vexl-next%40workspace%3A."
+  peerDependencies:
+    "@babel/core": ">=7.0.0"
+    "@babel/template": ">=7.0.0"
+    "@types/react": ">=17.0.0"
+    react: ">=17.0.0"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    "@babel/template":
+      optional: true
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+  checksum: 51399c6f3a29cb20cbe75f0e9c09ca1bf5823c53ac903a01cb05e73a291f8a80628e6f1bb2c865890f3fa61f7216b75f47e2279b2bc51c8bd1e67f60f6318686
   languageName: node
   linkType: hard
 

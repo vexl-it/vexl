@@ -84,6 +84,17 @@ function ThemeGroup({
           tag={<TextTag variant="new" label="New" />}
           onPress={() => {}}
         />
+
+        <SectionLabel>With children</SectionLabel>
+        <NotificationCard
+          avatar={<VexlAvatar />}
+          name="Vexl"
+          time="16:45"
+          category="Update"
+          message="There is a new event near you."
+        >
+          <TextTag variant="waiting" label="Nearby" />
+        </NotificationCard>
       </YStack>
     </Theme>
   )

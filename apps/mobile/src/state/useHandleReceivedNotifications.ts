@@ -5,21 +5,25 @@ import {
   NewChatMessageNoticeNotificationData,
   NewClubConnectionNotificationData,
   NewSocialNetworkConnectionNotificationData,
+  VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {Effect, Option, Schema} from 'effect'
+import {Effect, Option, Record, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
 import {useSetAtom, useStore} from 'jotai'
 import {useEffect} from 'react'
 import {AppState, Platform} from 'react-native'
 import {apiAtom} from '../api'
+import {addNotificationToCenterActionAtom} from '../components/NotificationsScreen/state'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {extractDataPayloadFromNotification} from '../utils/notifications/extractDataFromNotification'
 import {getDefaultChannel} from '../utils/notifications/notificationChannels'
+import {processVexlProductNotificationActionAtom} from '../utils/notifications/processVexlProductNotification'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from '../utils/notifications/showUINotificationFromRemoteMessage'
 import reportError from '../utils/reportError'
 import {checkForClubsAdmissionActionAtom} from './clubs/atom/checkForClubsAdmissionActionAtom'
+import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderV2Atom'
 import {
   syncAllClubsHandleStateWhenNotFoundActionAtom,
   syncSingleClubHandleStateWhenNotFoundActionAtom,
@@ -126,6 +130,24 @@ export function useHandleReceivedNotifications(): void {
           console.info('🔔 Handled notification in UI')
           return
         }
+
+        const vexlProductNotificationO = Schema.decodeUnknownOption(
+          VexlProductNotificationData
+        )(payload)
+
+        if (Option.isSome(vexlProductNotificationO)) {
+          console.info(
+            `🔔 Received Vexl product notification ${vexlProductNotificationO.value.uuid}`
+          )
+          await Effect.runPromise(
+            store.set(
+              processVexlProductNotificationActionAtom,
+              vexlProductNotificationO.value
+            )
+          )
+          return
+        }
+
         const newSocialNetworkConnectionNotificationO =
           Schema.decodeUnknownOption(
             NewSocialNetworkConnectionNotificationData
@@ -183,6 +205,11 @@ export function useHandleReceivedNotifications(): void {
         )(payload)
         if (Option.isSome(ClubDeactivatedNotificationDataO)) {
           const {t} = store.get(translationAtom)
+          const publicKeyO = Record.get(
+            store.get(clubsToKeyHolderAtom),
+            ClubDeactivatedNotificationDataO.value.clubUuid
+          ).pipe(Option.map((k) => k.keyPair.publicKey))
+
           await Effect.runPromise(
             store
               .set(syncSingleClubHandleStateWhenNotFoundActionAtom, {
@@ -232,6 +259,14 @@ export function useHandleReceivedNotifications(): void {
                 },
               },
             })
+
+            if (Option.isSome(publicKeyO))
+              store.set(addNotificationToCenterActionAtom, {
+                _tag: 'ClubDeactivationNotificationData',
+                pubKey: publicKeyO.value,
+                reason: ClubDeactivatedNotificationDataO.value.reason,
+                clubInfo: clubInfo.clubInfo,
+              })
 
             store.set(markRemovedClubAsNotifiedActionAtom, {
               clubUuid: ClubDeactivatedNotificationDataO.value.clubUuid,

@@ -3,6 +3,7 @@ import {
   ChatNotificationData,
   NewChatMessageNoticeNotificationData,
   OpenBrowserLinkNotificationData,
+  VexlProductNotificationData,
 } from '@vexl-next/domain/src/general/notifications'
 import {Effect, Either, Option, Schema} from 'effect'
 import * as Notifications from 'expo-notifications'
@@ -39,6 +40,15 @@ const handleExpoNotificationResponseAtom = atom(
       if (get(lastHandledExpoNotificationDateAtom) === notificationDate) return
       set(lastHandledExpoNotificationDateAtom, notificationDate)
 
+      const vexlProductNotificationO = Schema.decodeUnknownOption(
+        VexlProductNotificationData
+      )(response.notification.request.content.data)
+
+      if (Option.isSome(vexlProductNotificationO) && navigationRef.isReady()) {
+        navigationRef.navigate('Notifications')
+        return
+      }
+
       const newChatMessageNoticeO = Schema.decodeUnknownOption(
         NewChatMessageNoticeNotificationData
       )(response.notification.request.content.data)
@@ -57,6 +67,15 @@ const reactOnNotificationOpenAtom = atom(
     Effect.gen(function* (_) {
       if (get(lastNotificationIdHandledAtom) === notification.id) return
       set(lastNotificationIdHandledAtom, notification.id)
+
+      const vexlProductNotificationO = Schema.decodeUnknownOption(
+        VexlProductNotificationData
+      )(notification.data)
+
+      if (Option.isSome(vexlProductNotificationO) && navigationRef.isReady()) {
+        navigationRef.navigate('Notifications')
+        return
+      }
 
       const knownNotificationDataO = Schema.decodeUnknownOption(
         Schema.Union(

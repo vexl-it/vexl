@@ -253,8 +253,6 @@ export const offerFormMolecule = molecule(() => {
     readonly ProductCategory[] | undefined
   >(dummyOffer.offerInfo.publicPart.productCategories)
 
-  const currencySelectVisibleAtom = atom<boolean>(false)
-
   const showBuySellFieldAtom = atom<boolean>(
     (get) => get(nullableListingTypeAtom) !== undefined
   )
@@ -1306,7 +1304,6 @@ export const offerFormMolecule = molecule(() => {
     set(selectedSpokenLanguagesAtom, [...savedLanguages])
     set(spokenLanguagesAtom, [...savedLanguages])
     set(satsValueAtom, 0)
-    set(currencySelectVisibleAtom, false)
   })
 
   const btcPriceForOfferWithCurrencyAtom =
@@ -1491,7 +1488,6 @@ export const offerFormMolecule = molecule(() => {
     changePriceCurrencyActionAtom,
     updateListingTypeActionAtom,
     updateBtcNetworkAtom,
-    currencySelectVisibleAtom,
     createSelectClubAtom,
     selectedClubsUuidsAtom,
     toggleLanguageActionAtom,

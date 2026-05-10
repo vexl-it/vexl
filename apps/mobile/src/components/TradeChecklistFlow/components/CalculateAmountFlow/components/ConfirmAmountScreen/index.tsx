@@ -5,12 +5,10 @@ import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
-import {SATOSHIS_IN_BTC} from '../../../../../../state/currentBtcPriceAtoms'
 import {
   chatWithMessagesKeys,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {applyFeeOnNumberValue} from '../../../../../../state/tradeChecklist/utils/amount'
 import {
   getCurrentLocale,
   useTranslation,
@@ -20,6 +18,7 @@ import {localizedDecimalNumberActionAtom} from '../../../../../../utils/localiza
 import {preferencesAtom} from '../../../../../../utils/preferences'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../../ToastNotification/atom'
+import {applyFee, btcToSat} from '../../../../../TradeCalculator/helpers'
 import {
   addAmountActionAtom,
   submitTradeChecklistUpdatesActionAtom,
@@ -53,7 +52,7 @@ function ConfirmAmountScreen({
   const shouldNavigateBackToChatOnSave =
     !useWasOpenFromAgreeOnTradeDetailsScreen()
 
-  const fiatAmount = applyFeeOnNumberValue(
+  const fiatAmount = applyFee(
     amountData?.fiatAmount ?? 0,
     amountData?.feeAmount ?? 0
   )
@@ -175,9 +174,7 @@ function ConfirmAmountScreen({
               icon={Copy}
               minWidth="$13"
               onPress={() => {
-                copyValueToClipboard(
-                  `${Math.round(Number(amountData.btcAmount) * SATOSHIS_IN_BTC)}`
-                )
+                copyValueToClipboard(btcToSat(amountData.btcAmount ?? 0))
               }}
               size="small"
               variant="secondary"

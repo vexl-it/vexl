@@ -96,15 +96,15 @@ function CalculateAmountScreen({
   return (
     <TradeChecklistItemPageLayout
       header={{
-        title: t('tradeChecklist.calculateAmount.calculateAmount'),
+        title: t('tradeChecklist.calculateAmount.suggestAmount'),
       }}
       bottomButton={{
         disabled: saveButtonDisabled,
         onPress: onFooterButtonPress,
         text: isOtherSideAmountDataNewerThanMine
           ? t('common.accept')
-          : t('common.save'),
-        variant: 'secondary',
+          : t('common.send'),
+        variant: isOtherSideAmountDataNewerThanMine ? 'secondary' : 'primary',
       }}
     >
       <TradeCalculator

@@ -1,8 +1,9 @@
 import {Effect} from 'effect'
 import type {Atom, WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Dimensions, Modal} from 'react-native'
+import {KeyboardAvoidingView} from 'react-native-keyboard-controller'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -79,15 +80,19 @@ const AnimatedDialogBackdrop = Animated.createAnimatedComponent(DialogBackdrop)
 export interface DialogProps {
   readonly visible: boolean
   readonly onClose?: () => void
+  readonly onHidden?: () => void
   readonly children: React.ReactNode
   readonly footer?: React.ReactNode
+  readonly avoidKeyboard?: boolean
 }
 
 export function Dialog({
   visible,
   onClose,
+  onHidden,
   children,
   footer,
+  avoidKeyboard,
 }: DialogProps): React.JSX.Element | null {
   const [mounted, setMounted] = useState(false)
 
@@ -116,11 +121,14 @@ export function Dialog({
         (finished) => {
           if (finished) {
             scheduleOnRN(setMounted, false)
+            if (onHidden) {
+              scheduleOnRN(onHidden)
+            }
           }
         }
       )
     }
-  }, [visible, backdropOpacity, translateY])
+  }, [visible, backdropOpacity, translateY, onHidden])
 
   useEffect(() => {
     if (visible && !hasFooter && onClose) {
@@ -142,6 +150,18 @@ export function Dialog({
 
   if (!mounted) return null
 
+  const content = (
+    <Stack flex={1} justifyContent="flex-end">
+      <AnimatedDialogBackdrop style={backdropAnimatedStyle} onPress={onClose} />
+      <Animated.View style={contentAnimatedStyle}>
+        <DialogViewport paddingBottom={bottomOffset}>
+          <DialogCard>{children}</DialogCard>
+          {footer != null ? <XStack gap="$3">{footer}</XStack> : null}
+        </DialogViewport>
+      </Animated.View>
+    </Stack>
+  )
+
   return (
     <Modal
       transparent
@@ -150,18 +170,13 @@ export function Dialog({
       animationType="none"
       onRequestClose={onClose}
     >
-      <Stack flex={1} justifyContent="flex-end">
-        <AnimatedDialogBackdrop
-          style={backdropAnimatedStyle}
-          onPress={onClose}
-        />
-        <Animated.View style={contentAnimatedStyle}>
-          <DialogViewport paddingBottom={bottomOffset}>
-            <DialogCard>{children}</DialogCard>
-            {footer != null ? <XStack gap="$3">{footer}</XStack> : null}
-          </DialogViewport>
-        </Animated.View>
-      </Stack>
+      {avoidKeyboard ? (
+        <KeyboardAvoidingView behavior="padding" style={{flex: 1}}>
+          {content}
+        </KeyboardAvoidingView>
+      ) : (
+        content
+      )}
     </Modal>
   )
 }
@@ -174,6 +189,7 @@ export interface DialogAtomConfig {
   readonly positiveButtonDisabledAtom?: Atom<boolean>
   readonly positiveButtonVariant?: ButtonVariant
   readonly negativeButtonText?: string
+  readonly avoidKeyboard?: boolean
 }
 
 interface DialogAtomInternalState extends DialogAtomConfig {
@@ -217,24 +233,67 @@ export function DialogFromAtom({
   dialogAtom,
 }: DialogFromAtomProps): React.JSX.Element {
   const state = useAtomValue(dialogAtom)
-  const lastStateRef = useRef<DialogAtomInternalState | null>(null)
+  const [visible, setVisible] = useState(false)
+  const [displayState, setDisplayState] =
+    useState<DialogAtomInternalState | null>(null)
+  const displayedStateRef = useRef<DialogAtomInternalState | null>(null)
+  const pendingStateRef = useRef<DialogAtomInternalState | null>(null)
+  const stateRef = useRef<DialogAtomInternalState | null>(null)
+  stateRef.current = state
+
+  useEffect(() => {
+    if (state == null) {
+      pendingStateRef.current = null
+
+      if (displayedStateRef.current != null) {
+        setVisible(false)
+      }
+
+      return
+    }
+
+    if (displayedStateRef.current == null) {
+      displayedStateRef.current = state
+      setDisplayState(state)
+      setVisible(true)
+      return
+    }
+
+    if (displayedStateRef.current !== state) {
+      pendingStateRef.current = state
+      setVisible(false)
+    }
+  }, [state])
+
+  const handleHidden = useCallback(() => {
+    const pendingState = pendingStateRef.current
+
+    if (pendingState != null) {
+      pendingStateRef.current = null
+      displayedStateRef.current = pendingState
+      setDisplayState(pendingState)
+      setVisible(true)
+      return
+    }
+
+    if (stateRef.current == null) {
+      displayedStateRef.current = null
+      setDisplayState(null)
+      setVisible(false)
+    }
+  }, [])
+
   const positiveButtonDisabled = useAtomValue(
-    state?.positiveButtonDisabledAtom ??
-      lastStateRef.current?.positiveButtonDisabledAtom ??
-      falseAtom
+    displayState?.positiveButtonDisabledAtom ?? falseAtom
   )
-
-  if (state != null) {
-    lastStateRef.current = state
-  }
-
-  const displayState = state ?? lastStateRef.current
   const hasNegativeButton = displayState?.negativeButtonText != null
 
   return (
     <Dialog
-      visible={state != null}
-      onClose={() => state?.onResult(false)}
+      visible={visible}
+      onClose={() => displayState?.onResult(false)}
+      onHidden={handleHidden}
+      avoidKeyboard={displayState?.avoidKeyboard}
       footer={
         displayState != null ? (
           <>
@@ -243,7 +302,9 @@ export function DialogFromAtom({
                 variant="secondary"
                 size="large"
                 flex={1}
-                onPress={() => state?.onResult(false)}
+                onPress={() => {
+                  displayState?.onResult(false)
+                }}
               >
                 {displayState.negativeButtonText}
               </Button>
@@ -253,7 +314,9 @@ export function DialogFromAtom({
               size="large"
               flex={1}
               disabled={positiveButtonDisabled}
-              onPress={() => state?.onResult(true)}
+              onPress={() => {
+                displayState?.onResult(true)
+              }}
             >
               {displayState.positiveButtonText}
             </Button>

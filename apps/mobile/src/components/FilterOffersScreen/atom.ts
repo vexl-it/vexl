@@ -52,8 +52,6 @@ import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSa
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
 import {defaultCurrencyAtom} from '../../utils/preferences'
 
-export const currencySelectVisibleAtom = atom<boolean>(false)
-
 export const filterBarOptionsAtom = atom<
   ReadonlySet<MarketplaceFilterBarOption>
 >(offersFilterInitialState.filterBarOptions)

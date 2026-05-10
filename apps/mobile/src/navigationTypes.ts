@@ -11,6 +11,7 @@ import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneN
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {
@@ -52,6 +53,10 @@ export type RootStackParamsList = {
   SelectLocationSearch: {randomizeLocation?: boolean} | undefined
   SelectLocationRadius: {randomizeLocation?: boolean} | undefined
   FilterOffers: undefined
+  ChangeCurrency: {
+    readonly selectedCurrencyCode: CurrencyCode | undefined
+    readonly onSave: (currency: CurrencyCode) => void
+  }
 
   MapView: undefined
 
@@ -125,8 +130,6 @@ export type RootStackParamsList = {
   TodoScreen: undefined
 
   TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
-
-  TradePriceType: undefined
 
   SetContacts: {filter?: ContactsFilter | undefined} | undefined
 
@@ -234,7 +237,6 @@ export type ContactsTabScreenProps<T extends keyof ContactsTabParamsList> =
 export type TradeCalculatorStackParamsList = {
   TradeCalculator: undefined
   PremiumOrDiscount: undefined
-  SetYourOwnPrice: undefined
 }
 
 export type TradeCalculatorStackScreenProps<
@@ -267,7 +269,6 @@ export type TradeChecklistStackParamsList = {
   ConfirmAmount: {
     readonly amountData: AmountData | undefined
   }
-  SetYourOwnPrice: undefined
   PremiumOrDiscount: undefined
   Network: {
     readonly networkData: NetworkData | undefined

@@ -80,20 +80,6 @@ export function amountPending(data: AmountInState): boolean {
   return getLatestAmountDataMessage(data)?.status === 'pending'
 }
 
-export function applyFeeOnNumberValue(
-  numberValue: number,
-  feeAmount: number
-): number {
-  return numberValue + numberValue * (feeAmount / 100)
-}
-
-export function cancelFeeOnNumberValue(
-  numberValue: number,
-  feeAmount: number
-): number {
-  return numberValue / (1 + feeAmount / 100)
-}
-
 export function formatBtcPrice(btcPrice: number): string {
   return removeTrailingZerosFromNumberString(
     btcPrice.toFixed(DECIMALS_FOR_BTC_VALUE)

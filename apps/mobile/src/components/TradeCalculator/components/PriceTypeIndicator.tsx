@@ -60,7 +60,7 @@ function PriceTypeIndicator({
       )}
       <Typography variant="paragraphSmall" color={textColor}>
         {!tradePriceType || tradePriceType === 'live'
-          ? t('tradeChecklist.calculateAmount.livePrice')
+          ? t('tradeCalculator.liveMarketPrice')
           : tradePriceType === 'frozen'
             ? t('tradeChecklist.calculateAmount.frozenPrice')
             : tradePriceType === 'custom'

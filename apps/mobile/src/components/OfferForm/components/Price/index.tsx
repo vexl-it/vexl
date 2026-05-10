@@ -29,7 +29,6 @@ interface Props {
     [currencyCode: CurrencyCode],
     void
   >
-  currencySelectVisibleAtom: PrimitiveAtom<boolean>
 }
 
 function Price({
@@ -41,7 +40,6 @@ function Price({
   satsValueAtom,
   toggleSinglePriceActiveAtom,
   changePriceCurrencyActionAtom,
-  currencySelectVisibleAtom,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const tokens = getTokens()
@@ -107,7 +105,6 @@ function Price({
           currencyAtom={currencyAtom}
           satsValueAtom={satsValueAtom}
           changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
-          currencySelectVisibleAtom={currencySelectVisibleAtom}
         />
       )}
     </YStack>

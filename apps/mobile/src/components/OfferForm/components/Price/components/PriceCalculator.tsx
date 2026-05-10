@@ -28,7 +28,6 @@ interface Props {
     [currencyCode: CurrencyCode],
     void
   >
-  currencySelectVisibleAtom: PrimitiveAtom<boolean>
 }
 
 function PriceCalculator({
@@ -38,7 +37,6 @@ function PriceCalculator({
   currencyAtom,
   satsValueAtom,
   changePriceCurrencyActionAtom,
-  currencySelectVisibleAtom,
 }: Props): React.ReactElement {
   return (
     <YStack gap="$2">
@@ -53,7 +51,6 @@ function PriceCalculator({
           }
           currencyAtom={currencyAtom}
           changePriceCurrencyActionAtom={changePriceCurrencyActionAtom}
-          currencySelectVisibleAtom={currencySelectVisibleAtom}
         />
         <SatsInput
           calculateFiatValueOnSatsValueChangeActionAtom={

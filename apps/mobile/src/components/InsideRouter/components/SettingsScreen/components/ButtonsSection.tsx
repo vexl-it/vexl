@@ -4,7 +4,7 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import {Effect} from 'effect'
 import * as TE from 'fp-ts/TaskEither'
 import {pipe} from 'fp-ts/function'
-import {useSetAtom} from 'jotai'
+import {useAtom, useSetAtom} from 'jotai'
 import React, {Fragment, useCallback, useMemo} from 'react'
 import {
   Alert,
@@ -21,7 +21,7 @@ import notEmpty from '../../../../../utils/notEmpty'
 import openUrl from '../../../../../utils/openUrl'
 import {defaultCurrencyAtom} from '../../../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../../../AreYouSureDialog'
-import {ChangeCurrency} from '../../../../ChangeCurrency'
+import {useOpenChangeCurrency} from '../../../../ChangeCurrency'
 import SvgImage from '../../../../Image'
 import {reportIssueDialogAtom} from '../../../../ReportIssue'
 import editIconSvg from '../../../../images/editIconSvg'
@@ -30,10 +30,7 @@ import {
   changeLanguageActionAtom,
   showVexlNitroPhoneCooperationBannerActionAtom,
 } from '../actionAtoms'
-import {
-  changeCurrencyDialogVisibleAtom,
-  toggleScreenshotsDisabledActionAtom,
-} from '../atoms'
+import {toggleScreenshotsDisabledActionAtom} from '../atoms'
 import coinsIconSvg from '../images/coinsIconSvg'
 import contactIconSvg from '../images/contactIconSvg'
 import cpuIconSvg from '../images/cpuIconSvg'
@@ -115,11 +112,9 @@ function ButtonsSection(): React.ReactElement {
   const navigation = useNavigation()
   const logout = useLogout()
   const showAreYouSure = useSetAtom(askAreYouSureActionAtom)
-  const setChangeCurrencyDialogVisible = useSetAtom(
-    changeCurrencyDialogVisibleAtom
-  )
   const setReportIssueDialogVisible = useSetAtom(reportIssueDialogAtom)
-  const setDefaultCurrency = useSetAtom(defaultCurrencyAtom)
+  const [defaultCurrency, setDefaultCurrency] = useAtom(defaultCurrencyAtom)
+  const openChangeCurrency = useOpenChangeCurrency()
   const toggleScreenshotsDisabled = useSetAtom(
     toggleScreenshotsDisabledActionAtom
   )
@@ -259,7 +254,10 @@ function ButtonsSection(): React.ReactElement {
             text: 'CZK',
             icon: coinsIconSvg,
             onPress: () => {
-              setChangeCurrencyDialogVisible(true)
+              openChangeCurrency({
+                selectedCurrencyCode: defaultCurrency,
+                onSave: setDefaultCurrency,
+              })
             },
             children: <SelectedCurrencyTitle />,
           },
@@ -380,8 +378,10 @@ function ButtonsSection(): React.ReactElement {
     [
       changeLanguage,
       deleteAccountWithAreYouSure,
+      defaultCurrency,
       navigation,
-      setChangeCurrencyDialogVisible,
+      openChangeCurrency,
+      setDefaultCurrency,
       setReportIssueDialogVisible,
       showVexlNitroPhoneCooperationBanner,
       t,
@@ -406,13 +406,6 @@ function ButtonsSection(): React.ReactElement {
           {groupIndex !== data.length - 1 && <Stack h={16} />}
         </Fragment>
       ))}
-      <ChangeCurrency
-        selectedCurrencyCodeAtom={defaultCurrencyAtom}
-        onSave={(currency) => {
-          setDefaultCurrency(currency)
-        }}
-        visibleAtom={changeCurrencyDialogVisibleAtom}
-      />
     </Stack>
   )
 }

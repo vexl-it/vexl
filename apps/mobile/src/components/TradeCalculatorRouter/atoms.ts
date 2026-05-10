@@ -7,10 +7,13 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom} from 'jotai'
 import getDefaultCurrency from '../../utils/getDefaultCurrency'
 import {
+  amountInputsSwappedAtom,
   btcInputValueAtom,
+  btcOrSatAtom,
   btcPriceForOfferWithStateAtom,
-  calculateFiatValueOnBtcAmountChangeActionAtom,
   feeAmountAtom,
+  fiatInputValueAtom,
+  ownPriceAtom,
   premiumOrDiscountEnabledAtom,
   refreshCurrentBtcPriceActionAtom,
   selectedCurrencyCodeAtom,
@@ -25,23 +28,28 @@ export const resetTradeCalculatorStateActionAtom = atom(null, (get, set) => {
   return pipe(
     T.Do,
     T.map(() => {
+      const defaultCurrency = getDefaultCurrency()
+
+      set(listingTypeAtom, 'BITCOIN')
       set(offerTypeAtom, 'SELL')
-      set(selectedCurrencyCodeAtom, getDefaultCurrency())
+      set(selectedCurrencyCodeAtom, defaultCurrency)
+      set(tradePriceTypeAtom, 'live')
+      set(btcInputValueAtom, '')
+      set(fiatInputValueAtom, '')
+      set(premiumOrDiscountEnabledAtom, false)
+      set(feeAmountAtom, 0)
+      set(btcOrSatAtom, 'BTC')
+      set(amountInputsSwappedAtom, false)
+      set(ownPriceAtom, undefined)
     }),
     T.chain(() => set(refreshCurrentBtcPriceActionAtom)),
     T.map(() => {
-      set(tradePriceTypeAtom, 'live')
       set(
         tradeBtcPriceAtom,
         (prev) => get(btcPriceForOfferWithStateAtom)?.btcPrice?.BTC ?? prev
       )
       set(btcInputValueAtom, '')
-      set(calculateFiatValueOnBtcAmountChangeActionAtom, {
-        btcAmount: '0',
-      })
-
-      set(premiumOrDiscountEnabledAtom, false)
-      set(feeAmountAtom, 0)
+      set(fiatInputValueAtom, '')
     })
   )
 })

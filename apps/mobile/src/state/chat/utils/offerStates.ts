@@ -1,4 +1,6 @@
+import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {DateTime} from 'luxon'
+import {isOfferExpired} from '../../../utils/isOfferExpired'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type ChatWithMessages, type RequestState} from '../domain'
 
@@ -58,6 +60,31 @@ export function canChatBeRequested(
   }
 
   return {canBeRerequested: false}
+}
+
+export function shouldUseGrayscaleColours({
+  chat,
+  isMine,
+  offerInfo,
+  rerequestLimitDays,
+}: {
+  chat?: ChatWithMessages
+  isMine: boolean
+  offerInfo: OfferInfo
+  rerequestLimitDays: number
+}): boolean {
+  const requestState = getRequestState(chat)
+  const canBeRequested = chat
+    ? canChatBeRequested(chat, rerequestLimitDays).canBeRerequested
+    : true
+
+  if (!offerInfo.publicPart.active) return true
+  if (isOfferExpired(offerInfo.publicPart.expirationDate)) return true
+  if (isMine || requestState === 'initial') return false
+  if (requestState === 'accepted') return true
+  if (requestState === 'otherSideLeft') return true
+
+  return !canBeRequested
 }
 
 export type ChatState =

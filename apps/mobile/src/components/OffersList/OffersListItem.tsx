@@ -28,17 +28,22 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
     () => !!offer.ownershipInfo?.adminId,
     [offer.ownershipInfo?.adminId]
   )
+  const isMyOffer = !!offer.ownershipInfo
 
   const chatForOfferAtom = useMemo(
     () =>
       chatWithMessagesForOfferAtom({
         offerId: offer.offerInfo.offerId,
-        isMyOffer: isMine,
+        isMyOffer,
         otherSidePublicKey: Option.some(
           offer.offerInfo.publicPart.offerPublicKey
         ),
       }),
-    [isMine, offer.offerInfo.offerId, offer.offerInfo.publicPart.offerPublicKey]
+    [
+      isMyOffer,
+      offer.offerInfo.offerId,
+      offer.offerInfo.publicPart.offerPublicKey,
+    ]
   )
   const chatForOffer = useAtomValue(chatForOfferAtom)
 

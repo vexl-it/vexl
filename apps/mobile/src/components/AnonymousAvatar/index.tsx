@@ -2,6 +2,7 @@ import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   Avatar,
+  type AvatarCustomSize,
   type AvatarSize,
   resolveSizePx,
   avatarsSvg as uiAvatars,
@@ -38,7 +39,7 @@ export function AnonymousAvatarOrClubImage({
 }: {
   seed: RandomSeed
   size?: AvatarSize
-  customSize?: number
+  customSize?: AvatarCustomSize
   grayScale: boolean
   goldenAvatarType?: GoldenAvatarType
   clubImageUrl?: UriString

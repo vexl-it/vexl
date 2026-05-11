@@ -1,5 +1,5 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {BoxProduct} from '../icons/BoxProduct'
 import {CurrencyBitcoinCircle} from '../icons/CurrencyBitcoinCircle'
@@ -32,6 +32,12 @@ const IconTagFrame = styled(XStack, {
       product: {backgroundColor: '$backgroundHighlight'},
       service: {backgroundColor: '$backgroundHighlight'},
     },
+    neutral: {
+      true: {
+        backgroundColor: '$backgroundHighlight',
+        height: '$7',
+      },
+    },
   } as const,
 })
 
@@ -39,19 +45,28 @@ type IconTagFrameProps = React.ComponentProps<typeof IconTagFrame>
 
 interface IconTagProps extends Omit<IconTagFrameProps, 'children' | 'variant'> {
   readonly variant: IconTagVariant
+  readonly neutral?: boolean
 }
 
-export function IconTag({variant, ...rest}: IconTagProps): React.JSX.Element {
+export function IconTag({
+  neutral,
+  variant,
+  ...rest
+}: IconTagProps): React.JSX.Element {
   const theme = useTheme()
-  const iconColor =
-    variant === 'bitcoin'
+  const sizeTokens = getTokens().size
+  const iconColor = neutral
+    ? theme.foregroundSecondary.val
+    : variant === 'bitcoin'
       ? theme.accentHighlightSecondary.val
       : theme.foregroundPrimary.val
   const Icon = iconMap[variant]
+  const iconSize = neutral ? sizeTokens.$6.val : sizeTokens.$7.val
+  const frameVariant = neutral ? undefined : variant
 
   return (
-    <IconTagFrame variant={variant} {...rest}>
-      <Icon color={iconColor} size={24} />
+    <IconTagFrame neutral={neutral} variant={frameVariant} {...rest}>
+      <Icon color={iconColor} size={iconSize} />
     </IconTagFrame>
   )
 }

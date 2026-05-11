@@ -1,5 +1,5 @@
 import React from 'react'
-import {styled, useTheme} from 'tamagui'
+import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {Circle, XStack, YStack} from '../primitives'
@@ -70,6 +70,7 @@ export function OfferCard({
   onPress,
 }: OfferCardProps): React.JSX.Element {
   const theme = useTheme()
+  const sizeTokens = getTokens().size
   const secondaryColor = theme.foregroundSecondary.val
 
   const hasClubs = clubNames != null && clubNames.length > 0
@@ -96,7 +97,7 @@ export function OfferCard({
         ) : null}
         {hasFriends ? (
           <XStack gap="$1" alignItems="center">
-            <PeopleUsers size={16} color={secondaryColor} />
+            <PeopleUsers size={sizeTokens.$5.val} color={secondaryColor} />
             <Typography
               variant="micro"
               color="$foregroundSecondary"

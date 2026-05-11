@@ -70,7 +70,7 @@ export default function ProductNotificationPage() {
           urlParams: {newerThan: new Date(0)},
         })
       )
-      setNotifications(result.vexlProductNotifications)
+      setNotifications(Array.reverse(result.vexlProductNotifications))
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to load notifications'

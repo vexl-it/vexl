@@ -205,7 +205,7 @@ export async function processBackgroundMessage(
                 e._tag === 'FetchingClubError' ||
                 e._tag === 'NoSuchElementException'
               )
-                return Effect.succeed(Effect.void)
+                return Effect.void
 
               return Effect.fail(e)
             })

@@ -3,6 +3,8 @@ import {IconTag, OfferCard, TextTag} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
+import {chatWithMessagesForOfferAtom} from '../state/chat/hooks/useChatForOffer'
+import {shouldUseGrayscaleColours} from '../state/chat/utils/offerStates'
 import {
   smallestClubForIdsAtom,
   useGetAllClubsNamesForIds,
@@ -13,6 +15,7 @@ import {useTranslation} from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
+import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
 
 export default function OfferOnMarketplace({
@@ -25,7 +28,9 @@ export default function OfferOnMarketplace({
   const {t} = useTranslation()
   const {publicPart, privatePart} = offer.offerInfo
   const {ownershipInfo} = offer
-  const isMine = !!ownershipInfo
+  const isMine = !!ownershipInfo?.adminId
+  const isMyOffer = !!ownershipInfo
+  const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
 
   const smallestClub = useAtomValue(
     useMemo(
@@ -40,6 +45,23 @@ export default function OfferOnMarketplace({
 
   const isOffering = getIsOffering(publicPart.listingType, publicPart.offerType)
   const iconTagVariant = getIconTagVariant(publicPart.listingType)
+
+  const chatForOfferAtom = useMemo(
+    () =>
+      chatWithMessagesForOfferAtom({
+        offerId: offer.offerInfo.offerId,
+        isMyOffer,
+        otherSidePublicKey: Option.some(publicPart.offerPublicKey),
+      }),
+    [isMyOffer, offer.offerInfo.offerId, publicPart.offerPublicKey]
+  )
+  const chatForOffer = useAtomValue(chatForOfferAtom)
+  const shouldBeGrayscaled = shouldUseGrayscaleColours({
+    chat: chatForOffer,
+    isMine,
+    offerInfo: offer.offerInfo,
+    rerequestLimitDays,
+  })
 
   const name = isMine
     ? t('common.me')
@@ -138,8 +160,8 @@ export default function OfferOnMarketplace({
       avatar={
         isMine ? undefined : (
           <AnonymousAvatarOrClubImage
-            grayScale={false}
-            customSize={40}
+            grayScale={shouldBeGrayscaled}
+            customSize="$9"
             seed={randomSeedFromOfferInfo(offer.offerInfo)}
             clubImageUrl={clubImageUrl}
           />
@@ -148,7 +170,9 @@ export default function OfferOnMarketplace({
       name={name}
       textTag={
         <TextTag
-          variant={isOffering ? 'offer' : 'request'}
+          variant={
+            shouldBeGrayscaled ? 'neutral' : isOffering ? 'offer' : 'request'
+          }
           label={
             isMine
               ? isOffering
@@ -160,7 +184,9 @@ export default function OfferOnMarketplace({
           }
         />
       }
-      iconTag={<IconTag variant={iconTagVariant} />}
+      iconTag={
+        <IconTag neutral={shouldBeGrayscaled} variant={iconTagVariant} />
+      }
       commonFriends={commonFriendsText}
       clubNames={clubNames}
       price={price}

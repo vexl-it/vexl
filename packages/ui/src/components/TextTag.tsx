@@ -1,6 +1,7 @@
 import React from 'react'
 import {styled} from 'tamagui'
 
+import {typographyVariantStyles} from '../config/fonts'
 import {SizableText, XStack} from '../primitives'
 
 export type TextTagVariant =
@@ -14,6 +15,7 @@ export type TextTagVariant =
   | 'accepted'
   | 'waitingForConfirmation'
   | 'outdated'
+  | 'neutral'
 
 const leftShape = {
   borderTopLeftRadius: '$4',
@@ -51,6 +53,12 @@ const TextTagFrame = styled(XStack, {
         ...rightShape,
       },
       outdated: {backgroundColor: '$backgroundHighlight', ...rightShape},
+      neutral: {
+        backgroundColor: '$backgroundHighlight',
+        height: '$7',
+        paddingVertical: '$2',
+        ...leftShape,
+      },
     },
   } as const,
 })
@@ -74,6 +82,12 @@ const TextTagLabel = styled(SizableText, {
       accepted: {color: '$greenForeground'},
       waitingForConfirmation: {color: '$pinkForeground'},
       outdated: {color: '$foregroundPrimary'},
+      neutral: {
+        color: '$foregroundSecondary',
+        fontSize: typographyVariantStyles.micro.fontSize,
+        lineHeight: typographyVariantStyles.micro.lineHeight,
+        letterSpacing: typographyVariantStyles.micro.letterSpacing,
+      },
     },
   } as const,
 })

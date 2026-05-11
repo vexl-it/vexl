@@ -6,7 +6,8 @@ import {Stack, ZStack} from '../primitives'
 
 export type AvatarSize = 'small' | 'medium' | 'large'
 
-type SizeToken = '$8' | '$10' | '$12'
+type SizeToken = keyof ReturnType<typeof getTokens>['size']
+export type AvatarCustomSize = number | SizeToken
 
 const SIZE_TOKEN_MAP: Record<AvatarSize, SizeToken> = {
   small: '$8', // 32px
@@ -18,8 +19,17 @@ const GRAYSCALE_FILTER = [
   {name: 'feColorMatrix', type: 'saturate', values: 0} as const,
 ]
 
-export function resolveSizePx(size: AvatarSize, customSize?: number): number {
-  if (customSize != null) return customSize
+function resolveCustomSizePx(customSize: AvatarCustomSize): number {
+  if (typeof customSize === 'number') return customSize
+
+  return getTokens().size[customSize].val
+}
+
+export function resolveSizePx(
+  size: AvatarSize,
+  customSize?: AvatarCustomSize
+): number {
+  if (customSize != null) return resolveCustomSizePx(customSize)
   return getTokens().size[SIZE_TOKEN_MAP[size]].val
 }
 
@@ -27,7 +37,7 @@ export interface AvatarProps {
   readonly source?: RNImageProps['source']
   readonly children?: React.ReactNode
   readonly size?: AvatarSize
-  readonly customSize?: number
+  readonly customSize?: AvatarCustomSize
   readonly grayscale?: boolean
 }
 
@@ -39,6 +49,7 @@ export function Avatar({
   grayscale = false,
 }: AvatarProps): React.JSX.Element {
   const dimension = customSize ?? SIZE_TOKEN_MAP[size]
+  const backgroundColor = grayscale ? '$black100' : '$backgroundSecondary'
 
   if (source != null) {
     const px = resolveSizePx(size, customSize)
@@ -48,7 +59,7 @@ export function Avatar({
         width={px}
         height={px}
         borderRadius="$2.5"
-        backgroundColor="$backgroundSecondary"
+        backgroundColor={backgroundColor}
         overflow="hidden"
       >
         <FilterImage
@@ -67,7 +78,7 @@ export function Avatar({
       height={dimension}
       borderRadius="$2.5"
       overflow="hidden"
-      backgroundColor="$backgroundSecondary"
+      backgroundColor={backgroundColor}
     >
       <Stack
         position="absolute"

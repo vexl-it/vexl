@@ -75,11 +75,29 @@ function getNextPart(
 
   let partLengthIndex = startOffset
   while (data.charAt(partLengthIndex) !== 'A') {
-    partLengthChars.push(data.charAt(partLengthIndex))
+    if (partLengthIndex >= data.length) {
+      throw new Error('Invalid ECIES legacy ciphertext')
+    }
+
+    const nextLengthChar = data.charAt(partLengthIndex)
+    if (!/^\d$/.test(nextLengthChar)) {
+      throw new Error('Invalid ECIES legacy ciphertext')
+    }
+
+    partLengthChars.push(nextLengthChar)
     partLengthIndex = partLengthIndex + 1
   }
-  const partLength = parseInt(partLengthChars.join(''))
+  const partLength = Number.parseInt(partLengthChars.join(''), 10)
   const partEndsAt = partLengthIndex + 1 + partLength
+
+  if (
+    !Number.isSafeInteger(partLength) ||
+    partLength < 0 ||
+    partEndsAt > data.length
+  ) {
+    throw new Error('Invalid ECIES legacy ciphertext')
+  }
+
   const part = data.slice(partLengthIndex + 1, partEndsAt)
 
   return {

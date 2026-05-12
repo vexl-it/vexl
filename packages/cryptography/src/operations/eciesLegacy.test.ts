@@ -70,3 +70,14 @@ it('Should encrypt and decrypt message with secp256k1 key', async () => {
     })
   ).toEqual(message)
 })
+
+it('Should reject malformed ciphertext without hanging', async () => {
+  const key = generatePrivateKey()
+
+  await expect(
+    eciesLegacyDecrypt({
+      privateKey: key.privateKeyPemBase64,
+      data: '123',
+    })
+  ).rejects.toThrow('Invalid ECIES legacy ciphertext')
+})

@@ -1,7 +1,11 @@
 import * as Sentry from '@sentry/react-native'
 import {initReportError} from '@vexl-next/resources-utils/src/reportErrorFromResourcesUtils'
 import {Effect} from 'effect'
-import {toExtraWithRemovedSensitiveData} from './removeSensitiveData'
+import {
+  toErrorJsonWithRemovedSensitiveData,
+  toErrorWithRemovedSensitiveData,
+  toExtraWithRemovedSensitiveData,
+} from './removeSensitiveData'
 
 export type LogLvl = 'info' | 'warn' | 'error' | 'fatal'
 export type SeverityLevel =
@@ -35,18 +39,23 @@ function reportError(
   error: Error,
   extra?: Record<string, unknown>
 ): void {
+  const strippedError = toErrorWithRemovedSensitiveData(error)
+  const strippedExtra = extra
+    ? toExtraWithRemovedSensitiveData(extra)
+    : undefined
+
   if (!__DEV__) {
-    Sentry.captureException(error, {
+    Sentry.captureException(strippedError, {
       level: logLvlToSentryLvl(lvl),
-      extra: extra ? toExtraWithRemovedSensitiveData(extra) : undefined,
+      extra: strippedExtra,
     })
   }
   getConsoleLvl(lvl)(
     '‼️ there was an error reported. See hermes logs',
-    error,
-    JSON.stringify(extra, null, 2)
+    toErrorJsonWithRemovedSensitiveData(error),
+    JSON.stringify(strippedExtra, null, 2)
   )
-  getConsoleLvl(lvl)(error, extra)
+  getConsoleLvl(lvl)(toErrorJsonWithRemovedSensitiveData(error), strippedExtra)
 }
 
 export default reportError

@@ -34,6 +34,34 @@ export function toJsonWithRemovedSensitiveData(object: any): string {
   }
 }
 
+const errorToPlainObject = (
+  error: Error,
+  depth: number = 0
+): Record<string, unknown> => {
+  if (depth > 4) return {message: '[[truncated]]'}
+
+  return {
+    name: error.name,
+    message: error.message,
+    stack: error.stack,
+    cause:
+      error.cause instanceof Error
+        ? errorToPlainObject(error.cause, depth + 1)
+        : error.cause,
+  }
+}
+
+export function toErrorWithRemovedSensitiveData(error: Error): Error {
+  const strippedError = new Error(removeSensitiveData(error.message))
+  strippedError.name = error.name
+  if (error.stack) strippedError.stack = removeSensitiveData(error.stack)
+  return strippedError
+}
+
+export function toErrorJsonWithRemovedSensitiveData(error: Error): string {
+  return toJsonWithRemovedSensitiveData(errorToPlainObject(error))
+}
+
 export function toExtraWithRemovedSensitiveData(
   extra: Record<string, unknown>
 ): Record<string, string> {
@@ -41,8 +69,9 @@ export function toExtraWithRemovedSensitiveData(
     return {
       ...acc,
       [key]:
-        // Keep errors to get stacktrace
-        value instanceof Error ? value : toJsonWithRemovedSensitiveData(value),
+        value instanceof Error
+          ? toErrorJsonWithRemovedSensitiveData(value)
+          : toJsonWithRemovedSensitiveData(value),
     }
   }, {})
 }

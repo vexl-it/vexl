@@ -1,7 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {NotificationTokensDb} from '../../services/NotificationTokensDb'
 
 export const invalidateNotificationTokenHandler = HttpApiBuilder.handler(
@@ -14,8 +14,16 @@ export const invalidateNotificationTokenHandler = HttpApiBuilder.handler(
         const {payload} = req
 
         const db = yield* NotificationTokensDb
+        const secretForToken = yield* db.findSecretByNotificationToken(
+          payload.tokenToInvalidate
+        )
 
-        yield* db.deleteNotificationToken(payload.tokenToInvalidate)
+        if (
+          Option.isSome(secretForToken) &&
+          secretForToken.value.secret === payload.secret
+        ) {
+          yield* db.deleteNotificationToken(payload.tokenToInvalidate)
+        }
       })
     )
 )

@@ -51,6 +51,9 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const route = useRoute()
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
+  const marketplaceFirstOfferBanner = useAtomValue(
+    marketplaceFirstOfferBannerAtom
+  )
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,

@@ -30,6 +30,27 @@ const truncateForLog = (value: string): string =>
     ? `${value.slice(0, MAX_ERROR_BODY_LOG_LENGTH)}...[truncated]`
     : value
 
+const ABSOLUTE_URL_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i
+
+const buildBackendUrl = (path: string): URL | undefined => {
+  if (
+    !path ||
+    path.startsWith('/') ||
+    path.startsWith('//') ||
+    ABSOLUTE_URL_SCHEME_REGEX.test(path)
+  ) {
+    return undefined
+  }
+
+  const backendUrl = new URL(getBackendUrl(path))
+  const backendBasePath = backendUrl.pathname.endsWith('/')
+    ? backendUrl.pathname.slice(0, -1)
+    : backendUrl.pathname
+
+  backendUrl.pathname = `${backendBasePath}/${path}`
+  return backendUrl
+}
+
 async function proxyRequest(request: NextRequest, method: string) {
   const startedAt = Date.now()
   const requestId = getRequestId(request)
@@ -40,7 +61,11 @@ async function proxyRequest(request: NextRequest, method: string) {
     const backendBaseUrl = getBackendUrl(path)
 
     // Build the backend URL
-    const backendUrl = new URL(`${path}`, backendBaseUrl)
+    const backendUrl = buildBackendUrl(path)
+
+    if (!backendUrl) {
+      return NextResponse.json({error: 'Invalid proxy path'}, {status: 400})
+    }
 
     // Copy non-admin query params from the original request.
     request.nextUrl.searchParams.forEach((value, key) => {

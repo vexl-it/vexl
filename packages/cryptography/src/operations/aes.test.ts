@@ -28,24 +28,29 @@ describe('aes gcm', () => {
     expect(decrypted).toEqual(data)
   })
 
-  it('Should output data as expected', () => {
+  it('Should use a random iv for new encryptions', () => {
     const data = 'Another some messag'
     const staticPass = 'This is something'
-    const encrypt = aesGCMEncrypt({data, password: staticPass})
+    const encrypted1 = aesGCMEncrypt({data, password: staticPass})
+    const encrypted2 = aesGCMEncrypt({data, password: staticPass})
 
-    expect(encrypt).toEqual(
-      '000.AEW+Xc++na8J9NdjRYP4lSA7Tg==.CDQUB6lB7S9XWKirY5DbVg=='
+    expect(encrypted1).not.toEqual(encrypted2)
+    expect(aesGCMDecrypt({data: encrypted1, password: staticPass})).toEqual(
+      data
+    )
+    expect(aesGCMDecrypt({data: encrypted2, password: staticPass})).toEqual(
+      data
     )
   })
 
   it('Should fail when decrypting with bad security tag', () => {
     const data = 'some data'
     const encrypted = aesGCMEncrypt({data, password})
-    const [version, payload] = encrypted.split('.')
+    const [version, iv, payload] = encrypted.split('.')
     const crypto = getCrypto()
     expect(() => {
       aesGCMDecrypt({
-        data: `${version}.${payload}.${crypto
+        data: `${version}.${iv}.${payload}.${crypto
           .randomBytes(16)
           .toString('base64')}`,
         password,

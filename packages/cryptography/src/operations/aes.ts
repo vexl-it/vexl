@@ -16,21 +16,22 @@ export function aesGCMEncrypt({
     password,
     SALT,
     PBKDF2ITER,
-    32 + 12,
+    32,
     'sha1'
   )
 
-  const cipherKey = stretchedPass.subarray(0, 32)
-  const iv = stretchedPass.subarray(32, 32 + 12)
+  const iv = crypto.randomBytes(12)
 
-  const cipher = crypto.createCipheriv(CYPHER_ALGORITHM, cipherKey, iv)
+  const cipher = crypto.createCipheriv(CYPHER_ALGORITHM, stretchedPass, iv)
 
   const encrypted = Buffer.concat([cipher.update(data, 'utf8'), cipher.final()])
   const authTag = cipher.getAuthTag()
 
   return appendVersion(
-    `${encrypted.toString('base64')}.${authTag.toString('base64')}`,
-    1
+    `${iv.toString('base64')}.${encrypted.toString('base64')}.${authTag.toString(
+      'base64'
+    )}`,
+    2
   )
 }
 
@@ -42,7 +43,7 @@ export function aesGCMDecrypt({
   password: string
 }): string {
   const crypto = getCrypto()
-  const {data} = parseStringWithVersion(dataWithVersion)
+  const {data, version} = parseStringWithVersion(dataWithVersion)
   const stretchedPass = crypto.pbkdf2Sync(
     password,
     SALT,
@@ -53,10 +54,26 @@ export function aesGCMDecrypt({
   const cipherKey = stretchedPass.subarray(0, 32)
   const iv = stretchedPass.subarray(32, 32 + 12)
 
-  const decipher = crypto.createDecipheriv(CYPHER_ALGORITHM, cipherKey, iv)
+  if (version > 0) {
+    const [ivBase64, encrypted, authTag] = data.split('.')
+    if (!authTag || !encrypted || !ivBase64) throw new Error('Bad data')
+
+    const decipher = crypto.createDecipheriv(
+      CYPHER_ALGORITHM,
+      cipherKey,
+      Buffer.from(ivBase64, 'base64')
+    )
+
+    decipher.setAuthTag(Buffer.from(authTag, 'base64'))
+
+    return `${decipher.update(encrypted, 'base64', 'utf8')}${decipher.final(
+      'utf8'
+    )}`
+  }
 
   const [encrypted, authTag] = data.split('.')
   if (!authTag || !encrypted) throw new Error('Bad data')
+  const decipher = crypto.createDecipheriv(CYPHER_ALGORITHM, cipherKey, iv)
   decipher.setAuthTag(Buffer.from(authTag, 'base64'))
 
   return `${decipher.update(encrypted, 'base64', 'utf8')}${decipher.final(

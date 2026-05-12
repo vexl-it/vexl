@@ -188,6 +188,7 @@ function withExpectedSessionUpgrades(session: Session): SessionV2 {
       ...session.sessionCredentials,
       vexlAuthHeader: createMockVexlAuthHeader(session.sessionCredentials.hash),
     },
+    isLiquidityProvider: false,
   }
 }
 

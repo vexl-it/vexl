@@ -86,6 +86,7 @@ export const createOfferActionAtom = atom<
       // backward compatibility #2124 remove once all clients are updated
       fcmCypher: vexlNotificationToken,
       vexlNotificationToken,
+      ...(session.isLiquidityProvider ? {byLiquidityProvider: true} : {}),
     }
 
     const serverToClientHashesToHashedPhoneNumbersMap = yield* _(

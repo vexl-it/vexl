@@ -1,4 +1,4 @@
-import {useNavigation} from '@react-navigation/native'
+import {useNavigation, useRoute} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Option} from 'effect'
 import {useAtomValue, type Atom} from 'jotai'
@@ -9,8 +9,12 @@ import {
   canChatBeRequested,
   getRequestState,
 } from '../../state/chat/utils/offerStates'
+import {marketplaceFirstOfferBannerAtom} from '../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
+import CreateOfferMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/CreateOfferMarketplaceSuggestion'
+import EnableNotificationsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/EnableNotificationsMarketplaceSuggestion'
+import ImportContactsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/ImportContactsMarketplaceSuggestion'
 import OfferOnMarketplace from '../OfferOnMarketplace'
 
 interface Props {
@@ -18,9 +22,33 @@ interface Props {
   readonly offerAtom: Atom<OneOfferInState>
 }
 
+function MarketplaceFirstOfferBanner(): React.ReactElement | null {
+  const marketplaceFirstOfferBanner = useAtomValue(
+    marketplaceFirstOfferBannerAtom
+  )
+
+  if (marketplaceFirstOfferBanner == null) return null
+
+  return (
+    <>
+      <Stack height="$5" />
+      <Stack px="$5">
+        {marketplaceFirstOfferBanner === 'importContacts' ? (
+          <ImportContactsMarketplaceSuggestion />
+        ) : marketplaceFirstOfferBanner === 'enableNotifications' ? (
+          <EnableNotificationsMarketplaceSuggestion />
+        ) : (
+          <CreateOfferMarketplaceSuggestion />
+        )}
+      </Stack>
+    </>
+  )
+}
+
 function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const route = useRoute()
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
 
@@ -191,9 +219,14 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   ])
 
   return (
-    <Stack px="$5">
-      <OfferOnMarketplace offer={offer} onPress={content.onPress} />
-    </Stack>
+    <>
+      <Stack px="$5">
+        <OfferOnMarketplace offer={offer} onPress={content.onPress} />
+      </Stack>
+      {route.name === 'Marketplace' && isFirst && !isMyOffer ? (
+        <MarketplaceFirstOfferBanner />
+      ) : null}
+    </>
   )
 }
 

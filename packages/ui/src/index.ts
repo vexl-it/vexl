@@ -26,6 +26,8 @@ export {UserImagePlaceholder} from './assets/UserImagePlaceholder'
 
 // Graphics / Illustrations
 export * from './assets/graphics'
+export * from './assets/marketplaceIntro'
+export * from './assets/marketplaceLoader'
 
 // Fonts
 export {vexlFonts} from './assets/fonts'

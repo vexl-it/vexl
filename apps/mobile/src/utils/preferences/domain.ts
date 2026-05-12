@@ -78,6 +78,24 @@ export const Preferences = Schema.Struct({
   showVerifiedContacts: Schema.optionalWith(Schema.Boolean, {
     default: () => false,
   }),
+  showCreateOfferInMarketplaceSuggestion: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
+  showImportContactsInMarketplaceSuggestion: Schema.optionalWith(
+    Schema.Boolean,
+    {
+      default: () => true,
+    }
+  ),
+  showEnableNotificationsInMarketplaceSuggestion: Schema.optionalWith(
+    Schema.Boolean,
+    {
+      default: () => true,
+    }
+  ),
+  showMarketplaceIntroDialog: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   lastUsedOfferSpokenLanguages: Schema.optionalWith(
     Schema.Array(SpokenLanguage),
     {

@@ -15,6 +15,7 @@ import {
   completePostLoginFlowScreenActionAtom,
   finishPostLoginFlowActionAtom,
 } from '../../../state/postLoginOnboarding'
+import {sessionDataOrDummyAtom} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import PostLoginFlowScreen from './PostLoginFlowScreen'
 
@@ -25,25 +26,21 @@ export default function UsageInfoScreen(): React.ReactElement {
   const graphicScale = Math.min(1, availableWidth / 164)
   const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
   const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
+  const setSession = useSetAtom(sessionDataOrDummyAtom)
 
   const finish = (): void => {
     completeScreen('usageInfo')
     Effect.runFork(finishPostLoginFlow())
   }
 
+  const finishAsLiquidityProvider = (): void => {
+    setSession((session) => ({...session, isLiquidityProvider: true}))
+    finish()
+  }
+
   return (
-    <PostLoginFlowScreen
-      primaryButton={{
-        label: t('common.continue'),
-        onPress: finish,
-      }}
-    >
-      <YStack
-        flex={1}
-        justifyContent="space-between"
-        paddingVertical="$10"
-        gap="$5"
-      >
+    <PostLoginFlowScreen>
+      <YStack flex={1} justifyContent="space-between" paddingTop="$10" gap="$5">
         <YStack alignItems="center" gap="$7">
           <FaqWhatIsVexl
             height={164 * graphicScale}
@@ -71,7 +68,7 @@ export default function UsageInfoScreen(): React.ReactElement {
           <Selector
             icon={TelescopeExplore}
             label={t('postLoginFlow.v2.usageInfo.doBoth')}
-            onPress={finish}
+            onPress={finishAsLiquidityProvider}
           />
         </YStack>
       </YStack>

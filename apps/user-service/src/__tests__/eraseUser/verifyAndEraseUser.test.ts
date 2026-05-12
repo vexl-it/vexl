@@ -69,6 +69,52 @@ describe('Verify and erase user', () => {
     )
   })
 
+  it('Should reject replayed erase verification ids', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const initResponse = yield* _(initVerification)
+
+        expect(initResponse.verificationId).toBeDefined()
+
+        checkVerificationMock.mockReturnValueOnce(Effect.succeed('valid'))
+        const checkResponse = yield* _(
+          client.EraseUser.verifyAndEraseuser({
+            payload: {
+              verificationId: initResponse.verificationId,
+              code: '123456',
+            },
+          })
+        )
+
+        expect(
+          checkResponse.shortLivedTokenForErasingUserOnContactService
+        ).toBeDefined()
+
+        const replayResponse = yield* _(
+          client.EraseUser.verifyAndEraseuser({
+            payload: {
+              verificationId: initResponse.verificationId,
+              code: '123456',
+            },
+          }),
+          Effect.either
+        )
+
+        const VerifyCodeErrors = Schema.Union(
+          UnableToGenerateChallengeError,
+          VerificationNotFoundError,
+          InvalidVerificationError,
+          InvalidVerificationIdError,
+          UnableToVerifySmsCodeError
+        )
+
+        expectErrorResponse(VerifyCodeErrors)(replayResponse)
+      })
+    )
+  })
+
   it('Should return error response when verification unsuccessful', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

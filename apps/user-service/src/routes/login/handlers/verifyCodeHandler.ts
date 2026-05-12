@@ -50,6 +50,7 @@ export const verifyCodeHandler = HttpApiBuilder.handler(
       } satisfies ChallengeVerificationState
 
       yield* _(loginDb.storeChallengeVerificationState(verificationState))
+      yield* _(loginDb.deletePhoneVerificationState(req.payload.id))
 
       return new VerifyPhoneNumberResponse({
         challenge: verificationState.challenge,

@@ -34,6 +34,10 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     runTasksInParallel: true,
     sendReadReceipts: true,
     showVerifiedContacts: false,
+    showCreateOfferInMarketplaceSuggestion: true,
+    showImportContactsInMarketplaceSuggestion: true,
+    showEnableNotificationsInMarketplaceSuggestion: true,
+    showMarketplaceIntroDialog: true,
     lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(),
   },
   Preferences
@@ -103,6 +107,25 @@ export const sendReadReceiptsAtom = focusAtom(preferencesAtom, (o) =>
 
 export const showVerifiedContactsAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('showVerifiedContacts')
+)
+
+export const showCreateOfferInMarketplaceSuggestionAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showCreateOfferInMarketplaceSuggestion')
+)
+
+export const showImportContactsInMarketplaceSuggestionAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showImportContactsInMarketplaceSuggestion')
+)
+
+export const showEnableNotificationsInMarketplaceSuggestionAtom = focusAtom(
+  preferencesAtom,
+  (o) => o.prop('showEnableNotificationsInMarketplaceSuggestion')
+)
+
+export const showMarketplaceIntroDialogAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('showMarketplaceIntroDialog')
 )
 
 export const lastUsedOfferSpokenLanguagesAtom = focusAtom(

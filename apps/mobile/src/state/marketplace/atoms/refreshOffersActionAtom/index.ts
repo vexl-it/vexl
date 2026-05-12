@@ -11,6 +11,7 @@ import {updateOffersIdsForClubStateActionAtom} from '../../../clubs/atom/clubsWi
 import {sessionDataOrDummyAtom} from '../../../session'
 import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '../ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner'
 import {loadingStateAtom} from '../loadingState'
+import {resetImportContactsMarketplaceSuggestionSessionActionAtom} from '../offerSuggestionVisible'
 import {offersAtom, offersStateAtom} from '../offersState'
 import {combineIncomingOffers} from './utils/combineIncomingOffers'
 import {fetchOffersReportErrorsActionAtom} from './utils/fetchOffersReportErrorsActionAtom'
@@ -71,6 +72,7 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
       }),
       lastUpdatedAt2: updateStartedAt,
     }))
+    set(resetImportContactsMarketplaceSuggestionSessionActionAtom)
 
     yield* _(
       set(ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner)

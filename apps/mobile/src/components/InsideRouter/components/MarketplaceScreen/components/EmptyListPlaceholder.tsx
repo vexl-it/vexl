@@ -22,12 +22,12 @@ import {
 } from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
+import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import EmptyListWrapper from '../../../../EmptyListWrapper'
 import MarketplaceSuggestion from '../../../../MarketplaceSuggestion'
 import EmptyMarketplaceSuggestions from './EmptyMarketplaceSuggestions'
-
-const REACH_NUMBER_THRESHOLD = 30
+import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 
 interface Props {
   refreshing?: boolean
@@ -40,6 +40,7 @@ function EmptyListPlaceholder({
 }: Props): React.ReactElement {
   const navigation = useNavigation()
   const {t} = useTranslation()
+  const addContacts = useAddContactsFromMarketplaceAction()
 
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const filterActive = useAtomValue(isFilterActiveAtom)
@@ -144,9 +145,7 @@ function EmptyListPlaceholder({
         refreshing={refreshing}
         onRefresh={onRefresh}
         buttonText={t('suggestion.addMoreContacts')}
-        onButtonPress={() => {
-          navigation.navigate('SetContacts', {})
-        }}
+        onButtonPress={addContacts}
       >
         <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
           {importedContactsCount === 0

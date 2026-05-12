@@ -17,6 +17,7 @@ import {rateLimitPerIpMultiplierConfig} from '../commonConfigs'
 import {expectErrorResponse} from '../tests/expectErrorResponse'
 import {mockedRateLimitingLayer} from '../tests/mockedRateLimitingLayer'
 import {rateLimitingMiddlewareLayer} from './rateLimitngMiddlewareLayer'
+import {normalizePath} from './utils'
 
 const TestEndpoint = HttpApiEndpoint.post(
   'testEndpoint',
@@ -73,6 +74,13 @@ beforeEach(async () => {
 })
 
 describe('Rate Limiting Middleware', () => {
+  it('uses the same route key for query string variants', () => {
+    expect(normalizePath('/api/v1/test?nonce=1')).toEqual('/api/v1/test')
+    expect(normalizePath('/api/v1/test?nonce=2#fragment')).toEqual(
+      '/api/v1/test'
+    )
+  })
+
   it('allows requests under the rate limit', async () => {
     await runPromiseInMocked(
       Effect.gen(function* (_) {

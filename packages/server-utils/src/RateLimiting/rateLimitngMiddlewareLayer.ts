@@ -14,7 +14,7 @@ import {
 import {getConnectingIp} from '../getConnectingIp'
 import {makeMiddlewareEffect} from '../makeMiddlewareEffect'
 import {reportRateLimit} from './metrics'
-import {buildRateLimitingLimitsForEndpoints} from './utils'
+import {buildRateLimitingLimitsForEndpoints, normalizePath} from './utils'
 
 export const rateLimitingMiddlewareLayer = (
   spec: HttpApi.HttpApi<any, any, any, any>
@@ -67,13 +67,14 @@ export const rateLimitingMiddlewareLayer = (
         }
 
         const request = yield* _(HttpServerRequest.HttpServerRequest)
-        const endpointLimit = getEndpointLimit(request.method, request.url)
+        const route = normalizePath(request.url)
+        const endpointLimit = getEndpointLimit(request.method, route)
 
         // This means that the endpoint is not defined in the API spec. Let it pass to return 404 (or docs)
         if (endpointLimit._tag === 'noRouteFound') {
           yield* _(
             Effect.logInfo('No rate limiting route found for endpoint', {
-              route: request.url,
+              route,
               method: request.method,
             })
           )
@@ -85,7 +86,7 @@ export const rateLimitingMiddlewareLayer = (
           yield* _(
             Effect.fail(
               new UnexpectedServerError({
-                message: `Could not determine rate limit for endpoint ${request.method} ${request.url}`,
+                message: `Could not determine rate limit for endpoint ${request.method} ${route}`,
               })
             )
           )
@@ -97,7 +98,7 @@ export const rateLimitingMiddlewareLayer = (
         yield* _(
           Effect.log('Rate limiting check', {
             ip: connectingIp,
-            route: request.url,
+            route,
             method: request.method,
             limit,
           })
@@ -106,7 +107,7 @@ export const rateLimitingMiddlewareLayer = (
         const rateLimitResult = yield* _(
           rateLimiting.incrementAndRateLimitIp({
             ip: connectingIp,
-            route: request.url,
+            route,
             method: request.method,
             limit,
           })
@@ -116,7 +117,7 @@ export const rateLimitingMiddlewareLayer = (
           reportRateLimit({
             allowed: rateLimitResult.allowed,
             method: request.method,
-            route: request.url,
+            route,
             limit,
           })
         )
@@ -125,7 +126,7 @@ export const rateLimitingMiddlewareLayer = (
           yield* _(
             Effect.logInfo('Rate limiting ip', {
               ip: connectingIp,
-              route: request.url,
+              route,
               method: request.method,
             })
           )

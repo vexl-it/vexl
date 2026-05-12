@@ -1,3 +1,4 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {type TabItem, Tabs} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -8,6 +9,7 @@ import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../sta
 import {myOffersSortedAtomsAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
+import {showMarketplaceIntroDialogIfNeededActionAtom} from '../../../../../state/marketplace/atoms/showMarketplaceIntroDialogIfNeededActionAtom'
 import {useHandleRedirectToContactsScreen} from '../../../../../state/useHandleRedirectToContactsScreen'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAppState} from '../../../../../utils/useAppState'
@@ -68,6 +70,9 @@ function MarketplaceScreenContent({
   readonly onActiveTabChange: (tab: MarketplaceTab) => void
 }): React.ReactElement {
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
+  const showMarketplaceIntroDialogIfNeeded = useSetAtom(
+    showMarketplaceIntroDialogIfNeededActionAtom
+  )
   const {scrollY, onScroll} = useInsideScreenScroll()
   const scrollToTopRef = useRef<(() => void) | null>(null)
   const tabs = useTabs()
@@ -131,6 +136,22 @@ function MarketplaceScreenContent({
       },
       [refreshOffers]
     )
+  )
+
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab !== 'allOffers' || !areThereOffersWithoutFilters) {
+        return undefined
+      }
+
+      Effect.runFork(showMarketplaceIntroDialogIfNeeded())
+
+      return undefined
+    }, [
+      activeTab,
+      areThereOffersWithoutFilters,
+      showMarketplaceIntroDialogIfNeeded,
+    ])
   )
 
   return (

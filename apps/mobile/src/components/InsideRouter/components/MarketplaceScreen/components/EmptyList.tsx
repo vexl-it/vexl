@@ -1,16 +1,22 @@
 import {useNavigation} from '@react-navigation/native'
-import {FaqStayAnonymous, Typography} from '@vexl-next/ui'
+import {
+  FaqStayAnonymous,
+  MarketplaceEmptyLoader,
+  Typography,
+} from '@vexl-next/ui'
 import {Option} from 'effect/index'
 import {useAtomValue} from 'jotai'
-import React from 'react'
+import React, {useCallback} from 'react'
 import {Stack, XStack, YStack} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
+import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
+import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
 import {notificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import Button from '../../../../Button'
-
-const REACH_NUMBER_THRESHOLD = 30
+import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
+import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
 interface EmptyListAction {
   readonly description: string
@@ -27,9 +33,21 @@ interface EmptyListVariant {
 function useEmptyListVariants(): EmptyListVariant {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const addContacts = useAddContactsFromMarketplaceAction()
+  const enableNotifications = useEnableNotificationsFromMarketplaceAction()
   const reachNumber = useAtomValue(reachNumberAtom)
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const areNotificationsEnabled = useAtomValue(notificationsEnabledAtom)
+
+  const navigateToCommunity = useCallback(() => {
+    navigation.navigate('InsideTabs', {
+      screen: 'Community',
+    })
+  }, [navigation])
+
+  const navigateToCreateOffer = useCallback(() => {
+    navigation.navigate('CRUDOfferFlow')
+  }, [navigation])
 
   if (importedContactsCount === 0) {
     return {
@@ -39,7 +57,7 @@ function useEmptyListVariants(): EmptyListVariant {
           'emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust'
         ),
         buttonText: t('common.addContacts'),
-        onButtonPress: () => {},
+        onButtonPress: addContacts,
       },
     }
   }
@@ -54,12 +72,12 @@ function useEmptyListVariants(): EmptyListVariant {
       primaryAction: {
         description: t('emptyMarketplace.weWillLetYouKnowOnceYourFriends'),
         buttonText: t('common.enableNotifications'),
-        onButtonPress: () => {},
+        onButtonPress: enableNotifications,
       },
       secondaryAction: {
         description: t('emptyMarketplace.exploreTheCommunity'),
         buttonText: t('emptyMarketplace.goToCommunity'),
-        onButtonPress: () => {},
+        onButtonPress: navigateToCommunity,
       },
     }
   }
@@ -72,12 +90,12 @@ function useEmptyListVariants(): EmptyListVariant {
       primaryAction: {
         description: t('emptyMarketplace.noOnePostedYet'),
         buttonText: t('emptyMarketplace.postNewOffer'),
-        onButtonPress: () => {},
+        onButtonPress: navigateToCreateOffer,
       },
       secondaryAction: {
         description: t('emptyMarketplace.exploreTheCommunity'),
         buttonText: t('emptyMarketplace.goToCommunity'),
-        onButtonPress: () => {},
+        onButtonPress: navigateToCommunity,
       },
     }
   }
@@ -91,7 +109,7 @@ function useEmptyListVariants(): EmptyListVariant {
       primaryAction: {
         description: t('emptyMarketplace.turnOnNotificationsSoYouDontMiss'),
         buttonText: t('emptyMarketplace.turnOnNotifications'),
-        onButtonPress: () => {},
+        onButtonPress: enableNotifications,
       },
     }
   }
@@ -101,12 +119,12 @@ function useEmptyListVariants(): EmptyListVariant {
     primaryAction: {
       description: t('emptyMarketplace.beTheFirstToCreateOne'),
       buttonText: t('emptyMarketplace.postNewOffer'),
-      onButtonPress: () => {},
+      onButtonPress: navigateToCreateOffer,
     },
     secondaryAction: {
       description: t('emptyMarketplace.exploreTheCommunity'),
       buttonText: t('emptyMarketplace.goToCommunity'),
-      onButtonPress: () => {},
+      onButtonPress: navigateToCommunity,
     },
   }
 }
@@ -114,6 +132,13 @@ function useEmptyListVariants(): EmptyListVariant {
 function EmptyList(): React.ReactElement {
   const {t} = useTranslation()
   const emptyListVariant = useEmptyListVariants()
+  const shouldShowLoadingOffers = useAtomValue(shouldShowLoadingOffersAtom)
+
+  if (shouldShowLoadingOffers) {
+    return (
+      <MarketplaceEmptyLoader label={t('emptyMarketplace.loadingOffers')} />
+    )
+  }
 
   return (
     <YStack gap="$6" ai="center" paddingHorizontal="$5">

@@ -35,7 +35,7 @@ import writeSessionToStorage, {
 
 export class SessionSanityCheckFailed extends Data.TaggedError(
   'SessionSanityCheckFailed'
-)<{cause: unknown; message: string; session: SessionV2}> {}
+)<{cause: unknown; message: string}> {}
 
 function logLoadSessionProgress(text: string): void {
   console.log('🔑 loading session', text)
@@ -288,7 +288,6 @@ export function loadSession(
           new SessionSanityCheckFailed({
             message: 'Session sanity check failed',
             cause: 'Session data is invalid or corrupted',
-            session,
           })
         )
       )

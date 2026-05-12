@@ -13,6 +13,7 @@ import {BtcPayServerWebhookHeader} from '../../btcPayServerWebhookHeader'
 import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {NoContentResponse} from '../../NoContentResponse.brand'
+import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
   BlogsArticlesResponse,
   CreateInvoiceError,
@@ -152,6 +153,7 @@ const DonationsApiGroup = HttpApiGroup.make('Donations')
   .add(GetInvoiceStatusTypeEndpoint)
 
 export const ContentApiSpecification = HttpApi.make('Content API')
+  .middleware(RateLimitingMiddleware)
   .add(CmsContentApiGroup)
   .add(NewsAndAnnouncementsApiGroup)
   .add(VexlProductNotificationsApiGroup)

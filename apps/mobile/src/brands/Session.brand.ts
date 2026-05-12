@@ -17,6 +17,9 @@ export const SessionV2 = Schema.Struct({
   sessionNotificationToken: Schema.optional(VexlNotificationToken),
   privateKey: KeyHolder.PrivateKeyHolder,
   keyPairV2: KeyPairV2,
+  isLiquidityProvider: Schema.optionalWith(Schema.Boolean, {
+    default: () => false,
+  }),
 })
 export type SessionV2 = typeof SessionV2.Type
 

@@ -31,4 +31,5 @@ export const dummySession: SessionV2 = {
   },
   phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733733733'),
   version: 1,
+  isLiquidityProvider: false,
 }

@@ -123,5 +123,6 @@ export const upgradeSession = (
         ...session.sessionCredentials,
         vexlAuthHeader,
       },
+      isLiquidityProvider: false,
     }
   })

@@ -4,7 +4,7 @@ import {
   type InitPhoneVerificationResponse,
   type UnableToSendVerificationSmsError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, type Option} from 'effect'
+import {Effect, Schema, type Option} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {
@@ -17,6 +17,10 @@ import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {showErrorAlert} from '../../ErrorAlert'
 import {reportIssueDialogAtom} from '../../ReportIssue'
+
+class TooManyLoginAttemptsError extends Schema.TaggedError<TooManyLoginAttemptsError>(
+  'TooManyLoginAttemptsError'
+)('TooManyLoginAttemptsError', {}) {}
 
 export const initPhoneVerificationAtom = atom(
   null,
@@ -41,9 +45,7 @@ export const initPhoneVerificationAtom = atom(
       set(updateNumberOfLoginAttemptsActionAtom, phoneNumber)
 
       if (!get(allowLoginAgainAtom))
-        return yield* _(
-          Effect.fail({_tag: 'TooManyLoginAttemptsError' as const})
-        )
+        return yield* _(Effect.fail(new TooManyLoginAttemptsError()))
 
       const toReturn = yield* _(
         api.user.initPhoneVerification({

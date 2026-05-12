@@ -34,7 +34,7 @@ import {type ContactsFilter} from './state/contacts/domain'
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
-  LoginFlow: NavigatorScreenParams<LoginStackParamsList>
+  LoginFlow: NavigatorScreenParams<LoginFlowStackParamsList>
 
   PostLoginFlow: NavigatorScreenParams<PostLoginFlowStackParamsList>
 
@@ -201,10 +201,29 @@ export type LoginStackScreenProps<T extends keyof LoginStackParamsList> =
   >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type LoginFlowStackParamsList = {
+  Intro1: undefined
+  Intro2: undefined
+  PhoneNumber: undefined
+  CountryPicker: undefined
+  VerificationCode: {
+    readonly phoneNumber: E164PhoneNumber
+    readonly initPhoneVerificationResponse: InitPhoneVerificationResponse
+  }
+}
+
+export type LoginFlowStackScreenProps<
+  T extends keyof LoginFlowStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<LoginFlowStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type PostLoginFlowStackParamsList = {
-  ImportContactsExplanationScreen: undefined
-  ImportContacts: undefined
-  FindOffersInVexlClubsScreen: undefined
+  ContactsImport: undefined
+  NotificationSetup: undefined
+  UsageInfo: undefined
 }
 
 export type PostLoginFlowStackScreenProps<

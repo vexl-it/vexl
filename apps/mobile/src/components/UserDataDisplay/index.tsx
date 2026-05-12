@@ -1,8 +1,8 @@
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import React, {type ComponentProps} from 'react'
 import {Image, Stack, Text} from 'tamagui'
-import resolveLocalUri from '../../../../../utils/resolveLocalUri'
-import SvgImage from '../../../../Image'
+import resolveLocalUri from '../../utils/resolveLocalUri'
+import SvgImage from '../Image'
 
 interface Props {
   topText?: string

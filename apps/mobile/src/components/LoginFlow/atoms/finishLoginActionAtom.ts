@@ -11,30 +11,30 @@ import {type VerifyPhoneNumberResponse} from '@vexl-next/rest-api/src/services/u
 import {Effect, Match, Option, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
-import {apiAtom, apiEnv, platform} from '../../../../api'
-import {type Session, type SessionV2} from '../../../../brands/Session.brand'
-import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
-import {createVexlSecretActionAtom} from '../../../../state/notifications/actions/createVexlSecretActionAtom'
-import {generateVexlTokenActionAtom} from '../../../../state/notifications/actions/generateVexlTokenActionAtom'
-import {syncVexlNotificationTokensActionAtom} from '../../../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
-import {vexlNotificationTokenAtom} from '../../../../state/notifications/vexlNotificationTokenAtom'
-import {sessionAtom} from '../../../../state/session'
-import {upgradeSession} from '../../../../state/session/upgradeSession'
+import {apiAtom, apiEnv, platform} from '../../../api'
+import {type Session, type SessionV2} from '../../../brands/Session.brand'
+import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
+import {createVexlSecretActionAtom} from '../../../state/notifications/actions/createVexlSecretActionAtom'
+import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
+import {syncVexlNotificationTokensActionAtom} from '../../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
+import {vexlNotificationTokenAtom} from '../../../state/notifications/vexlNotificationTokenAtom'
+import {sessionAtom} from '../../../state/session'
+import {upgradeSession} from '../../../state/session/upgradeSession'
 import {
   appSource,
   deviceModel,
   osVersion,
   version,
   versionCode,
-} from '../../../../utils/environment'
-import {translationAtom} from '../../../../utils/localization/I18nProvider'
-import {navigationRef} from '../../../../utils/navigation'
-import {getNotificationTokenE} from '../../../../utils/notifications'
-import {isDeveloperAtom} from '../../../../utils/preferences'
-import reportError from '../../../../utils/reportError'
-import {askAreYouSureActionAtom} from '../../../AreYouSureDialog'
-import {showErrorAlert} from '../../../ErrorAlert'
-import {contactsMigratedAtom} from '../../../VersionMigrations/atoms'
+} from '../../../utils/environment'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {navigationRef} from '../../../utils/navigation'
+import {getNotificationTokenE} from '../../../utils/notifications'
+import {isDeveloperAtom} from '../../../utils/preferences'
+import reportError from '../../../utils/reportError'
+import {showErrorAlert} from '../../ErrorAlert'
+import {globalDialogAtom} from '../../GlobalDialog'
+import {contactsMigratedAtom} from '../../VersionMigrations/atoms'
 
 const TARGET_TIME_MILLISECONDS = 3000
 
@@ -79,11 +79,16 @@ const handleUserCreationActionAtom = atom(
       })
 
       const leftToWait = TARGET_TIME_MILLISECONDS - (Date.now() - startedAt)
-      if (leftToWait > 0)
-        setTimeout(() => {
-          set(sessionAtom, O.some(session))
-        }, leftToWait)
-      else set(sessionAtom, O.some(session))
+      if (leftToWait > 0) {
+        yield* Effect.promise(
+          () =>
+            new Promise<void>((resolve) => {
+              setTimeout(resolve, leftToWait)
+            })
+        )
+      }
+
+      set(sessionAtom, O.some(session))
     }).pipe(
       Effect.tapError((e) => {
         reportError('error', new Error('Error creating user at contact MS'), {
@@ -240,31 +245,28 @@ export const finishLoginActionAtom = atom(
       )
 
       if (userExists.exists) {
-        yield* _(
-          set(askAreYouSureActionAtom, {
-            variant: 'info',
-            steps: [
-              {
-                type: 'StepWithText',
-                title: t('loginFlow.userAlreadyExists'),
-                description: t('loginFlow.phoneNumberPreviouslyRegistered'),
-                negativeButtonText: t('common.cancel'),
-                positiveButtonText: t('common.continue'),
-              },
-            ],
-          })
-        ).pipe(
-          Effect.matchEffect({
-            onSuccess: () =>
-              set(handleUserCreationActionAtom, {
-                session,
-              }),
-            onFailure: () =>
-              set(deleteUserAndResetFlowActionAtom, {
-                session,
-              }),
+        const confirmed = yield* _(
+          set(globalDialogAtom, {
+            title: t('loginFlow.userAlreadyExists'),
+            subtitle: t('loginFlow.phoneNumberPreviouslyRegistered'),
+            negativeButtonText: t('common.cancel'),
+            positiveButtonText: t('common.continue'),
           })
         )
+
+        if (confirmed) {
+          yield* _(
+            set(handleUserCreationActionAtom, {
+              session,
+            })
+          )
+        } else {
+          yield* _(
+            set(deleteUserAndResetFlowActionAtom, {
+              session,
+            })
+          )
+        }
       } else {
         yield* _(
           set(handleUserCreationActionAtom, {
@@ -276,6 +278,7 @@ export const finishLoginActionAtom = atom(
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
     }).pipe(
       Effect.provide(FetchHttpClient.layer),
+      Effect.as(true),
       Effect.catchAll((e) => {
         const a: (arg: typeof e) => Effect.Effect<void> = Match.type<
           typeof e
@@ -401,7 +404,8 @@ export const finishLoginActionAtom = atom(
         return a(e).pipe(
           Effect.andThen(() => {
             resetNavigationToIntroScreen()
-          })
+          }),
+          Effect.as(false)
         )
       })
     )

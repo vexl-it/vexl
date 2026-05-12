@@ -14,6 +14,7 @@ import {
   SizableText,
   Stack,
   useVexlTheme,
+  VexlTextGraphic,
   XStack,
   YStack,
 } from '@vexl-next/ui'
@@ -25,6 +26,7 @@ const graphics = [
   {label: 'SellingGraphic', Component: SellingGraphic},
   {label: 'ContactsGraphic', Component: ContactsGraphic},
   {label: 'NotificationsGraphic', Component: NotificationsGraphic},
+  {label: 'VexlTextGraphic', Component: VexlTextGraphic},
   {label: 'FaqWhatIsVexl', Component: FaqWhatIsVexl},
   {label: 'FaqAnonymizationNotice', Component: FaqAnonymizationNotice},
   {label: 'FaqAnonymousCounterpart', Component: FaqAnonymousCounterpart},

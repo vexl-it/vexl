@@ -1,4 +1,6 @@
 import {
+  BuyingGraphic,
+  ContactsGraphic,
   FaqAnonymizationNotice,
   FaqAnonymousCounterpart,
   FaqDesigned,
@@ -7,6 +9,8 @@ import {
   FaqOpenSource,
   FaqStayAnonymous,
   FaqWhatIsVexl,
+  NotificationsGraphic,
+  SellingGraphic,
   SizableText,
   Stack,
   useVexlTheme,
@@ -17,6 +21,10 @@ import React, {useState} from 'react'
 import {ScrollView} from 'react-native'
 
 const graphics = [
+  {label: 'BuyingGraphic', Component: BuyingGraphic},
+  {label: 'SellingGraphic', Component: SellingGraphic},
+  {label: 'ContactsGraphic', Component: ContactsGraphic},
+  {label: 'NotificationsGraphic', Component: NotificationsGraphic},
   {label: 'FaqWhatIsVexl', Component: FaqWhatIsVexl},
   {label: 'FaqAnonymizationNotice', Component: FaqAnonymizationNotice},
   {label: 'FaqAnonymousCounterpart', Component: FaqAnonymousCounterpart},
@@ -42,7 +50,7 @@ export function GraphicsScreen(): React.JSX.Element {
           fontSize="$3"
           color="$foregroundPrimary"
         >
-          FAQ Graphics
+          Graphics
         </SizableText>
         <SizableText
           fontFamily="$body"

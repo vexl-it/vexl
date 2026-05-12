@@ -4,11 +4,14 @@ import {UnableToVerifySmsCodeError} from '@vexl-next/rest-api/src/services/user/
 import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specification'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {createShortLivedTokenForErasingUser} from '@vexl-next/server-utils/src/shortLivedTokenForErasingUserUtils'
-import {Effect, Option} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {loginCodeDummyForAll} from '../../../configs'
 import {checkVerification} from '../../../utils/smsVerificationUtils'
 import {validateAndDecodeVerificationId} from '../utils'
+
+const USED_ERASE_VERIFICATION_ID_PREFIX = 'usedEraseVerificationId:'
 
 export const verifyAndEraseUser = HttpApiBuilder.handler(
   UserApiSpecification,
@@ -22,13 +25,31 @@ export const verifyAndEraseUser = HttpApiBuilder.handler(
       const decodedVerificationId = yield* _(
         validateAndDecodeVerificationId(verificationId)
       )
+      const redis = yield* _(RedisService)
+      const verificationIdWasUsed = yield* _(
+        redis.exists(`${USED_ERASE_VERIFICATION_ID_PREFIX}${verificationId}`),
+        Effect.catchAll(
+          (e) => new UnexpectedServerError({status: 500, cause: e})
+        )
+      )
+
+      if (verificationIdWasUsed) {
+        return yield* _(
+          new UnableToVerifySmsCodeError({
+            status: 400,
+            code: '100104',
+            reason: 'BadCode',
+          })
+        )
+      }
+
       if (Option.isSome(dummyCodeForAll)) {
         if (dummyCodeForAll.value !== req.payload.code)
           return yield* _(
             new UnableToVerifySmsCodeError({
               status: 400,
-              code: '100104' as const,
-              reason: 'BadCode' as const,
+              code: '100104',
+              reason: 'BadCode',
             })
           )
       } else {
@@ -43,6 +64,13 @@ export const verifyAndEraseUser = HttpApiBuilder.handler(
         hashPhoneNumber(decodedVerificationId.phoneNumber),
         Effect.flatMap((hashedPhoneNumber) =>
           createShortLivedTokenForErasingUser(hashedPhoneNumber)
+        ),
+        Effect.tap(() =>
+          redis.set(Schema.Boolean)(
+            `${USED_ERASE_VERIFICATION_ID_PREFIX}${verificationId}`,
+            true,
+            {expiresAt: decodedVerificationId.expiresAt}
+          )
         ),
         Effect.catchAll(
           (e) => new UnexpectedServerError({status: 500, cause: e})

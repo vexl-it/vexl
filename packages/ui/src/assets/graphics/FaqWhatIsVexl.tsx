@@ -1,5 +1,6 @@
 import React, {useId} from 'react'
 import Svg, {Defs, G, LinearGradient, Path, Rect, Stop} from 'react-native-svg'
+import {useResolvedGraphicVariant} from './useResolvedGraphicVariant'
 
 interface Props {
   readonly variant?: 'dark' | 'light'
@@ -18,14 +19,19 @@ function LightContent({uid}: {readonly uid: string}): React.JSX.Element {
 }
 
 export function FaqWhatIsVexl({
-  variant = 'light',
+  variant,
   width = 170,
   height = 220,
 }: Props): React.JSX.Element {
+  const resolvedVariant = useResolvedGraphicVariant(variant)
   const uid = useId()
   return (
     <Svg width={width} height={height} viewBox="0 0 169.828 220" fill="none">
-      {variant === 'dark' ? <DarkContent /> : <LightContent uid={uid} />}
+      {resolvedVariant === 'dark' ? (
+        <DarkContent />
+      ) : (
+        <LightContent uid={uid} />
+      )}
     </Svg>
   )
 }

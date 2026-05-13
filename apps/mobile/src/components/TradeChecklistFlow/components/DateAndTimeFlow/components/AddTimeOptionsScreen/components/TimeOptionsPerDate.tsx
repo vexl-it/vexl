@@ -165,8 +165,8 @@ function TimeSlotChip({
         borderRadius="$3"
         backgroundColor={
           selected
-            ? theme.accentYellowPrimary.val
-            : theme.backgroundTertiary.val
+            ? theme.accentYellowPrimary.get()
+            : theme.backgroundTertiary.get()
         }
         alignItems="center"
         justifyContent="center"

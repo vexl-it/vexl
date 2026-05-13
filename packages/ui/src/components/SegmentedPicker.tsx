@@ -93,7 +93,7 @@ export function SegmentedPicker<T>({
               left: 0,
               bottom: 0,
               borderRadius: 16,
-              backgroundColor: theme.accentYellowSecondary.val,
+              backgroundColor: theme.accentYellowSecondary.get(),
             },
             indicatorStyle,
           ]}

@@ -155,7 +155,7 @@ function TradeCalculator({
           textAlign="right"
           trailingElement={
             isLivePriceType ? (
-              <InfoCircle color={theme.foregroundSecondary.val} size={16} />
+              <InfoCircle color={theme.foregroundSecondary.get()} size={16} />
             ) : undefined
           }
         />

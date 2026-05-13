@@ -77,7 +77,7 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
             borderRadius="$4"
             backgroundColor="$backgroundSecondary"
           >
-            <InfoCircle size={23} color={theme.foregroundSecondary.val} />
+            <InfoCircle size={23} color={theme.foregroundSecondary.get()} />
             <Typography
               flex={1}
               flexShrink={1}
@@ -125,7 +125,7 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
                   t('tradeChecklist.revealIdentity.nicknamePlaceholder')}
               </Typography>
             </Stack>
-            <PencilWriteEdit size={24} color={theme.foregroundPrimary.val} />
+            <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
           </XStack>
         </TouchableOpacity>
         <RowCheckbox

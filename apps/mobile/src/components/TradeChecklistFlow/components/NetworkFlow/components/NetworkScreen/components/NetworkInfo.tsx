@@ -21,7 +21,7 @@ function NetworkInfo(): React.ReactElement {
       p="$5"
     >
       <Stack pt="$0.5">
-        <InfoCircle size={18} color={theme.foregroundSecondary.val} />
+        <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
       </Stack>
       <Typography variant="description" color="$foregroundSecondary" flex={1}>
         {btcNetwork === 'LIGHTING'

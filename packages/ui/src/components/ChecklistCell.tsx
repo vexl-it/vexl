@@ -85,11 +85,11 @@ export function ChecklistCell({
   const iconBoxBg = (() => {
     switch (state) {
       case 'completed':
-        return theme.greenForeground.val
+        return theme.greenForeground.get()
       case 'pending':
-        return theme.navigationBackgroundHighlight.val
+        return theme.navigationBackgroundHighlight.get()
       case 'initial':
-        return theme.backgroundTertiary.val
+        return theme.backgroundTertiary.get()
     }
   })()
 
@@ -98,17 +98,17 @@ export function ChecklistCell({
       case 'completed':
         return (
           <RadiobuttonCircleFilled
-            color={theme.backgroundSecondary.val}
+            color={theme.backgroundSecondary.get()}
             size={24}
           />
         )
       case 'pending':
         return (
-          <ClockTime color={theme.accentHighlightSecondary.val} size={24} />
+          <ClockTime color={theme.accentHighlightSecondary.get()} size={24} />
         )
       case 'initial':
         return Icon ? (
-          <Icon color={theme.foregroundPrimary.val} size={24} />
+          <Icon color={theme.foregroundPrimary.get()} size={24} />
         ) : null
     }
   }
@@ -125,7 +125,7 @@ export function ChecklistCell({
         {subtitle ? <SubtitleText>{subtitle}</SubtitleText> : null}
       </YStack>
       {isPressable ? (
-        <ChevronRight color={theme.foregroundSecondary.val} size={24} />
+        <ChevronRight color={theme.foregroundSecondary.get()} size={24} />
       ) : null}
     </ChecklistCellFrame>
   )

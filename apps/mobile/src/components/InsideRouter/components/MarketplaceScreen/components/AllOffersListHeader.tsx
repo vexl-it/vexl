@@ -63,10 +63,10 @@ function AllOffersListHeader({
               <TotalOffersCount filteredOffersCount={filteredOffersCount} />
               <MarketplaceInlineButton
                 icon={
-                  <Map size={18} color={theme.accentHighlightPrimary.val} />
+                  <Map size={18} color={theme.accentHighlightPrimary.get()} />
                 }
                 label={t('marketplace.showOnMap')}
-                color={theme.accentHighlightPrimary.val}
+                color={theme.accentHighlightPrimary.get()}
                 onPress={handleShowOnMap}
               />
             </XStack>

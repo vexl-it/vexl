@@ -11,7 +11,7 @@ function AnonymizationNotice(props: XStackProps): React.ReactElement {
 
   return (
     <XStack ai="center" jc="center" mb="$2" {...props}>
-      <Image stroke={theme.foregroundTertiary.val} source={eyeSvg} />
+      <Image stroke={theme.foregroundTertiary.get()} source={eyeSvg} />
       <Typography variant="description" color="$foregroundTertiary" ml="$4">
         {t('tradeChecklist.notVisibleToAnyoneNotice')}
       </Typography>

@@ -127,12 +127,12 @@ function PremiumAndExpiration({
         </XStack>
         {expanded ? (
           <ChevronUp
-            color={theme.accentHighlightSecondary.val}
+            color={theme.accentHighlightSecondary.get()}
             size={getTokens().size.$7.val}
           />
         ) : (
           <ChevronDown
-            color={theme.accentHighlightSecondary.val}
+            color={theme.accentHighlightSecondary.get()}
             size={getTokens().size.$7.val}
           />
         )}

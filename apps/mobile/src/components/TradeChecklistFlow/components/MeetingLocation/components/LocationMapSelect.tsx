@@ -110,7 +110,7 @@ export default function LocationMapSelect({
               >
                 <ChevronLeft
                   size={24}
-                  color={theme.accentHighlightSecondary.val}
+                  color={theme.accentHighlightSecondary.get()}
                 />
               </IconButton>
               <Stack f={1} ai="center">
@@ -135,7 +135,10 @@ export default function LocationMapSelect({
               pointerEvents="none"
             >
               <LinearGradient
-                colors={[theme.backgroundPrimary.val, theme.gradientHelper.val]}
+                colors={[
+                  theme.backgroundPrimary.get(),
+                  theme.gradientHelper.get(),
+                ]}
                 style={{flex: 1}}
               />
             </Stack>

@@ -18,6 +18,7 @@ Redesign guidance:
 - Reuse components from `@vexl-next/ui` wherever possible before creating ad-hoc mobile-only UI. Prefer `@vexl-next/ui/src/components/Typography.tsx` for text styling instead of reintroducing old text conventions.
 - Keep visual styling aligned with the new UI package.
 - Use colors from `@vexl-next/ui/src/config/themes.ts`.
+- When a component needs a concrete color string for icons, SVG props, React Native props, gradients, or other non-token props, read it with `const theme = useTheme()` and call `.get()` (e.g. `theme.foregroundPrimary.get()`). Do not use `.val` for theme colors and do not read element colors from `getTokens().color`.
 - Use spacing, padding, gaps, border radiuses, and similar sizing values from `@vexl-next/ui/src/config/tokens.ts`.
 - On Tamagui components, prefer Tamagui shorthand props that resolve to the shared tokens.
 - On non-Tamagui components, read from the shared theme/tokens objects instead of hardcoding values.

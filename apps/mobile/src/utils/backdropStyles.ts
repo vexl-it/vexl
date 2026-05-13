@@ -4,6 +4,7 @@ import {useTheme} from 'tamagui'
 
 export function useBackgroundStyle(): ViewStyle {
   const theme = useTheme()
+  const backgroundPrimary = theme.backgroundPrimary.get()
 
   return useMemo(
     () => ({
@@ -12,9 +13,9 @@ export function useBackgroundStyle(): ViewStyle {
       left: 0,
       bottom: 0,
       right: 0,
-      backgroundColor: theme.backgroundPrimary.val,
+      backgroundColor: backgroundPrimary,
       opacity: 0.55,
     }),
-    [theme.backgroundPrimary.val]
+    [backgroundPrimary]
   )
 }

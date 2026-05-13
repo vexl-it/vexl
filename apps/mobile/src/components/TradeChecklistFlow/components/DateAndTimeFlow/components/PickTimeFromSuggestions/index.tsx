@@ -51,10 +51,10 @@ function TimeSuggestionCard({
   const item = useAtomValue(itemAtom)
   const theme = useTheme()
   const itemColor = item.outdated
-    ? theme.foregroundTertiary.val
+    ? theme.foregroundTertiary.get()
     : item.selected
-      ? theme.accentHighlightPrimary.val
-      : theme.foregroundPrimary.val
+      ? theme.accentHighlightPrimary.get()
+      : theme.foregroundPrimary.get()
 
   return (
     <TouchableOpacity
@@ -69,8 +69,8 @@ function TimeSuggestionCard({
         gap="$4"
         backgroundColor={
           item.selected
-            ? theme.accentYellowSecondary.val
-            : theme.backgroundSecondary.val
+            ? theme.accentYellowSecondary.get()
+            : theme.backgroundSecondary.get()
         }
         borderRadius="$5"
         paddingHorizontal="$5"
@@ -178,7 +178,7 @@ function PickTimeFromSuggestions({
       <YStack flex={1} gap="$7">
         <Typography
           variant="titlesSmall"
-          color={theme.foregroundPrimary.val}
+          color={theme.foregroundPrimary.get()}
           textAlign="center"
           marginTop="$4"
         >

@@ -58,7 +58,7 @@ function ResultItem({
     >
       <XStack ai="flex-start" gap="$4" pt="$5">
         <Stack pt="$1">
-          <PinGeolocation size={24} color={theme.foregroundPrimary.val} />
+          <PinGeolocation size={24} color={theme.foregroundPrimary.get()} />
         </Stack>
         <YStack
           f={1}
@@ -122,7 +122,10 @@ function SearchScreenContent({
             backgroundColor="$accentYellowSecondary"
             onPress={navigation.goBack}
           >
-            <ChevronLeft size={24} color={theme.accentHighlightSecondary.val} />
+            <ChevronLeft
+              size={24}
+              color={theme.accentHighlightSecondary.get()}
+            />
           </IconButton>
           <Stack f={1} ai="center">
             <Typography

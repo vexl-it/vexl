@@ -91,7 +91,10 @@ function ChatInfoJsonDebugContent({
               >
                 <RNText
                   selectable
-                  style={[jsonTextStyle, {color: theme.foregroundPrimary.val}]}
+                  style={[
+                    jsonTextStyle,
+                    {color: theme.foregroundPrimary.get()},
+                  ]}
                 >
                   {chatJson}
                 </RNText>

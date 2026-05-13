@@ -85,11 +85,11 @@ function DateSuggestionCard({
   const theme = useTheme()
   const {label, weekday} = getDateLabels(item.data.date)
   const primaryTextColor = item.outdated
-    ? theme.foregroundTertiary.val
-    : theme.foregroundPrimary.val
+    ? theme.foregroundTertiary.get()
+    : theme.foregroundPrimary.get()
   const secondaryTextColor = item.outdated
-    ? theme.foregroundTertiary.val
-    : theme.foregroundSecondary.val
+    ? theme.foregroundTertiary.get()
+    : theme.foregroundSecondary.get()
 
   return (
     <TouchableOpacity
@@ -102,7 +102,7 @@ function DateSuggestionCard({
       <XStack
         alignItems="center"
         justifyContent="space-between"
-        backgroundColor={theme.backgroundSecondary.val}
+        backgroundColor={theme.backgroundSecondary.get()}
         borderRadius="$5"
         paddingHorizontal="$5"
         paddingVertical="$5"
@@ -129,8 +129,8 @@ function DateSuggestionCard({
               variant="description"
               color={
                 item.outdated
-                  ? theme.foregroundTertiary.val
-                  : theme.accentHighlightSecondary.val
+                  ? theme.foregroundTertiary.get()
+                  : theme.accentHighlightSecondary.get()
               }
               textAlign="right"
               numberOfLines={2}

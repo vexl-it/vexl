@@ -23,14 +23,14 @@ function PriceTypeIndicator({
   const theme = useTheme()
   const tradePriceType = useAtomValue(tradePriceTypeAtom)
   const iconColor = displayInGrayColor
-    ? theme.foregroundSecondary.val
+    ? theme.foregroundSecondary.get()
     : !tradePriceType || tradePriceType === 'live'
       ? neutralTextColor
-        ? theme.accentHighlightSecondary.val
-        : theme.accentYellowPrimary.val
+        ? theme.accentHighlightSecondary.get()
+        : theme.accentYellowPrimary.get()
       : tradePriceType === 'frozen'
-        ? theme.pinkForeground.val
-        : theme.greenForeground.val
+        ? theme.pinkForeground.get()
+        : theme.greenForeground.get()
   const textColor = displayInGrayColor
     ? '$foregroundSecondary'
     : neutralTextColor

@@ -370,10 +370,10 @@ function TextMessage({
   const isMine = message.state !== 'received'
   const messageTextColor = isMine
     ? tokens.color.black100.val
-    : theme.foregroundPrimary.val
+    : theme.foregroundPrimary.get()
   const messageBackgroundColor = isMine
-    ? theme.accentYellowPrimary.val
-    : theme.backgroundTertiary.val
+    ? theme.accentYellowPrimary.get()
+    : theme.backgroundTertiary.get()
   const repliedToMessage =
     'repliedTo' in message.message ? message.message.repliedTo : undefined
   const repliedMessageAuthorName =

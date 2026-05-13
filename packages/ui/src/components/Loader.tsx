@@ -20,7 +20,7 @@ export function Loader({
   color,
 }: LoaderProps): React.JSX.Element {
   const theme = useTheme()
-  const resolvedColor = color ?? theme.accentYellowPrimary.val
+  const resolvedColor = color ?? theme.accentYellowPrimary.get()
 
   if (Platform.OS === 'android') {
     return <ActivityIndicator size={sizeMap[size]} color={resolvedColor} />

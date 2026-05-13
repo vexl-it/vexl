@@ -106,7 +106,7 @@ export function NotificationCard({
               <SubtitleText>{time}</SubtitleText>
               <Circle
                 size="$2"
-                backgroundColor={theme.foregroundSecondary.val}
+                backgroundColor={theme.foregroundSecondary.get()}
               />
               <SubtitleText>{category}</SubtitleText>
             </XStack>

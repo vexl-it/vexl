@@ -84,7 +84,7 @@ function ActionIcon({
   return (
     <ActionButton onPress={action.onPress}>
       <Icon
-        color={theme.foregroundPrimary.val}
+        color={theme.foregroundPrimary.get()}
         size={getTokens().size.$8.val}
       />
       {action.badge ? (
@@ -102,6 +102,7 @@ export function AnimatedNavigationBar({
   scrollY,
 }: AnimatedNavigationBarProps): React.JSX.Element {
   const theme = useTheme()
+  const backgroundSecondary = theme.backgroundSecondary.get()
   const insets = useSafeAreaInsets()
   const setNavBarHeight = useSetAtom(navBarHeightAtom)
 
@@ -116,7 +117,7 @@ export function AnimatedNavigationBar({
     const backgroundColor = interpolateColor(
       Math.min(scrollY.value, SCROLL_THRESHOLD),
       [0, SCROLL_THRESHOLD],
-      ['transparent', theme.backgroundSecondary.val]
+      ['transparent', backgroundSecondary]
     )
     return {backgroundColor}
   })

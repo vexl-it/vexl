@@ -26,7 +26,7 @@ function BannerBackButton(): React.ReactElement {
         )
       }}
     >
-      <ChevronLeft size={24} color={theme.foregroundSecondary.val} />
+      <ChevronLeft size={24} color={theme.foregroundSecondary.get()} />
     </Stack>
   ) : (
     <Stack width={24} />

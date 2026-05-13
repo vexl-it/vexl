@@ -24,7 +24,7 @@ function BannerCloseButton({
       borderRadius="$4"
       onPress={() => {}}
     >
-      <XmarkCancelClose size={24} color={theme.foregroundSecondary.val} />
+      <XmarkCancelClose size={24} color={theme.foregroundSecondary.get()} />
     </Stack>
   ) : (
     <Stack width={24} />

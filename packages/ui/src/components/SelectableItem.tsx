@@ -76,7 +76,7 @@ export function SelectableItem({
       </YStack>
       {selected ? (
         <RadiobuttonCircleFilled
-          color={theme.accentHighlightSecondary.val}
+          color={theme.accentHighlightSecondary.get()}
           size={24}
         />
       ) : null}

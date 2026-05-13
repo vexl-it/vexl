@@ -222,10 +222,10 @@ export function BuySellRangeSlider({
         : 'pink'
   const infoColor =
     bannerVariant === 'gray'
-      ? theme.foregroundSecondary.val
+      ? theme.foregroundSecondary.get()
       : bannerVariant === 'yellow'
-        ? theme.accentHighlightSecondary.val
-        : theme.pinkForeground.val
+        ? theme.accentHighlightSecondary.get()
+        : theme.pinkForeground.get()
 
   return (
     <YStack gap="$3">

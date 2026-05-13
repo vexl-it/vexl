@@ -276,13 +276,13 @@ function TextMessageActionMenu({
               style={style.blur}
               blurType="light"
               blurAmount={12}
-              reducedTransparencyFallbackColor={theme.backgroundPrimary.val}
+              reducedTransparencyFallbackColor={theme.backgroundPrimary.get()}
             />
             <View
               style={[
                 style.overlayTint,
                 {
-                  backgroundColor: theme.backgroundPrimary.val,
+                  backgroundColor: theme.backgroundPrimary.get(),
                   opacity: 0.16,
                 },
               ]}
@@ -319,12 +319,12 @@ function TextMessageActionMenu({
             backgroundColor="$backgroundOnBar"
           >
             <MessageActionItem
-              icon={<Reply color={theme.foregroundPrimary.val} size={20} />}
+              icon={<Reply color={theme.foregroundPrimary.get()} size={20} />}
               label={replyLabel}
               onPress={onReply}
             />
             <MessageActionItem
-              icon={<Copy color={theme.foregroundPrimary.val} size={20} />}
+              icon={<Copy color={theme.foregroundPrimary.get()} size={20} />}
               label={copyLabel}
               onPress={onCopy}
             />

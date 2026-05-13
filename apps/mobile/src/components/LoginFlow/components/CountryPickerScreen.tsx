@@ -184,7 +184,7 @@ export default function CountryPickerScreen({
         paddingHorizontal="$5"
       >
         <SearchMagnifyGlass
-          color={theme.foregroundPrimary.val}
+          color={theme.foregroundPrimary.get()}
           size={tokens.size[7].val}
         />
         <Input
@@ -198,8 +198,8 @@ export default function CountryPickerScreen({
           onChangeText={setSearchQuery}
           padding={0}
           placeholder={t('common.search')}
-          placeholderTextColor={theme.foregroundSecondary.val}
-          selectionColor={theme.accentYellowPrimary.val}
+          placeholderTextColor={theme.foregroundSecondary.get()}
+          selectionColor={theme.accentYellowPrimary.get()}
           value={searchQuery}
         />
       </XStack>

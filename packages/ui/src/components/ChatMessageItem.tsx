@@ -105,13 +105,13 @@ export function ChatMessageItem({
   const iconColor = (() => {
     switch (variant) {
       case 'highlighted':
-        return theme.accentHighlightSecondary.val
+        return theme.accentHighlightSecondary.get()
       case 'destructive':
-        return theme.redForeground.val
+        return theme.redForeground.get()
       case 'success':
-        return theme.greenForeground.val
+        return theme.greenForeground.get()
       case 'default':
-        return theme.foregroundSecondary.val
+        return theme.foregroundSecondary.get()
     }
   })()
 

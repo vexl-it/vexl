@@ -38,7 +38,7 @@ function LocationRow({
         justifyContent="center"
         pr="$1"
       >
-        <TrashBin size={24} color={theme.foregroundPrimary.val} />
+        <TrashBin size={24} color={theme.foregroundPrimary.get()} />
       </XStack>
     </XStack>
   )

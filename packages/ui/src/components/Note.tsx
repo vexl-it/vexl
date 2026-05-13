@@ -92,7 +92,7 @@ export function Note({
   onPress,
 }: NoteProps): React.JSX.Element {
   const theme = useTheme()
-  const iconColor = theme.foregroundSecondary.val
+  const iconColor = theme.foregroundSecondary.get()
   const isPressable = !!onPress
 
   return (

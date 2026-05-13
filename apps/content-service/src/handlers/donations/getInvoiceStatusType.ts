@@ -40,10 +40,11 @@ export const getInvoiceStatusTypeHandler = HttpApiBuilder.handler(
           storeId: req.urlParams.storeId,
         })
       )
+      const fetchedStatusType = statusToStatusTypeMap[invoice.status]
 
       return {
         invoiceId: req.urlParams.invoiceId,
-        statusType: statusToStatusTypeMap[invoice.status],
+        statusType: fetchedStatusType,
       } satisfies GetInvoiceStatusTypeResponse
     }).pipe(Effect.withSpan('getInvoiceStatusTypeHandler'), makeEndpointEffect)
 )

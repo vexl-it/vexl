@@ -69,7 +69,7 @@ const DonationsApiGroupLive = HttpApiBuilder.group(
     h
       .handle('createInvoice', createInvoiceHandler)
       .handle('getInvoice', getInvoiceHandler)
-      .handle('updateInvoiceStateWebhook', updateInvoiceStateWebhook)
+      .handleRaw('updateInvoiceStateWebhook', updateInvoiceStateWebhook)
       .handle('getInvoiceStatusType', getInvoiceStatusTypeHandler)
 )
 

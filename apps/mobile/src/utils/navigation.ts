@@ -8,7 +8,7 @@ import {type NavigationState} from 'react-native-tab-view'
 import {type RootStackParamsList} from '../navigationTypes'
 import reportError from './reportError'
 
-export const navigationRef = createNavigationContainerRef()
+export const navigationRef = createNavigationContainerRef<RootStackParamsList>()
 
 export function isPassedImportContactsOutsideReact(): boolean {
   const navigationState = navigationRef.getState()

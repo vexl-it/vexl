@@ -1,13 +1,14 @@
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {
+  InvoiceId,
+  InvoiceStatus,
+  PaymentLink,
   statusTypeToStatusMap,
-  type InvoiceId,
-  type InvoiceStatus,
-  type PaymentLink,
-  type StoreId,
+  StoreId,
+  type InvoicePaymentMethod,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {Array, Effect, pipe, Schema} from 'effect'
-import {atom} from 'jotai'
+import {atom, type WritableAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import {apiAtom} from '../../../api'
 import {
@@ -15,19 +16,24 @@ import {
   singleDonationAtom,
 } from '../../../state/donations/atom'
 import {type MyDonation} from '../../../state/donations/domain'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
+import {globalDialogAtom} from '../../GlobalDialog'
+import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {
   donationAmountAtom,
+  donationPaymentMethodAtom,
   MAX_DONATION_AMOUNT,
   selectedPredefinedDonationValueAtom,
 } from './stateAtoms'
 
 export const dummyDonation: MyDonation = {
-  invoiceId: 'dummy-invoice-id' as InvoiceId,
-  storeId: 'dummy-store-id' as StoreId,
-  status: 'New' as InvoiceStatus,
+  invoiceId: Schema.decodeSync(InvoiceId)('dummy-invoice-id'),
+  storeId: Schema.decodeSync(StoreId)('dummy-store-id'),
+  status: Schema.decodeSync(InvoiceStatus)('New'),
   paymentMethod: 'BTC-LN',
   exchangeRate: '1',
-  paymentLink: 'https://dummy-payment-link.com' as PaymentLink,
+  paymentLink: Schema.decodeSync(PaymentLink)('https://dummy-payment-link.com'),
   fiatAmount: '0',
   btcAmount: '0',
   currency: 'EUR',
@@ -43,13 +49,112 @@ export const paymentMethodAndAmountConfirmButtonDisabledAtom = atom<boolean>(
     const selectedPredefinedDonationValue = get(
       selectedPredefinedDonationValueAtom
     )
+    const amount = donationAmount
+      ? Number(donationAmount)
+      : selectedPredefinedDonationValue
+        ? Number(selectedPredefinedDonationValue)
+        : 0
 
-    return (
-      (!donationAmount && !selectedPredefinedDonationValue) ||
-      Number(donationAmount) === 0 ||
-      Number(donationAmount) > MAX_DONATION_AMOUNT
-    )
+    return Number.isNaN(amount) || amount <= 0 || amount > MAX_DONATION_AMOUNT
   }
+)
+
+export interface CreateDonationInvoiceParams {
+  readonly amount: number
+  readonly paymentMethod: InvoicePaymentMethod
+}
+
+export const createDonationInvoiceRequestActionAtom = atom(
+  null,
+  (get, set, {amount, paymentMethod}: CreateDonationInvoiceParams) => {
+    const api = get(apiAtom).content
+
+    return Effect.gen(function* (_) {
+      set(loadingOverlayDisplayedAtom, true)
+
+      const resp = yield* _(
+        api.createInvoice({
+          amount,
+          currency: 'EUR',
+          paymentMethod,
+        }),
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(loadingOverlayDisplayedAtom, false)
+          })
+        )
+      )
+
+      set(myDonationsAtom, (prev) => [
+        ...prev,
+        {
+          invoiceId: resp.invoiceId,
+          storeId: resp.storeId,
+          status: resp.status,
+          paymentMethod: resp.paymentMethod,
+          fiatAmount: resp.fiatAmount,
+          btcAmount: resp.btcAmount,
+          currency: resp.currency,
+          exchangeRate: resp.exchangeRate,
+          createdTime: resp.createdTime,
+          expirationTime: resp.expirationTime,
+          paymentLink: resp.paymentLink,
+        },
+      ])
+
+      set(
+        lastDisplayOfDonationPromptTimestampAtom,
+        Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
+      )
+
+      return resp.invoiceId
+    })
+  }
+)
+
+export const createDonationInvoiceWithUiFeedbackActionAtom: WritableAtom<
+  null,
+  [params: CreateDonationInvoiceParams],
+  Effect.Effect<InvoiceId | undefined>
+> = atom(null, (get, set, params: CreateDonationInvoiceParams) => {
+  const {t} = get(translationAtom)
+
+  return set(createDonationInvoiceRequestActionAtom, params).pipe(
+    Effect.catchAll(() =>
+      Effect.gen(function* (_) {
+        const shouldRetry = yield* _(
+          set(globalDialogAtom, {
+            title: t('donations.createInvoiceError.title'),
+            subtitle: t('donations.createInvoiceError.description'),
+            negativeButtonText: t('common.close'),
+            positiveButtonText: t('common.tryAgain'),
+          })
+        )
+
+        if (shouldRetry)
+          return yield* _(
+            set(createDonationInvoiceWithUiFeedbackActionAtom, params)
+          )
+
+        return undefined
+      })
+    )
+  )
+})
+
+export const createDonationInvoiceActionAtom: WritableAtom<
+  null,
+  [],
+  Effect.Effect<InvoiceId | undefined>
+> = atom(null, (get, set) =>
+  set(createDonationInvoiceWithUiFeedbackActionAtom, {
+    amount: get(donationAmountAtom)
+      ? Number(get(donationAmountAtom))
+      : get(selectedPredefinedDonationValueAtom)
+        ? Number(get(selectedPredefinedDonationValueAtom))
+        : 0,
+    paymentMethod: get(donationPaymentMethodAtom),
+  })
 )
 
 const DONATION_STATUSES_TO_UPDATE: InvoiceStatus[] = [

@@ -1,6 +1,10 @@
-import {HttpApiBuilder} from '@effect/platform/index'
-import {type BtcPayWebhookShaSignature} from '@vexl-next/rest-api/src/btcPayServerWebhookHeader'
+import type {HttpServerRequest} from '@effect/platform/index'
+import type {
+  BtcPayServerWebhookHeader,
+  BtcPayWebhookShaSignature,
+} from '@vexl-next/rest-api/src/btcPayServerWebhookHeader'
 
+import type {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {
   UnauthorizedError,
   UnexpectedServerError,
@@ -9,7 +13,6 @@ import {
   UpdateInvoiceStatusWebhookRequest,
   UpdateInvoiceWebhookError,
 } from '@vexl-next/rest-api/src/services/content/contracts'
-import {ContentApiSpecification} from '@vexl-next/rest-api/src/services/content/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Effect, Option, Schema} from 'effect'
 import * as crypto from 'node:crypto'
@@ -19,11 +22,11 @@ import {UpdateInvoiceStateWebhookService} from './UpdateInvoiceStateWebhookServi
 function isBtcPayServerSignatureValid({
   btcPayServerWebhookSecret,
   btcPayWebhookSignature,
-  body,
+  rawBody,
 }: {
   btcPayServerWebhookSecret: string
   btcPayWebhookSignature: BtcPayWebhookShaSignature
-  body: unknown
+  rawBody: string
 }): Effect.Effect<boolean, UnexpectedServerError> {
   return Effect.sync(() => {
     const checksum = Buffer.from(btcPayWebhookSignature)
@@ -31,7 +34,7 @@ function isBtcPayServerSignatureValid({
       `sha256=` +
       crypto
         .createHmac('sha256', btcPayServerWebhookSecret)
-        .update(JSON.stringify(body, null, 2))
+        .update(rawBody)
         .digest('hex')
     const digest = Buffer.from(expectedBtcPayServerSignature)
 
@@ -40,59 +43,96 @@ function isBtcPayServerSignatureValid({
       crypto.timingSafeEqual(digest, checksum)
     )
   }).pipe(
-    Effect.catchAllDefect(
-      (e) =>
+    Effect.catchAllDefect((e) =>
+      Effect.fail(
         new UnexpectedServerError({
           cause: e,
           message: 'Failed to check the signature in BTC Pay server header',
         })
+      )
     )
   )
 }
 
-export const updateInvoiceStateWebhook = HttpApiBuilder.handler(
-  ContentApiSpecification,
-  'Donations',
-  'updateInvoiceStateWebhook',
-  ({headers, payload: body}) =>
-    Effect.gen(function* (_) {
-      const updateInvoiceStateWebhookService = yield* _(
-        UpdateInvoiceStateWebhookService
+export const updateInvoiceStateWebhook = ({
+  headers,
+  request,
+}: {
+  headers: BtcPayServerWebhookHeader
+  request: HttpServerRequest.HttpServerRequest
+}): Effect.Effect<
+  {},
+  | NotFoundError
+  | UnauthorizedError
+  | UpdateInvoiceWebhookError
+  | UnexpectedServerError,
+  UpdateInvoiceStateWebhookService
+> =>
+  Effect.gen(function* (_) {
+    const rawBody = yield* _(
+      request.text,
+      Effect.mapError(
+        (e) =>
+          new UpdateInvoiceWebhookError({
+            cause: e,
+            status: 400,
+            message: 'Invalid webhook body error',
+          })
       )
-      const btcPayServerWebhookSecret = yield* _(
-        btcPayServerWebhookSecretConfig
-      )
+    )
+    const body: unknown = yield* _(
+      Effect.try({
+        try: () => JSON.parse(rawBody),
+        catch: (e) =>
+          new UpdateInvoiceWebhookError({
+            cause: e,
+            status: 400,
+            message: 'Invalid webhook JSON error',
+          }),
+      })
+    )
 
-      const {btcPayWebhookSignatureOrNone} = headers
+    const updateInvoiceStateWebhookService = yield* _(
+      UpdateInvoiceStateWebhookService
+    )
+    const btcPayServerWebhookSecret = yield* _(btcPayServerWebhookSecretConfig)
 
-      if (Option.isNone(btcPayWebhookSignatureOrNone))
-        return Effect.fail(
+    const {btcPayWebhookSignatureOrNone} = headers
+
+    if (Option.isNone(btcPayWebhookSignatureOrNone)) {
+      return yield* _(
+        Effect.fail(
           new UnauthorizedError({
             status: 401,
             message: 'Secret received from btc pay server is missing',
             cause: new Error('Secret received from btc pay server is missing'),
           })
         )
+      )
+    }
 
-      yield* _(
-        isBtcPayServerSignatureValid({
-          body,
-          btcPayServerWebhookSecret,
-          btcPayWebhookSignature: btcPayWebhookSignatureOrNone.value,
-        }),
-        Effect.filterOrFail(
-          (valid): valid is true => valid,
-          () =>
-            new UnauthorizedError({
-              status: 401,
-              message: 'Invalid secret received from btc pay server',
-              cause: new Error('Invalid secret received from btc pay server'),
-            })
+    const signatureValid = yield* _(
+      isBtcPayServerSignatureValid({
+        rawBody,
+        btcPayServerWebhookSecret,
+        btcPayWebhookSignature: btcPayWebhookSignatureOrNone.value,
+      })
+    )
+
+    if (!signatureValid) {
+      return yield* _(
+        Effect.fail(
+          new UnauthorizedError({
+            status: 401,
+            message: 'Invalid secret received from btc pay server',
+            cause: new Error('Invalid secret received from btc pay server'),
+          })
         )
       )
+    }
 
-      const webhookPayload = yield* _(
-        Schema.decodeUnknown(UpdateInvoiceStatusWebhookRequest)(body),
+    const webhookPayload = yield* _(
+      Schema.decodeUnknown(UpdateInvoiceStatusWebhookRequest)(body).pipe(
         Effect.mapError(
           (e) =>
             new UpdateInvoiceWebhookError({
@@ -102,14 +142,14 @@ export const updateInvoiceStateWebhook = HttpApiBuilder.handler(
             })
         )
       )
+    )
 
-      yield* _(
-        updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
-          invoiceId: webhookPayload.invoiceId,
-          type: webhookPayload.type,
-        })
-      )
+    yield* _(
+      updateInvoiceStateWebhookService.createOrUpdateInvoiceState({
+        invoiceId: webhookPayload.invoiceId,
+        type: webhookPayload.type,
+      })
+    )
 
-      return {}
-    }).pipe(Effect.withSpan('updateInvoiceStateWebhook'), makeEndpointEffect)
-)
+    return {}
+  }).pipe(Effect.withSpan('updateInvoiceStateWebhook'), makeEndpointEffect)

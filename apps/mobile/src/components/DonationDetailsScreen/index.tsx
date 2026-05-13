@@ -1,11 +1,9 @@
-import Clipboard from '@react-native-clipboard/clipboard'
+import {useScreenFooterHeight} from '@vexl-next/ui'
 import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useEffect, useMemo} from 'react'
-import {TouchableOpacity} from 'react-native'
-import {getTokens, ScrollView, Stack, Text, XStack} from 'tamagui'
-import {type RootStackScreenProps} from '../../navigationTypes'
+import {type DonationsFlowScreenProps} from '../../navigationTypes'
 import {SATOSHIS_IN_BTC} from '../../state/currentBtcPriceAtoms'
 import {singleDonationAtom} from '../../state/donations/atom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -13,20 +11,19 @@ import {
   localizedDecimalNumberActionAtom,
   localizedPriceActionAtom,
 } from '../../utils/localization/localizedNumbersAtoms'
-import BtcInvoiceStatus from '../BtcInvoiceStatus'
-import Button from '../Button'
 import {
   dummyDonation,
   updateSingleInvoiceStatusTypeRepeatingActionAtom,
 } from '../DonationPrompt/atoms'
-import Image from '../Image'
-import copySvg from '../images/copySvg'
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import {toastNotificationAtom} from '../ToastNotification/atom'
-import {showClaimConfirmationDialogActionAtom} from './atoms'
+import {donationTitle, timestampToDateTime} from '../DonationsFlow/utils'
+import {type DonationSummaryData} from './DonationDetailsSummary'
+import {ExpiredDonationDetails} from './ExpiredDonationDetails'
+import {InvalidDonationDetails} from './InvalidDonationDetails'
+import {NewDonationDetails} from './NewDonationDetails'
+import {OtherDonationDetails} from './OtherDonationDetails'
+import {SettledDonationDetails} from './SettledDonationDetails'
 
-type Props = RootStackScreenProps<'DonationDetails'>
+type Props = DonationsFlowScreenProps<'DonationDetails'>
 
 function DonationDetailsScreen({
   route: {
@@ -34,6 +31,8 @@ function DonationDetailsScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const {footerHeightAtom} = useScreenFooterHeight()
+  const footerHeight = useAtomValue(footerHeightAtom)
   const mySingleDonation = useAtomValue(
     useMemo(() => singleDonationAtom(invoiceId), [invoiceId])
   )
@@ -50,21 +49,30 @@ function DonationDetailsScreen({
     number: mySingleDonation?.exchangeRate ?? 0,
     currency: mySingleDonation?.currency,
   })
-  const setToastNotification = useSetAtom(toastNotificationAtom)
-  const showClaimConfirmationDialog = useSetAtom(
-    showClaimConfirmationDialogActionAtom
-  )
   const updateSingleInvoiceStatusTypeRepeating = useSetAtom(
     updateSingleInvoiceStatusTypeRepeatingActionAtom
   )
-
-  const showClaimConfirmationButton = ![
-    'New',
-    'Expired',
-    'Invalid',
-    'Processing',
-  ].includes(mySingleDonation?.status ?? '')
-
+  const status = mySingleDonation?.status ?? dummyDonation.status
+  const paymentMethod =
+    mySingleDonation?.paymentMethod ?? dummyDonation.paymentMethod
+  const paymentLink = mySingleDonation?.paymentLink ?? dummyDonation.paymentLink
+  const isLightning = paymentMethod !== 'BTC-CHAIN'
+  const localizedSatsAmount = `${localizedTotalSats} sats`
+  const title = donationTitle({paymentMethod, t})
+  const invoiceIdValue = mySingleDonation?.invoiceId ?? invoiceId
+  const createdAt = timestampToDateTime(
+    mySingleDonation?.createdTime ?? 0
+  ).toLocaleString(DateTime.DATETIME_MED)
+  const expiredAt = timestampToDateTime(
+    mySingleDonation?.expirationTime ?? 0
+  ).toLocaleString(DateTime.DATETIME_MED)
+  const summary: DonationSummaryData = {
+    localizedSatsAmount,
+    localizedFiatAmount: `${localizedFiatAmount}`,
+    localizedExchangeRate: `${localizedExchangeRate}`,
+    invoiceId: invoiceIdValue,
+    createdAt,
+  }
   useEffect(() => {
     const fiber = Effect.runFork(
       updateSingleInvoiceStatusTypeRepeating({invoiceId, storeId})
@@ -75,145 +83,46 @@ function DonationDetailsScreen({
     }
   }, [invoiceId, storeId, updateSingleInvoiceStatusTypeRepeating])
 
-  return (
-    <Screen customHorizontalPadding={getTokens().space[2].val}>
-      <ScreenTitle
-        allowMultipleLines
-        mb="$5"
-        text={t('donations.donationDetails')}
-        withBottomBorder
-        withBackButton
-      />
-      <ScrollView f={1} showsVerticalScrollIndicator={false}>
-        <Stack gap="$4">
-          <Stack gap="$2">
-            <XStack ai="center" jc="space-between">
-              <Text col="$white" fos={14} ff="$body500">
-                {t('donationPrompt.totalPrice')}
-              </Text>
-              <Text col="$white" fos={14} ff="$body500">
-                {`${localizedTotalSats} sats`}
-              </Text>
-            </XStack>
-            <XStack ai="center" jc="space-between">
-              <Text col="$white" fos={14} ff="$body500">
-                {t('donationPrompt.totalFiat')}
-              </Text>
-              <Text col="$white" fos={14} ff="$body500">
-                {localizedFiatAmount}
-              </Text>
-            </XStack>
-            <XStack ai="center" jc="space-between">
-              <Text col="$white" fos={14} ff="$body500">
-                {t('donationPrompt.exchangeRate')}
-              </Text>
-              <Text col="$white" fos={14} ff="$body500">
-                {`1 BTC = ${localizedExchangeRate}`}
-              </Text>
-            </XStack>
-            <XStack ai="center" jc="space-between">
-              <Text col="$white" fos={14} ff="$body500">
-                {t('donationPrompt.amountDue')}
-              </Text>
-              <Text col="$white" fos={14} ff="$body500">
-                {`${localizedTotalSats} sats`}
-              </Text>
-            </XStack>
-            <XStack ai="center" jc="space-between">
-              <Text col="$white" fos={14} ff="$body500">
-                {t('donationConfirmation.invoiceId')}
-              </Text>
-              <XStack ai="center" gap="$2">
-                <TouchableOpacity
-                  onPress={() => {
-                    Clipboard.setString(mySingleDonation?.invoiceId ?? '')
-                    setToastNotification(t('common.copied'))
-                  }}
-                >
-                  <Image source={copySvg} fill={getTokens().color.white.val} />
-                </TouchableOpacity>
-                <Text col="$white" fos={14} ff="$body500">
-                  {mySingleDonation?.invoiceId ?? 'N/A'}
-                </Text>
-              </XStack>
-            </XStack>
-            <XStack ai="center" jc="space-between">
-              <Text col="$white" fos={14} ff="$body500">
-                {t('donationPrompt.createdAt')}
-              </Text>
-              <Text col="$white" fos={14} ff="$body500">
-                {DateTime.fromSeconds(
-                  mySingleDonation?.createdTime ?? 0
-                ).toLocaleString(DateTime.DATETIME_MED)}
-              </Text>
-            </XStack>
-            {mySingleDonation?.status === 'Expired' && (
-              <XStack ai="center" jc="space-between">
-                <Text col="$white" fos={14} ff="$body500">
-                  {t('donationPrompt.expiredAt')}
-                </Text>
-                <Text col="$white" fos={14} ff="$body500">
-                  {DateTime.fromSeconds(
-                    mySingleDonation?.expirationTime ?? 0
-                  ).toLocaleString(DateTime.DATETIME_MED)}
-                </Text>
-              </XStack>
-            )}
-            <Stack als="center" my="$4">
-              <BtcInvoiceStatus
-                donationPaymentMethod={
-                  mySingleDonation?.paymentMethod ?? dummyDonation.paymentMethod
-                }
-                paymentLink={
-                  mySingleDonation?.paymentLink ?? dummyDonation.paymentLink
-                }
-                status={mySingleDonation?.status ?? dummyDonation.status}
-              />
-            </Stack>
-            {mySingleDonation?.status === 'New' && (
-              <>
-                <Stack w="100%" h={0.5} mx="$-4" bg="$grey" />
-                <Stack gap="$2" mt="$4">
-                  <XStack ai="center" jc="space-between">
-                    <Text fos={18} col="$white" ff="$body500">
-                      {mySingleDonation?.paymentMethod === 'BTC-LN'
-                        ? t('offerForm.network.lightning').toUpperCase()
-                        : t('offerForm.network.onChain').toUpperCase()}
-                    </Text>
-                    <Button
-                      size="small"
-                      beforeIcon={copySvg}
-                      iconFill={getTokens().color.main.val}
-                      variant="primary"
-                      text={t('donations.copyPaymentLink')}
-                      onPress={() => {
-                        Clipboard.setString(mySingleDonation?.paymentLink ?? '')
-                        setToastNotification(t('common.copied'))
-                      }}
-                    />
-                  </XStack>
-                  <Text col="$white" fos={14}>
-                    {mySingleDonation?.paymentLink}
-                  </Text>
-                </Stack>
-              </>
-            )}
-          </Stack>
-        </Stack>
-      </ScrollView>
-      <Stack>
-        {!!showClaimConfirmationButton && (
-          <Button
-            iconFill={getTokens().color.main.val}
-            variant="secondary"
-            text={t('donations.claimConfirmation')}
-            onPress={() => {
-              Effect.runFork(showClaimConfirmationDialog())
-            }}
-          />
-        )}
-      </Stack>
-    </Screen>
+  return status === 'New' ? (
+    <NewDonationDetails
+      footerHeight={footerHeight}
+      paymentLink={paymentLink}
+      isLightning={isLightning}
+      summary={summary}
+    />
+  ) : status === 'Expired' ? (
+    <ExpiredDonationDetails
+      footerHeight={footerHeight}
+      title={title}
+      donation={mySingleDonation}
+      paymentLink={paymentLink}
+      isLightning={isLightning}
+      summary={summary}
+      expiredAt={expiredAt}
+    />
+  ) : status === 'Invalid' ? (
+    <InvalidDonationDetails
+      footerHeight={footerHeight}
+      title={title}
+      donation={mySingleDonation}
+      summary={summary}
+      expiredAt={expiredAt}
+    />
+  ) : status === 'Settled' ? (
+    <SettledDonationDetails
+      footerHeight={footerHeight}
+      title={title}
+      summary={summary}
+      paidAt={createdAt}
+    />
+  ) : (
+    <OtherDonationDetails
+      footerHeight={footerHeight}
+      summary={summary}
+      paymentMethod={paymentMethod}
+      paymentLink={paymentLink}
+      status={status}
+    />
   )
 }
 

@@ -3,10 +3,10 @@ import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {DateTime} from 'luxon'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {navigationRef} from '../../../utils/navigation'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import DonationPrompt from '../components/DonationPrompt'
-import showDonationPromptActionAtom from './showDonationPromptActionAtom'
 import {shouldShowDonationPromptAtom} from './stateAtoms'
 
 export const DONATION_PROMPT_CHAT_MESSAGES_THRESHOLD_COUNT = 10
@@ -35,7 +35,9 @@ const showDonationPromptGiveLoveActionAtom = atom(
         })
       )
 
-      yield* _(set(showDonationPromptActionAtom))
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('DonationsFlow', {screen: 'SetDonation'})
+      }
     }).pipe(
       Effect.catchTag('UserDeclinedError', () => {
         set(

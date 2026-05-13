@@ -147,8 +147,8 @@ export function TextField({
         value={text}
         onChangeText={setText}
         placeholder={placeholder}
-        placeholderTextColor={theme.foregroundTertiary.val}
-        selectionColor={theme.accentYellowPrimary.val}
+        placeholderTextColor={theme.foregroundTertiary.get()}
+        selectionColor={theme.accentYellowPrimary.get()}
         autoFocus={autoFocus}
         onFocus={handleFocus}
         onBlur={handleBlur}
@@ -159,15 +159,15 @@ export function TextField({
         </Button>
       ) : onCheckmarkPress != null ? (
         <CheckmarkButtonFrame onPress={onCheckmarkPress}>
-          <Checkmark size={24} color={theme.accentHighlightPrimary.val} />
+          <Checkmark size={24} color={theme.accentHighlightPrimary.get()} />
         </CheckmarkButtonFrame>
       ) : showClear === true && hasText ? (
         <IconPressable onPress={handleClear}>
-          <XmarkCancelClose size={24} color={theme.foregroundPrimary.val} />
+          <XmarkCancelClose size={24} color={theme.foregroundPrimary.get()} />
         </IconPressable>
       ) : Icon != null ? (
         <IconPressable onPress={onIconPress}>
-          <Icon size={24} color={theme.foregroundPrimary.val} />
+          <Icon size={24} color={theme.foregroundPrimary.get()} />
         </IconPressable>
       ) : null}
     </TextFieldFrame>

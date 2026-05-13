@@ -123,7 +123,7 @@ function ConfirmAmountScreen({
       <YStack flex={1} gap="$7" pt="$4">
         <YStack
           alignItems="center"
-          backgroundColor={theme.backgroundSecondary.val}
+          backgroundColor={theme.backgroundSecondary.get()}
           borderRadius="$5"
           gap="$3"
           padding="$5"

@@ -168,7 +168,7 @@ export default function ChatOfferDetailContent({
                 pointerEvents="none"
               >
                 <FlagReport
-                  color={theme.redForeground.val}
+                  color={theme.redForeground.get()}
                   size={getTokens().size.$7.val}
                 />
                 <Typography color="$redForeground" variant="paragraph">

@@ -63,10 +63,10 @@ export function RowButton<T>(props: RowButtonProps<T>): React.JSX.Element {
   const theme = useTheme()
   const iconColor =
     variant === 'red'
-      ? theme.redForeground.val
+      ? theme.redForeground.get()
       : selected
-        ? theme.accentHighlightSecondary.val
-        : theme.accentHighlightPrimary.val
+        ? theme.accentHighlightSecondary.get()
+        : theme.accentHighlightPrimary.get()
   const labelSelected = variant === 'red' ? false : selected
 
   const handlePress = (): void => {

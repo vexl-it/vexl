@@ -22,7 +22,7 @@ const GoldenAvatar = avatarsGoldenGlassesAndBackgroundSvg[0]!
 
 function ThemedIcon({size}: {readonly size: number}): React.JSX.Element {
   const theme = useTheme()
-  return <UserProfile size={size} color={theme.foregroundPrimary.val} />
+  return <UserProfile size={size} color={theme.foregroundPrimary.get()} />
 }
 
 function SectionLabel({

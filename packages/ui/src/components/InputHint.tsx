@@ -31,8 +31,8 @@ export function InputHint({
 
   const color =
     variant === 'error'
-      ? theme.redForeground.val
-      : theme.foregroundSecondary.val
+      ? theme.redForeground.get()
+      : theme.foregroundSecondary.get()
 
   return (
     <InputHintFrame>

@@ -69,7 +69,7 @@ function AmountInput(
               <Stack als="flex-end" py="$2">
                 <VexlActivityIndicator
                   size="small"
-                  bc={theme.foregroundTertiary.val}
+                  bc={theme.foregroundTertiary.get()}
                 />
               </Stack>
             ) : (
@@ -77,14 +77,14 @@ function AmountInput(
                 ref={inputRef}
                 color={
                   isFocused || hasValue
-                    ? theme.foregroundPrimary.val
-                    : theme.foregroundTertiary.val
+                    ? theme.foregroundPrimary.get()
+                    : theme.foregroundTertiary.get()
                 }
-                placeholderTextColor={theme.foregroundTertiary.val}
+                placeholderTextColor={theme.foregroundTertiary.get()}
                 keyboardType="decimal-pad"
                 textAlign="right"
                 selectTextOnFocus
-                selectionColor={theme.accentHighlightSecondary.val}
+                selectionColor={theme.accentHighlightSecondary.get()}
                 {...props}
               />
             )}

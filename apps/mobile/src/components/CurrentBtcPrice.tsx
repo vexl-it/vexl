@@ -104,7 +104,7 @@ function CurrentBtcPrice({
     >
       <XStack ai="center" gap="$2">
         {btcPriceWithState?.state === 'loading' ? (
-          <Loader size="small" color={theme.foregroundSecondary.val} />
+          <Loader size="small" color={theme.foregroundSecondary.get()} />
         ) : (
           <YStack>
             <Text fos={16} ff="$body500" col="$foregroundPrimary" {...props}>

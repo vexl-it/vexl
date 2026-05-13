@@ -65,7 +65,7 @@ function Footer({
           alignItems="center"
           gap="$2"
         >
-          <InfoCircle size={18} color={theme.foregroundSecondary.val} />
+          <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
           <Typography
             variant="description"
             color="$foregroundSecondary"
@@ -91,7 +91,7 @@ function Footer({
           alignItems="center"
           gap="$2"
         >
-          <InfoCircle size={18} color={theme.foregroundPrimary.val} />
+          <InfoCircle size={18} color={theme.foregroundPrimary.get()} />
           <Typography variant="description" color="$foregroundPrimary" flex={1}>
             {state.noteText}
           </Typography>
@@ -112,7 +112,7 @@ function Footer({
         alignItems="center"
         gap="$2"
       >
-        <InfoCircle size={18} color={theme.foregroundSecondary.val} />
+        <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
         <Typography variant="description" color="$foregroundSecondary" flex={1}>
           {state.noteText}
         </Typography>
@@ -179,9 +179,12 @@ function OfferDetailScrollContent({
             onPress={onNoCommonFriendsPress}
           >
             {isClubOffer ? (
-              <ConferenceClub size={18} color={theme.foregroundSecondary.val} />
+              <ConferenceClub
+                size={18}
+                color={theme.foregroundSecondary.get()}
+              />
             ) : (
-              <PeopleUsers size={18} color={theme.foregroundSecondary.val} />
+              <PeopleUsers size={18} color={theme.foregroundSecondary.get()} />
             )}
             <Typography variant="micro" color="$foregroundSecondary" flex={1}>
               {isClubOffer

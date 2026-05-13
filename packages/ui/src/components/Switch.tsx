@@ -24,10 +24,10 @@ export function Switch({valueAtom, ...rest}: SwitchProps): React.JSX.Element {
         setIsOn(next)
       }}
       trackColor={{
-        false: theme.backgroundTertiary.val,
-        true: theme.accentHighlightSecondary.val,
+        false: theme.backgroundTertiary.get(),
+        true: theme.accentHighlightSecondary.get(),
       }}
-      thumbColor={theme.white100.val}
+      thumbColor={theme.white100.get()}
       {...rest}
     />
   )

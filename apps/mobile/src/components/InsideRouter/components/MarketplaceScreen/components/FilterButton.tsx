@@ -16,7 +16,7 @@ function FilterButton(): React.JSX.Element {
         navigation.navigate('FilterOffers')
       }}
     >
-      <TuneSettings size={24} color={theme.foregroundPrimary.val} />
+      <TuneSettings size={24} color={theme.foregroundPrimary.get()} />
     </IconButton>
   )
 }

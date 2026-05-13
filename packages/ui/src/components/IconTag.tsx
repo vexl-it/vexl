@@ -56,10 +56,10 @@ export function IconTag({
   const theme = useTheme()
   const sizeTokens = getTokens().size
   const iconColor = neutral
-    ? theme.foregroundSecondary.val
+    ? theme.foregroundSecondary.get()
     : variant === 'bitcoin'
-      ? theme.accentHighlightSecondary.val
-      : theme.foregroundPrimary.val
+      ? theme.accentHighlightSecondary.get()
+      : theme.foregroundPrimary.get()
   const Icon = iconMap[variant]
   const iconSize = neutral ? sizeTokens.$6.val : sizeTokens.$7.val
   const frameVariant = neutral ? undefined : variant

@@ -78,7 +78,7 @@ export function SearchBar(props: SearchBarProps): React.JSX.Element {
   const [text, setText] = useAtom(valueAtom)
   const theme = useTheme()
   const isDummy = variant === 'dummy'
-  const iconColor = theme.foregroundPrimary.val
+  const iconColor = theme.foregroundPrimary.get()
   const hasText = !isDummy && text.length > 0
 
   return (
@@ -97,8 +97,8 @@ export function SearchBar(props: SearchBarProps): React.JSX.Element {
         editable={!isDummy}
         pointerEvents={isDummy ? 'none' : undefined}
         placeholder={placeholder}
-        placeholderTextColor={theme.foregroundPrimary.val}
-        selectionColor={theme.accentYellowPrimary.val}
+        placeholderTextColor={theme.foregroundPrimary.get()}
+        selectionColor={theme.accentYellowPrimary.get()}
         autoFocus={isDummy ? false : autoFocus}
       />
       {hasText ? (

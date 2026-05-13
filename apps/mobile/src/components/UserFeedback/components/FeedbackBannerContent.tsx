@@ -58,7 +58,7 @@ function FeedbackBannerContent(): React.ReactElement {
       </Stack>
       {!feedbackFlowFinished && (
         <XStack ai="center" jc="center" gap="$1">
-          <EyeShut size={24} color={theme.foregroundSecondary.val} />
+          <EyeShut size={24} color={theme.foregroundSecondary.get()} />
           <Typography variant="description" color="$foregroundSecondary">
             {t('messages.yourAnswerIsAnonymous')}
           </Typography>

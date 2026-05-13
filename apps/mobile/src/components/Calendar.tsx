@@ -51,7 +51,7 @@ function CalendarHeader({
             addMonth?.(-1)
           }}
         >
-          <ChevronLeft color={theme.foregroundPrimary.val} size={24} />
+          <ChevronLeft color={theme.foregroundPrimary.get()} size={24} />
         </Pressable>
         <Typography color="$foregroundPrimary" variant="descriptionBold">
           {month?.toString('MMMM yyyy')}
@@ -69,7 +69,7 @@ function CalendarHeader({
             addMonth?.(1)
           }}
         >
-          <ChevronRight color={theme.foregroundPrimary.val} size={24} />
+          <ChevronRight color={theme.foregroundPrimary.get()} size={24} />
         </Pressable>
       </XStack>
       <XStack jc="space-between">
@@ -107,12 +107,12 @@ function CalendarDay({
   const isInactive = marking?.inactive === true || state === 'inactive'
   const isToday = marking?.today === true || state === 'today'
   const textColor = isSelected
-    ? theme.black100.val
+    ? theme.black100.get()
     : isDisabled || isInactive
-      ? theme.foregroundTertiary.val
+      ? theme.foregroundTertiary.get()
       : isToday
-        ? theme.accentYellowPrimary.val
-        : theme.foregroundPrimary.val
+        ? theme.accentYellowPrimary.get()
+        : theme.foregroundPrimary.get()
 
   return (
     <Pressable
@@ -138,8 +138,8 @@ function CalendarDay({
         br={999}
         backgroundColor={
           isSelected
-            ? (marking?.selectedColor ?? theme.accentYellowPrimary.val)
-            : theme.gradientHelper.val
+            ? (marking?.selectedColor ?? theme.accentYellowPrimary.get())
+            : theme.gradientHelper.get()
         }
       >
         <Text
@@ -169,21 +169,21 @@ function Calendar(props: CalendarProps): React.ReactElement {
 
   const calendarTheme: Theme = useMemo(
     () => ({
-      calendarBackground: theme.gradientHelper.val,
-      dayTextColor: theme.foregroundPrimary.val,
-      arrowColor: theme.foregroundPrimary.val,
-      monthTextColor: theme.foregroundPrimary.val,
-      selectedDayTextColor: theme.black100.val,
+      calendarBackground: theme.gradientHelper.get(),
+      dayTextColor: theme.foregroundPrimary.get(),
+      arrowColor: theme.foregroundPrimary.get(),
+      monthTextColor: theme.foregroundPrimary.get(),
+      selectedDayTextColor: theme.black100.get(),
       textDayFontWeight: '500',
       textMonthFontWeight: '600',
-      todayTextColor: theme.accentYellowPrimary.val,
-      agendaDayTextColor: theme.foregroundPrimary.val,
-      textSectionTitleColor: theme.foregroundSecondary.val,
+      todayTextColor: theme.accentYellowPrimary.get(),
+      agendaDayTextColor: theme.foregroundPrimary.get(),
+      textSectionTitleColor: theme.foregroundSecondary.get(),
       textDayHeaderFontSize: 14,
       textDayFontSize: 14,
-      selectedDayBackgroundColor: theme.accentYellowPrimary.val,
-      textDisabledColor: theme.foregroundTertiary.val,
-      selectedDotColor: theme.black100.val,
+      selectedDayBackgroundColor: theme.accentYellowPrimary.get(),
+      textDisabledColor: theme.foregroundTertiary.get(),
+      selectedDotColor: theme.black100.get(),
       'stylesheet.calendar.main': {
         dayContainer: {
           flex: 1,

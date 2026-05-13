@@ -41,8 +41,8 @@ export function CommonFriends({
 }: CommonFriendsProps): React.JSX.Element {
   const theme = useTheme()
 
-  const bgColor = theme.backgroundSecondary.val
-  const chevronColor = theme.foregroundSecondary.val
+  const bgColor = theme.backgroundSecondary.get()
+  const chevronColor = theme.foregroundSecondary.get()
 
   const gradientWidth = getTokens().size.$12.val
   const gap = getTokens().space.$3.val

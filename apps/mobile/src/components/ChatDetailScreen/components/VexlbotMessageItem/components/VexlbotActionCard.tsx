@@ -105,7 +105,7 @@ export default function VexlbotActionCard({
           <TouchableOpacity onPress={onClosePress}>
             <Stack>
               <XmarkCancelClose
-                color={theme.foregroundSecondary.val}
+                color={theme.foregroundSecondary.get()}
                 size={24}
               />
             </Stack>
@@ -118,7 +118,7 @@ export default function VexlbotActionCard({
           >
             <Stack>
               <XmarkCancelClose
-                color={theme.foregroundSecondary.val}
+                color={theme.foregroundSecondary.get()}
                 size={24}
               />
             </Stack>

@@ -205,7 +205,7 @@ function RevealedInfoCard({
         </Typography>
         <XStack alignItems="center" gap="$4" width="100%">
           <RevealedInfoCardSide {...leftSide} />
-          <ArrowsHorizontal color={theme.foregroundPrimary.val} size={28} />
+          <ArrowsHorizontal color={theme.foregroundPrimary.get()} size={28} />
           <RevealedInfoCardSide {...rightSide} />
         </XStack>
         <AddToContactsButton

@@ -11,10 +11,7 @@ import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {useWindowDimensions} from 'react-native'
-import {
-  completePostLoginFlowScreenActionAtom,
-  finishPostLoginFlowActionAtom,
-} from '../../../state/postLoginOnboarding'
+import {finishPostLoginFlowActionAtom} from '../../../state/postLoginOnboarding'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import PostLoginFlowScreen from './PostLoginFlowScreen'
@@ -24,12 +21,10 @@ export default function UsageInfoScreen(): React.ReactElement {
   const {width: windowWidth} = useWindowDimensions()
   const availableWidth = windowWidth - 40
   const graphicScale = Math.min(1, availableWidth / 164)
-  const completeScreen = useSetAtom(completePostLoginFlowScreenActionAtom)
   const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
   const setSession = useSetAtom(sessionDataOrDummyAtom)
 
   const finish = (): void => {
-    completeScreen('usageInfo')
     Effect.runFork(finishPostLoginFlow())
   }
 

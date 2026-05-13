@@ -1,26 +1,39 @@
+import {Play, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
 import React from 'react'
-import {TouchableOpacity} from 'react-native'
-import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Image from '../../Image'
-import playInContainerSvg from '../images/playInContainerSvg'
+
 interface Props {
   onPress: () => void
 }
 
 function FaqsRedirect({onPress}: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
+
   return (
-    <TouchableOpacity onPress={onPress}>
-      <Stack fd="row" ai="center" br="$4" bg="$darkBrown" p="$3">
-        <Image source={playInContainerSvg} />
-        <Stack fs={1}>
-          <Text ml="$2" fontSize={18} color="$main" ff="$body500">
-            {t('termsOfUse.dontHaveTime')}
-          </Text>
-        </Stack>
+    <XStack
+      alignItems="center"
+      backgroundColor="$navigationBackground"
+      borderRadius="$4"
+      gap="$4"
+      onPress={onPress}
+      padding="$5"
+      pressStyle={{opacity: 0.7}}
+    >
+      <Stack
+        alignItems="center"
+        backgroundColor="$accentHighlightSecondary"
+        borderRadius="$3"
+        height="$9"
+        justifyContent="center"
+        width="$9"
+      >
+        <Play color={theme.backgroundPrimary.get()} size={20} />
       </Stack>
-    </TouchableOpacity>
+      <Typography color="$foregroundPrimary" pt="$2" variant="description">
+        {t('termsOfUse.dontHaveTime2')}
+      </Typography>
+    </XStack>
   )
 }
 

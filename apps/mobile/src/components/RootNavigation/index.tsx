@@ -239,7 +239,14 @@ function RootNavigation(): React.ReactElement {
           name="NotificationSettings"
           component={NotificationSettingsScreen}
         />
-        <Stack.Screen name="TermsAndConditions" component={TosScreen} />
+        <Stack.Screen
+          name="TermsAndConditions"
+          component={TosScreen}
+          options={{
+            animation: 'slide_from_bottom',
+            presentation: 'card',
+          }}
+        />
         <Stack.Screen name="Faqs" component={FaqsScreen} />
         <Stack.Screen name="DebugScreen" component={DebugScreen} />
         <Stack.Screen

@@ -115,10 +115,10 @@ export function NavButton(props: NavButtonProps): React.JSX.Element {
 
   const iconColor =
     variant === 'highlighted'
-      ? theme.accentHighlightSecondary.val
+      ? theme.accentHighlightSecondary.get()
       : variant === 'destructive'
-        ? theme.white100.val
-        : theme.foregroundPrimary.val
+        ? theme.white100.get()
+        : theme.foregroundPrimary.get()
 
   if (props.type === 'text') {
     const {

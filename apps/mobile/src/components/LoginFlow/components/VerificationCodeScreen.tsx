@@ -111,14 +111,16 @@ export default function VerificationCodeScreen({
                     phoneNumber,
                   })
                 )
-              })
-            )
-              .catch((error) => {
-                Alert.alert(String(error))
-              })
-              .finally(() => {
-                loadingOverlay.hide()
-              })
+              }).pipe(
+                Effect.catchAll((errorMessage) =>
+                  Effect.sync(() => {
+                    Alert.alert(errorMessage)
+                  })
+                )
+              )
+            ).finally(() => {
+              loadingOverlay.hide()
+            })
           },
         }}
         footer={

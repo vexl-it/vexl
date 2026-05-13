@@ -1,131 +1,167 @@
+import {
+  Button,
+  NavigationBar,
+  Screen,
+  Stack,
+  Typography,
+  XStack,
+  XmarkCancelClose,
+} from '@vexl-next/ui'
+import {Array, Option, pipe} from 'effect'
 import React, {useState} from 'react'
-import {TouchableWithoutFeedback} from 'react-native'
-import {Stack, Text, XStack} from 'tamagui'
+import {
+  Pressable,
+  TouchableWithoutFeedback,
+  type GestureResponderEvent,
+} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import openUrl from '../../utils/openUrl'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import IconButton from '../IconButton'
-import SvgImage from '../Image'
-import {HeaderProxy} from '../PageWithButtonAndProgressHeader'
-import ProgressJourney from '../ProgressJourney'
-import Screen from '../Screen'
-import closeSvg from '../images/closeSvg'
-import useContent from './useContent'
+import useContent, {type FaqContent, type FaqType} from './useContent'
 
 type Props = RootStackScreenProps<'Faqs'>
 
-function FaqsScreen({
-  navigation,
-  route: {params},
-}: Props): React.ReactElement | null {
+function getInitialPage(
+  content: readonly FaqContent[],
+  pageType: FaqType | undefined
+): number {
+  if (!pageType) return 0
+
+  return pipe(
+    content,
+    Array.findFirstIndex((one) => one.type === pageType),
+    Option.getOrElse(() => 0)
+  )
+}
+
+function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()
-  const pageType = params?.pageType
-  const pageIndex = pageType ? content.findIndex((c) => c.type === pageType) : 0
-  const [page, setPage] = useState<number>(pageIndex)
-
+  const [page, setPage] = useState<number>(() =>
+    getInitialPage(content, params?.pageType)
+  )
+  const [contentWidth, setContentWidth] = useState(0)
   const pageContent = content[page]
 
+  if (!pageContent) return null
+
+  const Graphic = pageContent.graphic
+  const isLastPage = page === content.length - 1
+  const isFirstPage = page === 0
+
+  const goBack = (): void => {
+    if (page === 0) safeGoBack()
+    else setPage((currentPage) => currentPage - 1)
+  }
+
+  const goNext = (): void => {
+    if (isLastPage) safeGoBack()
+    else setPage((currentPage) => currentPage + 1)
+  }
+
+  const navigateContent = (event: GestureResponderEvent): void => {
+    if (contentWidth === 0) return
+
+    const isPressOnLeftHalf = event.nativeEvent.locationX < contentWidth / 2
+
+    if (isPressOnLeftHalf) {
+      if (!isFirstPage) setPage((currentPage) => currentPage - 1)
+    } else if (!isLastPage) {
+      setPage((currentPage) => currentPage + 1)
+    }
+  }
+
   return (
-    <Screen>
-      <Stack f={1} px="$2" pt="$2">
-        <HeaderProxy hidden showBackButton={true} progressNumber={1} />
-        <ProgressJourney
-          currentPage={page}
-          numberOfPages={content.length}
-          onPageChange={setPage}
-          // Links do not work otherwise...
-          touchableOverlayDisabled
-          onFinish={safeGoBack}
-          onSkip={safeGoBack}
-          withBackButton
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('faqs.faqsTitle')}
+          rightActions={[{icon: XmarkCancelClose, onPress: safeGoBack}]}
+        />
+      }
+    >
+      <Stack flex={1}>
+        <Pressable
+          onLayout={(event) => {
+            setContentWidth(event.nativeEvent.layout.width)
+          }}
+          onPress={navigateContent}
+          style={{flex: 1}}
         >
-          {!pageContent ? (
-            <></>
-          ) : (
-            <>
-              <XStack ai="center" jc="space-between">
-                {/* this makes the text to be centered on screen */}
-                <Stack width={40} />
-                <Stack f={1} ai="center" jc="center">
-                  <Text fos={18} col="$black" ff="$body600">
-                    {t('faqs.faqs')}
-                  </Text>
-                </Stack>
-                <IconButton
-                  width={40}
-                  height={40}
-                  variant="light"
-                  icon={closeSvg}
-                  onPress={safeGoBack}
-                />
-              </XStack>
-              <Stack f={1} ai="center" jc="center" w="100%" h="100%">
-                <Stack
-                  f={1}
-                  w="100%"
-                  h="100%"
-                  maxHeight={300}
-                  ai="center"
-                  jc="center"
-                >
-                  {!!pageContent && (
-                    <SvgImage
-                      height={pageContent.height ?? '100%'}
-                      width={pageContent.width ?? '100%'}
-                      source={pageContent.svg}
-                    />
-                  )}
-                </Stack>
-              </Stack>
-              <Text fos={24} ff="$heading" col="$black" mb="$2">
-                {pageContent?.title}
-              </Text>
-              {pageContent.withLink ? (
-                <TouchableWithoutFeedback
-                  onPress={openUrl(pageContent?.url ?? '')}
-                >
-                  <Text fos={16} ff="$body500" col="$greyOnWhite">
-                    <>
-                      {pageContent?.textBefore}{' '}
-                      <Text
-                        fos={16}
-                        textDecorationLine="underline"
-                        ff="$body700"
-                        col="$greyOnWhite"
-                      >
-                        {pageContent?.linkText}
-                      </Text>{' '}
-                      {pageContent?.textAfter}
-                    </>
-                  </Text>
-                </TouchableWithoutFeedback>
-              ) : (
-                <Text fos={16} ff="$body500" col="$greyOnWhite">
-                  {pageContent?.text}
-                </Text>
-              )}
-              {pageContent?.type === 'HOW_CAN_YOU_ENSURE' && (
-                <TouchableWithoutFeedback
-                  onPress={() => {
-                    navigation.navigate('TermsAndConditions')
-                  }}
-                >
-                  <Text
-                    mt="$2"
-                    textDecorationLine="underline"
-                    ff="$body700"
-                    col="$greyOnWhite"
+          <Stack
+            flex={1}
+            backgroundColor="$backgroundTertiary"
+            borderRadius="$4"
+            overflow="hidden"
+            paddingHorizontal="$5"
+            paddingTop="$4"
+            paddingBottom="$6"
+          >
+            <XStack gap="$2">
+              {pipe(
+                content,
+                Array.map((_, index) => (
+                  <TouchableWithoutFeedback
+                    hitSlop={5}
+                    key={index}
+                    onPress={() => {
+                      setPage(index)
+                    }}
                   >
-                    {t('faqs.howCanYouEnsureTosAndPP')}
-                  </Text>
-                </TouchableWithoutFeedback>
+                    <Stack
+                      backgroundColor={
+                        index <= page
+                          ? '$foregroundPrimary'
+                          : '$foregroundTertiary'
+                      }
+                      borderRadius="$11"
+                      flex={1}
+                      height="$2"
+                      opacity={index <= page ? 1 : 0.55}
+                    />
+                  </TouchableWithoutFeedback>
+                ))
               )}
-            </>
-          )}
-        </ProgressJourney>
+            </XStack>
+
+            <Stack
+              alignItems="center"
+              flex={1}
+              justifyContent="center"
+              minHeight={250}
+            >
+              <Graphic animate />
+            </Stack>
+
+            <Stack gap="$3">
+              <Typography
+                color="$foregroundPrimary"
+                letterSpacing={0}
+                fontWeight={700}
+                variant="heading3"
+                maxWidth={280}
+              >
+                {pageContent.title}
+              </Typography>
+              <Typography color="$foregroundSecondary" variant="paragraphSmall">
+                {pageContent.text}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Pressable>
+
+        <XStack gap="$3" paddingVertical="$3">
+          {!isFirstPage ? (
+            <Button flex={1} onPress={goBack} variant="secondary">
+              {t('common.back')}
+            </Button>
+          ) : null}
+          <Button flex={1} onPress={goNext} variant="primary">
+            {t(isLastPage ? 'common.done' : 'common.next')}
+          </Button>
+        </XStack>
       </Stack>
     </Screen>
   )

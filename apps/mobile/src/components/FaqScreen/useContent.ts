@@ -1,14 +1,15 @@
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import anonymizationNoticeSvg from '../../images/anonymizationNoticeSvg'
-import noRatingsSvg from '../../images/noRatingsSvg'
-import notificationsSvg from '../../images/notificationsSvg'
+import {
+  FaqAnonymizationNotice,
+  FaqAnonymousCounterpart,
+  FaqDesigned,
+  FaqNoRatings,
+  FaqNotifications,
+  FaqOpenSource,
+  FaqStayAnonymous,
+  FaqWhatIsVexl,
+} from '@vexl-next/ui'
+import type React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import anonymousCounterpartSvg from '../images/anonymousCounterpartSvg'
-import stayAnonymousSvg from '../images/stayAnonymousSvg'
-import vexlClubsSvg from '../images/vexlClubsSvg'
-import faq1Svg from './images/faq1Svg'
-import faq5Svg from './images/faq5Svg'
-import faq6Svg from './images/faq6Svg'
 
 export type FaqType =
   | 'WHAT_IS_VEXL'
@@ -19,101 +20,72 @@ export type FaqType =
   | 'HOW_CAN_YOU_ENSURE'
   | 'WHAT_ARE_VEXL_CLUBS'
   | 'HOW_DO_I_CONTACT_VEXL'
-  | 'WHY_NO_RATING'
 
-interface CommonProps {
-  type: FaqType
-  svg: SvgString
-  title: string
-  width?: string
-  height?: string
+export interface FaqGraphicProps {
+  readonly animate?: boolean
+  readonly height?: number
+  readonly variant?: 'dark' | 'light'
+  readonly width?: number
 }
 
-type ConditionalProps =
-  | {
-      withLink?: false
-      text: string
-    }
-  | {
-      withLink: true
-      textBefore: string
-      textAfter: string
-      linkText: string
-      url: string
-    }
+export interface FaqContent {
+  readonly type: FaqType
+  readonly graphic: React.ComponentType<FaqGraphicProps>
+  readonly title: string
+  readonly text: string
+}
 
-type Props = ConditionalProps & CommonProps
-
-export default function useContent(): Props[] {
+export default function useContent(): readonly FaqContent[] {
   const {t} = useTranslation()
 
   return [
     {
       type: 'WHAT_IS_VEXL',
-      svg: faq1Svg,
+      graphic: FaqWhatIsVexl,
       title: t('faqs.whatIsVexl'),
       text: t('faqs.vexlIsPlatform'),
     },
     {
       type: 'WHO_CAN_SEE_MY_CONTACTS',
-      svg: anonymizationNoticeSvg,
+      graphic: FaqAnonymizationNotice,
       title: t('faqs.whoCanSeeMyContacts'),
       text: t('faqs.peopleWhomYouAllowToSee'),
     },
     {
       type: 'HOW_CAN_I_REMAIN_ANONYMOUS',
-      svg: stayAnonymousSvg,
-      title: t('faqs.howCanIRemainAnonymous'),
+      graphic: FaqStayAnonymous,
+      title: t('faqs.howCanIStayAnonymous'),
       text: t('faqs.byDefaultYouParticipateInTheNetwork'),
     },
     {
       type: 'HOW_CAN_I_MAKE_SURE',
-      svg: anonymousCounterpartSvg,
-      title: t('faqs.howCanIMakeSure'),
+      graphic: FaqAnonymousCounterpart,
+      title: t('faqs.howDoIKnowWhoIAmTalkingTo'),
       text: t('faqs.oneChallenge'),
     },
     {
       type: 'HOW_CAN_I_ENSURE',
-      svg: faq5Svg,
-      title: t('faqs.howCanIEnsure'),
-      withLink: true,
-      textBefore: t('faqs.vexlIsOpensourceTextBeforeLink'),
-      textAfter: t('faqs.vexlIsOpensourceTextAfterLink'),
-      linkText: t('faqs.vexlIsOpensourceLinkText'),
-      url: t('faqs.auditUrl'),
+      graphic: FaqOpenSource,
+      title: t('faqs.areMyChatsAndDealsPrivate'),
+      text: t('faqs.vexlIsOpensource'),
     },
     {
       type: 'HOW_CAN_YOU_ENSURE',
-      svg: faq6Svg,
-      title: t('faqs.howCanYouEnsure'),
+      graphic: FaqDesigned,
+      title: t('faqs.howDoYouProtectMyData'),
       text: t('faqs.vexlIsDesigned'),
     },
     {
-      type: 'WHAT_ARE_VEXL_CLUBS',
-      svg: vexlClubsSvg,
-      title: t('faqs.whatAreVexlClubsAndWhyShouldIJoin'),
-      text: t('faqs.clubsConnectYouWithBroaderNetwork'),
-    },
-
-    {
       type: 'HOW_DO_I_CONTACT_VEXL',
-      svg: notificationsSvg,
+      graphic: FaqNotifications,
       title: t('faqs.howDoIContactVexl'),
       text: t('faqs.youCanAlwaysReachOutToUs'),
-      width: '70%',
-      height: '70%',
     },
     {
-      type: 'WHY_NO_RATING',
-      svg: noRatingsSvg,
-      title: t('faqs.whyNoRatingTitle'),
-      textBefore: t('faqs.whyNoRatingText'),
-      textAfter: '',
-      linkText: t('faqs.ratingUrlText'),
-      withLink: true,
-      url: t('faqs.ratingUrlLink'),
-      width: '90%',
-      height: '90%',
+      type: 'WHAT_ARE_VEXL_CLUBS',
+      graphic: FaqNoRatings,
+      title: t('faqs.whatAreVexlClubsAndWhyShouldIJoin'),
+      text: t('faqs.clubsConnectYouWithBroaderNetwork'),
     },
   ]
 }

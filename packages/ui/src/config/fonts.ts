@@ -184,7 +184,7 @@ export const typographyVariantStyles = {
     fontFamily: '$body',
     fontSize: '$3',
     fontWeight: '500',
-    lineHeight: 16,
+    lineHeight: 'normal',
     letterSpacing: -0.64,
   },
   descriptionBold: {

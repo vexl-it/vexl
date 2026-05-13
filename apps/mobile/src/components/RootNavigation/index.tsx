@@ -242,7 +242,14 @@ function RootNavigation(): React.ReactElement {
             presentation: 'card',
           }}
         />
-        <Stack.Screen name="Faqs" component={FaqsScreen} />
+        <Stack.Screen
+          name="Faqs"
+          component={FaqsScreen}
+          options={{
+            animation: 'slide_from_bottom',
+            presentation: 'card',
+          }}
+        />
         <Stack.Screen name="DebugScreen" component={DebugScreen} />
         <Stack.Screen
           name="TaskRegistryOverview"

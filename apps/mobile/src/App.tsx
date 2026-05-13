@@ -60,9 +60,9 @@ function App(): React.ReactElement {
             dark: isDarkTheme,
             colors: {
               ...navigationTheme.colors,
-              primary: theme.background?.val,
-              background: theme.backgroundPrimary.val,
-              text: theme.color?.val,
+              primary: theme.background?.get(),
+              background: theme.backgroundPrimary.get(),
+              text: theme.color?.get(),
             },
             fonts: {
               regular: {
@@ -90,7 +90,7 @@ function App(): React.ReactElement {
                 <GestureHandlerRootView
                   style={{
                     flex: 1,
-                    backgroundColor: theme.backgroundPrimary.val,
+                    backgroundColor: theme.backgroundPrimary.get(),
                   }}
                 >
                   <RootNavigation />

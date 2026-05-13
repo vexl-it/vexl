@@ -148,7 +148,7 @@ function SelectedCheckIcon(): React.JSX.Element {
       <Path
         fillRule="evenodd"
         d="M20.997 6.22267C21.615 6.62267 21.7923 7.44833 21.3923 8.06633L19.845 10.4573C19.943 10.9573 20 11.4717 20 12C20 16.4167 16.4167 20 12 20C7.58333 20 4 16.4167 4 12C4 7.58333 7.58333 4 12 4C13.9967 4 15.82 4.73333 17.2233 5.94333L12.4933 13.2533L9.77667 10.1433C9.41333 9.72667 8.78333 9.68333 8.36667 10.0467C7.95 10.41 7.90667 11.04 8.27 11.4567L11.8567 15.57C12.05 15.7867 12.3233 15.9133 12.61 15.9133C12.6367 15.9133 12.66 15.91 12.6833 15.91C12.9967 15.8867 13.28 15.72 13.45 15.4567L19.1533 6.618C19.5533 5.99933 20.3783 5.82233 20.997 6.22267Z"
-        fill={theme.accentHighlightPrimary.val}
+        fill={theme.accentHighlightPrimary.get()}
       />
     </Svg>
   )
@@ -179,8 +179,8 @@ function FirstDegreeVisual({
 }): React.JSX.Element {
   const theme = useTheme()
   const lineColor = selected
-    ? theme.accentHighlightSecondary.val
-    : theme.foregroundTertiary.val
+    ? theme.accentHighlightSecondary.get()
+    : theme.foregroundTertiary.get()
   const topAvatarSize = 60
   const bottomAvatarSize = 36
   const topAvatarX = (VISUAL_SIZE - topAvatarSize) / 2
@@ -233,8 +233,8 @@ function SecondDegreeVisual({
       <SvgXml
         xml={getSecondDegreeVisualXml(
           selected
-            ? theme.accentHighlightSecondary.val
-            : theme.foregroundTertiary.val
+            ? theme.accentHighlightSecondary.get()
+            : theme.foregroundTertiary.get()
         )}
         width={VISUAL_SIZE}
         height={VISUAL_SIZE}
@@ -293,7 +293,7 @@ export function FriendLevel({
           ) : (
             <RadiobuttonCircleEmpty
               size={ICON_SIZE}
-              color={theme.accentHighlightPrimary.val}
+              color={theme.accentHighlightPrimary.get()}
             />
           )}
         </Stack>

@@ -127,7 +127,7 @@ function LocationResultItem({
     >
       <XStack gap="$5" alignItems="flex-start">
         <Stack paddingTop="$1">
-          <PinGeolocation size={24} color={theme.foregroundPrimary.val} />
+          <PinGeolocation size={24} color={theme.foregroundPrimary.get()} />
         </Stack>
         <YStack flex={1} gap="$5">
           <YStack gap="$1">

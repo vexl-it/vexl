@@ -12,8 +12,8 @@ function InfoSquare({
 }): React.ReactElement {
   const theme = useTheme()
   const foregroundColor = negative
-    ? theme.redForeground.val
-    : theme.foregroundPrimary.val
+    ? theme.redForeground.get()
+    : theme.foregroundPrimary.get()
 
   return (
     <XStack

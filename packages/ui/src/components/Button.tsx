@@ -136,14 +136,14 @@ export function Button({
   const variantOrDisabled: ButtonVariant = rest.disabled ? 'disabled' : variant
   const iconColor =
     variantOrDisabled === 'primary'
-      ? theme.black100.val
+      ? theme.black100.get()
       : variantOrDisabled === 'secondary'
-        ? theme.accentHighlightPrimary.val
+        ? theme.accentHighlightPrimary.get()
         : variantOrDisabled === 'destructive'
-          ? theme.white100.val
+          ? theme.white100.get()
           : variantOrDisabled === 'tertiary'
-            ? theme.backgroundPrimary.val
-            : theme.foregroundTertiary.val
+            ? theme.backgroundPrimary.get()
+            : theme.foregroundTertiary.get()
   const iconSize = size === 'large' ? 24 : size === 'medium' ? 20 : 18
 
   return (

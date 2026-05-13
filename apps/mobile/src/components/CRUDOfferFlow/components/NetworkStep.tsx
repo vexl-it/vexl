@@ -26,8 +26,8 @@ function NetworkRow({
 }: NetworkRowProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = selected
-    ? theme.accentHighlightPrimary.val
-    : theme.foregroundPrimary.val
+    ? theme.accentHighlightPrimary.get()
+    : theme.foregroundPrimary.get()
   const textColor = selected ? '$accentHighlightPrimary' : '$foregroundPrimary'
 
   return (

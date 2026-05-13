@@ -24,7 +24,7 @@ function ChatListItemRightSwipeActions(
           <Image
             width={24}
             height={24}
-            fill={theme.foregroundPrimary.val}
+            fill={theme.foregroundPrimary.get()}
             source={trashIconSvg}
           />
           <Typography color="$foregroundPrimary" variant="micro">

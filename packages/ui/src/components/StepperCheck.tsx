@@ -70,10 +70,10 @@ export function StepperCheck({
   const isPressable = !selected
 
   const iconColor = selected
-    ? theme.accentHighlightSecondary.val
-    : theme.foregroundTertiary.val
+    ? theme.accentHighlightSecondary.get()
+    : theme.foregroundTertiary.get()
 
-  const chevronColor = theme.foregroundTertiary.val
+  const chevronColor = theme.foregroundTertiary.get()
 
   return (
     <StepperCheckFrame

@@ -156,7 +156,7 @@ export function EditRow({
   const isProfile = state === 'profile'
   const Icon = !isProfile ? icon : undefined
 
-  const foregroundColor = theme.foregroundPrimary.val
+  const foregroundColor = theme.foregroundPrimary.get()
 
   const iconBoxTone: 'tertiary' | 'secondary' | 'green' = (() => {
     switch (state) {
@@ -177,7 +177,7 @@ export function EditRow({
           <Icon color={foregroundColor} size={24} />
         ) : (
           <RadiobuttonCircleFilled
-            color={theme.backgroundSecondary.val}
+            color={theme.backgroundSecondary.get()}
             size={24}
           />
         )

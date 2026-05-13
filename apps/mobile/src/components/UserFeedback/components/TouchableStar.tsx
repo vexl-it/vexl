@@ -48,9 +48,9 @@ function TouchableStar({starOrderNumber}: Props): React.ReactElement {
       }}
     >
       {isSelected ? (
-        <StarFilled size={32} color={theme.accentYellowPrimary.val} />
+        <StarFilled size={32} color={theme.accentYellowPrimary.get()} />
       ) : (
-        <StarOutline size={32} color={theme.foregroundSecondary.val} />
+        <StarOutline size={32} color={theme.foregroundSecondary.get()} />
       )}
     </Stack>
   )

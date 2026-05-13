@@ -169,7 +169,10 @@ function LocationStep({
                   gap="$3"
                   alignItems="flex-start"
                 >
-                  <InfoCircle color={theme.foregroundSecondary.val} size={24} />
+                  <InfoCircle
+                    color={theme.foregroundSecondary.get()}
+                    size={24}
+                  />
                   <Typography
                     variant="description"
                     color="$foregroundSecondary"
@@ -201,7 +204,7 @@ function LocationStep({
                 >
                   <XStack flex={1} gap="$3" alignItems="flex-start">
                     <InfoCircle
-                      color={theme.foregroundSecondary.val}
+                      color={theme.foregroundSecondary.get()}
                       size={24}
                     />
                     <Typography
@@ -213,7 +216,7 @@ function LocationStep({
                     </Typography>
                   </XStack>
                   <ChevronRight
-                    color={theme.foregroundSecondary.val}
+                    color={theme.foregroundSecondary.get()}
                     size={24}
                   />
                 </XStack>

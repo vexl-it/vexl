@@ -127,13 +127,13 @@ function OfferAuthorBanner({
               </Typography>
               <Circle
                 size="$2"
-                backgroundColor={theme.foregroundSecondary.val}
+                backgroundColor={theme.foregroundSecondary.get()}
               />
               {!isMine && (
                 <XStack gap="$1" alignItems="center">
                   <PeopleUsers
                     size={16}
-                    color={theme.foregroundSecondary.val}
+                    color={theme.foregroundSecondary.get()}
                   />
                   <Typography
                     variant="micro"
@@ -147,7 +147,7 @@ function OfferAuthorBanner({
             </XStack>
           ) : !isMine ? (
             <XStack alignItems="center" gap="$1">
-              <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
+              <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
               <Typography
                 variant="micro"
                 color="$foregroundSecondary"

@@ -98,11 +98,13 @@ export function MenuItem({
   const theme = useTheme()
 
   const iconColor =
-    variant === 'danger' ? theme.redForeground.val : theme.foregroundPrimary.val
+    variant === 'danger'
+      ? theme.redForeground.get()
+      : theme.foregroundPrimary.get()
   const chevronColor =
     variant === 'danger'
-      ? theme.redForeground.val
-      : theme.foregroundSecondary.val
+      ? theme.redForeground.get()
+      : theme.foregroundSecondary.get()
 
   return (
     <MenuItemFrame contained={inMenu} onPress={onPress}>

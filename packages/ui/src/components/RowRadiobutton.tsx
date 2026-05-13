@@ -65,8 +65,8 @@ export function RowRadiobutton<T extends string>({
   const selected = radioGroupValue === value
   const theme = useTheme()
   const iconColor = selected
-    ? theme.accentHighlightPrimary.val
-    : theme.foregroundPrimary.val
+    ? theme.accentHighlightPrimary.get()
+    : theme.foregroundPrimary.get()
 
   return (
     <TamaguiRadioGroup.Item

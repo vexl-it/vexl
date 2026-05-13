@@ -90,12 +90,12 @@ function OtherSideInfoBanner({
               </Typography>
               <Circle
                 size="$2"
-                backgroundColor={theme.foregroundSecondary.val}
+                backgroundColor={theme.foregroundSecondary.get()}
               />
             </>
           ) : null}
           <XStack gap="$1" alignItems="center">
-            <PeopleUsers size={16} color={theme.foregroundSecondary.val} />
+            <PeopleUsers size={16} color={theme.foregroundSecondary.get()} />
             <Typography
               variant="micro"
               color="$foregroundSecondary"
@@ -130,12 +130,12 @@ function ActionRow({
   const tokens = getTokens()
   const iconColor =
     color === 'redForeground'
-      ? theme.redForeground.val
-      : theme.foregroundSecondary.val
+      ? theme.redForeground.get()
+      : theme.foregroundSecondary.get()
   const textColor =
     color === 'redForeground'
-      ? theme.redForeground.val
-      : theme.foregroundPrimary.val
+      ? theme.redForeground.get()
+      : theme.foregroundPrimary.get()
 
   return (
     <XStack
@@ -152,7 +152,7 @@ function ActionRow({
       {!!showChevron && (
         <Stack flex={1} alignItems="flex-end">
           <ChevronRight
-            color={theme.foregroundTertiary.val}
+            color={theme.foregroundTertiary.get()}
             size={tokens.size.$7.val}
           />
         </Stack>

@@ -52,7 +52,10 @@ function PremiumOrDiscount({
                 feeAmount
               )} %`}
             </Typography>
-            <ChevronRight color={theme.accentHighlightPrimary.val} size={24} />
+            <ChevronRight
+              color={theme.accentHighlightPrimary.get()}
+              size={24}
+            />
           </XStack>
         </TouchableOpacity>
       )}

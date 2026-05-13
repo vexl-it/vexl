@@ -167,7 +167,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
             {t('tradeChecklist.time.description')}
           </Typography>
         </Stack>
-        <Stack gap="$3" backgroundColor={theme.backgroundPrimary.val}>
+        <Stack gap="$3" backgroundColor={theme.backgroundPrimary.get()}>
           {pipe(
             uniqueAvailableDates,
             ArrayE.map((date) => (

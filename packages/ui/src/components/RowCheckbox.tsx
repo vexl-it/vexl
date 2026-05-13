@@ -92,8 +92,8 @@ export function RowCheckbox({
 }: RowCheckboxProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = checked
-    ? theme.accentHighlightSecondary.val
-    : theme.foregroundPrimary.val
+    ? theme.accentHighlightSecondary.get()
+    : theme.foregroundPrimary.get()
 
   return (
     <RowCheckboxFrame

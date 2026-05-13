@@ -1,5 +1,5 @@
 import React, {useCallback, useMemo, useState} from 'react'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {styled, useTheme} from 'tamagui'
 
 import {ArrowsVerticalSort} from '../icons/ArrowsVerticalSort'
 import {ChevronDown} from '../icons/ChevronDown'
@@ -131,7 +131,7 @@ export function Exchange({
   const [btcFocused, setBtcFocused] = useState(false)
   const [fiatFocused, setFiatFocused] = useState(false)
 
-  const arrowsIconColor = getTokens().color.black100.val
+  const arrowsIconColor = theme.black100.get()
 
   const toggleBtcUnit = useCallback(() => {
     if (onToggleBtcUnit) {
@@ -195,7 +195,7 @@ export function Exchange({
           >
             {btcUnit}
           </SizableText>
-          <ChevronDown size={24} color={theme.foregroundPrimary.val} />
+          <ChevronDown size={24} color={theme.foregroundPrimary.get()} />
         </CurrencyButton>
       ) : (
         <SizableText
@@ -212,8 +212,8 @@ export function Exchange({
           value={btcDisplayValue}
           onChangeText={onBtcValueChange}
           placeholder="0.00"
-          placeholderTextColor={theme.foregroundTertiary.val}
-          selectionColor={theme.accentYellowPrimary.val}
+          placeholderTextColor={theme.foregroundTertiary.get()}
+          selectionColor={theme.accentYellowPrimary.get()}
           keyboardType={btcUnit === 'SATS' ? 'number-pad' : 'decimal-pad'}
           onFocus={handleBtcFocus}
           onBlur={handleBtcBlur}
@@ -248,12 +248,12 @@ export function Exchange({
           {fiatCurrency}
         </SizableText>
         {fiatCurrencyEditable ? (
-          <ChevronDown size={24} color={theme.foregroundPrimary.val} />
+          <ChevronDown size={24} color={theme.foregroundPrimary.get()} />
         ) : null}
       </CurrencyButton>
       {fiatLoading ? (
         <Stack flex={1} alignItems="flex-end">
-          <Loader size="small" color={theme.foregroundTertiary.val} />
+          <Loader size="small" color={theme.foregroundTertiary.get()} />
         </Stack>
       ) : (
         <FieldInput
@@ -261,8 +261,8 @@ export function Exchange({
           value={fiatDisplayValue}
           onChangeText={onFiatValueChange}
           placeholder={fiatPlaceholder}
-          placeholderTextColor={theme.foregroundTertiary.val}
-          selectionColor={theme.accentYellowPrimary.val}
+          placeholderTextColor={theme.foregroundTertiary.get()}
+          selectionColor={theme.accentYellowPrimary.get()}
           keyboardType="decimal-pad"
           onFocus={handleFiatFocus}
           onBlur={handleFiatBlur}

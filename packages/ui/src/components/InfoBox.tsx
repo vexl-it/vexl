@@ -56,8 +56,8 @@ export function InfoBox({
   const theme = useTheme()
   const foregroundColor =
     variant === 'pink'
-      ? theme.foregroundPrimary.val
-      : theme.foregroundSecondary.val
+      ? theme.foregroundPrimary.get()
+      : theme.foregroundSecondary.get()
   const textColor =
     variant === 'pink' ? '$foregroundPrimary' : '$foregroundSecondary'
 

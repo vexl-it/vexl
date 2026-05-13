@@ -18,10 +18,10 @@ function SwitchTradePriceTypeButton(
         <ChevronDown
           color={
             !tradePriceType || tradePriceType === 'live'
-              ? theme.accentHighlightSecondary.val
+              ? theme.accentHighlightSecondary.get()
               : tradePriceType === 'frozen'
-                ? theme.pinkForeground.val
-                : theme.greenForeground.val
+                ? theme.pinkForeground.get()
+                : theme.greenForeground.get()
           }
           size={20}
         />

@@ -60,7 +60,7 @@ function SelectedOfferCard(): React.JSX.Element | null {
       style={containerStyle}
     >
       <LinearGradient
-        colors={[theme.gradientHelper.val, theme.backgroundPrimary.val]}
+        colors={[theme.gradientHelper.get(), theme.backgroundPrimary.get()]}
         start={{x: 0, y: 0}}
         end={{x: 0, y: 1}}
         locations={[0, 0.7]}

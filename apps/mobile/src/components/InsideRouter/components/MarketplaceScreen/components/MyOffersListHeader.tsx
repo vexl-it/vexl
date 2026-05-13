@@ -56,11 +56,11 @@ function MyOffersListHeader(): React.ReactElement | null {
             icon={
               <ArrowsVerticalSort
                 size={18}
-                color={theme.accentHighlightPrimary.val}
+                color={theme.accentHighlightPrimary.get()}
               />
             }
             label={sortButtonLabel}
-            color={theme.accentHighlightPrimary.val}
+            color={theme.accentHighlightPrimary.get()}
             onPress={toggleSorting}
           />
         </XStack>

@@ -74,17 +74,17 @@ export function EventCard({
   const theme = useTheme()
   const isPressable = !!onPress
 
-  const bgColor = theme.backgroundSecondary.val
+  const bgColor = theme.backgroundSecondary.get()
   const gradientWidth = getTokens().size.$12.val
 
   const titleColor =
     state === 'upcoming'
-      ? theme.foregroundPrimary.val
-      : theme.foregroundSecondary.val
+      ? theme.foregroundPrimary.get()
+      : theme.foregroundSecondary.get()
   const detailColor =
     state === 'upcoming'
-      ? theme.foregroundSecondary.val
-      : theme.foregroundTertiary.val
+      ? theme.foregroundSecondary.get()
+      : theme.foregroundTertiary.get()
 
   return (
     <CardFrame pressable={isPressable} onPress={onPress}>

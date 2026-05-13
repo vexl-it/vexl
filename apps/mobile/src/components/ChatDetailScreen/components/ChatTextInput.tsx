@@ -101,7 +101,7 @@ function ChatTextInput(): React.ReactElement | null {
       maxHeight: 110,
       paddingVertical: 0,
       paddingHorizontal: 0,
-      color: theme.foregroundPrimary.val,
+      color: theme.foregroundPrimary.get(),
       fontFamily: 'TTSatoshi500',
       fontSize: 16,
     }),
@@ -145,7 +145,7 @@ function ChatTextInput(): React.ReactElement | null {
             </YStack>
             <Image
               source={CancelSvg}
-              stroke={theme.foregroundSecondary.val}
+              stroke={theme.foregroundSecondary.get()}
               onPress={() => {
                 setReplyToMessage(undefined)
               }}
@@ -177,8 +177,8 @@ function ChatTextInput(): React.ReactElement | null {
                 onChangeText={setValue}
                 style={inputStyles}
                 placeholder={t('messages.typeSomething')}
-                placeholderTextColor={theme.foregroundTertiary.val}
-                selectionColor={theme.accentHighlightPrimary.val}
+                placeholderTextColor={theme.foregroundTertiary.get()}
+                selectionColor={theme.accentHighlightPrimary.get()}
               />
             </Stack>
             <Animated.View style={animatedStyle}>
@@ -189,7 +189,7 @@ function ChatTextInput(): React.ReactElement | null {
                 backgroundColor="$accentYellowSecondary"
                 onPress={sendText}
               >
-                <Send size={20} color={theme.accentHighlightPrimary.val} />
+                <Send size={20} color={theme.accentHighlightPrimary.get()} />
               </UiIconButton>
             </Animated.View>
           </XStack>

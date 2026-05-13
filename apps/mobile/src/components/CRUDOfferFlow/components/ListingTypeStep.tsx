@@ -105,7 +105,7 @@ function ListingTypeStep({
                 }}
               >
                 <PinBoard
-                  color={theme.accentHighlightSecondary.val}
+                  color={theme.accentHighlightSecondary.get()}
                   size={getTokens().size.$7.val}
                 />
                 <Typography

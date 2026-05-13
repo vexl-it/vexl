@@ -23,7 +23,7 @@ function CurrencySelectButton({
         <Typography variant="paragraphSmall" color="$foregroundPrimary">
           {currency ?? currencies.USD.code}
         </Typography>
-        <ChevronDown color={theme.foregroundPrimary.val} size={20} />
+        <ChevronDown color={theme.foregroundPrimary.get()} size={20} />
       </XStack>
     </TouchableOpacity>
   )

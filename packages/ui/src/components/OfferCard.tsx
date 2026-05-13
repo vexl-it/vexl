@@ -71,7 +71,7 @@ export function OfferCard({
 }: OfferCardProps): React.JSX.Element {
   const theme = useTheme()
   const sizeTokens = getTokens().size
-  const secondaryColor = theme.foregroundSecondary.val
+  const secondaryColor = theme.foregroundSecondary.get()
 
   const hasClubs = clubNames != null && clubNames.length > 0
   const hasFriends = commonFriends != null

@@ -116,7 +116,7 @@ function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
                     setRevealIdentityImageUri(undefined)
                   }}
                 >
-                  <TrashBin size={24} color={theme.white100.val} />
+                  <TrashBin size={24} color={theme.white100.get()} />
                 </IconButton>
               </XStack>
             </>
@@ -155,7 +155,7 @@ function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
                       rx={DASHED_BORDER_RADIUS}
                       ry={DASHED_BORDER_RADIUS}
                       fill="none"
-                      stroke={theme.foregroundTertiary.val}
+                      stroke={theme.foregroundTertiary.get()}
                       strokeWidth={DASHED_BORDER_WIDTH}
                       strokeDasharray="6 6"
                       transform={`translate(${DASHED_BORDER_INSET} ${DASHED_BORDER_INSET})`}

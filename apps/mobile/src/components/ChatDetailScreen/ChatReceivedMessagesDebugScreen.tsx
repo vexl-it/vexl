@@ -150,7 +150,7 @@ function ChatReceivedMessagesDebugContent({
                         selectable
                         style={[
                           jsonTextStyle,
-                          {color: theme.foregroundPrimary.val},
+                          {color: theme.foregroundPrimary.get()},
                         ]}
                       >
                         {messageJson}

@@ -22,12 +22,12 @@ export function GraphicHeaderDecoration(): React.JSX.Element {
       <Svg width={GRAPHIC_WIDTH} height={GRAPHIC_HEIGHT} viewBox="0 0 156 145">
         <Polygon
           points="0,6 139,145 0,145"
-          fill={theme.backgroundTertiary.val}
+          fill={theme.backgroundTertiary.get()}
           opacity={GRAPHIC_OPACITY}
         />
         <Polygon
           points="75,0 156,81 75,81"
-          fill={theme.backgroundTertiary.val}
+          fill={theme.backgroundTertiary.get()}
           opacity={GRAPHIC_OPACITY}
         />
       </Svg>

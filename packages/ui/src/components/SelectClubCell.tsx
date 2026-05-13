@@ -86,9 +86,9 @@ export function SelectClubCell({
 }: SelectClubCellProps): React.JSX.Element {
   const theme = useTheme()
 
-  const checkboxColor = theme.accentHighlightSecondary.val
-  const iconBoxBg = theme.accentYellowSecondary.val
-  const descriptionIconColor = theme.foregroundSecondary.val
+  const checkboxColor = theme.accentHighlightSecondary.get()
+  const iconBoxBg = theme.accentYellowSecondary.get()
+  const descriptionIconColor = theme.foregroundSecondary.get()
 
   return (
     <SelectClubCellFrame selected={selected} onPress={onPress}>

@@ -118,8 +118,8 @@ function AnimatedTabIcon({
       <Icon
         color={
           active
-            ? theme.accentHighlightPrimary.val
-            : theme.foregroundSecondary.val
+            ? theme.accentHighlightPrimary.get()
+            : theme.foregroundSecondary.get()
         }
         size={getTokens().size.$7.val}
       />

@@ -19,7 +19,12 @@ export function UserImagePlaceholder({size = 36}: Props): React.JSX.Element {
           <Rect width={18} height={36} transform="translate(18, 0)" />
         </ClipPath>
       </Defs>
-      <Rect width={36} height={36} rx={8} fill={theme.backgroundTertiary.val} />
+      <Rect
+        width={36}
+        height={36}
+        rx={8}
+        fill={theme.backgroundTertiary.get()}
+      />
       <Circle cx={18} cy={13} r={5} fill="#455749" clipPath="url(#leftHalf)" />
       <Circle cx={18} cy={13} r={5} fill="#ACD9B7" clipPath="url(#rightHalf)" />
       <Path

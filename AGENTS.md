@@ -19,6 +19,7 @@ Commands:
 Code rules:
 
 - **NEVER use the `as` keyword in TypeScript.** Use `Schema.decodeUnknown` to validate external data via `effect/Schema`.
+- UI theme colors: when a component needs a concrete color string for icons, SVG props, React Native props, gradients, or other non-token props, read it with `const theme = useTheme()` and call `.get()` (for example `theme.foregroundPrimary.get()`). Do not use `.val` for theme colors; keep `.val` for non-color tokens such as spacing and size.
 - HTTP services: build on `HttpApiBuilder` + `Layer`; reuse helpers from `packages/server-utils`. Keep schemas/types in shared packages.
 - Prefer Effect `Array` helpers with `pipe` over native array methods (`filter`, `map`, etc.). Use `Array.isNonEmptyArray` for emptiness checks.
 - Always use Context7 MCP tools (`resolve-library-id` then `query-docs`) for library documentation. For Effect, use the `effect-ts/effect` library ID.

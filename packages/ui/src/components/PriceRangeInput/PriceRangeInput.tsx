@@ -177,7 +177,7 @@ export function PriceRangeInput({
     }
   }, [maxText, minValue, maxValue, maxLimit, maxLabel, setMaxValue])
 
-  const chevronColor = theme.accentHighlightPrimary.val
+  const chevronColor = theme.accentHighlightPrimary.get()
 
   // Commit any in-flight text edit and drop focus so the slider can take over
   // cleanly — otherwise the blur handler fires later and overwrites the
@@ -198,7 +198,7 @@ export function PriceRangeInput({
             keyboardType="numeric"
             onFocus={handleMinFocus}
             onBlur={handleMinBlur}
-            selectionColor={theme.accentYellowPrimary.val}
+            selectionColor={theme.accentYellowPrimary.get()}
           />
         </InputFrame>
         <SeparatorFrame>
@@ -212,7 +212,7 @@ export function PriceRangeInput({
             keyboardType="numeric"
             onFocus={handleMaxFocus}
             onBlur={handleMaxBlur}
-            selectionColor={theme.accentYellowPrimary.val}
+            selectionColor={theme.accentYellowPrimary.get()}
           />
         </InputFrame>
       </XStack>

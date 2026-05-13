@@ -29,8 +29,8 @@ export function ReachStats({
 }: ReachStatsProps): React.JSX.Element {
   const theme = useTheme()
   const stepIconSize = getTokens().size.$5.val
-  const activeIconColor = theme.foregroundPrimary.val
-  const defaultIconColor = theme.foregroundTertiary.val
+  const activeIconColor = theme.foregroundPrimary.get()
+  const defaultIconColor = theme.foregroundTertiary.get()
 
   return (
     <YStack

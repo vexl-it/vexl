@@ -150,9 +150,9 @@ function PremiumOrDiscountScreen(): React.ReactElement {
           <Stack px="$2">
             <RNSlider
               trackClickable
-              maximumTrackTintColor={theme.backgroundHighlight.val}
+              maximumTrackTintColor={theme.backgroundHighlight.get()}
               maximumValue={SLIDER_THRESHOLD}
-              minimumTrackTintColor={theme.backgroundHighlight.val}
+              minimumTrackTintColor={theme.backgroundHighlight.get()}
               minimumValue={-SLIDER_THRESHOLD}
               step={1}
               thumbTouchSize={{
@@ -169,9 +169,9 @@ function PremiumOrDiscountScreen(): React.ReactElement {
                   width={tokens.size[8].val}
                   height={tokens.size[8].val}
                   borderRadius={tokens.radius[8].val}
-                  backgroundColor={theme.backgroundPrimary.val}
+                  backgroundColor={theme.backgroundPrimary.get()}
                   borderWidth={tokens.space[1].val}
-                  borderColor={theme.accentYellowPrimary.val}
+                  borderColor={theme.accentYellowPrimary.get()}
                   alignItems="center"
                   justifyContent="center"
                 >
@@ -179,7 +179,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
                     width={tokens.size[5].val}
                     height={tokens.size[5].val}
                     borderRadius={tokens.radius[7].val}
-                    backgroundColor={theme.accentYellowPrimary.val}
+                    backgroundColor={theme.accentYellowPrimary.get()}
                   />
                 </Stack>
               )}
@@ -202,7 +202,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
           p="$5"
         >
           <Stack pt="$0.5">
-            <InfoCircle size={18} color={theme.foregroundSecondary.val} />
+            <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
           </Stack>
           <Typography
             variant="description"

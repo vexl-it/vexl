@@ -61,7 +61,7 @@ export function ClubCard({
   onPress,
 }: ClubCardProps): React.JSX.Element {
   const theme = useTheme()
-  const iconColor = theme.foregroundSecondary.val
+  const iconColor = theme.foregroundSecondary.get()
 
   return (
     <ClubCardFrame pressable={!!onPress} onPress={onPress}>

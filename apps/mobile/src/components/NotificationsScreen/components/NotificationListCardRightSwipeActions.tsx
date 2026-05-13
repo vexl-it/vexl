@@ -21,7 +21,7 @@ function NotificationListCardRightSwipeActions(
           jc="center"
         >
           <YStack ai="center" gap="$1">
-            <TrashBin size={24} color={theme.foregroundPrimary.val} />
+            <TrashBin size={24} color={theme.foregroundPrimary.get()} />
             <Typography color="$foregroundPrimary" variant="micro">
               {t('common.delete')}
             </Typography>

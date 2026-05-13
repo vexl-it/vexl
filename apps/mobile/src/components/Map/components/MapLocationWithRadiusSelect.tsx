@@ -197,13 +197,14 @@ export default function MapLocationWithRadiusSelect({
   const safeAreaInsets = useSafeAreaInsets()
   const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
+  const accentHighlightSecondary = theme.accentHighlightSecondary.get()
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
   )
   const pinSvg = useMemo(
-    () => createPinSvg(theme.accentHighlightSecondary.val),
-    [theme.accentHighlightSecondary.val]
+    () => createPinSvg(accentHighlightSecondary),
+    [accentHighlightSecondary]
   )
 
   const initialZoom = useMemo(

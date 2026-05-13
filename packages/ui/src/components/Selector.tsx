@@ -104,9 +104,9 @@ function SelectorAction({
 
   return (
     <SelectorActionFrame backgroundColor={backgroundColor} onPress={onPress}>
-      {Icon ? <Icon color={theme.foregroundPrimary.val} size={24} /> : null}
+      {Icon ? <Icon color={theme.foregroundPrimary.get()} size={24} /> : null}
       <SelectorLabel>{label}</SelectorLabel>
-      <ChevronRight color={theme.foregroundSecondary.val} size={24} />
+      <ChevronRight color={theme.foregroundSecondary.get()} size={24} />
     </SelectorActionFrame>
   )
 }
@@ -132,7 +132,7 @@ function SelectorSwitch({
         setIsOn((prev) => !prev)
       }}
     >
-      {Icon ? <Icon color={theme.foregroundPrimary.val} size={24} /> : null}
+      {Icon ? <Icon color={theme.foregroundPrimary.get()} size={24} /> : null}
       <SelectorLabel>{label}</SelectorLabel>
       <Stack alignSelf="center" justifyContent="center">
         <Switch valueAtom={valueAtom} />

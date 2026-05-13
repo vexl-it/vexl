@@ -67,7 +67,7 @@ export default function LoginFlowScreen({
       <ScrollView
         contentContainerStyle={{flexGrow: 1}}
         keyboardShouldPersistTaps="handled"
-        style={{backgroundColor: theme.backgroundPrimary.val, flex: 1}}
+        style={{backgroundColor: theme.backgroundPrimary.get(), flex: 1}}
       >
         {content}
       </ScrollView>

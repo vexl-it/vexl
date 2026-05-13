@@ -174,7 +174,7 @@ export function Picker<T extends string>({
   )
 
   const SelectedIcon = selectedItem?.icon
-  const triggerIconColor = theme.accentHighlightPrimary.val
+  const triggerIconColor = theme.accentHighlightPrimary.get()
 
   const toggleOpen = useCallback(() => {
     if (open) {

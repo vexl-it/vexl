@@ -64,13 +64,14 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
       }
       header={
         <Stack alignItems="center" mt="$5">
-          <VexlTextGraphic height={27} />
+          <VexlTextGraphic animate height={27} />
         </Stack>
       }
     >
       <LoginFlowCentered>
         <YStack alignItems="center" gap="$9" width="100%">
           <FaqStayAnonymous
+            animate
             height={236 * faqGraphicScale}
             width={330 * faqGraphicScale}
           />

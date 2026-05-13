@@ -42,6 +42,7 @@ export default function NotificationSetupScreen({
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">
         <NotificationsGraphic
+          animate
           height={153 * graphicScale}
           width={157 * graphicScale}
         />

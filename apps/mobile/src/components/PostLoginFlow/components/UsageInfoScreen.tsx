@@ -38,6 +38,7 @@ export default function UsageInfoScreen(): React.ReactElement {
       <YStack flex={1} justifyContent="space-between" paddingTop="$10" gap="$5">
         <YStack f={1} gap="$7" alignItems="center" justifyContent="center">
           <FaqWhatIsVexl
+            animate
             height={164 * graphicScale}
             width={164 * graphicScale}
           />

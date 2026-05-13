@@ -7,5 +7,5 @@ export function useResolvedGraphicVariant(
 ): GraphicVariant {
   const systemColorScheme = useColorScheme()
 
-  return variant ?? (systemColorScheme === 'dark' ? 'light' : 'dark')
+  return variant ?? (systemColorScheme === 'light' ? 'light' : 'dark')
 }

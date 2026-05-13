@@ -36,7 +36,7 @@ export default function UsageInfoScreen(): React.ReactElement {
   return (
     <PostLoginFlowScreen>
       <YStack flex={1} justifyContent="space-between" paddingTop="$10" gap="$5">
-        <YStack alignItems="center" gap="$7">
+        <YStack f={1} gap="$7" alignItems="center" justifyContent="center">
           <FaqWhatIsVexl
             height={164 * graphicScale}
             width={164 * graphicScale}

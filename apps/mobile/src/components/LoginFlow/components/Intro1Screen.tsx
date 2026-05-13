@@ -1,5 +1,6 @@
 import {
   FaqStayAnonymous,
+  Stack,
   Typography,
   VexlTextGraphic,
   YStack,
@@ -23,7 +24,6 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const {width: windowWidth} = useWindowDimensions()
   const availableWidth = windowWidth - 40
-  const vexlTextScale = Math.min(1, availableWidth / 158)
   const faqGraphicScale = Math.min(1, availableWidth / 330)
   const setShowTosSummaryForAlreadyLoggedInUser = useSetAtom(
     showTosSummaryForAlreadyLoggedInUserAtom
@@ -62,12 +62,13 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
           .
         </Typography>
       }
+      header={
+        <Stack alignItems="center" mt="$5">
+          <VexlTextGraphic height={27} />
+        </Stack>
+      }
     >
       <LoginFlowCentered>
-        <VexlTextGraphic
-          height={48 * vexlTextScale}
-          width={158 * vexlTextScale}
-        />
         <YStack alignItems="center" gap="$9" width="100%">
           <FaqStayAnonymous
             height={236 * faqGraphicScale}

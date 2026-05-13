@@ -43,7 +43,7 @@ describe('Update invoice status type webhook', () => {
           `sha256=` +
           crypto
             .createHmac('sha256', btcPayServerWebhookSecret)
-            .update(JSON.stringify(body, null, 2))
+            .update(JSON.stringify(body))
             .digest('hex')
 
         yield* _(
@@ -112,7 +112,7 @@ describe('Update invoice status type webhook', () => {
           `sha256=` +
           crypto
             .createHmac('sha256', btcPayServerWebhookSecret)
-            .update(JSON.stringify({...body, isRedelivery: true}, null, 2))
+            .update(JSON.stringify({...body, isRedelivery: true}))
             .digest('hex')
 
         const resp = yield* _(

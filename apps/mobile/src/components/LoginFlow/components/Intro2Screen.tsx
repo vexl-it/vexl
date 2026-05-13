@@ -44,12 +44,14 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
             <YStack>
               <Stack height={75} />
               <SellingGraphic
+                animate
                 height={255 * graphicScale}
                 width={222 * graphicScale}
               />
             </YStack>
             <YStack>
               <BuyingGraphic
+                animate
                 height={231 * graphicScale}
                 width={186 * graphicScale}
               />

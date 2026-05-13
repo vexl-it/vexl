@@ -2,7 +2,7 @@ import {ContactsGraphic, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {useWindowDimensions} from 'react-native'
+import {Alert, useWindowDimensions} from 'react-native'
 import {type PostLoginFlowStackScreenProps} from '../../../navigationTypes'
 import {resolveAllContactsAsSeenActionAtom} from '../../../state/contacts/atom/contactsStore'
 import {submitContactsActionAtom} from '../../../state/contacts/atom/submitContactsActionAtom'
@@ -47,19 +47,26 @@ export default function ContactsImportScreen({
               normalizeAndImportAll: true,
               showOfferReencryptionDialog: false,
             })
-          ).then((result) => {
-            resolveAllContactsAsSeen()
-            setContactsLoading(false)
+          )
+            .then((result) => {
+              resolveAllContactsAsSeen()
 
-            if (result === 'permissionsNotGranted') {
-              void Effect.runPromise(
-                showContactsAccessDeniedExplanation()
-              ).then(goNext)
-              return
-            }
+              if (result === 'otherError') return
 
-            goNext()
-          })
+              if (result === 'permissionsNotGranted') {
+                return Effect.runPromise(
+                  showContactsAccessDeniedExplanation()
+                ).then(goNext)
+              }
+
+              goNext()
+            })
+            .catch(() => {
+              Alert.alert(t('common.somethingWentWrong'))
+            })
+            .finally(() => {
+              setContactsLoading(false)
+            })
         },
       }}
       secondaryButton={{

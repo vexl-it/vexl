@@ -70,6 +70,7 @@ export default function ContactsImportScreen({
     >
       <YStack alignItems="center" flex={1} justifyContent="center" gap="$9">
         <ContactsGraphic
+          animate
           height={214 * graphicScale}
           width={184 * graphicScale}
         />

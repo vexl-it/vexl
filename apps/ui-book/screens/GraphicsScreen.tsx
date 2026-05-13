@@ -123,6 +123,7 @@ export function GraphicsScreen(): React.JSX.Element {
                   Dark
                 </SizableText>
                 <activeEntry.Component
+                  animate
                   variant="dark"
                   width={150}
                   height={150}
@@ -145,6 +146,7 @@ export function GraphicsScreen(): React.JSX.Element {
                   Light
                 </SizableText>
                 <activeEntry.Component
+                  animate
                   variant="light"
                   width={150}
                   height={150}

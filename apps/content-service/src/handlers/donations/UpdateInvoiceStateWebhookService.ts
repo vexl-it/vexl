@@ -46,13 +46,14 @@ export class UpdateInvoiceStateWebhookService extends Context.Tag(
               })
             )
           }).pipe(
-            Effect.catchAll(
-              (e) =>
+            Effect.catchAll((e) =>
+              Effect.fail(
                 new UnexpectedServerError({
                   status: 500,
                   message: 'Error saving invoice state to redis',
                   cause: e,
                 })
+              )
             )
           ),
         getInvoiceStatusType: ({invoiceId}) =>

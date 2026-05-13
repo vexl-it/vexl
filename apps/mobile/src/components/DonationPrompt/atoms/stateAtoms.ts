@@ -6,11 +6,13 @@ export const PREDEFINED_DONATION_AMOUNTS = [10, 20, 30, 50]
 export const MAX_DONATION_AMOUNT = 1000 // Maximum donation amount in EUR
 export const DONATION_PROMPT_DAYS_THRESHOLD_COUNT = 2
 
+export type DonationPaymentMethod = 'BTC-CHAIN' | 'BTC-LN'
+
 export const donationAmountAtom = atom<string | undefined>(undefined)
 export const selectedPredefinedDonationValueAtom = atom<number | undefined>(
   undefined
 )
-export const donationPaymentMethodAtom = atom<'BTC-CHAIN' | 'BTC-LN'>('BTC-LN')
+export const donationPaymentMethodAtom = atom<DonationPaymentMethod>('BTC-LN')
 
 export const resetDonationPromptValuesActionAtom = atom(null, (get, set) => {
   set(donationAmountAtom, undefined)

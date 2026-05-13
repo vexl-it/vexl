@@ -1,6 +1,6 @@
+import {Typography, XStack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
-import {Text, XStack} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -58,16 +58,22 @@ function DonationPriceInSats(): React.ReactElement {
 
   return (
     <XStack als="flex-start" gap="$1" ai="center" flexWrap="wrap">
-      <Text col="$greyAccent2">
+      <Typography variant="description" color="$foregroundSecondary">
         {`${t('offer.approximatelyAbbreviation')}`}
-      </Text>
+      </Typography>
       {btcPriceWithState?.state === 'loading' ? (
         <VexlActivityIndicator size="small" bc="$greyAccent2" />
       ) : (
-        <Text col="$greyAccent2">{localizedDonationInSats}</Text>
+        <Typography variant="description" color="$foregroundPrimary">
+          {localizedDonationInSats}
+        </Typography>
       )}
-      <Text col="$greyAccent2">{t('common.SATS')}</Text>
-      <Text col="$greyAccent2">{`(${t('settings.btcPriceSourceCreditYadio')})`}</Text>
+      <Typography variant="description" color="$foregroundPrimary">
+        {t('common.SATS')}
+      </Typography>
+      <Typography variant="description" color="$foregroundSecondary">
+        {`(${t('settings.btcPriceSourceCreditYadio')})`}
+      </Typography>
     </XStack>
   )
 }

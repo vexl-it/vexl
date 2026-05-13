@@ -235,7 +235,7 @@ function ButtonsSection(): React.ReactElement {
             text: t('settings.items.myDonations'),
             icon: donationsSvg,
             onPress: () => {
-              navigation.navigate('MyDonations')
+              navigation.navigate('DonationsFlow', {screen: 'MyDonations'})
             },
             navigatesFurther: true,
           },

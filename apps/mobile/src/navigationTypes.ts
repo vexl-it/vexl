@@ -131,6 +131,8 @@ export type RootStackParamsList = {
 
   TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
 
+  DonationsFlow: NavigatorScreenParams<DonationsFlowParamsList>
+
   SetContacts: {filter?: ContactsFilter | undefined} | undefined
 
   NotificationSettings: undefined
@@ -144,10 +146,6 @@ export type RootStackParamsList = {
   TaskRegistryOverview: undefined
 
   EventsAndClubs: NavigatorScreenParams<EventsAndClubsParamsList>
-
-  MyDonations: undefined
-
-  DonationDetails: {invoiceId: InvoiceId}
 
   JoinClubFlow: NavigatorScreenParams<JoinClubFlowParamsList>
 
@@ -266,6 +264,19 @@ export type TradeCalculatorStackScreenProps<
   NativeStackScreenProps<TradeCalculatorStackParamsList, T>,
   RootStackScreenProps<keyof RootStackParamsList>
 >
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DonationsFlowParamsList = {
+  MyDonations: undefined
+  SetDonation: undefined
+  DonationDetails: {readonly invoiceId: InvoiceId}
+}
+
+export type DonationsFlowScreenProps<T extends keyof DonationsFlowParamsList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<DonationsFlowParamsList, T>,
+    RootStackScreenProps<keyof RootStackParamsList>
+  >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type TradeChecklistStackParamsList = {

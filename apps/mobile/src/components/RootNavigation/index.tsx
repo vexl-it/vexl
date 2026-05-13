@@ -32,7 +32,7 @@ import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
-import DonationDetailsScreen from '../DonationDetailsScreen'
+import DonationsFlow from '../DonationsFlow'
 import EditNameScreen from '../EditNameScreen'
 import EditOfferFieldScreen from '../EditOfferFieldScreen'
 import EventsAndClubsScreen from '../EventsAndClubsScreen'
@@ -46,7 +46,6 @@ import SettingsScreen from '../InsideRouter/components/SettingsScreen'
 import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MapViewScreen from '../MapViewScreen'
-import MyDonationsScreen from '../MyDonationsScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import NotificationsScreen from '../NotificationsScreen'
@@ -193,11 +192,7 @@ function RootNavigation(): React.ReactElement {
               name="EventsAndClubs"
               component={EventsAndClubsScreen}
             />
-            <Stack.Screen name="MyDonations" component={MyDonationsScreen} />
-            <Stack.Screen
-              name="DonationDetails"
-              component={DonationDetailsScreen}
-            />
+            <Stack.Screen name="DonationsFlow" component={DonationsFlow} />
             {/* <Stack.Screen
               name="NotificationPermissionsMissing"
               component={NotificationPermissionsScreen}

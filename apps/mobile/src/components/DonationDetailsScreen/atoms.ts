@@ -1,8 +1,10 @@
 import {Effect} from 'effect'
 import {atom} from 'jotai'
+import {type MyDonation} from '../../state/donations/domain'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import openUrl from '../../utils/openUrl'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
+import {createDonationInvoiceWithUiFeedbackActionAtom} from '../DonationPrompt/atoms'
 
 export const showClaimConfirmationDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
@@ -39,3 +41,12 @@ ${t('donationConfirmation.invoiceId')} (Invoice ID):\n\n`
     )()
   }).pipe(Effect.ignore)
 })
+
+export const retryDonationActionAtom = atom(
+  null,
+  (get, set, donation: MyDonation) =>
+    set(createDonationInvoiceWithUiFeedbackActionAtom, {
+      amount: Number(donation.fiatAmount),
+      paymentMethod: donation.paymentMethod,
+    })
+)

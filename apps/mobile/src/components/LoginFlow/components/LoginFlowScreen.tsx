@@ -1,4 +1,11 @@
-import {Button, Typography, XStack, YStack, useTheme} from '@vexl-next/ui'
+import {
+  Button,
+  Stack,
+  Typography,
+  XStack,
+  YStack,
+  useTheme,
+} from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
 import {ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -11,15 +18,17 @@ interface Props {
   }
   readonly children: ReactNode
   readonly footer?: ReactNode
+  readonly header?: ReactNode
   readonly scroll?: boolean
-  readonly disableHorizontalPadding?: boolean
+  readonly disableHorizontalPaddingForChildren?: boolean
 }
 
 export default function LoginFlowScreen({
   action,
   children,
+  header,
   footer,
-  disableHorizontalPadding,
+  disableHorizontalPaddingForChildren,
   scroll = false,
 }: Props): React.ReactElement {
   const insets = useSafeAreaInsets()
@@ -28,12 +37,17 @@ export default function LoginFlowScreen({
     <YStack
       flex={1}
       justifyContent="space-between"
-      paddingHorizontal={disableHorizontalPadding ? 0 : '$5'}
       paddingBottom={Math.max(insets.bottom, 16)}
       paddingTop={Math.max(insets.top, 20)}
     >
-      {children}
-      <YStack gap="$4">
+      <Stack>{header ?? null}</Stack>
+      <YStack
+        f={1}
+        paddingHorizontal={disableHorizontalPaddingForChildren ? 0 : '$5'}
+      >
+        {children}
+      </YStack>
+      <YStack gap="$4" paddingHorizontal="$5">
         {footer ?? null}
         {action ? (
           <Button
@@ -105,7 +119,7 @@ export function LoginFlowCentered({
   readonly children: ReactNode
 }): React.ReactElement {
   return (
-    <YStack flex={1} alignItems="center" gap="$8">
+    <YStack f={1} alignItems="center" justifyContent="center" gap="$8">
       {children}
     </YStack>
   )

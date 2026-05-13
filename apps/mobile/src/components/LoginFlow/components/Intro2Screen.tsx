@@ -1,4 +1,10 @@
-import {BuyingGraphic, SellingGraphic, XStack, YStack} from '@vexl-next/ui'
+import {
+  BuyingGraphic,
+  SellingGraphic,
+  Stack,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
@@ -19,6 +25,7 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
 
   return (
     <LoginFlowScreen
+      disableHorizontalPaddingForChildren
       action={{
         label: t('common.continue'),
         onPress: () => {
@@ -27,30 +34,31 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
       }}
     >
       <LoginFlowCentered>
-        <XStack
-          alignItems="center"
-          height={310 * graphicScale}
-          justifyContent="center"
-          overflow="hidden"
-          width="100%"
-        >
-          <SellingGraphic
-            height={255 * graphicScale}
-            width={222 * graphicScale}
-          />
-          <YStack
-            marginLeft={-32 * graphicScale}
-            marginTop={-48 * graphicScale}
+        <YStack f={1} justifyContent="space-around">
+          <XStack
+            alignItems="flex-start"
+            justifyContent="space-between"
+            overflow="visible"
+            width="100%"
           >
-            <BuyingGraphic
-              height={231 * graphicScale}
-              width={186 * graphicScale}
-            />
+            <YStack>
+              <Stack height={75} />
+              <SellingGraphic
+                height={255 * graphicScale}
+                width={222 * graphicScale}
+              />
+            </YStack>
+            <YStack>
+              <BuyingGraphic
+                height={231 * graphicScale}
+                width={186 * graphicScale}
+              />
+            </YStack>
+          </XStack>
+          <YStack gap="$4" width="100%">
+            <LoginFlowTitle>{t('loginFlow.v2.intro2.title')}</LoginFlowTitle>
+            <LoginFlowText>{t('loginFlow.v2.intro2.text')}</LoginFlowText>
           </YStack>
-        </XStack>
-        <YStack gap="$4" width="100%">
-          <LoginFlowTitle>{t('loginFlow.v2.intro2.title')}</LoginFlowTitle>
-          <LoginFlowText>{t('loginFlow.v2.intro2.text')}</LoginFlowText>
         </YStack>
       </LoginFlowCentered>
     </LoginFlowScreen>

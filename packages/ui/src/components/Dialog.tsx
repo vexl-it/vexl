@@ -171,7 +171,7 @@ export function Dialog({
       onRequestClose={onClose}
     >
       {avoidKeyboard ? (
-        <KeyboardAvoidingView behavior="padding" style={{flex: 1}}>
+        <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
           {content}
         </KeyboardAvoidingView>
       ) : (

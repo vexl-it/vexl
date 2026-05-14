@@ -1,27 +1,28 @@
+import {
+  Button,
+  ChevronLeft,
+  NavigationBar,
+  Screen,
+  Stack,
+  Switch,
+  Typography,
+  XStack,
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useState} from 'react'
+import React, {useCallback} from 'react'
 import {Alert} from 'react-native'
-import {Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import Button from '../Button'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 import {showErrorAlert} from '../ErrorAlert'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import Switch from '../Switch'
-import {appLogsEmptyAtom} from './atoms'
+import {appLogsEmptyAtom, appLogsEnabledAtom} from './atoms'
 import LogsList from './components/LogsList'
 import saveLogsToDirectoryAndShare from './utils/saveLogsToDirectory'
-import {setupAppLogs} from './utils/setupAppLogs'
-import {
-  clearLogs,
-  getCustomLoggingEnabled,
-  setCustomLoggingEnabled,
-} from './utils/storage'
+import {clearLogs} from './utils/storage'
 
 function AppLogsScreen(): React.ReactElement {
   const {t} = useTranslation()
-  const [enabled, setEnabled] = useState(getCustomLoggingEnabled())
+  const goBack = useSafeGoBack()
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
   const isAppLogsEmpty = useAtomValue(appLogsEmptyAtom)
 
@@ -69,45 +70,73 @@ function AppLogsScreen(): React.ReactElement {
   }, [setLoading, t])
 
   return (
-    <Screen>
-      <Stack mx="$2" my="$4" f={1}>
-        <ScreenTitle text={t('AppLogs.title')} withBackButton>
-          <Switch
-            value={enabled}
-            onValueChange={(enabled) => {
-              setEnabled(enabled)
-              setCustomLoggingEnabled(enabled)
-              setupAppLogs()
-            }}
-            style={{marginRight: 5}}
-          />
-        </ScreenTitle>
-        <Text mb="$3" ff="$body600" color="$white">
-          {t('AppLogs.warning')}
-        </Text>
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('AppLogs.title')}
+          leftAction={{
+            icon: ChevronLeft,
+            onPress: goBack,
+          }}
+        />
+      }
+      footer={
+        isAppLogsEmpty ? undefined : (
+          <XStack gap="$3">
+            <Button flex={1} variant="destructive" onPress={clearLogs}>
+              {t('AppLogs.clear')}
+            </Button>
+            <Button flex={1} variant="primary" onPress={exportLogs}>
+              {t('AppLogs.export')}
+            </Button>
+          </XStack>
+        )
+      }
+    >
+      <Stack flex={1} gap="$5">
+        <XStack
+          alignItems="center"
+          backgroundColor="$backgroundTertiary"
+          borderRadius="$5"
+          gap="$4"
+          justifyContent="space-between"
+          padding="$5"
+        >
+          <Stack flex={1} gap="$2">
+            <Typography
+              color="$foregroundPrimary"
+              letterSpacing={0}
+              variant="paragraph"
+            >
+              {t('AppLogs.enable')}
+            </Typography>
+            <Typography
+              color="$foregroundSecondary"
+              letterSpacing={0}
+              variant="micro"
+            >
+              {t('AppLogs.warningShort')}
+            </Typography>
+          </Stack>
+          <Stack alignItems="center">
+            <Switch valueAtom={appLogsEnabledAtom} />
+          </Stack>
+        </XStack>
 
-        <Stack f={1} my="$1">
+        {isAppLogsEmpty ? null : (
+          <Typography
+            color="$foregroundPrimary"
+            letterSpacing={0}
+            variant="paragraphDemibold"
+          >
+            {t('AppLogs.logs')}
+          </Typography>
+        )}
+
+        <Stack flex={1}>
           <LogsList />
         </Stack>
-        <XStack gap="$2">
-          <Button
-            fullSize
-            size="small"
-            variant="primary"
-            onPress={clearLogs}
-            text={t('AppLogs.clear')}
-            disabled={isAppLogsEmpty}
-          />
-
-          <Button
-            fullSize
-            size="small"
-            variant="secondary"
-            onPress={exportLogs}
-            text={t('AppLogs.export')}
-            disabled={isAppLogsEmpty}
-          />
-        </XStack>
       </Stack>
     </Screen>
   )

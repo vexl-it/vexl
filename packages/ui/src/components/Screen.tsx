@@ -3,7 +3,7 @@ import React, {useContext} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {styled} from 'tamagui'
 
-import {Stack, YStack} from '../primitives'
+import {ScrollView, Stack, YStack} from '../primitives'
 
 const defaultFooterHeightAtom = atom(0)
 
@@ -45,6 +45,7 @@ const OverlayNavigationBarFrame = styled(Stack, {
 export interface ScreenProps {
   readonly navigationBar: React.ReactNode
   readonly overlayNavigationBar?: boolean
+  readonly scrollable?: boolean
   noHorizontalPadding?: boolean
   readonly footer?: React.ReactNode
   readonly children: React.ReactNode
@@ -53,6 +54,7 @@ export interface ScreenProps {
 export function Screen({
   navigationBar,
   overlayNavigationBar,
+  scrollable,
   noHorizontalPadding,
   children,
   footer,
@@ -60,12 +62,27 @@ export function Screen({
   const insets = useSafeAreaInsets()
   const {footerHeightAtom} = useScreenFooterHeight()
   const setFooterHeight = useSetAtom(footerHeightAtom)
+  const [footerHeight, setLocalFooterHeight] = React.useState(0)
+  const bottomInsetOutsideContent = scrollable && !footer ? 0 : insets.bottom
+  const scrollViewBottomPadding = footer ? footerHeight : insets.bottom
+
+  const content = overlayNavigationBar ? (
+    <YStack flex={1}>{children}</YStack>
+  ) : (
+    <YStack
+      flex={1}
+      paddingTop="$3"
+      paddingHorizontal={noHorizontalPadding ? undefined : '$5'}
+    >
+      {children}
+    </YStack>
+  )
 
   return (
     <FooterHeightAtomContext.Provider value={{footerHeightAtom}}>
       <ScreenFrame
         paddingTop={overlayNavigationBar ? 0 : insets.top}
-        marginBottom={insets.bottom}
+        marginBottom={bottomInsetOutsideContent}
       >
         {overlayNavigationBar ? (
           <OverlayNavigationBarFrame paddingTop={insets.top}>
@@ -74,21 +91,25 @@ export function Screen({
         ) : (
           navigationBar
         )}
-        {overlayNavigationBar ? (
-          <YStack flex={1}>{children}</YStack>
-        ) : (
-          <YStack
-            flex={1}
-            paddingTop="$3"
-            paddingHorizontal={noHorizontalPadding ? undefined : '$5'}
+        {scrollable ? (
+          <ScrollView
+            style={{flex: 1}}
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: scrollViewBottomPadding,
+            }}
           >
-            {children}
-          </YStack>
+            {content}
+          </ScrollView>
+        ) : (
+          content
         )}
         {footer ? (
           <ScreenFooterFrame
             onLayout={(e) => {
-              setFooterHeight(e.nativeEvent.layout.height)
+              const measuredFooterHeight = e.nativeEvent.layout.height
+              setLocalFooterHeight(measuredFooterHeight)
+              setFooterHeight(measuredFooterHeight)
             }}
           >
             {footer}

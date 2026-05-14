@@ -11,14 +11,15 @@ import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
+import AccountScreen from '../AccountScreen'
 import AppLogsScreen from '../AppLogsScreen'
+import AppSettingsScreen from '../AppSettingsScreen'
 import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
 import OfferExpirationDateScreen from '../CRUDOfferFlow/components/OfferExpirationDateScreen'
 import SelectLocationRadiusScreen from '../CRUDOfferFlow/components/SelectLocationRadiusScreen'
 import SelectLocationSearchScreen from '../CRUDOfferFlow/components/SelectLocationSearchScreen'
 import {ChangeCurrencyScreen} from '../ChangeCurrency'
-import ChangeProfilePictureScreen from '../ChangeProfilePictureScreen/ChangeProfilePictureScreen'
 import ChatDetailScreen from '../ChatDetailScreen'
 import ChatImagePreviewScreen from '../ChatDetailScreen/ChatImagePreviewScreen'
 import ChatInfoJsonDebugScreen from '../ChatDetailScreen/ChatInfoJsonDebugScreen'
@@ -33,8 +34,9 @@ import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import DonationsFlow from '../DonationsFlow'
-import EditNameScreen from '../EditNameScreen'
+import EditIdentityScreen from '../EditIdentityScreen'
 import EditOfferFieldScreen from '../EditOfferFieldScreen'
+import EditProfileScreen from '../EditProfileScreen'
 import EventsAndClubsScreen from '../EventsAndClubsScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
@@ -42,7 +44,6 @@ import GoldenAvatarAnimation, {
   showGoldenAvatarAnimationAtom,
 } from '../GoldenAvatar'
 import InsideScreen from '../InsideRouter'
-import SettingsScreen from '../InsideRouter/components/SettingsScreen'
 import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MapViewScreen from '../MapViewScreen'
@@ -51,8 +52,10 @@ import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import NotificationsScreen from '../NotificationsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
+import ScanQrCodeScreen from '../ScanQrCodeScreen'
 import SendMessageScreen from '../SendMessageScreen'
 import SetContactsScreen from '../SetContactsScreen'
+import ShareProfileScreen from '../ShareProfileScreen'
 import TaskRegistryOverviewScreen from '../TaskRegistryOverviewScreen'
 import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
@@ -197,7 +200,6 @@ function RootNavigation(): React.ReactElement {
               name="NotificationPermissionsMissing"
               component={NotificationPermissionsScreen}
             /> */}
-            <Stack.Screen name="EditName" component={EditNameScreen} />
             <Stack.Screen
               name="TradeCalculatorFlow"
               options={{
@@ -205,10 +207,6 @@ function RootNavigation(): React.ReactElement {
                 presentation: 'containedTransparentModal',
               }}
               component={TradeCalculatorRouter}
-            />
-            <Stack.Screen
-              name="ChangeProfilePicture"
-              component={ChangeProfilePictureScreen}
             />
             <Stack.Screen
               name="TradeChecklistFlow"
@@ -223,7 +221,26 @@ function RootNavigation(): React.ReactElement {
               name="BlogArticlesList"
               component={BlogArticlesListScreen}
             />
-            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="Account" component={AccountScreen} />
+            <Stack.Screen
+              name="ScanQrCode"
+              component={ScanQrCodeScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'card',
+              }}
+            />
+            <Stack.Screen name="AppSettings" component={AppSettingsScreen} />
+            <Stack.Screen
+              name="ShareProfile"
+              component={ShareProfileScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'card',
+              }}
+            />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="EditIdentity" component={EditIdentityScreen} />
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}

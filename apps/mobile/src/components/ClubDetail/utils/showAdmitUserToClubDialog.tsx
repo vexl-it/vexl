@@ -2,7 +2,7 @@ import {Effect} from 'effect'
 import {atom} from 'jotai'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
-import QrScanner from '../../InsideRouter/components/SettingsScreen/components/QrScanner'
+import QrScanner from '../../QrScanner'
 
 export const showAdmitUserToClubScannerActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)

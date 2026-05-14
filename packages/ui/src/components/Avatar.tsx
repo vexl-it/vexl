@@ -4,13 +4,14 @@ import {FilterImage} from 'react-native-svg/filter-image'
 import {getTokens} from 'tamagui'
 import {Stack, ZStack} from '../primitives'
 
-export type AvatarSize = 'small' | 'medium' | 'large'
+export type AvatarSize = 'small' | 'medium' | 'large' | '$9'
 
 type SizeToken = keyof ReturnType<typeof getTokens>['size']
 export type AvatarCustomSize = number | SizeToken
 
 const SIZE_TOKEN_MAP: Record<AvatarSize, SizeToken> = {
   small: '$8', // 32px
+  $9: '$9', // 40px
   medium: '$10', // 48px
   large: '$12', // 64px
 }

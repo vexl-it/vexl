@@ -1,5 +1,8 @@
 import {Effect} from 'effect'
 import {exec} from 'node:child_process'
+import {mkdtemp, readFile, rm} from 'node:fs/promises'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
 import * as readline from 'node:readline'
 import {promisify} from 'node:util'
 import {ExpoStartupError} from '../errors/startup-errors.js'
@@ -10,6 +13,30 @@ export interface Device {
   id: string
   name: string
   type: 'physical' | 'emulator' | 'simulator'
+}
+
+interface DevicectlDevice {
+  connectionProperties?: {
+    pairingState?: string
+    tunnelState?: string
+    transportType?: string
+  }
+  deviceProperties?: {
+    name?: string
+    osVersionNumber?: string
+  }
+  hardwareProperties?: {
+    deviceType?: string
+    platform?: string
+    reality?: string
+    udid?: string
+  }
+}
+
+interface DevicectlListOutput {
+  result?: {
+    devices?: DevicectlDevice[]
+  }
 }
 
 /**
@@ -121,6 +148,45 @@ const parseSimctlDevices = (output: string): Device[] => {
 }
 
 /**
+ * Parse output from `xcrun devicectl list devices --json-output` to get
+ * connected physical iOS devices.
+ */
+const parseDevicectlPhysicalDevices = (output: string): Device[] => {
+  const devices: Device[] = []
+
+  try {
+    const data: DevicectlListOutput = JSON.parse(output)
+
+    for (const device of data.result?.devices ?? []) {
+      const hardware = device.hardwareProperties
+      const connection = device.connectionProperties
+      const properties = device.deviceProperties
+      const udid = hardware?.udid
+
+      if (!udid) continue
+      if (hardware?.platform !== 'iOS') continue
+      if (hardware?.reality !== 'physical') continue
+      if (connection?.pairingState !== 'paired') continue
+      if (connection?.tunnelState !== 'connected') continue
+
+      const name = properties?.name?.trim() || hardware.deviceType || udid
+      const osVersion = properties?.osVersionNumber
+      const deviceName = osVersion ? `${name} (iOS ${osVersion})` : name
+
+      devices.push({
+        id: udid,
+        name: deviceName,
+        type: 'physical',
+      })
+    }
+  } catch {
+    // JSON parse failed, return empty list
+  }
+
+  return devices
+}
+
+/**
  * Get list of all available Android AVDs using `emulator -list-avds`.
  *
  * This shows ALL available emulators, not just running ones.
@@ -195,6 +261,49 @@ const getIosSimulators = (): Effect.Effect<Device[], ExpoStartupError> =>
   })
 
 /**
+ * Get list of connected physical iOS devices using xcrun devicectl.
+ * Returns empty array if devicectl fails (non-critical).
+ */
+const getIosPhysicalDevices = (): Effect.Effect<Device[], never> =>
+  Effect.tryPromise({
+    try: async () => {
+      const tempDir = await mkdtemp(join(tmpdir(), 'vexl-ios-devices-'))
+      const outputPath = join(tempDir, 'devices.json')
+
+      try {
+        await execAsync(
+          `xcrun devicectl list devices --json-output "${outputPath}" --timeout 10`
+        )
+        const output = await readFile(outputPath, 'utf8')
+        return parseDevicectlPhysicalDevices(output)
+      } finally {
+        await rm(tempDir, {force: true, recursive: true})
+      }
+    },
+    catch: () => {
+      // devicectl not available or no device access - not critical
+      return new Error('devicectl failed')
+    },
+  }).pipe(Effect.catchAll(() => Effect.succeed([])))
+
+/**
+ * Get list of available iOS devices.
+ *
+ * Combines:
+ * 1. Connected physical iOS devices from `xcrun devicectl`
+ * 2. Available iOS simulators from `xcrun simctl`
+ */
+const getIosDevices = (): Effect.Effect<Device[], ExpoStartupError> =>
+  Effect.gen(function* () {
+    const [physicalDevices, simulators] = yield* Effect.all([
+      getIosPhysicalDevices(),
+      getIosSimulators(),
+    ])
+
+    return [...physicalDevices, ...simulators]
+  })
+
+/**
  * Prompt user to select a device from the list.
  */
 const promptUserForDevice = (
@@ -258,7 +367,7 @@ const promptUserForDevice = (
 export const getAvailableDevices = (
   platform: 'ios' | 'android'
 ): Effect.Effect<Device[], ExpoStartupError> =>
-  platform === 'android' ? getAndroidDevices() : getIosSimulators()
+  platform === 'android' ? getAndroidDevices() : getIosDevices()
 
 /**
  * Interactively select a device for the specified platform.

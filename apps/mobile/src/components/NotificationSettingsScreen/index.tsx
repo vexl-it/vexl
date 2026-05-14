@@ -1,28 +1,81 @@
-import {Effect} from 'effect'
-import {atom, type SetStateAction} from 'jotai'
+import {
+  ChevronLeft,
+  NavigationBar,
+  Screen,
+  Switch,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
+import {Array, Effect, pipe} from 'effect'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import React, {useMemo} from 'react'
-import {ScrollView} from 'react-native'
-import {getTokens, YStack} from 'tamagui'
 import {syncVexlNotificationTokensActionAtom} from '../../state/notifications/actions/syncVexlNotificationTokensActionAtom'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {notificationPreferencesAtom} from '../../utils/preferences'
 import {reportErrorE} from '../../utils/reportError'
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import PreferenceItem from './components/PreferenceItem'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 
-const notificationPreferencesToShow = [
+type NotificationPreference =
+  | 'marketing'
+  | 'chat'
+  | 'inactivityWarnings'
+  | 'newOfferInMarketplace'
+
+interface PreferenceContent {
+  readonly id: NotificationPreference
+  readonly title: string
+  readonly description: string
+  readonly atom: WritableAtom<boolean, [SetStateAction<boolean>], void>
+}
+
+const notificationPreferencesToShow: readonly NotificationPreference[] = [
   'marketing',
   'chat',
   'inactivityWarnings',
-  // 'newPhoneContacts',
   'newOfferInMarketplace',
-] as const
+]
+
+function PreferenceCard({
+  title,
+  description,
+  atom: valueAtom,
+}: Omit<PreferenceContent, 'id'>): React.ReactElement {
+  return (
+    <XStack
+      alignItems="center"
+      backgroundColor="$backgroundSecondary"
+      borderRadius="$5"
+      gap="$3"
+      justifyContent="center"
+      padding="$5"
+    >
+      <YStack flex={1} gap="$2">
+        <Typography
+          color="$foregroundPrimary"
+          letterSpacing={0}
+          variant="paragraph"
+        >
+          {title}
+        </Typography>
+        <Typography
+          color="$foregroundSecondary"
+          letterSpacing={0}
+          variant="micro"
+        >
+          {description}
+        </Typography>
+      </YStack>
+      <Switch aria-label={title} valueAtom={valueAtom} />
+    </XStack>
+  )
+}
 
 function NotificationSettingsScreen(): React.ReactElement {
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
   const marketingNotificationPreferenceAtom = useMemo(
     () =>
       atom(
@@ -53,30 +106,49 @@ function NotificationSettingsScreen(): React.ReactElement {
     []
   )
 
-  const contents = useMemo(() => {
-    return notificationPreferencesToShow.map((one) => ({
-      title: t(`notifications.preferences.${one}.title`),
-      description: t(`notifications.preferences.${one}.body`),
-      atom:
-        one === 'marketing'
-          ? marketingNotificationPreferenceAtom
-          : focusAtom(notificationPreferencesAtom, (o) => o.prop(one)),
-    }))
+  const contents = useMemo<readonly PreferenceContent[]>(() => {
+    return pipe(
+      notificationPreferencesToShow,
+      Array.map((one) => {
+        return {
+          id: one,
+          title: t(`notifications.preferences.${one}.title`),
+          description: t(`notifications.preferences.${one}.body`),
+          atom:
+            one === 'marketing'
+              ? marketingNotificationPreferenceAtom
+              : focusAtom(notificationPreferencesAtom, (o) => o.prop(one)),
+        }
+      })
+    )
   }, [marketingNotificationPreferenceAtom, t])
 
   return (
-    <Screen customHorizontalPadding={getTokens().space[2].val}>
-      <ScreenTitle
-        text={t('notifications.preferences.screenTitle')}
-        withBackButton
-      />
-      <ScrollView>
-        <YStack gap={6}>
-          {contents.map((one) => (
-            <PreferenceItem key={one.atom.toString()} {...one} />
-          ))}
+    <Screen
+      scrollable
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('notifications.preferences.screenTitle')}
+          leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
+        />
+      }
+    >
+      <YStack flex={1} paddingHorizontal="$3" paddingTop="$4">
+        <YStack gap="$5">
+          {pipe(
+            contents,
+            Array.map((one) => (
+              <PreferenceCard
+                key={one.id}
+                atom={one.atom}
+                description={one.description}
+                title={one.title}
+              />
+            ))
+          )}
         </YStack>
-      </ScrollView>
+      </YStack>
     </Screen>
   )
 }

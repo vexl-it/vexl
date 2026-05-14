@@ -9,6 +9,8 @@ import {FiatOrSats} from '../../state/marketplace/domain'
 import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 
+export const AppThemeMode = Schema.Literal('light', 'dark', 'system')
+
 const NotificationPreferences = Schema.Struct({
   offer: Schema.Boolean,
   chat: Schema.Boolean,
@@ -46,6 +48,9 @@ export const Preferences = Schema.Struct({
     default: () => false,
   }),
   appLanguage: Schema.optional(Schema.String),
+  appThemeMode: Schema.optionalWith(AppThemeMode, {
+    default: () => 'system',
+  }),
   marketplaceFiatOrSatsCurrency: Schema.optionalWith(FiatOrSats, {
     default: () => 'FIAT',
   }),

@@ -6,11 +6,12 @@ import {
   type Sort,
 } from '@vexl-next/domain/src/general/offers'
 import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
+import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {sessionDataOrDummyAtom} from '../../session'
 import sortOffers from '../utils/sortOffers'
 import {offersAtom} from './offersState'
@@ -41,6 +42,28 @@ export const myOffersSortedAtomsAtom = splitAtom(
 export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
 )
+
+const accountActionStepsStorageAtom = atomWithParsedMmkvStorage(
+  'accountActionSteps',
+  {
+    postedFirstOffer: false,
+  },
+  Schema.Struct({
+    postedFirstOffer: Schema.Boolean,
+  })
+)
+
+export const postedFirstOfferAtom = focusAtom(
+  accountActionStepsStorageAtom,
+  (optic) => optic.prop('postedFirstOffer')
+)
+
+export const hasPostedFirstOfferActionStepAtom = atom((get) => {
+  return (
+    get(postedFirstOfferAtom) ||
+    pipe(get(myActiveOffersAtom), Array.isNonEmptyArray)
+  )
+})
 
 export const displayAddListingTypeAtom = atom<boolean>(true)
 

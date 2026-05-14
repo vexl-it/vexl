@@ -8,7 +8,7 @@ import {type SendMessageApiErrors} from '@vexl-next/resources-utils/src/chat/sen
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {flow, pipe, type Effect, type ParseResult} from 'effect'
+import {Array, flow, pipe, type Effect, type ParseResult} from 'effect'
 import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
@@ -16,6 +16,7 @@ import {apiAtom} from '../../../api'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
+import {incrementClosedChatsActionAtom} from '../../accountStatsAtom'
 import {cancelTradeReminderActionAtom} from '../../tradeReminders/atoms/cancelTradeReminderActionAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {resetTradeChecklist} from '../utils/resetData'
@@ -109,6 +110,11 @@ export default function deleteChatActionAtom(
 
         void set(cancelTradeReminderActionAtom, chatWithMessages.chat.id)
 
+        const chatWasAlreadyClosed = pipe(
+          chatWithMessages.messages,
+          Array.some((one) => one.message.messageType === 'DELETE_CHAT')
+        )
+
         set(
           chatWithMessagesAtom,
           flow(
@@ -134,6 +140,7 @@ export default function deleteChatActionAtom(
             // resetRealLifeInfo
           )
         )
+        if (!chatWasAlreadyClosed) set(incrementClosedChatsActionAtom)
         return successMessage
       })
     )

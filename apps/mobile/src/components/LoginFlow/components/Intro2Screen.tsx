@@ -57,7 +57,7 @@ export default function Intro2Screen({navigation}: Props): React.ReactElement {
               />
             </YStack>
           </XStack>
-          <YStack gap="$4" width="100%">
+          <YStack gap="$4" px="$5" width="100%">
             <LoginFlowTitle>{t('loginFlow.v2.intro2.title')}</LoginFlowTitle>
             <LoginFlowText>{t('loginFlow.v2.intro2.text')}</LoginFlowText>
           </YStack>

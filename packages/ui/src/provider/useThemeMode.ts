@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useState} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 import {useColorScheme} from 'react-native'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
@@ -15,6 +15,10 @@ export function useThemeMode(
 ): UseThemeModeReturn {
   const systemColorScheme = useColorScheme()
   const [mode, setMode] = useState<ThemeMode>(initialMode)
+
+  useEffect(() => {
+    setMode(initialMode)
+  }, [initialMode])
 
   const resolvedTheme = useMemo(
     () =>

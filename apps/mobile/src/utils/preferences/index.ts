@@ -24,6 +24,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showTextDebugButton: false,
     disableScreenshots: false,
     isDeveloper: false,
+    appThemeMode: 'system',
     marketplaceFiatOrSatsCurrency: 'FIAT',
     showVexlSearchForCooSuggestion: true,
     showSuggestReencryptOffersMissingOnServer: false,
@@ -61,6 +62,10 @@ export const isDeveloperAtom = focusAtom(preferencesAtom, (p) =>
 
 export const currentAppLanguageAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('appLanguage')
+)
+
+export const appThemeModeAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('appThemeMode')
 )
 
 export const marketplaceFiatOrSatsCurrencyAtom = focusAtom(

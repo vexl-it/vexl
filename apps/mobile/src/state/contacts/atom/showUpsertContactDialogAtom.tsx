@@ -182,6 +182,7 @@ export const showUpsertContactDialogAtom = atom(
               ? t('common.change')
               : t('addContactDialog.addContact'),
           positiveButtonDisabledAtom,
+          avoidKeyboard: true,
           children: (
             <UpsertContactDialogBody
               contactNameAtom={contactNameAtom}

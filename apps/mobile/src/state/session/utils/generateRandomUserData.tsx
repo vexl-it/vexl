@@ -1,12 +1,14 @@
 import {type GoldenAvatarType} from '@vexl-next/domain/src/general/offers'
+import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
 import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
 import {Schema} from 'effect'
+import {getDefaultStore} from 'jotai'
 import {type Session} from '../../../brands/Session.brand'
 import avatarsGoldenSvg from '../../../components/AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
 import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
-import randomName from '../../../utils/randomName'
+import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import {
   RandomSeed,
@@ -45,6 +47,8 @@ export function generateRandomUserInSessionData({
         goldenAvatarType,
       })
     ),
-    userName: randomName(),
+    userName: UserName.make(
+      getDefaultStore().get(translationAtom).t('common.anonymous')
+    ),
   })
 }

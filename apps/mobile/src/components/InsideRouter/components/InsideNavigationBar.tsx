@@ -28,7 +28,7 @@ function InsideNavigationBar({
   }, [navigation])
 
   const handleSettingsPress = useCallback(() => {
-    navigation.navigate('Settings')
+    navigation.navigate('Account')
   }, [navigation])
 
   const handleNotificationsPress = useCallback(() => {

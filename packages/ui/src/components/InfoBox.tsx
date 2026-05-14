@@ -64,7 +64,7 @@ export function InfoBox({
   return (
     <InfoBoxFrame variant={variant} {...rest}>
       <InfoCircle color={foregroundColor} size={18} />
-      <Typography color={textColor} flex={1} variant="description">
+      <Typography mt="$2" color={textColor} flex={1} variant="description">
         {children}
       </Typography>
     </InfoBoxFrame>

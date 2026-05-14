@@ -51,7 +51,7 @@ function ThemedColumn({
   return (
     <Theme name={theme}>
       <YStack
-        gap="$4"
+        gap="$7"
         padding="$5"
         backgroundColor="$backgroundPrimary"
         borderRadius="$4"

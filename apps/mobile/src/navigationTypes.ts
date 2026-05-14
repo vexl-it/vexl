@@ -124,9 +124,6 @@ export type RootStackParamsList = {
       }
     | undefined
 
-  EditName: undefined
-  ChangeProfilePicture: undefined
-
   TodoScreen: undefined
 
   TradeCalculatorFlow: NavigatorScreenParams<TradeCalculatorStackParamsList>
@@ -151,7 +148,12 @@ export type RootStackParamsList = {
 
   BlogArticlesList: undefined
 
-  Settings: undefined
+  Account: undefined
+  ScanQrCode: undefined
+  AppSettings: NavigatorScreenParams<AppSettingsStackParamsList> | undefined
+  ShareProfile: undefined
+  EditProfile: NavigatorScreenParams<EditProfileStackParamsList> | undefined
+  EditIdentity: NavigatorScreenParams<EditIdentityStackParamsList> | undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -164,6 +166,48 @@ export type EventsAndClubsTabsScreenProps<
   T extends keyof EventsAndClubsParamsList,
 > = CompositeScreenProps<
   MaterialTopTabScreenProps<EventsAndClubsParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type EditProfileStackParamsList = {
+  EditProfileDefault: undefined
+  EditProfileSpokenLanguages: undefined
+}
+
+export type EditProfileStackScreenProps<
+  T extends keyof EditProfileStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<EditProfileStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type EditIdentityStackParamsList = {
+  EditIdentityPhoto: undefined
+  EditIdentityNickname: undefined
+  EditIdentitySummary: undefined
+}
+
+export type EditIdentityStackScreenProps<
+  T extends keyof EditIdentityStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<EditIdentityStackParamsList, T>,
+  RootStackScreenProps<keyof RootStackParamsList>
+>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type AppSettingsStackParamsList = {
+  AppSettingsDefault: undefined
+  AppSettingsLanguage: undefined
+  AppSettingsCurrency: undefined
+  AppSettingsAppearance: undefined
+}
+
+export type AppSettingsStackScreenProps<
+  T extends keyof AppSettingsStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<AppSettingsStackParamsList, T>,
   RootStackScreenProps<keyof RootStackParamsList>
 >
 

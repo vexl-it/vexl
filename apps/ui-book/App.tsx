@@ -78,7 +78,8 @@ function ScreenNav(): React.JSX.Element {
   }
 
   if (activeScreen !== null) {
-    const Screen = activeScreen.component
+    const ActiveScreen = activeScreen.component
+
     return (
       <YStack flex={1} backgroundColor="$backgroundPrimary">
         <XStack
@@ -117,7 +118,7 @@ function ScreenNav(): React.JSX.Element {
             {activeScreen.label}
           </SizableText>
         </XStack>
-        <Screen />
+        <ActiveScreen />
         <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
       </YStack>
     )

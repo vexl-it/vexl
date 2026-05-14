@@ -1,12 +1,16 @@
 import {atom} from 'jotai'
-import {emailBodyAtom} from '../components/InsideRouter/components/SettingsScreen/atoms'
+import {Platform} from 'react-native'
+import {version, versionCode} from './environment'
 import {translationAtom} from './localization/I18nProvider'
 import openUrl from './openUrl'
 
 export const contactSupportActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
   const supportEmail = t('settings.items.supportEmail')
-  const emailBody = get(emailBodyAtom)
+  const emailBody = encodeURIComponent(
+    `${t('reportIssue.predefinedBody')}\n\n\n\n\n
+    ${t('reportIssue.appAndOperatingSystemInfo')} (${t('reportIssue.pleaseDoNotDelete')}): ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
+  )
 
   openUrl(
     `mailto:${supportEmail}?body=${emailBody}`,

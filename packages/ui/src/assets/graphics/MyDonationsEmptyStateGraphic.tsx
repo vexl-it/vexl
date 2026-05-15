@@ -5,6 +5,7 @@ import {useTheme} from 'tamagui'
 interface Props {
   readonly width?: number
   readonly height?: number
+  readonly disableReplayOnPress?: boolean
 }
 
 function Bitcoin(): React.JSX.Element {

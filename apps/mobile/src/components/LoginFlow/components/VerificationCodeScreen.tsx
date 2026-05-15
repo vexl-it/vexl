@@ -6,7 +6,13 @@ import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
-import {Alert, Keyboard, TextInput, TouchableOpacity} from 'react-native'
+import {
+  Alert,
+  Keyboard,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
@@ -47,7 +53,9 @@ export default function VerificationCodeScreen({
 }: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const inputRef = useRef<TextInput>(null)
+  const submitInProgressRef = useRef(false)
   const [userCode, setUserCode] = useState('')
+  const [submitInProgress, setSubmitInProgress] = useState(false)
   const [countdownFinished, setCountdownFinished] = useState(false)
   const verifyPhoneNumber = useSetAtom(verifyPhoneNumberAtom)
   const finishLogin = useSetAtom(finishLoginActionAtom)
@@ -57,6 +65,53 @@ export default function VerificationCodeScreen({
   const parsedPhoneNumber = useMemo(() => {
     return parsePhoneNumber(phoneNumber).number?.international
   }, [phoneNumber])
+
+  const submitVerificationCode = useCallback(
+    (code: string): void => {
+      if (code.length !== 6 || submitInProgressRef.current) return
+
+      submitInProgressRef.current = true
+      setSubmitInProgress(true)
+      loadingOverlay.show()
+      void Effect.runPromise(
+        Effect.gen(function* (_) {
+          const privateKey = KeyHolder.generatePrivateKey()
+          const verifyPhoneNumberResponse = yield* _(
+            verifyPhoneNumber({
+              code,
+              id: initPhoneVerificationResponse.verificationId,
+              userPublicKey: privateKey.publicKeyPemBase64,
+            })
+          )
+
+          yield* _(
+            finishLogin({
+              verifyPhoneNumberResponse,
+              privateKey,
+              phoneNumber,
+            })
+          )
+        }).pipe(
+          Effect.catchAll((errorMessage) =>
+            Effect.sync(() => {
+              Alert.alert(errorMessage)
+            })
+          )
+        )
+      ).finally(() => {
+        submitInProgressRef.current = false
+        setSubmitInProgress(false)
+        loadingOverlay.hide()
+      })
+    },
+    [
+      finishLogin,
+      initPhoneVerificationResponse.verificationId,
+      loadingOverlay,
+      phoneNumber,
+      verifyPhoneNumber,
+    ]
+  )
 
   useFocusEffect(
     useCallback(() => {
@@ -89,38 +144,10 @@ export default function VerificationCodeScreen({
     <KeyboardAvoidingView>
       <LoginFlowScreen
         action={{
-          disabled: userCode.length !== 6,
+          disabled: userCode.length !== 6 || submitInProgress,
           label: t('common.continue'),
           onPress: () => {
-            loadingOverlay.show()
-            void Effect.runPromise(
-              Effect.gen(function* (_) {
-                const privateKey = KeyHolder.generatePrivateKey()
-                const verifyPhoneNumberResponse = yield* _(
-                  verifyPhoneNumber({
-                    code: userCode,
-                    id: initPhoneVerificationResponse.verificationId,
-                    userPublicKey: privateKey.publicKeyPemBase64,
-                  })
-                )
-
-                yield* _(
-                  finishLogin({
-                    verifyPhoneNumberResponse,
-                    privateKey,
-                    phoneNumber,
-                  })
-                )
-              }).pipe(
-                Effect.catchAll((errorMessage) =>
-                  Effect.sync(() => {
-                    Alert.alert(errorMessage)
-                  })
-                )
-              )
-            ).finally(() => {
-              loadingOverlay.hide()
-            })
+            submitVerificationCode(userCode)
           },
         }}
         footer={
@@ -177,15 +204,22 @@ export default function VerificationCodeScreen({
           >
             <YStack>
               <TextInput
+                autoComplete={
+                  Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
+                }
                 autoFocus
                 caretHidden
+                importantForAutofill="yes"
                 keyboardType="number-pad"
                 maxLength={6}
                 onChangeText={(value) => {
-                  setUserCode(value.substring(0, 6))
+                  const code = value.replace(/\D/g, '').substring(0, 6)
+                  setUserCode(code)
+                  submitVerificationCode(code)
                 }}
                 ref={inputRef}
                 style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+                textContentType="oneTimeCode"
                 value={userCode}
               />
               <XStack gap="$2" justifyContent="center">

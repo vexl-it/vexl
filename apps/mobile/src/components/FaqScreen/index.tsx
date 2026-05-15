@@ -12,6 +12,7 @@ import React, {useState} from 'react'
 import {
   Pressable,
   TouchableWithoutFeedback,
+  useWindowDimensions,
   type GestureResponderEvent,
 } from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -38,10 +39,10 @@ function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const content = useContent()
+  const {width: windowWidth} = useWindowDimensions()
   const [page, setPage] = useState<number>(() =>
     getInitialPage(content, params?.pageType)
   )
-  const [contentWidth, setContentWidth] = useState(0)
   const pageContent = content[page]
 
   if (!pageContent) return null
@@ -61,9 +62,7 @@ function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
   }
 
   const navigateContent = (event: GestureResponderEvent): void => {
-    if (contentWidth === 0) return
-
-    const isPressOnLeftHalf = event.nativeEvent.locationX < contentWidth / 2
+    const isPressOnLeftHalf = event.nativeEvent.pageX < windowWidth / 2
 
     if (isPressOnLeftHalf) {
       if (!isFirstPage) setPage((currentPage) => currentPage - 1)
@@ -83,13 +82,7 @@ function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
       }
     >
       <Stack flex={1}>
-        <Pressable
-          onLayout={(event) => {
-            setContentWidth(event.nativeEvent.layout.width)
-          }}
-          onPress={navigateContent}
-          style={{flex: 1}}
-        >
+        <Pressable onPress={navigateContent} style={{flex: 1}}>
           <Stack
             flex={1}
             backgroundColor="$backgroundTertiary"
@@ -132,7 +125,7 @@ function FaqsScreen({route: {params}}: Props): React.ReactElement | null {
               justifyContent="center"
               minHeight={250}
             >
-              <Graphic animate />
+              <Graphic animate disableReplayOnPress />
             </Stack>
 
             <Stack gap="$3">

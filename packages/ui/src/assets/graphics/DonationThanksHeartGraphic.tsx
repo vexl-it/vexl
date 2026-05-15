@@ -4,6 +4,7 @@ import Svg, {G, Path} from 'react-native-svg'
 interface Props {
   readonly width?: number
   readonly height?: number
+  readonly disableReplayOnPress?: boolean
 }
 
 export function DonationThanksHeartGraphic({

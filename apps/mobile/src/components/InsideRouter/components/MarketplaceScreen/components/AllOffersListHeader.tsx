@@ -70,27 +70,9 @@ function AllOffersListHeader({
                 onPress={handleShowOnMap}
               />
             </XStack>
-            {/* <YStack gap="$6">
-              <CheckUpdatedPrivacyPolicySuggestion />
-              <EnableBackgroundFetchSuggestion />
-              <ReencryptOffersSuggestion />
-              <VexlNewsSuggestions />
-              <RemovedClubsSuggestion />
-              <ImportNewContactsSuggestion />
-              <AddListingTypeToOffersSuggestion />
-            </YStack> */}
           </Stack>
         ) : (
           <EmptyList />
-          // <YStack gap="$6" mb="$6">
-          //   <CheckUpdatedPrivacyPolicySuggestion />
-          //   <EnableBackgroundFetchSuggestion />
-          //   <ReencryptOffersSuggestion />
-          //   <VexlNewsSuggestions />
-          //   <RemovedClubsSuggestion />
-          //   <EnableNewOffersNotificationSuggestion />
-          //   <EmptyListPlaceholder />
-          // </YStack>
         )}
       </Stack>
     )

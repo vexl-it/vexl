@@ -1,18 +1,38 @@
-import {type NewsAndAnnouncementsResponse} from '@vexl-next/rest-api/src/services/content/contracts'
+import {
+  type FullScreenWarning,
+  type NewsAndAnnouncementsResponse,
+} from '@vexl-next/rest-api/src/services/content/contracts'
+import {
+  Button,
+  FaqWhatIsVexl,
+  FullscreenWarningRedGraphic,
+  FullscreenWarningYellowGraphic,
+  NavigationBar,
+  Screen,
+  Stack,
+  Typography,
+  XmarkCancelClose,
+  YStack,
+} from '@vexl-next/ui'
 import {Option} from 'effect'
-import React, {useMemo} from 'react'
-import {Stack, Text, YStack} from 'tamagui'
+import React from 'react'
 import openUrl from '../../../utils/openUrl'
-import Button from '../../Button'
-import SVGImage from '../../Image'
-import Screen from '../../Screen'
 
-import cancelSvg from '../../ChatDetailScreen/images/cancelSvg'
-import faq1Svg from '../../FaqScreen/images/faq1Svg'
-import IconButton from '../../IconButton'
-import WhiteContainer from '../../WhiteContainer'
-import redIllustrationSvg from '../image/redIllustrationSvg'
-import yellowIllustrationSvg from '../image/yellowIllustrationSvg'
+function WarningGraphic({
+  type,
+}: {
+  readonly type: FullScreenWarning['type']
+}): React.ReactElement {
+  if (type === 'RED') {
+    return <FullscreenWarningRedGraphic animate />
+  }
+
+  if (type === 'YELLOW') {
+    return <FullscreenWarningYellowGraphic animate />
+  }
+
+  return <FaqWhatIsVexl animate width={174} height={174} />
+}
 
 export function FullscreenWarningComponent({
   data: {action, cancelable, description, title, type},
@@ -21,55 +41,58 @@ export function FullscreenWarningComponent({
   data: Option.Option.Value<NewsAndAnnouncementsResponse['fullScreenWarning']>
   onCancel: () => void
 }): React.ReactElement {
-  const image = useMemo(() => {
-    if (type === 'RED') {
-      return redIllustrationSvg
-    }
-    if (type === 'YELLOW') {
-      return yellowIllustrationSvg
-    }
-
-    return faq1Svg
-  }, [type])
-
   return (
-    <Screen>
-      <YStack p="$2" f={1} gap="$2">
-        <WhiteContainer>
-          {!!cancelable && (
-            <Stack alignSelf="flex-end">
-              <IconButton
-                icon={cancelSvg}
-                iconStroke="gray"
-                onPress={onCancel}
-                variant="plain"
-              />
-            </Stack>
-          )}
-          <Stack px="$10" f={1} jc="center" ai="center">
-            <SVGImage source={image} />
-          </Stack>
-          <Text
-            adjustsFontSizeToFit
-            numberOfLines={2}
-            fos={24}
-            color="$black"
-            ff="$heading"
-            mt="$4"
-          >
-            {title}
-          </Text>
-          <Text mt={16} fos={18} col="$greyOnWhite">
-            {description}
-          </Text>
-        </WhiteContainer>
-        {Option.isSome(action) && (
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          rightActions={
+            cancelable
+              ? [
+                  {
+                    icon: XmarkCancelClose,
+                    onPress: onCancel,
+                  },
+                ]
+              : undefined
+          }
+        />
+      }
+      footer={
+        Option.isSome(action) ? (
           <Button
             onPress={openUrl(action.value.url)}
-            variant={type === 'RED' ? 'redLight' : 'secondary'}
-            text={action.value.text}
-          ></Button>
-        )}
+            variant={type === 'RED' ? 'destructive' : 'secondary'}
+          >
+            {action.value.text}
+          </Button>
+        ) : undefined
+      }
+    >
+      <YStack flex={1} justifyContent="center" gap="$8" paddingBottom="$8">
+        <Stack alignItems="center" justifyContent="center">
+          <WarningGraphic type={type} />
+        </Stack>
+
+        <YStack gap="$5">
+          <Typography
+            variant="heading3"
+            color="$foregroundPrimary"
+            textAlign="center"
+            adjustsFontSizeToFit
+            numberOfLines={3}
+          >
+            {title}
+          </Typography>
+
+          <Typography
+            variant="paragraph"
+            color="$foregroundSecondary"
+            textAlign="center"
+          >
+            {description}
+          </Typography>
+        </YStack>
       </YStack>
     </Screen>
   )

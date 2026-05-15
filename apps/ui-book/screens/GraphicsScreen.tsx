@@ -9,6 +9,8 @@ import {
   FaqOpenSource,
   FaqStayAnonymous,
   FaqWhatIsVexl,
+  FullscreenWarningRedGraphic,
+  FullscreenWarningYellowGraphic,
   NotificationsGraphic,
   SellingGraphic,
   SizableText,
@@ -35,6 +37,14 @@ const graphics = [
   {label: 'FaqDesigned', Component: FaqDesigned},
   {label: 'FaqNotifications', Component: FaqNotifications},
   {label: 'FaqNoRatings', Component: FaqNoRatings},
+  {
+    label: 'FullscreenWarningRedGraphic',
+    Component: FullscreenWarningRedGraphic,
+  },
+  {
+    label: 'FullscreenWarningYellowGraphic',
+    Component: FullscreenWarningYellowGraphic,
+  },
 ] as const
 
 export function GraphicsScreen(): React.JSX.Element {

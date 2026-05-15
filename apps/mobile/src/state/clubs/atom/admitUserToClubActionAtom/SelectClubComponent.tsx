@@ -9,9 +9,11 @@ import {type ClubWithMembers} from '../../domain'
 export function SelectClubComponent({
   clubs,
   selectedClubAtom,
+  showHeader = true,
 }: {
   clubs: Array.NonEmptyReadonlyArray<ClubWithMembers>
   selectedClubAtom: PrimitiveAtom<ClubWithMembers>
+  showHeader?: boolean
 }): React.ReactElement {
   const [selectedClub, setSelectedClub] = useAtom(selectedClubAtom)
   const {t} = useTranslation()
@@ -27,12 +29,16 @@ export function SelectClubComponent({
 
   return (
     <YStack>
-      <Text fos={24} col="$black" ff="$heading" mb="$2">
-        {t('clubs.admition.selectClub.title')}
-      </Text>
-      <Text fos={18} col="$greyOnWhite" ff="$body500" mb="$4">
-        {t('clubs.admition.selectClub.text')}
-      </Text>
+      {!!showHeader && (
+        <>
+          <Text fos={24} col="$black" ff="$heading" mb="$2">
+            {t('clubs.admition.selectClub.title')}
+          </Text>
+          <Text fos={18} col="$greyOnWhite" ff="$body500" mb="$4">
+            {t('clubs.admition.selectClub.text')}
+          </Text>
+        </>
+      )}
       <Dropdown
         data={clubsDropdownItems}
         value={{value: selectedClub, label: selectedClub.club.name}}

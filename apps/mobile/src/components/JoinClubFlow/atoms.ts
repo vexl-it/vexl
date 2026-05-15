@@ -4,7 +4,12 @@ import {type BarcodeScanningResult, Camera} from 'expo-camera'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 
-import {handleDeepLinkActionAtom} from '../../utils/deepLinks'
+import {type ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import {LINK_TYPE_JOIN_CLUB} from '../../utils/deepLinks/domain'
+import {
+  InvalidDeepLinkError,
+  parseDeepLink,
+} from '../../utils/deepLinks/parseDeepLink'
 import {getImageFromGalleryAndTryToResolveThePermissionsAlongTheWay} from '../../utils/imagePickers'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
@@ -22,6 +27,8 @@ function createAccessCodeDefaultValue(): string[] {
 }
 
 export const accessCodeDefaultValue: string[] = createAccessCodeDefaultValue()
+
+export const clubToJoinAtom = atom<ClubInfo | null>(null)
 
 export const AccessCodeScope = createScope<
   WritableAtom<string[], [SetStateAction<string[]>], void>
@@ -47,6 +54,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
       if (get(isCodeInvalidAtom)) {
         set(isCodeInvalidAtom, false)
       }
+      set(clubToJoinAtom, null)
 
       for (let i = 0; i < CODE_LENGTH; i++) {
         const accessCodeElementOnIndexAtom = accessCodeAtoms[i]
@@ -67,8 +75,27 @@ export const accessCodeMolecule = molecule((_, getScope) => {
       const {t} = get(translationAtom)
       return Effect.gen(function* (_) {
         const {data: scanResult} = barcodeScanningResult
+        const {searchParams: linkData} = yield* _(parseDeepLink(scanResult))
 
-        return yield* _(set(handleDeepLinkActionAtom, scanResult))
+        if (linkData.type !== LINK_TYPE_JOIN_CLUB) {
+          return yield* _(
+            new InvalidDeepLinkError({
+              cause: new Error('Invalid link type'),
+              originalLink: scanResult,
+            })
+          )
+        }
+
+        set(clubToJoinAtom, null)
+        set(
+          accessCodeAtom,
+          Array.from(
+            {length: CODE_LENGTH},
+            (_, index) => linkData.code[index] ?? ''
+          )
+        )
+
+        return true
       }).pipe(
         Effect.catchAll((e) => {
           if (e._tag === 'InvalidDeepLinkError') {

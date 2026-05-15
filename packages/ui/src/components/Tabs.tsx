@@ -38,12 +38,14 @@ export interface TabsProps<T> {
   readonly activeTab: T
   readonly onTabPress: (value: T) => void
   readonly size?: 'small' | 'large'
+  readonly contentPaddingLeft?: number
 }
 
 export function Tabs<T>({
   tabs,
   activeTab,
   onTabPress,
+  contentPaddingLeft = 0,
   size = 'large',
 }: TabsProps<T>): React.JSX.Element {
   const spaceTokens = getTokens().space
@@ -140,6 +142,7 @@ export function Tabs<T>({
       <XStack
         gap={gap}
         alignItems="flex-start"
+        paddingLeft={contentPaddingLeft}
         paddingRight={gap}
         paddingBottom={spaceTokens.$2.val + UNDERLINE_HEIGHT}
       >

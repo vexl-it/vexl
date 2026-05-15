@@ -199,7 +199,7 @@ interface DialogAtomInternalState extends DialogAtomConfig {
 
 export type DialogAtom = WritableAtom<
   DialogAtomInternalState | null,
-  [config: DialogAtomConfig],
+  [config: DialogAtomConfig | null],
   Effect.Effect<boolean>
 >
 
@@ -208,9 +208,14 @@ export function createDialogAtom(): DialogAtom {
 
   return atom(
     (get) => get(stateAtom),
-    (get, set, config: DialogAtomConfig): Effect.Effect<boolean> => {
+    (get, set, config: DialogAtomConfig | null): Effect.Effect<boolean> => {
       const existing = get(stateAtom)
       existing?.onResult(false)
+
+      if (config == null) {
+        set(stateAtom, null)
+        return Effect.succeed(false)
+      }
 
       return Effect.async<boolean>((resolve) => {
         set(stateAtom, {

@@ -6,9 +6,9 @@ import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact
 import {Effect, Option, Struct} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
 import {showErrorAlert} from '../../../components/ErrorAlert'
-import clubImagePlaceholderSvg from '../../../components/JoinClubFlow/images/clubImagePlaceholderSvg'
+import {globalDialogAtom} from '../../../components/GlobalDialog'
+import {clubToJoinAtom} from '../../../components/JoinClubFlow/atoms'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../../utils/notifications'
@@ -18,11 +18,24 @@ import {generateVexlTokenActionAtom} from '../../notifications/actions/generateV
 import {clubsToKeyHolderAtom} from './clubsToKeyHolderV2Atom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from './refreshClubsActionAtom'
 
+interface SubmitCodeToJoinClubOptions {
+  readonly code: ClubCode
+  readonly onCodeNotFound?: () => void
+  readonly skipConfirmation?: boolean
+}
+
+type SubmitCodeToJoinClubInput = ClubCode | SubmitCodeToJoinClubOptions
+
+function getCodeFromInput(input: SubmitCodeToJoinClubInput): ClubCode {
+  return typeof input === 'string' ? input : input.code
+}
+
 export const submitCodeToJoinClubActionAtom = atom(
   null,
-  (get, set, code: ClubCode) => {
+  (get, set, input: SubmitCodeToJoinClubInput) => {
     const {t} = get(translationAtom)
     const api = get(apiAtom)
+    const code = getCodeFromInput(input)
 
     return Effect.gen(function* (_) {
       const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
@@ -40,34 +53,27 @@ export const submitCodeToJoinClubActionAtom = atom(
         })
       )
 
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              imageSource: {
-                type: club.club.clubImageUrl ? 'imageUri' : 'svgXml',
-                imageUri: club.club.clubImageUrl,
-                svgXml: clubImagePlaceholderSvg,
-              },
-              title: t('clubs.wannaStepInsideOfClub', {
+      if (typeof input === 'string' || !input.skipConfirmation) {
+        const confirmed = yield* _(
+          set(globalDialogAtom, {
+            title: t('clubs.wannaStepInsideOfClub', {
+              clubName: club.club.name,
+            }),
+            subtitle: t(
+              club.isModerator
+                ? 'clubs.joiningClubGivesYouAccessAsModerator'
+                : 'clubs.joiningClubGivesYouAccess',
+              {
                 clubName: club.club.name,
-              }),
-              description: t(
-                club.isModerator
-                  ? 'clubs.joiningClubGivesYouAccessAsModerator'
-                  : 'clubs.joiningClubGivesYouAccess',
-                {
-                  clubName: club.club.name,
-                }
-              ),
-              negativeButtonText: t('common.cancel'),
-              positiveButtonText: t('common.continue'),
-            },
-          ],
-        })
-      )
+              }
+            ),
+            negativeButtonText: t('common.cancel'),
+            positiveButtonText: t('common.continue'),
+          })
+        )
+
+        if (!confirmed) return false
+      }
 
       set(loadingOverlayDisplayedAtom, true)
 
@@ -115,21 +121,10 @@ export const submitCodeToJoinClubActionAtom = atom(
       )
 
       yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              imageSource: {
-                type: club.club.clubImageUrl ? 'imageUri' : 'svgXml',
-                imageUri: club.club.clubImageUrl,
-                svgXml: clubImagePlaceholderSvg,
-              },
-              title: t('clubs.clubJoinedSuccessfully'),
-              description: t('clubs.nowYouWillSeeOffersFromClubMembers'),
-              positiveButtonText: t('common.ok'),
-            },
-          ],
+        set(globalDialogAtom, {
+          title: t('clubs.clubJoinedSuccessfully'),
+          subtitle: t('clubs.nowYouWillSeeOffersFromClubMembers'),
+          positiveButtonText: t('common.ok'),
         })
       )
 
@@ -141,7 +136,15 @@ export const submitCodeToJoinClubActionAtom = atom(
         })
       ),
       Effect.catchAll((e) => {
-        if (e._tag === 'UserDeclinedError') return Effect.succeed(false)
+        const onCodeNotFound =
+          typeof input === 'string' ? undefined : input.onCodeNotFound
+
+        if (e._tag === 'NotFoundError' && onCodeNotFound) {
+          return Effect.sync(() => {
+            onCodeNotFound()
+            return false
+          })
+        }
 
         if (
           e._tag === 'ClubUserLimitExceededError' ||
@@ -159,16 +162,11 @@ export const submitCodeToJoinClubActionAtom = atom(
           })()
 
           return Effect.zipRight(
-            set(askAreYouSureActionAtom, {
-              variant: 'danger',
-              steps: [
-                {
-                  type: 'StepWithText',
-                  title: t('clubs.joiningUnsucessful'),
-                  description,
-                  positiveButtonText: t('common.close'),
-                },
-              ],
+            set(globalDialogAtom, {
+              title: t('clubs.joiningUnsucessful'),
+              subtitle: description,
+              positiveButtonText: t('common.close'),
+              positiveButtonVariant: 'destructive',
             }),
             Effect.succeed(false)
           )
@@ -183,6 +181,66 @@ export const submitCodeToJoinClubActionAtom = atom(
           e._tag === 'CryptoError'
         ) {
           reportError('error', new Error('Join club error'), {e})
+        }
+
+        showErrorAlert({
+          title: t('common.somethingWentWrong'),
+          description:
+            toCommonErrorMessage(e, t) ??
+            t('common.somethingWentWrongDescription'),
+          error: e,
+        })
+
+        return Effect.succeed(false)
+      })
+    )
+  }
+)
+
+export const validateCodeToJoinClubActionAtom = atom(
+  null,
+  (get, set, input: SubmitCodeToJoinClubOptions) => {
+    const {t} = get(translationAtom)
+    const api = get(apiAtom)
+
+    return Effect.gen(function* (_) {
+      const newKeypair = yield* _(eitherToEffect(generateKeyPair()))
+      const newKeypairV2 = yield* _(generateV2KeyPair())
+
+      const club = yield* _(
+        api.contact.getClubInfoByAccessCode({
+          code: input.code,
+          keyPair: newKeypair,
+          keyPairV2: newKeypairV2,
+        })
+      )
+      yield* _(
+        Effect.sync(() => {
+          set(clubToJoinAtom, club.club)
+        })
+      )
+
+      return true
+    }).pipe(
+      Effect.catchAll((e) => {
+        if (e._tag === 'NotFoundError') {
+          return Effect.sync(() => {
+            input.onCodeNotFound?.()
+            return false
+          })
+        }
+
+        if (
+          e._tag === 'InvalidChallengeError' ||
+          e._tag === 'HttpApiDecodeError' ||
+          e._tag === 'ResponseError' ||
+          e._tag === 'RequestError' ||
+          e._tag === 'UnexpectedServerError' ||
+          e._tag === 'CryptoError'
+        ) {
+          reportError('error', new Error('Validate join club code error'), {
+            e,
+          })
         }
 
         showErrorAlert({

@@ -12,9 +12,11 @@ import {
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
+import userSvg from '../../../components/images/userSvg'
 import getCountryCode from '../../../utils/getCountryCode'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {type NonUniqueContactId} from '../domain'
 
 export class ErrorAddingContactToPhoneContacts extends Schema.TaggedError<ErrorAddingContactToPhoneContacts>(
   'ErrorAddingContactToPhoneContacts'
@@ -170,6 +172,7 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
               textInputProps: {
                 autoCorrect: false,
                 placeholder: customName,
+                icon: userSvg,
               },
             },
           ],
@@ -210,10 +213,38 @@ export const addContactToPhoneActionAtom = atom(
   (
     _get,
     _set,
-    {customName, number}: {customName: string; number: E164PhoneNumber}
+    {
+      customName,
+      number,
+      phoneContactId,
+    }: {
+      customName: string
+      number: E164PhoneNumber
+      phoneContactId?: Option.Option<NonUniqueContactId>
+    }
   ) => {
     return Effect.gen(function* (_) {
       const contact = createContactPayload({customName, number})
+      const linkedPhoneContactId = Option.getOrUndefined(
+        phoneContactId ?? Option.none()
+      )
+
+      if (linkedPhoneContactId !== undefined) {
+        yield* _(
+          updateContactInPhoneContacts({
+            contact: {
+              id: linkedPhoneContactId,
+              name: contact.name,
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+              phoneNumbers: contact.phoneNumbers,
+            },
+          })
+        )
+
+        return true
+      }
+
       const existingContact = yield* _(findPhoneContactByNumber({number}))
 
       if (Option.isSome(existingContact) && existingContact.value.id) {
@@ -224,6 +255,7 @@ export const addContactToPhoneActionAtom = atom(
               name: contact.name,
               firstName: contact.firstName,
               lastName: contact.lastName,
+              phoneNumbers: contact.phoneNumbers,
             },
           })
         )

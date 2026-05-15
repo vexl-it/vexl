@@ -16,7 +16,7 @@ export function AccountReachStats(): React.ReactElement {
   const localizedReachNumber = localizeDecimalNumber({number: reachNumber})
 
   const navigateToContacts = useCallback(() => {
-    navigation.navigate('SetContacts')
+    navigation.navigate('ContactPreferences')
   }, [navigation])
 
   const steps = useMemo(

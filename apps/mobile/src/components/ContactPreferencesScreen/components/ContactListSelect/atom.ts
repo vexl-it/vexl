@@ -5,12 +5,16 @@ import {
   getPermissionsAsync,
   type ContactsPermissionResponse,
 } from 'expo-contacts'
-import {atom, type Atom, type SetStateAction, type WritableAtom} from 'jotai'
-import {splitAtom} from 'jotai/utils'
+import {atom, type SetStateAction} from 'jotai'
+import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
-import {globalDialogAtom} from '../../../../components/GlobalDialog'
+import {Linking} from 'react-native'
 import {addContactToPhoneActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
 import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
+import loadContactsFromDeviceActionAtom, {
+  loadingContactsFromDeviceAtom,
+} from '../../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
+import normalizeStoredContactsActionAtom from '../../../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {showUpsertContactDialogAtom} from '../../../../state/contacts/atom/showUpsertContactDialogAtom'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
@@ -26,7 +30,9 @@ import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {showErrorAlert} from '../../../ErrorAlert'
+import {globalDialogAtom} from '../../../GlobalDialog'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
+import {createUpdateContactActionAtom} from './createUpdateContactActionAtom'
 
 export const ContactsSelectScope = createScope<{
   normalizedContacts: StoredContactWithComputedValues[]
@@ -38,6 +44,8 @@ export const ContactsSelectScope = createScope<{
 
 const matchSorterKeys = ['info.name', 'info.numberToDisplay']
 const matchSorterThreshold = rankings.CONTAINS
+
+const addNewContactSelectedCountryCodeAtom = atom<string | undefined>(undefined)
 
 export const contactSelectMolecule = molecule((_, getScope) => {
   const {normalizedContacts, reloadContacts} = getScope(ContactsSelectScope)
@@ -139,17 +147,36 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const contactsAccessPrivilegesAtom = atom<
     ContactsPermissionResponse['accessPrivileges'] | undefined
   >()
-  const displayInfoAboutContactsAccessPrivilegesAtom = atom<boolean>(true)
+  const contactsPermissionResponseAtom = atom<
+    ContactsPermissionResponse | undefined
+  >()
+  const shouldOpenContactsSettingsAtom = atom((get) => {
+    const contactsPermissionResponse = get(contactsPermissionResponseAtom)
+
+    return (
+      contactsPermissionResponse != null &&
+      !contactsPermissionResponse.granted &&
+      !contactsPermissionResponse.canAskAgain
+    )
+  })
+  const displayInfoAboutContactsAccessPrivilegesAtom = atom<boolean>(false)
 
   const checkContactsAccessPrivilegesActionAtom = atom(null, (get, set) => {
     return Effect.tryPromise({
       try: async () => {
         const contactsPermissions = await getPermissionsAsync()
+        set(contactsPermissionResponseAtom, contactsPermissions)
         set(contactsAccessPrivilegesAtom, contactsPermissions.accessPrivileges)
+        set(
+          displayInfoAboutContactsAccessPrivilegesAtom,
+          contactsPermissions.accessPrivileges === 'limited'
+        )
       },
       catch: () => {
         // ignore errors here, it's used to display only info modal to user
+        set(contactsPermissionResponseAtom, undefined)
         set(contactsAccessPrivilegesAtom, undefined)
+        set(displayInfoAboutContactsAccessPrivilegesAtom, false)
       },
     })
   })
@@ -195,22 +222,10 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
-  function createIsNewContactAtom(
-    contactAtom: Atom<StoredContactWithComputedValues>
-  ): Atom<boolean> {
-    return atom((get) => !get(contactAtom).flags.seen)
-  }
-
-  function createSelectContactAtom(
-    contactAtom: Atom<StoredContactWithComputedValues>
-  ): WritableAtom<boolean, [SetStateAction<boolean>], void> {
-    return atom(
-      (get) =>
-        get(selectedNumbersAtom).has(
-          get(contactAtom).computedValues.normalizedNumber
-        ),
+  const selectContactAtom = atomFamily((contactNumber: E164PhoneNumber) =>
+    atom(
+      (get) => get(selectedNumbersAtom).has(contactNumber),
       (get, set, isSelected: SetStateAction<boolean>) => {
-        const contactNumber = get(contactAtom).computedValues.normalizedNumber
         const selected = getValueFromSetStateActionOfAtom(isSelected)(() =>
           get(selectedNumbersAtom).has(contactNumber)
         )
@@ -223,7 +238,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
         })
       }
     )
-  }
+  )
 
   const submitAllSelectedContactsActionAtom = atom(
     null,
@@ -247,6 +262,38 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       })
     }
   )
+
+  const importContactsFromPhoneActionAtom = atom(null, (get, set) => {
+    return Effect.gen(function* (_) {
+      set(loadingContactsFromDeviceAtom, true)
+
+      const contactsLoaded = yield* _(
+        set(loadContactsFromDeviceActionAtom).pipe(
+          Effect.match({
+            onFailure: () => false,
+            onSuccess: () => true,
+          })
+        )
+      )
+
+      if (contactsLoaded) {
+        yield* _(
+          set(normalizeStoredContactsActionAtom, {
+            onProgress: () => {},
+          }).pipe(Effect.catchAll(() => Effect.void))
+        )
+        reloadContacts()
+      }
+
+      return contactsLoaded
+    }).pipe(
+      Effect.ensuring(
+        Effect.sync(() => {
+          set(loadingContactsFromDeviceAtom, false)
+        })
+      )
+    )
+  })
 
   const searchTextAsCustomContactAtom = atom((get) => {
     const searchText = get(searchTextAtom)
@@ -370,51 +417,96 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
-  const editContactActionAtom = atom(
+  const addNewContactActionAtom = atom(
     null,
-    (get, set, {contact}: {contact: StoredContactWithComputedValues}) => {
-      return Effect.gen(function* (_) {
-        const {t} = get(translationAtom)
-        const contacts = get(storedContactsAtom)
+    (
+      get,
+      set,
+      params: {
+        readonly contactName: string
+        readonly phoneNumber: string
+        readonly saveToPhone: boolean
+      }
+    ): Effect.Effect<boolean> => {
+      const {t} = get(translationAtom)
+      const normalizedNumber = toE164PhoneNumberWithDefaultCountryCode(
+        params.phoneNumber
+      )
+      const contactName = params.contactName.trim()
 
-        const {contactName: customName, saveToPhone} = yield* _(
-          set(showUpsertContactDialogAtom, {
-            type: 'edit',
-            contactName: contact.info.name,
-            contactNumber: contact.computedValues.normalizedNumber,
-            phoneContactId: contact.info.nonUniqueContactId,
-          })
+      if (Option.isNone(normalizedNumber) || contactName.length === 0) {
+        return Effect.succeed(false)
+      }
+
+      const existingContactWithNumber = pipe(
+        get(storedContactsAtom),
+        Array.findFirst(
+          (contact) =>
+            Option.isSome(contact.computedValues) &&
+            contact.computedValues.value.normalizedNumber ===
+              normalizedNumber.value
         )
+      )
 
-        const updatedContacts = pipe(
-          contacts,
-          Array.findFirstIndex(
-            (one) => one.info.rawNumber === contact.info.rawNumber
-          ),
-          Option.map((index) =>
-            pipe(
-              Array.modify(contacts, index, (one) => ({
-                ...one,
-                info: {...one.info, name: customName},
-              }))
+      if (Option.isSome(existingContactWithNumber)) {
+        return pipe(
+          set(globalDialogAtom, {
+            title: t('addContactDialog.contactAlreadyAddedTitle'),
+            subtitle: t('addContactDialog.contactAlreadyAddedDescription'),
+            positiveButtonText: t('common.close'),
+          }),
+          Effect.as(false)
+        )
+      }
+
+      return Effect.gen(function* (_) {
+        const hash = yield* _(hashPhoneNumberE(normalizedNumber.value))
+        const manualContact = Schema.decodeSync(
+          StoredContactWithComputedValues
+        )({
+          info: {
+            name: contactName,
+            numberToDisplay: normalizedNumber.value,
+            rawNumber: normalizedNumber.value,
+          },
+          computedValues: {
+            hash,
+            normalizedNumber: normalizedNumber.value,
+          },
+          flags: {
+            seen: true,
+            imported: false,
+            importedManually: true,
+            invalidNumber: 'valid',
+          },
+        })
+
+        set(storedContactsAtom, (prev) => [
+          ...pipe(
+            prev,
+            Array.filter(
+              (contact) =>
+                Option.isNone(contact.computedValues) ||
+                contact.computedValues.value.normalizedNumber !==
+                  manualContact.computedValues.normalizedNumber
             )
           ),
-          Option.getOrElse(() => contacts)
-        )
+          {
+            ...manualContact,
+            computedValues: Option.some(manualContact.computedValues),
+          },
+        ])
 
-        set(storedContactsAtom, updatedContacts)
+        const contactsPermissionsGranted = params.saveToPhone
+          ? yield* _(areContactsPermissionsGranted())
+          : false
 
-        if (saveToPhone) {
+        if (params.saveToPhone && contactsPermissionsGranted) {
           yield* _(
-            areContactsPermissionsGranted(),
-            Effect.flatMap((contactsPermissionsGranted) =>
-              contactsPermissionsGranted
-                ? set(addContactToPhoneActionAtom, {
-                    customName,
-                    number: contact.computedValues.normalizedNumber,
-                  })
-                : Effect.succeed(false)
-            ),
+            set(addContactToPhoneActionAtom, {
+              customName: contactName,
+              number: normalizedNumber.value,
+            }),
             Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
               showErrorAlert({
                 title: t('contacts.errorAddingContactToYourPhoneContacts'),
@@ -426,30 +518,82 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           )
         }
 
-        reloadContacts()
-
-        yield* _(
-          set(globalDialogAtom, {
-            title: t('addContactDialog.contactUpdated'),
-            subtitle: t('addContactDialog.youHaveSuccessfullyUpdatedContact'),
-            positiveButtonText: t('common.niceWithExclamationMark'),
+        const submitContactsSuccess = yield* _(
+          set(submitContactsActionAtom, {
+            numbersToImport: deduplicate([
+              ...Array.fromIterable(get(selectedNumbersAtom)),
+              normalizedNumber.value,
+            ]),
+            normalizeAndImportAll: false,
+            showOfferReencryptionDialog: false,
           })
         )
-      }).pipe(Effect.ignore)
+
+        set(searchTextAtom, '')
+        reloadContacts()
+
+        if (submitContactsSuccess) {
+          if (params.saveToPhone && !contactsPermissionsGranted) {
+            const shouldOpenSettings = yield* _(
+              set(globalDialogAtom, {
+                title: t('addContactDialog.contactAddedToVexlOnlyTitle'),
+                subtitle: t(
+                  'addContactDialog.contactAddedToVexlOnlyDescription'
+                ),
+                positiveButtonText: t('common.openSettings'),
+                negativeButtonText: t('common.close'),
+              })
+            )
+
+            if (shouldOpenSettings) {
+              yield* _(
+                Effect.sync(() => {
+                  void Linking.openSettings()
+                })
+              )
+            }
+          } else {
+            yield* _(
+              set(globalDialogAtom, {
+                title: t('addContactDialog.contactAddedSuccessTitle'),
+                subtitle: t('addContactDialog.youCanEditThisContactAnytime'),
+              })
+            )
+          }
+        }
+
+        return submitContactsSuccess === 'success'
+      }).pipe(
+        Effect.catchAll((e) => {
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            error: e,
+          })
+
+          return Effect.succeed(false)
+        })
+      )
     }
   )
+
+  const updateContactActionAtom = createUpdateContactActionAtom({
+    reloadContacts,
+    selectedNumbersAtom,
+  })
 
   return {
     selectAllAtom,
     searchTextAtom,
-    createSelectContactAtom,
-    createIsNewContactAtom,
+    selectContactAtom,
     searchTextAsCustomContactAtom,
+    addNewContactSelectedCountryCodeAtom,
+    addNewContactActionAtom,
     addAndSelectContactWithUiFeedbackAtom,
     contactsFilterAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     selectedNumbersAtom,
     submitAllSelectedContactsActionAtom,
+    importContactsFromPhoneActionAtom,
     normalizedContacts,
     nonSubmittedContactsToDisplayAtomsAtom,
     submittedContactsToDisplayAtomsAtom,
@@ -460,8 +604,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     nonSubmittedContactsToDisplayCountAtom,
     allContactsToDisplayCountAtom,
     displayContactsCountAtom,
-    editContactActionAtom,
+    updateContactActionAtom,
     contactsAccessPrivilegesAtom,
+    shouldOpenContactsSettingsAtom,
     checkContactsAccessPrivilegesActionAtom,
     displayInfoAboutContactsAccessPrivilegesAtom,
   }

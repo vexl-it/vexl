@@ -59,28 +59,12 @@ function UpsertContactDialogBody({
 
   return (
     <YStack gap="$3">
-      <XStack
-        alignItems="center"
-        gap="$3"
-        padding="$3"
-        borderRadius="$5"
-        backgroundColor="$backgroundPrimary"
-      >
-        <Stack>
-          <UpsertContactDialogAvatar
-            phoneContactId={phoneContactId}
-            profileImage={profileImage}
-          />
-        </Stack>
-        <YStack flex={1} gap="$2">
-          <Typography color="$foregroundPrimary" variant="descriptionBold">
-            {previewName}
-          </Typography>
-          <Typography color="$foregroundSecondary" variant="micro">
-            {contactNumber}
-          </Typography>
-        </YStack>
-      </XStack>
+      <UpsertContactDialogContactRow
+        contactName={previewName}
+        contactNumber={contactNumber}
+        phoneContactId={phoneContactId}
+        profileImage={profileImage}
+      />
       <TextField
         backgroundColor="$backgroundPrimary"
         autoFocus
@@ -96,6 +80,51 @@ function UpsertContactDialogBody({
         valueAtom={saveToPhoneAtom}
       />
     </YStack>
+  )
+}
+
+export function UpsertContactDialogContactRow({
+  contactName,
+  contactNumber,
+  phoneContactId,
+  profileImage,
+}: {
+  readonly contactName: string
+  readonly contactNumber: string
+  readonly phoneContactId?: Option.Option<NonUniqueContactId>
+  readonly profileImage?: SvgStringOrImageUri
+}): React.JSX.Element {
+  return (
+    <XStack
+      alignItems="center"
+      gap="$3"
+      padding="$3"
+      borderRadius="$5"
+      backgroundColor="$backgroundPrimary"
+    >
+      <Stack>
+        <UpsertContactDialogAvatar
+          phoneContactId={phoneContactId}
+          profileImage={profileImage}
+        />
+      </Stack>
+      <YStack flex={1} gap="$2" minWidth={0}>
+        <Typography
+          color="$foregroundPrimary"
+          numberOfLines={1}
+          variant="descriptionBold"
+        >
+          {contactName}
+        </Typography>
+        <Typography
+          color="$foregroundSecondary"
+          numberOfLines={1}
+          variant="micro"
+        >
+          {contactNumber}
+        </Typography>
+      </YStack>
+    </XStack>
   )
 }
 

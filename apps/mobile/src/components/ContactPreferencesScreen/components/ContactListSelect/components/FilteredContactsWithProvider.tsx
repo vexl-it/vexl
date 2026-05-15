@@ -1,24 +1,14 @@
-import {useFocusEffect} from '@react-navigation/native'
 import {Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Option} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
-import {type ContactsTabScreenProps} from '../../../../../navigationTypes'
+import {useAtomValue} from 'jotai'
+import React from 'react'
 import {contactSelectMolecule} from '../atom'
 import AddContactRow from './AddContactRow'
 import ContactsList from './ContactsList'
 import ContactsListEmpty from './ContactsListEmpty'
 
-type Props = ContactsTabScreenProps<
-  'Submitted' | 'NonSubmitted' | 'New' | 'All'
->
-
-function FilteredContacts({
-  route: {
-    params: {filter},
-  },
-}: Props): React.ReactElement {
+function FilteredContacts(): React.ReactElement {
   const {
     contactsFilterAtom,
     searchTextAsCustomContactAtom,
@@ -28,27 +18,20 @@ function FilteredContacts({
     allContactsToDisplayAtomsAtom,
   } = useMolecule(contactSelectMolecule)
   const customContactToAdd = useAtomValue(searchTextAsCustomContactAtom)
+  const contactsFilter = useAtomValue(contactsFilterAtom)
   const toDisplay = useAtomValue(
-    filter === 'new'
+    contactsFilter === 'new'
       ? newContactsToDisplayAtomsAtom
-      : filter === 'submitted'
+      : contactsFilter === 'submitted'
         ? submittedContactsToDisplayAtomsAtom
-        : filter === 'nonSubmitted'
+        : contactsFilter === 'nonSubmitted'
           ? nonSubmittedContactsToDisplayAtomsAtom
           : allContactsToDisplayAtomsAtom
   )
 
-  const setContactsFilter = useSetAtom(contactsFilterAtom)
-
-  useFocusEffect(
-    useCallback(() => {
-      setContactsFilter(filter)
-    }, [filter, setContactsFilter])
-  )
-
   return (
     <Stack f={1}>
-      <Stack f={1} px="$4">
+      <Stack f={1} px="$5">
         {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
         {toDisplay.length === 0 && Option.isNone(customContactToAdd) && (
           <ContactsListEmpty />

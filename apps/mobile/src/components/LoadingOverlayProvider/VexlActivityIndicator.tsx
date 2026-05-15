@@ -1,4 +1,3 @@
-import {Stack, Typography, XStack, YStack} from '@vexl-next/ui'
 import React, {useEffect, useMemo} from 'react'
 import Animated, {
   useAnimatedStyle,
@@ -7,8 +6,9 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
+import {Stack, type StackProps, Text, XStack, YStack} from 'tamagui'
 
-interface Props extends React.ComponentProps<typeof Stack> {
+interface Props extends StackProps {
   size: 'xsmall' | 'small' | 'medium' | 'large'
   description?: string
 }
@@ -34,7 +34,7 @@ function DotObject({size, ...props}: Props): React.ReactElement {
       height={dimensions}
       width={dimensions}
       borderRadius={dimensions}
-      bc="$white100"
+      bc="$accentYellowPrimary"
       {...props}
     />
   )
@@ -105,12 +105,13 @@ function VexlActivityIndicator({
         </Animated.View>
       </XStack>
       {!!description && (
-        <Typography
-          variant={size === 'large' ? 'description' : 'micro'}
-          color="$foregroundSecondary"
+        <Text
+          fos={size === 'large' ? 14 : 12}
+          ff="$body500"
+          col="$foregroundSecondary"
         >
           {description}
-        </Typography>
+        </Text>
       )}
     </YStack>
   )

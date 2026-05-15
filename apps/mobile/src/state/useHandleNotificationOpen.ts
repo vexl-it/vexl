@@ -130,7 +130,7 @@ const reactOnNotificationOpenAtom = atom(
       } else if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
         navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
-        navigationRef.navigate('SetContacts', {})
+        navigationRef.navigate('ContactPreferences', {})
       } else if (notification.data?.inbox && notification.data?.sender) {
         Schema.decodeUnknownEither(ChatNotificationData)(
           notification.data

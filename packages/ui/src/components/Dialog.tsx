@@ -185,7 +185,7 @@ export interface DialogAtomConfig {
   readonly title?: string
   readonly subtitle?: string
   readonly children?: React.ReactNode
-  readonly positiveButtonText: string
+  readonly positiveButtonText?: string
   readonly positiveButtonDisabledAtom?: Atom<boolean>
   readonly positiveButtonVariant?: ButtonVariant
   readonly negativeButtonText?: string
@@ -291,7 +291,9 @@ export function DialogFromAtom({
   const positiveButtonDisabled = useAtomValue(
     displayState?.positiveButtonDisabledAtom ?? falseAtom
   )
+  const hasPositiveButton = displayState?.positiveButtonText != null
   const hasNegativeButton = displayState?.negativeButtonText != null
+  const hasFooter = hasPositiveButton || hasNegativeButton
 
   return (
     <Dialog
@@ -300,7 +302,7 @@ export function DialogFromAtom({
       onHidden={handleHidden}
       avoidKeyboard={displayState?.avoidKeyboard}
       footer={
-        displayState != null ? (
+        displayState != null && hasFooter ? (
           <>
             {hasNegativeButton ? (
               <Button
@@ -314,17 +316,19 @@ export function DialogFromAtom({
                 {displayState.negativeButtonText}
               </Button>
             ) : null}
-            <Button
-              variant={displayState.positiveButtonVariant ?? 'primary'}
-              size="large"
-              flex={1}
-              disabled={positiveButtonDisabled}
-              onPress={() => {
-                displayState?.onResult(true)
-              }}
-            >
-              {displayState.positiveButtonText}
-            </Button>
+            {hasPositiveButton ? (
+              <Button
+                variant={displayState.positiveButtonVariant ?? 'primary'}
+                size="large"
+                flex={1}
+                disabled={positiveButtonDisabled}
+                onPress={() => {
+                  displayState?.onResult(true)
+                }}
+              >
+                {displayState.positiveButtonText}
+              </Button>
+            ) : null}
           </>
         ) : undefined
       }

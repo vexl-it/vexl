@@ -876,8 +876,9 @@ export const offerFormMolecule = molecule(() => {
                   onFailure(error) {
                     if (error._tag === 'UserDeclinedError') {
                       if (navigationRef.isReady()) {
-                        navigationRef.navigate('EventsAndClubs', {
-                          screen: 'Clubs',
+                        navigationRef.navigate('InsideTabs', {
+                          screen: 'Community',
+                          params: {screen: 'Clubs'},
                         })
                       }
                     } else {

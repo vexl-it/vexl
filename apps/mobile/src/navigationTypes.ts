@@ -10,7 +10,7 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
@@ -108,7 +108,11 @@ export type RootStackParamsList = {
 
   ClubDetail: {clubUuid: ClubUuid}
 
+  ScanClubAdmissionQrCode: undefined
+
   ClubOffers: {clubUuid: ClubUuid}
+
+  WhatAreClubs: undefined
 
   NotificationPermissionsMissing: undefined
 
@@ -142,11 +146,7 @@ export type RootStackParamsList = {
 
   TaskRegistryOverview: undefined
 
-  EventsAndClubs: NavigatorScreenParams<EventsAndClubsParamsList>
-
   JoinClubFlow: NavigatorScreenParams<JoinClubFlowParamsList>
-
-  BlogArticlesList: undefined
 
   Account: undefined
   ScanQrCode: undefined
@@ -157,17 +157,19 @@ export type RootStackParamsList = {
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type EventsAndClubsParamsList = {
+export type CommunityParamsList = {
+  Discover: undefined
   Events: undefined
   Clubs: undefined
+  Board: undefined
+  Blog: undefined
 }
 
-export type EventsAndClubsTabsScreenProps<
-  T extends keyof EventsAndClubsParamsList,
-> = CompositeScreenProps<
-  MaterialTopTabScreenProps<EventsAndClubsParamsList, T>,
-  RootStackScreenProps<keyof RootStackParamsList>
->
+export type CommunityTabsScreenProps<T extends keyof CommunityParamsList> =
+  CompositeScreenProps<
+    MaterialTopTabScreenProps<CommunityParamsList, T>,
+    RootStackScreenProps<keyof RootStackParamsList>
+  >
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type EditProfileStackParamsList = {
@@ -279,7 +281,7 @@ export type PostLoginFlowStackScreenProps<
 export type InsideTabParamsList = {
   Marketplace: {initialTab?: 'allOffers' | 'myOffers'} | undefined
   Messages: undefined
-  Community: undefined
+  Community: NavigatorScreenParams<CommunityParamsList> | undefined
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -373,7 +375,8 @@ export type TradeChecklistStackScreenProps<
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type JoinClubFlowParamsList = {
   ScanClubQrCodeScreen: undefined
-  FillClubAccessCodeScreen: undefined
+  FillClubAccessCodeScreen: {autoSubmit?: boolean} | undefined
+  MakingSureScreen: {code: ClubCode}
 }
 
 export type JoinClubFlowStackScreenProps<

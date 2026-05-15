@@ -20,9 +20,11 @@ const scannerStyle = {
 function QrScanner({
   title,
   allowOnlySpecificTypes,
+  onScanHandled,
 }: {
   title?: string
   allowOnlySpecificTypes?: Array<DeepLinkData['searchParams']['type']>
+  onScanHandled?: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
   const [error, setError] = useState<string | undefined>(undefined)
@@ -74,7 +76,11 @@ function QrScanner({
           })
         ),
         Effect.andThen(() => {
-          forceHideAskAreYouSureDialog()
+          if (onScanHandled) {
+            onScanHandled()
+          } else {
+            forceHideAskAreYouSureDialog()
+          }
         }),
         Effect.runFork
       )
@@ -84,6 +90,7 @@ function QrScanner({
       t,
       forceHideAskAreYouSureDialog,
       allowOnlySpecificTypes,
+      onScanHandled,
     ]
   )
 

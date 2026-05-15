@@ -5,6 +5,7 @@ import React from 'react'
 import {type JoinClubFlowParamsList} from '../../navigationTypes'
 import {accessCodeDefaultValue, AccessCodeScope} from './atoms'
 import FillClubAccessCodeScreen from './components/FillClubAccessCodeScreen'
+import MakingSureScreen from './components/MakingSureScreen'
 import ScanClubQrCodeScreen from './components/ScanClubQrCodeScreen'
 
 const JoinClubFlowStack = createNativeStackNavigator<JoinClubFlowParamsList>()
@@ -15,7 +16,6 @@ function JoinClubFlow(): React.ReactElement {
       <JoinClubFlowStack.Navigator
         screenOptions={{
           headerShown: false,
-          presentation: 'card',
         }}
         initialRouteName="ScanClubQrCodeScreen"
       >
@@ -26,6 +26,10 @@ function JoinClubFlow(): React.ReactElement {
         <JoinClubFlowStack.Screen
           name="FillClubAccessCodeScreen"
           component={FillClubAccessCodeScreen}
+        />
+        <JoinClubFlowStack.Screen
+          name="MakingSureScreen"
+          component={MakingSureScreen}
         />
       </JoinClubFlowStack.Navigator>
     </ScopeProvider>

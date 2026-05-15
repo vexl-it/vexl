@@ -58,7 +58,6 @@ const TitleText = styled(SizableText, {
   letterSpacing: '$1',
   lineHeight: '$1',
   color: '$foregroundPrimary',
-  flex: 1,
 })
 
 const DescriptionText = styled(SizableText, {

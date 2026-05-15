@@ -1,4 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
+import {pipe} from 'effect'
+import {map} from 'effect/Array'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {type Ref, useRef} from 'react'
 import {TouchableWithoutFeedback} from 'react-native'
@@ -20,13 +22,16 @@ function OTPInput(): React.ReactElement {
     <TouchableWithoutFeedback onPress={() => ref.current?.focus()}>
       <YStack gap="$2">
         <XStack gap="$2">
-          {accessCodeAtoms.map((atom, index) => (
-            <CodeInputElement
-              key={atomKeyExtractor(atom)}
-              index={index}
-              accessCodeElementAtom={atom}
-            />
-          ))}
+          {pipe(
+            accessCodeAtoms,
+            map((atom, index) => (
+              <CodeInputElement
+                key={atomKeyExtractor(atom)}
+                index={index}
+                accessCodeElementAtom={atom}
+              />
+            ))
+          )}
         </XStack>
         <Input
           caretHidden

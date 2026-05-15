@@ -96,8 +96,8 @@ export default function SelectLocationRadiusScreen(): React.ReactElement {
             },
           }}
         />
-        <Stack height={1} backgroundColor="$backgroundHighlight" />
-        <XStack paddingHorizontal="$5" paddingVertical="$3" alignItems="center">
+        <Stack height={1} backgroundColor="$backgroundPrimary" />
+        <XStack paddingHorizontal="$5" paddingVertical="$5" alignItems="center">
           <Typography
             variant="micro"
             color="$foregroundPrimary"

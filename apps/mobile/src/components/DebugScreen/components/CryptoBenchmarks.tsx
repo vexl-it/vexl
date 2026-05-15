@@ -3,10 +3,9 @@ import {
   setEcdhComputeSecretImplementation,
 } from '@vexl-next/cryptography/src/implementations/ecdhComputeSecret'
 import {computeSharedSecret} from '@vexl-next/react-native-ecdh-platform-native-utils'
+import {Button, Typography, YStack} from '@vexl-next/ui'
 import React, {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
-import {Text, YStack} from 'tamagui'
-import Button from '../../Button'
 import {
   NUMBER_OF_GENERATIONS,
   runBenchmark,
@@ -86,11 +85,13 @@ export default function CryptoBenchmarks(): React.ReactElement {
 
   return (
     <YStack gap="$2">
-      <Text fos={20} color="$black">
+      <Typography variant="paragraphSmall" color="$foregroundPrimary">
         For each crypto operation, we run {NUMBER_OF_GENERATIONS} iterations and
         measure the time
-      </Text>
-      <Text col="$black">{text}</Text>
+      </Typography>
+      <Typography variant="description" color="$foregroundPrimary">
+        {text}
+      </Typography>
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onPress={async () => {
@@ -99,9 +100,10 @@ export default function CryptoBenchmarks(): React.ReactElement {
           await printGenerator(generator)
         }}
         variant="secondary"
-        text="Run benchmark"
         size="small"
-      />
+      >
+        Run benchmark
+      </Button>
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onPress={async () => {
@@ -110,9 +112,10 @@ export default function CryptoBenchmarks(): React.ReactElement {
           await printGenerator(generator)
         }}
         variant="secondary"
-        text="Run tests"
         size="small"
-      />
+      >
+        Run tests
+      </Button>
       <Button
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         onPress={async () => {
@@ -121,41 +124,46 @@ export default function CryptoBenchmarks(): React.ReactElement {
           await printGenerator(generator)
         }}
         variant="secondary"
-        text="Run 5000 offers encryption"
         size="small"
-      />
+      >
+        Run 5000 offers encryption
+      </Button>
       <Button
         onPress={() => {
           setEcdhComputeSecretImplementation(defaultImplementation)
         }}
         variant="primary"
         size="small"
-        text="set pure JS implementation"
-      />
+      >
+        set pure JS implementation
+      </Button>
       <Button
         onPress={() => {
           setEcdhComputeSecretImplementation(dummy10Implementation)
         }}
         variant="primary"
         size="small"
-        text="set 10ms implementation"
-      />
+      >
+        set 10ms implementation
+      </Button>
       <Button
         onPress={() => {
           setEcdhComputeSecretImplementation(dummy0Implementation)
         }}
         variant="primary"
         size="small"
-        text="set instant implementation"
-      />
+      >
+        set instant implementation
+      </Button>
       <Button
         onPress={() => {
           setEcdhComputeSecretImplementation(computeSharedSecret)
         }}
         variant="primary"
         size="small"
-        text="set android native implementation"
-      />
+      >
+        set android native implementation
+      </Button>
     </YStack>
   )
 }

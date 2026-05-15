@@ -1,8 +1,7 @@
-import {useAtom} from 'jotai'
+import {Switch, Typography, XStack, YStack} from '@vexl-next/ui'
+import {atom, type SetStateAction} from 'jotai'
 import React from 'react'
-import {Text, XStack, YStack} from 'tamagui'
 import {preferencesAtom} from '../../../utils/preferences'
-import Switch from '../../Switch'
 
 const preferencesToEdit = [
   'disableOfferRerequestLimit',
@@ -16,21 +15,45 @@ const preferencesToEdit = [
   'showVerifiedContacts',
 ] as const
 
-function Preferences(): React.ReactElement {
-  const [preferences, setPreferences] = useAtom(preferencesAtom)
+type PreferenceKey = (typeof preferencesToEdit)[number]
 
+function PreferenceSwitch({
+  preferenceKey,
+}: {
+  readonly preferenceKey: PreferenceKey
+}): React.ReactElement {
+  const preferenceAtom = React.useMemo(
+    () =>
+      atom(
+        (get) => get(preferencesAtom)[preferenceKey],
+        (get, set, value: SetStateAction<boolean>) => {
+          const current = get(preferencesAtom)[preferenceKey]
+          const nextValue = typeof value === 'function' ? value(current) : value
+
+          set(preferencesAtom, (old) => ({
+            ...old,
+            [preferenceKey]: nextValue,
+          }))
+        }
+      ),
+    [preferenceKey]
+  )
+
+  return <Switch valueAtom={preferenceAtom} />
+}
+
+function Preferences(): React.ReactElement {
   return (
-    <YStack>
-      <Text color="$black">Preferences</Text>
+    <YStack gap="$2">
+      <Typography variant="titlesSmall" color="$foregroundPrimary">
+        Preferences
+      </Typography>
       {preferencesToEdit.map((key) => (
-        <XStack key={key}>
-          <Text color="$black">{key}</Text>
-          <Switch
-            value={preferences[key]}
-            onValueChange={(newValue) => {
-              setPreferences((old) => ({...old, [key]: newValue}))
-            }}
-          ></Switch>
+        <XStack key={key} alignItems="center" justifyContent="space-between">
+          <Typography variant="paragraphSmall" color="$foregroundPrimary">
+            {key}
+          </Typography>
+          <PreferenceSwitch preferenceKey={key} />
         </XStack>
       ))}
     </YStack>

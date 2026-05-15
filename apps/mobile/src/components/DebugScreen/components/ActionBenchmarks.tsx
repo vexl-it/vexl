@@ -1,14 +1,12 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {useAtom, useAtomValue, useSetAtom, useStore} from 'jotai'
-import {Text, XStack, YStack} from 'tamagui'
+import {Button, Switch, Typography, XStack, YStack} from '@vexl-next/ui'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {
   benchmarkArrayAtom,
   benchmarkAtom,
   benchmarkEnabledAtom,
   clearBenchmarksActionAtom,
 } from '../../../state/ActionBenchmarks'
-import Button from '../../Button'
-import Switch from '../../Switch'
 
 function BenchmarksList(): React.ReactElement {
   const benchmarks = useAtomValue(benchmarkArrayAtom)
@@ -17,17 +15,22 @@ function BenchmarksList(): React.ReactElement {
     <YStack>
       {benchmarks.map((benchmark) => (
         <YStack key={benchmark.name}>
-          <Text color="$black">{benchmark.name}</Text>
+          <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+            {benchmark.name}
+          </Typography>
           <YStack>
             {benchmark.records.map((record, index) => (
               <XStack key={index} justifyContent="space-between">
-                <Text
+                <Typography
+                  variant="description"
                   color={
-                    record.endedAt - record.startedAt > 1000 ? '$red' : '$black'
+                    record.endedAt - record.startedAt > 1000
+                      ? '$redAccent1'
+                      : '$foregroundPrimary'
                   }
                 >
                   Duration: {record.endedAt - record.startedAt} ms
-                </Text>
+                </Typography>
               </XStack>
             ))}
           </YStack>
@@ -38,37 +41,35 @@ function BenchmarksList(): React.ReactElement {
 }
 
 export function ActionBenchmarks(): React.ReactElement {
-  const [benchmarkEnabled, setBenchmarkEnabled] = useAtom(benchmarkEnabledAtom)
   const clearBenchmarks = useSetAtom(clearBenchmarksActionAtom)
   const store = useStore()
   return (
     <YStack gap="$2">
-      <XStack>
-        <Text color="$black">Action Benchmarks</Text>
-        <Switch
-          value={benchmarkEnabled}
-          onValueChange={(newValue) => {
-            setBenchmarkEnabled(newValue)
-          }}
-        />
+      <XStack alignItems="center" justifyContent="space-between">
+        <Typography variant="titlesSmall" color="$foregroundPrimary">
+          Action Benchmarks
+        </Typography>
+        <Switch valueAtom={benchmarkEnabledAtom} />
       </XStack>
       <BenchmarksList />
       <Button
         variant="primary"
         size="small"
-        text="clear"
         onPress={() => {
           clearBenchmarks()
         }}
-      />
+      >
+        clear
+      </Button>
       <Button
         variant="primary"
         size="small"
-        text="Copy json"
         onPress={() => {
           Clipboard.setString(JSON.stringify(store.get(benchmarkAtom), null, 2))
         }}
-      />
+      >
+        Copy json
+      </Button>
     </YStack>
   )
 }

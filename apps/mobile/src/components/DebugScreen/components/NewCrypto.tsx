@@ -1,7 +1,6 @@
+import {Button, Typography, YStack} from '@vexl-next/ui'
 import React from 'react'
 import sodium from 'react-native-libsodium'
-import {Text, YStack} from 'tamagui'
-import Button from '../../Button'
 
 async function testIt(): Promise<void> {
   await sodium.ready
@@ -27,18 +26,19 @@ async function testIt(): Promise<void> {
 
 function NewCrypto(): React.ReactElement {
   return (
-    <YStack>
-      <Text color="$black" fos={25}>
+    <YStack gap="$2">
+      <Typography variant="titlesSmall" color="$foregroundPrimary">
         New crypto
-      </Text>
+      </Typography>
       <Button
         onPress={() => {
           void testIt()
         }}
         variant="primary"
         size="small"
-        text="Test it"
-      />
+      >
+        Test it
+      </Button>
     </YStack>
   )
 }

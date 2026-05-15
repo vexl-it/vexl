@@ -66,6 +66,21 @@ export function areContactsPermissionsGranted(): Effect.Effect<
   })
 }
 
+export function areContactsPermissionsAlreadyGranted(): Effect.Effect<
+  boolean,
+  UnknownContactsError
+> {
+  return Effect.tryPromise({
+    try: async () => {
+      const contactsPermissions = await Contacts.getPermissionsAsync()
+      return contactsPermissions.granted
+    },
+    catch: (e) => {
+      return new UnknownContactsError({cause: e})
+    },
+  })
+}
+
 export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Effect<
   ContactInfo[],
   ContactsPermissionsNotGrantedError | UnknownContactsError

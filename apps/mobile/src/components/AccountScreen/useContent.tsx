@@ -60,7 +60,7 @@ export function useContent(): AccountMenus {
             note: t('account.contactsCount', {count: numberOfContacts}),
             icon: PeopleUsers,
             onPress: () => {
-              navigation.navigate('SetContacts')
+              navigation.navigate('ContactPreferences')
             },
           },
         ],

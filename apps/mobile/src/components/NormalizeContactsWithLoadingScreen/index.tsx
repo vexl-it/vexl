@@ -9,6 +9,8 @@ import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
 
+const BACKGROUND_OPACITY = 0.86
+
 export default function NormalizeContactsWithLoadingScreen({
   children,
 }: {
@@ -53,16 +55,23 @@ export default function NormalizeContactsWithLoadingScreen({
 
   if (!state.done) {
     return (
-      <Stack flex={1} backgroundColor="$backgroundPrimary" padding="$5">
-        <Stack alignItems="center" justifyContent="center" flex={1}>
-          <VexlActivityIndicator
-            size="large"
-            bc={theme.accentYellowPrimary.get()}
-            description={
-              state.progress ? t('contacts.loadingContacts') : undefined
-            }
-          />
-        </Stack>
+      <Stack f={1} ai="center" jc="center" bg="$backgroundSecondary">
+        <Stack
+          pos="absolute"
+          t={0}
+          l={0}
+          r={0}
+          b={0}
+          bg={theme.backgroundPrimary.get()}
+          opacity={BACKGROUND_OPACITY}
+        />
+        <VexlActivityIndicator
+          size="large"
+          bc={theme.accentYellowPrimary.get()}
+          description={
+            state.progress ? t('contacts.preparingContacts') : undefined
+          }
+        />
       </Stack>
     )
   }

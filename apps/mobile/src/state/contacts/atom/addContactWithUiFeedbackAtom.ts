@@ -83,9 +83,7 @@ const editExistingContactActionAtom: ActionAtomType<
 
       yield* _(
         set(globalDialogAtom, {
-          title: t('addContactDialog.contactUpdated'),
-          subtitle: t('addContactDialog.youHaveSuccessfullyUpdatedContact'),
-          positiveButtonText: t('common.niceWithExclamationMark'),
+          title: t('addContactDialog.changesSaved'),
         })
       )
       return true
@@ -280,9 +278,9 @@ export const addContactWithUiFeedbackActionAtom: ActionAtomType<
       avatar?: SvgStringOrImageUri
     }
   ) => {
-    // if we are on the SetContacts screen, we should navigate back to the previous screen
+    // if we are on the ContactPreferences screen, we should navigate back to the previous screen
     // to avoid not showing added contact in the list
-    if (getActiveRouteNameOutsideOfReact() === 'SetContacts') {
+    if (getActiveRouteNameOutsideOfReact() === 'ContactPreferences') {
       safeNavigateBackOutsideReact()
     }
     const importedContacts = get(importedContactsAtom)

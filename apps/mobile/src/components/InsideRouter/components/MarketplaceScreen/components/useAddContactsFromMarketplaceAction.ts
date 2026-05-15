@@ -37,7 +37,7 @@ export default function useAddContactsFromMarketplaceAction(): () => void {
         )
       ).finally(() => {
         setLoadingContactsFromDevice(false)
-        navigation.navigate('SetContacts', {filter: 'new'})
+        navigation.navigate('ContactPreferences', {filter: 'new'})
       })
     })
   }, [

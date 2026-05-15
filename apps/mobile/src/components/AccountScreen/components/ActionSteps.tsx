@@ -27,7 +27,7 @@ export function ActionSteps(): React.ReactElement | null {
   }, [hasPostedFirstOffer, setPostedFirstOffer])
 
   const navigateToContacts = useCallback(() => {
-    navigation.navigate('SetContacts')
+    navigation.navigate('ContactPreferences')
   }, [navigation])
 
   const navigateToIdentity = useCallback(() => {

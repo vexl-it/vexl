@@ -1,15 +1,13 @@
 import {FlashList} from '@shopify/flash-list'
-import {Stack} from '@vexl-next/ui'
+import {Separator, Stack} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
 import React from 'react'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import ContactItem from './ContactItem'
-import ListFooter from './ListFooter'
-import ListHeader from './ListHeader'
 
 interface Props {
-  contacts: Array<Atom<StoredContactWithComputedValues>>
+  readonly contacts: ReadonlyArray<Atom<StoredContactWithComputedValues>>
 }
 
 function renderItem({
@@ -21,17 +19,20 @@ function renderItem({
 }
 
 function ItemSeparatorComponent(): React.ReactElement {
+  return <Separator borderColor="$backgroundTertiary" />
+}
+
+function ListFooterComponent(): React.ReactElement {
   return <Stack h={16} />
 }
 
 function ContactsList({contacts}: Props): React.ReactElement {
   return (
-    <Stack f={1} pt="$2">
+    <Stack f={1}>
       <FlashList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
+        ListFooterComponent={ListFooterComponent}
         data={contacts}
         ItemSeparatorComponent={ItemSeparatorComponent}
         keyExtractor={atomKeyExtractor}

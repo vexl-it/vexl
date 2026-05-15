@@ -866,7 +866,7 @@ export const offerFormMolecule = molecule(() => {
                         index: 0,
                         routes: [
                           {
-                            name: 'SetContacts',
+                            name: 'ContactPreferences',
                           },
                         ],
                       })

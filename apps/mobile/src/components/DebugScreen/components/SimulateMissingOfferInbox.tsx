@@ -4,6 +4,7 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {Button, Typography, YStack} from '@vexl-next/ui'
 import {Array, Effect} from 'effect'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -11,14 +12,12 @@ import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useState} from 'react'
 import {Alert} from 'react-native'
-import {Text, YStack} from 'tamagui'
 import {apiAtom} from '../../../api'
 import messagingStateAtom from '../../../state/chat/atoms/messagingStateAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {createOfferActionAtom} from '../../../state/marketplace/atoms/createOfferActionAtom'
 import {myOffersAtom} from '../../../state/marketplace/atoms/myOffers'
 import {packageName, version} from '../../../utils/environment'
-import Button from '../../Button'
 
 function SimulateMissingOfferInbox(): React.ReactElement {
   const offers = useAtomValue(myOffersAtom)
@@ -106,9 +105,9 @@ function SimulateMissingOfferInbox(): React.ReactElement {
 
   return (
     <YStack gap="$2">
-      <Text color="$black" fos={25}>
+      <Typography variant="titlesSmall" color="$foregroundPrimary">
         Simulate missing offer inbox
-      </Text>
+      </Typography>
       <Picker selectedValue={selectedOffer} onValueChange={setSelectedOffer}>
         {offers.map((one) => (
           <Picker.Item
@@ -128,8 +127,9 @@ function SimulateMissingOfferInbox(): React.ReactElement {
             Alert.alert('Done')
           })
         }}
-        text="Delete on server"
-      />
+      >
+        Delete on server
+      </Button>
       <Button
         size="small"
         variant="primary"
@@ -141,8 +141,9 @@ function SimulateMissingOfferInbox(): React.ReactElement {
             Alert.alert('Done')
           })
         }}
-        text="Delete everywhere"
-      />
+      >
+        Delete everywhere
+      </Button>
       <Button
         size="small"
         variant="primary"
@@ -153,8 +154,9 @@ function SimulateMissingOfferInbox(): React.ReactElement {
             Alert.alert('Done')
           })
         }}
-        text="Clone offer 10x"
-      />
+      >
+        Clone offer 10x
+      </Button>
     </YStack>
   )
 }

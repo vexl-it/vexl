@@ -11,6 +11,14 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {
+  ChevronLeft,
+  NavigationBar,
+  Screen,
+  Typography,
+  Button as UiButton,
+  YStack,
+} from '@vexl-next/ui'
+import {
   Array,
   Effect,
   pipe as effectPipe,
@@ -28,8 +36,7 @@ import {pipe} from 'fp-ts/function'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
-import {Alert, Platform, ScrollView} from 'react-native'
-import {Spacer, Text, YStack} from 'tamagui'
+import {Alert, Platform} from 'react-native'
 import {apiAtom, apiEnv} from '../../api'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import allChatsAtom from '../../state/chat/atoms/allChatsAtom'
@@ -64,6 +71,7 @@ import {
 import {refreshOffersActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom'
 import {getNewContactNetworkOffersAndDecryptPaginatedActionAtom} from '../../state/marketplace/atoms/refreshOffersActionAtom/utils/getNewOffersAndDecrypt'
 import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
+import {resetPostLoginFlowProgressActionAtom} from '../../state/postLoginOnboarding'
 import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
@@ -89,9 +97,6 @@ import reportError from '../../utils/reportError'
 import {startMeasure} from '../../utils/reportTime'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import Button from '../Button'
-import Screen from '../Screen'
-import WhiteContainer from '../WhiteContainer'
 import deleteInboxAtom from './atoms/deleteInboxAtom'
 import {ActionBenchmarks} from './components/ActionBenchmarks'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
@@ -140,6 +145,35 @@ const EUROPE_DEBUG_LOCATIONS = [
   {name: 'Athens', latitude: 37.9838, longitude: 23.7275},
   {name: 'Bucharest', latitude: 44.4268, longitude: 26.1025},
 ]
+
+type DebugButtonProps = Omit<
+  React.ComponentProps<typeof UiButton>,
+  'children'
+> & {
+  readonly text: string
+}
+
+function Button({text, ...props}: DebugButtonProps): React.JSX.Element {
+  return <UiButton {...props}>{text}</UiButton>
+}
+
+function DebugLabel({
+  children,
+  userSelect,
+}: {
+  readonly children: React.ReactNode
+  readonly userSelect?: 'auto'
+}): React.JSX.Element {
+  return (
+    <Typography
+      variant="paragraphSmall"
+      color="$foregroundPrimary"
+      userSelect={userSelect}
+    >
+      {children}
+    </Typography>
+  )
+}
 
 function createDebugEuropeOfferPublicPart({
   index,
@@ -191,13 +225,6 @@ function createDebugEuropeOfferPublicPart({
   })
 }
 
-// const ContentScroll = styled(ScrollView, {
-//   marginBottom: '$2',
-//   contentContainerStyle: {
-//     flex: 1,
-//   },
-// })
-
 function DebugScreen(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const navigation =
@@ -219,6 +246,9 @@ function DebugScreen(): React.ReactElement {
   const getNewContactNetworkOffersAndDecryptPaginated = useSetAtom(
     getNewContactNetworkOffersAndDecryptPaginatedActionAtom
   )
+  const resetPostLoginFlowProgress = useSetAtom(
+    resetPostLoginFlowProgressActionAtom
+  )
   const notificationToken = useAtomValue(vexlNotificationTokenAtom)
 
   if (!isDeveloper) {
@@ -226,12 +256,16 @@ function DebugScreen(): React.ReactElement {
       ? 'Show translators debug button'
       : 'Hide translators debug button'
     return (
-      <Screen>
-        <WhiteContainer>
-          <Text color="$black" fos={20} ff="$heading">
-            Debug screen
-          </Text>
-          <Spacer />
+      <Screen
+        navigationBar={
+          <NavigationBar
+            style="back"
+            title="Debug screen"
+            leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
+          />
+        }
+      >
+        <YStack gap="$4">
           <Button
             variant="secondary"
             size="small"
@@ -240,796 +274,794 @@ function DebugScreen(): React.ReactElement {
             }}
             text={buttonText}
           />
-          <Spacer />
           <LanguagePicker />
-          <Spacer />
           <Button variant="secondary" text="back" onPress={safeGoBack} />
-        </WhiteContainer>
+        </YStack>
       </Screen>
     )
   }
 
   return (
-    <Screen>
-      <WhiteContainer>
-        <ScrollView>
-          <YStack gap="$2">
-            <Text color="$black" fos={20} ff="$heading">
-              Debug screen
-            </Text>
-            <Text color="$black">
-              App version: {version} ({versionCode})
-            </Text>
-            <Text color="$black" userSelect="auto">
-              On Commit: {commitHash}
-            </Text>
-            <Text color="$black">__DEV__: {__DEV__}</Text>
-            <CryptoBenchmarks />
-            <Text color="$black">
-              enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
-            </Text>
-            <Text color="$black">
-              apiEnv: {JSON.stringify(apiEnv, null, 2)}
-            </Text>
-            <Text color="$black">
-              notficationSecretState:{' '}
-              {JSON.stringify(notificationToken, null, 2)}
-            </Text>
-            <Spacer />
-            <NewCrypto />
-            <Spacer />
-            <ActionBenchmarks />
-            <Spacer />
-            <LanguagePicker />
-            <Spacer />
-            <Button
-              variant="primary"
-              size="small"
-              text="Refresh connectionss"
-              onPress={() => {
-                Effect.runFork(
-                  Effect.gen(function* (_) {
-                    yield* store.set(syncConnectionsActionAtom)
+    <Screen
+      scrollable
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title="Debug screen"
+          leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
+        />
+      }
+      footer={<Button variant="secondary" text="back" onPress={safeGoBack} />}
+    >
+      <YStack gap="$4">
+        <YStack gap="$3">
+          <DebugLabel>
+            App version: {version} ({versionCode})
+          </DebugLabel>
+          <DebugLabel userSelect="auto">On Commit: {commitHash}</DebugLabel>
+          <DebugLabel>__DEV__: {__DEV__}</DebugLabel>
+          <CryptoBenchmarks />
+          <DebugLabel>
+            enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}
+          </DebugLabel>
+          <DebugLabel>apiEnv: {JSON.stringify(apiEnv, null, 2)}</DebugLabel>
+          <DebugLabel>
+            notficationSecretState: {JSON.stringify(notificationToken, null, 2)}
+          </DebugLabel>
+          <NewCrypto />
+          <ActionBenchmarks />
+          <LanguagePicker />
+          <Button
+            variant="primary"
+            size="small"
+            text="Reset post-login flow progress"
+            onPress={() => {
+              resetPostLoginFlowProgress()
+              Alert.alert('Post-login flow progress reset')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Refresh connectionss"
+            onPress={() => {
+              Effect.runFork(
+                Effect.gen(function* (_) {
+                  yield* store.set(syncConnectionsActionAtom)
 
-                    const connectionState = store.get(connectionStateAtom)
-                    console.log(connectionState)
-                  })
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Print contacts"
-              onPress={() => {
-                const contacts = store.get(storedContactsAtom)
-                console.log('Contacts: ', JSON.stringify(contacts, null, 2))
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Simulate non fatal error Error A"
-              onPress={() => {
-                reportError(
-                  'error',
-                  new Error('Simulated non fatal error A'),
-                  // Private key should be stripped
-                  {
-                    text: `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
-                  }
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Simulate non fatal error Error B"
-              onPress={() => {
-                reportError(
-                  'error',
-                  new Error('Simulated non fatal error B'),
-                  // Private key should be stripped
-                  {
-                    text: `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
-                  }
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Simulate fatal error"
-              onPress={() => {
-                throw new Error(`Simulated fatal error`)
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Report offers without location"
-              onPress={() => {
-                store.set(reportOffersWithoutLocationActionAtom)
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Clear offers state"
-              onPress={() => {
-                store.set(offersStateAtom, {
-                  lastUpdatedAt2: MINIMAL_DATE,
-                  offers: [],
-                  contactOffersNextPageParam: undefined,
-                  clubOffersNextPageParam: {},
+                  const connectionState = store.get(connectionStateAtom)
+                  console.log(connectionState)
                 })
-                Alert.alert('Done')
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Create 100 server debug offers around Europe"
-              onPress={() => {
-                if (packageName === 'it.vexl.next') {
-                  Alert.alert('Not available in production')
-                  return
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Print contacts"
+            onPress={() => {
+              const contacts = store.get(storedContactsAtom)
+              console.log('Contacts: ', JSON.stringify(contacts, null, 2))
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Simulate non fatal error Error A"
+            onPress={() => {
+              reportError(
+                'error',
+                new Error('Simulated non fatal error A'),
+                // Private key should be stripped
+                {
+                  text: `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
                 }
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Simulate non fatal error Error B"
+            onPress={() => {
+              reportError(
+                'error',
+                new Error('Simulated non fatal error B'),
+                // Private key should be stripped
+                {
+                  text: `Simulated non fatal error ${session.privateKey.privateKeyPemBase64}`,
+                }
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Simulate fatal error"
+            onPress={() => {
+              throw new Error(`Simulated fatal error`)
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Report offers without location"
+            onPress={() => {
+              store.set(reportOffersWithoutLocationActionAtom)
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Clear offers state"
+            onPress={() => {
+              store.set(offersStateAtom, {
+                lastUpdatedAt2: MINIMAL_DATE,
+                offers: [],
+                contactOffersNextPageParam: undefined,
+                clubOffersNextPageParam: {},
+              })
+              Alert.alert('Done')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Create 100 server debug offers around Europe"
+            onPress={() => {
+              if (packageName === 'it.vexl.next') {
+                Alert.alert('Not available in production')
+                return
+              }
 
-                Alert.alert(
-                  'Started',
-                  'Creating 100 offers on the server. This can take a while.'
-                )
+              Alert.alert(
+                'Started',
+                'Creating 100 offers on the server. This can take a while.'
+              )
 
-                pipe(
-                  Effect.forEach(
-                    Array.range(0, 99),
-                    (index) =>
-                      Effect.gen(function* (_) {
-                        const offerId = newOfferId()
-                        const inbox = yield* _(
-                          store.set(upsertInboxOnBeAndLocallyActionAtom, {
-                            for: 'myOffer',
-                            offerId,
-                          })
-                        )
-
-                        return yield* _(
-                          store.set(createOfferActionAtom, {
-                            offerId,
-                            payloadPublic: createDebugEuropeOfferPublicPart({
-                              index,
-                              offerPublicKey:
-                                inbox.inbox.privateKey.publicKeyPemBase64,
-                            }),
-                            intendedConnectionLevel: 'ALL',
-                            intendedClubs: [],
-                            offerKey: inbox.inbox.privateKey,
-                            onProgress: (progress) => {
-                              console.log(
-                                `Creating debug Europe offer ${
-                                  index + 1
-                                }/100: ${JSON.stringify(progress)}`
-                              )
-                            },
-                          })
-                        )
-                      }),
-                    {concurrency: 1}
-                  ),
-                  Effect.tap((createdOffers) =>
-                    Effect.sync(() => {
-                      Alert.alert(
-                        'Done',
-                        `Created ${createdOffers.length} all-friends offers around Europe`
+              pipe(
+                Effect.forEach(
+                  Array.range(0, 99),
+                  (index) =>
+                    Effect.gen(function* (_) {
+                      const offerId = newOfferId()
+                      const inbox = yield* _(
+                        store.set(upsertInboxOnBeAndLocallyActionAtom, {
+                          for: 'myOffer',
+                          offerId,
+                        })
                       )
-                    })
-                  ),
-                  Effect.tapError((error) =>
-                    Effect.sync(() => {
-                      console.error('Error creating debug Europe offers', error)
-                      Alert.alert(
-                        'Error',
-                        JSON.stringify(error, null, 2).slice(0, 1000)
+
+                      return yield* _(
+                        store.set(createOfferActionAtom, {
+                          offerId,
+                          payloadPublic: createDebugEuropeOfferPublicPart({
+                            index,
+                            offerPublicKey:
+                              inbox.inbox.privateKey.publicKeyPemBase64,
+                          }),
+                          intendedConnectionLevel: 'ALL',
+                          intendedClubs: [],
+                          offerKey: inbox.inbox.privateKey,
+                          onProgress: (progress) => {
+                            console.log(
+                              `Creating debug Europe offer ${
+                                index + 1
+                              }/100: ${JSON.stringify(progress)}`
+                            )
+                          },
+                        })
                       )
-                    })
-                  ),
-                  Effect.runFork
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Test get first page of offers and alert number"
-              onPress={() => {
-                void pipe(
-                  effectToTaskEither(
-                    getNewContactNetworkOffersAndDecryptPaginated({
-                      keyPair: session.privateKey,
-                      keyPairV2: session.keyPairV2,
-                      offersApi: store.get(apiAtom).offer,
-                      lastPrivatePartIdBase64: undefined,
-                    })
-                  ),
-                  TE.matchW(
-                    (error) => {
-                      Alert.alert('error', JSON.stringify(error, null, 2), [
-                        {text: 'ok'},
+                    }),
+                  {concurrency: 1}
+                ),
+                Effect.tap((createdOffers) =>
+                  Effect.sync(() => {
+                    Alert.alert(
+                      'Done',
+                      `Created ${createdOffers.length} all-friends offers around Europe`
+                    )
+                  })
+                ),
+                Effect.tapError((error) =>
+                  Effect.sync(() => {
+                    console.error('Error creating debug Europe offers', error)
+                    Alert.alert(
+                      'Error',
+                      JSON.stringify(error, null, 2).slice(0, 1000)
+                    )
+                  })
+                ),
+                Effect.runFork
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Test get first page of offers and alert number"
+            onPress={() => {
+              void pipe(
+                effectToTaskEither(
+                  getNewContactNetworkOffersAndDecryptPaginated({
+                    keyPair: session.privateKey,
+                    keyPairV2: session.keyPairV2,
+                    offersApi: store.get(apiAtom).offer,
+                    lastPrivatePartIdBase64: undefined,
+                  })
+                ),
+                TE.matchW(
+                  (error) => {
+                    Alert.alert('error', JSON.stringify(error, null, 2), [
+                      {text: 'ok'},
+                      {
+                        text: 'copy to clipboard',
+                        onPress: () => {
+                          Clipboard.setString(JSON.stringify(error, null, 2))
+                        },
+                      },
+                    ])
+                  },
+                  (result) => {
+                    const errors = effectPipe(
+                      Array.filterMap(result, Either.getLeft)
+                    )
+                    const success = effectPipe(
+                      Array.filterMap(result, Either.getRight)
+                    )
+
+                    Alert.alert(
+                      'success',
+                      `done got: ${success.length} success and ${errors.length} errors`,
+                      [
                         {
-                          text: 'copy to clipboard',
+                          text: 'ok',
+                        },
+                        {
+                          text: 'Check and copy to clipboard',
                           onPress: () => {
-                            Clipboard.setString(JSON.stringify(error, null, 2))
+                            alertAndReportInPersonOffersWithoutLocation(
+                              success,
+                              true,
+                              true
+                            )
                           },
                         },
-                      ])
-                    },
-                    (result) => {
-                      const errors = effectPipe(
-                        Array.filterMap(result, Either.getLeft)
-                      )
-                      const success = effectPipe(
-                        Array.filterMap(result, Either.getRight)
-                      )
-
-                      Alert.alert(
-                        'success',
-                        `done got: ${success.length} success and ${errors.length} errors`,
-                        [
-                          {
-                            text: 'ok',
-                          },
-                          {
-                            text: 'Check and copy to clipboard',
-                            onPress: () => {
-                              alertAndReportInPersonOffersWithoutLocation(
-                                success,
-                                true,
-                                true
-                              )
-                            },
-                          },
-                        ]
-                      )
-                    }
-                  )
-                )()
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="show not"
-              onPress={() => {
-                void (async () => {
-                  if (Platform.OS === 'android') {
-                    await notifee.displayNotification({
-                      id: 'some',
-                      title: 'summary',
-                      subtitle: 'some summary',
-                      android: {
-                        smallIcon: 'notification_icon',
-                        channelId: await getChannelForMessages(),
-                        groupSummary: true,
-                        groupId: 'some',
-                        groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
-                      },
-                    })
+                      ]
+                    )
                   }
+                )
+              )()
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="show not"
+            onPress={() => {
+              void (async () => {
+                if (Platform.OS === 'android') {
                   await notifee.displayNotification({
-                    id: 'nnn',
-                    title: `title ${Date.now()}`,
-                    subtitle: 'some notification',
-                    ios: {
-                      threadId: 'some',
-                    },
+                    id: 'some',
+                    title: 'summary',
+                    subtitle: 'some summary',
                     android: {
                       smallIcon: 'notification_icon',
                       channelId: await getChannelForMessages(),
+                      groupSummary: true,
                       groupId: 'some',
                       groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
                     },
                   })
-                })()
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="cancel all not"
-              onPress={() => {
-                void (async () => {
-                  await notifee.cancelAllNotifications()
-                })()
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="print all not"
-              onPress={() => {
-                void (async () => {
-                  const nots = await notifee.getDisplayedNotifications()
-                  console.log(JSON.stringify(nots, null, 2))
-                })()
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Print contactOffersNextPageParamBase64"
-              onPress={() => {
-                Alert.alert(
-                  'Last updated at',
-                  `inState: ${store.get(
-                    contactOffersNextPageParamAtom
-                  )}, minimalDate: ${MINIMAL_DATE}`
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Print clubOffersNextPageParamBase64"
-              onPress={() => {
-                Alert.alert(
-                  'Last updated at',
-                  `inState: ${JSON.stringify(
-                    store.get(clubOffersNextPageParamAtom)
-                  )}, minimalDate: ${MINIMAL_DATE}`
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Clear messaging state"
-              onPress={() => {
-                const userInbox: Inbox = {privateKey: session.privateKey}
-
-                store.set(messagingStateAtom, [{inbox: userInbox, chats: []}])
-                Alert.alert('Done')
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Clear BTC price data state"
-              onPress={() => {
-                store.set(btcPriceDataAtom, {})
-                Alert.alert('Done')
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Refresh chat state"
-              onPress={() => {
-                pipe(
-                  refreshMessaging(),
-                  Effect.andThen((r) => {
-                    Alert.alert(r)
-                  }),
-                  Effect.runFork
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Open missing chat detail"
-              onPress={() => {
-                navigation.navigate('ChatDetail', {
-                  inboxKey: session.privateKey.publicKeyPemBase64,
-                  otherSideKey: Schema.decodeSync(PublicKeyPemBase64)(
-                    'debug-chat-detail-that-does-not-exist'
-                  ),
-                })
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Simulate losing ownership info"
-              onPress={() => {
-                store.set(offersAtom, (o) =>
-                  o.map((one) => ({...one, ownershipInfo: undefined}))
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Refresh offers state"
-              onPress={() => {
-                void Effect.runPromise(
-                  andThenExpectVoidNoErrors(() => {
-                    Alert.alert('done')
-                  })(refreshOffers())
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="clear new contacts"
-              onPress={() => {
-                store.set(storedContactsAtom, [])
-              }}
-            />
-
-            <Button
-              variant="primary"
-              size="small"
-              text="Reconstruct user inbox"
-              onPress={() => {
-                store.set(messagingStateAtom, (old) => [
-                  ...old.filter(
-                    (one) =>
-                      one.inbox.privateKey.publicKeyPemBase64 !==
-                      session.privateKey.publicKeyPemBase64
-                  ),
-                  {
-                    inbox: {
-                      privateKey: session.privateKey,
-                    },
-                    chats: [],
+                }
+                await notifee.displayNotification({
+                  id: 'nnn',
+                  title: `title ${Date.now()}`,
+                  subtitle: 'some notification',
+                  ios: {
+                    threadId: 'some',
                   },
-                ])
-              }}
-            />
+                  android: {
+                    smallIcon: 'notification_icon',
+                    channelId: await getChannelForMessages(),
+                    groupId: 'some',
+                    groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+                  },
+                })
+              })()
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="cancel all not"
+            onPress={() => {
+              void (async () => {
+                await notifee.cancelAllNotifications()
+              })()
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="print all not"
+            onPress={() => {
+              void (async () => {
+                const nots = await notifee.getDisplayedNotifications()
+                console.log(JSON.stringify(nots, null, 2))
+              })()
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Print contactOffersNextPageParamBase64"
+            onPress={() => {
+              Alert.alert(
+                'Last updated at',
+                `inState: ${store.get(
+                  contactOffersNextPageParamAtom
+                )}, minimalDate: ${MINIMAL_DATE}`
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Print clubOffersNextPageParamBase64"
+            onPress={() => {
+              Alert.alert(
+                'Last updated at',
+                `inState: ${JSON.stringify(
+                  store.get(clubOffersNextPageParamAtom)
+                )}, minimalDate: ${MINIMAL_DATE}`
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Clear messaging state"
+            onPress={() => {
+              const userInbox: Inbox = {privateKey: session.privateKey}
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Delete offer connections without offer"
-              onPress={() => {
-                store.set(deleteOrphanRecordsActionAtom)
-              }}
-            />
+              store.set(messagingStateAtom, [{inbox: userInbox, chats: []}])
+              Alert.alert('Done')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Clear BTC price data state"
+            onPress={() => {
+              store.set(btcPriceDataAtom, {})
+              Alert.alert('Done')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Refresh chat state"
+            onPress={() => {
+              pipe(
+                refreshMessaging(),
+                Effect.andThen((r) => {
+                  Alert.alert(r)
+                }),
+                Effect.runFork
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Open missing chat detail"
+            onPress={() => {
+              navigation.navigate('ChatDetail', {
+                inboxKey: session.privateKey.publicKeyPemBase64,
+                otherSideKey: Schema.decodeSync(PublicKeyPemBase64)(
+                  'debug-chat-detail-that-does-not-exist'
+                ),
+              })
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Simulate losing ownership info"
+            onPress={() => {
+              store.set(offersAtom, (o) =>
+                o.map((one) => ({...one, ownershipInfo: undefined}))
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Refresh offers state"
+            onPress={() => {
+              void Effect.runPromise(
+                andThenExpectVoidNoErrors(() => {
+                  Alert.alert('done')
+                })(refreshOffers())
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="clear new contacts"
+            onPress={() => {
+              store.set(storedContactsAtom, [])
+            }}
+          />
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Print offer and chat state into console"
-              onPress={() => {
-                const offers = store.get(offersStateAtom)
-                const messagingState = store.get(messagingStateAtom)
-                const connectionState = store.get(offerToConnectionsAtom)
-                console.log({offers, messagingState, connectionState})
-              }}
-            />
+          <Button
+            variant="primary"
+            size="small"
+            text="Reconstruct user inbox"
+            onPress={() => {
+              store.set(messagingStateAtom, (old) => [
+                ...old.filter(
+                  (one) =>
+                    one.inbox.privateKey.publicKeyPemBase64 !==
+                    session.privateKey.publicKeyPemBase64
+                ),
+                {
+                  inbox: {
+                    privateKey: session.privateKey,
+                  },
+                  chats: [],
+                },
+              ])
+            }}
+          />
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Print my offers into console"
-              onPress={() => {
-                const offers = store.get(myOffersAtom)
-                console.log(JSON.stringify(offers, null, 2))
-              }}
-            />
+          <Button
+            variant="primary"
+            size="small"
+            text="Delete offer connections without offer"
+            onPress={() => {
+              store.set(deleteOrphanRecordsActionAtom)
+            }}
+          />
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Delete user inbox"
-              onPress={() =>
-                deleteInbox(session.privateKey).pipe(
-                  Effect.tap((result) => {
-                    if (result) {
-                      Alert.alert('done')
-                    } else {
-                      Alert.alert('error')
-                    }
-                  }),
-                  Effect.runFork
-                )
-              }
-            />
+          <Button
+            variant="primary"
+            size="small"
+            text="Print offer and chat state into console"
+            onPress={() => {
+              const offers = store.get(offersStateAtom)
+              const messagingState = store.get(messagingStateAtom)
+              const connectionState = store.get(offerToConnectionsAtom)
+              console.log({offers, messagingState, connectionState})
+            }}
+          />
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Delete all inboxes"
-              onPress={() => {
-                void pipe(
-                  deleteAllInboxes(),
-                  T.map((result) => {
-                    if (result) {
-                      Alert.alert('done')
-                    } else {
-                      Alert.alert('error')
-                    }
-                  })
-                )()
-              }}
-            />
+          <Button
+            variant="primary"
+            size="small"
+            text="Print my offers into console"
+            onPress={() => {
+              const offers = store.get(myOffersAtom)
+              console.log(JSON.stringify(offers, null, 2))
+            }}
+          />
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Send version update to all chats"
-              onPress={() => {
-                Effect.runFork(
-                  Effect.gen(function* (_) {
-                    const allChats = store.get(allChatsAtom).flat()
-                    const sendUpdate = Array.map(allChats, (one) => {
-                      const inboxAtom = focusChatByInboxKeyAndSenderKey({
-                        inboxKey: one.chat.inbox.privateKey.publicKeyPemBase64,
-                        senderKey: one.chat.otherSide.publicKey,
-                      })
-                      return store.set(
-                        sendUpdateNoticeMessageActionAtom,
-                        inboxAtom
-                      )
+          <Button
+            variant="primary"
+            size="small"
+            text="Delete user inbox"
+            onPress={() =>
+              deleteInbox(session.privateKey).pipe(
+                Effect.tap((result) => {
+                  if (result) {
+                    Alert.alert('done')
+                  } else {
+                    Alert.alert('error')
+                  }
+                }),
+                Effect.runFork
+              )
+            }
+          />
+
+          <Button
+            variant="primary"
+            size="small"
+            text="Delete all inboxes"
+            onPress={() => {
+              void pipe(
+                deleteAllInboxes(),
+                T.map((result) => {
+                  if (result) {
+                    Alert.alert('done')
+                  } else {
+                    Alert.alert('error')
+                  }
+                })
+              )()
+            }}
+          />
+
+          <Button
+            variant="primary"
+            size="small"
+            text="Send version update to all chats"
+            onPress={() => {
+              Effect.runFork(
+                Effect.gen(function* (_) {
+                  const allChats = store.get(allChatsAtom).flat()
+                  const sendUpdate = Array.map(allChats, (one) => {
+                    const inboxAtom = focusChatByInboxKeyAndSenderKey({
+                      inboxKey: one.chat.inbox.privateKey.publicKeyPemBase64,
+                      senderKey: one.chat.otherSide.publicKey,
                     })
-                    yield* _(Effect.all(sendUpdate))
-                  })
-                )
-              }}
-            />
-
-            <Button
-              variant="primary"
-              size="small"
-              text="Update all offers connections"
-              onPress={() => {
-                Effect.runFork(updateConnections({isInBackground: false}))
-              }}
-            />
-
-            <Button
-              variant="primary"
-              size="small"
-              text="Copy public key"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onPress={async () => {
-                Clipboard.setString(
-                  store.get(sessionDataOrDummyAtom).privateKey
-                    .publicKeyPemBase64
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Copy notification token"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onPress={async () => {
-                Clipboard.setString(
-                  (await Effect.runPromise(getNotificationTokenE())) ??
-                    'No token'
-                )
-              }}
-            />
-
-            <Button
-              variant="primary"
-              size="small"
-              text="Print background tasks"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onPress={async () => {
-                const registeredTasks =
-                  await TaskManager.getRegisteredTasksAsync()
-                console.log(JSON.stringify(registeredTasks, null, 2))
-                Alert.alert(
-                  'Registered tasks',
-                  JSON.stringify(registeredTasks, null, 2),
-                  [
-                    {
-                      text: 'copy',
-                      onPress: () => {
-                        Clipboard.setString(
-                          JSON.stringify(registeredTasks, null, 2)
-                        )
-                      },
-                    },
-                    {
-                      text: 'calcel',
-                    },
-                  ]
-                )
-              }}
-            />
-
-            {/* Testing background tasks is only available in dev mode */}
-            {!!__DEV__ && (
-              <Button
-                variant="primary"
-                size="small"
-                text="Run test background tasks"
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onPress={async () => {
-                  await BackgroundTask.triggerTaskWorkerForTestingAsync()
-                }}
-              />
-            )}
-
-            <Button
-              variant="primary"
-              size="small"
-              text="Create and Copy notification cypher"
-              onPress={() => {
-                Effect.runFork(
-                  Effect.gen(function* (_) {
-                    const notificationToken = yield* _(getNotificationTokenE())
-                    if (!notificationToken) {
-                      yield* _(
-                        Effect.sync(() => {
-                          Alert.alert('No notification token')
-                        })
-                      )
-                      return
-                    }
-
-                    const cypher = yield* _(
-                      fetchAndEncryptNotificationToken({
-                        clientPlatform: platform,
-                        clientVersion: versionCode,
-                        expoToken: notificationToken,
-                        notificationApi: store.get(apiAtom).notification,
-                        locale: t('localeName'),
-                      })
+                    return store.set(
+                      sendUpdateNoticeMessageActionAtom,
+                      inboxAtom
                     )
+                  })
+                  yield* _(Effect.all(sendUpdate))
+                })
+              )
+            }}
+          />
 
+          <Button
+            variant="primary"
+            size="small"
+            text="Update all offers connections"
+            onPress={() => {
+              Effect.runFork(updateConnections({isInBackground: false}))
+            }}
+          />
+
+          <Button
+            variant="primary"
+            size="small"
+            text="Copy public key"
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onPress={async () => {
+              Clipboard.setString(
+                store.get(sessionDataOrDummyAtom).privateKey.publicKeyPemBase64
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Copy notification token"
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onPress={async () => {
+              Clipboard.setString(
+                (await Effect.runPromise(getNotificationTokenE())) ?? 'No token'
+              )
+            }}
+          />
+
+          <Button
+            variant="primary"
+            size="small"
+            text="Print background tasks"
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onPress={async () => {
+              const registeredTasks =
+                await TaskManager.getRegisteredTasksAsync()
+              console.log(JSON.stringify(registeredTasks, null, 2))
+              Alert.alert(
+                'Registered tasks',
+                JSON.stringify(registeredTasks, null, 2),
+                [
+                  {
+                    text: 'copy',
+                    onPress: () => {
+                      Clipboard.setString(
+                        JSON.stringify(registeredTasks, null, 2)
+                      )
+                    },
+                  },
+                  {
+                    text: 'calcel',
+                  },
+                ]
+              )
+            }}
+          />
+
+          {/* Testing background tasks is only available in dev mode */}
+          {!!__DEV__ && (
+            <Button
+              variant="primary"
+              size="small"
+              text="Run test background tasks"
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onPress={async () => {
+                await BackgroundTask.triggerTaskWorkerForTestingAsync()
+              }}
+            />
+          )}
+
+          <Button
+            variant="primary"
+            size="small"
+            text="Create and Copy notification cypher"
+            onPress={() => {
+              Effect.runFork(
+                Effect.gen(function* (_) {
+                  const notificationToken = yield* _(getNotificationTokenE())
+                  if (!notificationToken) {
                     yield* _(
                       Effect.sync(() => {
-                        Clipboard.setString(cypher)
-                        Alert.alert('Copied')
+                        Alert.alert('No notification token')
                       })
                     )
-                  })
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Simulate offers deleted from server"
-              onPress={() => {
-                void effectToTaskEither(
-                  store.get(apiAtom).offer.deleteOffer({
-                    adminIds: store
-                      .get(myOffersAtom)
-                      .map((one) => one.ownershipInfo?.adminId)
-                      .filter((one): one is NonNullable<typeof one> => !!one),
-                  })
-                )()
-                  .then(() => {
-                    Alert.alert('done')
-                  })
-                  .catch((error) => {
-                    Alert.alert('Error', error.message)
-                  })
-              }}
-            />
+                    return
+                  }
 
-            <Button
-              variant="primary"
-              size="small"
-              text="Test dummy feedback request"
-              onPress={() => {
-                void effectToTaskEither(
-                  store.get(apiAtom).feedback.submitFeedback({
-                    formId: Schema.decodeSync(FeedbackFormId)(generateUuid()),
-                    type: 'create',
-                    stars: 5,
-                    textComment: 'from test',
-                  })
-                )()
-                  .then(() => {
-                    Alert.alert('done')
-                  })
-                  .catch((error) => {
-                    Alert.alert('Error', error.message)
-                  })
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Toggle debug notifications"
-              onPress={() => {
-                setShowDebugNotifications(!getShowDebugNotifications())
-                Alert.alert(
-                  getShowDebugNotifications() ? 'Enabled' : 'Disabled'
-                )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Simulate reach drop to 0"
-              onPress={() => {
-                setConnectionsState({
-                  lastUpdate: Schema.decodeSync(UnixMilliseconds)(
-                    DateTime.now().toMillis()
-                  ),
-                  firstLevel: [],
-                  secondLevel: [],
-                  commonFriends: HashMap.empty(),
-                  verifiedFriends: HashMap.empty(),
+                  const cypher = yield* _(
+                    fetchAndEncryptNotificationToken({
+                      clientPlatform: platform,
+                      clientVersion: versionCode,
+                      expoToken: notificationToken,
+                      notificationApi: store.get(apiAtom).notification,
+                      locale: t('localeName'),
+                    })
+                  )
+
+                  yield* _(
+                    Effect.sync(() => {
+                      Clipboard.setString(cypher)
+                      Alert.alert('Copied')
+                    })
+                  )
                 })
-                Alert.alert('Done')
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Show are you sure thing"
-              onPress={() => {
-                store
-                  .set(askAreYouSureActionAtom, {
-                    variant: 'info',
-                    steps: [
-                      {
-                        type: 'StepWithText',
-                        title: 'Are you sure?',
-                        description: 'This is a description',
-                        negativeButtonText: 'Cancel',
-                        positiveButtonText: 'Yes, I am sure',
-                      },
-                    ],
-                  })
-                  .pipe(Effect.runFork)
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text="Show installation source"
-              onPress={() => {
-                if (Platform.OS === 'android')
-                  Alert.alert(getInstallationSource() ?? 'none')
-                else
-                  Alert.alert(
-                    `ios: ${isTestFlight ? 'TestFlight' : 'Not testflight'}`
-                  )
-              }}
-            />
-            <Button
-              variant="primary"
-              size="small"
-              text={`(Effect) Generate and measure decoding of ${NUMBER_OF_TEST_CONTACTS} contacts`}
-              onPress={() => {
-                Effect.gen(function* (_) {
-                  const contacts = generateTestContacts()
-                  const measureDecodingContacts = startMeasure(
-                    `Measure decoding large amount of ${NUMBER_OF_TEST_CONTACTS} contacts`
-                  )
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Simulate offers deleted from server"
+            onPress={() => {
+              void effectToTaskEither(
+                store.get(apiAtom).offer.deleteOffer({
+                  adminIds: store
+                    .get(myOffersAtom)
+                    .map((one) => one.ownershipInfo?.adminId)
+                    .filter((one): one is NonNullable<typeof one> => !!one),
+                })
+              )()
+                .then(() => {
+                  Alert.alert('done')
+                })
+                .catch((error) => {
+                  Alert.alert('Error', error.message)
+                })
+            }}
+          />
 
-                  const result = pipe(
-                    contacts,
-                    Schema.decodeSync(
-                      Schema.parseJson(Schema.Array(StoredContact))
-                    )
-                  )
-
-                  const time = measureDecodingContacts()
-                  Alert.alert(`In ${time}s decoded ${result.length} contacts`)
-                }).pipe(
-                  Effect.tapError((e) =>
-                    Effect.sync(() => {
-                      Alert.alert('Error')
-                    })
-                  ),
-                  Effect.tapDefect((e) =>
-                    Effect.sync(() => {
-                      Alert.alert('Defect')
-                    })
-                  ),
-                  Effect.runFork
+          <Button
+            variant="primary"
+            size="small"
+            text="Test dummy feedback request"
+            onPress={() => {
+              void effectToTaskEither(
+                store.get(apiAtom).feedback.submitFeedback({
+                  formId: Schema.decodeSync(FeedbackFormId)(generateUuid()),
+                  type: 'create',
+                  stars: 5,
+                  textComment: 'from test',
+                })
+              )()
+                .then(() => {
+                  Alert.alert('done')
+                })
+                .catch((error) => {
+                  Alert.alert('Error', error.message)
+                })
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Toggle debug notifications"
+            onPress={() => {
+              setShowDebugNotifications(!getShowDebugNotifications())
+              Alert.alert(getShowDebugNotifications() ? 'Enabled' : 'Disabled')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Simulate reach drop to 0"
+            onPress={() => {
+              setConnectionsState({
+                lastUpdate: Schema.decodeSync(UnixMilliseconds)(
+                  DateTime.now().toMillis()
+                ),
+                firstLevel: [],
+                secondLevel: [],
+                commonFriends: HashMap.empty(),
+                verifiedFriends: HashMap.empty(),
+              })
+              Alert.alert('Done')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Show are you sure thing"
+            onPress={() => {
+              store
+                .set(askAreYouSureActionAtom, {
+                  variant: 'info',
+                  steps: [
+                    {
+                      type: 'StepWithText',
+                      title: 'Are you sure?',
+                      description: 'This is a description',
+                      negativeButtonText: 'Cancel',
+                      positiveButtonText: 'Yes, I am sure',
+                    },
+                  ],
+                })
+                .pipe(Effect.runFork)
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Show installation source"
+            onPress={() => {
+              if (Platform.OS === 'android')
+                Alert.alert(getInstallationSource() ?? 'none')
+              else
+                Alert.alert(
+                  `ios: ${isTestFlight ? 'TestFlight' : 'Not testflight'}`
                 )
-              }}
-            />
-          </YStack>
-          <SimulateMissingOfferInbox />
-          <Preferences />
-          <AfterInteractionTaskDemo />
-        </ScrollView>
-        <Button variant="secondary" text="back" onPress={safeGoBack} />
-      </WhiteContainer>
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text={`(Effect) Generate and measure decoding of ${NUMBER_OF_TEST_CONTACTS} contacts`}
+            onPress={() => {
+              Effect.gen(function* (_) {
+                const contacts = generateTestContacts()
+                const measureDecodingContacts = startMeasure(
+                  `Measure decoding large amount of ${NUMBER_OF_TEST_CONTACTS} contacts`
+                )
+
+                const result = pipe(
+                  contacts,
+                  Schema.decodeSync(
+                    Schema.parseJson(Schema.Array(StoredContact))
+                  )
+                )
+
+                const time = measureDecodingContacts()
+                Alert.alert(`In ${time}s decoded ${result.length} contacts`)
+              }).pipe(
+                Effect.tapError((e) =>
+                  Effect.sync(() => {
+                    Alert.alert('Error')
+                  })
+                ),
+                Effect.tapDefect((e) =>
+                  Effect.sync(() => {
+                    Alert.alert('Defect')
+                  })
+                ),
+                Effect.runFork
+              )
+            }}
+          />
+        </YStack>
+        <SimulateMissingOfferInbox />
+        <Preferences />
+        <AfterInteractionTaskDemo />
+      </YStack>
     </Screen>
   )
 }

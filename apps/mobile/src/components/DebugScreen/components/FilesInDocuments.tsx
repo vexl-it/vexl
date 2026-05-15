@@ -1,6 +1,6 @@
+import {Stack, Typography} from '@vexl-next/ui'
 import {Directory, Paths} from 'expo-file-system'
 import React, {useEffect, useState} from 'react'
-import {Stack, Text} from 'tamagui'
 import urlJoin from 'url-join'
 
 async function getFileOrDirectory(path: string): Promise<string> {
@@ -38,8 +38,12 @@ function FilesInDocuments(): React.ReactElement {
 
   return (
     <Stack>
-      <Text>Files in document dir:</Text>
-      <Text>{files}</Text>
+      <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
+        Files in document dir:
+      </Typography>
+      <Typography variant="description" color="$foregroundPrimary">
+        {files}
+      </Typography>
     </Stack>
   )
 }

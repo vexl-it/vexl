@@ -1,11 +1,10 @@
 import {hmac} from '@vexl-next/cryptography'
+import {Button, Typography, YStack} from '@vexl-next/ui'
 import type * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
 import React, {useCallback, useState} from 'react'
-import {Text, YStack} from 'tamagui'
 import formatNumber from '../../../utils/formatNumber'
 import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
-import Button from '../../Button'
 import ProgressBar from '../../ProgressBar'
 
 // sleep promise
@@ -60,20 +59,21 @@ export default function AfterInteractionTaskDemo(): React.ReactElement {
 
   return (
     <YStack gap="$2" my="$2">
-      <Text color="$black">
+      <Typography variant="paragraphSmall" color="$foregroundPrimary">
         Test extensive calculation that updates UI. (Calculating 2000 hmacs)
-      </Text>
-      <Button
-        size="small"
-        variant="secondary"
-        text="run"
-        onPress={runTask}
-      ></Button>
+      </Typography>
+      <Button size="small" variant="secondary" onPress={runTask}>
+        run
+      </Button>
       <ProgressBar percentDone={progress * 100} />
       {!result ? (
-        <Text color="$black">{Math.round(progress * 100)}</Text>
+        <Typography variant="description" color="$foregroundPrimary">
+          {Math.round(progress * 100)}
+        </Typography>
       ) : (
-        <Text color="$black">{result}</Text>
+        <Typography variant="description" color="$foregroundPrimary">
+          {result}
+        </Typography>
       )}
     </YStack>
   )

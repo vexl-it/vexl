@@ -1,3 +1,4 @@
+import {useNavigation} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Avatar, Button, NotificationCard, Stack, TextTag} from '@vexl-next/ui'
 import dayjs from 'dayjs'
@@ -8,11 +9,31 @@ import {Linking} from 'react-native'
 import Swipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
+import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {cancelNotificationCenterRecordActionAtom} from '../state'
 import {type NotificationCenterRecord} from '../state/domain'
 import NotificationListCardRightSwipeActions from './NotificationListCardRightSwipeActions'
 import VexlAvatar from './VexlAvatar'
+
+interface CardDataBase {
+  readonly name: string
+  readonly avatar: React.ReactNode
+  readonly category: string
+  readonly message: string
+}
+
+type CardData = CardDataBase &
+  (
+    | {
+        readonly action: () => void
+        readonly actionText: string
+      }
+    | {
+        readonly action?: undefined
+        readonly actionText?: undefined
+      }
+  )
 
 function getClubDeactivationMessage({
   reason,
@@ -55,15 +76,16 @@ function NotificationListCard({
   const cancelNotificationCenterRecord = useSetAtom(
     cancelNotificationCenterRecordActionAtom
   )
+  const navigation =
+    useNavigation<RootStackScreenProps<'Notifications'>['navigation']>()
   const {t} = useTranslation()
 
   if (notification.status.isCancelled) return null
 
-  const cardData = Match.value(notification.data).pipe(
+  const cardData: CardData = Match.value(notification.data).pipe(
     Match.tag('VexlProductNotificationData', ({productNotification}) => {
       const actionLink = productNotification.actionLink
-
-      return {
+      const sharedCardData = {
         name: 'Vexl',
         avatar: <VexlAvatar />,
         category:
@@ -71,11 +93,15 @@ function NotificationListCard({
             ? t('notificationsScreen.important')
             : t('notificationsScreen.system'),
         message: `${productNotification.title} ${productNotification.description}`,
-        action: actionLink
-          ? () => {
-              void Linking.openURL(actionLink)
-            }
-          : undefined,
+      }
+
+      if (!actionLink) return sharedCardData
+
+      return {
+        ...sharedCardData,
+        action: () => {
+          void Linking.openURL(actionLink)
+        },
         actionText: productNotification.actionText ?? t('common.learnMore'),
       }
     }),
@@ -86,8 +112,13 @@ function NotificationListCard({
       message: t('notificationsScreen.addmitedToClub.text', {
         name: clubInfo.name,
       }),
-      action: undefined,
-      actionText: undefined,
+      action: () => {
+        navigation.navigate('InsideTabs', {
+          screen: 'Community',
+          params: {screen: 'Clubs'},
+        })
+      },
+      actionText: t('notificationsScreen.addmitedToClub.seeClub'),
     })),
     Match.tag('ClubDeactivationNotificationData', ({clubInfo, reason}) => ({
       name: clubInfo.name,

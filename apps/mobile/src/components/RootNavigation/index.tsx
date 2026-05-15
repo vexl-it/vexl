@@ -14,7 +14,6 @@ import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountScreen from '../AccountScreen'
 import AppLogsScreen from '../AppLogsScreen'
 import AppSettingsScreen from '../AppSettingsScreen'
-import {BlogArticlesListScreen} from '../BlogArticlesListScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
 import OfferExpirationDateScreen from '../CRUDOfferFlow/components/OfferExpirationDateScreen'
 import SelectLocationRadiusScreen from '../CRUDOfferFlow/components/SelectLocationRadiusScreen'
@@ -28,7 +27,6 @@ import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMes
 import DeclineChatRequestScreen from '../ChatDetailScreen/DeclineChatRequestScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
-import {ClubDetailScreen} from '../ClubDetail'
 import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
@@ -37,7 +35,6 @@ import DonationsFlow from '../DonationsFlow'
 import EditIdentityScreen from '../EditIdentityScreen'
 import EditOfferFieldScreen from '../EditOfferFieldScreen'
 import EditProfileScreen from '../EditProfileScreen'
-import EventsAndClubsScreen from '../EventsAndClubsScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
 import GoldenAvatarAnimation, {
@@ -48,6 +45,8 @@ import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MapViewScreen from '../MapViewScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
+import NewClubDetailScreen from '../NewClubDetailScreen'
+import {ScanClubAdmissionQrCodeScreen} from '../NewClubDetailScreen/components/ScanClubAdmissionQrCodeScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import NotificationsScreen from '../NotificationsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
@@ -61,6 +60,7 @@ import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeCalculatorRouter from '../TradeCalculatorRouter'
 import TradeChecklistFlow from '../TradeChecklistFlow'
+import WhatAreClubsScreen from '../WhatAreClubsScreen'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
@@ -188,13 +188,18 @@ function RootNavigation(): React.ReactElement {
               }}
               component={CommonFriendsScreen}
             />
-            <Stack.Screen name="ClubDetail" component={ClubDetailScreen} />
-            <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
-            <Stack.Screen name="SetContacts" component={SetContactsScreen} />
+            <Stack.Screen name="ClubDetail" component={NewClubDetailScreen} />
             <Stack.Screen
-              name="EventsAndClubs"
-              component={EventsAndClubsScreen}
+              name="ScanClubAdmissionQrCode"
+              component={ScanClubAdmissionQrCodeScreen}
+              options={{
+                animation: 'slide_from_bottom',
+                presentation: 'card',
+              }}
             />
+            <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
+            <Stack.Screen name="WhatAreClubs" component={WhatAreClubsScreen} />
+            <Stack.Screen name="SetContacts" component={SetContactsScreen} />
             <Stack.Screen name="DonationsFlow" component={DonationsFlow} />
             {/* <Stack.Screen
               name="NotificationPermissionsMissing"
@@ -217,10 +222,6 @@ function RootNavigation(): React.ReactElement {
               component={TradeChecklistFlow}
             />
             <Stack.Screen name="JoinClubFlow" component={JoinClubFlow} />
-            <Stack.Screen
-              name="BlogArticlesList"
-              component={BlogArticlesListScreen}
-            />
             <Stack.Screen name="Account" component={AccountScreen} />
             <Stack.Screen
               name="ScanQrCode"

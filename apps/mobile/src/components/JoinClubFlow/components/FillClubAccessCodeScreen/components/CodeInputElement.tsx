@@ -1,7 +1,7 @@
+import {Stack, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {type PrimitiveAtom, useAtomValue} from 'jotai'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
 import {accessCodeMolecule} from '../../../atoms'
 
 interface Props {
@@ -23,14 +23,14 @@ function CodeInputElement({
       jc="center"
       h={48}
       w={48}
-      bc="$greyAccent5"
+      backgroundColor="$backgroundPrimary"
       borderRadius="$4"
-      borderWidth={2}
-      borderColor={isCodeInvalid ? '$red' : '$greyAccent5'}
+      borderWidth={1}
+      borderColor={isCodeInvalid ? '$redForeground' : '$backgroundHighlight'}
     >
-      <Text fos={18} ff="$body400" col="$black" textAlign="center">
+      <Typography variant="paragraph" color="$foregroundPrimary">
         {accessCodeElement}
-      </Text>
+      </Typography>
     </Stack>
   )
 }

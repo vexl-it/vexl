@@ -1,9 +1,10 @@
-import {Array, Effect, pipe, Record} from 'effect'
+import {Array, Effect, pipe, Record, Schema} from 'effect'
 import {atom} from 'jotai'
+import React from 'react'
 import {Alert} from 'react-native'
 import {apiAtom} from '../../../../api'
-import {askAreYouSureActionAtom} from '../../../../components/AreYouSureDialog'
 import {showErrorAlert} from '../../../../components/ErrorAlert'
+import {globalDialogAtom} from '../../../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../../components/LoadingOverlayProvider'
 import {type DeepLinkRequestClubAdmition} from '../../../../utils/deepLinks/parseDeepLink'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
@@ -11,6 +12,10 @@ import {clubsToKeyHolderAtom} from '../clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from '../clubsWithMembersAtom'
 import {syncSingleClubHandleStateWhenNotFoundActionAtom} from '../refreshClubsActionAtom'
 import {SelectClubComponent} from './SelectClubComponent'
+
+class NoClubsToModerateError extends Schema.TaggedError<NoClubsToModerateError>(
+  'NoClubsToModerateError'
+)('NoClubsToModerateError', {}) {}
 
 const clubsIModerateAtom = atom((get) =>
   pipe(
@@ -28,54 +33,45 @@ export const admitUserToClubActionAtom = atom(
       const clubsIModerate = get(clubsIModerateAtom)
       if (!Array.isNonEmptyArray(clubsIModerate)) {
         Alert.alert(t('clubs.youDontModerateAnyClub'))
-        return yield* _(Effect.fail({_tag: 'NoClubsToModerateError' as const}))
+        return yield* _(Effect.fail(new NoClubsToModerateError()))
       }
 
       const selectedClubAtom = atom(Array.headNonEmpty(clubsIModerate))
 
       if (clubsIModerate.length > 1) {
-        yield* _(
-          set(askAreYouSureActionAtom, {
-            variant: 'info',
-            steps: [
-              {
-                type: 'StepWithChildren',
-                MainSectionComponent: SelectClubComponent,
-                positiveButtonText: 'next',
-                mainSectionComponentProps: {
-                  clubs: clubsIModerate,
-                  selectedClubAtom,
-                },
-              },
-            ],
+        const confirmed = yield* _(
+          set(globalDialogAtom, {
+            title: t('clubs.admition.selectClub.title'),
+            subtitle: t('clubs.admition.selectClub.text'),
+            children: React.createElement(SelectClubComponent, {
+              clubs: clubsIModerate,
+              selectedClubAtom,
+              showHeader: false,
+            }),
+            positiveButtonText: t('common.next'),
           })
         )
+
+        if (!confirmed)
+          return yield* _(Effect.fail({_tag: 'UserDeclinedError'}))
       }
 
       const selectedClub = get(selectedClubAtom)
 
-      yield* _(
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              imageSource: {
-                type: 'imageUri',
-                imageUri: selectedClub.club.clubImageUrl,
-              },
-              title: t('clubs.admition.title', {
-                club: selectedClub.club.name,
-              }),
-              description: t('clubs.admition.text', {
-                club: selectedClub.club.name,
-              }),
-              positiveButtonText: t('common.next'),
-              negativeButtonText: t('common.cancel'),
-            },
-          ],
+      const confirmed = yield* _(
+        set(globalDialogAtom, {
+          title: t('clubs.admition.title', {
+            club: selectedClub.club.name,
+          }),
+          subtitle: t('clubs.admition.text', {
+            club: selectedClub.club.name,
+          }),
+          positiveButtonText: t('common.next'),
+          negativeButtonText: t('common.cancel'),
         })
       )
+
+      if (!confirmed) return yield* _(Effect.fail({_tag: 'UserDeclinedError'}))
 
       const clubKey = yield* _(
         get(clubsToKeyHolderAtom),
@@ -113,22 +109,12 @@ export const admitUserToClubActionAtom = atom(
       return {selectedClub}
     }).pipe(
       Effect.tap(({selectedClub}) =>
-        set(askAreYouSureActionAtom, {
-          variant: 'info',
-          steps: [
-            {
-              type: 'StepWithText',
-              imageSource: {
-                type: 'imageUri',
-                imageUri: selectedClub.club.clubImageUrl,
-              },
-              title: get(translationAtom).t('common.success'),
-              description: get(translationAtom).t('clubs.admition.success', {
-                club: selectedClub.club.name,
-              }),
-              positiveButtonText: get(translationAtom).t('common.ok'),
-            },
-          ],
+        set(globalDialogAtom, {
+          title: get(translationAtom).t('common.success'),
+          subtitle: get(translationAtom).t('clubs.admition.success', {
+            club: selectedClub.club.name,
+          }),
+          positiveButtonText: get(translationAtom).t('common.ok'),
         })
       ),
       Effect.tapError((e) => {
@@ -141,7 +127,10 @@ export const admitUserToClubActionAtom = atom(
           showErrorAlert({
             title: t('clubs.admition.alreadyMember'),
           })
-        } else if (e._tag === 'UserDeclinedError') {
+        } else if (
+          e._tag === 'NoClubsToModerateError' ||
+          e._tag === 'UserDeclinedError'
+        ) {
           return Effect.void
         } else {
           showErrorAlert({

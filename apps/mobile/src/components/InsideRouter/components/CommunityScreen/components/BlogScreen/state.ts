@@ -1,12 +1,12 @@
 import {type BlogsArticlesResponse} from '@vexl-next/rest-api/src/services/content/contracts'
 import {Effect, Option} from 'effect'
 import {atom} from 'jotai'
-import {apiAtom} from '../../api'
+import {apiAtom} from '../../../../../../api'
 
 export const blogsStateAtom = atom<{
-  loading: boolean
-  data: Option.Option<BlogsArticlesResponse>
-  error: Option.Option<unknown>
+  readonly loading: boolean
+  readonly data: Option.Option<BlogsArticlesResponse>
+  readonly error: Option.Option<unknown>
 }>({
   loading: false,
   data: Option.none(),

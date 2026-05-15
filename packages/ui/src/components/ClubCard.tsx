@@ -3,6 +3,7 @@ import {styled, useTheme} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {SizableText, XStack, YStack} from '../primitives'
+import {Typography} from './Typography'
 
 const ClubCardFrame = styled(XStack, {
   name: 'ClubCardFrame',
@@ -67,10 +68,18 @@ export function ClubCard({
     <ClubCardFrame pressable={!!onPress} onPress={onPress}>
       {avatar}
       <YStack flex={1} justifyContent="center" gap="$1">
-        <NameText>{name}</NameText>
+        <Typography
+          variant="tabSmallBold"
+          color="$foregroundPrimary"
+          numberOfLines={2}
+        >
+          {name}
+        </Typography>
         <XStack alignItems="center" gap="$1">
-          <PeopleUsers size={16} color={iconColor} />
-          <SubtitleText>{subtitle}</SubtitleText>
+          <PeopleUsers size={14} color={iconColor} />
+          <Typography variant="micro" color="$foregroundSecondary">
+            {subtitle}
+          </Typography>
         </XStack>
       </YStack>
       {tag}

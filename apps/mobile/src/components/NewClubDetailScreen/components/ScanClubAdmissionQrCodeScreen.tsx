@@ -7,7 +7,6 @@ import {
   YStack,
   useTheme,
 } from '@vexl-next/ui'
-import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {CameraView, type BarcodeScanningResult} from 'expo-camera'
 import {StatusBar} from 'expo-status-bar'
@@ -16,14 +15,12 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import Svg, {G, Mask, Rect} from 'react-native-svg'
-import {type JoinClubFlowStackScreenProps} from '../../../navigationTypes'
-import {enableHiddenFeatures} from '../../../utils/environment'
+import {type RootStackScreenProps} from '../../../navigationTypes'
+import {handleDeepLinkActionAtom} from '../../../utils/deepLinks'
 import {handleCameraPermissionsActionAtom} from '../../../utils/handleCameraPermissions'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {accessCodeMolecule} from '../atoms'
-import {showClubAccessDialogActionAtom} from '../utils/showClubAccessDialogActionAtom'
 
-type Props = JoinClubFlowStackScreenProps<'ScanClubQrCodeScreen'>
+type Props = RootStackScreenProps<'ScanClubAdmissionQrCode'>
 
 const scannerStyle = {
   // On android camera view will be resized to fit the whole camera preview. That will result in
@@ -32,23 +29,18 @@ const scannerStyle = {
   flex: 1,
 }
 
-function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
+export function ScanClubAdmissionQrCodeScreen({
+  navigation,
+}: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
   const scanned = useRef(false)
-  const {top, bottom} = useSafeAreaInsets()
-  const {height, width} = useWindowDimensions()
   const [permissionsGranted, setPermissionsGranted] = useState(false)
-  const {getClubQrCodeFromDeviceImageLibraryActionAtom} =
-    useMolecule(accessCodeMolecule)
-
-  const {handleCodeScannedActionAtom} = useMolecule(accessCodeMolecule)
+  const [error, setError] = useState<string | undefined>(undefined)
+  const {top, bottom} = useSafeAreaInsets()
+  const {width, height} = useWindowDimensions()
   const handleCameraPermissions = useSetAtom(handleCameraPermissionsActionAtom)
-  const handleCodeScanned = useSetAtom(handleCodeScannedActionAtom)
-  const showClubAccessDialog = useSetAtom(showClubAccessDialogActionAtom)
-  const getClubQrCodeFromDeviceImageLibrary = useSetAtom(
-    getClubQrCodeFromDeviceImageLibraryActionAtom
-  )
+  const handleDeepLinkAction = useSetAtom(handleDeepLinkActionAtom)
 
   const scanWindow = useMemo(() => {
     const size = Math.min(width - 96, height * 0.38)
@@ -59,16 +51,6 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
     }
   }, [height, width])
 
-  const close = useCallback(() => {
-    navigation.goBack()
-  }, [navigation])
-
-  useEffect(() => {
-    void Effect.runPromise(handleCameraPermissions()).then((result) => {
-      setPermissionsGranted(result === 'granted')
-    })
-  }, [handleCameraPermissions])
-
   const requestPermissions = useCallback(() => {
     void Effect.runPromise(handleCameraPermissions()).then((result) => {
       setPermissionsGranted(result === 'granted')
@@ -76,38 +58,40 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
   }, [handleCameraPermissions])
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      scanned.current = false
-    })
+    requestPermissions()
+  }, [requestPermissions])
 
-    return unsubscribe
+  const close = useCallback(() => {
+    navigation.goBack()
   }, [navigation])
 
   const onScanned = useCallback(
-    (data: BarcodeScanningResult) => {
+    ({data: linkdata}: BarcodeScanningResult) => {
       if (scanned.current) return
       scanned.current = true
+      setError(undefined)
 
-      void Effect.runPromise(handleCodeScanned(data)).then((success) => {
-        if (success) {
-          navigation.navigate('FillClubAccessCodeScreen', {autoSubmit: true})
-        } else {
-          scanned.current = false
-        }
-      })
+      handleDeepLinkAction(linkdata, ['request-club-admition']).pipe(
+        Effect.tapError(() =>
+          Effect.sync(() => {
+            scanned.current = false
+            setError(t('common.errorWhileReadingQrCode'))
+          })
+        ),
+        Effect.tap((success) =>
+          Effect.sync(() => {
+            if (success) {
+              navigation.goBack()
+            } else {
+              scanned.current = false
+            }
+          })
+        ),
+        Effect.runFork
+      )
     },
-    [handleCodeScanned, navigation]
+    [handleDeepLinkAction, navigation, t]
   )
-
-  const uploadFromDevice = useCallback(() => {
-    void Effect.runPromise(getClubQrCodeFromDeviceImageLibrary()).then(
-      (success) => {
-        if (success) {
-          navigation.navigate('FillClubAccessCodeScreen', {autoSubmit: true})
-        }
-      }
-    )
-  }, [getClubQrCodeFromDeviceImageLibrary, navigation])
 
   return (
     <Stack f={1} bc="$black">
@@ -147,7 +131,7 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
           left: 0,
         }}
       >
-        <Mask id="clubQrScannerMask">
+        <Mask id="clubAdmissionQrScannerMask">
           <Rect width={width} height={height} fill="white" />
           <G transform={`translate(${scanWindow.x} ${scanWindow.y})`}>
             <Rect
@@ -162,7 +146,7 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
           width={width}
           height={height}
           fill="rgba(16, 16, 16, 0.82)"
-          mask="url(#clubQrScannerMask)"
+          mask="url(#clubAdmissionQrScannerMask)"
         />
         <G transform={`translate(${scanWindow.x} ${scanWindow.y})`}>
           <Rect
@@ -192,36 +176,16 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
         top={Math.max(top + 88, scanWindow.y - 128)}
         als="center"
         textAlign="center"
+        px="$5"
       >
-        {t('clubs.scanCodeAndJoinVexlClub')}
+        {error ?? t('clubs.admition.scan')}
       </Typography>
 
-      <YStack pos="absolute" l={0} r={0} px="$5" b={bottom + 12} gap="$3">
-        <Button
-          variant="primary"
-          onPress={() => {
-            navigation.navigate('FillClubAccessCodeScreen')
-          }}
-        >
-          {t('clubs.enterClubAccessCode')}
+      <YStack pos="absolute" l={0} r={0} px="$5" b={bottom + 12}>
+        <Button variant="primary" onPress={close}>
+          {t('common.close')}
         </Button>
-        <Button
-          variant="secondary"
-          onPress={() => {
-            Effect.runFork(showClubAccessDialog())
-            navigation.goBack()
-          }}
-        >
-          {t('clubs.askForAccess')}
-        </Button>
-        {!!enableHiddenFeatures && (
-          <Button variant="secondary" onPress={uploadFromDevice}>
-            {t('clubs.uploadFromDevice')}
-          </Button>
-        )}
       </YStack>
     </Stack>
   )
 }
-
-export default ScanClubQrCodeScreen

@@ -17,6 +17,7 @@ interface Props {
   readonly width?: number
   readonly height?: number
   readonly animate?: boolean
+  readonly disableReplayOnPress?: boolean
 }
 
 const AnimatedGroup = Animated.createAnimatedComponent(G)
@@ -100,6 +101,7 @@ export function FaqWhatIsVexl({
   width = 170,
   height = 220,
   animate = false,
+  disableReplayOnPress = false,
 }: Props): React.JSX.Element {
   const resolvedVariant = useResolvedGraphicVariant(variant)
   const uid = useId()
@@ -114,7 +116,9 @@ export function FaqWhatIsVexl({
       height={height}
       viewBox="0 0 169.828 220"
       fill="none"
-      onPress={animate ? retriggerAnimation : undefined}
+      onPress={
+        animate && !disableReplayOnPress ? retriggerAnimation : undefined
+      }
     >
       {resolvedVariant === 'dark' ? (
         <DarkContent animate={animate} trigger={animationTrigger} />

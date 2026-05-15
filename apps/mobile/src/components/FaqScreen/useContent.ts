@@ -23,6 +23,7 @@ export type FaqType =
 
 export interface FaqGraphicProps {
   readonly animate?: boolean
+  readonly disableReplayOnPress?: boolean
   readonly height?: number
   readonly variant?: 'dark' | 'light'
   readonly width?: number

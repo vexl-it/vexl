@@ -9,11 +9,12 @@ import {
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
-import React from 'react'
+import React, {useCallback, useRef} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {finishPostLoginFlowActionAtom} from '../../../state/postLoginOnboarding'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import PostLoginFlowScreen from './PostLoginFlowScreen'
 
 export default function UsageInfoScreen(): React.ReactElement {
@@ -23,15 +24,35 @@ export default function UsageInfoScreen(): React.ReactElement {
   const graphicScale = Math.min(1, availableWidth / 164)
   const finishPostLoginFlow = useSetAtom(finishPostLoginFlowActionAtom)
   const setSession = useSetAtom(sessionDataOrDummyAtom)
+  const loadingOverlay = useShowLoadingOverlay()
+  const finishInProgressRef = useRef(false)
 
-  const finish = (): void => {
-    Effect.runFork(finishPostLoginFlow())
-  }
+  const finish = useCallback(
+    ({asLiquidityProvider}: {readonly asLiquidityProvider: boolean}): void => {
+      if (finishInProgressRef.current) return
 
-  const finishAsLiquidityProvider = (): void => {
-    setSession((session) => ({...session, isLiquidityProvider: true}))
-    finish()
-  }
+      finishInProgressRef.current = true
+      loadingOverlay.show()
+
+      if (asLiquidityProvider) {
+        setSession((session) => ({...session, isLiquidityProvider: true}))
+      }
+
+      void Effect.runPromise(finishPostLoginFlow()).finally(() => {
+        finishInProgressRef.current = false
+        loadingOverlay.hide()
+      })
+    },
+    [finishPostLoginFlow, loadingOverlay, setSession]
+  )
+
+  const finishAsBitcoinUser = useCallback((): void => {
+    finish({asLiquidityProvider: false})
+  }, [finish])
+
+  const finishAsLiquidityProvider = useCallback((): void => {
+    finish({asLiquidityProvider: true})
+  }, [finish])
 
   return (
     <PostLoginFlowScreen>
@@ -54,12 +75,12 @@ export default function UsageInfoScreen(): React.ReactElement {
           <Selector
             icon={CurrencyBitcoinCircle}
             label={t('postLoginFlow.v2.usageInfo.getBitcoin')}
-            onPress={finish}
+            onPress={finishAsBitcoinUser}
           />
           <Selector
             icon={BoxProduct}
             label={t('postLoginFlow.v2.usageInfo.spendBitcoin')}
-            onPress={finish}
+            onPress={finishAsBitcoinUser}
           />
           <Selector
             icon={TelescopeExplore}

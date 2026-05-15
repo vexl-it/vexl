@@ -11,7 +11,6 @@ import {
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import MarketplaceInlineButton from './MarketplaceInlineButton'
-import VexlNewsSuggestions from './VexlNewsSuggestions'
 
 const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
@@ -65,12 +64,9 @@ function MyOffersListHeader(): React.ReactElement | null {
           />
         </XStack>
       </Stack>
-      {myOffersSortedAtoms.length > 0 ? (
-        <Stack gap="$6">
-          <VexlNewsSuggestions />
-          <ReencryptOffersSuggestion />
-        </Stack>
-      ) : null}
+      <Stack gap="$6">
+        <ReencryptOffersSuggestion />
+      </Stack>
     </Stack>
   )
 }

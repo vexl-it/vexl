@@ -134,7 +134,13 @@ export type RootStackParamsList = {
 
   DonationsFlow: NavigatorScreenParams<DonationsFlowParamsList>
 
-  SetContacts: {filter?: ContactsFilter | undefined} | undefined
+  ContactPreferences: {filter?: ContactsFilter | undefined} | undefined
+  AddNewContact:
+    | {
+        readonly editContactNumber?: E164PhoneNumber | undefined
+      }
+    | undefined
+  AddNewContactCountryPicker: undefined
 
   NotificationSettings: undefined
 

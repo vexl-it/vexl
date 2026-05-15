@@ -12,6 +12,8 @@ import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notif
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountScreen from '../AccountScreen'
+import AddNewContactScreen from '../AddNewContactScreen'
+import AddNewContactCountryPickerScreen from '../AddNewContactScreen/AddNewContactCountryPickerScreen'
 import AppLogsScreen from '../AppLogsScreen'
 import AppSettingsScreen from '../AppSettingsScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
@@ -31,6 +33,7 @@ import ClubDetail from '../ClubDetail'
 import {ScanClubAdmissionQrCodeScreen} from '../ClubDetail/components/ScanClubAdmissionQrCodeScreen'
 import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
+import ContactPreferencesScreen from '../ContactPreferencesScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import DonationsFlow from '../DonationsFlow'
@@ -53,7 +56,6 @@ import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
 import ScanQrCodeScreen from '../ScanQrCodeScreen'
 import SendMessageScreen from '../SendMessageScreen'
-import SetContactsScreen from '../SetContactsScreen'
 import ShareProfileScreen from '../ShareProfileScreen'
 import TaskRegistryOverviewScreen from '../TaskRegistryOverviewScreen'
 import TodoScreen from '../TodoScreen'
@@ -199,7 +201,18 @@ function RootNavigation(): React.ReactElement {
             />
             <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
             <Stack.Screen name="WhatAreClubs" component={WhatAreClubsScreen} />
-            <Stack.Screen name="SetContacts" component={SetContactsScreen} />
+            <Stack.Screen
+              name="ContactPreferences"
+              component={ContactPreferencesScreen}
+            />
+            <Stack.Screen
+              name="AddNewContact"
+              component={AddNewContactScreen}
+            />
+            <Stack.Screen
+              name="AddNewContactCountryPicker"
+              component={AddNewContactCountryPickerScreen}
+            />
             <Stack.Screen name="DonationsFlow" component={DonationsFlow} />
             {/* <Stack.Screen
               name="NotificationPermissionsMissing"

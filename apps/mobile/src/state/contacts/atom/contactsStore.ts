@@ -1,7 +1,9 @@
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {Array, Option, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
+import {atomFamily} from 'jotai/utils'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {StoredContact, type StoredContactWithComputedValues} from '../domain'
 
@@ -67,6 +69,21 @@ export const normalizedContactsAtom = atom(
       )
     )
   }
+)
+
+export const contactByNormalizedNumberAtom = atomFamily(
+  (contactNumber: E164PhoneNumber | undefined) =>
+    atom((get) => {
+      if (contactNumber === undefined) return undefined
+
+      return pipe(
+        get(normalizedContactsAtom),
+        Array.findFirst(
+          (contact) => contact.computedValues.normalizedNumber === contactNumber
+        ),
+        Option.getOrUndefined
+      )
+    })
 )
 
 export const importedContactsHashesAtom = atom((get) => {

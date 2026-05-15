@@ -1,4 +1,4 @@
-import {Array, Effect, Schema} from 'effect'
+import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue} from 'jotai'
 import {focusAtom} from 'jotai-optics'
@@ -8,6 +8,8 @@ import {translationAtom} from '../utils/localization/I18nProvider'
 import {showCheckUpdatedPrivacyPolicySuggestionAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
 import {upsertInboxOnBeAndLocallyActionAtom} from './chat/hooks/useCreateInbox'
+import {importedContactsCountAtom} from './contacts/atom/contactsStore'
+import {notificationsEnabledAtom} from './notifications/areNotificationsEnabledAtom'
 import {sessionDataOrDummyAtom} from './session'
 
 const PostLoginFlowCompletedScreen = Schema.Literal(
@@ -38,8 +40,26 @@ export const postLoginFlowCompletedScreensAtom = focusAtom(
   (o) => o.prop('completedScreens')
 )
 
-export const postLoginFlowFinishedAtom = atom((get) => {
+export const postLoginFlowEffectiveCompletedScreensAtom = atom((get) => {
   const completedScreens = get(postLoginFlowCompletedScreensAtom)
+  const importedContactsCount = get(importedContactsCountAtom)
+  const notificationsEnabled = get(notificationsEnabledAtom)
+  const contactImportScreens: readonly PostLoginFlowCompletedScreen[] =
+    importedContactsCount > 0 ? ['contactsImport'] : []
+  const notificationSetupScreens: readonly PostLoginFlowCompletedScreen[] =
+    Option.isSome(notificationsEnabled) &&
+    notificationsEnabled.value.notifications
+      ? ['notificationSetup']
+      : []
+
+  return pipe(
+    [...completedScreens, ...contactImportScreens, ...notificationSetupScreens],
+    Array.dedupe
+  )
+})
+
+export const postLoginFlowFinishedAtom = atom((get) => {
+  const completedScreens = get(postLoginFlowEffectiveCompletedScreensAtom)
 
   return pipe(
     allPostLoginFlowScreens,
@@ -57,6 +77,10 @@ export const completePostLoginFlowScreenActionAtom = atom(
     set(postLoginFlowCompletedScreensAtom, [...completedScreens, screen])
   }
 )
+
+export const resetPostLoginFlowProgressActionAtom = atom(null, (_, set) => {
+  set(postLoginFlowProgressStorageAtom, {completedScreens: []})
+})
 
 export const finishPostLoginFlowActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)

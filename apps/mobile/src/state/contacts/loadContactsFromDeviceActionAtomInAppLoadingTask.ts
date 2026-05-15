@@ -3,6 +3,7 @@ import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import loadContactsFromDeviceActionAtom, {
   loadingContactsFromDeviceAtom,
 } from './atom/loadContactsFromDeviceActionAtom'
+import {areContactsPermissionsAlreadyGranted} from './utils'
 
 export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
   registerInAppLoadingTask({
@@ -13,6 +14,13 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
     },
     task: (store) =>
       Effect.gen(function* (_) {
+        const contactsPermissionsAlreadyGranted = yield* _(
+          areContactsPermissionsAlreadyGranted(),
+          Effect.catchAll(() => Effect.succeed(false))
+        )
+
+        if (!contactsPermissionsAlreadyGranted) return
+
         store.set(loadingContactsFromDeviceAtom, true)
 
         yield* _(

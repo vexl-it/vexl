@@ -2,33 +2,27 @@ import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {
   type FullScreenWarning,
   type NewsAndAnnouncementsResponse,
-  type VexlBotNews,
 } from '@vexl-next/rest-api/src/services/content/contracts'
 import {Array, Effect, Option, Schema} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
-import {atom, type WritableAtom} from 'jotai'
+import {atom} from 'jotai'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {ignoreReportErrors} from '../../utils/reportError'
 
 const newsAndAnnouncementsAtom = atom<NewsAndAnnouncementsResponse | null>()
 
+const withoutVexlBotNews = (
+  response: NewsAndAnnouncementsResponse
+): NewsAndAnnouncementsResponse => ({
+  ...response,
+  vexlBotNews: [],
+})
+
 export const fullScreenWarningDataAtom = atom(
   (get): Option.Option<FullScreenWarning> => {
     const state = get(newsAndAnnouncementsAtom)
     return Option.fromNullable(state?.fullScreenWarning).pipe(Option.flatten)
-  }
-)
-
-export const announcmentsAtom = atom(
-  (get): Option.Option<Array.NonEmptyReadonlyArray<VexlBotNews>> => {
-    const state = get(newsAndAnnouncementsAtom)
-    const vexlBotNews = state?.vexlBotNews
-
-    if (vexlBotNews && Array.isNonEmptyReadonlyArray(vexlBotNews))
-      return Option.some(vexlBotNews)
-
-    return Option.none()
   }
 )
 
@@ -45,6 +39,7 @@ export const loadNewsAndAnnouncementsActionAtom = atom(null, (get, set) => {
 
   return pipe(
     contentApi.getNewsAndAnnoucements(),
+    Effect.map(withoutVexlBotNews),
     Effect.tap((response) =>
       Effect.sync(() => {
         set(newsAndAnnouncementsAtom, response)
@@ -54,8 +49,7 @@ export const loadNewsAndAnnouncementsActionAtom = atom(null, (get, set) => {
       Effect.sync(() => {
         // remove cancelled ids from mmkv if they are no longer in the state
         const warningId = Option.getOrNull(response.fullScreenWarning)?.id
-        const newsIds = response.vexlBotNews.map((item) => item.id)
-        const idsFromResponse = [...(warningId ? [warningId] : []), ...newsIds]
+        const idsFromResponse = warningId ? [warningId] : []
         set(cancelledIdsMmkv, (prev) => ({
           ids: Array.intersection(idsFromResponse, prev.ids),
         }))
@@ -92,39 +86,6 @@ export const setCancelledIdActionAtom = atom(
     }))
   }
 )
-
-export const createIsVisibleIdAtom = (
-  id: Uuid,
-  temporary: boolean
-): WritableAtom<boolean, [visible: boolean], void> =>
-  atom(
-    (get) => {
-      const cancelledIds = get(cancelledIdsAtom)
-
-      return !cancelledIds.includes(id)
-    },
-    (_, set, v) => {
-      if (temporary) {
-        if (v) {
-          set(temporaryCancelledIdsAtom, (prev) => prev.filter((i) => i !== id))
-          return
-        }
-        set(temporaryCancelledIdsAtom, (prev) => [...prev, id])
-        return
-      }
-
-      // MMKV
-      if (v) {
-        set(cancelledIdsMmkv, (prev) => ({
-          ids: prev.ids.filter((i) => i !== id),
-        }))
-        return
-      }
-      set(cancelledIdsMmkv, (prev) => ({
-        ids: [...prev.ids, id],
-      }))
-    }
-  )
 
 export const isWarningClosedAtom = atom((get) => {
   const fullscreenWarning = get(fullScreenWarningDataAtom)

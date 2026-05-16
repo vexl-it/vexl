@@ -14,13 +14,10 @@ import React from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {
-  regenerateClubLinkActionAtom,
-  useClubInviteLink,
-} from '../../ClubDetail/state'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {SharableQrCode} from '../../SharableQrCode'
+import {regenerateClubLinkActionAtom, useClubInviteLink} from '../state'
 import {InviteCodeRow} from './InviteCodeRow'
 
 export function ModeratorSection({

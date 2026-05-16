@@ -1,70 +1,153 @@
+import {
+  Button,
+  ChevronLeft,
+  Menu,
+  MenuItem,
+  NavigationBar,
+  Screen,
+  SignOut,
+  Typography,
+  YStack,
+} from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {RefreshControl} from 'react-native-gesture-handler'
-import {getTokens, ScrollView, Stack, Text, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {
-  clubsWithMembersLoadingStateAtom,
-  singleClubAtom,
-} from '../../state/clubs/atom/clubsWithMembersAtom'
-import {syncSingleClubHandleStateWhenNotFoundActionAtom} from '../../state/clubs/atom/refreshClubsActionAtom'
+import {singleClubAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
+import {leaveClubActionAtom} from '../../state/clubs/atom/leaveClubActionAtom'
+import {createOfferCountForClub} from '../../state/marketplace/atoms/offersState'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import useSafeGoBack from '../../utils/useSafeGoBack'
-import Button from '../Button'
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
-import {ClubDetail} from './components/ClubDetail'
+import {showErrorAlert} from '../ErrorAlert'
+import {globalDialogAtom} from '../GlobalDialog'
+import {useShowLoadingOverlay} from '../LoadingOverlayProvider'
+import {DetailHeader} from './components/DetailHeader'
+import {ModeratorSection} from './components/ModeratorSection'
 
 type Props = RootStackScreenProps<'ClubDetail'>
 
-export function ClubDetailScreen({
+function ClubDetail({
+  navigation,
   route: {
     params: {clubUuid},
   },
-}: Props): React.ReactElement {
-  const club = useAtomValue(useMemo(() => singleClubAtom(clubUuid), [clubUuid]))
+}: Props): React.JSX.Element {
   const {t} = useTranslation()
-  const safeGoBack = useSafeGoBack()
-  const syncSingleClubHandleStateWhenNotFound = useSetAtom(
-    syncSingleClubHandleStateWhenNotFoundActionAtom
+  const club = useAtomValue(useMemo(() => singleClubAtom(clubUuid), [clubUuid]))
+  const offersCount = useAtomValue(
+    useMemo(() => createOfferCountForClub(clubUuid), [clubUuid])
   )
-  const clubsLoading =
-    useAtomValue(clubsWithMembersLoadingStateAtom).state === 'loading'
+  const leaveClub = useSetAtom(leaveClubActionAtom)
+  const showDialog = useSetAtom(globalDialogAtom)
+  const loadingOverlay = useShowLoadingOverlay()
+
+  const footer =
+    offersCount > 0 ? (
+      <Button
+        variant="primary"
+        onPress={() => {
+          navigation.navigate('ClubOffers', {clubUuid})
+        }}
+      >
+        {t('clubs.showOffers')}
+      </Button>
+    ) : undefined
 
   return (
-    <Screen>
-      <ScrollView
-        f={1}
-        indicatorStyle="white"
-        refreshControl={
-          <RefreshControl
-            refreshing={clubsLoading}
-            onRefresh={() =>
-              Effect.runFork(syncSingleClubHandleStateWhenNotFound({clubUuid}))
-            }
-            tintColor={getTokens().color.greyAccent5.val}
-          />
-        }
-      >
-        <Stack mx="$4" my="$4" f={1}>
-          <ScreenTitle text="" withBackButton></ScreenTitle>
-          {Option.isSome(club) ? (
-            <ClubDetail club={club.value} />
-          ) : (
-            <YStack alignItems="center" gap="$4" f={1} alignContent="center">
-              <Text fontFamily="$body500" fs={25}>
-                {t('common.nothingFound')}
-              </Text>
-              <Button
-                onPress={safeGoBack}
-                variant="secondary"
-                text={t('common.goBack')}
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('clubs.clubDetail')}
+          leftAction={{
+            icon: ChevronLeft,
+            onPress: navigation.goBack,
+          }}
+        />
+      }
+      footer={footer}
+      scrollable
+    >
+      {Option.match(club, {
+        onNone: () => (
+          <YStack flex={1} alignItems="center" justifyContent="center" gap="$5">
+            <Typography variant="paragraph" color="$foregroundPrimary">
+              {t('common.nothingFound')}
+            </Typography>
+            <Button variant="primary" onPress={navigation.goBack}>
+              {t('common.goBack')}
+            </Button>
+          </YStack>
+        ),
+        onSome: (clubWithMembers) => (
+          <YStack flex={1} gap="$5">
+            <DetailHeader
+              clubWithMembers={clubWithMembers}
+              offersCount={offersCount}
+            />
+            <ModeratorSection clubWithMembers={clubWithMembers} />
+            <Menu>
+              <MenuItem
+                label={t('clubs.leaveClub')}
+                icon={SignOut}
+                variant="danger"
+                showChevron={false}
+                onPress={() => {
+                  Effect.runFork(
+                    Effect.gen(function* (_) {
+                      const confirmed = yield* _(
+                        showDialog({
+                          title: t('clubs.areYouSureYouWantToLeave'),
+                          subtitle: t('clubs.leavingWarning'),
+                          positiveButtonText: t('common.yesLeave'),
+                          positiveButtonVariant: 'destructive',
+                          negativeButtonText: t('common.cancel'),
+                        })
+                      )
+
+                      if (!confirmed) return
+
+                      yield* _(
+                        Effect.sync(() => {
+                          loadingOverlay.show()
+                        })
+                      )
+                      yield* _(
+                        leaveClub(clubUuid).pipe(
+                          Effect.ensuring(
+                            Effect.sync(() => {
+                              loadingOverlay.hide()
+                            })
+                          )
+                        )
+                      )
+                      yield* _(
+                        Effect.sync(() => {
+                          navigation.goBack()
+                        })
+                      )
+                    }).pipe(
+                      Effect.catchAll((e) =>
+                        Effect.sync(() => {
+                          loadingOverlay.hide()
+                          showErrorAlert({
+                            title: t('common.somethingWentWrong'),
+                            description: t(
+                              'common.somethingWentWrongDescription'
+                            ),
+                            error: e,
+                          })
+                        })
+                      )
+                    )
+                  )
+                }}
               />
-            </YStack>
-          )}
-        </Stack>
-      </ScrollView>
+            </Menu>
+          </YStack>
+        ),
+      })}
     </Screen>
   )
 }
+
+export default ClubDetail

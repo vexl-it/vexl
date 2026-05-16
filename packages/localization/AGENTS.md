@@ -6,5 +6,6 @@ Stack: TypeScript, JSON resource files.
 
 Gotchas:
 
-- Only update `base.json` when adding translations. Other languages are handled by Crowdin -- do not edit them manually.
+- Prefer updating `base.json` when adding or changing translation keys. Direct edits to sibling `*-base.json` locale files are allowed only through the repository localization skills when syncing missing translations or removing unused keys.
+- When locale files are edited directly, make sure the same translation changes are uploaded to Crowdin before running `crowdin download`; otherwise Crowdin can overwrite the local edits.
 - Coordinate locale additions with mobile/dashboard to avoid missing keys.

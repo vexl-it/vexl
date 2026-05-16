@@ -22,7 +22,7 @@ import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Alert, ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, getTokens, useTheme} from 'tamagui'
+import {Stack, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useGetAllClubsNamesForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
@@ -273,14 +273,13 @@ export default function ChatInfoContent({
         }
       >
         <YStack flex={1} justifyContent="center" gap="$5">
-          <Text
+          <Typography
+            variant="heading3"
             color="$foregroundPrimary"
-            fontFamily="$body"
-            fontSize="$6"
             textAlign="center"
           >
             {t('common.chatNotFoundError')}
-          </Text>
+          </Typography>
           <Button
             onPress={() => {
               navigation.goBack()

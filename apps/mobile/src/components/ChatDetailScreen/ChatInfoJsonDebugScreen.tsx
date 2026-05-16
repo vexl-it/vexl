@@ -1,6 +1,7 @@
 import Clipboard from '@react-native-clipboard/clipboard'
 import {
   ArrowLeft,
+  Button,
   NavigationBar,
   Screen,
   Typography,
@@ -20,7 +21,6 @@ import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAt
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import Button from '../Button'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {ChatScope, chatMolecule} from './atoms'
 
@@ -100,15 +100,16 @@ function ChatInfoJsonDebugContent({
                 </RNText>
               </Stack>
               <Button
-                fullWidth
+                width="100%"
                 size="small"
-                text="Copy"
                 variant="secondary"
                 onPress={() => {
                   Clipboard.setString(chatJson)
                   setToastNotification(t('common.copied'))
                 }}
-              />
+              >
+                Copy
+              </Button>
             </Stack>
           </YStack>
         )}

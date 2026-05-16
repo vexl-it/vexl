@@ -1,8 +1,7 @@
-import {Button, Typography} from '@vexl-next/ui'
+import {Button, Screen, Stack, Typography} from '@vexl-next/ui'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
@@ -12,7 +11,6 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {hideNotificationsForChat} from '../../utils/notifications/chatNotifications'
 import {useOnFocusAndAppState} from '../../utils/useFocusAndAppState'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import Screen from '../Screen'
 import {ChatScope} from './atoms'
 import MessagesScreen from './components/MessagesScreen'
 
@@ -53,10 +51,7 @@ export default function ChatDetailScreen({
 
   if (!chatExists)
     return (
-      <Screen
-        insetsColor="$backgroundSecondary"
-        backgroundColor="$backgroundPrimary"
-      >
+      <Screen navigationBar={null} noHorizontalPadding>
         <Stack gap="$5" f={1} ai="center" jc="center" mt="$6">
           <Typography color="$foregroundPrimary" variant="heading3">
             {t('common.chatNotFoundError')}

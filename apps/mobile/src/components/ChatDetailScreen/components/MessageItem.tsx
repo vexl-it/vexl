@@ -1,12 +1,10 @@
-import {DotTypingIndicator, Typography} from '@vexl-next/ui'
+import {DotTypingIndicator, Rejected, Typography, useTheme} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'
-import BlockIconSvg from '../../../images/blockIconSvg'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import Image from '../../Image'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
@@ -60,6 +58,7 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): React.ReactElement | null {
   const item = useAtomValue(itemAtom)
+  const theme = useTheme()
   const {
     otherSideDataAtom,
     otherSideSupportsTradingChecklistAtom,
@@ -96,12 +95,12 @@ function MessageItem({
             <Stack
               width={80}
               height={80}
-              backgroundColor="$darkRed"
+              backgroundColor="$redBackground"
               alignItems="center"
               justifyContent="center"
               borderRadius="$4"
             >
-              <Image width={35} height={35} source={BlockIconSvg} />
+              <Rejected size={35} color={theme.redForeground.get()} />
             </Stack>
           }
         />

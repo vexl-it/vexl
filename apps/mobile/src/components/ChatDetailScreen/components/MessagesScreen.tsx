@@ -1,5 +1,5 @@
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
-import {KeyboardAvoidingView, Stack} from '@vexl-next/ui'
+import {KeyboardAvoidingView, Screen, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -8,7 +8,6 @@ import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import * as fromChatAtoms from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {useAppState} from '../../../utils/useAppState'
-import Screen from '../../Screen'
 import {chatMolecule} from '../atoms'
 import {ChatActionButtons} from './ChatActionButtons'
 import ChatTextInput from './ChatTextInput'
@@ -49,10 +48,7 @@ function MessagesScreen({
   return (
     <>
       <MarkAsReadWhenRendered />
-      <Screen
-        insetsColor="$backgroundSecondary"
-        backgroundColor="$backgroundPrimary"
-      >
+      <Screen navigationBar={null} noHorizontalPadding>
         <KeyboardAvoidingView>
           <Stack flex={1}>
             <MessagesScreenChatHeader />

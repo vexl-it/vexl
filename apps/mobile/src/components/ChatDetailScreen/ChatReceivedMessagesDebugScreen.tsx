@@ -2,6 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {
   ArrowLeft,
+  Button,
   NavigationBar,
   Screen,
   Typography,
@@ -22,7 +23,6 @@ import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAt
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import Button from '../Button'
 import {toastNotificationAtom} from '../ToastNotification/atom'
 import {ChatScope, chatMolecule} from './atoms'
 
@@ -99,9 +99,8 @@ function ChatReceivedMessagesDebugContent({
         ) : (
           <YStack gap="$4">
             <Button
-              fullWidth
+              width="100%"
               size="small"
-              text="Chat info JSON"
               variant="secondary"
               onPress={() => {
                 navigation.navigate('ChatInfoJsonDebug', {
@@ -109,7 +108,9 @@ function ChatReceivedMessagesDebugContent({
                   otherSideKey,
                 })
               }}
-            />
+            >
+              Chat info JSON
+            </Button>
             <Typography color="$foregroundSecondary" variant="paragraph">
               Showing {messagesToDisplay.length} message
               {messagesToDisplay.length === 1 ? '' : 's'} for this chat.
@@ -157,15 +158,16 @@ function ChatReceivedMessagesDebugContent({
                       </RNText>
                     </Stack>
                     <Button
-                      fullWidth
+                      width="100%"
                       size="small"
-                      text="Copy"
                       variant="secondary"
                       onPress={() => {
                         Clipboard.setString(messageJson)
                         setToastNotification(t('common.copied'))
                       }}
-                    />
+                    >
+                      Copy
+                    </Button>
                   </YStack>
                 )
               })

@@ -1,14 +1,12 @@
 import Clipboard from '@react-native-clipboard/clipboard'
+import {Button, Copy} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {getTokens} from 'tamagui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as network from '../../../../../state/tradeChecklist/utils/network'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
-import copySvg from '../../../../images/copySvg'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
@@ -89,12 +87,12 @@ function TradeChecklistNetworkView({
                   )
                   setToastNotification(t('common.copied'))
                 }}
-                beforeIcon={copySvg}
-                text={t('vexlbot.btcAddress')}
                 size="small"
                 variant="primary"
-                iconFill={getTokens().color.main.val}
-              />
+                icon={Copy}
+              >
+                {t('vexlbot.btcAddress')}
+              </Button>
             )}
         </VexlbotActionCard>
         {Option.isSome(lastTradeChecklistMessage) &&

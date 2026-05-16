@@ -1,18 +1,25 @@
 import {useNavigation} from '@react-navigation/native'
+import {
+  CheckboxFilled,
+  SquareOutline,
+  Stack,
+  Typography,
+  XStack,
+  useTheme,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useState} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack} from 'tamagui'
 import {showVexlbotInitialMessageForAllChatsAtom} from '../../../../../state/chat/atoms/showVexlbotInitialMessageForAllChatsAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Checkbox from '../../../../Checkbox'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
 
 function TradeChecklistReminder(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const theme = useTheme()
   const [dontShowSwitchValue, setDontShowSwitchValue] = useState<boolean>(false)
 
   const {
@@ -79,17 +86,21 @@ function TradeChecklistReminder(): React.ReactElement | null {
             setDontShowSwitchValue(!dontShowSwitchValue)
           }}
         >
-          <XStack gap="$2">
-            <Checkbox
-              size="small"
-              value={dontShowSwitchValue}
-              onChange={() => {
-                setDontShowSwitchValue(!dontShowSwitchValue)
-              }}
-            />
-            <Text fos={12} ff="$body500" col="$greyOnBlack">
+          <XStack gap="$2" alignItems="center">
+            {dontShowSwitchValue ? (
+              <CheckboxFilled
+                size={18}
+                color={theme.accentHighlightSecondary.get()}
+              />
+            ) : (
+              <SquareOutline
+                size={18}
+                color={theme.foregroundSecondary.get()}
+              />
+            )}
+            <Typography variant="micro" color="$foregroundSecondary">
               {t('common.dontShowMeThisAgain')}
-            </Text>
+            </Typography>
           </XStack>
         </TouchableOpacity>
       </Stack>

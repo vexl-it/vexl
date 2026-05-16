@@ -94,7 +94,7 @@ export function VexlBotRequestHelp({
               size="medium"
               onPress={handleOfferDetailsPress}
             >
-              {t('comomn.offerDetails')}
+              {t('common.offerDetails')}
             </Button>
 
             <Button

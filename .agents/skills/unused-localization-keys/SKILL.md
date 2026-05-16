@@ -34,7 +34,7 @@ yarn turbo:format
 yarn turbo:lint
 ```
 
-The default scan path is `apps/mobile/src`, because this repo's `base.json` powers the mobile app translations. Add more scan paths when checking other app surfaces:
+The default scan path is `apps`, so app surfaces outside mobile are checked before keys are reported as unused. Use `--scan` to narrow or customize the scan paths:
 
 ```bash
 yarn tsx .agents/skills/unused-localization-keys/scripts/find-unused-localization-keys.ts --scan apps/mobile/src --scan apps/ui-book

@@ -9,6 +9,7 @@ import {
   Typography,
   IconButton as UiIconButton,
   XStack,
+  XmarkCancelClose,
   YStack,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
@@ -27,10 +28,8 @@ import {useSessionAssumeLoggedIn} from '../../../state/session'
 import {version} from '../../../utils/environment'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {checkNotificationPermissionsAndAskIfPossibleTEActionAtom} from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
-import Image from '../../Image'
 import UriImageWithSizeLimits from '../../UriImageWithSizeLimits'
 import {chatMolecule} from '../atoms'
-import CancelSvg from '../images/cancelSvg'
 import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
 
 const responseImagePreviewLimits = {width: 200, height: 100}
@@ -143,13 +142,20 @@ function ChatTextInput(): React.ReactElement | null {
                 {truncate(replyToMessage.message.text, 100, '...')}
               </Typography>
             </YStack>
-            <Image
-              source={CancelSvg}
-              stroke={theme.foregroundSecondary.get()}
+            <UiIconButton
+              width="$9"
+              height="$9"
+              borderRadius="$3"
+              backgroundColor="transparent"
               onPress={() => {
                 setReplyToMessage(undefined)
               }}
-            />
+            >
+              <XmarkCancelClose
+                size={20}
+                color={theme.foregroundSecondary.get()}
+              />
+            </UiIconButton>
           </XStack>
         </Animated.View>
       )}

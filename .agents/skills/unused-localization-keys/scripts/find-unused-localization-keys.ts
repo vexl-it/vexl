@@ -33,6 +33,7 @@ type RemovalReport = {
 }
 
 const sourceExtensions = new Set(['.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx'])
+const defaultScanPaths = ['apps']
 
 const ignoredPathSegments = new Set([
   '.expo',
@@ -54,7 +55,7 @@ Options:
   --fix                  Remove unused keys from base.json and sibling *-base.json files.
   --json                 Print machine-readable JSON.
   --base <path>          Path to base.json. Default: packages/localization/base.json
-  --scan <path>          Path to scan. Can be repeated. Default: apps/mobile/src
+  --scan <path>          Path to scan. Can be repeated. Default: apps
   --repo-root <path>     Repository root. Default: current working directory.
   --help                 Show this help.
 `)
@@ -100,7 +101,7 @@ function parseArgs(argv: ReadonlyArray<string>): CliOptions {
   return {
     repoRoot: path.resolve(repoRoot),
     baseJsonPath,
-    scanPaths: scanPaths.length > 0 ? scanPaths : ['apps/mobile/src'],
+    scanPaths: scanPaths.length > 0 ? scanPaths : defaultScanPaths,
     fix,
     json,
   }

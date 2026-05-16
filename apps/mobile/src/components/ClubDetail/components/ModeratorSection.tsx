@@ -44,30 +44,33 @@ export function ModeratorSection({
       })}
 
       <Menu>
-        <MenuItem
-          label={t('clubs.moderator.displayQRCode')}
-          icon={QrCode}
-          onPress={() => {
-            if (Option.isNone(link)) return
-
-            Effect.runFork(
-              showDialog({
-                title: t('clubs.moderator.inviteQrCode.title'),
-                subtitle: t('clubs.moderator.inviteQrCode.text'),
-                positiveButtonText: t('common.close'),
-                children: (
-                  <Stack alignItems="center">
-                    <SharableQrCode
-                      size={300}
-                      value={link.value.fullLink}
-                      logo={{uri: club.clubImageUrl}}
-                    />
-                  </Stack>
-                ),
-              })
-            )
-          }}
-        />
+        {Option.match(link, {
+          onNone: () => null,
+          onSome: (clubLink) => (
+            <MenuItem
+              label={t('clubs.moderator.displayQRCode')}
+              icon={QrCode}
+              onPress={() => {
+                Effect.runFork(
+                  showDialog({
+                    title: t('clubs.moderator.inviteQrCode.title'),
+                    subtitle: t('clubs.moderator.inviteQrCode.text'),
+                    positiveButtonText: t('common.close'),
+                    children: (
+                      <Stack alignItems="center">
+                        <SharableQrCode
+                          size={300}
+                          value={clubLink.fullLink}
+                          logo={{uri: club.clubImageUrl}}
+                        />
+                      </Stack>
+                    ),
+                  })
+                )
+              }}
+            />
+          ),
+        })}
         <MenuItem
           label={t('clubs.moderator.inviteUserWithCode')}
           icon={Send}
@@ -76,7 +79,11 @@ export function ModeratorSection({
           }}
         />
         <MenuItem
-          label={t('clubs.moderator.regenerateInviteCode')}
+          label={t(
+            Option.isSome(link)
+              ? 'clubs.moderator.regenerateInviteCode'
+              : 'clubs.moderator.generateInviteCode'
+          )}
           icon={Refresh}
           onPress={() => {
             loadingOverlay.show()

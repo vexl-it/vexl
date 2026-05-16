@@ -27,6 +27,8 @@ import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMes
 import DeclineChatRequestScreen from '../ChatDetailScreen/DeclineChatRequestScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
+import ClubDetail from '../ClubDetail'
+import {ScanClubAdmissionQrCodeScreen} from '../ClubDetail/components/ScanClubAdmissionQrCodeScreen'
 import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
 import DebugScreen from '../DebugScreen'
@@ -45,8 +47,6 @@ import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MapViewScreen from '../MapViewScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
-import NewClubDetailScreen from '../NewClubDetailScreen'
-import {ScanClubAdmissionQrCodeScreen} from '../NewClubDetailScreen/components/ScanClubAdmissionQrCodeScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import NotificationsScreen from '../NotificationsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
@@ -188,7 +188,7 @@ function RootNavigation(): React.ReactElement {
               }}
               component={CommonFriendsScreen}
             />
-            <Stack.Screen name="ClubDetail" component={NewClubDetailScreen} />
+            <Stack.Screen name="ClubDetail" component={ClubDetail} />
             <Stack.Screen
               name="ScanClubAdmissionQrCode"
               component={ScanClubAdmissionQrCodeScreen}

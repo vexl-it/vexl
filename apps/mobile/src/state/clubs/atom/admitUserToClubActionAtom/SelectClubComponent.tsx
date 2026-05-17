@@ -1,10 +1,19 @@
+import {
+  Avatar,
+  ScrollView,
+  SelectClubCell,
+  Typography,
+  YStack,
+} from '@vexl-next/ui'
 import {Array} from 'effect'
 import {type PrimitiveAtom, useAtom} from 'jotai'
-import React, {useMemo} from 'react'
-import {Text, YStack} from 'tamagui'
-import {Dropdown} from '../../../../components/Dropdown'
+import React from 'react'
+import {useWindowDimensions} from 'react-native'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {type ClubWithMembers} from '../../domain'
+
+const MAX_LIST_HEIGHT = 360
+const LIST_HEIGHT_TO_WINDOW_RATIO = 0.45
 
 export function SelectClubComponent({
   clubs,
@@ -17,35 +26,55 @@ export function SelectClubComponent({
 }): React.ReactElement {
   const [selectedClub, setSelectedClub] = useAtom(selectedClubAtom)
   const {t} = useTranslation()
-
-  const clubsDropdownItems = useMemo(
-    () =>
-      Array.map(clubs, (one) => ({
-        label: one.club.name,
-        value: one,
-      })),
-    [clubs]
+  const {height} = useWindowDimensions()
+  const listMaxHeight = Math.min(
+    MAX_LIST_HEIGHT,
+    height * LIST_HEIGHT_TO_WINDOW_RATIO
   )
 
   return (
-    <YStack>
+    <YStack gap="$3">
       {!!showHeader && (
         <>
-          <Text fos={24} col="$black" ff="$heading" mb="$2">
+          <Typography variant="heading3" color="$foregroundPrimary">
             {t('clubs.admition.selectClub.title')}
-          </Text>
-          <Text fos={18} col="$greyOnWhite" ff="$body500" mb="$4">
+          </Typography>
+          <Typography variant="paragraph" color="$foregroundSecondary" mb="$1">
             {t('clubs.admition.selectClub.text')}
-          </Text>
+          </Typography>
         </>
       )}
-      <Dropdown
-        data={clubsDropdownItems}
-        value={{value: selectedClub, label: selectedClub.club.name}}
-        onChange={(v) => {
-          setSelectedClub(v.value)
-        }}
-      />
+      <ScrollView
+        maxHeight={listMaxHeight}
+        showsVerticalScrollIndicator={clubs.length > 3}
+      >
+        <YStack gap="$3">
+          {Array.map(clubs, (clubWithMembers) => {
+            const membersCount = Intl.NumberFormat().format(
+              clubWithMembers.members.length
+            )
+
+            return (
+              <SelectClubCell
+                key={clubWithMembers.club.uuid}
+                name={clubWithMembers.club.name}
+                description={t('clubs.members', {membersCount})}
+                selected={selectedClub.club.uuid === clubWithMembers.club.uuid}
+                avatar={
+                  <Avatar
+                    size="small"
+                    customSize={40}
+                    source={{uri: clubWithMembers.club.clubImageUrl}}
+                  />
+                }
+                onPress={() => {
+                  setSelectedClub(clubWithMembers)
+                }}
+              />
+            )
+          })}
+        </YStack>
+      </ScrollView>
     </YStack>
   )
 }

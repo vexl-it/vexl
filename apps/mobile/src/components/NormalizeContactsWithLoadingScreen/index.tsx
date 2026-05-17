@@ -1,14 +1,13 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {Stack, useTheme} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useState} from 'react'
 import {AppState} from 'react-native'
-import {Stack, getTokens} from 'tamagui'
 import normalizeStoredContactsActionAtom from '../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
-import WhiteContainer from '../WhiteContainer'
 
 export default function NormalizeContactsWithLoadingScreen({
   children,
@@ -21,6 +20,7 @@ export default function NormalizeContactsWithLoadingScreen({
   }>({done: false})
   const normalizeStoredContacts = useSetAtom(normalizeStoredContactsActionAtom)
   const {t} = useTranslation()
+  const theme = useTheme()
 
   const normalize = useCallback(() => {
     void Effect.runPromise(
@@ -53,17 +53,17 @@ export default function NormalizeContactsWithLoadingScreen({
 
   if (!state.done) {
     return (
-      <WhiteContainer>
+      <Stack flex={1} backgroundColor="$backgroundPrimary" padding="$5">
         <Stack alignItems="center" justifyContent="center" flex={1}>
           <VexlActivityIndicator
             size="large"
-            bc={getTokens().color.main.val}
+            bc={theme.accentYellowPrimary.get()}
             description={
               state.progress ? t('contacts.loadingContacts') : undefined
             }
           />
         </Stack>
-      </WhiteContainer>
+      </Stack>
     )
   }
 

@@ -62,7 +62,7 @@ function DonationPriceInSats(): React.ReactElement {
         {`${t('offer.approximatelyAbbreviation')}`}
       </Typography>
       {btcPriceWithState?.state === 'loading' ? (
-        <VexlActivityIndicator size="small" bc="$greyAccent2" />
+        <VexlActivityIndicator size="small" bc="$backgroundTertiary" />
       ) : (
         <Typography variant="description" color="$foregroundPrimary">
           {localizedDonationInSats}

@@ -1,12 +1,12 @@
-import {useVexlTheme} from '@vexl-next/ui'
+import {Stack, useTheme, useVexlTheme} from '@vexl-next/ui'
 import React, {useMemo} from 'react'
+import {StyleSheet} from 'react-native'
 import MapView, {
   Marker,
   PROVIDER_GOOGLE,
   type EdgePadding,
 } from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack} from 'tamagui'
 import {type MapValue} from '../brands'
 import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
@@ -22,10 +22,12 @@ type Props = React.ComponentProps<typeof Stack> & {
   interactive?: boolean
 }
 
-const mapStyle = {
-  width: '100%',
-  height: '100%',
-} as const
+const styles = StyleSheet.create({
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+})
 
 export default function MapSingleLocationDisplay({
   topChildren,
@@ -38,12 +40,18 @@ export default function MapSingleLocationDisplay({
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
   const {resolvedTheme} = useVexlTheme()
+  const theme = useTheme()
+  const backgroundPrimary = theme.backgroundPrimary.get()
 
   return (
-    <Stack position="relative" {...restProps} backgroundColor="$black">
+    <Stack
+      position="relative"
+      {...restProps}
+      backgroundColor="$backgroundPrimary"
+    >
       <MapView
         mapPadding={mapPadding}
-        style={mapStyle}
+        style={[styles.map, {backgroundColor: backgroundPrimary}]}
         toolbarEnabled={false}
         scrollEnabled={interactive}
         zoomEnabled={interactive}

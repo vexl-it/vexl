@@ -1,11 +1,11 @@
 import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Typography} from '@vexl-next/ui'
+import {Stack, Typography, useTheme} from '@vexl-next/ui'
+import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useEffect, useMemo} from 'react'
 import {type MarkedDates} from 'react-native-calendars/src/types'
-import {getTokens, Stack} from 'tamagui'
 import {
   type TradeChecklistStackParamsList,
   type TradeChecklistStackScreenProps,
@@ -31,6 +31,7 @@ function ChooseAvailableDaysScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
   const setAvailableDateTimes = useSetAtom(setAvailableDateTimesActionAtom)
@@ -41,8 +42,9 @@ function ChooseAvailableDaysScreen({
 
   const markedDates: MarkedDates = useMemo(
     () =>
-      uniqueAvailableDates.reduce(
-        (result: MarkedDates, date: UnixMilliseconds) => {
+      pipe(
+        uniqueAvailableDates,
+        Array.reduce({}, (result: MarkedDates, date: UnixMilliseconds) => {
           return {
             ...result,
             [unixMillisecondsToLocaleDateTime(date).toFormat(
@@ -54,14 +56,13 @@ function ChooseAvailableDaysScreen({
                 unixMillisecondsToLocaleDateTime(date)
                   .startOf('day')
                   .toMillis() < DateTime.now().startOf('day').toMillis()
-                  ? getTokens().color.greyAccent1.val
-                  : getTokens().color.main.val,
+                  ? theme.backgroundHighlight.get()
+                  : theme.accentYellowPrimary.get(),
             },
           }
-        },
-        {}
+        })
       ),
-    [uniqueAvailableDates]
+    [theme, uniqueAvailableDates]
   )
 
   useEffect(() => {

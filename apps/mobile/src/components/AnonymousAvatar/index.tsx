@@ -11,8 +11,8 @@ import {
 import React from 'react'
 import {randomNumberFromSeed} from '../../utils/randomNumber'
 import {type RandomSeed} from '../../utils/RandomSeed'
-import avatarsGoldenGlassesAndBackgroundSvg from './images/avatarsGoldenGlassesAndBackgroundSvg'
-import avatarsSvg from './images/avatarsSvg'
+import goldenAvatarXmlStrings from './images/avatarsGoldenGlassesAndBackgroundSvg'
+import basicAvatarXmlStrings from './images/avatarsSvg'
 
 export function getAvatarSvg({
   avatarIndex,
@@ -20,11 +20,11 @@ export function getAvatarSvg({
 }: {
   avatarIndex: number
   goldenAvatarType?: GoldenAvatarType
-}): (typeof avatarsSvg)[number] {
+}): (typeof basicAvatarXmlStrings)[number] {
   const avatars =
     goldenAvatarType === 'BACKGROUND_AND_GLASSES'
-      ? avatarsGoldenGlassesAndBackgroundSvg
-      : avatarsSvg
+      ? goldenAvatarXmlStrings
+      : basicAvatarXmlStrings
 
   return avatars[avatarIndex] ?? avatars[0]
 }

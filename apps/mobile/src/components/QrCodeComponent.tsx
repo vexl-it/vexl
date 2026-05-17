@@ -1,6 +1,6 @@
+import {Stack, Typography, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {type ImageSourcePropType} from 'react-native'
-import {Stack, Text, YStack} from 'tamagui'
 import {SharableQrCode} from './SharableQrCode'
 
 export function QrCodeComponent({
@@ -19,12 +19,12 @@ export function QrCodeComponent({
       <Stack alignContent="center" alignItems="center" mb="$2">
         <SharableQrCode size={300} value={link} logo={logo} />
       </Stack>
-      <Text color="black" ff="$heading" fontSize={32}>
+      <Typography variant="heading2" color="$foregroundPrimary">
         {heading}
-      </Text>
-      <Text color="$greyOnWhite" ff="$body500" fontSize={18}>
+      </Typography>
+      <Typography variant="paragraph" color="$foregroundSecondary">
         {text}
-      </Text>
+      </Typography>
     </YStack>
   )
 }

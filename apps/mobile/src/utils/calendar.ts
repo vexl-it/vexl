@@ -1,19 +1,28 @@
-import {type CalendarEventId} from '@vexl-next/domain/src/general/messaging'
-import {Option} from 'effect/index'
-import * as Calendar from 'expo-calendar'
+import {CalendarEventId} from '@vexl-next/domain/src/general/messaging'
+import {tokens} from '@vexl-next/ui'
+import {Array, Option, pipe, Schema} from 'effect/index'
 import {
   CalendarAccessLevel,
-  type Calendar as ExpoCalendar,
+  createCalendarAsync,
+  createEventAsync,
+  EntityTypes,
+  getCalendarsAsync,
+  getDefaultCalendarAsync,
+  getEventAsync,
+  requestCalendarPermissionsAsync,
+  updateEventAsync,
+  type Calendar,
   type Source,
 } from 'expo-calendar'
-import * as E from 'fp-ts/Either'
-import type * as TE from 'fp-ts/TaskEither'
+import {left, right} from 'fp-ts/Either'
+import {type TaskEither} from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
-import {getTokens} from 'tamagui'
 import {vexlCalendarIdAtom} from '../state/tradeChecklist/atoms/vexlCalendarStorageAtom'
 
 const CALENDAR_TITLE = 'Vexl'
+
+type CalendarEventIdType = typeof CalendarEventId.Type
 
 export interface PermissionsNotGrantedError {
   _tag: 'permissionsNotGranted'
@@ -41,26 +50,28 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
     (
       get,
       set
-    ): TE.TaskEither<PermissionsNotGrantedError | UnknownError, string> => {
+    ): TaskEither<PermissionsNotGrantedError | UnknownError, string> => {
       const vexlCalendarId = get(vexlCalendarIdAtom)
 
       return async () => {
         try {
-          const permissions = await Calendar.requestCalendarPermissionsAsync()
+          const permissions = await requestCalendarPermissionsAsync()
 
           if (permissions.status !== 'granted') {
-            return E.left({
+            return left({
               _tag: 'permissionsNotGranted',
               reason: 'PermissionsNotGranted',
             })
           }
 
-          const defaultCalendarSource =
+          const defaultCalendarSource: Source =
             Platform.OS === 'ios'
-              ? await Calendar.getDefaultCalendarAsync().then(
-                  (result) => result.source
-                )
-              : ({isLocalAccount: true, name: CALENDAR_TITLE} as Source)
+              ? await getDefaultCalendarAsync().then((result) => result.source)
+              : {
+                  isLocalAccount: true,
+                  name: CALENDAR_TITLE,
+                  type: 'LOCAL',
+                }
 
           const vexlCalendar = {
             title: CALENDAR_TITLE,
@@ -69,35 +80,36 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
             isSynced: true,
             isPrimary: false,
             accessLevel: CalendarAccessLevel.OWNER,
-            entityType: Calendar.EntityTypes.EVENT,
+            entityType: EntityTypes.EVENT,
             sourceId: defaultCalendarSource.id,
             source: defaultCalendarSource,
             ownerAccount: 'personal',
-            color: getTokens().color.main.val,
-          } satisfies Partial<ExpoCalendar>
+            color: tokens.color.yellow100.val,
+          } satisfies Partial<Calendar>
 
           if (Option.isNone(vexlCalendarId)) {
-            const calendarId = await Calendar.createCalendarAsync(vexlCalendar)
+            const calendarId = await createCalendarAsync(vexlCalendar)
             set(vexlCalendarIdAtom, Option.some(calendarId))
 
-            return E.right(calendarId)
+            return right(calendarId)
           }
 
-          const calendars = await Calendar.getCalendarsAsync()
-          const calendar = calendars.find(
-            (calendar) => calendar.id === vexlCalendarId.value
+          const calendars = await getCalendarsAsync()
+          const calendar = pipe(
+            calendars,
+            Array.findFirst((calendar) => calendar.id === vexlCalendarId.value)
           )
 
-          if (!calendar) {
-            const calendarId = await Calendar.createCalendarAsync(vexlCalendar)
+          if (Option.isNone(calendar)) {
+            const calendarId = await createCalendarAsync(vexlCalendar)
             set(vexlCalendarIdAtom, Option.some(calendarId))
 
-            return E.right(calendarId)
+            return right(calendarId)
           }
 
-          return E.right(calendar.id)
+          return right(calendar.value.id)
         } catch (error) {
-          return E.left({
+          return left({
             _tag: 'unknown',
             reason: 'Unknown',
             error,
@@ -112,35 +124,37 @@ export function createCalendarEvent({
   calendarId,
   event,
 }: {
-  calendarEventId: CalendarEventId | undefined
+  calendarEventId: CalendarEventIdType | undefined
   calendarId: string
   event: TradeChecklistCalendarEvent
-}): TE.TaskEither<
+}): TaskEither<
   UnknownError,
-  {calendarEventId: CalendarEventId; action: 'created' | 'updated'}
+  {calendarEventId: CalendarEventIdType; action: 'created' | 'updated'}
 > {
   return async () => {
     try {
       if (calendarEventId) {
-        const existingEvent = await Calendar.getEventAsync(
-          calendarEventId
-        ).catch(() => undefined)
+        const existingEvent = await getEventAsync(calendarEventId).catch(
+          () => undefined
+        )
         if (existingEvent) {
-          await Calendar.updateEventAsync(existingEvent.id, event)
-          return E.right({
-            calendarEventId: existingEvent.id as CalendarEventId,
+          await updateEventAsync(existingEvent.id, event)
+          return right({
+            calendarEventId: Schema.decodeSync(CalendarEventId)(
+              existingEvent.id
+            ),
             action: 'updated',
           })
         }
       }
 
-      const eventId = await Calendar.createEventAsync(calendarId, event)
-      return E.right({
-        calendarEventId: eventId as CalendarEventId,
+      const eventId = await createEventAsync(calendarId, event)
+      return right({
+        calendarEventId: Schema.decodeSync(CalendarEventId)(eventId),
         action: 'created',
       })
     } catch (error) {
-      return E.left({_tag: 'unknown', reason: 'Unknown', error})
+      return left({_tag: 'unknown', reason: 'Unknown', error})
     }
   }
 }

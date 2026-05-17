@@ -24,7 +24,11 @@ export function LastMessageTime({
   return (
     <Typography
       mx="$5"
-      color={message.state === 'sendingError' ? '$red' : '$foregroundTertiary'}
+      color={
+        message.state === 'sendingError'
+          ? '$redForeground'
+          : '$foregroundTertiary'
+      }
       variant="micro"
       textAlign={isMine ? 'right' : 'left'}
       marginTop="$3"

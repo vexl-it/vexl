@@ -2,11 +2,11 @@ import {
   createMaterialTopTabNavigator,
   type MaterialTopTabBarProps,
 } from '@react-navigation/material-top-tabs'
+import {Button, ScrollView, Stack, tokens, Typography} from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
-import {getTokens, ScrollView, Stack, Text} from 'tamagui'
 import {type ContactsTabParamsList} from '../../../../navigationTypes'
 import {
   normalizedContactsAtom,
@@ -16,9 +16,7 @@ import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
-import Button from '../../../Button'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
-import WhiteContainer from '../../../WhiteContainer'
 import {contactSelectMolecule, ContactsSelectScope} from './atom'
 import FilteredContacts from './components/FilteredContactsWithProvider'
 import SearchBar from './components/SearchBar'
@@ -68,18 +66,19 @@ function ContactsCountIndicator({
       py={2}
       minWidth={20}
       borderRadius="$2"
-      backgroundColor={isFocused ? '$grey' : '$main'}
+      backgroundColor={
+        isFocused ? '$backgroundTertiary' : '$accentYellowPrimary'
+      }
       alignItems="center"
       justifyContent="center"
       zi="$10"
     >
-      <Text
-        fontSize={14}
-        fontFamily="$body500"
-        col={isFocused ? '$greyOnBlack' : '$darkBrown'}
+      <Typography
+        variant="descriptionBold"
+        color={isFocused ? '$foregroundSecondary' : '$accentHighlightPrimary'}
       >
         {contactsCount}
-      </Text>
+      </Typography>
     </Stack>
   ) : null
 }
@@ -98,27 +97,33 @@ function CustomTabBar({
         contentContainerStyle={{
           alignSelf: 'flex-start',
           alignItems: 'center',
-          paddingHorizontal: getTokens().space[4].val,
-          paddingTop: getTokens().space[4].val,
+          paddingHorizontal: tokens.space[4].val,
+          paddingTop: tokens.space[4].val,
         }}
       >
         {state.routes.map((route, index) => {
-          // as any to solve ts error, that options does not exist
-          const {options} = descriptors[route.key] as any
+          const descriptor = descriptors[route.key]
+          if (descriptor == null) return null
+
+          const {options} = descriptor
           const isFocused = state.index === index
+          const tabLabel =
+            typeof options.tabBarLabel === 'string'
+              ? options.tabBarLabel
+              : route.name
 
           return (
-            <Stack key={options.tabBarLabel} mr="$2">
+            <Stack key={route.key} mr="$2">
               <Button
-                key={options.tabBarLabel}
                 testID={`@customTabBar/tab${route.name}`}
                 onPress={() => {
                   navigation.navigate(route.name, route.params)
                 }}
-                variant={isFocused ? 'secondary' : 'blackOnDark'}
+                variant={isFocused ? 'secondary' : 'tertiary'}
                 size="small"
-                text={options.tabBarLabel}
-              />
+              >
+                {tabLabel}
+              </Button>
               <ContactsCountIndicator
                 isFocused={isFocused}
                 routeName={route.name}
@@ -165,7 +170,12 @@ function ContactsListSelect({
 
   return (
     <>
-      <WhiteContainer noPadding>
+      <Stack
+        flex={1}
+        borderRadius="$5"
+        backgroundColor="$backgroundPrimary"
+        overflow="hidden"
+      >
         <Stack f={1}>
           <SearchBar />
           <Tab.Navigator
@@ -209,8 +219,8 @@ function ContactsListSelect({
             />
           </Tab.Navigator>
         </Stack>
-      </WhiteContainer>
-      <Stack pt="$2" bc="$black">
+      </Stack>
+      <Stack pt="$2" backgroundColor="$backgroundPrimary">
         <Button
           variant="secondary"
           onPress={() => {
@@ -220,9 +230,10 @@ function ContactsListSelect({
               })(submitAllSelectedContacts())
             )
           }}
-          fullWidth
-          text={t('common.submit')}
-        />
+          width="100%"
+        >
+          {t('common.submit')}
+        </Button>
       </Stack>
     </>
   )

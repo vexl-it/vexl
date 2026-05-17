@@ -1,5 +1,4 @@
-import {Copy, Typography, useTheme} from '@vexl-next/ui'
-import {XStack, YStack} from '@vexl-next/ui/src/primitives'
+import {Copy, Typography, useTheme, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 

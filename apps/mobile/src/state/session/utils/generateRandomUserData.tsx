@@ -6,26 +6,23 @@ import {fromSvgString} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.b
 import {Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {type Session} from '../../../brands/Session.brand'
-import avatarsGoldenSvg from '../../../components/AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
-import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
+import goldenAvatarImages from '../../../components/AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
+import basicAvatarImages from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
-import {
-  RandomSeed,
-  type RandomSeed as RandomSeedType,
-} from '../../../utils/RandomSeed'
+import {RandomSeed} from '../../../utils/RandomSeed'
 
 function getRandomAvatarSvgFromSeed({
   seed,
   goldenAvatarType,
 }: {
-  seed: RandomSeedType
+  seed: typeof RandomSeed.Type
   goldenAvatarType?: GoldenAvatarType
 }): SvgString {
   const avatars =
     goldenAvatarType === 'BACKGROUND_AND_GLASSES'
-      ? avatarsGoldenSvg
-      : avatarsSvg
+      ? goldenAvatarImages
+      : basicAvatarImages
   const index = randomNumberFromSeed(0, avatars.length - 1, seed)
   return avatars[index] ?? avatars[0]
 }

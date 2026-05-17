@@ -1,4 +1,13 @@
-import * as Haptics from 'expo-haptics'
+import {
+  avatarsGoldenGlassesAndBackgroundSvg,
+  Button,
+  IconButton,
+  Stack,
+  Typography,
+  useTheme,
+  XmarkCancelClose,
+} from '@vexl-next/ui'
+import {impactAsync, ImpactFeedbackStyle} from 'expo-haptics'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {Platform, useWindowDimensions, Vibration} from 'react-native'
@@ -13,20 +22,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, Stack, Text} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import Button from '../Button'
-import IconButton from '../IconButton'
-import Image from '../Image'
-import closeSvg from '../images/closeSvg'
-import avatarBackgroundSvg from './images/avatarBackgroundSvg'
-import avatarGlassesSvg from './images/avatarGlassesSvg'
-import avatarSvg1 from './images/avatarSvg1'
-import avatarSvg2 from './images/avatarSvg2'
-import avatarSvg3 from './images/avatarSvg3'
-import avatarSvg4 from './images/avatarSvg4'
-import goldenAvatarSvg from './images/goldenAvatarSvg'
-import shimerStarSvg from './images/shimerStarSvg'
+import {
+  AvatarBackground,
+  AvatarGlasses,
+  AvatarShapeFour,
+  AvatarShapeOne,
+  AvatarShapeThree,
+  AvatarShapeTwo,
+  ShimmerStar,
+} from './components/GoldenAvatarAnimationAssets'
 
 export const showGoldenAvatarAnimationAtom = atom(false)
 
@@ -38,6 +43,13 @@ function GoldenAvatar(): React.ReactElement | null {
   const {t} = useTranslation()
   const {height, width} = useWindowDimensions()
   const insets = useSafeAreaInsets()
+  const theme = useTheme()
+  const GoldenAvatarAsset = avatarsGoldenGlassesAndBackgroundSvg[0]
+  const avatarShapeOneColor = theme.greenBackground.get()
+  const avatarShapeTwoColor = theme.accentYellowPrimary.get()
+  const avatarShapeThreeColor = theme.backgroundHighlight.get()
+  const avatarShapeFourColor = theme.pinkForeground.get()
+  const avatarLensColor = theme.backgroundTertiary.get()
 
   const showGoldenAvatarAnimation = useAtomValue(showGoldenAvatarAnimationAtom)
   const forceHideGoldenAvatarAnimation = useSetAtom(
@@ -104,25 +116,25 @@ function GoldenAvatar(): React.ReactElement | null {
 
   useEffect(() => {
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+      void impactAsync(ImpactFeedbackStyle.Heavy)
     }, 1300)
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+      void impactAsync(ImpactFeedbackStyle.Heavy)
     }, 1400)
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      void impactAsync(ImpactFeedbackStyle.Medium)
     }, 1500)
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+      void impactAsync(ImpactFeedbackStyle.Heavy)
     }, 1700)
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      void impactAsync(ImpactFeedbackStyle.Light)
     }, 1900)
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      void impactAsync(ImpactFeedbackStyle.Medium)
     }, 2000)
     setTimeout(() => {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+      void impactAsync(ImpactFeedbackStyle.Light)
     }, 2200)
 
     setTimeout(() => {
@@ -250,7 +262,9 @@ function GoldenAvatar(): React.ReactElement | null {
         pt="$4"
         zIndex={1010}
       >
-        <IconButton icon={closeSvg} onPress={forceHideGoldenAvatarAnimation} />
+        <IconButton onPress={forceHideGoldenAvatarAnimation}>
+          <XmarkCancelClose color={theme.foregroundPrimary.get()} size={24} />
+        </IconButton>
       </Stack>
       <Animated.View
         style={[
@@ -260,7 +274,7 @@ function GoldenAvatar(): React.ReactElement | null {
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: getTokens().color.black.val,
+            backgroundColor: theme.black100.get(),
             zIndex: 1000,
           },
           backgroundOpacityAnimation,
@@ -268,9 +282,9 @@ function GoldenAvatar(): React.ReactElement | null {
       />
       <Stack mb="$4" zIndex={1001}>
         <Animated.View style={[descriptionOpacityAnimation]}>
-          <Text textAlign="center" ff="$heading" fos={18} col="$white">
+          <Typography variant="tabLarge" color="$white100" textAlign="center">
             {t('goldenGlasses.youReceived')}
-          </Text>
+          </Typography>
         </Animated.View>
       </Stack>
       <Stack zIndex={1001} width={150} height={150}>
@@ -281,7 +295,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeOneTranslateAnimation,
             ]}
           >
-            <Image source={avatarSvg1} />
+            <AvatarShapeOne color={avatarShapeOneColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -289,7 +303,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeTwoTranslateAnimation,
             ]}
           >
-            <Image source={avatarSvg2} />
+            <AvatarShapeTwo color={avatarShapeTwoColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -297,7 +311,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeThreeTranslateAnimation,
             ]}
           >
-            <Image source={avatarSvg3} />
+            <AvatarShapeThree color={avatarShapeThreeColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -305,7 +319,7 @@ function GoldenAvatar(): React.ReactElement | null {
               shapeFourTranslateAnimation,
             ]}
           >
-            <Image source={avatarSvg4} />
+            <AvatarShapeFour color={avatarShapeFourColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -313,7 +327,7 @@ function GoldenAvatar(): React.ReactElement | null {
               glassesTranslateAnimation,
             ]}
           >
-            <Image source={avatarGlassesSvg} />
+            <AvatarGlasses lensColor={avatarLensColor} />
           </Animated.View>
           <Animated.View
             style={[
@@ -321,7 +335,7 @@ function GoldenAvatar(): React.ReactElement | null {
               avatarBackgroundOpacityAnimation,
             ]}
           >
-            <Image source={avatarBackgroundSvg} />
+            <AvatarBackground />
           </Animated.View>
         </Animated.View>
         <Animated.View
@@ -330,7 +344,7 @@ function GoldenAvatar(): React.ReactElement | null {
             goldenAvatarRotationAnimation,
           ]}
         >
-          <Image source={goldenAvatarSvg} />
+          {GoldenAvatarAsset ? <GoldenAvatarAsset /> : null}
         </Animated.View>
         <Animated.View
           style={[
@@ -338,23 +352,27 @@ function GoldenAvatar(): React.ReactElement | null {
             starScaleAnimation,
           ]}
         >
-          <Image source={shimerStarSvg} />
+          <ShimmerStar />
         </Animated.View>
       </Stack>
       <Stack mt="$4" zIndex={1001} gap="$2">
         <Animated.View
           style={[{alignSelf: 'center'}, descriptionOpacityAnimation]}
         >
-          <Text textAlign="center" ff="$heading" fos={26} col="$main">
+          <Typography
+            variant="heading3"
+            color="$accentYellowPrimary"
+            textAlign="center"
+          >
             {t('goldenGlasses.goldenGlasses')}
-          </Text>
+          </Typography>
         </Animated.View>
         <Animated.View
           style={[{alignSelf: 'center'}, descriptionOpacityAnimation]}
         >
-          <Text textAlign="center" ff="$heading" fos={18} col="$white">
+          <Typography variant="tabLarge" color="$white100" textAlign="center">
             {t('goldenGlasses.forJoiningMeetup')}
-          </Text>
+          </Typography>
         </Animated.View>
       </Stack>
       <Stack
@@ -367,11 +385,9 @@ function GoldenAvatar(): React.ReactElement | null {
         b={insets.bottom}
       >
         <Animated.View style={continueButtonOpacityAnimation}>
-          <Button
-            text={t('common.continue')}
-            variant="secondary"
-            onPress={forceHideGoldenAvatarAnimation}
-          />
+          <Button variant="secondary" onPress={forceHideGoldenAvatarAnimation}>
+            {t('common.continue')}
+          </Button>
         </Animated.View>
       </Stack>
     </Stack>

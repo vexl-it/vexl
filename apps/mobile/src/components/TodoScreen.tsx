@@ -1,15 +1,18 @@
 import {useNavigation} from '@react-navigation/native'
+import {Button, Stack, Typography} from '@vexl-next/ui'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
 import useSafeGoBack from '../utils/useSafeGoBack'
-import Button from './Button'
 
 function TodoScreen(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   return (
     <Stack f={1}>
-      <Text col="$black">To be done</Text>
-      <Button variant="secondary" text="Go back" onPress={safeGoBack}></Button>
+      <Typography variant="paragraph" color="$foregroundPrimary">
+        To be done
+      </Typography>
+      <Button variant="secondary" onPress={safeGoBack}>
+        Go back
+      </Button>
     </Stack>
   )
 }

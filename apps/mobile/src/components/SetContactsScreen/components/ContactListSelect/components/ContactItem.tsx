@@ -1,15 +1,19 @@
+import {
+  IconButton,
+  PencilWriteEdit,
+  Stack,
+  Typography,
+  UserImagePlaceholder,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React from 'react'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
 import ContactPictureImage from '../../../../ContactPictureImage'
-import IconButton from '../../../../IconButton'
-import SvgImage from '../../../../Image'
-import editIconSvg from '../../../../images/editIconSvg'
-import picturePlaceholderSvg from '../../../../images/picturePlaceholderSvg'
 import {contactSelectMolecule} from '../atom'
 import IsNewIndicator from './IsNewIndicator'
 import IsSelectedCheckbox from './IsSelectedCheckbox'
@@ -22,6 +26,7 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
   const {editContactActionAtom} = useMolecule(contactSelectMolecule)
   const contact = useAtomValue(contactAtom)
   const editContact = useSetAtom(editContactActionAtom)
+  const theme = useTheme()
   const {
     info: {nonUniqueContactId, name},
     computedValues: {normalizedNumber},
@@ -38,39 +43,32 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
           height={50}
           br="$5"
           objectFit="cover"
-          fallback={
-            <SvgImage
-              width={50}
-              height={50}
-              source={picturePlaceholderSvg}
-              fill={getTokens().color.grey.val}
-            />
-          }
+          fallback={<UserImagePlaceholder size={50} />}
         />
       </Stack>
       <Stack f={1} ml="$4" jc="space-between">
-        <Text ff="$body500" fs={18} mb="$1" color="$black">
+        <Typography variant="paragraph" mb="$1" color="$foregroundPrimary">
           {name}
-        </Text>
-        <Text
+        </Typography>
+        <Typography
           testID="@contactItem/normalizedNumber"
-          ff="$body600"
-          col="$greyOnBlack"
-          fos={14}
+          variant="descriptionBold"
+          color="$foregroundSecondary"
         >
           {getInternationalPhoneNumber(normalizedNumber)}
-        </Text>
+        </Typography>
       </Stack>
       <XStack gap="$2">
         <IconButton
-          variant="primary"
           height={32}
           width={32}
-          icon={editIconSvg}
+          padding="$2"
           onPress={() => {
             Effect.runFork(editContact({contact}))
           }}
-        />
+        >
+          <PencilWriteEdit size={20} color={theme.foregroundPrimary.get()} />
+        </IconButton>
         <IsSelectedCheckbox contactAtom={contactAtom} />
       </XStack>
     </XStack>

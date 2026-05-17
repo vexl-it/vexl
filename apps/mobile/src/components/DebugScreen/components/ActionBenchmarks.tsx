@@ -25,7 +25,7 @@ function BenchmarksList(): React.ReactElement {
                   variant="description"
                   color={
                     record.endedAt - record.startedAt > 1000
-                      ? '$redAccent1'
+                      ? '$redForeground'
                       : '$foregroundPrimary'
                   }
                 >

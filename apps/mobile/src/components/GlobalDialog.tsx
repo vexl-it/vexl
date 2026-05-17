@@ -2,16 +2,44 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import {createDialogAtom, DialogFromAtom, Stack} from '@vexl-next/ui'
+import {
+  createDialogAtom,
+  DialogFromAtom,
+  Input,
+  Stack,
+  Typography,
+  useTheme,
+} from '@vexl-next/ui'
 import {Effect, Either} from 'effect'
 import {atom, useAtom, type Atom, type WritableAtom} from 'jotai'
 import React from 'react'
-import {Text, type ColorTokens} from 'tamagui'
 import {ImageUniversal, type ImageUniversalProps} from './Image'
-import type {Props} from './Input'
-import Input from './Input'
 
 export const globalDialogAtom = createDialogAtom()
+
+type UiInputProps = React.ComponentProps<typeof Input>
+type DialogBackgroundColor = React.ComponentProps<
+  typeof Stack
+>['backgroundColor']
+
+interface DialogTextInputProps
+  extends Omit<UiInputProps, 'autoFocus' | 'onChangeText' | 'value'> {
+  readonly icon?: unknown
+  readonly onClearPress?: () => void
+  readonly showClearButton?: boolean
+}
+
+function getUiInputProps({
+  icon: _icon,
+  onClearPress: _onClearPress,
+  showClearButton: _showClearButton,
+  ...inputProps
+}: DialogTextInputProps): Omit<
+  DialogTextInputProps,
+  'icon' | 'onClearPress' | 'showClearButton'
+> {
+  return inputProps
+}
 
 export interface StepWithText {
   type: 'StepWithText'
@@ -29,7 +57,7 @@ export interface StepWithChildren<T> {
   type: 'StepWithChildren'
   negativeButtonText?: string
   positiveButtonText: string
-  backgroundColor?: ColorTokens
+  backgroundColor?: DialogBackgroundColor
   goBackOnNegativeButtonPress?: boolean
   MainSectionComponent: React.ComponentType<T>
   mainSectionComponentProps?: T
@@ -44,7 +72,7 @@ interface StepWithInput {
   title: string
   description?: string
   subtitle?: string
-  textInputProps: Props
+  textInputProps: DialogTextInputProps
   defaultValue?: string
   positiveButtonDisabledAtom?: Atom<boolean>
 }
@@ -115,9 +143,15 @@ function DialogStepTextContent({
         />
       )}
       {!!step.emojiTop && (
-        <Text fontSize={72} textAlign={step.textAlign ?? 'left'}>
+        <Typography
+          variant="heading1"
+          color="$foregroundPrimary"
+          fontSize={72}
+          lineHeight={84}
+          textAlign={step.textAlign ?? 'left'}
+        >
           {step.emojiTop}
-        </Text>
+        </Typography>
       )}
     </Stack>
   )
@@ -132,20 +166,41 @@ function createInputContent({
 }): React.ReactElement {
   function InputContent(): React.ReactElement {
     const [value, setValue] = useAtom(valueAtom)
+    const theme = useTheme()
+    const textInputProps = getUiInputProps(step.textInputProps)
 
     return (
       <Stack gap="$3">
         {!!step.subtitle && (
-          <Text fontSize={18} color="$foregroundPrimary">
+          <Typography variant="paragraph" color="$foregroundPrimary">
             {step.subtitle}
-          </Text>
+          </Typography>
         )}
-        <Input
-          autoFocus={step.autoFocus}
-          value={value}
-          onChangeText={setValue}
-          {...step.textInputProps}
-        />
+        <Stack
+          alignItems="center"
+          backgroundColor="$backgroundSecondary"
+          borderRadius="$5"
+          borderWidth={1}
+          borderColor="transparent"
+          minHeight="$11"
+          paddingHorizontal="$5"
+          justifyContent="center"
+        >
+          <Input
+            unstyled
+            alignSelf="stretch"
+            color="$foregroundPrimary"
+            fontFamily="$body"
+            fontSize="$4"
+            fontWeight="500"
+            placeholderTextColor={theme.foregroundTertiary.get()}
+            selectionColor={theme.accentYellowPrimary.get()}
+            autoFocus={step.autoFocus}
+            value={value}
+            onChangeText={setValue}
+            {...textInputProps}
+          />
+        </Stack>
       </Stack>
     )
   }

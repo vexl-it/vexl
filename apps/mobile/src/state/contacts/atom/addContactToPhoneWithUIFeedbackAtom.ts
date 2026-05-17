@@ -1,11 +1,17 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
-import * as Contacts from 'expo-contacts'
-import {type Contact, type ExistingContact} from 'expo-contacts'
+import {
+  addContactAsync,
+  Fields,
+  getContactsAsync,
+  presentFormAsync,
+  updateContactAsync,
+  type Contact,
+  type ExistingContact,
+} from 'expo-contacts'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
-import userSvg from '../../../components/images/userSvg'
 import getCountryCode from '../../../utils/getCountryCode'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
@@ -23,7 +29,7 @@ function addContactsToPhoneContacts({
 }): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
   return Effect.tryPromise({
     try: async () => {
-      await Contacts.addContactAsync(contact)
+      await addContactAsync(contact)
     },
     catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
   })
@@ -37,9 +43,9 @@ function updateContactInPhoneContacts({
   return Effect.tryPromise({
     try: async () => {
       if (Platform.OS === 'android') {
-        await Contacts.presentFormAsync(contact.id)
+        await presentFormAsync(contact.id)
       } else {
-        await Contacts.updateContactAsync(contact)
+        await updateContactAsync(contact)
       }
     },
     catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
@@ -72,8 +78,8 @@ function findPhoneContactByNumber({
 > {
   return Effect.tryPromise({
     try: async () => {
-      const contacts = await Contacts.getContactsAsync({
-        fields: [Contacts.Fields.PhoneNumbers],
+      const contacts = await getContactsAsync({
+        fields: [Fields.PhoneNumbers],
       })
 
       return pipe(
@@ -164,8 +170,6 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
               textInputProps: {
                 autoCorrect: false,
                 placeholder: customName,
-                variant: 'greyOnWhite',
-                icon: userSvg,
               },
             },
           ],

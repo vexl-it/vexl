@@ -1,9 +1,14 @@
 import {useMemo} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {type TabProps} from '../Tabs'
 
 export type TabType = 'termsOfUse' | 'privacyPolicy' | 'childSafety'
-export default function useContent(): Array<TabProps<TabType>> {
+
+export interface TosTab {
+  readonly title: string
+  readonly type: TabType
+}
+
+export default function useContent(): TosTab[] {
   const {t} = useTranslation()
 
   return useMemo(

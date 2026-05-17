@@ -1,17 +1,17 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {useVexlTheme} from '@vexl-next/ui'
+import {Stack, Typography, YStack, useTheme, useVexlTheme} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
+import {StyleSheet} from 'react-native'
 import MapView, {
   PROVIDER_GOOGLE,
   type EdgePadding,
   type Region,
 } from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, Text, useTheme, YStack} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
@@ -19,11 +19,10 @@ import {
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import Image from '../../Image'
 import {type MapValue} from '../brands'
-import {createPinSvg} from '../img/pinSvg'
 import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
+import {MapPinAsset} from './MapSvgAssets'
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
@@ -35,10 +34,12 @@ type Props = React.ComponentProps<typeof Stack> & {
   onMapMoved?: () => void
 }
 
-const mapStyle = {
-  width: '100%',
-  height: '100%',
-} as const
+const styles = StyleSheet.create({
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+})
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function useAtoms({
@@ -89,9 +90,15 @@ function PickedLocationText({
   const {t} = useTranslation()
 
   if (geocodingState.state !== 'done')
-    return <Text>{t('common.loading')}...</Text>
+    return (
+      <Typography variant="micro" color="$foregroundPrimary">
+        {t('common.loading')}...
+      </Typography>
+    )
 
-  const color = E.isLeft(geocodingState.result) ? '$red' : '$white'
+  const color = E.isLeft(geocodingState.result)
+    ? '$redForeground'
+    : '$foregroundPrimary'
   const text = pipe(
     geocodingState.result,
     E.match(
@@ -101,9 +108,9 @@ function PickedLocationText({
   )
 
   return (
-    <Text ta="center" color={color}>
+    <Typography variant="micro" textAlign="center" color={color}>
       {text}
-    </Text>
+    </Typography>
   )
 }
 
@@ -121,14 +128,11 @@ export default function MapLocationSelect({
   const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
   const accentHighlightSecondary = theme.accentHighlightSecondary.get()
+  const backgroundPrimary = theme.backgroundPrimary.get()
 
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
-  )
-  const pinSvg = useMemo(
-    () => createPinSvg(accentHighlightSecondary),
-    [accentHighlightSecondary]
   )
   const [currentRegion, setCurrentRegion] = useState(initialRegion)
 
@@ -144,13 +148,17 @@ export default function MapLocationSelect({
   }, [initialRegion])
 
   return (
-    <Stack position="relative" {...restProps} backgroundColor="$black">
+    <Stack
+      position="relative"
+      {...restProps}
+      backgroundColor="$backgroundPrimary"
+    >
       <MapView
         mapPadding={mapPadding}
         provider={PROVIDER_GOOGLE}
         toolbarEnabled={false}
         customMapStyle={getMapTheme(resolvedTheme)}
-        style={mapStyle}
+        style={[styles.map, {backgroundColor: backgroundPrimary}]}
         onRegionChangeComplete={(region, {isGesture}) => {
           if (isGesture) {
             onMapMoved?.()
@@ -167,7 +175,7 @@ export default function MapLocationSelect({
         left="50%"
         transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
       >
-        <Image width={70} height={70} source={pinSvg} />
+        <MapPinAsset color={accentHighlightSecondary} />
       </Stack>
 
       <Stack
@@ -188,7 +196,7 @@ export default function MapLocationSelect({
               paddingVertical="$2"
               borderRadius="$6"
               alignSelf="center"
-              backgroundColor="rgba(0, 0, 0,0.8)"
+              backgroundColor="$backgroundPrimary"
             >
               <PickedLocationText geocodingState={geocodingState} />
             </Stack>

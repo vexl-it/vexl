@@ -1,17 +1,22 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {spokenLanguagesOptions} from '@vexl-next/domain/src/general/offers'
-import {Button, Loader, NavButton, Switch, Typography} from '@vexl-next/ui'
-import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {
+  Button,
+  ChevronLeft,
+  Loader,
+  NavButton,
+  Screen,
   ScrollView,
   Separator,
   Stack,
+  Switch,
+  Typography,
+  useScreenFooterHeight,
   XStack,
   YStack,
-} from '@vexl-next/ui/src/primitives'
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {getTokens} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
@@ -19,7 +24,6 @@ import {useOpenChangeCurrency} from '../ChangeCurrency'
 import DeferredContent from '../DeferredContent'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
 import FriendLevel from '../OfferForm/components/FriendLevel'
-import Screen from '../Screen'
 import {
   amountBottomLimitForRangeInputAtom,
   amountFilterEnabledAtom,
@@ -68,6 +72,8 @@ function FilterOffersScreen(): React.ReactElement {
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
+  const {footerHeightAtom} = useScreenFooterHeight()
+  const footerHeight = useAtomValue(footerHeightAtom)
 
   const connectionSubtitles = useMemo(() => {
     if (numberOfFriends.state !== 'success') return undefined
@@ -100,37 +106,45 @@ function FilterOffersScreen(): React.ReactElement {
   )
 
   return (
-    <Screen>
-      <XStack
-        alignItems="center"
-        justifyContent="space-between"
-        paddingHorizontal="$5"
-        paddingVertical="$4"
-      >
-        <XStack flex={1} alignItems="center">
-          <NavButton
-            variant="highlighted"
-            icon={ChevronLeft}
-            onPress={safeGoBack}
-          />
-        </XStack>
-        <Typography
-          variant="titlesSmall"
-          color="$foregroundPrimary"
-          textAlign="center"
+    <Screen
+      noHorizontalPadding
+      navigationBar={
+        <XStack
+          alignItems="center"
+          justifyContent="space-between"
+          paddingHorizontal="$5"
+          paddingVertical="$4"
         >
-          {t('filterOffers.filters')}
-        </Typography>
-        <XStack flex={1} justifyContent="flex-end">
-          <NavButton type="text" variant="normal" onPress={resetOfferForm}>
-            {t('filterOffers.clearAll')}
-          </NavButton>
+          <XStack flex={1} alignItems="center">
+            <NavButton
+              variant="highlighted"
+              icon={ChevronLeft}
+              onPress={safeGoBack}
+            />
+          </XStack>
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            textAlign="center"
+          >
+            {t('filterOffers.filters')}
+          </Typography>
+          <XStack flex={1} justifyContent="flex-end">
+            <NavButton type="text" variant="normal" onPress={resetOfferForm}>
+              {t('filterOffers.clearAll')}
+            </NavButton>
+          </XStack>
         </XStack>
-      </XStack>
-
+      }
+      footer={
+        <Button variant="primary" size="large" onPress={handleSave}>
+          {t('filterOffers.seeOffers', {count: filteredOffersCount})}
+        </Button>
+      }
+    >
       <DeferredContent>
         <ScrollView
-          contentContainerStyle={{paddingBottom: getTokens().space.$4.val}}
+          contentContainerStyle={{paddingBottom: footerHeight}}
           showsVerticalScrollIndicator={false}
         >
           <YStack paddingHorizontal="$5" gap="$3">
@@ -275,12 +289,6 @@ function FilterOffersScreen(): React.ReactElement {
           </YStack>
         </ScrollView>
       </DeferredContent>
-
-      <YStack paddingHorizontal="$5" paddingVertical="$4">
-        <Button variant="primary" size="large" onPress={handleSave}>
-          {t('filterOffers.seeOffers', {count: filteredOffersCount})}
-        </Button>
-      </YStack>
     </Screen>
   )
 }

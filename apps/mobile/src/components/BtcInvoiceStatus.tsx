@@ -3,16 +3,20 @@ import {
   type InvoiceStatus,
   type PaymentLink,
 } from '@vexl-next/rest-api/src/services/content/contracts'
+import {
+  Checkmark,
+  ClockTime,
+  Copy,
+  Rejected,
+  Stack,
+  Typography,
+  XStack,
+  useTheme,
+} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, XStack} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
-import Image from './Image'
-import clockSvg from './images/clockSvg'
-import copySvg from './images/copySvg'
-import slashSvg from './images/slashSvg'
-import successfulSvg from './images/successfulSvg'
 import {SharableQrCode} from './SharableQrCode'
 import {toastNotificationAtom} from './ToastNotification/atom'
 
@@ -23,8 +27,6 @@ interface Props {
   isInModal?: boolean
 }
 const QR_CODE_SIZE = 300
-const PROCESSING_STATUSES: InvoiceStatus[] = ['Processing']
-const ERROR_STATUSES: InvoiceStatus[] = ['Invalid', 'Expired']
 
 function BtcInvoiceStatus({
   donationPaymentMethod,
@@ -33,7 +35,10 @@ function BtcInvoiceStatus({
   isInModal,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const setToastNotification = useSetAtom(toastNotificationAtom)
+  const statusIconColor = theme.accentYellowPrimary.get()
+  const copyIconColor = theme.foregroundSecondary.get()
 
   return (
     <Stack gap="$4">
@@ -44,7 +49,7 @@ function BtcInvoiceStatus({
             jc="center"
             h={QR_CODE_SIZE + 10}
             w={QR_CODE_SIZE + 10}
-            bc="$white"
+            bc="$white100"
           >
             <SharableQrCode
               size={QR_CODE_SIZE}
@@ -84,24 +89,23 @@ function BtcInvoiceStatus({
                   gap="$2"
                   height={200}
                   width={200}
-                  bc="$grey"
+                  bc="$backgroundSecondary"
                   borderRadius="$10"
                 >
-                  <Image
-                    height={64}
-                    width={64}
-                    source={
-                      PROCESSING_STATUSES.includes(status)
-                        ? clockSvg
-                        : ERROR_STATUSES.includes(status)
-                          ? slashSvg
-                          : successfulSvg
-                    }
-                    stroke={getTokens().color.main.val}
-                  />
-                  <Text col="$main" ff="$body500" fos={24} textAlign="center">
+                  {status === 'Processing' ? (
+                    <ClockTime size={64} color={statusIconColor} />
+                  ) : status === 'Invalid' || status === 'Expired' ? (
+                    <Rejected size={64} color={statusIconColor} />
+                  ) : (
+                    <Checkmark size={64} color={statusIconColor} />
+                  )}
+                  <Typography
+                    color="$accentYellowPrimary"
+                    variant="titlesSmall"
+                    textAlign="center"
+                  >
                     {t(`donations.invoiceStatus.${status}`)}
-                  </Text>
+                  </Typography>
                 </Stack>
               </Stack>
             </Stack>
@@ -110,29 +114,28 @@ function BtcInvoiceStatus({
       </Stack>
       {status === 'New' && !!isInModal && (
         <Stack gap="$1">
-          <Text col="$grey" ff="$body500">
+          <Typography variant="description" color="$foregroundSecondary">
             {donationPaymentMethod === 'BTC-LN'
               ? t('offerForm.network.lightning').toUpperCase()
               : t('offerForm.network.onChain').toUpperCase()}
-          </Text>
+          </Typography>
           <XStack ai="center" jc="space-between" gap="$2">
-            <Text
+            <Typography
               flexShrink={1}
-              col="$grey"
-              fos={16}
-              ff="$body600"
+              color="$foregroundPrimary"
+              variant="paragraphSmallBold"
               numberOfLines={1}
               ellipsizeMode="middle"
             >
               {paymentLink}
-            </Text>
+            </Typography>
             <TouchableOpacity
               onPress={() => {
                 Clipboard.setString(paymentLink)
                 setToastNotification(t('common.copied'))
               }}
             >
-              <Image source={copySvg} fill={getTokens().color.grey.val} />
+              <Copy size={24} color={copyIconColor} />
             </TouchableOpacity>
           </XStack>
         </Stack>

@@ -1,9 +1,9 @@
 import Clipboard from '@react-native-clipboard/clipboard'
+import {Button, Stack, Typography} from '@vexl-next/ui'
 import {atom, getDefaultStore, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {Stack, Text, useWindowDimensions} from 'tamagui'
+import {useWindowDimensions} from 'react-native'
 import {useTranslation} from '../utils/localization/I18nProvider'
-import Button from './Button'
 import {toastNotificationAtom} from './ToastNotification/atom'
 
 interface ErrorAlertProps {
@@ -39,38 +39,40 @@ function ErrorAlert(): React.ReactElement | null {
       zIndex="$100"
       backgroundColor="rgba(0, 0, 0, 0.4)"
     >
-      <Stack bc="$white" maxWidth={width * 0.8} br="$4" p="$4">
-        <Stack gap="$2" bc="$greyAccent4" br="$4" p="$4" mb="$4">
-          <Text ff="$heading" col="$black">
+      <Stack bc="$backgroundPrimary" maxWidth={width * 0.8} br="$4" p="$4">
+        <Stack gap="$2" bc="$backgroundSecondary" br="$4" p="$4" mb="$4">
+          <Typography variant="heading3" color="$foregroundPrimary">
             {errorAlert.title}
-          </Text>
+          </Typography>
         </Stack>
         {!!errorAlert.description && (
-          <Text fos={16} ff="$body500" col="$greyAccent1">
+          <Typography variant="paragraphSmall" color="$foregroundSecondary">
             {errorAlert.description}
-          </Text>
+          </Typography>
         )}
         <Stack gap="$2" mt="$4">
           <Button
-            fullWidth
+            alignSelf="stretch"
             size="small"
-            text={t('common.copyErrorToClipboard')}
             variant="secondary"
             onPress={() => {
               Clipboard.setString(JSON.stringify(errorAlert.error, null, 2))
               setToastNotification(t('common.copied'))
               showErrorAlert(null)
             }}
-          />
+          >
+            {t('common.copyErrorToClipboard')}
+          </Button>
           <Button
-            fullWidth
+            alignSelf="stretch"
             size="small"
-            text={t('common.close')}
             variant="secondary"
             onPress={() => {
               showErrorAlert(null)
             }}
-          />
+          >
+            {t('common.close')}
+          </Button>
         </Stack>
       </Stack>
     </Stack>

@@ -1,19 +1,8 @@
+import {Stack} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, type ReactNode} from 'react'
-import {Stack, styled} from 'tamagui'
 import VexlActivityIndicator from './VexlActivityIndicator'
-
-const RootContainer = styled(Stack, {
-  pos: 'absolute',
-  t: 0,
-  l: 0,
-  r: 0,
-  b: 0,
-  ai: 'center',
-  jc: 'center',
-  bg: 'rgba(0, 0, 0, 0.5)',
-})
 
 interface Props {
   children: ReactNode
@@ -27,9 +16,18 @@ function LoadingOverlayProvider({children}: Props): React.ReactElement {
     <>
       {children}
       {!!isDisplayed && (
-        <RootContainer>
-          <VexlActivityIndicator size="large" bc="$main" />
-        </RootContainer>
+        <Stack pos="absolute" t={0} l={0} r={0} b={0} ai="center" jc="center">
+          <Stack
+            pos="absolute"
+            t={0}
+            l={0}
+            r={0}
+            b={0}
+            bg="$black100"
+            opacity={0.5}
+          />
+          <VexlActivityIndicator size="large" bc="$accentYellowPrimary" />
+        </Stack>
       )}
     </>
   )

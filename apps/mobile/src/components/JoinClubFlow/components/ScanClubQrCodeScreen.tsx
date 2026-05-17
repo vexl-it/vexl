@@ -5,6 +5,7 @@ import {
   Typography,
   XmarkCancelClose,
   YStack,
+  tokens,
   useTheme,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
@@ -110,7 +111,7 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
   }, [getClubQrCodeFromDeviceImageLibrary, navigation])
 
   return (
-    <Stack f={1} bc="$black">
+    <Stack f={1} bc="$black100">
       <StatusBar style="light" />
       {!!permissionsGranted && (
         <CameraView
@@ -148,20 +149,25 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
         }}
       >
         <Mask id="clubQrScannerMask">
-          <Rect width={width} height={height} fill="white" />
+          <Rect
+            width={width}
+            height={height}
+            fill={tokens.color.white100.val}
+          />
           <G transform={`translate(${scanWindow.x} ${scanWindow.y})`}>
             <Rect
               width={scanWindow.size}
               height={scanWindow.size}
               rx={32}
-              fill="black"
+              fill={tokens.color.black100.val}
             />
           </G>
         </Mask>
         <Rect
           width={width}
           height={height}
-          fill="rgba(16, 16, 16, 0.82)"
+          fill={tokens.color.black100.val}
+          fillOpacity={0.82}
           mask="url(#clubQrScannerMask)"
         />
         <G transform={`translate(${scanWindow.x} ${scanWindow.y})`}>

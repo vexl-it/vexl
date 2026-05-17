@@ -1,5 +1,5 @@
+import {Stack, Typography} from '@vexl-next/ui'
 import React from 'react'
-import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import ContactsAccessPrivilegesInfoModal from './ContactsAccessPrivilegesInfoModal'
 
@@ -9,9 +9,13 @@ function ListHeader(): React.ReactElement {
   return (
     <Stack mt="$2" mb="$4" gap="$2">
       <ContactsAccessPrivilegesInfoModal />
-      <Text fos={14} ta="center" col="$greyOnWhite">
+      <Typography
+        variant="description"
+        textAlign="center"
+        color="$foregroundSecondary"
+      >
         {t('postLoginFlow.contactsList.toAddCustomContact')}
-      </Text>
+      </Typography>
     </Stack>
   )
 }

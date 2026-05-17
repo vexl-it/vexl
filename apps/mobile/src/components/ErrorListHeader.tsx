@@ -1,5 +1,5 @@
+import {Stack, Typography} from '@vexl-next/ui'
 import React, {useMemo, type ComponentProps} from 'react'
-import {Stack, Text} from 'tamagui'
 import useCommonErrorMessages from '../utils/useCommonErrorMessages'
 
 type Props<T> = {
@@ -27,15 +27,19 @@ export default function ErrorListHeader<T extends {_tag: string}>({
 
   if (!message) return null
   return (
-    <Stack p="$4" backgroundColor="$darkRed" {...rest}>
+    <Stack p="$4" backgroundColor="$redBackground" {...rest}>
       {!!topText && (
-        <Text color="$red" fs={20}>
+        <Typography color="$redForeground" variant="paragraphSmallBold">
           {topText}
-        </Text>
+        </Typography>
       )}
-      <Text textAlign="center" color="$red">
+      <Typography
+        textAlign="center"
+        color="$redForeground"
+        variant="paragraphSmall"
+      >
         {message}
-      </Text>
+      </Typography>
     </Stack>
   )
 }

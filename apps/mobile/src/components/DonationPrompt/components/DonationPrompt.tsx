@@ -1,5 +1,5 @@
+import {Stack, Typography, YStack} from '@vexl-next/ui'
 import React from 'react'
-import {Stack, Text, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {ImageUniversal} from '../../Image'
 
@@ -8,7 +8,7 @@ function DonationPrompt(): React.ReactElement {
 
   return (
     <YStack ai="center">
-      <Stack ai="center" top="$-5" bc="$red">
+      <Stack ai="center" top="$-5">
         <ImageUniversal
           source={{
             type: 'requiredImage',
@@ -17,17 +17,20 @@ function DonationPrompt(): React.ReactElement {
         />
       </Stack>
       <Stack gap="$2">
-        <Text
-          fontFamily="$heading"
-          fontSize={24}
-          color="$black"
+        <Typography
+          variant="heading3"
+          color="$foregroundPrimary"
           textAlign="left"
         >
           {t('donationPrompt.giveLove')}
-        </Text>
-        <Text fontSize={18} color="$greyOnWhite" textAlign="left">
+        </Typography>
+        <Typography
+          variant="paragraph"
+          color="$foregroundSecondary"
+          textAlign="left"
+        >
           {t('donationPrompt.ifYouLikeVexlSupportItsImprovement')}
-        </Text>
+        </Typography>
       </Stack>
     </YStack>
   )

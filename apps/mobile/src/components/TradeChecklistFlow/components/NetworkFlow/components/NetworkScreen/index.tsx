@@ -97,6 +97,7 @@ function NetworkScreen({
 
   return (
     <TradeChecklistItemPageLayout
+      scrollable
       header={{
         title: t('tradeChecklist.network.network'),
       }}
@@ -107,7 +108,6 @@ function NetworkScreen({
         text: t('common.save'),
         variant: 'primary',
       }}
-      scrollable={false}
     >
       <YStack flex={1} gap="$6" pt="$4">
         <LightningOrOnChain />

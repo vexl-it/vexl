@@ -3,22 +3,20 @@ import {
   Button,
   Camera,
   IconButton,
+  Image,
+  Stack,
+  tokens,
   TrashBin,
   Typography,
+  useTheme,
   XmarkCancelClose,
+  XStack,
+  YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import Svg, {Rect} from 'react-native-svg'
-import {
-  getTokens,
-  Stack,
-  Image as TamaguiImage,
-  useTheme,
-  XStack,
-  YStack,
-} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import {selectImageActionAtom} from '../../../../state/selectImageActionAtom'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -35,7 +33,7 @@ const DASHED_BORDER_SIZE = 256
 const DASHED_BORDER_WIDTH = 1
 const DASHED_BORDER_INSET = DASHED_BORDER_WIDTH / 2
 const DASHED_BORDER_RECT_SIZE = DASHED_BORDER_SIZE - DASHED_BORDER_WIDTH
-const DASHED_BORDER_RADIUS = getTokens().radius[5].val
+const DASHED_BORDER_RADIUS = tokens.radius[5].val
 
 function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -90,7 +88,7 @@ function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
         <YStack flex={1} alignItems="center" gap="$8" pt="$6">
           {revealIdentityImageUri ? (
             <>
-              <TamaguiImage
+              <Image
                 borderRadius="$5"
                 height={DASHED_BORDER_SIZE}
                 width={DASHED_BORDER_SIZE}
@@ -167,9 +165,9 @@ function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
                     width={88}
                     height={88}
                     borderRadius={44}
-                    backgroundColor="$main"
+                    backgroundColor="$accentYellowPrimary"
                   >
-                    <Camera size={40} color="black" />
+                    <Camera size={40} color={theme.black100.get()} />
                   </Stack>
                 </Stack>
               </Stack>

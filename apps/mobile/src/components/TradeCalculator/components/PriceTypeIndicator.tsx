@@ -1,15 +1,17 @@
-import {Typography} from '@vexl-next/ui'
+import {
+  Snowflake,
+  Typography,
+  UserProfile,
+  useTheme,
+  XStack,
+} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {useTheme, XStack, type XStackProps} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {AnimatedLiveIndicator} from '../../AnimatedLiveIndicator'
-import Image from '../../Image'
-import userSvg from '../../images/userSvg'
 import {tradePriceTypeAtom} from '../atoms'
-import snowflakeSvg from '../images/snowflakeSvg'
 
-interface Props extends XStackProps {
+interface Props extends React.ComponentProps<typeof XStack> {
   displayInGrayColor?: boolean
   neutralTextColor?: boolean
 }
@@ -54,9 +56,9 @@ function PriceTypeIndicator({
           }
         />
       ) : tradePriceType === 'frozen' ? (
-        <Image height={16} width={16} source={snowflakeSvg} fill={iconColor} />
+        <Snowflake size={16} color={iconColor} />
       ) : (
-        <Image height={16} width={16} source={userSvg} stroke={iconColor} />
+        <UserProfile size={16} color={iconColor} />
       )}
       <Typography variant="paragraphSmall" color={textColor}>
         {!tradePriceType || tradePriceType === 'live'

@@ -1,13 +1,14 @@
-import {Slider as RNSlider} from '@miblanchard/react-native-slider'
 import {useFocusEffect} from '@react-navigation/native'
-import {InfoCircle, Typography, tokens} from '@vexl-next/ui'
+import {BuySellRangeSlider, Typography, XStack, YStack} from '@vexl-next/ui'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {iosHapticFeedback} from '../../../../../../utils/iosHapticFeedback'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {
+  getInfoText,
+  SLIDER_THRESHOLD,
+} from '../../../../../../utils/premiumOrDiscount'
 import useSafeGoBack from '../../../../../../utils/useSafeGoBack'
-import {SLIDER_THRESHOLD} from '../../../../../PremiumOrDiscountSlider'
 import {feeAmountAtom} from '../../../../../TradeCalculator/atoms'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
@@ -20,7 +21,6 @@ const tempFeeAmountAtom = atom<number>(0)
 
 function PremiumOrDiscountScreen(): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const goBack = useSafeGoBack()
 
   const isMineOffer = useAtomValue(isMineOfferAtom)
@@ -50,41 +50,16 @@ function PremiumOrDiscountScreen(): React.ReactElement {
     ? t('offerForm.premiumOrDiscount.buyFaster')
     : t('offerForm.premiumOrDiscount.earnMore')
 
-  let infoMessage = ''
+  const infoMessage = getInfoText(tempFeeAmount, iAmTheBuyer, t)
+  const handlePercentageChange = useCallback(
+    (percentage: number): void => {
+      if (percentage === tempFeeAmount) return
 
-  if (iAmTheBuyer) {
-    if (tempFeeAmount === 0) {
-      infoMessage = t(
-        'offerForm.premiumOrDiscount.youBuyForTheActualMarketPrice'
-      )
-    } else if (tempFeeAmount > 0) {
-      infoMessage =
-        tempFeeAmount <= SLIDER_THRESHOLD / 2
-          ? t('offerForm.premiumOrDiscount.theOptimalPositionForMostPeople')
-          : t('offerForm.premiumOrDiscount.youBuyReallyFast')
-    } else {
-      infoMessage =
-        Math.abs(tempFeeAmount) <= SLIDER_THRESHOLD / 2
-          ? t('offerForm.premiumOrDiscount.youBuyPrettyCheap')
-          : t('offerForm.premiumOrDiscount.youBuyVeryCheaply')
-    }
-  } else {
-    if (tempFeeAmount === 0) {
-      infoMessage = t(
-        'offerForm.premiumOrDiscount.youSellForTheActualMarketPrice'
-      )
-    } else if (tempFeeAmount > 0) {
-      infoMessage =
-        tempFeeAmount <= SLIDER_THRESHOLD / 2
-          ? t('offerForm.premiumOrDiscount.youEarnBitMore')
-          : t('offerForm.premiumOrDiscount.youEarnSoMuchMore')
-    } else {
-      infoMessage =
-        Math.abs(tempFeeAmount) <= SLIDER_THRESHOLD / 2
-          ? t('offerForm.premiumOrDiscount.youSellSlightlyFaster')
-          : t('offerForm.premiumOrDiscount.youSellMuchFaster')
-    }
-  }
+      iosHapticFeedback()
+      setTempFeeAmount(percentage)
+    },
+    [setTempFeeAmount, tempFeeAmount]
+  )
 
   return (
     <TradeChecklistItemPageLayout
@@ -109,7 +84,7 @@ function PremiumOrDiscountScreen(): React.ReactElement {
               ? t('offerForm.premiumOrDiscount.youBuyBtcFor')
               : t('offerForm.premiumOrDiscount.youSellBtcFor')}
           </Typography>
-          <Stack
+          <XStack
             backgroundColor="$backgroundSecondary"
             borderRadius="$5"
             px="$4"
@@ -125,93 +100,18 @@ function PremiumOrDiscountScreen(): React.ReactElement {
             >
               {priceLabel}
             </Typography>
-          </Stack>
-        </XStack>
-        <YStack gap="$4">
-          <XStack alignItems="flex-start" gap="$4">
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              flex={1}
-              numberOfLines={2}
-            >
-              {leftLabel}
-            </Typography>
-            <Typography
-              variant="micro"
-              color="$foregroundSecondary"
-              flex={1}
-              textAlign="right"
-              numberOfLines={2}
-            >
-              {rightLabel}
-            </Typography>
           </XStack>
-          <Stack px="$2">
-            <RNSlider
-              trackClickable
-              maximumTrackTintColor={theme.backgroundHighlight.get()}
-              maximumValue={SLIDER_THRESHOLD}
-              minimumTrackTintColor={theme.backgroundHighlight.get()}
-              minimumValue={-SLIDER_THRESHOLD}
-              step={1}
-              thumbTouchSize={{
-                width: tokens.size[12].val,
-                height: tokens.size[12].val,
-              }}
-              trackStyle={{
-                height: tokens.space[1].val,
-                borderRadius: tokens.radius[8].val,
-              }}
-              value={tempFeeAmount}
-              renderThumbComponent={() => (
-                <Stack
-                  width={tokens.size[8].val}
-                  height={tokens.size[8].val}
-                  borderRadius={tokens.radius[8].val}
-                  backgroundColor={theme.backgroundPrimary.get()}
-                  borderWidth={tokens.space[1].val}
-                  borderColor={theme.accentYellowPrimary.get()}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Stack
-                    width={tokens.size[5].val}
-                    height={tokens.size[5].val}
-                    borderRadius={tokens.radius[7].val}
-                    backgroundColor={theme.accentYellowPrimary.get()}
-                  />
-                </Stack>
-              )}
-              onValueChange={(value) => {
-                const nextValue = value[0] ?? 0
-
-                if (nextValue !== tempFeeAmount) {
-                  iosHapticFeedback()
-                  setTempFeeAmount(nextValue)
-                }
-              }}
-            />
-          </Stack>
-        </YStack>
-        <XStack
-          alignItems="flex-start"
-          gap="$3"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$5"
-          p="$5"
-        >
-          <Stack pt="$0.5">
-            <InfoCircle size={18} color={theme.foregroundSecondary.get()} />
-          </Stack>
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            flex={1}
-          >
-            {infoMessage}
-          </Typography>
         </XStack>
+        <BuySellRangeSlider
+          leftLabel={leftLabel}
+          rightLabel={rightLabel}
+          minPercentage={-SLIDER_THRESHOLD}
+          maxPercentage={SLIDER_THRESHOLD}
+          percentage={tempFeeAmount}
+          onPercentageChange={handlePercentageChange}
+          infoText={infoMessage}
+          amountText=""
+        />
       </YStack>
     </TradeChecklistItemPageLayout>
   )

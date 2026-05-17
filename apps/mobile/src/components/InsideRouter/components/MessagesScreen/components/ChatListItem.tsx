@@ -1,9 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {
-  ChatMessageItem,
-  Stack,
-  type ChatMessageItemVariant,
-} from '@vexl-next/ui'
+import {ChatMessageItem, Stack} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import React, {useMemo, useRef} from 'react'
@@ -29,19 +25,6 @@ import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
 export interface ChatListData {
   chat: ChatWithMessages
   lastMessage: ChatMessageWithState
-}
-
-function getPreviewVariant(color?: string): ChatMessageItemVariant {
-  switch (color) {
-    case '$green':
-      return 'success'
-    case '$red':
-      return 'destructive'
-    case '$main':
-      return 'highlighted'
-    default:
-      return 'default'
-  }
 }
 
 function ChatListItem({
@@ -140,7 +123,7 @@ function ChatListItem({
             message={preview.text}
             time={time}
             unread={isUnread}
-            variant={getPreviewVariant(preview.color)}
+            variant={preview.variant}
             isTyping={isTyping}
             onPress={() => {
               navigation.navigate('ChatDetail', {

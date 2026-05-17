@@ -1,17 +1,15 @@
 import Clipboard from '@react-native-clipboard/clipboard'
+import {FlagReport, Stack, Typography, useTheme, XStack} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
 import {atom, useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text, XStack, getTokens} from 'tamagui'
 import {contactSupportActionAtom} from '../utils/contactSupportActionAtom'
 import {
   translationAtom,
   useTranslation,
 } from '../utils/localization/I18nProvider'
 import {askAreYouSureActionAtom} from './GlobalDialog'
-import Image from './Image'
-import emailIconSvg from './images/emailIconSvg'
 import {toastNotificationAtom} from './ToastNotification/atom'
 
 // atom needs to be defined here to avoid circular dependencies with MainSectionComponent: ReportIssue used in askAreYouSureActionAtom
@@ -48,7 +46,7 @@ interface Props {
 
 function ReportIssue({title, subtitle}: Props): React.ReactElement {
   const {t} = useTranslation()
-  const tokens = getTokens()
+  const theme = useTheme()
 
   const supportEmail = t('settings.items.supportEmail')
   const contactSupport = useSetAtom(contactSupportActionAtom)
@@ -56,22 +54,21 @@ function ReportIssue({title, subtitle}: Props): React.ReactElement {
 
   return (
     <Stack gap="$2" jc="flex-end">
-      <Text
-        col="$black"
+      <Typography
+        color="$foregroundPrimary"
         my="$4"
-        ff="$heading"
-        fos={28}
+        variant="graphPrice"
         numberOfLines={2}
         adjustsFontSizeToFit
       >
         {title ?? t('reportIssue.somethingWentWrong')}
-      </Text>
-      <Text fos={18} ff="$body500" col="$greyOnWhite">
+      </Typography>
+      <Typography variant="paragraph" color="$foregroundSecondary">
         {subtitle ?? t('reportIssue.feelFreeToGetInTouch')}
-      </Text>
+      </Typography>
       <XStack ai="center" gap="$3" mt="$6" onPress={contactSupport}>
-        <Stack ai="center" jc="center" bc="$greyAccent5" p="$3" br="$5">
-          <Image stroke={tokens.color.greyOnWhite.val} source={emailIconSvg} />
+        <Stack ai="center" jc="center" bc="$backgroundSecondary" p="$3" br="$5">
+          <FlagReport color={theme.foregroundSecondary.get()} size={24} />
         </Stack>
         <TouchableOpacity
           onPress={() => {
@@ -79,9 +76,9 @@ function ReportIssue({title, subtitle}: Props): React.ReactElement {
             setToastNotification(t('common.copied'))
           }}
         >
-          <Text fos={18} ff="$body500" col="$black">
+          <Typography variant="paragraph" color="$foregroundPrimary">
             {supportEmail}
-          </Text>
+          </Typography>
         </TouchableOpacity>
       </XStack>
     </Stack>

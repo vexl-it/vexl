@@ -1,11 +1,18 @@
-import {KeyboardAvoidingView, SearchBar, Typography} from '@vexl-next/ui'
+import {
+  ArrowLeft,
+  KeyboardAvoidingView,
+  NavigationBar,
+  Screen,
+  SearchBar,
+  Stack,
+  Typography,
+  YStack,
+} from '@vexl-next/ui'
 import {atom, useAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {ScrollView} from 'react-native'
-import {Stack, YStack} from 'tamagui'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import Screen from '../Screen'
-import ScreenTitle from '../ScreenTitle'
+import useSafeGoBack from '../../utils/useSafeGoBack'
 import ChatSearchChatResultItem from './components/ChatSearchChatResultItem'
 import ChatSearchMessageResultItem from './components/ChatSearchMessageResultItem'
 import {useChatSearchResults} from './state'
@@ -27,6 +34,7 @@ function SectionTitle({children}: {children: string}): React.ReactElement {
 
 function ChatSearchScreen(): React.ReactElement {
   const {t} = useTranslation()
+  const safeGoBack = useSafeGoBack()
   const queryAtom = useMemo(() => atom(''), [])
   const [query, setQuery] = useAtom(queryAtom)
   const trimmedQuery = query.trim()
@@ -41,16 +49,26 @@ function ChatSearchScreen(): React.ReactElement {
   }, [setQuery])
 
   return (
-    <Screen>
+    <Screen
+      noHorizontalPadding
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('messages.search.title')}
+          leftAction={{
+            icon: ArrowLeft,
+            onPress: safeGoBack,
+          }}
+        />
+      }
+    >
       <KeyboardAvoidingView>
         <YStack f={1} pt="$2">
           <YStack px="$5">
-            <ScreenTitle text={t('messages.search.title')} withBackButton />
             <SearchBar
               valueAtom={queryAtom}
               autoFocus
               placeholder={t('messages.search.placeholder')}
-              mt="$6"
             />
           </YStack>
           <ScrollView

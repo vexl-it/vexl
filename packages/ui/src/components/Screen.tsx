@@ -1,7 +1,7 @@
 import {atom, useSetAtom} from 'jotai'
 import React, {useContext} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {styled} from 'tamagui'
+import {styled, type YStackProps} from 'tamagui'
 
 import {ScrollView, Stack, YStack} from '../primitives'
 
@@ -46,7 +46,8 @@ export interface ScreenProps {
   readonly navigationBar: React.ReactNode
   readonly overlayNavigationBar?: boolean
   readonly scrollable?: boolean
-  noHorizontalPadding?: boolean
+  readonly safeAreasBackgroundColor?: YStackProps['backgroundColor']
+  readonly noHorizontalPadding?: boolean
   readonly footer?: React.ReactNode
   readonly children: React.ReactNode
 }
@@ -55,6 +56,7 @@ export function Screen({
   navigationBar,
   overlayNavigationBar,
   scrollable,
+  safeAreasBackgroundColor,
   noHorizontalPadding,
   children,
   footer,
@@ -69,21 +71,24 @@ export function Screen({
   const content = overlayNavigationBar ? (
     <YStack flex={1}>{children}</YStack>
   ) : (
-    <YStack
-      flex={1}
-      paddingTop="$3"
-      paddingHorizontal={noHorizontalPadding ? undefined : '$5'}
-    >
+    <YStack flex={1} paddingHorizontal={noHorizontalPadding ? undefined : '$5'}>
+      <Stack
+        width="100%"
+        paddingTop="$3"
+        backgroundColor={safeAreasBackgroundColor}
+      />
       {children}
     </YStack>
   )
 
   return (
     <FooterHeightAtomContext.Provider value={{footerHeightAtom}}>
-      <ScreenFrame
-        paddingTop={overlayNavigationBar ? 0 : insets.top}
-        marginBottom={bottomInsetOutsideContent}
-      >
+      <Stack
+        backgroundColor={safeAreasBackgroundColor}
+        width="100%"
+        height={overlayNavigationBar ? 0 : insets.top}
+      />
+      <ScreenFrame>
         {overlayNavigationBar ? (
           <OverlayNavigationBarFrame paddingTop={insets.top}>
             {navigationBar}
@@ -116,6 +121,11 @@ export function Screen({
           </ScreenFooterFrame>
         ) : null}
       </ScreenFrame>
+      <Stack
+        height={bottomInsetOutsideContent}
+        backgroundColor={safeAreasBackgroundColor}
+        width="100%"
+      />
     </FooterHeightAtomContext.Provider>
   )
 }

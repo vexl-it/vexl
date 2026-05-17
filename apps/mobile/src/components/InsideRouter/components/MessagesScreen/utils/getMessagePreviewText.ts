@@ -1,3 +1,4 @@
+import {type ChatMessageItemVariant} from '@vexl-next/ui'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {type TFunction} from '../../../../../utils/localization/I18nProvider'
 
@@ -9,7 +10,7 @@ export function getMessagePreviewText({
   messageWithState: ChatMessageWithState
   name: string
   t: TFunction
-}): {text: string; color?: string} {
+}): {text: string; variant?: ChatMessageItemVariant} {
   const {message, state} = messageWithState
   const direction = state === 'received' ? 'incoming' : 'outgoing'
 
@@ -18,7 +19,7 @@ export function getMessagePreviewText({
       text: t(`messages.messagePreviews.${direction}.APPROVE_MESSAGING`, {
         them: name,
       }),
-      color: '$green',
+      variant: 'success',
     }
   }
   if (message.messageType === 'DISAPPROVE_MESSAGING') {
@@ -26,7 +27,7 @@ export function getMessagePreviewText({
       text: t(`messages.messagePreviews.${direction}.DISAPPROVE_MESSAGING`, {
         them: name,
       }),
-      color: '$red',
+      variant: 'destructive',
     }
   }
   if (
@@ -38,7 +39,7 @@ export function getMessagePreviewText({
       text: t(`messages.messagePreviews.${direction}.APPROVE_REVEAL`, {
         them: name,
       }),
-      color: '$green',
+      variant: 'success',
     }
   }
   if (message.messageType === 'REQUEST_MESSAGING') {
@@ -46,13 +47,13 @@ export function getMessagePreviewText({
       text: t(`messages.messagePreviews.${direction}.REQUEST_MESSAGING`, {
         them: name,
       }),
-      color: '$main',
+      variant: 'highlighted',
     }
   }
   if (message.messageType === 'BLOCK_CHAT') {
     return {
       text: t(`messages.messagePreviews.${direction}.BLOCK_CHAT`, {them: name}),
-      color: '$red',
+      variant: 'destructive',
     }
   }
   if (message.messageType === 'DELETE_CHAT') {
@@ -60,7 +61,7 @@ export function getMessagePreviewText({
       text: t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
         them: name,
       }),
-      color: '$red',
+      variant: 'destructive',
     }
   }
   if (
@@ -72,7 +73,7 @@ export function getMessagePreviewText({
       text: t(`messages.messagePreviews.${direction}.DISAPPROVE_REVEAL`, {
         them: name,
       }),
-      color: '$red',
+      variant: 'destructive',
     }
   }
   if (message.messageType === 'CANCEL_REQUEST_MESSAGING') {
@@ -83,7 +84,7 @@ export function getMessagePreviewText({
           them: name,
         }
       ),
-      color: '$red',
+      variant: 'destructive',
     }
   }
   if (
@@ -123,7 +124,7 @@ export function getMessagePreviewText({
         message: message.text,
         them: name,
       }),
-      color: '$red',
+      variant: 'destructive',
     }
   }
   if (

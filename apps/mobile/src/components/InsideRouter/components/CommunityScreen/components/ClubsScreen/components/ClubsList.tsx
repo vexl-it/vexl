@@ -1,10 +1,16 @@
-import {Button, ClubCard, Stack, Typography, YStack} from '@vexl-next/ui'
+import {
+  Button,
+  ClubCard,
+  Stack,
+  Typography,
+  useTheme,
+  YStack,
+} from '@vexl-next/ui'
 import {Effect, pipe} from 'effect'
 import {isNonEmptyArray} from 'effect/Array'
 import {type Atom, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {FlatList, RefreshControl} from 'react-native'
-import {getTokens} from 'tamagui'
 import {type CommunityTabsScreenProps} from '../../../../../../../navigationTypes'
 import {
   clubsWithMembersAtomsAtom,
@@ -99,6 +105,7 @@ export function ClubsList({
   const clubsAtoms = useAtomValue(clubsWithMembersAtomsAtom)
   const clubsLoading =
     useAtomValue(clubsWithMembersLoadingStateAtom).state === 'loading'
+  const theme = useTheme()
 
   const handleJoinPress = (): void => {
     navigation.navigate('JoinClubFlow', {
@@ -135,7 +142,7 @@ export function ClubsList({
           onRefresh={() => {
             pipe(syncAllClubsHandleStateWhenNotFound(), Effect.runFork)
           }}
-          tintColor={getTokens().color.greyAccent2.val}
+          tintColor={theme.foregroundSecondary.get()}
         />
       }
       ListFooterComponent={

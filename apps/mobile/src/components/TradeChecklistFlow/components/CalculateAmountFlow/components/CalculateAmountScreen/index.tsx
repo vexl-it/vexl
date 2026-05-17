@@ -1,3 +1,4 @@
+import {InfoBox} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
@@ -6,7 +7,6 @@ import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
-import Info from '../../../../../Info'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   btcPriceForOfferWithStateAtom,
@@ -112,10 +112,8 @@ function CalculateAmountScreen({
           navigation.navigate('PremiumOrDiscount')
         }}
       >
-        <Info
-          hideCloseButton
-          variant="yellow"
-          text={`${t(
+        <InfoBox variant="default">
+          {`${t(
             'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
             {
               username: t('common.otherSide'),
@@ -126,7 +124,7 @@ function CalculateAmountScreen({
               ? t('vexlbot.higherThanLivePrice')
               : t('vexlbot.lowerThanLivePrice')
           }`}
-        />
+        </InfoBox>
       </TradeCalculator>
     </TradeChecklistItemPageLayout>
   )

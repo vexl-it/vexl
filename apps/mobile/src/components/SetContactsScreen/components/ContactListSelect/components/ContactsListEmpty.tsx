@@ -1,9 +1,9 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {Stack, Typography} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {Linking} from 'react-native'
-import {Stack, Text} from 'tamagui'
 import {areContactsPermissionsGranted} from '../../../../../state/contacts/utils'
 import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../../../../state/lastRouteMmkvAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -46,16 +46,24 @@ function ContactsListEmpty(): React.ReactElement {
       }
     >
       <Stack gap="$2">
-        <Text textAlign="center" col="$greyOnWhite" fos={20} ff="$body600">
+        <Typography
+          textAlign="center"
+          color="$foregroundPrimary"
+          variant="titlesSmall"
+        >
           {!permissionsGranted
             ? t('contacts.youHaveNotAllowedAccessToYourContacts')
             : t('postLoginFlow.contactsList.nothingFound.title')}
-        </Text>
-        <Text textAlign="center" fos={14} ta="center" col="$greyOnWhite">
+        </Typography>
+        <Typography
+          textAlign="center"
+          color="$foregroundSecondary"
+          variant="description"
+        >
           {!permissionsGranted
             ? t('contacts.didYouChangeYourMind')
             : t('postLoginFlow.contactsList.nothingFound.text')}
-        </Text>
+        </Typography>
         <ContactsAccessPrivilegesInfoModal mt="$4" />
       </Stack>
     </EmptyListWrapper>

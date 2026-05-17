@@ -1,7 +1,10 @@
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
-import {type SvgString} from '@vexl-next/domain/src/utility/SvgString.brand'
-import avatarsGoldenGlassesAndBackgroundSvg from '../../../components/AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
-import avatarsSvg from '../../../components/AnonymousAvatar/images/avatarsSvg'
+import {
+  fromImageUri,
+  fromSvgString,
+} from '@vexl-next/domain/src/utility/SvgStringOrImageUri.brand'
+import goldenAvatarImages from '../../../components/AnonymousAvatar/images/avatarsGoldenGlassesAndBackgroundSvg'
+import basicAvatarImages from '../../../components/AnonymousAvatar/images/avatarsSvg'
 import {randomNumberFromSeed} from '../../../utils/randomNumber'
 import {randomSeedFromChat} from '../../../utils/RandomSeed'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
@@ -34,26 +37,22 @@ export default function processIdentityRevealMessageIfAny(
         : chat.chat.otherSide.goldenAvatarType
     const anonymousAvatars =
       goldenAvatarType === 'BACKGROUND_AND_GLASSES'
-        ? avatarsGoldenGlassesAndBackgroundSvg
-        : avatarsSvg
+        ? goldenAvatarImages
+        : basicAvatarImages
 
     const realLifeInfo: RealLifeInfo = {
       userName: identityRevealMessage.message.deanonymizedUser.name,
       image: identityRevealMessage.message.image
-        ? {
-            type: 'imageUri',
-            imageUri: resolveLocalUri(identityRevealMessage.message.image),
-          }
-        : {
-            type: 'svgXml',
-            svgXml: anonymousAvatars[
+        ? fromImageUri(resolveLocalUri(identityRevealMessage.message.image))
+        : fromSvgString(
+            anonymousAvatars[
               randomNumberFromSeed(
                 0,
                 anonymousAvatars.length - 1,
                 randomSeedFromChat(chat.chat)
               )
-            ] as SvgString,
-          },
+            ] ?? anonymousAvatars[0]
+          ),
       partialPhoneNumber:
         identityRevealMessage.message.deanonymizedUser.partialPhoneNumber,
     }

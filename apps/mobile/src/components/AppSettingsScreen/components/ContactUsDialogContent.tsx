@@ -1,5 +1,5 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Copy, SizableText, Stack, XStack, useTheme} from '@vexl-next/ui'
+import {Copy, Stack, Typography, XStack, useTheme} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -27,17 +27,14 @@ function ContactUsDialogContent(): React.ReactElement {
       paddingLeft="$4"
       paddingRight="$2"
     >
-      <SizableText
+      <Typography
         color="$foregroundPrimary"
         flex={1}
-        fontFamily="$body"
-        fontSize="$3"
-        fontWeight="500"
-        letterSpacing="$3"
         numberOfLines={1}
+        variant="paragraphSmall"
       >
         {supportEmail}
-      </SizableText>
+      </Typography>
       <Stack
         alignItems="center"
         backgroundColor="$backgroundTertiary"

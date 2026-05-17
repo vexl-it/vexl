@@ -1,7 +1,7 @@
 import {FlashList} from '@shopify/flash-list'
+import {Stack} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
 import React from 'react'
-import {Stack} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import ContactItem from './ContactItem'

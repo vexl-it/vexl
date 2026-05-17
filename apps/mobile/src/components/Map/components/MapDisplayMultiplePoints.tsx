@@ -3,7 +3,7 @@ import {
   type Latitude,
   type Longitude,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {useVexlTheme} from '@vexl-next/ui'
+import {Stack, tokens, useTheme, useVexlTheme} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {
   atom,
@@ -23,7 +23,7 @@ import {
   type Region,
 } from 'react-native-maps'
 import Svg, {Path} from 'react-native-svg'
-import {Stack, getTokens, useDebounce} from 'tamagui'
+import {useDebounce} from 'tamagui'
 import europeRegion from '../utils/europeRegion'
 import {getMapTheme} from '../utils/mapStyle'
 
@@ -64,9 +64,9 @@ const mapClusteringDefaultProps = {
   // Map parameters
   edgePadding: {top: 50, left: 50, right: 50, bottom: 50},
   // Cluster styles
-  clusterColor: '#00B386',
-  clusterTextColor: '#FFFFFF',
-  spiderLineColor: '#FF0000',
+  clusterColor: 'green',
+  clusterTextColor: 'white',
+  spiderLineColor: 'red',
   // Callbacks
   onRegionChangeComplete: () => {},
   onClusterPress: () => {},
@@ -86,8 +86,7 @@ const styles = StyleSheet.create({
   map: {
     width: '100%',
     height: '100%',
-    backgroundColor: 'black',
-    borderRadius: getTokens().radius[3].val,
+    borderRadius: tokens.radius[3].val,
   },
 })
 
@@ -193,6 +192,14 @@ function MMapView({
   onRegionChangeComplete?: (region: Region, d: Details) => void
 }): React.ReactElement {
   const {resolvedTheme} = useVexlTheme()
+  const theme = useTheme()
+  const accentYellowPrimary = theme.accentYellowPrimary.get()
+  const backgroundHighlight = theme.backgroundHighlight.get()
+  const backgroundPrimary = theme.backgroundPrimary.get()
+  const clusterTextColor =
+    resolvedTheme === 'dark'
+      ? theme.backgroundPrimary.get()
+      : theme.foregroundPrimary.get()
   const ref = useRef<MapView>(null)
   // TODO: remove after update of react-native-map-clustering
   const dummySuperClusterRefFnc = useRef(null)
@@ -227,28 +234,23 @@ function MMapView({
       ref={ref}
       superClusterRef={dummySuperClusterRefFnc}
       initialRegion={europeRegion}
-      clusterColor={
-        inFocusMode
-          ? getTokens().color.greyAccent1.val
-          : getTokens().color.main.val
-      }
+      clusterColor={inFocusMode ? backgroundHighlight : accentYellowPrimary}
+      clusterTextColor={clusterTextColor}
       customMapStyle={getMapTheme(resolvedTheme)}
       onMapLoaded={onMapLoaded}
       layoutAnimationConf={{duration: 150}}
       minZoom={0}
       maxZoom={20}
-      loadingBackgroundColor={resolvedTheme === 'dark' ? '#000000' : '#FFFFFF'}
+      loadingBackgroundColor={backgroundPrimary}
       loadingIndicatorColor={
-        inFocusMode
-          ? getTokens().color.greyAccent1.val
-          : getTokens().color.main.val
+        inFocusMode ? backgroundHighlight : accentYellowPrimary
       }
       clusteringEnabled
       loadingEnabled
       provider={PROVIDER_GOOGLE}
       mapPadding={mapPadding}
       toolbarEnabled={false}
-      style={styles.map}
+      style={[styles.map, {backgroundColor: backgroundPrimary}]}
       onRegionChange={onChangedDebounce}
     >
       {children}
@@ -268,20 +270,10 @@ export default function MapDisplayMultiplePoints<T>({
 }: Props<T>): React.ReactElement {
   const points = useAtomValue(pointsAtom)
   const idsToFocus = useAtomValue(pointIdsToFocusAtom)
-  const {resolvedTheme} = useVexlTheme()
-  const tokens = getTokens()
-  const pinColor =
-    resolvedTheme === 'dark'
-      ? tokens.color.white100.val
-      : tokens.color.black100.val
-  const pinCenterColor =
-    resolvedTheme === 'dark'
-      ? tokens.color.black100.val
-      : tokens.color.white100.val
-  const focusedPinColor =
-    resolvedTheme === 'dark'
-      ? tokens.color.yellow100.val
-      : tokens.color.gold100.val
+  const theme = useTheme()
+  const pinColor = theme.foregroundPrimary.get()
+  const pinCenterColor = theme.backgroundPrimary.get()
+  const focusedPinColor = theme.accentHighlightSecondary.get()
   const [notFocusedPoints, focusedPoints] = pipe(
     points,
     Array.partition((point) => idsToFocus?.includes(point.id) ?? false)

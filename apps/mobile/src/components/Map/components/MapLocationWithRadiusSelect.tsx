@@ -17,8 +17,8 @@ import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Dimensions, StyleSheet} from 'react-native'
-import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
+import {StyleSheet, type LayoutChangeEvent} from 'react-native'
+import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
@@ -30,6 +30,11 @@ import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {type MapValue, type MapValueWithRadius} from '../brands'
 import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
+import {
+  calculateAvailableSelectionFrame,
+  calculateLongitudeRadiusDelta,
+  calculateRingDiameter,
+} from './MapLocationWithRadiusSelect.geometry'
 import {MapPinAsset, RadiusRingAsset} from './MapSvgAssets'
 
 type Props = React.ComponentProps<typeof Stack> & {
@@ -39,13 +44,6 @@ type Props = React.ComponentProps<typeof Stack> & {
   onPick: (place: MapValueWithRadius | null) => void
   hideSlider?: boolean
   mapRef: React.RefObject<MapView | null>
-}
-
-const mapPaddings = {
-  top: tokens.space[10].val,
-  bottom: tokens.space[10].val,
-  left: 0,
-  right: 0,
 }
 
 const circleMargin = tokens.space[2].val
@@ -60,44 +58,54 @@ const styles = StyleSheet.create({
 const MIN_ZOOM = 7
 const MAX_ZOOM = 16
 
+interface SelectedMapState {
+  center: {
+    latitude: number
+    longitude: number
+  }
+  radius: number
+}
+
 function clampZoom(value: number): number {
   return Math.max(MIN_ZOOM, Math.min(value, MAX_ZOOM))
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function useAtoms({
-  initialRegion,
+  initialSelectedMapState,
   onPick,
 }: {
   onPick: (place: MapValueWithRadius | null) => void
-  initialRegion: Region
+  initialSelectedMapState: SelectedMapState
 }) {
   return useMemo(() => {
     const {
-      effectiveInputAtom: selectedRegionAtom,
+      effectiveInputAtom: selectedMapStateAtom,
       resultAtom: getGeocodedRegionAtom,
     } = createEffectAtomWithProgress({
-      inputAtom: atom(initialRegion),
-      effectToRun: (region, get) =>
+      inputAtom: atom(initialSelectedMapState),
+      effectToRun: (selectedMapState, get) =>
         get(apiAtom)
           .location.getGeocodedCoordinates({
             lang: getCurrentLocale(),
-            latitude: Schema.decodeSync(Latitude)(region.latitude),
-            longitude: Schema.decodeSync(Longitude)(region.longitude),
+            latitude: Schema.decodeSync(Latitude)(
+              selectedMapState.center.latitude
+            ),
+            longitude: Schema.decodeSync(Longitude)(
+              selectedMapState.center.longitude
+            ),
           })
           .pipe(
             Effect.tap((data) => {
-              const {width} = Dimensions.get('window')
-              const usedWidthWithoutPadding = (width - circleMargin * 2) / width
-
               onPick({
                 ...data,
-                latitude: Schema.decodeSync(Latitude)(region.latitude),
-                longitude: Schema.decodeSync(Longitude)(region.longitude),
-                radius: Schema.decodeSync(Radius)(
-                  (Math.abs(region.longitudeDelta) * usedWidthWithoutPadding) /
-                    2
+                latitude: Schema.decodeSync(Latitude)(
+                  selectedMapState.center.latitude
                 ),
+                longitude: Schema.decodeSync(Longitude)(
+                  selectedMapState.center.longitude
+                ),
+                radius: Schema.decodeSync(Radius)(selectedMapState.radius),
               })
               return data
             })
@@ -105,26 +113,21 @@ function useAtoms({
     })
 
     return {
-      selectedRegionAtom,
+      selectedMapStateAtom,
       selectedRegionRadiusAtom: atom<string>((get) => {
-        const {width} = Dimensions.get('window')
-        const usedWidthWithoutPadding = (width - circleMargin * 2) / width
-
-        const selectedRegion = get(selectedRegionAtom)
-        const radiusLongitudeDeg =
-          (selectedRegion.longitudeDelta * usedWidthWithoutPadding) / 2
+        const selectedMapState = get(selectedMapStateAtom)
         return Intl.NumberFormat(getCurrentLocale()).format(
           Math.round(
             longitudeDeltaToKilometers(
-              radiusLongitudeDeg,
-              Schema.decodeSync(Latitude)(selectedRegion.latitude)
+              selectedMapState.radius,
+              Schema.decodeSync(Latitude)(selectedMapState.center.latitude)
             ) * 10
           ) / 10
         )
       }),
       getGeocodedRegionAtom,
     }
-  }, [initialRegion, onPick])
+  }, [initialSelectedMapState, onPick])
 }
 
 function PickedLocationText({
@@ -235,17 +238,59 @@ export default function MapLocationWithRadiusSelect({
     [initialRegion]
   )
   const [zoom, setZoom] = useState(initialZoom)
+  const initialSelectedMapState = useMemo(
+    () => ({
+      center: {
+        latitude: initialRegion.latitude,
+        longitude: initialRegion.longitude,
+      },
+      radius: Math.abs(initialRegion.longitudeDelta) / 2,
+    }),
+    [initialRegion]
+  )
+  const [containerSize, setContainerSize] = useState({width: 0, height: 0})
+  const [topOverlayHeight, setTopOverlayHeight] = useState(0)
+  const [bottomOverlayHeight, setBottomOverlayHeight] = useState(0)
+
+  const overlayInsets = useMemo(
+    () => ({
+      top: safeAreaInsets.top + topOverlayHeight,
+      bottom: safeAreaInsets.bottom + bottomOverlayHeight,
+      left: safeAreaInsets.left,
+      right: safeAreaInsets.right,
+    }),
+    [
+      bottomOverlayHeight,
+      safeAreaInsets.bottom,
+      safeAreaInsets.left,
+      safeAreaInsets.right,
+      safeAreaInsets.top,
+      topOverlayHeight,
+    ]
+  )
+
+  const selectionFrame = useMemo(
+    () =>
+      calculateAvailableSelectionFrame({
+        container: containerSize,
+        overlays: overlayInsets,
+      }),
+    [containerSize, overlayInsets]
+  )
+  const ringDiameter = useMemo(
+    () => calculateRingDiameter({frame: selectionFrame, margin: circleMargin}),
+    [selectionFrame]
+  )
 
   useEffect(() => {
     setZoom(initialZoom)
   }, [initialZoom])
 
   const atoms = useAtoms({
-    initialRegion,
+    initialSelectedMapState,
     onPick,
   })
-  const setRegion = useSetAtom(atoms.selectedRegionAtom)
-  const {width, height} = useMemo(() => Dimensions.get('window'), [])
+  const setSelectedMapState = useSetAtom(atoms.selectedMapStateAtom)
   const handleZoomChange = useCallback(
     (value: number) => {
       setZoom(value)
@@ -255,34 +300,74 @@ export default function MapLocationWithRadiusSelect({
     },
     [mapRef]
   )
+  const handleContainerLayout = useCallback((event: LayoutChangeEvent) => {
+    const {width, height} = event.nativeEvent.layout
+
+    setContainerSize({
+      width,
+      height,
+    })
+  }, [])
+  const handleTopOverlayLayout = useCallback((event: LayoutChangeEvent) => {
+    setTopOverlayHeight(Math.ceil(event.nativeEvent.layout.height))
+  }, [])
+  const handleBottomOverlayLayout = useCallback((event: LayoutChangeEvent) => {
+    setBottomOverlayHeight(Math.ceil(event.nativeEvent.layout.height))
+  }, [])
+  const handleRegionChangeComplete = useCallback(() => {
+    if (ringDiameter <= 0) return
+
+    const map = mapRef.current
+    if (!map) return
+
+    const centerPoint = {
+      x: selectionFrame.centerX,
+      y: selectionFrame.centerY,
+    }
+    const radiusPoint = {
+      x: selectionFrame.centerX + ringDiameter / 2,
+      y: selectionFrame.centerY,
+    }
+
+    void Promise.all([
+      map.coordinateForPoint(centerPoint),
+      map.coordinateForPoint(radiusPoint),
+    ]).then(([centerCoordinate, radiusCoordinate]) => {
+      setSelectedMapState({
+        center: {
+          latitude: centerCoordinate.latitude,
+          longitude: centerCoordinate.longitude,
+        },
+        radius: calculateLongitudeRadiusDelta({
+          centerLongitude: centerCoordinate.longitude,
+          edgeLongitude: radiusCoordinate.longitude,
+        }),
+      })
+    })
+  }, [mapRef, ringDiameter, selectionFrame, setSelectedMapState])
 
   return (
     <Stack
       position="relative"
       {...restProps}
       backgroundColor="$backgroundPrimary"
+      onLayout={handleContainerLayout}
     >
       <MapView
         ref={mapRef}
-        mapPadding={mapPaddings}
+        mapPadding={overlayInsets}
         provider={PROVIDER_GOOGLE}
         customMapStyle={getMapTheme(resolvedTheme)}
         style={[styles.map, {backgroundColor: backgroundPrimary}]}
         toolbarEnabled={false}
-        onRegionChangeComplete={(region) => {
-          void mapRef.current
-            ?.coordinateForPoint({x: width / 2, y: height / 2})
-            .then((v) => {
-              setRegion({...region, ...v})
-            })
-        }}
+        onRegionChangeComplete={handleRegionChangeComplete}
         region={initialRegion}
       />
       <Stack
         pointerEvents="none"
         position="absolute"
-        top="50%"
-        left="50%"
+        top={selectionFrame.centerY}
+        left={selectionFrame.centerX}
         transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
       >
         <MapPinAsset color={accentHighlightSecondary} />
@@ -293,11 +378,10 @@ export default function MapLocationWithRadiusSelect({
         position="absolute"
         justifyContent="center"
         alignItems="center"
-        marginHorizontal={circleMargin}
-        top={0}
-        right={0}
-        left={0}
-        bottom={0}
+        top={selectionFrame.centerY - ringDiameter / 2}
+        left={selectionFrame.centerX - ringDiameter / 2}
+        width={ringDiameter}
+        height={ringDiameter}
       >
         <RadiusRingAsset color={accentHighlightSecondary} size="100%" />
       </Stack>
@@ -312,8 +396,8 @@ export default function MapLocationWithRadiusSelect({
         h="100%"
         w="100%"
       >
-        <Stack flex={3}></Stack>
-        <Stack flex={2} p="$2">
+        <Stack height={selectionFrame.y + selectionFrame.height / 2}></Stack>
+        <Stack p="$2">
           <Stack
             paddingHorizontal="$4"
             paddingVertical="$2"
@@ -346,9 +430,9 @@ export default function MapLocationWithRadiusSelect({
           paddingLeft={safeAreaInsets.left}
           paddingRight={safeAreaInsets.right}
         >
-          <Stack>{topChildren}</Stack>
+          <Stack onLayout={handleTopOverlayLayout}>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
-          <Stack>
+          <Stack onLayout={handleBottomOverlayLayout}>
             {hideSlider !== true ? (
               <Stack mb="$4" mx="$4">
                 <RadiusSlider

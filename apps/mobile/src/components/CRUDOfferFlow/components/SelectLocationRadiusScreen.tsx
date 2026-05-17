@@ -1,4 +1,9 @@
-import {StackActions, useNavigation, useRoute} from '@react-navigation/native'
+import {
+  StackActions,
+  useNavigation,
+  useRoute,
+  type RouteProp,
+} from '@react-navigation/native'
 import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {
   NavigationBar,
@@ -13,6 +18,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useRef, useState} from 'react'
 import type MapView from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {type RootStackParamsList} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import randomlyShiftLatLong from '../../../utils/randomlyShiftMapValueWithRadius'
 import {type MapValueWithRadius} from '../../Map/brands'
@@ -26,11 +32,9 @@ const MAX_ZOOM = 16
 export default function SelectLocationRadiusScreen(): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const route = useRoute()
-  const params = (route.params ?? {}) as {
-    randomizeLocation?: boolean
-  }
-  const randomizeLocation = params.randomizeLocation ?? false
+  const route =
+    useRoute<RouteProp<RootStackParamsList, 'SelectLocationRadius'>>()
+  const randomizeLocation = route.params?.randomizeLocation ?? false
 
   const {locationAtom, selectedMapValueAtom} = useMolecule(offerFormMolecule)
   const setLocation = useSetAtom(locationAtom)
@@ -115,37 +119,42 @@ export default function SelectLocationRadiusScreen(): React.ReactElement {
           onPick={setPickedLocation}
           hideSlider
           mapRef={mapRef}
-        />
-
-        <Stack position="absolute" bottom="$8" left="$3" right="$3">
-          <YStack
-            backgroundColor="$backgroundPrimary"
-            borderRadius="$7"
-            padding="$3"
-            gap="$3"
-          >
-            <XStack paddingHorizontal="$2" paddingVertical="$3">
-              <Typography
-                variant="paragraphDemibold"
-                color="$foregroundPrimary"
+          bottomChildren={
+            <Stack paddingBottom="$8" paddingHorizontal="$3">
+              <YStack
+                backgroundColor="$backgroundPrimary"
+                borderRadius="$7"
+                padding="$3"
+                gap="$3"
               >
-                {t('offerForm.location.changeRadius')}
-              </Typography>
-            </XStack>
-            <Stack paddingHorizontal="$5">
-              <RadiusSlider
-                min={MIN_ZOOM}
-                max={MAX_ZOOM}
-                value={zoom}
-                onValueChange={handleZoomChange}
-                step={1}
-              />
+                <XStack paddingHorizontal="$2" paddingVertical="$3">
+                  <Typography
+                    variant="paragraphDemibold"
+                    color="$foregroundPrimary"
+                  >
+                    {t('offerForm.location.changeRadius')}
+                  </Typography>
+                </XStack>
+                <Stack paddingHorizontal="$5">
+                  <RadiusSlider
+                    min={MIN_ZOOM}
+                    max={MAX_ZOOM}
+                    value={zoom}
+                    onValueChange={handleZoomChange}
+                    step={1}
+                  />
+                </Stack>
+                <UiButton
+                  variant="primary"
+                  size="large"
+                  onPress={handleConfirm}
+                >
+                  {t('common.confirm')}
+                </UiButton>
+              </YStack>
             </Stack>
-            <UiButton variant="primary" size="large" onPress={handleConfirm}>
-              {t('common.confirm')}
-            </UiButton>
-          </YStack>
-        </Stack>
+          }
+        />
       </Stack>
     </YStack>
   )

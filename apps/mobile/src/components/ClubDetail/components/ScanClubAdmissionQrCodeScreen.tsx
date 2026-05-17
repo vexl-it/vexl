@@ -94,7 +94,7 @@ export function ScanClubAdmissionQrCodeScreen({
   )
 
   return (
-    <Stack f={1} bc="$black">
+    <Stack f={1} bc="$black100">
       <StatusBar style="light" />
       {!!permissionsGranted && (
         <CameraView

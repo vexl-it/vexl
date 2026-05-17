@@ -3,8 +3,8 @@ import {atom} from 'jotai'
 import {type MyDonation} from '../../state/donations/domain'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import openUrl from '../../utils/openUrl'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {createDonationInvoiceWithUiFeedbackActionAtom} from '../DonationPrompt/atoms'
+import {askAreYouSureActionAtom} from '../GlobalDialog'
 
 export const showClaimConfirmationDialogActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)

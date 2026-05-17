@@ -5,7 +5,7 @@ import {DateTime} from 'luxon'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {navigationRef} from '../../../utils/navigation'
 import {lastDisplayOfDonationPromptTimestampAtom} from '../../../utils/preferences'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
+import {askAreYouSureActionAtom} from '../../GlobalDialog'
 import DonationPrompt from '../components/DonationPrompt'
 import {shouldShowDonationPromptAtom} from './stateAtoms'
 

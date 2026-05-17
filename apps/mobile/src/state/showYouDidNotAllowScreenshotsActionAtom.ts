@@ -1,7 +1,7 @@
 import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {askAreYouSureActionAtom} from '../components/AreYouSureDialog'
+import {askAreYouSureActionAtom} from '../components/GlobalDialog'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {preferencesAtom} from '../utils/preferences'
 

@@ -14,12 +14,14 @@ import valueOrDefaultAtom from '../../../../utils/atomUtils/valueOrDefaultAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import reportError from '../../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../../utils/useCommonErrorMessages'
+import {showErrorAlert} from '../../../ErrorAlert'
 import {
   askAreYouSureActionAtom,
-  type AreYouSureDialogAtomStepResult,
-} from '../../../AreYouSureDialog'
-import {showErrorAlert} from '../../../ErrorAlert'
+  type GlobalDialogAtomStepResult,
+} from '../../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../LoadingOverlayProvider'
+
+const noDialogResult: GlobalDialogAtomStepResult[] = [{type: 'noResult'}]
 
 export const deleteChatFromListActionAtom = atom(
   null,
@@ -52,7 +54,7 @@ export const deleteChatFromListActionAtom = atom(
 
     return pipe(
       skipAsk
-        ? TE.right([{type: 'noResult'}] as AreYouSureDialogAtomStepResult[])
+        ? TE.right(noDialogResult)
         : set(askAreYouSureActionAtom, {
             variant: 'danger',
             steps: [

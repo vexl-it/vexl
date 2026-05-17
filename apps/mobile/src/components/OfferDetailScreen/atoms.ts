@@ -11,9 +11,8 @@ import {createSingleOfferReportedFlagAtom} from '../../state/marketplace/atoms/o
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import reportError from '../../utils/reportError'
 import {toCommonErrorMessage} from '../../utils/useCommonErrorMessages'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
 import {showErrorAlert} from '../ErrorAlert'
-import {globalDialogAtom} from '../GlobalDialog'
+import {askAreYouSureActionAtom, globalDialogAtom} from '../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 
 export const showCommonFriendsExplanationActionAtom = atom(

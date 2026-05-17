@@ -4,7 +4,6 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {AccountReachStats} from './components/AccountReachStats'
-import {AccountStats} from './components/AccountStats'
 import {ActionSteps} from './components/ActionSteps'
 import {Menus} from './components/Menus'
 import UserBanner from './components/UserBanner'
@@ -41,7 +40,7 @@ function AccountScreen({navigation}: Props): React.ReactElement {
         <UserBanner />
         <ActionSteps />
         <AccountReachStats />
-        <AccountStats />
+        {/*<AccountStats />*/}
         <Menus />
         <VersionInfo />
       </YStack>

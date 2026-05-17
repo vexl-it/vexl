@@ -13,7 +13,6 @@ import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
-import AreYouSureDialog from './components/AreYouSureDialog'
 import BadgeCountManager from './components/BadgeCountManager'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
@@ -100,7 +99,6 @@ function App(): React.ReactElement {
             </VersionMigrations>
             <UploadingOfferProgressModal />
           </LoadingOverlayProvider>
-          <AreYouSureDialog />
           <GlobalDialog />
           <UserFeedbackDialog />
           <ErrorAlert />

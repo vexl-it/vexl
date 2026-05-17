@@ -11,7 +11,7 @@ import {Alert, Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {toastNotificationAtom} from '../../components/ToastNotification/atom'
 import {translationAtom} from '../localization/I18nProvider'
-import {askAreYouSureActionAtom} from './../../components/AreYouSureDialog'
+import {askAreYouSureActionAtom} from './../../components/GlobalDialog'
 import {areNotificationsEnabledAtom} from './areNotificaitonsEnabledAtom'
 
 const ALLOW_ASKING_EVERY_MILLIS = 10 * 60 * 1000

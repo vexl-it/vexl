@@ -182,7 +182,7 @@ export function Dialog({
 }
 
 export interface DialogAtomConfig {
-  readonly title: string
+  readonly title?: string
   readonly subtitle?: string
   readonly children?: React.ReactNode
   readonly positiveButtonText: string

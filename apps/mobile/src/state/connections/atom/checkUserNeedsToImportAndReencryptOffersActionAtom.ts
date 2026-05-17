@@ -1,6 +1,6 @@
 import {Effect} from 'effect/index'
 import {atom} from 'jotai'
-import {askAreYouSureActionAtom} from '../../../components/AreYouSureDialog'
+import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {submitContactsActionAtom} from '../../contacts/atom/submitContactsActionAtom'

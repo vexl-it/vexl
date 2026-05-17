@@ -104,7 +104,7 @@ export function DonationSummaryCard({
             pressStyle={{opacity: 0.7}}
             onPress={onCopyInvoiceId}
           >
-            <Copy size={18} color={theme.foregroundPrimary.val} />
+            <Copy size={18} color={theme.foregroundPrimary.get()} />
             <Typography
               variant="descriptionBold"
               color="$foregroundPrimary"

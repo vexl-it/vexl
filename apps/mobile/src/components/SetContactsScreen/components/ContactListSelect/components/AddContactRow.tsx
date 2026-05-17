@@ -1,14 +1,12 @@
+import {PlusAdd, Stack, Typography, useTheme} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Image from '../../../../Image'
 import {contactSelectMolecule} from '../atom'
-import addSvg from '../image/addSvg'
 
 function AddContactRow({
   contact,
@@ -16,6 +14,7 @@ function AddContactRow({
   contact: StoredContactWithComputedValues
 }): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const {addAndSelectContactWithUiFeedbackAtom} = useMolecule(
     contactSelectMolecule
   )
@@ -31,13 +30,26 @@ function AddContactRow({
       >
         <Stack f={1} ai="center" jc="center">
           <Stack mb="$4">
-            <Image source={addSvg} />
+            <Stack
+              width={38}
+              height={38}
+              borderRadius="$5"
+              backgroundColor="$accentYellowPrimary"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <PlusAdd size={24} color={theme.accentHighlightPrimary.get()} />
+            </Stack>
           </Stack>
-          <Text col="$greyOnWhite">
+          <Typography
+            variant="paragraph"
+            color="$foregroundSecondary"
+            textAlign="center"
+          >
             {t('postLoginFlow.contactsList.addContactManually', {
               number: contact.info.numberToDisplay,
             })}
-          </Text>
+          </Typography>
         </Stack>
       </TouchableOpacity>
     </Stack>

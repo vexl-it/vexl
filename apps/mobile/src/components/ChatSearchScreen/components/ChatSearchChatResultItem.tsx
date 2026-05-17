@@ -1,8 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
-import {Typography} from '@vexl-next/ui'
+import {Stack, Typography, XStack, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, XStack, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import FromNowComponent from '../../FromNowComponent'
@@ -40,8 +39,7 @@ function ChatSearchChatResultItem({
               text={result.displayName}
               query={query}
               color="$foregroundPrimary"
-              ff="$body600"
-              fos={16}
+              variant="paragraphSmallBold"
               f={1}
               numberOfLines={1}
             />

@@ -1,5 +1,5 @@
+import {Stack} from '@vexl-next/ui'
 import React from 'react'
-import {Stack} from 'tamagui'
 
 function ListFooter(): React.ReactElement {
   return <Stack h={16} />

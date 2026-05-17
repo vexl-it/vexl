@@ -48,7 +48,11 @@ function MessagesScreen({
   return (
     <>
       <MarkAsReadWhenRendered />
-      <Screen navigationBar={null} noHorizontalPadding>
+      <Screen
+        safeAreasBackgroundColor="$backgroundSecondary"
+        navigationBar={null}
+        noHorizontalPadding
+      >
         <KeyboardAvoidingView>
           <Stack flex={1}>
             <MessagesScreenChatHeader />

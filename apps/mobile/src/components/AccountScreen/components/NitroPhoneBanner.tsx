@@ -1,10 +1,9 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Banner} from '@vexl-next/ui'
+import {Banner, Image} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
-import Image from '../../Image'
 import {toastNotificationAtom} from '../../ToastNotification/atom'
 
 const NITRO_PHONE_DISCOUNT_CODE = 'VEXL2025'
@@ -32,7 +31,7 @@ function NitroPhoneBanner(): React.ReactElement {
       })}
       image={
         <Image
-          resizeMode="cover"
+          objectFit="cover"
           source={require('../images/nitro_phone.png')}
           style={{height: 112, width: '100%'}}
         />

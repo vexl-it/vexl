@@ -5,8 +5,9 @@ import {
   Button,
   Image,
   Loader,
-  SizableText,
   Stack,
+  tokens,
+  Typography,
   YStack,
 } from '@vexl-next/ui'
 import dayjs from 'dayjs'
@@ -14,11 +15,8 @@ import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {Linking} from 'react-native'
-import {getTokens} from 'tamagui'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {blogsStateAtom, loadBlogsActionAtom} from './state'
-
-const spaceTokens = getTokens().space
 
 const BlogImage = React.memo(function BlogImage({
   mainImage,
@@ -101,14 +99,9 @@ function BlogScreen(): React.JSX.Element {
 
         {Option.isSome(error) && (
           <YStack gap="$4" alignItems="flex-start">
-            <SizableText
-              fontFamily="$body"
-              fontSize="$3"
-              fontWeight="500"
-              color="$foregroundPrimary"
-            >
+            <Typography variant="paragraphSmall" color="$foregroundPrimary">
               {t('common.somethingWentWrong')}
-            </SizableText>
+            </Typography>
             <Button
               size="small"
               variant="primary"
@@ -133,8 +126,8 @@ function BlogScreen(): React.JSX.Element {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         paddingBottom: 24,
-        paddingHorizontal: spaceTokens.$5.val,
-        paddingTop: spaceTokens.$6.val,
+        paddingHorizontal: tokens.space[5].val,
+        paddingTop: tokens.space[6].val,
       }}
     />
   )

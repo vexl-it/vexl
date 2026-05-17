@@ -1,15 +1,20 @@
+import {Typography} from '@vexl-next/ui'
 import type Luxon from 'luxon'
 import React, {useEffect, useState} from 'react'
-import {Text, type TextProps} from 'tamagui'
 
-interface Props extends TextProps {
+type TypographyProps = React.ComponentProps<typeof Typography>
+
+interface Props
+  extends Omit<TypographyProps, 'children' | 'color' | 'variant'> {
   countUntil: Luxon.DateTime
   onFinished: () => void
+  color?: TypographyProps['color']
 }
 
 function Countdown({
   countUntil,
   onFinished,
+  color = '$foregroundPrimary',
   ...props
 }: Props): React.ReactElement {
   const [secLeft, setSecLeft] = useState(
@@ -32,9 +37,9 @@ function Countdown({
   }, [setSecLeft, countUntil, onFinished])
 
   return (
-    <Text col="$black" ff="$body500" {...props}>
+    <Typography variant="paragraphSmall" color={color} {...props}>
       {secLeft}
-    </Text>
+    </Typography>
   )
 }
 

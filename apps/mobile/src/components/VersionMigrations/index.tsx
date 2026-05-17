@@ -1,7 +1,8 @@
+import {Typography, useTheme, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
-import {Spinner, Text, YStack} from 'tamagui'
+import {ActivityIndicator} from 'react-native'
 import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {needToRunMigrationAtom} from './atoms'
@@ -14,6 +15,7 @@ export default function VersionMigrations({
   children: React.ReactNode
 }): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const store = useStore()
   const needToRunMigration = useMemo(() => {
     return store.get(needToRunMigrationAtom)
@@ -48,16 +50,23 @@ export default function VersionMigrations({
       f={1}
       alignContent="center"
       justifyContent="center"
-      backgroundColor="$black"
+      backgroundColor="$backgroundPrimary"
       px="$5"
       gap="$3"
     >
-      <Spinner color="$main" size="large"></Spinner>
-      <Text textAlign="center" color="white" fos={18}>
+      <ActivityIndicator
+        color={theme.accentHighlightPrimary.get()}
+        size="large"
+      />
+      <Typography
+        variant="paragraph"
+        textAlign="center"
+        color="$foregroundPrimary"
+      >
         {t('migrations.migrating', {
           percentDone: progress.progress.percent,
         })}
-      </Text>
+      </Typography>
     </YStack>
   )
 }

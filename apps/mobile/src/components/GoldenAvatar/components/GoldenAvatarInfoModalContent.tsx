@@ -1,6 +1,6 @@
+import {Stack, Typography} from '@vexl-next/ui'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Stack, Text} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import openUrl from '../../../utils/openUrl'
 
@@ -16,24 +16,31 @@ function GoldenAvatarInfoModalContent({
   return (
     <Stack gap="$2">
       {!!showTitle && (
-        <Text
-          fontFamily="$heading"
-          fontSize={24}
-          color="$black"
+        <Typography
+          variant="heading3"
+          color="$foregroundPrimary"
           textAlign="left"
         >
           {t('goldenGlasses.userJoinedOneOfOurChosenVexlMeetups')}
-        </Text>
+        </Typography>
       )}
       {!!showDescription && (
-        <Text fontSize={18} color="$greyOnWhite" textAlign="left">
+        <Typography
+          variant="paragraph"
+          color="$foregroundSecondary"
+          textAlign="left"
+        >
           {t('goldenGlasses.goAndTryToFindYours')}
-        </Text>
+        </Typography>
       )}
       <TouchableOpacity onPress={openUrl(t('common.communityUrl'))}>
-        <Text fos={18} textDecorationLine="underline" col="$greyOnWhite">
+        <Typography
+          variant="paragraph"
+          color="$foregroundSecondary"
+          textDecorationLine="underline"
+        >
           {t('common.communityUrl')}
-        </Text>
+        </Typography>
       </TouchableOpacity>
     </Stack>
   )

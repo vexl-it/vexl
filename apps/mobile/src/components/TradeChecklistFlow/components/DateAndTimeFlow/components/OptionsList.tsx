@@ -1,15 +1,18 @@
-import {Typography} from '@vexl-next/ui'
+import {
+  Checkmark,
+  ChevronRight,
+  Stack,
+  Typography,
+  useTheme,
+  XmarkCancelClose,
+  XStack,
+} from '@vexl-next/ui'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useCallback} from 'react'
 import {FlatList, TouchableWithoutFeedback} from 'react-native'
-import {getTokens, Stack, XStack} from 'tamagui'
 
-import chevronRightSvg from '../../../../../images/chevronRightSvg'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Image from '../../../../Image'
-import closeSvg from '../../../../images/closeSvg'
-import selectedCheckSvg from '../images/selectedCheckSvg'
 
 export interface Item<T> {
   data: T
@@ -36,6 +39,7 @@ function Item<T>({
   showChevron?: boolean
 }): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const item = useAtomValue(itemAtom)
   const {selected} = item
 
@@ -47,19 +51,21 @@ function Item<T>({
       }}
     >
       <XStack
-        mt="$2"
+        marginTop="$2"
         gap="$2"
-        ai="center"
-        jc="space-between"
-        bc={item.outdated ? '$blackAccent1' : '$grey'}
-        px="$4"
-        py="$5"
-        br="$4"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor={
+          item.outdated ? '$backgroundTertiary' : '$backgroundSecondary'
+        }
+        paddingHorizontal="$4"
+        paddingVertical="$5"
+        borderRadius="$4"
       >
-        <Stack fs={1} gap="$2">
+        <Stack flexShrink={1} gap="$2">
           <Typography
             variant="paragraphSmallBold"
-            mih={24}
+            minHeight={24}
             color={
               selected
                 ? '$accentHighlightPrimary'
@@ -81,15 +87,17 @@ function Item<T>({
             </Typography>
           )}
         </Stack>
-        {!!showChevron && <Image stroke="#AFAFAF" source={chevronRightSvg} />}
-        {!!selected && <Image source={selectedCheckSvg}></Image>}
+        {!!showChevron && (
+          <ChevronRight size={20} color={theme.foregroundTertiary.get()} />
+        )}
+        {!!selected && (
+          <Checkmark size={20} color={theme.accentHighlightSecondary.get()} />
+        )}
         {!!item.outdated && (
-          <XStack ai="center" gap="$1" p="$1">
-            <Image
-              height={12}
-              width={12}
-              source={closeSvg}
-              stroke={getTokens().color.yellow100.val}
+          <XStack alignItems="center" gap="$1" padding="$1">
+            <XmarkCancelClose
+              size={12}
+              color={theme.accentHighlightSecondary.get()}
             />
             <Typography variant="micro" color="$accentHighlightPrimary">
               {t('common.outdated')}

@@ -5,7 +5,6 @@ import {
   Button,
   Rejected,
   Stack,
-  tokens,
   Typography,
   useTheme,
   XStack,
@@ -369,7 +368,7 @@ function TextMessage({
 
   const isMine = message.state !== 'received'
   const messageTextColor = isMine
-    ? tokens.color.black100.val
+    ? theme.black100.get()
     : theme.foregroundPrimary.get()
   const messageBackgroundColor = isMine
     ? theme.accentYellowPrimary.get()
@@ -408,7 +407,9 @@ function TextMessage({
               {!!false && (
                 <Typography
                   color={
-                    message.state === 'sendingError' ? '$red' : '$greyOnBlack'
+                    message.state === 'sendingError'
+                      ? '$redForeground'
+                      : '$foregroundSecondary'
                   }
                   variant="description"
                   textAlign={isMine ? 'right' : 'left'}

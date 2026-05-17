@@ -1,13 +1,11 @@
-import {KeyboardAvoidingView} from '@vexl-next/ui'
+import {KeyboardAvoidingView, Screen, Stack, useTheme} from '@vexl-next/ui'
 import {deepEqual} from 'fast-equals'
 import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
-import {Stack, getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import VexlActivityIndicator from '../LoadingOverlayProvider/VexlActivityIndicator'
-import Screen from '../Screen'
 import ScreenTitle from '../ScreenTitle'
 import ContactsListSelect from './components/ContactListSelect'
 
@@ -15,22 +13,27 @@ type Props = RootStackScreenProps<'SetContacts'>
 
 function SetContactsScreen({route: {params}}: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const loadingContactsFromDevice = useAtomValue(loadingContactsFromDeviceAtom)
 
   return (
-    <Screen testID="@setContactsScreen">
-      <KeyboardAvoidingView>
+    <Screen
+      navigationBar={
         <ScreenTitle
           p="$2"
           text={t('loginFlow.importContacts.action')}
           withBackButton
         />
-        <Stack f={1} mx="$2">
+      }
+      noHorizontalPadding
+    >
+      <KeyboardAvoidingView>
+        <Stack testID="@setContactsScreen" f={1} mx="$2">
           {loadingContactsFromDevice ? (
             <Stack f={1} ai="center" jc="center">
               <VexlActivityIndicator
                 size="large"
-                bc={getTokens().color.main.val}
+                bc={theme.accentYellowPrimary.get()}
               />
             </Stack>
           ) : (

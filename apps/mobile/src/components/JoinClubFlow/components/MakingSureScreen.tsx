@@ -1,11 +1,13 @@
 import {
   Button,
+  ConferenceClub,
   NavigationBar,
   Screen,
   Typography,
   XStack,
   XmarkCancelClose,
   YStack,
+  useTheme,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
@@ -16,12 +18,12 @@ import {submitCodeToJoinClubActionAtom} from '../../../state/clubs/atom/submitCo
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {ImageUniversal} from '../../Image'
 import {clubToJoinAtom} from '../atoms'
-import clubImagePlaceholderSvg from '../images/clubImagePlaceholderSvg'
 
 type Props = JoinClubFlowStackScreenProps<'MakingSureScreen'>
 
 function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
   const {t} = useTranslation()
+  const theme = useTheme()
   const submitCodeToJoinClub = useSetAtom(submitCodeToJoinClubActionAtom)
   const clubToJoin = useAtomValue(clubToJoinAtom)
   const setClubToJoin = useSetAtom(clubToJoinAtom)
@@ -110,20 +112,28 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
             overflow="hidden"
             backgroundColor="$accentYellowSecondary"
           >
-            <ImageUniversal
-              width={imageSize}
-              height={imageSize}
-              style={{
-                height: imageSize,
-                resizeMode: 'cover',
-                width: imageSize,
-              }}
-              source={
-                clubToJoin?.clubImageUrl
-                  ? {type: 'imageUri', imageUri: clubToJoin.clubImageUrl}
-                  : {type: 'svgXml', svgXml: clubImagePlaceholderSvg}
-              }
-            />
+            {clubToJoin?.clubImageUrl ? (
+              <ImageUniversal
+                width={imageSize}
+                height={imageSize}
+                style={{
+                  height: imageSize,
+                  resizeMode: 'cover',
+                  width: imageSize,
+                }}
+                source={{
+                  type: 'imageUri',
+                  imageUri: clubToJoin.clubImageUrl,
+                }}
+              />
+            ) : (
+              <YStack flex={1} alignItems="center" justifyContent="center">
+                <ConferenceClub
+                  size={80}
+                  color={theme.accentHighlightSecondary.get()}
+                />
+              </YStack>
+            )}
           </YStack>
           <YStack alignItems="center" gap="$7">
             <Typography

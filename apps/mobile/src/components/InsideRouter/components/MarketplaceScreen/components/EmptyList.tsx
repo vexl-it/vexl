@@ -1,20 +1,22 @@
 import {useNavigation} from '@react-navigation/native'
 import {
+  Button,
   FaqStayAnonymous,
   MarketplaceEmptyLoader,
+  Stack,
   Typography,
+  XStack,
+  YStack,
 } from '@vexl-next/ui'
 import {Option} from 'effect/index'
 import {useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import {Stack, XStack, YStack} from 'tamagui'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
 import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
 import {notificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import Button from '../../../../Button'
 import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
@@ -145,47 +147,51 @@ function EmptyList(): React.ReactElement {
       <Stack ai="center" jc="center">
         <FaqStayAnonymous variant="dark" width={253} height={179} />
       </Stack>
-      <Typography
-        variant="heading3"
-        fontWeight="700"
-        color="$white"
-        ta="center"
-        py="$2"
-      >
+      <Typography variant="heading3" color="$white100" ta="center" py="$2">
         {emptyListVariant.title}
       </Typography>
       <YStack gap="$4" ai="center" w="100%">
-        <Typography variant="description" color="$greyOnWhite" ta="center">
+        <Typography
+          variant="description"
+          color="$foregroundSecondary"
+          ta="center"
+        >
           {emptyListVariant.primaryAction.description}
         </Typography>
         <Button
           variant="secondary"
           size="small"
-          text={emptyListVariant.primaryAction.buttonText}
           onPress={emptyListVariant.primaryAction.onButtonPress}
-          fullWidth
-        />
+          width="100%"
+        >
+          {emptyListVariant.primaryAction.buttonText}
+        </Button>
       </YStack>
       {!!emptyListVariant.secondaryAction && (
         <>
           <XStack ai="center" gap="$2" w="100%">
-            <Stack f={1} h={1} bc="$greyOnWhite" />
-            <Typography variant="description" color="$greyOnWhite">
+            <Stack f={1} h={1} bc="$foregroundSecondary" />
+            <Typography variant="description" color="$foregroundSecondary">
               {t('common.or')}
             </Typography>
-            <Stack f={1} h={1} bc="$greyOnWhite" />
+            <Stack f={1} h={1} bc="$foregroundSecondary" />
           </XStack>
           <YStack gap="$4" ai="center" w="100%">
-            <Typography variant="description" color="$greyOnWhite" ta="center">
+            <Typography
+              variant="description"
+              color="$foregroundSecondary"
+              ta="center"
+            >
               {emptyListVariant.secondaryAction.description}
             </Typography>
             <Button
               variant="primary"
               size="small"
-              text={emptyListVariant.secondaryAction.buttonText}
               onPress={emptyListVariant.secondaryAction.onButtonPress}
-              fullWidth
-            />
+              width="100%"
+            >
+              {emptyListVariant.secondaryAction.buttonText}
+            </Button>
           </YStack>
         </>
       )}

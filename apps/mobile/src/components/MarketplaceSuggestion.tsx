@@ -1,16 +1,21 @@
+import {
+  BubbleTip,
+  Button,
+  Stack,
+  Typography,
+  useTheme,
+  XmarkCancelClose,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
+import {AvatarBasic1} from '@vexl-next/ui/src/assets/anonymousAvatars/AvatarBasic1'
+import {AvatarGolden1} from '@vexl-next/ui/src/assets/anonymousAvatars/AvatarGolden1'
 import {atom, useAtom, useAtomValue, type WritableAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {getTokens, Stack, Text, XStack, YStack, type YStackProps} from 'tamagui'
+import {type YStackProps} from 'tamagui'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../utils/preferences'
-import Button from './Button'
-import Image from './Image'
-import anonymousAvatarHappyGoldenGlassesNoBackgroundSvg from './images/anonymousAvatarHappyGoldenGlassesNoBackgroundSvg'
-import anonymousAvatarHappyNoBackgroundSvg from './images/anonymousAvatarHappyNoBackgroundSvg'
-import bubbleTipSvg from './images/bubbleTipSvg'
-import closeSvg from './images/closeSvg'
-import UserAvatar from './UserAvatar'
 
 interface Props extends YStackProps {
   buttonText?: string
@@ -35,7 +40,7 @@ function MarketplaceSuggestion({
   visibleStateAtom: nullableVisibleStateAtom,
   ...props
 }: Props): React.ReactElement | null {
-  const tokens = getTokens()
+  const theme = useTheme()
   const {t} = useTranslation()
 
   const visibleStateAtom = useMemo(() => {
@@ -49,86 +54,91 @@ function MarketplaceSuggestion({
   return (
     <YStack {...props}>
       <Stack mb="$2">
-        <XStack bc="$white" p="$4" br="$5">
-          <Text f={1} fs={1} col="$black" fos={18} ff="$body500">
+        <XStack bc="$white100" p="$4" br="$5">
+          <Typography f={1} fs={1} color="$black100" variant="paragraph">
             {text}
-          </Text>
+          </Typography>
           {!hideCloseButton && (
             <TouchableOpacity
               onPress={() => {
                 setIsVisible(false)
               }}
             >
-              <Image stroke={tokens.color.greyOnWhite.val} source={closeSvg} />
+              <XmarkCancelClose
+                color={theme.foregroundSecondary.get()}
+                size={24}
+              />
             </TouchableOpacity>
           )}
         </XStack>
         <Stack pos="absolute" b={-7} l={43}>
-          <Image source={bubbleTipSvg} />
+          <BubbleTip color={theme.white100.get()} size={25} />
         </Stack>
       </Stack>
       <XStack jc="space-between">
         <XStack f={1} mr="$2">
-          <UserAvatar
-            userImage={{
-              type: 'svgXml',
-              svgXml: goldenAvatarType
-                ? anonymousAvatarHappyGoldenGlassesNoBackgroundSvg
-                : anonymousAvatarHappyNoBackgroundSvg,
-            }}
-            width={48}
-            height={48}
-          />
+          <Stack width={48} height={48} borderRadius="$3" overflow="hidden">
+            {goldenAvatarType ? (
+              <AvatarGolden1 size={48} />
+            ) : (
+              <AvatarBasic1 size={48} />
+            )}
+          </Stack>
           <Stack fs={1} ml="$2" jc="center">
             <XStack fs={1} flexWrap="wrap">
               {origin ? (
-                <Text col="$white" fos={16} ff="$body600">
+                <Typography color="$white100" variant="paragraphSmallBold">
                   {origin.title}
-                </Text>
+                </Typography>
               ) : (
                 <>
-                  <Text col="$white" fos={16} ff="$body600">
+                  <Typography color="$white100" variant="paragraphSmallBold">
                     {t('suggestion.vexl')}
-                  </Text>
-                  <Text> </Text>
+                  </Typography>
+                  <Typography color="$white100" variant="paragraphSmallBold">
+                    {' '}
+                  </Typography>
                   {type === 'warning' ? (
-                    <Text
+                    <Typography
                       adjustsFontSizeToFit
                       numberOfLines={1}
-                      col="$red"
-                      fos={16}
-                      ff="$body600"
+                      color="$redForeground"
+                      variant="paragraphSmallBold"
                     >
                       {t('suggestion.warns')}
-                    </Text>
+                    </Typography>
                   ) : (
-                    <Text
+                    <Typography
                       adjustsFontSizeToFit
                       numberOfLines={1}
-                      col="$main"
-                      fos={16}
-                      ff="$body600"
+                      color="$accentYellowPrimary"
+                      variant="paragraphSmallBold"
                     >
                       {t('suggestion.suggests')}
-                    </Text>
+                    </Typography>
                   )}
                 </>
               )}
             </XStack>
-            <Text adjustsFontSizeToFit numberOfLines={2} col="$greyOnBlack">
+            <Typography
+              adjustsFontSizeToFit
+              numberOfLines={2}
+              color="$foregroundSecondary"
+              variant="description"
+            >
               {origin ? origin.subtitle : t('suggestion.yourAppGuide')}
-            </Text>
+            </Typography>
           </Stack>
         </XStack>
         {!!buttonText && (
           <Stack maxWidth="70%">
             <Button
-              numberOfLines={2}
               size="medium"
-              text={buttonText}
               onPress={onButtonPress}
-              variant={type === 'warning' ? 'redLight' : 'secondary'}
-            />
+              variant={type === 'warning' ? 'destructive' : 'secondary'}
+            >
+              {buttonText}
+            </Button>
           </Stack>
         )}
       </XStack>

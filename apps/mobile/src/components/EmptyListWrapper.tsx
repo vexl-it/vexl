@@ -1,7 +1,6 @@
-import {Button} from '@vexl-next/ui'
+import {Button, Stack, YStack, useTheme} from '@vexl-next/ui'
 import React from 'react'
 import {RefreshControl, ScrollView} from 'react-native'
-import {Stack, YStack, getTokens} from 'tamagui'
 import usePixelsFromBottomWhereTabsEnd from './InsideRouter/utils'
 
 interface ContentProps {
@@ -46,6 +45,7 @@ function EmptyListWrapper({
   horizontalPadding = false,
 }: Props): React.ReactElement {
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
+  const theme = useTheme()
 
   return inScrollView ? (
     <ScrollView
@@ -55,7 +55,7 @@ function EmptyListWrapper({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={getTokens().color.greyAccent5.val}
+            tintColor={theme.foregroundTertiary.get()}
           />
         ) : undefined
       }

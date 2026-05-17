@@ -1,5 +1,12 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
-import {Loader} from '@vexl-next/ui'
+import {
+  Loader,
+  Typography,
+  XStack,
+  YStack,
+  useTheme,
+  type TypographyProps,
+} from '@vexl-next/ui'
 import {Option} from 'effect/index'
 import {
   atom,
@@ -10,7 +17,6 @@ import {
 } from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {TouchableOpacity} from 'react-native'
-import {Text, XStack, YStack, useTheme, type TextProps} from 'tamagui'
 import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
@@ -23,7 +29,8 @@ import {currencies} from '../utils/localization/currency'
 import {localizedDateTimeActionAtom} from '../utils/localization/localizedNumbersAtoms'
 import {preferencesAtom} from '../utils/preferences'
 
-interface Props extends TextProps {
+interface Props
+  extends Omit<TypographyProps, 'children' | 'color' | 'variant'> {
   customBtcPriceAtom?: PrimitiveAtom<number> | undefined
   currencyAtom: Atom<CurrencyCode | undefined>
   disabled?: boolean
@@ -107,7 +114,11 @@ function CurrentBtcPrice({
           <Loader size="small" color={theme.foregroundSecondary.get()} />
         ) : (
           <YStack>
-            <Text fos={16} ff="$body500" col="$foregroundPrimary" {...props}>
+            <Typography
+              variant="paragraphSmall"
+              color="$foregroundPrimary"
+              {...props}
+            >
               {`1 BTC = ${
                 customBtcPrice
                   ? customBtcPrice.toLocaleString(currentLocale, {
@@ -120,11 +131,11 @@ function CurrentBtcPrice({
                         {maximumFractionDigits: 0}
                       )
               } ${currency}`}
-            </Text>
+            </Typography>
             {showLastUpdatedAt && lastUpdatedAtFormattedValue !== null ? (
-              <Text fos={12} col="$foregroundTertiary">
+              <Typography variant="micro" color="$foregroundTertiary">
                 {t('common.lastUpdated')}: {lastUpdatedAtFormattedValue}
-              </Text>
+              </Typography>
             ) : null}
           </YStack>
         )}

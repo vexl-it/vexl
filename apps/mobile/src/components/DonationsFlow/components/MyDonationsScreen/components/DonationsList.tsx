@@ -1,10 +1,9 @@
 import {FlashList} from '@shopify/flash-list'
-import {Banner, Stack, Typography, YStack} from '@vexl-next/ui'
+import {Banner, Stack, Typography, YStack, useTheme} from '@vexl-next/ui'
 import {Array, Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {RefreshControl} from 'react-native-gesture-handler'
-import {getTokens} from 'tamagui'
 import {
   myDonationsSortedAtom,
   myDonationsStateAtom,
@@ -29,6 +28,7 @@ interface Props {
 
 function DonationsList({onDonatePress}: Props): React.ReactElement {
   const {t} = useTranslation()
+  const theme = useTheme()
   const myDonationsSorted = useAtomValue(myDonationsSortedAtom)
   const myDonationsLoading = useAtomValue(myDonationsStateAtom) === 'loading'
   const updateAllNonSettledOrExpiredInvoicesStatusTypes = useSetAtom(
@@ -69,7 +69,7 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
           onRefresh={() =>
             Effect.runFork(updateAllNonSettledOrExpiredInvoicesStatusTypes())
           }
-          tintColor={getTokens().color.greyAccent5.val}
+          tintColor={theme.foregroundTertiary.get()}
         />
       }
     />

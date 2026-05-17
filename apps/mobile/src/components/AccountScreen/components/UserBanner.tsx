@@ -3,6 +3,7 @@ import {Avatar, Button, tokens, Typography, XStack, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
+import {SvgXml} from 'react-native-svg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {
   anonymizedUserDataAtom,
@@ -11,7 +12,6 @@ import {
 } from '../../../state/session/userDataAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import SvgImage from '../../Image'
 
 function UserBanner(): React.ReactElement {
   const realUserData = useAtomValue(realUserDataAtom)
@@ -41,10 +41,10 @@ function UserBanner(): React.ReactElement {
     <XStack alignItems="center" gap="$3" paddingVertical="$4">
       {profileImage.type === 'svgXml' ? (
         <Avatar size="$9">
-          <SvgImage
+          <SvgXml
             width={tokens.size[9].val}
             height={tokens.size[9].val}
-            source={profileImage.svgXml}
+            xml={profileImage.svgXml.xml}
           />
         </Avatar>
       ) : (
@@ -53,12 +53,11 @@ function UserBanner(): React.ReactElement {
           source={{uri: resolveLocalUri(profileImage.imageUri)}}
         />
       )}
-      <YStack flex={1} minWidth={0} justifyContent="space-between">
+      <YStack flex={1} minWidth={0} gap="$2">
         <Typography
           variant="paragraphSmallBold"
           color="$foregroundPrimary"
           numberOfLines={1}
-          lineHeight={0}
         >
           {displayName}
         </Typography>
@@ -66,7 +65,6 @@ function UserBanner(): React.ReactElement {
           variant="micro"
           color="$foregroundSecondary"
           numberOfLines={1}
-          lineHeight={0}
         >
           {formattedPhoneNumber}
         </Typography>

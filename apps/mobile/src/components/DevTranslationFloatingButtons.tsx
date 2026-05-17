@@ -1,11 +1,12 @@
+import {useTheme} from '@vexl-next/ui'
 import {useSetAtom} from 'jotai'
 import React from 'react'
 import {Dimensions} from 'react-native'
 import Draggable from 'react-native-draggable'
-import {getTokens} from 'tamagui'
 import {showDevLabelsAtom} from '../utils/localization/I18nProvider'
 
 function DevTranslationFloatingButton(): React.ReactElement {
+  const theme = useTheme()
   const setShowDevLabels = useSetAtom(showDevLabelsAtom)
 
   return (
@@ -14,7 +15,7 @@ function DevTranslationFloatingButton(): React.ReactElement {
       y={Dimensions.get('window').height - 100}
       z={1000}
       renderSize={56}
-      renderColor={getTokens().color.red.val}
+      renderColor={theme.redBackground.get()}
       renderText="🔍"
       isCircle
       onShortPressRelease={() => {

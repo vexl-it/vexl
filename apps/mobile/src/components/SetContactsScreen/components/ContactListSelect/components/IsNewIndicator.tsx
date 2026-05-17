@@ -1,7 +1,7 @@
+import {Stack, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
-import {Stack, Text} from 'tamagui'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {contactSelectMolecule} from '../atom'
@@ -22,10 +22,18 @@ function IsNewIndicator({
   )
 
   return isNewContact ? (
-    <Stack pos="absolute" r={-13} t={-10} p="$1" br={5} zi="$10" bc="$main">
-      <Text fontSize={10} color="$white">
+    <Stack
+      pos="absolute"
+      r={-13}
+      t={-10}
+      p="$1"
+      br={5}
+      zi="$10"
+      bc="$accentYellowPrimary"
+    >
+      <Typography variant="micro" color="$accentHighlightPrimary">
         {t('postLoginFlow.contactsList.new')}
-      </Text>
+      </Typography>
     </Stack>
   ) : null
 }

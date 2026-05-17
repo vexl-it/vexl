@@ -4,16 +4,22 @@ import {
   Radius,
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Typography, useVexlTheme} from '@vexl-next/ui'
+import {
+  RadiusSlider,
+  Stack,
+  Typography,
+  tokens,
+  useTheme,
+  useVexlTheme,
+} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useMemo} from 'react'
-import {Dimensions} from 'react-native'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import {Dimensions, StyleSheet} from 'react-native'
 import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {Stack, getTokens, useTheme} from 'tamagui'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
 import {
@@ -21,13 +27,10 @@ import {
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import Image from '../../Image'
-import Slider from '../../Slider'
 import {type MapValue, type MapValueWithRadius} from '../brands'
-import {createPinSvg} from '../img/pinSvg'
-import radiusRingSvg from '../img/radiusRingSvg'
 import {getMapTheme} from '../utils/mapStyle'
 import mapValueToRegion from '../utils/mapValueToRegion'
+import {MapPinAsset, RadiusRingAsset} from './MapSvgAssets'
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
@@ -39,19 +42,27 @@ type Props = React.ComponentProps<typeof Stack> & {
 }
 
 const mapPaddings = {
-  top: getTokens().space[10].val,
-  bottom: getTokens().space[10].val,
+  top: tokens.space[10].val,
+  bottom: tokens.space[10].val,
   left: 0,
   right: 0,
 }
 
-const circleMargin = getTokens().space[2].val
+const circleMargin = tokens.space[2].val
 
-const mapStyle = {
-  width: '100%',
-  height: '100%',
-  backgroundColor: 'black',
-} as const
+const styles = StyleSheet.create({
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+})
+
+const MIN_ZOOM = 7
+const MAX_ZOOM = 16
+
+function clampZoom(value: number): number {
+  return Math.max(MIN_ZOOM, Math.min(value, MAX_ZOOM))
+}
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function useAtoms({
@@ -130,7 +141,7 @@ function PickedLocationText({
   const radius = useAtomValue(selectedRegionRadiusAtom)
 
   return geocodingState.state !== 'done' ? (
-    <Typography variant="micro" color="$white">
+    <Typography variant="micro" color="$foregroundPrimary">
       {t('common.loading')}...
     </Typography>
   ) : (
@@ -138,7 +149,11 @@ function PickedLocationText({
       <Typography
         variant="micro"
         textAlign="center"
-        color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
+        color={
+          E.isLeft(geocodingState.result)
+            ? '$redForeground'
+            : '$foregroundPrimary'
+        }
       >
         {pipe(
           geocodingState.result,
@@ -152,7 +167,11 @@ function PickedLocationText({
       <Typography
         variant="micro"
         textAlign="center"
-        color={E.isLeft(geocodingState.result) ? '$red' : '$white'}
+        color={
+          E.isLeft(geocodingState.result)
+            ? '$redForeground'
+            : '$foregroundPrimary'
+        }
       >
         {t('map.locationSelect.radius', {
           radius,
@@ -198,24 +217,28 @@ export default function MapLocationWithRadiusSelect({
   const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
   const accentHighlightSecondary = theme.accentHighlightSecondary.get()
+  const backgroundPrimary = theme.backgroundPrimary.get()
   const initialRegion = useMemo(
     () => mapValueToRegion(initialValue),
     [initialValue]
   )
-  const pinSvg = useMemo(
-    () => createPinSvg(accentHighlightSecondary),
-    [accentHighlightSecondary]
-  )
 
   const initialZoom = useMemo(
     () =>
-      calculateZoom(
-        initialRegion.latitude,
-        initialRegion.latitudeDelta,
-        initialRegion.longitudeDelta
+      clampZoom(
+        calculateZoom(
+          initialRegion.latitude,
+          initialRegion.latitudeDelta,
+          initialRegion.longitudeDelta
+        )
       ),
     [initialRegion]
   )
+  const [zoom, setZoom] = useState(initialZoom)
+
+  useEffect(() => {
+    setZoom(initialZoom)
+  }, [initialZoom])
 
   const atoms = useAtoms({
     initialRegion,
@@ -223,15 +246,28 @@ export default function MapLocationWithRadiusSelect({
   })
   const setRegion = useSetAtom(atoms.selectedRegionAtom)
   const {width, height} = useMemo(() => Dimensions.get('window'), [])
+  const handleZoomChange = useCallback(
+    (value: number) => {
+      setZoom(value)
+      mapRef.current?.setCamera({
+        zoom: value,
+      })
+    },
+    [mapRef]
+  )
 
   return (
-    <Stack position="relative" {...restProps} backgroundColor="$black">
+    <Stack
+      position="relative"
+      {...restProps}
+      backgroundColor="$backgroundPrimary"
+    >
       <MapView
         ref={mapRef}
         mapPadding={mapPaddings}
         provider={PROVIDER_GOOGLE}
         customMapStyle={getMapTheme(resolvedTheme)}
-        style={mapStyle}
+        style={[styles.map, {backgroundColor: backgroundPrimary}]}
         toolbarEnabled={false}
         onRegionChangeComplete={(region) => {
           void mapRef.current
@@ -249,7 +285,7 @@ export default function MapLocationWithRadiusSelect({
         left="50%"
         transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
       >
-        <Image width={70} height={70} source={pinSvg} />
+        <MapPinAsset color={accentHighlightSecondary} />
       </Stack>
 
       <Stack
@@ -263,7 +299,7 @@ export default function MapLocationWithRadiusSelect({
         left={0}
         bottom={0}
       >
-        <Image source={radiusRingSvg} />
+        <RadiusRingAsset color={accentHighlightSecondary} size="100%" />
       </Stack>
 
       <Stack
@@ -283,7 +319,7 @@ export default function MapLocationWithRadiusSelect({
             paddingVertical="$2"
             borderRadius="$6"
             alignSelf="center"
-            backgroundColor="rgba(0, 0, 0,0.8)"
+            backgroundColor="$backgroundPrimary"
           >
             <PickedLocationText
               geocodedRegionAtom={atoms.getGeocodedRegionAtom}
@@ -315,16 +351,12 @@ export default function MapLocationWithRadiusSelect({
           <Stack>
             {hideSlider !== true ? (
               <Stack mb="$4" mx="$4">
-                <Slider
-                  value={initialZoom}
+                <RadiusSlider
+                  value={zoom}
                   step={0.2}
-                  onValueChange={(v) => {
-                    mapRef.current?.setCamera({
-                      zoom: v[0],
-                    })
-                  }}
-                  maximumValue={16}
-                  minimumValue={7}
+                  onValueChange={handleZoomChange}
+                  max={MAX_ZOOM}
+                  min={MIN_ZOOM}
                 />
               </Stack>
             ) : null}

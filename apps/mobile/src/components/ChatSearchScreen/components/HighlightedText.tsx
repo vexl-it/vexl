@@ -1,5 +1,9 @@
+import {
+  Typography,
+  type TypographyProps,
+  type TypographyVariant,
+} from '@vexl-next/ui'
 import React, {Fragment} from 'react'
-import {Text, type TextProps} from 'tamagui'
 
 function getHighlightedTextParts(
   text: string,
@@ -45,28 +49,33 @@ function HighlightedText({
   text,
   query,
   highlightColor = '$accentYellowPrimary',
+  highlightVariant,
   ...props
 }: {
   text: string
   query: string
-  highlightColor?: TextProps['color']
-} & TextProps): React.ReactElement {
+  highlightColor?: TypographyProps['color']
+  highlightVariant?: TypographyVariant
+} & Omit<TypographyProps, 'children'>): React.ReactElement {
   const parts = getHighlightedTextParts(text, query)
 
   return (
-    <Text {...props}>
+    <Typography {...props}>
       {parts.map((part, index) => (
         <Fragment key={`${part.text}-${index}`}>
           {part.highlighted ? (
-            <Text color={highlightColor} ff="$body600">
+            <Typography
+              color={highlightColor}
+              variant={highlightVariant ?? props.variant}
+            >
               {part.text}
-            </Text>
+            </Typography>
           ) : (
             part.text
           )}
         </Fragment>
       ))}
-    </Text>
+    </Typography>
   )
 }
 

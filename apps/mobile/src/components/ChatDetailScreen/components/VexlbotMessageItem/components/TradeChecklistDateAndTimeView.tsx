@@ -134,6 +134,7 @@ export default function TradeChecklistDateAndTimeView({
 
       return (
         <VexlbotActionCard
+          mt="$2"
           mb="$2"
           statusLabel={isMessageOutdated ? t('common.outdated') : pendingLabel}
           statusVariant={

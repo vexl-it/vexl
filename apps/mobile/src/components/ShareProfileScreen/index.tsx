@@ -3,10 +3,11 @@ import {
   Button,
   InfoBox,
   NavigationBar,
+  resolveSizePx,
   Screen,
   Stack,
-  tokens,
   Typography,
+  useTheme,
   XmarkCancelClose,
   XStack,
   YStack,
@@ -15,7 +16,7 @@ import {parsePhoneNumber} from 'awesome-phonenumber'
 import {atom, useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
 import {useWindowDimensions} from 'react-native'
-import {useTheme} from 'tamagui'
+import {SvgXml} from 'react-native-svg'
 import {
   userDataRealOrAnonymizedAtom,
   userPhoneNumberAtom,
@@ -24,7 +25,6 @@ import {createImportContactLink} from '../../utils/deepLinks/createLinks'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../utils/resolveLocalUri'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import SvgImage from '../Image'
 import {SharableQrCode} from '../SharableQrCode'
 
 const encodedUserDetailsUriAtom = atom<string>((get) => {
@@ -59,10 +59,10 @@ function ProfileCard(): React.ReactElement {
     >
       {profileImage.type === 'svgXml' ? (
         <Avatar size="$9">
-          <SvgImage
-            width={tokens.size[9].val}
-            height={tokens.size[9].val}
-            source={profileImage.svgXml}
+          <SvgXml
+            width={resolveSizePx('$9')}
+            height={resolveSizePx('$9')}
+            xml={profileImage.svgXml.xml}
           />
         </Avatar>
       ) : (
@@ -71,12 +71,11 @@ function ProfileCard(): React.ReactElement {
           source={{uri: resolveLocalUri(profileImage.imageUri)}}
         />
       )}
-      <YStack flex={1} minWidth={0} justifyContent="space-between">
+      <YStack flex={1} minWidth={0} gap="$2">
         <Typography
           variant="paragraphSmallBold"
           color="$foregroundPrimary"
           numberOfLines={1}
-          lineHeight={0}
         >
           {displayName}
         </Typography>
@@ -84,7 +83,6 @@ function ProfileCard(): React.ReactElement {
           variant="micro"
           color="$foregroundSecondary"
           numberOfLines={1}
-          lineHeight={0}
         >
           {formattedPhoneNumber}
         </Typography>

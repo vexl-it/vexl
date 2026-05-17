@@ -5,11 +5,11 @@ import {
   type ListRenderItemInfo,
 } from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Stack, tokens, useTheme} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
 import React, {useEffect, useMemo, useRef} from 'react'
 import {RefreshControl} from 'react-native'
 import Animated from 'react-native-reanimated'
-import {getTokens, Stack} from 'tamagui'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import OffersListItem from './OffersListItem'
@@ -43,10 +43,11 @@ function OffersList({
 }: Props): React.JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
   const animatedFlashListRef = useRef<FlashListRef<Atom<OneOfferInState>>>(null)
+  const theme = useTheme()
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingBottom: bottomOffset + Number(getTokens().space[5].val),
+      paddingBottom: bottomOffset + Number(tokens.space[5].val),
       ...externalContentContainerStyle,
     }),
     [bottomOffset, externalContentContainerStyle]
@@ -75,7 +76,7 @@ function OffersList({
         <RefreshControl
           refreshing={refreshing ?? false}
           onRefresh={onRefresh ?? (() => {})}
-          tintColor={getTokens().color.greyAccent5.val}
+          tintColor={theme.foregroundSecondary.get()}
         />
       }
       ItemSeparatorComponent={ItemSeparatorComponent}

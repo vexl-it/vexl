@@ -1,9 +1,8 @@
 import Clipboard from '@react-native-clipboard/clipboard'
-import {Button, Copy, Typography} from '@vexl-next/ui'
+import {Button, Copy, Typography, XStack, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
-import {XStack, YStack, useTheme} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../../../navigationTypes'
 import {
   chatWithMessagesKeys,
@@ -35,7 +34,6 @@ function ConfirmAmountScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const theme = useTheme()
   const store = useStore()
   const preferences = useAtomValue(preferencesAtom)
   const currentLocale = preferences.appLanguage ?? getCurrentLocale()
@@ -123,7 +121,7 @@ function ConfirmAmountScreen({
       <YStack flex={1} gap="$7" pt="$4">
         <YStack
           alignItems="center"
-          backgroundColor={theme.backgroundSecondary.get()}
+          backgroundColor="$backgroundSecondary"
           borderRadius="$5"
           gap="$3"
           padding="$5"

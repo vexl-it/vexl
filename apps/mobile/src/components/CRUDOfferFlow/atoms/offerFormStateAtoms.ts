@@ -78,9 +78,8 @@ import {
   toCommonErrorMessage,
   type SomeError,
 } from '../../../utils/useCommonErrorMessages'
-import {askAreYouSureActionAtom} from '../../AreYouSureDialog'
 import {showErrorAlert} from '../../ErrorAlert'
-import {globalDialogAtom} from '../../GlobalDialog'
+import {askAreYouSureActionAtom, globalDialogAtom} from '../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
 import {type MapValue} from '../../Map/brands'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'

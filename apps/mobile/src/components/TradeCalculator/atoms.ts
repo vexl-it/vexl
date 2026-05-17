@@ -17,8 +17,7 @@ import {
 import {tradeOrOriginOfferCurrencyAtom} from '../../state/tradeChecklist/atoms/fromChatAtoms'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../utils/localization/I18nProvider'
-import {askAreYouSureActionAtom} from '../AreYouSureDialog'
-import {globalDialogAtom} from '../GlobalDialog'
+import {askAreYouSureActionAtom, globalDialogAtom} from '../GlobalDialog'
 import TradePriceTypeDialogContent, {
   type SelectableTradePriceType,
 } from './components/TradePriceTypeDialogContent'

@@ -11,7 +11,7 @@ import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/
 import {Option, pipe} from 'effect'
 import {atom, type SetStateAction} from 'jotai'
 import {focusAtom} from 'jotai-optics'
-import {askAreYouSureActionAtom} from '../../components/AreYouSureDialog'
+import {askAreYouSureActionAtom} from '../../components/GlobalDialog'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {goldenAvatarTypeAtom} from '../../utils/preferences'

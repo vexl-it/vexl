@@ -9,7 +9,7 @@ import {
   translationAtom,
   useTranslation,
 } from '../utils/localization/I18nProvider'
-import {askAreYouSureActionAtom} from './AreYouSureDialog'
+import {askAreYouSureActionAtom} from './GlobalDialog'
 import Image from './Image'
 import emailIconSvg from './images/emailIconSvg'
 import {toastNotificationAtom} from './ToastNotification/atom'

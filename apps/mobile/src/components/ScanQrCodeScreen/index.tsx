@@ -19,7 +19,7 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {handleDeepLinkActionAtom} from '../../utils/deepLinks'
 import {handleCameraPermissionsActionAtom} from '../../utils/handleCameraPermissions'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {forceHideAskAreYouSureActionAtom} from '../AreYouSureDialog'
+import {forceHideAskAreYouSureActionAtom} from '../GlobalDialog'
 
 type Props = RootStackScreenProps<'ScanQrCode'>
 
@@ -40,9 +40,7 @@ function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
   const {width, height} = useWindowDimensions()
   const handleCameraPermissions = useSetAtom(handleCameraPermissionsActionAtom)
   const handleDeepLinkAction = useSetAtom(handleDeepLinkActionAtom)
-  const forceHideAskAreYouSureDialog = useSetAtom(
-    forceHideAskAreYouSureActionAtom
-  )
+  const forceHideAskGlobalDialog = useSetAtom(forceHideAskAreYouSureActionAtom)
 
   const scanWindow = useMemo(() => {
     const size = Math.min(width - 48, height * 0.4)
@@ -79,7 +77,7 @@ function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
         Effect.tap((success) =>
           Effect.sync(() => {
             if (success) {
-              forceHideAskAreYouSureDialog()
+              forceHideAskGlobalDialog()
               navigation.goBack()
             } else {
               scanned.current = false
@@ -89,7 +87,7 @@ function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
         Effect.runFork
       )
     },
-    [forceHideAskAreYouSureDialog, handleDeepLinkAction, navigation, t]
+    [forceHideAskGlobalDialog, handleDeepLinkAction, navigation, t]
   )
 
   return (

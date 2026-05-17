@@ -1,6 +1,8 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import React from 'react'
+import {useSetAtom} from 'jotai'
+import React, {useEffect} from 'react'
 import {type EditIdentityStackParamsList} from '../../navigationTypes'
+import {prepareEditProfileIdentityDraftActionAtom} from './atoms/editIdentityAtoms'
 import EditIdentityNicknameScreen from './components/EditIdentityNicknameScreen'
 import EditIdentityPhotoScreen from './components/EditIdentityPhotoScreen'
 import EditIdentitySummaryScreen from './components/EditIdentitySummaryScreen'
@@ -8,6 +10,12 @@ import EditIdentitySummaryScreen from './components/EditIdentitySummaryScreen'
 const Stack = createNativeStackNavigator<EditIdentityStackParamsList>()
 
 function EditIdentityScreen(): React.ReactElement {
+  const prepareDraft = useSetAtom(prepareEditProfileIdentityDraftActionAtom)
+
+  useEffect(() => {
+    prepareDraft()
+  }, [prepareDraft])
+
   return (
     <Stack.Navigator
       initialRouteName="EditIdentityPhoto"

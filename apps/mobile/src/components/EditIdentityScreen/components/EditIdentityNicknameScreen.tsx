@@ -12,15 +12,12 @@ import {
 } from '@vexl-next/ui'
 import {Option, Schema} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback} from 'react'
 import {Stack} from 'tamagui'
 import {type EditIdentityStackScreenProps} from '../../../navigationTypes'
 import {invalidUsernameUIFeedbackAtom} from '../../../state/session/userDataAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {
-  editProfileIdentityNicknameAtom,
-  prepareEditProfileIdentityDraftActionAtom,
-} from '../atoms/editIdentityAtoms'
+import {editProfileIdentityNicknameAtom} from '../atoms/editIdentityAtoms'
 
 type Props = EditIdentityStackScreenProps<'EditIdentityNickname'>
 
@@ -30,16 +27,9 @@ function EditIdentityNicknameScreen({navigation}: Props): React.ReactElement {
     (state) => state.routes[state.index - 1]?.name
   )
   const nickname = useAtomValue(editProfileIdentityNicknameAtom)
-  const prepareDraft = useSetAtom(prepareEditProfileIdentityDraftActionAtom)
   const showInvalidUsernameUIFeedback = useSetAtom(
     invalidUsernameUIFeedbackAtom
   )
-
-  useEffect(() => {
-    if (previousRouteName == null) {
-      prepareDraft()
-    }
-  }, [prepareDraft, previousRouteName])
 
   const closeFlow = useCallback(() => {
     navigation.getParent()?.goBack()

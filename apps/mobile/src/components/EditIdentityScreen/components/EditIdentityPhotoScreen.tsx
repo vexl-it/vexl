@@ -7,7 +7,7 @@ import {
   XmarkCancelClose,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback} from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import Svg, {Rect} from 'react-native-svg'
 import {
@@ -21,10 +21,7 @@ import {type EditIdentityStackScreenProps} from '../../../navigationTypes'
 import {selectImageActionAtom} from '../../../state/selectImageActionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
-import {
-  editProfileIdentityImageUriAtom,
-  prepareEditProfileIdentityDraftActionAtom,
-} from '../atoms/editIdentityAtoms'
+import {editProfileIdentityImageUriAtom} from '../atoms/editIdentityAtoms'
 
 type Props = EditIdentityStackScreenProps<'EditIdentityPhoto'>
 
@@ -39,11 +36,6 @@ function EditIdentityPhotoScreen({navigation}: Props): React.ReactElement {
   const theme = useTheme()
   const imageUri = useAtomValue(editProfileIdentityImageUriAtom)
   const selectImage = useSetAtom(selectImageActionAtom)
-  const prepareDraft = useSetAtom(prepareEditProfileIdentityDraftActionAtom)
-
-  useEffect(() => {
-    prepareDraft()
-  }, [prepareDraft])
 
   const closeFlow = useCallback(() => {
     navigation.getParent()?.goBack()

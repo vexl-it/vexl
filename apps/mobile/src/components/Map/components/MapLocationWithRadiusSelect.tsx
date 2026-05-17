@@ -26,6 +26,7 @@ import {
   getCurrentLocale,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
+import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {type MapValue, type MapValueWithRadius} from '../brands'
 import {getMapTheme} from '../utils/mapStyle'
@@ -251,6 +252,8 @@ export default function MapLocationWithRadiusSelect({
   const [containerSize, setContainerSize] = useState({width: 0, height: 0})
   const [topOverlayHeight, setTopOverlayHeight] = useState(0)
   const [bottomOverlayHeight, setBottomOverlayHeight] = useState(0)
+  const isContainerMeasured =
+    containerSize.width > 0 && containerSize.height > 0
 
   const overlayInsets = useMemo(
     () => ({
@@ -315,6 +318,7 @@ export default function MapLocationWithRadiusSelect({
     setBottomOverlayHeight(Math.ceil(event.nativeEvent.layout.height))
   }, [])
   const handleRegionChangeComplete = useCallback(() => {
+    if (!isContainerMeasured) return
     if (ringDiameter <= 0) return
 
     const map = mapRef.current
@@ -332,19 +336,33 @@ export default function MapLocationWithRadiusSelect({
     void Promise.all([
       map.coordinateForPoint(centerPoint),
       map.coordinateForPoint(radiusPoint),
-    ]).then(([centerCoordinate, radiusCoordinate]) => {
-      setSelectedMapState({
-        center: {
-          latitude: centerCoordinate.latitude,
-          longitude: centerCoordinate.longitude,
-        },
-        radius: calculateLongitudeRadiusDelta({
-          centerLongitude: centerCoordinate.longitude,
-          edgeLongitude: radiusCoordinate.longitude,
-        }),
+    ])
+      .then(([centerCoordinate, radiusCoordinate]) => {
+        setSelectedMapState({
+          center: {
+            latitude: centerCoordinate.latitude,
+            longitude: centerCoordinate.longitude,
+          },
+          radius: calculateLongitudeRadiusDelta({
+            centerLongitude: centerCoordinate.longitude,
+            edgeLongitude: radiusCoordinate.longitude,
+          }),
+        })
       })
-    })
-  }, [mapRef, ringDiameter, selectionFrame, setSelectedMapState])
+      .catch((error: unknown) => {
+        reportError(
+          'warn',
+          new Error('Error while reading selected map region', {cause: error}),
+          {error}
+        )
+      })
+  }, [
+    isContainerMeasured,
+    mapRef,
+    ringDiameter,
+    selectionFrame,
+    setSelectedMapState,
+  ])
 
   return (
     <Stack
@@ -363,28 +381,32 @@ export default function MapLocationWithRadiusSelect({
         onRegionChangeComplete={handleRegionChangeComplete}
         region={initialRegion}
       />
-      <Stack
-        pointerEvents="none"
-        position="absolute"
-        top={selectionFrame.centerY}
-        left={selectionFrame.centerX}
-        transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
-      >
-        <MapPinAsset color={accentHighlightSecondary} />
-      </Stack>
+      {isContainerMeasured ? (
+        <React.Fragment>
+          <Stack
+            pointerEvents="none"
+            position="absolute"
+            top={selectionFrame.centerY}
+            left={selectionFrame.centerX}
+            transform={[{translateX: -70 / 2}, {translateY: (-70 / 3) * 2}]}
+          >
+            <MapPinAsset color={accentHighlightSecondary} />
+          </Stack>
 
-      <Stack
-        pointerEvents="none"
-        position="absolute"
-        justifyContent="center"
-        alignItems="center"
-        top={selectionFrame.centerY - ringDiameter / 2}
-        left={selectionFrame.centerX - ringDiameter / 2}
-        width={ringDiameter}
-        height={ringDiameter}
-      >
-        <RadiusRingAsset color={accentHighlightSecondary} size="100%" />
-      </Stack>
+          <Stack
+            pointerEvents="none"
+            position="absolute"
+            justifyContent="center"
+            alignItems="center"
+            top={selectionFrame.centerY - ringDiameter / 2}
+            left={selectionFrame.centerX - ringDiameter / 2}
+            width={ringDiameter}
+            height={ringDiameter}
+          >
+            <RadiusRingAsset color={accentHighlightSecondary} size="100%" />
+          </Stack>
+        </React.Fragment>
+      ) : null}
 
       <Stack
         pointerEvents="none"

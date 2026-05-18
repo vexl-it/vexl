@@ -8,7 +8,10 @@ import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
-import {type ReportNotificationInteractionRequest} from './contracts'
+import {
+  type ReportFrontendEventRequest,
+  type ReportNotificationInteractionRequest,
+} from './contracts'
 import {MetricsApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -77,6 +80,11 @@ export function api({
       ) =>
         client.reportNotificationInteraction({
           urlParams: request,
+          headers: commonHeaders,
+        }),
+      reportFrontendEvent: (request: ReportFrontendEventRequest) =>
+        client.reportFrontendEvent({
+          payload: request,
           headers: commonHeaders,
         }),
     }

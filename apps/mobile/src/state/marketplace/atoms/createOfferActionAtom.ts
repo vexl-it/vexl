@@ -28,6 +28,7 @@ import {apiAtom} from '../../../api'
 import getCountryPrefix from '../../../utils/getCountryCode'
 import reportError from '../../../utils/reportError'
 import {incrementPostedOffersActionAtom} from '../../accountStatsAtom'
+import {reportFrontendEventActionAtom} from '../../analytics/atoms'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {upsertOfferToConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
@@ -132,6 +133,7 @@ export const createOfferActionAtom = atom<
     set(offersAtom, (oldState) => [...oldState, createdOffer])
     set(postedFirstOfferAtom, true)
     set(incrementPostedOffersActionAtom)
+    set(reportFrontendEventActionAtom, 'offerCreated')
 
     set(upsertOfferToConnectionsActionAtom, {
       connections: {

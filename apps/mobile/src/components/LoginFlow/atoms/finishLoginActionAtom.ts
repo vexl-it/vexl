@@ -13,6 +13,7 @@ import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../api'
 import {type Session, type SessionV2} from '../../../brands/Session.brand'
+import {reportFrontendEventActionAtom} from '../../../state/analytics/atoms'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
 import {createVexlSecretActionAtom} from '../../../state/notifications/actions/createVexlSecretActionAtom'
 import {generateVexlTokenActionAtom} from '../../../state/notifications/actions/generateVexlTokenActionAtom'
@@ -243,6 +244,7 @@ export const finishLoginActionAtom = atom(
           notifyExistingUserAboutLogin: true,
         })
       )
+      let loginFinished = false
 
       if (userExists.exists) {
         const confirmed = yield* _(
@@ -260,12 +262,14 @@ export const finishLoginActionAtom = atom(
               session,
             })
           )
+          loginFinished = true
         } else {
           yield* _(
             set(deleteUserAndResetFlowActionAtom, {
               session,
             })
           )
+          return
         }
       } else {
         yield* _(
@@ -273,9 +277,11 @@ export const finishLoginActionAtom = atom(
             session,
           })
         )
+        loginFinished = true
       }
 
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
+      if (loginFinished) set(reportFrontendEventActionAtom, 'loginFinished')
     }).pipe(
       Effect.provide(FetchHttpClient.layer),
       Effect.as(true),

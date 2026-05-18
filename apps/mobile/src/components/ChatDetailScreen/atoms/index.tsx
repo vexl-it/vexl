@@ -25,6 +25,7 @@ import {focusAtom} from 'jotai-optics'
 import {selectAtom, splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {Alert} from 'react-native'
+import {reportFrontendEventActionAtom} from '../../../state/analytics/atoms'
 import acceptMessagingRequestAtom from '../../../state/chat/atoms/acceptMessagingRequestAtom'
 import cancelRequestActionAtomHandleUI from '../../../state/chat/atoms/cancelRequestActionAtomHandleUI'
 import createCanChatBeRerequestedAtom from '../../../state/chat/atoms/createCanBeRerequestedAtom'
@@ -1075,6 +1076,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
           return false
         }
+
+        set(
+          reportFrontendEventActionAtom,
+          approve ? 'offerRequestAccepted' : 'offerRequestDenied'
+        )
 
         return true
       })

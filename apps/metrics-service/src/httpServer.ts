@@ -10,13 +10,16 @@ import {RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'
 import {rateLimitingMiddlewareLayer} from '@vexl-next/server-utils/src/RateLimiting/rateLimitngMiddlewareLayer'
 import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Layer} from 'effect/index'
+import {reportFrontendEvent} from './routes/reportFrontendEvent'
 import {reportNotificationInteraction} from './routes/reportNotificationInteraction'
 
 const RootApiGroupLive = HttpApiBuilder.group(
   MetricsApiSpecification,
   'root',
   (h) =>
-    h.handle('reportNotificationInteraction', reportNotificationInteraction)
+    h
+      .handle('reportNotificationInteraction', reportNotificationInteraction)
+      .handle('reportFrontendEvent', reportFrontendEvent)
 )
 
 export const MetricsApiLive = HttpApiBuilder.api(MetricsApiSpecification).pipe(

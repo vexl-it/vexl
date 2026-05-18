@@ -1,4 +1,4 @@
-import {Either, Schema, pipe, type ParseResult} from 'effect'
+import {Array, Either, Schema, pipe, type ParseResult} from 'effect'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {type WritingToStoreError} from '../mmkv/domain'
@@ -8,10 +8,23 @@ import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom
 
 const AUTHOR_ID_KEY = '___author_id' as const
 export const CLEAR_STORAGE_KEY = '__clear_storage'
+const ClearStoragePayload = Schema.Struct({
+  preserveKeys: Schema.optional(Schema.Array(Schema.String)),
+})
 
 const AuthorKeySchema = Schema.Struct({
   [AUTHOR_ID_KEY]: Schema.String,
 })
+
+function shouldPreserveOnClear(key: string): boolean {
+  return pipe(
+    storage.getVerified(CLEAR_STORAGE_KEY, ClearStoragePayload),
+    Either.map((payload) =>
+      pipe(payload.preserveKeys ?? [], Array.contains(key))
+    ),
+    Either.getOrElse(() => false)
+  )
+}
 
 const saveWithAuthorKey = <A, I extends object>({
   schema,
@@ -121,6 +134,7 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
     const listener = storage._storage.addOnValueChangedListener(
       (changedKey) => {
         if (changedKey === CLEAR_STORAGE_KEY) {
+          if (shouldPreserveOnClear(key)) return
           console.info(`Setting MMKV atom with key '${key}' to default value`)
           setAtom(defaultValue)
           return

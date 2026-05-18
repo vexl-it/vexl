@@ -2,6 +2,25 @@ import {NotificationTrackingId} from '@vexl-next/domain/src/general/Notification
 import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
+export const FrontendEvent = Schema.Literal(
+  'offerRequested',
+  'offerRequestDenied',
+  'offerRequestAccepted',
+  'offerRerequested',
+  'offerRequestAcceptedByOtherSide',
+  'chatClosed',
+  'appStartedFirstTime',
+  'loginFinished',
+  'offerCreated'
+)
+export type FrontendEvent = typeof FrontendEvent.Type
+
+export const ReportFrontendEventRequest = Schema.Struct({
+  analyticsUuid: Uuid,
+  event: FrontendEvent,
+})
+export type ReportFrontendEventRequest = typeof ReportFrontendEventRequest.Type
+
 export const ReportNotificationInteractionRequest = Schema.Struct({
   uuid: Uuid,
   count: Schema.NumberFromString.pipe(Schema.greaterThanOrEqualTo(0)),

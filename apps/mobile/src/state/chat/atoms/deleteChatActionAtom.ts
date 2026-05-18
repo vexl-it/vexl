@@ -17,6 +17,7 @@ import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
 import {incrementClosedChatsActionAtom} from '../../accountStatsAtom'
+import {reportFrontendEventActionAtom} from '../../analytics/atoms'
 import {cancelTradeReminderActionAtom} from '../../tradeReminders/atoms/cancelTradeReminderActionAtom'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import {resetTradeChecklist} from '../utils/resetData'
@@ -140,7 +141,10 @@ export default function deleteChatActionAtom(
             // resetRealLifeInfo
           )
         )
-        if (!chatWasAlreadyClosed) set(incrementClosedChatsActionAtom)
+        if (!chatWasAlreadyClosed) {
+          set(incrementClosedChatsActionAtom)
+          set(reportFrontendEventActionAtom, 'chatClosed')
+        }
         return successMessage
       })
     )

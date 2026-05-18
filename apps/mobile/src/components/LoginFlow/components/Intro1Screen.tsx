@@ -9,6 +9,10 @@ import {useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
 import {useWindowDimensions} from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {
+  ANALYTICS_STATE_STORAGE_KEY,
+  ensureAnalyticsUuidAndReportFirstStartActionAtom,
+} from '../../../state/analytics/atoms'
 import clearMmkvStorageAndEmptyAtoms from '../../../utils/clearMmkvStorageAndEmptyAtoms'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {showTosSummaryForAlreadyLoggedInUserAtom} from '../../../utils/preferences'
@@ -28,17 +32,26 @@ export default function Intro1Screen({navigation}: Props): React.ReactElement {
   const setShowTosSummaryForAlreadyLoggedInUser = useSetAtom(
     showTosSummaryForAlreadyLoggedInUserAtom
   )
+  const ensureAnalyticsUuidAndReportFirstStart = useSetAtom(
+    ensureAnalyticsUuidAndReportFirstStartActionAtom
+  )
 
   useEffect(() => {
     setShowTosSummaryForAlreadyLoggedInUser(false)
-  }, [setShowTosSummaryForAlreadyLoggedInUser])
+    ensureAnalyticsUuidAndReportFirstStart()
+  }, [
+    ensureAnalyticsUuidAndReportFirstStart,
+    setShowTosSummaryForAlreadyLoggedInUser,
+  ])
 
   return (
     <LoginFlowScreen
       action={{
         label: t('loginFlow.v2.intro1.action'),
         onPress: () => {
-          clearMmkvStorageAndEmptyAtoms()
+          clearMmkvStorageAndEmptyAtoms({
+            preserveKeys: [ANALYTICS_STATE_STORAGE_KEY],
+          })
           navigation.navigate('Intro2')
         },
       }}

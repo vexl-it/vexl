@@ -13,6 +13,7 @@
     "checkJs": false,
     "allowJs": true
   },
+  "include": ["src", "jest.config.ts"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

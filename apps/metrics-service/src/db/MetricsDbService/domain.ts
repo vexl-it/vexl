@@ -7,6 +7,7 @@ export type MetricRecordId = typeof MetricRecordId.Type
 export class MetricRecord extends Schema.Class<MetricRecord>('MetricRecord')({
   id: MetricRecordId,
   uuid: Uuid,
+  analyticsUuid: Schema.NullOr(Uuid),
   name: Schema.String,
   value: Schema.Int,
   timestamp: Schema.DateFromSelf,

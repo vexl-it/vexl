@@ -14,6 +14,7 @@ export class MessageWithUuidAlreadyStoredError extends Schema.TaggedError<Messag
 export const InsertMetricsParams = Schema.Struct({
   name: Schema.String,
   uuid: Uuid,
+  analyticsUuid: Schema.optional(Uuid),
   value: Schema.Int,
   timestamp: Schema.Date,
   type: Schema.Literal('Increment', 'Total'),
@@ -34,11 +35,20 @@ export const createInsertMetricRecord = Effect.gen(function* (_) {
     Request: InsertMetricsParams,
     execute: (params) => sql`
       INSERT INTO
-        "metrics" (name, UUID, value, timestamp, type, attributes)
+        "metrics" (
+          name,
+          UUID,
+          analytics_uuid,
+          value,
+          timestamp,
+          type,
+          attributes
+        )
       VALUES
         (
           ${params.name},
           ${params.uuid},
+          ${params.analyticsUuid ?? null},
           ${params.value},
           ${params.timestamp},
           ${params.type},

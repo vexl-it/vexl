@@ -39,6 +39,7 @@ import {showChatNotification} from '../../../utils/notifications/chatNotificatio
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
+import {reportFrontendEventActionAtom} from '../../analytics/atoms'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
   focusOfferByPublicKeyAtom,
@@ -344,6 +345,19 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
       )
     ),
     TE.chainFirstW(({newMessages}) => {
+      const receivedApproveMessaging = pipe(
+        newMessages,
+        Array.some(
+          (one) =>
+            one.state === 'received' &&
+            one.message.messageType === 'APPROVE_MESSAGING'
+        )
+      )
+
+      if (receivedApproveMessaging) {
+        set(reportFrontendEventActionAtom, 'offerRequestAcceptedByOtherSide')
+      }
+
       const visibleMessagesToReport = newMessages.filter(
         (one) =>
           one.state === 'received' &&

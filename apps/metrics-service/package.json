@@ -7,6 +7,7 @@
     "build:esbuild": "node esbuild.config.js",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf ./dist",
+    "test": "jest",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "lint": "eslint src",

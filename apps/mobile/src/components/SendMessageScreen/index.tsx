@@ -14,6 +14,7 @@ import {useSetAtom} from 'jotai'
 import React, {useCallback, useRef, useState} from 'react'
 import {Alert, Dimensions, Keyboard, Pressable} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {reportFrontendEventActionAtom} from '../../state/analytics/atoms'
 import {sendRequestHandleUIActionAtom} from '../../state/chat/atoms/sendRequestActionAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -32,6 +33,7 @@ function SendMessageScreen({
   const {t} = useTranslation()
   const offer = useSingleOffer(offerId)
   const submitRequest = useSetAtom(sendRequestHandleUIActionAtom)
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
   const textRef = useRef('')
   const [hasText, setHasText] = useState(false)
 
@@ -69,10 +71,12 @@ function SendMessageScreen({
         const chat = yield* _(submitRequest({text, originOffer: offer.value}))
 
         if (mode === 'rerequest') {
+          reportFrontendEvent('offerRerequested')
           safeGoBack()
           return
         }
 
+        reportFrontendEvent('offerRequested')
         openChatDetailReplacingRequestFlow({
           otherSideKey: chat.otherSide.publicKey,
           inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
@@ -103,6 +107,7 @@ function SendMessageScreen({
     handleClose,
     mode,
     openChatDetailReplacingRequestFlow,
+    reportFrontendEvent,
   ])
 
   const navigationBar = (

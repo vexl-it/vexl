@@ -22,9 +22,9 @@ export default function clearMmkvStorageAndEmptyAtoms({
 
   storage._storage.clearAll()
 
-  Array.map(preservedValues, ({key, value}) => {
+  for (const {key, value} of preservedValues) {
     storage._storage.set(key, value)
-  })
+  }
 
   // set all atoms except preserved ones to defaultValue
   storage.setJSON(CLEAR_STORAGE_KEY)({

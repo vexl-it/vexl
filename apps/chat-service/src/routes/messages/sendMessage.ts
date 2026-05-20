@@ -13,6 +13,7 @@ import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureRece
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
+import {messageRecordToServerMessage} from './messageRecordToServerMessage'
 
 export const sendMessage = HttpApiBuilder.handler(
   ChatApiSpecification,
@@ -59,9 +60,10 @@ export const sendMessage = HttpApiBuilder.handler(
       )
 
       return {
-        id: Number(messageRecord.id),
-        message: req.payload.message,
-        senderPublicKey: req.payload.senderPublicKey,
+        ...messageRecordToServerMessage({
+          messageRecord,
+          senderPublicKey: req.payload.senderPublicKey,
+        }),
         notificationHandled: false,
       } satisfies SendMessageResponse
     }).pipe(

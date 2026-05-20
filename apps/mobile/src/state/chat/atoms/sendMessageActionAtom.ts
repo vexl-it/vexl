@@ -48,7 +48,7 @@ export default function sendMessageActionAtom(
           taskToEffect(replaceImageFileUrisWithBase64(message))
         )
 
-        yield* _(
+        const serverMessage = yield* _(
           sendMessage({
             message: m,
             api: api.chat,
@@ -67,6 +67,8 @@ export default function sendMessageActionAtom(
           yield* _(
             set(showDonationPromptGiveLoveActionAtom, {skipTimeCheck: false})
           )
+
+        return serverMessage
       }).pipe(
         Effect.match({
           onFailure(e) {
@@ -93,11 +95,12 @@ export default function sendMessageActionAtom(
               message,
             } as ChatMessageWithState
           },
-          onSuccess() {
+          onSuccess(serverMessage) {
             return {
               state: 'sent',
               message,
-            } as ChatMessageWithState
+              receivedByServerAt: serverMessage.receivedByServerAt,
+            } satisfies ChatMessageWithState
           },
         }),
         Effect.map((message) => {

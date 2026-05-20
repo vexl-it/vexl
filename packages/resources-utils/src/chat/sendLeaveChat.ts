@@ -51,7 +51,7 @@ export default function sendLeaveChat({
       taskEitherToEffect(messageToNetwork(receiverPublicKey)(message))
     )
 
-    yield* _(
+    const serverMessage = yield* _(
       callWithNotificationService(api.leaveChat, {
         message: encryptedMessage,
         receiverPublicKey,
@@ -68,6 +68,7 @@ export default function sendLeaveChat({
     return {
       message: encryptedMessage,
       senderPublicKey: senderKeypair.publicKeyPemBase64,
+      receivedByServerAt: serverMessage.receivedByServerAt,
     }
   })
 }

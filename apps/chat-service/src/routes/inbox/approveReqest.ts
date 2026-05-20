@@ -20,6 +20,7 @@ import {
 } from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
+import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
 export const approveRequest = HttpApiBuilder.handler(
   ChatApiSpecification,
@@ -110,10 +111,11 @@ export const approveRequest = HttpApiBuilder.handler(
       )
 
       return {
-        id: Number(sentMessage.id),
-        message: req.payload.message,
+        ...messageRecordToServerMessage({
+          messageRecord: sentMessage,
+          senderPublicKey: req.payload.publicKey,
+        }),
         notificationHandled: false,
-        senderPublicKey: req.payload.publicKey,
       } satisfies ApproveRequestResponse
     }).pipe(
       withInboxActionRedisLock(

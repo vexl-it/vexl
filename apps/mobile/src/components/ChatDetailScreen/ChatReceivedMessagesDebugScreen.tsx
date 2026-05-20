@@ -9,7 +9,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
-import {Array, Order, pipe} from 'effect'
+import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Text as RNText, ScrollView} from 'react-native'
@@ -18,6 +18,7 @@ import {Stack, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
+import compareMessages from '../../state/chat/utils/compareMessages'
 import {useStatusBarStyleForScreen} from '../../state/statusBarStyleAtom'
 import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
 import valueOrDefaultAtom from '../../utils/atomUtils/valueOrDefaultAtom'
@@ -64,10 +65,9 @@ function ChatReceivedMessagesDebugContent({
         message.state === 'sent' ||
         message.state === 'sendingError'
     ),
-    Array.sortBy(
-      Order.mapInput(Order.number, (message) => message.message.time)
-    )
+    Array.sort(compareMessages)
   )
+  const messageHistoryJson = JSON.stringify(messagesToDisplay, null, 2)
 
   return (
     <Screen
@@ -110,6 +110,17 @@ function ChatReceivedMessagesDebugContent({
               }}
             >
               Chat info JSON
+            </Button>
+            <Button
+              width="100%"
+              size="small"
+              variant="secondary"
+              onPress={() => {
+                Clipboard.setString(messageHistoryJson)
+                setToastNotification(t('common.copied'))
+              }}
+            >
+              Copy message history
             </Button>
             <Typography color="$foregroundSecondary" variant="paragraph">
               Showing {messagesToDisplay.length} message

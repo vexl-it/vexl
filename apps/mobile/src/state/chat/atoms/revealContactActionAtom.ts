@@ -123,10 +123,11 @@ export default function revealContactActionAtom(
             otherSideVersion: chat.otherSideVersion,
           })
         ),
-        TE.map(() => {
+        TE.map((serverMessage) => {
           const successMessage: ChatMessageWithState = {
             message,
             state: 'sent',
+            receivedByServerAt: serverMessage.receivedByServerAt,
           }
 
           if (successMessage.message.messageType === 'APPROVE_CONTACT_REVEAL') {

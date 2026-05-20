@@ -8,6 +8,7 @@ import Animated from 'react-native-reanimated'
 import {Stack} from 'tamagui'
 import messagingStateAtom from '../../../../../state/chat/atoms/messagingStateAtom'
 import {type ChatWithMessages} from '../../../../../state/chat/domain'
+import compareMessages from '../../../../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../../../../state/chat/utils/isChatActive'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -35,10 +36,7 @@ const chatIdsAtom = selectAtom(messagingStateAtom, (inboxes): ChatListData[] =>
       return {chat: one, lastMessage}
     })
     .filter(notEmpty)
-    .sort(
-      (a, b) =>
-        (b.lastMessage?.message.time ?? 0) - (a.lastMessage?.message.time ?? 0)
-    )
+    .sort((a, b) => compareMessages(b.lastMessage, a.lastMessage))
 )
 
 const chatIdAtomsAtom = splitAtom(chatIdsAtom)

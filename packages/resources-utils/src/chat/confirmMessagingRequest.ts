@@ -9,7 +9,10 @@ import {
 } from '@vexl-next/domain/src/general/messaging'
 import {isVexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  now,
+  type UnixMilliseconds,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
@@ -61,6 +64,11 @@ export type ApiConfirmMessagingRequest = Effect.Effect.Error<
   ReturnType<ChatApi['approveRequest']>
 >
 
+export interface SentConfirmMessagingRequest {
+  message: ChatMessage
+  receivedByServerAt?: UnixMilliseconds
+}
+
 export default function confirmMessagingRequest({
   text,
   fromKeypair,
@@ -86,7 +94,7 @@ export default function confirmMessagingRequest({
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
-  ChatMessage,
+  SentConfirmMessagingRequest,
   | ApiConfirmMessagingRequest
   | JsonStringifyError
   | ParseResult.ParseError
@@ -106,7 +114,7 @@ export default function confirmMessagingRequest({
       taskEitherToEffect(messageToNetwork(toPublicKey)(approvedMessage))
     )
 
-    yield* _(
+    const serverMessage = yield* _(
       callWithNotificationService(api.approveRequest, {
         message,
         approve,
@@ -120,6 +128,9 @@ export default function confirmMessagingRequest({
       })
     )
 
-    return approvedMessage
+    return {
+      message: approvedMessage,
+      receivedByServerAt: serverMessage.receivedByServerAt,
+    }
   })
 }

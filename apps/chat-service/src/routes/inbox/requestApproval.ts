@@ -22,6 +22,7 @@ import {
   withInboxActionFromSecurityRedisLock,
   withInboxActionRedisLock,
 } from '../../utils/withInboxActionRedisLock'
+import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
 const canSendRequest = ({
   receiverInbox,
@@ -117,9 +118,10 @@ export const requestApproval = HttpApiBuilder.handler(
       yield* _(reportRequestSent(1))
 
       return {
-        id: Number(insertedMessage.id),
-        message: insertedMessage.message,
-        senderPublicKey: security.publicKey,
+        ...messageRecordToServerMessage({
+          messageRecord: insertedMessage,
+          senderPublicKey: security.publicKey,
+        }),
         notificationHandled: false,
       } satisfies RequestApprovalResponse
     }).pipe(
@@ -181,9 +183,10 @@ export const requestApprovalV2 = HttpApiBuilder.handler(
       yield* _(reportRequestSent(1))
 
       return {
-        id: Number(insertedMessage.id),
-        message: insertedMessage.message,
-        senderPublicKey: req.payload.publicKey,
+        ...messageRecordToServerMessage({
+          messageRecord: insertedMessage,
+          senderPublicKey: req.payload.publicKey,
+        }),
         notificationHandled: false,
       } satisfies RequestApprovalResponse
     }).pipe(

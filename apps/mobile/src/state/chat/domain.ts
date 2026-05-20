@@ -11,6 +11,7 @@ import {
   generateChatId,
   Inbox,
 } from '@vexl-next/domain/src/general/messaging'
+import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
@@ -45,26 +46,31 @@ export class ErrorInboxAlreadyExists extends Schema.TaggedError<ErrorInboxAlread
 export const ReceivedMessage = Schema.Struct({
   state: Schema.Literal('received'),
   message: ChatMessage,
+  receivedByServerAt: Schema.optional(UnixMilliseconds),
 })
 
 export const ReceivedButRequiresNewerVersionMessage = Schema.Struct({
   state: Schema.Literal('receivedButRequiresNewerVersion'),
   message: ChatMessageRequiringNewerVersion,
+  receivedByServerAt: Schema.optional(UnixMilliseconds),
 })
 
 export const SendingMessage = Schema.Struct({
   state: Schema.Literal('sending'),
   message: ChatMessage,
+  receivedByServerAt: Schema.optional(UnixMilliseconds),
 })
 
 export const SentMessage = Schema.Struct({
   state: Schema.Literal('sent'),
   message: ChatMessage,
+  receivedByServerAt: Schema.optional(UnixMilliseconds),
 })
 
 export const SendingErrorMessage = Schema.Struct({
   state: Schema.Literal('sendingError'),
   message: ChatMessage,
+  receivedByServerAt: Schema.optional(UnixMilliseconds),
   error: Schema.Union(
     ErrorEncryptingMessage,
     ErrorGeneratingChallenge,

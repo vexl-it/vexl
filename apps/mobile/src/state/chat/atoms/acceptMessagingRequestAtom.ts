@@ -5,7 +5,6 @@ import {
   type RateLimitedError,
   type UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import confirmMessagingRequest, {
   type ApiConfirmMessagingRequest,
 } from '@vexl-next/resources-utils/src/chat/confirmMessagingRequest'
@@ -102,7 +101,8 @@ const acceptMessagingRequestAtom = atom(
       TE.bind('message', ({configMessage: message}) =>
         TE.of({
           state: 'sent' as const,
-          message: message satisfies ChatMessage,
+          message: message.message,
+          receivedByServerAt: message.receivedByServerAt,
         } satisfies ChatMessageWithState)
       ),
       TE.map(({message, vexlToken}) => {

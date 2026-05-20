@@ -12,6 +12,7 @@ import {reportChatClosed, reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
+import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
 export const leaveChat = HttpApiBuilder.handler(
   ChatApiSpecification,
@@ -74,9 +75,10 @@ export const leaveChat = HttpApiBuilder.handler(
       yield* _(reportChatClosed(1))
 
       return {
-        id: Number(sentMessage.id),
-        message: sentMessage.message,
-        senderPublicKey: req.payload.senderPublicKey,
+        ...messageRecordToServerMessage({
+          messageRecord: sentMessage,
+          senderPublicKey: req.payload.senderPublicKey,
+        }),
         notificationHandled: false,
       } satisfies CancelApprovalResponse
     }).pipe(

@@ -11,8 +11,12 @@ import {
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {formatFullCurrencyAmount} from '../utils/localization/currency'
-import {useTranslation} from '../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
+import {getOfferFeeLabel} from '../utils/offerAmountDetails'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
@@ -26,6 +30,7 @@ export default function OfferOnMarketplace({
   onPress?: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
+  const locale = getCurrentLocale()
   const {publicPart, privatePart} = offer.offerInfo
   const {ownershipInfo} = offer
   const isMine = !!ownershipInfo?.adminId
@@ -113,6 +118,17 @@ export default function OfferOnMarketplace({
     t,
   ])
 
+  const premiumLabel = useMemo(
+    () =>
+      getOfferFeeLabel({
+        feeAmount: publicPart.feeAmount,
+        locale,
+        t,
+        spaceAroundSign: true,
+      }),
+    [locale, publicPart.feeAmount, t]
+  )
+
   const details = useMemo(() => {
     const result: string[] = []
 
@@ -190,6 +206,7 @@ export default function OfferOnMarketplace({
       commonFriends={commonFriendsText}
       clubNames={clubNames}
       price={price}
+      premiumLabel={premiumLabel.length > 0 ? premiumLabel : undefined}
       description={publicPart.offerDescription}
       details={details}
       onPress={onPress}

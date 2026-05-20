@@ -30,6 +30,7 @@ function ThemedColumn({
 
         <YStack gap="$3">
           <InfoBox>{sampleText}</InfoBox>
+          <InfoBox variant="yellow">{sampleText}</InfoBox>
           <InfoBox variant="pink">{sampleText}</InfoBox>
           <InfoBox variant="tertiary">{sampleText}</InfoBox>
           <InfoBox variant="naked">{sampleText}</InfoBox>

@@ -71,6 +71,7 @@ const OptionalTag = styled(XStack, {
 interface EditRowBaseProps {
   readonly headline: string
   readonly headlineSuffix?: string
+  readonly subheadline?: string
   readonly overline?: string
   readonly optionalLabel?: string
   readonly showEditButton?: boolean
@@ -141,6 +142,7 @@ export function EditRow({
   state,
   headline,
   headlineSuffix,
+  subheadline,
   overline,
   optionalLabel,
   showEditButton = state !== 'initial',
@@ -200,7 +202,7 @@ export function EditRow({
       ) : (
         <IconBox tone={iconBoxTone}>{leadingIcon}</IconBox>
       )}
-      <YStack flex={1} gap={overline ? '$2' : undefined}>
+      <YStack flex={1} gap={overline || subheadline ? '$2' : undefined}>
         {overline ? (
           <Typography
             variant="micro"
@@ -221,6 +223,15 @@ export function EditRow({
             {headline}
           </Typography>
         )}
+        {subheadline ? (
+          <Typography
+            variant="micro"
+            color="$foregroundPrimary"
+            numberOfLines={1}
+          >
+            {subheadline}
+          </Typography>
+        ) : null}
       </YStack>
       {optionalLabel ? (
         <OptionalTag>

@@ -119,7 +119,8 @@ export default function revealIdentityActionAtom(
       return pipe(
         replaceImageFileUrisWithBase64(messageWithFileUri),
         TE.fromTask,
-        TE.chainFirstW((message) =>
+        TE.bindTo('message'),
+        TE.bindW('serverMessage', ({message}) =>
           effectToTaskEither(
             sendMessage({
               api: api.chat,
@@ -133,7 +134,7 @@ export default function revealIdentityActionAtom(
             })
           )
         ),
-        TE.map((message): ChatMessageWithState => {
+        TE.map(({message, serverMessage}): ChatMessageWithState => {
           if (
             ['APPROVE_REVEAL', 'DISAPPROVE_REVEAL'].includes(
               message.messageType
@@ -160,6 +161,7 @@ export default function revealIdentityActionAtom(
           const successMessage: ChatMessageWithState = {
             message: messageWithFileUri,
             state: 'sent',
+            receivedByServerAt: serverMessage.receivedByServerAt,
           }
           set(chatWithMessagesAtom, addMessageToChat(successMessage))
           return successMessage

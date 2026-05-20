@@ -1,5 +1,6 @@
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
+import compareMessages from '../../../state/chat/utils/compareMessages'
 import addToSortedArray from '../../../utils/addToSortedArray'
 
 export interface MessageWithState {
@@ -23,9 +24,7 @@ export function addVexlBotOrMessageWithStateToArray(
   item: MessageWithState
 ): (args: MessageWithState[]) => MessageWithState[] {
   return (items) =>
-    addToSortedArray(items, (a, b) => {
-      const aMillis = getMessageTime(a)
-      const bMillis = getMessageTime(b)
-      return aMillis - bMillis
-    })(item)
+    addToSortedArray(items, (a, b) => compareMessages(a.message, b.message))(
+      item
+    )
 }

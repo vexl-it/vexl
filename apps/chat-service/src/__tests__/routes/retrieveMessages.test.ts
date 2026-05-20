@@ -94,6 +94,59 @@ describe('Retrieve messages', () => {
           'someMessage2',
           'someMessage3',
         ])
+        expect(
+          messagesForUser1.messages.find(
+            (one) => one.message === 'someMessage3'
+          )?.receivedByServerAt
+        ).toBeDefined()
+      })
+    )
+  })
+
+  it('Returns legacy messages without receivedByServerAt', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const messageToSend = (yield* _(
+          user2.inbox1.addChallenge({
+            message: 'legacyMessage' as MessageCypher,
+            messageType: 'MESSAGE' as const,
+            receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+          })
+        )) satisfies SendMessageRequest
+
+        yield* _(setAuthHeaders(user2.authHeaders))
+        yield* _(
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          UPDATE message
+          SET
+            received_by_server_at = NULL
+          WHERE
+            message = 'legacyMessage'
+        `)
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+        const messagesForUser1 = yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
+        )
+
+        expect(
+          messagesForUser1.messages.find(
+            (one) => one.message === 'legacyMessage'
+          )?.receivedByServerAt
+        ).toBeUndefined()
       })
     )
   })

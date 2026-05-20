@@ -9,6 +9,7 @@ import {useMemo} from 'react'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../state/chat/domain'
+import compareMessages from '../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../state/chat/utils/isChatActive'
 import {offersAtom} from '../../state/marketplace/atoms/offersState'
 import {getOtherSideRealNameOrFriendLevel} from '../../utils/chat/getOtherSideFriendLevel'
@@ -30,6 +31,7 @@ export interface SearchMessageResult {
   messageId: ChatMessageId
   messageText: string
   messageTime: UnixMilliseconds
+  message: ChatMessageWithState
 }
 
 function getOfferForChat({
@@ -95,7 +97,7 @@ export function useChatSearchResults({
           },
         ]
       })
-      .sort((a, b) => b.lastMessage.message.time - a.lastMessage.message.time)
+      .sort((a, b) => compareMessages(b.lastMessage, a.lastMessage))
   }, [messagingState, offers, t])
 
   return useMemo(() => {
@@ -122,11 +124,12 @@ export function useChatSearchResults({
               messageId: messageWithState.message.uuid,
               messageText,
               messageTime: messageWithState.message.time,
+              message: messageWithState,
             },
           ]
         })
       )
-      .sort((a, b) => b.messageTime - a.messageTime)
+      .sort((a, b) => compareMessages(b.message, a.message))
 
     return {chats, messages}
   }, [query, searchableChats])

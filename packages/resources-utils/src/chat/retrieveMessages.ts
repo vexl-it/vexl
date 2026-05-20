@@ -1,6 +1,7 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
+import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {Array, Effect, Either, pipe} from 'effect'
 import {flow} from 'fp-ts/function'
@@ -15,6 +16,11 @@ import {
 export type ApiErrorRetrievingMessages = Effect.Effect.Error<
   ReturnType<ChatApi['retrieveMessages']>
 >
+
+export interface RetrievedChatMessage {
+  message: ChatMessage
+  receivedByServerAt?: UnixMilliseconds
+}
 
 export default function retrieveMessages({
   api,
@@ -31,7 +37,7 @@ export default function retrieveMessages({
       | ErrorParsingChatMessage
       | ErrorChatMessageRequiresNewerVersion
     >
-    messages: ChatMessage[]
+    messages: RetrievedChatMessage[]
   },
   ApiErrorRetrievingMessages
 > {
@@ -45,6 +51,11 @@ export default function retrieveMessages({
               privateKey: inboxKeypair,
               appVersion: currentAppVersion,
             })(message)
+          ).pipe(
+            Effect.map((chatMessage) => ({
+              message: chatMessage,
+              receivedByServerAt: message.receivedByServerAt,
+            }))
           )
         ),
         Array.map(Effect.either),

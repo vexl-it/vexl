@@ -90,7 +90,7 @@ export default function sendMessage({
       taskEitherToEffect(messagePreviewToNetwork(receiverPublicKey)(message))
     )
 
-    yield* _(
+    const serverMessage = yield* _(
       callWithNotificationService(api.sendMessage, {
         message: encryptedMessage,
         messagePreview: encryptedPreview,
@@ -109,6 +109,7 @@ export default function sendMessage({
     return {
       message: encryptedMessage,
       senderPublicKey: senderKeypair.publicKeyPemBase64,
+      receivedByServerAt: serverMessage.receivedByServerAt,
     }
   })
 }

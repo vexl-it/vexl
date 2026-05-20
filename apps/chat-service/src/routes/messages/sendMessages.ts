@@ -31,6 +31,7 @@ import {findAndEnsureReceiverInbox} from '../../utils/findAndEnsureReceiverInbox
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
 import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
+import {messageRecordToServerMessage} from './messageRecordToServerMessage'
 
 const sendMessage = (
   senderPublicKey: PublicKeyPemBase64,
@@ -77,9 +78,7 @@ const sendMessage = (
     )
 
     return {
-      id: Number(messageRecord.id),
-      message: messageRecord.message,
-      senderPublicKey,
+      ...messageRecordToServerMessage({messageRecord, senderPublicKey}),
       notificationHandled: false,
     } satisfies SendMessageResponse
   }).pipe(

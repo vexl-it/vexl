@@ -2,7 +2,6 @@ import {
   type PrivateKeyHolder,
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
-import {type ChatMessage} from '@vexl-next/domain/src/general/messaging'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
@@ -12,6 +11,7 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
+  type RetrievedChatMessage,
 } from '@vexl-next/resources-utils/src/chat/retrieveMessages'
 import {type ErrorChatMessageRequiresNewerVersion} from '@vexl-next/resources-utils/src/chat/utils/parseChatMessage'
 import {
@@ -165,15 +165,17 @@ function incompatibleErrorToChatMessageWithState(
   return {
     message: error.message,
     state: 'receivedButRequiresNewerVersion',
+    receivedByServerAt: error.message.serverMessage.receivedByServerAt,
   }
 }
 
 function messageToChatMessageWithState(
-  message: ChatMessage
+  message: RetrievedChatMessage
 ): ChatMessageWithState {
   return {
-    message,
+    message: message.message,
     state: 'received',
+    receivedByServerAt: message.receivedByServerAt,
   }
 }
 

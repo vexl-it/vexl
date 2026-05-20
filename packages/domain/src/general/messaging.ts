@@ -224,6 +224,7 @@ export type MessageCypher = typeof MessageCypher.Type
 export const ServerMessage = Schema.Struct({
   message: MessageCypher,
   senderPublicKey: PublicKeyPemBase64,
+  receivedByServerAt: Schema.optional(UnixMilliseconds),
 })
 export type ServerMessage = typeof ServerMessage.Type
 

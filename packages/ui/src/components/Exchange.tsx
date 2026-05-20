@@ -46,6 +46,8 @@ export interface ExchangeProps {
   readonly swapped?: boolean
   /** Called when user taps the center swap control */
   readonly onSwapPress?: () => void
+  /** Whether to render the centered swap control (default true) */
+  readonly showSwapControl?: boolean
 
   /** BCP 47 locale for Intl number formatting (default "en-US") */
   readonly locale?: string
@@ -125,6 +127,7 @@ export function Exchange({
   onFiatBlur,
   swapped = false,
   onSwapPress,
+  showSwapControl = true,
   locale = 'en-US',
 }: ExchangeProps): React.JSX.Element {
   const theme = useTheme()
@@ -278,29 +281,31 @@ export function Exchange({
         {swapped ? btcField : fiatField}
       </YStack>
 
-      <Stack
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        bottom={0}
-        alignItems="center"
-        justifyContent="center"
-        pointerEvents={onSwapPress ? 'auto' : 'none'}
-      >
+      {showSwapControl ? (
         <Stack
-          width="$10"
-          height="$10"
-          borderRadius="$3"
-          backgroundColor="$accentYellowPrimary"
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
           alignItems="center"
           justifyContent="center"
-          role={onSwapPress ? 'button' : undefined}
-          onPress={onSwapPress}
+          pointerEvents={onSwapPress ? 'auto' : 'none'}
         >
-          <ArrowsVerticalSort size={24} color={arrowsIconColor} />
+          <Stack
+            width="$10"
+            height="$10"
+            borderRadius="$3"
+            backgroundColor="$accentYellowPrimary"
+            alignItems="center"
+            justifyContent="center"
+            role={onSwapPress ? 'button' : undefined}
+            onPress={onSwapPress}
+          >
+            <ArrowsVerticalSort size={24} color={arrowsIconColor} />
+          </Stack>
         </Stack>
-      </Stack>
+      ) : null}
     </Stack>
   )
 }

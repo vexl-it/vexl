@@ -6,10 +6,10 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated'
 import {scheduleOnRN} from 'react-native-worklets'
-import {getTokens, styled, useTheme} from 'tamagui'
+import {getTokens, styled} from 'tamagui'
 
-import {InfoCircle} from '../icons/InfoCircle'
 import {Stack, XStack, YStack} from '../primitives'
+import {InfoBox, type InfoBoxVariant} from './InfoBox'
 import {Typography} from './Typography'
 
 function clampPosition(position: number): number {
@@ -61,30 +61,6 @@ const SliderThumbInnerRing = styled(Stack, {
   backgroundColor: '$accentYellowPrimary',
 })
 
-const InfoBanner = styled(XStack, {
-  name: 'BuySellRangeSliderInfoBanner',
-  alignItems: 'center',
-  padding: '$5',
-  borderRadius: '$3',
-  gap: '$3',
-  variants: {
-    variant: {
-      gray: {
-        backgroundColor: '$backgroundSecondary',
-      },
-      yellow: {
-        backgroundColor: '$accentYellowSecondary',
-      },
-      pink: {
-        backgroundColor: '$pinkBackground',
-      },
-    },
-  } as const,
-  defaultVariants: {
-    variant: 'gray',
-  },
-})
-
 const AnimatedSliderThumb = Animated.createAnimatedComponent(SliderThumb)
 
 export interface BuySellRangeSliderProps {
@@ -109,7 +85,6 @@ export function BuySellRangeSlider({
   amountText,
 }: BuySellRangeSliderProps): React.JSX.Element {
   const tokens = getTokens()
-  const theme = useTheme()
   const thumbSize = tokens.size.$9.val
   const range = maxPercentage - minPercentage
   const midPercentage = (minPercentage + maxPercentage) / 2
@@ -214,18 +189,12 @@ export function BuySellRangeSlider({
     transform: [{translateX: thumbPosition.value * usableWidth.value}],
   }))
 
-  const bannerVariant =
+  const bannerVariant: InfoBoxVariant =
     distanceFromCenter === 0
       ? 'gray'
       : distanceFromCenter <= quarterRange
         ? 'yellow'
         : 'pink'
-  const infoColor =
-    bannerVariant === 'gray'
-      ? theme.foregroundSecondary.get()
-      : bannerVariant === 'yellow'
-        ? theme.accentHighlightSecondary.get()
-        : theme.pinkForeground.get()
 
   return (
     <YStack gap="$3">
@@ -263,12 +232,9 @@ export function BuySellRangeSlider({
           </XStack>
         ) : null}
       </Stack>
-      <InfoBanner variant={bannerVariant}>
-        <InfoCircle size={24} color={infoColor} />
-        <Typography variant="description" color={infoColor} flex={1}>
-          {infoText}
-        </Typography>
-      </InfoBanner>
+      <InfoBox variant={bannerVariant} iconSize={24} p="$5" gap="$3" textMt={0}>
+        {infoText}
+      </InfoBox>
     </YStack>
   )
 }

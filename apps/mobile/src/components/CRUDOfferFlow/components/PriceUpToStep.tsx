@@ -10,7 +10,7 @@ import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useState} from 'react'
+import React, {useMemo, useState} from 'react'
 import {XStack, YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
@@ -18,6 +18,7 @@ import {
   getCurrentLocale,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
+import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
@@ -80,12 +81,14 @@ function PriceUpToStep({
     calculateSatsValueOnFiatValueChangeActionAtom,
     calculateFiatValueOnSatsValueChangeActionAtom,
     checkAmountExceedsLimitAndShowDialogActionAtom,
+    expirationDateAtom,
   } = useMolecule(offerFormMolecule)
 
   const currency = useAtomValue(currencyAtom)
   const btcPriceData = useAtomValue(btcPriceForOfferWithCurrencyAtom)
   const amountBottomLimit = useAtomValue(amountBottomLimitAtom) ?? 0
   const satsValue = useAtomValue(satsValueAtom)
+  const expirationDate = useAtomValue(expirationDateAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
   const openChangeCurrency = useOpenChangeCurrency()
@@ -100,6 +103,15 @@ function PriceUpToStep({
   )
 
   const [btcUnit, setBtcUnit] = useState<BtcUnit>('SATS')
+  const amountDetailsLabel = useMemo(
+    () =>
+      getOfferAmountDetailsLabel({
+        expirationDate,
+        locale,
+        t,
+      }),
+    [expirationDate, locale, t]
+  )
 
   if (!currency) return null
 
@@ -116,6 +128,7 @@ function PriceUpToStep({
         icon={icon}
         overline={overline ?? t('offerForm.priceUpTo')}
         headline={completedHeadline}
+        subheadline={amountDetailsLabel}
         onPress={onEdit}
       />
     )

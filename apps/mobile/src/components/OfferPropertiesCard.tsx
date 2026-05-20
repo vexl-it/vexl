@@ -2,7 +2,14 @@ import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import React, {useMemo} from 'react'
-import {useTranslation} from '../utils/localization/I18nProvider'
+import {
+  getCurrentLocale,
+  useTranslation,
+} from '../utils/localization/I18nProvider'
+import {
+  formatOfferExpirationDate,
+  getOfferFeeLabel,
+} from '../utils/offerAmountDetails'
 import {
   getAmountLabel,
   getLanguagesLabel,
@@ -68,6 +75,8 @@ export default function OfferPropertiesCard({
   readonly minimalContainer?: boolean
 }): React.ReactElement | null {
   const {t} = useTranslation()
+  const locale = getCurrentLocale()
+  const {feeAmount, expirationDate} = offer.offerInfo.publicPart
 
   const rows = useMemo(
     () =>
@@ -76,6 +85,19 @@ export default function OfferPropertiesCard({
           {
             label: t('offerForm.amountOfTransaction.amountOfTransaction'),
             value: getAmountLabel(offer),
+          },
+          {
+            label: t('offerForm.premiumOrDiscount.premiumOrDiscount'),
+            value: getOfferFeeLabel({
+              feeAmount,
+              locale,
+              t,
+              spaceAroundSign: true,
+            }),
+          },
+          {
+            label: t('offerForm.expiration.expirationDate'),
+            value: formatOfferExpirationDate(expirationDate, locale),
           },
           {
             label: t('offerForm.location.location'),
@@ -99,7 +121,7 @@ export default function OfferPropertiesCard({
         ],
         Array.filter((row) => row.value.length > 0)
       ),
-    [offer, t]
+    [expirationDate, feeAmount, locale, offer, t]
   )
 
   if (!Array.isNonEmptyArray(rows)) return null

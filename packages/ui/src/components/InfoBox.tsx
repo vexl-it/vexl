@@ -5,7 +5,13 @@ import {InfoCircle} from '../icons/InfoCircle'
 import {XStack} from '../primitives'
 import {Typography} from './Typography'
 
-export type InfoBoxVariant = 'default' | 'pink' | 'tertiary' | 'naked'
+export type InfoBoxVariant =
+  | 'default'
+  | 'gray'
+  | 'yellow'
+  | 'pink'
+  | 'tertiary'
+  | 'naked'
 
 const InfoBoxFrame = styled(XStack, {
   name: 'InfoBox',
@@ -20,6 +26,12 @@ const InfoBoxFrame = styled(XStack, {
     variant: {
       default: {
         backgroundColor: '$backgroundSecondary',
+      },
+      gray: {
+        backgroundColor: '$backgroundSecondary',
+      },
+      yellow: {
+        backgroundColor: '$accentYellowSecondary',
       },
       pink: {
         backgroundColor: '$pinkBackground',
@@ -46,25 +58,35 @@ export interface InfoBoxProps
   extends Omit<InfoBoxFrameProps, 'children' | 'variant'> {
   readonly children: string
   readonly variant?: InfoBoxVariant
+  readonly iconSize?: number
+  readonly textMt?: React.ComponentProps<typeof Typography>['mt']
 }
 
 export function InfoBox({
   children,
   variant = 'default',
+  iconSize = 18,
+  textMt = '$2',
   ...rest
 }: InfoBoxProps): React.JSX.Element {
   const theme = useTheme()
   const foregroundColor =
-    variant === 'pink'
-      ? theme.foregroundPrimary.get()
-      : theme.foregroundSecondary.get()
+    variant === 'yellow'
+      ? theme.accentHighlightSecondary.get()
+      : variant === 'pink'
+        ? theme.pinkForeground.get()
+        : theme.foregroundSecondary.get()
   const textColor =
-    variant === 'pink' ? '$foregroundPrimary' : '$foregroundSecondary'
+    variant === 'yellow'
+      ? '$accentHighlightSecondary'
+      : variant === 'pink'
+        ? '$pinkForeground'
+        : '$foregroundSecondary'
 
   return (
     <InfoBoxFrame variant={variant} {...rest}>
-      <InfoCircle color={foregroundColor} size={18} />
-      <Typography mt="$2" color={textColor} flex={1} variant="description">
+      <InfoCircle color={foregroundColor} size={iconSize} />
+      <Typography mt={textMt} color={textColor} flex={1} variant="description">
         {children}
       </Typography>
     </InfoBoxFrame>

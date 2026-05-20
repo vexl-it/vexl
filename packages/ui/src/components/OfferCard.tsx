@@ -131,15 +131,6 @@ export function OfferCard({
                   >
                     {name}
                   </Typography>
-                  {premiumLabel != null ? (
-                    <Typography
-                      variant="descriptionBold"
-                      color="$accentHighlightSecondary"
-                      numberOfLines={1}
-                    >
-                      {premiumLabel}
-                    </Typography>
-                  ) : null}
                 </XStack>
                 <XStack gap="$1" alignItems="center">
                   {textTag}
@@ -169,9 +160,20 @@ export function OfferCard({
         )}
       </HeaderFrame>
       <ContentFrame>
-        <Typography variant="tabSmall" color="$foregroundPrimary">
-          {price}
-        </Typography>
+        <YStack gap="$2">
+          <Typography variant="tabSmall" color="$foregroundPrimary">
+            {price}
+          </Typography>
+          {premiumLabel != null ? (
+            <Typography
+              variant="micro"
+              color="$foregroundPrimary"
+              numberOfLines={1}
+            >
+              {premiumLabel}
+            </Typography>
+          ) : null}
+        </YStack>
         <Typography
           variant="description"
           color="$foregroundSecondary"

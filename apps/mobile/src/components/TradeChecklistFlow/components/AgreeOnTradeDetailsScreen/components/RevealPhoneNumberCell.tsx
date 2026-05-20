@@ -6,6 +6,7 @@ import {
   identityRevealedAtom,
   tradeChecklistContactDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import {contactRevealed} from '../../../../../state/tradeChecklist/utils/contact'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtoms'
 import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
@@ -20,6 +21,7 @@ function RevealPhoneNumberCell(): React.ReactElement {
   const contactRevealTriggeredFromChat = useAtomValue(
     contactRevealTriggeredFromChatAtom
   )
+  const phoneNumberRevealed = contactRevealed(tradeChecklistContactData)
 
   const disabled = useMemo(() => {
     const revealContactAlreadySent =
@@ -40,8 +42,12 @@ function RevealPhoneNumberCell(): React.ReactElement {
     <ChecklistCell
       icon={CellPhoneMobileDevice}
       disabled={disabled}
-      state={mapTradeChecklistItemStatusToUiState(itemStatus)}
-      pressable
+      state={
+        phoneNumberRevealed
+          ? 'completed'
+          : mapTradeChecklistItemStatusToUiState(itemStatus)
+      }
+      pressable={!phoneNumberRevealed}
       onPress={() => {
         void revealContact()()
       }}

@@ -74,6 +74,8 @@ const ButtonLabel = styled(SizableText, {
   name: 'ButtonText',
   fontFamily: '$body',
   fontWeight: '600',
+  flexShrink: 1,
+  textAlign: 'center',
 
   variants: {
     size: {
@@ -149,7 +151,13 @@ export function Button({
   return (
     <ButtonFrame variant={variantOrDisabled} size={size} {...rest}>
       {Icon ? <Icon color={iconColor} size={iconSize} /> : null}
-      <ButtonLabel variant={variantOrDisabled} size={size}>
+      <ButtonLabel
+        variant={variantOrDisabled}
+        size={size}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+      >
         {children}
       </ButtonLabel>
     </ButtonFrame>

@@ -81,8 +81,7 @@ export default function createSubmitChecklistUpdateActionAtom(
         Array.map(toSend, (message) =>
           pipe(
             Effect.Do,
-            Effect.map(() => message),
-            Effect.tap((message) =>
+            Effect.flatMap(() =>
               sendMessage({
                 api: api.chat,
                 senderKeypair: chatWithMessages.chat.inbox.privateKey,
@@ -94,7 +93,8 @@ export default function createSubmitChecklistUpdateActionAtom(
                   chatWithMessages.chat.otherSideFcmCypher,
                 otherSideVersion: chatWithMessages.chat.otherSideVersion,
               })
-            )
+            ),
+            Effect.map((serverMessage) => ({message, serverMessage}))
           )
         ),
         Effect.allWith({concurrency: 'unbounded'})
@@ -102,12 +102,13 @@ export default function createSubmitChecklistUpdateActionAtom(
 
       const successMessages: ChatMessageWithState[] = Array.map(
         sentMessages,
-        (message) => ({
+        ({message, serverMessage}) => ({
           message: {
             ...message,
             tradeChecklistUpdate: message.tradeChecklistUpdate,
           },
           state: 'sent',
+          receivedByServerAt: serverMessage.receivedByServerAt,
         })
       )
 

@@ -13,7 +13,10 @@ import {
   type GoldenAvatarType,
 } from '@vexl-next/domain/src/general/offers'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  now,
+  type UnixMilliseconds,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type ErrorSigningChallenge,
@@ -76,6 +79,11 @@ export type ApiErrorRequestMessaging = Effect.Effect.Error<
   ReturnType<ChatApi['requestApproval']>
 >
 
+export interface SentMessagingRequest {
+  message: ChatMessage
+  receivedByServerAt?: UnixMilliseconds
+}
+
 export function sendMessagingRequest({
   text,
   fromKeypair,
@@ -109,7 +117,7 @@ export function sendMessagingRequest({
   verifiedCommonFriends?: readonly HashedPhoneNumber[]
   friendLevel?: readonly FriendLevel[]
 }): Effect.Effect<
-  ChatMessage,
+  SentMessagingRequest,
   | ApiErrorRequestMessaging
   | InvalidChallengeError
   | ErrorGeneratingChallenge
@@ -137,7 +145,7 @@ export function sendMessagingRequest({
       taskEitherToEffect(messageToNetwork(toPublicKey)(requestChatMessage))
     )
 
-    yield* _(
+    const serverMessage = yield* _(
       callWithNotificationService(api.requestApprovalV2, {
         message,
         receiverPublicKey: toPublicKey,
@@ -150,6 +158,9 @@ export function sendMessagingRequest({
       })
     )
 
-    return requestChatMessage
+    return {
+      message: requestChatMessage,
+      receivedByServerAt: serverMessage.receivedByServerAt,
+    }
   })
 }

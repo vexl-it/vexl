@@ -47,7 +47,7 @@ const sendRequestActionAtom = atom(
         })
       )
 
-      const message = yield* _(
+      const sentMessage = yield* _(
         sendMessagingRequest({
           text,
           notificationApi: api.notification,
@@ -72,7 +72,11 @@ const sendRequestActionAtom = atom(
 
       return set(upsertChatForTheirOfferActionAtom, {
         inbox: {privateKey: inbox.privateKey},
-        initialMessage: {state: 'sent', message},
+        initialMessage: {
+          state: 'sent',
+          message: sentMessage.message,
+          receivedByServerAt: sentMessage.receivedByServerAt,
+        },
         sentVexlNotificationToken: notificationToken,
         offer: originOffer,
       })

@@ -20,5 +20,8 @@ export class MessageRecord extends Schema.Class<MessageRecord>('MessageRecord')(
     type: MessageType, // TODO brand
     inboxId: InboxRecordId,
     expiresAt: Schema.DateFromSelf,
+    receivedByServerAt: Schema.optionalWith(Schema.DateFromSelf, {
+      nullable: true,
+    }),
   }
 ) {}

@@ -15,6 +15,7 @@ import {encryptPublicKey} from '../../db/domain'
 import {reportMessageSent, reportRequestCanceled} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
+import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
 export const cancelRequest = HttpApiBuilder.handler(
   ChatApiSpecification,
@@ -72,9 +73,10 @@ export const cancelRequest = HttpApiBuilder.handler(
       yield* _(reportRequestCanceled(1))
 
       return {
-        id: Number(sentMessage.id),
-        message: sentMessage.message,
-        senderPublicKey: security.publicKey,
+        ...messageRecordToServerMessage({
+          messageRecord: sentMessage,
+          senderPublicKey: security.publicKey,
+        }),
         notificationHandled: false,
       } satisfies CancelApprovalResponse
     }).pipe(
@@ -146,9 +148,10 @@ export const cancelRequestV2 = HttpApiBuilder.handler(
       yield* _(reportRequestCanceled(1))
 
       return {
-        id: Number(sentMessage.id),
-        message: sentMessage.message,
-        senderPublicKey: req.payload.publicKey,
+        ...messageRecordToServerMessage({
+          messageRecord: sentMessage,
+          senderPublicKey: req.payload.publicKey,
+        }),
         notificationHandled: false,
       } satisfies CancelApprovalResponse
     }).pipe(

@@ -52,7 +52,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
       })
 
       const api = get(apiAtom)
-      yield* _(
+      const serverMessage = yield* _(
         sendMessage({
           api: api.chat,
           senderKeypair: chat.chat.inbox.privateKey,
@@ -69,6 +69,7 @@ export const sendUpdateNoticeMessageActionAtom = atom(
         addMessageToChat({
           state: 'sent',
           message: messageToSend,
+          receivedByServerAt: serverMessage.receivedByServerAt,
         } satisfies ChatMessageWithState)
       )
     }).pipe(

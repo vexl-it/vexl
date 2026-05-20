@@ -88,11 +88,12 @@ describe('Send message', () => {
         )) satisfies SendMessageRequest
 
         yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
+        const sendMessageResponse = yield* _(
           client.Messages.sendMessage({
             payload: messageToSend,
           })
         )
+        expect(sendMessageResponse.receivedByServerAt).toBeDefined()
 
         yield* _(setAuthHeaders(user2.authHeaders))
         const messagesReceived = yield* _(
@@ -106,6 +107,7 @@ describe('Send message', () => {
 
         expect(messagesReceived.messages.length).toBe(1)
         expect(messagesReceived.messages[0].message).toBe('someMessage')
+        expect(messagesReceived.messages[0].receivedByServerAt).toBeDefined()
 
         const messagesReceived2 = yield* _(
           client.Messages.retrieveMessages({
@@ -152,6 +154,7 @@ describe('Send message', () => {
         `)
         const expiresAt = new Date(messages[0].expiresAt as any)
         expect(messages[0].expiresAt).not.toBeNull()
+        expect(messages[0].receivedByServerAt).not.toBeNull()
 
         const lowerLimit = yield* _(messageExpirationLowerLimitDaysConfig)
         const upperLimit = yield* _(messageExpirationUpperLimitDaysConfig)

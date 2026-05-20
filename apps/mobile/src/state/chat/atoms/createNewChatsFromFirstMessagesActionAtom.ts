@@ -16,6 +16,7 @@ import {
 } from '../../clubs/atom/clubsWithMembersAtom'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
+import compareMessages from '../utils/compareMessages'
 
 export default function createNewChatsFromFirstMessagesActionAtom({
   inbox,
@@ -39,8 +40,9 @@ export default function createNewChatsFromFirstMessagesActionAtom({
         Array.map((senderPublicKey): ChatWithMessages | undefined => {
           const messages = messagesBySender[senderPublicKey]
           if (!messages) return undefined
+          const sortedMessages = Array.sort(messages, compareMessages)
 
-          const lastMessage = messages.at(-1)
+          const lastMessage = sortedMessages.at(-1)
           if (!lastMessage) return undefined
 
           const goldenAvatarType =
@@ -111,7 +113,7 @@ export default function createNewChatsFromFirstMessagesActionAtom({
             },
             feedbackSubmitted: false,
             hiddenMessagesIds: HashSet.empty(),
-            messages: [...messages],
+            messages: sortedMessages,
           } satisfies ChatWithMessages
 
           set(updateChatsPeakCountStatActionAtom, {chat: newChat.chat})

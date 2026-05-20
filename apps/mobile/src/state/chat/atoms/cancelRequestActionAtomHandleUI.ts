@@ -101,8 +101,9 @@ const cancelRequestActionAtomHandleUI = atom(
       )
 
       const successMessage: ChatMessageWithState = {
-        message: sentMessage,
+        message: sentMessage.message,
         state: 'sent',
+        receivedByServerAt: sentMessage.receivedByServerAt,
       }
 
       set(chatAtom, addMessageToChat(successMessage))

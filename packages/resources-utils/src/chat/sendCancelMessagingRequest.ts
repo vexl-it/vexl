@@ -7,7 +7,10 @@ import {
   type ChatMessage,
 } from '@vexl-next/domain/src/general/messaging'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {now} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
+import {
+  now,
+  type UnixMilliseconds,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {
   type ErrorSigningChallenge,
@@ -52,6 +55,11 @@ export type ApiErrorRequestMessaging = Effect.Effect.Error<
   ReturnType<ChatApi['cancelRequestApproval']>
 >
 
+export interface SentCancelMessagingRequest {
+  message: ChatMessage
+  receivedByServerAt?: UnixMilliseconds
+}
+
 export function sendCancelMessagingRequest({
   text,
   fromKeypair,
@@ -71,7 +79,7 @@ export function sendCancelMessagingRequest({
   otherSideVersion: SemverString | undefined
   notificationApi: NotificationApi
 }): Effect.Effect<
-  ChatMessage,
+  SentCancelMessagingRequest,
   | ApiErrorRequestMessaging
   | JsonStringifyError
   | ParseResult.ParseError
@@ -92,7 +100,7 @@ export function sendCancelMessagingRequest({
       taskEitherToEffect(messageToNetwork(toPublicKey)(cancelRequestMessage))
     )
 
-    yield* _(
+    const serverMessage = yield* _(
       callWithNotificationService(api.cancelRequestApprovalV2, {
         message,
         receiverPublicKey: toPublicKey,
@@ -105,6 +113,9 @@ export function sendCancelMessagingRequest({
       })
     )
 
-    return cancelRequestMessage
+    return {
+      message: cancelRequestMessage,
+      receivedByServerAt: serverMessage.receivedByServerAt,
+    }
   })
 }

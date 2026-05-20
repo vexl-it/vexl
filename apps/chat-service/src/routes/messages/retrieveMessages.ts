@@ -8,6 +8,7 @@ import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {decryptPublicKey} from '../../db/domain'
 import {ensureInboxExists} from '../../utils/ensureInboxExists'
+import {messageRecordToServerMessage} from './messageRecordToServerMessage'
 
 export const retrieveMessages = HttpApiBuilder.handler(
   ChatApiSpecification,
@@ -37,9 +38,11 @@ export const retrieveMessages = HttpApiBuilder.handler(
             decryptPublicKey(oneMessage.senderPublicKey).pipe(
               Effect.map((senderPublicKey) =>
                 Option.some({
-                  id: oneMessage.id,
-                  message: oneMessage.message,
-                  senderPublicKey,
+                  messageRecord: oneMessage,
+                  serverMessage: messageRecordToServerMessage({
+                    messageRecord: oneMessage,
+                    senderPublicKey,
+                  }),
                 })
               ),
               // if one message fails, make sure to return the rest to not make the inbox unusable
@@ -61,16 +64,18 @@ export const retrieveMessages = HttpApiBuilder.handler(
       yield* _(
         messagesToReturn,
         Array.map((message) =>
-          messagesDb.updateMessageAsPulledByMessageRecord(message.id)
+          messagesDb.updateMessageAsPulledByMessageRecord(
+            message.messageRecord.id
+          )
         ),
         (effects) => Effect.all(effects, {batching: true})
       )
 
       return {
-        messages: Array.map(messagesToReturn, (one) => ({
-          ...one,
-          id: Number(one.id),
-        })),
+        messages: Array.map(
+          messagesToReturn,
+          (oneMessage) => oneMessage.serverMessage
+        ),
       }
     }).pipe(withDbTransaction, makeEndpointEffect)
 )

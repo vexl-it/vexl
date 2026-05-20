@@ -1,3 +1,4 @@
+import {Stack, Typography, XStack, YStack} from '@vexl-next/ui'
 import React, {useEffect, useMemo} from 'react'
 import Animated, {
   useAnimatedStyle,
@@ -6,9 +7,8 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import {Stack, type StackProps, Text, XStack, YStack} from 'tamagui'
 
-interface Props extends StackProps {
+interface Props extends React.ComponentProps<typeof Stack> {
   size: 'xsmall' | 'small' | 'medium' | 'large'
   description?: string
 }
@@ -105,13 +105,12 @@ function VexlActivityIndicator({
         </Animated.View>
       </XStack>
       {!!description && (
-        <Text
-          fos={size === 'large' ? 14 : 12}
-          ff="$body500"
-          col="$foregroundSecondary"
+        <Typography
+          variant={size === 'large' ? 'description' : 'micro'}
+          color="$foregroundSecondary"
         >
           {description}
-        </Text>
+        </Typography>
       )}
     </YStack>
   )

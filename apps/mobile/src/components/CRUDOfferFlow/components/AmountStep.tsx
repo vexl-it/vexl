@@ -15,6 +15,7 @@ import {
   getCurrentLocale,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
+import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
@@ -45,6 +46,8 @@ function AmountStep({
     btcPricesReadyAtom,
     amountTopLimitForRangeInputAtom,
     amountBottomLimitForRangeInputAtom,
+    feeAmountAtom,
+    expirationDateAtom,
     btcPriceForOfferWithCurrencyAtom,
     changePriceCurrencyActionAtom,
   } = useMolecule(offerFormMolecule)
@@ -55,6 +58,8 @@ function AmountStep({
   const openChangeCurrency = useOpenChangeCurrency()
   const amountMin = useAtomValue(amountBottomLimitForRangeInputAtom)
   const amountMax = useAtomValue(amountTopLimitForRangeInputAtom)
+  const feeAmount = useAtomValue(feeAmountAtom)
+  const expirationDate = useAtomValue(expirationDateAtom)
   const maxLimit = useAtomValue(maxAmountForCurrencyAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
 
@@ -73,6 +78,17 @@ function AmountStep({
     return `${formatter.format(amountMin)} – ${formatter.format(amountMax)} ${currencies[currency].code}`
   }, [amountMin, amountMax, currency, locale])
 
+  const amountDetailsLabel = useMemo(
+    () =>
+      getOfferAmountDetailsLabel({
+        feeAmount,
+        expirationDate,
+        locale,
+        t,
+      }),
+    [expirationDate, feeAmount, locale, t]
+  )
+
   if (!currency) return null
 
   if (!active) {
@@ -82,6 +98,7 @@ function AmountStep({
         icon={icon}
         overline={overline ?? t('offerForm.selectAmount')}
         headline={amountLabel}
+        subheadline={amountDetailsLabel}
         onPress={onEdit}
       />
     )

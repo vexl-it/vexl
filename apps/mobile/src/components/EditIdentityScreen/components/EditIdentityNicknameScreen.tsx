@@ -3,7 +3,6 @@ import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {
   Button,
   ChevronLeft,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   TextField,
@@ -56,43 +55,41 @@ function EditIdentityNicknameScreen({navigation}: Props): React.ReactElement {
   }, [navigation, nickname, showInvalidUsernameUIFeedback])
 
   return (
-    <KeyboardAvoidingView>
-      <Screen
-        navigationBar={
-          <NavigationBar
-            style="back"
-            title={t('editProfileScreen.nickname.title')}
-            leftAction={{
-              icon: ChevronLeft,
-              onPress: goBack,
-            }}
-            rightActions={[
-              {
-                icon: XmarkCancelClose,
-                onPress: closeFlow,
-              },
-            ]}
-          />
-        }
-        footer={
-          <Button disabled={!nickname.trim()} onPress={handleNext}>
-            {t('editProfileScreen.nickname.nextButton')}
-          </Button>
-        }
-      >
-        <Stack flex={1} gap="$7" paddingTop="$4">
-          <Typography variant="description" color="$foregroundSecondary">
-            {t('editProfileScreen.nickname.description')}
-          </Typography>
-          <TextField
-            autoFocus
-            valueAtom={editProfileIdentityNicknameAtom}
-            placeholder={t('editProfileScreen.nickname.placeholder')}
-            showClear
-          />
-        </Stack>
-      </Screen>
-    </KeyboardAvoidingView>
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('editProfileScreen.nickname.title')}
+          leftAction={{
+            icon: ChevronLeft,
+            onPress: goBack,
+          }}
+          rightActions={[
+            {
+              icon: XmarkCancelClose,
+              onPress: closeFlow,
+            },
+          ]}
+        />
+      }
+      footer={
+        <Button disabled={!nickname.trim()} onPress={handleNext}>
+          {t('editProfileScreen.nickname.nextButton')}
+        </Button>
+      }
+    >
+      <Stack flex={1} gap="$7" paddingTop="$4">
+        <Typography variant="description" color="$foregroundSecondary">
+          {t('editProfileScreen.nickname.description')}
+        </Typography>
+        <TextField
+          autoFocus
+          valueAtom={editProfileIdentityNicknameAtom}
+          placeholder={t('editProfileScreen.nickname.placeholder')}
+          showClear
+        />
+      </Stack>
+    </Screen>
   )
 }
 

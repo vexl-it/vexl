@@ -1,7 +1,6 @@
 import {
   Button,
   ChevronLeft,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   Stack,
@@ -146,85 +145,80 @@ function DeclineChatRequestContent({
   }
 
   return (
-    <KeyboardAvoidingView>
-      <Screen
-        navigationBar={navigationBar}
-        footer={
-          <XStack gap="$4">
-            <Button
-              variant="secondary"
-              flex={1}
-              onPress={handleSkip}
-              disabled={isSubmitting}
+    <Screen
+      navigationBar={navigationBar}
+      footer={
+        <XStack gap="$4">
+          <Button
+            variant="secondary"
+            flex={1}
+            onPress={handleSkip}
+            disabled={isSubmitting}
+          >
+            {t('common.skip')}
+          </Button>
+          <Button
+            variant={isSendDisabled ? 'disabled' : 'primary'}
+            disabled={isSendDisabled}
+            flex={1}
+            onPress={handleSend}
+          >
+            {t('common.send')}
+          </Button>
+        </XStack>
+      }
+    >
+      <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
+        <YStack gap="$5">
+          <OfferAuthorBanner offer={offer} />
+          <YStack gap="$2">
+            <Stack
+              backgroundColor="$backgroundTertiary"
+              px="$4"
+              py="$5"
+              borderRadius="$4"
+              borderBottomRightRadius="$2"
+              borderBottomLeftRadius="$2"
             >
-              {t('common.skip')}
-            </Button>
-            <Button
-              variant={isSendDisabled ? 'disabled' : 'primary'}
-              disabled={isSendDisabled}
-              flex={1}
-              onPress={handleSend}
-            >
-              {t('common.send')}
-            </Button>
-          </XStack>
-        }
-      >
-        <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
-          <YStack gap="$5">
-            <OfferAuthorBanner offer={offer} />
-            <YStack gap="$2">
-              <Stack
-                backgroundColor="$backgroundTertiary"
-                px="$4"
-                py="$5"
-                borderRadius="$4"
-                borderBottomRightRadius="$2"
-                borderBottomLeftRadius="$2"
-              >
-                <Typography
-                  variant="descriptionBold"
-                  color="$foregroundPrimary"
-                >
-                  {t('messages.stateYourReasonForRejection')}
-                </Typography>
-              </Stack>
-              <TextArea
-                height={Dimensions.get('window').height * 0.3}
-                backgroundColor="$backgroundSecondary"
-                borderRadius="$5"
-                py="$6"
-                px="$4"
-                borderTopRightRadius="$2"
-                borderTopLeftRadius="$2"
-                placeholder={t('messages.stateYourReasonForRejection')}
-                placeholderTextColor="$foregroundSecondary"
-                value={text}
-                onChangeText={setText}
-                fontFamily="$body"
-                fontSize="$5"
-                lineHeight={24}
-                fontWeight="500"
-                color="$foregroundPrimary"
-                verticalAlign="top"
-                borderWidth={0}
-              />
-              <Typography
-                variant="micro"
-                color={
-                  hasReachedCharacterLimit
-                    ? '$redForeground'
-                    : '$foregroundSecondary'
-                }
-                textAlign="right"
-              >
-                {`${text.length}/${MAX_DECLINE_REASON_LENGTH}`}
+              <Typography variant="descriptionBold" color="$foregroundPrimary">
+                {t('messages.stateYourReasonForRejection')}
               </Typography>
-            </YStack>
+            </Stack>
+            <TextArea
+              height={Dimensions.get('window').height * 0.3}
+              backgroundColor="$backgroundSecondary"
+              borderRadius="$5"
+              py="$6"
+              px="$4"
+              borderTopRightRadius="$2"
+              borderTopLeftRadius="$2"
+              placeholder={t('messages.stateYourReasonForRejection')}
+              placeholderTextColor="$foregroundSecondary"
+              value={text}
+              onChangeText={setText}
+              fontFamily="$body"
+              fontSize="$5"
+              lineHeight={24}
+              fontWeight="500"
+              color="$foregroundPrimary"
+              verticalAlign="top"
+              borderWidth={0}
+            />
+            <Typography
+              variant="micro"
+              color={
+                hasReachedCharacterLimit
+                  ? '$redForeground'
+                  : '$foregroundSecondary'
+              }
+              textAlign="right"
+            >
+              {`${text.length}/${MAX_DECLINE_REASON_LENGTH}`}
+            </Typography>
           </YStack>
-        </Pressable>
-      </Screen>
-    </KeyboardAvoidingView>
+        </YStack>
+      </Pressable>
+    </Screen>
   )
 }
 

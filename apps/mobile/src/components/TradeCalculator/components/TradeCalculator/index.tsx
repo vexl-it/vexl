@@ -112,7 +112,6 @@ function TradeCalculator({
                       negativeButtonText: t('common.close'),
                       positiveButtonDisabledAtom:
                         ownPriceSaveButtonDisabledAtom,
-                      avoidKeyboard: true,
                       children: (
                         <SetYourOwnPriceDialogContent
                           fiatCurrency={fiatCurrency ?? 'USD'}

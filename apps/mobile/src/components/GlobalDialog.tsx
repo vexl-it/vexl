@@ -273,7 +273,6 @@ export const askGlobalDialogActionAtom: WritableAtom<
           positiveButtonDisabledAtom: step.positiveButtonDisabledAtom,
           positiveButtonVariant: positiveButtonVariant(state.variant),
           negativeButtonText: step.negativeButtonText,
-          avoidKeyboard: step.type === 'StepWithInput',
         }).pipe(
           Effect.match({
             onFailure: () => {

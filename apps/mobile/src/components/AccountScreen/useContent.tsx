@@ -186,7 +186,6 @@ export function useContent(): AccountMenus {
                       positiveButtonVariant: 'destructive',
                       negativeButtonText: t('common.cancel'),
                       positiveButtonDisabledAtom,
-                      avoidKeyboard: true,
                       children: (
                         <DeleteAccountConfirmationDialogContent
                           confirmationAtom={confirmationAtom}

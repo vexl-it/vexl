@@ -1,7 +1,6 @@
 import {
   Button,
   EditRow,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   XmarkCancelClose,
@@ -71,121 +70,111 @@ function EditOfferFieldScreen({
         />
       }
     >
-      <KeyboardAvoidingView>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            paddingBottom: insets.bottom + getTokens().space.$5.val,
-          }}
-        >
-          <YStack>
-            {field === 'amount' ? (
-              listingType === 'BITCOIN' ? (
-                <AmountStep
-                  active
-                  onEdit={noop}
-                  onComplete={handleComplete}
-                  ctaLabel={saveLabel}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + getTokens().space.$5.val,
+        }}
+      >
+        <YStack>
+          {field === 'amount' ? (
+            listingType === 'BITCOIN' ? (
+              <AmountStep
+                active
+                onEdit={noop}
+                onComplete={handleComplete}
+                ctaLabel={saveLabel}
+              />
+            ) : (
+              <PriceUpToStep
+                active
+                onEdit={noop}
+                onComplete={handleComplete}
+                ctaLabel={saveLabel}
+              />
+            )
+          ) : null}
+          {field === 'location' ? (
+            <LocationStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+            />
+          ) : null}
+          {field === 'network' ? (
+            <NetworkStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+            />
+          ) : null}
+          {field === 'describe' ? (
+            <DescribeStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+            />
+          ) : null}
+          {field === 'language' ? (
+            <LanguageStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+            />
+          ) : null}
+          {field === 'productCategory' ? (
+            <ProductCategoryStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+            />
+          ) : null}
+          {field === 'friendLevel' ? (
+            <YStack>
+              <EditRow
+                state="initial"
+                headline={t('offerForm.whoCanSeeYourOffer')}
+              />
+              <YStack gap="$5" paddingVertical="$5">
+                <FriendLevel
+                  intendedConnectionLevelAtom={intendedConnectionLevelAtom}
                 />
-              ) : (
-                <PriceUpToStep
-                  active
-                  onEdit={noop}
-                  onComplete={handleComplete}
-                  ctaLabel={saveLabel}
-                />
-              )
-            ) : null}
-            {field === 'location' ? (
-              <LocationStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-              />
-            ) : null}
-            {field === 'network' ? (
-              <NetworkStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-              />
-            ) : null}
-            {field === 'describe' ? (
-              <DescribeStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-              />
-            ) : null}
-            {field === 'language' ? (
-              <LanguageStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-              />
-            ) : null}
-            {field === 'productCategory' ? (
-              <ProductCategoryStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-              />
-            ) : null}
-            {field === 'friendLevel' ? (
-              <YStack>
-                <EditRow
-                  state="initial"
-                  headline={t('offerForm.whoCanSeeYourOffer')}
-                />
-                <YStack gap="$5" paddingVertical="$5">
-                  <FriendLevel
-                    intendedConnectionLevelAtom={intendedConnectionLevelAtom}
-                  />
-                  <Button
-                    variant="primary"
-                    size="large"
-                    onPress={handleComplete}
-                  >
-                    {t('common.save')}
-                  </Button>
-                </YStack>
+                <Button variant="primary" size="large" onPress={handleComplete}>
+                  {t('common.save')}
+                </Button>
               </YStack>
-            ) : null}
-            {field === 'clubs' ? (
-              <YStack>
-                <EditRow
-                  state="initial"
-                  headline={t('offerForm.publishToVexlClub')}
-                />
-                <YStack gap="$5" paddingVertical="$5">
-                  <YStack gap="$3">
-                    {clubsWithMembersAtoms.map((clubWithMembersAtom) => (
-                      <ClubItem
-                        key={atomKeyExtractor(clubWithMembersAtom)}
-                        clubWithMembersAtom={clubWithMembersAtom}
-                        createSelectClubAtom={createSelectClubAtom}
-                      />
-                    ))}
-                  </YStack>
-                  <Button
-                    variant="primary"
-                    size="large"
-                    onPress={handleComplete}
-                  >
-                    {t('common.save')}
-                  </Button>
+            </YStack>
+          ) : null}
+          {field === 'clubs' ? (
+            <YStack>
+              <EditRow
+                state="initial"
+                headline={t('offerForm.publishToVexlClub')}
+              />
+              <YStack gap="$5" paddingVertical="$5">
+                <YStack gap="$3">
+                  {clubsWithMembersAtoms.map((clubWithMembersAtom) => (
+                    <ClubItem
+                      key={atomKeyExtractor(clubWithMembersAtom)}
+                      clubWithMembersAtom={clubWithMembersAtom}
+                      createSelectClubAtom={createSelectClubAtom}
+                    />
+                  ))}
                 </YStack>
+                <Button variant="primary" size="large" onPress={handleComplete}>
+                  {t('common.save')}
+                </Button>
               </YStack>
-            ) : null}
-          </YStack>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            </YStack>
+          ) : null}
+        </YStack>
+      </ScrollView>
     </Screen>
   )
 }

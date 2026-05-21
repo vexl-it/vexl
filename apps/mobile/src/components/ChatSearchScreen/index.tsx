@@ -1,6 +1,5 @@
 import {
   ArrowLeft,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   SearchBar,
@@ -62,89 +61,80 @@ function ChatSearchScreen(): React.ReactElement {
         />
       }
     >
-      <KeyboardAvoidingView>
-        <YStack f={1} pt="$2">
-          <YStack px="$5">
-            <SearchBar
-              valueAtom={queryAtom}
-              autoFocus
-              placeholder={t('messages.search.placeholder')}
-            />
-          </YStack>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingTop: 24,
-              paddingBottom: 24,
-            }}
-          >
-            {trimmedQuery !== '' && chats.length > 0 ? (
-              <YStack gap="$2" mb="$5" px="$4">
-                <Stack>
-                  <SectionTitle>
-                    {t('messages.search.sections.chats')}
-                  </SectionTitle>
-                </Stack>
-                {chats.map((one) => (
-                  <ChatSearchChatResultItem
-                    key={one.chat.id}
+      <YStack f={1} pt="$2">
+        <YStack px="$5">
+          <SearchBar
+            valueAtom={queryAtom}
+            autoFocus
+            placeholder={t('messages.search.placeholder')}
+          />
+        </YStack>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: 24,
+            paddingBottom: 24,
+          }}
+        >
+          {trimmedQuery !== '' && chats.length > 0 ? (
+            <YStack gap="$2" mb="$5" px="$4">
+              <Stack>
+                <SectionTitle>
+                  {t('messages.search.sections.chats')}
+                </SectionTitle>
+              </Stack>
+              {chats.map((one) => (
+                <ChatSearchChatResultItem
+                  key={one.chat.id}
+                  result={one}
+                  query={trimmedQuery}
+                />
+              ))}
+            </YStack>
+          ) : null}
+
+          {trimmedQuery !== '' && messages.length > 0 ? (
+            <YStack gap="$2" px="$5">
+              <Stack>
+                <SectionTitle>
+                  {t('messages.search.sections.messages')}
+                </SectionTitle>
+              </Stack>
+              {messages.map((one, index) => (
+                <YStack key={one.messageId}>
+                  {index > 0 ? (
+                    <Stack h={1} mt="$4" mb="$5" bg="$backgroundTertiary" />
+                  ) : null}
+                  <ChatSearchMessageResultItem
                     result={one}
                     query={trimmedQuery}
                   />
-                ))}
-              </YStack>
-            ) : null}
+                </YStack>
+              ))}
+            </YStack>
+          ) : null}
 
-            {trimmedQuery !== '' && messages.length > 0 ? (
-              <YStack gap="$2" px="$5">
-                <Stack>
-                  <SectionTitle>
-                    {t('messages.search.sections.messages')}
-                  </SectionTitle>
-                </Stack>
-                {messages.map((one, index) => (
-                  <YStack key={one.messageId}>
-                    {index > 0 ? (
-                      <Stack h={1} mt="$4" mb="$5" bg="$backgroundTertiary" />
-                    ) : null}
-                    <ChatSearchMessageResultItem
-                      result={one}
-                      query={trimmedQuery}
-                    />
-                  </YStack>
-                ))}
-              </YStack>
-            ) : null}
-
-            {showEmptyState ? (
-              <YStack
-                f={1}
-                ai="center"
-                jc="flex-start"
-                px="$5"
-                pt="$10"
-                gap="$4"
+          {showEmptyState ? (
+            <YStack f={1} ai="center" jc="flex-start" px="$5" pt="$10" gap="$4">
+              <Typography
+                color="$foregroundPrimary"
+                variant="heading3"
+                textAlign="center"
               >
-                <Typography
-                  color="$foregroundPrimary"
-                  variant="heading3"
-                  textAlign="center"
-                >
-                  {t('messages.search.empty.title')}
-                </Typography>
-                <Typography
-                  color="$foregroundSecondary"
-                  variant="description"
-                  textAlign="center"
-                >
-                  {t('messages.search.empty.subtitle')}
-                </Typography>
-              </YStack>
-            ) : null}
-          </ScrollView>
-        </YStack>
-      </KeyboardAvoidingView>
+                {t('messages.search.empty.title')}
+              </Typography>
+              <Typography
+                color="$foregroundSecondary"
+                variant="description"
+                textAlign="center"
+              >
+                {t('messages.search.empty.subtitle')}
+              </Typography>
+            </YStack>
+          ) : null}
+        </ScrollView>
+      </YStack>
     </Screen>
   )
 }

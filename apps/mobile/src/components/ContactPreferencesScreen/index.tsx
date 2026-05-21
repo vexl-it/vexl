@@ -1,7 +1,6 @@
 import {
   AddUserPersonContact,
   ChevronLeft,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   Stack,
@@ -126,19 +125,17 @@ function ContactPreferencesScreen({
       }
       noHorizontalPadding
     >
-      <KeyboardAvoidingView>
-        <Stack f={1} testID="@contactPreferences" bg="$backgroundPrimary">
-          {shouldRenderContactsContent ? (
-            <ContactPreferencesContent
-              filter={params?.filter}
-              onReady={handleContactsContentReady}
-            />
-          ) : null}
-          <ContactPreferencesLoadingOverlay
-            visible={isContactPreferencesLoading}
+      <Stack f={1} testID="@contactPreferences" bg="$backgroundPrimary">
+        {shouldRenderContactsContent ? (
+          <ContactPreferencesContent
+            filter={params?.filter}
+            onReady={handleContactsContentReady}
           />
-        </Stack>
-      </KeyboardAvoidingView>
+        ) : null}
+        <ContactPreferencesLoadingOverlay
+          visible={isContactPreferencesLoading}
+        />
+      </Stack>
     </Screen>
   )
 }

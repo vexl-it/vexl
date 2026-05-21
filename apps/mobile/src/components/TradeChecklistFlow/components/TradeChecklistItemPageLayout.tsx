@@ -1,7 +1,6 @@
 import {
   Button,
   ChevronLeft,
-  KeyboardAvoidingView,
   NavigationBar,
   type NavigationBarAction,
 } from '@vexl-next/ui'
@@ -48,60 +47,58 @@ export function TradeChecklistItemPageLayout({
   )
 
   return (
-    <KeyboardAvoidingView>
-      <YStack f={1} pt={top} pb={bottom}>
-        {!!header && (
-          <NavigationBar
-            style="back"
-            title={header.title}
-            leftAction={
-              !hideLeftChevron
-                ? {
-                    icon: ChevronLeft,
-                    onPress: () => {
-                      void dismissKeyboardAndResolveOnLayoutUpdate().then(
-                        header.onBackPress ?? goBack
-                      )
-                    },
-                  }
-                : undefined
-            }
-            rightActions={header.rightActions?.map((action) => ({
-              ...action,
-              onPress: () => {
-                void dismissKeyboardAndResolveOnLayoutUpdate().then(
-                  action.onPress
-                )
-              },
-            }))}
-          />
+    <YStack f={1} pt={top} pb={bottom}>
+      {!!header && (
+        <NavigationBar
+          style="back"
+          title={header.title}
+          leftAction={
+            !hideLeftChevron
+              ? {
+                  icon: ChevronLeft,
+                  onPress: () => {
+                    void dismissKeyboardAndResolveOnLayoutUpdate().then(
+                      header.onBackPress ?? goBack
+                    )
+                  },
+                }
+              : undefined
+          }
+          rightActions={header.rightActions?.map((action) => ({
+            ...action,
+            onPress: () => {
+              void dismissKeyboardAndResolveOnLayoutUpdate().then(
+                action.onPress
+              )
+            },
+          }))}
+        />
+      )}
+      <Stack f={1}>
+        {scrollable ? (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {content}
+          </ScrollView>
+        ) : (
+          content
         )}
-        <Stack f={1}>
-          {scrollable ? (
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {content}
-            </ScrollView>
-          ) : (
-            content
-          )}
-        </Stack>
-        {footer}
-        {!!bottomButton && (
-          <YStack p="$5">
-            <Button
-              variant={bottomButton.variant ?? 'primary'}
-              disabled={bottomButton.disabled}
-              onPress={() => {
-                void dismissKeyboardAndResolveOnLayoutUpdate().then(
-                  bottomButton.onPress
-                )
-              }}
-            >
-              {bottomButton.text}
-            </Button>
-          </YStack>
-        )}
-      </YStack>
-    </KeyboardAvoidingView>
+      </Stack>
+      {footer}
+      {!!bottomButton && (
+        <YStack p="$5">
+          <Button
+            variant={bottomButton.variant ?? 'primary'}
+            disabled={bottomButton.disabled}
+            onPress={() => {
+              void dismissKeyboardAndResolveOnLayoutUpdate().then(
+                bottomButton.onPress
+              )
+            }}
+          >
+            {bottomButton.text}
+          </Button>
+        </YStack>
+      )}
+    </YStack>
   )
 }

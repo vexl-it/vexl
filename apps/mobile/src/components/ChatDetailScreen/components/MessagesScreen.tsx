@@ -1,5 +1,5 @@
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
-import {KeyboardAvoidingView, Screen, Stack} from '@vexl-next/ui'
+import {Screen, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
@@ -53,22 +53,20 @@ function MessagesScreen({
         navigationBar={null}
         noHorizontalPadding
       >
-        <KeyboardAvoidingView>
-          <Stack flex={1}>
-            <MessagesScreenChatHeader />
-            <StickyHeader />
-            <Stack f={1}>
-              <MessagesList targetMessageId={targetMessageId} />
-            </Stack>
-            {canSendMessages ? (
-              <Stack>
-                <ChatTextInput />
-              </Stack>
-            ) : (
-              <ChatActionButtons />
-            )}
+        <Stack flex={1}>
+          <MessagesScreenChatHeader />
+          <StickyHeader />
+          <Stack f={1}>
+            <MessagesList targetMessageId={targetMessageId} />
           </Stack>
-        </KeyboardAvoidingView>
+          {canSendMessages ? (
+            <Stack>
+              <ChatTextInput />
+            </Stack>
+          ) : (
+            <ChatActionButtons />
+          )}
+        </Stack>
       </Screen>
     </>
   )

@@ -3,7 +3,7 @@ import {
   toE164PhoneNumber,
   type E164PhoneNumber,
 } from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {KeyboardAvoidingView, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import type {CountryCode} from 'libphonenumber-js'
@@ -193,81 +193,77 @@ export default function PhoneNumberScreen({
   }, [selectedCountryCode, selectedCountry?.cca2])
 
   return (
-    <KeyboardAvoidingView>
-      <LoginFlowScreen
-        footer={
-          <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
-        }
-        action={{
-          disabled: Option.isNone(phoneNumber),
-          label: t('common.continue'),
-          onPress: () => {
-            if (Option.isNone(phoneNumber)) return
+    <LoginFlowScreen
+      footer={
+        <LoginFlowText>{t('loginFlow.v2.phoneNumber.caption')}</LoginFlowText>
+      }
+      action={{
+        disabled: Option.isNone(phoneNumber),
+        label: t('common.continue'),
+        onPress: () => {
+          if (Option.isNone(phoneNumber)) return
 
-            loadingOverlay.show()
-            void Effect.runPromise(initPhoneVerification(phoneNumber.value))
-              .then((result) => {
-                if (result._tag === 'Some') {
-                  navigation.navigate('VerificationCode', {
-                    phoneNumber: phoneNumber.value,
-                    initPhoneVerificationResponse: result.value,
-                  })
-                }
-              })
-              .finally(loadingOverlay.hide)
-          },
-        }}
-        scroll
-      >
-        <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
-          <YStack gap="$4" width="100%">
-            <LoginFlowTitle>
-              {t('loginFlow.v2.phoneNumber.title')}
-            </LoginFlowTitle>
-            <LoginFlowText>{t('loginFlow.v2.phoneNumber.text')}</LoginFlowText>
-          </YStack>
-          <XStack
-            alignItems="center"
-            gap="$4"
-            justifyContent="center"
+          loadingOverlay.show()
+          void Effect.runPromise(initPhoneVerification(phoneNumber.value))
+            .then((result) => {
+              if (result._tag === 'Some') {
+                navigation.navigate('VerificationCode', {
+                  phoneNumber: phoneNumber.value,
+                  initPhoneVerificationResponse: result.value,
+                })
+              }
+            })
+            .finally(loadingOverlay.hide)
+        },
+      }}
+      scroll
+    >
+      <YStack flex={1} gap="$10" justifyContent="flex-start" paddingTop="$11">
+        <YStack gap="$4" width="100%">
+          <LoginFlowTitle>{t('loginFlow.v2.phoneNumber.title')}</LoginFlowTitle>
+          <LoginFlowText>{t('loginFlow.v2.phoneNumber.text')}</LoginFlowText>
+        </YStack>
+        <XStack
+          alignItems="center"
+          gap="$4"
+          justifyContent="center"
+          onPress={() => {
+            inputRef.current?.focus()
+          }}
+          pressStyle={{opacity: 0.8}}
+          width="100%"
+        >
+          <TextInput
+            autoFocus
+            keyboardType="number-pad"
+            maxLength={phoneNumberMaxLength}
+            onChangeText={(value) => {
+              const digits = value
+                .replace(/\D/g, '')
+                .substring(0, phoneNumberMaxLength)
+              setNationalNumber(digits)
+              setPhoneNumber(toE164PhoneNumber(`${callingCode}${digits}`))
+            }}
+            ref={inputRef}
+            style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+            submitBehavior="submit"
+            value={nationalNumber}
+          />
+          <Typography
+            color="$foregroundPrimary"
             onPress={() => {
-              inputRef.current?.focus()
+              Keyboard.dismiss()
+              navigation.navigate('CountryPicker')
             }}
             pressStyle={{opacity: 0.8}}
-            width="100%"
+            textDecorationLine="underline"
+            variant="heading3"
           >
-            <TextInput
-              autoFocus
-              keyboardType="number-pad"
-              maxLength={phoneNumberMaxLength}
-              onChangeText={(value) => {
-                const digits = value
-                  .replace(/\D/g, '')
-                  .substring(0, phoneNumberMaxLength)
-                setNationalNumber(digits)
-                setPhoneNumber(toE164PhoneNumber(`${callingCode}${digits}`))
-              }}
-              ref={inputRef}
-              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
-              submitBehavior="submit"
-              value={nationalNumber}
-            />
-            <Typography
-              color="$foregroundPrimary"
-              onPress={() => {
-                Keyboard.dismiss()
-                navigation.navigate('CountryPicker')
-              }}
-              pressStyle={{opacity: 0.8}}
-              textDecorationLine="underline"
-              variant="heading3"
-            >
-              {callingCode}
-            </Typography>
-            {phoneNumberGroupElements}
-          </XStack>
-        </YStack>
-      </LoginFlowScreen>
-    </KeyboardAvoidingView>
+            {callingCode}
+          </Typography>
+          {phoneNumberGroupElements}
+        </XStack>
+      </YStack>
+    </LoginFlowScreen>
   )
 }

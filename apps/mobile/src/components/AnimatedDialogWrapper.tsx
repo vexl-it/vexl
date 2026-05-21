@@ -1,5 +1,4 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {KeyboardAvoidingView} from '@vexl-next/ui'
 import React from 'react'
 import {BackHandler, StyleSheet} from 'react-native'
 import Animated, {FadeIn, SlideInDown} from 'react-native-reanimated'
@@ -40,33 +39,31 @@ function AnimatedDialogWrapper({
 
   return (
     <Stack testID="@animatedDialog" position="absolute" t={0} l={0} r={0} b={0}>
-      <KeyboardAvoidingView>
-        <Animated.View
-          entering={FadeIn}
-          // TODO: check this with future versions of react-native-reanimated as there are multiple issues reported
-          // that cause crashing on new arch with entering/exiting animations on Android edge-to-edge devices and iOS also
-          // https://github.com/wix/react-native-navigation/issues/8096
-          // https://github.com/software-mansion/react-native-reanimated/issues/7493
-          // exiting={FadeOut}
-          style={styles.backdrop}
-        />
-        <Animated.View
-          style={styles.bounce}
-          entering={SlideInDown}
-          // exiting={SlideOutDown}
+      <Animated.View
+        entering={FadeIn}
+        // TODO: check this with future versions of react-native-reanimated as there are multiple issues reported
+        // that cause crashing on new arch with entering/exiting animations on Android edge-to-edge devices and iOS also
+        // https://github.com/wix/react-native-navigation/issues/8096
+        // https://github.com/software-mansion/react-native-reanimated/issues/7493
+        // exiting={FadeOut}
+        style={styles.backdrop}
+      />
+      <Animated.View
+        style={styles.bounce}
+        entering={SlideInDown}
+        // exiting={SlideOutDown}
+      >
+        <YStack
+          pt={insets.top}
+          pl={insets.left}
+          pr={insets.right}
+          pb={insets.bottom}
+          flex={1}
+          gap="$2"
         >
-          <YStack
-            pt={insets.top}
-            pl={insets.left}
-            pr={insets.right}
-            pb={insets.bottom}
-            flex={1}
-            gap="$2"
-          >
-            {children}
-          </YStack>
-        </Animated.View>
-      </KeyboardAvoidingView>
+          {children}
+        </YStack>
+      </Animated.View>
     </Stack>
   )
 }

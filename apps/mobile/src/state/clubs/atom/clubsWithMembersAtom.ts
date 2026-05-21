@@ -1,9 +1,8 @@
 import {type ClubInfo, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {Array, HashSet, Option, pipe, Schema} from 'effect'
+import {Array, HashSet, Option, Order, pipe, Schema} from 'effect'
 import {type Atom, atom, useAtomValue} from 'jotai'
-import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {myOffersAtom} from '../../marketplace/atoms/myOffers'
@@ -41,12 +40,32 @@ export const clubsWithMembersAtom = atom(
   (get) => get(clubsWithMembersStorageAtom).data
 )
 
+const clubsWithMembersByNameOrder = pipe(
+  Order.string,
+  Order.mapInput((clubWithMembers: ClubWithMembers) =>
+    clubWithMembers.club.name.toLocaleLowerCase()
+  ),
+  Order.combine(
+    pipe(
+      Order.string,
+      Order.mapInput(
+        (clubWithMembers: ClubWithMembers) => clubWithMembers.club.uuid
+      )
+    )
+  )
+)
+
+export const clubsWithMembersSortedByNameAtom = atom((get) =>
+  pipe(get(clubsWithMembersAtom), Array.sort(clubsWithMembersByNameOrder))
+)
+
 export const clubsWithMembersLoadingStateAtom = atom<ClubsLoadingState>({
   state: 'initial',
 })
 
 export const clubsWithMembersAtomsAtom = splitAtom(
-  focusAtom(clubsWithMembersStorageAtom, (optic) => optic.prop('data'))
+  clubsWithMembersSortedByNameAtom,
+  (clubWithMembers) => clubWithMembers.club.uuid
 )
 
 export const clubsWithMembersByUuidAtom = atom((get) => {

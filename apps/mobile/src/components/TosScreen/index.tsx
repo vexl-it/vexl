@@ -97,6 +97,12 @@ function Markdown({children}: {readonly children: string}): React.ReactElement {
           fontSize: 16,
           lineHeight: 22,
         },
+        heading1: {
+          color: theme.foregroundPrimary.get(),
+          fontFamily: 'TTSatoshi600',
+          fontSize: 24,
+          lineHeight: 32,
+        },
         heading2: {
           color: theme.foregroundPrimary.get(),
           fontFamily: 'TTSatoshi600',

@@ -83,6 +83,10 @@ export interface DialogProps {
   readonly onHidden?: () => void
   readonly children: React.ReactNode
   readonly footer?: React.ReactNode
+  /**
+   * Dialogs avoid the keyboard by default. Set to false when the dialog should
+   * keep its original modal layout.
+   */
   readonly avoidKeyboard?: boolean
 }
 
@@ -187,6 +191,10 @@ export interface DialogAtomConfig {
   readonly positiveButtonDisabledAtom?: Atom<boolean>
   readonly positiveButtonVariant?: ButtonVariant
   readonly negativeButtonText?: string
+  /**
+   * Dialogs avoid the keyboard by default. Set to false when the dialog should
+   * keep its original modal layout.
+   */
   readonly avoidKeyboard?: boolean
 }
 

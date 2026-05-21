@@ -43,6 +43,7 @@ import {
 import {
   filterMarketplaceOffers,
   filterOffersByViewport,
+  isAmountFilterEnabled,
   selectOffersByMarketplaceFilterBarOptions,
   shouldCombineOnlineOffersWithLocationFilter,
 } from '../../state/marketplace/utils/filterMarketplaceOffers'
@@ -469,11 +470,7 @@ const setConditionallyRenderedFilterElementsActionAtom = atom(
     set(locationStateAtom, filterValue.locationState)
     set(paymentMethodAtom, filterValue.paymentMethod)
     set(btcNetworkAtom, filterValue.btcNetwork)
-    set(
-      amountFilterEnabledBaseAtom,
-      filterValue.amountBottomLimit !== undefined ||
-        filterValue.amountTopLimit !== undefined
-    )
+    set(amountFilterEnabledBaseAtom, isAmountFilterEnabled(filterValue))
     set(amountBottomLimitAtom, filterValue.amountBottomLimit)
     set(amountTopLimitAtom, filterValue.amountTopLimit)
     set(spokenLanguagesAtom, filterValue.spokenLanguages)
@@ -517,7 +514,10 @@ export const initializeOffersFilterOnDisplayActionAtom = atom(
       String(filterFromStorage.singlePrice)
     )
 
-    if (!filterFromStorage.currency) {
+    if (
+      isAmountFilterEnabled(filterFromStorage) &&
+      !filterFromStorage.currency
+    ) {
       const currency = get(defaultCurrencyAtom)
       set(updateCurrencyLimitsAtom, {currency})
     }
@@ -532,11 +532,12 @@ export const resetFilterOmitTextFilterActionAtom = atom(null, (get, set) => {
 
 function getDraftOffersFilter(get: Getter): OffersFilter {
   const {text} = get(offersFilterFromStorageAtom)
+  const amountFilterEnabled = get(amountFilterEnabledAtom)
 
   return {
     sort: get(sortingAtom),
     filterBarOptions: get(filterBarOptionsAtom),
-    currency: get(currencyAtom),
+    currency: amountFilterEnabled ? get(currencyAtom) : undefined,
     location: get(locationAtom),
     locationState: get(locationStateAtom),
     paymentMethod: get(paymentMethodAtom),
@@ -548,11 +549,11 @@ function getDraftOffersFilter(get: Getter): OffersFilter {
           ? ['FIRST_DEGREE', 'SECOND_DEGREE']
           : undefined,
     spokenLanguages: get(spokenLanguagesAtom),
-    amountBottomLimit: get(amountFilterEnabledAtom)
+    amountBottomLimit: amountFilterEnabled
       ? get(amountBottomLimitAtom)
       : undefined,
     amountTopLimit: (() => {
-      if (!get(amountFilterEnabledAtom)) return undefined
+      if (!amountFilterEnabled) return undefined
       const topLimit = get(amountTopLimitAtom)
       // Treat "at max" as unbounded so cross-currency offers created at their
       // currency's cap aren't filtered out after FX drift.

@@ -6,12 +6,10 @@ import {
   Loader,
   NavButton,
   Screen,
-  ScrollView,
   Separator,
   Stack,
   Switch,
   Typography,
-  useScreenFooterHeight,
   XStack,
   YStack,
 } from '@vexl-next/ui'
@@ -65,6 +63,7 @@ function FilterOffersScreen(): React.ReactElement {
     initializeOffersFilterOnDisplayActionAtom
   )
   const updateCurrencyLimits = useSetAtom(updateCurrencyLimitsAtom)
+  const setIntendedConnectionLevel = useSetAtom(intendedConnectionLevelAtom)
   const openChangeCurrency = useOpenChangeCurrency()
   const currency = useAtomValue(currencyAtom)
   const amountFilterEnabled = useAtomValue(amountFilterEnabledAtom)
@@ -72,8 +71,7 @@ function FilterOffersScreen(): React.ReactElement {
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
-  const {footerHeightAtom} = useScreenFooterHeight()
-  const footerHeight = useAtomValue(footerHeightAtom)
+  const amountContentVisible = amountFilterEnabled && !!currency
 
   const connectionSubtitles = useMemo(() => {
     if (numberOfFriends.state !== 'success') return undefined
@@ -108,6 +106,7 @@ function FilterOffersScreen(): React.ReactElement {
   return (
     <Screen
       noHorizontalPadding
+      scrollable
       navigationBar={
         <XStack
           alignItems="center"
@@ -143,151 +142,154 @@ function FilterOffersScreen(): React.ReactElement {
       }
     >
       <DeferredContent>
-        <ScrollView
-          contentContainerStyle={{paddingBottom: footerHeight}}
-          showsVerticalScrollIndicator={false}
-        >
-          <YStack paddingHorizontal="$5" gap="$3">
-            <LookingToSection />
+        <YStack paddingHorizontal="$5" gap="$3">
+          <LookingToSection />
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Sort by */}
-            <Typography
-              variant="titlesSmall"
-              color="$foregroundPrimary"
-              paddingVertical="$3"
-            >
-              {t('filterOffers.sortBy')}
-            </Typography>
-            <Sorting />
+          {/* Sort by */}
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            paddingVertical="$3"
+          >
+            {t('filterOffers.sortBy')}
+          </Typography>
+          <Sorting />
 
-            <ProductCategorySection />
+          <ProductCategorySection />
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Amount */}
-            <XStack alignItems="center" gap="$4" paddingVertical="$3">
-              <YStack flex={1} gap="$1">
-                <Typography variant="titlesSmall" color="$foregroundPrimary">
-                  {t('offerForm.amountOfTransaction.amountOfTransaction')}
-                </Typography>
-                <Typography variant="description" color="$foregroundSecondary">
-                  {t('filterOffers.amountDescription')}
-                </Typography>
-              </YStack>
-              <Switch valueAtom={amountFilterEnabledAtom} />
-            </XStack>
-            <AnimatedCollapse expanded={amountFilterEnabled}>
-              <YStack gap="$3">
-                {!amountPricesReady ? (
-                  <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
-                    <Loader size="small" />
-                    <Typography
-                      variant="description"
-                      color="$foregroundSecondary"
-                    >
-                      {t('offerForm.loadingExchangeRate')}
-                    </Typography>
-                  </XStack>
-                ) : null}
-                <Stack
-                  opacity={amountPricesReady ? 1 : 0.5}
-                  pointerEvents={amountPricesReady ? 'auto' : 'none'}
-                >
-                  <AmountOfTransaction
-                    amountTopLimitAtom={amountTopLimitForRangeInputAtom}
-                    amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
-                    currencyAtom={currencyAtom}
-                    onCurrencyPress={() => {
-                      openChangeCurrency({
-                        selectedCurrencyCode: currency,
-                        onSave: (currency) => {
-                          updateCurrencyLimits({currency})
-                        },
-                      })
-                    }}
-                    maxLabel={t('offerForm.max')}
-                  />
-                </Stack>
-                <BtcPriceInfo />
-              </YStack>
-            </AnimatedCollapse>
+          {/* Amount */}
+          <XStack alignItems="center" gap="$4" paddingVertical="$3">
+            <YStack flex={1} gap="$1">
+              <Typography variant="titlesSmall" color="$foregroundPrimary">
+                {t('offerForm.amountOfTransaction.amountOfTransaction')}
+              </Typography>
+              <Typography variant="description" color="$foregroundSecondary">
+                {t('filterOffers.amountDescription')}
+              </Typography>
+            </YStack>
+            <Switch valueAtom={amountFilterEnabledAtom} />
+          </XStack>
+          <AnimatedCollapse expanded={amountContentVisible}>
+            <YStack gap="$3">
+              {amountContentVisible && !amountPricesReady ? (
+                <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
+                  <Loader size="small" />
+                  <Typography
+                    variant="description"
+                    color="$foregroundSecondary"
+                  >
+                    {t('offerForm.loadingExchangeRate')}
+                  </Typography>
+                </XStack>
+              ) : null}
+              {amountContentVisible ? (
+                <>
+                  <Stack
+                    opacity={amountPricesReady ? 1 : 0.5}
+                    pointerEvents={amountPricesReady ? 'auto' : 'none'}
+                  >
+                    <AmountOfTransaction
+                      amountTopLimitAtom={amountTopLimitForRangeInputAtom}
+                      amountBottomLimitAtom={amountBottomLimitForRangeInputAtom}
+                      currencyAtom={currencyAtom}
+                      onCurrencyPress={() => {
+                        openChangeCurrency({
+                          selectedCurrencyCode: currency,
+                          onSave: (currency) => {
+                            updateCurrencyLimits({currency})
+                          },
+                        })
+                      }}
+                      maxLabel={t('offerForm.max')}
+                    />
+                  </Stack>
+                  <BtcPriceInfo />
+                </>
+              ) : null}
+            </YStack>
+          </AnimatedCollapse>
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Location */}
-            <Typography
-              variant="titlesSmall"
-              color="$foregroundPrimary"
-              paddingVertical="$3"
-            >
-              {t('offerForm.location.location')}
-            </Typography>
-            <LocationSection />
+          {/* Location */}
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            paddingVertical="$3"
+          >
+            {t('offerForm.location.location')}
+          </Typography>
+          <LocationSection />
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Preferred language */}
-            <Typography
-              variant="titlesSmall"
-              color="$foregroundPrimary"
-              paddingVertical="$3"
-            >
-              {t('filterOffers.preferredLanguage')}
-            </Typography>
-            <XStack flexWrap="wrap" gap="$3">
-              {spokenLanguagesOptions.map((language) => (
-                <SpokenLanguageTag key={language} language={language} />
-              ))}
-            </XStack>
+          {/* Preferred language */}
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            paddingVertical="$3"
+          >
+            {t('filterOffers.preferredLanguage')}
+          </Typography>
+          <XStack flexWrap="wrap" gap="$3">
+            {spokenLanguagesOptions.map((language) => (
+              <SpokenLanguageTag key={language} language={language} />
+            ))}
+          </XStack>
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Network */}
-            <Typography
-              variant="titlesSmall"
-              color="$foregroundPrimary"
-              paddingVertical="$3"
-            >
-              {t('offerForm.network.network')}
-            </Typography>
-            <NetworkSection />
+          {/* Network */}
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            paddingVertical="$3"
+          >
+            {t('offerForm.network.network')}
+          </Typography>
+          <NetworkSection />
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Connection */}
-            <Typography
-              variant="titlesSmall"
-              color="$foregroundPrimary"
-              paddingVertical="$3"
-            >
-              {t('filterOffers.connection')}
-            </Typography>
-            <FriendLevel
-              subtitles={connectionSubtitles}
-              intendedConnectionLevelAtom={intendedConnectionLevelAtom}
-            />
+          {/* Connection */}
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            paddingVertical="$3"
+          >
+            {t('filterOffers.connection')}
+          </Typography>
+          <FriendLevel
+            allowDeselect
+            onDeselect={() => {
+              setIntendedConnectionLevel(undefined)
+            }}
+            subtitles={connectionSubtitles}
+            intendedConnectionLevelAtom={intendedConnectionLevelAtom}
+          />
 
-            <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
 
-            {/* Show club offers */}
-            <XStack alignItems="center" gap="$4" paddingVertical="$3">
-              <YStack flex={1} gap="$1">
-                <Typography variant="titlesSmall" color="$foregroundPrimary">
-                  {t('filterOffers.showClubOffers')}
-                </Typography>
-                <Typography variant="description" color="$foregroundSecondary">
-                  {t('filterOffers.clubsDescription')}
-                </Typography>
-              </YStack>
-              <Switch valueAtom={clubsFilterEnabledAtom} />
-            </XStack>
-            <AnimatedCollapse expanded={clubsFilterEnabled}>
-              <ClubsSection />
-            </AnimatedCollapse>
-          </YStack>
-        </ScrollView>
+          {/* Show club offers */}
+          <XStack alignItems="center" gap="$4" paddingVertical="$3">
+            <YStack flex={1} gap="$1">
+              <Typography variant="titlesSmall" color="$foregroundPrimary">
+                {t('filterOffers.showClubOffers')}
+              </Typography>
+              <Typography variant="description" color="$foregroundSecondary">
+                {t('filterOffers.clubsDescription')}
+              </Typography>
+            </YStack>
+            <Switch valueAtom={clubsFilterEnabledAtom} />
+          </XStack>
+          <AnimatedCollapse expanded={clubsFilterEnabled}>
+            <ClubsSection />
+          </AnimatedCollapse>
+        </YStack>
       </DeferredContent>
     </Screen>
   )

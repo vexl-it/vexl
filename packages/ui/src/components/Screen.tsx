@@ -65,8 +65,11 @@ export function Screen({
   const {footerHeightAtom} = useScreenFooterHeight()
   const setFooterHeight = useSetAtom(footerHeightAtom)
   const [footerHeight, setLocalFooterHeight] = React.useState(0)
-  const bottomInsetOutsideContent = scrollable && !footer ? 0 : insets.bottom
-  const scrollViewBottomPadding = footer ? footerHeight : insets.bottom
+  const bottomInsetOutsideContent = scrollable ? 0 : insets.bottom
+  const footerBottomOffset = bottomInsetOutsideContent === 0 ? insets.bottom : 0
+  const scrollViewBottomPadding = footer
+    ? footerHeight + footerBottomOffset
+    : insets.bottom
 
   const content = overlayNavigationBar ? (
     <YStack flex={1}>{children}</YStack>
@@ -111,6 +114,7 @@ export function Screen({
         )}
         {footer ? (
           <ScreenFooterFrame
+            bottom={footerBottomOffset}
             onLayout={(e) => {
               const measuredFooterHeight = e.nativeEvent.layout.height
               setLocalFooterHeight(measuredFooterHeight)

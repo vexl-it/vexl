@@ -12,29 +12,44 @@ export type RadioGroupProps<T extends string = string> = Omit<
   readonly value?: T
   readonly defaultValue?: T
   readonly onValueChange?: (value: T) => void
+  readonly onSelectedValuePress?: (value: T) => void
 }
 
 const RadioGroupValueContext = React.createContext<string | undefined>(
   undefined
 )
+const RadioGroupSelectedValuePressContext = React.createContext<
+  ((value: string) => void) | undefined
+>(undefined)
 
 export function useRadioGroupValue(): string | undefined {
   return React.useContext(RadioGroupValueContext)
 }
 
-export function RadioGroup<T extends string>({
-  allowedValues,
-  children,
-  defaultValue,
-  onValueChange,
-  value,
-  ...rest
-}: RadioGroupProps<T>): React.JSX.Element {
+export function useRadioGroupSelectedValuePress():
+  | ((value: string) => void)
+  | undefined {
+  return React.useContext(RadioGroupSelectedValuePressContext)
+}
+
+export function RadioGroup<T extends string>(
+  props: RadioGroupProps<T>
+): React.JSX.Element {
+  const {
+    allowedValues,
+    children,
+    defaultValue,
+    onSelectedValuePress,
+    onValueChange,
+    value,
+    ...rest
+  } = props
   const [internalValue, setInternalValue] = React.useState<T | undefined>(
     defaultValue
   )
+  const isControlled = 'value' in props
 
-  const currentValue = value ?? internalValue
+  const currentValue = isControlled ? value : internalValue
 
   const handleValueChange = (nextValue: string): void => {
     pipe(
@@ -43,8 +58,21 @@ export function RadioGroup<T extends string>({
       Option.match({
         onNone: () => {},
         onSome: (matchedValue) => {
-          setInternalValue(matchedValue)
+          if (!isControlled) setInternalValue(matchedValue)
           onValueChange?.(matchedValue)
+        },
+      })
+    )
+  }
+
+  const handleSelectedValuePress = (nextValue: string): void => {
+    pipe(
+      allowedValues,
+      Array.findFirst((allowedValue) => allowedValue === nextValue),
+      Option.match({
+        onNone: () => {},
+        onSome: (matchedValue) => {
+          onSelectedValuePress?.(matchedValue)
         },
       })
     )
@@ -52,14 +80,18 @@ export function RadioGroup<T extends string>({
 
   return (
     <RadioGroupValueContext.Provider value={currentValue}>
-      <TamaguiRadioGroup
-        {...rest}
-        value={currentValue}
-        defaultValue={defaultValue}
-        onValueChange={handleValueChange}
+      <RadioGroupSelectedValuePressContext.Provider
+        value={onSelectedValuePress ? handleSelectedValuePress : undefined}
       >
-        {children}
-      </TamaguiRadioGroup>
+        <TamaguiRadioGroup
+          {...rest}
+          value={currentValue}
+          defaultValue={defaultValue}
+          onValueChange={handleValueChange}
+        >
+          {children}
+        </TamaguiRadioGroup>
+      </RadioGroupSelectedValuePressContext.Provider>
     </RadioGroupValueContext.Provider>
   )
 }

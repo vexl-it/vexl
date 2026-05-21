@@ -1,15 +1,24 @@
 import React from 'react'
-import {KeyboardAvoidingView as RNKeyboardAvoidingView} from 'react-native-keyboard-controller'
-import {Stack} from '../primitives'
+import {
+  KeyboardAvoidingView as RNKeyboardAvoidingView,
+  type KeyboardAvoidingViewProps,
+} from 'react-native-keyboard-controller'
 
 export function KeyboardAvoidingView({
   children,
-}: {
-  readonly children: React.ReactNode
-}): React.JSX.Element {
+  style,
+  ...props
+}: Omit<
+  KeyboardAvoidingViewProps,
+  'behavior' | 'contentContainerStyle'
+>): React.JSX.Element {
   return (
-    <RNKeyboardAvoidingView behavior="padding" style={{flex: 1}}>
-      <Stack flex={1}>{children}</Stack>
+    <RNKeyboardAvoidingView
+      {...props}
+      behavior="height"
+      style={[{flex: 1}, style]}
+    >
+      {children}
     </RNKeyboardAvoidingView>
   )
 }

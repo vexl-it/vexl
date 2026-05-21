@@ -3,7 +3,6 @@ import {ClubCode} from '@vexl-next/domain/src/general/clubs'
 import {
   ArrowLeft,
   Button,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   Typography,
@@ -147,99 +146,95 @@ function FillClubAccessCodeScreen({
   )
 
   return (
-    <KeyboardAvoidingView>
-      <Screen
-        navigationBar={
-          <NavigationBar
-            style="back"
-            leftAction={{
-              icon: ArrowLeft,
-              onPress: navigation.goBack,
-            }}
-          />
-        }
-        footer={
-          <Button
-            disabled={!isCodeFilled || submitInProgress}
-            variant="primary"
-            onPress={() => {
-              submitCode(accessCode.join(''))
-            }}
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          leftAction={{
+            icon: ArrowLeft,
+            onPress: navigation.goBack,
+          }}
+        />
+      }
+      footer={
+        <Button
+          disabled={!isCodeFilled || submitInProgress}
+          variant="primary"
+          onPress={() => {
+            submitCode(accessCode.join(''))
+          }}
+        >
+          {t('clubs.joinClub')}
+        </Button>
+      }
+    >
+      <YStack flex={1} justifyContent="center" gap="$10">
+        <YStack alignItems="center" gap="$4">
+          <Typography
+            variant="heading3"
+            color="$foregroundPrimary"
+            textAlign="center"
           >
-            {t('clubs.joinClub')}
-          </Button>
-        }
-      >
-        <YStack flex={1} justifyContent="center" gap="$10">
-          <YStack alignItems="center" gap="$4">
-            <Typography
-              variant="heading3"
-              color="$foregroundPrimary"
-              textAlign="center"
-            >
-              {t('clubs.enterYourClubCode')}
-            </Typography>
-          </YStack>
-          <TouchableOpacity
-            activeOpacity={1}
-            disabled={submitInProgress}
-            onPress={() => {
-              inputRef.current?.focus()
-            }}
-          >
-            <YStack gap="$3">
-              <TextInput
-                autoFocus
-                caretHidden
-                editable={!submitInProgress}
-                keyboardType="number-pad"
-                maxLength={CODE_LENGTH}
-                onChangeText={(value) => {
-                  const code = value
-                    .replace(/\D/g, '')
-                    .substring(0, CODE_LENGTH)
-                  handleAccessCodeElementChange(code)
-                }}
-                ref={inputRef}
-                style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
-                value={accessCode.join('')}
-              />
-              <XStack gap="$2" justifyContent="center">
-                {pipe(
-                  Array.makeBy(CODE_LENGTH, (index) => (
-                    <CodeBox
-                      key={index}
-                      disabled={submitInProgress}
-                      invalid={isCodeInvalid}
-                      value={accessCode[index]}
-                    />
-                  ))
-                )}
-              </XStack>
-              {!!submitInProgress && (
-                <Typography
-                  color="$foregroundPrimary"
-                  textAlign="center"
-                  variant="paragraphSmall"
-                >
-                  {t('clubs.verifying')}
-                </Typography>
-              )}
-              {!!isCodeInvalid && !submitInProgress && (
-                <Typography
-                  color="$redForeground"
-                  textAlign="center"
-                  variant="paragraphSmall"
-                >
-                  {t('clubs.codeDidNotWorkDoubleCheckAndTryAgain')}
-                </Typography>
-              )}
-            </YStack>
-          </TouchableOpacity>
-          <YStack />
+            {t('clubs.enterYourClubCode')}
+          </Typography>
         </YStack>
-      </Screen>
-    </KeyboardAvoidingView>
+        <TouchableOpacity
+          activeOpacity={1}
+          disabled={submitInProgress}
+          onPress={() => {
+            inputRef.current?.focus()
+          }}
+        >
+          <YStack gap="$3">
+            <TextInput
+              autoFocus
+              caretHidden
+              editable={!submitInProgress}
+              keyboardType="number-pad"
+              maxLength={CODE_LENGTH}
+              onChangeText={(value) => {
+                const code = value.replace(/\D/g, '').substring(0, CODE_LENGTH)
+                handleAccessCodeElementChange(code)
+              }}
+              ref={inputRef}
+              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+              value={accessCode.join('')}
+            />
+            <XStack gap="$2" justifyContent="center">
+              {pipe(
+                Array.makeBy(CODE_LENGTH, (index) => (
+                  <CodeBox
+                    key={index}
+                    disabled={submitInProgress}
+                    invalid={isCodeInvalid}
+                    value={accessCode[index]}
+                  />
+                ))
+              )}
+            </XStack>
+            {!!submitInProgress && (
+              <Typography
+                color="$foregroundPrimary"
+                textAlign="center"
+                variant="paragraphSmall"
+              >
+                {t('clubs.verifying')}
+              </Typography>
+            )}
+            {!!isCodeInvalid && !submitInProgress && (
+              <Typography
+                color="$redForeground"
+                textAlign="center"
+                variant="paragraphSmall"
+              >
+                {t('clubs.codeDidNotWorkDoubleCheckAndTryAgain')}
+              </Typography>
+            )}
+          </YStack>
+        </TouchableOpacity>
+        <YStack />
+      </YStack>
+    </Screen>
   )
 }
 

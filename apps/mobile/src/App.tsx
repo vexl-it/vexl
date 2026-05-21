@@ -3,7 +3,7 @@ import {
   DefaultTheme,
   NavigationContainer,
 } from '@react-navigation/native'
-import {useVexlTheme} from '@vexl-next/ui'
+import {KeyboardAvoidingView, useVexlTheme} from '@vexl-next/ui'
 import * as NavigationBar from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
 import React from 'react'
@@ -47,7 +47,10 @@ function App(): React.ReactElement {
 
   return (
     <SafeAreaProvider>
-      <KeyboardProvider>
+      <KeyboardProvider
+        navigationBarTranslucent={Platform.OS === 'android'}
+        statusBarTranslucent={Platform.OS === 'android'}
+      >
         <BadgeCountManager />
         <PreventScreenshots />
         <DisableLogBoxForTests />
@@ -92,7 +95,9 @@ function App(): React.ReactElement {
                     backgroundColor: theme.backgroundPrimary.get(),
                   }}
                 >
-                  <RootNavigation />
+                  <KeyboardAvoidingView>
+                    <RootNavigation />
+                  </KeyboardAvoidingView>
                   {/* <InAppLoadingTasksIndicator /> */}
                 </GestureHandlerRootView>
               </OverlayInfoScreen>

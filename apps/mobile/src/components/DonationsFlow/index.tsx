@@ -1,5 +1,4 @@
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
-import {KeyboardAvoidingView} from '@vexl-next/ui'
 import React from 'react'
 import {type DonationsFlowParamsList} from '../../navigationTypes'
 import DonationDetailsScreen from '../DonationDetailsScreen'
@@ -10,21 +9,16 @@ const Stack = createNativeStackNavigator<DonationsFlowParamsList>()
 
 function DonationsFlow(): React.ReactElement {
   return (
-    <KeyboardAvoidingView>
-      <Stack.Navigator
-        initialRouteName="MyDonations"
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="MyDonations" component={MyDonationsScreen} />
-        <Stack.Screen name="SetDonation" component={SetDonationScreen} />
-        <Stack.Screen
-          name="DonationDetails"
-          component={DonationDetailsScreen}
-        />
-      </Stack.Navigator>
-    </KeyboardAvoidingView>
+    <Stack.Navigator
+      initialRouteName="MyDonations"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="MyDonations" component={MyDonationsScreen} />
+      <Stack.Screen name="SetDonation" component={SetDonationScreen} />
+      <Stack.Screen name="DonationDetails" component={DonationDetailsScreen} />
+    </Stack.Navigator>
   )
 }
 

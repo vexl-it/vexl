@@ -1,10 +1,4 @@
-import {
-  KeyboardAvoidingView,
-  NavigationBar,
-  Screen,
-  Stack,
-  XmarkCancelClose,
-} from '@vexl-next/ui'
+import {NavigationBar, Screen, Stack, XmarkCancelClose} from '@vexl-next/ui'
 import {ScopeProvider} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import React, {useEffect} from 'react'
@@ -47,41 +41,39 @@ export default function AddNewContactScreen({
   }, [contactToEditFromStore, editContactNumber])
 
   return (
-    <KeyboardAvoidingView>
-      <Screen
-        navigationBar={
-          <NavigationBar
-            style="back"
-            title={t(
-              isEditingContact
-                ? 'addContactDialog.editContact'
-                : 'contactPreferences.addContactManually.title'
-            )}
-            rightActions={[
-              {
-                icon: XmarkCancelClose,
-                onPress: safeGoBack,
-              },
-            ]}
+    <Screen
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t(
+            isEditingContact
+              ? 'addContactDialog.editContact'
+              : 'contactPreferences.addContactManually.title'
+          )}
+          rightActions={[
+            {
+              icon: XmarkCancelClose,
+              onPress: safeGoBack,
+            },
+          ]}
+        />
+      }
+      noHorizontalPadding
+    >
+      <Stack flex={1}>
+        <ScopeProvider
+          scope={ContactsSelectScope}
+          value={{
+            normalizedContacts,
+            reloadContacts: () => {},
+          }}
+        >
+          <AddNewContactForm
+            contactToEdit={contactToEdit}
+            onClose={safeGoBack}
           />
-        }
-        noHorizontalPadding
-      >
-        <Stack flex={1}>
-          <ScopeProvider
-            scope={ContactsSelectScope}
-            value={{
-              normalizedContacts,
-              reloadContacts: () => {},
-            }}
-          >
-            <AddNewContactForm
-              contactToEdit={contactToEdit}
-              onClose={safeGoBack}
-            />
-          </ScopeProvider>
-        </Stack>
-      </Screen>
-    </KeyboardAvoidingView>
+        </ScopeProvider>
+      </Stack>
+    </Screen>
   )
 }

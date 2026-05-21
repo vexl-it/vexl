@@ -2,7 +2,6 @@ import {CommonActions} from '@react-navigation/native'
 import {
   Button,
   ChevronLeft,
-  KeyboardAvoidingView,
   NavigationBar,
   Screen,
   TextArea,
@@ -139,47 +138,45 @@ function SendMessageScreen({
   }
 
   return (
-    <KeyboardAvoidingView>
-      <Screen
-        navigationBar={navigationBar}
-        footer={
-          <Button
-            variant={hasText ? 'primary' : 'disabled'}
-            disabled={!hasText}
-            onPress={handleSend}
-          >
-            {t('common.send')}
-          </Button>
-        }
-      >
-        <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
-          <YStack gap="$5">
-            <OfferAuthorBanner offer={offer.value} />
-            <TextArea
-              height={Dimensions.get('window').height * 0.3}
-              backgroundColor="$backgroundTertiary"
-              borderRadius="$5"
-              padding="$6"
-              placeholder={t('offer.sendMessagePlaceholder')}
-              placeholderTextColor="$foregroundSecondary"
-              defaultValue=""
-              onChangeText={(val) => {
-                textRef.current = val
-                const nonEmpty = val.trim().length > 0
-                if (nonEmpty !== hasText) setHasText(nonEmpty)
-              }}
-              fontFamily="$body"
-              fontSize="$5"
-              lineHeight={24}
-              fontWeight="500"
-              color="$foregroundPrimary"
-              verticalAlign="top"
-              borderWidth={0}
-            />
-          </YStack>
-        </Pressable>
-      </Screen>
-    </KeyboardAvoidingView>
+    <Screen
+      navigationBar={navigationBar}
+      footer={
+        <Button
+          variant={hasText ? 'primary' : 'disabled'}
+          disabled={!hasText}
+          onPress={handleSend}
+        >
+          {t('common.send')}
+        </Button>
+      }
+    >
+      <Pressable style={{flex: 1}} onPress={Keyboard.dismiss}>
+        <YStack gap="$5">
+          <OfferAuthorBanner offer={offer.value} />
+          <TextArea
+            height={Dimensions.get('window').height * 0.3}
+            backgroundColor="$backgroundTertiary"
+            borderRadius="$5"
+            padding="$6"
+            placeholder={t('offer.sendMessagePlaceholder')}
+            placeholderTextColor="$foregroundSecondary"
+            defaultValue=""
+            onChangeText={(val) => {
+              textRef.current = val
+              const nonEmpty = val.trim().length > 0
+              if (nonEmpty !== hasText) setHasText(nonEmpty)
+            }}
+            fontFamily="$body"
+            fontSize="$5"
+            lineHeight={24}
+            fontWeight="500"
+            color="$foregroundPrimary"
+            verticalAlign="top"
+            borderWidth={0}
+          />
+        </YStack>
+      </Pressable>
+    </Screen>
   )
 }
 

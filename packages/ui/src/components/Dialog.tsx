@@ -3,7 +3,6 @@ import type {Atom, WritableAtom} from 'jotai'
 import {atom, useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Dimensions, Modal} from 'react-native'
-import {KeyboardAvoidingView} from 'react-native-keyboard-controller'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -16,6 +15,7 @@ import {getTokens, styled} from 'tamagui'
 
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 import {Button, type ButtonVariant} from './Button'
+import {KeyboardAvoidingView} from './KeyboardAvoidingView'
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
@@ -170,10 +170,8 @@ export function Dialog({
       animationType="none"
       onRequestClose={onClose}
     >
-      {avoidKeyboard ? (
-        <KeyboardAvoidingView behavior="height" style={{flex: 1}}>
-          {content}
-        </KeyboardAvoidingView>
+      {avoidKeyboard !== false ? (
+        <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
       ) : (
         content
       )}

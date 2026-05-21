@@ -1,6 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {KeyHolder} from '@vexl-next/cryptography'
-import {KeyboardAvoidingView, Typography, XStack, YStack} from '@vexl-next/ui'
+import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
@@ -141,99 +141,97 @@ export default function VerificationCodeScreen({
   )
 
   return (
-    <KeyboardAvoidingView>
-      <LoginFlowScreen
-        action={{
-          disabled: userCode.length !== 6 || submitInProgress,
-          label: t('common.continue'),
-          onPress: () => {
-            submitVerificationCode(userCode)
-          },
-        }}
-        footer={
-          countdownFinished ? (
-            <TouchableOpacity onPress={safeGoBack}>
-              <Typography
-                color="$foregroundSecondary"
-                textAlign="center"
-                variant="paragraphSmall"
-              >
-                {t('loginFlow.v2.verificationCode.retry')}
-              </Typography>
-            </TouchableOpacity>
-          ) : (
+    <LoginFlowScreen
+      action={{
+        disabled: userCode.length !== 6 || submitInProgress,
+        label: t('common.continue'),
+        onPress: () => {
+          submitVerificationCode(userCode)
+        },
+      }}
+      footer={
+        countdownFinished ? (
+          <TouchableOpacity onPress={safeGoBack}>
             <Typography
               color="$foregroundSecondary"
               textAlign="center"
               variant="paragraphSmall"
             >
-              {t('loginFlow.v2.verificationCode.retryCountdown')}{' '}
-              <Countdown
-                col="$foregroundSecondary"
-                countUntil={DateTime.fromISO(
-                  initPhoneVerificationResponse.expirationAt
-                )}
-                onFinished={() => {
-                  setCountdownFinished(true)
-                }}
-              />
-              {t('common.secondsShort')}
+              {t('loginFlow.v2.verificationCode.retry')}
             </Typography>
-          )
-        }
-        scroll
-      >
-        <YStack flex={1} justifyContent="center" gap="$10">
-          <YStack alignItems="center" gap="$4">
-            <LoginFlowTitle>
-              {t('loginFlow.v2.verificationCode.title')}
-            </LoginFlowTitle>
-            <Typography color="$foregroundSecondary" variant="paragraphSmall">
-              {t('loginFlow.v2.verificationCode.text')}{' '}
-              <Typography color="$foregroundSecondary" variant="paragraphSmall">
-                {parsedPhoneNumber}
-              </Typography>
-              .
-            </Typography>
-          </YStack>
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => {
-              inputRef.current?.focus()
-            }}
-          >
-            <YStack>
-              <TextInput
-                autoComplete={
-                  Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
-                }
-                autoFocus
-                caretHidden
-                importantForAutofill="yes"
-                keyboardType="number-pad"
-                maxLength={6}
-                onChangeText={(value) => {
-                  const code = value.replace(/\D/g, '').substring(0, 6)
-                  setUserCode(code)
-                  submitVerificationCode(code)
-                }}
-                ref={inputRef}
-                style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
-                textContentType="oneTimeCode"
-                value={userCode}
-              />
-              <XStack gap="$2" justifyContent="center">
-                <CodeBox value={userCode.charAt(0)} />
-                <CodeBox value={userCode.charAt(1)} />
-                <CodeBox value={userCode.charAt(2)} />
-                <CodeBox value={userCode.charAt(3)} />
-                <CodeBox value={userCode.charAt(4)} />
-                <CodeBox value={userCode.charAt(5)} />
-              </XStack>
-            </YStack>
           </TouchableOpacity>
+        ) : (
+          <Typography
+            color="$foregroundSecondary"
+            textAlign="center"
+            variant="paragraphSmall"
+          >
+            {t('loginFlow.v2.verificationCode.retryCountdown')}{' '}
+            <Countdown
+              col="$foregroundSecondary"
+              countUntil={DateTime.fromISO(
+                initPhoneVerificationResponse.expirationAt
+              )}
+              onFinished={() => {
+                setCountdownFinished(true)
+              }}
+            />
+            {t('common.secondsShort')}
+          </Typography>
+        )
+      }
+      scroll
+    >
+      <YStack flex={1} justifyContent="center" gap="$10">
+        <YStack alignItems="center" gap="$4">
+          <LoginFlowTitle>
+            {t('loginFlow.v2.verificationCode.title')}
+          </LoginFlowTitle>
+          <Typography color="$foregroundSecondary" variant="paragraphSmall">
+            {t('loginFlow.v2.verificationCode.text')}{' '}
+            <Typography color="$foregroundSecondary" variant="paragraphSmall">
+              {parsedPhoneNumber}
+            </Typography>
+            .
+          </Typography>
         </YStack>
-      </LoginFlowScreen>
-    </KeyboardAvoidingView>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => {
+            inputRef.current?.focus()
+          }}
+        >
+          <YStack>
+            <TextInput
+              autoComplete={
+                Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
+              }
+              autoFocus
+              caretHidden
+              importantForAutofill="yes"
+              keyboardType="number-pad"
+              maxLength={6}
+              onChangeText={(value) => {
+                const code = value.replace(/\D/g, '').substring(0, 6)
+                setUserCode(code)
+                submitVerificationCode(code)
+              }}
+              ref={inputRef}
+              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+              textContentType="oneTimeCode"
+              value={userCode}
+            />
+            <XStack gap="$2" justifyContent="center">
+              <CodeBox value={userCode.charAt(0)} />
+              <CodeBox value={userCode.charAt(1)} />
+              <CodeBox value={userCode.charAt(2)} />
+              <CodeBox value={userCode.charAt(3)} />
+              <CodeBox value={userCode.charAt(4)} />
+              <CodeBox value={userCode.charAt(5)} />
+            </XStack>
+          </YStack>
+        </TouchableOpacity>
+      </YStack>
+    </LoginFlowScreen>
   )
 }

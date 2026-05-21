@@ -17,6 +17,15 @@ function isViewportTooWide(viewport: Viewport): boolean {
   )
 }
 
+export function isAmountFilterEnabled(
+  filter: Pick<OffersFilter, 'amountBottomLimit' | 'amountTopLimit'>
+): boolean {
+  return (
+    filter.amountBottomLimit !== undefined ||
+    filter.amountTopLimit !== undefined
+  )
+}
+
 export function shouldCombineOnlineOffersWithLocationFilter(
   filter: Pick<OffersFilter, 'location' | 'locationState'>
 ): boolean {
@@ -102,6 +111,7 @@ export function filterMarketplaceOffers({
 }): OneOfferInState[] {
   const shouldCombineOnlineWithLocation =
     shouldCombineOnlineOffersWithLocationFilter(filter)
+  const shouldFilterByCurrency = isAmountFilterEnabled(filter)
 
   return pipe(
     offers,
@@ -176,6 +186,7 @@ export function filterMarketplaceOffers({
       if (isBtcOffer(offer)) {
         if (
           filter.currency &&
+          shouldFilterByCurrency &&
           filter.currency !== offer.offerInfo.publicPart.currency
         )
           return false

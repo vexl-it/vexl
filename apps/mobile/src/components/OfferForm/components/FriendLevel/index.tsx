@@ -46,6 +46,8 @@ const friendLevelSubtitleAtom = atom((get) => {
 
 interface Props {
   hideSubtitle?: boolean
+  allowDeselect?: boolean
+  onDeselect?: () => void
   subtitles?: {first: string; second: string}
   intendedConnectionLevelAtom: WritableAtom<
     IntendedConnectionLevel | undefined,
@@ -56,6 +58,8 @@ interface Props {
 
 function FriendLevel({
   hideSubtitle,
+  allowDeselect,
+  onDeselect,
   subtitles: customSubtitles,
   intendedConnectionLevelAtom,
 }: Props): React.ReactElement {
@@ -73,6 +77,15 @@ function FriendLevel({
         loading={numberOfFriends.state === 'loading'}
         selected={intendedConnectionLevel === 'FIRST'}
         onPress={() => {
+          if (
+            allowDeselect &&
+            intendedConnectionLevel === 'FIRST' &&
+            onDeselect
+          ) {
+            onDeselect()
+            return
+          }
+
           setIntendedConnectionLevel('FIRST')
         }}
         title={t('offerForm.friendLevel.firstDegree')}
@@ -86,6 +99,15 @@ function FriendLevel({
         loading={numberOfFriends.state === 'loading'}
         selected={intendedConnectionLevel === 'ALL'}
         onPress={() => {
+          if (
+            allowDeselect &&
+            intendedConnectionLevel === 'ALL' &&
+            onDeselect
+          ) {
+            onDeselect()
+            return
+          }
+
           setIntendedConnectionLevel('ALL')
         }}
         title={t('offerForm.friendLevel.secondDegree')}

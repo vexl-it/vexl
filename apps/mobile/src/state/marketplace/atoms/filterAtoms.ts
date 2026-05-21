@@ -12,6 +12,7 @@ import {
   OffersFilter,
   OffersFilterEquals,
 } from '../domain'
+import {isAmountFilterEnabled} from '../utils/filterMarketplaceOffers'
 
 export const offersFilterInitialState = {
   sort: undefined,
@@ -81,6 +82,9 @@ export const isFilterActiveAtom = atom((get) => {
     // filterBarOptions is ignored since it is part of the main filter on marketplace
     filterBarOptions,
     location,
+    currency,
+    amountBottomLimit,
+    amountTopLimit,
     ...offersFilterFromStorage
   } = get(offersFilterFromStorageAtom)
 
@@ -95,6 +99,11 @@ export const isFilterActiveAtom = atom((get) => {
     {
       ...offersFilterFromStorage,
       filterBarOptions: fbo,
+      currency: isAmountFilterEnabled({amountBottomLimit, amountTopLimit})
+        ? currency
+        : undefined,
+      amountBottomLimit,
+      amountTopLimit,
       singlePrice: Array.isNonEmptyArray(
         Array.intersection(Array.fromIterable(filterBarOptions), [
           'BUY_PRODUCT',

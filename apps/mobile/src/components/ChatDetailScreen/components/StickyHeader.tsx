@@ -88,7 +88,7 @@ function StickyHeader(): React.ReactElement | null {
   }, [offer])
 
   const offerLanguageFlags = useMemo(() => {
-    if (!offer) return null
+    if (!offer) return []
 
     const result: string[] = []
 
@@ -100,7 +100,7 @@ function StickyHeader(): React.ReactElement | null {
       }
     }
 
-    return result.length > 0 ? result.join(' ') : null
+    return result
   }, [offer])
 
   const offerMetadata = useMemo(() => {
@@ -115,8 +115,8 @@ function StickyHeader(): React.ReactElement | null {
     if (offerCity) {
       result.push({key: 'city', text: offerCity})
     }
-    if (offerLanguageFlags) {
-      result.push({key: 'languages', text: offerLanguageFlags})
+    if (offerLanguageFlags.length > 0) {
+      result.push({key: 'languages', text: ''})
     }
 
     return result
@@ -152,18 +152,52 @@ function StickyHeader(): React.ReactElement | null {
           </XStack>
         ) : null}
         <XStack alignItems="center" gap="$2" flexWrap="wrap">
-          {offerMetadata.map((item, index) => (
-            <XStack key={item.key} alignItems="center" gap="$2" flexShrink={1}>
-              {index > 0 ? (
+          {offerMetadata.map((item, index) => {
+            if (item.key === 'languages') {
+              return (
+                <React.Fragment key={item.key}>
+                  {index > 0 ? (
+                    <Typography
+                      color="$foregroundSecondary"
+                      variant="description"
+                    >
+                      •
+                    </Typography>
+                  ) : null}
+                  {offerLanguageFlags.map((flag, flagIndex) => (
+                    <Typography
+                      key={`${flag}-${flagIndex}`}
+                      color="$foregroundSecondary"
+                      variant="description"
+                    >
+                      {flag}
+                    </Typography>
+                  ))}
+                </React.Fragment>
+              )
+            }
+
+            return (
+              <XStack
+                key={item.key}
+                alignItems="center"
+                gap="$2"
+                flexShrink={1}
+              >
+                {index > 0 ? (
+                  <Typography
+                    color="$foregroundSecondary"
+                    variant="description"
+                  >
+                    •
+                  </Typography>
+                ) : null}
                 <Typography color="$foregroundSecondary" variant="description">
-                  •
+                  {item.text}
                 </Typography>
-              ) : null}
-              <Typography color="$foregroundSecondary" variant="description">
-                {item.text}
-              </Typography>
-            </XStack>
-          ))}
+              </XStack>
+            )
+          })}
         </XStack>
       </YStack>
       <Stack>

@@ -22,7 +22,7 @@ export function OtherSideLeftVexlBot(): React.ReactElement | null {
   return (
     <>
       {!feedbackSubmitted && (
-        <VexlbotActionCard>
+        <VexlbotActionCard mt="$4">
           <UserFeedback
             onFinishClose={handleSubmitFeedback}
             feedbackType="CHAT_RATING"

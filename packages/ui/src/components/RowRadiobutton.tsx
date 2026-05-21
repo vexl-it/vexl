@@ -4,7 +4,7 @@ import {RadioGroup as TamaguiRadioGroup, styled, useTheme} from 'tamagui'
 import {RadiobuttonCircleEmpty} from '../icons/RadiobuttonCircleEmpty'
 import {RadiobuttonCircleFilled} from '../icons/RadiobuttonCircleFilled'
 import {SizableText, XStack, YStack} from '../primitives'
-import {useRadioGroupValue} from './RadioGroup'
+import {useRadioGroupSelectedValuePress, useRadioGroupValue} from './RadioGroup'
 
 const RowRadiobuttonLabel = styled(SizableText, {
   name: 'RowRadiobuttonLabel',
@@ -62,6 +62,7 @@ export function RowRadiobutton<T extends string>({
   disabled,
 }: RowRadiobuttonProps<T>): React.JSX.Element {
   const radioGroupValue = useRadioGroupValue()
+  const onSelectedValuePress = useRadioGroupSelectedValuePress()
   const selected = radioGroupValue === value
   const theme = useTheme()
   const iconColor = selected
@@ -80,6 +81,9 @@ export function RowRadiobutton<T extends string>({
       borderRadius="$5"
       gap="$3"
       pressStyle={{opacity: 0.7}}
+      onPress={() => {
+        if (selected) onSelectedValuePress?.(value)
+      }}
     >
       <XStack gap="$3" alignItems="center">
         {selected ? (

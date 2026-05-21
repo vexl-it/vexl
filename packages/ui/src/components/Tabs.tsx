@@ -72,6 +72,15 @@ export function Tabs<T>({
     [tabs, activeTab]
   )
 
+  const scrollToTab = useCallback((index: number) => {
+    const layout = tabLayouts.current[index]
+    const viewWidth = scrollViewWidth.current
+    if (!layout || !scrollViewRef.current || viewWidth <= 0) return
+
+    const scrollX = Math.max(0, layout.x - (viewWidth - layout.width) / 2)
+    scrollViewRef.current.scrollTo({x: scrollX, animated: true})
+  }, [])
+
   const handleTabLayout = useCallback(
     (index: number, event: LayoutChangeEvent) => {
       const {x, width} = event.nativeEvent.layout
@@ -83,6 +92,7 @@ export function Tabs<T>({
           underlineWidth.value = width
           underlineOpacity.value = withTiming(1, {duration: 150})
           hasInitialized.current = true
+          scrollToTab(index)
           return
         }
 
@@ -90,9 +100,10 @@ export function Tabs<T>({
         underlineWidth.value = withTiming(width, {
           duration: ANIMATION_DURATION,
         })
+        scrollToTab(index)
       }
     },
-    [activeIndex, underlineLeft, underlineOpacity, underlineWidth]
+    [activeIndex, scrollToTab, underlineLeft, underlineOpacity, underlineWidth]
   )
 
   useEffect(() => {
@@ -103,7 +114,8 @@ export function Tabs<T>({
     underlineWidth.value = withTiming(layout.width, {
       duration: ANIMATION_DURATION,
     })
-  }, [activeIndex, underlineLeft, underlineWidth])
+    scrollToTab(activeIndex)
+  }, [activeIndex, scrollToTab, underlineLeft, underlineWidth])
 
   const handleTabPress = useCallback(
     (index: number) => {
@@ -111,23 +123,8 @@ export function Tabs<T>({
       const tab = tabs[index]
       if (!tab) return
       onTabPress(tab.value)
-
-      const layout = tabLayouts.current[index]
-      if (layout && scrollViewRef.current) {
-        const nextLayout = tabLayouts.current[index + 1]
-        const peekExtra = nextLayout
-          ? gap + Math.min(nextLayout.width, nextLayout.width * 0.5 + gap)
-          : 0
-        const tabEnd = layout.x + layout.width + peekExtra
-        const viewWidth = scrollViewWidth.current
-        const scrollX =
-          viewWidth > 0
-            ? Math.max(0, tabEnd - viewWidth)
-            : Math.max(0, layout.x - gap)
-        scrollViewRef.current.scrollTo({x: scrollX, animated: true})
-      }
     },
-    [activeIndex, gap, onTabPress, tabs]
+    [activeIndex, onTabPress, tabs]
   )
 
   return (

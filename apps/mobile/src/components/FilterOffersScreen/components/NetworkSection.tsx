@@ -18,7 +18,9 @@ function NetworkSection(): React.ReactElement {
       allowedValues={BtcNetwork.literals}
       value={currentValue}
       onValueChange={setBtcNetwork}
-      onSelectedValuePress={setBtcNetwork}
+      onSelectedValuePress={() => {
+        setBtcNetwork(undefined)
+      }}
     >
       <YStack gap="$3">
         <RowRadiobutton

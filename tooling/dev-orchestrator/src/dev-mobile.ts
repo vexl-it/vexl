@@ -126,7 +126,9 @@ const resolveDevice = (
   return getAvailableDevices(options.platform).pipe(
     Effect.map((devices) => {
       for (const device of devices) {
-        if (device.id === options.device) return device
+        if (device.id === options.device || device.name === options.device) {
+          return device
+        }
       }
 
       return fallbackDevice
@@ -195,13 +197,17 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
 
     // Step 5: Build config and start Expo
     const buildMode = getBuildMode(options)
+    const expoDevice =
+      options.platform === 'android' && selectedDevice?.type === 'physical'
+        ? selectedDevice.name
+        : selectedDevice?.id
     const config: MobileCommandConfig = {
       platform: options.platform,
       buildMode,
       releaseMode: options.releaseMode ?? false,
       clearCache: options.clearCache ?? false,
       staging: options.staging ?? false,
-      device: selectedDevice?.id,
+      device: expoDevice,
       deviceType: selectedDevice?.type,
       port,
       host,

@@ -19,6 +19,28 @@ const isContactApproveRevealMessage = (
   return chatMessage.tradeChecklistUpdate?.contact?.status === 'APPROVE_REVEAL'
 }
 
+const isContactRequestRevealMessage = (
+  message: ChatMessageWithState
+): boolean => {
+  const chatMessage = message.message
+
+  if (chatMessage.messageType === 'REQUEST_CONTACT_REVEAL') return true
+
+  if (chatMessage.messageType !== 'TRADE_CHECKLIST_UPDATE') return false
+  return chatMessage.tradeChecklistUpdate?.contact?.status === 'REQUEST_REVEAL'
+}
+
+const isIdentityApproveRevealMessage = (
+  message: ChatMessageWithState
+): boolean => {
+  const chatMessage = message.message
+
+  if (chatMessage.messageType === 'APPROVE_REVEAL') return true
+
+  if (chatMessage.messageType !== 'TRADE_CHECKLIST_UPDATE') return false
+  return chatMessage.tradeChecklistUpdate?.identity?.status === 'APPROVE_REVEAL'
+}
+
 const isIdentityMessage = (message: ChatMessageWithState): boolean => {
   const chatMessage = message.message
 
@@ -65,6 +87,17 @@ const isIdentityOrContactRevealMessage = (
   return isIdentityMessage(message) || isContactMessage(message)
 }
 
+const identityShared = (
+  messages: ChatMessageWithState[],
+  identity: TradeChecklistInState['identity']
+): boolean => {
+  return (
+    pipe(messages, Array.some(isIdentityApproveRevealMessage)) ||
+    identity.sent?.status === 'APPROVE_REVEAL' ||
+    identity.received?.status === 'APPROVE_REVEAL'
+  )
+}
+
 export default function filterIrrelevantIdentityOrContactMessages(
   messages: ChatMessageWithState[],
   tradeChecklist: TradeChecklistInState
@@ -80,6 +113,31 @@ export default function filterIrrelevantIdentityOrContactMessages(
     Array.findLast(isContactMessage),
     Option.getOrUndefined
   )
+
+  if (
+    latestIdentityMessage &&
+    !identityShared(messages, tradeChecklist.identity)
+  ) {
+    // Phone reveal is dependent on identity reveal. If both are requested at
+    // once, keep the identity action visible and hide the phone action.
+    return (message: ChatMessageWithState) =>
+      !isIdentityOrContactRevealMessage(message) ||
+      message.message.uuid === latestIdentityMessage.message.uuid
+  }
+
+  if (
+    latestIdentityMessage &&
+    latestContactMessage &&
+    isContactRequestRevealMessage(latestContactMessage) &&
+    latestContactMessage.message.time <= latestIdentityMessage.message.time
+  ) {
+    // The phone request was sent together with/before identity reveal. Once
+    // identity is revealed, the follow-up phone action is rendered under the
+    // identity reveal card instead of as its own older bot message.
+    return (message: ChatMessageWithState) =>
+      !isIdentityOrContactRevealMessage(message) ||
+      message.message.uuid === latestIdentityMessage.message.uuid
+  }
 
   if (latestContactMessage) {
     if (

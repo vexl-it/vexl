@@ -106,6 +106,14 @@ export function Tabs<T>({
     [activeIndex, scrollToTab, underlineLeft, underlineOpacity, underlineWidth]
   )
 
+  const handleScrollViewLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      scrollViewWidth.current = event.nativeEvent.layout.width
+      scrollToTab(activeIndex)
+    },
+    [activeIndex, scrollToTab]
+  )
+
   useEffect(() => {
     if (!hasInitialized.current) return
     const layout = tabLayouts.current[activeIndex]
@@ -132,9 +140,7 @@ export function Tabs<T>({
       ref={scrollViewRef}
       horizontal
       showsHorizontalScrollIndicator={false}
-      onLayout={(event: LayoutChangeEvent) => {
-        scrollViewWidth.current = event.nativeEvent.layout.width
-      }}
+      onLayout={handleScrollViewLayout}
     >
       <XStack
         gap={gap}

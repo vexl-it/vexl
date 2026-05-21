@@ -95,7 +95,7 @@ export const accessCodeMolecule = molecule((_, getScope) => {
           )
         )
 
-        return true
+        return linkData.code
       }).pipe(
         Effect.catchAll((e) => {
           if (e._tag === 'InvalidDeepLinkError') {

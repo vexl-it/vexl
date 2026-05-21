@@ -90,7 +90,7 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
       scanned.current = true
 
       void Effect.runPromise(handleCodeScanned(data)).then((success) => {
-        if (success !== false && success !== true) {
+        if (typeof success === 'string') {
           navigation.navigate('FillClubAccessCodeScreen', {
             autoSubmit: true,
             code: success,
@@ -106,7 +106,7 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
   const uploadFromDevice = useCallback(() => {
     void Effect.runPromise(getClubQrCodeFromDeviceImageLibrary()).then(
       (success) => {
-        if (success !== false && success !== true) {
+        if (typeof success === 'string') {
           navigation.navigate('FillClubAccessCodeScreen', {
             autoSubmit: true,
             code: success,

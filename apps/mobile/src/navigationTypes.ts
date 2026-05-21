@@ -381,7 +381,7 @@ export type TradeChecklistStackScreenProps<
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type JoinClubFlowParamsList = {
   ScanClubQrCodeScreen: undefined
-  FillClubAccessCodeScreen: {autoSubmit?: boolean} | undefined
+  FillClubAccessCodeScreen: {autoSubmit?: boolean; code?: ClubCode} | undefined
   MakingSureScreen: {code: ClubCode}
 }
 

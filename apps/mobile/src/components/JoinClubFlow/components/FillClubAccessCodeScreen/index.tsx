@@ -75,6 +75,12 @@ function FillClubAccessCodeScreen({
   const validateCodeToJoinClub = useSetAtom(validateCodeToJoinClubActionAtom)
   const autoSubmitted = useRef(false)
 
+  useEffect(() => {
+    if (route.params?.code) {
+      handleAccessCodeElementChange(route.params.code)
+    }
+  }, [handleAccessCodeElementChange, route.params?.code])
+
   const submitCode = useCallback(
     (code: string): void => {
       if (code.length !== CODE_LENGTH || submitInProgressRef.current) return

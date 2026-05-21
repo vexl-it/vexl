@@ -5,17 +5,18 @@ import {
 } from 'react-native-keyboard-controller'
 
 export function KeyboardAvoidingView({
+  behavior = 'height',
   children,
   style,
   ...props
 }: Omit<
   KeyboardAvoidingViewProps,
-  'behavior' | 'contentContainerStyle'
+  'contentContainerStyle'
 >): React.JSX.Element {
   return (
     <RNKeyboardAvoidingView
       {...props}
-      behavior="height"
+      behavior={behavior}
       style={[{flex: 1}, style]}
     >
       {children}

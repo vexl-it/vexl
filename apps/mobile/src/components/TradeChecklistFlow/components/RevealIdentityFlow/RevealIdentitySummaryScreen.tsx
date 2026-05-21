@@ -20,6 +20,7 @@ import {
   revealIdentityPreviewImageAtom,
   revealIdentityUsernameAtom,
   saveRevealIdentityDraftActionAtom,
+  showRevealIdentityPhoneNumberCheckboxAtom,
 } from '../../atoms/revealIdentityAtoms'
 import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
 
@@ -35,6 +36,9 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
   const revealIdentityUsername = useAtomValue(revealIdentityUsernameAtom)
   const [revealIdentityPhoneNumber, setRevealIdentityPhoneNumber] = useAtom(
     revealIdentityPhoneNumberAtom
+  )
+  const showRevealIdentityPhoneNumberCheckbox = useAtomValue(
+    showRevealIdentityPhoneNumberCheckboxAtom
   )
   const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
   const discardRevealIdentityDraft = useSetAtom(
@@ -128,12 +132,14 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
             <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
           </XStack>
         </TouchableOpacity>
-        <RowCheckbox
-          label={t('tradeChecklist.revealIdentity.includePhoneNumber')}
-          description={getInternationalPhoneNumber(phoneNumber)}
-          checked={revealIdentityPhoneNumber}
-          onCheckedChange={setRevealIdentityPhoneNumber}
-        />
+        {showRevealIdentityPhoneNumberCheckbox ? (
+          <RowCheckbox
+            label={t('tradeChecklist.revealIdentity.includePhoneNumber')}
+            description={getInternationalPhoneNumber(phoneNumber)}
+            checked={revealIdentityPhoneNumber}
+            onCheckedChange={setRevealIdentityPhoneNumber}
+          />
+        ) : null}
       </Stack>
     </TradeChecklistItemPageLayout>
   )

@@ -1,8 +1,9 @@
 import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {type UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-import {Option, Schema} from 'effect/index'
+import {Array, Option, Schema, pipe} from 'effect/index'
 import {atom} from 'jotai'
+import {type ChatMessageWithState} from '../../../state/chat/domain'
 import anonymizePhoneNumber from '../../../state/chat/utils/anonymizePhoneNumber'
 import {sessionDataOrDummyAtom} from '../../../state/session'
 import {
@@ -21,6 +22,17 @@ export const revealIdentityUsernameAtom = atom<string>('')
 export const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
 export const revealIdentityPhoneNumberAtom = atom<boolean>(false)
 
+function isReceivedContactRevealRequestMessage(
+  message: ChatMessageWithState
+): boolean {
+  return (
+    message.state === 'received' &&
+    (message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+      message.message.tradeChecklistUpdate?.contact?.status ===
+        'REQUEST_REVEAL')
+  )
+}
+
 export const revealIdentityFlowTypeAtom = atom((get) => {
   const tradeChecklistData = get(tradeChecklistDataAtom)
   const requestMessage = get(chatWithMessagesAtom).messages.find(
@@ -32,6 +44,25 @@ export const revealIdentityFlowTypeAtom = atom((get) => {
       requestMessage?.state === 'received')
     ? 'RESPOND_REVEAL'
     : 'REQUEST_REVEAL'
+})
+
+const receivedContactRevealRequestAtom = atom((get) => {
+  const tradeChecklistData = get(tradeChecklistDataAtom)
+
+  return (
+    tradeChecklistData.contact.received?.status === 'REQUEST_REVEAL' ||
+    pipe(
+      get(chatWithMessagesAtom).messages,
+      Array.some(isReceivedContactRevealRequestMessage)
+    )
+  )
+})
+
+export const showRevealIdentityPhoneNumberCheckboxAtom = atom((get) => {
+  return (
+    get(revealIdentityFlowTypeAtom) === 'REQUEST_REVEAL' ||
+    get(receivedContactRevealRequestAtom)
+  )
 })
 
 export const shouldOpenRevealIdentitySummaryAtom = atom((get) => {
@@ -98,10 +129,17 @@ export const saveRevealIdentityDraftActionAtom = atom(null, (get, set) => {
 
   const {phoneNumber} = get(sessionDataOrDummyAtom)
   const revealIdentityImageUri = get(revealIdentityImageUriAtom)
-  const shouldRevealPhoneNumber = get(revealIdentityPhoneNumberAtom)
   const revealIdentityType = get(revealIdentityFlowTypeAtom)
+  const receivedContactRevealRequest = get(receivedContactRevealRequestAtom)
+  const shouldRevealPhoneNumber =
+    get(showRevealIdentityPhoneNumberCheckboxAtom) &&
+    get(revealIdentityPhoneNumberAtom)
   const status =
     revealIdentityType === 'RESPOND_REVEAL'
+      ? 'APPROVE_REVEAL'
+      : 'REQUEST_REVEAL'
+  const contactRevealStatus =
+    revealIdentityType === 'RESPOND_REVEAL' && receivedContactRevealRequest
       ? 'APPROVE_REVEAL'
       : 'REQUEST_REVEAL'
   const timestamp = unixMillisecondsNow()
@@ -131,7 +169,7 @@ export const saveRevealIdentityDraftActionAtom = atom(null, (get, set) => {
     ...(shouldRevealPhoneNumber
       ? {
           contact: {
-            status,
+            status: contactRevealStatus,
             fullPhoneNumber: phoneNumber,
             timestamp,
           },

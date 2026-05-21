@@ -1,7 +1,7 @@
 import {useNavigation} from '@react-navigation/native'
 import {Avatar, Button, Typography, XStack, YStack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Effect} from 'effect/index'
+import {Array, Effect, pipe} from 'effect/index'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
@@ -30,6 +30,15 @@ import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard
 const requestDeclinedAvatar = require('./images/requestDeclined.png')
 const requestPendingAvatar = require('./images/requestPending.png')
 
+function isContactRevealRequestMessage(message: ChatMessageWithState): boolean {
+  return (
+    message.message.messageType === 'REQUEST_CONTACT_REVEAL' ||
+    ((message.state === 'sent' || message.state === 'received') &&
+      message.message.tradeChecklistUpdate?.contact?.status ===
+        'REQUEST_REVEAL')
+  )
+}
+
 function IdentityRevealMessageItem({
   message,
   isLatest,
@@ -47,10 +56,12 @@ function IdentityRevealMessageItem({
     otherSideDataAtom,
     disapproveIdentityRevealWithUiFeedbackAtom,
     identityRevealRequestMessageIdAtom,
+    messagesAtom,
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber, fullPhoneNumber} =
     useAtomValue(otherSideDataAtom)
   const chat = useAtomValue(chatAtom)
+  const messages = useAtomValue(messagesAtom)
   const store = useStore()
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
   const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
@@ -168,8 +179,19 @@ function IdentityRevealMessageItem({
       message.message.tradeChecklistUpdate?.identity?.status ===
         'APPROVE_REVEAL')
   ) {
+    const hasNewerPendingPhoneNumberMessage = pipe(
+      messages,
+      Array.some(
+        (one) =>
+          one.message.time > message.message.time &&
+          isContactRevealRequestMessage(one)
+      )
+    )
     const shouldPromptForPhoneNumber =
-      contactRevealStatus === 'notStarted' && !fullPhoneNumber
+      ((contactRevealStatus === 'theyAsked' ||
+        contactRevealStatus === 'iAsked') &&
+        !hasNewerPendingPhoneNumberMessage) ||
+      (contactRevealStatus === 'notStarted' && !fullPhoneNumber)
 
     return (
       <>

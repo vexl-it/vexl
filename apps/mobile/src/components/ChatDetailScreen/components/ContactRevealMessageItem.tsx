@@ -104,7 +104,11 @@ function ContactRevealMessageItem({
     ? getInternationalPhoneNumber(fullPhoneNumber)
     : partialPhoneNumber
 
-  if (isContactRevealMessage && contactRevealStatus === 'theyAsked') {
+  if (
+    isContactRevealRequest &&
+    message.state === 'received' &&
+    contactRevealStatus === 'theyAsked'
+  ) {
     return (
       <VexlbotActionCard
         mt="$2"
@@ -141,8 +145,8 @@ function ContactRevealMessageItem({
   }
 
   if (
-    isContactRevealMessage &&
-    contactRevealStatus === 'iAsked' &&
+    isContactRevealRequest &&
+    (contactRevealStatus === 'iAsked' || message.state !== 'received') &&
     !contactRevealRequestHidden
   ) {
     return (

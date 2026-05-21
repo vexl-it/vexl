@@ -1,3 +1,4 @@
+import {CommonActions} from '@react-navigation/native'
 import {
   Button,
   ConferenceClub,
@@ -9,11 +10,14 @@ import {
   YStack,
   useTheme,
 } from '@vexl-next/ui'
-import {Effect} from 'effect'
+import {Array, Effect} from 'effect'
 import {pipe} from 'fp-ts/lib/function'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
-import {type JoinClubFlowStackScreenProps} from '../../../navigationTypes'
+import {
+  type JoinClubFlowStackScreenProps,
+  type RootStackParamsList,
+} from '../../../navigationTypes'
 import {submitCodeToJoinClubActionAtom} from '../../../state/clubs/atom/submitCodeToJoinClubActionAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {ImageUniversal} from '../../Image'
@@ -29,6 +33,38 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
   const setClubToJoin = useSetAtom(clubToJoinAtom)
   const [submitInProgress, setSubmitInProgress] = useState(false)
   const imageSize = 140
+
+  const navigateToClubsScreenRemovingJoinFlow = (): void => {
+    const parentNavigation = navigation.getParent()
+    const clubsRouteParams = {
+      screen: 'Community',
+      params: {screen: 'Clubs'},
+    } satisfies RootStackParamsList['InsideTabs']
+    const clubsRoute = {
+      name: 'InsideTabs',
+      params: clubsRouteParams,
+    }
+
+    if (parentNavigation) {
+      parentNavigation.dispatch((state) => {
+        const routesToKeep = pipe(
+          state.routes,
+          Array.filter(
+            (route) =>
+              route.name !== 'JoinClubFlow' && route.name !== 'InsideTabs'
+          )
+        )
+
+        return CommonActions.reset({
+          ...state,
+          routes: [...routesToKeep, clubsRoute],
+          index: routesToKeep.length,
+        })
+      })
+    } else {
+      navigation.navigate('InsideTabs', clubsRoute.params)
+    }
+  }
 
   const cancelJoinFlow = (): void => {
     setClubToJoin(null)
@@ -56,10 +92,7 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
           Effect.sync(() => {
             if (success) {
               setClubToJoin(null)
-              navigation.navigate('InsideTabs', {
-                screen: 'Community',
-                params: {screen: 'Clubs'},
-              })
+              navigateToClubsScreenRemovingJoinFlow()
             }
           })
         )

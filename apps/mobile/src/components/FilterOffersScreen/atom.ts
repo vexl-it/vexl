@@ -268,7 +268,12 @@ export const locationActiveAtom = atom<boolean | undefined>(true)
 
 export const updateBtcNetworkAtom = atom(
   (get) => get(btcNetworkAtom),
-  (get, set, btcNetwork: BtcNetwork) => {
+  (get, set, btcNetwork: BtcNetwork | undefined) => {
+    if (!btcNetwork) {
+      set(btcNetworkAtom, undefined)
+      return
+    }
+
     set(btcNetworkAtom, (prev) =>
       prev?.includes(btcNetwork) ? undefined : [btcNetwork]
     )

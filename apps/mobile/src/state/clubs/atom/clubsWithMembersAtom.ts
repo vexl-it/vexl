@@ -55,8 +55,15 @@ const clubsWithMembersByNameOrder = pipe(
   )
 )
 
-export const clubsWithMembersSortedByNameAtom = atom((get) =>
-  pipe(get(clubsWithMembersAtom), Array.sort(clubsWithMembersByNameOrder))
+export const clubsWithMembersSortedByNameAtom = atom(
+  (get) =>
+    pipe(get(clubsWithMembersAtom), Array.sort(clubsWithMembersByNameOrder)),
+  (_get, set, clubsWithMembers: readonly ClubWithMembers[]) => {
+    set(clubsWithMembersStorageAtom, (prev) => ({
+      ...prev,
+      data: [...clubsWithMembers],
+    }))
+  }
 )
 
 export const clubsWithMembersLoadingStateAtom = atom<ClubsLoadingState>({

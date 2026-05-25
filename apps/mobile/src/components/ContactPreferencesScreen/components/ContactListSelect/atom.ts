@@ -15,7 +15,6 @@ import loadContactsFromDeviceActionAtom, {
   loadingContactsFromDeviceAtom,
 } from '../../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import normalizeStoredContactsActionAtom from '../../../../state/contacts/atom/normalizeStoredContactsActionAtom'
-import {showUpsertContactDialogAtom} from '../../../../state/contacts/atom/showUpsertContactDialogAtom'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
   StoredContactWithComputedValues,
@@ -295,128 +294,6 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     )
   })
 
-  const searchTextAsCustomContactAtom = atom((get) => {
-    const searchText = get(searchTextAtom)
-    const number = toE164PhoneNumberWithDefaultCountryCode(searchText)
-
-    if (Option.isNone(number)) return Option.none()
-
-    const hash = Effect.runSync(
-      hashPhoneNumberE(number.value).pipe(
-        Effect.match({
-          onSuccess(value) {
-            return Option.some(value)
-          },
-          onFailure() {
-            return Option.none()
-          },
-        })
-      )
-    )
-
-    if (Option.isNone(hash)) return Option.none()
-
-    return Option.some(
-      Schema.decodeSync(StoredContactWithComputedValues)({
-        info: {
-          name: searchText,
-          numberToDisplay: searchText,
-          rawNumber: searchText,
-        },
-        computedValues: {
-          hash: hash.value,
-          normalizedNumber: number.value,
-        },
-        flags: {
-          seen: true,
-          imported: false,
-          importedManually: true,
-          invalidNumber: 'valid',
-        },
-      })
-    )
-  })
-
-  const addAndSelectContactWithUiFeedbackAtom = atom(
-    null,
-    (get, set, contact: StoredContactWithComputedValues) => {
-      const {t} = get(translationAtom)
-
-      return Effect.gen(function* (_) {
-        const {contactName: customName, saveToPhone} = yield* _(
-          set(showUpsertContactDialogAtom, {
-            type: 'create',
-            contactName: contact.info.name,
-            contactNumber: contact.computedValues.normalizedNumber,
-            phoneContactId: contact.info.nonUniqueContactId,
-          })
-        )
-
-        set(storedContactsAtom, (prev) => [
-          ...prev,
-          {
-            ...contact,
-            computedValues: Option.some(contact.computedValues),
-            info: {...contact.info, name: customName},
-          },
-        ])
-
-        const addToPhoneSuccess = saveToPhone
-          ? yield* _(
-              areContactsPermissionsGranted(),
-              Effect.flatMap((contactsPermissionsGranted) =>
-                contactsPermissionsGranted
-                  ? set(addContactToPhoneActionAtom, {
-                      customName,
-                      number: contact.computedValues.normalizedNumber,
-                    })
-                  : Effect.succeed(false)
-              ),
-              Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
-                showErrorAlert({
-                  title: t('contacts.errorAddingContactToYourPhoneContacts'),
-                  error: e,
-                })
-
-                return Effect.succeed(false)
-              })
-            )
-          : false
-
-        const submitContactsSuccess = yield* _(
-          set(submitContactsActionAtom, {
-            numbersToImport: deduplicate([
-              ...Array.fromIterable(get(selectedNumbersAtom)),
-              contact.computedValues.normalizedNumber,
-            ]),
-            normalizeAndImportAll: false,
-            showOfferReencryptionDialog: false,
-          })
-        )
-
-        set(searchTextAtom, '')
-        reloadContacts()
-
-        if (submitContactsSuccess) {
-          yield* _(
-            set(globalDialogAtom, {
-              title: t('addContactDialog.contactAdded'),
-              subtitle: t(
-                addToPhoneSuccess
-                  ? 'addContactDialog.youHaveAddedContactToVexlAndPhoneContacts'
-                  : 'addContactDialog.youHaveAddedContactToVexlContacts',
-                {
-                  contactName: customName,
-                }
-              ),
-              positiveButtonText: t('common.niceWithExclamationMark'),
-            })
-          )
-        }
-      })
-    }
-  )
-
   const addNewContactActionAtom = atom(
     null,
     (
@@ -585,10 +462,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     selectAllAtom,
     searchTextAtom,
     selectContactAtom,
-    searchTextAsCustomContactAtom,
     addNewContactSelectedCountryCodeAtom,
     addNewContactActionAtom,
-    addAndSelectContactWithUiFeedbackAtom,
     contactsFilterAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     selectedNumbersAtom,

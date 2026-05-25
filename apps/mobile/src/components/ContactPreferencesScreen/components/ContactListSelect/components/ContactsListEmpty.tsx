@@ -1,11 +1,9 @@
-import {useNavigation} from '@react-navigation/native'
-import {Button, Separator, Stack, Typography, XStack} from '@vexl-next/ui'
+import {Button, Stack, Typography} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Linking} from 'react-native'
-import {type RootStackScreenProps} from '../../../../../navigationTypes'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {contactSelectMolecule} from '../atom'
 
@@ -17,8 +15,6 @@ function ContactsListEmpty({
   variant = 'noMatchingContacts',
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const navigation =
-    useNavigation<RootStackScreenProps<'ContactPreferences'>['navigation']>()
   const {importContactsFromPhoneActionAtom, shouldOpenContactsSettingsAtom} =
     useMolecule(contactSelectMolecule)
   const importContactsFromPhone = useSetAtom(importContactsFromPhoneActionAtom)
@@ -96,23 +92,6 @@ function ContactsListEmpty({
               ? 'contactPreferences.emptyContacts.allowAccessInSettings'
               : 'contactPreferences.emptyContacts.importFromPhone'
           )}
-        </Button>
-        <XStack width="100%" alignItems="center" gap="$3">
-          <Separator flex={1} borderColor="$foregroundTertiary" />
-          <Typography color="$foregroundTertiary" variant="description">
-            {t('common.or')}
-          </Typography>
-          <Separator flex={1} borderColor="$foregroundTertiary" />
-        </XStack>
-        <Button
-          width="100%"
-          size="small"
-          variant="tertiary"
-          onPress={() => {
-            navigation.navigate('AddNewContact')
-          }}
-        >
-          {t('contactPreferences.emptyContacts.addManually')}
         </Button>
       </Stack>
     </Stack>

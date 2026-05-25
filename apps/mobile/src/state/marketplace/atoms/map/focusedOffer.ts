@@ -3,8 +3,10 @@ import {
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {type LatLong} from '@vexl-next/domain/src/utility/geoCoordinates'
+import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import europeRegion from '../../../../components/Map/utils/europeRegion'
+import {filterLocationsByCircularLocationFilter} from '../../utils/circularLocationFilter'
 import getOfferLocationBorderPoints from '../../utils/getOfferLocationBorderPoints'
 import {locationFilterAtom, resetLocationFilterActionAtom} from '../filterAtoms'
 import {filteredOffersForMapAtom} from '../filteredOffers'
@@ -36,13 +38,23 @@ export const refocusMapActionAtom = atom(
       set(resetLocationFilterActionAtom)
       const offers = get(filteredOffersForMapAtom)
       if (offers.length > 0) {
-        const borderPoints = offers.flatMap((one: OneOfferInState) =>
-          one.offerInfo.publicPart.location.flatMap(
-            getOfferLocationBorderPoints
+        const locationFilter = get(locationFilterAtom)
+        const borderPoints = pipe(
+          offers,
+          Array.flatMap((one: OneOfferInState) =>
+            pipe(
+              filterLocationsByCircularLocationFilter({
+                locations: one.offerInfo.publicPart.location,
+                locationFilter,
+              }),
+              Array.flatMap(getOfferLocationBorderPoints)
+            )
           )
         )
-        set(animateToCoordinateActionAtom, borderPoints)
-        return
+        if (Array.isNonEmptyReadonlyArray(borderPoints)) {
+          set(animateToCoordinateActionAtom, borderPoints)
+          return
+        }
       }
     }
 
@@ -55,10 +67,13 @@ export const refocusMapActionAtom = atom(
     const locationFilter = get(locationFilterAtom)
     if (locationFilter && locationFilter.length > 0) {
       const oneLocation = locationFilter[0]
-      const coordinates: LatLong[] = locationFilter.map((one) => ({
-        latitude: one.latitude,
-        longitude: one.longitude,
-      }))
+      const coordinates: LatLong[] = pipe(
+        locationFilter,
+        Array.map((one) => ({
+          latitude: one.latitude,
+          longitude: one.longitude,
+        }))
+      )
 
       if (coordinates.length === 1 && oneLocation) {
         // this should avoid zooming too much on filtered location if there is only one
@@ -76,11 +91,23 @@ export const refocusMapActionAtom = atom(
     const offers = get(filteredOffersForMapAtom)
 
     if (offers.length > 0) {
-      const borderPoints = offers.flatMap((one: OneOfferInState) =>
-        one.offerInfo.publicPart.location.flatMap(getOfferLocationBorderPoints)
+      const locationFilter = get(locationFilterAtom)
+      const borderPoints = pipe(
+        offers,
+        Array.flatMap((one: OneOfferInState) =>
+          pipe(
+            filterLocationsByCircularLocationFilter({
+              locations: one.offerInfo.publicPart.location,
+              locationFilter,
+            }),
+            Array.flatMap(getOfferLocationBorderPoints)
+          )
+        )
       )
-      set(animateToCoordinateActionAtom, borderPoints)
-      return
+      if (Array.isNonEmptyReadonlyArray(borderPoints)) {
+        set(animateToCoordinateActionAtom, borderPoints)
+        return
+      }
     }
 
     set(animateToRegionActionAtom, europeRegion)
@@ -91,6 +118,8 @@ export const focusOfferActionAtom = atom(
   null,
   (get, set, offerId: OfferId | null) => {
     set(focusedOfferIdAtom, offerId)
-    set(refocusMapActionAtom, {focusAllOffers: false})
+    if (offerId) {
+      set(refocusMapActionAtom, {focusAllOffers: false})
+    }
   }
 )

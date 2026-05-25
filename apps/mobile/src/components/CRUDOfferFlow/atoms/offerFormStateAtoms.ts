@@ -81,7 +81,6 @@ import {
 import {showErrorAlert} from '../../ErrorAlert'
 import {askAreYouSureActionAtom, globalDialogAtom} from '../../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../LoadingOverlayProvider'
-import {type MapValue} from '../../Map/brands'
 import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOfferProgressModal/atoms'
 import numberOfFriendsAtom, {
   numberOfFriendsLoadedEffect,
@@ -461,8 +460,6 @@ export const offerFormMolecule = molecule(() => {
       }
     }
   )
-
-  const selectedMapValueAtom = atom<MapValue | null>(null)
 
   const removeLocationActionAtom = atom(null, (get, set, placeId: string) => {
     set(locationAtom, (prev) => prev?.filter((loc) => loc.placeId !== placeId))
@@ -1299,7 +1296,6 @@ export const offerFormMolecule = molecule(() => {
     )
     set(singlePriceActiveAtom, true)
     set(selectedClubsUuidsAtom, [])
-    set(selectedMapValueAtom, null)
     const savedLanguages = get(lastUsedOfferSpokenLanguagesAtom)
     set(selectedSpokenLanguagesAtom, [...savedLanguages])
     set(spokenLanguagesAtom, [...savedLanguages])
@@ -1459,7 +1455,6 @@ export const offerFormMolecule = molecule(() => {
     productCategoriesAtom,
     selectProductCategoryActionAtom,
     removeLocationActionAtom,
-    selectedMapValueAtom,
     expirationDateAtom,
     paymentMethodAtom,
     offerDescriptionAtom,

@@ -1,11 +1,8 @@
-import {
-  type OfferId,
-  type OfferLocation,
-  type OneOfferInState,
-} from '@vexl-next/domain/src/general/offers'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {type EdgePadding} from 'react-native-maps'
+import {locationFilterAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {filteredOffersForMapAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {
   focusedOfferAtom,
@@ -18,36 +15,35 @@ import {
 } from '../../state/marketplace/atoms/map/mapViewAtoms'
 import {mapRegionAtom} from '../../state/marketplace/atoms/mapRegionAtom'
 import europeRegion from '../Map/utils/europeRegion'
+import {createMapPointsForOffers} from './mapPoints'
+
+export {
+  createMapPointsForOffers,
+  offerHasVisibleMapLocation,
+  type OfferWithMapLocations,
+} from './mapPoints'
 
 export const mapViewSelectedOfferIdAtom = focusedOfferIdAtom
 export const mapViewSelectedOfferAtom = focusedOfferAtom
 
 export const mapPointsAtom = atom((get) => {
   const offers = get(filteredOffersForMapAtom)
+  const locationFilter = get(locationFilterAtom)
 
-  return pipe(
+  return createMapPointsForOffers({
     offers,
-    Array.flatMap((offer: OneOfferInState) =>
-      pipe(
-        offer.offerInfo.publicPart.location,
-        Array.map((one: OfferLocation) => ({
-          data: offer,
-          id: `${offer.offerInfo.offerId}-${one.placeId}`,
-          latitude: one.latitude,
-          longitude: one.longitude,
-        }))
-      )
-    )
-  )
+    locationFilter,
+  })
 })
 
 export const focusedPointsIdsAtom = atom((get) => {
-  const focusedOffer = get(focusedOfferAtom)
-  if (!focusedOffer) return undefined
+  const focusedOfferId = get(focusedOfferIdAtom)
+  if (!focusedOfferId) return undefined
 
   return pipe(
-    focusedOffer.offerInfo.publicPart.location,
-    Array.map((one) => `${focusedOffer.offerInfo.offerId}-${one.placeId}`)
+    get(mapPointsAtom),
+    Array.filter((point) => point.data.offerInfo.offerId === focusedOfferId),
+    Array.map((point) => point.id)
   )
 })
 
@@ -70,12 +66,6 @@ export const clearMapViewSelectionActionAtom = atom(null, (get, set) => {
   set(focusedOfferIdAtom, null)
 })
 
-export const mapViewLoadingRequestAtom = atom(0)
-
-export const requestMapViewLoadingActionAtom = atom(null, (get, set) => {
-  set(mapViewLoadingRequestAtom, get(mapViewLoadingRequestAtom) + 1)
-})
-
 export const fitMapViewToAllPinsActionAtom = atom(
   null,
   (get, set, edgePadding?: EdgePadding) => {
@@ -83,16 +73,11 @@ export const fitMapViewToAllPinsActionAtom = atom(
     set(mapRegionAtom, null)
 
     const coordinates = pipe(
-      get(filteredOffersForMapAtom),
-      Array.flatMap((offer) =>
-        pipe(
-          offer.offerInfo.publicPart.location,
-          Array.map((location) => ({
-            latitude: location.latitude,
-            longitude: location.longitude,
-          }))
-        )
-      )
+      get(mapPointsAtom),
+      Array.map((point) => ({
+        latitude: point.latitude,
+        longitude: point.longitude,
+      }))
     )
 
     if (coordinates.length === 0) {

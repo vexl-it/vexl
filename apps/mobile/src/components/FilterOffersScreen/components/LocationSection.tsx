@@ -5,7 +5,7 @@ import {YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import LocationsList from '../../OfferForm/components/LocationsList'
+import LocationsList from '../../LocationPicker/components/LocationsList'
 import {
   isOnlineFilterAtom,
   isOnlineFilterVisibleAtom,
@@ -26,7 +26,7 @@ function LocationSection(): React.ReactElement {
   )
 
   const handleAddLocation = useCallback(() => {
-    navigation.navigate('SelectLocationSearch', {randomizeLocation: false})
+    navigation.navigate('FilterLocationSearch')
   }, [navigation])
 
   return (

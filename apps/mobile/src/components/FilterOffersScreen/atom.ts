@@ -42,12 +42,11 @@ import {
 } from '../../state/marketplace/domain'
 import {
   filterMarketplaceOffers,
-  filterOffersByViewport,
+  filterOffersByCircularLocation,
   isAmountFilterEnabled,
   selectOffersByMarketplaceFilterBarOptions,
   shouldCombineOnlineOffersWithLocationFilter,
 } from '../../state/marketplace/utils/filterMarketplaceOffers'
-import {radiusToViewport} from '../../state/marketplace/utils/toViewport'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import calculatePriceInFiatFromSats from '../../utils/calculatePriceInFiatFromSats'
 import calculatePriceInSats from '../../utils/calculatePriceInSats'
@@ -611,21 +610,9 @@ export const filteredOffersPreviewCountAtom = atom((get) => {
       get(createBtcPriceForCurrencyAtom(currency))?.btcPrice?.BTC,
   })
 
-  const viewportToFilterBy = draftFilter.location
-    ? radiusToViewport(
-        pipe(
-          draftFilter.location,
-          Array.map((one) => ({
-            point: {latitude: one.latitude, longitude: one.longitude},
-            radius: one.radius,
-          }))
-        )
-      )
-    : undefined
-
-  return filterOffersByViewport({
+  return filterOffersByCircularLocation({
     offers: filteredOffers,
-    viewport: viewportToFilterBy,
+    locationFilter: draftFilter.location,
     includeOnlineOffers:
       shouldCombineOnlineOffersWithLocationFilter(draftFilter),
   }).length

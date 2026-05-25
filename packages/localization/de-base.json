@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Übermittel die Adresse auf sichere Weise und vergewissere dich, dass es über einen anderen sicheren Kanal verifiziert wurde.",
   "offerForm.location.setAreaDescription": "Lege den Bereich fest, in dem du dich für einen Trade treffen möchtest. So können dir relevante Angebote in deiner Nähe angezeigt werden.",
   "offerForm.location.changeRadius": "Radius ändern",
+  "offerForm.location.meetingAreaDescription": "Lege fest, wo du dich treffen möchtest. Du siehst Angebote, deren Treffbereich sich mit deinem überschneidet.",
+  "offerForm.location.setMeetingArea": "Treffbereich festlegen",
   "offerForm.inPerson": "Persönlich",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Liefermethode",

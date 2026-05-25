@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Tuma anwani kwa njia salama na hakikisha kuiangalia kupitia njia nyingine salama.",
   "offerForm.location.setAreaDescription": "Weka eneo ambalo uko tayari kukutana kwa biashara. Hii husaidia kukuonyesha ofa zinazokufaa karibu nawe.",
   "offerForm.location.changeRadius": "Badilisha umbali",
+  "offerForm.location.meetingAreaDescription": "Weka mahali uko tayari kukutana. Utaona ofa ambazo eneo lao la kukutana linaingiliana na lako.",
+  "offerForm.location.setMeetingArea": "Weka eneo la kukutana",
   "offerForm.inPerson": "Ana kwa ana",
   "offerForm.online": "Mtandaoni",
   "offerForm.deliveryMethod": "Njia ya utoaji",

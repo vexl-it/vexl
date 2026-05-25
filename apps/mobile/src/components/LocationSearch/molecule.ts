@@ -1,11 +1,5 @@
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
-import {
-  createScope,
-  molecule,
-  type MoleculeOrInterface,
-  use,
-  useMolecule,
-} from 'bunshi/dist/react'
+import {createScope, molecule, use} from 'bunshi/dist/react'
 import {randomUUID} from 'crypto'
 import {Schema} from 'effect/index'
 import {atom} from 'jotai'
@@ -58,12 +52,3 @@ export const LocationSearchMolecule = molecule(() => {
     errorAtom,
   }
 })
-
-type InferMoleculeType<C extends MoleculeOrInterface<any>> =
-  C extends MoleculeOrInterface<infer T> ? T : never
-
-export function useLocationSearchMolecule(): InferMoleculeType<
-  typeof LocationSearchMolecule
-> {
-  return useMolecule(LocationSearchMolecule)
-}

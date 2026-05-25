@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Forward the address in a secure manner and be sure to verify it through another secure channel.",
   "offerForm.location.setAreaDescription": "محدوده‌ای رو تنظیم کن که حاضری برای معامله اونجا قرار بذاری. این کمک می‌کنه پیشنهادهای مرتبط نزدیکت رو ببینی.",
   "offerForm.location.changeRadius": "تغییر شعاع",
+  "offerForm.location.meetingAreaDescription": "جایی رو که حاضری قرار بذاری تنظیم کن. پیشنهادهایی رو می‌بینی که محدوده‌ی قرارشون با محدوده‌ی تو هم‌پوشانی داره.",
+  "offerForm.location.setMeetingArea": "تنظیم محدوده قرار",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

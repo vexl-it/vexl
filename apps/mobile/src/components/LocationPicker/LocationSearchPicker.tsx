@@ -1,4 +1,4 @@
-import {useNavigation, useRoute} from '@react-navigation/native'
+import {useNavigation} from '@react-navigation/native'
 import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {NavigationBar, Screen, SearchBar, Typography} from '@vexl-next/ui'
 import {ChevronLeft, PinGeolocation} from '@vexl-next/ui/src/icons'
@@ -9,24 +9,35 @@ import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
 import {FlatList} from 'react-native'
 import {debounce, useTheme} from 'tamagui'
-import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {type RootStackParamsList} from '../../navigationTypes'
+import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
+import {useTranslation} from '../../utils/localization/I18nProvider'
 import {
+  LocationSearchMolecule,
   LocationSearchScope,
   newLocationSessionId,
-  useLocationSearchMolecule,
-} from '../../LocationSearch/molecule'
-import {type MapValue} from '../../Map/brands'
-import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
+} from '../LocationSearch/molecule'
+import {LocationPickerMolecule} from './molecule'
+import {locationSuggestionToMapValue} from './utils'
+
+type Props =
+  | {
+      readonly radiusRouteName: 'OfferLocationRadius'
+      readonly radiusRouteParams?: RootStackParamsList['OfferLocationRadius']
+    }
+  | {
+      readonly radiusRouteName: 'FilterLocationRadius'
+    }
 
 function LocationSearchContent({
   onLocationSelect,
 }: {
-  readonly onLocationSelect: (mapValue: MapValue) => void
+  readonly onLocationSelect: (locationSuggestion: LocationSuggestion) => void
 }): React.JSX.Element {
   const {t} = useTranslation()
-  const {searchQueryAtom, searchResultsAtomsAtom, isLoadingAtom} =
-    useLocationSearchMolecule()
+  const {searchQueryAtom, searchResultsAtomsAtom, isLoadingAtom} = useMolecule(
+    LocationSearchMolecule
+  )
 
   const searchResultsAtoms = useAtomValue(searchResultsAtomsAtom)
   const isLoading = useAtomValue(isLoadingAtom)
@@ -45,8 +56,8 @@ function LocationSearchContent({
     const baseAtom = atom('')
     return atom(
       (get) => get(baseAtom),
-      (_get, set, update: React.SetStateAction<string>) => {
-        const prev = _get(baseAtom)
+      (get, set, update: React.SetStateAction<string>) => {
+        const prev = get(baseAtom)
         const newValue = typeof update === 'function' ? update(prev) : update
         set(baseAtom, newValue)
         if (newValue.trim() === '') {
@@ -58,24 +69,11 @@ function LocationSearchContent({
     )
   }, [])
 
-  const handleLocationPress = useCallback(
-    (data: LocationSuggestion) => {
-      onLocationSelect({
-        placeId: data.userData.placeId,
-        address: `${data.userData.suggestFirstRow}, ${data.userData.suggestSecondRow}`,
-        latitude: data.userData.latitude,
-        longitude: data.userData.longitude,
-        viewport: data.userData.viewport,
-      })
-    },
-    [onLocationSelect]
-  )
-
   const renderItem = useCallback(
     ({item}: {item: Atom<LocationSuggestion>}): React.ReactElement => {
-      return <LocationResultItem atom={item} onPress={handleLocationPress} />
+      return <LocationResultItem atom={item} onPress={onLocationSelect} />
     },
-    [handleLocationPress]
+    [onLocationSelect]
   )
 
   return (
@@ -85,7 +83,16 @@ function LocationSearchContent({
         placeholder={t('offerForm.location.addCityOrDistrict')}
         autoFocus
       />
-      {searchResultsAtoms.length === 0 && !isLoading ? (
+      {isLoading ? (
+        <Typography
+          variant="paragraph"
+          color="$foregroundSecondary"
+          textAlign="center"
+          paddingTop="$10"
+        >
+          {t('common.loading')}...
+        </Typography>
+      ) : searchResultsAtoms.length === 0 ? (
         <Typography
           variant="paragraph"
           color="$foregroundSecondary"
@@ -145,26 +152,24 @@ function LocationResultItem({
   )
 }
 
-export default function SelectLocationSearchScreen(): React.ReactElement {
+export default function LocationSearchPicker(props: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
-  const route = useRoute()
-  const params = (route.params ?? {}) as {
-    randomizeLocation?: boolean
-  }
-  const randomizeLocation = params.randomizeLocation ?? false
-
-  const {selectedMapValueAtom} = useMolecule(offerFormMolecule)
+  const {selectedMapValueAtom} = useMolecule(LocationPickerMolecule)
   const setSelectedMapValue = useSetAtom(selectedMapValueAtom)
 
   const [sessionId] = useState(() => newLocationSessionId())
 
   const handleLocationSelect = useCallback(
-    (mapValue: MapValue) => {
-      setSelectedMapValue(mapValue)
-      navigation.navigate('SelectLocationRadius', {randomizeLocation})
+    (locationSuggestion: LocationSuggestion) => {
+      setSelectedMapValue(locationSuggestionToMapValue(locationSuggestion))
+      if (props.radiusRouteName === 'OfferLocationRadius') {
+        navigation.navigate('OfferLocationRadius', props.radiusRouteParams)
+      } else {
+        navigation.navigate('FilterLocationRadius')
+      }
     },
-    [setSelectedMapValue, navigation, randomizeLocation]
+    [setSelectedMapValue, navigation, props]
   )
 
   return (

@@ -1,4 +1,3 @@
-import {useFocusEffect} from '@react-navigation/native'
 import {spokenLanguagesOptions} from '@vexl-next/domain/src/general/offers'
 import {
   Button,
@@ -14,7 +13,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
@@ -97,11 +96,9 @@ function FilterOffersScreen(): React.ReactElement {
     runAfterTwoAnimationFrames(saveFilter)
   }, [safeGoBack, saveFilter])
 
-  useFocusEffect(
-    useCallback(() => {
-      initializeOffersFilterOnDisplay()
-    }, [initializeOffersFilterOnDisplay])
-  )
+  useEffect(() => {
+    initializeOffersFilterOnDisplay()
+  }, [initializeOffersFilterOnDisplay])
 
   return (
     <Screen

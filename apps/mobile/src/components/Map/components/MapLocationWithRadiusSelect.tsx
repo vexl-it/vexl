@@ -16,7 +16,7 @@ import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {StyleSheet, type LayoutChangeEvent} from 'react-native'
 import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -249,9 +249,11 @@ export default function MapLocationWithRadiusSelect({
     }),
     [initialRegion]
   )
+  const selectedCenterRef = useRef(initialSelectedMapState.center)
   const [containerSize, setContainerSize] = useState({width: 0, height: 0})
   const [topOverlayHeight, setTopOverlayHeight] = useState(0)
   const [bottomOverlayHeight, setBottomOverlayHeight] = useState(0)
+  const [isMapReady, setIsMapReady] = useState(false)
   const isContainerMeasured =
     containerSize.width > 0 && containerSize.height > 0
 
@@ -287,7 +289,8 @@ export default function MapLocationWithRadiusSelect({
 
   useEffect(() => {
     setZoom(initialZoom)
-  }, [initialZoom])
+    selectedCenterRef.current = initialSelectedMapState.center
+  }, [initialSelectedMapState, initialZoom])
 
   const atoms = useAtoms({
     initialSelectedMapState,
@@ -298,6 +301,7 @@ export default function MapLocationWithRadiusSelect({
     (value: number) => {
       setZoom(value)
       mapRef.current?.setCamera({
+        center: selectedCenterRef.current,
         zoom: value,
       })
     },
@@ -316,6 +320,9 @@ export default function MapLocationWithRadiusSelect({
   }, [])
   const handleBottomOverlayLayout = useCallback((event: LayoutChangeEvent) => {
     setBottomOverlayHeight(Math.ceil(event.nativeEvent.layout.height))
+  }, [])
+  const handleMapReady = useCallback(() => {
+    setIsMapReady(true)
   }, [])
   const handleRegionChangeComplete = useCallback(() => {
     if (!isContainerMeasured) return
@@ -338,7 +345,7 @@ export default function MapLocationWithRadiusSelect({
       map.coordinateForPoint(radiusPoint),
     ])
       .then(([centerCoordinate, radiusCoordinate]) => {
-        setSelectedMapState({
+        const selectedMapState = {
           center: {
             latitude: centerCoordinate.latitude,
             longitude: centerCoordinate.longitude,
@@ -347,7 +354,10 @@ export default function MapLocationWithRadiusSelect({
             centerLongitude: centerCoordinate.longitude,
             edgeLongitude: radiusCoordinate.longitude,
           }),
-        })
+        }
+
+        selectedCenterRef.current = selectedMapState.center
+        setSelectedMapState(selectedMapState)
       })
       .catch((error: unknown) => {
         reportError(
@@ -373,13 +383,14 @@ export default function MapLocationWithRadiusSelect({
     >
       <MapView
         ref={mapRef}
-        mapPadding={overlayInsets}
+        mapPadding={isMapReady ? overlayInsets : undefined}
         provider={PROVIDER_GOOGLE}
         customMapStyle={getMapTheme(resolvedTheme)}
         style={[styles.map, {backgroundColor: backgroundPrimary}]}
         toolbarEnabled={false}
+        onMapReady={handleMapReady}
         onRegionChangeComplete={handleRegionChangeComplete}
-        region={initialRegion}
+        initialRegion={initialRegion}
       />
       {isContainerMeasured ? (
         <React.Fragment>

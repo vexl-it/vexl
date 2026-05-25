@@ -1,4 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {Stack} from '@vexl-next/ui/src/primitives'
 import {LinearGradient} from 'expo-linear-gradient'
 import {useAtomValue} from 'jotai'
@@ -21,15 +22,23 @@ const FOCUSED_CARD_HIDDEN_TRANSLATE_Y =
   getTokens().space.$13.val + getTokens().space.$12.val
 const AnimatedStack = Animated.createAnimatedComponent(Stack)
 
-function SelectedOfferCard(): React.JSX.Element | null {
+interface Props {
+  readonly selectedOfferId: OfferId | null
+}
+
+function SelectedOfferCard({selectedOfferId}: Props): React.JSX.Element | null {
   const navigation = useNavigation()
   const theme = useTheme()
   const selectedOffer = useAtomValue(mapViewSelectedOfferAtom)
+  const selectedOfferToRender =
+    selectedOffer?.offerInfo.offerId === selectedOfferId ? selectedOffer : null
   const visibleProgress = useSharedValue(0)
 
   useEffect(() => {
-    visibleProgress.value = withTiming(selectedOffer ? 1 : 0, {duration: 280})
-  }, [selectedOffer, visibleProgress])
+    visibleProgress.value = withTiming(selectedOfferToRender ? 1 : 0, {
+      duration: 280,
+    })
+  }, [selectedOfferToRender, visibleProgress])
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: visibleProgress.value,
@@ -42,15 +51,17 @@ function SelectedOfferCard(): React.JSX.Element | null {
   }))
 
   const onPress = useCallback(() => {
-    if (!selectedOffer) return
+    if (!selectedOfferToRender) return
     navigation.navigate('OfferDetail', {
-      offerId: selectedOffer.offerInfo.offerId,
+      offerId: selectedOfferToRender.offerInfo.offerId,
     })
-  }, [navigation, selectedOffer])
+  }, [navigation, selectedOfferToRender])
+
+  if (!selectedOfferToRender) return null
 
   return (
     <AnimatedStack
-      pointerEvents={selectedOffer ? 'box-none' : 'none'}
+      pointerEvents="box-none"
       position="absolute"
       left={0}
       right={0}
@@ -74,15 +85,13 @@ function SelectedOfferCard(): React.JSX.Element | null {
         pointerEvents="none"
       />
       <Stack paddingHorizontal="$5">
-        {selectedOffer ? (
-          <Animated.View
-            key={selectedOffer.offerInfo.offerId}
-            entering={SlideInDown.duration(260)}
-            exiting={SlideOutDown.duration(220)}
-          >
-            <OfferOnMarketplace offer={selectedOffer} onPress={onPress} />
-          </Animated.View>
-        ) : null}
+        <Animated.View
+          key={selectedOfferToRender.offerInfo.offerId}
+          entering={SlideInDown.duration(260)}
+          exiting={SlideOutDown.duration(220)}
+        >
+          <OfferOnMarketplace offer={selectedOfferToRender} onPress={onPress} />
+        </Animated.View>
       </Stack>
     </AnimatedStack>
   )

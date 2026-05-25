@@ -20,7 +20,7 @@ import FilterTagBar from '../InsideRouter/components/MarketplaceScreen/component
 import {
   clearMapViewSelectionActionAtom,
   fitMapViewToAllPinsActionAtom,
-  mapViewLoadingRequestAtom,
+  mapViewSelectedOfferAtom,
   mapViewSelectedOfferIdAtom,
 } from './atoms'
 import FullScreenMap from './components/FullScreenMap'
@@ -91,8 +91,8 @@ function MapViewScreen(): React.JSX.Element {
   const navigation = useNavigation()
   const safeGoBack = useSafeGoBack()
   const selectedOfferId = useAtomValue(mapViewSelectedOfferIdAtom)
+  const selectedOffer = useAtomValue(mapViewSelectedOfferAtom)
   const isFilterActive = useAtomValue(isFilterActiveAtom)
-  const mapViewLoadingRequest = useAtomValue(mapViewLoadingRequestAtom)
   const fitMapToAllPins = useSetAtom(fitMapViewToAllPinsActionAtom)
   const clearSelection = useSetAtom(clearMapViewSelectionActionAtom)
   const [isMapLoading, setIsMapLoading] = useState(true)
@@ -154,18 +154,12 @@ function MapViewScreen(): React.JSX.Element {
     refocusMapAfterOfferSetChange()
   }, [refocusMapAfterOfferSetChange])
 
-  useEffect(() => {
-    if (mapViewLoadingRequest === 0) return
-
-    showMapLoading()
-    hideMapLoadingAfterMarkersSettle()
-  }, [hideMapLoadingAfterMarkersSettle, mapViewLoadingRequest, showMapLoading])
-
   useFocusEffect(
     useCallback(() => {
+      clearSelection()
       showMapLoading()
       hideMapLoadingAfterMarkersSettle()
-    }, [hideMapLoadingAfterMarkersSettle, showMapLoading])
+    }, [clearSelection, hideMapLoadingAfterMarkersSettle, showMapLoading])
   )
 
   const handleRootLayout = useCallback((event: LayoutChangeEvent) => {
@@ -248,13 +242,13 @@ function MapViewScreen(): React.JSX.Element {
       </YStack>
       <MapBottomSheet
         containerHeight={screenHeight}
-        visible={!selectedOfferId}
+        visible={!selectedOffer}
         onSearchStart={showMapLoading}
         onSearchChange={handleSearchChange}
         sheetTopOffset={mapTopOffset}
         shouldRenderOffers={shouldRenderOffers}
       />
-      <SelectedOfferCard />
+      <SelectedOfferCard selectedOfferId={selectedOfferId} />
       <MapLoadingOverlay visible={isMapLoading || !shouldRenderMap} />
     </Stack>
   )

@@ -1,10 +1,17 @@
 import {useFocusEffect} from '@react-navigation/native'
+import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
-  type Latitude,
-  type Longitude,
-} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Stack, tokens, useTheme, useVexlTheme} from '@vexl-next/ui'
-import {Array, pipe} from 'effect'
+  Image,
+  marketplaceMapPinDefaultDark,
+  marketplaceMapPinDefaultLight,
+  marketplaceMapPinFocusedDark,
+  marketplaceMapPinFocusedLight,
+  Stack,
+  tokens,
+  useTheme,
+  useVexlTheme,
+} from '@vexl-next/ui'
+import {Array, Option, pipe, Schema} from 'effect'
 import {
   atom,
   useAtomValue,
@@ -12,8 +19,8 @@ import {
   type Atom,
   type WritableAtom,
 } from 'jotai'
-import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Dimensions, LayoutAnimation, Platform, StyleSheet} from 'react-native'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {Dimensions, LayoutAnimation, StyleSheet} from 'react-native'
 import MapView from 'react-native-map-clustering'
 import {
   Marker,
@@ -22,8 +29,6 @@ import {
   type EdgePadding,
   type Region,
 } from 'react-native-maps'
-import Svg, {Path} from 'react-native-svg'
-import {useDebounce} from 'tamagui'
 import europeRegion from '../utils/europeRegion'
 import {getMapTheme} from '../utils/mapStyle'
 
@@ -34,13 +39,36 @@ export interface Point<T> {
   longitude: Longitude
 }
 
+interface PinCoordinate {
+  latitude: Latitude
+  longitude: Longitude
+}
+
+interface PinMapMarkerProps {
+  anchor: {x: number; y: number}
+  cluster?: false
+  coordinate: PinCoordinate
+  identifier: string
+  onPress: () => void
+  tracksViewChanges: boolean
+  zIndex: number | undefined
+}
+
+interface VisiblePoint<T> {
+  isFocused: boolean
+  point: Point<T>
+  shouldCluster: boolean
+}
+
 interface Props<T> {
   mapPadding: EdgePadding
   pointsAtom: Atom<ReadonlyArray<Point<T>>>
   onPointPress: (p: Point<T>) => void
   pointIdsToFocusAtom: Atom<ReadonlyArray<Point<T>['id']> | undefined>
-  onRegionChangeComplete?: (region: Region, d: Details) => void
-  refAtom?: WritableAtom<null, [v: MapView], void>
+  onRegionChangeStart?: (region: Region, d: Details) => void
+  onRegionChangeComplete?: (region: Region) => void
+  onClusterPress?: (coordinates: readonly PinCoordinate[]) => void
+  refAtom?: WritableAtom<null, [v: MapView | undefined], void>
   onMapReady?: () => void
   showAllPointsInFocusMode?: boolean
 }
@@ -75,12 +103,15 @@ const mapClusteringDefaultProps = {
   mapRef: () => {},
 }
 
-const emptyAtom = atom<MapView | undefined>(undefined)
+const emptyRefAtom: WritableAtom<null, [MapView | undefined], void> = atom(
+  null,
+  () => {}
+)
 const PIN_MARKER_SIZE = 32
 const PIN_MARKER_ASPECT_RATIO = 43 / 32
 const PIN_MARKER_HEIGHT = PIN_MARKER_SIZE * PIN_MARKER_ASPECT_RATIO
 const PIN_TRACKING_SETTLE_MS = 260
-const REGION_CHANGE_DEBOUNCE_MS = 250
+const emptyFocusedPointIds: readonly string[] = []
 
 const styles = StyleSheet.create({
   map: {
@@ -90,86 +121,209 @@ const styles = StyleSheet.create({
   },
 })
 
-function PinMarker({
-  centerColor,
-  color,
-  size,
+export function getMapDisplayPointKey<T>({point}: {point: Point<T>}): string {
+  return point.id
+}
+
+export function getMapDisplayMarkerKey<T>({
+  point,
+  shouldCluster,
 }: {
-  centerColor: string
-  color: string
-  size: number
-}): React.ReactElement {
-  return (
-    <Svg
-      width={size}
-      height={size * PIN_MARKER_ASPECT_RATIO}
-      viewBox="0 0 32 43"
-      fill="none"
-    >
-      <Path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M16.733 41.915C19.87 39.039 32 27.195 32 16C32 7.163 24.837 0 16 0S0 7.163 0 16c0 10.952 12.145 22.989 15.273 25.908.415.388 1.042.391 1.46.007Z"
-        fill={color}
-      />
-      <Path
-        d="M16 21.142c2.524 0 4.571-2.047 4.571-4.571S18.524 12 16 12s-4.571 2.047-4.571 4.571S13.476 21.142 16 21.142Z"
-        fill={centerColor}
-      />
-    </Svg>
+  point: Point<T>
+  shouldCluster: boolean
+}): string {
+  return `${point.id}-${shouldCluster ? 'clustered' : 'direct'}`
+}
+
+export function getVisibleMarkerPoints<T>({
+  idsToFocus,
+  points,
+  showAllPointsInFocusMode,
+}: {
+  idsToFocus: ReadonlyArray<Point<T>['id']> | undefined
+  points: ReadonlyArray<Point<T>>
+  showAllPointsInFocusMode: boolean
+}): ReadonlyArray<Point<T>> {
+  const focusedPointIds = idsToFocus ?? emptyFocusedPointIds
+  const isPointFocused = (point: Point<T>): boolean =>
+    pipe(focusedPointIds, Array.contains(point.id))
+  const isInFocusMode = pipe(points, Array.some(isPointFocused))
+
+  if (!isInFocusMode || showAllPointsInFocusMode) return points
+
+  return pipe(points, Array.filter(isPointFocused))
+}
+
+export function getVisibleMapPoints<T>({
+  idsToFocus,
+  points,
+  showAllPointsInFocusMode,
+}: {
+  idsToFocus: ReadonlyArray<Point<T>['id']> | undefined
+  points: ReadonlyArray<Point<T>>
+  showAllPointsInFocusMode: boolean
+}): ReadonlyArray<VisiblePoint<T>> {
+  const focusedPointIds = idsToFocus ?? emptyFocusedPointIds
+  const isPointFocused = (point: Point<T>): boolean =>
+    pipe(focusedPointIds, Array.contains(point.id))
+
+  return pipe(
+    getVisibleMarkerPoints({idsToFocus, points, showAllPointsInFocusMode}),
+    Array.map((point) => ({
+      isFocused: isPointFocused(point),
+      point,
+      shouldCluster: !isPointFocused(point),
+    }))
   )
 }
 
-function PinMapMarker<T>({
-  centerColor,
-  color,
-  emphasized = false,
-  onPointPress,
-  point,
+export function getClusteredVisibleMapPoints<T>(
+  visiblePoints: ReadonlyArray<VisiblePoint<T>>
+): ReadonlyArray<VisiblePoint<T>> {
+  return pipe(
+    visiblePoints,
+    Array.filter(({shouldCluster}) => shouldCluster)
+  )
+}
+
+export function getDirectVisibleMapPoints<T>(
+  visiblePoints: ReadonlyArray<VisiblePoint<T>>
+): ReadonlyArray<VisiblePoint<T>> {
+  return pipe(
+    visiblePoints,
+    Array.filter(({shouldCluster}) => !shouldCluster)
+  )
+}
+
+export function getMapDisplayTrackingKey<T>(
+  visiblePoints: ReadonlyArray<VisiblePoint<T>>
+): string {
+  return pipe(
+    visiblePoints,
+    Array.map(
+      ({isFocused, point, shouldCluster}) =>
+        `${getMapDisplayMarkerKey({point, shouldCluster})}:${isFocused ? 'focused' : 'default'}`
+    ),
+    Array.join('|')
+  )
+}
+
+const ClusterLeafSchema = Schema.Struct({
+  geometry: Schema.Struct({
+    coordinates: Schema.Tuple(Longitude, Latitude),
+  }),
+})
+
+export function getClusterLeavesCoordinates(
+  leaves: readonly unknown[]
+): readonly PinCoordinate[] {
+  return pipe(
+    leaves,
+    Array.filterMap((leaf) =>
+      pipe(
+        Schema.decodeUnknownOption(ClusterLeafSchema)(leaf),
+        Option.map(({geometry: {coordinates}}) => ({
+          longitude: coordinates[0],
+          latitude: coordinates[1],
+        }))
+      )
+    )
+  )
+}
+
+export function getMapPinImage({
+  isFocused,
+  resolvedTheme,
 }: {
-  centerColor: string
-  color: string
+  isFocused: boolean
+  resolvedTheme: 'dark' | 'light'
+}): number {
+  if (isFocused) {
+    return resolvedTheme === 'dark'
+      ? marketplaceMapPinFocusedDark
+      : marketplaceMapPinFocusedLight
+  }
+
+  return resolvedTheme === 'dark'
+    ? marketplaceMapPinDefaultDark
+    : marketplaceMapPinDefaultLight
+}
+
+export function getPinMapMarkerProps<T>({
+  clustered,
+  isFocused,
+  point,
+  coordinate,
+  emphasized = false,
+  identifier = getMapDisplayPointKey({
+    point,
+  }),
+  onPointPress,
+  tracksViewChanges,
+}: {
+  clustered: boolean
+  coordinate: PinCoordinate
   emphasized?: boolean
+  identifier?: string
+  isFocused: boolean
   onPointPress: (p: Point<T>) => void
   point: Point<T>
+  tracksViewChanges: boolean
+}): PinMapMarkerProps {
+  const markerPropsBase = {
+    anchor: {x: 0.5, y: 1},
+    coordinate,
+    identifier,
+    onPress: () => {
+      onPointPress(point)
+    },
+    tracksViewChanges,
+    zIndex: emphasized ? 999 : undefined,
+  }
+
+  return clustered ? markerPropsBase : {...markerPropsBase, cluster: false}
+}
+
+function PinMapMarker<T>({
+  clustered,
+  coordinate,
+  isFocused,
+  onPointPress,
+  point,
+  resolvedTheme,
+  tracksViewChanges,
+}: {
+  clustered: boolean
+  coordinate: PinCoordinate
+  isFocused: boolean
+  onPointPress: (p: Point<T>) => void
+  point: Point<T>
+  resolvedTheme: 'dark' | 'light'
+  tracksViewChanges: boolean
 }): React.ReactElement {
-  const [tracksViewChanges, setTracksViewChanges] = useState(true)
-
-  useEffect(() => {
-    setTracksViewChanges(true)
-
-    const settleTimeout = setTimeout(() => {
-      setTracksViewChanges(false)
-    }, PIN_TRACKING_SETTLE_MS)
-
-    return () => {
-      clearTimeout(settleTimeout)
-    }
-  }, [centerColor, color, emphasized, point.id])
+  const image = getMapPinImage({isFocused, resolvedTheme})
+  const markerProps = getPinMapMarkerProps({
+    clustered,
+    coordinate,
+    emphasized: isFocused,
+    isFocused,
+    onPointPress,
+    point,
+    tracksViewChanges,
+  })
 
   return (
-    <Marker
-      zIndex={emphasized ? 999 : undefined}
-      tracksViewChanges={tracksViewChanges || Platform.OS === 'ios'}
-      coordinate={{
-        latitude: point.latitude,
-        longitude: point.longitude,
-      }}
-      anchor={{x: 0.5, y: 1}}
-      onPress={() => {
-        onPointPress(point)
-      }}
-    >
+    <Marker {...markerProps}>
       <Stack
         w={PIN_MARKER_SIZE}
         h={PIN_MARKER_HEIGHT}
         alignItems="center"
         justifyContent="center"
       >
-        <PinMarker
-          centerColor={centerColor}
-          color={color}
-          size={PIN_MARKER_SIZE}
+        <Image
+          source={image}
+          width={PIN_MARKER_SIZE}
+          height={PIN_MARKER_HEIGHT}
         />
       </Stack>
     </Marker>
@@ -180,21 +334,24 @@ function MMapView({
   children,
   refAtom,
   mapPadding,
-  inFocusMode,
+  onClusterPress,
   onMapReady,
+  onRegionChangeStart,
   onRegionChangeComplete,
+  tracksViewChanges,
 }: {
   children: React.ReactNode
-  refAtom?: WritableAtom<null, [v: MapView], void>
+  refAtom?: WritableAtom<null, [v: MapView | undefined], void>
   mapPadding: EdgePadding
-  inFocusMode: boolean
+  onClusterPress?: (coordinates: readonly PinCoordinate[]) => void
   onMapReady?: () => void
-  onRegionChangeComplete?: (region: Region, d: Details) => void
+  onRegionChangeStart?: (region: Region, d: Details) => void
+  onRegionChangeComplete?: (region: Region) => void
+  tracksViewChanges: boolean
 }): React.ReactElement {
   const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
   const accentYellowPrimary = theme.accentYellowPrimary.get()
-  const backgroundHighlight = theme.backgroundHighlight.get()
   const backgroundPrimary = theme.backgroundPrimary.get()
   const clusterTextColor =
     resolvedTheme === 'dark'
@@ -203,7 +360,7 @@ function MMapView({
   const ref = useRef<MapView>(null)
   // TODO: remove after update of react-native-map-clustering
   const dummySuperClusterRefFnc = useRef(null)
-  const setMapViewRef = useSetAtom(refAtom ?? emptyAtom)
+  const setMapViewRef = useSetAtom(refAtom ?? emptyRefAtom)
   const loadedCallbackCalledRef = useRef(false)
 
   const onMapLoaded = useCallback(() => {
@@ -212,21 +369,44 @@ function MMapView({
     onMapReady?.()
   }, [onMapReady])
 
+  const handleClusterPress = useCallback(
+    (_cluster: unknown, leaves?: readonly unknown[]) => {
+      onClusterPress?.(getClusterLeavesCoordinates(leaves ?? []))
+    },
+    [onClusterPress]
+  )
+
+  const handleRegionChangeStart = useCallback(
+    (region: Region, details: Details) => {
+      onRegionChangeStart?.(region, details)
+    },
+    [onRegionChangeStart]
+  )
+
+  const handleRegionChangeComplete = useCallback(
+    (region: Region) => {
+      onRegionChangeComplete?.(region)
+    },
+    [onRegionChangeComplete]
+  )
+
   useFocusEffect(
     useCallback(() => {
       setMapViewRef(ref.current ?? undefined)
-    }, [ref, setMapViewRef])
+
+      return () => {
+        setMapViewRef(undefined)
+      }
+    }, [setMapViewRef])
   )
 
-  const onChangedDebounce = useDebounce(
-    useCallback(
-      (region: Region, details: Details) => {
-        if (onRegionChangeComplete) onRegionChangeComplete(region, details)
-      },
-      [onRegionChangeComplete]
-    ),
-    REGION_CHANGE_DEBOUNCE_MS
-  )
+  useEffect(() => {
+    setMapViewRef(ref.current ?? undefined)
+
+    return () => {
+      setMapViewRef(undefined)
+    }
+  }, [setMapViewRef])
 
   return (
     <MapView
@@ -234,24 +414,26 @@ function MMapView({
       ref={ref}
       superClusterRef={dummySuperClusterRefFnc}
       initialRegion={europeRegion}
-      clusterColor={inFocusMode ? backgroundHighlight : accentYellowPrimary}
+      clusterColor={accentYellowPrimary}
       clusterTextColor={clusterTextColor}
       customMapStyle={getMapTheme(resolvedTheme)}
       onMapLoaded={onMapLoaded}
       layoutAnimationConf={{duration: 150}}
       minZoom={0}
       maxZoom={20}
+      preserveClusterPressBehavior
+      tracksViewChanges={tracksViewChanges}
       loadingBackgroundColor={backgroundPrimary}
-      loadingIndicatorColor={
-        inFocusMode ? backgroundHighlight : accentYellowPrimary
-      }
+      loadingIndicatorColor={accentYellowPrimary}
       clusteringEnabled
       loadingEnabled
       provider={PROVIDER_GOOGLE}
       mapPadding={mapPadding}
       toolbarEnabled={false}
       style={[styles.map, {backgroundColor: backgroundPrimary}]}
-      onRegionChange={onChangedDebounce}
+      onRegionChangeStart={handleRegionChangeStart}
+      onRegionChangeComplete={handleRegionChangeComplete}
+      onClusterPress={handleClusterPress}
     >
       {children}
     </MapView>
@@ -263,58 +445,83 @@ export default function MapDisplayMultiplePoints<T>({
   mapPadding,
   onPointPress,
   pointsAtom,
+  onRegionChangeStart,
   onRegionChangeComplete,
+  onClusterPress,
   refAtom,
   onMapReady,
   showAllPointsInFocusMode = false,
 }: Props<T>): React.ReactElement {
   const points = useAtomValue(pointsAtom)
   const idsToFocus = useAtomValue(pointIdsToFocusAtom)
-  const theme = useTheme()
-  const pinColor = theme.foregroundPrimary.get()
-  const pinCenterColor = theme.backgroundPrimary.get()
-  const focusedPinColor = theme.accentHighlightSecondary.get()
-  const [notFocusedPoints, focusedPoints] = pipe(
+  const {resolvedTheme} = useVexlTheme()
+  const visiblePoints = getVisibleMapPoints({
+    idsToFocus,
     points,
-    Array.partition((point) => idsToFocus?.includes(point.id) ?? false)
+    showAllPointsInFocusMode,
+  })
+  const clusteredVisiblePoints = getClusteredVisibleMapPoints(visiblePoints)
+  const directVisiblePoints = getDirectVisibleMapPoints(visiblePoints)
+  const trackingKey = `${resolvedTheme}:${getMapDisplayTrackingKey(visiblePoints)}`
+  const [settledTrackingKey, setSettledTrackingKey] = useState<string | null>(
+    null
   )
+  const tracksViewChanges = settledTrackingKey !== trackingKey
+  useEffect(() => {
+    const settleTimeout = setTimeout(() => {
+      setSettledTrackingKey(trackingKey)
+    }, PIN_TRACKING_SETTLE_MS)
 
-  const isInFocusMode = focusedPoints.length > 0
-  const shouldRenderNotFocusedPoints =
-    !isInFocusMode || showAllPointsInFocusMode
+    return () => {
+      clearTimeout(settleTimeout)
+    }
+  }, [trackingKey])
+
+  const markerElements = useMemo(
+    () =>
+      pipe(
+        clusteredVisiblePoints,
+        Array.appendAll(directVisiblePoints),
+        Array.map(({isFocused, point, shouldCluster}) => (
+          <PinMapMarker
+            key={getMapDisplayMarkerKey({
+              point,
+              shouldCluster,
+            })}
+            clustered={shouldCluster}
+            coordinate={{
+              latitude: point.latitude,
+              longitude: point.longitude,
+            }}
+            isFocused={isFocused}
+            onPointPress={onPointPress}
+            point={point}
+            resolvedTheme={resolvedTheme}
+            tracksViewChanges={tracksViewChanges}
+          />
+        ))
+      ),
+    [
+      clusteredVisiblePoints,
+      directVisiblePoints,
+      onPointPress,
+      resolvedTheme,
+      tracksViewChanges,
+    ]
+  )
 
   return (
     <Stack w="100%" h="100%" position="relative">
       <MMapView
-        inFocusMode={isInFocusMode}
         refAtom={refAtom}
         mapPadding={mapPadding}
+        onClusterPress={onClusterPress}
         onMapReady={onMapReady}
+        onRegionChangeStart={onRegionChangeStart}
         onRegionChangeComplete={onRegionChangeComplete}
+        tracksViewChanges={tracksViewChanges}
       >
-        {shouldRenderNotFocusedPoints
-          ? notFocusedPoints.map((point) => (
-              <PinMapMarker
-                key={point.id}
-                centerColor={pinCenterColor}
-                color={pinColor}
-                onPointPress={onPointPress}
-                point={point}
-              />
-            ))
-          : null}
-        {focusedPoints.map((point) => {
-          return (
-            <PinMapMarker
-              key={point.id}
-              centerColor={pinCenterColor}
-              color={focusedPinColor}
-              emphasized
-              onPointPress={onPointPress}
-              point={point}
-            />
-          )
-        })}
+        {markerElements}
       </MMapView>
     </Stack>
   )

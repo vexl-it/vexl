@@ -147,7 +147,7 @@ function LocationStep({
                   label={t('offerForm.addLocation')}
                   icon={PlusAdd}
                   onPress={() => {
-                    navigation.navigate('SelectLocationSearch', {
+                    navigation.navigate('OfferLocationSearch', {
                       randomizeLocation: true,
                     })
                   }}

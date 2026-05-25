@@ -7,7 +7,7 @@ import {
   SearchBar,
   Typography,
 } from '@vexl-next/ui'
-import {ScopeProvider} from 'bunshi/dist/react'
+import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {type Atom, atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
 import {FlatList, TouchableOpacity} from 'react-native'
@@ -17,9 +17,9 @@ import {type TradeChecklistStackScreenProps} from '../../../../../navigationType
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {
+  LocationSearchMolecule,
   LocationSearchScope,
   newLocationSessionId,
-  useLocationSearchMolecule,
 } from '../../../../LocationSearch/molecule'
 
 type Props = TradeChecklistStackScreenProps<'LocationSearch'>
@@ -91,7 +91,9 @@ function SearchScreenContent({
   const localSearchText = useAtomValue(localSearchTextAtom)
   const trimmedSearchText = localSearchText.trim()
 
-  const {searchQueryAtom, searchResultsAtomsAtom} = useLocationSearchMolecule()
+  const {searchQueryAtom, searchResultsAtomsAtom} = useMolecule(
+    LocationSearchMolecule
+  )
   const setSearchQuery = useSetAtom(searchQueryAtom)
   const searchResultsAtoms = useAtomValue(searchResultsAtomsAtom)
 

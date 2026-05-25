@@ -18,8 +18,8 @@ import AppLogsScreen from '../AppLogsScreen'
 import AppSettingsScreen from '../AppSettingsScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
 import OfferExpirationDateScreen from '../CRUDOfferFlow/components/OfferExpirationDateScreen'
-import SelectLocationRadiusScreen from '../CRUDOfferFlow/components/SelectLocationRadiusScreen'
-import SelectLocationSearchScreen from '../CRUDOfferFlow/components/SelectLocationSearchScreen'
+import OfferLocationRadiusScreen from '../CRUDOfferFlow/components/OfferLocationRadiusScreen'
+import OfferLocationSearchScreen from '../CRUDOfferFlow/components/OfferLocationSearchScreen'
 import {ChangeCurrencyScreen} from '../ChangeCurrency'
 import ChatDetailScreen from '../ChatDetailScreen'
 import ChatImagePreviewScreen from '../ChatDetailScreen/ChatImagePreviewScreen'
@@ -42,6 +42,8 @@ import EditOfferFieldScreen from '../EditOfferFieldScreen'
 import EditProfileScreen from '../EditProfileScreen'
 import FaqsScreen from '../FaqScreen'
 import FilterOffersScreen from '../FilterOffersScreen'
+import FilterLocationRadiusScreen from '../FilterOffersScreen/components/FilterLocationRadiusScreen'
+import FilterLocationSearchScreen from '../FilterOffersScreen/components/FilterLocationSearchScreen'
 import GoldenAvatarAnimation, {
   showGoldenAvatarAnimationAtom,
 } from '../GoldenAvatar'
@@ -122,12 +124,20 @@ function RootNavigation(): React.ReactElement {
               component={OfferExpirationDateScreen}
             />
             <Stack.Screen
-              name="SelectLocationSearch"
-              component={SelectLocationSearchScreen}
+              name="OfferLocationSearch"
+              component={OfferLocationSearchScreen}
             />
             <Stack.Screen
-              name="SelectLocationRadius"
-              component={SelectLocationRadiusScreen}
+              name="OfferLocationRadius"
+              component={OfferLocationRadiusScreen}
+            />
+            <Stack.Screen
+              name="FilterLocationSearch"
+              component={FilterLocationSearchScreen}
+            />
+            <Stack.Screen
+              name="FilterLocationRadius"
+              component={FilterLocationRadiusScreen}
             />
             <Stack.Screen name="FilterOffers" component={FilterOffersScreen} />
             <Stack.Screen

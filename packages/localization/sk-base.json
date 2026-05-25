@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Adresu preposielaj bezpečným spôsobom a nezabudni si ju overiť iným bezpečným kanálom.",
   "offerForm.location.setAreaDescription": "Nastav oblasť, kde si ochotný stretnúť sa kvôli obchodu. Pomôže ti to vidieť relevantné ponuky v okolí.",
   "offerForm.location.changeRadius": "Zmeniť okruh",
+  "offerForm.location.meetingAreaDescription": "Nastav, kde si ochotný stretnúť sa. Uvidíš ponuky, ktorých oblasť stretnutia sa prekrýva s tou tvojou.",
+  "offerForm.location.setMeetingArea": "Nastaviť oblasť stretnutia",
   "offerForm.inPerson": "Osobne",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Spôsob doručenia",

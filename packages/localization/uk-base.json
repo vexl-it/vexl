@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Forward the address in a secure manner and be sure to verify it through another secure channel.",
   "offerForm.location.setAreaDescription": "Вкажи район, де ти готовий зустрітися для угоди. Це допоможе показувати тобі релевантні пропозиції поруч.",
   "offerForm.location.changeRadius": "Змінити радіус",
+  "offerForm.location.meetingAreaDescription": "Вкажи, де ти готовий зустрітися. Ти бачитимеш пропозиції, чия зона зустрічі перетинається з твоєю.",
+  "offerForm.location.setMeetingArea": "Вказати зону зустрічі",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Stuur het adres door op een veilige manier en zorg ervoor dat je het verifieert via een ander veilig kanaal.",
   "offerForm.location.setAreaDescription": "Stel het gebied in waar je wilt afspreken voor een trade. Dit helpt om relevante aanbiedingen in de buurt te tonen.",
   "offerForm.location.changeRadius": "Radius wijzigen",
+  "offerForm.location.meetingAreaDescription": "Stel in waar je wilt afspreken. Je ziet aanbiedingen waarvan het ontmoetingsgebied overlapt met dat van jou.",
+  "offerForm.location.setMeetingArea": "Ontmoetingsgebied instellen",
   "offerForm.inPerson": "In persoon",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Verzendmethode",

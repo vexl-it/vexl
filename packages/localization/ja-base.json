@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "アドレスを安全な方法で転送し、別の安全な方法を通じて確認してください。",
   "offerForm.location.setAreaDescription": "取引で会えるエリアを設定してください。近くの関連するオファーが表示されやすくなります。",
   "offerForm.location.changeRadius": "半径を変更",
+  "offerForm.location.meetingAreaDescription": "会える場所を設定してください。あなたの待ち合わせエリアと重なるオファーが表示されます。",
+  "offerForm.location.setMeetingArea": "待ち合わせエリアを設定",
   "offerForm.inPerson": "対面",
   "offerForm.online": "オンライン",
   "offerForm.deliveryMethod": "配送方法",

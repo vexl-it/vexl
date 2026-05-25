@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "以安全的方式转发地址，并确保通过另一个安全渠道进行验证。",
   "offerForm.location.setAreaDescription": "设置你愿意见面交易的区域。这样能帮你看到附近更相关的出价。",
   "offerForm.location.changeRadius": "更改半径",
+  "offerForm.location.meetingAreaDescription": "设置你愿意见面的地方。你会看到见面区域与你重叠的出价。",
+  "offerForm.location.setMeetingArea": "设置见面区域",
   "offerForm.inPerson": "亲自见面",
   "offerForm.online": "网上",
   "offerForm.deliveryMethod": "发送方式",

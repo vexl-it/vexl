@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Forward the address in a secure manner and be sure to verify it through another secure channel.",
   "offerForm.location.setAreaDescription": "Atur area tempat kamu bersedia bertemu untuk trade. Ini membantu menampilkan penawaran relevan di sekitarmu.",
   "offerForm.location.changeRadius": "Ubah radius",
+  "offerForm.location.meetingAreaDescription": "Atur di mana kamu bersedia bertemu. Kamu akan melihat penawaran yang area bertemunya tumpang tindih dengan areamu.",
+  "offerForm.location.setMeetingArea": "Atur area bertemu",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

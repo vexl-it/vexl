@@ -1,7 +1,11 @@
 import {
+  calculateAsymmetricZoomRange,
   calculateAvailableSelectionFrame,
+  calculateCenteredZoomRange,
   calculateLongitudeRadiusDelta,
   calculateRingDiameter,
+  calculateZoomFromLongitudeDelta,
+  calculateZoomFromNormalizedSliderValue,
 } from './MapLocationWithRadiusSelect.geometry'
 
 describe('MapLocationWithRadiusSelect geometry', () => {
@@ -60,5 +64,117 @@ describe('MapLocationWithRadiusSelect geometry', () => {
         edgeLongitude: -179,
       })
     ).toBe(2)
+  })
+
+  test('calculates zoom from longitude delta using web mercator sizing', () => {
+    expect(
+      calculateZoomFromLongitudeDelta({
+        longitudeDelta: 360,
+        mapWidth: 256,
+      })
+    ).toBeCloseTo(0)
+
+    expect(
+      calculateZoomFromLongitudeDelta({
+        longitudeDelta: 180,
+        mapWidth: 256,
+      })
+    ).toBeCloseTo(1)
+  })
+
+  test('centers zoom range around the initial zoom', () => {
+    const zoomRange = calculateCenteredZoomRange({
+      centerZoom: 7.2,
+      span: 9,
+      minZoom: 0,
+      maxZoom: 20,
+    })
+
+    expect(zoomRange.min).toBeCloseTo(2.7)
+    expect(zoomRange.max).toBeCloseTo(11.7)
+    expect((zoomRange.min + zoomRange.max) / 2).toBeCloseTo(7.2)
+  })
+
+  test('clamps centered zoom range to absolute zoom bounds', () => {
+    expect(
+      calculateCenteredZoomRange({
+        centerZoom: 18,
+        span: 9,
+        minZoom: 0,
+        maxZoom: 20,
+      })
+    ).toEqual({
+      min: 11,
+      max: 20,
+    })
+  })
+
+  test('allows less zoom out than zoom in from the initial zoom', () => {
+    expect(
+      calculateAsymmetricZoomRange({
+        initialZoom: 6,
+        zoomOut: 0.8,
+        zoomIn: 6,
+        minZoom: 0,
+        maxZoom: 20,
+      })
+    ).toEqual({
+      min: 5.2,
+      max: 12,
+    })
+  })
+
+  test('clamps asymmetric zoom range to absolute zoom bounds', () => {
+    expect(
+      calculateAsymmetricZoomRange({
+        initialZoom: 19,
+        zoomOut: 0.8,
+        zoomIn: 6,
+        minZoom: 0,
+        maxZoom: 20,
+      })
+    ).toEqual({
+      min: 18.2,
+      max: 20,
+    })
+  })
+
+  test('keeps initial zoom at the center of normalized slider value', () => {
+    expect(
+      calculateZoomFromNormalizedSliderValue({
+        sliderValue: 0.5,
+        initialZoom: 6,
+        zoomOut: 0.8,
+        zoomIn: 6,
+        minZoom: 0,
+        maxZoom: 20,
+      })
+    ).toBe(6)
+  })
+
+  test('maps normalized slider left side to capped zoom out', () => {
+    expect(
+      calculateZoomFromNormalizedSliderValue({
+        sliderValue: 0,
+        initialZoom: 6,
+        zoomOut: 0.8,
+        zoomIn: 6,
+        minZoom: 0,
+        maxZoom: 20,
+      })
+    ).toBe(5.2)
+  })
+
+  test('maps normalized slider right side to larger zoom in', () => {
+    expect(
+      calculateZoomFromNormalizedSliderValue({
+        sliderValue: 1,
+        initialZoom: 6,
+        zoomOut: 0.8,
+        zoomIn: 6,
+        minZoom: 0,
+        maxZoom: 20,
+      })
+    ).toBe(12)
   })
 })

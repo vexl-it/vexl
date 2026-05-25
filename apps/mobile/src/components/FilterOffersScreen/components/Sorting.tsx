@@ -6,12 +6,19 @@ import React, {useMemo} from 'react'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {sortingAtom} from '../atom'
 
+const DEFAULT_SORTING_VALUE = 'DEFAULT_SORTING'
+type SortPickerValue = Sort | typeof DEFAULT_SORTING_VALUE
+
 function Sorting(): React.ReactElement {
   const {t} = useTranslation()
   const [sorting, setSorting] = useAtom(sortingAtom)
 
-  const sortingItems: ReadonlyArray<PickerItem<Sort>> = useMemo(
+  const sortingItems: ReadonlyArray<PickerItem<SortPickerValue>> = useMemo(
     () => [
+      {
+        label: t('filterOffers.selectSortingMethod'),
+        value: DEFAULT_SORTING_VALUE,
+      },
       {
         label: t('filterOffers.lowestFeeFirst'),
         value: 'LOWEST_FEE_FIRST',
@@ -52,11 +59,11 @@ function Sorting(): React.ReactElement {
   )
 
   return (
-    <Picker<Sort>
+    <Picker<SortPickerValue>
       items={sortingItems}
-      value={sorting}
+      value={sorting ?? DEFAULT_SORTING_VALUE}
       onValueChange={(value) => {
-        setSorting(value)
+        setSorting(value === DEFAULT_SORTING_VALUE ? undefined : value)
       }}
       placeholder={t('filterOffers.selectSortingMethod')}
     />

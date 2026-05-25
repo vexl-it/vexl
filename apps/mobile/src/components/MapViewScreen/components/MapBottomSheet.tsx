@@ -186,7 +186,7 @@ function MapBottomSheet({
   onSearchChange,
   sheetTopOffset,
   shouldRenderOffers,
-}: Props): React.JSX.Element {
+}: Props): React.JSX.Element | null {
   const insets = useSafeAreaInsets()
   const {height: keyboardHeight, progress: keyboardProgress} =
     useReanimatedKeyboardAnimation()
@@ -222,7 +222,7 @@ function MapBottomSheet({
 
   useEffect(() => {
     if (!visible) {
-      translateY.value = withTiming(sheetHeight, TIMING_CONFIG)
+      translateY.value = sheetHeight
       updateListViewportHeight(sheetHeight)
     } else {
       translateY.value = withTiming(middleY, TIMING_CONFIG)
@@ -321,6 +321,8 @@ function MapBottomSheet({
     translateY.value = withTiming(nextTranslateY, TIMING_CONFIG)
     updateListViewportHeight(nextTranslateY)
   }, [middleY, translateY, updateListViewportHeight])
+
+  if (!visible) return null
 
   return (
     <AnimatedStack

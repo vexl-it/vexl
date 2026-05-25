@@ -11,7 +11,6 @@ import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneN
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {
@@ -50,13 +49,12 @@ export type RootStackParamsList = {
     field: EditableOfferField
   }
   OfferExpirationDate: undefined
-  SelectLocationSearch: {randomizeLocation?: boolean} | undefined
-  SelectLocationRadius: {randomizeLocation?: boolean} | undefined
+  OfferLocationSearch: {randomizeLocation?: boolean} | undefined
+  OfferLocationRadius: {randomizeLocation?: boolean} | undefined
+  FilterLocationSearch: undefined
+  FilterLocationRadius: undefined
   FilterOffers: undefined
-  ChangeCurrency: {
-    readonly selectedCurrencyCode: CurrencyCode | undefined
-    readonly onSave: (currency: CurrencyCode) => void
-  }
+  ChangeCurrency: undefined
 
   MapView: undefined
 

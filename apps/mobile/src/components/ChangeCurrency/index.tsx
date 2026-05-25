@@ -16,19 +16,16 @@ import {
 } from '@vexl-next/ui'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {
   changeCurrenciesToDisplayAtom,
+  type ChangeCurrencyConfig,
+  changeCurrencyConfigAtom,
   changeCurrencySearchTextAtom,
 } from './atoms'
-
-interface ChangeCurrencyProps {
-  readonly selectedCurrencyCode: CurrencyCode | undefined
-  readonly onSave: (currency: CurrencyCode) => void
-}
 
 const CurrencyItem = React.memo(function CurrencyItem({
   item,
@@ -137,25 +134,30 @@ function ChangeCurrencyContent({
   )
 }
 
-export function useOpenChangeCurrency(): (config: ChangeCurrencyProps) => void {
+export function useOpenChangeCurrency(): (
+  config: ChangeCurrencyConfig
+) => void {
   const setSearchText = useSetAtom(changeCurrencySearchTextAtom)
+  const setConfig = useSetAtom(changeCurrencyConfigAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'ChangeCurrency'>['navigation']>()
 
   return useCallback(
-    (config: ChangeCurrencyProps) => {
+    (config: ChangeCurrencyConfig) => {
       setSearchText('')
-      navigation.navigate('ChangeCurrency', config)
+      setConfig(config)
+      navigation.navigate('ChangeCurrency')
     },
-    [navigation, setSearchText]
+    [navigation, setConfig, setSearchText]
   )
 }
 
 export function ChangeCurrencyScreen({
   navigation,
-  route,
-}: RootStackScreenProps<'ChangeCurrency'>): React.JSX.Element {
+}: RootStackScreenProps<'ChangeCurrency'>): React.JSX.Element | null {
   const setSearchText = useSetAtom(changeCurrencySearchTextAtom)
+  const setConfig = useSetAtom(changeCurrencyConfigAtom)
+  const config = useAtomValue(changeCurrencyConfigAtom)
 
   const handleClose = useCallback(() => {
     navigation.goBack()
@@ -164,13 +166,24 @@ export function ChangeCurrencyScreen({
   useFocusEffect(
     useCallback(() => {
       setSearchText('')
-    }, [setSearchText])
+      return () => {
+        setConfig(undefined)
+      }
+    }, [setConfig, setSearchText])
   )
+
+  useEffect(() => {
+    if (!config) {
+      navigation.goBack()
+    }
+  }, [config, navigation])
+
+  if (!config) return null
 
   return (
     <ChangeCurrencyContent
-      selectedCurrencyCode={route.params.selectedCurrencyCode}
-      onSave={route.params.onSave}
+      selectedCurrencyCode={config.selectedCurrencyCode}
+      onSave={config.onSave}
       onClose={handleClose}
     />
   )

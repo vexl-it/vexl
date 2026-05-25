@@ -1,7 +1,15 @@
-import {type CurrencyInfo} from '@vexl-next/domain/src/general/currency.brand'
+import {
+  type CurrencyCode,
+  type CurrencyInfo,
+} from '@vexl-next/domain/src/general/currency.brand'
 import {Array, String, pipe} from 'effect'
 import {atom} from 'jotai'
 import {currencies} from '../../utils/localization/currency'
+
+export interface ChangeCurrencyConfig {
+  readonly selectedCurrencyCode: CurrencyCode | undefined
+  readonly onSave: (currency: CurrencyCode) => void
+}
 
 const allCurrencies = Object.values(currencies)
 
@@ -16,6 +24,10 @@ const matchesCurrency =
   }
 
 export const changeCurrencySearchTextAtom = atom('')
+
+export const changeCurrencyConfigAtom = atom<ChangeCurrencyConfig | undefined>(
+  undefined
+)
 
 export const changeCurrenciesToDisplayAtom = atom((get) => {
   const searchText = get(changeCurrencySearchTextAtom)

@@ -28,6 +28,7 @@ export {UserImagePlaceholder} from './assets/UserImagePlaceholder'
 export * from './assets/graphics'
 export * from './assets/marketplaceIntro'
 export * from './assets/marketplaceLoader'
+export * from './assets/marketplaceMapPins'
 
 // Fonts
 export {vexlFonts} from './assets/fonts'

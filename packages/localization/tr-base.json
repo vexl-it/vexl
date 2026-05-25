@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Forward the address in a secure manner and be sure to verify it through another secure channel.",
   "offerForm.location.setAreaDescription": "Takas için buluşmaya hazır olduğun bölgeyi ayarla. Bu, yakınındaki ilgili teklifleri göstermemize yardımcı olur.",
   "offerForm.location.changeRadius": "Yarıçapı değiştir",
+  "offerForm.location.meetingAreaDescription": "Nerede buluşmaya hazır olduğunu ayarla. Buluşma alanı seninkiyle çakışan teklifleri göreceksin.",
+  "offerForm.location.setMeetingArea": "Buluşma alanını ayarla",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

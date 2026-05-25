@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Przekaż adres w bezpieczny sposób i upewnij się, że zweryfikujesz go przez inny bezpieczny kanał.",
   "offerForm.location.setAreaDescription": "Ustaw obszar, w którym chcesz spotkać się na transakcję. Dzięki temu zobaczysz trafne oferty w pobliżu.",
   "offerForm.location.changeRadius": "Zmień promień",
+  "offerForm.location.meetingAreaDescription": "Ustaw, gdzie chcesz się spotkać. Zobaczysz oferty, których obszar spotkania pokrywa się z Twoim.",
+  "offerForm.location.setMeetingArea": "Ustaw obszar spotkania",
   "offerForm.inPerson": "Osobiście",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Sposób dostawy",

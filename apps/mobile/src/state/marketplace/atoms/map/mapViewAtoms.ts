@@ -1,27 +1,41 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import type MapView from 'react-native-map-clustering'
 import {type EdgePadding, type LatLng, type Region} from 'react-native-maps'
+import {filterLocationsByCircularLocationFilter} from '../../utils/circularLocationFilter'
 import getOfferLocationBorderPoints from '../../utils/getOfferLocationBorderPoints'
+import {locationFilterAtom} from '../filterAtoms'
+import {requestMapRegionCommitAfterCameraMoveActionAtom} from '../mapRegionAtom'
 
 const mapViewRefAtom = atom<MapView | undefined>(undefined)
-export const setMapViewRefAtom = atom(null, (_, set, v: MapView) => {
-  set(mapViewRefAtom, v)
-})
+export const setMapViewRefAtom = atom(
+  null,
+  (_, set, v: MapView | undefined) => {
+    set(mapViewRefAtom, v)
+  }
+)
 export const animateToRegionActionAtom = atom(
   null,
   (get, set, region: Region) => {
     const ref = get(mapViewRefAtom)
+    if (!ref) return
+
+    set(requestMapRegionCommitAfterCameraMoveActionAtom)
     // @ts-expect-error bad typing of react-native-map-clustering
-    ref?.animateToRegion(region)
+    ref.animateToRegion(region)
   }
 )
 
 export const animateToCoordinateActionAtom = atom(
   null,
-  (get, set, coordinates: LatLng[]) => {
+  (get, set, coordinates: readonly LatLng[]) => {
+    const ref = get(mapViewRefAtom)
+    if (!ref) return
+
+    set(requestMapRegionCommitAfterCameraMoveActionAtom)
     // @ts-expect-error bad typing of react-native-map-clustering
-    get(mapViewRefAtom)?.fitToCoordinates(coordinates)
+    ref.fitToCoordinates(coordinates)
   }
 )
 
@@ -34,12 +48,16 @@ export const fitToCoordinatesActionAtom = atom(
       coordinates,
       edgePadding,
     }: {
-      coordinates: LatLng[]
+      coordinates: readonly LatLng[]
       edgePadding?: EdgePadding
     }
   ) => {
+    const ref = get(mapViewRefAtom)
+    if (!ref) return
+
+    set(requestMapRegionCommitAfterCameraMoveActionAtom)
     // @ts-expect-error bad typing of react-native-map-clustering
-    get(mapViewRefAtom)?.fitToCoordinates(coordinates, {
+    ref.fitToCoordinates(coordinates, {
       animated: true,
       edgePadding,
     })
@@ -51,10 +69,20 @@ export const animateToOfferActionAtom = atom(
   (get, set, offer: OneOfferInState) => {
     if (offer.offerInfo.publicPart.location.length === 0) return
 
-    const borderPoints = offer.offerInfo.publicPart.location.flatMap(
-      getOfferLocationBorderPoints
+    const borderPoints = pipe(
+      filterLocationsByCircularLocationFilter({
+        locations: offer.offerInfo.publicPart.location,
+        locationFilter: get(locationFilterAtom),
+      }),
+      Array.flatMap(getOfferLocationBorderPoints)
     )
+    if (!Array.isNonEmptyReadonlyArray(borderPoints)) return
+
+    const ref = get(mapViewRefAtom)
+    if (!ref) return
+
+    set(requestMapRegionCommitAfterCameraMoveActionAtom)
     // @ts-expect-error bad typing of react-native-map-clustering
-    get(mapViewRefAtom)?.fitToCoordinates(borderPoints)
+    ref.fitToCoordinates(borderPoints)
   }
 )

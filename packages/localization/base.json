@@ -497,6 +497,8 @@
   "offerForm.location.forwardTheAddress": "Forward the address in a secure manner and be sure to verify it through another secure channel.",
   "offerForm.location.setAreaDescription": "Set the area where you're willing to meet for a trade. This helps show you relevant offers nearby.",
   "offerForm.location.changeRadius": "Change the radius",
+  "offerForm.location.meetingAreaDescription": "Set where you're willing to meet. You'll see offers whose meeting area overlaps yours.",
+  "offerForm.location.setMeetingArea": "Set meeting area",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

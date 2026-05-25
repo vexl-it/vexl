@@ -1,5 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Array, pipe, Schema} from 'effect'
+import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
@@ -7,13 +7,13 @@ import {importedContactsAtom} from '../../contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import {
   filterMarketplaceOffers,
+  filterOffersByCircularLocation,
   filterOffersByPinViewport,
   filterOffersByTextSearch,
-  filterOffersByViewport,
   shouldCombineOnlineOffersWithLocationFilter,
 } from '../utils/filterMarketplaceOffers'
 import sortOffers from '../utils/sortOffers'
-import {deltasToViewport, radiusToViewport} from '../utils/toViewport'
+import {deltasToViewport} from '../utils/toViewport'
 import {
   locationFilterAtom,
   offersFilterFromStorageAtom,
@@ -71,14 +71,15 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
   return sortOffers(filteredByText, filter.sort ?? 'NEWEST_OFFER')
 })
 
-export const filteredOffersForMapAtom = atom((get) =>
-  pipe(
-    get(filteredOffersIgnoreLocationAtom),
-    Array.filter(
-      (offer) => !offer.offerInfo.publicPart.locationState.includes('ONLINE')
-    )
-  )
-)
+export const filteredOffersForMapAtom = atom((get) => {
+  const locationFilter = get(locationFilterAtom)
+
+  return filterOffersByCircularLocation({
+    offers: get(filteredOffersIgnoreLocationAtom),
+    locationFilter,
+    includeOnlineOffers: false,
+  })
+})
 
 const mapViewViewportToFilterByAtom = atom((get) => {
   const selectedRegion = get(mapRegionAtom)
@@ -102,31 +103,17 @@ export const filteredOffersForVisibleMapRegionAtom = atom((get) =>
   filterOffersByPinViewport({
     offers: get(filteredOffersForMapAtom),
     viewport: get(mapViewViewportToFilterByAtom),
+    locationFilter: get(locationFilterAtom),
   })
 )
-
-const viewportToFilterByAtom = atom((get) => {
-  const locationFilter = get(locationFilterAtom)
-
-  if (locationFilter) {
-    return radiusToViewport(
-      locationFilter.map((one) => ({
-        point: {latitude: one.latitude, longitude: one.longitude},
-        radius: one.radius,
-      }))
-    )
-  }
-
-  return undefined
-})
 
 export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)
   const filteredOffers = get(filteredOffersIgnoreLocationAtom)
 
-  const offersFilteredBySelectedLocation = filterOffersByViewport({
+  const offersFilteredBySelectedLocation = filterOffersByCircularLocation({
     offers: filteredOffers,
-    viewport: get(viewportToFilterByAtom),
+    locationFilter: get(locationFilterAtom),
     includeOnlineOffers: shouldCombineOnlineOffersWithLocationFilter(filter),
   })
 

@@ -1,13 +1,21 @@
 import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {
+  type OfferLocation,
+  type OneOfferInState,
+} from '@vexl-next/domain/src/general/offers'
 import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, pipe} from 'effect'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
 import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
 import areIncluded from './areIncluded'
+import {
+  filterLocationsByCircularLocationFilter,
+  isAnyLocationInsideCircularLocationFilter,
+} from './circularLocationFilter'
 import filterOffersByText from './filterOffersByText'
-import isOfferInsideViewPort, {
+import {
+  isOfferLocationPinInsideViewPort,
   isOfferPinInsideViewPort,
 } from './isOfferInsideViewport'
 
@@ -253,18 +261,16 @@ export function filterOffersByTextSearch({
   })
 }
 
-export function filterOffersByViewport({
+export function filterOffersByCircularLocation({
   offers,
-  viewport,
+  locationFilter,
   includeOnlineOffers = false,
 }: {
   offers: OneOfferInState[]
-  viewport: Viewport | undefined
+  locationFilter: readonly OfferLocation[] | undefined
   includeOnlineOffers?: boolean
 }): OneOfferInState[] {
-  if (!viewport) return offers
-
-  if (isViewportTooWide(viewport)) return offers
+  if (!Array.isNonEmptyReadonlyArray(locationFilter ?? [])) return offers
 
   return pipe(
     offers,
@@ -276,7 +282,10 @@ export function filterOffersByViewport({
         return true
       }
 
-      return isOfferInsideViewPort(viewport, offer)
+      return isAnyLocationInsideCircularLocationFilter({
+        locations: offer.offerInfo.publicPart.location,
+        locationFilter,
+      })
     })
   )
 }
@@ -284,9 +293,11 @@ export function filterOffersByViewport({
 export function filterOffersByPinViewport({
   offers,
   viewport,
+  locationFilter,
 }: {
   offers: OneOfferInState[]
   viewport: Viewport | undefined
+  locationFilter?: readonly OfferLocation[]
 }): OneOfferInState[] {
   if (!viewport) return offers
 
@@ -294,6 +305,20 @@ export function filterOffersByPinViewport({
 
   return pipe(
     offers,
-    Array.filter((offer) => isOfferPinInsideViewPort(viewport, offer))
+    Array.filter((offer) => {
+      if (!Array.isNonEmptyReadonlyArray(locationFilter ?? [])) {
+        return isOfferPinInsideViewPort(viewport, offer)
+      }
+
+      return pipe(
+        filterLocationsByCircularLocationFilter({
+          locations: offer.offerInfo.publicPart.location,
+          locationFilter,
+        }),
+        Array.some((location) =>
+          isOfferLocationPinInsideViewPort(viewport, location)
+        )
+      )
+    })
   )
 }

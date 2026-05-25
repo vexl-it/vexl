@@ -261,6 +261,10 @@ export function filterOffersByTextSearch({
   })
 }
 
+function isOnlineOffer(offer: OneOfferInState): boolean {
+  return offer.offerInfo.publicPart.locationState.includes('ONLINE')
+}
+
 export function filterOffersByCircularLocation({
   offers,
   locationFilter,
@@ -270,15 +274,19 @@ export function filterOffersByCircularLocation({
   locationFilter: readonly OfferLocation[] | undefined
   includeOnlineOffers?: boolean
 }): OneOfferInState[] {
-  if (!Array.isNonEmptyReadonlyArray(locationFilter ?? [])) return offers
+  if (!Array.isNonEmptyReadonlyArray(locationFilter ?? [])) {
+    if (includeOnlineOffers) return offers
+
+    return pipe(
+      offers,
+      Array.filter((offer) => !isOnlineOffer(offer))
+    )
+  }
 
   return pipe(
     offers,
     Array.filter((offer) => {
-      if (
-        includeOnlineOffers &&
-        offer.offerInfo.publicPart.locationState.includes('ONLINE')
-      ) {
+      if (includeOnlineOffers && isOnlineOffer(offer)) {
         return true
       }
 

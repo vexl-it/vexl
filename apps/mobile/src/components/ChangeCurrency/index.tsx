@@ -16,7 +16,7 @@ import {
 } from '@vexl-next/ui'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -158,6 +158,7 @@ export function ChangeCurrencyScreen({
   const setSearchText = useSetAtom(changeCurrencySearchTextAtom)
   const setConfig = useSetAtom(changeCurrencyConfigAtom)
   const config = useAtomValue(changeCurrencyConfigAtom)
+  const isFocusedRef = useRef(false)
 
   const handleClose = useCallback(() => {
     navigation.goBack()
@@ -165,15 +166,17 @@ export function ChangeCurrencyScreen({
 
   useFocusEffect(
     useCallback(() => {
+      isFocusedRef.current = true
       setSearchText('')
       return () => {
+        isFocusedRef.current = false
         setConfig(undefined)
       }
     }, [setConfig, setSearchText])
   )
 
   useEffect(() => {
-    if (!config) {
+    if (!config && isFocusedRef.current) {
       navigation.goBack()
     }
   }, [config, navigation])

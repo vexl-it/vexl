@@ -59,7 +59,7 @@ interface Props {
 }
 
 const DEFAULT_DURATION_SECONDS = 15
-const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/
+const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/
 
 const getFileExtension = (file: File): FileExtension | null => {
   const extension = file.name.split('.').pop()?.toLowerCase()

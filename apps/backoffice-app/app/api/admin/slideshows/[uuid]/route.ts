@@ -1,4 +1,4 @@
-import {runDb} from '@/src/server/slideshows/db'
+import {isDuplicatePublicSlugError, runDb} from '@/src/server/slideshows/db'
 import {
   badRequest,
   decodeJsonBody,
@@ -66,12 +66,20 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       if (!publicSlugAvailable) return badRequest('Public slug is already used')
     }
 
-    const slideshow = await runDb(
-      updateSlideshow(decodedUuid.right, decoded.right)
-    )
-    if (!slideshow) return notFound('Slideshow not found')
+    try {
+      const slideshow = await runDb(
+        updateSlideshow(decodedUuid.right, decoded.right)
+      )
+      if (!slideshow) return notFound('Slideshow not found')
 
-    return jsonOk({slideshow})
+      return jsonOk({slideshow})
+    } catch (error) {
+      if (isDuplicatePublicSlugError(error)) {
+        return badRequest('Public slug is already used')
+      }
+
+      throw error
+    }
   } catch (error) {
     return internalServerError(error)
   }

@@ -1,5 +1,7 @@
 import {type NextRequest, NextResponse} from 'next/server'
 
+export const runtime = 'nodejs'
+
 export async function PUT(request: NextRequest) {
   try {
     const presignedUrl = request.headers.get('x-presigned-url')

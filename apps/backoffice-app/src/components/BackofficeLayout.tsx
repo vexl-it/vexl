@@ -31,6 +31,11 @@ export function BackofficeLayout({children}: {children: React.ReactNode}) {
       href: '/product-notification',
       current: pathname === '/product-notification',
     },
+    {
+      name: 'TV slideshows',
+      href: '/slideshows',
+      current: pathname.startsWith('/slideshows'),
+    },
   ]
 
   return (

@@ -14,6 +14,7 @@ import {
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
+import {reportFrontendEventActionAtom} from '../../state/analytics/atoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
@@ -55,6 +56,7 @@ function FilterOffersScreen(): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const saveFilter = useSetAtom(saveFilterActionAtom)
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
   const resetFilterOmitTextFilter = useSetAtom(
     resetFilterOmitTextFilterActionAtom
   )
@@ -92,9 +94,10 @@ function FilterOffersScreen(): React.ReactElement {
   }, [resetFilterOmitTextFilter])
 
   const handleSave = useCallback(() => {
+    reportFrontendEvent('offerSearchPerformed')
     safeGoBack()
     runAfterTwoAnimationFrames(saveFilter)
-  }, [safeGoBack, saveFilter])
+  }, [reportFrontendEvent, safeGoBack, saveFilter])
 
   useEffect(() => {
     initializeOffersFilterOnDisplay()

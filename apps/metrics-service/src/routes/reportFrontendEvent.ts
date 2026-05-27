@@ -1,5 +1,4 @@
 import {HttpApiBuilder} from '@effect/platform/index'
-import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   type FrontendEvent,
@@ -7,34 +6,37 @@ import {
 } from '@vexl-next/rest-api/src/services/metrics/contracts'
 import {MetricsApiSpecification} from '@vexl-next/rest-api/src/services/metrics/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {Effect, Match, Option} from 'effect/index'
+import {Effect, Option} from 'effect/index'
 import {MetricsDbService} from '../db/MetricsDbService'
 import {type InsertMetricsParams} from '../db/MetricsDbService/queries/createInsertMetricRecord'
 
-const MAX_TIMESTAMP_JITTER_MS = 30 * 60 * 1000
 const metricTypeIncrement = 'Increment'
-
-export function frontendEventToMetricName(event: FrontendEvent): string {
-  return Match.value(event).pipe(
-    Match.when('offerRequested', () => 'FE_OFFER_REQUESTED'),
-    Match.when('offerRequestDenied', () => 'FE_OFFER_REQUEST_DENIED'),
-    Match.when('offerRequestAccepted', () => 'FE_OFFER_REQUEST_ACCEPTED'),
-    Match.when('offerRerequested', () => 'FE_OFFER_REREQUESTED'),
-    Match.when(
-      'offerRequestAcceptedByOtherSide',
-      () => 'FE_OFFER_REQUEST_ACCEPTED_BY_OTHER_SIDE'
-    ),
-    Match.when('chatClosed', () => 'FE_CHAT_CLOSED'),
-    Match.when('appStartedFirstTime', () => 'FE_APP_STARTED_FIRST_TIME'),
-    Match.when('loginFinished', () => 'FE_LOGIN_FINISHED'),
-    Match.when('offerCreated', () => 'FE_OFFER_CREATED'),
-    Match.exhaustive
-  )
+const frontendEventMetricNames: Record<FrontendEvent, string> = {
+  appOpened: 'FE_APP_OPENED',
+  sessionStarted: 'FE_SESSION_STARTED',
+  marketplaceOpened: 'FE_MARKETPLACE_OPENED',
+  offerSearchPerformed: 'FE_OFFER_SEARCH_PERFORMED',
+  noOffersFound: 'FE_NO_OFFERS_FOUND',
+  offerViewed: 'FE_OFFER_VIEWED',
+  offerCreateStarted: 'FE_OFFER_CREATE_STARTED',
+  offerPaused: 'FE_OFFER_PAUSED',
+  offerResumed: 'FE_OFFER_RESUMED',
+  offerDeleted: 'FE_OFFER_DELETED',
+  chatCreated: 'FE_CHAT_CREATED',
+  chatOpened: 'FE_CHAT_OPENED',
+  offerRequested: 'FE_OFFER_REQUESTED',
+  offerRequestDenied: 'FE_OFFER_REQUEST_DENIED',
+  offerRequestAccepted: 'FE_OFFER_REQUEST_ACCEPTED',
+  offerRerequested: 'FE_OFFER_REREQUESTED',
+  offerRequestAcceptedByOtherSide: 'FE_OFFER_REQUEST_ACCEPTED_BY_OTHER_SIDE',
+  chatClosed: 'FE_CHAT_CLOSED',
+  appStartedFirstTime: 'FE_APP_STARTED_FIRST_TIME',
+  loginFinished: 'FE_LOGIN_FINISHED',
+  offerCreated: 'FE_OFFER_CREATED',
 }
 
-export function timestampWithFrontendEventJitter(now: Date): Date {
-  const jitterMs = Math.floor(Math.random() * (MAX_TIMESTAMP_JITTER_MS + 1))
-  return new Date(now.getTime() + jitterMs)
+export function frontendEventToMetricName(event: FrontendEvent): string {
+  return frontendEventMetricNames[event]
 }
 
 function metadataFromHeaders(
@@ -56,23 +58,34 @@ function metadataFromHeaders(
   }
 }
 
-export function frontendEventToMetricRecord({
+function metadataFromPayloadAndHeaders({
   headers,
   payload,
-  now,
 }: {
   headers: CommonHeaders
   payload: ReportFrontendEventRequest
-  now: Date
+}): Record<string, string | number | boolean> {
+  return {
+    ...(payload.attributes ?? {}),
+    ...metadataFromHeaders(headers),
+  }
+}
+
+export function frontendEventToMetricRecord({
+  headers,
+  payload,
+}: {
+  headers: CommonHeaders
+  payload: ReportFrontendEventRequest
 }): InsertMetricsParams {
   return {
     name: frontendEventToMetricName(payload.event),
-    timestamp: timestampWithFrontendEventJitter(now),
+    timestamp: payload.date,
     type: metricTypeIncrement,
-    uuid: generateUuid(),
-    analyticsUuid: payload.analyticsUuid,
+    uuid: payload.id,
+    analyticsUuid: payload.analyticsId,
     value: 1,
-    attributes: metadataFromHeaders(headers),
+    attributes: metadataFromPayloadAndHeaders({headers, payload}),
   }
 }
 
@@ -88,22 +101,12 @@ export const reportFrontendEvent = HttpApiBuilder.handler(
           frontendEventToMetricRecord({
             headers,
             payload,
-            now: new Date(),
           })
-        ),
-        Effect.catchTag('MessageWithUuidAlreadyStoredError', () =>
-          metricsDb.insertMetricRecord(
-            frontendEventToMetricRecord({
-              headers,
-              payload,
-              now: new Date(),
-            })
-          )
         ),
         Effect.catchTag('MessageWithUuidAlreadyStoredError', () =>
           Effect.zipRight(
             Effect.logWarning(
-              'Generated duplicate frontend metric uuid twice. Not inserting.'
+              'Frontend metric with this uuid was already stored. Not inserting.'
             ),
             Effect.void
           )

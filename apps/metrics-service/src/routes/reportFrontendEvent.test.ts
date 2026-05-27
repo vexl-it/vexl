@@ -10,10 +10,10 @@ import {Option, Schema} from 'effect'
 import {
   frontendEventToMetricName,
   frontendEventToMetricRecord,
-  timestampWithFrontendEventJitter,
 } from './reportFrontendEvent'
 
-const analyticsUuid = Schema.decodeSync(Uuid)(
+const eventId = Schema.decodeSync(Uuid)('00000000-0000-4000-8000-000000000002')
+const analyticsId = Schema.decodeSync(Uuid)(
   '00000000-0000-4000-8000-000000000001'
 )
 
@@ -31,6 +31,9 @@ const headers = makeCommonHeaders({
 
 describe('reportFrontendEvent helpers', () => {
   it('maps frontend event names to FE metric names', () => {
+    expect(frontendEventToMetricName('sessionStarted')).toBe(
+      'FE_SESSION_STARTED'
+    )
     expect(frontendEventToMetricName('offerRequested')).toBe(
       'FE_OFFER_REQUESTED'
     )
@@ -39,34 +42,23 @@ describe('reportFrontendEvent helpers', () => {
     )
   })
 
-  it('jitters timestamps within receipt time plus thirty minutes', () => {
-    const now = new Date('2026-05-18T12:00:00.000Z')
-    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.999999)
-    const timestamp = timestampWithFrontendEventJitter(now)
-
-    expect(timestamp.getTime()).toBeGreaterThanOrEqual(now.getTime())
-    expect(timestamp.getTime()).toBeLessThanOrEqual(
-      now.getTime() + 30 * 60 * 1000
-    )
-
-    randomSpy.mockRestore()
-  })
-
-  it('creates unique metric uuids while allowing duplicate analytics uuid', () => {
-    const now = new Date('2026-05-18T12:00:00.000Z')
-    const first = frontendEventToMetricRecord({
+  it('stores frontend-provided event id, analytics id, date, and attributes', () => {
+    const date = new Date('2026-05-18T12:00:00.000Z')
+    const record = frontendEventToMetricRecord({
       headers,
-      payload: {analyticsUuid, event: 'chatClosed'},
-      now,
-    })
-    const second = frontendEventToMetricRecord({
-      headers,
-      payload: {analyticsUuid, event: 'chatClosed'},
-      now,
+      payload: {
+        id: eventId,
+        analyticsId,
+        event: 'chatClosed',
+        date,
+        attributes: {source: 'test'},
+      },
     })
 
-    expect(first.analyticsUuid).toBe(analyticsUuid)
-    expect(second.analyticsUuid).toBe(analyticsUuid)
-    expect(first.uuid).not.toBe(second.uuid)
+    expect(record.uuid).toBe(eventId)
+    expect(record.analyticsUuid).toBe(analyticsId)
+    expect(record.timestamp).toBe(date)
+    expect(record.attributes?.source).toBe('test')
+    expect(record.attributes?.clientPlatform).toBe('IOS')
   })
 })

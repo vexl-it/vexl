@@ -40,6 +40,7 @@ import {deepEqual} from 'fast-equals'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {symmetricDifference} from 'set-operations'
+import {reportFrontendEventActionAtom} from '../../../state/analytics/atoms'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../../state/chat/hooks/useCreateInbox'
 import {clubsWithMembersAtom} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
@@ -932,6 +933,7 @@ export const offerFormMolecule = molecule(() => {
       )
 
       set(loadingOverlayDisplayedAtom, false)
+      set(reportFrontendEventActionAtom, 'offerDeleted')
 
       return true
     }).pipe(
@@ -1055,6 +1057,11 @@ export const offerFormMolecule = molecule(() => {
           },
           delayMs: 1500,
         })
+      )
+
+      set(
+        reportFrontendEventActionAtom,
+        targetValue ? 'offerResumed' : 'offerPaused'
       )
     }).pipe(
       Effect.match({

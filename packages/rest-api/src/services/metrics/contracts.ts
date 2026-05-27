@@ -3,6 +3,18 @@ import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Schema} from 'effect'
 
 export const FrontendEvent = Schema.Literal(
+  'appOpened',
+  'sessionStarted',
+  'marketplaceOpened',
+  'offerSearchPerformed',
+  'noOffersFound',
+  'offerViewed',
+  'offerCreateStarted',
+  'offerPaused',
+  'offerResumed',
+  'offerDeleted',
+  'chatCreated',
+  'chatOpened',
   'offerRequested',
   'offerRequestDenied',
   'offerRequestAccepted',
@@ -15,9 +27,18 @@ export const FrontendEvent = Schema.Literal(
 )
 export type FrontendEvent = typeof FrontendEvent.Type
 
+export const FrontendEventAttributes = Schema.Record({
+  key: Schema.String,
+  value: Schema.Union(Schema.String, Schema.Number, Schema.Boolean),
+})
+export type FrontendEventAttributes = typeof FrontendEventAttributes.Type
+
 export const ReportFrontendEventRequest = Schema.Struct({
-  analyticsUuid: Uuid,
+  id: Uuid,
+  analyticsId: Uuid,
   event: FrontendEvent,
+  attributes: Schema.optional(FrontendEventAttributes),
+  date: Schema.DateFromString,
 })
 export type ReportFrontendEventRequest = typeof ReportFrontendEventRequest.Type
 

@@ -6,6 +6,7 @@ import {
 import {KeyboardAvoidingView, useVexlTheme} from '@vexl-next/ui'
 import * as NavigationBar from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
+import {useSetAtom} from 'jotai'
 import React from 'react'
 import {Platform} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
@@ -25,6 +26,7 @@ import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import {UserFeedbackDialog} from './components/UserFeedback/UserFeedbackDialog'
 import VersionMigrations from './components/VersionMigrations'
+import {reportAppOpenedActionAtom} from './state/analytics/atoms'
 import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
@@ -38,8 +40,17 @@ function App(): React.ReactElement {
   const {resolvedTheme} = useVexlTheme()
   const isDarkTheme = resolvedTheme === 'dark'
   const navigationTheme = isDarkTheme ? DarkTheme : DefaultTheme
+  const reportAppOpened = useSetAtom(reportAppOpenedActionAtom)
 
-  useAppState(setLastTimeAppWasRunningToNow)
+  useAppState(
+    React.useCallback(
+      (state) => {
+        setLastTimeAppWasRunningToNow()
+        if (state === 'active') reportAppOpened()
+      },
+      [reportAppOpened]
+    )
+  )
 
   useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()

@@ -1,8 +1,10 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {Button, Screen, Stack, Typography} from '@vexl-next/ui'
 import {ScopeProvider} from 'bunshi/dist/react'
-import {useAtomValue, useStore} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {reportFrontendEventActionAtom} from '../../state/analytics/atoms'
 import {focusChatWithMessagesByKeysAtom} from '../../state/chat/atoms/focusChatWithMessagesAtom'
 import {dummyChatWithMessages} from '../../state/chat/domain'
 import hasNonNullableValueAtom from '../../utils/atomUtils/hasNonNullableValueAtom'
@@ -24,6 +26,7 @@ export default function ChatDetailScreen({
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
   const store = useStore()
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
 
   const {nonNullChatWithMessagesAtom, chatExistsAtom} = useMemo(() => {
     const chatWithMessagesAtom = focusChatWithMessagesByKeysAtom({
@@ -47,6 +50,12 @@ export default function ChatDetailScreen({
     useCallback(() => {
       void hideNotificationsForChat(store.get(nonNullChatWithMessagesAtom).chat)
     }, [nonNullChatWithMessagesAtom, store])
+  )
+
+  useFocusEffect(
+    useCallback(() => {
+      if (chatExists) reportFrontendEvent('chatOpened')
+    }, [chatExists, reportFrontendEvent])
   )
 
   if (!chatExists)

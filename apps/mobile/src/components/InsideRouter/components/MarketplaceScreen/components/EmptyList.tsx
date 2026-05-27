@@ -9,8 +9,9 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Option} from 'effect/index'
-import {useAtomValue} from 'jotai'
-import React, {useCallback} from 'react'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useEffect} from 'react'
+import {reportFrontendEventActionAtom} from '../../../../../state/analytics/atoms'
 import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
@@ -135,6 +136,11 @@ function EmptyList(): React.ReactElement {
   const {t} = useTranslation()
   const emptyListVariant = useEmptyListVariants()
   const shouldShowLoadingOffers = useAtomValue(shouldShowLoadingOffersAtom)
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
+
+  useEffect(() => {
+    if (!shouldShowLoadingOffers) reportFrontendEvent('noOffersFound')
+  }, [reportFrontendEvent, shouldShowLoadingOffers])
 
   if (shouldShowLoadingOffers) {
     return (

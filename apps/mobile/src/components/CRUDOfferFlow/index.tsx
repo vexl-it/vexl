@@ -12,6 +12,7 @@ import {
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, YStack} from 'tamagui'
+import {reportFrontendEventActionAtom} from '../../state/analytics/atoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
@@ -49,14 +50,16 @@ function CRUDOfferFlow(): React.ReactElement {
     initializeValuesForOfferFormActionAtom
   )
   const resetOfferForm = useSetAtom(resetOfferFormActionAtom)
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
   const insets = useSafeAreaInsets()
 
   const [activeStep, setActiveStep] = useState<OfferSetupStep>('offerType')
   useEffect(() => {
     resetOfferForm()
     setActiveStep('offerType')
+    reportFrontendEvent('offerCreateStarted')
     void Effect.runPromise(initializeValuesForOfferForm())
-  }, [initializeValuesForOfferForm, resetOfferForm])
+  }, [initializeValuesForOfferForm, reportFrontendEvent, resetOfferForm])
 
   const scrollRef = useRef<KeyboardAwareScrollViewRef>(null)
   const stepYsRef = useRef<Partial<Record<OfferSetupStep, number>>>({})

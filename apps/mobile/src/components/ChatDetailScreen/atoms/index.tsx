@@ -1081,6 +1081,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
           reportFrontendEventActionAtom,
           approve ? 'offerRequestAccepted' : 'offerRequestDenied'
         )
+        if (approve) set(reportFrontendEventActionAtom, 'chatCreated')
 
         return true
       })

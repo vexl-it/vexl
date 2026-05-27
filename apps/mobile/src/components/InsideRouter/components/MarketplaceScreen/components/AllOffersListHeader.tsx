@@ -4,6 +4,7 @@ import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {Stack, useTheme, XStack} from 'tamagui'
+import {reportFrontendEventActionAtom} from '../../../../../state/analytics/atoms'
 import {useOffersLoadingError} from '../../../../../state/marketplace'
 import {refocusMapActionAtom} from '../../../../../state/marketplace/atoms/map/focusedOffer'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
@@ -33,11 +34,13 @@ function AllOffersListHeader({
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
   const refocusMap = useSetAtom(refocusMapActionAtom)
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
 
   const handleFilterChange = useCallback(() => {
+    reportFrontendEvent('offerSearchPerformed')
     onFilterChange()
     refocusMap({focusAllOffers: false})
-  }, [onFilterChange, refocusMap])
+  }, [onFilterChange, refocusMap, reportFrontendEvent])
 
   const handleShowOnMap = useCallback(() => {
     navigation.navigate('MapView')

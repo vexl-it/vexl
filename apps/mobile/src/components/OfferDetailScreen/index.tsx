@@ -17,9 +17,10 @@ import {
 } from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useMemo} from 'react'
+import React, {useCallback, useEffect, useMemo} from 'react'
 import {ScrollView} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {reportFrontendEventActionAtom} from '../../state/analytics/atoms'
 import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
@@ -216,10 +217,12 @@ function OfferDetailScreen({
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
   const reportOffer = useSetAtom(reportOfferActionAtom)
+  const reportFrontendEvent = useSetAtom(reportFrontendEventActionAtom)
   const showNoCommonFriendsExplanation = useSetAtom(
     showNoCommonFriendsExplanationActionAtom
   )
   const offer = useSingleOffer(offerId)
+  const offerViewedReportedRef = React.useRef(false)
   const offerRerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const isMyOffer = Option.match(offer, {
     onNone: () => false,
@@ -252,6 +255,14 @@ function OfferDetailScreen({
   }, [chatForOffer, offerRerequestLimitDays])
 
   const canSendRequest = !chatForOffer || requestPossibleInfo.canBeRerequested
+
+  useEffect(() => {
+    if (offerViewedReportedRef.current || Option.isNone(offer) || isMyOffer)
+      return
+
+    offerViewedReportedRef.current = true
+    reportFrontendEvent('offerViewed')
+  }, [isMyOffer, offer, reportFrontendEvent])
 
   const handleSendMessage = useCallback(() => {
     navigation.navigate('SendMessage', {offerId})

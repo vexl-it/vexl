@@ -31,6 +31,9 @@ const Container = styled.div`
 
 const CountriesContainer = styled.div`
   flex: 1;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
 `
 

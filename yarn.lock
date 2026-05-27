@@ -12139,8 +12139,8 @@ __metadata:
     react-native-keyboard-controller: 1.20.7
     react-native-launch-arguments: ^4.1.1
     react-native-libsodium: ^1.7.0
-    react-native-map-clustering: ^3.4.2
-    react-native-maps: 1.26.20
+    react-native-map-clustering: ^4.0.0
+    react-native-maps: 1.27.2
     react-native-markdown-display: ^7.0.0-alpha.2
     react-native-mmkv: ^3.3.3
     react-native-open-notification: ^0.1.4
@@ -22642,10 +22642,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kdbush@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "kdbush@npm:3.0.0"
-  checksum: bc5fa433958e42664a8a92457e4f0d1db55b3b8e36956aac0102964adb2eab043bdbff156570dc8d867144ceff588fb7a1c6e099ba9be068cd1767a73e1ace92
+"kdbush@npm:^4.0.2":
+  version: 4.1.0
+  resolution: "kdbush@npm:4.1.0"
+  checksum: 41966f5a853b1206157aeb75f6d971ddfd6711d5ef6b5a9798cf682c70b15d5596685e6075fa75d5af56294bfaabd77589ef261c812e5c36524c151e5fecddec
   languageName: node
   linkType: hard
 
@@ -27962,22 +27962,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-map-clustering@npm:^3.4.2":
-  version: 3.4.2
-  resolution: "react-native-map-clustering@npm:3.4.2"
+"react-native-map-clustering@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "react-native-map-clustering@npm:4.0.0"
   dependencies:
     "@mapbox/geo-viewport": ^0.4.1
-    supercluster: ^7.1.0
+    supercluster: ^8.0.0
   peerDependencies:
     react-native: "*"
     react-native-maps: "*"
-  checksum: 4ded7c6d1a1f02340f380c6253f4e29b784e26b6b4fdf8f2f5fe6ee597c1a2bdb3eb175be58900d145c24494ea5575d33ee5cb419efee7558e6e166a14b9cff6
+  checksum: 4afd158958290c6c2de5207efe1873ddeb9e5e794dd59c9ef4e469e18082962c6f3261445b058e11f67d1b963dee39ba1fb1c5a1aa8bab5cb4a1690dfc894085
   languageName: node
   linkType: hard
 
-"react-native-maps@npm:1.26.20":
-  version: 1.26.20
-  resolution: "react-native-maps@npm:1.26.20"
+"react-native-maps@npm:1.27.2":
+  version: 1.27.2
+  resolution: "react-native-maps@npm:1.27.2"
   dependencies:
     "@types/geojson": ^7946.0.13
   peerDependencies:
@@ -27987,23 +27987,7 @@ __metadata:
   peerDependenciesMeta:
     react-native-web:
       optional: true
-  checksum: 924b54da9c0adf203d51db91396c0389b9bc7cf08ca818df729aed42ebe12ec15c74a5b901e6edf6a2c30d2798eb70bc2b9f911c95775a6335c28fa1f38dba99
-  languageName: node
-  linkType: hard
-
-"react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::locator=vexl-next%40workspace%3A.":
-  version: 1.26.20
-  resolution: "react-native-maps@patch:react-native-maps@npm%3A1.26.20#./.yarn/patches/react-native-maps-npm-1.26.20-0e409856e3.patch::version=1.26.20&hash=a55ca4&locator=vexl-next%40workspace%3A."
-  dependencies:
-    "@types/geojson": ^7946.0.13
-  peerDependencies:
-    react: ">= 18.3.1"
-    react-native: ">= 0.76.0"
-    react-native-web: ">= 0.11"
-  peerDependenciesMeta:
-    react-native-web:
-      optional: true
-  checksum: 8afd06995db55c0e50097cf30080f19bcdbe1fb7d9656683ede029ec2da98671e758aee7e39766713f84f94c2dd932cd552442816e793647dc49b10d68ddceff
+  checksum: e6cf3faa7ce5d28ba66679781732ad429386773b1528b34c96c0a5bdd29d276af05a5058badbe03290b7eb89ded179b2768b9e8518946ff31741d2fc46ebd9e6
   languageName: node
   linkType: hard
 
@@ -30757,12 +30741,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supercluster@npm:^7.1.0":
-  version: 7.1.5
-  resolution: "supercluster@npm:7.1.5"
+"supercluster@npm:^8.0.0":
+  version: 8.0.1
+  resolution: "supercluster@npm:8.0.1"
   dependencies:
-    kdbush: ^3.0.0
-  checksum: 69863238870093b96617135884721b6343746e14f396b2d67d6b55c52c362ec0516c5e386aa21815e75a9cef2054e831ac34023d0d8b600091d28cea0794f027
+    kdbush: ^4.0.2
+  checksum: 39d141f768a511efa53260252f9dab9a2ce0228b334e55482c8d3019e151932f05e1a9a0252d681737651b13c741c665542a6ddb40ec27de96159ea7ad41f7f4
   languageName: node
   linkType: hard
 

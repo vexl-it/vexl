@@ -1,11 +1,8 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
-  Image,
-  marketplaceMapPinDefaultDark,
-  marketplaceMapPinDefaultLight,
-  marketplaceMapPinFocusedDark,
-  marketplaceMapPinFocusedLight,
+  MARKETPLACE_MAP_PIN_ASPECT_RATIO,
+  MarketplaceMapPin,
   Stack,
   tokens,
   useTheme,
@@ -20,7 +17,14 @@ import {
   type WritableAtom,
 } from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {Dimensions, LayoutAnimation, StyleSheet} from 'react-native'
+import {
+  Dimensions,
+  LayoutAnimation,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 import MapView from 'react-native-map-clustering'
 import {
   Marker,
@@ -54,10 +58,21 @@ interface PinMapMarkerProps {
   zIndex: number | undefined
 }
 
+interface MarkerClusteringControlProps {
+  cluster?: false
+}
+
 interface VisiblePoint<T> {
   isFocused: boolean
   point: Point<T>
   shouldCluster: boolean
+}
+
+interface ClusterMarkerDimensions {
+  readonly fontSize: number
+  readonly height: number
+  readonly size: number
+  readonly width: number
 }
 
 interface Props<T> {
@@ -107,13 +122,34 @@ const emptyRefAtom: WritableAtom<null, [MapView | undefined], void> = atom(
   null,
   () => {}
 )
-const PIN_MARKER_SIZE = 32
-const PIN_MARKER_ASPECT_RATIO = 43 / 32
-const PIN_MARKER_HEIGHT = PIN_MARKER_SIZE * PIN_MARKER_ASPECT_RATIO
 const PIN_TRACKING_SETTLE_MS = 260
+const PIN_MARKER_SIZE = 32
+const PIN_MARKER_HEIGHT = PIN_MARKER_SIZE * MARKETPLACE_MAP_PIN_ASPECT_RATIO
 const emptyFocusedPointIds: readonly string[] = []
+const ANDROID_MARKER_REFRESH_MS = 900
 
 const styles = StyleSheet.create({
+  cluster: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+  clusterContainer: {
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  clusterText: {
+    fontWeight: 'bold',
+    includeFontPadding: false,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  clusterWrapper: {
+    position: 'absolute',
+    opacity: 0.5,
+    zIndex: 0,
+  },
   map: {
     width: '100%',
     height: '100%',
@@ -133,6 +169,22 @@ export function getMapDisplayMarkerKey<T>({
   shouldCluster: boolean
 }): string {
   return `${point.id}-${shouldCluster ? 'clustered' : 'direct'}`
+}
+
+export function getMapDisplayRenderedMarkerKey<T>({
+  androidMarkerRefreshEpoch,
+  point,
+  shouldCluster,
+}: {
+  androidMarkerRefreshEpoch: number
+  point: Point<T>
+  shouldCluster: boolean
+}): string {
+  const baseKey = getMapDisplayMarkerKey({point, shouldCluster})
+
+  if (androidMarkerRefreshEpoch <= 0) return baseKey
+
+  return `${baseKey}-android-refresh-${androidMarkerRefreshEpoch}`
 }
 
 export function getVisibleMarkerPoints<T>({
@@ -214,6 +266,16 @@ const ClusterLeafSchema = Schema.Struct({
   }),
 })
 
+const ClusterMarkerSchema = Schema.Struct({
+  geometry: Schema.Struct({
+    coordinates: Schema.Tuple(Longitude, Latitude),
+  }),
+  id: Schema.Union(Schema.Number, Schema.String),
+  properties: Schema.Struct({
+    point_count: Schema.Number,
+  }),
+})
+
 export function getClusterLeavesCoordinates(
   leaves: readonly unknown[]
 ): readonly PinCoordinate[] {
@@ -231,27 +293,16 @@ export function getClusterLeavesCoordinates(
   )
 }
 
-export function getMapPinImage({
-  isFocused,
-  resolvedTheme,
+export function getMarkerClusteringControlProps({
+  clustered,
 }: {
-  isFocused: boolean
-  resolvedTheme: 'dark' | 'light'
-}): number {
-  if (isFocused) {
-    return resolvedTheme === 'dark'
-      ? marketplaceMapPinFocusedDark
-      : marketplaceMapPinFocusedLight
-  }
-
-  return resolvedTheme === 'dark'
-    ? marketplaceMapPinDefaultDark
-    : marketplaceMapPinDefaultLight
+  clustered: boolean
+}): MarkerClusteringControlProps {
+  return clustered ? {} : {cluster: false}
 }
 
 export function getPinMapMarkerProps<T>({
   clustered,
-  isFocused,
   point,
   coordinate,
   emphasized = false,
@@ -265,7 +316,6 @@ export function getPinMapMarkerProps<T>({
   coordinate: PinCoordinate
   emphasized?: boolean
   identifier?: string
-  isFocused: boolean
   onPointPress: (p: Point<T>) => void
   point: Point<T>
   tracksViewChanges: boolean
@@ -281,57 +331,171 @@ export function getPinMapMarkerProps<T>({
     zIndex: emphasized ? 999 : undefined,
   }
 
-  return clustered ? markerPropsBase : {...markerPropsBase, cluster: false}
+  return {
+    ...markerPropsBase,
+    ...getMarkerClusteringControlProps({clustered}),
+  }
 }
 
-function PinMapMarker<T>({
-  clustered,
-  coordinate,
-  isFocused,
-  onPointPress,
-  point,
-  resolvedTheme,
+function getObjectProperty(value: unknown, key: string): unknown {
+  if (typeof value !== 'object' || value === null) return undefined
+
+  return Reflect.get(value, key)
+}
+
+function getFunctionObjectProperty(
+  value: unknown,
+  key: string
+): (() => void) | undefined {
+  const property = getObjectProperty(value, key)
+
+  if (typeof property !== 'function') return undefined
+
+  return () => {
+    property()
+  }
+}
+
+function getClusterMarkerDimensions(
+  pointCount: number
+): ClusterMarkerDimensions {
+  if (pointCount >= 50) {
+    return {fontSize: 20, height: 84, size: 64, width: 84}
+  }
+
+  if (pointCount >= 25) {
+    return {fontSize: 19, height: 78, size: 58, width: 78}
+  }
+
+  if (pointCount >= 15) {
+    return {fontSize: 18, height: 72, size: 54, width: 72}
+  }
+
+  if (pointCount >= 10) {
+    return {fontSize: 17, height: 66, size: 50, width: 66}
+  }
+
+  if (pointCount >= 8) {
+    return {fontSize: 17, height: 60, size: 46, width: 60}
+  }
+
+  if (pointCount >= 4) {
+    return {fontSize: 16, height: 54, size: 40, width: 54}
+  }
+
+  return {fontSize: 15, height: 48, size: 36, width: 48}
+}
+
+function getClusterRenderKey({
+  androidMarkerRefreshEpoch,
+  cluster,
+}: {
+  androidMarkerRefreshEpoch: number
+  cluster: unknown
+}): string {
+  return pipe(
+    Schema.decodeUnknownOption(ClusterMarkerSchema)(cluster),
+    Option.match({
+      onNone: () =>
+        `cluster-unknown-android-refresh-${androidMarkerRefreshEpoch}`,
+      onSome: ({id}) =>
+        `cluster-${String(id)}-android-refresh-${androidMarkerRefreshEpoch}`,
+    })
+  )
+}
+
+// Android map markers snapshot their children into bitmaps. Keep this cluster
+// bubble in plain React Native View/Text; Tamagui text can be captured blank.
+function ClusterMarker({
+  androidMarkerRefreshEpoch,
+  cluster,
+  clusterColor,
+  clusterTextColor,
   tracksViewChanges,
 }: {
-  clustered: boolean
-  coordinate: PinCoordinate
-  isFocused: boolean
-  onPointPress: (p: Point<T>) => void
-  point: Point<T>
-  resolvedTheme: 'dark' | 'light'
+  androidMarkerRefreshEpoch: number
+  cluster: unknown
+  clusterColor: string
+  clusterTextColor: string
   tracksViewChanges: boolean
-}): React.ReactElement {
-  const image = getMapPinImage({isFocused, resolvedTheme})
-  const markerProps = getPinMapMarkerProps({
-    clustered,
-    coordinate,
-    emphasized: isFocused,
-    isFocused,
-    onPointPress,
-    point,
-    tracksViewChanges,
-  })
+}): React.ReactElement | null {
+  return pipe(
+    Schema.decodeUnknownOption(ClusterMarkerSchema)(cluster),
+    Option.match({
+      onNone: () => null,
+      onSome: ({
+        geometry: {coordinates},
+        id,
+        properties: {point_count: pointCount},
+      }) => {
+        const {fontSize, height, size, width} =
+          getClusterMarkerDimensions(pointCount)
+        const onPress = getFunctionObjectProperty(cluster, 'onPress')
 
-  return (
-    <Marker {...markerProps}>
-      <Stack
-        w={PIN_MARKER_SIZE}
-        h={PIN_MARKER_HEIGHT}
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Image
-          source={image}
-          width={PIN_MARKER_SIZE}
-          height={PIN_MARKER_HEIGHT}
-        />
-      </Stack>
-    </Marker>
+        return (
+          <Marker
+            key={`cluster-${String(id)}-android-refresh-${androidMarkerRefreshEpoch}`}
+            coordinate={{
+              longitude: coordinates[0],
+              latitude: coordinates[1],
+            }}
+            identifier={`cluster-${String(id)}`}
+            onPress={onPress}
+            tracksViewChanges={tracksViewChanges}
+            zIndex={pointCount + 1}
+          >
+            <View
+              collapsable={false}
+              style={[styles.clusterContainer, {width, height}]}
+            >
+              <View
+                collapsable={false}
+                style={[
+                  styles.clusterWrapper,
+                  {
+                    backgroundColor: clusterColor,
+                    borderRadius: width / 2,
+                    height,
+                    width,
+                  },
+                ]}
+              />
+              <View
+                collapsable={false}
+                style={[
+                  styles.cluster,
+                  {
+                    backgroundColor: clusterColor,
+                    borderRadius: size / 2,
+                    height: size,
+                    width: size,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.clusterText,
+                    {
+                      color: clusterTextColor,
+                      fontSize,
+                      lineHeight: fontSize + 2,
+                    },
+                  ]}
+                >
+                  {pointCount}
+                </Text>
+              </View>
+            </View>
+          </Marker>
+        )
+      },
+    })
   )
 }
 
 function MMapView({
   children,
+  androidMarkerRefreshEpoch,
   refAtom,
   mapPadding,
   onClusterPress,
@@ -341,6 +505,7 @@ function MMapView({
   tracksViewChanges,
 }: {
   children: React.ReactNode
+  androidMarkerRefreshEpoch: number
   refAtom?: WritableAtom<null, [v: MapView | undefined], void>
   mapPadding: EdgePadding
   onClusterPress?: (coordinates: readonly PinCoordinate[]) => void
@@ -374,6 +539,25 @@ function MMapView({
       onClusterPress?.(getClusterLeavesCoordinates(leaves ?? []))
     },
     [onClusterPress]
+  )
+
+  const renderCluster = useCallback(
+    (cluster: unknown) => (
+      <ClusterMarker
+        key={getClusterRenderKey({androidMarkerRefreshEpoch, cluster})}
+        androidMarkerRefreshEpoch={androidMarkerRefreshEpoch}
+        cluster={cluster}
+        clusterColor={accentYellowPrimary}
+        clusterTextColor={clusterTextColor}
+        tracksViewChanges={tracksViewChanges}
+      />
+    ),
+    [
+      accentYellowPrimary,
+      androidMarkerRefreshEpoch,
+      clusterTextColor,
+      tracksViewChanges,
+    ]
   )
 
   const handleRegionChangeStart = useCallback(
@@ -426,6 +610,8 @@ function MMapView({
       loadingBackgroundColor={backgroundPrimary}
       loadingIndicatorColor={accentYellowPrimary}
       clusteringEnabled
+      googleRenderer={Platform.OS === 'android' ? 'LEGACY' : undefined}
+      spiralEnabled={false}
       loadingEnabled
       provider={PROVIDER_GOOGLE}
       mapPadding={mapPadding}
@@ -434,6 +620,7 @@ function MMapView({
       onRegionChangeStart={handleRegionChangeStart}
       onRegionChangeComplete={handleRegionChangeComplete}
       onClusterPress={handleClusterPress}
+      renderCluster={renderCluster}
     >
       {children}
     </MapView>
@@ -455,6 +642,10 @@ export default function MapDisplayMultiplePoints<T>({
   const points = useAtomValue(pointsAtom)
   const idsToFocus = useAtomValue(pointIdsToFocusAtom)
   const {resolvedTheme} = useVexlTheme()
+  const theme = useTheme()
+  const pinColor = theme.foregroundPrimary.get()
+  const pinCenterColor = theme.backgroundPrimary.get()
+  const focusedPinColor = theme.accentHighlightSecondary.get()
   const visiblePoints = getVisibleMapPoints({
     idsToFocus,
     points,
@@ -466,7 +657,30 @@ export default function MapDisplayMultiplePoints<T>({
   const [settledTrackingKey, setSettledTrackingKey] = useState<string | null>(
     null
   )
-  const tracksViewChanges = settledTrackingKey !== trackingKey
+  const [androidMarkerRefreshEpoch, setAndroidMarkerRefreshEpoch] = useState(0)
+  const [androidMarkerRefreshActive, setAndroidMarkerRefreshActive] =
+    useState(false)
+  const tracksViewChanges =
+    settledTrackingKey !== trackingKey || androidMarkerRefreshActive
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS !== 'android') return undefined
+
+      setAndroidMarkerRefreshActive(true)
+      setAndroidMarkerRefreshEpoch((current) => current + 1)
+
+      const settleTimeout = setTimeout(() => {
+        setAndroidMarkerRefreshActive(false)
+      }, ANDROID_MARKER_REFRESH_MS)
+
+      return () => {
+        clearTimeout(settleTimeout)
+        setAndroidMarkerRefreshActive(false)
+      }
+    }, [])
+  )
+
   useEffect(() => {
     const settleTimeout = setTimeout(() => {
       setSettledTrackingKey(trackingKey)
@@ -482,30 +696,54 @@ export default function MapDisplayMultiplePoints<T>({
       pipe(
         clusteredVisiblePoints,
         Array.appendAll(directVisiblePoints),
-        Array.map(({isFocused, point, shouldCluster}) => (
-          <PinMapMarker
-            key={getMapDisplayMarkerKey({
-              point,
-              shouldCluster,
-            })}
-            clustered={shouldCluster}
-            coordinate={{
+        Array.map(({isFocused, point, shouldCluster}) => {
+          const markerProps = getPinMapMarkerProps({
+            clustered: shouldCluster,
+            coordinate: {
               latitude: point.latitude,
               longitude: point.longitude,
-            }}
-            isFocused={isFocused}
-            onPointPress={onPointPress}
-            point={point}
-            resolvedTheme={resolvedTheme}
-            tracksViewChanges={tracksViewChanges}
-          />
-        ))
+            },
+            emphasized: isFocused,
+            onPointPress,
+            point,
+            tracksViewChanges,
+          })
+          const markerColor = isFocused ? focusedPinColor : pinColor
+
+          return (
+            <Marker
+              key={getMapDisplayRenderedMarkerKey({
+                androidMarkerRefreshEpoch,
+                point,
+                shouldCluster,
+              })}
+              {...markerProps}
+            >
+              <Stack
+                h={PIN_MARKER_HEIGHT}
+                w={PIN_MARKER_SIZE}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <MarketplaceMapPin
+                  centerColor={pinCenterColor}
+                  color={markerColor}
+                  width={PIN_MARKER_SIZE}
+                  height={PIN_MARKER_HEIGHT}
+                />
+              </Stack>
+            </Marker>
+          )
+        })
       ),
     [
       clusteredVisiblePoints,
       directVisiblePoints,
+      focusedPinColor,
+      androidMarkerRefreshEpoch,
       onPointPress,
-      resolvedTheme,
+      pinCenterColor,
+      pinColor,
       tracksViewChanges,
     ]
   )
@@ -513,6 +751,7 @@ export default function MapDisplayMultiplePoints<T>({
   return (
     <Stack w="100%" h="100%" position="relative">
       <MMapView
+        androidMarkerRefreshEpoch={androidMarkerRefreshEpoch}
         refAtom={refAtom}
         mapPadding={mapPadding}
         onClusterPress={onClusterPress}

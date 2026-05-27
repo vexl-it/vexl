@@ -1,4 +1,18 @@
 /** @type {import('next').NextConfig} */
+const nodeBuiltins = [
+  'crypto',
+  'dns',
+  'events',
+  'fs',
+  'net',
+  'os',
+  'path',
+  'stream',
+  'tls',
+  'util',
+]
+const optionalNodePackages = ['pg-native']
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
@@ -21,6 +35,28 @@ const nextConfig = {
 
   // Webpack configuration to handle Node.js modules
   webpack: (config, {isServer}) => {
+    if (isServer) {
+      const existingExternals = Array.isArray(config.externals)
+        ? config.externals
+        : config.externals
+          ? [config.externals]
+          : []
+
+      config.externals = [
+        ...existingExternals,
+        ({request}, callback) => {
+          if (
+            nodeBuiltins.includes(request) ||
+            optionalNodePackages.includes(request)
+          ) {
+            return callback(null, `commonjs ${request}`)
+          }
+
+          return callback()
+        },
+      ]
+    }
+
     // For client-side builds, mark Node.js built-ins as external or provide polyfills
     if (!isServer) {
       config.resolve.fallback = {

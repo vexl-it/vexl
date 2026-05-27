@@ -1,7 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Stack} from '@vexl-next/ui/src/primitives'
 import {useSetAtom, useStore} from 'jotai'
-import React, {useCallback, useRef} from 'react'
+import React, {useCallback, useEffect, useRef} from 'react'
 import {
   type Details,
   type EdgePadding,
@@ -27,7 +27,10 @@ import {
 } from '../atoms'
 
 interface Props {
+  readonly bottomSheetRecenterKey: number
+  readonly bottomSheetVisibleHeight: number
   readonly fitEdgePadding: EdgePadding
+  readonly mapHeight: number
   readonly onMapReady?: () => void
 }
 
@@ -49,12 +52,40 @@ function getZoomedOutRegion(region: Region): Region {
   }
 }
 
+export function getRegionAdjustedForBottomSheetVisibleHeightChange({
+  mapHeight,
+  nextVisibleHeight,
+  previousVisibleHeight,
+  region,
+}: {
+  readonly mapHeight: number
+  readonly nextVisibleHeight: number
+  readonly previousVisibleHeight: number
+  readonly region: Region
+}): Region {
+  if (mapHeight <= 0) return region
+
+  const visibleHeightDelta = nextVisibleHeight - previousVisibleHeight
+  const latitudeOffset =
+    (visibleHeightDelta / 2 / mapHeight) * region.latitudeDelta
+
+  return {
+    ...region,
+    latitude: region.latitude - latitudeOffset,
+  }
+}
+
 function FullScreenMap({
+  bottomSheetRecenterKey,
+  bottomSheetVisibleHeight,
   fitEdgePadding,
+  mapHeight,
   onMapReady: onMapReadyProp,
 }: Props): React.JSX.Element {
   const store = useStore()
   const latestRegionRef = useRef<Region | null>(null)
+  const previousBottomSheetVisibleHeightRef = useRef(bottomSheetVisibleHeight)
+  const handledBottomSheetRecenterKeyRef = useRef(bottomSheetRecenterKey)
   const currentCameraMoveStartedAsGestureRef = useRef(false)
   const setSelectedRegion = useSetAtom(mapRegionAtom)
   const commitMapRegionAfterCameraMove = useSetAtom(
@@ -112,6 +143,36 @@ function FullScreenMap({
     fitMapToAllPins(fitEdgePadding)
     onMapReadyProp?.()
   }, [fitEdgePadding, fitMapToAllPins, onMapReadyProp])
+
+  useEffect(() => {
+    if (handledBottomSheetRecenterKeyRef.current === bottomSheetRecenterKey)
+      return
+
+    handledBottomSheetRecenterKeyRef.current = bottomSheetRecenterKey
+
+    const previousVisibleHeight = previousBottomSheetVisibleHeightRef.current
+    if (previousVisibleHeight === bottomSheetVisibleHeight) return
+    if (mapHeight <= 0) return
+
+    previousBottomSheetVisibleHeightRef.current = bottomSheetVisibleHeight
+
+    const latestRegion = latestRegionRef.current
+    if (!latestRegion) return
+
+    animateToRegion(
+      getRegionAdjustedForBottomSheetVisibleHeightChange({
+        mapHeight,
+        nextVisibleHeight: bottomSheetVisibleHeight,
+        previousVisibleHeight,
+        region: latestRegion,
+      })
+    )
+  }, [
+    animateToRegion,
+    bottomSheetRecenterKey,
+    bottomSheetVisibleHeight,
+    mapHeight,
+  ])
 
   const handlePointPress = useCallback(
     (point: {data: OneOfferInState}) => {

@@ -3,9 +3,9 @@ import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Button, Loader, Typography} from '@vexl-next/ui'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
-import {useAtomValue, type Atom} from 'jotai'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Dimensions, StyleSheet} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import {useReanimatedKeyboardAnimation} from 'react-native-keyboard-controller'
@@ -25,6 +25,7 @@ import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import SearchOffers from '../../InsideRouter/components/MarketplaceScreen/components/SearchOffers'
 import OfferOnMarketplace from '../../OfferOnMarketplace'
+import {selectMapViewOfferActionAtom} from '../atoms'
 
 const {height: DEFAULT_SCREEN_HEIGHT} = Dimensions.get('window')
 const tokens = getTokens()
@@ -51,6 +52,10 @@ interface Props {
   readonly visible: boolean
   readonly onSearchStart?: () => void
   readonly onSearchChange?: () => void
+  readonly onVisibleHeightChange?: (change: {
+    readonly height: number
+    readonly recenterMap: boolean
+  }) => void
   readonly sheetTopOffset: number
   readonly shouldRenderOffers: boolean
 }
@@ -60,12 +65,12 @@ function BottomSheetRow({
 }: {
   readonly offerAtom: Atom<OneOfferInState>
 }): React.JSX.Element {
-  const navigation = useNavigation()
   const offer = useAtomValue(offerAtom)
+  const selectOffer = useSetAtom(selectMapViewOfferActionAtom)
 
   const onPress = useCallback(() => {
-    navigation.navigate('OfferDetail', {offerId: offer.offerInfo.offerId})
-  }, [navigation, offer.offerInfo.offerId])
+    selectOffer(offer.offerInfo.offerId)
+  }, [offer.offerInfo.offerId, selectOffer])
 
   return <OfferOnMarketplace offer={offer} onPress={onPress} />
 }
@@ -184,6 +189,7 @@ function MapBottomSheet({
   visible,
   onSearchStart,
   onSearchChange,
+  onVisibleHeightChange,
   sheetTopOffset,
   shouldRenderOffers,
 }: Props): React.JSX.Element | null {
@@ -202,7 +208,32 @@ function MapBottomSheet({
   const collapsedY = sheetHeight - HEADER_HEIGHT - insets.bottom
   const translateY = useSharedValue(sheetHeight)
   const startY = useSharedValue(middleY)
+  const wasFullyExpandedSnapRef = useRef(false)
   const [listViewportHeight, setListViewportHeight] = useState(0)
+
+  const getSheetVisibleHeight = useCallback(
+    (sheetTranslateY: number) => Math.max(0, sheetHeight - sheetTranslateY),
+    [sheetHeight]
+  )
+
+  const updateSheetVisibleHeight = useCallback(
+    (sheetTranslateY: number) => {
+      if (sheetTranslateY <= FULL_Y) {
+        wasFullyExpandedSnapRef.current = true
+        return
+      }
+
+      const isCollapsedSnap = sheetTranslateY >= collapsedY
+      const recenterMap = !(wasFullyExpandedSnapRef.current && isCollapsedSnap)
+      wasFullyExpandedSnapRef.current = false
+
+      onVisibleHeightChange?.({
+        height: getSheetVisibleHeight(sheetTranslateY),
+        recenterMap,
+      })
+    },
+    [collapsedY, getSheetVisibleHeight, onVisibleHeightChange]
+  )
 
   const getListViewportHeight = useCallback(
     (sheetTranslateY: number) => {
@@ -227,8 +258,16 @@ function MapBottomSheet({
     } else {
       translateY.value = withTiming(middleY, TIMING_CONFIG)
       updateListViewportHeight(middleY)
+      updateSheetVisibleHeight(middleY)
     }
-  }, [middleY, sheetHeight, translateY, updateListViewportHeight, visible])
+  }, [
+    middleY,
+    sheetHeight,
+    translateY,
+    updateListViewportHeight,
+    updateSheetVisibleHeight,
+    visible,
+  ])
 
   const panGesture = useMemo(
     () =>
@@ -260,8 +299,16 @@ function MapBottomSheet({
           }
           translateY.value = withTiming(nearest, TIMING_CONFIG)
           scheduleOnRN(updateListViewportHeight, nearest)
+          scheduleOnRN(updateSheetVisibleHeight, nearest)
         }),
-    [collapsedY, middleY, startY, translateY, updateListViewportHeight]
+    [
+      collapsedY,
+      middleY,
+      startY,
+      translateY,
+      updateListViewportHeight,
+      updateSheetVisibleHeight,
+    ]
   )
 
   const shadowProgressStyle = useAnimatedStyle(() => {
@@ -320,7 +367,8 @@ function MapBottomSheet({
 
     translateY.value = withTiming(nextTranslateY, TIMING_CONFIG)
     updateListViewportHeight(nextTranslateY)
-  }, [middleY, translateY, updateListViewportHeight])
+    updateSheetVisibleHeight(nextTranslateY)
+  }, [middleY, translateY, updateListViewportHeight, updateSheetVisibleHeight])
 
   if (!visible) return null
 

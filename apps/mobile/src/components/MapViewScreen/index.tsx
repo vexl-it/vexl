@@ -7,7 +7,7 @@ import {
 } from '@vexl-next/ui'
 import {ChevronLeft, TuneSettings} from '@vexl-next/ui/src/icons'
 import {Stack, YStack} from '@vexl-next/ui/src/primitives'
-import {useAtomValue, useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Dimensions, StyleSheet, type LayoutChangeEvent} from 'react-native'
 import {type EdgePadding} from 'react-native-maps'
@@ -36,6 +36,10 @@ const {height: DEFAULT_SCREEN_HEIGHT} = Dimensions.get('window')
 const MAP_FIT_SIDE_PADDING = getTokens().space.$5.val
 const MAP_FIT_TOP_PADDING = getTokens().space.$4.val
 const MAP_FIT_BOTTOM_GAP = getTokens().space.$4.val
+
+function getMiddleSheetVisibleHeight(screenHeight: number): number {
+  return Math.round(screenHeight * MAP_BOTTOM_SHEET_MIDDLE_VISIBLE_HEIGHT_RATIO)
+}
 
 function MapLoadingOverlay({
   visible,
@@ -89,6 +93,7 @@ function MapViewScreen(): React.JSX.Element {
   const {t} = useTranslation()
   const insets = useSafeAreaInsets()
   const navigation = useNavigation()
+  const store = useStore()
   const safeGoBack = useSafeGoBack()
   const selectedOfferId = useAtomValue(mapViewSelectedOfferIdAtom)
   const selectedOffer = useAtomValue(mapViewSelectedOfferAtom)
@@ -99,25 +104,23 @@ function MapViewScreen(): React.JSX.Element {
   const [shouldRenderMap, setShouldRenderMap] = useState(false)
   const [shouldRenderOffers, setShouldRenderOffers] = useState(false)
   const [screenHeight, setScreenHeight] = useState(0)
+  const [mapHeight, setMapHeight] = useState(0)
   const [mapTopOffset, setMapTopOffset] = useState(0)
+  const [bottomSheetVisibleHeight, setBottomSheetVisibleHeight] = useState(() =>
+    getMiddleSheetVisibleHeight(DEFAULT_SCREEN_HEIGHT)
+  )
+  const [bottomSheetRecenterKey, setBottomSheetRecenterKey] = useState(0)
   const mapLoadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
   const mapFitEdgePadding: EdgePadding = useMemo(() => {
-    const availableHeight = screenHeight || DEFAULT_SCREEN_HEIGHT
-
     return {
       top: MAP_FIT_TOP_PADDING,
       left: MAP_FIT_SIDE_PADDING,
       right: MAP_FIT_SIDE_PADDING,
-      bottom:
-        Math.round(
-          availableHeight * MAP_BOTTOM_SHEET_MIDDLE_VISIBLE_HEIGHT_RATIO
-        ) +
-        insets.bottom +
-        MAP_FIT_BOTTOM_GAP,
+      bottom: bottomSheetVisibleHeight + insets.bottom + MAP_FIT_BOTTOM_GAP,
     }
-  }, [insets.bottom, screenHeight])
+  }, [bottomSheetVisibleHeight, insets.bottom])
 
   const clearMapLoadingTimeout = useCallback(() => {
     if (mapLoadingTimeoutRef.current === null) return
@@ -154,12 +157,33 @@ function MapViewScreen(): React.JSX.Element {
     refocusMapAfterOfferSetChange()
   }, [refocusMapAfterOfferSetChange])
 
+  const handleBottomSheetVisibleHeightChange = useCallback(
+    ({
+      height: nextVisibleHeight,
+      recenterMap,
+    }: {
+      readonly height: number
+      readonly recenterMap: boolean
+    }) => {
+      setBottomSheetVisibleHeight((currentVisibleHeight) =>
+        currentVisibleHeight === nextVisibleHeight
+          ? currentVisibleHeight
+          : nextVisibleHeight
+      )
+      if (recenterMap) {
+        setBottomSheetRecenterKey((currentKey) => currentKey + 1)
+      }
+    },
+    []
+  )
+
   useFocusEffect(
     useCallback(() => {
-      clearSelection()
+      if (store.get(mapViewSelectedOfferIdAtom)) return
+
       showMapLoading()
       hideMapLoadingAfterMarkersSettle()
-    }, [clearSelection, hideMapLoadingAfterMarkersSettle, showMapLoading])
+    }, [hideMapLoadingAfterMarkersSettle, showMapLoading, store])
   )
 
   const handleRootLayout = useCallback((event: LayoutChangeEvent) => {
@@ -171,8 +195,13 @@ function MapViewScreen(): React.JSX.Element {
 
   const handleMapAreaLayout = useCallback((event: LayoutChangeEvent) => {
     const nextTopOffset = event.nativeEvent.layout.y
+    const nextHeight = event.nativeEvent.layout.height
+
     setMapTopOffset((currentTopOffset) =>
       currentTopOffset === nextTopOffset ? currentTopOffset : nextTopOffset
+    )
+    setMapHeight((currentHeight) =>
+      currentHeight === nextHeight ? currentHeight : nextHeight
     )
   }, [])
 
@@ -234,7 +263,10 @@ function MapViewScreen(): React.JSX.Element {
         <Stack flex={1} onLayout={handleMapAreaLayout}>
           {shouldRenderMap ? (
             <FullScreenMap
+              bottomSheetRecenterKey={bottomSheetRecenterKey}
+              bottomSheetVisibleHeight={bottomSheetVisibleHeight}
               fitEdgePadding={mapFitEdgePadding}
+              mapHeight={mapHeight}
               onMapReady={hideMapLoadingAfterMarkersSettle}
             />
           ) : null}
@@ -245,6 +277,7 @@ function MapViewScreen(): React.JSX.Element {
         visible={!selectedOffer}
         onSearchStart={showMapLoading}
         onSearchChange={handleSearchChange}
+        onVisibleHeightChange={handleBottomSheetVisibleHeightChange}
         sheetTopOffset={mapTopOffset}
         shouldRenderOffers={shouldRenderOffers}
       />

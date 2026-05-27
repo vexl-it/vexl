@@ -92,6 +92,7 @@ export function useClubImageUpload(): UseClubImageUploadResult {
         body: selectedFile,
         headers: {
           'Content-Type': selectedFile.type,
+          'x-admin-token': adminToken,
           'x-presigned-url': result.presignedUrl,
         },
       })

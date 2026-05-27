@@ -27,7 +27,7 @@ export const SlideDurationSeconds = Schema.Int.pipe(
 )
 
 export const PublicSlug = Schema.NonEmptyString.pipe(
-  Schema.filter((slug) => /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/.test(slug))
+  Schema.filter((slug) => /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(slug))
 )
 export type PublicSlug = typeof PublicSlug.Type
 

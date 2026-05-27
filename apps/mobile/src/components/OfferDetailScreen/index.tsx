@@ -17,7 +17,7 @@ import {
 } from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo} from 'react'
+import React, {useCallback, useMemo} from 'react'
 import {ScrollView} from 'react-native'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
@@ -26,7 +26,6 @@ import {
   getRequestState,
 } from '../../state/chat/utils/offerStates'
 import {useSingleOffer} from '../../state/marketplace'
-import {focusOfferActionAtom} from '../../state/marketplace/atoms/map/focusedOffer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
@@ -216,7 +215,6 @@ function OfferDetailScreen({
 }: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
-  const setFocusedOffer = useSetAtom(focusOfferActionAtom)
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const showNoCommonFriendsExplanation = useSetAtom(
     showNoCommonFriendsExplanationActionAtom
@@ -254,14 +252,6 @@ function OfferDetailScreen({
   }, [chatForOffer, offerRerequestLimitDays])
 
   const canSendRequest = !chatForOffer || requestPossibleInfo.canBeRerequested
-
-  useEffect(() => {
-    setFocusedOffer(offerId)
-
-    return () => {
-      setFocusedOffer(null)
-    }
-  }, [offerId, setFocusedOffer])
 
   const handleSendMessage = useCallback(() => {
     navigation.navigate('SendMessage', {offerId})

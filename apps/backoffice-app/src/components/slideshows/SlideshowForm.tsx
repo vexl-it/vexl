@@ -268,7 +268,7 @@ export function SlideshowForm({
           slideshowUuid,
           fileExtension,
         })
-        await uploadFileToS3(upload.presignedUrl, file)
+        await uploadFileToS3(adminToken, upload.presignedUrl, file)
         updateSlide(slide.uuid, (current) => {
           if (current.type === 'website') return current
 

@@ -1,14 +1,23 @@
+import {
+  badRequest,
+  internalServerError,
+  jsonOk,
+  requireAdmin,
+} from '@/src/server/slideshows/http'
 import {type NextRequest, NextResponse} from 'next/server'
 
 export const runtime = 'nodejs'
 
 export async function PUT(request: NextRequest) {
   try {
+    const authError = await requireAdmin(request)
+    if (authError) return authError
+
     const presignedUrl = request.headers.get('x-presigned-url')
     const contentType = request.headers.get('content-type')
 
     if (!presignedUrl) {
-      return NextResponse.json({error: 'Missing presigned URL'}, {status: 400})
+      return badRequest('Missing presigned URL')
     }
 
     // Get the file data from the request
@@ -31,15 +40,8 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({success: true}, {status: 200})
+    return jsonOk({success: true})
   } catch (error) {
-    console.error('Error proxying S3 upload:', error)
-    return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
-      {status: 500}
-    )
+    return internalServerError(error)
   }
 }

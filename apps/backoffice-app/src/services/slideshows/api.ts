@@ -116,6 +116,7 @@ export const requestSlideshowUpload = (
   })
 
 export const uploadFileToS3 = async (
+  adminToken: string,
   presignedUrl: string,
   file: File
 ): Promise<void> => {
@@ -124,6 +125,7 @@ export const uploadFileToS3 = async (
     body: file,
     headers: {
       'Content-Type': file.type,
+      'x-admin-token': adminToken,
       'x-presigned-url': presignedUrl,
     },
   })

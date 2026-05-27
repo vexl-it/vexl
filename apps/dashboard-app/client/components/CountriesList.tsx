@@ -16,8 +16,15 @@ import AnimatedNumber from './AnimatedNumber'
 const Scroll = styled.div`
   position: relative;
   flex: 1;
+  min-height: 0;
   display: block;
-  overflow-y: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `
 
 const BottomSpacer = styled.div`
@@ -28,11 +35,10 @@ const BottomSpacer = styled.div`
 `
 
 const Container = styled.div`
-  position: absolute;
-  inset: 0;
-  bottom: auto;
+  position: relative;
   display: flex;
   width: 100%;
+  min-height: 100%;
   flex-direction: column;
   gap: 12px;
   box-sizing: border-box;
@@ -41,10 +47,7 @@ const Container = styled.div`
   /* padding-bottom: 300px; */
 
   ${mobileMediaQuery} {
-    position: relative;
-    inset: auto;
-    max-height: max(70vh, 500px);
-    overflow: hidden;
+    min-height: 0;
   }
 `
 
@@ -135,11 +138,16 @@ const Root = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: 800px;
+  height: 100%;
+  min-height: 0;
   /*
   &::after {
     display: none;
   } */
+
+  ${mobileMediaQuery} {
+    height: max(70vh, 500px);
+  }
 `
 
 function AnimatedBar({

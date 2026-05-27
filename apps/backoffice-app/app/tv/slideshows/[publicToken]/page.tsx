@@ -53,6 +53,7 @@ function SlideView({slide}: {readonly slide: SlideshowSlide}) {
           key={slide.uuid}
           src={slide.url}
           title="Website slide"
+          sandbox="allow-scripts allow-same-origin"
           className="h-screen w-screen border-0 bg-black"
           onError={() => {
             setIframeFailed(true)

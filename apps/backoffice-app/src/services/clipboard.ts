@@ -17,11 +17,12 @@ const copyWithTextarea = (value: string): boolean => {
 }
 
 export const copyToClipboard = async (value: string): Promise<void> => {
-  if (copyWithTextarea(value)) return
-
   try {
     await navigator.clipboard.writeText(value)
+    return
   } catch {
-    throw new Error('Failed to copy to clipboard')
+    if (copyWithTextarea(value)) return
   }
+
+  throw new Error('Failed to copy to clipboard')
 }

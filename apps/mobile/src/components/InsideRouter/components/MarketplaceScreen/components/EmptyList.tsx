@@ -11,7 +11,10 @@ import {
 import {Option} from 'effect/index'
 import {useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
-import {reachNumberAtom} from '../../../../../state/connections/atom/connectionStateAtom'
+import {
+  fistAndSecondLevelConnectionsReachAtom,
+  reachNumberAtom,
+} from '../../../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
 import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
@@ -27,9 +30,31 @@ interface EmptyListAction {
 }
 
 interface EmptyListVariant {
-  readonly title: string
   readonly primaryAction: EmptyListAction
   readonly secondaryAction?: EmptyListAction | undefined
+}
+
+const CONNECTIONS_COUNT_HEADING_THRESHOLD = 50
+
+function useEmptyListHeading(): string {
+  const {t} = useTranslation()
+  const connectionsCount = useAtomValue(fistAndSecondLevelConnectionsReachAtom)
+  const areNotificationsEnabled = useAtomValue(notificationsEnabledAtom)
+
+  if (
+    Option.isNone(areNotificationsEnabled) ||
+    !areNotificationsEnabled.value.notifications
+  ) {
+    return t('emptyMarketplace.youAreEarly')
+  }
+
+  if (connectionsCount < CONNECTIONS_COUNT_HEADING_THRESHOLD) {
+    return t('emptyMarketplace.friendsCanSeeYourOffers', {
+      count: connectionsCount,
+    })
+  }
+
+  return t('emptyMarketplace.noOffersYet')
 }
 
 function useEmptyListVariants(): EmptyListVariant {
@@ -53,7 +78,6 @@ function useEmptyListVariants(): EmptyListVariant {
 
   if (importedContactsCount === 0) {
     return {
-      title: t('emptyMarketplace.yourMarketStartsWithYourContacts'),
       primaryAction: {
         description: t(
           'emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust'
@@ -70,7 +94,6 @@ function useEmptyListVariants(): EmptyListVariant {
     !areNotificationsEnabled.value.notifications
   ) {
     return {
-      title: t('emptyMarketplace.youAreTheFirstOneInYourNetwork'),
       primaryAction: {
         description: t('emptyMarketplace.weWillLetYouKnowOnceYourFriends'),
         buttonText: t('common.enableNotifications'),
@@ -86,9 +109,6 @@ function useEmptyListVariants(): EmptyListVariant {
 
   if (reachNumber < REACH_NUMBER_THRESHOLD) {
     return {
-      title: t('emptyMarketplace.friendsCanSeeYourOffers', {
-        count: reachNumber,
-      }),
       primaryAction: {
         description: t('emptyMarketplace.noOnePostedYet'),
         buttonText: t('emptyMarketplace.postNewOffer'),
@@ -107,7 +127,6 @@ function useEmptyListVariants(): EmptyListVariant {
     !areNotificationsEnabled.value.notifications
   ) {
     return {
-      title: t('emptyMarketplace.youAreEarly'),
       primaryAction: {
         description: t('emptyMarketplace.turnOnNotificationsSoYouDontMiss'),
         buttonText: t('emptyMarketplace.turnOnNotifications'),
@@ -117,7 +136,6 @@ function useEmptyListVariants(): EmptyListVariant {
   }
 
   return {
-    title: t('emptyMarketplace.noOffersHere'),
     primaryAction: {
       description: t('emptyMarketplace.beTheFirstToCreateOne'),
       buttonText: t('emptyMarketplace.postNewOffer'),
@@ -133,6 +151,7 @@ function useEmptyListVariants(): EmptyListVariant {
 
 function EmptyList(): React.ReactElement {
   const {t} = useTranslation()
+  const emptyListHeading = useEmptyListHeading()
   const emptyListVariant = useEmptyListVariants()
   const shouldShowLoadingOffers = useAtomValue(shouldShowLoadingOffersAtom)
 
@@ -147,8 +166,13 @@ function EmptyList(): React.ReactElement {
       <Stack ai="center" jc="center">
         <FaqStayAnonymous variant="dark" width={253} height={179} />
       </Stack>
-      <Typography variant="heading3" color="$white100" ta="center" py="$2">
-        {emptyListVariant.title}
+      <Typography
+        variant="heading3"
+        color="$foregroundPrimary"
+        ta="center"
+        py="$2"
+      >
+        {emptyListHeading}
       </Typography>
       <YStack gap="$4" ai="center" w="100%">
         <Typography

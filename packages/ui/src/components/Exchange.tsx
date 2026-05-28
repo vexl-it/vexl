@@ -114,7 +114,12 @@ function getDecimalSeparator(locale: string): string {
 
 function normalizeDecimalSeparator(value: string, locale: string): string {
   const decimalSeparator = getDecimalSeparator(locale)
-  return value.replace(/[.,]/g, decimalSeparator)
+  const otherSeparator = decimalSeparator === ',' ? '.' : ','
+  const escapedOtherSeparator = otherSeparator === '.' ? '\\.' : otherSeparator
+
+  return value
+    .replace(new RegExp(`${escapedOtherSeparator}(?=\\d{3}(?!\\d))`, 'g'), '')
+    .replace(/[.,]/, decimalSeparator)
 }
 
 export function Exchange({

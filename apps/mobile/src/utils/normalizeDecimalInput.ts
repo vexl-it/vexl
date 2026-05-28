@@ -3,6 +3,9 @@ export function normalizeDecimalInput(input: string): string {
 }
 
 export function parseDecimalInput(input: string): number | undefined {
-  const parsed = Number(normalizeDecimalInput(input))
+  const normalizedInput = normalizeDecimalInput(input)
+  if (normalizedInput === '') return undefined
+
+  const parsed = Number(normalizedInput)
   return Number.isNaN(parsed) ? undefined : parsed
 }

@@ -895,7 +895,7 @@
   "reportIssue.openInEmail": "Abrir en e-mail",
   "reportIssue.somethingWentWrong": "¿Algo salió mal?",
   "reportIssue.feelFreeToGetInTouch": "No dudes en ponerse en contacto con nuestro servicio de asistencia.",
-  "reportIssue.predefinedBody": "Hola, estoy informando de un problema...",
+  "reportIssue.predefinedBody": "Hola, estoy informando de un problema:",
   "reportIssue.appAndOperatingSystemInfo": "Información del sistema operativo y de aplicación",
   "reportIssue.pleaseDoNotDelete": "Por favor, no lo borres",
   "AppLogs.title": "Registros de la aplicación",

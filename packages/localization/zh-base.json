@@ -895,7 +895,7 @@
   "reportIssue.openInEmail": "在电子邮件中打开",
   "reportIssue.somethingWentWrong": "出了什么问题吗？",
   "reportIssue.feelFreeToGetInTouch": "欢迎随时与我们的客服联系。",
-  "reportIssue.predefinedBody": "您好！我要报告一个软件缺陷...",
+  "reportIssue.predefinedBody": "您好！我要报告一个软件缺陷:",
   "reportIssue.appAndOperatingSystemInfo": "应用程序和操作系统信息",
   "reportIssue.pleaseDoNotDelete": "请勿删除",
   "AppLogs.title": "应用程序内的日志",

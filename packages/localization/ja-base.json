@@ -895,7 +895,7 @@
   "reportIssue.openInEmail": "メールで開く",
   "reportIssue.somethingWentWrong": "問題が発生しました?",
   "reportIssue.feelFreeToGetInTouch": "お気軽にお問い合わせください。",
-  "reportIssue.predefinedBody": "こんにちは！問題を報告しています...",
+  "reportIssue.predefinedBody": "こんにちは！問題を報告しています:",
   "reportIssue.appAndOperatingSystemInfo": "App and operating system info",
   "reportIssue.pleaseDoNotDelete": "Please, don't delete",
   "AppLogs.title": "アプリ内ログ",

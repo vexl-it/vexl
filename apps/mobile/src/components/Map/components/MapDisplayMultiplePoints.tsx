@@ -356,6 +356,12 @@ function getFunctionObjectProperty(
   }
 }
 
+// react-native-map-clustering v4 passes its cluster tap handler to custom
+// renderCluster output as cluster.onPress.
+function getClusterMarkerOnPress(cluster: unknown): (() => void) | undefined {
+  return getFunctionObjectProperty(cluster, 'onPress')
+}
+
 function getClusterMarkerDimensions(
   pointCount: number
 ): ClusterMarkerDimensions {
@@ -430,7 +436,7 @@ function ClusterMarker({
       }) => {
         const {fontSize, height, size, width} =
           getClusterMarkerDimensions(pointCount)
-        const onPress = getFunctionObjectProperty(cluster, 'onPress')
+        const onPress = getClusterMarkerOnPress(cluster)
 
         return (
           <Marker

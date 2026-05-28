@@ -633,7 +633,7 @@
   "notifications.CANCEL_REQUEST_MESSAGING.body": "The conversation won't be started.",
   "notifications.preferences.marketing.body": "Get updates about new features.",
   "notifications.preferences.chat.title": "Chat notifications",
-  "notifications.preferences.chat.body": "New Wants and messages.",
+  "notifications.preferences.chat.body": "New offers and messages.",
   "notifications.preferences.inactivityWarnings.title": "Inactivity warnings",
   "notifications.preferences.inactivityWarnings.body": "We'll let you know before your offers get deactivated.",
   "notifications.preferences.marketplace.title": "marketplace",

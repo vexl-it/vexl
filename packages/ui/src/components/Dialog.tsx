@@ -19,7 +19,7 @@ import {KeyboardAvoidingView} from './KeyboardAvoidingView'
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const ANIMATION_DURATION = 300
-const BACKDROP_OPACITY = 0.5
+const BACKDROP_OPACITY = 0.9
 const AUTO_DISMISS_MS = 2000
 const falseAtom = atom(false)
 

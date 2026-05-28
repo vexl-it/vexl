@@ -59,6 +59,63 @@ describe('reportFrontendEvent helpers', () => {
     expect(record.analyticsUuid).toBe(analyticsId)
     expect(record.timestamp).toBe(date)
     expect(record.attributes?.source).toBe('test')
-    expect(record.attributes?.clientPlatform).toBe('IOS')
+    expect(record.attributes?.client_platform).toBe('IOS')
+  })
+
+  it('adds app metadata from common headers when event attributes are empty', () => {
+    const record = frontendEventToMetricRecord({
+      headers,
+      payload: {
+        id: eventId,
+        analyticsId,
+        event: 'sessionStarted',
+        date: new Date('2026-05-18T12:00:00.000Z'),
+      },
+    })
+
+    expect(record.attributes).toEqual({
+      client_version: 123,
+      client_semver: '1.2.3',
+      client_platform: 'IOS',
+      app_source: 'appStore',
+      language: 'en',
+      is_developer: false,
+    })
+  })
+
+  it('uses common headers as the source of truth for app metadata', () => {
+    const record = frontendEventToMetricRecord({
+      headers,
+      payload: {
+        id: eventId,
+        analyticsId,
+        event: 'sessionStarted',
+        date: new Date('2026-05-18T12:00:00.000Z'),
+        attributes: {
+          clientVersion: 999,
+          client_version: 999,
+          clientSemver: '9.9.9',
+          client_semver: '9.9.9',
+          clientPlatform: 'ANDROID',
+          client_platform: 'ANDROID',
+          appSource: 'spoofed',
+          app_source: 'spoofed',
+          language: 'xx',
+          isDeveloper: true,
+          is_developer: true,
+          source: 'test',
+        },
+      },
+    })
+
+    expect(record.attributes).toEqual({
+      source: 'test',
+      client_version: 123,
+      client_semver: '1.2.3',
+      client_platform: 'IOS',
+      app_source: 'appStore',
+      language: 'en',
+      is_developer: false,
+    })
   })
 })

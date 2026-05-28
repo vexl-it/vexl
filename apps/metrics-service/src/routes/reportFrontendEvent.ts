@@ -35,6 +35,20 @@ const frontendEventMetricNames: Record<FrontendEvent, string> = {
   offerCreated: 'FE_OFFER_CREATED',
 }
 
+const reservedMetadataAttributes: Record<string, true> = {
+  clientVersion: true,
+  client_version: true,
+  clientSemver: true,
+  client_semver: true,
+  clientPlatform: true,
+  client_platform: true,
+  appSource: true,
+  app_source: true,
+  isDeveloper: true,
+  is_developer: true,
+  language: true,
+}
+
 export function frontendEventToMetricName(event: FrontendEvent): string {
   return frontendEventMetricNames[event]
 }
@@ -43,19 +57,36 @@ function metadataFromHeaders(
   headers: CommonHeaders
 ): Record<string, string | number | boolean> {
   return {
-    clientVersion: Option.getOrElse(
+    client_version: Option.getOrElse(
       headers.clientVersionOrNone,
       () => 'UNKNOWN'
     ),
-    clientSemver: Option.getOrElse(headers.clientSemverOrNone, () => 'UNKNOWN'),
-    clientPlatform: Option.getOrElse(
+    client_semver: Option.getOrElse(
+      headers.clientSemverOrNone,
+      () => 'UNKNOWN'
+    ),
+    client_platform: Option.getOrElse(
       headers.clientPlatformOrNone,
       () => 'UNKNOWN'
     ),
-    appSource: Option.getOrElse(headers.appSourceOrNone, () => 'UNKNOWN'),
+    app_source: Option.getOrElse(headers.appSourceOrNone, () => 'UNKNOWN'),
     language: Option.getOrElse(headers.language, () => 'UNKNOWN'),
-    isDeveloper: headers.isDeveloper,
+    is_developer: headers.isDeveloper,
   }
+}
+
+function removeReservedMetadataAttributes(
+  attributes: ReportFrontendEventRequest['attributes']
+): Record<string, string | number | boolean> {
+  if (!attributes) return {}
+
+  const result: Record<string, string | number | boolean> = {}
+
+  for (const [key, value] of Object.entries(attributes)) {
+    if (!reservedMetadataAttributes[key]) result[key] = value
+  }
+
+  return result
 }
 
 function metadataFromPayloadAndHeaders({
@@ -66,7 +97,7 @@ function metadataFromPayloadAndHeaders({
   payload: ReportFrontendEventRequest
 }): Record<string, string | number | boolean> {
   return {
-    ...(payload.attributes ?? {}),
+    ...removeReservedMetadataAttributes(payload.attributes),
     ...metadataFromHeaders(headers),
   }
 }

@@ -16,10 +16,16 @@ The current reporting shape sends only:
 - `event`: one string literal from `FrontendEvent`.
 
 The metrics service stores each event as an increment metric with generic app
-headers (`clientVersion`, `clientSemver`, `clientPlatform`, `appSource`,
-`language`, `isDeveloper`). Event names should describe countable frontend
+headers (`client_version`, `client_semver`, `client_platform`, `app_source`,
+`language`, `is_developer`). Event names should describe countable frontend
 actions. Cohorts, retention, churn, and active counts are BI/backend
 aggregations over these events, grouped by `analyticsId`.
+
+Metric `attributes` are persisted as JSONB with snake_case keys. The app
+metadata keys above are server-derived from common request headers and are
+reserved; frontend payload attributes must not use them or their old camelCase
+aliases (`clientVersion`, `clientSemver`, `clientPlatform`, `appSource`,
+`isDeveloper`).
 
 Do not report phone numbers, contact data, public keys, message ids, exact
 coordinates, or other user-identifying values from FE analytics events.
@@ -128,13 +134,13 @@ Relevant columns:
 - `value`: increment value, currently `1` for FE events.
 - `analytics_uuid`: anonymous analytics ID used to group events from the same
   login/device context.
-- `attributes`: JSON object with app headers such as `clientPlatform`,
-  `clientVersion`, `clientSemver`, `appSource`, `language`, and `isDeveloper`.
+- `attributes`: JSON object with app headers such as `client_platform`,
+  `client_version`, `client_semver`, `app_source`, `language`, and `is_developer`.
 
 Most business dashboards should filter out developer builds:
 
 ```sql
-COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+COALESCE(attributes ->> 'is_developer', 'false') = 'false'
 ```
 
 ### Event Counts Overview
@@ -162,7 +168,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name IN (
     'FE_APP_OPENED',
     'FE_SESSION_STARTED',
@@ -191,7 +197,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name = 'FE_SESSION_STARTED'
   AND analytics_uuid IS NOT NULL
 GROUP BY 1
@@ -225,7 +231,7 @@ FROM days
 LEFT JOIN metrics m
   ON m.name = 'FE_SESSION_STARTED'
   AND m.analytics_uuid IS NOT NULL
-  AND COALESCE(m.attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(m.attributes ->> 'is_developer', 'false') = 'false'
   AND m."timestamp" >= days.day - interval '29 days'
   AND m."timestamp" < days.day + interval '1 day'
 GROUP BY days.day
@@ -244,7 +250,7 @@ WITH registrations AS (
     MIN("timestamp") AS registered_at
   FROM metrics
   WHERE
-    COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+    COALESCE(attributes ->> 'is_developer', 'false') = 'false'
     AND name = 'FE_LOGIN_FINISHED'
     AND analytics_uuid IS NOT NULL
   GROUP BY analytics_uuid
@@ -255,7 +261,7 @@ activity AS (
     "timestamp"
   FROM metrics
   WHERE
-    COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+    COALESCE(attributes ->> 'is_developer', 'false') = 'false'
     AND name = 'FE_SESSION_STARTED'
     AND analytics_uuid IS NOT NULL
 )
@@ -327,7 +333,7 @@ WITH creators AS (
     MIN("timestamp") AS first_offer_created_at
   FROM metrics
   WHERE
-    COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+    COALESCE(attributes ->> 'is_developer', 'false') = 'false'
     AND name = 'FE_OFFER_CREATED'
     AND analytics_uuid IS NOT NULL
   GROUP BY analytics_uuid
@@ -338,7 +344,7 @@ activity AS (
     "timestamp"
   FROM metrics
   WHERE
-    COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+    COALESCE(attributes ->> 'is_developer', 'false') = 'false'
     AND name = 'FE_SESSION_STARTED'
     AND analytics_uuid IS NOT NULL
 )
@@ -386,7 +392,7 @@ WITH chat_openers AS (
     MIN("timestamp") AS first_chat_opened_at
   FROM metrics
   WHERE
-    COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+    COALESCE(attributes ->> 'is_developer', 'false') = 'false'
     AND name = 'FE_CHAT_OPENED'
     AND analytics_uuid IS NOT NULL
   GROUP BY analytics_uuid
@@ -397,7 +403,7 @@ activity AS (
     "timestamp"
   FROM metrics
   WHERE
-    COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+    COALESCE(attributes ->> 'is_developer', 'false') = 'false'
     AND name = 'FE_SESSION_STARTED'
     AND analytics_uuid IS NOT NULL
 )
@@ -453,7 +459,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name IN (
     'FE_MARKETPLACE_OPENED',
     'FE_OFFER_SEARCH_PERFORMED',
@@ -481,7 +487,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name IN ('FE_OFFER_CREATE_STARTED', 'FE_OFFER_CREATED')
 GROUP BY 1
 ORDER BY 1;
@@ -510,7 +516,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name IN (
     'FE_OFFER_REQUESTED',
     'FE_OFFER_REREQUESTED',
@@ -537,7 +543,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name = 'FE_CHAT_CREATED'
 GROUP BY 1
 ORDER BY 1;
@@ -549,16 +555,16 @@ Use this as a table or stacked bar panel to spot integration/client issues.
 
 ```sql
 SELECT
-  COALESCE(attributes ->> 'clientPlatform', 'UNKNOWN') AS platform,
-  COALESCE(attributes ->> 'clientSemver', 'UNKNOWN') AS app_version,
-  COALESCE(attributes ->> 'appSource', 'UNKNOWN') AS app_source,
+  COALESCE(attributes ->> 'client_platform', 'UNKNOWN') AS platform,
+  COALESCE(attributes ->> 'client_semver', 'UNKNOWN') AS app_version,
+  COALESCE(attributes ->> 'app_source', 'UNKNOWN') AS app_source,
   name AS event,
   SUM(value)::bigint AS events_count,
   COUNT(DISTINCT analytics_uuid)::bigint AS unique_analytics_ids
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name LIKE 'FE_%'
 GROUP BY 1, 2, 3, 4
 ORDER BY events_count DESC;
@@ -577,7 +583,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name = 'FE_SESSION_STARTED'
   AND analytics_uuid IS NOT NULL
 GROUP BY 1
@@ -598,7 +604,7 @@ SELECT
 FROM metrics
 WHERE
   $__timeFilter("timestamp")
-  AND COALESCE(attributes ->> 'isDeveloper', 'false') = 'false'
+  AND COALESCE(attributes ->> 'is_developer', 'false') = 'false'
   AND name IN (
     'FE_OFFER_CREATED',
     'FE_OFFER_RESUMED',

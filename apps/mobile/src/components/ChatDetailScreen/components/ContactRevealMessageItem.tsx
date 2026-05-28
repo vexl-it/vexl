@@ -4,6 +4,7 @@ import {
   CellPhoneDisabled,
   Stack,
   Typography,
+  useTheme,
   XStack,
   YStack,
 } from '@vexl-next/ui'
@@ -50,6 +51,7 @@ function ContactRevealMessageItem({
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {t} = useTranslation()
+  const theme = useTheme()
   const {
     otherSideDataAtom,
     contactRevealStatusAtom,
@@ -217,7 +219,10 @@ function ContactRevealMessageItem({
           width="100%"
         >
           <Stack mb="$3">
-            <CellPhoneDisabled size={32} color="$foregroundPrimary" />
+            <CellPhoneDisabled
+              size={32}
+              color={theme.foregroundPrimary.get()}
+            />
           </Stack>
           <Typography color="$foregroundPrimary" variant="paragraphDemibold">
             {t('common.unknownPhoneNumber')}

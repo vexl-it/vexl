@@ -1,4 +1,4 @@
-import {Stack, Typography, YStack} from '@vexl-next/ui'
+import {Typography, YStack} from '@vexl-next/ui'
 import React from 'react'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 
@@ -17,19 +17,6 @@ function BoardScreen(): React.JSX.Element {
         borderRadius="$5"
         backgroundColor="$backgroundSecondary"
       >
-        <Stack
-          width={48}
-          height={4}
-          borderRadius="$8"
-          backgroundColor="$accentYellowPrimary"
-        />
-        <Typography
-          variant="tabSmallBold"
-          color="$foregroundSecondary"
-          textAlign="center"
-        >
-          {t('community.tabs.board')}
-        </Typography>
         <Typography
           variant="heading3"
           color="$foregroundPrimary"

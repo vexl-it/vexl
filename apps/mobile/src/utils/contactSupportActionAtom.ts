@@ -11,7 +11,7 @@ export const contactSupportActionAtom = atom(null, (get, set) => {
     `${t('reportIssue.predefinedBody')}\n\n
     ---------
     ${t('reportIssue.pleaseDoNotDelete')}:
-    ${t('reportIssue.appAndOperatingSystemInfo')} (): ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
+    ${t('reportIssue.appAndOperatingSystemInfo')}: ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
   )
 
   openUrl(

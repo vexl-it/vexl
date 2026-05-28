@@ -53,7 +53,10 @@ function ClubsStep({onOfferCreated}: Props): React.JSX.Element {
               onOfferCreated()
               navigation.popTo('InsideTabs', {
                 screen: 'Marketplace',
-                params: {initialTab: 'myOffers'},
+                params: {
+                  initialTab: 'myOffers',
+                  tabSwitchRequestId: String(Date.now()),
+                },
               })
             }
           })

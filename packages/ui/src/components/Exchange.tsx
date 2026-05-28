@@ -108,6 +108,15 @@ function formatNumber(value: string, locale: string): string {
   }).format(num)
 }
 
+function getDecimalSeparator(locale: string): string {
+  return new Intl.NumberFormat(locale).format(1.1).includes(',') ? ',' : '.'
+}
+
+function normalizeDecimalSeparator(value: string, locale: string): string {
+  const decimalSeparator = getDecimalSeparator(locale)
+  return value.replace(/[.,]/g, decimalSeparator)
+}
+
 export function Exchange({
   btcValue,
   btcUnit,
@@ -213,7 +222,13 @@ export function Exchange({
       {btcEditable ? (
         <FieldInput
           value={btcDisplayValue}
-          onChangeText={onBtcValueChange}
+          onChangeText={(value) => {
+            onBtcValueChange?.(
+              btcUnit === 'BTC'
+                ? normalizeDecimalSeparator(value, locale)
+                : value
+            )
+          }}
           placeholder="0.00"
           placeholderTextColor={theme.foregroundTertiary.get()}
           selectionColor={theme.accentYellowPrimary.get()}
@@ -262,7 +277,9 @@ export function Exchange({
         <FieldInput
           autoFocus={fiatAutoFocus}
           value={fiatDisplayValue}
-          onChangeText={onFiatValueChange}
+          onChangeText={(value) => {
+            onFiatValueChange(normalizeDecimalSeparator(value, locale))
+          }}
           placeholder={fiatPlaceholder}
           placeholderTextColor={theme.foregroundTertiary.get()}
           selectionColor={theme.accentYellowPrimary.get()}

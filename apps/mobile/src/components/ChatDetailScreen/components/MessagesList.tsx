@@ -4,7 +4,7 @@ import {tokens} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useRef} from 'react'
-import {type ViewabilityConfig} from 'react-native'
+import {type NativeScrollEvent, type ViewabilityConfig} from 'react-native'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {chatMolecule} from '../atoms'
 import findTargetMessageIndex, {
@@ -13,6 +13,7 @@ import findTargetMessageIndex, {
 import MessageItem, {type MessagesListItem} from './MessageItem'
 
 const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
+const SCROLLED_TO_BOTTOM_THRESHOLD_PX = 2
 
 const contentStyle = {
   paddingBottom: tokens.size[4].val,
@@ -21,6 +22,8 @@ const contentStyle = {
 const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD,
 }
+
+type MessageListMessageItem = Extract<MessagesListItem, {type: 'message'}>
 
 function renderItem({
   item,
@@ -48,9 +51,28 @@ function MessagesList({
   const viewportHeightRef = useRef(0)
   const contentHeightRef = useRef(0)
   const didInitialScrollToBottomRef = useRef(false)
+  const isScrolledToBottomRef = useRef(true)
+  const latestMessageIdRef = useRef<ChatMessageId | undefined>(undefined)
   const scrolledToTargetMessageIdRef = useRef<ChatMessageId | undefined>(
     undefined
   )
+
+  const scrollToBottom = useCallback((animated: boolean) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToEnd({animated})
+      isScrolledToBottomRef.current = true
+    })
+  }, [])
+
+  const updateIsScrolledToBottom = useCallback((event: NativeScrollEvent) => {
+    const distanceFromBottom =
+      event.contentSize.height -
+      event.layoutMeasurement.height -
+      event.contentOffset.y
+
+    isScrolledToBottomRef.current =
+      distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
+  }, [])
 
   const getMessagesListItems = useCallback(() => {
     const items: TargetMessageIndexListItem[] = []
@@ -60,6 +82,20 @@ function MessagesList({
     }
 
     return items
+  }, [dataAtoms, store])
+
+  const getLatestMessageListItem = useCallback(():
+    | MessageListMessageItem
+    | undefined => {
+    for (let index = dataAtoms.length - 1; index >= 0; index -= 1) {
+      const dataAtom = dataAtoms[index]
+      if (!dataAtom) continue
+
+      const item = store.get(dataAtom)
+      if (item?.type === 'message') return item
+    }
+
+    return undefined
   }, [dataAtoms, store])
 
   const tryScrollToTargetMessage = useCallback(() => {
@@ -91,13 +127,14 @@ function MessagesList({
     if (tryScrollToTargetMessage()) return
     if (didInitialScrollToBottomRef.current) return
     if (viewportHeightRef.current === 0) return
-    if (contentHeightRef.current <= viewportHeightRef.current) return
+    if (contentHeightRef.current <= viewportHeightRef.current) {
+      isScrolledToBottomRef.current = true
+      return
+    }
 
     didInitialScrollToBottomRef.current = true
-    requestAnimationFrame(() => {
-      listRef.current?.scrollToEnd({animated: false})
-    })
-  }, [tryScrollToTargetMessage])
+    scrollToBottom(false)
+  }, [scrollToBottom, tryScrollToTargetMessage])
 
   useEffect(() => {
     scrolledToTargetMessageIdRef.current = undefined
@@ -108,6 +145,28 @@ function MessagesList({
     tryInitialScrollToBottom()
   }, [dataAtoms, targetMessageId, tryInitialScrollToBottom])
 
+  useEffect(() => {
+    if (targetMessageId) return
+    if (!didInitialScrollToBottomRef.current) return
+
+    const latestMessage = getLatestMessageListItem()
+    if (!latestMessage) return
+
+    const latestMessageId = latestMessage.message.message.uuid
+    if (latestMessageIdRef.current === latestMessageId) return
+
+    const shouldScrollToBottom =
+      latestMessageIdRef.current === undefined ||
+      latestMessage.message.state !== 'received' ||
+      isScrolledToBottomRef.current
+
+    latestMessageIdRef.current = latestMessageId
+
+    if (shouldScrollToBottom) {
+      scrollToBottom(true)
+    }
+  }, [dataAtoms, getLatestMessageListItem, scrollToBottom, targetMessageId])
+
   return (
     <FlashList
       ref={listRef}
@@ -115,18 +174,29 @@ function MessagesList({
       contentContainerStyle={contentStyle}
       keyExtractor={atomKeyExtractor}
       maintainVisibleContentPosition={{
-        autoscrollToBottomThreshold: 0.2,
+        autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
+        startRenderingFromBottom: !targetMessageId,
       }}
       onContentSizeChange={(_, height) => {
         contentHeightRef.current = height
+        if (height <= viewportHeightRef.current) {
+          isScrolledToBottomRef.current = true
+        }
         tryInitialScrollToBottom()
       }}
       onLayout={(event) => {
         viewportHeightRef.current = event.nativeEvent.layout.height
+        if (contentHeightRef.current <= event.nativeEvent.layout.height) {
+          isScrolledToBottomRef.current = true
+        }
         tryInitialScrollToBottom()
       }}
       onLoad={tryInitialScrollToBottom}
+      onScroll={(event) => {
+        updateIsScrolledToBottom(event.nativeEvent)
+      }}
       renderItem={renderItem}
+      scrollEventThrottle={16}
       onViewableItemsChanged={
         handleIsRevealIdentityOrContactRevealMessageVisible
       }

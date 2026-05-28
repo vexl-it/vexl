@@ -3,7 +3,7 @@ import {
   fromDateTime,
   UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array as ArrayE, Schema} from 'effect'
+import {Array as ArrayE, pipe, Schema} from 'effect'
 import {atom, type WritableAtom} from 'jotai'
 import {DateTime, type DateTimeUnit} from 'luxon'
 import {type DateData} from 'react-native-calendars'
@@ -257,9 +257,25 @@ export const removeTimestampFromAvailableAtom = atom(
   }
 )
 
-export const isThereAnyAvailableDateTimeSelectedAtom = atom(
-  (get) => get(availableDateTimesAtom).length > 0
-)
+export const areAllAvailableDatesTimeSlotsSelectedAtom = atom((get) => {
+  const uniqueAvailableDates = get(uniqueAvailableDatesAtom)
+  const availableDateTimes = get(availableDateTimesAtom)
+
+  return pipe(
+    uniqueAvailableDates,
+    ArrayE.every((availableDate) =>
+      pipe(
+        availableDateTimes,
+        ArrayE.some((availableDateTime) =>
+          DateTime.fromMillis(availableDateTime.date).hasSame(
+            DateTime.fromMillis(availableDate),
+            'day'
+          )
+        )
+      )
+    )
+  )
+})
 
 export const noDateTimeSelectedActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)

@@ -16,6 +16,8 @@ import {
   chatWithMessagesAtom,
   tradeChecklistDataAtom,
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
+import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
+import {revealIdentityFlowTypeFromStatus} from './revealIdentityFlowType'
 import updatesToBeSentAtom from './updatesToBeSentAtom'
 
 export const revealIdentityUsernameAtom = atom<string>('')
@@ -34,16 +36,9 @@ function isReceivedContactRevealRequestMessage(
 }
 
 export const revealIdentityFlowTypeAtom = atom((get) => {
-  const tradeChecklistData = get(tradeChecklistDataAtom)
-  const requestMessage = get(chatWithMessagesAtom).messages.find(
-    (one) => one.message.messageType === 'REQUEST_REVEAL'
+  return revealIdentityFlowTypeFromStatus(
+    getIdentityRevealStatus(get(chatWithMessagesAtom))
   )
-
-  return !tradeChecklistData.identity.sent &&
-    (tradeChecklistData.identity.received ||
-      requestMessage?.state === 'received')
-    ? 'RESPOND_REVEAL'
-    : 'REQUEST_REVEAL'
 })
 
 const receivedContactRevealRequestAtom = atom((get) => {

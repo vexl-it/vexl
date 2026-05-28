@@ -21,6 +21,7 @@ import {Platform} from 'react-native'
 import {vexlCalendarIdAtom} from '../state/tradeChecklist/atoms/vexlCalendarStorageAtom'
 
 const CALENDAR_TITLE = 'Vexl'
+const DEFAULT_TRADE_CHECKLIST_EVENT_DURATION_MS = 60 * 60 * 1000
 
 type CalendarEventIdType = typeof CalendarEventId.Type
 
@@ -42,6 +43,19 @@ export interface TradeChecklistCalendarEvent {
   endDate: Date
   location?: string
   notes?: string
+}
+
+export function ensureTradeChecklistCalendarEventHasDuration(
+  event: TradeChecklistCalendarEvent
+): TradeChecklistCalendarEvent {
+  if (event.endDate.getTime() > event.startDate.getTime()) return event
+
+  return {
+    ...event,
+    endDate: new Date(
+      event.startDate.getTime() + DEFAULT_TRADE_CHECKLIST_EVENT_DURATION_MS
+    ),
+  }
 }
 
 export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom =
@@ -133,12 +147,15 @@ export function createCalendarEvent({
 > {
   return async () => {
     try {
+      const eventWithDuration =
+        ensureTradeChecklistCalendarEventHasDuration(event)
+
       if (calendarEventId) {
         const existingEvent = await getEventAsync(calendarEventId).catch(
           () => undefined
         )
         if (existingEvent) {
-          await updateEventAsync(existingEvent.id, event)
+          await updateEventAsync(existingEvent.id, eventWithDuration)
           return right({
             calendarEventId: Schema.decodeSync(CalendarEventId)(
               existingEvent.id
@@ -148,7 +165,7 @@ export function createCalendarEvent({
         }
       }
 
-      const eventId = await createEventAsync(calendarId, event)
+      const eventId = await createEventAsync(calendarId, eventWithDuration)
       return right({
         calendarEventId: Schema.decodeSync(CalendarEventId)(eventId),
         action: 'created',

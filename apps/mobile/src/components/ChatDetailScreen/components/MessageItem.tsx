@@ -60,18 +60,20 @@ function MessageItem({
   const item = useAtomValue(itemAtom)
   const theme = useTheme()
   const {
+    chatAtom,
     otherSideDataAtom,
     otherSideSupportsTradingChecklistAtom,
     chatStateAtom,
-    contactRevealStatusAtom,
   } = useMolecule(chatMolecule)
   const {t} = useTranslation()
   const chatState = useAtomValue(chatStateAtom)
+  const chat = useAtomValue(chatAtom)
   const {image} = useAtomValue(otherSideDataAtom)
-  const contactRevealStatus = useAtomValue(contactRevealStatusAtom)
   const otherSideSupportsTradingChecklist = useAtomValue(
     otherSideSupportsTradingChecklistAtom
   )
+  const otherSideName =
+    chat.otherSide.realLifeInfo?.userName ?? t('common.otherSide')
 
   if (item.type === 'typingIndicator') {
     return <TypingIndication />
@@ -119,7 +121,7 @@ function MessageItem({
         <>
           <BigImageMessage
             title={t(`messages.messagePreviews.${direction}.DELETE_CHAT`, {
-              them: t('common.otherSide'),
+              them: otherSideName,
             })}
             description={
               chatState === 'requestedByMe' || chatState === 'requestedByThem'
@@ -185,8 +187,7 @@ function MessageItem({
       item.message.message.messageType === 'APPROVE_REVEAL' ||
       item.message.message.messageType === 'DISAPPROVE_REVEAL' ||
       (item.message.message.messageType === 'TRADE_CHECKLIST_UPDATE' &&
-        item.message.message.tradeChecklistUpdate?.identity &&
-        contactRevealStatus !== 'shared')
+        item.message.message.tradeChecklistUpdate?.identity)
     ) {
       return (
         <IdentityRevealMessageItem

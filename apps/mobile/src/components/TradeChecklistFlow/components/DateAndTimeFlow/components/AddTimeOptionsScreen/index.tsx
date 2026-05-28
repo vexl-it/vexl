@@ -21,7 +21,7 @@ import {
 } from '../../../../utils'
 import {TradeChecklistItemPageLayout} from '../../../TradeChecklistItemPageLayout'
 import {
-  isThereAnyAvailableDateTimeSelectedAtom,
+  areAllAvailableDatesTimeSlotsSelectedAtom,
   isThereAnyOutdatedDateTimeAtom,
   noDateTimeSelectedActionAtom,
   uniqueAvailableDatesAtom,
@@ -40,8 +40,8 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   const setNoDateTimeSelected = useSetAtom(noDateTimeSelectedActionAtom)
 
   const uniqueAvailableDates = useAtomValue(uniqueAvailableDatesAtom)
-  const isThereAnyAvailableDateTimeSelected = useAtomValue(
-    isThereAnyAvailableDateTimeSelectedAtom
+  const areAllAvailableDatesTimeSlotsSelected = useAtomValue(
+    areAllAvailableDatesTimeSlotsSelectedAtom
   )
 
   const showLoadingOverlay = useSetAtom(loadingOverlayDisplayedAtom)
@@ -92,7 +92,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
   )
 
   const onSavePress = useCallback(() => {
-    if (!isThereAnyAvailableDateTimeSelected) {
+    if (!areAllAvailableDatesTimeSlotsSelected) {
       Effect.runFork(setNoDateTimeSelected())
       return
     }
@@ -136,7 +136,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
     }
   }, [
     addDateAndTimeSuggestions,
-    isThereAnyAvailableDateTimeSelected,
+    areAllAvailableDatesTimeSlotsSelected,
     isThereAnyOutdatedDateTime,
     navigation,
     setInfoModal,
@@ -156,7 +156,7 @@ function AddTimeOptionsScreen({navigation}: Props): React.ReactElement {
       bottomButton={{
         disabled:
           uniqueAvailableDates.length < MINIMUM_AVAILABLE_DAYS_THRESHOLD ||
-          !isThereAnyAvailableDateTimeSelected,
+          !areAllAvailableDatesTimeSlotsSelected,
         text: t('common.continue'),
         onPress: onSavePress,
       }}

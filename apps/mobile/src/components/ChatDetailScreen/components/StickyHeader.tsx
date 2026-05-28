@@ -1,13 +1,68 @@
 import {useNavigation} from '@react-navigation/native'
-import {InfoCircle, NavButton, Typography, XStack, YStack} from '@vexl-next/ui'
+import {
+  NavButton,
+  Typography,
+  XmarkCancelClose,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
-import React, {useMemo} from 'react'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useMemo} from 'react'
+import {type GestureResponderEvent} from 'react-native'
 import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatCurrencyAmount} from '../../../utils/localization/currency'
 import {chatMolecule} from '../atoms'
+
+function getOfferTitleKey({
+  isMineOffer,
+  listingType,
+  offerType,
+}: {
+  isMineOffer: boolean
+  listingType: 'BITCOIN' | 'PRODUCT' | 'OTHER'
+  offerType: 'BUY' | 'SELL'
+}):
+  | 'chatDetail.offerTitle.mine.buyBitcoin'
+  | 'chatDetail.offerTitle.mine.sellBitcoin'
+  | 'chatDetail.offerTitle.mine.buyProduct'
+  | 'chatDetail.offerTitle.mine.sellProduct'
+  | 'chatDetail.offerTitle.mine.buyOther'
+  | 'chatDetail.offerTitle.mine.sellOther'
+  | 'chatDetail.offerTitle.theirs.buyBitcoin'
+  | 'chatDetail.offerTitle.theirs.sellBitcoin'
+  | 'chatDetail.offerTitle.theirs.buyProduct'
+  | 'chatDetail.offerTitle.theirs.sellProduct'
+  | 'chatDetail.offerTitle.theirs.buyOther'
+  | 'chatDetail.offerTitle.theirs.sellOther' {
+  if (isMineOffer) {
+    if (offerType === 'BUY') {
+      if (listingType === 'PRODUCT')
+        return 'chatDetail.offerTitle.mine.buyProduct'
+      if (listingType === 'OTHER') return 'chatDetail.offerTitle.mine.buyOther'
+      return 'chatDetail.offerTitle.mine.buyBitcoin'
+    }
+
+    if (listingType === 'PRODUCT')
+      return 'chatDetail.offerTitle.mine.sellProduct'
+    if (listingType === 'OTHER') return 'chatDetail.offerTitle.mine.sellOther'
+    return 'chatDetail.offerTitle.mine.sellBitcoin'
+  }
+
+  if (offerType === 'BUY') {
+    if (listingType === 'PRODUCT')
+      return 'chatDetail.offerTitle.theirs.buyProduct'
+    if (listingType === 'OTHER') return 'chatDetail.offerTitle.theirs.buyOther'
+    return 'chatDetail.offerTitle.theirs.buyBitcoin'
+  }
+
+  if (listingType === 'PRODUCT')
+    return 'chatDetail.offerTitle.theirs.sellProduct'
+  if (listingType === 'OTHER') return 'chatDetail.offerTitle.theirs.sellOther'
+  return 'chatDetail.offerTitle.theirs.sellBitcoin'
+}
 
 const languageToFlagMap: Record<string, string> = {
   BG: 'BG',
@@ -41,27 +96,35 @@ function StickyHeader(): React.ReactElement | null {
   const offer = useAtomValue(offerForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showInfoBar = useAtomValue(showInfoBarAtom)
+  const setShowInfoBar = useSetAtom(showInfoBarAtom)
+
+  const openOfferDetail = useCallback(() => {
+    navigation.navigate('ChatOfferDetail', {
+      inboxKey,
+      otherSideKey: chat.otherSide.publicKey,
+    })
+  }, [chat.otherSide.publicKey, inboxKey, navigation])
+
+  const hideStickyHeader = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation()
+      setShowInfoBar(false)
+    },
+    [setShowInfoBar]
+  )
 
   const offerTitle = useMemo(() => {
     if (!offer || chat.origin.type === 'unknown') return null
 
-    const actionText =
-      offer.offerInfo.publicPart.offerType === 'BUY'
-        ? t('common.wants')
-        : t('common.sells')
     const listingType = offer.offerInfo.publicPart.listingType ?? 'BITCOIN'
-    const listingTypeText =
-      listingType === 'PRODUCT'
-        ? t('common.product')
-        : listingType === 'OTHER'
-          ? t('common.other')
-          : t('common.bitcoin')
 
-    return {
-      actionText,
-      isMineOffer: !!offer.ownershipInfo?.adminId,
-      listingTypeText,
-    }
+    return t(
+      getOfferTitleKey({
+        isMineOffer: !!offer.ownershipInfo?.adminId,
+        listingType,
+        offerType: offer.offerInfo.publicPart.offerType,
+      })
+    )
   }, [chat.origin.type, offer, t])
 
   const offerAmount = useMemo(() => {
@@ -130,24 +193,13 @@ function StickyHeader(): React.ReactElement | null {
       py="$4"
       px="$5"
       backgroundColor="$backgroundSecondary"
+      onPress={openOfferDetail}
     >
       <YStack flex={1} gap="$2">
         {offerTitle ? (
           <XStack alignItems="center" flexWrap="wrap">
-            {offerTitle.isMineOffer ? (
-              <Typography
-                color="$foregroundPrimary"
-                variant="paragraphSmallBold"
-              >
-                {t('common.me')}{' '}
-              </Typography>
-            ) : null}
-            <Typography color="$greenForeground" variant="paragraphSmallBold">
-              {offerTitle.actionText}
-            </Typography>
             <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
-              {' '}
-              {offerTitle.listingTypeText}
+              {offerTitle}
             </Typography>
           </XStack>
         ) : null}
@@ -203,13 +255,8 @@ function StickyHeader(): React.ReactElement | null {
       <Stack>
         <NavButton
           variant="tetriary"
-          icon={InfoCircle}
-          onPress={() => {
-            navigation.navigate('ChatOfferDetail', {
-              inboxKey,
-              otherSideKey: chat.otherSide.publicKey,
-            })
-          }}
+          icon={XmarkCancelClose}
+          onPress={hideStickyHeader}
         />
       </Stack>
     </XStack>

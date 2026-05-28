@@ -154,3 +154,108 @@ it('keeps post-identity phone prompt attached to identity reveal', () => {
 
   expect(visibleMessages).toEqual([identityApproval])
 })
+
+it('keeps newer identity request visible after older approval', () => {
+  const identityApproval = chatMessage({
+    messageType: 'TRADE_CHECKLIST_UPDATE',
+    state: 'sent',
+    time: 1,
+    tradeChecklistUpdate: {
+      identity: {
+        status: 'APPROVE_REVEAL',
+        timestamp: timestamp(1),
+      },
+    },
+  })
+  const identityRequest = chatMessage({
+    messageType: 'TRADE_CHECKLIST_UPDATE',
+    state: 'received',
+    time: 2,
+    tradeChecklistUpdate: {
+      identity: {
+        status: 'REQUEST_REVEAL',
+        timestamp: timestamp(2),
+      },
+    },
+  })
+
+  const messages = [identityApproval, identityRequest]
+  const visibleMessages = pipe(
+    messages,
+    Array.filter(
+      filterIrrelevantIdentityOrContactMessages(messages, {
+        ...emptyTradeChecklist(),
+        identity: {
+          sent: {
+            status: 'APPROVE_REVEAL',
+            timestamp: timestamp(1),
+          },
+          received: {
+            status: 'REQUEST_REVEAL',
+            timestamp: timestamp(2),
+          },
+        },
+      })
+    )
+  )
+
+  expect(visibleMessages).toEqual([identityRequest])
+})
+
+it('keeps newer identity request visible after older denial', () => {
+  const identityRequest = chatMessage({
+    messageType: 'TRADE_CHECKLIST_UPDATE',
+    state: 'received',
+    time: 1,
+    tradeChecklistUpdate: {
+      identity: {
+        status: 'REQUEST_REVEAL',
+        timestamp: timestamp(1),
+      },
+    },
+  })
+  const identityDenial = chatMessage({
+    messageType: 'TRADE_CHECKLIST_UPDATE',
+    state: 'sent',
+    time: 2,
+    tradeChecklistUpdate: {
+      identity: {
+        status: 'DISAPPROVE_REVEAL',
+        timestamp: timestamp(2),
+      },
+    },
+  })
+  const newerIdentityRequest = chatMessage({
+    messageType: 'TRADE_CHECKLIST_UPDATE',
+    state: 'received',
+    time: 3,
+    tradeChecklistUpdate: {
+      identity: {
+        status: 'REQUEST_REVEAL',
+        timestamp: timestamp(3),
+      },
+    },
+  })
+
+  const messages = [identityRequest, identityDenial, newerIdentityRequest]
+  const visibleMessages = pipe(
+    messages,
+    Array.filter(
+      filterIrrelevantIdentityOrContactMessages(messages, {
+        ...emptyTradeChecklist(),
+        identity: {
+          sent: {
+            status: 'DISAPPROVE_REVEAL',
+            timestamp: timestamp(2),
+          },
+          received: {
+            status: 'REQUEST_REVEAL',
+            timestamp: timestamp(3),
+          },
+        },
+      })
+    )
+  )
+
+  expect(visibleMessages).toEqual([newerIdentityRequest])
+})

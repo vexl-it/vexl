@@ -66,6 +66,7 @@ import {
 import {MAX_AMOUNT_EUR} from '../../../utils/localization/currency'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import {navigationRef} from '../../../utils/navigation'
+import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
 import notEmpty from '../../../utils/notEmpty'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 import {getIsOffering} from '../../../utils/offerHelpers'
@@ -1308,13 +1309,14 @@ export const offerFormMolecule = molecule(() => {
   const calculateSatsValueOnFiatValueChangeActionAtom = atom(
     null,
     (get, set, priceString: string) => {
-      if (!priceString || isNaN(Number(priceString))) {
+      const priceNumber = parseDecimalInput(priceString)
+
+      if (!priceString || priceNumber === undefined) {
         set(satsValueAtom, 0)
         set(amountBottomLimitAtom, 0)
         return
       }
 
-      const priceNumber = Number(priceString)
       const currentBtcPrice = get(btcPriceForOfferWithCurrencyAtom)?.btcPrice
 
       set(amountBottomLimitAtom, priceNumber)
@@ -1334,13 +1336,14 @@ export const offerFormMolecule = molecule(() => {
   const calculateFiatValueOnSatsValueChangeActionAtom = atom(
     null,
     (get, set, satsString: string) => {
-      if (!satsString || isNaN(Number(satsString))) {
+      const satsNumber = parseDecimalInput(satsString)
+
+      if (!satsString || satsNumber === undefined) {
         set(amountBottomLimitAtom, 0)
         set(satsValueAtom, 0)
         return
       }
 
-      const satsNumber = Number(satsString)
       const currentBtcPrice = get(btcPriceForOfferWithCurrencyAtom)?.btcPrice
 
       set(satsValueAtom, satsNumber)

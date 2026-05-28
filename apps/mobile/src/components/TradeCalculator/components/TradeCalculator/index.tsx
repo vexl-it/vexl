@@ -5,7 +5,7 @@ import React, {useState} from 'react'
 import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
 import {
-  getCurrentLocale,
+  getLocaleFromTranslation,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
 import {AnimatedLiveIndicator} from '../../../AnimatedLiveIndicator'
@@ -79,7 +79,7 @@ function TradeCalculator({
   const switchBtcOrSatValue = useSetAtom(switchBtcOrSatValueActionAtom)
   const updateFiatCurrency = useSetAtom(updateFiatCurrencyActionAtom)
   const openChangeCurrency = useOpenChangeCurrency()
-  const locale = getCurrentLocale()
+  const locale = getLocaleFromTranslation(t)
   const isLivePriceType = !tradePriceType || tradePriceType === 'live'
   const liveBtcPriceFormatted =
     btcPriceForOfferWithState?.state === 'error'

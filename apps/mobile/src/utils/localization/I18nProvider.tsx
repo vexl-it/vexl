@@ -70,3 +70,8 @@ export function useTranslation(): TranslationContext {
 export function getCurrentLocale(): string {
   return (i18n.locale === 'en_dev' ? 'en' : i18n.locale) ?? 'en'
 }
+
+export function getLocaleFromTranslation(t: TFunction): string {
+  const locale = t('localeName')
+  return locale === 'en_dev' || locale === 'localeName' ? 'en' : locale
+}

@@ -2,7 +2,7 @@ import {Exchange, InfoBox, YStack} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
 import {
-  getCurrentLocale,
+  getLocaleFromTranslation,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
 import {btcPriceForOfferWithStateAtom, ownPriceAtom} from '../atoms'
@@ -16,7 +16,7 @@ function SetYourOwnPriceDialogContent({
   fiatCurrency,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const locale = getCurrentLocale()
+  const locale = getLocaleFromTranslation(t)
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
   const [ownPrice, setOwnPrice] = useAtom(ownPriceAtom)
   const currentMarketPrice =

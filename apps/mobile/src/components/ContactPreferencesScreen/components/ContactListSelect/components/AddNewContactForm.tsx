@@ -17,7 +17,7 @@ import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
 import {Keyboard, Platform} from 'react-native'
 import {getCountryByCca2} from 'react-native-country-select'
 import {type RootStackScreenProps} from '../../../../../navigationTypes'
@@ -86,6 +86,7 @@ export default function AddNewContactForm({
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber)
   const [contactName, setContactName] = useState(contactToEdit?.info.name ?? '')
   const [submitting, setSubmitting] = useState(false)
+  const phoneNumberInputRef = useRef<React.ComponentRef<typeof Input>>(null)
   const saveToPhoneAtom = useMemo(() => atom(true), [])
   const [saveToPhone] = useAtom(saveToPhoneAtom)
   const isEditingContact = contactToEdit !== undefined
@@ -121,6 +122,18 @@ export default function AddNewContactForm({
     setPhoneNumber(initialPhoneNumber)
     setContactName(contactToEdit?.info.name ?? '')
   }, [contactToEdit?.info.name, initialPhoneNumber])
+
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return undefined
+
+    const focusTimeout = setTimeout(() => {
+      phoneNumberInputRef.current?.focus()
+    }, 100)
+
+    return () => {
+      clearTimeout(focusTimeout)
+    }
+  }, [])
 
   return (
     <DismissKeyboardOnPressOutside>
@@ -159,6 +172,7 @@ export default function AddNewContactForm({
                 paddingHorizontal="$5"
               >
                 <Input
+                  ref={phoneNumberInputRef}
                   unstyled
                   autoFocus={Platform.OS === 'android'}
                   autoComplete="tel"

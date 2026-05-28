@@ -4,7 +4,9 @@ import {
   Button,
   CellPhoneMobileDevice,
   ChevronDown,
+  DismissKeyboardOnPressOutside,
   Input,
+  Stack,
   Switch,
   Typography,
   XStack,
@@ -16,7 +18,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
-import {Keyboard} from 'react-native'
+import {Keyboard, Platform} from 'react-native'
 import {getCountryByCca2} from 'react-native-country-select'
 import {type RootStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -121,160 +123,162 @@ export default function AddNewContactForm({
   }, [contactToEdit?.info.name, initialPhoneNumber])
 
   return (
-    <YStack flex={1} justifyContent="space-between">
-      <YStack gap="$5" paddingHorizontal="$5" paddingTop="$5">
-        <YStack gap="$2">
-          <XStack gap="$3" width="100%">
-            <XStack
-              alignItems="center"
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              gap="$2"
-              height="$11"
-              justifyContent="center"
-              onPress={() => {
-                Keyboard.dismiss()
-                navigation.navigate('AddNewContactCountryPicker')
-              }}
-              paddingHorizontal="$5"
-              pressStyle={{opacity: 0.8}}
-            >
-              <Typography color="$accentHighlightPrimary" variant="paragraph">
-                {callingCode}
-              </Typography>
-              <ChevronDown
-                color={theme.accentHighlightPrimary.get()}
-                size={24}
-              />
-            </XStack>
-            <XStack
-              alignItems="center"
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              flex={1}
-              height="$11"
-              paddingHorizontal="$5"
-            >
-              <Input
-                unstyled
-                autoFocus
-                autoComplete="tel"
-                color="$foregroundPrimary"
+    <DismissKeyboardOnPressOutside>
+      <YStack flex={1} justifyContent="space-between">
+        <YStack gap="$5" paddingHorizontal="$5" paddingTop="$5">
+          <YStack gap="$2">
+            <XStack gap="$3" width="100%">
+              <XStack
+                alignItems="center"
+                backgroundColor="$backgroundSecondary"
+                borderRadius="$5"
+                gap="$2"
+                height="$11"
+                justifyContent="center"
+                onPress={() => {
+                  Keyboard.dismiss()
+                  navigation.navigate('AddNewContactCountryPicker')
+                }}
+                paddingHorizontal="$5"
+                pressStyle={{opacity: 0.8}}
+              >
+                <Typography color="$accentHighlightPrimary" variant="paragraph">
+                  {callingCode}
+                </Typography>
+                <ChevronDown
+                  color={theme.accentHighlightPrimary.get()}
+                  size={24}
+                />
+              </XStack>
+              <XStack
+                alignItems="center"
+                backgroundColor="$backgroundSecondary"
+                borderRadius="$5"
                 flex={1}
-                fontFamily="$body"
-                fontSize="$4"
-                fontWeight="500"
-                keyboardType="phone-pad"
-                onChangeText={setPhoneNumber}
-                placeholder={t(
-                  'contactPreferences.addContactManually.phoneNumber'
-                )}
-                placeholderTextColor={theme.foregroundTertiary.get()}
-                returnKeyType="next"
-                selectionColor={theme.accentYellowPrimary.get()}
-                submitBehavior="submit"
-                value={phoneNumber}
-              />
+                height="$11"
+                paddingHorizontal="$5"
+              >
+                <Input
+                  unstyled
+                  autoFocus={Platform.OS === 'android'}
+                  autoComplete="tel"
+                  color="$foregroundPrimary"
+                  flex={1}
+                  fontFamily="$body"
+                  fontSize="$4"
+                  fontWeight="500"
+                  keyboardType="phone-pad"
+                  onChangeText={setPhoneNumber}
+                  placeholder={t(
+                    'contactPreferences.addContactManually.phoneNumber'
+                  )}
+                  placeholderTextColor={theme.foregroundTertiary.get()}
+                  selectionColor={theme.accentYellowPrimary.get()}
+                  value={phoneNumber}
+                />
+              </XStack>
             </XStack>
+            {shouldShowPhoneNumberError ? (
+              <Typography
+                color="$redForeground"
+                paddingHorizontal="$1"
+                variant="micro"
+              >
+                {t('contactPreferences.addContactManually.invalidPhoneNumber')}
+              </Typography>
+            ) : null}
+          </YStack>
+          <XStack
+            alignItems="center"
+            backgroundColor="$backgroundSecondary"
+            borderRadius="$5"
+            height="$11"
+            paddingHorizontal="$5"
+          >
+            <Input
+              unstyled
+              autoComplete="name"
+              color="$foregroundPrimary"
+              flex={1}
+              fontFamily="$body"
+              fontSize="$4"
+              fontWeight="500"
+              onChangeText={setContactName}
+              placeholder={t('contactPreferences.addContactManually.name')}
+              placeholderTextColor={theme.foregroundTertiary.get()}
+              returnKeyType="done"
+              selectionColor={theme.accentYellowPrimary.get()}
+              submitBehavior="blurAndSubmit"
+              value={contactName}
+            />
           </XStack>
-          {shouldShowPhoneNumberError ? (
+          <XStack
+            alignItems="center"
+            backgroundColor="$backgroundSecondary"
+            borderRadius="$5"
+            gap="$4"
+            height="$12"
+            paddingHorizontal="$4"
+          >
+            <CellPhoneMobileDevice
+              color={theme.foregroundPrimary.get()}
+              size={24}
+            />
             <Typography
-              color="$redForeground"
-              paddingHorizontal="$1"
-              variant="micro"
+              color="$foregroundPrimary"
+              flex={1}
+              variant="paragraphSmall"
             >
-              {t('contactPreferences.addContactManually.invalidPhoneNumber')}
+              {t(
+                isEditingContact && isAlreadyInPhoneContacts
+                  ? 'addContactDialog.updateInYourPhoneContacts'
+                  : 'addContactDialog.alsoSaveToYourPhone'
+              )}
             </Typography>
-          ) : null}
+            <Stack alignSelf="center" justifyContent="center">
+              <Switch valueAtom={saveToPhoneAtom} />
+            </Stack>
+          </XStack>
         </YStack>
-        <XStack
-          alignItems="center"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$5"
-          height="$11"
-          paddingHorizontal="$5"
-        >
-          <Input
-            unstyled
-            autoComplete="name"
-            color="$foregroundPrimary"
-            flex={1}
-            fontFamily="$body"
-            fontSize="$4"
-            fontWeight="500"
-            onChangeText={setContactName}
-            placeholder={t('contactPreferences.addContactManually.name')}
-            placeholderTextColor={theme.foregroundTertiary.get()}
-            returnKeyType="done"
-            selectionColor={theme.accentYellowPrimary.get()}
-            submitBehavior="submit"
-            value={contactName}
-          />
-        </XStack>
-        <XStack
-          alignItems="center"
-          backgroundColor="$backgroundSecondary"
-          borderRadius="$5"
-          gap="$4"
-          height="$12"
-          paddingHorizontal="$4"
-        >
-          <CellPhoneMobileDevice
-            color={theme.foregroundPrimary.get()}
-            size={24}
-          />
-          <Typography
-            color="$foregroundPrimary"
-            flex={1}
-            variant="paragraphSmall"
+        <YStack paddingHorizontal="$5">
+          <Button
+            disabled={isSubmitDisabled}
+            onPress={() => {
+              if (isSubmitDisabled) return
+
+              Keyboard.dismiss()
+              setSubmitting(true)
+              const submitEffect =
+                contactToEdit === undefined
+                  ? addNewContact({
+                      contactName,
+                      phoneNumber: rawPhoneNumber,
+                      saveToPhone,
+                    })
+                  : updateContact({
+                      contact: contactToEdit,
+                      contactName,
+                      phoneNumber: rawPhoneNumber,
+                      saveToPhone,
+                    })
+
+              void Effect.runPromise(submitEffect)
+                .then((success) => {
+                  if (success) onClose()
+                })
+                .finally(() => {
+                  setSubmitting(false)
+                })
+            }}
           >
             {t(
-              isEditingContact && isAlreadyInPhoneContacts
-                ? 'addContactDialog.updateInYourPhoneContacts'
-                : 'addContactDialog.alsoSaveToYourPhone'
+              isEditingContact
+                ? 'addContactDialog.saveChanges'
+                : 'addContactDialog.addContact'
             )}
-          </Typography>
-          <Switch valueAtom={saveToPhoneAtom} />
-        </XStack>
+          </Button>
+        </YStack>
       </YStack>
-      <YStack paddingHorizontal="$5" paddingVertical="$8">
-        <Button
-          disabled={isSubmitDisabled}
-          onPress={() => {
-            if (isSubmitDisabled) return
-
-            Keyboard.dismiss()
-            setSubmitting(true)
-            const submitEffect =
-              contactToEdit === undefined
-                ? addNewContact({
-                    contactName,
-                    phoneNumber: rawPhoneNumber,
-                    saveToPhone,
-                  })
-                : updateContact({
-                    contact: contactToEdit,
-                    contactName,
-                    phoneNumber: rawPhoneNumber,
-                    saveToPhone,
-                  })
-
-            void Effect.runPromise(submitEffect)
-              .then((success) => {
-                if (success) onClose()
-              })
-              .finally(() => {
-                setSubmitting(false)
-              })
-          }}
-        >
-          {t(
-            isEditingContact
-              ? 'addContactDialog.saveChanges'
-              : 'addContactDialog.addContact'
-          )}
-        </Button>
-      </YStack>
-    </YStack>
+    </DismissKeyboardOnPressOutside>
   )
 }

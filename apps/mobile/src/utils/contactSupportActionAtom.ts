@@ -8,8 +8,10 @@ export const contactSupportActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
   const supportEmail = t('settings.items.supportEmail')
   const emailBody = encodeURIComponent(
-    `${t('reportIssue.predefinedBody')}\n\n\n\n\n
-    ${t('reportIssue.appAndOperatingSystemInfo')} (${t('reportIssue.pleaseDoNotDelete')}): ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
+    `${t('reportIssue.predefinedBody')}\n\n
+    ---------
+    ${t('reportIssue.pleaseDoNotDelete')}:
+    ${t('reportIssue.appAndOperatingSystemInfo')} (): ${version}(${versionCode}), ${Platform.OS} ${Platform.Version}\n\n`
   )
 
   openUrl(

@@ -15,9 +15,10 @@ import {XStack, YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
 import {
-  getCurrentLocale,
+  getLocaleFromTranslation,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
+import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
 import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
@@ -36,11 +37,11 @@ function displayValueToSatsString(
   btcUnit: BtcUnit
 ): string | null {
   if (!value) return '0'
-  const num = Number(value)
-  if (Number.isNaN(num)) return null
+  const num = parseDecimalInput(value)
+  if (num === undefined) return null
   return btcUnit === 'BTC'
     ? Math.round(num * SATOSHIS_IN_BTC).toString()
-    : value
+    : String(num)
 }
 
 function formatFiatAmount(
@@ -70,7 +71,7 @@ function PriceUpToStep({
   overline,
 }: PriceUpToStepProps): React.ReactElement | null {
   const {t} = useTranslation()
-  const locale = getCurrentLocale()
+  const locale = getLocaleFromTranslation(t)
   const {
     currencyAtom,
     amountBottomLimitAtom,
@@ -103,6 +104,9 @@ function PriceUpToStep({
   )
 
   const [btcUnit, setBtcUnit] = useState<BtcUnit>('SATS')
+  const [btcInputDraft, setBtcInputDraft] = useState<string | undefined>(
+    undefined
+  )
   const amountDetailsLabel = useMemo(
     () =>
       getOfferAmountDetailsLabel({
@@ -134,7 +138,7 @@ function PriceUpToStep({
     )
   }
 
-  const btcValue = satsToDisplayValue(satsValue, btcUnit)
+  const btcValue = btcInputDraft ?? satsToDisplayValue(satsValue, btcUnit)
   const fiatValue = amountBottomLimit ? String(amountBottomLimit) : ''
 
   // Step is optional — empty inputs can skip. But if the user has entered a
@@ -154,17 +158,25 @@ function PriceUpToStep({
         <Exchange
           btcValue={btcValue}
           btcUnit={btcUnit}
-          onBtcUnitChange={setBtcUnit}
+          onBtcUnitChange={(unit) => {
+            setBtcInputDraft(undefined)
+            setBtcUnit(unit)
+          }}
           onToggleBtcUnit={() => {
+            setBtcInputDraft(undefined)
             setBtcUnit((prev) => (prev === 'BTC' ? 'SATS' : 'BTC'))
           }}
           onBtcValueChange={(value) => {
+            setBtcInputDraft(value)
             const satsString = displayValueToSatsString(value, btcUnit)
             if (satsString !== null) calculateFiatOnSatsChange(satsString)
           }}
           fiatValue={fiatValue}
           fiatCurrency={currencyCode}
-          onFiatValueChange={calculateSatsOnFiatChange}
+          onFiatValueChange={(value) => {
+            setBtcInputDraft(undefined)
+            calculateSatsOnFiatChange(value)
+          }}
           onFiatCurrencyPress={() => {
             openChangeCurrency({
               selectedCurrencyCode: currency,

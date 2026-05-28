@@ -283,7 +283,9 @@ export type PostLoginFlowStackScreenProps<
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type InsideTabParamsList = {
-  Marketplace: {initialTab?: 'allOffers' | 'myOffers'} | undefined
+  Marketplace:
+    | {initialTab?: 'allOffers' | 'myOffers'; tabSwitchRequestId?: string}
+    | undefined
   Messages: undefined
   Community: NavigatorScreenParams<CommunityParamsList> | undefined
 }

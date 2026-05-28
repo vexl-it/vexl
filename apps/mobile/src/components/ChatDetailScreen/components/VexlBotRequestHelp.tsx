@@ -76,6 +76,7 @@ export function VexlBotRequestHelp({
   }
 
   if (chatState === 'chatOpen') return null
+  if (chatState === 'requestedByMe') return null
 
   if (message.message.messageType === 'REQUEST_MESSAGING') {
     if (message.state === 'received') {

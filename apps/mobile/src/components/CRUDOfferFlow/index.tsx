@@ -1,9 +1,10 @@
+import {useNavigation, usePreventRemove} from '@react-navigation/native'
 import {Button, EditRow, Loader, NavigationBar, Screen} from '@vexl-next/ui'
 import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {type LayoutChangeEvent} from 'react-native'
 import {
   KeyboardAwareScrollView,
@@ -12,6 +13,7 @@ import {
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, YStack} from 'tamagui'
+import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
@@ -32,6 +34,8 @@ import {type OfferSetupStep} from './offerSetupSteps'
 
 function CRUDOfferFlow(): React.ReactElement {
   const {t} = useTranslation()
+  const navigation =
+    useNavigation<RootStackScreenProps<'CRUDOfferFlow'>['navigation']>()
   const safeGoBack = useSafeGoBack()
   const {
     offerTypeAtom,
@@ -52,7 +56,9 @@ function CRUDOfferFlow(): React.ReactElement {
   const insets = useSafeAreaInsets()
 
   const [activeStep, setActiveStep] = useState<OfferSetupStep>('offerType')
+  const skipExitConfirmationRef = useRef(false)
   useEffect(() => {
+    skipExitConfirmationRef.current = false
     resetOfferForm()
     setActiveStep('offerType')
     void Effect.runPromise(initializeValuesForOfferForm())
@@ -124,34 +130,48 @@ function CRUDOfferFlow(): React.ReactElement {
   })()
   const areFriendLevelCountsLoading = numberOfFriends.state === 'loading'
 
+  const confirmDiscardNewOffer = useCallback(
+    () =>
+      Effect.gen(function* (_) {
+        return yield* _(
+          showDialog({
+            title: t('offerForm.discardNewOffer'),
+            subtitle: t('offerForm.discardNewOfferDescription'),
+            positiveButtonText: t('common.discard'),
+            positiveButtonVariant: 'destructive',
+            negativeButtonText: t('common.goBack'),
+          })
+        )
+      }),
+    [showDialog, t]
+  )
+
+  usePreventRemove(!!offerType, ({data}) => {
+    if (skipExitConfirmationRef.current) {
+      navigation.dispatch(data.action)
+      return
+    }
+
+    void Effect.runPromise(confirmDiscardNewOffer()).then((confirmed) => {
+      if (confirmed) {
+        navigation.dispatch(data.action)
+      }
+    })
+  })
+
   const closeAction = useMemo(
     () => ({
       icon: XmarkCancelClose,
       onPress: () => {
-        if (!offerType) {
-          safeGoBack()
-          return
-        }
-        void Effect.runPromise(
-          Effect.gen(function* (_) {
-            const confirmed = yield* _(
-              showDialog({
-                title: t('offerForm.discardNewOffer'),
-                subtitle: t('offerForm.discardNewOfferDescription'),
-                positiveButtonText: t('common.discard'),
-                positiveButtonVariant: 'destructive',
-                negativeButtonText: t('common.goBack'),
-              })
-            )
-            if (confirmed) {
-              safeGoBack()
-            }
-          })
-        )
+        safeGoBack()
       },
     }),
-    [offerType, safeGoBack, showDialog, t]
+    [safeGoBack]
   )
+
+  const onOfferCreated = useCallback(() => {
+    skipExitConfirmationRef.current = true
+  }, [])
 
   return (
     <Screen
@@ -357,7 +377,7 @@ function CRUDOfferFlow(): React.ReactElement {
                     </YStack>
                   ) : (
                     <YStack gap="$5" paddingTop="$5">
-                      <ClubsStep />
+                      <ClubsStep onOfferCreated={onOfferCreated} />
                     </YStack>
                   )}
                 </YStack>

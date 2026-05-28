@@ -1,6 +1,7 @@
 import {Array, Option, pipe} from 'effect'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {type TradeChecklistInState} from '../../../state/tradeChecklist/domain'
+import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 
 const bothSidesSharedPhoneNumbers = (
   contact: TradeChecklistInState['contact']
@@ -28,17 +29,6 @@ const isContactRequestRevealMessage = (
 
   if (chatMessage.messageType !== 'TRADE_CHECKLIST_UPDATE') return false
   return chatMessage.tradeChecklistUpdate?.contact?.status === 'REQUEST_REVEAL'
-}
-
-const isIdentityApproveRevealMessage = (
-  message: ChatMessageWithState
-): boolean => {
-  const chatMessage = message.message
-
-  if (chatMessage.messageType === 'APPROVE_REVEAL') return true
-
-  if (chatMessage.messageType !== 'TRADE_CHECKLIST_UPDATE') return false
-  return chatMessage.tradeChecklistUpdate?.identity?.status === 'APPROVE_REVEAL'
 }
 
 const isIdentityMessage = (message: ChatMessageWithState): boolean => {
@@ -89,13 +79,9 @@ const isIdentityOrContactRevealMessage = (
 
 const identityShared = (
   messages: ChatMessageWithState[],
-  identity: TradeChecklistInState['identity']
+  tradeChecklist: TradeChecklistInState
 ): boolean => {
-  return (
-    pipe(messages, Array.some(isIdentityApproveRevealMessage)) ||
-    identity.sent?.status === 'APPROVE_REVEAL' ||
-    identity.received?.status === 'APPROVE_REVEAL'
-  )
+  return getIdentityRevealStatus({messages, tradeChecklist}) === 'shared'
 }
 
 export default function filterIrrelevantIdentityOrContactMessages(
@@ -114,10 +100,7 @@ export default function filterIrrelevantIdentityOrContactMessages(
     Option.getOrUndefined
   )
 
-  if (
-    latestIdentityMessage &&
-    !identityShared(messages, tradeChecklist.identity)
-  ) {
+  if (latestIdentityMessage && !identityShared(messages, tradeChecklist)) {
     // Phone reveal is dependent on identity reveal. If both are requested at
     // once, keep the identity action visible and hide the phone action.
     return (message: ChatMessageWithState) =>

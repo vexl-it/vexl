@@ -4,6 +4,7 @@ import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMillisecond
 import {
   Button,
   Rejected,
+  Reply,
   Stack,
   Typography,
   useTheme,
@@ -23,6 +24,13 @@ import {
   View,
 } from 'react-native'
 import Autolink from 'react-native-autolink'
+import {Gesture, GestureDetector} from 'react-native-gesture-handler'
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated'
+import {scheduleOnRN} from 'react-native-worklets'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -41,6 +49,14 @@ const imageHeight = 300
 const replyImageHeight = 50
 const messagePopScale = 1.04
 const messagePopAnimationDuration = 120
+const replySwipeActionOffset = 56
+const replySwipeActivationDistance = 72
+const replySwipeMaxOffset = 88
+const replySwipeSpringConfig = {
+  damping: 18,
+  mass: 0.7,
+  stiffness: 180,
+}
 
 const style = StyleSheet.create({
   image: {
@@ -214,6 +230,8 @@ function TextMessage({
   const openActionMenuTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
+  const swipeTranslateX = useSharedValue(0)
+  const shouldTriggerReplyFromSwipe = useSharedValue(false)
   const pendingActionAfterCloseRef = useRef<(() => void) | null>(null)
   const sendMessage = useSetAtom(sendMessageAtom)
   const lastMessageReadByOtherSideAt = useAtomValue(
@@ -283,6 +301,11 @@ function TextMessage({
     requestCloseMessageActionMenu()
   }, [messageItem, requestCloseMessageActionMenu, setReplyToMessage])
 
+  const onReplySwipeTriggered = useCallback(() => {
+    if (messageItem.type !== 'message') return
+    setReplyToMessage(messageItem.message)
+  }, [messageItem, setReplyToMessage])
+
   const onCopyPressed = useCallback(() => {
     if (messageItem.type !== 'message') return
     Clipboard.setString(messageItem.message.message.text)
@@ -316,6 +339,49 @@ function TextMessage({
       }, messagePopAnimationDuration)
     })
   }, [messageBubbleLayout, messageBubbleScale])
+
+  const swipeToReplyGesture = Gesture.Pan()
+    .activeOffsetX(12)
+    .failOffsetY([-12, 12])
+    .onUpdate((event) => {
+      const nextTranslateX = Math.min(
+        Math.max(event.translationX, 0),
+        replySwipeMaxOffset
+      )
+      swipeTranslateX.value = nextTranslateX
+      shouldTriggerReplyFromSwipe.value =
+        event.translationX >= replySwipeActivationDistance
+    })
+    .onEnd(() => {
+      if (shouldTriggerReplyFromSwipe.value) {
+        scheduleOnRN(onReplySwipeTriggered)
+      }
+      shouldTriggerReplyFromSwipe.value = false
+      swipeTranslateX.value = withSpring(0, replySwipeSpringConfig)
+    })
+    .onFinalize(() => {
+      shouldTriggerReplyFromSwipe.value = false
+      swipeTranslateX.value = withSpring(0, replySwipeSpringConfig)
+    })
+
+  const swipeAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{translateX: swipeTranslateX.value}],
+  }))
+
+  const swipeReplyIconAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: Math.min(
+      Math.abs(swipeTranslateX.value) / replySwipeActionOffset,
+      1
+    ),
+    transform: [
+      {
+        scale: Math.min(
+          0.85 + Math.abs(swipeTranslateX.value) / replySwipeActionOffset / 5,
+          1.05
+        ),
+      },
+    ],
+  }))
 
   const onPressResend = useCallback(() => {
     if (messageItem.type !== 'message') return
@@ -430,15 +496,47 @@ function TextMessage({
               maxWidth: '80%',
             }}
           >
-            <Pressable delayLongPress={250} onLongPress={onLongPressMessage}>
-              <Animated.View
-                style={{
-                  transform: [{scale: messageBubbleScale}],
-                }}
+            <Stack justifyContent="center">
+              <Reanimated.View
+                pointerEvents="none"
+                style={[
+                  {
+                    position: 'absolute',
+                    left: 0,
+                    width: replySwipeActionOffset,
+                    alignItems: 'center',
+                  },
+                  swipeReplyIconAnimatedStyle,
+                ]}
               >
-                {messageBubble}
-              </Animated.View>
-            </Pressable>
+                <Stack
+                  width="$9"
+                  height="$9"
+                  borderRadius="$9"
+                  alignItems="center"
+                  justifyContent="center"
+                  backgroundColor="$backgroundSecondary"
+                >
+                  <Reply size={18} color={theme.foregroundPrimary.get()} />
+                </Stack>
+              </Reanimated.View>
+              <GestureDetector gesture={swipeToReplyGesture}>
+                <Reanimated.View style={swipeAnimatedStyle}>
+                  <Pressable
+                    delayLongPress={250}
+                    onLongPress={onLongPressMessage}
+                  >
+                    <Animated.View
+                      style={{
+                        transform: [{scale: messageBubbleScale}],
+                      }}
+                    >
+                      {messageBubble}
+                    </Animated.View>
+                  </Pressable>
+                </Reanimated.View>
+              </GestureDetector>
+            </Stack>
           </View>
         </XStack>
       </Stack>

@@ -4,10 +4,11 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {
+  chatWithMessagesAtom,
   identityRevealTriggeredFromChatAtom,
-  identityRevealedAtom,
   tradeChecklistIdentityDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
+import getIdentityRevealStatus from '../../../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {
@@ -20,7 +21,9 @@ function RevealIdentityCell(): React.ReactElement {
   const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
-  const identityRevealed = useAtomValue(identityRevealedAtom)
+  const chatWithMessages = useAtomValue(chatWithMessagesAtom)
+  const identityRevealStatus = getIdentityRevealStatus(chatWithMessages)
+  const identityRevealed = identityRevealStatus === 'shared'
   const itemStatus = useAtomValue(
     useMemo(() => createChecklistItemStatusAtom('REVEAL_IDENTITY'), [])
   )
@@ -56,9 +59,11 @@ function RevealIdentityCell(): React.ReactElement {
       icon={EyeShut}
       disabled={disabled}
       state={
-        identityRevealed
+        identityRevealStatus === 'shared'
           ? ('completed' as const)
-          : identityRevealTriggeredFromChat
+          : identityRevealStatus === 'iAsked' ||
+              identityRevealStatus === 'theyAsked' ||
+              identityRevealTriggeredFromChat
             ? ('pending' as const)
             : mapTradeChecklistItemStatusToUiState(itemStatus)
       }

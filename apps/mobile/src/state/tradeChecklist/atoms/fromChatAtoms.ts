@@ -11,6 +11,7 @@ import type {ChatIds, ChatWithMessages} from '../../chat/domain'
 import {dummyChatWithMessages} from '../../chat/domain'
 import {offerForChatOriginAtom} from '../../marketplace/atoms/offersState'
 import {getLatestAmountDataMessage} from '../utils/amount'
+import getIdentityRevealStatus from '../utils/getIdentityRevealStatus'
 
 export const parentChatAtomAtom = atom<FocusAtomType<ChatWithMessages>>(
   atom(dummyChatWithMessages)
@@ -58,16 +59,7 @@ export const tradeChecklistContactDataAtom = atom(
 )
 
 export const identityRevealedAtom = atom((get) => {
-  const tradeChecklistData = get(tradeChecklistDataAtom)
-  const identityRevealedOldWay = get(chatWithMessagesAtom).messages.some(
-    (one) => one.message.messageType === 'APPROVE_REVEAL'
-  )
-
-  return (
-    tradeChecklistData.identity.sent?.status === 'APPROVE_REVEAL' ||
-    tradeChecklistData.identity.received?.status === 'APPROVE_REVEAL' ||
-    identityRevealedOldWay
-  )
+  return getIdentityRevealStatus(get(chatWithMessagesAtom)) === 'shared'
 })
 
 const chatOriginAtom = focusAtom(chatWithMessagesAtom, (p) =>

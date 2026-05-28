@@ -26,15 +26,9 @@ function RevealPhoneNumberCell(): React.ReactElement {
   const disabled = useMemo(() => {
     const revealContactAlreadySent =
       tradeChecklistContactData.sent && !tradeChecklistContactData.received
-    const contactRevealDeclined =
-      tradeChecklistContactData.sent && itemStatus === 'declined'
 
-    return Boolean(revealContactAlreadySent) || Boolean(contactRevealDeclined)
-  }, [
-    itemStatus,
-    tradeChecklistContactData.received,
-    tradeChecklistContactData.sent,
-  ])
+    return Boolean(revealContactAlreadySent)
+  }, [tradeChecklistContactData.received, tradeChecklistContactData.sent])
 
   if (!identityRevealed || contactRevealTriggeredFromChat) return <></>
 

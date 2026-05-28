@@ -3,6 +3,7 @@ import {deepEqual} from 'fast-equals'
 import {atom, type Atom} from 'jotai'
 import {tradeChecklistDataAtom} from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
+import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import * as MeetingLocation from '../../../state/tradeChecklist/utils/location'
 import {type TradeChecklistItem} from '../domain'
 import updatesToBeSentAtom from './updatesToBeSentAtom'
@@ -76,30 +77,22 @@ export default function createChecklistItemStatusAtom(
     }
 
     if (item === 'REVEAL_IDENTITY') {
-      const identityReveal = tradeChecklistData.identity
-
       if (updates.identity?.status === 'REQUEST_REVEAL') return 'readyToSend'
+      if (updates.identity?.status === 'DISAPPROVE_REVEAL') return 'declined'
+      if (updates.identity?.status === 'APPROVE_REVEAL') return 'accepted'
 
-      if (
-        identityReveal?.received?.status === 'DISAPPROVE_REVEAL' ||
-        updates?.identity?.status === 'DISAPPROVE_REVEAL' ||
-        identityReveal?.sent?.status === 'DISAPPROVE_REVEAL'
-      )
-        return 'declined'
+      const identityRevealStatus = getIdentityRevealStatus({
+        messages: [],
+        tradeChecklist: tradeChecklistData,
+      })
 
+      if (identityRevealStatus === 'denied') return 'declined'
+      if (identityRevealStatus === 'shared') return 'accepted'
       if (
-        identityReveal?.received?.status === 'APPROVE_REVEAL' ||
-        identityReveal?.sent?.status === 'APPROVE_REVEAL'
-      )
-        return 'accepted'
-
-      if (
-        identityReveal?.sent?.status === 'REQUEST_REVEAL' ||
-        identityReveal?.received?.status === 'REQUEST_REVEAL'
+        identityRevealStatus === 'iAsked' ||
+        identityRevealStatus === 'theyAsked'
       )
         return 'pending'
-
-      if (identityReveal?.received?.status === 'disapproved') return 'warning'
     }
 
     if (item === 'REVEAL_PHONE_NUMBER') {

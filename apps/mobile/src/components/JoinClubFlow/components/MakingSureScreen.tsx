@@ -145,7 +145,7 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
             overflow="hidden"
             backgroundColor="$accentYellowSecondary"
           >
-            {clubToJoin?.clubImageUrl ? (
+            {clubToJoin?.club.clubImageUrl ? (
               <ImageUniversal
                 width={imageSize}
                 height={imageSize}
@@ -156,7 +156,7 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
                 }}
                 source={{
                   type: 'imageUri',
-                  imageUri: clubToJoin.clubImageUrl,
+                  imageUri: clubToJoin.club.clubImageUrl,
                 }}
               />
             ) : (
@@ -175,9 +175,14 @@ function MakingSureScreen({navigation, route}: Props): React.JSX.Element {
               textAlign="center"
             >
               {clubToJoin
-                ? t('clubs.joinSpecificClubQuestion', {
-                    clubName: clubToJoin.name,
-                  })
+                ? t(
+                    clubToJoin.isModerator
+                      ? 'clubs.joinSpecificClubAsModerator'
+                      : 'clubs.joinSpecificClubQuestion',
+                    {
+                      clubName: clubToJoin.club.name,
+                    }
+                  )
                 : t('clubs.joinClubQuestion')}
             </Typography>
             <Typography

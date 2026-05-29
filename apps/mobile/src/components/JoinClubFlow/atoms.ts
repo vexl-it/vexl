@@ -28,7 +28,12 @@ function createAccessCodeDefaultValue(): string[] {
 
 export const accessCodeDefaultValue: string[] = createAccessCodeDefaultValue()
 
-export const clubToJoinAtom = atom<ClubInfo | null>(null)
+interface ClubToJoin {
+  readonly club: ClubInfo
+  readonly isModerator: boolean
+}
+
+export const clubToJoinAtom = atom<ClubToJoin | null>(null)
 
 export const AccessCodeScope = createScope<
   WritableAtom<string[], [SetStateAction<string[]>], void>

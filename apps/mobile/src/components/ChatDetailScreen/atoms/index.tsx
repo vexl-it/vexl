@@ -60,6 +60,7 @@ import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueF
 import {
   createCalendarEvent,
   createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActionAtom,
+  openCalendarEvent,
 } from '../../../utils/calendar'
 import {type SelectedImage} from '../../../utils/imagePickers'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
@@ -810,28 +811,43 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             event,
           })
         ),
-        TE.chainFirstW(({createEventActionResult: {action}}) => {
-          const userDeclinedError = toBasicError('UserDeclinedError')(
-            new Error('Declined')
-          )
-
-          return set(globalDialogAtom, {
-            title:
-              action === 'created'
-                ? t('tradeChecklist.eventAddedSuccess')
-                : t('tradeChecklist.eventEditSuccess'),
-            subtitle:
-              action === 'created'
-                ? t('tradeChecklist.eventAddedSuccessDescription')
-                : t('tradeChecklist.eventEditSuccessDescription'),
-            positiveButtonText: t('common.close'),
-          }).pipe(
+        TE.chainFirstW(({createEventActionResult: {action, calendarEventId}}) =>
+          pipe(
+            set(globalDialogAtom, {
+              title:
+                action === 'created'
+                  ? t('tradeChecklist.eventAddedSuccess')
+                  : t('tradeChecklist.eventEditSuccess'),
+              subtitle:
+                action === 'created'
+                  ? t('tradeChecklist.eventAddedSuccessDescription')
+                  : t('tradeChecklist.eventEditSuccessDescription'),
+              positiveButtonText: t('tradeChecklist.showCalendarEvent'),
+              negativeButtonText: t('common.close'),
+            }),
             effectToTaskEither,
-            TE.chainW((confirmed) =>
-              confirmed ? TE.right(undefined) : TE.left(userDeclinedError)
-            )
+            TE.chainW((shouldOpenEvent) =>
+              shouldOpenEvent
+                ? openCalendarEvent(calendarEventId)
+                : TE.right(undefined)
+            ),
+            TE.orElseW((e) => {
+              reportError('error', new Error('Error opening calendar event'), {
+                e,
+              })
+
+              showErrorAlert({
+                title: t('common.somethingWentWrong'),
+                description:
+                  toCommonErrorMessage(e, t) ??
+                  t('common.somethingWentWrongDescription'),
+                error: e,
+              })
+
+              return TE.right(undefined)
+            })
           )
-        }),
+        ),
         TE.match(
           (e) => {
             set(loadingOverlayDisplayedAtom, false)

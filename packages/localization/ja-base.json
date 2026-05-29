@@ -1304,6 +1304,7 @@
   "emptyMarketplace.friendsCanSeeYourOffers": "{{count}}人の友達があなたのオファーを見られます",
   "emptyMarketplace.noOnePostedYet": "まだ誰も投稿していません。あなたが最初になれるかも。あるいはネットワークを広げて、もっと見てみよう。",
   "emptyMarketplace.postNewOffer": "新しいオファーを投稿",
+  "emptyMarketplace.addMoreContacts": "連絡先をさらに追加",
   "emptyMarketplace.youAreEarly": "早く来たね。",
   "emptyMarketplace.turnOnNotificationsSoYouDontMiss": "新しいオファーを見逃さないように通知をオンにしよう。",
   "emptyMarketplace.turnOnNotifications": "通知をオンにする",

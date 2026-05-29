@@ -1,11 +1,20 @@
+import {
+  type ListingType,
+  type OfferType,
+} from '@vexl-next/domain/src/general/offers'
 import {EditRow, RowButton} from '@vexl-next/ui'
 import {ArrowLeft, ArrowRight} from '@vexl-next/ui/src/icons'
+import type {IconProps} from '@vexl-next/ui/src/icons/types'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtom} from 'jotai'
+import {Array, pipe} from 'effect'
+import {useAtom, useAtomValue} from 'jotai'
 import React, {useCallback} from 'react'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {YStack} from 'tamagui'
-import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {
+  useTranslation,
+  type TFunction,
+} from '../../../utils/localization/I18nProvider'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 
 interface OfferTypeStepProps {
@@ -20,19 +29,25 @@ function OfferTypeStep({
   onComplete,
 }: OfferTypeStepProps): React.ReactElement {
   const {t} = useTranslation()
-  const {offerTypeAtom} = useMolecule(offerFormMolecule)
+  const {listingTypeAtom, offerTypeAtom} = useMolecule(offerFormMolecule)
+  const listingType = useAtomValue(listingTypeAtom)
   const [offerType, setOfferType] = useAtom(offerTypeAtom)
 
-  const offerTypeLabel =
-    offerType === 'SELL' ? t('offerForm.offer') : t('offerForm.want')
+  const offerTypeLabel = getOfferTypeLabel({
+    listingType,
+    offerType,
+    t,
+  })
 
   const handlePress = useCallback(
-    (type: 'BUY' | 'SELL') => {
+    (type: OfferType) => {
       setOfferType(type)
       onComplete()
     },
     [setOfferType, onComplete]
   )
+
+  const offerTypeOptions = getOfferTypeOptions(listingType)
 
   return (
     <>
@@ -49,25 +64,70 @@ function OfferTypeStep({
       {active ? (
         <Animated.View entering={FadeIn} exiting={FadeOut}>
           <YStack gap="$3">
-            <RowButton
-              label={t('offerForm.offer')}
-              icon={ArrowRight}
-              value="SELL"
-              selected={offerType === 'SELL'}
-              onPress={handlePress}
-            />
-            <RowButton
-              label={t('offerForm.want')}
-              icon={ArrowLeft}
-              value="BUY"
-              selected={offerType === 'BUY'}
-              onPress={handlePress}
-            />
+            {pipe(
+              offerTypeOptions,
+              Array.map(({icon, type}) => (
+                <RowButton
+                  key={type}
+                  label={getOfferTypeLabel({
+                    listingType,
+                    offerType: type,
+                    t,
+                  })}
+                  icon={icon}
+                  value={type}
+                  selected={offerType === type}
+                  onPress={handlePress}
+                />
+              ))
+            )}
           </YStack>
         </Animated.View>
       ) : null}
     </>
   )
+}
+
+interface OfferTypeOption {
+  readonly type: OfferType
+  readonly icon: React.ComponentType<IconProps>
+}
+
+function getOfferTypeOptions(
+  listingType: ListingType | undefined
+): readonly OfferTypeOption[] {
+  const buyOption = {type: 'BUY', icon: ArrowLeft} satisfies OfferTypeOption
+  const sellOption = {type: 'SELL', icon: ArrowRight} satisfies OfferTypeOption
+
+  return listingType === 'PRODUCT'
+    ? [sellOption, buyOption]
+    : [buyOption, sellOption]
+}
+
+function getOfferTypeLabel({
+  listingType,
+  offerType,
+  t,
+}: {
+  readonly listingType: ListingType | undefined
+  readonly offerType: OfferType | undefined
+  readonly t: TFunction
+}): string {
+  if (listingType === 'PRODUCT') {
+    return offerType === 'SELL'
+      ? t('offerForm.sellProduct')
+      : t('offerForm.seekProduct')
+  }
+
+  if (listingType === 'OTHER') {
+    return offerType === 'SELL'
+      ? t('offerForm.provideService')
+      : t('offerForm.hireService')
+  }
+
+  return offerType === 'SELL'
+    ? t('offerForm.wantToSellBitcoin')
+    : t('offerForm.wantToBuyBitcoin')
 }
 
 export default OfferTypeStep

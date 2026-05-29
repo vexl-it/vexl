@@ -42,6 +42,13 @@ export function getAmountLabel(offer: OneOfferInState): string {
     return formatAmount(publicPart.amountBottomLimit)
   }
 
+  if (
+    publicPart.listingType === 'PRODUCT' ||
+    publicPart.listingType === 'OTHER'
+  ) {
+    return i18n.t('offer.forFree')
+  }
+
   return ''
 }
 

@@ -55,12 +55,12 @@ function CRUDOfferFlow(): React.ReactElement {
   const resetOfferForm = useSetAtom(resetOfferFormActionAtom)
   const insets = useSafeAreaInsets()
 
-  const [activeStep, setActiveStep] = useState<OfferSetupStep>('offerType')
+  const [activeStep, setActiveStep] = useState<OfferSetupStep>('listingType')
   const skipExitConfirmationRef = useRef(false)
   useEffect(() => {
     skipExitConfirmationRef.current = false
     resetOfferForm()
-    setActiveStep('offerType')
+    setActiveStep('listingType')
     void Effect.runPromise(initializeValuesForOfferForm())
   }, [initializeValuesForOfferForm, resetOfferForm])
 
@@ -146,7 +146,7 @@ function CRUDOfferFlow(): React.ReactElement {
     [showDialog, t]
   )
 
-  usePreventRemove(!!offerType, ({data}) => {
+  usePreventRemove(!!listingType || !!offerType, ({data}) => {
     if (skipExitConfirmationRef.current) {
       navigation.dispatch(data.action)
       return
@@ -193,27 +193,27 @@ function CRUDOfferFlow(): React.ReactElement {
         }}
       >
         <YStack gap="$5">
-          <Stack onLayout={handleStepLayout('offerType')}>
-            <OfferTypeStep
-              active={activeStep === 'offerType'}
+          <Stack onLayout={handleStepLayout('listingType')}>
+            <ListingTypeStep
+              active={activeStep === 'listingType'}
               onEdit={() => {
-                setActiveStep('offerType')
+                setActiveStep('listingType')
               }}
               onComplete={() => {
-                setActiveStep('listingType')
+                setActiveStep('offerType')
               }}
             />
           </Stack>
-          {activeStep !== 'offerType' ? (
-            <Stack onLayout={handleStepLayout('listingType')}>
-              <ListingTypeStep
-                active={activeStep === 'listingType'}
+          {activeStep !== 'listingType' ? (
+            <Stack onLayout={handleStepLayout('offerType')}>
+              <OfferTypeStep
+                active={activeStep === 'offerType'}
                 onEdit={() => {
-                  setActiveStep('listingType')
+                  setActiveStep('offerType')
                 }}
-                onComplete={(type) => {
+                onComplete={() => {
                   setActiveStep(
-                    type === 'PRODUCT' ? 'productCategory' : 'amount'
+                    listingType === 'PRODUCT' ? 'productCategory' : 'amount'
                   )
                 }}
               />

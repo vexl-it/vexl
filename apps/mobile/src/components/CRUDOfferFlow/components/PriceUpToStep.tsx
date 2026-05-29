@@ -141,19 +141,12 @@ function PriceUpToStep({
   const btcValue = btcInputDraft ?? satsToDisplayValue(satsValue, btcUnit)
   const fiatValue = amountBottomLimit ? String(amountBottomLimit) : ''
 
-  // Step is optional — empty inputs can skip. But if the user has entered a
-  // value we can't validate against the per-currency cap until prices load,
-  // so block Next to avoid the 10 000 fallback mis-rejecting legitimate amounts.
   const hasPriceInput = amountBottomLimit > 0 || satsValue > 0
-  const nextDisabled = hasPriceInput && !pricesReady
+  const nextDisabled = !hasPriceInput || !pricesReady
 
   return (
     <YStack>
-      <EditRow
-        state="initial"
-        headline={t('offerForm.priceUpTo')}
-        optionalLabel={t('offerForm.optional')}
-      />
+      <EditRow state="initial" headline={t('offerForm.priceUpTo')} />
       <YStack gap="$3" paddingVertical="$6">
         <Exchange
           btcValue={btcValue}
@@ -193,7 +186,7 @@ function PriceUpToStep({
           showPremium={false}
         />
 
-        {nextDisabled ? (
+        {!pricesReady ? (
           <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
             <Loader size="small" />
             <Typography variant="description" color="$foregroundSecondary">

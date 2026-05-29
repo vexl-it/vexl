@@ -109,9 +109,19 @@ function getOfferFormValidationErrorMessage(
   offerForm: OfferPublicPart,
   t: TFunction
 ): string | undefined {
-  const {listingType, locationState, location, offerDescription} = offerForm
+  const {
+    amountBottomLimit,
+    listingType,
+    locationState,
+    location,
+    offerDescription,
+  } = offerForm
 
   if (!listingType) return t('offerForm.errorListingTypeNotFilled')
+
+  if (listingType !== 'BITCOIN' && amountBottomLimit <= 0) {
+    return t('offerForm.errorPriceNotFilled')
+  }
 
   if (listingType === 'PRODUCT' && locationState.length === 0) {
     return t('offerForm.errorDeliveryMethodNotFilled')
@@ -346,15 +356,7 @@ export const offerFormMolecule = molecule(() => {
     (get, set, locationState: LocationState) => {
       const listingType = get(listingTypeAtom)
 
-      if (!listingType || listingType !== 'PRODUCT') {
-        set(locationStateAtom, [locationState])
-      } else {
-        set(locationStateAtom, (prev) =>
-          prev?.includes(locationState)
-            ? prev.filter((state) => state !== locationState)
-            : [...(prev ?? []), locationState]
-        )
-      }
+      set(locationStateAtom, [locationState])
 
       // TODO: after removing compatibility with old vexl apps refactor to ['CASH', 'REVOLUT', 'BANK'] for ['IN_PERSON', 'ONLINE'] delivery method
       set(paymentMethodAtom, () => {

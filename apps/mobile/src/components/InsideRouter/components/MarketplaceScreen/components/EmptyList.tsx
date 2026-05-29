@@ -27,7 +27,7 @@ import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplace
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
 const EMPTY_MARKETPLACE_REFRESH_INTERVAL_MS = 5000
-const LOADING_OFFERS_EMPTY_STATE_TIMEOUT_MS = 30_000
+const LOADING_OFFERS_EMPTY_STATE_TIMEOUT_MS = 15_000
 
 interface EmptyListAction {
   readonly description: string

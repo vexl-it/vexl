@@ -614,6 +614,7 @@ export const filteredOffersPreviewCountAtom = atom((get) => {
     offers: filteredOffers,
     locationFilter: draftFilter.location,
     includeOnlineOffers:
+      !Array.isNonEmptyReadonlyArray(draftFilter.location ?? []) ||
       shouldCombineOnlineOffersWithLocationFilter(draftFilter),
   }).length
 })

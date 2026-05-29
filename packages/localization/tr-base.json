@@ -918,6 +918,8 @@
   "suggestion.whatAreClubs": "What are clubs?",
   "suggestion.whatAreClubs2": "Vexl Clubs nedir ve neden katılmalıyım?",
   "suggestion.whatAreClubs2Text": "Kulüpler ağını doğrudan kişilerin ötesine genişletir, böylece daha fazla teklif görürsün. Kulüp üyeleriyle takas yapmanın yakın arkadaşlarınla takas yapmaya göre daha az güvenilir olduğunu unutma.",
+  "suggestion.howDoIJoinClub": "Bir kulübe nasıl katılırım?",
+  "suggestion.howDoIJoinClubText": "Yerel BTC buluşmalarında veya Bitcoin topluluklarında sor. Birçoğunun zaten kendi kulüpleri var. Bir topluluk yönetiyorsan ya da buluşmalar düzenliyorsan marketing@vexl.it adresinden bize ulaş, yeni bir kulüp oluşturman için sana yardımcı olalım.",
   "addContactDialog.addContact": "Add contact",
   "addContactDialog.editContact": "Kişiyi düzenle",
   "addContactDialog.saveChanges": "Değişiklikleri kaydet",

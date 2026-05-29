@@ -918,6 +918,8 @@
   "suggestion.whatAreClubs": "Vilabu ni nini?",
   "suggestion.whatAreClubs2": "Vexl Clubs ni nini na kwa nini nijiunge?",
   "suggestion.whatAreClubs2Text": "Vilabu hupanua mtandao wako zaidi ya anwani zako za moja kwa moja, hivyo unaona ofa zaidi. Kumbuka kuwa kufanya biashara na wanachama wa klabu hakuaminiki kama kufanya biashara na marafiki zako wa karibu.",
+  "suggestion.howDoIJoinClub": "Nitajisajili vipi kwenye klabu?",
+  "suggestion.howDoIJoinClubText": "Uliza kwenye mikutano ya BTC ya eneo lako au jumuiya za Bitcoin. Nyingi tayari zina klabu zao. Ikiwa unaendesha jumuiya au unapanga mikutano, wasiliana nasi kupitia marketing@vexl.it na tutakusaidia kuunda klabu mpya.",
   "addContactDialog.addContact": "Ongeza mawasiliano",
   "addContactDialog.editContact": "Hariri anwani",
   "addContactDialog.saveChanges": "Hifadhi mabadiliko",

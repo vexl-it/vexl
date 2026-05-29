@@ -6,7 +6,7 @@ export const fetchVexlProductNotificationsInAppLoadingTaskId =
     name: 'fetchVexlProductNotifications',
     requirements: {
       requiresUserLoggedIn: true,
-      runOn: 'start',
+      runOn: 'resume',
     },
     task: (store) => store.set(fetchVexlProductNotificationsActionAtom),
   })

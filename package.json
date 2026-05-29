@@ -40,7 +40,7 @@
     "firebase-admin": "^12.3.1",
     "prettier": "^3.3.2",
     "tsx": "^4.16.0",
-    "turbo": "^1.11.3"
+    "turbo": "^2.9.14"
   },
   "resolutions": {
     "crypto-browserify@^3.12.0": "patch:crypto-browserify@npm%3A3.12.0#./.yarn/patches/crypto-browserify-npm-3.12.0-bed454fef0.patch",

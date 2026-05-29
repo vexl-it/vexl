@@ -34,21 +34,20 @@ function ListingTypeStep({
     [updateListingType, onComplete]
   )
 
-  const listingTypeLabel = listingType
-    ? t(`offerForm.${listingType}`)
-    : t('offerForm.BITCOIN')
+  const listingTypeLabel = (() => {
+    if (listingType === 'PRODUCT') return t('offerForm.PRODUCTS')
+    if (listingType === 'OTHER') return t('offerForm.SERVICES')
+    return t('offerForm.BITCOIN')
+  })()
 
   return (
     <>
       {active ? (
-        <EditRow
-          state="initial"
-          headline={t('offerForm.whatAreYouLookingFor')}
-        />
+        <EditRow state="initial" headline={t('offerForm.whatAreYouHereFor')} />
       ) : (
         <EditRow
           state="completed"
-          overline={t('offerForm.whatAreYouLookingFor')}
+          overline={t('offerForm.whatAreYouHereFor')}
           headline={listingTypeLabel}
           onPress={onEdit}
         />
@@ -65,14 +64,14 @@ function ListingTypeStep({
                 onPress={handlePress}
               />
               <RowButton
-                label={t('offerForm.PRODUCT')}
+                label={t('offerForm.PRODUCTS')}
                 icon={BoxProduct}
                 value="PRODUCT"
                 selected={listingType === 'PRODUCT'}
                 onPress={handlePress}
               />
               <RowButton
-                label={t('offerForm.SERVICE')}
+                label={t('offerForm.SERVICES')}
                 icon={Tools}
                 value="OTHER"
                 selected={listingType === 'OTHER'}

@@ -1,5 +1,8 @@
 import {useNavigation} from '@react-navigation/native'
-import {type LocationState} from '@vexl-next/domain/src/general/offers'
+import {
+  type ListingType,
+  type LocationState,
+} from '@vexl-next/domain/src/general/offers'
 import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
   Button,
@@ -21,15 +24,29 @@ import {globalDialogAtom} from '../../GlobalDialog'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import LocationRow from './LocationRow'
 
-function useLocationTabs(isProduct: boolean): ReadonlyArray<{
+function useLocationTabs(listingType: ListingType | undefined): ReadonlyArray<{
   readonly label: string
   readonly value: LocationState
 }> {
   const {t} = useTranslation()
+  const isProduct = listingType === 'PRODUCT'
+  const isService = listingType === 'OTHER'
+
   return [
-    {label: t('offerForm.inPerson'), value: 'IN_PERSON'},
     {
-      label: isProduct ? t('offerForm.delivery') : t('offerForm.online'),
+      label: isProduct
+        ? t('offerForm.pickup')
+        : isService
+          ? t('offerForm.onSite')
+          : t('offerForm.inPerson'),
+      value: 'IN_PERSON',
+    },
+    {
+      label: isProduct
+        ? t('offerForm.delivery')
+        : isService
+          ? t('offerForm.remote')
+          : t('offerForm.online'),
       value: 'ONLINE',
     },
   ]
@@ -75,7 +92,7 @@ function LocationStep({
   const isProduct = listingType === 'PRODUCT'
   const isOnline = locationState?.includes('ONLINE') ?? false
   const activeTab: LocationState = isOnline ? 'ONLINE' : 'IN_PERSON'
-  const tabs = useLocationTabs(isProduct)
+  const tabs = useLocationTabs(listingType)
 
   const hasLocations = (location?.length ?? 0) > 0
 

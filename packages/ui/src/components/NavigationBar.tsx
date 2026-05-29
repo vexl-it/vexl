@@ -25,13 +25,16 @@ const BackBar = styled(XStack, {
   justifyContent: 'space-between',
   paddingHorizontal: '$5',
   paddingVertical: '$4',
+  gap: '$3',
   alignSelf: 'stretch',
 })
 
 const BackSideContainer = styled(XStack, {
   name: 'NavigationBarBackSide',
   alignItems: 'center',
-  flex: 1,
+  flexShrink: 0,
+  minWidth: '$9',
+  zIndex: 1,
 
   variants: {
     side: {
@@ -48,6 +51,8 @@ const BackCenterContainer = styled(YStack, {
   name: 'NavigationBarBackCenter',
   alignItems: 'center',
   justifyContent: 'center',
+  flex: 1,
+  minWidth: 0,
 })
 
 const BackTitle = styled(SizableText, {
@@ -58,6 +63,7 @@ const BackTitle = styled(SizableText, {
   letterSpacing: '$5',
   color: '$foregroundPrimary',
   textAlign: 'center',
+  maxWidth: '100%',
 })
 
 const ChatBar = styled(XStack, {
@@ -156,8 +162,12 @@ export function NavigationBar(props: NavigationBarProps): React.JSX.Element {
               <HighlightedNavAction action={props.leftAction} />
             ) : null}
           </BackSideContainer>
-          <BackCenterContainer>
-            {props.title ? <BackTitle>{props.title}</BackTitle> : null}
+          <BackCenterContainer pointerEvents="none">
+            {props.title ? (
+              <BackTitle numberOfLines={1} ellipsizeMode="tail">
+                {props.title}
+              </BackTitle>
+            ) : null}
           </BackCenterContainer>
           <BackSideContainer side="right">
             {props.rightActions?.map((action, i) => (

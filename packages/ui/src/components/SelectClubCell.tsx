@@ -3,6 +3,7 @@ import {styled, useTheme} from 'tamagui'
 
 import {CheckboxFilled} from '../icons/CheckboxFilled'
 import {PeopleUsers} from '../icons/PeopleUsers'
+import {SquareOutline} from '../icons/SquareOutline'
 import {SizableText, Stack, XStack, YStack} from '../primitives'
 
 const SelectClubCellFrame = styled(XStack, {
@@ -75,6 +76,7 @@ export interface SelectClubCellProps {
   readonly avatar: React.ReactNode
   readonly description: string
   readonly onPress?: () => void
+  readonly showUncheckedCheckbox?: boolean
 }
 
 export function SelectClubCell({
@@ -83,12 +85,14 @@ export function SelectClubCell({
   avatar,
   description,
   onPress,
+  showUncheckedCheckbox = false,
 }: SelectClubCellProps): React.JSX.Element {
   const theme = useTheme()
 
   const checkboxColor = theme.accentHighlightSecondary.get()
   const iconBoxBg = theme.accentYellowSecondary.get()
   const descriptionIconColor = theme.foregroundSecondary.get()
+  const uncheckedCheckboxColor = theme.foregroundPrimary.get()
 
   return (
     <SelectClubCellFrame selected={selected} onPress={onPress}>
@@ -97,7 +101,15 @@ export function SelectClubCell({
           <CheckboxFilled size={24} color={checkboxColor} />
         </IconBox>
       ) : (
-        <>{avatar}</>
+        <>
+          {showUncheckedCheckbox ? (
+            <IconBox>
+              <SquareOutline size={24} color={uncheckedCheckboxColor} />
+            </IconBox>
+          ) : (
+            <>{avatar}</>
+          )}
+        </>
       )}
       <YStack flex={1} justifyContent="center" gap="$1">
         <NameText selected={selected}>{name}</NameText>

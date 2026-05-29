@@ -38,6 +38,7 @@ function ClubItem({
       name={club.name}
       description={t('clubs.members', {membersCount})}
       selected={selected}
+      showUncheckedCheckbox
       avatar={
         <Avatar
           size="small"

@@ -1,5 +1,5 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Schema} from 'effect'
+import {Array, Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import calculatePriceInSats from '../../../utils/calculatePriceInSats'
@@ -110,11 +110,14 @@ export const filteredOffersForVisibleMapRegionAtom = atom((get) =>
 export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)
   const filteredOffers = get(filteredOffersIgnoreLocationAtom)
+  const locationFilter = get(locationFilterAtom)
 
   const offersFilteredBySelectedLocation = filterOffersByCircularLocation({
     offers: filteredOffers,
-    locationFilter: get(locationFilterAtom),
-    includeOnlineOffers: shouldCombineOnlineOffersWithLocationFilter(filter),
+    locationFilter,
+    includeOnlineOffers:
+      !Array.isNonEmptyReadonlyArray(locationFilter ?? []) ||
+      shouldCombineOnlineOffersWithLocationFilter(filter),
   })
 
   return offersFilteredBySelectedLocation

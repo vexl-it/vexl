@@ -124,7 +124,7 @@ function PriceUpToStep({
   if (!active) {
     const completedHeadline = amountBottomLimit
       ? formatFiatAmount(amountBottomLimit, currencyCode, locale)
-      : t('offerForm.anyPrice')
+      : ''
 
     return (
       <EditRow

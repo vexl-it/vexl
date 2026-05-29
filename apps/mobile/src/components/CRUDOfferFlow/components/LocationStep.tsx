@@ -90,6 +90,7 @@ function LocationStep({
   const showDialog = useSetAtom(globalDialogAtom)
 
   const isProduct = listingType === 'PRODUCT'
+  const isService = listingType === 'OTHER'
   const isOnline = locationState?.includes('ONLINE') ?? false
   const activeTab: LocationState = isOnline ? 'ONLINE' : 'IN_PERSON'
   const tabs = useLocationTabs(listingType)
@@ -103,7 +104,13 @@ function LocationStep({
           state="completed"
           icon={icon}
           overline={overline ?? t('offerForm.setLocation')}
-          headline={isProduct ? t('offerForm.delivery') : t('offerForm.online')}
+          headline={
+            isProduct
+              ? t('offerForm.delivery')
+              : isService
+                ? t('offerForm.remote')
+                : t('offerForm.online')
+          }
           onPress={onEdit}
         />
       )

@@ -22,7 +22,7 @@ import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {type Effect, Schema} from 'effect'
 import {fastDeepEqualRemoveUndefineds} from '../../utils/fastDeepEqualRemoveUndefineds'
 
-export const REACH_NUMBER_THRESHOLD = 30
+export const REACH_NUMBER_THRESHOLD = 150
 
 export type ApiErrorFetchingOffers = Effect.Effect.Error<
   ReturnType<OfferApi['getOffersForMeModifiedOrCreatedAfterPaginated']>

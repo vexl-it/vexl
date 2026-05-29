@@ -8,20 +8,26 @@ import {
   XStack,
   YStack,
 } from '@vexl-next/ui'
-import {Option} from 'effect/index'
-import {useAtomValue} from 'jotai'
-import React, {useCallback} from 'react'
+import {Effect, Option} from 'effect/index'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useEffect, useState} from 'react'
 import {
   fistAndSecondLevelConnectionsReachAtom,
   reachNumberAtom,
 } from '../../../../../state/connections/atom/connectionStateAtom'
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
+import {useAreOffersLoading} from '../../../../../state/marketplace'
+import {hasPostedFirstOfferActionStepAtom} from '../../../../../state/marketplace/atoms/myOffers'
+import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
 import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
 import {notificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
+
+const EMPTY_MARKETPLACE_REFRESH_INTERVAL_MS = 5000
+const LOADING_OFFERS_EMPTY_STATE_TIMEOUT_MS = 30_000
 
 interface EmptyListAction {
   readonly description: string
@@ -65,6 +71,7 @@ function useEmptyListVariants(): EmptyListVariant {
   const reachNumber = useAtomValue(reachNumberAtom)
   const importedContactsCount = useAtomValue(importedContactsCountAtom)
   const areNotificationsEnabled = useAtomValue(notificationsEnabledAtom)
+  const hasPostedFirstOffer = useAtomValue(hasPostedFirstOfferActionStepAtom)
 
   const navigateToCommunity = useCallback(() => {
     navigation.navigate('InsideTabs', {
@@ -75,6 +82,19 @@ function useEmptyListVariants(): EmptyListVariant {
   const navigateToCreateOffer = useCallback(() => {
     navigation.navigate('CRUDOfferFlow')
   }, [navigation])
+
+  const navigateToContactPreferences = useCallback(() => {
+    navigation.navigate('ContactPreferences')
+  }, [navigation])
+
+  const createOfferOrAddContactsAction = {
+    buttonText: hasPostedFirstOffer
+      ? t('emptyMarketplace.addMoreContacts')
+      : t('emptyMarketplace.postNewOffer'),
+    onButtonPress: hasPostedFirstOffer
+      ? navigateToContactPreferences
+      : navigateToCreateOffer,
+  }
 
   if (importedContactsCount === 0) {
     return {
@@ -111,8 +131,7 @@ function useEmptyListVariants(): EmptyListVariant {
     return {
       primaryAction: {
         description: t('emptyMarketplace.noOnePostedYet'),
-        buttonText: t('emptyMarketplace.postNewOffer'),
-        onButtonPress: navigateToCreateOffer,
+        ...createOfferOrAddContactsAction,
       },
       secondaryAction: {
         description: t('emptyMarketplace.exploreTheCommunity'),
@@ -137,9 +156,8 @@ function useEmptyListVariants(): EmptyListVariant {
 
   return {
     primaryAction: {
-      description: t('emptyMarketplace.beTheFirstToCreateOne'),
-      buttonText: t('emptyMarketplace.postNewOffer'),
-      onButtonPress: navigateToCreateOffer,
+      description: t('emptyMarketplace.noOnePostedYet'),
+      ...createOfferOrAddContactsAction,
     },
     secondaryAction: {
       description: t('emptyMarketplace.exploreTheCommunity'),
@@ -154,8 +172,41 @@ function EmptyList(): React.ReactElement {
   const emptyListHeading = useEmptyListHeading()
   const emptyListVariant = useEmptyListVariants()
   const shouldShowLoadingOffers = useAtomValue(shouldShowLoadingOffersAtom)
+  const refreshOffers = useSetAtom(refreshOffersActionAtom)
+  const loading = useAreOffersLoading()
+  const [loadingOffersTimedOut, setLoadingOffersTimedOut] = useState(false)
 
-  if (shouldShowLoadingOffers) {
+  useEffect(() => {
+    if (!shouldShowLoadingOffers || loadingOffersTimedOut || loading) {
+      return undefined
+    }
+
+    const intervalId = setInterval(() => {
+      Effect.runFork(refreshOffers())
+    }, EMPTY_MARKETPLACE_REFRESH_INTERVAL_MS)
+
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [loading, loadingOffersTimedOut, refreshOffers, shouldShowLoadingOffers])
+
+  useEffect(() => {
+    if (!shouldShowLoadingOffers) {
+      setLoadingOffersTimedOut(false)
+      return undefined
+    }
+
+    setLoadingOffersTimedOut(false)
+    const timeoutId = setTimeout(() => {
+      setLoadingOffersTimedOut(true)
+    }, LOADING_OFFERS_EMPTY_STATE_TIMEOUT_MS)
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
+  }, [shouldShowLoadingOffers])
+
+  if (shouldShowLoadingOffers && !loadingOffersTimedOut) {
     return (
       <MarketplaceEmptyLoader label={t('emptyMarketplace.loadingOffers')} />
     )
@@ -183,7 +234,7 @@ function EmptyList(): React.ReactElement {
           {emptyListVariant.primaryAction.description}
         </Typography>
         <Button
-          variant="secondary"
+          variant="primary"
           size="small"
           onPress={emptyListVariant.primaryAction.onButtonPress}
           width="100%"
@@ -209,7 +260,7 @@ function EmptyList(): React.ReactElement {
               {emptyListVariant.secondaryAction.description}
             </Typography>
             <Button
-              variant="primary"
+              variant="secondary"
               size="small"
               onPress={emptyListVariant.secondaryAction.onButtonPress}
               width="100%"

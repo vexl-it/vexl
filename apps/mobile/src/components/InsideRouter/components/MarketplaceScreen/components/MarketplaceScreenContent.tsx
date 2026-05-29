@@ -120,6 +120,9 @@ function MarketplaceScreenContent({
   const offersAtoms =
     activeTab === 'allOffers' ? allOffersAtoms : myOffersSortedAtoms
 
+  const isAllOffersEmptyStateVisible =
+    activeTab === 'allOffers' && !areThereOffersWithoutFilters
+
   const listEmptyComponent =
     activeTab === 'allOffers'
       ? areThereOffersWithoutFilters
@@ -162,7 +165,11 @@ function MarketplaceScreenContent({
         ListEmptyComponent={listEmptyComponent}
         offersAtoms={offersAtoms}
         onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
-        refreshing={activeTab === 'allOffers' ? loading : false}
+        refreshing={
+          activeTab === 'allOffers' && !isAllOffersEmptyStateVisible
+            ? loading
+            : false
+        }
         onScroll={onScroll}
         scrollEventThrottle={16}
         maintainVisibleContentPosition={{disabled: true}}

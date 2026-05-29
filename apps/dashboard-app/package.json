@@ -49,7 +49,7 @@
     "react-spring": "^9.7.3",
     "react-use": "^17.5.0",
     "serve-handler": "^6.1.5",
-    "ws": "^8.18.3"
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "@formkit/auto-animate": "^0.8.2",

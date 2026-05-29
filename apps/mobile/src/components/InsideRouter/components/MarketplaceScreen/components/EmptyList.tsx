@@ -196,7 +196,6 @@ function EmptyList(): React.ReactElement {
       return undefined
     }
 
-    setLoadingOffersTimedOut(false)
     const timeoutId = setTimeout(() => {
       setLoadingOffersTimedOut(true)
     }, LOADING_OFFERS_EMPTY_STATE_TIMEOUT_MS)
@@ -206,7 +205,7 @@ function EmptyList(): React.ReactElement {
     }
   }, [shouldShowLoadingOffers])
 
-  if (shouldShowLoadingOffers && !loadingOffersTimedOut) {
+  if (shouldShowLoadingOffers && (!loadingOffersTimedOut || loading)) {
     return (
       <MarketplaceEmptyLoader label={t('emptyMarketplace.loadingOffers')} />
     )

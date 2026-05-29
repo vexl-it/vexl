@@ -10,14 +10,17 @@ import {
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
-import {formatFullCurrencyAmount} from '../utils/localization/currency'
 import {
   getCurrentLocale,
   useTranslation,
 } from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
 import {getOfferFeeLabel} from '../utils/offerAmountDetails'
-import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
+import {
+  getAmountLabel,
+  getIconTagVariant,
+  getIsOffering,
+} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
@@ -88,35 +91,7 @@ export default function OfferOnMarketplace({
     ? smallestClub.value.club.clubImageUrl
     : undefined
 
-  const price = useMemo(() => {
-    if (!publicPart.listingType || publicPart.listingType === 'BITCOIN') {
-      const top = formatFullCurrencyAmount(
-        publicPart.currency,
-        publicPart.amountTopLimit
-      )
-      if (publicPart.amountBottomLimit > 0) {
-        const bottom = formatFullCurrencyAmount(
-          publicPart.currency,
-          publicPart.amountBottomLimit
-        )
-        return `${bottom} \u2013 ${top}`
-      }
-      return `${t('offer.upTo')} ${top}`
-    }
-    if (publicPart.amountBottomLimit !== 0) {
-      return formatFullCurrencyAmount(
-        publicPart.currency,
-        publicPart.amountBottomLimit
-      )
-    }
-    return ''
-  }, [
-    publicPart.currency,
-    publicPart.amountBottomLimit,
-    publicPart.amountTopLimit,
-    publicPart.listingType,
-    t,
-  ])
+  const price = getAmountLabel(offer)
 
   const premiumLabel = useMemo(
     () =>

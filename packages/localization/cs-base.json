@@ -1105,6 +1105,7 @@
   "tradeChecklist.eventEditSuccess": "Událost úspěšně aktualizována",
   "tradeChecklist.eventEditSuccessDescription": "Událost byla úspěšně aktualizována pro zvolený datum a čas.",
   "tradeChecklist.calendarPermissionsNotGranted": "Vexl nemá přístup ke kalendáři. Zkontroluj oprávnění a zkus to znovu.",
+  "tradeChecklist.showCalendarEvent": "Zobrazit událost",
   "tradeChecklist.discardChanges": "Zahodit změny?",
   "tradeChecklist.allChangesWillBeLost": "Veškeré neodeslané změny, které jsi provedl, budou ztraceny.",
   "tradeChecklist.time.description": "Vyber, kdy máš volno. Přepínačem níže můžeš použít časy pro všechny dny.",

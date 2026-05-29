@@ -123,7 +123,11 @@ export const submitCodeToJoinClubActionAtom = atom(
       yield* _(
         set(globalDialogAtom, {
           title: t('clubs.clubJoinedSuccessfully'),
-          subtitle: t('clubs.nowYouWillSeeOffersFromClubMembers'),
+          subtitle: club.isModerator
+            ? `${t('clubs.nowYouWillSeeOffersFromClubMembers')} ${t(
+                'clubs.youJoinedAsModerator'
+              )}`
+            : t('clubs.nowYouWillSeeOffersFromClubMembers'),
           positiveButtonText: t('common.ok'),
         })
       )
@@ -216,7 +220,10 @@ export const validateCodeToJoinClubActionAtom = atom(
       )
       yield* _(
         Effect.sync(() => {
-          set(clubToJoinAtom, club.club)
+          set(clubToJoinAtom, {
+            club: club.club,
+            isModerator: club.isModerator,
+          })
         })
       )
 

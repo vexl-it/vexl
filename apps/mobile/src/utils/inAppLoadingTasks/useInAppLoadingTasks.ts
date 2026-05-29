@@ -7,6 +7,7 @@ import {executeTasksWithDependencies, taskRegistryAtom} from './index'
 
 // tasks
 import '../../components/FullscreenWarningScreen/loadNewsAndAnnouncementsInAppLoadingTask'
+import '../../components/NotificationsScreen/state/fetchVexlProductNotificationsInAppLoadingTask'
 import '../../state/chat/checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTask'
 import '../../state/chat/checkAndReportCurrentVersionToChatsInAppLoadingTask'
 import '../../state/chat/decodePreviouslyUncompatibleMessagesInAppLoadingTask'

@@ -918,6 +918,8 @@
   "suggestion.whatAreClubs": "What are clubs?",
   "suggestion.whatAreClubs2": "Hva er Vexl Clubs, og hvorfor bør jeg bli med?",
   "suggestion.whatAreClubs2Text": "Klubber utvider nettverket ditt utover de direkte kontaktene dine, så du ser flere tilbud. Husk at handel med klubbmedlemmer er mindre tillitsbasert enn handel med nære venner.",
+  "suggestion.howDoIJoinClub": "Hvordan blir jeg med i en klubb?",
+  "suggestion.howDoIJoinClubText": "Spør rundt på lokale BTC-meetups eller i Bitcoin-miljøer. Mange har allerede egne klubber. Hvis du driver et miljø eller arrangerer meetups, kontakt oss på marketing@vexl.it, så hjelper vi deg med å lage en ny klubb.",
   "addContactDialog.addContact": "Add contact",
   "addContactDialog.editContact": "Rediger kontakt",
   "addContactDialog.saveChanges": "Lagre endringer",

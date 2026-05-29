@@ -918,6 +918,8 @@
   "suggestion.whatAreClubs": "What are clubs?",
   "suggestion.whatAreClubs2": "Vexl Clubs چی هستن و چرا باید عضو بشم؟",
   "suggestion.whatAreClubs2Text": "کلاب‌ها شبکه‌ات رو فراتر از مخاطب‌های مستقیمت گسترش می‌دن، پس پیشنهادهای بیشتری می‌بینی. یادت باشه معامله با اعضای کلاب نسبت به معامله با دوست‌های نزدیکت اعتماد کمتری داره.",
+  "suggestion.howDoIJoinClub": "چطور عضو یک کلاب بشم؟",
+  "suggestion.howDoIJoinClubText": "توی میت‌آپ‌های محلی BTC یا کامیونیتی‌های بیت‌کوینت پرس‌وجو کن. خیلی‌هاشون همین حالا کلاب خودشون رو دارن. اگر کامیونیتی داری یا میت‌آپ برگزار می‌کنی، به marketing@vexl.it پیام بده تا کمکت کنیم یک کلاب جدید بسازی.",
   "addContactDialog.addContact": "Add contact",
   "addContactDialog.editContact": "ویرایش مخاطب",
   "addContactDialog.saveChanges": "ذخیره تغییرات",

@@ -9,6 +9,7 @@ import {
   getCalendarsAsync,
   getDefaultCalendarAsync,
   getEventAsync,
+  openEventInCalendarAsync,
   requestCalendarPermissionsAsync,
   updateEventAsync,
   type Calendar,
@@ -24,6 +25,46 @@ const CALENDAR_TITLE = 'Vexl'
 const DEFAULT_TRADE_CHECKLIST_EVENT_DURATION_MS = 60 * 60 * 1000
 
 type CalendarEventIdType = typeof CalendarEventId.Type
+type CalendarIdResolutionResult =
+  | {calendarId: string; isVexlCalendar: true}
+  | {calendarId: string; isVexlCalendar: false}
+
+const NativeCalendarErrorDetails = Schema.Struct({
+  code: Schema.optional(Schema.String),
+  message: Schema.optional(Schema.String),
+  name: Schema.optional(Schema.String),
+})
+
+type NativeCalendarErrorDetailsType = typeof NativeCalendarErrorDetails.Type
+
+function getNativeCalendarErrorDetails(
+  error: unknown
+): NativeCalendarErrorDetailsType | undefined {
+  return Option.getOrUndefined(
+    Schema.decodeUnknownOption(NativeCalendarErrorDetails)(error)
+  )
+}
+
+async function createVexlCalendarOrFallbackToDefaultCalendar({
+  defaultCalendar,
+  vexlCalendar,
+}: {
+  defaultCalendar: Calendar | undefined
+  vexlCalendar: Partial<Calendar>
+}): Promise<CalendarIdResolutionResult> {
+  try {
+    return {
+      calendarId: await createCalendarAsync(vexlCalendar),
+      isVexlCalendar: true,
+    }
+  } catch (error) {
+    if (Platform.OS === 'ios' && defaultCalendar?.allowsModifications) {
+      return {calendarId: defaultCalendar.id, isVexlCalendar: false}
+    }
+
+    throw error
+  }
+}
 
 export interface PermissionsNotGrantedError {
   _tag: 'permissionsNotGranted'
@@ -34,6 +75,8 @@ export interface PermissionsNotGrantedError {
 export interface UnknownError {
   _tag: 'unknown'
   reason: 'Unknown'
+  operation?: string
+  errorDetails?: NativeCalendarErrorDetailsType
   error?: unknown
 }
 
@@ -68,6 +111,8 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
       const vexlCalendarId = get(vexlCalendarIdAtom)
 
       return async () => {
+        let operation = 'requestCalendarPermissionsAsync'
+
         try {
           const permissions = await requestCalendarPermissionsAsync()
 
@@ -78,14 +123,19 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
             })
           }
 
-          const defaultCalendarSource: Source =
+          operation =
             Platform.OS === 'ios'
-              ? await getDefaultCalendarAsync().then((result) => result.source)
-              : {
-                  isLocalAccount: true,
-                  name: CALENDAR_TITLE,
-                  type: 'LOCAL',
-                }
+              ? 'getDefaultCalendarAsync'
+              : 'resolveAndroidLocalCalendarSource'
+
+          const defaultCalendar =
+            Platform.OS === 'ios' ? await getDefaultCalendarAsync() : undefined
+
+          const defaultCalendarSource: Source = defaultCalendar?.source ?? {
+            isLocalAccount: true,
+            name: CALENDAR_TITLE,
+            type: 'LOCAL',
+          }
 
           const vexlCalendar = {
             title: CALENDAR_TITLE,
@@ -102,23 +152,42 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
           } satisfies Partial<Calendar>
 
           if (Option.isNone(vexlCalendarId)) {
-            const calendarId = await createCalendarAsync(vexlCalendar)
-            set(vexlCalendarIdAtom, Option.some(calendarId))
+            operation = 'createCalendarAsync'
+            const {calendarId, isVexlCalendar} =
+              await createVexlCalendarOrFallbackToDefaultCalendar({
+                defaultCalendar,
+                vexlCalendar,
+              })
+
+            if (isVexlCalendar) set(vexlCalendarIdAtom, Option.some(calendarId))
 
             return right(calendarId)
           }
 
-          const calendars = await getCalendarsAsync()
+          operation = 'getCalendarsAsync(EVENT)'
+          const calendars = await getCalendarsAsync(EntityTypes.EVENT)
           const calendar = pipe(
             calendars,
             Array.findFirst((calendar) => calendar.id === vexlCalendarId.value)
           )
 
           if (Option.isNone(calendar)) {
-            const calendarId = await createCalendarAsync(vexlCalendar)
-            set(vexlCalendarIdAtom, Option.some(calendarId))
+            operation = 'createCalendarAsync'
+            const {calendarId, isVexlCalendar} =
+              await createVexlCalendarOrFallbackToDefaultCalendar({
+                defaultCalendar,
+                vexlCalendar,
+              })
+
+            if (isVexlCalendar) set(vexlCalendarIdAtom, Option.some(calendarId))
 
             return right(calendarId)
+          }
+
+          if (Platform.OS === 'ios' && !calendar.value.allowsModifications) {
+            return defaultCalendar?.allowsModifications
+              ? right(defaultCalendar.id)
+              : right(calendar.value.id)
           }
 
           return right(calendar.value.id)
@@ -126,6 +195,8 @@ export const createCalendarIfNotExistsAndTryToResolvePermissionsAlongTheWayActio
           return left({
             _tag: 'unknown',
             reason: 'Unknown',
+            operation,
+            errorDetails: getNativeCalendarErrorDetails(error),
             error,
           })
         }
@@ -146,15 +217,19 @@ export function createCalendarEvent({
   {calendarEventId: CalendarEventIdType; action: 'created' | 'updated'}
 > {
   return async () => {
+    let operation = 'ensureTradeChecklistCalendarEventHasDuration'
+
     try {
       const eventWithDuration =
         ensureTradeChecklistCalendarEventHasDuration(event)
 
       if (calendarEventId) {
+        operation = 'getEventAsync'
         const existingEvent = await getEventAsync(calendarEventId).catch(
           () => undefined
         )
         if (existingEvent) {
+          operation = 'updateEventAsync'
           await updateEventAsync(existingEvent.id, eventWithDuration)
           return right({
             calendarEventId: Schema.decodeSync(CalendarEventId)(
@@ -165,13 +240,39 @@ export function createCalendarEvent({
         }
       }
 
+      operation = 'createEventAsync'
       const eventId = await createEventAsync(calendarId, eventWithDuration)
       return right({
         calendarEventId: Schema.decodeSync(CalendarEventId)(eventId),
         action: 'created',
       })
     } catch (error) {
-      return left({_tag: 'unknown', reason: 'Unknown', error})
+      return left({
+        _tag: 'unknown',
+        reason: 'Unknown',
+        operation,
+        errorDetails: getNativeCalendarErrorDetails(error),
+        error,
+      })
+    }
+  }
+}
+
+export function openCalendarEvent(
+  calendarEventId: CalendarEventIdType
+): TaskEither<UnknownError, void> {
+  return async () => {
+    try {
+      await openEventInCalendarAsync({id: calendarEventId})
+      return right(undefined)
+    } catch (error) {
+      return left({
+        _tag: 'unknown',
+        reason: 'Unknown',
+        operation: 'openEventInCalendarAsync',
+        errorDetails: getNativeCalendarErrorDetails(error),
+        error,
+      })
     }
   }
 }

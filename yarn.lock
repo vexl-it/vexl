@@ -11928,7 +11928,7 @@ __metadata:
     ts-node: ^10.9.1
     typescript: ~5.9.2
     vite: ^7.3.2
-    ws: ^8.18.3
+    ws: ^8.20.1
   languageName: unknown
   linkType: soft
 
@@ -12120,7 +12120,7 @@ __metadata:
     ts-jest: ^29.2.0
     ts-node: ^10.9.1
     typescript: ~5.9.2
-    ws: ^8.18.3
+    ws: ^8.20.1
   languageName: unknown
   linkType: soft
 
@@ -33376,6 +33376,21 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 7a426122c373e053a65a2affbcdcdbf8f643ba0265577afd4e08595397ca244c05de81570300711e2363a9dab5aea3ae644b445bc7468b1ebbb51bfe2efb20e1
+  languageName: node
+  linkType: hard
+
+"ws@npm:^8.20.1":
+  version: 8.21.0
+  resolution: "ws@npm:8.21.0"
+  peerDependencies:
+    bufferutil: ^4.0.1
+    utf-8-validate: ">=5.0.2"
+  peerDependenciesMeta:
+    bufferutil:
+      optional: true
+    utf-8-validate:
+      optional: true
+  checksum: 83ff89ae011bc5c3c5605a45a0d50e12589143c7500ca4de83a8d43b3cd26e71f422cb3206fd1a9e6d541d666eeb66255c30d095d62d413b3c7afe5d2c5cb928
   languageName: node
   linkType: hard
 

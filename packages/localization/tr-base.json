@@ -1304,6 +1304,7 @@
   "emptyMarketplace.friendsCanSeeYourOffers": "{{count}} arkadaş tekliflerini görebilir",
   "emptyMarketplace.noOnePostedYet": "Henüz kimse paylaşım yapmadı — ilk sen olabilirsin. Ya da daha fazlasını görmek için ağını büyüt.",
   "emptyMarketplace.postNewOffer": "Yeni teklif yayınla",
+  "emptyMarketplace.addMoreContacts": "Daha fazla kişi ekle",
   "emptyMarketplace.youAreEarly": "Erken geldin.",
   "emptyMarketplace.turnOnNotificationsSoYouDontMiss": "Yenilerini kaçırmamak için bildirimleri aç.",
   "emptyMarketplace.turnOnNotifications": "Bildirimleri aç",

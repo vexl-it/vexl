@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Den andre vil ha et produkt",
   "chatDetail.offerTitle.theirs.sellProduct": "Den andre selger et produkt",
   "chatDetail.offerTitle.theirs.buyOther": "Den andre vil ha noe annet",
-  "chatDetail.offerTitle.theirs.sellOther": "Den andre tilbyr noe annet"
+  "chatDetail.offerTitle.theirs.sellOther": "Den andre tilbyr noe annet",
+  "contacts.processingContacts": "Processing contacts"
 }

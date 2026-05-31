@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Die andere Person will ein Produkt",
   "chatDetail.offerTitle.theirs.sellProduct": "Die andere Person verkauft ein Produkt",
   "chatDetail.offerTitle.theirs.buyOther": "Die andere Person will etwas anderes",
-  "chatDetail.offerTitle.theirs.sellOther": "Die andere Person bietet etwas anderes an"
+  "chatDetail.offerTitle.theirs.sellOther": "Die andere Person bietet etwas anderes an",
+  "contacts.processingContacts": "Processing contacts"
 }

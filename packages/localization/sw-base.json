@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Anataka bidhaa",
   "chatDetail.offerTitle.theirs.sellProduct": "Anauza bidhaa",
   "chatDetail.offerTitle.theirs.buyOther": "Anataka kitu kingine",
-  "chatDetail.offerTitle.theirs.sellOther": "Anatoa kitu kingine"
+  "chatDetail.offerTitle.theirs.sellOther": "Anatoa kitu kingine",
+  "contacts.processingContacts": "Processing contacts"
 }

@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Chce produkt",
   "chatDetail.offerTitle.theirs.sellProduct": "Predáva produkt",
   "chatDetail.offerTitle.theirs.buyOther": "Chce niečo iné",
-  "chatDetail.offerTitle.theirs.sellOther": "Ponúka niečo iné"
+  "chatDetail.offerTitle.theirs.sellOther": "Ponúka niečo iné",
+  "contacts.processingContacts": "Processing contacts"
 }

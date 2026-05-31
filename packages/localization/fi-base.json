@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Hän haluaa tuotteen",
   "chatDetail.offerTitle.theirs.sellProduct": "Hän myy tuotetta",
   "chatDetail.offerTitle.theirs.buyOther": "Hän haluaa jotain muuta",
-  "chatDetail.offerTitle.theirs.sellOther": "Hän tarjoaa jotain muuta"
+  "chatDetail.offerTitle.theirs.sellOther": "Hän tarjoaa jotain muuta",
+  "contacts.processingContacts": "Processing contacts"
 }

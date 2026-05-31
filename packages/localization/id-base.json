@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Dia mau produk",
   "chatDetail.offerTitle.theirs.sellProduct": "Dia menjual produk",
   "chatDetail.offerTitle.theirs.buyOther": "Dia mau sesuatu yang lain",
-  "chatDetail.offerTitle.theirs.sellOther": "Dia menawarkan sesuatu yang lain"
+  "chatDetail.offerTitle.theirs.sellOther": "Dia menawarkan sesuatu yang lain",
+  "contacts.processingContacts": "Processing contacts"
 }

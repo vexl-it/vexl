@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "对方想要一件商品",
   "chatDetail.offerTitle.theirs.sellProduct": "对方正在出售一件商品",
   "chatDetail.offerTitle.theirs.buyOther": "对方想要别的东西",
-  "chatDetail.offerTitle.theirs.sellOther": "对方正在提供别的东西"
+  "chatDetail.offerTitle.theirs.sellOther": "对方正在提供别的东西",
+  "contacts.processingContacts": "Processing contacts"
 }

@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Хоче товар",
   "chatDetail.offerTitle.theirs.sellProduct": "Продає товар",
   "chatDetail.offerTitle.theirs.buyOther": "Хоче щось інше",
-  "chatDetail.offerTitle.theirs.sellOther": "Пропонує щось інше"
+  "chatDetail.offerTitle.theirs.sellOther": "Пропонує щось інше",
+  "contacts.processingContacts": "Processing contacts"
 }

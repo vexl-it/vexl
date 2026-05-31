@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "طرف مقابل یه محصول می‌خواد",
   "chatDetail.offerTitle.theirs.sellProduct": "طرف مقابل یه محصول می‌فروشه",
   "chatDetail.offerTitle.theirs.buyOther": "طرف مقابل چیز دیگه‌ای می‌خواد",
-  "chatDetail.offerTitle.theirs.sellOther": "طرف مقابل چیز دیگه‌ای پیشنهاد می‌ده"
+  "chatDetail.offerTitle.theirs.sellOther": "طرف مقابل چیز دیگه‌ای پیشنهاد می‌ده",
+  "contacts.processingContacts": "Processing contacts"
 }

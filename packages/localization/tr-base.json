@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Bir ürün istiyor",
   "chatDetail.offerTitle.theirs.sellProduct": "Bir ürün satıyor",
   "chatDetail.offerTitle.theirs.buyOther": "Başka bir şey istiyor",
-  "chatDetail.offerTitle.theirs.sellOther": "Başka bir şey sunuyor"
+  "chatDetail.offerTitle.theirs.sellOther": "Başka bir şey sunuyor",
+  "contacts.processingContacts": "Processing contacts"
 }

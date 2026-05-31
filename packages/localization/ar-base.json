@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "الطرف الآخر يريد منتجًا",
   "chatDetail.offerTitle.theirs.sellProduct": "الطرف الآخر يبيع منتجًا",
   "chatDetail.offerTitle.theirs.buyOther": "الطرف الآخر يريد شيئًا آخر",
-  "chatDetail.offerTitle.theirs.sellOther": "الطرف الآخر يعرض شيئًا آخر"
+  "chatDetail.offerTitle.theirs.sellOther": "الطرف الآخر يعرض شيئًا آخر",
+  "contacts.processingContacts": "Processing contacts"
 }

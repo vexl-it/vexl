@@ -7,11 +7,14 @@ import {
   translationAtom,
   useTranslation,
 } from '../../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 import numberOfFriendsAtom from '../../../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {showErrorAlert} from '../../../ErrorAlert'
 
 const friendLevelSubtitleAtom = atom((get) => {
   const {t} = get(translationAtom)
+  const locale = get(formattingLocaleAtom)
   const numberOfFriends = get(numberOfFriendsAtom)
 
   if (numberOfFriends.state === 'loading')
@@ -35,11 +38,17 @@ const friendLevelSubtitleAtom = atom((get) => {
   }
 
   return {
-    firstFriendLevelText: t('offerForm.friendLevel.reachPeople', {
-      count: numberOfFriends.firstLevelFriendsCount,
+    firstFriendLevelText: t('offerForm.friendLevel.reachPeopleFormatted', {
+      localizedString: formatInteger(
+        numberOfFriends.firstLevelFriendsCount,
+        locale
+      ),
     }),
-    secondFriendLevelText: t('offerForm.friendLevel.reachPeople', {
-      count: numberOfFriends.firstAndSecondLevelFriendsCount,
+    secondFriendLevelText: t('offerForm.friendLevel.reachPeopleFormatted', {
+      localizedString: formatInteger(
+        numberOfFriends.firstAndSecondLevelFriendsCount,
+        locale
+      ),
     }),
   }
 })

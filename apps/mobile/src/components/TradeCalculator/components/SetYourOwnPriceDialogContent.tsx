@@ -1,10 +1,9 @@
 import {Exchange, InfoBox, YStack} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
 import React, {useMemo} from 'react'
-import {
-  getLocaleFromTranslation,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {btcPriceForOfferWithStateAtom, ownPriceAtom} from '../atoms'
 import {normalizeInputString, parseNormalizedInput} from '../helpers'
 
@@ -16,7 +15,7 @@ function SetYourOwnPriceDialogContent({
   fiatCurrency,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
-  const locale = getLocaleFromTranslation(t)
+  const locale = useAtomValue(formattingLocaleAtom)
   const btcPriceForOfferWithState = useAtomValue(btcPriceForOfferWithStateAtom)
   const [ownPrice, setOwnPrice] = useAtom(ownPriceAtom)
   const currentMarketPrice =
@@ -26,7 +25,7 @@ function SetYourOwnPriceDialogContent({
 
   const fiatPlaceholder =
     currentMarketPrice !== undefined
-      ? currentMarketPrice.toLocaleString(locale, {
+      ? formatDecimal(currentMarketPrice, locale, {
           maximumFractionDigits: 0,
         })
       : '-'
@@ -54,9 +53,9 @@ function SetYourOwnPriceDialogContent({
       priceDifferencePercentage < 0
         ? 'tradeChecklist.calculateAmount.yourPriceLowerThanMarket'
         : 'tradeChecklist.calculateAmount.yourPriceHigherThanMarket',
-      {percentage: roundedPercentage}
+      {percentage: formatDecimal(roundedPercentage, locale)}
     )
-  }, [currentMarketPrice, ownPrice, t])
+  }, [currentMarketPrice, locale, ownPrice, t])
 
   return (
     <YStack gap="$4">

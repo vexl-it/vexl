@@ -2,10 +2,14 @@ import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {reencryptOffersMissingOnServerActionAtom} from '../../state/marketplace/atoms/offersMissingOnServer'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {offerProgressModalActionAtoms} from '../UploadingOfferProgressModal/atoms'
 
 export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
+  const locale = get(formattingLocaleAtom)
+
   return pipe(
     set(reencryptOffersMissingOnServerActionAtom, {
       onProgress: ({
@@ -19,8 +23,8 @@ export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
             title: t('reuploadOffers.progress.title'),
             bottomText: t('offerForm.offerEncryption.dontCloseTheApp'),
             belowProgressLeft: t('reuploadOffers.progress.status', {
-              processingIndex: String(processingIndex + 1),
-              totalToProcess: String(totalToProcess),
+              processingIndex: formatInteger(processingIndex + 1, locale),
+              totalToProcess: formatInteger(totalToProcess, locale),
             }),
           },
         })
@@ -33,15 +37,16 @@ export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
           data: {
             title: t('reuploadOffers.progress.errorTitle'),
             bottomText: t('reuploadOffers.progress.errorExplanation', {
-              failedCount: String(result.errors.length),
-              totalCount: String(
-                result.reuploaded.length + result.errors.length
+              failedCount: formatInteger(result.errors.length, locale),
+              totalCount: formatInteger(
+                result.reuploaded.length + result.errors.length,
+                locale
               ),
             }),
             indicateProgress: {type: 'done'},
             belowProgressLeft: t(
               'reuploadOffers.progress.errorExplanationShort',
-              {failedCount: String(result.errors.length)}
+              {failedCount: formatInteger(result.errors.length, locale)}
             ),
           },
         })
@@ -53,7 +58,7 @@ export const reencryptOffersWithModalActionAtom = atom(null, (get, set) => {
           title: t('reuploadOffers.progress.successTitle'),
           bottomText: t('reuploadOffers.progress.bottomText'),
           belowProgressLeft: t('reuploadOffers.progress.belowProgressLeft', {
-            reuploadedCount: String(result.reuploaded.length),
+            reuploadedCount: formatInteger(result.reuploaded.length, locale),
           }),
           indicateProgress: {type: 'progress', percentage: 100},
         },

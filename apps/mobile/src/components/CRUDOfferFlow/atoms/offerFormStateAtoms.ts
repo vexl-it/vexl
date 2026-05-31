@@ -64,6 +64,11 @@ import {
   type TFunction,
 } from '../../../utils/localization/I18nProvider'
 import {MAX_AMOUNT_EUR} from '../../../utils/localization/currency'
+import {
+  formatDecimal,
+  formatInteger,
+} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import getDefaultSpokenLanguage from '../../../utils/localization/getDefaultSpokenLanguage'
 import {navigationRef} from '../../../utils/navigation'
 import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
@@ -692,6 +697,7 @@ export const offerFormMolecule = molecule(() => {
       const {t} = get(translationAtom)
       const offerForm = get(offerFormAtom)
       const maxAmount = get(maxAmountForCurrencyAtom)
+      const locale = get(formattingLocaleAtom)
 
       if (
         !offerForm.currency ||
@@ -705,7 +711,9 @@ export const offerFormMolecule = molecule(() => {
         set(globalDialogAtom, {
           title: t('offerForm.errorExceededLimitsTitle'),
           subtitle: t('offerForm.errorExceededLimitsDescription', {
-            limit: maxAmount,
+            limit: formatDecimal(maxAmount, locale, {
+              maximumFractionDigits: 0,
+            }),
             currency: offerForm.currency,
           }),
           positiveButtonText: t('offerForm.errorExceededLimitsButton'),
@@ -953,6 +961,7 @@ export const offerFormMolecule = molecule(() => {
 
   const modifyOfferLoaderTitleAtom = atom((get) => {
     const {t} = get(translationAtom)
+    const locale = get(formattingLocaleAtom)
     const numberOfFriends = get(numberOfFriendsAtom)
     // TODO: this value is from state and may not be 100% accurate
     // as we are fetching connections when encrypting offer once more
@@ -994,12 +1003,15 @@ export const offerFormMolecule = molecule(() => {
           : numberOfFriends.firstAndSecondLevelFriendsCount + clubsMembersCount
 
     return {
-      loadingText: t('offerForm.offerEncryption.forPeople', {
-        count: friendsCount,
+      loadingText: t('offerForm.offerEncryption.forPeopleFormatted', {
+        localizedString: formatInteger(friendsCount, locale),
       }),
-      doneText: t('offerForm.offerEncryption.anonymouslyDeliveredToPeople', {
-        count: friendsCount,
-      }),
+      doneText: t(
+        'offerForm.offerEncryption.anonymouslyDeliveredToPeopleFormatted',
+        {
+          localizedString: formatInteger(friendsCount, locale),
+        }
+      ),
     }
   })
 

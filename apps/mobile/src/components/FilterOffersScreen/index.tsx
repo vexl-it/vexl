@@ -15,6 +15,8 @@ import {
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatDecimal, formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {useOpenChangeCurrency} from '../ChangeCurrency'
@@ -70,22 +72,26 @@ function FilterOffersScreen(): React.ReactElement {
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
   const amountContentVisible = amountFilterEnabled && !!currency
 
   const connectionSubtitles = useMemo(() => {
     if (numberOfFriends.state !== 'success') return undefined
-    const fmt = Intl.NumberFormat()
     return {
       first: t('filterOffers.reachPeople', {
-        connectionsCount: fmt.format(numberOfFriends.firstLevelFriendsCount),
+        connectionsCount: formatDecimal(
+          numberOfFriends.firstLevelFriendsCount,
+          locale
+        ),
       }),
       second: t('filterOffers.reachPeople', {
-        connectionsCount: fmt.format(
-          numberOfFriends.firstAndSecondLevelFriendsCount
+        connectionsCount: formatDecimal(
+          numberOfFriends.firstAndSecondLevelFriendsCount,
+          locale
         ),
       }),
     }
-  }, [numberOfFriends, t])
+  }, [locale, numberOfFriends, t])
 
   const resetOfferForm = useCallback(() => {
     resetFilterOmitTextFilter()
@@ -134,7 +140,9 @@ function FilterOffersScreen(): React.ReactElement {
       }
       footer={
         <Button variant="primary" size="large" onPress={handleSave}>
-          {t('filterOffers.seeOffers', {count: filteredOffersCount})}
+          {t('filterOffers.seeOffersFormatted', {
+            localizedString: formatInteger(filteredOffersCount, locale),
+          })}
         </Button>
       }
     >

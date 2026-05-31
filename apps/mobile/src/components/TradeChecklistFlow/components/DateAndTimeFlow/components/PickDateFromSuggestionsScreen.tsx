@@ -9,6 +9,11 @@ import {XStack, YStack, useTheme} from 'tamagui'
 import type {TradeChecklistStackScreenProps} from '../../../../../navigationTypes'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {
+  formatDate,
+  formatTime,
+} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {useAtomValueRefreshOnFocus} from '../../../../../utils/useFocusMemo'
 import {TradeChecklistItemPageLayout} from '../../TradeChecklistItemPageLayout'
@@ -16,7 +21,8 @@ import {checkIsOldDateTimeMessage, convertDateTimesToNewFormat} from '../utils'
 import {type Item as OptionItem} from './OptionsList'
 
 function createOptionsFromChosenDays(
-  days: AvailableDateTimeOption[]
+  days: AvailableDateTimeOption[],
+  locale: string
 ): Array<OptionItem<AvailableDateTimeOption>> {
   const uniqueDates: AvailableDateTimeOption[] = []
   // TODO: remove this logic once all devices update to new checklist DateTime format
@@ -36,18 +42,20 @@ function createOptionsFromChosenDays(
     data: day,
     key: day.date.toString(),
     outdated: day.date < DateTime.now().startOf('day').toMillis(),
-    title: unixMillisecondsToLocaleDateTime(day.date).toLocaleString({
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    }),
+    title: formatDate(
+      unixMillisecondsToLocaleDateTime(day.date).toMillis(),
+      locale,
+      {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }
+    ),
     rightText: daysOptions
       .filter((d) => d.date === day.date)
       .map((d) =>
-        unixMillisecondsToLocaleDateTime(d.to).toLocaleString(
-          DateTime.TIME_SIMPLE
-        )
+        formatTime(unixMillisecondsToLocaleDateTime(d.to).toMillis(), locale)
       )
       .join(', '),
   }))
@@ -55,17 +63,20 @@ function createOptionsFromChosenDays(
 
 type Props = TradeChecklistStackScreenProps<'PickDateFromSuggestions'>
 
-function getDateLabels(date: AvailableDateTimeOption['date']): Readonly<{
+function getDateLabels(
+  date: AvailableDateTimeOption['date'],
+  locale: string
+): Readonly<{
   weekday: string
   label: string
 }> {
   const localizedDate = unixMillisecondsToLocaleDateTime(date)
 
   return {
-    weekday: localizedDate.toLocaleString({
+    weekday: formatDate(localizedDate.toMillis(), locale, {
       weekday: 'long',
     }),
-    label: localizedDate.toLocaleString({
+    label: formatDate(localizedDate.toMillis(), locale, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -83,7 +94,8 @@ function DateSuggestionCard({
   const {t} = useTranslation()
   const item = useAtomValue(itemAtom)
   const theme = useTheme()
-  const {label, weekday} = getDateLabels(item.data.date)
+  const locale = useAtomValue(formattingLocaleAtom)
+  const {label, weekday} = getDateLabels(item.data.date, locale)
   const primaryTextColor = item.outdated
     ? theme.foregroundTertiary.get()
     : theme.foregroundPrimary.get()
@@ -152,11 +164,13 @@ export default function PickDateFromSuggestionsScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   const itemsToShowAtoms = useAtomValueRefreshOnFocus(
     useCallback(
-      () => splitAtom(atom(createOptionsFromChosenDays(chosenDateTimes))),
-      [chosenDateTimes]
+      () =>
+        splitAtom(atom(createOptionsFromChosenDays(chosenDateTimes, locale))),
+      [chosenDateTimes, locale]
     )
   )
 

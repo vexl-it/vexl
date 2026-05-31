@@ -9,6 +9,7 @@ import {
 import React, {useMemo} from 'react'
 import {createMaxAmountForCurrencyAtom} from '../../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../../utils/localization/currency'
+import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 
 interface Props {
   amountTopLimitAtom: WritableAtom<number, [SetStateAction<number>], void>
@@ -26,6 +27,7 @@ function AmountOfTransaction({
   maxLabel,
 }: Props): React.ReactElement | null {
   const currency = useAtomValue(currencyAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
   const maxAmountAtom = useMemo(
     () => createMaxAmountForCurrencyAtom(currencyAtom),
     [currencyAtom]
@@ -42,6 +44,7 @@ function AmountOfTransaction({
       onCurrencyPress={onCurrencyPress ?? (() => {})}
       maxLimit={maxLimit}
       maxLabel={maxLabel}
+      locale={locale}
     />
   )
 }

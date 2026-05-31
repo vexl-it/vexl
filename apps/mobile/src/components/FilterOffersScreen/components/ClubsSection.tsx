@@ -6,6 +6,8 @@ import {clubsWithMembersAtomsAtom} from '../../../state/clubs/atom/clubsWithMemb
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {createSelectClubInFilterAtom} from '../atom'
 
 function FilterClubItem({
@@ -14,6 +16,7 @@ function FilterClubItem({
   clubWithMembersAtom: Atom<ClubWithMembers>
 }): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {club, members} = useAtomValue(clubWithMembersAtom)
   const selectAtom = useMemo(
     () => createSelectClubInFilterAtom(clubWithMembersAtom),
@@ -21,7 +24,7 @@ function FilterClubItem({
   )
   const [isSelected, setSelected] = useAtom(selectAtom)
 
-  const membersCount = Intl.NumberFormat().format(members.length)
+  const membersCount = formatDecimal(members.length, locale)
 
   return (
     <SelectClubCell

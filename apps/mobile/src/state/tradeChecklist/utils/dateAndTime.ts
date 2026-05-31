@@ -6,7 +6,12 @@ import {
   UnixMilliseconds0,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {DateTime} from 'luxon'
+import {getCurrentLocale} from '../../../utils/localization/I18nProvider'
+import {
+  formatDate,
+  formatDateTime,
+  formatTime,
+} from '../../../utils/localization/formatting'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type TradeChecklistInState} from '../domain'
 
@@ -90,28 +95,36 @@ export function getSuggestions(data: DateAndTimeInState):
   return undefined
 }
 
-export function toStringWithTime(unixMilliseconds: UnixMilliseconds): string {
-  return unixMillisecondsToLocaleDateTime(unixMilliseconds).toLocaleString({
-    weekday: 'short',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  })
+export function toStringWithTime(
+  unixMilliseconds: UnixMilliseconds,
+  locale: string = getCurrentLocale()
+): string {
+  return formatDateTime(
+    unixMillisecondsToLocaleDateTime(unixMilliseconds).toMillis(),
+    locale,
+    {
+      weekday: 'short',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    }
+  )
 }
 
-export function toStringWithRange(suggestion: AvailableDateTimeOption): string {
+export function toStringWithRange(
+  suggestion: AvailableDateTimeOption,
+  locale: string = getCurrentLocale()
+): string {
   const from = unixMillisecondsToLocaleDateTime(suggestion.from)
   const to = unixMillisecondsToLocaleDateTime(suggestion.to)
   const date = unixMillisecondsToLocaleDateTime(suggestion.date)
 
-  return `${date.toLocaleString({
+  return `${formatDate(date.toMillis(), locale, {
     weekday: 'short',
     month: 'numeric',
     day: 'numeric',
-  })} ${from.toLocaleString(DateTime.TIME_SIMPLE)} - ${to.toLocaleString(
-    DateTime.TIME_SIMPLE
-  )}`
+  })} ${formatTime(from.toMillis(), locale)} - ${formatTime(to.toMillis(), locale)}`
 }
 
 export function dateAndTimeSettled(data: DateAndTimeInState): boolean {

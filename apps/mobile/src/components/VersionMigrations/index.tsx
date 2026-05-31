@@ -1,10 +1,12 @@
 import {Typography, useTheme, YStack} from '@vexl-next/ui'
 import {Effect} from 'effect'
-import {useStore} from 'jotai'
+import {useAtomValue, useStore} from 'jotai'
 import React, {useEffect, useMemo, useState} from 'react'
 import {ActivityIndicator} from 'react-native'
 import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {needToRunMigrationAtom} from './atoms'
 import migrateContacts from './migrations/contacts'
 import {type MigrationProgress} from './types'
@@ -15,6 +17,7 @@ export default function VersionMigrations({
   children: React.ReactNode
 }): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const theme = useTheme()
   const store = useStore()
   const needToRunMigration = useMemo(() => {
@@ -64,7 +67,7 @@ export default function VersionMigrations({
         color="$foregroundPrimary"
       >
         {t('migrations.migrating', {
-          percentDone: progress.progress.percent,
+          percentDone: formatInteger(progress.progress.percent, locale),
         })}
       </Typography>
     </YStack>

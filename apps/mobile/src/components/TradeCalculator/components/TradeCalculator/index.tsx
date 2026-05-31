@@ -4,10 +4,9 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useState} from 'react'
 import {Stack, XStack, YStack, useTheme} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
-import {
-  getLocaleFromTranslation,
-  useTranslation,
-} from '../../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 import {AnimatedLiveIndicator} from '../../../AnimatedLiveIndicator'
 import {useOpenChangeCurrency} from '../../../ChangeCurrency'
 import CurrentBtcPrice from '../../../CurrentBtcPrice'
@@ -79,14 +78,16 @@ function TradeCalculator({
   const switchBtcOrSatValue = useSetAtom(switchBtcOrSatValueActionAtom)
   const updateFiatCurrency = useSetAtom(updateFiatCurrencyActionAtom)
   const openChangeCurrency = useOpenChangeCurrency()
-  const locale = getLocaleFromTranslation(t)
+  const locale = useAtomValue(formattingLocaleAtom)
   const isLivePriceType = !tradePriceType || tradePriceType === 'live'
   const liveBtcPriceFormatted =
     btcPriceForOfferWithState?.state === 'error'
       ? '-'
-      : (btcPriceForOfferWithState?.btcPrice?.BTC.toLocaleString(locale, {
-          maximumFractionDigits: 0,
-        }) ?? '-')
+      : btcPriceForOfferWithState?.btcPrice?.BTC
+        ? formatDecimal(btcPriceForOfferWithState.btcPrice.BTC, locale, {
+            maximumFractionDigits: 0,
+          })
+        : '-'
 
   return (
     <Stack gap="$7">

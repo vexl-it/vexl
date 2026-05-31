@@ -30,37 +30,47 @@ import {clubsWithMembersAtomsAtom} from '../../../../../../state/clubs/atom/club
 import {type ClubWithMembers} from '../../../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {
+  formatDate,
+  formatInteger,
+  formatTime,
+} from '../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from '../BlogScreen/state'
 import ClubAvatar from '../ClubsScreen/components/ClubAvatar'
 import {loadEventsActionAtom, upcomingEventsAtom} from '../EventsScreen/state'
 
-const DATE_FORMAT = 'ddd, MMM D'
-const DATE_FORMAT_YEAR = 'ddd, MMM D YYYY'
-const TIME_FORMAT = 'HH:mm'
 const BULLET = '•'
 const CARD_WIDTH = 296
 const BLOGS_LIMIT = 4
 
 type Props = CommunityTabsScreenProps<'Discover'>
 
-function formatEventDate(event: Event): string {
+function formatEventDate(event: Event, locale: string): string {
   const startDate = dayjs(event.startDate)
-  const dateFormat = !startDate.isSame(dayjs(), 'year')
-    ? DATE_FORMAT_YEAR
-    : DATE_FORMAT
-  const formattedStartDate = startDate.format(dateFormat)
+  const formattedStartDate = formatDate(new Date(event.startDate), locale, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: startDate.isSame(dayjs(), 'year') ? undefined : 'numeric',
+  })
+  const formattedStartTime = formatTime(new Date(event.startDate), locale)
 
   return Option.match(event.endDate, {
-    onNone: () =>
-      `${formattedStartDate} ${BULLET} ${startDate.format(TIME_FORMAT)}`,
+    onNone: () => `${formattedStartDate} ${BULLET} ${formattedStartTime}`,
     onSome: (endDate) => {
       const formattedEndDate = dayjs(endDate)
+      const endDateValue = new Date(endDate)
 
       if (formattedEndDate.isSame(startDate, 'day')) {
-        return `${formattedStartDate} ${BULLET} ${startDate.format(TIME_FORMAT)}-${formattedEndDate.format(TIME_FORMAT)}`
+        return `${formattedStartDate} ${BULLET} ${formattedStartTime}-${formatTime(endDateValue, locale)}`
       }
 
-      return `${formattedStartDate} - ${formattedEndDate.format(DATE_FORMAT)}`
+      return `${formattedStartDate} - ${formatDate(endDateValue, locale, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      })}`
     },
   })
 }
@@ -163,12 +173,18 @@ function SectionTitle({
   )
 }
 
-function EventItem({event}: {readonly event: Event}): React.JSX.Element {
+function EventItem({
+  event,
+  locale,
+}: {
+  readonly event: Event
+  readonly locale: string
+}): React.JSX.Element {
   return (
     <HorizontalItem>
       <EventCard
         title={event.name}
-        details={[formatEventDate(event), event.venue]}
+        details={[formatEventDate(event, locale), event.venue]}
         attendees={pipe(event.speakers, Array.map(toEventCardAttendee))}
         state="upcoming"
         onPress={() => {
@@ -188,13 +204,16 @@ function ClubItem({
 }): React.JSX.Element {
   const {club, members} = useAtomValue(atom)
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   return (
     <HorizontalItem>
       <ClubCard
         avatar={<ClubAvatar uri={club.clubImageUrl} />}
         name={club.name}
-        subtitle={t('clubs.commonFriends', {count: members.length})}
+        subtitle={t('clubs.commonFriendsFormatted', {
+          localizedString: formatInteger(members.length, locale),
+        })}
         onPress={() => {
           navigation.navigate('ClubDetail', {clubUuid: club.uuid})
         }}
@@ -205,8 +224,10 @@ function ClubItem({
 
 function BlogItem({
   item,
+  locale,
 }: {
   readonly item: BlogArticlePreview
+  readonly locale: string
 }): React.JSX.Element {
   return (
     <HorizontalItem>
@@ -214,7 +235,9 @@ function BlogItem({
         image={<BlogImage mainImage={item.mainImage} />}
         title={item.title}
         description={Option.getOrElse(item.teaserText, () => '')}
-        date={dayjs(item.publishedOn).format('LL')}
+        date={formatDate(new Date(item.publishedOn), locale, {
+          dateStyle: 'long',
+        })}
         onPress={() => {
           void Linking.openURL(item.link)
         }}
@@ -226,6 +249,7 @@ function BlogItem({
 function DiscoverScreen({navigation}: Props): React.JSX.Element {
   const {t} = useTranslation()
   const theme = useTheme()
+  const locale = useAtomValue(formattingLocaleAtom)
   const loadEvents = useSetAtom(loadEventsActionAtom)
   const loadBlogs = useSetAtom(loadBlogsActionAtom)
   const upcomingEvents = useAtomValue(upcomingEventsAtom)
@@ -289,7 +313,9 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
             <HorizontalRow>
               {pipe(
                 upcomingEvents,
-                Array.map((event) => <EventItem key={event.id} event={event} />)
+                Array.map((event) => (
+                  <EventItem key={event.id} event={event} locale={locale} />
+                ))
               )}
             </HorizontalRow>
           </YStack>
@@ -350,7 +376,9 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
             <HorizontalRow>
               {pipe(
                 latestBlogs,
-                Array.map((item) => <BlogItem key={item.id} item={item} />)
+                Array.map((item) => (
+                  <BlogItem key={item.id} item={item} locale={locale} />
+                ))
               )}
             </HorizontalRow>
           </YStack>

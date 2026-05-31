@@ -2,13 +2,16 @@ import {useNavigation, type NavigationProp} from '@react-navigation/native'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Calendar, ChecklistCell} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
-import {DateTime} from 'luxon'
 import React, {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {tradeChecklistDateAndTimeDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as DateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
+import {
+  formatDateTime,
+  formatInteger,
+} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {
   dateAndTimePickUpdateToBeSentAtom,
@@ -16,14 +19,19 @@ import {
 } from '../../../atoms/updatesToBeSentAtom'
 import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
-function formatDateTime(millis: UnixMilliseconds): string {
-  return unixMillisecondsToLocaleDateTime(millis).toLocaleString(
-    DateTime.DATETIME_SHORT
-  )
+function formatChecklistDateTime(
+  millis: UnixMilliseconds,
+  locale: string
+): string {
+  return formatDateTime(millis, locale, {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  })
 }
 
 function DateAndTimeCell(): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
 
@@ -40,11 +48,17 @@ function DateAndTimeCell(): React.ReactElement {
   )
 
   const subtitle = tradeChecklistDateAndTimeData.received?.picks?.dateTime
-    ? formatDateTime(tradeChecklistDateAndTimeData.received.picks.dateTime)
+    ? formatChecklistDateTime(
+        tradeChecklistDateAndTimeData.received.picks.dateTime,
+        locale
+      )
     : tradeChecklistDateAndTimeData.sent?.picks?.dateTime
-      ? formatDateTime(tradeChecklistDateAndTimeData.sent.picks.dateTime)
+      ? formatChecklistDateTime(
+          tradeChecklistDateAndTimeData.sent.picks.dateTime,
+          locale
+        )
       : dateAndTimePickUpdateToBeSent
-        ? formatDateTime(dateAndTimePickUpdateToBeSent)
+        ? formatChecklistDateTime(dateAndTimePickUpdateToBeSent, locale)
         : undefined
 
   const onPress = useCallback(() => {
@@ -80,10 +94,10 @@ function DateAndTimeCell(): React.ReactElement {
           : 'tradeChecklist.optionsDetail.DATE_AND_TIME.themAddedTimeOptions',
         {
           them: t('common.otherSide'),
-          number: suggestions.suggestions.length,
+          number: formatInteger(suggestions.suggestions.length, locale),
         }
       )}`
-  }, [nextChecklistData.dateAndTime, t])
+  }, [locale, nextChecklistData.dateAndTime, t])
 
   return (
     <ChecklistCell
@@ -92,7 +106,7 @@ function DateAndTimeCell(): React.ReactElement {
       pressable
       onPress={onPress}
       subtitle={subtitle ?? suggestionsSubtitle}
-      headline="Select date and time"
+      headline={t('tradeChecklist.options.DATE_AND_TIME')}
     />
   )
 }

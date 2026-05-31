@@ -12,6 +12,8 @@ import {
 } from '../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import {computeMaxAmountForCurrency} from '../../../../utils/localization/currency'
+import {formatDecimal} from '../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 import {globalDialogAtom} from '../../../GlobalDialog'
 import {
   btcPriceForOfferWithStateAtom,
@@ -133,6 +135,7 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
   null,
   (get, set) => {
     const {t} = get(translationAtom)
+    const locale = get(formattingLocaleAtom)
     const calculatorState = get(calculatorStateAtom)
     const tradePriceType = calculatorState.priceSource
     const btcAmount = formatSavedBtcAmountFromBtcUnit(
@@ -163,7 +166,12 @@ export const saveLocalCalculatedAmountDataStateToMainStateActionAtom = atom(
           title: t('tradeChecklist.calculateAmount.exceededTransactionLimit'),
           subtitle: t(
             'tradeChecklist.calculateAmount.transactionLimitForSelectedCurrency',
-            {amount: maxAmount, currency}
+            {
+              amount: formatDecimal(maxAmount, locale, {
+                maximumFractionDigits: 0,
+              }),
+              currency,
+            }
           ),
           positiveButtonText: t('common.close'),
         }).pipe(effectToTaskEither),

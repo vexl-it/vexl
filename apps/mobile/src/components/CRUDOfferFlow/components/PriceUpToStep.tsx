@@ -14,10 +14,9 @@ import React, {useMemo, useState} from 'react'
 import {XStack, YStack} from 'tamagui'
 import {SATOSHIS_IN_BTC} from '../../../state/currentBtcPriceAtoms'
 import {currencies} from '../../../utils/localization/currency'
-import {
-  getLocaleFromTranslation,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {parseDecimalInput} from '../../../utils/normalizeDecimalInput'
 import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
@@ -49,8 +48,7 @@ function formatFiatAmount(
   currencyCode: string,
   locale: string
 ): string {
-  const formatter = new Intl.NumberFormat(locale, {maximumFractionDigits: 0})
-  return `${formatter.format(amount)} ${currencyCode}`
+  return `${formatDecimal(amount, locale, {maximumFractionDigits: 0})} ${currencyCode}`
 }
 
 interface PriceUpToStepProps {
@@ -71,7 +69,7 @@ function PriceUpToStep({
   overline,
 }: PriceUpToStepProps): React.ReactElement | null {
   const {t} = useTranslation()
-  const locale = getLocaleFromTranslation(t)
+  const locale = useAtomValue(formattingLocaleAtom)
   const {
     currencyAtom,
     amountBottomLimitAtom,

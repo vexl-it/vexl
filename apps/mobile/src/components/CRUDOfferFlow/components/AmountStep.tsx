@@ -11,10 +11,9 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {Stack, XStack, YStack} from 'tamagui'
 import {currencies} from '../../../utils/localization/currency'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {getOfferAmountDetailsLabel} from '../../../utils/offerAmountDetails'
 import BtcPriceInfo from '../../BtcPriceInfo'
 import {useOpenChangeCurrency} from '../../ChangeCurrency'
@@ -39,7 +38,7 @@ function AmountStep({
   overline,
 }: AmountStepProps): React.ReactElement | null {
   const {t} = useTranslation()
-  const locale = getCurrentLocale()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {
     currencyAtom,
     maxAmountForCurrencyAtom,
@@ -72,10 +71,13 @@ function AmountStep({
 
   const amountLabel = useMemo(() => {
     if (!currency) return ''
-    const formatter = new Intl.NumberFormat(locale, {
+    const minAmount = formatDecimal(amountMin, locale, {
       maximumFractionDigits: 0,
     })
-    return `${formatter.format(amountMin)} – ${formatter.format(amountMax)} ${currencies[currency].code}`
+    const maxAmount = formatDecimal(amountMax, locale, {
+      maximumFractionDigits: 0,
+    })
+    return `${minAmount} – ${maxAmount} ${currencies[currency].code}`
   }, [amountMin, amountMax, currency, locale])
 
   const amountDetailsLabel = useMemo(
@@ -126,6 +128,7 @@ function AmountStep({
             currency={currencies[currency].code}
             onCurrencyPress={handleCurrencyPress}
             maxLimit={maxLimit}
+            locale={locale}
           />
         </Stack>
         <BtcPriceInfo btcPriceData={btcPriceData} currency={currency} />

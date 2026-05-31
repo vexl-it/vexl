@@ -1,17 +1,16 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../utils/localization/I18nProvider'
+import {useTranslation} from '../utils/localization/I18nProvider'
+import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {
   formatOfferExpirationDate,
   getOfferFeeLabel,
 } from '../utils/offerAmountDetails'
 import {
-  getAmountLabel,
+  getAmountLabelActionAtom,
   getLanguagesLabel,
   getLocationLabels,
   getPaymentMethodLabel,
@@ -75,8 +74,9 @@ export default function OfferPropertiesCard({
   readonly minimalContainer?: boolean
 }): React.ReactElement | null {
   const {t} = useTranslation()
-  const locale = getCurrentLocale()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {feeAmount, expirationDate} = offer.offerInfo.publicPart
+  const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
 
   const rows = useMemo(
     () =>
@@ -121,7 +121,7 @@ export default function OfferPropertiesCard({
         ],
         Array.filter((row) => row.value.length > 0)
       ),
-    [expirationDate, feeAmount, locale, offer, t]
+    [expirationDate, feeAmount, getAmountLabel, locale, offer, t]
   )
 
   if (!Array.isNonEmptyArray(rows)) return null

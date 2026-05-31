@@ -10,12 +10,22 @@ import {
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {getLatestAmountDataMessage} from '../../../../../state/tradeChecklist/utils/amount'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {
+  formatDecimal,
+  formatInteger,
+} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {amountUpdateToBeSentAtom} from '../../../atoms/updatesToBeSentAtom'
 import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
+function getFractionDigits(number: number): number {
+  return number.toString().split('.')[1]?.length ?? 0
+}
+
 function CalculateAmountCell(): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
 
@@ -36,12 +46,18 @@ function CalculateAmountCell(): React.ReactElement {
         (tradeChecklistAmountData.sent?.timestamp ?? 0) &&
       itemStatus !== 'accepted'
     ) {
+      const receivedAmount = tradeChecklistAmountData.received
+      const btcAmount = receivedAmount.btcAmount ?? 0
+      const fiatAmount = receivedAmount.fiatAmount ?? 0
+
       return t(
         'tradeChecklist.optionsDetail.CALCULATE_AMOUNT.themAddedAmount',
         {
           them: t('common.otherSide'),
-          btcAmount: tradeChecklistAmountData.received.btcAmount,
-          fiatAmount: tradeChecklistAmountData.received.fiatAmount,
+          btcAmount: formatDecimal(btcAmount, locale, {
+            minimumFractionDigits: getFractionDigits(btcAmount),
+          }),
+          fiatAmount: formatInteger(fiatAmount, locale),
           currency: tradeOrOriginOfferCurrency,
         }
       )
@@ -50,6 +66,7 @@ function CalculateAmountCell(): React.ReactElement {
   }, [
     amountUpdateToBeSent,
     itemStatus,
+    locale,
     tradeOrOriginOfferCurrency,
     t,
     tradeChecklistAmountData.received,
@@ -146,7 +163,7 @@ function CalculateAmountCell(): React.ReactElement {
       pressable
       onPress={onPress}
       subtitle={subtitle ?? sideNote}
-      headline="Set trade amount"
+      headline={t('tradeChecklist.options.CALCULATE_AMOUNT')}
     />
   )
 }

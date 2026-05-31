@@ -1,11 +1,11 @@
 import {Array, pipe} from 'effect'
-import {DateTime} from 'luxon'
 import {type TFunction} from './localization/I18nProvider'
+import {formatDate, formatDecimal} from './localization/formatting'
 
 function formatFeeAmount(feeAmount: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
+  return formatDecimal(Math.abs(feeAmount), locale, {
     maximumFractionDigits: 2,
-  }).format(Math.abs(feeAmount))
+  })
 }
 
 export function getOfferFeeLabel({
@@ -36,8 +36,8 @@ export function formatOfferExpirationDate(
   locale: string
 ): string {
   return expirationDate
-    ? DateTime.fromISO(expirationDate).toLocaleString(DateTime.DATE_SHORT, {
-        locale,
+    ? formatDate(new Date(expirationDate), locale, {
+        dateStyle: 'short',
       })
     : ''
 }

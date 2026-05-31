@@ -5,8 +5,10 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {type IconTagVariant} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
+import {atom} from 'jotai'
 import {formatFullCurrencyAmount} from './localization/currency'
-import {i18n} from './localization/I18nProvider'
+import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
+import {translationAtom} from './localization/I18nProvider'
 import spokenLanguageToFlagEmoji from './localization/spokenLanguageToFlagEmoji'
 
 export function getIsOffering(
@@ -24,33 +26,38 @@ export function getIconTagVariant(
   return 'bitcoin'
 }
 
-export function getAmountLabel(offer: OneOfferInState): string {
-  const {publicPart} = offer.offerInfo
+export const getAmountLabelActionAtom = atom(
+  null,
+  (get, _set, offer: OneOfferInState): string => {
+    const {t} = get(translationAtom)
+    const locale = get(formattingLocaleAtom)
+    const {publicPart} = offer.offerInfo
 
-  const formatAmount = (amount: number): string =>
-    formatFullCurrencyAmount(publicPart.currency, amount)
+    const formatAmount = (amount: number): string =>
+      formatFullCurrencyAmount(publicPart.currency, amount, locale)
 
-  if (!publicPart.listingType || publicPart.listingType === 'BITCOIN') {
-    if (publicPart.amountBottomLimit > 0) {
-      return `${formatAmount(publicPart.amountBottomLimit)} \u2013 ${formatAmount(publicPart.amountTopLimit)}`
+    if (!publicPart.listingType || publicPart.listingType === 'BITCOIN') {
+      if (publicPart.amountBottomLimit > 0) {
+        return `${formatAmount(publicPart.amountBottomLimit)} \u2013 ${formatAmount(publicPart.amountTopLimit)}`
+      }
+
+      return `${t('offer.upTo')} ${formatAmount(publicPart.amountTopLimit)}`
     }
 
-    return `${i18n.t('offer.upTo')} ${formatAmount(publicPart.amountTopLimit)}`
-  }
+    if (publicPart.amountBottomLimit !== 0) {
+      return formatAmount(publicPart.amountBottomLimit)
+    }
 
-  if (publicPart.amountBottomLimit !== 0) {
-    return formatAmount(publicPart.amountBottomLimit)
-  }
+    if (
+      publicPart.listingType === 'PRODUCT' ||
+      publicPart.listingType === 'OTHER'
+    ) {
+      return t('offer.forFree')
+    }
 
-  if (
-    publicPart.listingType === 'PRODUCT' ||
-    publicPart.listingType === 'OTHER'
-  ) {
-    return i18n.t('offer.forFree')
+    return ''
   }
-
-  return ''
-}
+)
 
 export function getLocationLabels(offer: OneOfferInState): readonly string[] {
   return pipe(

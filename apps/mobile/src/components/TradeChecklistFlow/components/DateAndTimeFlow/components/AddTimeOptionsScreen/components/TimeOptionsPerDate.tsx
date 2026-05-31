@@ -7,10 +7,12 @@ import {DateTime} from 'luxon'
 import React, {useEffect, useMemo, useState} from 'react'
 import {Animated, Easing, TouchableOpacity} from 'react-native'
 import {Stack, useTheme, XStack, YStack} from 'tamagui'
+import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../../../utils/localization/I18nProvider'
+  formatDate,
+  formatTime,
+} from '../../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../../utils/localization/formattingLocaleAtom'
 import {availableDateTimesAtom, uniqueAvailableDatesAtom} from '../../../atoms'
 import {createAvailableDateTimeEntry} from '../../../utils'
 
@@ -36,22 +38,25 @@ function isSameDay(
   )
 }
 
-function getDateHeadline(date: UnixMilliseconds): {
+function getDateHeadline(
+  date: UnixMilliseconds,
+  locale: string
+): {
   weekday: string
   label: string
 } {
-  const localizedDate = DateTime.fromMillis(date).setLocale(getCurrentLocale())
-
   return {
-    weekday: localizedDate.toFormat('cccc').toLowerCase(),
-    label: localizedDate.toFormat('LLL d, yyyy'),
+    weekday: formatDate(date, locale, {weekday: 'long'}).toLowerCase(),
+    label: formatDate(date, locale, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }),
   }
 }
 
-function getSlotLabel(slot: UnixMilliseconds): string {
-  return DateTime.fromMillis(slot)
-    .setLocale(getCurrentLocale())
-    .toLocaleString(DateTime.TIME_SIMPLE)
+function getSlotLabel(slot: UnixMilliseconds, locale: string): string {
+  return formatTime(slot, locale)
 }
 
 function createSlotSections(date: UnixMilliseconds): SlotSection[] {
@@ -189,6 +194,7 @@ function TimeOptionsPerDate({
   onCollapse,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const [availableDateTimes, setAvailableDateTimes] = useAtom(
     availableDateTimesAtom
   )
@@ -214,7 +220,10 @@ function TimeOptionsPerDate({
   )
 
   const slotSections = useMemo(() => createSlotSections(date), [date])
-  const {weekday, label} = useMemo(() => getDateHeadline(date), [date])
+  const {weekday, label} = useMemo(
+    () => getDateHeadline(date, locale),
+    [date, locale]
+  )
 
   useEffect(() => {
     if (!expanded) {
@@ -245,9 +254,9 @@ function TimeOptionsPerDate({
     () =>
       pipe(
         savedSlots,
-        ArrayE.map((slot) => getSlotLabel(slot))
+        ArrayE.map((slot) => getSlotLabel(slot, locale))
       ),
-    [savedSlots]
+    [locale, savedSlots]
   )
 
   const onSlotPress = (slot: UnixMilliseconds): void => {
@@ -380,7 +389,7 @@ function TimeOptionsPerDate({
                       ArrayE.map((slot) => (
                         <TimeSlotChip
                           key={slot}
-                          label={getSlotLabel(slot)}
+                          label={getSlotLabel(slot, locale)}
                           selected={draftSlots.includes(slot)}
                           onPress={() => {
                             onSlotPress(slot)

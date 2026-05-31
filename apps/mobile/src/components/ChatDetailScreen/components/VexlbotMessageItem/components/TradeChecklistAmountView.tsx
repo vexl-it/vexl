@@ -8,16 +8,17 @@ import React, {useCallback} from 'react'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import {SATOSHIS_IN_BTC} from '../../../../../state/currentBtcPriceAtoms'
 import * as amount from '../../../../../state/tradeChecklist/utils/amount'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../../utils/localization/currency'
+import {
+  formatDecimal,
+  formatInteger,
+} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import {
   localizedDecimalNumberActionAtom,
   localizedPercentActionAtom,
 } from '../../../../../utils/localization/localizedNumbersAtoms'
-import {preferencesAtom} from '../../../../../utils/preferences'
 import {toastNotificationAtom} from '../../../../ToastNotification/atom'
 import {applyFee} from '../../../../TradeCalculator/helpers'
 import {chatMolecule} from '../../../atoms'
@@ -43,8 +44,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
     tradeOrOriginOfferCurrencyAtom
   )
   const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
-  const preferences = useAtomValue(preferencesAtom)
-  const currentLocale = preferences.appLanguage ?? getCurrentLocale()
+  const currentLocale = useAtomValue(formattingLocaleAtom)
   const amountData = useAtomValue(tradeChecklistAmountAtom)
   const latestAmountDataMessage = amount.getLatestAmountDataMessage(amountData)
   const chatId = useAtomValue(chatIdAtom)
@@ -53,12 +53,10 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
   const btcPricePercentageDifference = useAtomValue(
     btcPricePercentageDifferenceToDisplayInVexlbotMessageAtom
   )
-  const btcTradePrice = useSetAtom(localizedDecimalNumberActionAtom)({
-    number:
-      message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
-        ? (message.message.tradeChecklistUpdate?.amount?.btcPrice ?? 0)
-        : 0,
-  })
+  const btcTradePrice =
+    message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
+      ? (message.message.tradeChecklistUpdate?.amount?.btcPrice ?? 0)
+      : 0
   const btcAmount = useSetAtom(localizedDecimalNumberActionAtom)({
     number:
       message.message.messageType === 'TRADE_CHECKLIST_UPDATE'
@@ -121,6 +119,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
       message.message.tradeChecklistUpdate.amount.fiatAmount ?? 0,
       message.message.tradeChecklistUpdate.amount.feeAmount ?? 0
     )
+    const roundedFiatAmount = Math.round(fiatAmount)
 
     const isMessageOutdated =
       message.message.tradeChecklistUpdate.amount.timestamp !==
@@ -135,7 +134,10 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
             'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
             {
               username: t('common.otherSide'),
-              percentage: Math.abs(btcPricePercentageDifference),
+              percentage: formatDecimal(
+                Math.abs(btcPricePercentageDifference),
+                currentLocale
+              ),
             }
           )} ${
             btcPricePercentageDifference >= 0
@@ -143,9 +145,9 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
               : t('vexlbot.lowerThanLivePrice')
           }`
         : undefined
-    const amountQuote = `${fiatAmount.toLocaleString(currentLocale)} ${currencies[tradeOrOriginOfferCurrency].code} = ${btcAmount} BTC`
+    const amountQuote = `${formatInteger(roundedFiatAmount, currentLocale)} ${currencies[tradeOrOriginOfferCurrency].code} = ${btcAmount} BTC`
     const feeText = `${t('messages.fee')}${feeAmount}`
-    const exchangeRate = `${t('messages.exchangeRate')}${btcTradePrice} ${currencies[tradeOrOriginOfferCurrency].code}`
+    const exchangeRate = `${t('messages.exchangeRate')}${formatInteger(btcTradePrice, currentLocale)} ${currencies[tradeOrOriginOfferCurrency].code}`
 
     const amountDescription = `${amountQuote}\n${feeText}\n${exchangeRate}`
 
@@ -215,7 +217,7 @@ function TradeChecklistAmountView({message}: Props): React.ReactElement | null {
                     icon={Copy}
                     minWidth={copyActionMinWidth}
                     onPress={() => {
-                      copyValueToClipboard(`${fiatAmount}`)
+                      copyValueToClipboard(`${roundedFiatAmount}`)
                     }}
                     size="small"
                     variant="secondary"

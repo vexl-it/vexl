@@ -1,7 +1,12 @@
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {getLocales} from 'expo-localization'
 import {atom} from 'jotai'
-import {preferencesAtom} from '../preferences'
+import {
+  formatCurrency,
+  formatDateTime,
+  formatDecimal,
+  formatPercent,
+} from './formatting'
+import {formattingLocaleAtom} from './formattingLocaleAtom'
 
 export const localizedPriceActionAtom = atom(
   null,
@@ -20,19 +25,14 @@ export const localizedPriceActionAtom = atom(
       minimumFractionDigits?: number
     }
   ) => {
-    const preferences = get(preferencesAtom)
-    const locale =
-      preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
+    const locale = get(formattingLocaleAtom)
 
     if (Number.isNaN(Number(number))) return number
 
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      currencyDisplay: 'symbol',
+    return formatCurrency(Number(number), currency, locale, {
       maximumFractionDigits,
       minimumFractionDigits,
-    }).format(Number(number))
+    })
   }
 )
 
@@ -51,17 +51,14 @@ export const localizedDecimalNumberActionAtom = atom(
       maximumFractionDigits?: number
     }
   ) => {
-    const preferences = get(preferencesAtom)
-    const locale =
-      preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
+    const locale = get(formattingLocaleAtom)
 
     if (Number.isNaN(Number(number))) return number
 
-    return Intl.NumberFormat(locale, {
-      style: 'decimal',
+    return formatDecimal(Number(number), locale, {
       minimumFractionDigits,
       maximumFractionDigits,
-    }).format(Number(number))
+    })
   }
 )
 
@@ -75,30 +72,24 @@ export const localizedPercentActionAtom = atom(
       minimumFractionDigits,
     }: {number: string | number; minimumFractionDigits?: number}
   ) => {
-    const preferences = get(preferencesAtom)
-    const locale =
-      preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
+    const locale = get(formattingLocaleAtom)
 
     if (Number.isNaN(Number(number))) return number
 
-    return Intl.NumberFormat(locale, {
-      style: 'percent',
-
+    return formatPercent(Number(number), locale, {
       minimumFractionDigits,
-    }).format(Number(number))
+    })
   }
 )
 
 export const localizedDateTimeActionAtom = atom(
   null,
   (get, set, {unixMilliseconds}: {unixMilliseconds: UnixMilliseconds}) => {
-    const preferences = get(preferencesAtom)
-    const locale =
-      preferences.appLanguage ?? getLocales().at(0)?.languageTag ?? 'en-GB'
+    const locale = get(formattingLocaleAtom)
 
-    return Intl.DateTimeFormat(locale, {
+    return formatDateTime(unixMilliseconds, locale, {
       dateStyle: 'medium',
       timeStyle: 'short',
-    }).format(unixMilliseconds)
+    })
   }
 )

@@ -27,6 +27,8 @@ import {
 } from '../../state/chat/utils/offerStates'
 import {useSingleOffer} from '../../state/marketplace'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import CommonFriends from '../CommonFriends'
@@ -215,6 +217,7 @@ function OfferDetailScreen({
 }: Props): React.ReactElement {
   const safeGoBack = useSafeGoBack()
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const reportOffer = useSetAtom(reportOfferActionAtom)
   const showNoCommonFriendsExplanation = useSetAtom(
     showNoCommonFriendsExplanationActionAtom
@@ -286,11 +289,20 @@ function OfferDetailScreen({
       : undefined
     const noteText =
       possibleInDays != null && possibleInDays > 1
-        ? t('offer.canSendAgainDays', {days: possibleInDays})
+        ? t('offer.canSendAgainDays', {
+            days: formatInteger(possibleInDays, locale),
+          })
         : t('offer.canSendAgainTomorrow')
 
     return {type: 'waitingToRerequestAgain', noteText}
-  }, [canSendRequest, requestState, requestPossibleInfo, handleOpenChat, t])
+  }, [
+    canSendRequest,
+    requestState,
+    requestPossibleInfo,
+    handleOpenChat,
+    locale,
+    t,
+  ])
 
   const handleNoCommonFriendsPress = useCallback(() => {
     if (Option.isSome(offer)) {

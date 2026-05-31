@@ -10,11 +10,13 @@ import {
   type IconProps,
 } from '@vexl-next/ui'
 import {Option} from 'effect'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {Image} from 'tamagui'
 import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatDate, formatInteger} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {localizedDecimalNumberActionAtom} from '../../../utils/localization/localizedNumbersAtoms'
 
 function ClubStatItem({
@@ -47,11 +49,12 @@ export function DetailHeader({
 }): React.JSX.Element {
   const {club, members} = clubWithMembers
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const localizeDecimalNumber = useSetAtom(localizedDecimalNumberActionAtom)
   const membersCount = localizeDecimalNumber({
     number: members.length,
   })
-  const expirationDate = club.validUntil.toLocaleDateString()
+  const expirationDate = formatDate(club.validUntil, locale)
 
   return (
     <YStack gap="$6">
@@ -80,7 +83,9 @@ export function DetailHeader({
             />
             <ClubStatItem
               icon={ArrowsHorizontal}
-              label={t('clubs.offers', {count: offersCount})}
+              label={t('clubs.offersFormatted', {
+                localizedString: formatInteger(offersCount, locale),
+              })}
             />
             <ClubStatItem
               icon={SandWatch}

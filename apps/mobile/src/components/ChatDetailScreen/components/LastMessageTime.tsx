@@ -4,6 +4,7 @@ import {useAtomValue} from 'jotai'
 import {DateTime} from 'luxon'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {chatMolecule} from '../atoms'
 import formatChatTime from '../utils/formatChatTime'
 
@@ -13,6 +14,7 @@ export function LastMessageTime({
   message: ChatMessageWithState
 }): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {lastMessageReadByOtherSideAtAtom} = useMolecule(chatMolecule)
 
   const lastMessageReadByOtherSideAt = useAtomValue(
@@ -38,14 +40,15 @@ export function LastMessageTime({
         !!lastMessageReadByOtherSideAt &&
         t('messages.readAt', {
           time: formatChatTime(
-            DateTime.fromMillis(lastMessageReadByOtherSideAt)
+            DateTime.fromMillis(lastMessageReadByOtherSideAt),
+            locale
           ),
         })}
       {message.state === 'sent' &&
         !lastMessageReadByOtherSideAt &&
-        formatChatTime(DateTime.fromMillis(message.message.time))}
+        formatChatTime(DateTime.fromMillis(message.message.time), locale)}
       {message.state === 'received' &&
-        formatChatTime(DateTime.fromMillis(message.message.time))}
+        formatChatTime(DateTime.fromMillis(message.message.time), locale)}
     </Typography>
   )
 }

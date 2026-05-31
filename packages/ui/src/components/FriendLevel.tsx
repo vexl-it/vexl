@@ -110,6 +110,7 @@ function getSecondDegreeVisualXml(strokeColor: string): string {
 const FriendLevelFrame = styled(Stack, {
   name: 'FriendLevel',
   alignItems: 'center',
+  width: CARD_SIZE,
 
   variants: {
     pressable: {
@@ -311,13 +312,26 @@ export function FriendLevel({
           )}
         </Stack>
       </CardFrame>
-      <Typography variant="paragraphDemibold" marginTop="$3" color={textColor}>
+      <Typography
+        variant="paragraphDemibold"
+        marginTop="$3"
+        color={textColor}
+        textAlign="center"
+        width="100%"
+      >
         {title}
       </Typography>
-      <XStack alignItems="center" gap="$2" marginTop="$2">
+      <XStack
+        alignItems="center"
+        gap="$2"
+        justifyContent="center"
+        marginTop="$2"
+        width="100%"
+      >
         {loading ? <Loader size="small" /> : null}
         {subtitle ? (
           <Typography
+            flex={1}
             variant="description"
             textAlign="center"
             color={textColor}

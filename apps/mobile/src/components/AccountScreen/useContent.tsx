@@ -21,6 +21,8 @@ import {importedContactsCountAtom} from '../../state/contacts/atom/contactsStore
 import {useLogout} from '../../state/useLogout'
 import {contactSupportActionAtom} from '../../utils/contactSupportActionAtom'
 import {useTranslation as useTranslations} from '../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import openUrl from '../../utils/openUrl'
 import ContactUsDialogContent from '../AppSettingsScreen/components/ContactUsDialogContent'
 import {globalDialogAtom} from '../GlobalDialog'
@@ -46,10 +48,15 @@ export function useContent(): AccountMenus {
   const {t} = useTranslations()
   const navigation = useNavigation()
   const numberOfContacts = useAtomValue(importedContactsCountAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
   const showDialog = useSetAtom(globalDialogAtom)
   const contactSupport = useSetAtom(contactSupportActionAtom)
   const logout = useLogout()
   return useMemo((): AccountMenus => {
+    const contactsCount = t('account.contactsCountFormatted', {
+      localizedString: formatDecimal(numberOfContacts, locale),
+    })
+
     return [
       {
         type: 'menu' as const,
@@ -57,7 +64,7 @@ export function useContent(): AccountMenus {
         items: [
           {
             label: t('account.contactPreferences'),
-            note: t('account.contactsCount', {count: numberOfContacts}),
+            note: contactsCount,
             icon: PeopleUsers,
             onPress: () => {
               navigation.navigate('ContactPreferences')
@@ -205,5 +212,13 @@ export function useContent(): AccountMenus {
         ],
       },
     ] as const
-  }, [contactSupport, logout, navigation, numberOfContacts, showDialog, t])
+  }, [
+    contactSupport,
+    locale,
+    logout,
+    navigation,
+    numberOfContacts,
+    showDialog,
+    t,
+  ])
 }

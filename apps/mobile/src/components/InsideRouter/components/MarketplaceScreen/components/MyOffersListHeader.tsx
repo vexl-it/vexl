@@ -9,6 +9,8 @@ import {
   selectedMyOffersSortingOptionAtom,
 } from '../../../../../state/marketplace/atoms/myOffers'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import MarketplaceInlineButton from './MarketplaceInlineButton'
 
@@ -16,6 +18,7 @@ const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
 
 function MyOffersListHeader(): React.ReactElement | null {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const theme = useTheme()
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
   const activeOffersCount = useAtomValue(myActiveOffers)
@@ -49,7 +52,9 @@ function MyOffersListHeader(): React.ReactElement | null {
           justifyContent="space-between"
         >
           <Typography variant="description" color="$foregroundSecondary">
-            {t('marketplace.offersCount', {count: activeOffersCount})}
+            {t('marketplace.offersCountFormatted', {
+              localizedString: formatInteger(activeOffersCount, locale),
+            })}
           </Typography>
           <MarketplaceInlineButton
             icon={

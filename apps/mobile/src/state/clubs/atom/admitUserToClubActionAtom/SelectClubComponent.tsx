@@ -6,10 +6,12 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {Array} from 'effect'
-import {type PrimitiveAtom, useAtom} from 'jotai'
+import {type PrimitiveAtom, useAtom, useAtomValue} from 'jotai'
 import React from 'react'
 import {useWindowDimensions} from 'react-native'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 import {type ClubWithMembers} from '../../domain'
 
 const MAX_LIST_HEIGHT = 360
@@ -26,6 +28,7 @@ export function SelectClubComponent({
 }): React.ReactElement {
   const [selectedClub, setSelectedClub] = useAtom(selectedClubAtom)
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {height} = useWindowDimensions()
   const listMaxHeight = Math.min(
     MAX_LIST_HEIGHT,
@@ -50,8 +53,9 @@ export function SelectClubComponent({
       >
         <YStack gap="$3">
           {Array.map(clubs, (clubWithMembers) => {
-            const membersCount = Intl.NumberFormat().format(
-              clubWithMembers.members.length
+            const membersCount = formatDecimal(
+              clubWithMembers.members.length,
+              locale
             )
 
             return (

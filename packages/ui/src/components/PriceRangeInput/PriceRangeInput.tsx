@@ -78,6 +78,14 @@ export interface PriceRangeInputProps {
   readonly onCurrencyPress: () => void
   readonly maxLimit: number
   readonly maxLabel?: string
+  readonly locale?: string
+}
+
+function formatInteger(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 0,
+    useGrouping: true,
+  }).format(value)
 }
 
 export function PriceRangeInput({
@@ -87,15 +95,16 @@ export function PriceRangeInput({
   onCurrencyPress,
   maxLimit,
   maxLabel,
+  locale = 'en-US',
 }: PriceRangeInputProps): React.JSX.Element {
   const [minValue, setMinValue] = useAtom(minValueAtom)
   const [maxValue, setMaxValue] = useAtom(maxValueAtom)
   const theme = useTheme()
 
   const maxValueAtLimit = maxLabel != null && maxValue >= maxLimit
-  const [minText, setMinText] = useState(String(minValue))
+  const [minText, setMinText] = useState(formatInteger(minValue, locale))
   const [maxText, setMaxText] = useState(
-    maxValueAtLimit ? maxLabel : String(maxValue)
+    maxValueAtLimit ? maxLabel : formatInteger(maxValue, locale)
   )
   const minInputRef = useRef<TextInput>(null)
   const maxInputRef = useRef<TextInput>(null)
@@ -104,17 +113,19 @@ export function PriceRangeInput({
 
   useEffect(() => {
     if (!minFocusRef.current) {
-      setMinText(String(minValue))
+      setMinText(formatInteger(minValue, locale))
     }
-  }, [minValue])
+  }, [minValue, locale])
 
   useEffect(() => {
     if (!maxFocusRef.current) {
       setMaxText(
-        maxLabel != null && maxValue >= maxLimit ? maxLabel : String(maxValue)
+        maxLabel != null && maxValue >= maxLimit
+          ? maxLabel
+          : formatInteger(maxValue, locale)
       )
     }
-  }, [maxValue, maxLimit, maxLabel])
+  }, [maxValue, maxLimit, maxLabel, locale])
 
   useEffect(() => {
     const clampedMinValue = Math.max(0, Math.min(minValue, maxValue, maxLimit))
@@ -142,7 +153,8 @@ export function PriceRangeInput({
 
   const handleMinFocus = useCallback(() => {
     minFocusRef.current = true
-  }, [])
+    setMinText(String(minValue))
+  }, [minValue])
 
   const handleMinBlur = useCallback(() => {
     minFocusRef.current = false
@@ -150,11 +162,11 @@ export function PriceRangeInput({
     if (!isNaN(num)) {
       const clamped = Math.max(0, Math.min(num, maxValue, maxLimit))
       setMinValue(clamped)
-      setMinText(String(clamped))
+      setMinText(formatInteger(clamped, locale))
     } else {
-      setMinText(String(minValue))
+      setMinText(formatInteger(minValue, locale))
     }
-  }, [minText, minValue, maxValue, maxLimit, setMinValue])
+  }, [minText, minValue, maxValue, maxLimit, locale, setMinValue])
 
   const handleMaxFocus = useCallback(() => {
     maxFocusRef.current = true
@@ -168,14 +180,18 @@ export function PriceRangeInput({
       const clamped = Math.min(maxLimit, Math.max(num, minValue, 0))
       setMaxValue(clamped)
       setMaxText(
-        maxLabel != null && clamped >= maxLimit ? maxLabel : String(clamped)
+        maxLabel != null && clamped >= maxLimit
+          ? maxLabel
+          : formatInteger(clamped, locale)
       )
     } else {
       setMaxText(
-        maxLabel != null && maxValue >= maxLimit ? maxLabel : String(maxValue)
+        maxLabel != null && maxValue >= maxLimit
+          ? maxLabel
+          : formatInteger(maxValue, locale)
       )
     }
-  }, [maxText, minValue, maxValue, maxLimit, maxLabel, setMaxValue])
+  }, [maxText, minValue, maxValue, maxLimit, maxLabel, locale, setMaxValue])
 
   const chevronColor = theme.accentHighlightPrimary.get()
 

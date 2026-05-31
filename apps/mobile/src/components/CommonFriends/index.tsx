@@ -14,6 +14,8 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {showVerifiedContactsAtom} from '../../utils/preferences'
 
 interface Props {
@@ -85,6 +87,7 @@ function CommonFriends({
   otherSideClubs,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'CommonFriends'>['navigation']>()
   const store = useStore()
@@ -175,7 +178,9 @@ function CommonFriends({
 
   return (
     <CommonFriendsUI
-      label={t('offer.numberOfCommon', {number: commonFriendsCount})}
+      label={t('offer.numberOfCommon', {
+        number: formatInteger(commonFriendsCount, locale),
+      })}
       friends={friends}
       onPress={handlePress}
     />

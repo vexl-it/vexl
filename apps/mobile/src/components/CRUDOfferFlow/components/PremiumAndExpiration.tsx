@@ -3,14 +3,12 @@ import {BuySellRangeSlider, RowButton, Typography} from '@vexl-next/ui'
 import {Calendar, ChevronDown, ChevronUp} from '@vexl-next/ui/src/icons'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useState} from 'react'
 import {getTokens, useTheme, XStack, YStack} from 'tamagui'
 import {currencies} from '../../../utils/localization/currency'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
+import {formatDate, formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {getInfoText, SLIDER_THRESHOLD} from '../../../utils/premiumOrDiscount'
 import AnimatedCollapse from '../../FilterOffersScreen/components/AnimatedCollapse'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
@@ -28,7 +26,7 @@ function PremiumAndExpiration({
 }: PremiumAndExpirationProps): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
-  const locale = getCurrentLocale()
+  const locale = useAtomValue(formattingLocaleAtom)
   const navigation = useNavigation()
   const {
     currencyAtom,
@@ -76,10 +74,13 @@ function PremiumAndExpiration({
     const adjustedMin = Math.round(amountMin * multiplier)
     const adjustedMax = Math.round(amountMax * multiplier)
     const currencyCode = currencies[currency].code
-    const formatter = new Intl.NumberFormat(locale, {
+    const minAmount = formatDecimal(adjustedMin, locale, {
       maximumFractionDigits: 0,
     })
-    const range = `${formatter.format(adjustedMin)} – ${formatter.format(adjustedMax)} ${currencyCode}`
+    const maxAmount = formatDecimal(adjustedMax, locale, {
+      maximumFractionDigits: 0,
+    })
+    const range = `${minAmount} – ${maxAmount} ${currencyCode}`
     return isBuy
       ? t('offerForm.premiumOrDiscount.youllPayAround', {amount: range})
       : t('offerForm.premiumOrDiscount.youllGetAround', {amount: range})
@@ -215,10 +216,9 @@ function PremiumAndExpiration({
               <RowButton
                 label={
                   expirationDate
-                    ? DateTime.fromISO(expirationDate).toLocaleString(
-                        DateTime.DATE_FULL,
-                        {locale}
-                      )
+                    ? formatDate(new Date(expirationDate), locale, {
+                        dateStyle: 'full',
+                      })
                     : t('offerForm.expiration.selectDate')
                 }
                 icon={Calendar}

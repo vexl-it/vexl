@@ -1,4 +1,7 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import {
+  createNativeStackNavigator,
+  type NativeStackNavigationOptions,
+} from '@react-navigation/native-stack'
 import {useAtomValue} from 'jotai'
 import React, {memo} from 'react'
 import {type RootStackParamsList} from '../../navigationTypes'
@@ -68,6 +71,16 @@ import WhatAreClubsScreen from '../WhatAreClubsScreen'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
 const Stack = createNativeStackNavigator<RootStackParamsList>()
+
+const slideFromBottomCardOptions: NativeStackNavigationOptions = {
+  animation: 'slide_from_bottom',
+  presentation: 'card',
+}
+
+const slideFromBottomContainedModalOptions: NativeStackNavigationOptions = {
+  animation: 'slide_from_bottom',
+  presentation: 'containedTransparentModal',
+}
 
 function LoggedInHookGroup(): null {
   // Notifications
@@ -161,34 +174,22 @@ function RootNavigation(): React.ReactElement {
             />
             <Stack.Screen
               name="ChatInfo"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
+              options={slideFromBottomCardOptions}
               component={ChatInfoScreen}
             />
             <Stack.Screen
               name="ChatOfferDetail"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
+              options={slideFromBottomCardOptions}
               component={ChatOfferDetailScreen}
             />
             <Stack.Screen
               name="ChatReceivedMessagesDebug"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
+              options={slideFromBottomCardOptions}
               component={ChatReceivedMessagesDebugScreen}
             />
             <Stack.Screen
               name="ChatInfoJsonDebug"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
+              options={slideFromBottomCardOptions}
               component={ChatInfoJsonDebugScreen}
             />
             <Stack.Screen name="ChatSearch" component={ChatSearchScreen} />
@@ -204,10 +205,7 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="ScanClubAdmissionQrCode"
               component={ScanClubAdmissionQrCodeScreen}
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
+              options={slideFromBottomCardOptions}
             />
             <Stack.Screen name="ClubOffers" component={ClubOffersScreen} />
             <Stack.Screen name="WhatAreClubs" component={WhatAreClubsScreen} />
@@ -230,18 +228,11 @@ function RootNavigation(): React.ReactElement {
             /> */}
             <Stack.Screen
               name="TradeCalculatorFlow"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'containedTransparentModal',
-              }}
               component={TradeCalculatorRouter}
             />
             <Stack.Screen
               name="TradeChecklistFlow"
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'containedTransparentModal',
-              }}
+              options={slideFromBottomContainedModalOptions}
               component={TradeChecklistFlow}
             />
             <Stack.Screen name="JoinClubFlow" component={JoinClubFlow} />
@@ -249,20 +240,10 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="ScanQrCode"
               component={ScanQrCodeScreen}
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
+              options={slideFromBottomCardOptions}
             />
             <Stack.Screen name="AppSettings" component={AppSettingsScreen} />
-            <Stack.Screen
-              name="ShareProfile"
-              component={ShareProfileScreen}
-              options={{
-                animation: 'slide_from_bottom',
-                presentation: 'card',
-              }}
-            />
+            <Stack.Screen name="ShareProfile" component={ShareProfileScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="EditIdentity" component={EditIdentityScreen} />
             <Stack.Screen
@@ -278,18 +259,12 @@ function RootNavigation(): React.ReactElement {
         <Stack.Screen
           name="TermsAndConditions"
           component={TosScreen}
-          options={{
-            animation: 'slide_from_bottom',
-            presentation: 'card',
-          }}
+          options={slideFromBottomCardOptions}
         />
         <Stack.Screen
           name="Faqs"
           component={FaqsScreen}
-          options={{
-            animation: 'slide_from_bottom',
-            presentation: 'card',
-          }}
+          options={slideFromBottomCardOptions}
         />
         <Stack.Screen name="DebugScreen" component={DebugScreen} />
         <Stack.Screen

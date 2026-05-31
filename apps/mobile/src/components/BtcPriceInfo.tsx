@@ -2,9 +2,11 @@ import {type BtcPriceDataWithState} from '@vexl-next/domain/src/general/btcPrice
 import {type CurrencyCode} from '@vexl-next/domain/src/general/offers'
 import {Loader, Typography} from '@vexl-next/ui'
 import {XStack} from '@vexl-next/ui/src/primitives'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {formatBtcPrice, formatBtcPriceUpdatedAt} from '../utils/formatBtcPrice'
 import {useTranslation} from '../utils/localization/I18nProvider'
+import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 
 interface BtcPriceInfoProps {
   readonly btcPriceData: BtcPriceDataWithState | undefined
@@ -16,8 +18,9 @@ function BtcPriceInfo({
   currency,
 }: BtcPriceInfoProps): React.ReactElement {
   const {t} = useTranslation()
-  const formattedPrice = formatBtcPrice(btcPriceData, currency)
-  const updatedAt = formatBtcPriceUpdatedAt(btcPriceData)
+  const locale = useAtomValue(formattingLocaleAtom)
+  const formattedPrice = formatBtcPrice(btcPriceData, currency, locale)
+  const updatedAt = formatBtcPriceUpdatedAt(btcPriceData, locale)
 
   return (
     <XStack

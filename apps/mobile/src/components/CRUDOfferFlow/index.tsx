@@ -15,6 +15,8 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, Stack, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {globalDialogAtom} from '../GlobalDialog'
 import FriendLevel from '../OfferForm/components/FriendLevel'
@@ -34,6 +36,7 @@ import {type OfferSetupStep} from './offerSetupSteps'
 
 function CRUDOfferFlow(): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'CRUDOfferFlow'>['navigation']>()
   const safeGoBack = useSafeGoBack()
@@ -126,7 +129,12 @@ function CRUDOfferFlow(): React.ReactElement {
         ? numberOfFriends.firstLevelFriendsCount
         : numberOfFriends.firstAndSecondLevelFriendsCount
 
-    return `${friendLevelLabel} (${t('offerForm.friendLevel.reachPeopleInline', {count: reachCount})})`
+    return `${friendLevelLabel} (${t(
+      'offerForm.friendLevel.reachPeopleInlineFormatted',
+      {
+        localizedString: formatInteger(reachCount, locale),
+      }
+    )})`
   })()
   const areFriendLevelCountsLoading = numberOfFriends.state === 'loading'
 

@@ -13,11 +13,10 @@ import {XmarkCancelClose} from '@vexl-next/ui/src/icons'
 import {ScrollView, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../utils/localization/currency'
+import {formatDecimal} from '../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../utils/localization/formattingLocaleAtom'
 import {
   getInfoText,
   SLIDER_THRESHOLD,
@@ -47,7 +46,7 @@ function useOfferTypeTabs(): ReadonlyArray<{
 
 function PremiumOrDiscountScreen(): React.ReactElement {
   const {t} = useTranslation()
-  const locale = getCurrentLocale()
+  const locale = useAtomValue(formattingLocaleAtom)
   const goBack = useSafeGoBack()
   const {footerHeightAtom} = useScreenFooterHeight()
 
@@ -73,10 +72,14 @@ function PremiumOrDiscountScreen(): React.ReactElement {
     const currency = fiatCurrency ?? 'USD'
     const amountWithoutFee = cancelFee(fiatValueNumber, feeAmount)
     const amountWithTempFee = applyFee(amountWithoutFee, tempFeeAmount)
-    const formatter = new Intl.NumberFormat(locale, {
-      maximumFractionDigits: 0,
-    })
-    const amount = `${formatter.format(Math.round(amountWithTempFee))} ${currencies[currency].code}`
+    const formattedAmount = formatDecimal(
+      Math.round(amountWithTempFee),
+      locale,
+      {
+        maximumFractionDigits: 0,
+      }
+    )
+    const amount = `${formattedAmount} ${currencies[currency].code}`
 
     return isBuy
       ? t('offerForm.premiumOrDiscount.youllPayAround', {amount})

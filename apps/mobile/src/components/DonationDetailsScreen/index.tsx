@@ -1,12 +1,13 @@
 import {useScreenFooterHeight} from '@vexl-next/ui'
 import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {DateTime} from 'luxon'
 import React, {useEffect, useMemo} from 'react'
 import {type DonationsFlowScreenProps} from '../../navigationTypes'
 import {SATOSHIS_IN_BTC} from '../../state/currentBtcPriceAtoms'
 import {singleDonationAtom} from '../../state/donations/atom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatDateTime} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import {
   localizedDecimalNumberActionAtom,
   localizedPriceActionAtom,
@@ -31,6 +32,7 @@ function DonationDetailsScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {footerHeightAtom} = useScreenFooterHeight()
   const footerHeight = useAtomValue(footerHeightAtom)
   const mySingleDonation = useAtomValue(
@@ -60,12 +62,14 @@ function DonationDetailsScreen({
   const localizedSatsAmount = `${localizedTotalSats} sats`
   const title = donationTitle({paymentMethod, t})
   const invoiceIdValue = mySingleDonation?.invoiceId ?? invoiceId
-  const createdAt = timestampToDateTime(
-    mySingleDonation?.createdTime ?? 0
-  ).toLocaleString(DateTime.DATETIME_MED)
-  const expiredAt = timestampToDateTime(
-    mySingleDonation?.expirationTime ?? 0
-  ).toLocaleString(DateTime.DATETIME_MED)
+  const createdAt = formatDateTime(
+    timestampToDateTime(mySingleDonation?.createdTime ?? 0).toMillis(),
+    locale
+  )
+  const expiredAt = formatDateTime(
+    timestampToDateTime(mySingleDonation?.expirationTime ?? 0).toMillis(),
+    locale
+  )
   const summary: DonationSummaryData = {
     localizedSatsAmount,
     localizedFiatAmount: `${localizedFiatAmount}`,

@@ -181,16 +181,26 @@ function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
         />
       </Stack>
 
-      <Typography
-        variant="heading2"
-        color="$white100"
+      <YStack
         pos="absolute"
-        top={Math.max(top + 64, scanWindow.y - 100)}
-        als="center"
-        textAlign="center"
+        t={top + 64}
+        l={24}
+        r={24}
+        b={height - scanWindow.y + 24}
+        jc="flex-end"
+        pointerEvents="none"
       >
-        {error ?? t('qrScanner.title')}
-      </Typography>
+        <Typography
+          variant="heading3"
+          color="$white100"
+          textAlign="center"
+          numberOfLines={3}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+        >
+          {error ?? t('qrScanner.title')}
+        </Typography>
+      </YStack>
 
       <YStack pos="absolute" l={0} r={0} px="$5" b={bottom + 12}>
         <Button variant="primary" onPress={close}>

@@ -3,6 +3,8 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import {YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
 import {type MessagesListItem} from '../utils/buildMessagesListData'
@@ -17,6 +19,7 @@ export function DisapproveMessagingMessage({
 }): React.ReactElement | null {
   const {otherSideDataAtom, canBeRerequestedAtom} = useMolecule(chatMolecule)
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {image} = useAtomValue(otherSideDataAtom)
   const item = useAtomValue(itemAtom)
   const rerequestInfo = useAtomValue(canBeRerequestedAtom)
@@ -28,7 +31,9 @@ export function DisapproveMessagingMessage({
   const resendText = rerequestInfo.canBeRerequested
     ? t('offer.canSendAgain')
     : rerequestInfo.possibleInDays != null && rerequestInfo.possibleInDays > 1
-      ? t('offer.canSendAgainDays', {days: rerequestInfo.possibleInDays})
+      ? t('offer.canSendAgainDays', {
+          days: formatInteger(rerequestInfo.possibleInDays, locale),
+        })
       : t('offer.canSendAgainTomorrow')
 
   return (

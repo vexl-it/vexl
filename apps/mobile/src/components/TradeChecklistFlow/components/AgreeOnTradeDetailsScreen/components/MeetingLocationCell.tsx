@@ -5,11 +5,13 @@ import React, {useCallback, useMemo} from 'react'
 import {type TradeChecklistStackParamsList} from '../../../../../navigationTypes'
 import {tradeChecklistLocationDataAtom} from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import * as MeetingLocation from '../../../../../state/tradeChecklist/utils/location'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {tradeChecklistWithUpdatesMergedAtom} from '../../../atoms/updatesToBeSentAtom'
 import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function MeetingLocationCell(): React.ReactElement {
+  const {t} = useTranslation()
   const navigation: NavigationProp<TradeChecklistStackParamsList> =
     useNavigation()
 
@@ -54,7 +56,7 @@ function MeetingLocationCell(): React.ReactElement {
       pressable
       subtitle={MeetingLocation.getSubtitle(nextChecklistData.location)}
       onPress={onPress}
-      headline="Set meeting location"
+      headline={t('tradeChecklist.options.MEETING_LOCATION')}
     />
   )
 }

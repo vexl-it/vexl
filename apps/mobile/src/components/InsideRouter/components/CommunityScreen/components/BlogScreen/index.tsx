@@ -10,12 +10,13 @@ import {
   Typography,
   YStack,
 } from '@vexl-next/ui'
-import dayjs from 'dayjs'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo} from 'react'
 import {Linking} from 'react-native'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {formatDate} from '../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {blogsStateAtom, loadBlogsActionAtom} from './state'
 
 const BlogImage = React.memo(function BlogImage({
@@ -42,9 +43,10 @@ const BlogItem = React.memo(function BlogItem({
     () => Option.getOrElse(item.teaserText, () => ''),
     [item.teaserText]
   )
+  const locale = useAtomValue(formattingLocaleAtom)
   const date = useMemo(
-    () => dayjs(item.publishedOn).format('LL'),
-    [item.publishedOn]
+    () => formatDate(new Date(item.publishedOn), locale, {dateStyle: 'long'}),
+    [item.publishedOn, locale]
   )
   const handlePress = useCallback(() => {
     void Linking.openURL(item.link)

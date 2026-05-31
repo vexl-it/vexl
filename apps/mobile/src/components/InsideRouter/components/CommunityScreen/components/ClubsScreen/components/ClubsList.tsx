@@ -20,6 +20,8 @@ import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../../../../../.
 import {type ClubWithMembers} from '../../../../../../../state/clubs/domain'
 import atomKeyExtractor from '../../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../../utils/localization/formattingLocaleAtom'
 import ClubAvatar from './ClubAvatar'
 
 type Navigation = CommunityTabsScreenProps<'Clubs'>['navigation']
@@ -33,12 +35,15 @@ function ClubListItem({
 }): React.ReactElement {
   const {club, members} = useAtomValue(atom)
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   return (
     <ClubCard
       avatar={<ClubAvatar uri={club.clubImageUrl} />}
       name={club.name}
-      subtitle={t('clubs.commonFriends', {count: members.length})}
+      subtitle={t('clubs.commonFriendsFormatted', {
+        localizedString: formatInteger(members.length, locale),
+      })}
       onPress={() => {
         navigation.navigate('ClubDetail', {clubUuid: club.uuid})
       }}

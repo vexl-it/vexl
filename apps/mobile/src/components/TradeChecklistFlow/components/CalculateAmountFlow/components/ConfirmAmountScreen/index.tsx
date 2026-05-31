@@ -8,13 +8,11 @@ import {
   chatWithMessagesKeys,
   tradeOrOriginOfferCurrencyAtom,
 } from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {currencies} from '../../../../../../utils/localization/currency'
+import {formatInteger} from '../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {localizedDecimalNumberActionAtom} from '../../../../../../utils/localization/localizedNumbersAtoms'
-import {preferencesAtom} from '../../../../../../utils/preferences'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../../../../../ToastNotification/atom'
 import {applyFee, btcToSat} from '../../../../../TradeCalculator/helpers'
@@ -35,8 +33,7 @@ function ConfirmAmountScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const store = useStore()
-  const preferences = useAtomValue(preferencesAtom)
-  const currentLocale = preferences.appLanguage ?? getCurrentLocale()
+  const currentLocale = useAtomValue(formattingLocaleAtom)
   const tradeOrOriginOfferCurrency = useAtomValue(
     tradeOrOriginOfferCurrencyAtom
   )
@@ -54,6 +51,7 @@ function ConfirmAmountScreen({
     amountData?.fiatAmount ?? 0,
     amountData?.feeAmount ?? 0
   )
+  const roundedFiatAmount = Math.round(fiatAmount)
   const selectedCurrency =
     amountData?.currency ?? tradeOrOriginOfferCurrency ?? 'EUR'
   const fiatCurrency = currencies[selectedCurrency].code
@@ -132,7 +130,7 @@ function ConfirmAmountScreen({
               color="$foregroundPrimary"
               textAlign="center"
             >
-              {`${fiatAmount.toLocaleString(currentLocale)} ${fiatCurrency}`}
+              {`${formatInteger(roundedFiatAmount, currentLocale)} ${fiatCurrency}`}
             </Typography>
             <Typography
               variant="paragraphSmall"
@@ -186,7 +184,7 @@ function ConfirmAmountScreen({
               icon={Copy}
               minWidth="$13"
               onPress={() => {
-                copyValueToClipboard(`${fiatAmount}`)
+                copyValueToClipboard(`${roundedFiatAmount}`)
               }}
               size="small"
               variant="secondary"

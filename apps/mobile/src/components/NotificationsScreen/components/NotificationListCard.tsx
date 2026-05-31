@@ -11,6 +11,8 @@ import Swipeable, {
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatDate, formatTime} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {cancelNotificationCenterRecordActionAtom} from '../state'
 import {type NotificationCenterRecord} from '../state/domain'
 import NotificationListCardRightSwipeActions from './NotificationListCardRightSwipeActions'
@@ -60,10 +62,13 @@ function getClubDeactivationMessage({
   }
 }
 
-function formatNotificationTime(date: UnixMilliseconds): string {
-  if (dayjs(date).isSame(dayjs(), 'day')) return dayjs(date).format('HH:mm')
+function formatNotificationTime(
+  date: UnixMilliseconds,
+  locale: string
+): string {
+  if (dayjs(date).isSame(dayjs(), 'day')) return formatTime(date, locale)
 
-  return dayjs(date).format('LL')
+  return formatDate(date, locale, {dateStyle: 'long'})
 }
 
 function NotificationListCard({
@@ -79,6 +84,7 @@ function NotificationListCard({
   const navigation =
     useNavigation<RootStackScreenProps<'Notifications'>['navigation']>()
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   if (notification.status.isCancelled) return null
 
@@ -156,7 +162,7 @@ function NotificationListCard({
           <NotificationCard
             avatar={cardData.avatar}
             name={cardData.name}
-            time={formatNotificationTime(notification.date)}
+            time={formatNotificationTime(notification.date, locale)}
             category={cardData.category}
             message={cardData.message}
             tag={

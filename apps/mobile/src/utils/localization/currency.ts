@@ -5,6 +5,7 @@ import {
 import {Schema} from 'effect'
 import {bigNumberToString} from '../bigNumberToString'
 import {getCurrentLocale} from './I18nProvider'
+import {formatDecimal} from './formatting'
 
 const decodeCurrencyInfo = Schema.decodeSync(CurrencyInfo)
 
@@ -1127,12 +1128,13 @@ export function formatCurrencyAmount(
 
 export function formatFullCurrencyAmount(
   code: CurrencyCode,
-  amount: number
+  amount: number,
+  locale: string = getCurrentLocale()
 ): string {
   const currency = currencies[code]
-  const formattedAmount = new Intl.NumberFormat(getCurrentLocale(), {
+  const formattedAmount = formatDecimal(amount, locale, {
     maximumFractionDigits: 0,
-  }).format(amount)
+  })
 
   if (currency.position === 'before') {
     return `${currency.symbol}${formattedAmount}`

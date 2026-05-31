@@ -20,6 +20,8 @@ import {
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
+import {formatInteger} from '../utils/localization/formatting'
+import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {getIconTagVariant, getIsOffering} from '../utils/offerHelpers'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
@@ -42,6 +44,8 @@ function OfferAuthorBanner({
   const {t} = useTranslation()
   const theme = useTheme()
   const commonFriendsCount = offer.offerInfo.privatePart.commonFriends.length
+  const locale = useAtomValue(formattingLocaleAtom)
+  const localizedCommonFriendsCount = formatInteger(commonFriendsCount, locale)
   const clubsForOffer = useGetAllClubsForIds(
     offer.offerInfo.privatePart.clubIds
   )
@@ -140,7 +144,9 @@ function OfferAuthorBanner({
                     color="$foregroundSecondary"
                     numberOfLines={1}
                   >
-                    {t('offer.numberOfCommon', {number: commonFriendsCount})}
+                    {t('offer.numberOfCommon', {
+                      number: localizedCommonFriendsCount,
+                    })}
                   </Typography>
                 </XStack>
               )}
@@ -153,7 +159,9 @@ function OfferAuthorBanner({
                 color="$foregroundSecondary"
                 numberOfLines={1}
               >
-                {t('offer.numberOfCommon', {number: commonFriendsCount})}
+                {t('offer.numberOfCommon', {
+                  number: localizedCommonFriendsCount,
+                })}
               </Typography>
             </XStack>
           ) : null}

@@ -19,6 +19,8 @@ import type {TradeChecklistStackScreenProps} from '../../../../../../navigationT
 import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import atomKeyExtractor from '../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {formatDate} from '../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
@@ -32,8 +34,11 @@ import {useState} from './state'
 
 type Props = TradeChecklistStackScreenProps<'PickTimeFromSuggestions'>
 
-function getPickedDateLabel(date: AvailableDateTimeOption['date']): string {
-  return unixMillisecondsToLocaleDateTime(date).toLocaleString({
+function getPickedDateLabel(
+  date: AvailableDateTimeOption['date'],
+  locale: string
+): string {
+  return formatDate(unixMillisecondsToLocaleDateTime(date).toMillis(), locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'short',
@@ -102,6 +107,7 @@ function PickTimeFromSuggestions({
   const {t} = useTranslation()
   const theme = useTheme()
   const store = useStore()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   const shouldSendOnSubmit = !useWasOpenFromAgreeOnTradeDetailsScreen()
   const {selectItem, selectedItem, itemsAtoms} = useState(
@@ -182,7 +188,7 @@ function PickTimeFromSuggestions({
           textAlign="center"
           marginTop="$4"
         >
-          {getPickedDateLabel(pickedOption.date)}
+          {getPickedDateLabel(pickedOption.date, locale)}
         </Typography>
         <FlatList
           data={itemsAtoms}

@@ -38,6 +38,8 @@ import {
 } from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {offerFormMolecule} from '../CRUDOfferFlow/atoms/offerFormStateAtoms'
@@ -59,6 +61,7 @@ function MyOfferDetailScreen({
   navigation,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const safeGoBack = useSafeGoBack()
   const insets = useSafeAreaInsets()
   const offerOption = useSingleOffer(offerId)
@@ -155,7 +158,9 @@ function MyOfferDetailScreen({
       level === 'FIRST'
         ? numberOfFriends.firstLevelFriendsCount
         : numberOfFriends.firstAndSecondLevelFriendsCount
-    return `${base} (${t('offerForm.friendLevel.reachPeopleInline', {count: reach})})`
+    return `${base} (${t('offerForm.friendLevel.reachPeopleInlineFormatted', {
+      localizedString: formatInteger(reach, locale),
+    })})`
   })()
 
   const clubsHeadline = (() => {
@@ -163,7 +168,12 @@ function MyOfferDetailScreen({
     const reach = allClubsWithMembers
       .filter((c) => selectedClubsUuids.includes(c.club.uuid))
       .reduce((sum, c) => sum + c.members.length, 0)
-    return `${selectedClubNames.join(', ')} (${t('offerForm.friendLevel.reachPeopleInline', {count: reach})})`
+    return `${selectedClubNames.join(', ')} (${t(
+      'offerForm.friendLevel.reachPeopleInlineFormatted',
+      {
+        localizedString: formatInteger(reach, locale),
+      }
+    )})`
   })()
 
   if (Option.isNone(offerOption)) {

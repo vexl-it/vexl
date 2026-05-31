@@ -15,6 +15,7 @@ import {
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../utils/unixMillisecondsToLocaleDateTime'
 import formatChatTime from '../../../../ChatDetailScreen/utils/formatChatTime'
 import UserAvatar from '../../../../UserAvatar'
@@ -33,6 +34,7 @@ function ChatListItem({
   dataAtom: Atom<ChatListData>
 }): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const swipeableRef = useRef<SwipeableMethods>(null)
   const navigation = useNavigation()
 
@@ -87,7 +89,8 @@ function ChatListItem({
     t,
   })
   const time = formatChatTime(
-    unixMillisecondsToLocaleDateTime(lastMessage.message.time)
+    unixMillisecondsToLocaleDateTime(lastMessage.message.time),
+    locale
   )
 
   return (

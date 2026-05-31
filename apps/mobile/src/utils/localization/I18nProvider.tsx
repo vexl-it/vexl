@@ -4,6 +4,7 @@ import type {TranslateOptions} from 'i18n-js'
 import {I18n} from 'i18n-js'
 import {atom, useAtomValue} from 'jotai'
 import {enableHiddenFeatures, isStaging} from '../environment'
+import {normalizeFormattingLocale} from './formatting'
 
 const {dev: devTranslation, ...prodTranslations} = translations
 
@@ -68,10 +69,10 @@ export function useTranslation(): TranslationContext {
 }
 
 export function getCurrentLocale(): string {
-  return (i18n.locale === 'en_dev' ? 'en' : i18n.locale) ?? 'en'
+  return normalizeFormattingLocale(i18n.locale)
 }
 
 export function getLocaleFromTranslation(t: TFunction): string {
   const locale = t('localeName')
-  return locale === 'en_dev' || locale === 'localeName' ? 'en' : locale
+  return normalizeFormattingLocale(locale === 'localeName' ? undefined : locale)
 }

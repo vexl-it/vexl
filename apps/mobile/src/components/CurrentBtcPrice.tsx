@@ -21,13 +21,11 @@ import {
   createBtcPriceForCurrencyAtom,
   refreshBtcPriceActionAtom,
 } from '../state/currentBtcPriceAtoms'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../utils/localization/I18nProvider'
+import {useTranslation} from '../utils/localization/I18nProvider'
 import {currencies} from '../utils/localization/currency'
+import {formatDecimal} from '../utils/localization/formatting'
+import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {localizedDateTimeActionAtom} from '../utils/localization/localizedNumbersAtoms'
-import {preferencesAtom} from '../utils/preferences'
 
 interface Props
   extends Omit<TypographyProps, 'children' | 'color' | 'variant'> {
@@ -79,8 +77,7 @@ function CurrentBtcPrice({
     localizedDateTime,
   ])
 
-  const preferences = useAtomValue(preferencesAtom)
-  const currentLocale = preferences.appLanguage ?? getCurrentLocale()
+  const currentLocale = useAtomValue(formattingLocaleAtom)
 
   useEffect(() => {
     if (!customBtcPrice && !btcPriceWithState) {
@@ -121,12 +118,13 @@ function CurrentBtcPrice({
             >
               {`1 BTC = ${
                 customBtcPrice
-                  ? customBtcPrice.toLocaleString(currentLocale, {
+                  ? formatDecimal(customBtcPrice, currentLocale, {
                       maximumFractionDigits: 0,
                     })
                   : btcPriceWithState?.state === 'error'
                     ? '-'
-                    : btcPriceWithState?.btcPrice.BTC.toLocaleString(
+                    : formatDecimal(
+                        btcPriceWithState?.btcPrice.BTC ?? 0,
                         currentLocale,
                         {maximumFractionDigits: 0}
                       )

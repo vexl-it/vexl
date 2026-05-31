@@ -12,6 +12,7 @@ import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type MapValueWithRadius} from '../Map/brands'
 import MapLocationWithRadiusSelect from '../Map/components/MapLocationWithRadiusSelect'
 import {
+  calculateNormalizedSliderValueFromZoom,
   calculateZoomFromLongitudeDelta,
   calculateZoomFromNormalizedSliderValue,
 } from '../Map/components/MapLocationWithRadiusSelect.geometry'
@@ -100,6 +101,22 @@ export default function LocationRadiusPicker({
     [initialZoom]
   )
 
+  const handleMapZoomChange = useCallback(
+    (zoom: number) => {
+      setSliderValue(
+        calculateNormalizedSliderValueFromZoom({
+          zoom,
+          initialZoom,
+          zoomOut: MAX_ZOOM_OUT_FROM_INITIAL,
+          zoomIn: MAX_ZOOM_IN_FROM_INITIAL,
+          minZoom: MIN_ZOOM,
+          maxZoom: MAX_ZOOM,
+        })
+      )
+    },
+    [initialZoom]
+  )
+
   const handleConfirm = useCallback(() => {
     if (!pickedLocation) return
     onConfirm(pickedLocation)
@@ -139,6 +156,7 @@ export default function LocationRadiusPicker({
           onPick={handlePick}
           hideSlider
           mapRef={mapRef}
+          onMapZoomChange={handleMapZoomChange}
           bottomChildren={
             <Stack paddingBottom="$8" paddingHorizontal="$3">
               <YStack

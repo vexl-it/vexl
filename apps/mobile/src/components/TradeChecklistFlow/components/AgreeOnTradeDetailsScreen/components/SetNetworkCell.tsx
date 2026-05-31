@@ -67,7 +67,7 @@ function SetNetworkCell(): React.ReactElement {
           : sideNote
       }
       onPress={onPress}
-      headline="Set network"
+      headline={t('tradeChecklist.options.SET_NETWORK')}
     />
   )
 }

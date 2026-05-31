@@ -3,6 +3,7 @@ import {
   calculateAvailableSelectionFrame,
   calculateCenteredZoomRange,
   calculateLongitudeRadiusDelta,
+  calculateNormalizedSliderValueFromZoom,
   calculateRingDiameter,
   calculateZoomFromLongitudeDelta,
   calculateZoomFromNormalizedSliderValue,
@@ -176,5 +177,60 @@ describe('MapLocationWithRadiusSelect geometry', () => {
         maxZoom: 20,
       })
     ).toBe(12)
+  })
+
+  test('maps zoom back to normalized slider value', () => {
+    const input = {
+      initialZoom: 6,
+      zoomOut: 0.8,
+      zoomIn: 6,
+      minZoom: 0,
+      maxZoom: 20,
+    }
+
+    expect(
+      calculateNormalizedSliderValueFromZoom({
+        ...input,
+        zoom: 5.2,
+      })
+    ).toBe(0)
+
+    expect(
+      calculateNormalizedSliderValueFromZoom({
+        ...input,
+        zoom: 6,
+      })
+    ).toBe(0.5)
+
+    expect(
+      calculateNormalizedSliderValueFromZoom({
+        ...input,
+        zoom: 12,
+      })
+    ).toBe(1)
+  })
+
+  test('clamps zoom outside normalized slider bounds', () => {
+    const input = {
+      initialZoom: 6,
+      zoomOut: 0.8,
+      zoomIn: 6,
+      minZoom: 0,
+      maxZoom: 20,
+    }
+
+    expect(
+      calculateNormalizedSliderValueFromZoom({
+        ...input,
+        zoom: 4,
+      })
+    ).toBe(0)
+
+    expect(
+      calculateNormalizedSliderValueFromZoom({
+        ...input,
+        zoom: 15,
+      })
+    ).toBe(1)
   })
 })

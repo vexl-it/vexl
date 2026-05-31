@@ -1,12 +1,17 @@
 import {useNavigation} from '@react-navigation/native'
 import {Circle, Typography, XStack, YStack} from '@vexl-next/ui'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
 import {styled} from 'tamagui'
 import {type DonationsFlowScreenProps} from '../../../../../navigationTypes'
 import {type MyDonation} from '../../../../../state/donations/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {
+  formatDateTime,
+  formatInteger,
+} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import {localizedPriceActionAtom} from '../../../../../utils/localization/localizedNumbersAtoms'
 import {donationTitle, timestampToDateTime} from '../../../utils'
 import {DonationStatusTag} from '../../DonationStatusTag'
@@ -42,9 +47,11 @@ const ContentFrame = styled(YStack, {
 
 function expiresInText({
   expirationTime,
+  locale,
   t,
 }: {
   readonly expirationTime: number
+  readonly locale: string
   readonly t: ReturnType<typeof useTranslation>['t']
 }): string | undefined {
   const expirationDateTime = timestampToDateTime(expirationTime)
@@ -59,7 +66,9 @@ function expiresInText({
 
     return expiresInDays === 1
       ? t('donations.expiresInOneDay')
-      : t('donations.expiresInDays', {days: expiresInDays})
+      : t('donations.expiresInDays', {
+          days: formatInteger(expiresInDays, locale),
+        })
   }
 
   if (expiresInMinutes >= 60) {
@@ -67,12 +76,16 @@ function expiresInText({
 
     return expiresInHours === 1
       ? t('donations.expiresInOneHour')
-      : t('donations.expiresInHours', {hours: expiresInHours})
+      : t('donations.expiresInHours', {
+          hours: formatInteger(expiresInHours, locale),
+        })
   }
 
   return expiresInMinutes === 1
     ? t('donations.expiresInOneMinute')
-    : t('donations.expiresIn', {minutes: expiresInMinutes})
+    : t('donations.expiresIn', {
+        minutes: formatInteger(expiresInMinutes, locale),
+      })
 }
 
 function DonationsListItem({
@@ -83,8 +96,10 @@ function DonationsListItem({
   const navigation =
     useNavigation<DonationsFlowScreenProps<'MyDonations'>['navigation']>()
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const expiresIn = expiresInText({
     expirationTime: donation.expirationTime,
+    locale,
     t,
   })
 
@@ -94,8 +109,9 @@ function DonationsListItem({
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   })
-  const createdAt = timestampToDateTime(donation.createdTime).toLocaleString(
-    DateTime.DATETIME_MED
+  const createdAt = formatDateTime(
+    timestampToDateTime(donation.createdTime).toMillis(),
+    locale
   )
   const shouldShowExpiry = donation.status === 'New' && !!expiresIn
 

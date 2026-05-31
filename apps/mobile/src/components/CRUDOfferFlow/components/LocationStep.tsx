@@ -20,6 +20,8 @@ import React from 'react'
 import Animated, {FadeIn, FadeOut} from 'react-native-reanimated'
 import {useTheme, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import LocationRow from './LocationRow'
@@ -72,6 +74,7 @@ function LocationStep({
   const {t} = useTranslation()
   const theme = useTheme()
   const navigation = useNavigation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {
     listingTypeAtom,
     locationStateAtom,
@@ -97,6 +100,20 @@ function LocationStep({
 
   const hasLocations = (location?.length ?? 0) > 0
 
+  const formatLocationWithRadius = (
+    loc: NonNullable<typeof location>[number]
+  ): string => {
+    const radiusKm =
+      Math.round(longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10) / 10
+
+    return `${loc.shortAddress ?? loc.address}, ${t(
+      'map.locationSelect.radius',
+      {
+        radius: formatDecimal(radiusKm, locale),
+      }
+    )}`
+  }
+
   if (!active) {
     if (isOnline) {
       return (
@@ -116,12 +133,7 @@ function LocationStep({
       )
     }
 
-    const formatted = (location ?? []).map((loc) => {
-      const radiusKm =
-        Math.round(longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10) /
-        10
-      return `${loc.shortAddress ?? loc.address}, range ${radiusKm} km`
-    })
+    const formatted = (location ?? []).map(formatLocationWithRadius)
     const remaining = formatted.length - 2
     const headline = formatted.slice(0, 2).join('\n')
 
@@ -151,11 +163,7 @@ function LocationStep({
           {!isOnline ? (
             <YStack gap="$3">
               {location?.map((loc) => {
-                const radiusKm =
-                  Math.round(
-                    longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10
-                  ) / 10
-                const displayText = `${loc.shortAddress ?? loc.address}, range ${radiusKm} km`
+                const displayText = formatLocationWithRadius(loc)
                 return (
                   <LocationRow
                     key={loc.placeId}

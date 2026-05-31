@@ -4,6 +4,7 @@ import {useAtomValue, type Atom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Stack, XStack} from 'tamagui'
 import {createIsOtherSideTypingAtom} from '../../../state/chat/atoms/typingIndication'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
@@ -58,6 +59,7 @@ function MessageItem({
   itemAtom: Atom<MessagesListItem>
 }): React.ReactElement | null {
   const item = useAtomValue(itemAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
   const theme = useTheme()
   const {
     chatAtom,
@@ -274,7 +276,7 @@ function MessageItem({
     return (
       <Stack alignItems="center" my="$5">
         <Typography color="$foregroundTertiary" variant="micro">
-          {formatChatTime(item.time)}
+          {formatChatTime(item.time, locale)}
         </Typography>
       </Stack>
     )

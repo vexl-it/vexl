@@ -186,6 +186,54 @@ export function calculateZoomFromNormalizedSliderValue({
   )
 }
 
+export function calculateNormalizedSliderValueFromZoom({
+  zoom,
+  initialZoom,
+  zoomOut,
+  zoomIn,
+  minZoom,
+  maxZoom,
+}: {
+  zoom: number
+  initialZoom: number
+  zoomOut: number
+  zoomIn: number
+  minZoom: number
+  maxZoom: number
+}): number {
+  const sliderCenter = 0.5
+  const zoomRange = calculateAsymmetricZoomRange({
+    initialZoom,
+    zoomOut,
+    zoomIn,
+    minZoom,
+    maxZoom,
+  })
+  const boundedZoom = Math.min(Math.max(zoom, zoomRange.min), zoomRange.max)
+  const boundedInitialZoom = Math.min(
+    Math.max(initialZoom, zoomRange.min),
+    zoomRange.max
+  )
+
+  if (boundedZoom <= boundedInitialZoom) {
+    const zoomOutRange = boundedInitialZoom - zoomRange.min
+    if (zoomOutRange <= 0) return sliderCenter
+
+    return (
+      sliderCenter -
+      sliderCenter * ((boundedInitialZoom - boundedZoom) / zoomOutRange)
+    )
+  }
+
+  const zoomInRange = zoomRange.max - boundedInitialZoom
+  if (zoomInRange <= 0) return sliderCenter
+
+  return (
+    sliderCenter +
+    sliderCenter * ((boundedZoom - boundedInitialZoom) / zoomInRange)
+  )
+}
+
 export function calculateLongitudeRadiusDelta({
   centerLongitude,
   edgeLongitude,

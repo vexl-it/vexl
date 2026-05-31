@@ -2,12 +2,12 @@ import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Typography, useTheme, XmarkCancelClose, XStack} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
+import {useAtomValue} from 'jotai'
 import React from 'react'
 import {TouchableOpacity} from 'react-native'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../../../utils/localization/I18nProvider'
+import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 
 interface Props {
   locations: readonly OfferLocation[] | undefined
@@ -20,6 +20,7 @@ function LocationsList({
 }: Props): React.ReactElement[] | null {
   const {t} = useTranslation()
   const theme = useTheme()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   return locations
     ? pipe(
@@ -46,10 +47,11 @@ function LocationsList({
               {loc.address}
               {' - '}
               {t('map.locationSelect.radius', {
-                radius: Intl.NumberFormat(getCurrentLocale()).format(
+                radius: formatDecimal(
                   Math.round(
                     longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10
-                  ) / 10
+                  ) / 10,
+                  locale
                 ),
               })}
             </Typography>

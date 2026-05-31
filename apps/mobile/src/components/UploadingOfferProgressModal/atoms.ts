@@ -2,6 +2,8 @@ import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offer
 import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {translationAtom} from '../../utils/localization/I18nProvider'
+import {formatInteger} from '../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 
 export interface ShownData {
   mode: 'shown'
@@ -101,6 +103,7 @@ export const offerProgressModalActionAtoms = {
       }
     ) => {
       const {t} = get(translationAtom)
+      const locale = get(formattingLocaleAtom)
 
       if (progress.type === 'ENCRYPTING_PRIVATE_PAYLOADS') {
         const {totalToEncrypt, currentlyProcessingIndex} = progress
@@ -111,7 +114,7 @@ export const offerProgressModalActionAtoms = {
         set(dataAtom, {
           mode: 'shown',
           belowProgressRight: t('progressBar.ENCRYPTING_PRIVATE_PAYLOADS', {
-            percentDone: percentage,
+            percentDone: formatInteger(percentage, locale),
           }),
           indicateProgress: {type: 'progress', percentage},
           ...textData,

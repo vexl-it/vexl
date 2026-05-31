@@ -9,6 +9,8 @@ import {
   postedOffersAtom,
 } from '../../../state/accountStatsAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 
 const STACKED_LAYOUT_BREAKPOINT = 360
 
@@ -63,6 +65,7 @@ export function AccountStats(): React.ReactElement {
     useNavigation<RootStackScreenProps<'Account'>['navigation']>()
   const {width} = useWindowDimensions()
   const closedChats = useAtomValue(closedChatsAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
   const postedOffers = useAtomValue(postedOffersAtom)
   const stacked = width < STACKED_LAYOUT_BREAKPOINT
 
@@ -78,16 +81,16 @@ export function AccountStats(): React.ReactElement {
     <XStack flexDirection={stacked ? 'column' : 'row'} gap="$4">
       <StatsCard
         label={t('account.stats.closed')}
-        value={t('account.stats.dealsCount', {
-          count: closedChats,
+        value={t('account.stats.dealsCountFormatted', {
+          localizedString: formatInteger(closedChats, locale),
         })}
         buttonLabel={t('account.stats.exploreMarket')}
         onPress={navigateToMarketplace}
       />
       <StatsCard
         label={t('account.stats.posted')}
-        value={t('account.stats.dealsCount', {
-          count: postedOffers,
+        value={t('account.stats.dealsCountFormatted', {
+          localizedString: formatInteger(postedOffers, locale),
         })}
         buttonLabel={t('account.stats.postOffer')}
         onPress={navigateToCreateOffer}

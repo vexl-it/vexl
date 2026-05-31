@@ -1,7 +1,7 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {IconTag, OfferCard, TextTag} from '@vexl-next/ui'
 import {Option} from 'effect'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {chatWithMessagesForOfferAtom} from '../state/chat/hooks/useChatForOffer'
 import {shouldUseGrayscaleColours} from '../state/chat/utils/offerStates'
@@ -10,14 +10,13 @@ import {
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
-import {
-  getCurrentLocale,
-  useTranslation,
-} from '../utils/localization/I18nProvider'
+import {formatInteger} from '../utils/localization/formatting'
+import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
+import {useTranslation} from '../utils/localization/I18nProvider'
 import spokenLanguageToFlagEmoji from '../utils/localization/spokenLanguageToFlagEmoji'
 import {getOfferFeeLabel} from '../utils/offerAmountDetails'
 import {
-  getAmountLabel,
+  getAmountLabelActionAtom,
   getIconTagVariant,
   getIsOffering,
 } from '../utils/offerHelpers'
@@ -33,12 +32,13 @@ export default function OfferOnMarketplace({
   onPress?: () => void
 }): React.ReactElement {
   const {t} = useTranslation()
-  const locale = getCurrentLocale()
+  const locale = useAtomValue(formattingLocaleAtom)
   const {publicPart, privatePart} = offer.offerInfo
   const {ownershipInfo} = offer
   const isMine = !!ownershipInfo?.adminId
   const isMyOffer = !!ownershipInfo
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
+  const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
 
   const smallestClub = useAtomValue(
     useMemo(
@@ -78,7 +78,9 @@ export default function OfferOnMarketplace({
 
   const commonFriendsCount = privatePart.commonFriends.length
   const commonFriendsText = !isMine
-    ? t('marketplace.commonFriends', {count: commonFriendsCount})
+    ? t('marketplace.commonFriendsFormatted', {
+        localizedString: formatInteger(commonFriendsCount, locale),
+      })
     : undefined
 
   const clubNames = isMine

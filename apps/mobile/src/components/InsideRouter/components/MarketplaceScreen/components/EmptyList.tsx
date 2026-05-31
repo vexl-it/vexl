@@ -23,6 +23,8 @@ import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atom
 import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
 import {notificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
@@ -44,6 +46,7 @@ const CONNECTIONS_COUNT_HEADING_THRESHOLD = 50
 
 function useEmptyListHeading(): string {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
   const connectionsCount = useAtomValue(fistAndSecondLevelConnectionsReachAtom)
   const areNotificationsEnabled = useAtomValue(notificationsEnabledAtom)
 
@@ -55,8 +58,8 @@ function useEmptyListHeading(): string {
   }
 
   if (connectionsCount < CONNECTIONS_COUNT_HEADING_THRESHOLD) {
-    return t('emptyMarketplace.friendsCanSeeYourOffers', {
-      count: connectionsCount,
+    return t('emptyMarketplace.friendsCanSeeYourOffersFormatted', {
+      localizedString: formatInteger(connectionsCount, locale),
     })
   }
 

@@ -8,6 +8,7 @@ import React from 'react'
 import {type ChatMessageWithState} from '../../../../../state/chat/domain'
 import * as dateAndTime from '../../../../../state/tradeChecklist/utils/dateAndTime'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
 import {chatMolecule} from '../../../atoms'
 import VexlbotActionCard from './VexlbotActionCard'
 import VexlbotNextActionSuggestion from './VexlbotNextActionSuggestion'
@@ -59,6 +60,7 @@ export default function TradeChecklistDateAndTimeView({
   const store = useStore()
   const lastTradeChecklistMessage = useAtomValue(lastTradeChecklistMessageAtom)
   const dateAndTimeData = useAtomValue(tradeChecklistDateAndTimeAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
   const latestDateAndTimeDataMessageTimestamp =
     dateAndTime.getLatestMessageTimestamp(dateAndTimeData)
   const addEventToCalendar = useSetAtom(addEventToCalendarActionAtom)
@@ -75,7 +77,9 @@ export default function TradeChecklistDateAndTimeView({
     const pick = message.message.tradeChecklistUpdate.dateAndTime.picks
 
     if (!!pick && !isMessageOutdated) {
-      const acceptedDetails = [dateAndTime.toStringWithTime(pick.dateTime)]
+      const acceptedDetails = [
+        dateAndTime.toStringWithTime(pick.dateTime, locale),
+      ]
 
       return (
         <>
@@ -123,8 +127,8 @@ export default function TradeChecklistDateAndTimeView({
             DateTime.fromMillis(one.from),
             'hours'
           ).hours >= 1
-            ? dateAndTime.toStringWithRange(one)
-            : dateAndTime.toStringWithTime(one.to)
+            ? dateAndTime.toStringWithRange(one, locale)
+            : dateAndTime.toStringWithTime(one.to, locale)
         )
       )
       const pendingLabel =

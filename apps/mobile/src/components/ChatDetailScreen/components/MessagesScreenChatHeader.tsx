@@ -6,6 +6,8 @@ import {TouchableOpacity} from 'react-native'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {getOtherSideRealNameOrFriendLevel} from '../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {formatInteger} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
@@ -17,6 +19,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   const {
     chatAtom,
@@ -64,7 +67,9 @@ export function MessagesScreenChatHeader(): React.ReactElement {
             t,
           }) ?? otherSideData.userName
         }
-        subtitle={t('offer.numberOfCommon', {number: commonConnectionsCount})}
+        subtitle={t('offer.numberOfCommon', {
+          number: formatInteger(commonConnectionsCount, locale),
+        })}
         leftAction={{icon: ChevronLeft, onPress: safeGoBack}}
         avatar={
           <TouchableOpacity

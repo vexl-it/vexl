@@ -3,6 +3,8 @@ import {atom, useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
 import {DateTime} from 'luxon'
 import {useMemo} from 'react'
+import {formatTime} from '../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import unixMillisecondsToLocaleDateTime from '../../../../../../utils/unixMillisecondsToLocaleDateTime'
 import {
   checkIsOldDateTimeMessage,
@@ -12,7 +14,8 @@ import type {Item as OptionsListItem} from '../OptionsList'
 
 function generateHoursList(
   fromOptions: AvailableDateTimeOption[],
-  forOption: AvailableDateTimeOption
+  forOption: AvailableDateTimeOption,
+  locale: string
 ): Array<OptionsListItem<DateTime>> {
   // TODO: remove this logic once all devices update to new checklist DateTime format
   const isOldChecklistDateTimeMessage = checkIsOldDateTimeMessage(fromOptions)
@@ -28,7 +31,7 @@ function generateHoursList(
       data: option,
       key: option.toString(),
       outdated: option.toMillis() < DateTime.now().toMillis(),
-      title: option.toLocaleString(DateTime.TIME_SIMPLE),
+      title: formatTime(option.toMillis(), locale),
       selected: false,
     }
   })
@@ -42,8 +45,9 @@ export function useState(
   selectItem: (val: DateTime) => void
   selectedItem: OptionsListItem<DateTime> | undefined
 } {
+  const locale = useAtomValue(formattingLocaleAtom)
   const atoms = useMemo(() => {
-    const initialValue = generateHoursList(chosenDayTimes, pickedOption)
+    const initialValue = generateHoursList(chosenDayTimes, pickedOption, locale)
 
     const itemAtoms = atom(initialValue)
     const selectItemActionAtom = atom(null, (get, set, item: DateTime) => {
@@ -68,7 +72,7 @@ export function useState(
       selectItemActionAtom,
       selectedItemAtom,
     }
-  }, [chosenDayTimes, pickedOption])
+  }, [chosenDayTimes, pickedOption, locale])
 
   return {
     itemsAtoms: useAtomValue(atoms.itemsAtomsAtom),

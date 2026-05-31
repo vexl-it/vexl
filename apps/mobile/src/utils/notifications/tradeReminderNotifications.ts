@@ -8,20 +8,18 @@ import {
   type UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
 import {Duration} from 'effect/index'
 import {getDefaultStore} from 'jotai'
 import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
-import {getCurrentLocale, translationAtom} from '../localization/I18nProvider'
+import {translationAtom} from '../localization/I18nProvider'
+import {formatDateTime} from '../localization/formatting'
+import {formattingLocaleAtom} from '../localization/formattingLocaleAtom'
 import {getChannelForTradeReminders} from './notificationChannels'
 import {TradeReminderNotificationData} from './tradeReminderNotificationData'
 
 export const TRADE_REMINDER_TIME_BEFORE_MEETING = Duration.decode(
   '40 minutes'
 ).pipe(Duration.toMillis)
-
-dayjs.extend(localizedFormat)
 
 export async function scheduleTradeReminder({
   chat,
@@ -47,13 +45,14 @@ export async function scheduleTradeReminder({
     return null
   }
 
-  const {t} = getDefaultStore().get(translationAtom)
-  const locale = getCurrentLocale()
+  const store = getDefaultStore()
+  const {t} = store.get(translationAtom)
+  const locale = store.get(formattingLocaleAtom)
   const otherSideData = getOtherSideData(chat)
   const userName = otherSideData.userName
 
   // Format the meeting time using the user's locale
-  const formattedTime = dayjs(meetingTime).locale(locale).format('LLL')
+  const formattedTime = formatDateTime(meetingTime, locale)
 
   console.log('[TradeReminder] Scheduling notification', {
     chatId: chat.id,

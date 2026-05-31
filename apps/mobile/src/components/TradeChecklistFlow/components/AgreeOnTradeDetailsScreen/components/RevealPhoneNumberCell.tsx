@@ -7,11 +7,13 @@ import {
   tradeChecklistContactDataAtom,
 } from '../../../../../state/tradeChecklist/atoms/fromChatAtoms'
 import {contactRevealed} from '../../../../../state/tradeChecklist/utils/contact'
+import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import createChecklistItemStatusAtom from '../../../atoms/createChecklistItemStatusAtom'
 import {revealContactWithUiFeedbackAtom} from '../../../atoms/revealContactAtoms'
 import mapTradeChecklistItemStatusToUiState from './mapTradeChecklistItemStatusToUiState'
 
 function RevealPhoneNumberCell(): React.ReactElement {
+  const {t} = useTranslation()
   const identityRevealed = useAtomValue(identityRevealedAtom)
   const revealContact = useSetAtom(revealContactWithUiFeedbackAtom)
   const itemStatus = useAtomValue(
@@ -45,7 +47,7 @@ function RevealPhoneNumberCell(): React.ReactElement {
       onPress={() => {
         void revealContact()()
       }}
-      headline="Reveal phone number"
+      headline={t('tradeChecklist.options.REVEAL_PHONE_NUMBER')}
     />
   )
 }

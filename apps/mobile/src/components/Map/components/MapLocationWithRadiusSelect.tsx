@@ -18,7 +18,7 @@ import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {StyleSheet, type LayoutChangeEvent} from 'react-native'
-import MapView, {PROVIDER_GOOGLE} from 'react-native-maps'
+import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
@@ -26,6 +26,8 @@ import {
   getCurrentLocale,
   useTranslation,
 } from '../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {type MapValue, type MapValueWithRadius} from '../brands'
@@ -35,6 +37,7 @@ import {
   calculateAvailableSelectionFrame,
   calculateLongitudeRadiusDelta,
   calculateRingDiameter,
+  calculateZoomFromLongitudeDelta,
 } from './MapLocationWithRadiusSelect.geometry'
 import {MapPinAsset, RadiusRingAsset} from './MapSvgAssets'
 
@@ -45,6 +48,7 @@ type Props = React.ComponentProps<typeof Stack> & {
   onPick: (place: MapValueWithRadius | null) => void
   hideSlider?: boolean
   mapRef: React.RefObject<MapView | null>
+  onMapZoomChange?: (zoom: number) => void
 }
 
 const circleMargin = tokens.space[2].val
@@ -117,13 +121,14 @@ function useAtoms({
       selectedMapStateAtom,
       selectedRegionRadiusAtom: atom<string>((get) => {
         const selectedMapState = get(selectedMapStateAtom)
-        return Intl.NumberFormat(getCurrentLocale()).format(
+        return formatDecimal(
           Math.round(
             longitudeDeltaToKilometers(
               selectedMapState.radius,
               Schema.decodeSync(Latitude)(selectedMapState.center.latitude)
             ) * 10
-          ) / 10
+          ) / 10,
+          get(formattingLocaleAtom)
         )
       }),
       getGeocodedRegionAtom,
@@ -215,6 +220,7 @@ export default function MapLocationWithRadiusSelect({
   bottomChildren,
   hideSlider,
   mapRef,
+  onMapZoomChange,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
@@ -324,55 +330,69 @@ export default function MapLocationWithRadiusSelect({
   const handleMapReady = useCallback(() => {
     setIsMapReady(true)
   }, [])
-  const handleRegionChangeComplete = useCallback(() => {
-    if (!isContainerMeasured) return
-    if (ringDiameter <= 0) return
+  const handleRegionChangeComplete = useCallback(
+    (region: Region) => {
+      if (!isContainerMeasured) return
+      if (ringDiameter <= 0) return
 
-    const map = mapRef.current
-    if (!map) return
+      const map = mapRef.current
+      if (!map) return
 
-    const centerPoint = {
-      x: selectionFrame.centerX,
-      y: selectionFrame.centerY,
-    }
-    const radiusPoint = {
-      x: selectionFrame.centerX + ringDiameter / 2,
-      y: selectionFrame.centerY,
-    }
-
-    void Promise.all([
-      map.coordinateForPoint(centerPoint),
-      map.coordinateForPoint(radiusPoint),
-    ])
-      .then(([centerCoordinate, radiusCoordinate]) => {
-        const selectedMapState = {
-          center: {
-            latitude: centerCoordinate.latitude,
-            longitude: centerCoordinate.longitude,
-          },
-          radius: calculateLongitudeRadiusDelta({
-            centerLongitude: centerCoordinate.longitude,
-            edgeLongitude: radiusCoordinate.longitude,
-          }),
-        }
-
-        selectedCenterRef.current = selectedMapState.center
-        setSelectedMapState(selectedMapState)
+      const regionZoom = calculateZoomFromLongitudeDelta({
+        longitudeDelta: region.longitudeDelta,
+        mapWidth: containerSize.width,
       })
-      .catch((error: unknown) => {
-        reportError(
-          'warn',
-          new Error('Error while reading selected map region', {cause: error}),
-          {error}
-        )
-      })
-  }, [
-    isContainerMeasured,
-    mapRef,
-    ringDiameter,
-    selectionFrame,
-    setSelectedMapState,
-  ])
+      setZoom(clampZoom(regionZoom))
+      onMapZoomChange?.(regionZoom)
+
+      const centerPoint = {
+        x: selectionFrame.centerX,
+        y: selectionFrame.centerY,
+      }
+      const radiusPoint = {
+        x: selectionFrame.centerX + ringDiameter / 2,
+        y: selectionFrame.centerY,
+      }
+
+      void Promise.all([
+        map.coordinateForPoint(centerPoint),
+        map.coordinateForPoint(radiusPoint),
+      ])
+        .then(([centerCoordinate, radiusCoordinate]) => {
+          const selectedMapState = {
+            center: {
+              latitude: centerCoordinate.latitude,
+              longitude: centerCoordinate.longitude,
+            },
+            radius: calculateLongitudeRadiusDelta({
+              centerLongitude: centerCoordinate.longitude,
+              edgeLongitude: radiusCoordinate.longitude,
+            }),
+          }
+
+          selectedCenterRef.current = selectedMapState.center
+          setSelectedMapState(selectedMapState)
+        })
+        .catch((error: unknown) => {
+          reportError(
+            'warn',
+            new Error('Error while reading selected map region', {
+              cause: error,
+            }),
+            {error}
+          )
+        })
+    },
+    [
+      containerSize.width,
+      isContainerMeasured,
+      mapRef,
+      onMapZoomChange,
+      ringDiameter,
+      selectionFrame,
+      setSelectedMapState,
+    ]
+  )
 
   return (
     <Stack

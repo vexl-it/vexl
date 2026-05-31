@@ -7,6 +7,8 @@ import {chatWithMessagesKeys} from '../../../../../../state/tradeChecklist/atoms
 import calculatePercentageDifference from '../../../../../../utils/calculatePercentageDifference'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {formatDecimal} from '../../../../../../utils/localization/formatting'
+import {formattingLocaleAtom} from '../../../../../../utils/localization/formattingLocaleAtom'
 import {loadingOverlayDisplayedAtom} from '../../../../../LoadingOverlayProvider'
 import {
   btcPriceForOfferWithStateAtom,
@@ -32,6 +34,7 @@ function CalculateAmountScreen({
   },
 }: Props): React.ReactElement {
   const {t} = useTranslation()
+  const locale = useAtomValue(formattingLocaleAtom)
 
   const isOtherSideAmountDataNewerThanMine = useAtomValue(
     isOtherSideAmountDataNewerThanMineAtom
@@ -117,7 +120,10 @@ function CalculateAmountScreen({
             'tradeChecklist.calculateAmount.choseToCalculateWithCustomPrice',
             {
               username: t('common.otherSide'),
-              percentage: btcPricePercentageDifference,
+              percentage: formatDecimal(
+                Math.abs(btcPricePercentageDifference),
+                locale
+              ),
             }
           )} ${
             btcPricePercentageDifference >= 0

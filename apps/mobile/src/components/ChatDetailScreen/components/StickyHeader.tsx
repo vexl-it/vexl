@@ -13,7 +13,8 @@ import {type GestureResponderEvent} from 'react-native'
 import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
-import {formatCurrencyAmount} from '../../../utils/localization/currency'
+import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
+import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {chatMolecule} from '../atoms'
 
 function getOfferTitleKey({
@@ -96,6 +97,7 @@ function StickyHeader(): React.ReactElement | null {
   const offer = useAtomValue(offerForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showInfoBar = useAtomValue(showInfoBarAtom)
+  const currentLocale = useAtomValue(formattingLocaleAtom)
   const setShowInfoBar = useSetAtom(showInfoBarAtom)
 
   const openOfferDetail = useCallback(() => {
@@ -130,11 +132,12 @@ function StickyHeader(): React.ReactElement | null {
   const offerAmount = useMemo(() => {
     if (!offer) return null
 
-    return formatCurrencyAmount(
+    return formatFullCurrencyAmount(
       offer.offerInfo.publicPart.currency,
-      offer.offerInfo.publicPart.amountTopLimit
+      offer.offerInfo.publicPart.amountTopLimit,
+      currentLocale
     )
-  }, [offer])
+  }, [currentLocale, offer])
 
   const offerLocationTypeText = useMemo(() => {
     if (!offer) return null
@@ -230,12 +233,7 @@ function StickyHeader(): React.ReactElement | null {
             }
 
             return (
-              <XStack
-                key={item.key}
-                alignItems="center"
-                gap="$2"
-                flexShrink={1}
-              >
+              <XStack key={item.key} alignItems="center" gap="$2">
                 {index > 0 ? (
                   <Typography
                     color="$foregroundSecondary"

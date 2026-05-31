@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "Druga strona chce produkt",
   "chatDetail.offerTitle.theirs.sellProduct": "Druga strona sprzedaje produkt",
   "chatDetail.offerTitle.theirs.buyOther": "Druga strona chce coś innego",
-  "chatDetail.offerTitle.theirs.sellOther": "Druga strona oferuje coś innego"
+  "chatDetail.offerTitle.theirs.sellOther": "Druga strona oferuje coś innego",
+  "contacts.processingContacts": "Processing contacts"
 }

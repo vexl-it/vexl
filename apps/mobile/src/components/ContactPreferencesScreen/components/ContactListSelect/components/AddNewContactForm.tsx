@@ -26,6 +26,7 @@ import {userPhoneNumberAtom} from '../../../../../state/session/userDataAtoms'
 import getCountryCode from '../../../../../utils/getCountryCode'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import PreparingContactsOverlay from '../../PreparingContactsOverlay'
 import {contactSelectMolecule} from '../atom'
 
 interface Props {
@@ -87,6 +88,7 @@ export default function AddNewContactForm({
   const [contactName, setContactName] = useState(contactToEdit?.info.name ?? '')
   const [submitting, setSubmitting] = useState(false)
   const phoneNumberInputRef = useRef<React.ComponentRef<typeof Input>>(null)
+  const deferredSubmitFrameRef = useRef<number | undefined>(undefined)
   const saveToPhoneAtom = useMemo(() => atom(true), [])
   const [saveToPhone] = useAtom(saveToPhoneAtom)
   const isEditingContact = contactToEdit !== undefined
@@ -135,9 +137,17 @@ export default function AddNewContactForm({
     }
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (deferredSubmitFrameRef.current != null) {
+        cancelAnimationFrame(deferredSubmitFrameRef.current)
+      }
+    }
+  }, [])
+
   return (
     <DismissKeyboardOnPressOutside>
-      <YStack flex={1} justifyContent="space-between">
+      <YStack flex={1} justifyContent="space-between" pos="relative">
         <YStack gap="$5" paddingHorizontal="$5" paddingTop="$5">
           <YStack gap="$2">
             <XStack gap="$3" width="100%">
@@ -262,27 +272,30 @@ export default function AddNewContactForm({
 
               Keyboard.dismiss()
               setSubmitting(true)
-              const submitEffect =
-                contactToEdit === undefined
-                  ? addNewContact({
-                      contactName,
-                      phoneNumber: rawPhoneNumber,
-                      saveToPhone,
-                    })
-                  : updateContact({
-                      contact: contactToEdit,
-                      contactName,
-                      phoneNumber: rawPhoneNumber,
-                      saveToPhone,
-                    })
+              deferredSubmitFrameRef.current = requestAnimationFrame(() => {
+                deferredSubmitFrameRef.current = undefined
+                const submitEffect =
+                  contactToEdit === undefined
+                    ? addNewContact({
+                        contactName,
+                        phoneNumber: rawPhoneNumber,
+                        saveToPhone,
+                      })
+                    : updateContact({
+                        contact: contactToEdit,
+                        contactName,
+                        phoneNumber: rawPhoneNumber,
+                        saveToPhone,
+                      })
 
-              void Effect.runPromise(submitEffect)
-                .then((success) => {
-                  if (success) onClose()
-                })
-                .finally(() => {
-                  setSubmitting(false)
-                })
+                void Effect.runPromise(submitEffect)
+                  .then((success) => {
+                    if (success) onClose()
+                  })
+                  .finally(() => {
+                    setSubmitting(false)
+                  })
+              })
             }}
           >
             {t(
@@ -292,6 +305,10 @@ export default function AddNewContactForm({
             )}
           </Button>
         </YStack>
+        <PreparingContactsOverlay
+          labelKey="contacts.processingContacts"
+          visible={submitting}
+        />
       </YStack>
     </DismissKeyboardOnPressOutside>
   )

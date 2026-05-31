@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "相手は商品を求めています",
   "chatDetail.offerTitle.theirs.sellProduct": "相手は商品を販売中",
   "chatDetail.offerTitle.theirs.buyOther": "相手はほかのものを求めています",
-  "chatDetail.offerTitle.theirs.sellOther": "相手はほかのものを提供中"
+  "chatDetail.offerTitle.theirs.sellOther": "相手はほかのものを提供中",
+  "contacts.processingContacts": "Processing contacts"
 }

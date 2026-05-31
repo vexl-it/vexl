@@ -18,7 +18,6 @@ import {apiAtom} from '../../../api'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
 import {offerProgressModalActionAtoms} from '../../../components/UploadingOfferProgressModal/atoms'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
-import notEmpty from '../../../utils/notEmpty'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
@@ -39,24 +38,35 @@ import normalizeStoredContactsActionAtom from './normalizeStoredContactsActionAt
 
 const CONTACT_IMPORT_BATCHES = 1000
 
+type SubmitContactsActionParams = {
+  readonly showOfferReencryptionDialog: boolean
+  readonly manageLoadingOverlay?: boolean
+} & (
+  | {
+      readonly normalizeAndImportAll: true
+    }
+  | {
+      readonly normalizeAndImportAll: false
+      readonly numbersToImport: E164PhoneNumber[]
+    }
+)
+
 export const submitContactsActionAtom = atom(
   null,
   (
     get,
     set,
-    params: {showOfferReencryptionDialog: boolean} & (
-      | {
-          normalizeAndImportAll: true
-        }
-      | {normalizeAndImportAll: false; numbersToImport: E164PhoneNumber[]}
-    )
+    params: SubmitContactsActionParams
   ): Effect.Effect<
     'success' | 'noContactsSelected' | 'permissionsNotGranted' | 'otherError'
   > => {
     const contactApi = get(apiAtom).contact
     const {t} = get(translationAtom)
+    const manageLoadingOverlay = params.manageLoadingOverlay ?? true
 
-    set(loadingOverlayDisplayedAtom, true)
+    if (manageLoadingOverlay) {
+      set(loadingOverlayDisplayedAtom, true)
+    }
 
     return Effect.gen(function* (_) {
       const areThereAnyMyOffers = get(areThereAnyMyOffersAtom)
@@ -70,31 +80,52 @@ export const submitContactsActionAtom = atom(
 
       const numbersToImport = !params.normalizeAndImportAll
         ? params.numbersToImport
-        : allContacts.map((one) => one.computedValues.normalizedNumber)
+        : pipe(
+            allContacts,
+            Array.map((one) => one.computedValues.normalizedNumber)
+          )
 
-      const contactsThatShouldBeRemovedFromImport = HashSet.fromIterable(
-        allContacts.filter(
-          (one) =>
-            one.flags.imported &&
-            !numbersToImport.includes(one.computedValues.normalizedNumber)
+      const numbersToImportSet = HashSet.fromIterable(numbersToImport)
+
+      const allContactsByNumber = pipe(
+        allContacts,
+        Array.reduce(
+          HashMap.empty<E164PhoneNumber, StoredContactWithComputedValues>(),
+          (map, contact) =>
+            HashMap.set(map, contact.computedValues.normalizedNumber, contact)
         )
       )
 
-      const contactsThatShouldBeImported = numbersToImport
-        .map((oneNumberToImport): StoredContactWithComputedValues | undefined =>
-          allContacts.find(
-            (oneContact) =>
-              oneContact.computedValues.normalizedNumber === oneNumberToImport
+      const contactsThatShouldBeRemovedFromImport = HashSet.fromIterable(
+        pipe(
+          allContacts,
+          Array.filter(
+            (one) =>
+              one.flags.imported &&
+              !HashSet.has(
+                numbersToImportSet,
+                one.computedValues.normalizedNumber
+              )
           )
         )
-        .filter(notEmpty)
+      )
+
+      const contactsThatShouldBeImported = pipe(
+        numbersToImport,
+        Array.filterMap((numberToImport) =>
+          HashMap.get(allContactsByNumber, numberToImport)
+        )
+      )
 
       const doIncrementalUpdate =
         // If there are no contacts to remove, we can do an incremental import
         HashSet.size(contactsThatShouldBeRemovedFromImport) === 0
 
       const newContactsToImport = doIncrementalUpdate
-        ? contactsThatShouldBeImported.filter((one) => !one.flags.imported)
+        ? pipe(
+            contactsThatShouldBeImported,
+            Array.filter((one) => !one.flags.imported)
+          )
         : contactsThatShouldBeImported
 
       const importedNumbersSoFarRef = yield* _(
@@ -130,15 +161,14 @@ export const submitContactsActionAtom = atom(
                   Ref.update(hashedPhoneNumberToServerToClientHashRef, (ref) =>
                     pipe(
                       response.phoneNumberHashesToServerToClientHash,
-                      Array.map(
-                        ({hashedNumber, serverToClientHash}) =>
-                          [hashedNumber, serverToClientHash] as const
-                      ),
-                      (pairs) =>
-                        HashMap.fromIterable<
+                      Array.reduce(
+                        HashMap.empty<
                           HashedPhoneNumber,
                           ServerToClientHashedNumber
-                        >(pairs),
+                        >(),
+                        (map, {hashedNumber, serverToClientHash}) =>
+                          HashMap.set(map, hashedNumber, serverToClientHash)
+                      ),
                       (addition) => HashMap.union(addition, ref)
                     )
                   )
@@ -208,7 +238,9 @@ export const submitContactsActionAtom = atom(
                       areThereAnyMyOffers &&
                       params.showOfferReencryptionDialog
                     ) {
-                      set(loadingOverlayDisplayedAtom, false)
+                      if (manageLoadingOverlay) {
+                        set(loadingOverlayDisplayedAtom, false)
+                      }
                       set(offerProgressModalActionAtoms.show, {
                         title: t('contacts.refreshingOffers.title'),
                         bottomText: t(
@@ -311,23 +343,25 @@ export const submitContactsActionAtom = atom(
         return Effect.void
       }),
       Effect.match({
-        onFailure: (e) => {
+        onFailure: (e): 'permissionsNotGranted' | 'otherError' => {
           if (e._tag === 'ContactsPermissionsNotGrantedError')
-            return 'permissionsNotGranted' as const
-          return 'otherError' as const
+            return 'permissionsNotGranted'
+          return 'otherError'
         },
-        onSuccess: () => {
+        onSuccess: (): 'success' | 'noContactsSelected' => {
           if (
             params.normalizeAndImportAll &&
             get(normalizedContactsAtom).length === 0
           ) {
-            return 'noContactsSelected' as const
+            return 'noContactsSelected'
           }
-          return 'success' as const
+          return 'success'
         },
       }),
       Effect.tap(() => {
-        set(loadingOverlayDisplayedAtom, false)
+        if (manageLoadingOverlay) {
+          set(loadingOverlayDisplayedAtom, false)
+        }
         return Effect.void
       })
     )

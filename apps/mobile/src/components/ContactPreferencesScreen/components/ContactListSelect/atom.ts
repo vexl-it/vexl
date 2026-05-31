@@ -25,7 +25,7 @@ import {
   hashPhoneNumberE,
 } from '../../../../state/contacts/utils'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import deduplicate, {deduplicateBy} from '../../../../utils/deduplicate'
+import {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {showErrorAlert} from '../../../ErrorAlert'
@@ -45,6 +45,16 @@ const matchSorterKeys = ['info.name', 'info.numberToDisplay']
 const matchSorterThreshold = rankings.CONTAINS
 
 const addNewContactSelectedCountryCodeAtom = atom<string | undefined>(undefined)
+
+function isContactDefaultSelected(
+  contact: StoredContactWithComputedValues
+): boolean {
+  return (
+    contact.flags.imported ||
+    !contact.flags.seen ||
+    (contact.flags.importedManually && !contact.flags.imported)
+  )
+}
 
 export const contactSelectMolecule = molecule((_, getScope) => {
   const {normalizedContacts, reloadContacts} = getScope(ContactsSelectScope)
@@ -185,10 +195,40 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const selectedNumbersAtom = atom(
     new Set(
       normalizedContacts
-        .filter((one) => one.flags.imported || !one.flags.seen)
+        .filter(isContactDefaultSelected)
         .map((one) => one.computedValues.normalizedNumber)
     )
   )
+  const knownContactNumbersAtom = atom(
+    new Set(
+      normalizedContacts.map((one) => one.computedValues.normalizedNumber)
+    )
+  )
+  const syncDefaultSelectedContactsActionAtom = atom(null, (get, set) => {
+    const knownContactNumbers = get(knownContactNumbersAtom)
+    const currentContactNumbers = new Set(
+      normalizedContacts.map((one) => one.computedValues.normalizedNumber)
+    )
+    const newDefaultSelectedNumbers = normalizedContacts
+      .filter(
+        (one) =>
+          isContactDefaultSelected(one) &&
+          !knownContactNumbers.has(one.computedValues.normalizedNumber)
+      )
+      .map((one) => one.computedValues.normalizedNumber)
+
+    if (newDefaultSelectedNumbers.length > 0) {
+      set(selectedNumbersAtom, (selectedNumbers) => {
+        const nextSelectedNumbers = new Set(selectedNumbers)
+        newDefaultSelectedNumbers.forEach((number) => {
+          nextSelectedNumbers.add(number)
+        })
+        return nextSelectedNumbers
+      })
+    }
+
+    set(knownContactNumbersAtom, currentContactNumbers)
+  })
 
   const areThereAnyContactsToDisplayForSelectedTabAtom = atom((get) => {
     const contactsToDisplay = get(_contactsToDisplayAtom)
@@ -251,10 +291,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             numbersToImport: selectedNumbers,
             normalizeAndImportAll: false,
             showOfferReencryptionDialog: selectedNumbers.length > 0,
+            manageLoadingOverlay: false,
           })
         )
 
-        if (result) {
+        if (result === 'success') {
           set(toastNotificationAtom, t('contacts.contactsSubmitted'))
         }
         return result === 'success'
@@ -395,51 +436,36 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           )
         }
 
-        const submitContactsSuccess = yield* _(
-          set(submitContactsActionAtom, {
-            numbersToImport: deduplicate([
-              ...Array.fromIterable(get(selectedNumbersAtom)),
-              normalizedNumber.value,
-            ]),
-            normalizeAndImportAll: false,
-            showOfferReencryptionDialog: false,
-          })
-        )
-
         set(searchTextAtom, '')
         reloadContacts()
 
-        if (submitContactsSuccess) {
-          if (params.saveToPhone && !contactsPermissionsGranted) {
-            const shouldOpenSettings = yield* _(
-              set(globalDialogAtom, {
-                title: t('addContactDialog.contactAddedToVexlOnlyTitle'),
-                subtitle: t(
-                  'addContactDialog.contactAddedToVexlOnlyDescription'
-                ),
-                positiveButtonText: t('common.openSettings'),
-                negativeButtonText: t('common.close'),
-              })
-            )
+        if (params.saveToPhone && !contactsPermissionsGranted) {
+          const shouldOpenSettings = yield* _(
+            set(globalDialogAtom, {
+              title: t('addContactDialog.contactAddedToVexlOnlyTitle'),
+              subtitle: t('addContactDialog.contactAddedToVexlOnlyDescription'),
+              positiveButtonText: t('common.openSettings'),
+              negativeButtonText: t('common.close'),
+            })
+          )
 
-            if (shouldOpenSettings) {
-              yield* _(
-                Effect.sync(() => {
-                  void Linking.openSettings()
-                })
-              )
-            }
-          } else {
+          if (shouldOpenSettings) {
             yield* _(
-              set(globalDialogAtom, {
-                title: t('addContactDialog.contactAddedSuccessTitle'),
-                subtitle: t('addContactDialog.youCanEditThisContactAnytime'),
+              Effect.sync(() => {
+                void Linking.openSettings()
               })
             )
           }
+        } else {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('addContactDialog.contactAddedSuccessTitle'),
+              subtitle: t('addContactDialog.youCanEditThisContactAnytime'),
+            })
+          )
         }
 
-        return submitContactsSuccess === 'success'
+        return true
       }).pipe(
         Effect.catchAll((e) => {
           showErrorAlert({
@@ -467,6 +493,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     contactsFilterAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     selectedNumbersAtom,
+    syncDefaultSelectedContactsActionAtom,
     submitAllSelectedContactsActionAtom,
     importContactsFromPhoneActionAtom,
     normalizedContacts,

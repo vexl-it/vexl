@@ -1,12 +1,17 @@
 import {Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import React from 'react'
+import React, {useEffect} from 'react'
+import {type ContactsFilter} from '../../../../../state/contacts/domain'
 import {contactSelectMolecule} from '../atom'
 import ContactsList from './ContactsList'
 import ContactsListEmpty from './ContactsListEmpty'
 
-function FilteredContacts(): React.ReactElement {
+function FilteredContacts({
+  onReady,
+}: {
+  readonly onReady: (filter: ContactsFilter) => void
+}): React.ReactElement {
   const {
     contactsFilterAtom,
     newContactsToDisplayAtomsAtom,
@@ -24,6 +29,16 @@ function FilteredContacts(): React.ReactElement {
           ? nonSubmittedContactsToDisplayAtomsAtom
           : allContactsToDisplayAtomsAtom
   )
+
+  useEffect(() => {
+    const readyFrame = requestAnimationFrame(() => {
+      onReady(contactsFilter)
+    })
+
+    return () => {
+      cancelAnimationFrame(readyFrame)
+    }
+  }, [contactsFilter, onReady, toDisplay])
 
   return (
     <Stack f={1}>

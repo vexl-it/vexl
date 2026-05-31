@@ -1460,5 +1460,6 @@
   "chatDetail.offerTitle.theirs.buyProduct": "E wan product",
   "chatDetail.offerTitle.theirs.sellProduct": "E dey sell product",
   "chatDetail.offerTitle.theirs.buyOther": "E wan anoda thing",
-  "chatDetail.offerTitle.theirs.sellOther": "E dey offer anoda thing"
+  "chatDetail.offerTitle.theirs.sellOther": "E dey offer anoda thing",
+  "contacts.processingContacts": "Processing contacts"
 }

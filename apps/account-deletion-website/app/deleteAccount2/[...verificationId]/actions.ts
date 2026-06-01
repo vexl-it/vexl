@@ -131,6 +131,8 @@ export async function submitDeleteAccount2(
       }
     }
 
+    console.error('submitDeleteAccount2 unexpected error', error)
+
     return {
       error: 'Unexpected error. Try to resend the code and try again.',
     }

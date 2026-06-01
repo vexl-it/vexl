@@ -2,6 +2,7 @@
 
 import SubmitButton from '@/src/components/SubmitButton'
 import {emptyErrorFormState} from '@/src/shared/formState'
+import {DELETE_ACCOUNT_INIT_TURNSTILE_ACTION} from '@vexl-next/rest-api/src/services/user/contracts'
 import Script from 'next/script'
 import {useActionState, useEffect} from 'react'
 import {submitDeleteAccount1} from './actions'
@@ -43,7 +44,7 @@ export default function DeleteAccount1Form() {
           <div
             className="cf-turnstile"
             data-sitekey={turnstileSiteKey}
-            data-action="delete-account-init"
+            data-action={DELETE_ACCOUNT_INIT_TURNSTILE_ACTION}
             data-response-field-name="turnstileToken"
           />
         ) : null}

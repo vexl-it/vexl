@@ -16,7 +16,10 @@ export const WebflowEventItem = Schema.Struct({
   fieldData: Schema.Struct({
     'start-date-time': Schema.DateFromString,
     'event-link': Schema.String,
-    'end-date-time': Schema.optionalWith(Schema.DateFromString, {as: 'Option'}),
+    'end-date-time': Schema.optionalWith(Schema.DateFromString, {
+      nullable: true,
+      as: 'Option',
+    }),
     name: Schema.String,
     venue: Schema.String,
     'event-speakers': Schema.optionalWith(Schema.Array(Schema.String), {

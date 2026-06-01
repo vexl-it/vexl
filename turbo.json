@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "tasks": {
     "topo": {
       "dependsOn": ["^topo"]
     },
@@ -10,7 +10,7 @@
     },
     "format": {
       "outputs": ["node_modules/.cache/.prettiercache"],
-      "outputMode": "new-only"
+      "outputLogs": "new-only"
     },
     "lint": {
       "dependsOn": ["^topo"],

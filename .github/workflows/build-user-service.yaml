@@ -1,9 +1,6 @@
 name: "[Build] user-service docker image"
 run-name: "Run on commit ${{github.sha}} for environment ${{inputs.env}}"
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 permissions:
   packages: write
   contents: write

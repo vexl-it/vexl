@@ -13,12 +13,11 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {formatDecimal, formatInteger} from '../../utils/localization/formatting'
+import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import numberOfFriendsAtom from '../CRUDOfferFlow/atoms/numberOfFriendsAtom'
 import {useOpenChangeCurrency} from '../ChangeCurrency'
 import DeferredContent from '../DeferredContent'
 import AmountOfTransaction from '../OfferForm/components/AmountOfTransaction'
@@ -70,28 +69,9 @@ function FilterOffersScreen(): React.ReactElement {
   const amountFilterEnabled = useAtomValue(amountFilterEnabledAtom)
   const amountPricesReady = useAtomValue(btcPricesReadyForFilterAtom)
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
-  const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
   const locale = useAtomValue(formattingLocaleAtom)
   const amountContentVisible = amountFilterEnabled && !!currency
-
-  const connectionSubtitles = useMemo(() => {
-    if (numberOfFriends.state !== 'success') return undefined
-    return {
-      first: t('filterOffers.reachPeople', {
-        connectionsCount: formatDecimal(
-          numberOfFriends.firstLevelFriendsCount,
-          locale
-        ),
-      }),
-      second: t('filterOffers.reachPeople', {
-        connectionsCount: formatDecimal(
-          numberOfFriends.firstAndSecondLevelFriendsCount,
-          locale
-        ),
-      }),
-    }
-  }, [locale, numberOfFriends, t])
 
   const resetOfferForm = useCallback(() => {
     resetFilterOmitTextFilter()
@@ -269,11 +249,11 @@ function FilterOffersScreen(): React.ReactElement {
             {t('filterOffers.connection')}
           </Typography>
           <FriendLevel
+            hideSubtitle
             allowDeselect
             onDeselect={() => {
               setIntendedConnectionLevel(undefined)
             }}
-            subtitles={connectionSubtitles}
             intendedConnectionLevelAtom={intendedConnectionLevelAtom}
           />
 

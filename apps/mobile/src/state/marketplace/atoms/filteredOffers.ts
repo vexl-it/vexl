@@ -2,9 +2,7 @@ import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {importedContactsAtom} from '../../contacts/atom/contactsStore'
-import {createBtcPriceForCurrencyAtom} from '../../currentBtcPriceAtoms'
 import {
   filterMarketplaceOffers,
   filterOffersByCircularLocation,
@@ -14,42 +12,17 @@ import {
 } from '../utils/filterMarketplaceOffers'
 import sortOffers from '../utils/sortOffers'
 import {deltasToViewport} from '../utils/toViewport'
-import {
-  locationFilterAtom,
-  offersFilterFromStorageAtom,
-  singlePriceCurrencyAtom,
-} from './filterAtoms'
+import {locationFilterAtom, offersFilterFromStorageAtom} from './filterAtoms'
 import {mapRegionAtom} from './mapRegionAtom'
 import {offersSelectedByMarketplaceFilterBarOptionsAtom} from './offersByMarketplaceFilterBarOptions'
-
-const btcPriceWithStateForFilterCurrencyAtom = createBtcPriceForCurrencyAtom(
-  singlePriceCurrencyAtom
-)
 
 const filterMarketplaceOffersAtom = atom((get) => {
   const offers = get(offersSelectedByMarketplaceFilterBarOptionsAtom)
   const filter = get(offersFilterFromStorageAtom)
-  const btcPriceWithStateForFilterCurrency = get(
-    btcPriceWithStateForFilterCurrencyAtom
-  )
-
-  const filterPriceInSats =
-    filter.singlePrice &&
-    btcPriceWithStateForFilterCurrency &&
-    btcPriceWithStateForFilterCurrency.state !== 'loading'
-      ? calculatePriceInSats({
-          price: filter.singlePrice,
-          currentBtcPrice:
-            btcPriceWithStateForFilterCurrency.btcPrice?.BTC ?? 0,
-        })
-      : null
 
   return filterMarketplaceOffers({
     offers,
     filter,
-    filterPriceInSats,
-    getBtcPriceForCurrency: (currency) =>
-      get(createBtcPriceForCurrencyAtom(currency))?.btcPrice?.BTC,
   })
 })
 

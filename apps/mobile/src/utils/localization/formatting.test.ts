@@ -18,10 +18,19 @@ describe('normalizeFormattingLocale', () => {
   })
 
   it.each([
+    ['ar', 'ar'],
     ['cs', 'cs'],
     ['sk', 'sk'],
     ['de', 'de'],
+    ['fa', 'fa'],
+    ['fi', 'fi'],
     ['fr', 'fr'],
+    ['id', 'id'],
+    ['no', 'no'],
+    ['pcm', 'pcm'],
+    ['sv', 'sv'],
+    ['tr', 'tr'],
+    ['uk', 'uk'],
   ])(
     'keeps supported non-English language %s unchanged',
     (locale, expected) => {

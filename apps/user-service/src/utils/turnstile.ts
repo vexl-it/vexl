@@ -2,7 +2,10 @@ import {
   type UnexpectedServerError,
   UnexpectedServerError as UnexpectedServerErrorClass,
 } from '@vexl-next/domain/src/general/commonErrors'
-import {TurnstileVerificationError} from '@vexl-next/rest-api/src/services/user/contracts'
+import {
+  type TurnstileToken,
+  TurnstileVerificationError,
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Context, Effect, Layer, Option, Schema} from 'effect/index'
 import {
   turnstileExpectedHostnameConfig,
@@ -21,7 +24,7 @@ type TurnstileVerificationResponse = typeof TurnstileVerificationResponse.Type
 export interface TurnstileOperations {
   verifyToken: (args: {
     expectedAction: string
-    token: string
+    token: TurnstileToken
   }) => Effect.Effect<void, TurnstileVerificationError | UnexpectedServerError>
 }
 
@@ -93,15 +96,6 @@ export class TurnstileService extends Context.Tag('TurnstileService')<
       }) => {
         if (Option.isNone(turnstileSecretKey)) {
           return Effect.void
-        }
-
-        if (token.length === 0) {
-          return Effect.fail(
-            new TurnstileVerificationError({
-              status: 400,
-              reason: 'MissingToken',
-            })
-          )
         }
 
         return Effect.tryPromise({

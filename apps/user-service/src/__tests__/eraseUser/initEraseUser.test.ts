@@ -2,6 +2,7 @@ import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.bra
 import {AesGtmCypher} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
+  TurnstileToken,
   TurnstileVerificationError,
   UnableToSendVerificationSmsError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
@@ -23,6 +24,13 @@ beforeEach(() => {
   verifyTurnstileTokenMock.mockClear()
 })
 
+const validTurnstileToken = Schema.decodeSync(TurnstileToken)(
+  'valid-turnstile-token'
+)
+const invalidTurnstileToken = Schema.decodeSync(TurnstileToken)(
+  'invalid-turnstile-token'
+)
+
 describe('Initialize erase user', () => {
   it('Issues sms code when requested', async () => {
     await runPromiseInMockedEnvironment(
@@ -35,7 +43,7 @@ describe('Initialize erase user', () => {
             }),
             payload: {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-              turnstileToken: 'valid-turnstile-token',
+              turnstileToken: validTurnstileToken,
             },
           })
         )
@@ -82,7 +90,7 @@ describe('Initialize erase user', () => {
             }),
             payload: {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-              turnstileToken: 'valid-turnstile-token',
+              turnstileToken: validTurnstileToken,
             },
           }),
           Effect.either
@@ -114,7 +122,7 @@ describe('Initialize erase user', () => {
             }),
             payload: {
               phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-              turnstileToken: 'invalid-turnstile-token',
+              turnstileToken: invalidTurnstileToken,
             },
           }),
           Effect.either

@@ -57,16 +57,32 @@ export async function submitDeleteAccount1(
       deleteAccount1FormSchema,
       formData
     )
-    const [{createUserPublicApi}, {E164PhoneNumber}] = await Promise.all([
-      import('@/src/server/userApi'),
-      import('@vexl-next/domain/src/general/E164PhoneNumber.brand'),
-    ])
+    const [{createUserPublicApi}, {E164PhoneNumber}, {TurnstileToken}] =
+      await Promise.all([
+        import('@/src/server/userApi'),
+        import('@vexl-next/domain/src/general/E164PhoneNumber.brand'),
+        import('@vexl-next/rest-api/src/services/user/contracts'),
+      ])
     const phoneNumber = Effect.runSync(
       Schema.decodeUnknown(E164PhoneNumber)(rawPhoneNumber)
     )
+    const decodedTurnstileToken =
+      Schema.decodeEither(TurnstileToken)(turnstileToken)
+
+    if (Either.isLeft(decodedTurnstileToken)) {
+      return {
+        error: 'Human verification failed. Please try again.',
+      }
+    }
+
     const userApi = await createUserPublicApi()
     const result = await Effect.runPromise(
-      Effect.either(userApi.initEraseUser({phoneNumber, turnstileToken}))
+      Effect.either(
+        userApi.initEraseUser({
+          phoneNumber,
+          turnstileToken: decodedTurnstileToken.right,
+        })
+      )
     )
 
     if (Either.isLeft(result)) {

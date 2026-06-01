@@ -79,8 +79,7 @@ export async function submitDeleteAccount2(
       )
 
       return {
-        error:
-          'Your account was deleted, but we could not finish removing your network data. Please contact Vexl support.',
+        error: 'Unexpected error. Try to resend the code and try again.',
       }
     }
 
@@ -101,7 +100,8 @@ export async function submitDeleteAccount2(
       )
 
       return {
-        error: 'Unexpected error. Try to resend the code and try again.',
+        error:
+          'Your account was deleted, but we could not finish removing your network data. Please contact Vexl support.',
       }
     }
 

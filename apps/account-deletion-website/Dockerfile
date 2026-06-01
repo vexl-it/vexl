@@ -1,6 +1,8 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
 
+RUN corepack enable && corepack prepare yarn@3.4.1 --activate
+
 COPY . .
 
 WORKDIR /app/apps/account-deletion-website

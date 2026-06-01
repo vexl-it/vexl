@@ -1,3 +1,4 @@
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe, Schema} from 'effect'
 import {type OffersFilter} from '../domain'
@@ -5,6 +6,9 @@ import {filterMarketplaceOffers} from './filterMarketplaceOffers'
 
 const offerPublicKey =
   'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVUTlhndG9GMVRBNVVrVWZ4YWFBbHp4cDBRSFlwZS8yVApFSk1nQXR0d0tabnZBZFBUVUNXdCtweGhpWGUzNDNlbjNndHI5OHZoS1pZSGc4VGRQT3JHMEE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K'
+const clubUuid = Schema.decodeSync(ClubUuid)(
+  '11111111-1111-4111-8111-111111111111'
+)
 
 function makeOffer({
   id,
@@ -12,12 +16,14 @@ function makeOffer({
   currency,
   amountBottomLimit,
   amountTopLimit,
+  clubIds,
 }: {
   readonly id: string
   readonly listingType: 'BITCOIN' | 'PRODUCT' | 'OTHER'
   readonly currency: 'CZK' | 'EUR'
   readonly amountBottomLimit: number
   readonly amountTopLimit: number
+  readonly clubIds?: readonly ClubUuid[]
 }): Schema.Schema.Type<typeof OneOfferInState> {
   return Schema.decodeSync(OneOfferInState)({
     offerInfo: {
@@ -28,7 +34,7 @@ function makeOffer({
         verifiedCommonFriends: [],
         friendLevel: ['FIRST_DEGREE'],
         symmetricKey: 'symmetric-key',
-        clubIds: [],
+        clubIds: clubIds ?? [],
       },
       publicPart: {
         offerPublicKey,
@@ -94,6 +100,14 @@ function filterOfferIds({
           amountBottomLimit: 20_000,
           amountTopLimit: 20_000,
         }),
+        makeOffer({
+          id: 'club-offer',
+          listingType: 'BITCOIN',
+          currency: 'CZK',
+          amountBottomLimit: 10_000,
+          amountTopLimit: 10_000,
+          clubIds: [clubUuid],
+        }),
       ],
       filter,
     }),
@@ -113,7 +127,7 @@ describe('filterMarketplaceOffers amount filter', () => {
           amountTopLimit: 50_000,
         },
       })
-    ).toEqual(['btc-overlap', 'product-inside'])
+    ).toEqual(['btc-overlap', 'product-inside', 'club-offer'])
   })
 
   test('keeps every listing type when amount filter is inactive', () => {
@@ -129,6 +143,25 @@ describe('filterMarketplaceOffers amount filter', () => {
       'product-inside',
       'service-outside',
       'service-wrong-currency',
+      'club-offer',
+    ])
+  })
+
+  test('treats an empty clubs UUID list as an inactive clubs filter', () => {
+    expect(
+      filterOfferIds({
+        filter: {
+          filterBarOptions: new Set(),
+          spokenLanguages: [],
+          clubsUuids: [],
+        },
+      })
+    ).toEqual([
+      'btc-overlap',
+      'product-inside',
+      'service-outside',
+      'service-wrong-currency',
+      'club-offer',
     ])
   })
 })

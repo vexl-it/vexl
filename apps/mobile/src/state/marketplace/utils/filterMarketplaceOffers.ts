@@ -143,6 +143,7 @@ export function filterMarketplaceOffers({
 }): OneOfferInState[] {
   const shouldCombineOnlineWithLocation =
     shouldCombineOnlineOffersWithLocationFilter(filter)
+  const filterClubUuids = filter.clubsUuids
 
   return pipe(
     offers,
@@ -192,12 +193,12 @@ export function filterMarketplaceOffers({
         return false
 
       if (
-        filter.clubsUuids &&
+        Array.isNonEmptyReadonlyArray(filterClubUuids ?? []) &&
         offer.offerInfo.privatePart.clubIds.length > 0 &&
         !Array.isNonEmptyArray(
           Array.intersection(
             offer.offerInfo.privatePart.clubIds,
-            filter.clubsUuids
+            filterClubUuids ?? []
           )
         )
       )

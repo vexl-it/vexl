@@ -511,7 +511,10 @@ const setFilterAtomsActionAtom = atom(
   (get, set, filterValue: OffersFilter) => {
     set(filterBarOptionsAtom, filterValue.filterBarOptions)
     set(sortingAtom, filterValue.sort)
-    set(clubsFilterEnabledBaseAtom, filterValue.clubsUuids !== undefined)
+    set(
+      clubsFilterEnabledBaseAtom,
+      Array.isNonEmptyReadonlyArray(filterValue.clubsUuids ?? [])
+    )
     set(setClubsInFilterActionAtom, filterValue.clubsUuids)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }

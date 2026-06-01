@@ -111,8 +111,9 @@ export const clubsFilterEnabledAtom = atom(
     )
     set(clubsFilterEnabledBaseAtom, enabled)
     if (enabled) {
-      const allClubUuids = get(clubsWithMembersAtom).map(
-        (club) => club.club.uuid
+      const allClubUuids = pipe(
+        get(clubsWithMembersAtom),
+        Array.map((club) => club.club.uuid)
       )
       set(clubsUuidsFilterAtom, allClubUuids)
     }
@@ -452,13 +453,25 @@ export const setClubsInFilterActionAtom = atom(
   null,
   (get, set, filterClubsUuids: readonly ClubUuid[] | undefined) => {
     const clubsWithMembers = get(clubsWithMembersAtom)
-    const myClubsUuids = clubsWithMembers.map((club) => club.club.uuid)
 
     if (filterClubsUuids) {
+      if (!Array.isNonEmptyReadonlyArray(clubsWithMembers)) {
+        set(clubsUuidsFilterAtom, filterClubsUuids)
+        return
+      }
+
       // user can leave the club but UUID can be still in the filter storage
       // we need to clean that up
-      set(clubsUuidsFilterAtom, () =>
-        filterClubsUuids.filter((uuid) => myClubsUuids.includes(uuid))
+      const myClubsUuids = pipe(
+        clubsWithMembers,
+        Array.map((club) => club.club.uuid)
+      )
+      set(
+        clubsUuidsFilterAtom,
+        pipe(
+          filterClubsUuids,
+          Array.filter((uuid) => Array.contains(myClubsUuids, uuid))
+        )
       )
     } else {
       set(clubsUuidsFilterAtom, undefined)
@@ -498,10 +511,7 @@ const setFilterAtomsActionAtom = atom(
   (get, set, filterValue: OffersFilter) => {
     set(filterBarOptionsAtom, filterValue.filterBarOptions)
     set(sortingAtom, filterValue.sort)
-    set(
-      clubsFilterEnabledBaseAtom,
-      filterValue.clubsUuids !== undefined && filterValue.clubsUuids.length > 0
-    )
+    set(clubsFilterEnabledBaseAtom, filterValue.clubsUuids !== undefined)
     set(setClubsInFilterActionAtom, filterValue.clubsUuids)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
   }
@@ -585,17 +595,6 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
 
 export const filteredOffersPreviewCountAtom = atom((get) => {
   const draftFilter = getDraftOffersFilter(get)
-  const btcPriceWithState = get(btcPriceForOfferWithCurrencyAtom)
-
-  const filterPriceInSats =
-    draftFilter.singlePrice &&
-    btcPriceWithState &&
-    btcPriceWithState.state !== 'loading'
-      ? calculatePriceInSats({
-          price: draftFilter.singlePrice,
-          currentBtcPrice: btcPriceWithState.btcPrice?.BTC ?? 0,
-        })
-      : null
 
   const offersAfterBarFilter = selectOffersByMarketplaceFilterBarOptions({
     offers: get(offersToSeeInMarketplaceAtom),
@@ -605,9 +604,6 @@ export const filteredOffersPreviewCountAtom = atom((get) => {
   const filteredOffers = filterMarketplaceOffers({
     offers: offersAfterBarFilter,
     filter: draftFilter,
-    filterPriceInSats,
-    getBtcPriceForCurrency: (currency) =>
-      get(createBtcPriceForCurrencyAtom(currency))?.btcPrice?.BTC,
   })
 
   return filterOffersByCircularLocation({

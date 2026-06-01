@@ -2,8 +2,23 @@ import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
-import {newOfferId, OfferPublicPart} from '@vexl-next/domain/src/general/offers'
+import {
+  type BtcNetwork,
+  CurrencyCode,
+  type IntendedConnectionLevel,
+  type ListingType,
+  type LocationState,
+  newOfferId,
+  OfferPublicPart,
+  type OfferType,
+  type PaymentMethod,
+  type ProductCategory,
+  productCategoryOptions,
+  type SpokenLanguage,
+  spokenLanguagesOptions,
+} from '@vexl-next/domain/src/general/offers'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
@@ -24,6 +39,7 @@ import {
   pipe as effectPipe,
   Either,
   HashMap,
+  Option,
   Schema,
 } from 'effect'
 import * as BackgroundTask from 'expo-background-task'
@@ -46,6 +62,9 @@ import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessa
 import focusChatByInboxKeyAndSenderKey from '../../state/chat/atoms/focusChatByInboxKeyAndSenderKey'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../state/chat/hooks/useCreateInbox'
+import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
+import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
+import {type ClubWithMembers} from '../../state/clubs/domain'
 import connectionStateAtom, {
   syncConnectionsActionAtom,
 } from '../../state/connections/atom/connectionStateAtom'
@@ -111,6 +130,8 @@ import {
 } from './utils/generateTestContacts'
 
 const DEBUG_EUROPE_OFFERS_PREFIX = 'debug-europe-offer-'
+const DEBUG_FILTER_TEST_OFFERS_PREFIX = 'debug-filter-test-offer-'
+const DEBUG_FILTER_TEST_OFFERS_COUNT = 9
 
 const DEFAULT_EUROPE_DEBUG_LOCATION = {
   name: 'Prague',
@@ -223,6 +244,247 @@ function createDebugEuropeOfferPublicPart({
     listingType: 'BITCOIN',
     authorClientVersion: version,
   })
+}
+
+interface DebugFilterTestOfferSpec {
+  readonly label: string
+  readonly listingType: ListingType
+  readonly offerType: OfferType
+  readonly productCategory?: ProductCategory
+  readonly locationState: LocationState[]
+  readonly paymentMethod: PaymentMethod[]
+  readonly btcNetwork: BtcNetwork[]
+  readonly spokenLanguages: SpokenLanguage[]
+  readonly intendedConnectionLevel: IntendedConnectionLevel
+  readonly useSelectedClub: boolean
+  readonly priceMode: 'RANGE' | 'SINGLE'
+}
+
+interface DebugFilterTestLocation {
+  readonly placeId: string
+  readonly latitude: number
+  readonly longitude: number
+  readonly radius: number
+  readonly address: string
+  readonly shortAddress: string
+}
+
+function randomDebugFilterTestAmount({
+  min,
+  max,
+}: {
+  readonly min: number
+  readonly max: number
+}): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function pickDebugFilterTestCurrencies(): CurrencyCode[] {
+  const selectedCurrencies: CurrencyCode[] = []
+
+  while (selectedCurrencies.length < 5) {
+    const currency =
+      CurrencyCode.literals[
+        randomDebugFilterTestAmount({
+          min: 0,
+          max: CurrencyCode.literals.length - 1,
+        })
+      ]
+
+    if (currency && !selectedCurrencies.includes(currency)) {
+      selectedCurrencies.push(currency)
+    }
+  }
+
+  return selectedCurrencies
+}
+
+function debugFilterTestLocation(index: number): DebugFilterTestLocation[] {
+  const city =
+    EUROPE_DEBUG_LOCATIONS[(index * 3 + 2) % EUROPE_DEBUG_LOCATIONS.length] ??
+    DEFAULT_EUROPE_DEBUG_LOCATION
+
+  return [
+    {
+      placeId: `${DEBUG_FILTER_TEST_OFFERS_PREFIX}place-${index}`,
+      latitude: city.latitude + (index % 3) * 0.04,
+      longitude: city.longitude - (index % 2) * 0.05,
+      radius: 0.2,
+      address: `${city.name} filter fixture ${index + 1}`,
+      shortAddress: city.name,
+    },
+  ]
+}
+
+function languageAt(index: number): SpokenLanguage {
+  return spokenLanguagesOptions[index % spokenLanguagesOptions.length] ?? 'ENG'
+}
+
+function createDebugFilterTestOfferSpecs(): readonly DebugFilterTestOfferSpec[] {
+  const productOffers = Array.map(
+    productCategoryOptions,
+    (productCategory, index): DebugFilterTestOfferSpec => ({
+      label: `${index % 2 === 0 ? 'BUY_PRODUCT' : 'SELL_PRODUCT'} ${productCategory}`,
+      listingType: 'PRODUCT',
+      offerType: index % 2 === 0 ? 'SELL' : 'BUY',
+      productCategory,
+      locationState:
+        index === 2
+          ? ['IN_PERSON', 'ONLINE']
+          : index % 2 === 0
+            ? ['ONLINE']
+            : ['IN_PERSON'],
+      paymentMethod:
+        index === 2
+          ? ['CASH', 'BANK', 'REVOLUT']
+          : index % 2 === 0
+            ? ['BANK']
+            : ['CASH'],
+      btcNetwork:
+        index === 0
+          ? ['LIGHTING']
+          : index === 1
+            ? ['ON_CHAIN']
+            : ['LIGHTING', 'ON_CHAIN'],
+      spokenLanguages: [languageAt(index + 2), languageAt(index + 5)],
+      intendedConnectionLevel: index === 1 ? 'FIRST' : 'ALL',
+      useSelectedClub: index === 2,
+      priceMode: 'SINGLE',
+    })
+  )
+
+  return [
+    {
+      label: 'BUY_BTC',
+      listingType: 'BITCOIN',
+      offerType: 'SELL',
+      locationState: ['IN_PERSON'],
+      paymentMethod: ['CASH'],
+      btcNetwork: ['LIGHTING'],
+      spokenLanguages: ['ENG'],
+      intendedConnectionLevel: 'ALL',
+      useSelectedClub: false,
+      priceMode: 'RANGE',
+    },
+    {
+      label: 'SELL_BTC',
+      listingType: 'BITCOIN',
+      offerType: 'BUY',
+      locationState: ['ONLINE'],
+      paymentMethod: ['BANK', 'REVOLUT'],
+      btcNetwork: ['ON_CHAIN'],
+      spokenLanguages: ['DEU', 'ESP'],
+      intendedConnectionLevel: 'FIRST',
+      useSelectedClub: false,
+      priceMode: 'RANGE',
+    },
+    ...productOffers,
+    {
+      label: 'HIRE_SERVICE',
+      listingType: 'OTHER',
+      offerType: 'SELL',
+      locationState: ['IN_PERSON', 'ONLINE'],
+      paymentMethod: ['CASH', 'BANK'],
+      btcNetwork: ['LIGHTING', 'ON_CHAIN'],
+      spokenLanguages: ['FRA', 'ITA'],
+      intendedConnectionLevel: 'ALL',
+      useSelectedClub: false,
+      priceMode: 'SINGLE',
+    },
+    {
+      label: 'PROVIDE_SERVICE',
+      listingType: 'OTHER',
+      offerType: 'BUY',
+      locationState: ['ONLINE'],
+      paymentMethod: ['REVOLUT'],
+      btcNetwork: ['LIGHTING'],
+      spokenLanguages: ['CZE', 'SVK', 'ENG'],
+      intendedConnectionLevel: 'FIRST',
+      useSelectedClub: false,
+      priceMode: 'SINGLE',
+    },
+  ]
+}
+
+function createDebugFilterTestOfferPublicPart({
+  index,
+  offerPublicKey,
+  spec,
+  currency,
+}: {
+  readonly index: number
+  readonly offerPublicKey: PublicKeyPemBase64
+  readonly spec: DebugFilterTestOfferSpec
+  readonly currency: CurrencyCode
+}): OfferPublicPart {
+  const amount =
+    spec.priceMode === 'RANGE'
+      ? randomDebugFilterTestAmount({min: 5_000, max: 60_000})
+      : randomDebugFilterTestAmount({min: 80, max: 4_500})
+  const amountTopLimit =
+    spec.priceMode === 'RANGE'
+      ? amount + randomDebugFilterTestAmount({min: 5_000, max: 40_000})
+      : amount
+  const productCategoryPayload = spec.productCategory
+    ? {
+        productCategory: spec.productCategory,
+        productCategories: [spec.productCategory],
+      }
+    : {}
+
+  return Schema.decodeSync(OfferPublicPart)({
+    offerPublicKey,
+    location: debugFilterTestLocation(index),
+    offerDescription: `${DEBUG_FILTER_TEST_OFFERS_PREFIX}${index + 1} ${spec.label}`,
+    amountBottomLimit: amount,
+    amountTopLimit,
+    feeState: 'WITHOUT_FEE',
+    feeAmount: 0,
+    locationState: spec.locationState,
+    paymentMethod: spec.paymentMethod,
+    btcNetwork: spec.btcNetwork,
+    currency,
+    spokenLanguages: spec.spokenLanguages,
+    expirationDate: new Date(
+      Date.now() + 30 * 24 * 60 * 60 * 1000
+    ).toISOString(),
+    offerType: spec.offerType,
+    activePriceState: 'NONE',
+    activePriceValue: 0,
+    activePriceCurrency: currency,
+    active: true,
+    groupUuids: [],
+    listingType: spec.listingType,
+    ...productCategoryPayload,
+    authorClientVersion: version,
+  })
+}
+
+function getFirstDebugFilterTestClub({
+  clubsWithMembers,
+  clubsToKeyHolder,
+}: {
+  readonly clubsWithMembers: readonly ClubWithMembers[]
+  readonly clubsToKeyHolder: Partial<Record<ClubUuid, unknown>>
+}): ClubWithMembers | undefined {
+  return effectPipe(
+    clubsWithMembers,
+    Array.findFirst((clubWithMembers) =>
+      Boolean(clubsToKeyHolder[clubWithMembers.club.uuid])
+    ),
+    Option.getOrUndefined
+  )
+}
+
+function serializeDebugFilterTestOfferError(error: unknown): string {
+  try {
+    return (
+      JSON.stringify(error, null, 2)?.slice(0, 1000) ??
+      String(error).slice(0, 1000)
+    )
+  } catch {
+    return String(error).slice(0, 1000)
+  }
 }
 
 function DebugScreen(): React.ReactElement {
@@ -469,6 +731,115 @@ function DebugScreen(): React.ReactElement {
                     Alert.alert(
                       'Error',
                       JSON.stringify(error, null, 2).slice(0, 1000)
+                    )
+                  })
+                ),
+                Effect.runFork
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Create filter test offers with different attributes"
+            onPress={() => {
+              if (packageName === 'it.vexl.next') {
+                Alert.alert('Not available in production')
+                return
+              }
+
+              const selectedClub = getFirstDebugFilterTestClub({
+                clubsWithMembers: store.get(clubsWithMembersAtom),
+                clubsToKeyHolder: store.get(clubsToKeyHolderAtom),
+              })
+
+              if (!selectedClub) {
+                Alert.alert(
+                  'Club required',
+                  'Join or create a club first. The filter-test fixture needs one club available in both club members state and club key-holder state.'
+                )
+                return
+              }
+
+              const selectedCurrencies = pickDebugFilterTestCurrencies()
+              const specs = createDebugFilterTestOfferSpecs()
+              const specsWithIndex = Array.map(specs, (spec, index) => ({
+                spec,
+                index,
+              }))
+
+              Alert.alert(
+                'Started',
+                `Creating ${DEBUG_FILTER_TEST_OFFERS_COUNT} filter test offers on the server. This can take a while.`
+              )
+
+              pipe(
+                Effect.forEach(
+                  specsWithIndex,
+                  ({spec, index}) =>
+                    Effect.gen(function* (_) {
+                      const offerId = newOfferId()
+                      const inbox = yield* _(
+                        store.set(upsertInboxOnBeAndLocallyActionAtom, {
+                          for: 'myOffer',
+                          offerId,
+                        })
+                      )
+                      const currency =
+                        selectedCurrencies[index % selectedCurrencies.length] ??
+                        'EUR'
+                      const intendedClubs = spec.useSelectedClub
+                        ? [selectedClub.club.uuid]
+                        : []
+
+                      console.log(
+                        `Creating debug filter test offer ${index + 1}/${specs.length}: ${spec.label}`
+                      )
+
+                      return yield* _(
+                        store.set(createOfferActionAtom, {
+                          offerId,
+                          payloadPublic: createDebugFilterTestOfferPublicPart({
+                            index,
+                            offerPublicKey:
+                              inbox.inbox.privateKey.publicKeyPemBase64,
+                            spec,
+                            currency,
+                          }),
+                          intendedConnectionLevel: spec.intendedConnectionLevel,
+                          intendedClubs,
+                          offerKey: inbox.inbox.privateKey,
+                          onProgress: (progress) => {
+                            console.log(
+                              `Creating debug filter test offer ${
+                                index + 1
+                              }/${specs.length}: ${JSON.stringify(progress)}`
+                            )
+                          },
+                        })
+                      )
+                    }),
+                  {concurrency: 1}
+                ),
+                Effect.tap((createdOffers) =>
+                  Effect.sync(() => {
+                    Alert.alert(
+                      'Done',
+                      `Created ${createdOffers.length} filter test offers.\nCurrencies: ${selectedCurrencies.join(
+                        ', '
+                      )}\nClub: ${selectedClub.club.name}`
+                    )
+                  })
+                ),
+                Effect.tapError((error) =>
+                  Effect.sync(() => {
+                    console.error(
+                      'Error creating debug filter test offers',
+                      error
+                    )
+                    Alert.alert(
+                      'Error',
+                      serializeDebugFilterTestOfferError(error)
                     )
                   })
                 ),

@@ -1,11 +1,9 @@
-import {type CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
 import {
   type OfferLocation,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, pipe} from 'effect'
-import calculatePriceInSats from '../../../utils/calculatePriceInSats'
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
 import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
 import areIncluded from './areIncluded'
@@ -48,6 +46,36 @@ export function isBtcOffer(offer: OneOfferInState): boolean {
     !offer.offerInfo.publicPart.listingType ||
     offer.offerInfo.publicPart.listingType === 'BITCOIN'
   )
+}
+
+function offerMatchesAmountFilter({
+  offer,
+  filter,
+}: {
+  offer: OneOfferInState
+  filter: OffersFilter
+}): boolean {
+  if (!isAmountFilterEnabled(filter)) return true
+
+  if (
+    filter.currency &&
+    filter.currency !== offer.offerInfo.publicPart.currency
+  )
+    return false
+
+  if (
+    filter.amountTopLimit !== undefined &&
+    offer.offerInfo.publicPart.amountBottomLimit > filter.amountTopLimit
+  )
+    return false
+
+  if (
+    filter.amountBottomLimit !== undefined &&
+    offer.offerInfo.publicPart.amountTopLimit < filter.amountBottomLimit
+  )
+    return false
+
+  return true
 }
 
 export function offerMatchesMarketplaceFilterBarOption(
@@ -109,17 +137,12 @@ export function selectOffersByMarketplaceFilterBarOptions({
 export function filterMarketplaceOffers({
   offers,
   filter,
-  filterPriceInSats,
-  getBtcPriceForCurrency,
 }: {
   offers: OneOfferInState[]
   filter: OffersFilter
-  filterPriceInSats: number | null
-  getBtcPriceForCurrency: (currency: CurrencyCode) => number | undefined
 }): OneOfferInState[] {
   const shouldCombineOnlineWithLocation =
     shouldCombineOnlineOffersWithLocationFilter(filter)
-  const shouldFilterByCurrency = isAmountFilterEnabled(filter)
 
   return pipe(
     offers,
@@ -193,13 +216,6 @@ export function filterMarketplaceOffers({
 
       if (isBtcOffer(offer)) {
         if (
-          filter.currency &&
-          shouldFilterByCurrency &&
-          filter.currency !== offer.offerInfo.publicPart.currency
-        )
-          return false
-
-        if (
           filter.paymentMethod &&
           !shouldCombineOnlineWithLocation &&
           !areIncluded(
@@ -208,37 +224,9 @@ export function filterMarketplaceOffers({
           )
         )
           return false
-
-        if (
-          filter.amountTopLimit &&
-          offer.offerInfo.publicPart.amountBottomLimit > filter.amountTopLimit
-        )
-          return false
-
-        if (
-          filter.amountBottomLimit &&
-          offer.offerInfo.publicPart.amountTopLimit < filter.amountBottomLimit
-        )
-          return false
-
-        return true
       }
 
-      if (!filterPriceInSats) return true
-
-      if (
-        offer.offerInfo.publicPart.amountBottomLimit === 0 &&
-        offer.offerInfo.publicPart.amountTopLimit === 0
-      )
-        return true
-
-      return (
-        (calculatePriceInSats({
-          price: offer.offerInfo.publicPart.amountBottomLimit,
-          currentBtcPrice:
-            getBtcPriceForCurrency(offer.offerInfo.publicPart.currency) ?? 0,
-        }) ?? 0) <= filterPriceInSats
-      )
+      return offerMatchesAmountFilter({offer, filter})
     })
   )
 }

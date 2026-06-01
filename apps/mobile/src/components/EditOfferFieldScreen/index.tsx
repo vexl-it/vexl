@@ -143,6 +143,7 @@ function EditOfferFieldScreen({
               />
               <YStack gap="$5" paddingVertical="$5">
                 <FriendLevel
+                  hideSubtitle
                   intendedConnectionLevelAtom={intendedConnectionLevelAtom}
                 />
                 <Button variant="primary" size="large" onPress={handleComplete}>

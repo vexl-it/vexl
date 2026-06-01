@@ -12,9 +12,6 @@ on:
           - json
           - csv
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     name: Generate daily limits
@@ -39,7 +36,7 @@ jobs:
         run: yarn workspace @vexl-next/generate-api-call-limits print-api-call-limits --output=${{ github.event.inputs.env }} > daily-limits.${{ github.event.inputs.env }}
 
       - name: Upload daily limits file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: daily-limits-${{ github.event.inputs.env }}
           path: daily-limits.${{ github.event.inputs.env }}

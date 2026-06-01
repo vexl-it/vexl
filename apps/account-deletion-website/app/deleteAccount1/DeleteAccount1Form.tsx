@@ -15,6 +15,12 @@ export default function DeleteAccount1Form() {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
   useEffect(() => {
+    if (!turnstileSiteKey) {
+      console.error('Turnstile site key is not configured.')
+    }
+  }, [turnstileSiteKey])
+
+  useEffect(() => {
     if (!state.error || !turnstileSiteKey) return
     window.turnstile?.reset()
   }, [state.error, turnstileSiteKey])

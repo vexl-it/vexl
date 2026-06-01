@@ -76,12 +76,16 @@ export const getEventsHandler = HttpApiBuilder.handler(
       const events = yield* _(webflowService.fetchEvents())
       const speakers = yield* _(webflowService.fetchSpeakers())
 
-      return {
+      const response = {
         events: webflowEventsToResponse({
           speakers: speakers.items,
           events: events.items,
         }),
       } satisfies EventsResponse
+
+      yield* _(cache.saveEventsToCacheForked(response))
+
+      return response
     }).pipe(
       Effect.catchAll(
         (e) =>
@@ -89,11 +93,6 @@ export const getEventsHandler = HttpApiBuilder.handler(
             cause: e,
             status: 500,
           })
-      ),
-      Effect.tap((data) =>
-        CacheService.pipe(
-          Effect.flatMap((cache) => cache.saveEventsToCacheForked(data))
-        )
       ),
       Effect.withSpan('getEvents'),
       makeEndpointEffect

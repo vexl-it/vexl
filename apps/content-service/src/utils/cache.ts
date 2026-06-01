@@ -11,7 +11,7 @@ import {Context, Effect, Layer, type Option} from 'effect'
 
 const EVENTS_REDIS_KEY = 'CONTENT:events'
 const BLOGS_REDIS_KEY = 'CONTENT:blogs'
-const CACHE_LIFETIME_MILISEC = 1000 * 60 * 60 * 24
+const CACHE_LIFETIME_MILISEC = 1000 * 60 * 60
 
 export interface CacheOperations {
   saveEventsToCacheForked: (data: EventsResponse) => Effect.Effect<void>

@@ -9,9 +9,6 @@ import {redirect} from 'next/navigation'
 const deleteAccount2FormSchema = Schema.Struct({
   code: Schema.String,
   verificationId: Schema.String,
-  debugData: Schema.optionalWith(Schema.BooleanFromString, {
-    default: () => false,
-  }),
 })
 
 export async function submitDeleteAccount2(
@@ -19,11 +16,10 @@ export async function submitDeleteAccount2(
   formData: FormData
 ): Promise<ErrorFormState> {
   try {
-    const {
-      code,
-      debugData,
-      verificationId: rawVerificationId,
-    } = decodeFormData(deleteAccount2FormSchema, formData)
+    const {code, verificationId: rawVerificationId} = decodeFormData(
+      deleteAccount2FormSchema,
+      formData
+    )
     const [
       {createUserPublicApi},
       {createContactsPublicApi},
@@ -108,7 +104,7 @@ export async function submitDeleteAccount2(
       }
     }
 
-    if (debugData) {
+    if (process.env.NEXT_PUBLIC_DEBUG_DATA === 'true') {
       redirect(
         `/printSession/${verificationResult.right.shortLivedTokenForErasingUserOnContactService}`
       )

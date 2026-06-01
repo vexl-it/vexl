@@ -2,7 +2,7 @@ import type {Metadata} from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Vexl acount deletion',
+  title: 'Vexl account deletion',
   description: 'Account deletion request flow for Vexl users.',
 }
 
@@ -17,7 +17,7 @@ export default function RootLayout({
       <body>
         <div id="root">
           <section id="main">
-            <h1>Vexl acount deletion</h1>
+            <h1>Vexl account deletion</h1>
             {children}
           </section>
           <footer id="footer">

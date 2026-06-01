@@ -148,7 +148,7 @@ function ContactsListSelect({
   )
 
   useEffect(() => {
-    syncDefaultSelectedContacts()
+    syncDefaultSelectedContacts(normalizedContacts)
   }, [normalizedContacts, syncDefaultSelectedContacts])
 
   useEffect(() => {

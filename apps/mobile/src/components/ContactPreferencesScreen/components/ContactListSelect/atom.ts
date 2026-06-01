@@ -204,31 +204,39 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       normalizedContacts.map((one) => one.computedValues.normalizedNumber)
     )
   )
-  const syncDefaultSelectedContactsActionAtom = atom(null, (get, set) => {
-    const knownContactNumbers = get(knownContactNumbersAtom)
-    const currentContactNumbers = new Set(
-      normalizedContacts.map((one) => one.computedValues.normalizedNumber)
-    )
-    const newDefaultSelectedNumbers = normalizedContacts
-      .filter(
-        (one) =>
-          isContactDefaultSelected(one) &&
-          !knownContactNumbers.has(one.computedValues.normalizedNumber)
+  const syncDefaultSelectedContactsActionAtom = atom(
+    null,
+    (get, set, latestNormalizedContacts: StoredContactWithComputedValues[]) => {
+      const knownContactNumbers = get(knownContactNumbersAtom)
+      const currentContactNumbers = new Set(
+        pipe(
+          latestNormalizedContacts,
+          Array.map((one) => one.computedValues.normalizedNumber)
+        )
       )
-      .map((one) => one.computedValues.normalizedNumber)
+      const newDefaultSelectedNumbers = pipe(
+        latestNormalizedContacts,
+        Array.filter(
+          (one) =>
+            isContactDefaultSelected(one) &&
+            !knownContactNumbers.has(one.computedValues.normalizedNumber)
+        ),
+        Array.map((one) => one.computedValues.normalizedNumber)
+      )
 
-    if (newDefaultSelectedNumbers.length > 0) {
-      set(selectedNumbersAtom, (selectedNumbers) => {
-        const nextSelectedNumbers = new Set(selectedNumbers)
-        newDefaultSelectedNumbers.forEach((number) => {
-          nextSelectedNumbers.add(number)
+      if (newDefaultSelectedNumbers.length > 0) {
+        set(selectedNumbersAtom, (selectedNumbers) => {
+          const nextSelectedNumbers = new Set(selectedNumbers)
+          newDefaultSelectedNumbers.forEach((number) => {
+            nextSelectedNumbers.add(number)
+          })
+          return nextSelectedNumbers
         })
-        return nextSelectedNumbers
-      })
-    }
+      }
 
-    set(knownContactNumbersAtom, currentContactNumbers)
-  })
+      set(knownContactNumbersAtom, currentContactNumbers)
+    }
+  )
 
   const areThereAnyContactsToDisplayForSelectedTabAtom = atom((get) => {
     const contactsToDisplay = get(_contactsToDisplayAtom)

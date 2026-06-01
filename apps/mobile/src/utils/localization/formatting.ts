@@ -2,18 +2,27 @@ const FALLBACK_FORMATTING_LOCALE = 'en-US'
 
 function isSupportedAppLanguageCode(locale: string): boolean {
   switch (locale) {
+    case 'ar':
     case 'bg':
     case 'cs':
     case 'de':
     case 'es':
+    case 'fa':
+    case 'fi':
     case 'fr':
+    case 'id':
     case 'it':
     case 'ja':
     case 'nl':
+    case 'no':
+    case 'pcm':
     case 'pl':
     case 'pt':
     case 'sk':
+    case 'sv':
     case 'sw':
+    case 'tr':
+    case 'uk':
     case 'zh':
       return true
     default:

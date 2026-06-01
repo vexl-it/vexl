@@ -23,10 +23,12 @@ export const WebflowEventItem = Schema.Struct({
     name: Schema.String,
     venue: Schema.String,
     'event-speakers': Schema.optionalWith(Schema.Array(Schema.String), {
+      nullable: true,
       default: () => [],
     }),
     slug: Schema.String,
     'golden-glasses': Schema.optionalWith(Schema.Boolean, {
+      nullable: true,
       default: () => false,
     }),
   }),
@@ -42,14 +44,17 @@ export const WebflowSpeakerItem = Schema.Struct({
   isArchived: Schema.Boolean,
   isDraft: Schema.Boolean,
   fieldData: Schema.Struct({
-    'link-to-socials': Schema.optionalWith(Schema.String, {as: 'Option'}),
+    'link-to-socials': Schema.optionalWith(Schema.String, {
+      nullable: true,
+      as: 'Option',
+    }),
     name: Schema.String,
     slug: Schema.String,
     'event-speaker-image': Schema.optionalWith(
       Schema.Struct({
         url: Schema.String,
       }),
-      {as: 'Option'}
+      {nullable: true, as: 'Option'}
     ),
   }),
 })
@@ -65,7 +70,10 @@ export const WebflowBlogItem = Schema.Struct({
   isArchived: Schema.Boolean,
   isDraft: Schema.Boolean,
   fieldData: Schema.Struct({
-    'teaser-text': Schema.optionalWith(Schema.String, {as: 'Option'}),
+    'teaser-text': Schema.optionalWith(Schema.String, {
+      nullable: true,
+      as: 'Option',
+    }),
     'rich-text': Schema.String,
     name: Schema.String,
     slug: BlogSlug,
@@ -73,7 +81,7 @@ export const WebflowBlogItem = Schema.Struct({
       Schema.Struct({
         url: UriString,
       }),
-      {as: 'Option'}
+      {nullable: true, as: 'Option'}
     ),
   }),
 })

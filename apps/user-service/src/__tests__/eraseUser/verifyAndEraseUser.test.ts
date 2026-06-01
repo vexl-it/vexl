@@ -3,6 +3,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   InvalidVerificationError,
   InvalidVerificationIdError,
+  TurnstileToken,
   UnableToGenerateChallengeError,
   UnableToVerifySmsCodeError,
   VerificationNotFoundError,
@@ -17,6 +18,9 @@ import {
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 const phoneNumberToTest = Schema.decodeSync(E164PhoneNumber)('+420733333333')
+const validTurnstileToken = Schema.decodeSync(TurnstileToken)(
+  'valid-turnstile-token'
+)
 
 beforeEach(() => {
   createVerificationMock.mockClear()
@@ -32,7 +36,7 @@ const initVerification = Effect.gen(function* (_) {
       }),
       payload: {
         phoneNumber: phoneNumberToTest,
-        turnstileToken: 'valid-turnstile-token',
+        turnstileToken: validTurnstileToken,
       },
     })
   )

@@ -265,9 +265,15 @@ export type EraseUserVerificationId = typeof EraseUserVerificationId.Type
 export const DELETE_ACCOUNT_INIT_TURNSTILE_ACTION =
   'delete-account-init' as const
 
+export const TurnstileToken = Schema.NonEmptyString.pipe(
+  Schema.maxLength(2048),
+  Schema.brand('TurnstileToken')
+)
+export type TurnstileToken = typeof TurnstileToken.Type
+
 export const InitEraseUserRequest = Schema.Struct({
   phoneNumber: E164PhoneNumber,
-  turnstileToken: Schema.String,
+  turnstileToken: TurnstileToken,
 })
 export type InitEraseUserRequest = typeof InitEraseUserRequest.Type
 

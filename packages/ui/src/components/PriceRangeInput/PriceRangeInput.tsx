@@ -88,6 +88,10 @@ function formatInteger(value: number, locale: string): string {
   }).format(value)
 }
 
+function formatIntegerForEditing(value: number): string {
+  return String(value)
+}
+
 export function PriceRangeInput({
   minValueAtom,
   maxValueAtom,
@@ -153,7 +157,7 @@ export function PriceRangeInput({
 
   const handleMinFocus = useCallback(() => {
     minFocusRef.current = true
-    setMinText(String(minValue))
+    setMinText(formatIntegerForEditing(minValue))
   }, [minValue])
 
   const handleMinBlur = useCallback(() => {
@@ -170,7 +174,7 @@ export function PriceRangeInput({
 
   const handleMaxFocus = useCallback(() => {
     maxFocusRef.current = true
-    setMaxText(String(maxValue))
+    setMaxText(formatIntegerForEditing(maxValue))
   }, [maxValue])
 
   const handleMaxBlur = useCallback(() => {

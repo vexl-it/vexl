@@ -2,13 +2,17 @@ name: "[Release] build eas production"
 run-name: "Run on commit ${{github.sha}}"
 
 on: workflow_dispatch
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     name: Install and build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24.x
           cache: yarn

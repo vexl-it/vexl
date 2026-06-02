@@ -1,7 +1,13 @@
-import {OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {
+  OneOfferInState,
+  type OfferType,
+} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe, Schema} from 'effect'
-import {type OffersFilter} from '../domain'
-import {filterMarketplaceOffers} from './filterMarketplaceOffers'
+import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
+import {
+  filterMarketplaceOffers,
+  selectOffersByMarketplaceFilterBarOptions,
+} from './filterMarketplaceOffers'
 
 const offerPublicKey =
   'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVUTlhndG9GMVRBNVVrVWZ4YWFBbHp4cDBRSFlwZS8yVApFSk1nQXR0d0tabnZBZFBUVUNXdCtweGhpWGUzNDNlbjNndHI5OHZoS1pZSGc4VGRQT3JHMEE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K'
@@ -12,12 +18,14 @@ function makeOffer({
   currency,
   amountBottomLimit,
   amountTopLimit,
+  offerType = 'SELL',
 }: {
   readonly id: string
   readonly listingType: 'BITCOIN' | 'PRODUCT' | 'OTHER'
   readonly currency: 'CZK' | 'EUR'
   readonly amountBottomLimit: number
   readonly amountTopLimit: number
+  readonly offerType?: OfferType
 }): Schema.Schema.Type<typeof OneOfferInState> {
   return Schema.decodeSync(OneOfferInState)({
     offerInfo: {
@@ -43,7 +51,7 @@ function makeOffer({
         btcNetwork: ['LIGHTING'],
         currency,
         spokenLanguages: ['ENG'],
-        offerType: 'SELL',
+        offerType,
         activePriceState: 'NONE',
         activePriceValue: 0,
         activePriceCurrency: currency,
@@ -130,5 +138,70 @@ describe('filterMarketplaceOffers amount filter', () => {
       'service-outside',
       'service-wrong-currency',
     ])
+  })
+})
+
+describe('selectOffersByMarketplaceFilterBarOptions', () => {
+  test('matches product and service options using the persisted Bitcoin-leg offer type', () => {
+    const offers = [
+      makeOffer({
+        id: 'product-seller',
+        listingType: 'PRODUCT',
+        currency: 'CZK',
+        amountBottomLimit: 20_000,
+        amountTopLimit: 20_000,
+        offerType: 'BUY',
+      }),
+      makeOffer({
+        id: 'product-buyer',
+        listingType: 'PRODUCT',
+        currency: 'CZK',
+        amountBottomLimit: 20_000,
+        amountTopLimit: 20_000,
+        offerType: 'SELL',
+      }),
+      makeOffer({
+        id: 'service-provider',
+        listingType: 'OTHER',
+        currency: 'CZK',
+        amountBottomLimit: 20_000,
+        amountTopLimit: 20_000,
+        offerType: 'BUY',
+      }),
+      makeOffer({
+        id: 'service-hirer',
+        listingType: 'OTHER',
+        currency: 'CZK',
+        amountBottomLimit: 20_000,
+        amountTopLimit: 20_000,
+        offerType: 'SELL',
+      }),
+    ]
+
+    expect(
+      pipe(
+        selectOffersByMarketplaceFilterBarOptions({
+          offers,
+          selectedOptions: new Set<MarketplaceFilterBarOption>([
+            'BUY_PRODUCT',
+            'HIRE_SERVICE',
+          ]),
+        }),
+        Array.map((offer) => offer.offerInfo.offerId)
+      )
+    ).toEqual(['product-seller', 'service-provider'])
+
+    expect(
+      pipe(
+        selectOffersByMarketplaceFilterBarOptions({
+          offers,
+          selectedOptions: new Set<MarketplaceFilterBarOption>([
+            'SELL_PRODUCT',
+            'PROVIDE_SERVICE',
+          ]),
+        }),
+        Array.map((offer) => offer.offerInfo.offerId)
+      )
+    ).toEqual(['product-buyer', 'service-hirer'])
   })
 })

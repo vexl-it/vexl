@@ -15,6 +15,7 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
 import {chatMolecule} from '../atoms'
 
 function getOfferTitleKey({
@@ -124,7 +125,10 @@ function StickyHeader(): React.ReactElement | null {
       getOfferTitleKey({
         isMineOffer: !!offer.ownershipInfo?.adminId,
         listingType,
-        offerType: offer.offerInfo.publicPart.offerType,
+        offerType: getUserFacingOfferType({
+          listingType,
+          offerType: offer.offerInfo.publicPart.offerType,
+        }),
       })
     )
   }, [chat.origin.type, offer, t])

@@ -15,6 +15,7 @@ import {
   useTranslation,
   type TFunction,
 } from '../../../utils/localization/I18nProvider'
+import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 
 interface OfferTypeStepProps {
@@ -32,19 +33,22 @@ function OfferTypeStep({
   const {listingTypeAtom, offerTypeAtom} = useMolecule(offerFormMolecule)
   const listingType = useAtomValue(listingTypeAtom)
   const [offerType, setOfferType] = useAtom(offerTypeAtom)
+  const selectedOfferType = offerType
+    ? getUserFacingOfferType({listingType, offerType})
+    : undefined
 
   const offerTypeLabel = getOfferTypeLabel({
     listingType,
-    offerType,
+    offerType: selectedOfferType,
     t,
   })
 
   const handlePress = useCallback(
     (type: OfferType) => {
-      setOfferType(type)
+      setOfferType(getUserFacingOfferType({listingType, offerType: type}))
       onComplete()
     },
-    [setOfferType, onComplete]
+    [listingType, setOfferType, onComplete]
   )
 
   const offerTypeOptions = getOfferTypeOptions(listingType)
@@ -76,7 +80,7 @@ function OfferTypeStep({
                   })}
                   icon={icon}
                   value={type}
-                  selected={offerType === type}
+                  selected={selectedOfferType === type}
                   onPress={handlePress}
                 />
               ))

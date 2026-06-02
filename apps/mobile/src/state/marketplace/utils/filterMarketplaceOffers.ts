@@ -1,9 +1,11 @@
 import {
   type OfferLocation,
+  type OfferType,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, pipe} from 'effect'
+import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
 import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
 import areIncluded from './areIncluded'
@@ -82,33 +84,48 @@ export function offerMatchesMarketplaceFilterBarOption(
   offer: OneOfferInState,
   option: MarketplaceFilterBarOption
 ): boolean {
+  const {publicPart} = offer.offerInfo
+  const persistedOfferTypeForUserFacingAction = (
+    userFacingOfferType: OfferType
+  ): OfferType =>
+    getUserFacingOfferType({
+      listingType: publicPart.listingType,
+      offerType: userFacingOfferType,
+    })
+
   if (option === 'BUY_BTC')
-    return offer.offerInfo.publicPart.offerType === 'SELL' && isBtcOffer(offer)
+    return (
+      publicPart.offerType === persistedOfferTypeForUserFacingAction('SELL') &&
+      isBtcOffer(offer)
+    )
 
   if (option === 'SELL_BTC')
-    return offer.offerInfo.publicPart.offerType === 'BUY' && isBtcOffer(offer)
+    return (
+      publicPart.offerType === persistedOfferTypeForUserFacingAction('BUY') &&
+      isBtcOffer(offer)
+    )
 
   if (option === 'BUY_PRODUCT')
     return (
-      offer.offerInfo.publicPart.offerType === 'SELL' &&
-      offer.offerInfo.publicPart.listingType === 'PRODUCT'
+      publicPart.offerType === persistedOfferTypeForUserFacingAction('SELL') &&
+      publicPart.listingType === 'PRODUCT'
     )
 
   if (option === 'SELL_PRODUCT')
     return (
-      offer.offerInfo.publicPart.offerType === 'BUY' &&
-      offer.offerInfo.publicPart.listingType === 'PRODUCT'
+      publicPart.offerType === persistedOfferTypeForUserFacingAction('BUY') &&
+      publicPart.listingType === 'PRODUCT'
     )
 
   if (option === 'HIRE_SERVICE')
     return (
-      offer.offerInfo.publicPart.offerType === 'SELL' &&
-      offer.offerInfo.publicPart.listingType === 'OTHER'
+      publicPart.offerType === persistedOfferTypeForUserFacingAction('SELL') &&
+      publicPart.listingType === 'OTHER'
     )
 
   return (
-    offer.offerInfo.publicPart.offerType === 'BUY' &&
-    offer.offerInfo.publicPart.listingType === 'OTHER'
+    publicPart.offerType === persistedOfferTypeForUserFacingAction('BUY') &&
+    publicPart.listingType === 'OTHER'
   )
 }
 

@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Детайли за дарението",
+  "donations.detail.donationNotFound": "Дарението не е намерено. Може да е било премахнато от това устройство.",
   "donations.detail.invoiceId": "ID на фактура",
   "donations.detail.paidAt": "Платено на",
   "donations.detail.thanksTitle": "Благодарим за дарението!",

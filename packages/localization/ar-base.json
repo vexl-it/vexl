@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "تفاصيل التبرع",
+  "donations.detail.donationNotFound": "لم يتم العثور على التبرع. ربما تمت إزالته من هذا الجهاز.",
   "donations.detail.invoiceId": "معرّف الفاتورة",
   "donations.detail.paidAt": "تم الدفع في",
   "donations.detail.thanksTitle": "شكرًا على تبرعك!",

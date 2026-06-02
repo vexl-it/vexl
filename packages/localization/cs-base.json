@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Neplatný",
   "donations.invoiceStatus.Settled": "Uhrazené",
   "donations.detail.title": "Detail daru",
+  "donations.detail.donationNotFound": "Dar se nenašel. Možná byl z tohoto zařízení odstraněn.",
   "donations.detail.invoiceId": "ID faktury",
   "donations.detail.paidAt": "Zaplaceno",
   "donations.detail.thanksTitle": "Díky za dar!",

@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "جزئیات کمک",
+  "donations.detail.donationNotFound": "کمک مالی پیدا نشد. شاید از این دستگاه حذف شده باشد.",
   "donations.detail.invoiceId": "Invoice ID",
   "donations.detail.paidAt": "پرداخت‌شده در",
   "donations.detail.thanksTitle": "مرسی بابت کمکت!",

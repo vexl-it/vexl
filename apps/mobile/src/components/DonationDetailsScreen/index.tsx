@@ -1,4 +1,12 @@
-import {useScreenFooterHeight} from '@vexl-next/ui'
+import {
+  Button,
+  NavigationBar,
+  Screen,
+  Typography,
+  useScreenFooterHeight,
+  XmarkCancelClose,
+  YStack,
+} from '@vexl-next/ui'
 import {Effect, Fiber} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
@@ -12,10 +20,8 @@ import {
   localizedDecimalNumberActionAtom,
   localizedPriceActionAtom,
 } from '../../utils/localization/localizedNumbersAtoms'
-import {
-  dummyDonation,
-  updateSingleInvoiceStatusTypeRepeatingActionAtom,
-} from '../DonationPrompt/atoms'
+import useSafeGoBack from '../../utils/useSafeGoBack'
+import {updateSingleInvoiceStatusTypeRepeatingActionAtom} from '../DonationPrompt/atoms'
 import {donationTitle, timestampToDateTime} from '../DonationsFlow/utils'
 import {type DonationSummaryData} from './DonationDetailsSummary'
 import {ExpiredDonationDetails} from './ExpiredDonationDetails'
@@ -38,36 +44,86 @@ function DonationDetailsScreen({
   const mySingleDonation = useAtomValue(
     useMemo(() => singleDonationAtom(invoiceId), [invoiceId])
   )
-  const storeId = mySingleDonation?.storeId ?? dummyDonation.storeId
-  const satsAmount = Number(mySingleDonation?.btcAmount ?? 0) * SATOSHIS_IN_BTC
-  const localizedTotalSats = useSetAtom(localizedDecimalNumberActionAtom)({
-    number: satsAmount,
-  })
-  const localizedFiatAmount = useSetAtom(localizedPriceActionAtom)({
-    number: mySingleDonation?.fiatAmount ?? 0,
-    currency: mySingleDonation?.currency,
-  })
-  const localizedExchangeRate = useSetAtom(localizedPriceActionAtom)({
-    number: mySingleDonation?.exchangeRate ?? 0,
-    currency: mySingleDonation?.currency,
-  })
+  const localizeDecimalNumber = useSetAtom(localizedDecimalNumberActionAtom)
+  const localizePrice = useSetAtom(localizedPriceActionAtom)
   const updateSingleInvoiceStatusTypeRepeating = useSetAtom(
     updateSingleInvoiceStatusTypeRepeatingActionAtom
   )
-  const status = mySingleDonation?.status ?? dummyDonation.status
-  const paymentMethod =
-    mySingleDonation?.paymentMethod ?? dummyDonation.paymentMethod
-  const paymentLink = mySingleDonation?.paymentLink ?? dummyDonation.paymentLink
+  const safeGoBack = useSafeGoBack()
+
+  const navigationBar = (
+    <NavigationBar
+      style="back"
+      title={t('donations.detail.title')}
+      rightActions={[{icon: XmarkCancelClose, onPress: safeGoBack}]}
+    />
+  )
+
+  useEffect(() => {
+    const storeId = mySingleDonation?.storeId
+    if (!storeId) return
+
+    const fiber = Effect.runFork(
+      updateSingleInvoiceStatusTypeRepeating({invoiceId, storeId})
+    )
+
+    return () => {
+      Effect.runFork(Fiber.interrupt(fiber))
+    }
+  }, [
+    invoiceId,
+    mySingleDonation?.storeId,
+    updateSingleInvoiceStatusTypeRepeating,
+  ])
+
+  if (!mySingleDonation) {
+    return (
+      <Screen
+        navigationBar={navigationBar}
+        footer={
+          <Button variant="primary" onPress={safeGoBack} width="100%">
+            {t('common.back')}
+          </Button>
+        }
+      >
+        <YStack flex={1} alignItems="center" justifyContent="center">
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            textAlign="center"
+          >
+            {t('donations.detail.donationNotFound')}
+          </Typography>
+        </YStack>
+      </Screen>
+    )
+  }
+
+  const satsAmount = Number(mySingleDonation.btcAmount) * SATOSHIS_IN_BTC
+  const localizedTotalSats = localizeDecimalNumber({
+    number: satsAmount,
+  })
+  const localizedFiatAmount = localizePrice({
+    number: mySingleDonation.fiatAmount,
+    currency: mySingleDonation.currency,
+  })
+  const localizedExchangeRate = localizePrice({
+    number: mySingleDonation.exchangeRate,
+    currency: mySingleDonation.currency,
+  })
+  const status = mySingleDonation.status
+  const paymentMethod = mySingleDonation.paymentMethod
+  const paymentLink = mySingleDonation.paymentLink
   const isLightning = paymentMethod !== 'BTC-CHAIN'
   const localizedSatsAmount = `${localizedTotalSats} sats`
   const title = donationTitle({paymentMethod, t})
-  const invoiceIdValue = mySingleDonation?.invoiceId ?? invoiceId
+  const invoiceIdValue = mySingleDonation.invoiceId
   const createdAt = formatDateTime(
-    timestampToDateTime(mySingleDonation?.createdTime ?? 0).toMillis(),
+    timestampToDateTime(mySingleDonation.createdTime).toMillis(),
     locale
   )
   const expiredAt = formatDateTime(
-    timestampToDateTime(mySingleDonation?.expirationTime ?? 0).toMillis(),
+    timestampToDateTime(mySingleDonation.expirationTime).toMillis(),
     locale
   )
   const summary: DonationSummaryData = {
@@ -77,16 +133,6 @@ function DonationDetailsScreen({
     invoiceId: invoiceIdValue,
     createdAt,
   }
-  useEffect(() => {
-    const fiber = Effect.runFork(
-      updateSingleInvoiceStatusTypeRepeating({invoiceId, storeId})
-    )
-
-    return () => {
-      Effect.runFork(Fiber.interrupt(fiber))
-    }
-  }, [invoiceId, storeId, updateSingleInvoiceStatusTypeRepeating])
-
   return status === 'New' ? (
     <NewDonationDetails
       footerHeight={footerHeight}

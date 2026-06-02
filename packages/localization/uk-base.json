@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Деталі донату",
+  "donations.detail.donationNotFound": "Донат не знайдено. Можливо, його видалили з цього пристрою.",
   "donations.detail.invoiceId": "ID інвойсу",
   "donations.detail.paidAt": "Оплачено о",
   "donations.detail.thanksTitle": "Дякуємо за донат!",

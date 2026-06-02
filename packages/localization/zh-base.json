@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "无效",
   "donations.invoiceStatus.Settled": "已结算",
   "donations.detail.title": "捐赠详情",
+  "donations.detail.donationNotFound": "未找到捐赠。它可能已从此设备中移除。",
   "donations.detail.invoiceId": "Invoice ID",
   "donations.detail.paidAt": "付款时间",
   "donations.detail.thanksTitle": "谢谢你的捐赠！",

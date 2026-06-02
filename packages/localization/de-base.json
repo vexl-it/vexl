@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Ungültig",
   "donations.invoiceStatus.Settled": "Erledigt",
   "donations.detail.title": "Spendendetail",
+  "donations.detail.donationNotFound": "Spende nicht gefunden. Sie wurde vielleicht von diesem Gerät entfernt.",
   "donations.detail.invoiceId": "Invoice-ID",
   "donations.detail.paidAt": "Bezahlt am",
   "donations.detail.thanksTitle": "Danke für deine Spende!",

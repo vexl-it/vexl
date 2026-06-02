@@ -20,7 +20,7 @@ export const localizedPriceActionAtom = atom(
       minimumFractionDigits,
     }: {
       number: string | number
-      currency: string | undefined
+      currency: string
       maximumFractionDigits?: number
       minimumFractionDigits?: number
     }

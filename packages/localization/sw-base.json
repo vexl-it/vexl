@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Maelezo ya mchango",
+  "donations.detail.donationNotFound": "Mchango haukupatikana. Huenda umeondolewa kwenye kifaa hiki.",
   "donations.detail.invoiceId": "Invoice ID",
   "donations.detail.paidAt": "Ililipwa saa",
   "donations.detail.thanksTitle": "Asante kwa kuchangia!",

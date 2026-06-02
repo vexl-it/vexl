@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Nieprawidłowa",
   "donations.invoiceStatus.Settled": "Rozliczona",
   "donations.detail.title": "Szczegóły darowizny",
+  "donations.detail.donationNotFound": "Nie znaleziono darowizny. Mogła zostać usunięta z tego urządzenia.",
   "donations.detail.invoiceId": "ID faktury",
   "donations.detail.paidAt": "Zapłacono o",
   "donations.detail.thanksTitle": "Dzięki za darowiznę!",

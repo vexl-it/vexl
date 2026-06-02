@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Non valida",
   "donations.invoiceStatus.Settled": "Saldata",
   "donations.detail.title": "Dettaglio donazione",
+  "donations.detail.donationNotFound": "Donazione non trovata. Potrebbe essere stata rimossa da questo dispositivo.",
   "donations.detail.invoiceId": "ID fattura",
   "donations.detail.paidAt": "Pagato il",
   "donations.detail.thanksTitle": "Grazie per la donazione!",

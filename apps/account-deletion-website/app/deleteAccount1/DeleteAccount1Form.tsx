@@ -7,12 +7,15 @@ import Script from 'next/script'
 import {useActionState, useEffect} from 'react'
 import {submitDeleteAccount1} from './actions'
 
-export default function DeleteAccount1Form() {
+export default function DeleteAccount1Form({
+  turnstileSiteKey,
+}: {
+  turnstileSiteKey: string | undefined
+}) {
   const [state, formAction] = useActionState(
     submitDeleteAccount1,
     emptyErrorFormState
   )
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
   useEffect(() => {
     if (!turnstileSiteKey) {

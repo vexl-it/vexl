@@ -34,7 +34,7 @@ export const offersFilterInitialState = {
 } satisfies OffersFilter
 
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
-  'offersFilter',
+  'offersFilterV2',
   {filter: offersFilterInitialState},
   Schema.Struct({filter: OffersFilter})
 )

@@ -326,7 +326,7 @@ function createDebugFilterTestOfferSpecs(): readonly DebugFilterTestOfferSpec[] 
     (productCategory, index): DebugFilterTestOfferSpec => ({
       label: `${index % 2 === 0 ? 'BUY_PRODUCT' : 'SELL_PRODUCT'} ${productCategory}`,
       listingType: 'PRODUCT',
-      offerType: index % 2 === 0 ? 'SELL' : 'BUY',
+      offerType: index % 2 === 0 ? 'BUY' : 'SELL',
       productCategory,
       locationState:
         index === 2
@@ -382,7 +382,7 @@ function createDebugFilterTestOfferSpecs(): readonly DebugFilterTestOfferSpec[] 
     {
       label: 'HIRE_SERVICE',
       listingType: 'OTHER',
-      offerType: 'SELL',
+      offerType: 'BUY',
       locationState: ['IN_PERSON', 'ONLINE'],
       paymentMethod: ['CASH', 'BANK'],
       btcNetwork: ['LIGHTING', 'ON_CHAIN'],
@@ -394,7 +394,7 @@ function createDebugFilterTestOfferSpecs(): readonly DebugFilterTestOfferSpec[] 
     {
       label: 'PROVIDE_SERVICE',
       listingType: 'OTHER',
-      offerType: 'BUY',
+      offerType: 'SELL',
       locationState: ['ONLINE'],
       paymentMethod: ['REVOLUT'],
       btcNetwork: ['LIGHTING'],

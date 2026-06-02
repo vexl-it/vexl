@@ -10,12 +10,15 @@ import {formatFullCurrencyAmount} from './localization/currency'
 import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
 import {translationAtom} from './localization/I18nProvider'
 import spokenLanguageToFlagEmoji from './localization/spokenLanguageToFlagEmoji'
+import {getUserFacingOfferType} from './offerTypeSemantics'
+
+export {getUserFacingOfferType} from './offerTypeSemantics'
 
 export function getIsOffering(
-  _listingType: ListingType | undefined,
+  listingType: ListingType | undefined,
   offerType: OfferType
 ): boolean {
-  return offerType === 'SELL'
+  return getUserFacingOfferType({listingType, offerType}) === 'SELL'
 }
 
 export function getIconTagVariant(

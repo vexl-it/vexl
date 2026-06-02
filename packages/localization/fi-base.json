@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Lahjoituksen tiedot",
+  "donations.detail.donationNotFound": "Lahjoitusta ei löytynyt. Se on ehkä poistettu tältä laitteelta.",
   "donations.detail.invoiceId": "Laskun ID",
   "donations.detail.paidAt": "Maksettu",
   "donations.detail.thanksTitle": "Kiitos lahjoituksesta!",

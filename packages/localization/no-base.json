@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Donasjonsdetalj",
+  "donations.detail.donationNotFound": "Donasjonen ble ikke funnet. Den kan ha blitt fjernet fra denne enheten.",
   "donations.detail.invoiceId": "Faktura-ID",
   "donations.detail.paidAt": "Betalt kl.",
   "donations.detail.thanksTitle": "Takk for donasjonen!",

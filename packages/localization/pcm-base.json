@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Donation detail",
+  "donations.detail.donationNotFound": "We no find di donation. E fit don commot from dis device.",
   "donations.detail.invoiceId": "Invoice ID",
   "donations.detail.paidAt": "Paid at",
   "donations.detail.thanksTitle": "Thanks for donating!",

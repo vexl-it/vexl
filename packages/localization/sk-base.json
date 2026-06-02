@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Neplatná",
   "donations.invoiceStatus.Settled": "Potvrdená",
   "donations.detail.title": "Detail daru",
+  "donations.detail.donationNotFound": "Dar sa nenašiel. Možno bol z tohto zariadenia odstránený.",
   "donations.detail.invoiceId": "ID faktúry",
   "donations.detail.paidAt": "Zaplatené o",
   "donations.detail.thanksTitle": "Vďaka za dar!",

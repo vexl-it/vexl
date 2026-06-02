@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Detail donasi",
+  "donations.detail.donationNotFound": "Donasi tidak ditemukan. Mungkin sudah dihapus dari perangkat ini.",
   "donations.detail.invoiceId": "ID invoice",
   "donations.detail.paidAt": "Dibayar pada",
   "donations.detail.thanksTitle": "Terima kasih sudah berdonasi!",

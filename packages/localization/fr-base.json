@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalide",
   "donations.invoiceStatus.Settled": "Effectué",
   "donations.detail.title": "Détail du don",
+  "donations.detail.donationNotFound": "Don introuvable. Il a peut-être été supprimé de cet appareil.",
   "donations.detail.invoiceId": "ID de facture",
   "donations.detail.paidAt": "Payé le",
   "donations.detail.thanksTitle": "Merci pour ton don !",

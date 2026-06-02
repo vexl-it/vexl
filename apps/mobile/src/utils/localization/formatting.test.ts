@@ -1,4 +1,5 @@
 import {
+  formatCurrency,
   formatDate,
   formatDateTime,
   formatDecimal,
@@ -56,6 +57,10 @@ describe('formatting helpers', () => {
 
     expect(formatted).toMatch(/^1\s234\s567,89$/)
     expect(formatted).not.toBe('1,234,567.89')
+  })
+
+  it('formats currency with an explicit currency code', () => {
+    expect(formatCurrency(1, 'EUR', 'en')).toBe('€1.00')
   })
 
   it('formats a fixed datetime differently for en-US and Czech', () => {

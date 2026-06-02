@@ -75,7 +75,7 @@ export function formatInteger(
 
 export function formatCurrency(
   number: number,
-  currency: string | undefined,
+  currency: string,
   locale: string | undefined,
   options?: Intl.NumberFormatOptions
 ): string {

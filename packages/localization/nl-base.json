@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Donatiedetail",
+  "donations.detail.donationNotFound": "Donatie niet gevonden. Misschien is die van dit apparaat verwijderd.",
   "donations.detail.invoiceId": "Factuur-ID",
   "donations.detail.paidAt": "Betaald op",
   "donations.detail.thanksTitle": "Bedankt voor je donatie!",

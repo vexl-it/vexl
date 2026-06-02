@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "寄付詳細",
+  "donations.detail.donationNotFound": "寄付が見つかりません。このデバイスから削除された可能性があります。",
   "donations.detail.invoiceId": "請求書ID",
   "donations.detail.paidAt": "支払い日時",
   "donations.detail.thanksTitle": "寄付ありがとう！",

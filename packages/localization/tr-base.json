@@ -1289,6 +1289,7 @@
   "donations.invoiceStatus.Invalid": "Invalid",
   "donations.invoiceStatus.Settled": "Settled",
   "donations.detail.title": "Bağış detayı",
+  "donations.detail.donationNotFound": "Bağış bulunamadı. Bu cihazdan kaldırılmış olabilir.",
   "donations.detail.invoiceId": "Fatura ID'si",
   "donations.detail.paidAt": "Ödendiği zaman",
   "donations.detail.thanksTitle": "Bağışın için teşekkürler!",

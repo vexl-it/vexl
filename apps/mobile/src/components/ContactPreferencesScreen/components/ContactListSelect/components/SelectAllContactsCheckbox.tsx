@@ -5,15 +5,23 @@ import React from 'react'
 import {contactSelectMolecule} from '../atom'
 import AnimatedSelectionCheckboxIcon from './AnimatedSelectionCheckboxIcon'
 
-function SelectAllContactsCheckbox(): React.ReactElement {
+function SelectAllContactsCheckbox({
+  disabled,
+}: {
+  readonly disabled: boolean
+}): React.ReactElement {
   const {selectAllAtom} = useMolecule(contactSelectMolecule)
   const [allSelected, setAllSelected] = useAtom(selectAllAtom)
 
   return (
     <IconButton
+      disabled={disabled}
+      opacity={disabled ? 0.45 : 1}
       testID="@contactsList/selectAll"
       backgroundColor="$backgroundTertiary"
       onPress={() => {
+        if (disabled) return
+
         setAllSelected((value) => !value)
       }}
     >

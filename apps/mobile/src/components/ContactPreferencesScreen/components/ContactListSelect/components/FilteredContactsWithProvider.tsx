@@ -1,41 +1,29 @@
 import {Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect} from 'react'
-import {type ContactsFilter} from '../../../../../state/contacts/domain'
 import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 import {contactSelectMolecule} from '../atom'
 import ContactsList from './ContactsList'
 import ContactsListEmpty from './ContactsListEmpty'
 
-function FilteredContacts({
-  onReady,
-}: {
-  readonly onReady: (filter: ContactsFilter) => void
-}): React.ReactElement {
+function FilteredContacts(): React.ReactElement {
   const {
     contactsFilterAtom,
-    newContactsToDisplayAtomsAtom,
-    submittedContactsToDisplayAtomsAtom,
-    nonSubmittedContactsToDisplayAtomsAtom,
-    allContactsToDisplayAtomsAtom,
+    searchTextAtom,
+    readyContactsQueryAtom,
+    contactsToDisplayAtomsAtom,
   } = useMolecule(contactSelectMolecule)
   const contactsFilter = useAtomValue(contactsFilterAtom)
-  const toDisplay = useAtomValue(
-    contactsFilter === 'new'
-      ? newContactsToDisplayAtomsAtom
-      : contactsFilter === 'submitted'
-        ? submittedContactsToDisplayAtomsAtom
-        : contactsFilter === 'nonSubmitted'
-          ? nonSubmittedContactsToDisplayAtomsAtom
-          : allContactsToDisplayAtomsAtom
-  )
+  const searchText = useAtomValue(searchTextAtom)
+  const toDisplay = useAtomValue(contactsToDisplayAtomsAtom)
+  const setReadyContactsQuery = useSetAtom(readyContactsQueryAtom)
 
   useEffect(() => {
     return runAfterAnimationFrame(() => {
-      onReady(contactsFilter)
+      setReadyContactsQuery({contactsFilter, searchText})
     })
-  }, [contactsFilter, onReady, toDisplay])
+  }, [contactsFilter, searchText, setReadyContactsQuery, toDisplay])
 
   return (
     <Stack f={1}>

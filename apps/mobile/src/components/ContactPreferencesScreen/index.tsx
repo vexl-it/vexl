@@ -12,6 +12,7 @@ import {type RootStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import {type ContactsFilter} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {runAfterAnimationFrame} from '../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import ContactsListSelect from './components/ContactListSelect'
 import ContactPreferencesLoadingOverlay from './components/ContactPreferencesLoadingOverlay'
@@ -59,11 +60,7 @@ function ContactPreferencesContent({
   readonly onReady: () => void
 }): React.ReactElement {
   useEffect(() => {
-    const readyFrame = requestAnimationFrame(onReady)
-
-    return () => {
-      cancelAnimationFrame(readyFrame)
-    }
+    return runAfterAnimationFrame(onReady)
   }, [onReady])
 
   return <ContactsListSelect addContactRequestId={0} filter={filter} />
@@ -85,13 +82,9 @@ function ContactPreferencesScreen({
   }, [])
 
   useEffect(() => {
-    const contentMountFrame = requestAnimationFrame(() => {
+    return runAfterAnimationFrame(() => {
       setShouldRenderContactsContent(true)
     })
-
-    return () => {
-      cancelAnimationFrame(contentMountFrame)
-    }
   }, [])
 
   return (

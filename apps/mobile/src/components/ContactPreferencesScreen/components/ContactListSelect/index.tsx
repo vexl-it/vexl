@@ -16,6 +16,7 @@ import {
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {runAfterAnimationFrame} from '../../../../utils/runAfterAnimationFrames'
 import {useOnFocusAndAppState} from '../../../../utils/useFocusAndAppState'
 import useSafeGoBack from '../../../../utils/useSafeGoBack'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
@@ -98,8 +99,12 @@ function ContactsListSelect({
   const latestOptimisticContactsFilterRef = useRef<ContactsFilter>(
     filter ?? 'all'
   )
-  const deferredFilterFrameRef = useRef<number | undefined>(undefined)
-  const deferredSubmitFrameRef = useRef<number | undefined>(undefined)
+  const cancelDeferredFilterFrameRef = useRef<(() => void) | undefined>(
+    undefined
+  )
+  const cancelDeferredSubmitFrameRef = useRef<(() => void) | undefined>(
+    undefined
+  )
   const areThereAnyContactsToDisplayForSelectedTab = useAtomValue(
     areThereAnyContactsToDisplayForSelectedTabAtom
   )
@@ -132,12 +137,8 @@ function ContactsListSelect({
   useEffect(() => {
     return () => {
       resolveAllContactsAsSeen()
-      if (deferredFilterFrameRef.current != null) {
-        cancelAnimationFrame(deferredFilterFrameRef.current)
-      }
-      if (deferredSubmitFrameRef.current != null) {
-        cancelAnimationFrame(deferredSubmitFrameRef.current)
-      }
+      cancelDeferredFilterFrameRef.current?.()
+      cancelDeferredSubmitFrameRef.current?.()
     }
   }, [resolveAllContactsAsSeen])
 
@@ -153,10 +154,8 @@ function ContactsListSelect({
 
   useEffect(() => {
     const nextFilter = filter ?? 'all'
-    if (deferredFilterFrameRef.current != null) {
-      cancelAnimationFrame(deferredFilterFrameRef.current)
-      deferredFilterFrameRef.current = undefined
-    }
+    cancelDeferredFilterFrameRef.current?.()
+    cancelDeferredFilterFrameRef.current = undefined
     latestOptimisticContactsFilterRef.current = nextFilter
     setOptimisticContactsFilter(nextFilter)
     setIsContactsTabPreparing(false)
@@ -170,13 +169,11 @@ function ContactsListSelect({
       latestOptimisticContactsFilterRef.current = nextFilter
       setOptimisticContactsFilter(nextFilter)
 
-      if (deferredFilterFrameRef.current != null) {
-        cancelAnimationFrame(deferredFilterFrameRef.current)
-      }
+      cancelDeferredFilterFrameRef.current?.()
 
       setIsContactsTabPreparing(true)
-      deferredFilterFrameRef.current = requestAnimationFrame(() => {
-        deferredFilterFrameRef.current = undefined
+      cancelDeferredFilterFrameRef.current = runAfterAnimationFrame(() => {
+        cancelDeferredFilterFrameRef.current = undefined
         setContactsFilter(nextFilter)
       })
     },
@@ -231,16 +228,18 @@ function ContactsListSelect({
             if (isSubmittingContacts) return
 
             setIsSubmittingContacts(true)
-            deferredSubmitFrameRef.current = requestAnimationFrame(() => {
-              deferredSubmitFrameRef.current = undefined
-              void Effect.runPromise(
-                andThenExpectBooleanNoErrors((success) => {
-                  if (success) goBack()
-                })(submitAllSelectedContacts())
-              ).finally(() => {
-                setIsSubmittingContacts(false)
-              })
-            })
+            cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(
+              () => {
+                cancelDeferredSubmitFrameRef.current = undefined
+                void Effect.runPromise(
+                  andThenExpectBooleanNoErrors((success) => {
+                    if (success) goBack()
+                  })(submitAllSelectedContacts())
+                ).finally(() => {
+                  setIsSubmittingContacts(false)
+                })
+              }
+            )
           }}
         >
           {t('common.submit')}

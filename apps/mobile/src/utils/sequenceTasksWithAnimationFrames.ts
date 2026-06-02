@@ -2,13 +2,14 @@ import * as A from 'fp-ts/Array'
 import * as RA from 'fp-ts/ReadonlyArray'
 import * as T from 'fp-ts/Task'
 import {pipe} from 'fp-ts/function'
+import {runAfterAnimationFrame} from './runAfterAnimationFrames'
 
 const requestAnimationFrameTask: T.Task<void> = () =>
-  new Promise<void>((resolve) =>
-    requestAnimationFrame(() => {
+  new Promise<void>((resolve) => {
+    runAfterAnimationFrame(() => {
       resolve()
     })
-  )
+  })
 
 /**
  * A method that sequences tasks and calls requestAnimationFrame between items. Make sure to tweak numberToProcessBetweenAnimations

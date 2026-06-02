@@ -6,6 +6,7 @@ import {
   marketplaceFilterBarSelectedFieldAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
 import {type MarketplaceFilterBarOption} from '../../../../../state/marketplace/domain'
+import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 
 interface Props {
   onSelectStart?: () => void
@@ -22,13 +23,13 @@ function FilterTagBar({
   const [filterBarSelectedFields, setFilterBarSelectedFields] = useAtom(
     marketplaceFilterBarSelectedFieldAtom
   )
-  const pendingSelectionFrameRef = useRef<number | null>(null)
+  const cancelPendingSelectionFrameRef = useRef<(() => void) | undefined>(
+    undefined
+  )
 
   const clearPendingSelectionFrame = useCallback(() => {
-    if (pendingSelectionFrameRef.current === null) return
-
-    cancelAnimationFrame(pendingSelectionFrameRef.current)
-    pendingSelectionFrameRef.current = null
+    cancelPendingSelectionFrameRef.current?.()
+    cancelPendingSelectionFrameRef.current = undefined
   }, [])
 
   const commitSelectedValues = useCallback(
@@ -48,8 +49,8 @@ function FilterTagBar({
 
       onSelectStart()
       clearPendingSelectionFrame()
-      pendingSelectionFrameRef.current = requestAnimationFrame(() => {
-        pendingSelectionFrameRef.current = null
+      cancelPendingSelectionFrameRef.current = runAfterAnimationFrame(() => {
+        cancelPendingSelectionFrameRef.current = undefined
         commitSelectedValues(values)
       })
     },

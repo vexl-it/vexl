@@ -3,6 +3,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
 import React, {useEffect} from 'react'
 import {type ContactsFilter} from '../../../../../state/contacts/domain'
+import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 import {contactSelectMolecule} from '../atom'
 import ContactsList from './ContactsList'
 import ContactsListEmpty from './ContactsListEmpty'
@@ -31,13 +32,9 @@ function FilteredContacts({
   )
 
   useEffect(() => {
-    const readyFrame = requestAnimationFrame(() => {
+    return runAfterAnimationFrame(() => {
       onReady(contactsFilter)
     })
-
-    return () => {
-      cancelAnimationFrame(readyFrame)
-    }
   }, [contactsFilter, onReady, toDisplay])
 
   return (

@@ -5,7 +5,7 @@ import {
   getPermissionsAsync,
   type ContactsPermissionResponse,
 } from 'expo-contacts'
-import {atom, type SetStateAction} from 'jotai'
+import {atom, type Atom, type SetStateAction} from 'jotai'
 import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
 import {Linking} from 'react-native'
@@ -46,6 +46,11 @@ const matchSorterThreshold = rankings.CONTAINS
 
 const addNewContactSelectedCountryCodeAtom = atom<string | undefined>(undefined)
 
+interface ContactsQuery {
+  readonly contactsFilter: ContactsFilter
+  readonly searchText: string
+}
+
 function isContactDefaultSelected(
   contact: StoredContactWithComputedValues
 ): boolean {
@@ -61,62 +66,61 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   const searchTextAtom = atom('')
   const contactsFilterAtom = atom<ContactsFilter>('all')
-
-  const newContactsToDisplayAtom = atom((get) => {
-    const searchText = get(searchTextAtom)
-
-    const contactsToShow = deduplicateBy(
-      normalizedContacts.filter((one) => !one.flags.seen),
-      (one) => one.computedValues.normalizedNumber
-    )
-
-    return matchSorter(contactsToShow, searchText, {
-      keys: matchSorterKeys,
-      threshold: matchSorterThreshold,
-    })
+  const requestedContactsFilterAtom = atom<ContactsFilter>('all')
+  const requestedSearchTextAtom = atom('')
+  const readyContactsQueryAtom = atom<ContactsQuery>({
+    contactsFilter: 'all',
+    searchText: '',
   })
+  const isContactsPreparingAtom = atom((get) => {
+    const readyContactsQuery = get(readyContactsQueryAtom)
 
-  const submittedContactsToDisplayAtom = atom((get) => {
-    const searchText = get(searchTextAtom)
-
-    const contactsToShow = deduplicateBy(
-      normalizedContacts.filter((one) => one.flags.imported),
-      (one) => one.computedValues.normalizedNumber
+    return (
+      get(requestedContactsFilterAtom) !== readyContactsQuery.contactsFilter ||
+      get(requestedSearchTextAtom) !== readyContactsQuery.searchText
     )
-
-    return matchSorter(contactsToShow, searchText, {
-      keys: matchSorterKeys,
-      threshold: matchSorterThreshold,
-    })
   })
+  const resetContactsFilterFromRouteActionAtom = atom(
+    null,
+    (get, set, contactsFilter: ContactsFilter) => {
+      const readyContactsQuery = get(readyContactsQueryAtom)
 
-  const nonSubmittedContactsToDisplayAtom = atom((get) => {
-    const searchText = get(searchTextAtom)
+      set(requestedContactsFilterAtom, contactsFilter)
+      set(contactsFilterAtom, contactsFilter)
+      set(readyContactsQueryAtom, {
+        ...readyContactsQuery,
+        contactsFilter,
+      })
+    }
+  )
+  const createContactsToDisplayAtom = (
+    shouldDisplayContact: (contact: StoredContactWithComputedValues) => boolean
+  ): Atom<StoredContactWithComputedValues[]> =>
+    atom((get) => {
+      const searchText = get(searchTextAtom)
+      const contactsToShow = pipe(
+        normalizedContacts,
+        Array.filter(shouldDisplayContact),
+        (contacts) =>
+          deduplicateBy(contacts, (one) => one.computedValues.normalizedNumber)
+      )
 
-    const contactsToShow = deduplicateBy(
-      normalizedContacts.filter((one) => !one.flags.imported && one.flags.seen),
-      (one) => one.computedValues.normalizedNumber
-    )
-
-    return matchSorter(contactsToShow, searchText, {
-      keys: matchSorterKeys,
-      threshold: matchSorterThreshold,
+      return matchSorter(contactsToShow, searchText, {
+        keys: matchSorterKeys,
+        threshold: matchSorterThreshold,
+      })
     })
-  })
 
-  const allContactsToDisplayAtom = atom((get) => {
-    const searchText = get(searchTextAtom)
-
-    const normalizedNumbers = deduplicateBy(
-      normalizedContacts,
-      (one) => one.computedValues.normalizedNumber
-    )
-
-    return matchSorter(normalizedNumbers, searchText, {
-      keys: matchSorterKeys,
-      threshold: matchSorterThreshold,
-    })
-  })
+  const newContactsToDisplayAtom = createContactsToDisplayAtom(
+    (one) => !one.flags.seen
+  )
+  const submittedContactsToDisplayAtom = createContactsToDisplayAtom(
+    (one) => one.flags.imported
+  )
+  const nonSubmittedContactsToDisplayAtom = createContactsToDisplayAtom(
+    (one) => !one.flags.imported && one.flags.seen
+  )
+  const allContactsToDisplayAtom = createContactsToDisplayAtom(() => true)
 
   const _contactsToDisplayAtom = atom((get) => {
     const contactsFilter = get(contactsFilterAtom)
@@ -140,6 +144,19 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     nonSubmittedContactsToDisplayAtom
   )
   const allContactsToDisplayAtomsAtom = splitAtom(allContactsToDisplayAtom)
+  const contactsToDisplayAtomsAtom = atom((get) => {
+    const contactsFilter = get(contactsFilterAtom)
+
+    return get(
+      contactsFilter === 'submitted'
+        ? submittedContactsToDisplayAtomsAtom
+        : contactsFilter === 'nonSubmitted'
+          ? nonSubmittedContactsToDisplayAtomsAtom
+          : contactsFilter === 'new'
+            ? newContactsToDisplayAtomsAtom
+            : allContactsToDisplayAtomsAtom
+    )
+  })
 
   const newContactsToDisplayCountAtom = atom(
     (get) => get(newContactsToDisplayAtomsAtom).length
@@ -248,8 +265,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     (get) => {
       const selectedNumbers = get(selectedNumbersAtom)
       const contactsToDisplay = get(_contactsToDisplayAtom)
-      return !contactsToDisplay.some(
-        (one) => !selectedNumbers.has(one.computedValues.normalizedNumber)
+      return (
+        Array.isNonEmptyArray(contactsToDisplay) &&
+        pipe(
+          contactsToDisplay,
+          Array.every((one) =>
+            selectedNumbers.has(one.computedValues.normalizedNumber)
+          )
+        )
       )
     },
     (get, set, update: SetStateAction<boolean>) => {
@@ -495,6 +518,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   return {
     selectAllAtom,
     searchTextAtom,
+    requestedContactsFilterAtom,
+    requestedSearchTextAtom,
+    readyContactsQueryAtom,
+    isContactsPreparingAtom,
+    resetContactsFilterFromRouteActionAtom,
     selectContactAtom,
     addNewContactSelectedCountryCodeAtom,
     addNewContactActionAtom,
@@ -509,6 +537,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     submittedContactsToDisplayAtomsAtom,
     newContactsToDisplayAtomsAtom,
     allContactsToDisplayAtomsAtom,
+    contactsToDisplayAtomsAtom,
     newContactsToDisplayCountAtom,
     submittedContactsToDisplayCountAtom,
     nonSubmittedContactsToDisplayCountAtom,

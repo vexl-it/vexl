@@ -1,65 +1,23 @@
-import {
-  Button,
-  FilterBar,
-  type FilterBarItem,
-  Stack,
-  XStack,
-} from '@vexl-next/ui'
+import {Button, type FilterBarItem, Stack, XStack} from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
-import {Array, Effect, Option, pipe} from 'effect'
-import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {
-  normalizedContactsAtom,
-  resolveAllContactsAsSeenActionAtom,
-} from '../../../../state/contacts/atom/contactsStore'
+import {Array} from 'effect'
+import {useAtomValue} from 'jotai'
+import React, {useMemo, useState} from 'react'
+import {normalizedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
-import {andThenExpectBooleanNoErrors} from '../../../../utils/andThenExpectNoErrors'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
-import {runAfterAnimationFrame} from '../../../../utils/runAfterAnimationFrames'
-import {useOnFocusAndAppState} from '../../../../utils/useFocusAndAppState'
-import useSafeGoBack from '../../../../utils/useSafeGoBack'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import PreparingContactsOverlay from '../PreparingContactsOverlay'
 import {contactSelectMolecule, ContactsSelectScope} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
+import ContactsFilterBar from './components/ContactsFilterBar'
 import ContactsListEmpty from './components/ContactsListEmpty'
 import FilteredContacts from './components/FilteredContactsWithProvider'
 import SearchBar from './components/SearchBar'
 import SelectAllContactsCheckbox from './components/SelectAllContactsCheckbox'
-
-function ContactsFilterBar({
-  items,
-  selectedFilter,
-  onSelectedFilterChange,
-}: {
-  readonly items: ReadonlyArray<FilterBarItem<ContactsFilter>>
-  readonly selectedFilter: ContactsFilter
-  readonly onSelectedFilterChange: (filter: ContactsFilter) => void
-}): React.ReactElement {
-  const handleSelectedValuesChange = useCallback(
-    (values: ReadonlySet<ContactsFilter>) => {
-      pipe(
-        Array.fromIterable(values),
-        Array.findFirst((value) => value !== selectedFilter),
-        Option.getOrElse(() => selectedFilter),
-        onSelectedFilterChange
-      )
-    },
-    [onSelectedFilterChange, selectedFilter]
-  )
-
-  return (
-    <Stack height="$11" justifyContent="center">
-      <FilterBar
-        items={items}
-        selectedValues={new Set([selectedFilter])}
-        onSelectedValuesChange={handleSelectedValuesChange}
-        containerStyle={{marginLeft: '$5'}}
-      />
-    </Stack>
-  )
-}
+import useContactListSelectLifecycle from './hooks/useContactListSelectLifecycle'
+import usePreparedContactsFilter from './hooks/usePreparedContactsFilter'
+import useSubmitSelectedContacts from './hooks/useSubmitSelectedContacts'
 
 function ContactsListSelect({
   addContactRequestId,
@@ -69,45 +27,18 @@ function ContactsListSelect({
   readonly filter?: ContactsFilter
 }): React.ReactElement {
   const {t} = useTranslation()
-  const goBack = useSafeGoBack()
   const {
-    submitAllSelectedContactsActionAtom,
-    checkContactsAccessPrivilegesActionAtom,
-    contactsFilterAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
-    syncDefaultSelectedContactsActionAtom,
-    normalizedContacts,
+    isContactsPreparingAtom,
   } = useMolecule(contactSelectMolecule)
-
-  const resolveAllContactsAsSeen = useSetAtom(
-    resolveAllContactsAsSeenActionAtom
-  )
-  const submitAllSelectedContacts = useSetAtom(
-    submitAllSelectedContactsActionAtom
-  )
-  const checkContactsAccessPrivileges = useSetAtom(
-    checkContactsAccessPrivilegesActionAtom
-  )
-  const setContactsFilter = useSetAtom(contactsFilterAtom)
-  const syncDefaultSelectedContacts = useSetAtom(
-    syncDefaultSelectedContactsActionAtom
-  )
-  const [optimisticContactsFilter, setOptimisticContactsFilter] =
-    useState<ContactsFilter>(filter ?? 'all')
-  const [isContactsTabPreparing, setIsContactsTabPreparing] = useState(false)
-  const [isSubmittingContacts, setIsSubmittingContacts] = useState(false)
-  const latestOptimisticContactsFilterRef = useRef<ContactsFilter>(
-    filter ?? 'all'
-  )
-  const cancelDeferredFilterFrameRef = useRef<(() => void) | undefined>(
-    undefined
-  )
-  const cancelDeferredSubmitFrameRef = useRef<(() => void) | undefined>(
-    undefined
-  )
+  const normalizedContacts = useContactListSelectLifecycle()
+  const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
   const areThereAnyContactsToDisplayForSelectedTab = useAtomValue(
     areThereAnyContactsToDisplayForSelectedTabAtom
   )
+  const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
+  const {isSubmittingContacts, submitSelectedContacts} =
+    useSubmitSelectedContacts()
 
   const shouldShowEmptyContactsState =
     !Array.isNonEmptyArray(normalizedContacts) && addContactRequestId === 0
@@ -134,64 +65,12 @@ function ContactsListSelect({
     [t]
   )
 
-  useEffect(() => {
-    return () => {
-      resolveAllContactsAsSeen()
-      cancelDeferredFilterFrameRef.current?.()
-      cancelDeferredSubmitFrameRef.current?.()
-    }
-  }, [resolveAllContactsAsSeen])
-
-  useOnFocusAndAppState(
-    useCallback(() => {
-      Effect.runFork(checkContactsAccessPrivileges())
-    }, [checkContactsAccessPrivileges])
-  )
-
-  useEffect(() => {
-    syncDefaultSelectedContacts(normalizedContacts)
-  }, [normalizedContacts, syncDefaultSelectedContacts])
-
-  useEffect(() => {
-    const nextFilter = filter ?? 'all'
-    cancelDeferredFilterFrameRef.current?.()
-    cancelDeferredFilterFrameRef.current = undefined
-    latestOptimisticContactsFilterRef.current = nextFilter
-    setOptimisticContactsFilter(nextFilter)
-    setIsContactsTabPreparing(false)
-    setContactsFilter(nextFilter)
-  }, [filter, setContactsFilter])
-
-  const handleContactsFilterChange = useCallback(
-    (nextFilter: ContactsFilter) => {
-      if (latestOptimisticContactsFilterRef.current === nextFilter) return
-
-      latestOptimisticContactsFilterRef.current = nextFilter
-      setOptimisticContactsFilter(nextFilter)
-
-      cancelDeferredFilterFrameRef.current?.()
-
-      setIsContactsTabPreparing(true)
-      cancelDeferredFilterFrameRef.current = runAfterAnimationFrame(() => {
-        cancelDeferredFilterFrameRef.current = undefined
-        setContactsFilter(nextFilter)
-      })
-    },
-    [setContactsFilter]
-  )
-
-  const handleFilteredContactsReady = useCallback(
-    (readyFilter: ContactsFilter) => {
-      if (latestOptimisticContactsFilterRef.current === readyFilter) {
-        setIsContactsTabPreparing(false)
-      }
-    },
-    []
-  )
-
   if (shouldShowEmptyContactsState) {
     return <ContactsListEmpty variant="emptyContacts" />
   }
+
+  const isSelectAllContactsCheckboxDisabled =
+    !areThereAnyContactsToDisplayForSelectedTab || isContactsPreparing
 
   return (
     <Stack f={1} pos="relative">
@@ -202,45 +81,25 @@ function ContactsListSelect({
             <Stack flex={1}>
               <SearchBar addContactRequestId={addContactRequestId} />
             </Stack>
-            {areThereAnyContactsToDisplayForSelectedTab &&
-            !isContactsTabPreparing ? (
-              <SelectAllContactsCheckbox />
-            ) : null}
+            <SelectAllContactsCheckbox
+              disabled={isSelectAllContactsCheckboxDisabled}
+            />
           </XStack>
         </Stack>
         <ContactsFilterBar
           items={contactsFilterItems}
-          selectedFilter={optimisticContactsFilter}
-          onSelectedFilterChange={handleContactsFilterChange}
+          selectedFilter={selectedFilter}
+          onSelectedFilterChange={setSelectedFilter}
         />
         <Stack f={1} pos="relative">
-          <FilteredContacts onReady={handleFilteredContactsReady} />
-          <PreparingContactsOverlay
-            visible={isContactsTabPreparing}
-            zIndex={10}
-          />
+          <FilteredContacts />
+          <PreparingContactsOverlay visible={isContactsPreparing} zIndex={10} />
         </Stack>
       </Stack>
       <Stack px="$5" py="$4">
         <Button
           disabled={isSubmittingContacts}
-          onPress={() => {
-            if (isSubmittingContacts) return
-
-            setIsSubmittingContacts(true)
-            cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(
-              () => {
-                cancelDeferredSubmitFrameRef.current = undefined
-                void Effect.runPromise(
-                  andThenExpectBooleanNoErrors((success) => {
-                    if (success) goBack()
-                  })(submitAllSelectedContacts())
-                ).finally(() => {
-                  setIsSubmittingContacts(false)
-                })
-              }
-            )
-          }}
+          onPress={submitSelectedContacts}
         >
           {t('common.submit')}
         </Button>

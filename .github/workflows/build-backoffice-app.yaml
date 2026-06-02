@@ -11,6 +11,12 @@ on:
         options:
           - prod
           - stage
+  workflow_call:
+    inputs:
+      env:
+        description: "Environment to build"
+        required: true
+        type: string
 
 permissions:
   id-token: write

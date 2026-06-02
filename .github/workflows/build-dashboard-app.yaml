@@ -17,6 +17,12 @@ on:
           - prod
           - stage
           - dev
+  workflow_call:
+    inputs:
+      env:
+        description: "Environment to build"
+        required: true
+        type: string
 
 jobs:
   build-and-push:

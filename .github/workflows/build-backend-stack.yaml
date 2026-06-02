@@ -78,3 +78,21 @@ jobs:
     secrets: inherit
     with:
       env: ${{ inputs.env }}
+
+  web-app:
+    uses: ./.github/workflows/build-web-app.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  backoffice-app:
+    uses: ./.github/workflows/build-backoffice-app.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}
+
+  dashboard-app:
+    uses: ./.github/workflows/build-dashboard-app.yaml
+    secrets: inherit
+    with:
+      env: ${{ inputs.env }}

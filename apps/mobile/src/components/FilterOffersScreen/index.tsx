@@ -1,6 +1,5 @@
 import {spokenLanguagesOptions} from '@vexl-next/domain/src/general/offers'
 import {
-  Button,
   ChevronLeft,
   Loader,
   NavButton,
@@ -15,8 +14,7 @@ import {
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect} from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {formatInteger} from '../../utils/localization/formatting'
-import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
+import {runAfterTwoAnimationFrames} from '../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {useOpenChangeCurrency} from '../ChangeCurrency'
 import DeferredContent from '../DeferredContent'
@@ -29,7 +27,6 @@ import {
   btcPricesReadyForFilterAtom,
   clubsFilterEnabledAtom,
   currencyAtom,
-  filteredOffersPreviewCountAtom,
   initializeOffersFilterOnDisplayActionAtom,
   intendedConnectionLevelAtom,
   resetFilterOmitTextFilterActionAtom,
@@ -39,18 +36,13 @@ import {
 import AnimatedCollapse from './components/AnimatedCollapse'
 import BtcPriceInfo from './components/BtcPriceInfo'
 import ClubsSection from './components/ClubsSection'
+import FilterOffersFooter from './components/FilterOffersFooter'
 import LocationSection from './components/LocationSection'
 import LookingToSection from './components/LookingToSection'
 import NetworkSection from './components/NetworkSection'
 import ProductCategorySection from './components/ProductCategorySection'
 import Sorting from './components/Sorting'
 import SpokenLanguageTag from './components/SpokenLanguageTag'
-
-function runAfterTwoAnimationFrames(callback: () => void): void {
-  requestAnimationFrame(() => {
-    requestAnimationFrame(callback)
-  })
-}
 
 function FilterOffersScreen(): React.ReactElement {
   const {t} = useTranslation()
@@ -69,8 +61,6 @@ function FilterOffersScreen(): React.ReactElement {
   const amountFilterEnabled = useAtomValue(amountFilterEnabledAtom)
   const amountPricesReady = useAtomValue(btcPricesReadyForFilterAtom)
   const clubsFilterEnabled = useAtomValue(clubsFilterEnabledAtom)
-  const filteredOffersCount = useAtomValue(filteredOffersPreviewCountAtom)
-  const locale = useAtomValue(formattingLocaleAtom)
   const amountContentVisible = amountFilterEnabled && !!currency
 
   const resetOfferForm = useCallback(() => {
@@ -118,13 +108,7 @@ function FilterOffersScreen(): React.ReactElement {
           </XStack>
         </XStack>
       }
-      footer={
-        <Button variant="primary" size="large" onPress={handleSave}>
-          {t('filterOffers.seeOffersFormatted', {
-            localizedString: formatInteger(filteredOffersCount, locale),
-          })}
-        </Button>
-      }
+      footer={<FilterOffersFooter onPress={handleSave} />}
     >
       <DeferredContent>
         <YStack paddingHorizontal="$5" gap="$3">

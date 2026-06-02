@@ -5,6 +5,7 @@ import {
   type IntendedConnectionLevel,
   type LocationState,
   type OfferLocation,
+  type OneOfferInState,
   type PaymentMethod,
   type ProductCategory,
   type Sort,
@@ -593,11 +594,19 @@ export const saveFilterActionAtom = atom(null, (get, set) => {
   set(offersFilterFromStorageAtom, getDraftOffersFilter(get))
 })
 
-export const filteredOffersPreviewCountAtom = atom((get) => {
-  const draftFilter = getDraftOffersFilter(get)
+export const draftOffersFilterSnapshotAtom = atom((get) =>
+  getDraftOffersFilter(get)
+)
 
+function getFilteredOffersPreviewCount({
+  draftFilter,
+  offers,
+}: {
+  draftFilter: OffersFilter
+  offers: OneOfferInState[]
+}): number {
   const offersAfterBarFilter = selectOffersByMarketplaceFilterBarOptions({
-    offers: get(offersToSeeInMarketplaceAtom),
+    offers,
     selectedOptions: draftFilter.filterBarOptions,
   })
 
@@ -613,7 +622,41 @@ export const filteredOffersPreviewCountAtom = atom((get) => {
       !Array.isNonEmptyReadonlyArray(draftFilter.location ?? []) ||
       shouldCombineOnlineOffersWithLocationFilter(draftFilter),
   }).length
-})
+}
+
+export const filteredOffersPreviewCountAtom = atom<number | undefined>(
+  undefined
+)
+
+export const isFilteredOffersPreviewCountPendingAtom = atom<boolean>(true)
+
+export const setFilteredOffersPreviewCountPendingActionAtom = atom(
+  null,
+  (_get, set, isPending: boolean) => {
+    set(isFilteredOffersPreviewCountPendingAtom, isPending)
+  }
+)
+
+export const recomputeFilteredOffersPreviewCountActionAtom = atom(
+  null,
+  (get, set) => {
+    const previewCount = getFilteredOffersPreviewCount({
+      draftFilter: get(draftOffersFilterSnapshotAtom),
+      offers: get(offersToSeeInMarketplaceAtom),
+    })
+
+    set(filteredOffersPreviewCountAtom, previewCount)
+    set(isFilteredOffersPreviewCountPendingAtom, false)
+  }
+)
+
+export const initializeFilteredOffersPreviewCountActionAtom = atom(
+  null,
+  (_get, set) => {
+    set(filteredOffersPreviewCountAtom, undefined)
+    set(isFilteredOffersPreviewCountPendingAtom, true)
+  }
+)
 
 export function createSelectClubInFilterAtom(
   clubWithMembersAtom: Atom<ClubWithMembers>

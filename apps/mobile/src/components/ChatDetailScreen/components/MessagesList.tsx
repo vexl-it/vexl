@@ -6,6 +6,7 @@ import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {type NativeScrollEvent, type ViewabilityConfig} from 'react-native'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
+import {runAfterAnimationFrame} from '../../../utils/runAfterAnimationFrames'
 import {chatMolecule} from '../atoms'
 import findTargetMessageIndex, {
   type TargetMessageIndexListItem,
@@ -58,7 +59,7 @@ function MessagesList({
   )
 
   const scrollToBottom = useCallback((animated: boolean) => {
-    requestAnimationFrame(() => {
+    runAfterAnimationFrame(() => {
       listRef.current?.scrollToEnd({animated})
       isScrolledToBottomRef.current = true
     })
@@ -112,7 +113,7 @@ function MessagesList({
     if (targetMessageIndex === undefined) return false
 
     scrolledToTargetMessageIdRef.current = targetMessageId
-    requestAnimationFrame(() => {
+    runAfterAnimationFrame(() => {
       void listRef.current?.scrollToIndex({
         animated: false,
         index: targetMessageIndex,

@@ -167,17 +167,21 @@ function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
   const {
     amountBottomLimit,
     amountTopLimit,
+    feeAmount,
+    feeState,
     listingType,
     offerDescription,
     ...restOfPublicPart
   } = publicPart
+  const isBitcoinListing = listingType === 'BITCOIN'
 
   return {
     ...restOfPublicPart,
     listingType,
     amountBottomLimit,
-    amountTopLimit:
-      listingType !== 'BITCOIN' ? amountBottomLimit : amountTopLimit,
+    amountTopLimit: isBitcoinListing ? amountTopLimit : amountBottomLimit,
+    feeAmount: isBitcoinListing ? feeAmount : 0,
+    feeState: isBitcoinListing ? feeState : 'WITHOUT_FEE',
     offerDescription: offerDescription.trim(),
   }
 }
@@ -1408,6 +1412,11 @@ export const offerFormMolecule = molecule(() => {
       const locationState = get(locationStateAtom)
 
       set(listingTypeAtom, listingType)
+
+      if (listingType !== 'BITCOIN') {
+        set(feeAmountAtom, 0)
+        set(feeStateAtom, 'WITHOUT_FEE')
+      }
 
       if (listingType !== 'PRODUCT') {
         set(productCategoriesAtom, undefined)

@@ -20,8 +20,6 @@ function SelectAllContactsCheckbox({
       testID="@contactsList/selectAll"
       backgroundColor="$backgroundTertiary"
       onPress={() => {
-        if (disabled) return
-
         setAllSelected((value) => !value)
       }}
     >

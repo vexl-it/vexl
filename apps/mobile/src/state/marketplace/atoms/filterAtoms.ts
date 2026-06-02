@@ -1,11 +1,13 @@
 import {type FilterBarItem} from '@vexl-next/ui'
-import {Array, Record, Schema} from 'effect'
+import {Array, Either, Record, Schema, pipe} from 'effect'
 import {type ReadonlyArray} from 'effect/Array'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {storage} from '../../../utils/mmkv/effectMmkv'
+import reportError from '../../../utils/reportError'
 import {clubsToKeyHolderAtom} from '../../clubs/atom/clubsToKeyHolderV2Atom'
 import {
   MarketplaceFilterBarOption,
@@ -33,10 +35,83 @@ export const offersFilterInitialState = {
   productCategories: undefined,
 } satisfies OffersFilter
 
+const OFFERS_FILTER_STORAGE_KEY = 'offersFilterV2'
+const LEGACY_OFFERS_FILTER_STORAGE_KEY = 'offersFilter'
+const OffersFilterStorage = Schema.Struct({filter: OffersFilter})
+interface OffersFilterStorage {
+  readonly filter: OffersFilter
+}
+
+const offersFilterDefaultStorageValue: OffersFilterStorage = {
+  filter: offersFilterInitialState,
+}
+
+function readOffersFilterInitialStorageValue(): OffersFilterStorage {
+  return pipe(
+    storage.getVerified(OFFERS_FILTER_STORAGE_KEY, OffersFilterStorage),
+    Either.match({
+      onLeft: (currentStorageError) => {
+        if (currentStorageError._tag !== 'ValueNotSet') {
+          reportError(
+            'warn',
+            new Error(
+              `Error while parsing stored value. Using provided default. Key: ${OFFERS_FILTER_STORAGE_KEY}`
+            ),
+            {currentStorageError}
+          )
+          return offersFilterDefaultStorageValue
+        }
+
+        return pipe(
+          storage.getVerified(
+            LEGACY_OFFERS_FILTER_STORAGE_KEY,
+            OffersFilterStorage
+          ),
+          Either.match({
+            onLeft: (legacyStorageError) => {
+              if (legacyStorageError._tag !== 'ValueNotSet') {
+                reportError(
+                  'warn',
+                  new Error(
+                    `Error while migrating stored value. Using provided default. Key: ${LEGACY_OFFERS_FILTER_STORAGE_KEY}`
+                  ),
+                  {legacyStorageError}
+                )
+              }
+
+              return offersFilterDefaultStorageValue
+            },
+            onRight: (legacyStorageValue) => {
+              pipe(
+                storage.saveVerified(
+                  OFFERS_FILTER_STORAGE_KEY,
+                  OffersFilterStorage
+                )(legacyStorageValue),
+                Either.mapLeft((saveStorageError) => {
+                  reportError(
+                    'warn',
+                    new Error(
+                      `Error while saving migrated value. Key: ${OFFERS_FILTER_STORAGE_KEY}`
+                    ),
+                    {saveStorageError}
+                  )
+                })
+              )
+
+              return legacyStorageValue
+            },
+          })
+        )
+      },
+      onRight: (currentStorageValue) => currentStorageValue,
+    })
+  )
+}
+
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
-  'offersFilterV2',
-  {filter: offersFilterInitialState},
-  Schema.Struct({filter: OffersFilter})
+  OFFERS_FILTER_STORAGE_KEY,
+  readOffersFilterInitialStorageValue(),
+  OffersFilterStorage
 )
 
 export const offersFilterFromStorageAtom = focusAtom(

@@ -7,7 +7,7 @@ import {
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Stack, tokens, useTheme} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef} from 'react'
+import React, {useEffect, useMemo, useRef} from 'react'
 import {RefreshControl} from 'react-native'
 import Animated from 'react-native-reanimated'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
@@ -17,6 +17,12 @@ import OffersListItem from './OffersListItem'
 const ItemSeparatorComponent = (): React.ReactElement => <Stack h="$5" />
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
+
+function renderItem(
+  info: ListRenderItemInfo<Atom<OneOfferInState>>
+): React.ReactElement {
+  return <OffersListItem isFirst={info.index === 0} offerAtom={info.item} />
+}
 
 export interface Props
   extends Omit<FlashListProps<Atom<OneOfferInState>>, 'renderItem' | 'data'> {
@@ -61,20 +67,6 @@ function OffersList({
       scrollToTopRef.current = null
     }
   }, [scrollToTopRef])
-
-  const firstOfferAtom = offersAtoms[0]
-
-  const renderItem = useCallback(
-    (info: ListRenderItemInfo<Atom<OneOfferInState>>): React.ReactElement => {
-      return (
-        <OffersListItem
-          isFirst={info.item === firstOfferAtom}
-          offerAtom={info.item}
-        />
-      )
-    },
-    [firstOfferAtom]
-  )
 
   return (
     <ReanimatedFlashList

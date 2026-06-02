@@ -85,9 +85,7 @@ export function offerMatchesMarketplaceFilterBarOption(
   option: MarketplaceFilterBarOption
 ): boolean {
   const {publicPart} = offer.offerInfo
-  const persistedOfferTypeForUserFacingAction = (
-    userFacingOfferType: OfferType
-  ): OfferType =>
+  const toPersistedOfferType = (userFacingOfferType: OfferType): OfferType =>
     getUserFacingOfferType({
       listingType: publicPart.listingType,
       offerType: userFacingOfferType,
@@ -95,36 +93,34 @@ export function offerMatchesMarketplaceFilterBarOption(
 
   if (option === 'BUY_BTC')
     return (
-      publicPart.offerType === persistedOfferTypeForUserFacingAction('SELL') &&
-      isBtcOffer(offer)
+      publicPart.offerType === toPersistedOfferType('SELL') && isBtcOffer(offer)
     )
 
   if (option === 'SELL_BTC')
     return (
-      publicPart.offerType === persistedOfferTypeForUserFacingAction('BUY') &&
-      isBtcOffer(offer)
+      publicPart.offerType === toPersistedOfferType('BUY') && isBtcOffer(offer)
     )
 
   if (option === 'BUY_PRODUCT')
     return (
-      publicPart.offerType === persistedOfferTypeForUserFacingAction('SELL') &&
+      publicPart.offerType === toPersistedOfferType('SELL') &&
       publicPart.listingType === 'PRODUCT'
     )
 
   if (option === 'SELL_PRODUCT')
     return (
-      publicPart.offerType === persistedOfferTypeForUserFacingAction('BUY') &&
+      publicPart.offerType === toPersistedOfferType('BUY') &&
       publicPart.listingType === 'PRODUCT'
     )
 
   if (option === 'HIRE_SERVICE')
     return (
-      publicPart.offerType === persistedOfferTypeForUserFacingAction('SELL') &&
+      publicPart.offerType === toPersistedOfferType('SELL') &&
       publicPart.listingType === 'OTHER'
     )
 
   return (
-    publicPart.offerType === persistedOfferTypeForUserFacingAction('BUY') &&
+    publicPart.offerType === toPersistedOfferType('BUY') &&
     publicPart.listingType === 'OTHER'
   )
 }

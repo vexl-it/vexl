@@ -17,3 +17,5 @@ export const shouldShowLoadingOffersAtom = atom((get) => {
     areNotificationsEnabled.value.notifications
   )
 })
+
+export const newOfferButtonVisibleOnLoadingMarketplaceAtom = atom(false)

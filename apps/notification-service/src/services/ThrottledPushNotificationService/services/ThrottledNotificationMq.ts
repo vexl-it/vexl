@@ -14,6 +14,7 @@ import {PushNotificationService} from '../../PushNotificationService'
 import {lockOnNotificationToken} from '../utils'
 import {LastTimeIssuedForNotificationTokenDb} from './LastTimeIssuedForNotificationTokenDb'
 import {NotificationWaitingToBeIssuedForNotificationToken} from './NotificationWaitingToBeIssuedForNotificationToken'
+export {processThrottledNotificationsJobId} from './ThrottledNotificationJobId'
 
 export class ProcessThrottledNotificationsError extends Data.TaggedError(
   'ProcessThrottledNotificationsError'
@@ -43,10 +44,6 @@ export const EnqueueProcessNotificationsContext = EnqueueTaskContext
 
 export type EnqueueProcessNotificationsContext =
   typeof EnqueueProcessNotificationsContext
-
-export const processThrottledNotificationsJobId = (
-  token: VexlNotificationTokenSecret
-): string => `process-throttled-notifications:${token}`
 
 export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
   Effect.gen(function* (_) {

@@ -1,9 +1,16 @@
-import React from 'react'
+import React, {useCallback} from 'react'
+import {type GestureResponderEvent} from 'react-native'
 import {getTokens, styled, useTheme} from 'tamagui'
 
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {Circle, XStack, YStack} from '../primitives'
+import {CardButton} from './CardButton'
 import {Typography} from './Typography'
+
+export interface OfferCardActionButton {
+  readonly label: string
+  readonly onPress: () => void
+}
 
 export interface OfferCardProps {
   readonly avatar?: React.ReactNode
@@ -17,6 +24,7 @@ export interface OfferCardProps {
   readonly description: string
   readonly details: readonly string[]
   readonly onPress?: () => void
+  readonly actionButton?: OfferCardActionButton
 }
 
 const CardFrame = styled(YStack, {
@@ -68,10 +76,19 @@ export function OfferCard({
   description,
   details,
   onPress,
+  actionButton,
 }: OfferCardProps): React.JSX.Element {
   const theme = useTheme()
   const sizeTokens = getTokens().size
   const secondaryColor = theme.foregroundSecondary.get()
+
+  const handleActionButtonPress = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation()
+      actionButton?.onPress()
+    },
+    [actionButton]
+  )
 
   const hasClubs = clubNames != null && clubNames.length > 0
   const hasFriends = commonFriends != null
@@ -198,6 +215,11 @@ export function OfferCard({
             </React.Fragment>
           ))}
         </XStack>
+        {actionButton != null ? (
+          <CardButton contrast width="100%" onPress={handleActionButtonPress}>
+            {actionButton.label}
+          </CardButton>
+        ) : null}
       </ContentFrame>
     </CardFrame>
   )

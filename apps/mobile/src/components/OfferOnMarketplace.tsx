@@ -1,5 +1,10 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {IconTag, OfferCard, TextTag} from '@vexl-next/ui'
+import {
+  IconTag,
+  OfferCard,
+  TextTag,
+  type OfferCardActionButton,
+} from '@vexl-next/ui'
 import {Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
@@ -27,9 +32,11 @@ import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
 export default function OfferOnMarketplace({
   offer,
   onPress,
+  actionButton,
 }: {
   offer: OneOfferInState
   onPress?: () => void
+  actionButton?: OfferCardActionButton
 }): React.ReactElement {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
@@ -187,6 +194,7 @@ export default function OfferOnMarketplace({
       description={publicPart.offerDescription}
       details={details}
       onPress={onPress}
+      actionButton={actionButton}
     />
   )
 }

@@ -81,6 +81,7 @@ export function shouldUseGrayscaleColours({
   if (!offerInfo.publicPart.active) return true
   if (isOfferExpired(offerInfo.publicPart.expirationDate)) return true
   if (isMine || requestState === 'initial') return false
+  if (requestState === 'requested') return true
   if (requestState === 'accepted') return true
   if (requestState === 'otherSideLeft') return true
 

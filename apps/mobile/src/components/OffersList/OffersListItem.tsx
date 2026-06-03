@@ -8,6 +8,7 @@ import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOff
 import {
   canChatBeRequested,
   getRequestState,
+  shouldUseGrayscaleColours,
 } from '../../state/chat/utils/offerStates'
 import {marketplaceFirstOfferBannerAtom} from '../../state/marketplace/atoms/offerSuggestionVisible'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -82,6 +83,16 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
     if (!chatForOffer) return true
     return canChatBeRequested(chatForOffer, rerequestLimitDays).canBeRerequested
   }, [chatForOffer, rerequestLimitDays])
+
+  const shouldShowGoToChatButton =
+    !isMine &&
+    !!chatForOffer?.chat &&
+    shouldUseGrayscaleColours({
+      chat: chatForOffer,
+      isMine,
+      offerInfo: offer.offerInfo,
+      rerequestLimitDays,
+    })
 
   const navigateToOffer = useCallback(() => {
     if (isMine) {
@@ -224,7 +235,15 @@ function OffersListItem({isFirst, offerAtom}: Props): React.ReactElement {
   return (
     <>
       <Stack px="$5">
-        <OfferOnMarketplace offer={offer} onPress={content.onPress} />
+        <OfferOnMarketplace
+          offer={offer}
+          onPress={content.onPress}
+          actionButton={
+            shouldShowGoToChatButton
+              ? {label: t('offer.goToChat'), onPress: navigateToChat}
+              : undefined
+          }
+        />
       </Stack>
       {route.name === 'Marketplace' && isFirst && !isMyOffer ? (
         <MarketplaceFirstOfferBanner />

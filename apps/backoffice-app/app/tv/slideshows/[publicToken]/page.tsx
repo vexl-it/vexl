@@ -5,7 +5,7 @@ import {
   type SlideshowSlide,
   type TvSlideshow,
 } from '@/src/services/slideshows/domain'
-import {Array} from 'effect'
+import {Array, pipe} from 'effect'
 import {useParams} from 'next/navigation'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 
@@ -36,7 +36,6 @@ function SlideView({slide}: {readonly slide: SlideshowSlide}) {
     case 'video':
       return (
         <video
-          key={slide.uuid}
           src={slide.url}
           className="h-screen w-screen bg-black object-contain"
           autoPlay
@@ -50,7 +49,6 @@ function SlideView({slide}: {readonly slide: SlideshowSlide}) {
         <SlideFallback message="This website cannot be displayed here." />
       ) : (
         <iframe
-          key={slide.uuid}
           src={slide.url}
           title="Website slide"
           sandbox="allow-scripts allow-same-origin"
@@ -93,6 +91,14 @@ export default function TvSlideshowPage() {
       return null
     }
     return slideshow.slides[currentIndex] ?? slideshow.slides[0]
+  }, [currentIndex, slideshow])
+
+  const activeIndex = useMemo(() => {
+    if (!slideshow || !Array.isNonEmptyReadonlyArray(slideshow.slides)) {
+      return null
+    }
+
+    return currentIndex >= slideshow.slides.length ? 0 : currentIndex
   }, [currentIndex, slideshow])
 
   const goToNextSlide = useCallback(() => {
@@ -151,8 +157,27 @@ export default function TvSlideshowPage() {
   if (!currentSlide) return <SlideFallback message="No slides configured." />
 
   return (
-    <main className="h-screen w-screen overflow-hidden bg-black">
-      <SlideView slide={currentSlide} />
+    <main className="relative h-screen w-screen overflow-hidden bg-black">
+      {pipe(
+        slideshow.slides,
+        Array.map((slide, slideIndex) => {
+          const isActive = slideIndex === activeIndex
+
+          return (
+            <div
+              key={slide.uuid}
+              aria-hidden={!isActive}
+              className={`absolute inset-0 h-screen w-screen bg-black ${
+                isActive
+                  ? 'visible z-10 opacity-100'
+                  : 'invisible z-0 opacity-0'
+              }`}
+            >
+              <SlideView slide={slide} />
+            </div>
+          )
+        })
+      )}
     </main>
   )
 }

@@ -7,7 +7,7 @@ import {
 } from '@/src/services/slideshows/domain'
 import {Array, pipe} from 'effect'
 import {useParams} from 'next/navigation'
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 
 const SlideFallback = ({message}: {readonly message: string}) => (
   <div className="flex h-screen w-screen items-center justify-center bg-black p-8 text-center text-sm text-white">
@@ -15,12 +15,34 @@ const SlideFallback = ({message}: {readonly message: string}) => (
   </div>
 )
 
-function SlideView({slide}: {readonly slide: SlideshowSlide}) {
+function SlideView({
+  isActive,
+  slide,
+}: {
+  readonly isActive: boolean
+  readonly slide: SlideshowSlide
+}) {
   const [iframeFailed, setIframeFailed] = useState(false)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
     setIframeFailed(false)
   }, [slide.uuid])
+
+  useEffect(() => {
+    if (slide.type !== 'video') return
+
+    const video = videoRef.current
+    if (!video) return
+
+    if (!isActive) {
+      video.pause()
+      return
+    }
+
+    video.currentTime = 0
+    void video.play().catch(() => undefined)
+  }, [isActive, slide.type, slide.uuid])
 
   switch (slide.type) {
     case 'image':
@@ -36,6 +58,7 @@ function SlideView({slide}: {readonly slide: SlideshowSlide}) {
     case 'video':
       return (
         <video
+          ref={videoRef}
           src={slide.url}
           className="h-screen w-screen bg-black object-contain"
           autoPlay
@@ -173,7 +196,7 @@ export default function TvSlideshowPage() {
                   : 'invisible z-0 opacity-0'
               }`}
             >
-              <SlideView slide={slide} />
+              <SlideView isActive={isActive} slide={slide} />
             </div>
           )
         })

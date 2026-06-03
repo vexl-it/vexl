@@ -1,9 +1,3 @@
-# AGENTS
-
-Purpose: Minimal Expo app for previewing and testing @vexl-next/ui components on iOS and Android.
-
-Stack: Expo 54, React 19.1.0, React Native 0.81.5, Tamagui v1.
-
 Structure:
 
 - `App.tsx` — Root component with theme provider and screen navigation.

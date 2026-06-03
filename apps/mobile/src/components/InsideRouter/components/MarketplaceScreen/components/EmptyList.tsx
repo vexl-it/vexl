@@ -19,7 +19,10 @@ import {importedContactsCountAtom} from '../../../../../state/contacts/atom/cont
 import {useAreOffersLoading} from '../../../../../state/marketplace'
 import {hasPostedFirstOfferActionStepAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
-import {shouldShowLoadingOffersAtom} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
+import {
+  newOfferButtonVisibleOnLoadingMarketplaceAtom,
+  shouldShowLoadingOffersAtom,
+} from '../../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
 import {REACH_NUMBER_THRESHOLD} from '../../../../../state/marketplace/domain'
 import {notificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
@@ -176,8 +179,13 @@ function EmptyList(): React.ReactElement {
   const emptyListVariant = useEmptyListVariants()
   const shouldShowLoadingOffers = useAtomValue(shouldShowLoadingOffersAtom)
   const refreshOffers = useSetAtom(refreshOffersActionAtom)
+  const setNewOfferButtonVisibleOnLoadingMarketplace = useSetAtom(
+    newOfferButtonVisibleOnLoadingMarketplaceAtom
+  )
   const loading = useAreOffersLoading()
   const [loadingOffersTimedOut, setLoadingOffersTimedOut] = useState(false)
+  const isLoadingOffersVisible =
+    shouldShowLoadingOffers && (!loadingOffersTimedOut || loading)
 
   useEffect(() => {
     if (!shouldShowLoadingOffers || loadingOffersTimedOut || loading) {
@@ -208,7 +216,15 @@ function EmptyList(): React.ReactElement {
     }
   }, [shouldShowLoadingOffers])
 
-  if (shouldShowLoadingOffers && (!loadingOffersTimedOut || loading)) {
+  useEffect(() => {
+    setNewOfferButtonVisibleOnLoadingMarketplace(isLoadingOffersVisible)
+
+    return () => {
+      setNewOfferButtonVisibleOnLoadingMarketplace(false)
+    }
+  }, [isLoadingOffersVisible, setNewOfferButtonVisibleOnLoadingMarketplace])
+
+  if (isLoadingOffersVisible) {
     return (
       <MarketplaceEmptyLoader label={t('emptyMarketplace.loadingOffers')} />
     )

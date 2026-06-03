@@ -2,10 +2,11 @@ import {useNavigation, useRoute} from '@react-navigation/native'
 import {FabButton, PlusAdd, type TabItem} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {getTokens, Stack} from 'tamagui'
+import {Stack, useTheme} from 'tamagui'
 import {type InsideTabParamsList} from '../../../../navigationTypes'
 import {areThereAnyMyOffersAtom} from '../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {newOfferButtonVisibleOnLoadingMarketplaceAtom} from '../../../../state/marketplace/atoms/shouldShowLoadingOffersAtom'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {InsideScreen} from '../InsideScreen'
 import MarketplaceScreenContent from './components/MarketplaceScreenContent'
@@ -30,12 +31,18 @@ function NewOfferFab({
 }): React.JSX.Element | null {
   const {t} = useTranslation()
   const navigation = useNavigation()
+  const theme = useTheme()
   const areThereOffersFromOthers = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
   const areThereMyOffers = useAtomValue(areThereAnyMyOffersAtom)
+  const newOfferButtonVisibleOnLoadingMarketplace = useAtomValue(
+    newOfferButtonVisibleOnLoadingMarketplaceAtom
+  )
   const showFab =
-    activeTab === 'allOffers' ? areThereOffersFromOthers : areThereMyOffers
+    activeTab === 'allOffers'
+      ? areThereOffersFromOthers || newOfferButtonVisibleOnLoadingMarketplace
+      : areThereMyOffers
 
   const navigateToNewOffer = useCallback(() => {
     navigation.navigate('CRUDOfferFlow')
@@ -46,7 +53,7 @@ function NewOfferFab({
   return (
     <Stack position="absolute" bottom="$4" right="$4" zIndex={2}>
       <FabButton
-        icon={<PlusAdd size={24} color={getTokens().color.black100.val} />}
+        icon={<PlusAdd size={24} color={theme.black100.get()} />}
         label={t('offerForm.myNewOffer')}
         onPress={navigateToNewOffer}
       />

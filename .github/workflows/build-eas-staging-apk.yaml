@@ -5,8 +5,9 @@ on: workflow_dispatch
 
 jobs:
   build:
-    name: Install and build
+    name: Install, build, and upload APK
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -24,7 +25,16 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
-          mkdir apps/mobile/credentials && echo $GOOGLE_SERVICE_ACCOUNT > apps/mobile/credentials/google.json
-      - name: Build on EAS
-        run: eas build --platform android --profile stagingApk --non-interactive --no-wait
+          mkdir -p apps/mobile/credentials && echo "$GOOGLE_SERVICE_ACCOUNT" > apps/mobile/credentials/google.json
+      - name: Build on EAS and download APK
+        run: |
+          eas build --platform android --profile stagingApk --non-interactive --wait --json > build.json
+          APK_URL="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' build.json)"
+          test "$APK_URL" != "null"
+          curl -L "$APK_URL" -o vexl-staging.apk
         working-directory: apps/mobile
+      - name: Upload signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: vexl-staging-signed-apk
+          path: apps/mobile/vexl-staging.apk

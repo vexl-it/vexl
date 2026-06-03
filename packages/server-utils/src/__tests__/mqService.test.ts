@@ -21,4 +21,20 @@ describe('validateBullMqJobOptions', () => {
 
     expect(Exit.isSuccess(result)).toBe(true)
   })
+
+  it('allows options without a custom job ID', async () => {
+    const result = await Effect.runPromiseExit(
+      validateBullMqJobOptions({}, (character) => ({character}))
+    )
+
+    expect(Exit.isSuccess(result)).toBe(true)
+  })
+
+  it('allows undefined options', async () => {
+    const result = await Effect.runPromiseExit(
+      validateBullMqJobOptions(undefined, (character) => ({character}))
+    )
+
+    expect(Exit.isSuccess(result)).toBe(true)
+  })
 })

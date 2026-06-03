@@ -12,7 +12,7 @@ It's always better to remove code than to add a new code. If you see an oportuni
 
 Long term maintainability is a core priority. If you add new functionality, first check if there is shared logic that can be extracted to a separate module. Duplicate logic across multiple files is a code smell and should be avoided. Don't be afraid to change existing code. Don't take shortcuts by just adding local logic to solve a problem.
 
-When changing any UI / UX in the mobile app you must read @docs/ui_coding_guideline.md and follow the guidelines described there!
+When changing any UI / UX in the mobile app or in the ui package you must read @docs/ui_coding_guideline.md and follow the guidelines described there!
 
 - **NEVER use the `as` keyword in TypeScript.** Use `Schema.decodeUnknown` to validate external data via `effect/Schema`.
 - HTTP services: build on `HttpApiBuilder` + `Layer`; reuse helpers from `packages/server-utils`. Keep schemas/types in shared packages.

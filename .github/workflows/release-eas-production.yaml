@@ -3,9 +3,6 @@ run-name: "Run on commit ${{github.sha}}"
 
 on: workflow_dispatch
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     name: Install and build

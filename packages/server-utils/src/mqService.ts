@@ -19,6 +19,19 @@ export class MqServiceError extends Data.TaggedError('MqServiceError')<{
   message: string
 }> {}
 
+const BULLMQ_JOB_ID_FORBIDDEN_CHARACTER = ':'
+
+export const validateBullMqJobOptions = <E>(
+  options: JobsOptions | undefined,
+  onInvalidJobId: (forbiddenCharacter: string) => E
+): Effect.Effect<void, E> => {
+  if (options?.jobId?.includes(BULLMQ_JOB_ID_FORBIDDEN_CHARACTER)) {
+    return Effect.fail(onInvalidJobId(BULLMQ_JOB_ID_FORBIDDEN_CHARACTER))
+  }
+
+  return Effect.void
+}
+
 export type EnqueueTask<A, R> = (
   task: A,
   options?: JobsOptions
@@ -103,8 +116,15 @@ export const makeMqService = <A, I, R, TAG extends string>(
       Effect.map(
         (queue) => (task: A, options?: JobsOptions) =>
           pipe(
-            task,
-            Schema.encode(JobPayloadSchema),
+            validateBullMqJobOptions(
+              options,
+              (forbiddenCharacter) =>
+                new MqServiceError({
+                  cause: {forbiddenCharacter},
+                  message: `Invalid BullMQ jobId for ${queueName} queue: custom job IDs cannot contain "${forbiddenCharacter}"`,
+                })
+            ),
+            Effect.flatMap(() => pipe(task, Schema.encode(JobPayloadSchema))),
             Effect.flatMap((data) =>
               Effect.tryPromise({
                 try: async () => await queue.add(queueName, data, options),

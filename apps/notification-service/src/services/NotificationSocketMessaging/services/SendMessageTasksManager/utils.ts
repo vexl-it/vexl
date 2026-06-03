@@ -1,6 +1,7 @@
 import {RedisNamespacePrefixConfig} from '@vexl-next/server-utils/src/commonConfigs'
+import {validateBullMqJobOptions} from '@vexl-next/server-utils/src/mqService'
 import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
-import {Queue as BullQueue, type Job, type JobsOptions, Worker} from 'bullmq'
+import {Queue, Worker, type Job, type JobsOptions} from 'bullmq'
 import {
   Context,
   Effect,
@@ -38,7 +39,7 @@ const createQueue = pipe(
     Effect.acquireRelease(
       Effect.try({
         try: () =>
-          new BullQueue(PENDING_TASKS_QUEUE_NAME, {
+          new Queue(PENDING_TASKS_QUEUE_NAME, {
             connection: redisConnection,
             prefix,
             defaultJobOptions: {
@@ -65,10 +66,22 @@ const createQueue = pipe(
   Effect.map(
     (queue) => (task: SendMessageTask, options?: JobsOptions) =>
       pipe(
-        task,
-        Schema.encode(SendMessageTask),
-        SendMessageTasksManagerError.wrapErrors(
-          'Error while encoding pending task data'
+        validateBullMqJobOptions(
+          options,
+          (forbiddenCharacter) =>
+            new SendMessageTasksManagerError({
+              cause: {forbiddenCharacter},
+              message: `Invalid BullMQ jobId for pending tasks queue: custom job IDs cannot contain "${forbiddenCharacter}"`,
+            })
+        ),
+        Effect.flatMap(() =>
+          pipe(
+            task,
+            Schema.encode(SendMessageTask),
+            SendMessageTasksManagerError.wrapErrors(
+              'Error while encoding pending task data'
+            )
+          )
         ),
         Effect.flatMap((data) =>
           Effect.tryPromise({

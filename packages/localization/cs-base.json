@@ -1462,5 +1462,7 @@
   "chatDetail.offerTitle.theirs.sellProduct": "Prodává produkt",
   "chatDetail.offerTitle.theirs.buyOther": "Chce něco jiného",
   "chatDetail.offerTitle.theirs.sellOther": "Nabízí něco jiného",
-  "contacts.processingContacts": "Processing contacts"
+  "contacts.processingContacts": "Processing contacts",
+  "messages.fallbackMessage.body": "You have received a new message in Vexl",
+  "messages.fallbackMessage.title": "New message in Vexl"
 }

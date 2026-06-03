@@ -1462,5 +1462,7 @@
   "chatDetail.offerTitle.theirs.sellProduct": "Hän myy tuotetta",
   "chatDetail.offerTitle.theirs.buyOther": "Hän haluaa jotain muuta",
   "chatDetail.offerTitle.theirs.sellOther": "Hän tarjoaa jotain muuta",
-  "contacts.processingContacts": "Processing contacts"
+  "contacts.processingContacts": "Processing contacts",
+  "messages.fallbackMessage.body": "You have received a new message in Vexl",
+  "messages.fallbackMessage.title": "New message in Vexl"
 }

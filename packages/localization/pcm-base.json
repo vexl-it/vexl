@@ -1462,5 +1462,7 @@
   "chatDetail.offerTitle.theirs.sellProduct": "E dey sell product",
   "chatDetail.offerTitle.theirs.buyOther": "E wan anoda thing",
   "chatDetail.offerTitle.theirs.sellOther": "E dey offer anoda thing",
-  "contacts.processingContacts": "Processing contacts"
+  "contacts.processingContacts": "Processing contacts",
+  "messages.fallbackMessage.body": "You have received a new message in Vexl",
+  "messages.fallbackMessage.title": "New message in Vexl"
 }

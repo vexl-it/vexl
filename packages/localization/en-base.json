@@ -1462,5 +1462,7 @@
   "chatDetail.offerTitle.theirs.sellProduct": "They're selling a product",
   "chatDetail.offerTitle.theirs.buyOther": "They want something else",
   "chatDetail.offerTitle.theirs.sellOther": "They're offering something else",
-  "contacts.processingContacts": "Processing contacts"
+  "contacts.processingContacts": "Processing contacts",
+  "messages.fallbackMessage.body": "Tap to read it.",
+  "messages.fallbackMessage.title": "New message in Vexl"
 }

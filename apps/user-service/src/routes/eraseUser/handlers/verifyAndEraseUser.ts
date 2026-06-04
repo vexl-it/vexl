@@ -26,22 +26,7 @@ export const verifyAndEraseUser = HttpApiBuilder.handler(
         validateAndDecodeVerificationId(verificationId)
       )
       const redis = yield* _(RedisService)
-      const verificationIdWasUsed = yield* _(
-        redis.exists(`${USED_ERASE_VERIFICATION_ID_PREFIX}${verificationId}`),
-        Effect.catchAll(
-          (e) => new UnexpectedServerError({status: 500, cause: e})
-        )
-      )
-
-      if (verificationIdWasUsed) {
-        return yield* _(
-          new UnableToVerifySmsCodeError({
-            status: 400,
-            code: '100104',
-            reason: 'BadCode',
-          })
-        )
-      }
+      const usedVerificationIdRedisKey = `${USED_ERASE_VERIFICATION_ID_PREFIX}${verificationId}`
 
       if (Option.isSome(dummyCodeForAll)) {
         if (dummyCodeForAll.value !== req.payload.code)
@@ -60,17 +45,29 @@ export const verifyAndEraseUser = HttpApiBuilder.handler(
           })
         )
       }
+      const verificationIdWasClaimed = yield* _(
+        redis.setIfNotExists(Schema.Boolean)(usedVerificationIdRedisKey, true, {
+          expiresAt: decodedVerificationId.expiresAt,
+        }),
+        Effect.catchAll(
+          (e) => new UnexpectedServerError({status: 500, cause: e})
+        )
+      )
+
+      if (!verificationIdWasClaimed) {
+        return yield* _(
+          new UnableToVerifySmsCodeError({
+            status: 400,
+            code: '100104',
+            reason: 'BadCode',
+          })
+        )
+      }
+
       return yield* _(
         hashPhoneNumber(decodedVerificationId.phoneNumber),
         Effect.flatMap((hashedPhoneNumber) =>
           createShortLivedTokenForErasingUser(hashedPhoneNumber)
-        ),
-        Effect.tap(() =>
-          redis.set(Schema.Boolean)(
-            `${USED_ERASE_VERIFICATION_ID_PREFIX}${verificationId}`,
-            true,
-            {expiresAt: decodedVerificationId.expiresAt}
-          )
         ),
         Effect.catchAll(
           (e) => new UnexpectedServerError({status: 500, cause: e})

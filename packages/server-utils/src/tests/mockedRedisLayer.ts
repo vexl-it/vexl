@@ -1,4 +1,4 @@
-import {Effect, HashMap, Layer, Ref, Schema} from 'effect'
+import {Effect, HashMap, Layer, Option, Ref, Schema} from 'effect'
 import {isNonEmptyReadonlyArray} from 'effect/Array'
 import {NoSuchElementException} from 'effect/Cause'
 import {RedisService, type RedisOperations} from '../RedisService'
@@ -27,10 +27,22 @@ export const mockedRedisLayer = Layer.effect(
       >(HashMap.empty())
     )
 
+    const valueExists = (
+      hm: HashMap.HashMap<string, {expiration: number; value: string}>,
+      key: string
+    ): boolean =>
+      HashMap.get(hm, key).pipe(
+        Option.match({
+          onNone: () => false,
+          onSome: (value) =>
+            value.expiration === -1 || value.expiration > Date.now(),
+        })
+      )
+
     const toReturn: RedisOperations = {
       delete: (key: string) => Ref.update(state, HashMap.remove(key)),
       exists: (key: string) =>
-        Ref.get(state).pipe(Effect.map((hm) => HashMap.has(hm, key))),
+        Ref.get(state).pipe(Effect.map((hm) => valueExists(hm, key))),
 
       setExpiresAt: (key: string, expiresAt: number) =>
         Ref.update(state, (hm) =>
@@ -59,6 +71,22 @@ export const mockedRedisLayer = Layer.effect(
                 expiration: opts?.expiresAt ?? -1,
                 value: encoded,
               })
+            )
+          )
+        ),
+      setIfNotExists: (schema) => (key: string, value: any, opts) =>
+        Schema.encode(Schema.parseJson(schema))(value).pipe(
+          Effect.flatMap((encoded) =>
+            Ref.modify(state, (hm) =>
+              valueExists(hm, key)
+                ? [false, hm]
+                : [
+                    true,
+                    HashMap.set(hm, key, {
+                      expiration: opts?.expiresAt ?? -1,
+                      value: encoded,
+                    }),
+                  ]
             )
           )
         ),

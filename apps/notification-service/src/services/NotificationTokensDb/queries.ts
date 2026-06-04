@@ -60,12 +60,28 @@ export const createSaveNotificationTokenSecret = Effect.gen(function* () {
   const query = SqlSchema.single({
     Request: CreateNotificationTokenParams,
     Result: NotificationSecretRecord,
-    execute: (params) => sql`
-      INSERT INTO
-        notification_token_secrets ${sql.insert(params)}
-      RETURNING
-        *
-    `,
+    execute: (params) =>
+      sql.withTransaction(
+        Effect.gen(function* (_) {
+          // Remove all existing references to the expo notification token to ensure it's only associated with one secret at a time.
+          if (params.expoNotificationToken !== null) {
+            yield* _(sql`
+              UPDATE notification_token_secrets
+              SET
+                expo_notification_token = NULL
+              WHERE
+                expo_notification_token = ${params.expoNotificationToken}
+            `)
+          }
+
+          return yield* _(sql`
+            INSERT INTO
+              notification_token_secrets ${sql.insert(params)}
+            RETURNING
+              *
+          `)
+        })
+      ),
   })
 
   return flow(
@@ -114,25 +130,41 @@ export const createUpdateClientInfo = Effect.gen(function* () {
   const query = SqlSchema.single({
     Request: UpdateClientInfoParams,
     Result: NotificationSecretRecord,
-    execute: (params) => sql`
-      UPDATE notification_token_secrets
-      SET
-        ${sql.update({
-        expoNotificationToken: params.expoNotificationToken,
-        systemVexlToken: params.systemVexlToken,
-        marketingVexlToken: params.marketingVexlToken,
-        clientPlatform: params.clientPlatform,
-        clientVersion: params.clientVersion,
-        clientAppSource: params.clientAppSource,
-        clientLanguage: params.clientLanguage,
-        clientPrefix: params.clientPrefix,
-        updatedAt: new Date(),
-      })}
-      WHERE
-        secret = ${params.secretToken}
-      RETURNING
-        *
-    `,
+    execute: (params) =>
+      sql.withTransaction(
+        Effect.gen(function* (_) {
+          if (params.expoNotificationToken !== null) {
+            yield* _(sql`
+              UPDATE notification_token_secrets
+              SET
+                expo_notification_token = NULL
+              WHERE
+                expo_notification_token = ${params.expoNotificationToken}
+                AND secret <> ${params.secretToken}
+            `)
+          }
+
+          return yield* _(sql`
+            UPDATE notification_token_secrets
+            SET
+              ${sql.update({
+              expoNotificationToken: params.expoNotificationToken,
+              systemVexlToken: params.systemVexlToken,
+              marketingVexlToken: params.marketingVexlToken,
+              clientPlatform: params.clientPlatform,
+              clientVersion: params.clientVersion,
+              clientAppSource: params.clientAppSource,
+              clientLanguage: params.clientLanguage,
+              clientPrefix: params.clientPrefix,
+              updatedAt: new Date(),
+            })}
+            WHERE
+              secret = ${params.secretToken}
+            RETURNING
+              *
+          `)
+        })
+      ),
   })
 
   return flow(

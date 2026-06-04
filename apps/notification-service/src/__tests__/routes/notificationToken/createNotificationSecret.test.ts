@@ -18,6 +18,9 @@ const validAppSource = Schema.decodeSync(AppSource)('playStore')
 const validExpoToken = Schema.decodeSync(ExpoNotificationToken)(
   'ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]'
 )
+const duplicateExpoToken = Schema.decodeSync(ExpoNotificationToken)(
+  'ExponentPushToken[createDuplicateToken]'
+)
 
 const validPrefix = Schema.decodeSync(CountryPrefix)(420)
 
@@ -97,6 +100,49 @@ describe('CreateNotificationSecret', () => {
         if (Option.isNone(savedRecord)) return
 
         expect(savedRecord.value.clientPrefix).toEqual(validPrefix)
+      })
+    )
+  })
+
+  it('Should keep a duplicate expo token only on the newest secret', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const firstResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: duplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const secondResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: duplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const firstRecord = yield* _(
+          db.findSecretBySecretValue(firstResp.secret)
+        )
+        const secondRecord = yield* _(
+          db.findSecretBySecretValue(secondResp.secret)
+        )
+
+        expect(Option.isSome(firstRecord)).toBe(true)
+        expect(Option.isSome(secondRecord)).toBe(true)
+        if (Option.isNone(firstRecord) || Option.isNone(secondRecord)) return
+
+        expect(firstRecord.value.expoNotificationToken).toBeNull()
+        expect(secondRecord.value.expoNotificationToken).toEqual(
+          duplicateExpoToken
+        )
       })
     )
   })

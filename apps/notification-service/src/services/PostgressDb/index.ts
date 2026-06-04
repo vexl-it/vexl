@@ -6,6 +6,7 @@ import {createNotificationTokens} from './migrations/001_createNotificationToken
 import {addClientPrefix} from './migrations/002_addClientPrefix'
 import {addSystemAndMarketingVexlTokens} from './migrations/003_addSystemAndMarketingVexlTokens'
 import {createPendingBatchedNotifications} from './migrations/004_createPendingBatchedNotifications'
+import {deduplicateExpoNotificationTokens} from './migrations/005_deduplicateExpoNotificationTokens'
 
 const migrations = [
   {
@@ -27,6 +28,11 @@ const migrations = [
     id: 4,
     name: 'create_pending_batched_notifications',
     migrationEffect: createPendingBatchedNotifications,
+  },
+  {
+    id: 5,
+    name: 'deduplicate_expo_notification_tokens',
+    migrationEffect: deduplicateExpoNotificationTokens,
   },
 ] as const
 

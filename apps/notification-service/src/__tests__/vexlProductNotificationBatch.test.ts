@@ -168,6 +168,44 @@ describe('Vexl product notification batching', () => {
     )
   })
 
+  it('selects vexl tokens from rows with null expo notification token', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+        const systemToken = token('vexl_nt_null_expo_system')
+
+        const createResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: expoToken(
+                'ExponentPushToken[nullExpoSelection]'
+              ),
+            },
+            headers,
+          })
+        )
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: createResp.secret,
+              systemVexlToken: systemToken,
+            },
+            headers,
+          })
+        )
+
+        const selectedTokens = yield* _(db.selectVexlTokens('general'))
+        expect(
+          Option.isSome(
+            Array.findFirst(selectedTokens, (one) => one === systemToken)
+          )
+        ).toBe(true)
+      })
+    )
+  })
+
   it('pending rows encode and decode through UserNotificationMqEntry JSON', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {

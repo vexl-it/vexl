@@ -13,6 +13,7 @@ import {notificationThrottleTtlMinutesConfig} from '../../../configs'
 import {PushNotificationService} from '../../PushNotificationService'
 import {lockOnNotificationToken} from '../utils'
 import {LastTimeIssuedForNotificationTokenDb} from './LastTimeIssuedForNotificationTokenDb'
+import {notificationTokenOperationalId} from './NotificationTokenOperationalId'
 import {NotificationWaitingToBeIssuedForNotificationToken} from './NotificationWaitingToBeIssuedForNotificationToken'
 export {processThrottledNotificationsJobId} from './ThrottledNotificationJobId'
 
@@ -60,9 +61,12 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
     )
     const throttleTtlMs =
       (yield* _(notificationThrottleTtlMinutesConfig)) * 60 * 1000
+    const tokenOperationalId = notificationTokenOperationalId(token)
 
     yield* _(
-      Effect.log('Processing throttled notifications for token', {token})
+      Effect.log('Processing throttled notifications for token', {
+        tokenOperationalId,
+      })
     )
     const lastTimeIssued = yield* _(
       lastTimeIssuedForNotificationTokenDb.getLastTimeIssuedForNotificationToken(
@@ -76,7 +80,7 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
       yield* _(
         Effect.log(
           'Skipping processing throttled notifications for token, still in throttle period',
-          {token}
+          {tokenOperationalId}
         )
       )
       return
@@ -93,14 +97,18 @@ export const processThrottledNotificationsWorker = consumerLayer(({token}) =>
       notificationsWaitingToBeIssuedDb.getAndClearWaitingListForToken(token)
     )
     if (pendingNotifications.length === 0) {
-      yield* _(Effect.log('No pending notifications found for token', {token}))
+      yield* _(
+        Effect.log('No pending notifications found for token', {
+          tokenOperationalId,
+        })
+      )
       return
     }
 
     yield* _(
       Effect.log('Found pending notifications. Issuing', {
         count: pendingNotifications.length,
-        token,
+        tokenOperationalId,
       })
     )
     yield* _(

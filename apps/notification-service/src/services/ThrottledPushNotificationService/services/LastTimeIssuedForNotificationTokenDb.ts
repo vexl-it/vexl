@@ -9,12 +9,13 @@ import {
 } from '@vexl-next/server-utils/src/RedisService'
 import {Context, Duration, Effect, Layer} from 'effect'
 import {type NoSuchElementException} from 'effect/Cause'
+import {notificationTokenOperationalId} from './NotificationTokenOperationalId'
 
 const KEY_PREFIX = 'notification-service:last-issued:'
 const TTL_MS = Duration.toMillis(Duration.decode('1 day'))
 
 const createRedisKey = (token: VexlNotificationTokenSecret): string =>
-  `${KEY_PREFIX}${token}`
+  `${KEY_PREFIX}${notificationTokenOperationalId(token)}`
 
 export interface LastTimeIssuedForNotificationTokenDbOperations {
   getLastTimeIssuedForNotificationToken: (

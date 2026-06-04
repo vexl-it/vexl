@@ -22,6 +22,12 @@ const validExpoToken = Schema.decodeSync(ExpoNotificationToken)(
 const validExpoTokenUpdate = Schema.decodeSync(ExpoNotificationToken)(
   'ExponentPushToken[zzzzzzzzzzzzzzzzzzzz]'
 )
+const firstDuplicateExpoToken = Schema.decodeSync(ExpoNotificationToken)(
+  'ExponentPushToken[updateDuplicateFirst]'
+)
+const secondDuplicateExpoToken = Schema.decodeSync(ExpoNotificationToken)(
+  'ExponentPushToken[updateDuplicateSecond]'
+)
 const validSystemVexlToken = Schema.decodeSync(VexlNotificationToken)(
   'vexl_nt_system'
 )
@@ -203,6 +209,111 @@ describe('UpdateNotificationInfo', () => {
         expect(updatedRecord.value.marketingVexlToken).toEqual(
           validMarketingVexlToken
         )
+      })
+    )
+  })
+
+  it('Should move an expo token from another secret to the updated secret', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const firstResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: firstDuplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const secondResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: secondDuplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: secondResp.secret,
+              expoNotificationToken: firstDuplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const firstRecord = yield* _(
+          db.findSecretBySecretValue(firstResp.secret)
+        )
+        const secondRecord = yield* _(
+          db.findSecretBySecretValue(secondResp.secret)
+        )
+
+        expect(Option.isSome(firstRecord)).toBe(true)
+        expect(Option.isSome(secondRecord)).toBe(true)
+        if (Option.isNone(firstRecord) || Option.isNone(secondRecord)) return
+
+        expect(firstRecord.value.expoNotificationToken).toBeNull()
+        expect(secondRecord.value.expoNotificationToken).toEqual(
+          firstDuplicateExpoToken
+        )
+      })
+    )
+  })
+
+  it('Should clear only the current secret expo token when expo token is omitted', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const db = yield* _(NotificationTokensDb)
+
+        const firstResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: firstDuplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const secondResp = yield* _(
+          app.NotificationTokenGroup.CreateNotificationSecret({
+            payload: {
+              expoNotificationToken: secondDuplicateExpoToken,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        yield* _(
+          app.NotificationTokenGroup.updateNoficationInfo({
+            payload: {
+              secret: secondResp.secret,
+            },
+            headers: validHeaders,
+          })
+        )
+
+        const firstRecord = yield* _(
+          db.findSecretBySecretValue(firstResp.secret)
+        )
+        const secondRecord = yield* _(
+          db.findSecretBySecretValue(secondResp.secret)
+        )
+
+        expect(Option.isSome(firstRecord)).toBe(true)
+        expect(Option.isSome(secondRecord)).toBe(true)
+        if (Option.isNone(firstRecord) || Option.isNone(secondRecord)) return
+
+        expect(firstRecord.value.expoNotificationToken).toEqual(
+          firstDuplicateExpoToken
+        )
+        expect(secondRecord.value.expoNotificationToken).toBeNull()
       })
     )
   })

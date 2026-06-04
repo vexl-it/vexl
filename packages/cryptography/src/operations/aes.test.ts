@@ -65,6 +65,16 @@ describe('aes gcm', () => {
       aesGCMDecrypt({data: encrypted, password: 'bad password'})
     }).toThrow('Unsupported state or unable to authenticate data')
   })
+
+  it('Should fail when decrypting unsupported future aes gcm versions', () => {
+    const data = 'some data'
+    const encrypted = aesGCMEncrypt({data, password})
+    const encryptedWithUnsupportedVersion = encrypted.replace(/^001\./, '002.')
+
+    expect(() => {
+      aesGCMDecrypt({data: encryptedWithUnsupportedVersion, password})
+    }).toThrow('Unsupported AES-GCM data version')
+  })
 })
 
 describe('aes ctr', () => {

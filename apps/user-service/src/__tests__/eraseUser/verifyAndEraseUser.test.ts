@@ -9,7 +9,7 @@ import {
   VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
-import {Effect, Schema} from 'effect'
+import {Effect, Either, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   checkVerificationMock,
@@ -20,6 +20,13 @@ import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironm
 const phoneNumberToTest = Schema.decodeSync(E164PhoneNumber)('+420733333333')
 const validTurnstileToken = Schema.decodeSync(TurnstileToken)(
   'valid-turnstile-token'
+)
+const VerifyCodeErrors = Schema.Union(
+  UnableToGenerateChallengeError,
+  VerificationNotFoundError,
+  InvalidVerificationError,
+  InvalidVerificationIdError,
+  UnableToVerifySmsCodeError
 )
 
 beforeEach(() => {
@@ -102,15 +109,42 @@ describe('Verify and erase user', () => {
           Effect.either
         )
 
-        const VerifyCodeErrors = Schema.Union(
-          UnableToGenerateChallengeError,
-          VerificationNotFoundError,
-          InvalidVerificationError,
-          InvalidVerificationIdError,
-          UnableToVerifySmsCodeError
+        expectErrorResponse(VerifyCodeErrors)(replayResponse)
+      })
+    )
+  })
+
+  it('Should atomically reject concurrent replayed erase verification ids', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const initResponse = yield* _(initVerification)
+
+        expect(initResponse.verificationId).toBeDefined()
+
+        checkVerificationMock.mockReturnValue(Effect.succeed('valid'))
+        const verifyRequest = client.EraseUser.verifyAndEraseuser({
+          payload: {
+            verificationId: initResponse.verificationId,
+            code: '123456',
+          },
+        }).pipe(Effect.either)
+
+        const [firstResponse, secondResponse] = yield* _(
+          Effect.all([verifyRequest, verifyRequest], {concurrency: 'unbounded'})
         )
 
-        expectErrorResponse(VerifyCodeErrors)(replayResponse)
+        const successCount =
+          Number(Either.isRight(firstResponse)) +
+          Number(Either.isRight(secondResponse))
+        expect(successCount).toBe(1)
+
+        const failedResponse = Either.isLeft(firstResponse)
+          ? firstResponse
+          : secondResponse
+
+        expectErrorResponse(VerifyCodeErrors)(failedResponse)
       })
     )
   })
@@ -126,7 +160,7 @@ describe('Verify and erase user', () => {
         checkVerificationMock.mockReturnValueOnce(
           Effect.fail(
             new UnableToVerifySmsCodeError({
-              reason: 'BadCode' as const,
+              reason: 'BadCode',
               status: 400,
               code: '100104',
             })
@@ -140,13 +174,6 @@ describe('Verify and erase user', () => {
             },
           }),
           Effect.either
-        )
-        const VerifyCodeErrors = Schema.Union(
-          UnableToGenerateChallengeError,
-          VerificationNotFoundError,
-          InvalidVerificationError,
-          InvalidVerificationIdError,
-          UnableToVerifySmsCodeError
         )
 
         expectErrorResponse(VerifyCodeErrors)(checkResponse)

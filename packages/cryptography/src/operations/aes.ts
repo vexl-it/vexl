@@ -54,7 +54,7 @@ export function aesGCMDecrypt({
   const cipherKey = stretchedPass.subarray(0, 32)
   const iv = stretchedPass.subarray(32, 32 + 12)
 
-  if (version > 0) {
+  if (version === 1) {
     const [ivBase64, encrypted, authTag] = data.split('.')
     if (!authTag || !encrypted || !ivBase64) throw new Error('Bad data')
 
@@ -70,6 +70,8 @@ export function aesGCMDecrypt({
       'utf8'
     )}`
   }
+
+  if (version !== 0) throw new Error('Unsupported AES-GCM data version')
 
   const [encrypted, authTag] = data.split('.')
   if (!authTag || !encrypted) throw new Error('Bad data')

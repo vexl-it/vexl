@@ -13,6 +13,10 @@ import {
 import {focusAtom} from 'jotai-optics'
 import {type SessionV2} from '../../brands/Session.brand'
 import getValueFromSetStateActionOfAtom from '../../utils/atomUtils/getValueFromSetStateActionOfAtom'
+import {
+  makeErrorJsonWithRemovedSensitiveData,
+  makeErrorWithRemovedSensitiveData,
+} from '../../utils/errorSanitization'
 import {replaceAll} from '../../utils/replaceAll'
 import {dummySession} from './dummySesssion'
 import writeSessionToStorage, {
@@ -50,33 +54,11 @@ function toJsonWithRemovedSensitiveData(object: any): string {
   }
 }
 
-const errorToPlainObject = (
-  error: Error,
-  depth: number = 0
-): Record<string, unknown> => {
-  if (depth > 4) return {message: '[[truncated]]'}
+const toErrorWithRemovedSensitiveData =
+  makeErrorWithRemovedSensitiveData(removeSensitiveData)
 
-  return {
-    name: error.name,
-    message: error.message,
-    stack: error.stack,
-    cause:
-      error.cause instanceof Error
-        ? errorToPlainObject(error.cause, depth + 1)
-        : error.cause,
-  }
-}
-
-function toErrorWithRemovedSensitiveData(error: Error): Error {
-  const strippedError = new Error(removeSensitiveData(error.message))
-  strippedError.name = error.name
-  if (error.stack) strippedError.stack = removeSensitiveData(error.stack)
-  return strippedError
-}
-
-function toErrorJsonWithRemovedSensitiveData(error: Error): string {
-  return toJsonWithRemovedSensitiveData(errorToPlainObject(error))
-}
+const toErrorJsonWithRemovedSensitiveData =
+  makeErrorJsonWithRemovedSensitiveData(toJsonWithRemovedSensitiveData)
 
 export function toExtraWithRemovedSensitiveData(
   extra: Record<string, unknown>

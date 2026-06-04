@@ -33,12 +33,7 @@ const truncateForLog = (value: string): string =>
 const ABSOLUTE_URL_SCHEME_REGEX = /^[a-z][a-z0-9+.-]*:/i
 
 const buildBackendUrl = (path: string): URL | undefined => {
-  if (
-    !path ||
-    path.startsWith('/') ||
-    path.startsWith('//') ||
-    ABSOLUTE_URL_SCHEME_REGEX.test(path)
-  ) {
+  if (!path || path.startsWith('/') || ABSOLUTE_URL_SCHEME_REGEX.test(path)) {
     return undefined
   }
 

@@ -51,6 +51,14 @@ export interface RedisOperations {
     opts?: {expiresAt?: UnixMilliseconds}
   ) => Effect.Effect<void, ParseResult.ParseError | RedisError, R>
 
+  setIfNotExists: <A, I, R>(
+    schema: Schema.Schema<A, I, R>
+  ) => (
+    key: string,
+    value: A,
+    opts?: {expiresAt?: UnixMilliseconds}
+  ) => Effect.Effect<boolean, ParseResult.ParseError | RedisError, R>
+
   insertToSet: <A, I, R>(
     schema: Schema.Schema<A, I, R>
   ) => (
@@ -267,6 +275,27 @@ export class RedisService extends Context.Tag('RedisService')<
           Effect.withSpan('Redis set', {attributes: {key, value, expiresAt}})
         )
       }
+
+      const setStringIfNotExists = (
+        key: string,
+        value: string,
+        expiresAt?: UnixMilliseconds
+      ): Effect.Effect<boolean, RedisError> =>
+        Effect.tryPromise({
+          try: async () => {
+            const result =
+              expiresAt === undefined
+                ? await redisClient.set(key, value, 'NX')
+                : await redisClient.set(key, value, 'PXAT', expiresAt, 'NX')
+
+            return result === 'OK'
+          },
+          catch: (e) => new RedisError({cause: e}),
+        }).pipe(
+          Effect.withSpan('Redis set if not exists', {
+            attributes: {key, value, expiresAt},
+          })
+        )
 
       const deleteKey = (key: string): Effect.Effect<void, RedisError> =>
         // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
@@ -493,6 +522,16 @@ export class RedisService extends Context.Tag('RedisService')<
             encode(value).pipe(
               Effect.flatMap((encoded) =>
                 setString(key, encoded, opts?.expiresAt)
+              )
+            )
+        },
+        setIfNotExists: (schema) => {
+          const encode = Schema.encode(Schema.parseJson(schema))
+
+          return (key, value, opts) =>
+            encode(value).pipe(
+              Effect.flatMap((encoded) =>
+                setStringIfNotExists(key, encoded, opts?.expiresAt)
               )
             )
         },

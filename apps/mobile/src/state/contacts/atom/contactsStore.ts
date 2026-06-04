@@ -20,6 +20,15 @@ export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>
   o.prop('contacts')
 )
 
+export const newPhoneContactsToReviewRawNumbersAtom = atom((get) =>
+  pipe(
+    get(storedContactsAtom),
+    Array.filter((contact) => !contact.flags.seen),
+    Array.map((contact) => contact.info.rawNumber),
+    Array.dedupe
+  )
+)
+
 export const importedContactsAtom = atom((get) =>
   pipe(
     get(storedContactsAtom),

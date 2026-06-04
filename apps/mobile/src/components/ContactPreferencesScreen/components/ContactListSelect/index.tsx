@@ -30,9 +30,11 @@ function ContactsListSelect({
   const {
     areThereAnyContactsToDisplayForSelectedTabAtom,
     isContactsPreparingAtom,
+    newContactsToDisplayCountAtom,
   } = useMolecule(contactSelectMolecule)
   const normalizedContacts = useContactListSelectLifecycle()
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
+  const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
   const areThereAnyContactsToDisplayForSelectedTab = useAtomValue(
     areThereAnyContactsToDisplayForSelectedTabAtom
   )
@@ -52,6 +54,7 @@ function ContactsListSelect({
       {
         label: t('postLoginFlow.contactsList.new'),
         value: 'new',
+        badge: newContactsToDisplayCount > 0,
       },
       {
         label: t('postLoginFlow.contactsList.nonSubmitted'),
@@ -62,7 +65,7 @@ function ContactsListSelect({
         value: 'submitted',
       },
     ],
-    [t]
+    [newContactsToDisplayCount, t]
   )
 
   if (shouldShowEmptyContactsState) {

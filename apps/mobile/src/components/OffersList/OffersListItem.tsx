@@ -16,6 +16,7 @@ import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import CreateOfferMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/CreateOfferMarketplaceSuggestion'
 import EnableNotificationsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/EnableNotificationsMarketplaceSuggestion'
 import ImportContactsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/ImportContactsMarketplaceSuggestion'
+import ImportNewContactsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/ImportNewContactsMarketplaceSuggestion'
 import OfferOnMarketplace from '../OfferOnMarketplace'
 
 interface Props {
@@ -34,7 +35,9 @@ function MarketplaceFirstOfferBanner(): React.ReactElement | null {
     <>
       <Stack height="$5" />
       <Stack px="$5">
-        {marketplaceFirstOfferBanner === 'importContacts' ? (
+        {marketplaceFirstOfferBanner === 'importNewContacts' ? (
+          <ImportNewContactsMarketplaceSuggestion />
+        ) : marketplaceFirstOfferBanner === 'importContacts' ? (
           <ImportContactsMarketplaceSuggestion />
         ) : marketplaceFirstOfferBanner === 'enableNotifications' ? (
           <EnableNotificationsMarketplaceSuggestion />

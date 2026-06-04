@@ -1,4 +1,4 @@
-import {Array, Option, Schema} from 'effect/index'
+import {Array, Option, Schema, pipe} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
@@ -8,6 +8,7 @@ import {
   showImportContactsInMarketplaceSuggestionAtom,
 } from '../../../utils/preferences'
 import {reachNumberAtom} from '../../connections/atom/connectionStateAtom'
+import {newPhoneContactsToReviewRawNumbersAtom} from '../../contacts/atom/contactsStore'
 import {notificationsEnabledAtom} from '../../notifications/areNotificationsEnabledAtom'
 import {REACH_NUMBER_THRESHOLD} from '../domain'
 import {filteredOffersIncludingLocationFilterAtomsAtom} from './filteredOffers'
@@ -33,6 +34,17 @@ export const createOfferSuggestionVisibleAtom = focusAtom(
   (o) => o.prop('visible')
 )
 
+export const importNewContactsSuggestionDismissedStorageAtom =
+  atomWithParsedMmkvStorage(
+    'importNewContactsSuggestionDismissed',
+    {
+      dismissedRawNumbers: [],
+    },
+    Schema.Struct({
+      dismissedRawNumbers: Schema.Array(Schema.String).pipe(Schema.mutable),
+    })
+  )
+
 export const shouldShowCreateOfferInMarketplaceSuggestionAtom = atom((get) => {
   return (
     Array.isNonEmptyArray(
@@ -55,6 +67,31 @@ export const shouldShowImportContactsInMarketplaceSuggestionAtom = atom(
   }
 )
 
+export const shouldShowImportNewContactsInMarketplaceSuggestionAtom = atom(
+  (get) => {
+    const newPhoneContactsRawNumbers = get(
+      newPhoneContactsToReviewRawNumbersAtom
+    )
+    const dismissedRawNumbers = get(
+      importNewContactsSuggestionDismissedStorageAtom
+    ).dismissedRawNumbers
+
+    const hasUndismissedNewPhoneContacts = pipe(
+      newPhoneContactsRawNumbers,
+      Array.findFirst(
+        (rawNumber) => !pipe(dismissedRawNumbers, Array.contains(rawNumber))
+      ),
+      Option.isSome
+    )
+
+    return (
+      Array.isNonEmptyArray(
+        get(filteredOffersIncludingLocationFilterAtomsAtom)
+      ) && hasUndismissedNewPhoneContacts
+    )
+  }
+)
+
 export const shouldShowEnableNotificationsInMarketplaceSuggestionAtom = atom(
   (get) => {
     const notificationsEnabled = get(notificationsEnabledAtom)
@@ -73,8 +110,16 @@ export const shouldShowEnableNotificationsInMarketplaceSuggestionAtom = atom(
 const marketplaceSuggestionDismissedThisSessionAtom = atom<boolean>(false)
 
 export const marketplaceFirstOfferBannerAtom = atom<
-  'importContacts' | 'enableNotifications' | 'createOffer' | null
+  | 'importNewContacts'
+  | 'importContacts'
+  | 'enableNotifications'
+  | 'createOffer'
+  | null
 >((get) => {
+  if (get(shouldShowImportNewContactsInMarketplaceSuggestionAtom)) {
+    return 'importNewContacts'
+  }
+
   if (get(shouldShowImportContactsInMarketplaceSuggestionAtom)) {
     return 'importContacts'
   }
@@ -105,6 +150,23 @@ export const dismissImportContactsInMarketplaceSuggestionActionAtom = atom(
   null,
   (get, set) => {
     set(showImportContactsInMarketplaceSuggestionAtom, false)
+    set(marketplaceSuggestionDismissedThisSessionAtom, true)
+  }
+)
+
+export const dismissImportNewContactsInMarketplaceSuggestionActionAtom = atom(
+  null,
+  (get, set) => {
+    const newPhoneContactsRawNumbers = get(
+      newPhoneContactsToReviewRawNumbersAtom
+    )
+
+    set(importNewContactsSuggestionDismissedStorageAtom, (old) => ({
+      dismissedRawNumbers: pipe(
+        [...old.dismissedRawNumbers, ...newPhoneContactsRawNumbers],
+        Array.dedupe
+      ),
+    }))
     set(marketplaceSuggestionDismissedThisSessionAtom, true)
   }
 )

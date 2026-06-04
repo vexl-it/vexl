@@ -12,6 +12,10 @@ const MigrationRow = Schema.Struct({
   updatedAtText: Schema.String,
 })
 
+const IndexExistsRow = Schema.Struct({
+  indexExists: Schema.Boolean,
+})
+
 describe('deduplicateExpoNotificationTokens migration', () => {
   it('keeps the latest duplicate by updated_at and id without changing vexl tokens', async () => {
     await runPromiseInMockedEnvironment(
@@ -134,6 +138,16 @@ describe('deduplicateExpoNotificationTokens migration', () => {
             updatedAtText: '2026-01-01 00:00:00',
           },
         ])
+
+        const indexRows = yield* _(
+          sql`
+            SELECT
+              to_regclass('idx_notification_secrets_expo_token_unique') IS NOT NULL AS index_exists
+          `,
+          Effect.flatMap(Schema.decodeUnknown(Schema.Array(IndexExistsRow)))
+        )
+
+        expect(indexRows).toEqual([{indexExists: true}])
       })
     )
   })

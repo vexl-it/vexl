@@ -16,6 +16,7 @@ import {FilterTag} from './FilterTag'
 export interface FilterBarItem<T> {
   readonly label: string
   readonly value: T
+  readonly badge?: boolean
 }
 
 export function toggleValueInSet<T>(set: ReadonlySet<T>, value: T): Set<T> {
@@ -157,6 +158,7 @@ export function FilterBar<T>({
               key={item.label}
               label={item.label}
               selected={selected}
+              badge={item.badge}
               onPress={() => {
                 handlePress(index)
               }}

@@ -8,7 +8,7 @@ import {TextArea, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 
-const MAX_DESCRIPTION_LENGTH = 140
+const MAX_DESCRIPTION_LENGTH = 500
 
 interface DescribeStepProps {
   readonly active: boolean

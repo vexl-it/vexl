@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Nenhum",
   "editOffer.unpublishedChangesTitle": "Tens alterações por publicar",
   "editOffer.unpublishedChangesDescription": "Se saíres agora, todas as tuas alterações serão descartadas. Não serão guardadas nem publicadas.",
+  "editOffer.unsavedStepChangesTitle": "Guardar alterações antes de sair?",
+  "editOffer.unsavedStepChangesDescription": "Se saíres agora deste passo de edição, as tuas alterações serão descartadas.",
   "editOffer.discard": "Descartar",
   "editOffer.publish": "Publicar",
   "editOffer.detail.amount": "Montante",

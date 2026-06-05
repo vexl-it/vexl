@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Ingen",
   "editOffer.unpublishedChangesTitle": "Du har upubliserte endringer",
   "editOffer.unpublishedChangesDescription": "Hvis du går nå, blir alle endringene dine forkastet. De blir ikke lagret eller publisert.",
+  "editOffer.unsavedStepChangesTitle": "Lagre endringer før du går?",
+  "editOffer.unsavedStepChangesDescription": "Hvis du forlater dette redigeringstrinnet nå, blir endringene dine forkastet.",
   "editOffer.discard": "Forkast",
   "editOffer.publish": "Publiser",
   "editOffer.detail.amount": "Beløp",

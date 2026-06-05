@@ -191,6 +191,7 @@ export interface DialogAtomConfig {
   readonly positiveButtonDisabledAtom?: Atom<boolean>
   readonly positiveButtonVariant?: ButtonVariant
   readonly negativeButtonText?: string
+  readonly disableClose?: boolean
   /**
    * Dialogs avoid the keyboard by default. Set to false when the dialog should
    * keep its original modal layout.
@@ -304,7 +305,11 @@ export function DialogFromAtom({
   return (
     <Dialog
       visible={visible}
-      onClose={() => displayState?.onResult(false)}
+      onClose={
+        displayState?.disableClose
+          ? undefined
+          : () => displayState?.onResult(false)
+      }
       onHidden={handleHidden}
       avoidKeyboard={displayState?.avoidKeyboard}
       footer={

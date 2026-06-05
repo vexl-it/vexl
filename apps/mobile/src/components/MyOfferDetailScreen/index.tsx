@@ -1,9 +1,6 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {
   Button,
-  Dialog,
-  DialogDescription,
-  DialogTitle,
   EditRow,
   NavigationBar,
   Pause,
@@ -27,7 +24,7 @@ import {
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useLayoutEffect, useState} from 'react'
+import React, {useCallback, useLayoutEffect} from 'react'
 import {BackHandler} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, ScrollView, XStack, YStack} from 'tamagui'
@@ -71,9 +68,9 @@ function MyOfferDetailScreen({
     offerActiveAtom,
     pauseOrResumeOfferActionAtom,
     deleteOfferWithConfirmationActionAtom,
-    discardChangesActionAtom,
     hasUnsavedChangesAtom,
     editOfferActionAtom,
+    showUnpublishedChangesDialogActionAtom,
     listingTypeAtom,
     offerTitleAtom,
     intendedConnectionLevelAtom,
@@ -85,9 +82,11 @@ function MyOfferDetailScreen({
   const deleteOfferWithConfirmation = useSetAtom(
     deleteOfferWithConfirmationActionAtom
   )
-  const discardChanges = useSetAtom(discardChangesActionAtom)
   const hasUnsavedChanges = useAtomValue(hasUnsavedChangesAtom)
   const publishChanges = useSetAtom(editOfferActionAtom)
+  const showUnpublishedChangesDialog = useSetAtom(
+    showUnpublishedChangesDialogActionAtom
+  )
   const listingType = useAtomValue(listingTypeAtom)
   const offerTitle = useAtomValue(offerTitleAtom)
   const intendedConnectionLevel = useAtomValue(intendedConnectionLevelAtom)
@@ -96,19 +95,21 @@ function MyOfferDetailScreen({
   const selectedClubNames = useGetAllClubsNamesForIds(selectedClubsUuids)
   const allClubsWithMembers = useAtomValue(clubsWithMembersAtom)
 
-  const [discardDialogVisible, setDiscardDialogVisible] = useState(false)
-
   useLayoutEffect(() => {
     setOfferForm(offerId)
   }, [offerId, setOfferForm])
 
   const handleBackPress = useCallback((): void => {
     if (hasUnsavedChanges) {
-      setDiscardDialogVisible(true)
+      void Effect.runPromise(
+        Effect.andThen(showUnpublishedChangesDialog(), (success) => {
+          if (success) safeGoBack()
+        })
+      )
     } else {
       safeGoBack()
     }
-  }, [hasUnsavedChanges, safeGoBack])
+  }, [hasUnsavedChanges, safeGoBack, showUnpublishedChangesDialog])
 
   useFocusEffect(
     useCallback(() => {
@@ -124,21 +125,6 @@ function MyOfferDetailScreen({
       }
     }, [handleBackPress])
   )
-
-  const handleDiscardPress = useCallback((): void => {
-    setDiscardDialogVisible(false)
-    discardChanges()
-    safeGoBack()
-  }, [discardChanges, safeGoBack])
-
-  const handlePublishPress = useCallback((): void => {
-    setDiscardDialogVisible(false)
-    void Effect.runPromise(
-      Effect.andThen(publishChanges(), (success) => {
-        if (success) safeGoBack()
-      })
-    )
-  }, [publishChanges, safeGoBack])
 
   const navigateToEdit = useCallback(
     (field: EditableOfferField) => {
@@ -361,34 +347,6 @@ function MyOfferDetailScreen({
           ) : null}
         </YStack>
       </ScrollView>
-      <Dialog
-        visible={discardDialogVisible}
-        footer={
-          <>
-            <Button
-              variant="secondary"
-              size="large"
-              flex={1}
-              onPress={handleDiscardPress}
-            >
-              {t('editOffer.discard')}
-            </Button>
-            <Button
-              variant="primary"
-              size="large"
-              flex={1}
-              onPress={handlePublishPress}
-            >
-              {t('editOffer.publish')}
-            </Button>
-          </>
-        }
-      >
-        <DialogTitle>{t('editOffer.unpublishedChangesTitle')}</DialogTitle>
-        <DialogDescription>
-          {t('editOffer.unpublishedChangesDescription')}
-        </DialogDescription>
-      </Dialog>
     </Screen>
   )
 }

@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Brak",
   "editOffer.unpublishedChangesTitle": "Masz nieopublikowane zmiany",
   "editOffer.unpublishedChangesDescription": "Jeśli teraz wyjdziesz, wszystkie Twoje zmiany zostaną odrzucone. Nie zostaną zapisane ani opublikowane.",
+  "editOffer.unsavedStepChangesTitle": "Zapisać zmiany przed wyjściem?",
+  "editOffer.unsavedStepChangesDescription": "Jeśli teraz opuścisz ten krok edycji, Twoje zmiany zostaną odrzucone.",
   "editOffer.discard": "Odrzuć",
   "editOffer.publish": "Opublikuj",
   "editOffer.detail.amount": "Kwota",

@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Ninguno",
   "editOffer.unpublishedChangesTitle": "Tienes cambios sin publicar",
   "editOffer.unpublishedChangesDescription": "Si sales ahora, se descartarán todos tus cambios. No se guardarán ni se publicarán.",
+  "editOffer.unsavedStepChangesTitle": "¿Guardar los cambios antes de salir?",
+  "editOffer.unsavedStepChangesDescription": "Si sales de este paso de edición ahora, se descartarán tus cambios.",
   "editOffer.discard": "Descartar",
   "editOffer.publish": "Publicar",
   "editOffer.detail.amount": "Importe",

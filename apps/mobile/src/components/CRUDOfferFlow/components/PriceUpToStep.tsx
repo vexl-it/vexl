@@ -58,6 +58,7 @@ interface PriceUpToStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function PriceUpToStep({
@@ -67,6 +68,7 @@ function PriceUpToStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: PriceUpToStepProps): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
@@ -144,7 +146,11 @@ function PriceUpToStep({
 
   return (
     <YStack>
-      <EditRow state="initial" headline={t('offerForm.priceUpTo')} />
+      <EditRow
+        state="initial"
+        headline={t('offerForm.priceUpTo')}
+        showInitialIcon={showInitialIcon}
+      />
       <YStack gap="$3" paddingVertical="$6">
         <Exchange
           btcValue={btcValue}

@@ -67,6 +67,7 @@ interface NetworkStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function NetworkStep({
@@ -76,6 +77,7 @@ function NetworkStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: NetworkStepProps): React.JSX.Element {
   const {t} = useTranslation()
   const {locationStateAtom, updateBtcNetworkAtom} =
@@ -112,6 +114,7 @@ function NetworkStep({
         <EditRow
           state="initial"
           headline={t('offerForm.selectPaymentDetails')}
+          showInitialIcon={showInitialIcon}
         />
         <YStack gap="$5" paddingVertical="$5">
           <YStack gap="$3">

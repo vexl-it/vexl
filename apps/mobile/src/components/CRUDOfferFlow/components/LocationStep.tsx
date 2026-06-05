@@ -61,6 +61,7 @@ interface LocationStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function LocationStep({
@@ -70,6 +71,7 @@ function LocationStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: LocationStepProps): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -152,7 +154,11 @@ function LocationStep({
   return (
     <Animated.View entering={FadeIn} exiting={FadeOut}>
       <YStack>
-        <EditRow state="initial" headline={t('offerForm.setLocation')} />
+        <EditRow
+          state="initial"
+          headline={t('offerForm.setLocation')}
+          showInitialIcon={showInitialIcon}
+        />
         <YStack gap="$5" paddingVertical="$5">
           <SegmentedPicker
             tabs={tabs}

@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Hiçbiri",
   "editOffer.unpublishedChangesTitle": "Yayınlanmamış değişikliklerin var",
   "editOffer.unpublishedChangesDescription": "Şimdi ayrılırsan tüm değişikliklerin silinecek. Kaydedilmeyecek veya yayınlanmayacak.",
+  "editOffer.unsavedStepChangesTitle": "Çıkmadan önce değişiklikleri kaydet?",
+  "editOffer.unsavedStepChangesDescription": "Bu düzenleme adımından şimdi çıkarsan değişikliklerin silinecek.",
   "editOffer.discard": "Vazgeç",
   "editOffer.publish": "Yayınla",
   "editOffer.detail.amount": "Tutar",

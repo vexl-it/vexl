@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "None",
   "editOffer.unpublishedChangesTitle": "You get changes wey you never publish",
   "editOffer.unpublishedChangesDescription": "If you leave now, all your changes go loss. Dem no go save or publish.",
+  "editOffer.unsavedStepChangesTitle": "Save changes before you comot?",
+  "editOffer.unsavedStepChangesDescription": "If you leave this edit step now, your changes go discard.",
   "editOffer.discard": "Discard",
   "editOffer.publish": "Publish",
   "editOffer.detail.amount": "Amount",

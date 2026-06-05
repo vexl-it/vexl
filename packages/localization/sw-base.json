@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Hakuna",
   "editOffer.unpublishedChangesTitle": "Una mabadiliko ambayo hayajachapishwa",
   "editOffer.unpublishedChangesDescription": "Ukiondoka sasa, mabadiliko yako yote yatatupwa. Hayatahifadhiwa wala kuchapishwa.",
+  "editOffer.unsavedStepChangesTitle": "Uhifadhi mabadiliko kabla ya kuondoka?",
+  "editOffer.unsavedStepChangesDescription": "Ukiondoka kwenye hatua hii ya kuhariri sasa, mabadiliko yako yatatupwa.",
   "editOffer.discard": "Tupa",
   "editOffer.publish": "Chapisha",
   "editOffer.detail.amount": "Kiasi",

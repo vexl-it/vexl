@@ -19,6 +19,7 @@ interface LanguageStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function LanguageStep({
@@ -28,6 +29,7 @@ function LanguageStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: LanguageStepProps): React.JSX.Element {
   const {t} = useTranslation()
   const {
@@ -62,6 +64,7 @@ function LanguageStep({
         <EditRow
           state="initial"
           headline={t('offerForm.chooseOfferLanguage')}
+          showInitialIcon={showInitialIcon}
         />
         <YStack gap="$5" paddingVertical="$5">
           <XStack flexWrap="wrap" gap="$3">

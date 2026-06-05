@@ -17,6 +17,7 @@ interface DescribeStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function DescribeStep({
@@ -26,6 +27,7 @@ function DescribeStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: DescribeStepProps): React.JSX.Element {
   const {t} = useTranslation()
   const {offerDescriptionAtom} = useMolecule(offerFormMolecule)
@@ -48,7 +50,11 @@ function DescribeStep({
   return (
     <Animated.View entering={FadeIn} exiting={FadeOut}>
       <YStack>
-        <EditRow state="initial" headline={t('offerForm.describeYourOffer')} />
+        <EditRow
+          state="initial"
+          headline={t('offerForm.describeYourOffer')}
+          showInitialIcon={showInitialIcon}
+        />
         <YStack gap="$5" paddingVertical="$5">
           <YStack
             backgroundColor="$backgroundSecondary"

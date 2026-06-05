@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Geen",
   "editOffer.unpublishedChangesTitle": "Je hebt ongepubliceerde wijzigingen",
   "editOffer.unpublishedChangesDescription": "Als je nu weggaat, worden al je wijzigingen weggegooid. Ze worden niet opgeslagen of gepubliceerd.",
+  "editOffer.unsavedStepChangesTitle": "Wijzigingen opslaan voordat je weggaat?",
+  "editOffer.unsavedStepChangesDescription": "Als je deze bewerkingsstap nu verlaat, worden je wijzigingen weggegooid.",
   "editOffer.discard": "Weggooien",
   "editOffer.publish": "Publiceren",
   "editOffer.detail.amount": "Bedrag",

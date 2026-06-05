@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Žiadne",
   "editOffer.unpublishedChangesTitle": "Máš nezverejnené zmeny",
   "editOffer.unpublishedChangesDescription": "Ak teraz odídeš, všetky tvoje zmeny sa zahodia. Nebudú uložené ani zverejnené.",
+  "editOffer.unsavedStepChangesTitle": "Uložiť zmeny pred odchodom?",
+  "editOffer.unsavedStepChangesDescription": "Ak teraz opustíš tento krok úprav, tvoje zmeny budú zahodené.",
   "editOffer.discard": "Zahodiť",
   "editOffer.publish": "Zverejniť",
   "editOffer.detail.amount": "Suma",

@@ -21,6 +21,7 @@ export const SATOSHIS_IN_BTC = 100_000_000
 export const DECIMALS_FOR_BTC_VALUE = 8
 
 const FETCH_LIMIT = 10 * 60 * 1000 // 10 minutes
+const FETCH_TIMEOUT = 15 * 1000 // 15 seconds
 
 const PriceDataStored = Schema.Struct({
   data: Schema.partial(
@@ -80,6 +81,24 @@ export function createBtcPricesReadyAtom(
   })
 }
 
+export function createBtcPricesLoadingAtom(
+  currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
+): Atom<boolean> {
+  return atom((get): boolean => {
+    const btcPriceData = get(btcPriceDataAtom)
+    const currency =
+      typeof currencyStringOrAtom === 'string'
+        ? currencyStringOrAtom
+        : get(currencyStringOrAtom)
+    if (!currency) return false
+
+    const currencyLoading = btcPriceData[currency]?.state === 'loading'
+    const eurLoading =
+      currency !== 'EUR' && btcPriceData.EUR?.state === 'loading'
+    return currencyLoading || eurLoading
+  })
+}
+
 export function createMaxAmountForCurrencyAtom(
   currencyStringOrAtom: CurrencyCode | Atom<CurrencyCode | undefined>
 ): Atom<number> {
@@ -131,7 +150,9 @@ export const refreshBtcPriceActionAtom = atom(
 
     return pipe(
       effectToTaskEither(
-        api.btcExchangeRate.getExchangeRate({query: {currency}})
+        api.btcExchangeRate
+          .getExchangeRate({query: {currency}})
+          .pipe(Effect.timeout(FETCH_TIMEOUT))
       ),
       TE.matchW(
         (l) => {
@@ -168,8 +189,8 @@ export const refreshBtcPriceActionAtom = atom(
 )
 
 // Refresh the selected currency's BTC price plus EUR (needed as the anchor for
-// the per-currency max-amount cap). The returned Effect resolves with the
-// selected currency's fetch result — true on success, false on failure.
+// the per-currency max-amount cap). The returned Effect resolves true only when
+// all required prices are available.
 export function refreshBtcPriceWithEurEffect(
   set: Setter,
   currency: CurrencyCode
@@ -183,6 +204,6 @@ export function refreshBtcPriceWithEurEffect(
       : Effect.succeed(true)
   return Effect.map(
     Effect.all([refreshCurrent, refreshEur], {concurrency: 'unbounded'}),
-    ([current]) => current
+    ([current, eur]) => current && eur
   )
 }

@@ -44,6 +44,7 @@ function AmountStep({
   const {
     currencyAtom,
     maxAmountForCurrencyAtom,
+    btcPricesLoadingAtom,
     btcPricesReadyAtom,
     amountTopLimitForRangeInputAtom,
     amountBottomLimitForRangeInputAtom,
@@ -51,17 +52,20 @@ function AmountStep({
     expirationDateAtom,
     btcPriceForOfferWithCurrencyAtom,
     changePriceCurrencyActionAtom,
+    retryBtcPriceForOfferCurrencyActionAtom,
   } = useMolecule(offerFormMolecule)
 
   const currency = useAtomValue(currencyAtom)
   const btcPriceData = useAtomValue(btcPriceForOfferWithCurrencyAtom)
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
+  const retryBtcPrice = useSetAtom(retryBtcPriceForOfferCurrencyActionAtom)
   const openChangeCurrency = useOpenChangeCurrency()
   const amountMin = useAtomValue(amountBottomLimitForRangeInputAtom)
   const amountMax = useAtomValue(amountTopLimitForRangeInputAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
   const maxLimit = useAtomValue(maxAmountForCurrencyAtom)
+  const pricesLoading = useAtomValue(btcPricesLoadingAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
 
   const handleCurrencyPress = useCallback(() => {
@@ -116,7 +120,7 @@ function AmountStep({
         showInitialIcon={showInitialIcon}
       />
       <YStack gap="$3" paddingVertical="$6">
-        {!pricesReady ? (
+        {pricesLoading ? (
           <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
             <Loader size="small" />
             <Typography variant="description" color="$foregroundSecondary">
@@ -125,8 +129,8 @@ function AmountStep({
           </XStack>
         ) : null}
         <Stack
-          opacity={pricesReady ? 1 : 0.5}
-          pointerEvents={pricesReady ? 'auto' : 'none'}
+          opacity={pricesLoading ? 0.5 : 1}
+          pointerEvents={pricesLoading ? 'none' : 'auto'}
         >
           <PriceRangeInput
             minValueAtom={amountBottomLimitForRangeInputAtom}
@@ -137,7 +141,13 @@ function AmountStep({
             locale={locale}
           />
         </Stack>
-        <BtcPriceInfo btcPriceData={btcPriceData} currency={currency} />
+        <BtcPriceInfo
+          btcPriceData={btcPriceData}
+          currency={currency}
+          isRefreshing={pricesLoading}
+          onRetry={retryBtcPrice}
+          showRetry={!pricesReady && !!btcPriceData}
+        />
 
         <PremiumAndExpiration amountMin={amountMin} amountMax={amountMax} />
 

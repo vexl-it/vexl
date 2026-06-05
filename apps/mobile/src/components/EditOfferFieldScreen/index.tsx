@@ -9,7 +9,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
 import {deepEqual} from 'fast-equals'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback, useLayoutEffect} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, ScrollView, YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -108,7 +108,7 @@ function EditOfferFieldScreen({
   )
   const showDialog = useSetAtom(globalDialogAtom)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     takeOfferFormDraftSnapshot()
   }, [field, takeOfferFormDraftSnapshot])
 

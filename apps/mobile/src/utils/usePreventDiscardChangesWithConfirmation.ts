@@ -46,9 +46,12 @@ export default function usePreventDiscardChangesWithConfirmation({
 
   usePreventRemove(enabled, ({data}) => {
     if (allowNextRemoveRef.current) {
+      allowNextRemoveRef.current = false
       navigation.dispatch(data.action)
       return
     }
+
+    if (pendingNavigationActionRef.current !== undefined) return
 
     pendingNavigationActionRef.current = data.action
     void confirmLeave()

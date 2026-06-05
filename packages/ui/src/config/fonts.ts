@@ -198,7 +198,7 @@ export const typographyVariantStyles = {
     fontFamily: '$body',
     fontSize: '$2',
     fontWeight: '500',
-    lineHeight: 14,
+    lineHeight: 20,
     letterSpacing: -0.28,
   },
   tabSmallBold: {
@@ -219,7 +219,7 @@ export const typographyVariantStyles = {
     fontFamily: '$body',
     fontSize: '$1',
     fontWeight: '500',
-    lineHeight: 12,
+    lineHeight: 17,
     letterSpacing: -0.36,
   },
 } as const

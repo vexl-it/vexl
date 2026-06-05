@@ -35,6 +35,15 @@ const requestJson = async <A>(
   return await response.json()
 }
 
+const readTextError = async (response: Response): Promise<string> => {
+  try {
+    const body = await response.text()
+    return body.length > 0 ? body : response.statusText
+  } catch {
+    return response.statusText
+  }
+}
+
 export const listSlideshows = (
   adminToken: string
 ): Promise<SlideshowListResponse> =>
@@ -116,22 +125,20 @@ export const requestSlideshowUpload = (
   })
 
 export const uploadFileToS3 = async (
-  adminToken: string,
   presignedUrl: string,
+  contentType: string,
   file: File
 ): Promise<void> => {
-  const response = await fetch('/api/upload-to-s3', {
+  const response = await fetch(presignedUrl, {
     method: 'PUT',
     body: file,
     headers: {
-      'Content-Type': file.type,
-      'x-admin-token': adminToken,
-      'x-presigned-url': presignedUrl,
+      'Content-Type': contentType,
     },
   })
 
   if (!response.ok) {
-    throw new Error(await readError(response))
+    throw new Error(await readTextError(response))
   }
 }
 

@@ -123,6 +123,7 @@ export const RequestUploadResponse = Schema.Struct({
   presignedUrl: Schema.NonEmptyString,
   assetUrl: AssetUrl,
   s3Key: Schema.NonEmptyString,
+  contentType: Schema.NonEmptyString,
   expiresIn: Schema.Int,
 })
 export type RequestUploadResponse = typeof RequestUploadResponse.Type

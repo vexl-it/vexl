@@ -59,6 +59,7 @@ export const requestClubImageUpload = HttpApiBuilder.handler(
       return {
         presignedUrl: result.presignedUrl,
         s3Key: result.s3Key,
+        contentType,
         expiresIn: result.expiresIn,
       }
     }).pipe(makeEndpointEffect)

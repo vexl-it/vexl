@@ -12,7 +12,10 @@ import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
-import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {
+  type LocationPlaceId,
+  type OfferId,
+} from '@vexl-next/domain/src/general/offers'
 import {
   type AmountData,
   type AvailableDateTimeOption,
@@ -50,7 +53,12 @@ export type RootStackParamsList = {
   }
   OfferExpirationDate: undefined
   OfferLocationSearch: {randomizeLocation?: boolean} | undefined
-  OfferLocationRadius: {randomizeLocation?: boolean} | undefined
+  OfferLocationRadius:
+    | {
+        randomizeLocation?: boolean
+        editingLocationPlaceId?: LocationPlaceId
+      }
+    | undefined
   FilterLocationSearch: undefined
   FilterLocationRadius: undefined
   FilterOffers: undefined

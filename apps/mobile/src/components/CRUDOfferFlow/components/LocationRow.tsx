@@ -6,9 +6,11 @@ import {useTheme} from 'tamagui'
 
 function LocationRow({
   text,
+  onPress,
   onRemove,
 }: {
   readonly text: string
+  readonly onPress: () => void
   readonly onRemove: () => void
 }): React.JSX.Element {
   const theme = useTheme()
@@ -22,6 +24,8 @@ function LocationRow({
       pr="$3"
       py="$5"
       alignItems="center"
+      onPress={onPress}
+      pressStyle={{opacity: 0.7}}
     >
       <Typography
         variant="description"
@@ -32,7 +36,10 @@ function LocationRow({
         {text}
       </Typography>
       <XStack
-        onPress={onRemove}
+        onPress={(event) => {
+          event.stopPropagation()
+          onRemove()
+        }}
         pressStyle={{opacity: 0.7}}
         alignItems="center"
         justifyContent="center"

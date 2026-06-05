@@ -466,7 +466,14 @@ export const offerFormMolecule = molecule(() => {
   )
 
   const removeLocationActionAtom = atom(null, (get, set, placeId: string) => {
-    set(locationAtom, (prev) => prev?.filter((loc) => loc.placeId !== placeId))
+    set(locationAtom, (prev) =>
+      prev
+        ? pipe(
+            prev,
+            Array.filter((loc) => loc.placeId !== placeId)
+          )
+        : prev
+    )
   })
 
   const btcNetworkAtom = getAtomWithNullableValueHandling(

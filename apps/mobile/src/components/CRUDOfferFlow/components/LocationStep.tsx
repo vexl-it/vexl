@@ -23,6 +23,8 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
 import {globalDialogAtom} from '../../GlobalDialog'
+import {LocationPickerMolecule} from '../../LocationPicker/molecule'
+import {offerLocationToMapValueWithRadius} from '../../LocationPicker/utils'
 import {offerFormMolecule} from '../atoms/offerFormStateAtoms'
 import LocationRow from './LocationRow'
 
@@ -84,11 +86,13 @@ function LocationStep({
     removeLocationActionAtom,
     updateLocationStateAndPaymentMethodAtom,
   } = useMolecule(offerFormMolecule)
+  const {selectedMapValueAtom} = useMolecule(LocationPickerMolecule)
 
   const listingType = useAtomValue(listingTypeAtom)
   const locationState = useAtomValue(locationStateAtom)
   const location = useAtomValue(locationAtom)
   const removeLocation = useSetAtom(removeLocationActionAtom)
+  const setSelectedMapValue = useSetAtom(selectedMapValueAtom)
   const updateLocationState = useAtom(
     updateLocationStateAndPaymentMethodAtom
   )[1]
@@ -174,6 +178,15 @@ function LocationStep({
                   <LocationRow
                     key={loc.placeId}
                     text={displayText}
+                    onPress={() => {
+                      setSelectedMapValue(
+                        offerLocationToMapValueWithRadius(loc)
+                      )
+                      navigation.navigate('OfferLocationRadius', {
+                        randomizeLocation: true,
+                        editingLocationPlaceId: loc.placeId,
+                      })
+                    }}
                     onRemove={() => {
                       removeLocation(loc.placeId)
                     }}

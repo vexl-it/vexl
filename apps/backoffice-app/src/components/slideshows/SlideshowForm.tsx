@@ -1,15 +1,13 @@
 'use client'
 
 import {getAdminToken} from '@/src/services/adminTokenService'
-import {
-  requestSlideshowUpload,
-  uploadFileToS3,
-} from '@/src/services/slideshows/api'
+import {requestSlideshowUpload} from '@/src/services/slideshows/api'
 import {
   SlideshowSlides,
   type FileExtension,
   type SlideshowSlide,
 } from '@/src/services/slideshows/domain'
+import {uploadToPresignedUrl} from '@/src/services/uploadToPresignedUrl'
 import {Array, Either, pipe, Schema} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useCallback, useState} from 'react'
@@ -268,7 +266,11 @@ export function SlideshowForm({
           slideshowUuid,
           fileExtension,
         })
-        await uploadFileToS3(upload.presignedUrl, upload.contentType, file)
+        await uploadToPresignedUrl({
+          presignedUrl: upload.presignedUrl,
+          contentType: upload.contentType,
+          file,
+        })
         updateSlide(slide.uuid, (current) => {
           if (current.type === 'website') return current
 

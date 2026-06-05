@@ -31,7 +31,7 @@ export const uploadToPresignedUrl = async ({
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
-        'Upload failed before S3 returned a response. Verify that the S3 bucket CORS policy allows PUT requests from this backoffice origin.'
+        'Upload failed before a response was received from S3. This can be caused by a network error, DNS failure, or a missing CORS policy on the bucket.'
       )
     }
 

@@ -77,11 +77,13 @@ function PriceUpToStep({
     amountBottomLimitAtom,
     satsValueAtom,
     btcPriceForOfferWithCurrencyAtom,
+    btcPricesLoadingAtom,
     btcPricesReadyAtom,
     changePriceCurrencyActionAtom,
     calculateSatsValueOnFiatValueChangeActionAtom,
     calculateFiatValueOnSatsValueChangeActionAtom,
     checkAmountExceedsLimitAndShowDialogActionAtom,
+    retryBtcPriceForOfferCurrencyActionAtom,
     expirationDateAtom,
   } = useMolecule(offerFormMolecule)
 
@@ -90,8 +92,10 @@ function PriceUpToStep({
   const amountBottomLimit = useAtomValue(amountBottomLimitAtom) ?? 0
   const satsValue = useAtomValue(satsValueAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
+  const pricesLoading = useAtomValue(btcPricesLoadingAtom)
   const pricesReady = useAtomValue(btcPricesReadyAtom)
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
+  const retryBtcPrice = useSetAtom(retryBtcPriceForOfferCurrencyActionAtom)
   const openChangeCurrency = useOpenChangeCurrency()
   const calculateSatsOnFiatChange = useSetAtom(
     calculateSatsValueOnFiatValueChangeActionAtom
@@ -182,7 +186,13 @@ function PriceUpToStep({
           }}
           locale={locale}
         />
-        <BtcPriceInfo btcPriceData={btcPriceData} currency={currency} />
+        <BtcPriceInfo
+          btcPriceData={btcPriceData}
+          currency={currency}
+          isRefreshing={pricesLoading}
+          onRetry={retryBtcPrice}
+          showRetry={!pricesReady && !!btcPriceData}
+        />
 
         <PremiumAndExpiration
           amountMin={amountBottomLimit}
@@ -190,7 +200,7 @@ function PriceUpToStep({
           showPremium={false}
         />
 
-        {!pricesReady ? (
+        {pricesLoading ? (
           <XStack alignItems="center" gap="$3" paddingHorizontal="$4">
             <Loader size="small" />
             <Typography variant="description" color="$foregroundSecondary">

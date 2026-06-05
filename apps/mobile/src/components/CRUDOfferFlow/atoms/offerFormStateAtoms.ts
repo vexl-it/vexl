@@ -46,6 +46,7 @@ import {type ClubWithMembers} from '../../../state/clubs/domain'
 import {importedContactsCountAtom} from '../../../state/contacts/atom/contactsStore'
 import {
   createBtcPriceForCurrencyAtom,
+  createBtcPricesLoadingAtom,
   createBtcPricesReadyAtom,
   createMaxAmountForCurrencyAtom,
   refreshBtcPriceWithEurEffect,
@@ -292,6 +293,7 @@ export const offerFormMolecule = molecule(() => {
   )
 
   const maxAmountForCurrencyAtom = createMaxAmountForCurrencyAtom(currencyAtom)
+  const btcPricesLoadingAtom = createBtcPricesLoadingAtom(currencyAtom)
   const btcPricesReadyAtom = createBtcPricesReadyAtom(currencyAtom)
 
   const amountBottomLimitAtom = getAtomWithNullableValueHandling(
@@ -359,6 +361,18 @@ export const offerFormMolecule = molecule(() => {
     (get, set): Effect.Effect<void> => {
       set(initLanguagesFromPreferencesActionAtom)
       return set(initializeAmountTopLimitFromBtcPriceActionAtom)
+    }
+  )
+
+  const showExchangeRateRequestTimedOutDialogActionAtom = atom(
+    null,
+    (get, set) => {
+      const {t} = get(translationAtom)
+      return set(globalDialogAtom, {
+        title: t('offerForm.exchangeRateRequestTimedOutTitle'),
+        subtitle: t('offerForm.exchangeRateRequestTimedOutDescription'),
+        positiveButtonText: t('common.close'),
+      })
     }
   )
 
@@ -1511,11 +1525,39 @@ export const offerFormMolecule = molecule(() => {
               calculateFiatValueOnSatsValueChangeActionAtom,
               String(get(satsValueAtom))
             )
+          } else {
+            yield* _(set(showExchangeRateRequestTimedOutDialogActionAtom))
           }
         })
       )
     }
   )
+
+  const retryBtcPriceForOfferCurrencyActionAtom = atom(null, (get, set) => {
+    void Effect.runPromise(
+      Effect.gen(function* (_) {
+        const currency = get(currencyAtom)
+        if (!currency) return
+
+        const currentResult = yield* _(
+          refreshBtcPriceWithEurEffect(set, currency)
+        )
+        if (get(currencyAtom) !== currency) return
+
+        set(amountTopLimitAtom, get(maxAmountForCurrencyAtom))
+        if (!currentResult) {
+          yield* _(set(showExchangeRateRequestTimedOutDialogActionAtom))
+
+          return
+        }
+
+        set(
+          calculateFiatValueOnSatsValueChangeActionAtom,
+          String(get(satsValueAtom))
+        )
+      })
+    )
+  })
 
   const updateListingTypeActionAtom = atom(
     null,
@@ -1579,6 +1621,7 @@ export const offerFormMolecule = molecule(() => {
     createOfferActionAtom,
     currencyAtom,
     maxAmountForCurrencyAtom,
+    btcPricesLoadingAtom,
     btcPricesReadyAtom,
     amountBottomLimitAtom,
     amountBottomLimitForRangeInputAtom,
@@ -1625,6 +1668,7 @@ export const offerFormMolecule = molecule(() => {
     calculateSatsValueOnFiatValueChangeActionAtom,
     calculateFiatValueOnSatsValueChangeActionAtom,
     changePriceCurrencyActionAtom,
+    retryBtcPriceForOfferCurrencyActionAtom,
     updateListingTypeActionAtom,
     updateBtcNetworkAtom,
     createSelectClubAtom,

@@ -51,7 +51,10 @@ export default function usePreventDiscardChangesWithConfirmation({
       return
     }
 
-    if (pendingNavigationActionRef.current !== undefined) return
+    if (pendingNavigationActionRef.current !== undefined) {
+      pendingNavigationActionRef.current = data.action
+      return
+    }
 
     pendingNavigationActionRef.current = data.action
     void confirmLeave()

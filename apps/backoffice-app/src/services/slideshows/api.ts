@@ -120,7 +120,13 @@ export const requestSlideshowUpload = async (
     }
   )
 
-  return Schema.decodeUnknownSync(RequestUploadResponseSchema)(response)
+  try {
+    return Schema.decodeUnknownSync(RequestUploadResponseSchema)(response)
+  } catch {
+    throw new Error(
+      'Unexpected response shape from /api/admin/slideshows/request-upload. The server may be running an older version.'
+    )
+  }
 }
 
 export const getPublicSlideshow = (

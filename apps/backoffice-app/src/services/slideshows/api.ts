@@ -1,4 +1,3 @@
-import {uploadToPresignedUrl} from '../uploadToPresignedUrl'
 import {
   type CreateSlideshowRequest,
   type RequestUploadRequest,
@@ -115,14 +114,6 @@ export const requestSlideshowUpload = (
     headers: jsonHeaders(adminToken),
     body: JSON.stringify(payload),
   })
-
-export const uploadFileToS3 = async (
-  presignedUrl: string,
-  contentType: string,
-  file: File
-): Promise<void> => {
-  await uploadToPresignedUrl({presignedUrl, contentType, file})
-}
 
 export const getPublicSlideshow = (
   publicToken: string

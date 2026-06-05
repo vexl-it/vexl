@@ -1,20 +1,12 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
+import {uploadToPresignedUrl} from '@/src/services/uploadToPresignedUrl'
 import {useRouter} from 'next/navigation'
 import {useCallback, useState} from 'react'
 
 type FileExtension = 'png' | 'jpg' | 'jpeg'
 const RESOURCES_BASE_URL = 'https://resources.vexl.it/'
-
-const readUploadError = async (response: Response): Promise<string> => {
-  try {
-    const body = await response.text()
-    return body.length > 0 ? body : response.statusText
-  } catch {
-    return response.statusText
-  }
-}
 
 interface UseClubImageUploadResult {
   selectedFile: File | null
@@ -94,17 +86,11 @@ export function useClubImageUpload(): UseClubImageUploadResult {
       )
 
       setUploadProgress(50)
-      const uploadResponse = await fetch(result.presignedUrl, {
-        method: 'PUT',
-        body: selectedFile,
-        headers: {
-          'Content-Type': result.contentType,
-        },
+      await uploadToPresignedUrl({
+        presignedUrl: result.presignedUrl,
+        contentType: result.contentType,
+        file: selectedFile,
       })
-
-      if (!uploadResponse.ok) {
-        throw new Error(await readUploadError(uploadResponse))
-      }
 
       setUploadProgress(100)
       setUploadedImageUrl(`${RESOURCES_BASE_URL}${result.s3Key}`)

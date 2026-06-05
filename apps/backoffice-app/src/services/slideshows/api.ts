@@ -1,3 +1,4 @@
+import {uploadToPresignedUrl} from '../uploadToPresignedUrl'
 import {
   type CreateSlideshowRequest,
   type RequestUploadRequest,
@@ -33,15 +34,6 @@ const requestJson = async <A>(
   }
 
   return await response.json()
-}
-
-const readTextError = async (response: Response): Promise<string> => {
-  try {
-    const body = await response.text()
-    return body.length > 0 ? body : response.statusText
-  } catch {
-    return response.statusText
-  }
 }
 
 export const listSlideshows = (
@@ -129,17 +121,7 @@ export const uploadFileToS3 = async (
   contentType: string,
   file: File
 ): Promise<void> => {
-  const response = await fetch(presignedUrl, {
-    method: 'PUT',
-    body: file,
-    headers: {
-      'Content-Type': contentType,
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(await readTextError(response))
-  }
+  await uploadToPresignedUrl({presignedUrl, contentType, file})
 }
 
 export const getPublicSlideshow = (

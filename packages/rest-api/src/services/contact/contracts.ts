@@ -270,6 +270,7 @@ export type RequestClubImageUploadRequest =
 export const RequestClubImageUploadResponse = Schema.Struct({
   presignedUrl: Schema.String,
   s3Key: Schema.String,
+  contentType: Schema.String,
   expiresIn: Schema.Number,
 })
 export type RequestClubImageUploadResponse =

@@ -1,12 +1,20 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
-import {Array, Option, pipe, String} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useCallback, useState} from 'react'
 
 type FileExtension = 'png' | 'jpg' | 'jpeg'
-const RESOURCES_BASE_URL = 'https://resources.vexl.it/clubs/'
+const RESOURCES_BASE_URL = 'https://resources.vexl.it/'
+
+const readUploadError = async (response: Response): Promise<string> => {
+  try {
+    const body = await response.text()
+    return body.length > 0 ? body : response.statusText
+  } catch {
+    return response.statusText
+  }
+}
 
 interface UseClubImageUploadResult {
   selectedFile: File | null
@@ -86,31 +94,20 @@ export function useClubImageUpload(): UseClubImageUploadResult {
       )
 
       setUploadProgress(50)
-      // Upload through proxy to avoid CORS issues
-      const uploadResponse = await fetch('/api/upload-to-s3', {
+      const uploadResponse = await fetch(result.presignedUrl, {
         method: 'PUT',
         body: selectedFile,
         headers: {
-          'Content-Type': selectedFile.type,
-          'x-admin-token': adminToken,
-          'x-presigned-url': result.presignedUrl,
+          'Content-Type': result.contentType,
         },
       })
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json()
-        throw new Error(errorData.error ?? 'Failed to upload image to S3')
+        throw new Error(await readUploadError(uploadResponse))
       }
 
       setUploadProgress(100)
-      const imageUrl = pipe(
-        result.presignedUrl,
-        String.split('/'),
-        Array.last,
-        Option.map((imageName) => `${RESOURCES_BASE_URL}${imageName}`),
-        Option.getOrElse(() => '')
-      )
-      setUploadedImageUrl(imageUrl)
+      setUploadedImageUrl(`${RESOURCES_BASE_URL}${result.s3Key}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload image')
     } finally {

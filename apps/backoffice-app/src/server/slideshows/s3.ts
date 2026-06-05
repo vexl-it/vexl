@@ -74,6 +74,7 @@ export const createSlideshowUpload = (
       presignedUrl,
       assetUrl: `${trimTrailingSlash(resourcesBaseUrl)}/${s3Key}`,
       s3Key,
+      contentType,
       expiresIn,
     })
   })

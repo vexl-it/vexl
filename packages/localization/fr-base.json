@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Aucun",
   "editOffer.unpublishedChangesTitle": "Tu as des changements non publiés",
   "editOffer.unpublishedChangesDescription": "Si tu pars maintenant, tous tes changements seront perdus. Ils ne seront ni enregistrés ni publiés.",
+  "editOffer.unsavedStepChangesTitle": "Enregistrer les changements avant de quitter ?",
+  "editOffer.unsavedStepChangesDescription": "Si tu quittes cette étape de modification maintenant, tes changements seront abandonnés.",
   "editOffer.discard": "Abandonner",
   "editOffer.publish": "Publier",
   "editOffer.detail.amount": "Montant",

@@ -46,6 +46,7 @@ function CRUDOfferFlow(): React.ReactElement {
     initializeValuesForOfferFormActionAtom,
     intendedConnectionLevelAtom,
     resetOfferFormActionAtom,
+    discardLocationIfNotInPersonActionAtom,
   } = useMolecule(offerFormMolecule)
   const offerType = useAtomValue(offerTypeAtom)
   const listingType = useAtomValue(listingTypeAtom)
@@ -56,6 +57,9 @@ function CRUDOfferFlow(): React.ReactElement {
     initializeValuesForOfferFormActionAtom
   )
   const resetOfferForm = useSetAtom(resetOfferFormActionAtom)
+  const discardLocationIfNotInPerson = useSetAtom(
+    discardLocationIfNotInPersonActionAtom
+  )
   const insets = useSafeAreaInsets()
 
   const [activeStep, setActiveStep] = useState<OfferSetupStep>('listingType')
@@ -282,6 +286,7 @@ function CRUDOfferFlow(): React.ReactElement {
                   setActiveStep('location')
                 }}
                 onComplete={() => {
+                  discardLocationIfNotInPerson()
                   setActiveStep('network')
                 }}
               />

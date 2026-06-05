@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "无",
   "editOffer.unpublishedChangesTitle": "你有未发布的更改",
   "editOffer.unpublishedChangesDescription": "如果你现在离开，所有更改都会被丢弃。它们不会被保存或发布。",
+  "editOffer.unsavedStepChangesTitle": "离开前保存更改吗？",
+  "editOffer.unsavedStepChangesDescription": "如果你现在离开此编辑步骤，你的更改将被丢弃。",
   "editOffer.discard": "丢弃",
   "editOffer.publish": "发布",
   "editOffer.detail.amount": "金额",

@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Keine",
   "editOffer.unpublishedChangesTitle": "Du hast unveröffentlichte Änderungen",
   "editOffer.unpublishedChangesDescription": "Wenn du jetzt gehst, werden alle deine Änderungen verworfen. Sie werden nicht gespeichert oder veröffentlicht.",
+  "editOffer.unsavedStepChangesTitle": "Änderungen vor dem Verlassen speichern?",
+  "editOffer.unsavedStepChangesDescription": "Wenn du diesen Bearbeitungsschritt jetzt verlässt, werden deine Änderungen verworfen.",
   "editOffer.discard": "Verwerfen",
   "editOffer.publish": "Veröffentlichen",
   "editOffer.detail.amount": "Betrag",

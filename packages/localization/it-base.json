@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Nessuno",
   "editOffer.unpublishedChangesTitle": "Hai modifiche non pubblicate",
   "editOffer.unpublishedChangesDescription": "Se esci ora, tutte le modifiche verranno eliminate. Non saranno salvate né pubblicate.",
+  "editOffer.unsavedStepChangesTitle": "Salvare le modifiche prima di uscire?",
+  "editOffer.unsavedStepChangesDescription": "Se esci ora da questo passaggio di modifica, le tue modifiche verranno scartate.",
   "editOffer.discard": "Scarta",
   "editOffer.publish": "Pubblica",
   "editOffer.detail.amount": "Importo",

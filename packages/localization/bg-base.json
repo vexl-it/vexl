@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Няма",
   "editOffer.unpublishedChangesTitle": "Имаш непубликувани промени",
   "editOffer.unpublishedChangesDescription": "Ако излезеш сега, всички твои промени ще бъдат изхвърлени. Няма да бъдат запазени или публикувани.",
+  "editOffer.unsavedStepChangesTitle": "Да запазиш ли промените преди излизане?",
+  "editOffer.unsavedStepChangesDescription": "Ако напуснеш тази стъпка за редактиране сега, промените ти ще бъдат изхвърлени.",
   "editOffer.discard": "Изхвърли",
   "editOffer.publish": "Публикувай",
   "editOffer.detail.amount": "Сума",

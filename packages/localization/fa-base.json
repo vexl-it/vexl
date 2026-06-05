@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "هیچ‌کدوم",
   "editOffer.unpublishedChangesTitle": "تغییرات منتشرنشده داری",
   "editOffer.unpublishedChangesDescription": "اگه الان خارج بشی، همه تغییراتت حذف می‌شن. ذخیره یا منتشر نمی‌شن.",
+  "editOffer.unsavedStepChangesTitle": "قبل از خروج تغییرات ذخیره بشن؟",
+  "editOffer.unsavedStepChangesDescription": "اگر الان از این مرحله ویرایش خارج بشی، تغییراتت حذف می‌شن.",
   "editOffer.discard": "حذف کن",
   "editOffer.publish": "منتشر کن",
   "editOffer.detail.amount": "مقدار",

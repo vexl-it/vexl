@@ -27,6 +27,7 @@ interface AmountStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function AmountStep({
@@ -36,6 +37,7 @@ function AmountStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: AmountStepProps): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
@@ -108,7 +110,11 @@ function AmountStep({
 
   return (
     <YStack>
-      <EditRow state="initial" headline={t('offerForm.selectAmount')} />
+      <EditRow
+        state="initial"
+        headline={t('offerForm.selectAmount')}
+        showInitialIcon={showInitialIcon}
+      />
       <YStack gap="$3" paddingVertical="$6">
         {!pricesReady ? (
           <XStack alignItems="center" gap="$3" paddingHorizontal="$4">

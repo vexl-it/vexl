@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Немає",
   "editOffer.unpublishedChangesTitle": "У тебе є неопубліковані зміни",
   "editOffer.unpublishedChangesDescription": "Якщо підеш зараз, усі твої зміни буде втрачено. Вони не будуть збережені чи опубліковані.",
+  "editOffer.unsavedStepChangesTitle": "Зберегти зміни перед виходом?",
+  "editOffer.unsavedStepChangesDescription": "Якщо ти зараз вийдеш із цього кроку редагування, твої зміни буде скасовано.",
   "editOffer.discard": "Скасувати",
   "editOffer.publish": "Опублікувати",
   "editOffer.detail.amount": "Сума",

@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Ei mitään",
   "editOffer.unpublishedChangesTitle": "Sinulla on julkaisemattomia muutoksia",
   "editOffer.unpublishedChangesDescription": "Jos poistut nyt, kaikki muutoksesi hylätään. Niitä ei tallenneta eikä julkaista.",
+  "editOffer.unsavedStepChangesTitle": "Tallennetaanko muutokset ennen poistumista?",
+  "editOffer.unsavedStepChangesDescription": "Jos poistut tästä muokkausvaiheesta nyt, muutoksesi hylätään.",
   "editOffer.discard": "Hylkää",
   "editOffer.publish": "Julkaise",
   "editOffer.detail.amount": "Summa",

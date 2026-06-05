@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Inga",
   "editOffer.unpublishedChangesTitle": "Du har opublicerade ändringar",
   "editOffer.unpublishedChangesDescription": "Om du lämnar nu försvinner alla dina ändringar. De sparas eller publiceras inte.",
+  "editOffer.unsavedStepChangesTitle": "Spara ändringar innan du lämnar?",
+  "editOffer.unsavedStepChangesDescription": "Om du lämnar det här redigeringssteget nu kommer dina ändringar att kastas.",
   "editOffer.discard": "Kasta",
   "editOffer.publish": "Publicera",
   "editOffer.detail.amount": "Belopp",

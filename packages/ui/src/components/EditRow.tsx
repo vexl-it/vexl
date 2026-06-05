@@ -75,6 +75,7 @@ interface EditRowBaseProps {
   readonly overline?: string
   readonly optionalLabel?: string
   readonly showEditButton?: boolean
+  readonly showInitialIcon?: boolean
   readonly onPress?: () => void
 }
 
@@ -146,6 +147,7 @@ export function EditRow({
   overline,
   optionalLabel,
   showEditButton = state !== 'initial',
+  showInitialIcon = true,
   onPress,
   ...rest
 }: EditRowProps): React.JSX.Element {
@@ -190,6 +192,7 @@ export function EditRow({
         return <QuestionmarkCircle color={foregroundColor} size={24} />
     }
   })()
+  const showLeadingIcon = isProfile || !isInitial || showInitialIcon
 
   return (
     <EditRowFrame
@@ -197,11 +200,13 @@ export function EditRow({
       pressable={showEditButton}
       onPress={showEditButton ? onPress : undefined}
     >
-      {isProfile && avatar ? (
-        <Avatar customSize={iconBoxSize} {...avatar} />
-      ) : (
-        <IconBox tone={iconBoxTone}>{leadingIcon}</IconBox>
-      )}
+      {showLeadingIcon ? (
+        isProfile && avatar ? (
+          <Avatar customSize={iconBoxSize} {...avatar} />
+        ) : (
+          <IconBox tone={iconBoxTone}>{leadingIcon}</IconBox>
+        )
+      ) : null}
       <YStack flex={1} gap={overline || subheadline ? '$2' : undefined}>
         {overline ? (
           <Typography

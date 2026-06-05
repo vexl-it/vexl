@@ -91,6 +91,7 @@ import {offerProgressModalActionAtoms as progressModal} from '../../UploadingOff
 import numberOfFriendsAtom, {
   numberOfFriendsLoadedEffect,
 } from './numberOfFriendsAtom'
+import {formatOfferPublicPart} from './offerFormLocationCleanup'
 
 function getAtomWithNullableValueHandling<T, S>(
   nullableAtom: PrimitiveAtom<T | undefined>,
@@ -108,6 +109,30 @@ function getAtomWithNullableValueHandling<T, S>(
         set(atomToSet, (val) => ({...val, [propertyToSetInAtom]: value}))
     }
   )
+}
+
+function copyOptionalReadonlyArray<T>(
+  value: readonly T[] | undefined
+): readonly T[] | undefined {
+  return value ? [...value] : undefined
+}
+
+interface OfferFormDraftSnapshot {
+  readonly offer: OneOfferInState
+  readonly nullableOfferType: OfferType | undefined
+  readonly nullableListingType: ListingType | undefined
+  readonly nullableCurrency: CurrencyCode | undefined
+  readonly nullableAmountBottomLimit: number | undefined
+  readonly nullableAmountTopLimit: number | undefined
+  readonly nullableBtcNetwork: readonly BtcNetwork[] | undefined
+  readonly nullablePaymentMethod: readonly PaymentMethod[] | undefined
+  readonly nullableLocation: readonly OfferLocation[] | undefined
+  readonly nullableLocationState: readonly LocationState[] | undefined
+  readonly nullableProductCategories: readonly ProductCategory[] | undefined
+  readonly selectedSpokenLanguages: readonly SpokenLanguage[]
+  readonly selectedClubsUuids: readonly ClubUuid[]
+  readonly singlePriceActive: boolean
+  readonly satsValue: number
 }
 
 function getOfferFormValidationErrorMessage(
@@ -161,29 +186,6 @@ function getOfferFormValidationErrorMessage(
   }
 
   return undefined
-}
-
-function formatOfferPublicPart(publicPart: OfferPublicPart): OfferPublicPart {
-  const {
-    amountBottomLimit,
-    amountTopLimit,
-    feeAmount,
-    feeState,
-    listingType,
-    offerDescription,
-    ...restOfPublicPart
-  } = publicPart
-  const isBitcoinListing = listingType === 'BITCOIN'
-
-  return {
-    ...restOfPublicPart,
-    listingType,
-    amountBottomLimit,
-    amountTopLimit: isBitcoinListing ? amountTopLimit : amountBottomLimit,
-    feeAmount: isBitcoinListing ? feeAmount : 0,
-    feeState: isBitcoinListing ? feeState : 'WITHOUT_FEE',
-    offerDescription: offerDescription.trim(),
-  }
 }
 
 export function createOfferDummyPublicPart(): OfferPublicPart {
@@ -363,8 +365,6 @@ export const offerFormMolecule = molecule(() => {
   const updateLocationStateAndPaymentMethodAtom = atom(
     null,
     (get, set, locationState: LocationState) => {
-      const listingType = get(listingTypeAtom)
-
       set(locationStateAtom, [locationState])
 
       // TODO: after removing compatibility with old vexl apps refactor to ['CASH', 'REVOLUT', 'BANK'] for ['IN_PERSON', 'ONLINE'] delivery method
@@ -379,14 +379,6 @@ export const offerFormMolecule = molecule(() => {
 
         return ['BANK', 'REVOLUT']
       })
-
-      if (
-        (listingType === 'BITCOIN' && locationState === 'ONLINE') ||
-        (listingType === 'PRODUCT' &&
-          !get(locationStateAtom)?.includes('IN_PERSON'))
-      ) {
-        set(locationAtom, [])
-      }
     }
   )
 
@@ -520,9 +512,24 @@ export const offerFormMolecule = molecule(() => {
         updateLocationStateAndPaymentMethodAtom,
         isActive ? 'ONLINE' : 'IN_PERSON'
       )
-      set(locationAtom, [])
     }
   )
+
+  const discardLocationIfNotInPersonActionAtom = atom(null, (get, set) => {
+    const locationState = get(locationStateAtom)
+    const location = get(locationAtom)
+
+    if (
+      locationState &&
+      location &&
+      !pipe(
+        locationState,
+        Array.some((state) => state === 'IN_PERSON')
+      )
+    ) {
+      set(locationAtom, [])
+    }
+  })
 
   const offerActiveAtom = focusAtom(offerFormAtom, (optic) =>
     optic.prop('active')
@@ -694,6 +701,78 @@ export const offerFormMolecule = molecule(() => {
       }
     }
   )
+
+  const offerFormDraftSnapshotAtom = atom<OfferFormDraftSnapshot | undefined>(
+    undefined
+  )
+
+  const currentOfferFormDraftSnapshotAtom = atom(
+    (get): OfferFormDraftSnapshot => ({
+      offer: get(offerAtom),
+      nullableOfferType: get(nullableOfferTypeAtom),
+      nullableListingType: get(nullableListingTypeAtom),
+      nullableCurrency: get(nullableCurrencyAtom),
+      nullableAmountBottomLimit: get(nullableAmountBottomLimitAtom),
+      nullableAmountTopLimit: get(nullableAmountTopLimitAtom),
+      nullableBtcNetwork: copyOptionalReadonlyArray(
+        get(nullableBtcNetworkAtom)
+      ),
+      nullablePaymentMethod: copyOptionalReadonlyArray(
+        get(nullablePaymentMethodAtom)
+      ),
+      nullableLocation: copyOptionalReadonlyArray(get(nullableLocationAtom)),
+      nullableLocationState: copyOptionalReadonlyArray(
+        get(nullableLocationStateAtom)
+      ),
+      nullableProductCategories: copyOptionalReadonlyArray(
+        get(nullableProductCategoriesAtom)
+      ),
+      selectedSpokenLanguages: [...get(selectedSpokenLanguagesAtom)],
+      selectedClubsUuids: [...get(selectedClubsUuidsAtom)],
+      singlePriceActive: get(singlePriceActiveAtom),
+      satsValue: get(satsValueAtom),
+    })
+  )
+
+  const takeOfferFormDraftSnapshotActionAtom = atom(null, (get, set) => {
+    set(offerFormDraftSnapshotAtom, get(currentOfferFormDraftSnapshotAtom))
+  })
+
+  const restoreOfferFormDraftSnapshotActionAtom = atom(null, (get, set) => {
+    const snapshot = get(offerFormDraftSnapshotAtom)
+    if (!snapshot) return
+
+    set(offerAtom, snapshot.offer)
+    set(nullableOfferTypeAtom, snapshot.nullableOfferType)
+    set(nullableListingTypeAtom, snapshot.nullableListingType)
+    set(nullableCurrencyAtom, snapshot.nullableCurrency)
+    set(nullableAmountBottomLimitAtom, snapshot.nullableAmountBottomLimit)
+    set(nullableAmountTopLimitAtom, snapshot.nullableAmountTopLimit)
+    set(
+      nullableBtcNetworkAtom,
+      copyOptionalReadonlyArray(snapshot.nullableBtcNetwork)
+    )
+    set(
+      nullablePaymentMethodAtom,
+      copyOptionalReadonlyArray(snapshot.nullablePaymentMethod)
+    )
+    set(
+      nullableLocationAtom,
+      copyOptionalReadonlyArray(snapshot.nullableLocation)
+    )
+    set(
+      nullableLocationStateAtom,
+      copyOptionalReadonlyArray(snapshot.nullableLocationState)
+    )
+    set(
+      nullableProductCategoriesAtom,
+      copyOptionalReadonlyArray(snapshot.nullableProductCategories)
+    )
+    set(selectedSpokenLanguagesAtom, [...snapshot.selectedSpokenLanguages])
+    set(selectedClubsUuidsAtom, [...snapshot.selectedClubsUuids])
+    set(singlePriceActiveAtom, snapshot.singlePriceActive)
+    set(satsValueAtom, snapshot.satsValue)
+  })
 
   const checkAmountExceedsLimitAndShowDialogActionAtom = atom(
     null,
@@ -1244,6 +1323,32 @@ export const offerFormMolecule = molecule(() => {
     })
   })
 
+  const showUnpublishedChangesDialogActionAtom = atom(
+    null,
+    (get, set): Effect.Effect<boolean> => {
+      const {t} = get(translationAtom)
+
+      return Effect.gen(function* (_) {
+        const confirmed = yield* _(
+          set(globalDialogAtom, {
+            title: t('editOffer.unpublishedChangesTitle'),
+            subtitle: t('editOffer.unpublishedChangesDescription'),
+            positiveButtonText: t('editOffer.publish'),
+            negativeButtonText: t('editOffer.discard'),
+            disableClose: true,
+          })
+        )
+
+        if (!confirmed) {
+          set(discardChangesActionAtom)
+          return true
+        }
+
+        return yield* _(set(editOfferActionAtom))
+      })
+    }
+  )
+
   const setOfferFormActionAtom = atom(
     null,
     (get, set, offerId: OfferId | undefined) => {
@@ -1463,6 +1568,7 @@ export const offerFormMolecule = molecule(() => {
     modifyOfferLoaderTitleAtom,
     toggleOfferActiveAtom,
     editOfferActionAtom,
+    showUnpublishedChangesDialogActionAtom,
     createOfferActionAtom,
     currencyAtom,
     maxAmountForCurrencyAtom,
@@ -1486,6 +1592,7 @@ export const offerFormMolecule = molecule(() => {
     offerDescriptionAtom,
     toggleSinglePriceActiveAtom,
     toggleLocationActiveAtom,
+    discardLocationIfNotInPersonActionAtom,
     offerActiveAtom,
     updateCurrencyLimitsAtom,
     updateLocationStateAndPaymentMethodAtom,
@@ -1501,6 +1608,10 @@ export const offerFormMolecule = molecule(() => {
     selectedSpokenLanguagesAtom,
     resetSelectedSpokenLanguagesActionAtom,
     saveSelectedSpokenLanguagesActionAtom,
+    offerFormDraftSnapshotAtom,
+    currentOfferFormDraftSnapshotAtom,
+    takeOfferFormDraftSnapshotActionAtom,
+    restoreOfferFormDraftSnapshotActionAtom,
     setOfferFormActionAtom,
     satsValueAtom,
     btcPriceForOfferWithCurrencyAtom,

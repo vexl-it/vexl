@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "なし",
   "editOffer.unpublishedChangesTitle": "未公開の変更があります",
   "editOffer.unpublishedChangesDescription": "今離れると、すべての変更が破棄されます。保存も公開もされません。",
+  "editOffer.unsavedStepChangesTitle": "退出する前に変更を保存しますか？",
+  "editOffer.unsavedStepChangesDescription": "この編集ステップを今離れると、変更は破棄されます。",
   "editOffer.discard": "破棄",
   "editOffer.publish": "公開",
   "editOffer.detail.amount": "金額",

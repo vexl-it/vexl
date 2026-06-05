@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "None",
   "editOffer.unpublishedChangesTitle": "You have unpublished changes",
   "editOffer.unpublishedChangesDescription": "If you leave now, all your changes will be discarded. They will not be saved or published.",
+  "editOffer.unsavedStepChangesTitle": "Save changes before leaving?",
+  "editOffer.unsavedStepChangesDescription": "If you leave this edit step now, your changes will be discarded.",
   "editOffer.discard": "Discard",
   "editOffer.publish": "Publish",
   "editOffer.detail.amount": "Amount",

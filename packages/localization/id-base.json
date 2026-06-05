@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "Tidak ada",
   "editOffer.unpublishedChangesTitle": "Kamu punya perubahan yang belum dipublikasikan",
   "editOffer.unpublishedChangesDescription": "Kalau kamu keluar sekarang, semua perubahanmu akan dibuang. Perubahan itu tidak akan disimpan atau dipublikasikan.",
+  "editOffer.unsavedStepChangesTitle": "Simpan perubahan sebelum keluar?",
+  "editOffer.unsavedStepChangesDescription": "Jika kamu keluar dari langkah edit ini sekarang, perubahanmu akan dibuang.",
   "editOffer.discard": "Buang",
   "editOffer.publish": "Publikasikan",
   "editOffer.detail.amount": "Jumlah",

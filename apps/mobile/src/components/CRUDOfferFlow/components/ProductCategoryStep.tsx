@@ -38,6 +38,7 @@ interface ProductCategoryStepProps {
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
   readonly overline?: string
+  readonly showInitialIcon?: boolean
 }
 
 function ProductCategoryStep({
@@ -47,6 +48,7 @@ function ProductCategoryStep({
   ctaLabel,
   icon,
   overline,
+  showInitialIcon,
 }: ProductCategoryStepProps): React.ReactElement {
   const {t} = useTranslation()
   const {productCategoriesAtom, selectProductCategoryActionAtom} =
@@ -84,7 +86,11 @@ function ProductCategoryStep({
 
   return (
     <>
-      <EditRow state="initial" headline={t('offerForm.selectTypeOfProduct')} />
+      <EditRow
+        state="initial"
+        headline={t('offerForm.selectTypeOfProduct')}
+        showInitialIcon={showInitialIcon}
+      />
       <Animated.View entering={FadeIn} exiting={FadeOut}>
         <YStack gap="$5" paddingVertical="$5">
           <XStack flexWrap="wrap" gap="$3">

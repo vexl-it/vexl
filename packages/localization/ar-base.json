@@ -735,6 +735,8 @@
   "editOffer.noClubsSelected": "لا شيء",
   "editOffer.unpublishedChangesTitle": "لديك تغييرات غير منشورة",
   "editOffer.unpublishedChangesDescription": "إذا غادرت الآن، سيتم تجاهل كل تغييراتك. لن يتم حفظها أو نشرها.",
+  "editOffer.unsavedStepChangesTitle": "حفظ التغييرات قبل المغادرة؟",
+  "editOffer.unsavedStepChangesDescription": "إذا غادرت خطوة التعديل هذه الآن، فسيتم تجاهل تغييراتك.",
   "editOffer.discard": "تجاهل",
   "editOffer.publish": "نشر",
   "editOffer.detail.amount": "المبلغ",

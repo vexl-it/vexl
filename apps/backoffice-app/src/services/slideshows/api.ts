@@ -1,4 +1,6 @@
+import {Schema} from 'effect'
 import {
+  RequestUploadResponse as RequestUploadResponseSchema,
   type CreateSlideshowRequest,
   type RequestUploadRequest,
   type RequestUploadResponse,
@@ -105,15 +107,21 @@ export const regenerateSlideshowToken = (
     headers: jsonHeaders(adminToken),
   })
 
-export const requestSlideshowUpload = (
+export const requestSlideshowUpload = async (
   adminToken: string,
   payload: RequestUploadRequest
-): Promise<RequestUploadResponse> =>
-  requestJson('/api/admin/slideshows/request-upload', {
-    method: 'POST',
-    headers: jsonHeaders(adminToken),
-    body: JSON.stringify(payload),
-  })
+): Promise<RequestUploadResponse> => {
+  const response = await requestJson<unknown>(
+    '/api/admin/slideshows/request-upload',
+    {
+      method: 'POST',
+      headers: jsonHeaders(adminToken),
+      body: JSON.stringify(payload),
+    }
+  )
+
+  return Schema.decodeUnknownSync(RequestUploadResponseSchema)(response)
+}
 
 export const getPublicSlideshow = (
   publicToken: string

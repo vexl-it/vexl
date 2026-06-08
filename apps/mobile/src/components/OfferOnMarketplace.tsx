@@ -106,11 +106,12 @@ export default function OfferOnMarketplace({
     () =>
       getOfferFeeLabel({
         feeAmount: publicPart.feeAmount,
+        listingType: publicPart.listingType,
         locale,
         t,
         spaceAroundSign: true,
       }),
-    [locale, publicPart.feeAmount, t]
+    [locale, publicPart.feeAmount, publicPart.listingType, t]
   )
 
   const details = useMemo(() => {

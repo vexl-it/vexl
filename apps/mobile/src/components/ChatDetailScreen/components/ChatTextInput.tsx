@@ -15,8 +15,8 @@ import {
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
 import truncate from 'just-truncate'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {TextInput as RNTextInput} from 'react-native'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {Platform, TextInput as RNTextInput} from 'react-native'
 import Animated, {
   SlideInDown,
   SlideOutDown,
@@ -33,6 +33,8 @@ import {chatMolecule} from '../atoms'
 import {usePeriodicTypingIndication} from './usePeriodicTypingIndication'
 
 const responseImagePreviewLimits = {width: 200, height: 100}
+const iosAutocorrectCommitDelayMs = 50
+
 function ChatTextInput(): React.ReactElement | null {
   const theme = useTheme()
   const [value, setValue] = useState('')
@@ -45,6 +47,10 @@ function ChatTextInput(): React.ReactElement | null {
   const {t} = useTranslation()
   const textInputRef = useRef<RNTextInput>(null)
   const latestValueRef = useRef('')
+  const pendingIosSendRef = useRef(false)
+  const pendingIosSendTimeoutRef = useRef<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined)
   const checkNotificationsAndAskIfPossible = useSetAtom(
     checkNotificationPermissionsAndAskIfPossibleTEActionAtom
   )
@@ -63,61 +69,106 @@ function ChatTextInput(): React.ReactElement | null {
     }
   }, [value])
 
-  const handleChangeText = useCallback((text: string) => {
-    latestValueRef.current = text
-    setValue(text)
-  }, [])
-
   const clearTextInput = useCallback(() => {
+    textInputRef.current?.clear()
     latestValueRef.current = ''
     setValue('')
   }, [])
 
-  const sendText = useCallback(() => {
-    const latestValue = latestValueRef.current
-    if (!latestValue.trim()) return
-
-    const message: ChatMessage = {
-      text: latestValue,
-      myVersion: version,
-      time: unixMillisecondsNow(),
-      uuid: generateChatMessageId(),
-      repliedTo: replyToMessage
-        ? {
-            text: truncate(replyToMessage.message.text, 100, '...'),
-            messageAuthor: replyToMessage.state === 'received' ? 'them' : 'me',
-            image: replyToMessage.message.image,
-          }
-        : undefined,
-      messageType: 'MESSAGE',
-      senderPublicKey: session.privateKey.publicKeyPemBase64,
+  const clearPendingIosSendTimeout = useCallback(() => {
+    if (pendingIosSendTimeoutRef.current) {
+      clearTimeout(pendingIosSendTimeoutRef.current)
+      pendingIosSendTimeoutRef.current = undefined
     }
-    clearTextInput()
-    setReplyToMessage(undefined)
+  }, [])
 
-    void sendMessage(message)
-    void checkNotificationsAndAskIfPossible()()
-  }, [
-    clearTextInput,
-    replyToMessage,
-    session.privateKey.publicKeyPemBase64,
-    setReplyToMessage,
-    sendMessage,
-    checkNotificationsAndAskIfPossible,
-  ])
+  const sendTextImmediately = useCallback(
+    (text: string): boolean => {
+      if (!text.trim()) return false
 
-  const inputStyles = useMemo(
-    () => ({
-      minHeight: 21,
-      maxHeight: 110,
-      paddingVertical: 0,
-      paddingHorizontal: 0,
-      color: theme.foregroundPrimary.get(),
-      fontFamily: 'TTSatoshi500',
-      fontSize: 16,
-    }),
-    [theme]
+      const message: ChatMessage = {
+        text,
+        myVersion: version,
+        time: unixMillisecondsNow(),
+        uuid: generateChatMessageId(),
+        repliedTo: replyToMessage
+          ? {
+              text: truncate(replyToMessage.message.text, 100, '...'),
+              messageAuthor:
+                replyToMessage.state === 'received' ? 'them' : 'me',
+              image: replyToMessage.message.image,
+            }
+          : undefined,
+        messageType: 'MESSAGE',
+        senderPublicKey: session.privateKey.publicKeyPemBase64,
+      }
+      clearTextInput()
+      setReplyToMessage(undefined)
+
+      void sendMessage(message)
+      void checkNotificationsAndAskIfPossible()()
+
+      return true
+    },
+    [
+      clearTextInput,
+      replyToMessage,
+      session.privateKey.publicKeyPemBase64,
+      setReplyToMessage,
+      sendMessage,
+      checkNotificationsAndAskIfPossible,
+    ]
   )
+
+  const sendLatestText = useCallback(() => {
+    clearPendingIosSendTimeout()
+    pendingIosSendRef.current = false
+    sendTextImmediately(latestValueRef.current)
+  }, [clearPendingIosSendTimeout, sendTextImmediately])
+
+  const scheduleIosSend = useCallback(
+    (delayMs: number) => {
+      clearPendingIosSendTimeout()
+      pendingIosSendTimeoutRef.current = setTimeout(sendLatestText, delayMs)
+    },
+    [clearPendingIosSendTimeout, sendLatestText]
+  )
+
+  const handleChangeText = useCallback(
+    (text: string) => {
+      latestValueRef.current = text
+      setValue(text)
+
+      if (pendingIosSendRef.current) {
+        scheduleIosSend(0)
+      }
+    },
+    [scheduleIosSend]
+  )
+
+  const sendText = useCallback(() => {
+    if (!latestValueRef.current.trim() || pendingIosSendRef.current) return
+
+    if (Platform.OS === 'ios') {
+      pendingIosSendRef.current = true
+      scheduleIosSend(iosAutocorrectCommitDelayMs)
+      return
+    }
+
+    sendTextImmediately(latestValueRef.current)
+  }, [scheduleIosSend, sendTextImmediately])
+
+  useEffect(() => clearPendingIosSendTimeout, [clearPendingIosSendTimeout])
+
+  const inputStyles = {
+    minHeight: 21,
+    maxHeight: 110,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    color: theme.foregroundPrimary.get(),
+    fontFamily: 'TTSatoshi500',
+    fontSize: 16,
+  }
 
   return (
     <YStack>

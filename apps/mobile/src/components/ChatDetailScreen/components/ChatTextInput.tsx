@@ -36,7 +36,6 @@ const responseImagePreviewLimits = {width: 200, height: 100}
 function ChatTextInput(): React.ReactElement | null {
   const theme = useTheme()
   const [value, setValue] = useState('')
-  const [inputResetKey, setInputResetKey] = useState(0)
   const {sendMessageAtom, replyToMessageAtom, otherSideDataAtom} =
     useMolecule(chatMolecule)
   const [replyToMessage, setReplyToMessage] = useAtom(replyToMessageAtom)
@@ -45,7 +44,7 @@ function ChatTextInput(): React.ReactElement | null {
   const session = useSessionAssumeLoggedIn()
   const {t} = useTranslation()
   const textInputRef = useRef<RNTextInput>(null)
-  const ignoreTextChangesWhileResettingRef = useRef(false)
+  const latestValueRef = useRef('')
   const checkNotificationsAndAskIfPossible = useSetAtom(
     checkNotificationPermissionsAndAskIfPossibleTEActionAtom
   )
@@ -57,19 +56,6 @@ function ChatTextInput(): React.ReactElement | null {
     textInputRef.current?.focus()
   }, [replyToMessage])
 
-  useEffect(() => {
-    if (inputResetKey === 0) return
-
-    const timeout = setTimeout(() => {
-      textInputRef.current?.focus()
-      ignoreTextChangesWhileResettingRef.current = false
-    }, 0)
-
-    return () => {
-      clearTimeout(timeout)
-    }
-  }, [inputResetKey])
-
   const animatedStyle = useAnimatedStyle(() => {
     return {
       marginRight: 5,
@@ -78,23 +64,21 @@ function ChatTextInput(): React.ReactElement | null {
   }, [value])
 
   const handleChangeText = useCallback((text: string) => {
-    if (ignoreTextChangesWhileResettingRef.current) return
-
+    latestValueRef.current = text
     setValue(text)
   }, [])
 
   const clearTextInput = useCallback(() => {
-    ignoreTextChangesWhileResettingRef.current = true
-    textInputRef.current?.clear()
+    latestValueRef.current = ''
     setValue('')
-    setInputResetKey((key) => key + 1)
   }, [])
 
   const sendText = useCallback(() => {
-    if (!value.trim()) return
+    const latestValue = latestValueRef.current
+    if (!latestValue.trim()) return
 
     const message: ChatMessage = {
-      text: value,
+      text: latestValue,
       myVersion: version,
       time: unixMillisecondsNow(),
       uuid: generateChatMessageId(),
@@ -114,7 +98,6 @@ function ChatTextInput(): React.ReactElement | null {
     void sendMessage(message)
     void checkNotificationsAndAskIfPossible()()
   }, [
-    value,
     clearTextInput,
     replyToMessage,
     session.privateKey.publicKeyPemBase64,
@@ -206,7 +189,6 @@ function ChatTextInput(): React.ReactElement | null {
           >
             <Stack flex={1} justifyContent="center">
               <RNTextInput
-                key={inputResetKey}
                 ref={textInputRef}
                 multiline
                 value={value}

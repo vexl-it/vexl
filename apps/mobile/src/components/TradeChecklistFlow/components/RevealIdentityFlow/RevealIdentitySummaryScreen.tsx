@@ -5,7 +5,7 @@ import {
   Typography,
 } from '@vexl-next/ui'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, useTheme, XStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
@@ -15,6 +15,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import UserAvatar from '../../../UserAvatar'
 import {
   discardRevealIdentityDraftActionAtom,
+  initializeEmptyRevealIdentityDraftFromProfileActionAtom,
   revealIdentityFlowTypeAtom,
   revealIdentityPhoneNumberAtom,
   revealIdentityPreviewImageAtom,
@@ -44,7 +45,14 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
   const discardRevealIdentityDraft = useSetAtom(
     discardRevealIdentityDraftActionAtom
   )
+  const initializeEmptyRevealIdentityDraftFromProfile = useSetAtom(
+    initializeEmptyRevealIdentityDraftFromProfileActionAtom
+  )
   const saveRevealIdentityDraft = useSetAtom(saveRevealIdentityDraftActionAtom)
+
+  useEffect(() => {
+    initializeEmptyRevealIdentityDraftFromProfile()
+  }, [initializeEmptyRevealIdentityDraftFromProfile])
 
   const closeFlow = useCallback(() => {
     discardRevealIdentityDraft()

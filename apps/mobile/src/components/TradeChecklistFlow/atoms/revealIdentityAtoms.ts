@@ -112,6 +112,25 @@ export const discardRevealIdentityDraftActionAtom = atom(null, (_get, set) => {
   set(revealIdentityPhoneNumberAtom, false)
 })
 
+export const initializeEmptyRevealIdentityDraftFromProfileActionAtom = atom(
+  null,
+  (get, set) => {
+    const realUserName = get(realUserNameAtom)
+    const realUserImage = get(realUserImageAtom)
+
+    if (!get(revealIdentityUsernameAtom).trim() && realUserName) {
+      set(revealIdentityUsernameAtom, realUserName)
+    }
+
+    if (
+      !get(revealIdentityImageUriAtom) &&
+      realUserImage?.type === 'imageUri'
+    ) {
+      set(revealIdentityImageUriAtom, realUserImage.imageUri)
+    }
+  }
+)
+
 export const saveRevealIdentityDraftActionAtom = atom(null, (get, set) => {
   const parsedUserName = Schema.decodeUnknownOption(UserName)(
     get(revealIdentityUsernameAtom).trim()

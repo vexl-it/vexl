@@ -107,6 +107,7 @@ export default function OfferPropertiesCard({
           label: t('offerForm.premiumOrDiscount.premiumOrDiscount'),
           value: getOfferFeeLabel({
             feeAmount,
+            listingType,
             locale,
             t,
             spaceAroundSign: true,

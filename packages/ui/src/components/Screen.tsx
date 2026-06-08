@@ -1,9 +1,13 @@
 import {atom, useSetAtom} from 'jotai'
 import React, {useContext} from 'react'
+import {
+  KeyboardAwareScrollView,
+  KeyboardStickyView,
+} from 'react-native-keyboard-controller'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {styled, type YStackProps} from 'tamagui'
+import {styled, type StackProps, type YStackProps} from 'tamagui'
 
-import {ScrollView, Stack, YStack} from '../primitives'
+import {Stack, YStack} from '../primitives'
 
 const defaultFooterHeightAtom = atom(0)
 
@@ -25,10 +29,6 @@ const ScreenFrame = styled(YStack, {
 
 const ScreenFooterFrame = styled(Stack, {
   name: 'ScreenFooter',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
   paddingHorizontal: '$5',
   paddingTop: '$5',
 })
@@ -49,6 +49,8 @@ export interface ScreenProps {
   readonly safeAreasBackgroundColor?: YStackProps['backgroundColor']
   readonly noHorizontalPadding?: boolean
   readonly footer?: React.ReactNode
+  readonly footerAvoidsKeyboard?: boolean
+  readonly footerFrameProps?: StackProps
   readonly children: React.ReactNode
 }
 
@@ -60,16 +62,18 @@ export function Screen({
   noHorizontalPadding,
   children,
   footer,
+  footerAvoidsKeyboard = true,
+  footerFrameProps,
 }: ScreenProps): React.JSX.Element {
   const insets = useSafeAreaInsets()
   const {footerHeightAtom} = useScreenFooterHeight()
   const setFooterHeight = useSetAtom(footerHeightAtom)
   const [footerHeight, setLocalFooterHeight] = React.useState(0)
-  const bottomInsetOutsideContent = scrollable ? 0 : insets.bottom
-  const footerBottomOffset = bottomInsetOutsideContent === 0 ? insets.bottom : 0
-  const scrollViewBottomPadding = footer
-    ? footerHeight + footerBottomOffset
-    : insets.bottom
+  const footerHeightRef = React.useRef(0)
+  const footerOwnsBottomInset = !!footer
+  const bottomInsetOutsideContent =
+    scrollable || footerOwnsBottomInset ? 0 : insets.bottom
+  const scrollViewBottomPadding = footer ? footerHeight : insets.bottom
 
   const content = overlayNavigationBar ? (
     <YStack flex={1}>{children}</YStack>
@@ -83,6 +87,28 @@ export function Screen({
       {children}
     </YStack>
   )
+
+  const handleFooterLayout = React.useCallback(
+    (e: {nativeEvent: {layout: {height: number}}}) => {
+      const measuredFooterHeight = e.nativeEvent.layout.height
+      if (footerHeightRef.current === measuredFooterHeight) return
+
+      footerHeightRef.current = measuredFooterHeight
+      setLocalFooterHeight(measuredFooterHeight)
+      setFooterHeight(measuredFooterHeight)
+    },
+    [setFooterHeight]
+  )
+
+  const footerContent = footer ? (
+    <ScreenFooterFrame
+      paddingBottom={insets.bottom}
+      {...footerFrameProps}
+      onLayout={handleFooterLayout}
+    >
+      {footer}
+    </ScreenFooterFrame>
+  ) : null
 
   return (
     <FooterHeightAtomContext.Provider value={{footerHeightAtom}}>
@@ -100,29 +126,36 @@ export function Screen({
           navigationBar
         )}
         {scrollable ? (
-          <ScrollView
+          <KeyboardAwareScrollView
             style={{flex: 1}}
             contentContainerStyle={{
               flexGrow: 1,
               paddingBottom: scrollViewBottomPadding,
             }}
+            bottomOffset={footer ? footerHeight : 0}
+            keyboardShouldPersistTaps="handled"
           >
             {content}
-          </ScrollView>
+          </KeyboardAwareScrollView>
         ) : (
           content
         )}
-        {footer ? (
-          <ScreenFooterFrame
-            bottom={footerBottomOffset}
-            onLayout={(e) => {
-              const measuredFooterHeight = e.nativeEvent.layout.height
-              setLocalFooterHeight(measuredFooterHeight)
-              setFooterHeight(measuredFooterHeight)
+        {footerContent && footerAvoidsKeyboard ? (
+          <KeyboardStickyView
+            offset={{closed: 0, opened: insets.bottom}}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
             }}
           >
-            {footer}
-          </ScreenFooterFrame>
+            {footerContent}
+          </KeyboardStickyView>
+        ) : footerContent ? (
+          <Stack position="absolute" bottom={0} left={0} right={0}>
+            {footerContent}
+          </Stack>
         ) : null}
       </ScreenFrame>
       <Stack

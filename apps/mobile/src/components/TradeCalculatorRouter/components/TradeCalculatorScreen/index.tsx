@@ -1,5 +1,5 @@
 import {Button, ChevronLeft, NavigationBar, Screen} from '@vexl-next/ui'
-import {ScrollView, Stack} from '@vexl-next/ui/src/primitives'
+import {Stack} from '@vexl-next/ui/src/primitives'
 import React from 'react'
 import {type TradeCalculatorStackScreenProps} from '../../../../navigationTypes'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -14,6 +14,7 @@ function TradeCalculatorScreen({navigation}: Props): React.ReactElement {
 
   return (
     <Screen
+      scrollable
       navigationBar={
         <NavigationBar
           style="back"
@@ -30,15 +31,13 @@ function TradeCalculatorScreen({navigation}: Props): React.ReactElement {
         </Button>
       }
     >
-      <ScrollView f={1} showsVerticalScrollIndicator={false}>
-        <Stack pt="$3">
-          <TradeCalculator
-            onPremiumOrDiscountPress={() => {
-              navigation.navigate('PremiumOrDiscount')
-            }}
-          />
-        </Stack>
-      </ScrollView>
+      <Stack pt="$3">
+        <TradeCalculator
+          onPremiumOrDiscountPress={() => {
+            navigation.navigate('PremiumOrDiscount')
+          }}
+        />
+      </Stack>
     </Screen>
   )
 }

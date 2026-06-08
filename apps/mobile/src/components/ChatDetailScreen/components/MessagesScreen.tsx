@@ -52,6 +52,12 @@ function MessagesScreen({
         safeAreasBackgroundColor="$backgroundSecondary"
         navigationBar={null}
         noHorizontalPadding
+        footer={canSendMessages ? <ChatTextInput /> : <ChatActionButtons />}
+        footerFrameProps={{
+          backgroundColor: '$backgroundSecondary',
+          paddingHorizontal: 0,
+          paddingTop: 0,
+        }}
       >
         <Stack flex={1}>
           <MessagesScreenChatHeader />
@@ -59,13 +65,6 @@ function MessagesScreen({
           <Stack f={1}>
             <MessagesList targetMessageId={targetMessageId} />
           </Stack>
-          {canSendMessages ? (
-            <Stack>
-              <ChatTextInput />
-            </Stack>
-          ) : (
-            <ChatActionButtons />
-          )}
         </Stack>
       </Screen>
     </>

@@ -6,6 +6,7 @@ import {
   ChevronDown,
   DismissKeyboardOnPressOutside,
   Input,
+  KeyboardStickyView,
   Stack,
   Switch,
   Typography,
@@ -18,7 +19,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo, useRef, useState} from 'react'
-import {Platform} from 'react-native'
+import {Platform, type LayoutChangeEvent} from 'react-native'
 import {getCountryByCca2} from 'react-native-country-select'
 import {type RootStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -91,6 +92,8 @@ export default function AddNewContactForm({
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber)
   const [contactName, setContactName] = useState(contactToEdit?.info.name ?? '')
   const [submitting, setSubmitting] = useState(false)
+  const footerHeightRef = useRef(0)
+  const [footerHeight, setFooterHeight] = useState(0)
   const phoneNumberInputRef = useRef<React.ComponentRef<typeof Input>>(null)
   const saveToPhoneAtom = useMemo(() => atom(true), [])
   const [saveToPhone] = useAtom(saveToPhoneAtom)
@@ -140,10 +143,23 @@ export default function AddNewContactForm({
     }
   }, [])
 
+  const handleFooterLayout = React.useCallback((event: LayoutChangeEvent) => {
+    const measuredFooterHeight = event.nativeEvent.layout.height
+    if (footerHeightRef.current === measuredFooterHeight) return
+
+    footerHeightRef.current = measuredFooterHeight
+    setFooterHeight(measuredFooterHeight)
+  }, [])
+
   return (
     <DismissKeyboardOnPressOutside>
       <YStack flex={1} justifyContent="space-between" pos="relative">
-        <YStack gap="$5" paddingHorizontal="$5" paddingTop="$5">
+        <YStack
+          gap="$5"
+          paddingBottom={footerHeight}
+          paddingHorizontal="$5"
+          paddingTop="$5"
+        >
           <YStack gap="$2">
             <XStack gap="$3" width="100%">
               <XStack
@@ -260,45 +276,49 @@ export default function AddNewContactForm({
             </Stack>
           </XStack>
         </YStack>
-        <YStack paddingHorizontal="$5">
-          <Button
-            disabled={isSubmitDisabled}
-            onPress={() => {
-              if (isSubmitDisabled) return
+        <KeyboardStickyView
+          style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
+        >
+          <YStack paddingHorizontal="$5" onLayout={handleFooterLayout}>
+            <Button
+              disabled={isSubmitDisabled}
+              onPress={() => {
+                if (isSubmitDisabled) return
 
-              setSubmitting(true)
-              void dismissKeyboardAndResolveOnLayoutUpdate()
-                .then(() => {
-                  return Effect.runPromise(
-                    contactToEdit === undefined
-                      ? addNewContact({
-                          contactName,
-                          phoneNumber: rawPhoneNumber,
-                          saveToPhone,
-                        })
-                      : updateContact({
-                          contact: contactToEdit,
-                          contactName,
-                          phoneNumber: rawPhoneNumber,
-                          saveToPhone,
-                        })
-                  )
-                })
-                .then((success) => {
-                  if (success) onClose()
-                })
-                .finally(() => {
-                  setSubmitting(false)
-                })
-            }}
-          >
-            {t(
-              isEditingContact
-                ? 'addContactDialog.saveChanges'
-                : 'addContactDialog.addContact'
-            )}
-          </Button>
-        </YStack>
+                setSubmitting(true)
+                void dismissKeyboardAndResolveOnLayoutUpdate()
+                  .then(() => {
+                    return Effect.runPromise(
+                      contactToEdit === undefined
+                        ? addNewContact({
+                            contactName,
+                            phoneNumber: rawPhoneNumber,
+                            saveToPhone,
+                          })
+                        : updateContact({
+                            contact: contactToEdit,
+                            contactName,
+                            phoneNumber: rawPhoneNumber,
+                            saveToPhone,
+                          })
+                    )
+                  })
+                  .then((success) => {
+                    if (success) onClose()
+                  })
+                  .finally(() => {
+                    setSubmitting(false)
+                  })
+              }}
+            >
+              {t(
+                isEditingContact
+                  ? 'addContactDialog.saveChanges'
+                  : 'addContactDialog.addContact'
+              )}
+            </Button>
+          </YStack>
+        </KeyboardStickyView>
         <PreparingContactsOverlay
           labelKey="contacts.processingContacts"
           visible={submitting}

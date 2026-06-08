@@ -22,6 +22,8 @@ import {accessCodeMolecule, CODE_LENGTH} from '../../atoms'
 
 type Props = JoinClubFlowStackScreenProps<'FillClubAccessCodeScreen'>
 
+const codeBoxHeight = 48
+
 function CodeBox({
   disabled,
   invalid,
@@ -38,7 +40,7 @@ function CodeBox({
       borderColor={invalid ? '$redForeground' : '$backgroundHighlight'}
       borderRadius="$3"
       borderWidth={1}
-      height={48}
+      height={codeBoxHeight}
       justifyContent="center"
       width={50}
     >
@@ -155,6 +157,7 @@ function FillClubAccessCodeScreen({
 
   return (
     <Screen
+      scrollable
       navigationBar={
         <NavigationBar
           style="back"
@@ -205,7 +208,12 @@ function FillClubAccessCodeScreen({
                 handleAccessCodeElementChange(code)
               }}
               ref={inputRef}
-              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+              style={{
+                height: codeBoxHeight,
+                opacity: 0,
+                position: 'absolute',
+                width: '100%',
+              }}
               value={accessCode.join('')}
             />
             <XStack gap="$2" justifyContent="center">

@@ -10,8 +10,7 @@ import {Effect} from 'effect'
 import {deepEqual} from 'fast-equals'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useLayoutEffect} from 'react'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {getTokens, ScrollView, YStack} from 'tamagui'
+import {YStack} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {clubsWithMembersAtomsAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
@@ -61,7 +60,6 @@ function EditOfferFieldScreen({
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
-  const insets = useSafeAreaInsets()
 
   const {
     listingTypeAtom,
@@ -249,6 +247,7 @@ function EditOfferFieldScreen({
 
   return (
     <Screen
+      scrollable
       navigationBar={
         <NavigationBar
           style="back"
@@ -257,121 +256,113 @@ function EditOfferFieldScreen({
         />
       }
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + getTokens().space.$5.val,
-        }}
-      >
-        <YStack>
-          {field === 'amount' ? (
-            listingType === 'BITCOIN' ? (
-              <AmountStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-                showInitialIcon={showInitialIcon}
+      <YStack>
+        {field === 'amount' ? (
+          listingType === 'BITCOIN' ? (
+            <AmountStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+              showInitialIcon={showInitialIcon}
+            />
+          ) : (
+            <PriceUpToStep
+              active
+              onEdit={noop}
+              onComplete={handleComplete}
+              ctaLabel={saveLabel}
+              showInitialIcon={showInitialIcon}
+            />
+          )
+        ) : null}
+        {field === 'location' ? (
+          <LocationStep
+            active
+            onEdit={noop}
+            onComplete={handleLocationComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
+        ) : null}
+        {field === 'network' ? (
+          <NetworkStep
+            active
+            onEdit={noop}
+            onComplete={handleComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
+        ) : null}
+        {field === 'describe' ? (
+          <DescribeStep
+            active
+            onEdit={noop}
+            onComplete={handleComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
+        ) : null}
+        {field === 'language' ? (
+          <LanguageStep
+            active
+            onEdit={noop}
+            onComplete={handleComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
+        ) : null}
+        {field === 'productCategory' ? (
+          <ProductCategoryStep
+            active
+            onEdit={noop}
+            onComplete={handleComplete}
+            ctaLabel={saveLabel}
+            showInitialIcon={showInitialIcon}
+          />
+        ) : null}
+        {field === 'friendLevel' ? (
+          <YStack>
+            <EditRow
+              state="initial"
+              headline={t('offerForm.whoCanSeeYourOffer')}
+              showInitialIcon={showInitialIcon}
+            />
+            <YStack gap="$5" paddingVertical="$5">
+              <FriendLevel
+                hideSubtitle
+                intendedConnectionLevelAtom={intendedConnectionLevelAtom}
               />
-            ) : (
-              <PriceUpToStep
-                active
-                onEdit={noop}
-                onComplete={handleComplete}
-                ctaLabel={saveLabel}
-                showInitialIcon={showInitialIcon}
-              />
-            )
-          ) : null}
-          {field === 'location' ? (
-            <LocationStep
-              active
-              onEdit={noop}
-              onComplete={handleLocationComplete}
-              ctaLabel={saveLabel}
-              showInitialIcon={showInitialIcon}
-            />
-          ) : null}
-          {field === 'network' ? (
-            <NetworkStep
-              active
-              onEdit={noop}
-              onComplete={handleComplete}
-              ctaLabel={saveLabel}
-              showInitialIcon={showInitialIcon}
-            />
-          ) : null}
-          {field === 'describe' ? (
-            <DescribeStep
-              active
-              onEdit={noop}
-              onComplete={handleComplete}
-              ctaLabel={saveLabel}
-              showInitialIcon={showInitialIcon}
-            />
-          ) : null}
-          {field === 'language' ? (
-            <LanguageStep
-              active
-              onEdit={noop}
-              onComplete={handleComplete}
-              ctaLabel={saveLabel}
-              showInitialIcon={showInitialIcon}
-            />
-          ) : null}
-          {field === 'productCategory' ? (
-            <ProductCategoryStep
-              active
-              onEdit={noop}
-              onComplete={handleComplete}
-              ctaLabel={saveLabel}
-              showInitialIcon={showInitialIcon}
-            />
-          ) : null}
-          {field === 'friendLevel' ? (
-            <YStack>
-              <EditRow
-                state="initial"
-                headline={t('offerForm.whoCanSeeYourOffer')}
-                showInitialIcon={showInitialIcon}
-              />
-              <YStack gap="$5" paddingVertical="$5">
-                <FriendLevel
-                  hideSubtitle
-                  intendedConnectionLevelAtom={intendedConnectionLevelAtom}
-                />
-                <Button variant="primary" size="large" onPress={handleComplete}>
-                  {t('common.save')}
-                </Button>
-              </YStack>
+              <Button variant="primary" size="large" onPress={handleComplete}>
+                {t('common.save')}
+              </Button>
             </YStack>
-          ) : null}
-          {field === 'clubs' ? (
-            <YStack>
-              <EditRow
-                state="initial"
-                headline={t('offerForm.publishToVexlClub')}
-                showInitialIcon={showInitialIcon}
-              />
-              <YStack gap="$5" paddingVertical="$5">
-                <YStack gap="$3">
-                  {clubsWithMembersAtoms.map((clubWithMembersAtom) => (
-                    <ClubItem
-                      key={atomKeyExtractor(clubWithMembersAtom)}
-                      clubWithMembersAtom={clubWithMembersAtom}
-                      createSelectClubAtom={createSelectClubAtom}
-                    />
-                  ))}
-                </YStack>
-                <Button variant="primary" size="large" onPress={handleComplete}>
-                  {t('common.save')}
-                </Button>
+          </YStack>
+        ) : null}
+        {field === 'clubs' ? (
+          <YStack>
+            <EditRow
+              state="initial"
+              headline={t('offerForm.publishToVexlClub')}
+              showInitialIcon={showInitialIcon}
+            />
+            <YStack gap="$5" paddingVertical="$5">
+              <YStack gap="$3">
+                {clubsWithMembersAtoms.map((clubWithMembersAtom) => (
+                  <ClubItem
+                    key={atomKeyExtractor(clubWithMembersAtom)}
+                    clubWithMembersAtom={clubWithMembersAtom}
+                    createSelectClubAtom={createSelectClubAtom}
+                  />
+                ))}
               </YStack>
+              <Button variant="primary" size="large" onPress={handleComplete}>
+                {t('common.save')}
+              </Button>
             </YStack>
-          ) : null}
-        </YStack>
-      </ScrollView>
+          </YStack>
+        ) : null}
+      </YStack>
     </Screen>
   )
 }

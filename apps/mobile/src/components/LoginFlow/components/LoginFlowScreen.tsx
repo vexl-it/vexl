@@ -1,5 +1,7 @@
 import {
   Button,
+  KeyboardAwareScrollView,
+  KeyboardStickyView,
   Stack,
   Typography,
   XStack,
@@ -7,7 +9,7 @@ import {
   useTheme,
 } from '@vexl-next/ui'
 import React, {type ReactNode} from 'react'
-import {ScrollView} from 'react-native'
+import {type LayoutChangeEvent} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 
 interface Props {
@@ -33,11 +35,45 @@ export default function LoginFlowScreen({
 }: Props): React.ReactElement {
   const insets = useSafeAreaInsets()
   const theme = useTheme()
+  const footerHeightRef = React.useRef(0)
+  const [footerHeight, setFooterHeight] = React.useState(0)
+  const handleFooterLayout = React.useCallback((e: LayoutChangeEvent) => {
+    const measuredFooterHeight = e.nativeEvent.layout.height
+    if (footerHeightRef.current === measuredFooterHeight) return
+
+    footerHeightRef.current = measuredFooterHeight
+    setFooterHeight(measuredFooterHeight)
+  }, [])
+
+  const bottomContent =
+    footer || action ? (
+      <KeyboardStickyView
+        style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
+      >
+        <YStack
+          gap="$4"
+          paddingBottom={Math.max(insets.bottom, 16)}
+          paddingHorizontal="$5"
+          onLayout={handleFooterLayout}
+        >
+          {footer ?? null}
+          {action ? (
+            <Button
+              disabled={action.disabled}
+              onPress={action.onPress}
+              width="100%"
+            >
+              {action.label}
+            </Button>
+          ) : null}
+        </YStack>
+      </KeyboardStickyView>
+    ) : null
+
   const content = (
     <YStack
       flex={1}
-      justifyContent="space-between"
-      paddingBottom={Math.max(insets.bottom, 16)}
+      paddingBottom={footerHeight}
       paddingTop={Math.max(insets.top, 20)}
     >
       <Stack>{header ?? null}</Stack>
@@ -47,36 +83,29 @@ export default function LoginFlowScreen({
       >
         {children}
       </YStack>
-      <YStack gap="$4" paddingHorizontal="$5">
-        {footer ?? null}
-        {action ? (
-          <Button
-            disabled={action.disabled}
-            onPress={action.onPress}
-            width="100%"
-          >
-            {action.label}
-          </Button>
-        ) : null}
-      </YStack>
     </YStack>
   )
 
   if (scroll) {
     return (
-      <ScrollView
-        contentContainerStyle={{flexGrow: 1}}
-        keyboardShouldPersistTaps="handled"
-        style={{backgroundColor: theme.backgroundPrimary.get(), flex: 1}}
-      >
-        {content}
-      </ScrollView>
+      <YStack flex={1} backgroundColor="$backgroundPrimary">
+        <KeyboardAwareScrollView
+          contentContainerStyle={{flexGrow: 1}}
+          keyboardShouldPersistTaps="handled"
+          style={{backgroundColor: theme.backgroundPrimary.get(), flex: 1}}
+          bottomOffset={footerHeight}
+        >
+          {content}
+        </KeyboardAwareScrollView>
+        {bottomContent}
+      </YStack>
     )
   }
 
   return (
     <YStack flex={1} backgroundColor="$backgroundPrimary">
       {content}
+      {bottomContent}
     </YStack>
   )
 }

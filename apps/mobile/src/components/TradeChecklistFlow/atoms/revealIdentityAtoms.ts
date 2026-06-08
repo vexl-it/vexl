@@ -23,6 +23,7 @@ import updatesToBeSentAtom from './updatesToBeSentAtom'
 export const revealIdentityUsernameAtom = atom<string>('')
 export const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
 export const revealIdentityPhoneNumberAtom = atom<boolean>(false)
+const revealIdentityDraftInitializedAtom = atom<boolean>(false)
 
 function isReceivedContactRevealRequestMessage(
   message: ChatMessageWithState
@@ -104,17 +105,23 @@ export const prepareRevealIdentityDraftActionAtom = atom(null, (get, set) => {
       (realUserImage?.type === 'imageUri' ? realUserImage.imageUri : undefined)
   )
   set(revealIdentityPhoneNumberAtom, Boolean(updates.contact))
+  set(revealIdentityDraftInitializedAtom, true)
 })
 
 export const discardRevealIdentityDraftActionAtom = atom(null, (_get, set) => {
   set(revealIdentityUsernameAtom, '')
   set(revealIdentityImageUriAtom, undefined)
   set(revealIdentityPhoneNumberAtom, false)
+  set(revealIdentityDraftInitializedAtom, false)
 })
 
 export const initializeEmptyRevealIdentityDraftFromProfileActionAtom = atom(
   null,
   (get, set) => {
+    if (get(revealIdentityDraftInitializedAtom)) return
+
+    set(revealIdentityDraftInitializedAtom, true)
+
     const realUserName = get(realUserNameAtom)
     const realUserImage = get(realUserImageAtom)
 

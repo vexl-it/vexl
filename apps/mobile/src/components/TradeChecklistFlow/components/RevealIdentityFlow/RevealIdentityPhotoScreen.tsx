@@ -14,7 +14,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import Svg, {Rect} from 'react-native-svg'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
@@ -23,6 +23,7 @@ import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../../utils/resolveLocalUri'
 import {
   discardRevealIdentityDraftActionAtom,
+  initializeEmptyRevealIdentityDraftFromProfileActionAtom,
   revealIdentityImageUriAtom,
 } from '../../atoms/revealIdentityAtoms'
 import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
@@ -46,7 +47,14 @@ function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
   const discardRevealIdentityDraft = useSetAtom(
     discardRevealIdentityDraftActionAtom
   )
+  const initializeEmptyRevealIdentityDraftFromProfile = useSetAtom(
+    initializeEmptyRevealIdentityDraftFromProfileActionAtom
+  )
   const setRevealIdentityImageUri = useSetAtom(revealIdentityImageUriAtom)
+
+  useEffect(() => {
+    initializeEmptyRevealIdentityDraftFromProfile()
+  }, [initializeEmptyRevealIdentityDraftFromProfile])
 
   const closeFlow = useCallback(() => {
     discardRevealIdentityDraft()

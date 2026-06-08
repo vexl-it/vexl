@@ -142,7 +142,6 @@ export function Screen({
         )}
         {footerContent && footerAvoidsKeyboard ? (
           <KeyboardStickyView
-            offset={{closed: 0, opened: insets.bottom}}
             style={{
               position: 'absolute',
               bottom: 0,

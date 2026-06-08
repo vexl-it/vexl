@@ -156,8 +156,8 @@ function MessagesList({
         easing: Easing.out(Easing.cubic),
         toValue: height,
         useNativeDriver: false,
-      }).start(() => {
-        keyboardAnimationActiveRef.current = false
+      }).start(({finished}) => {
+        if (finished) keyboardAnimationActiveRef.current = false
       })
     },
     []

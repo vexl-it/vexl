@@ -14,12 +14,12 @@ import findTargetMessageIndex, {
 import MessageItem, {type MessagesListItem} from './MessageItem'
 
 const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
-const SCROLLED_TO_BOTTOM_THRESHOLD_PX = 2
+const SCROLLED_TO_BOTTOM_THRESHOLD_PX = 48
 const VIEWPORT_HEIGHT_CHANGE_THRESHOLD_PX = 1
 
 const contentStyle = {
   paddingBottom: tokens.size[4].val,
-} as const
+}
 
 const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD,
@@ -52,6 +52,7 @@ function MessagesList({
   const listRef = useRef<FlashListRef<Atom<MessagesListItem>>>(null)
   const currentScrollOffsetRef = useRef(0)
   const viewportHeightRef = useRef(0)
+  const viewportBottomAnchorRef = useRef<number | undefined>(undefined)
   const contentHeightRef = useRef(0)
   const didInitialScrollToBottomRef = useRef(false)
   const isScrolledToBottomRef = useRef(true)
@@ -67,12 +68,16 @@ function MessagesList({
         contentHeightRef.current - viewportHeightRef.current,
         0
       )
+      viewportBottomAnchorRef.current =
+        currentScrollOffsetRef.current + viewportHeightRef.current
       isScrolledToBottomRef.current = true
     })
   }, [])
 
   const updateIsScrolledToBottom = useCallback((event: NativeScrollEvent) => {
     currentScrollOffsetRef.current = event.contentOffset.y
+    viewportBottomAnchorRef.current =
+      event.contentOffset.y + event.layoutMeasurement.height
 
     const distanceFromBottom =
       event.contentSize.height -
@@ -81,6 +86,27 @@ function MessagesList({
 
     isScrolledToBottomRef.current =
       distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
+  }, [])
+
+  const scrollToViewportBottomAnchor = useCallback((anchor: number) => {
+    const maxOffset = Math.max(
+      contentHeightRef.current - viewportHeightRef.current,
+      0
+    )
+    const offset = Math.min(
+      Math.max(anchor - viewportHeightRef.current, 0),
+      maxOffset
+    )
+    const distanceFromBottom = maxOffset - offset
+
+    currentScrollOffsetRef.current = offset
+    viewportBottomAnchorRef.current = offset + viewportHeightRef.current
+    isScrolledToBottomRef.current =
+      distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
+    listRef.current?.scrollToOffset({
+      animated: false,
+      offset,
+    })
   }, [])
 
   const getMessagesListItems = useCallback(() => {
@@ -132,37 +158,30 @@ function MessagesList({
     return true
   }, [getMessagesListItems, targetMessageId])
 
-  const preserveBottomVisibleContentOnViewportShrink = useCallback(
+  const preserveBottomVisibleContentOnViewportChange = useCallback(
     (nextViewportHeight: number) => {
       const previousViewportHeight = viewportHeightRef.current
       const viewportHeightDifference =
         previousViewportHeight - nextViewportHeight
+      const viewportBottomAnchor =
+        currentScrollOffsetRef.current + previousViewportHeight
 
       viewportHeightRef.current = nextViewportHeight
 
       if (targetMessageId) return
       if (previousViewportHeight === 0) return
       if (
-        viewportHeightDifference <= VIEWPORT_HEIGHT_CHANGE_THRESHOLD_PX ||
+        Math.abs(viewportHeightDifference) <=
+          VIEWPORT_HEIGHT_CHANGE_THRESHOLD_PX ||
         contentHeightRef.current <= nextViewportHeight
       ) {
         return
       }
 
-      const nextOffset = Math.min(
-        currentScrollOffsetRef.current + viewportHeightDifference,
-        Math.max(contentHeightRef.current - nextViewportHeight, 0)
-      )
-
-      currentScrollOffsetRef.current = nextOffset
-      runAfterAnimationFrame(() => {
-        listRef.current?.scrollToOffset({
-          animated: false,
-          offset: nextOffset,
-        })
-      })
+      viewportBottomAnchorRef.current = viewportBottomAnchor
+      scrollToViewportBottomAnchor(viewportBottomAnchor)
     },
-    [targetMessageId]
+    [scrollToViewportBottomAnchor, targetMessageId]
   )
 
   const tryInitialScrollToBottom = useCallback(() => {
@@ -181,6 +200,7 @@ function MessagesList({
   useEffect(() => {
     scrolledToTargetMessageIdRef.current = undefined
     didInitialScrollToBottomRef.current = false
+    viewportBottomAnchorRef.current = undefined
   }, [targetMessageId])
 
   useEffect(() => {
@@ -223,11 +243,16 @@ function MessagesList({
         contentHeightRef.current = height
         if (height <= viewportHeightRef.current) {
           isScrolledToBottomRef.current = true
+        } else if (
+          !targetMessageId &&
+          viewportBottomAnchorRef.current !== undefined
+        ) {
+          scrollToViewportBottomAnchor(viewportBottomAnchorRef.current)
         }
         tryInitialScrollToBottom()
       }}
       onLayout={(event) => {
-        preserveBottomVisibleContentOnViewportShrink(
+        preserveBottomVisibleContentOnViewportChange(
           event.nativeEvent.layout.height
         )
         if (contentHeightRef.current <= event.nativeEvent.layout.height) {

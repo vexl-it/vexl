@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import {useAtomValue, useSetAtom} from 'jotai'
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import mobileMediaQuery from '../mobileMediaQuery'
 import {
   connectionStateAtom,
@@ -12,6 +12,7 @@ import Confetti from './Confetti'
 import CountriesList from './CountriesList'
 import LatestConnections from './LatestConnection'
 import NumberOfUsers from './NumberOfUsers'
+import UserCountPage from './UserCountPage'
 import VexlBanner from './VexlBanner'
 
 const Container = styled.div`
@@ -103,9 +104,28 @@ const LoadingMessage = styled.div`
   opacity: 0.84;
 `
 
+function useShowUserCountPage(): boolean {
+  const [hash, setHash] = useState(() => window.location.hash)
+
+  useEffect(() => {
+    const onHashChange = (): void => {
+      setHash(window.location.hash)
+    }
+
+    window.addEventListener('hashchange', onHashChange)
+
+    return () => {
+      window.removeEventListener('hashchange', onHashChange)
+    }
+  }, [])
+
+  return hash === '#user-count'
+}
+
 export default function App(): React.ReactElement {
   const listenForChanges = useSetAtom(listenForChangesActionAtom)
   const connectionState = useAtomValue(connectionStateAtom)
+  const showUserCountPage = useShowUserCountPage()
   const dashboardBootstrappingState = useAtomValue(
     dashboardBootstrappingStateAtom
   )
@@ -119,24 +139,30 @@ export default function App(): React.ReactElement {
 
   return (
     <>
-      <Container>
-        <CountriesContainer>
-          <CountriesList />
-        </CountriesContainer>
-        <MiddleColumn>
-          <ConnectionsContainer>
-            <LatestConnections />
-          </ConnectionsContainer>
-          <CountContainer>
-            <NumberOfUsers />
-          </CountContainer>
-        </MiddleColumn>
-        <BanerContainer>
-          <VexlBanner />
-        </BanerContainer>
-      </Container>
-      <Confetti />
-      <Alert />
+      {showUserCountPage ? (
+        <UserCountPage />
+      ) : (
+        <>
+          <Container>
+            <CountriesContainer>
+              <CountriesList />
+            </CountriesContainer>
+            <MiddleColumn>
+              <ConnectionsContainer>
+                <LatestConnections />
+              </ConnectionsContainer>
+              <CountContainer>
+                <NumberOfUsers />
+              </CountContainer>
+            </MiddleColumn>
+            <BanerContainer>
+              <VexlBanner />
+            </BanerContainer>
+          </Container>
+          <Confetti />
+          <Alert />
+        </>
+      )}
       {(connectionState._tag !== 'Connected' ||
         dashboardBootstrappingState.status === 'loading') && (
         <LoadingOverlay>

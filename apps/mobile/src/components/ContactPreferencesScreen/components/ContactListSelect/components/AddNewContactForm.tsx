@@ -18,14 +18,17 @@ import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {atom, useAtom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useEffect, useMemo, useRef, useState} from 'react'
-import {Keyboard, Platform} from 'react-native'
+import {Platform} from 'react-native'
 import {getCountryByCca2} from 'react-native-country-select'
 import {type RootStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {userPhoneNumberAtom} from '../../../../../state/session/userDataAtoms'
+import {
+  dismissKeyboardAndResolveOnLayoutUpdate,
+  runAfterKeyboardDismiss,
+} from '../../../../../utils/dismissKeyboardPromise'
 import getCountryCode from '../../../../../utils/getCountryCode'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import PreparingContactsOverlay from '../../PreparingContactsOverlay'
 import {contactSelectMolecule} from '../atom'
@@ -89,9 +92,6 @@ export default function AddNewContactForm({
   const [contactName, setContactName] = useState(contactToEdit?.info.name ?? '')
   const [submitting, setSubmitting] = useState(false)
   const phoneNumberInputRef = useRef<React.ComponentRef<typeof Input>>(null)
-  const cancelDeferredSubmitFrameRef = useRef<(() => void) | undefined>(
-    undefined
-  )
   const saveToPhoneAtom = useMemo(() => atom(true), [])
   const [saveToPhone] = useAtom(saveToPhoneAtom)
   const isEditingContact = contactToEdit !== undefined
@@ -140,12 +140,6 @@ export default function AddNewContactForm({
     }
   }, [])
 
-  useEffect(() => {
-    return () => {
-      cancelDeferredSubmitFrameRef.current?.()
-    }
-  }, [])
-
   return (
     <DismissKeyboardOnPressOutside>
       <YStack flex={1} justifyContent="space-between" pos="relative">
@@ -160,8 +154,9 @@ export default function AddNewContactForm({
                 height="$11"
                 justifyContent="center"
                 onPress={() => {
-                  Keyboard.dismiss()
-                  navigation.navigate('AddNewContactCountryPicker')
+                  runAfterKeyboardDismiss(() => {
+                    navigation.navigate('AddNewContactCountryPicker')
+                  })
                 }}
                 paddingHorizontal="$5"
                 pressStyle={{opacity: 0.8}}
@@ -271,12 +266,10 @@ export default function AddNewContactForm({
             onPress={() => {
               if (isSubmitDisabled) return
 
-              Keyboard.dismiss()
               setSubmitting(true)
-              cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(
-                () => {
-                  cancelDeferredSubmitFrameRef.current = undefined
-                  const submitEffect =
+              void dismissKeyboardAndResolveOnLayoutUpdate()
+                .then(() => {
+                  return Effect.runPromise(
                     contactToEdit === undefined
                       ? addNewContact({
                           contactName,
@@ -289,16 +282,14 @@ export default function AddNewContactForm({
                           phoneNumber: rawPhoneNumber,
                           saveToPhone,
                         })
-
-                  void Effect.runPromise(submitEffect)
-                    .then((success) => {
-                      if (success) onClose()
-                    })
-                    .finally(() => {
-                      setSubmitting(false)
-                    })
-                }
-              )
+                  )
+                })
+                .then((success) => {
+                  if (success) onClose()
+                })
+                .finally(() => {
+                  setSubmitting(false)
+                })
             }}
           >
             {t(

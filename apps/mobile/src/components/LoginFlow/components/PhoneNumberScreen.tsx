@@ -17,6 +17,10 @@ import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Keyboard, TextInput} from 'react-native'
 import {getCountryByCca2, type ICountry} from 'react-native-country-select'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {
+  dismissKeyboardAndResolveOnLayoutUpdate,
+  runAfterKeyboardDismiss,
+} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
@@ -131,6 +135,7 @@ export default function PhoneNumberScreen({
   const [phoneNumber, setPhoneNumber] = useState<
     Option.Option<E164PhoneNumber>
   >(Option.none())
+  const navigationInProgressRef = useRef(false)
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
   const phoneNumberMaxLength = getNationalNumberLength(selectedCountry)
@@ -157,7 +162,11 @@ export default function PhoneNumberScreen({
     useCallback(() => {
       let refocusTimeout: ReturnType<typeof setTimeout> | undefined
 
+      navigationInProgressRef.current = false
+
       const focusInput = (): void => {
+        if (navigationInProgressRef.current) return
+
         inputRef.current?.focus()
       }
 
@@ -205,8 +214,10 @@ export default function PhoneNumberScreen({
 
           loadingOverlay.show()
           void Effect.runPromise(initPhoneVerification(phoneNumber.value))
-            .then((result) => {
+            .then(async (result) => {
               if (result._tag === 'Some') {
+                navigationInProgressRef.current = true
+                await dismissKeyboardAndResolveOnLayoutUpdate()
                 navigation.navigate('VerificationCode', {
                   phoneNumber: phoneNumber.value,
                   initPhoneVerificationResponse: result.value,
@@ -252,8 +263,10 @@ export default function PhoneNumberScreen({
           <Typography
             color="$foregroundPrimary"
             onPress={() => {
-              Keyboard.dismiss()
-              navigation.navigate('CountryPicker')
+              navigationInProgressRef.current = true
+              runAfterKeyboardDismiss(() => {
+                navigation.navigate('CountryPicker')
+              })
             }}
             pressStyle={{opacity: 0.8}}
             textDecorationLine="underline"

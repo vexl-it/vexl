@@ -16,6 +16,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Keyboard, TextInput, TouchableOpacity} from 'react-native'
 import {type JoinClubFlowStackScreenProps} from '../../../../navigationTypes'
 import {validateCodeToJoinClubActionAtom} from '../../../../state/clubs/atom/submitCodeToJoinClubActionAtom'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {accessCodeMolecule, CODE_LENGTH} from '../../atoms'
 
@@ -102,6 +103,7 @@ function FillClubAccessCodeScreen({
           )
 
           if (success) {
+            yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
             navigation.navigate('MakingSureScreen', {code: clubCode})
           }
         })

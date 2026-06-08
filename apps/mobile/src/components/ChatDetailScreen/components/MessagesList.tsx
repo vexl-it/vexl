@@ -61,18 +61,37 @@ function MessagesList({
     undefined
   )
 
-  const scrollToBottom = useCallback((animated: boolean) => {
-    runAfterAnimationFrame(() => {
-      listRef.current?.scrollToEnd({animated})
-      currentScrollOffsetRef.current = Math.max(
-        contentHeightRef.current - viewportHeightRef.current,
-        0
-      )
-      viewportBottomAnchorRef.current =
-        currentScrollOffsetRef.current + viewportHeightRef.current
-      isScrolledToBottomRef.current = true
-    })
+  const updateScrollRefsToBottom = useCallback(() => {
+    currentScrollOffsetRef.current = Math.max(
+      contentHeightRef.current - viewportHeightRef.current,
+      0
+    )
+    viewportBottomAnchorRef.current =
+      currentScrollOffsetRef.current + viewportHeightRef.current
+    isScrolledToBottomRef.current = true
   }, [])
+
+  const isContentScrolledToBottom = useCallback((contentHeight: number) => {
+    const maxOffset = Math.max(contentHeight - viewportHeightRef.current, 0)
+    const distanceFromBottom = maxOffset - currentScrollOffsetRef.current
+
+    return distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
+  }, [])
+
+  const scrollToBottom = useCallback(
+    (animated: boolean) => {
+      runAfterAnimationFrame(() => {
+        listRef.current?.scrollToEnd({animated})
+        updateScrollRefsToBottom()
+      })
+    },
+    [updateScrollRefsToBottom]
+  )
+
+  const keepScrolledToBottom = useCallback(() => {
+    updateScrollRefsToBottom()
+    scrollToBottom(false)
+  }, [scrollToBottom, updateScrollRefsToBottom])
 
   const updateIsScrolledToBottom = useCallback((event: NativeScrollEvent) => {
     currentScrollOffsetRef.current = event.contentOffset.y
@@ -240,9 +259,16 @@ function MessagesList({
         startRenderingFromBottom: !targetMessageId,
       }}
       onContentSizeChange={(_, height) => {
+        const wasScrolledToBottom =
+          viewportHeightRef.current !== 0 &&
+          isContentScrolledToBottom(contentHeightRef.current)
+
         contentHeightRef.current = height
+
         if (height <= viewportHeightRef.current) {
-          isScrolledToBottomRef.current = true
+          updateScrollRefsToBottom()
+        } else if (!targetMessageId && wasScrolledToBottom) {
+          keepScrolledToBottom()
         } else if (
           !targetMessageId &&
           viewportBottomAnchorRef.current !== undefined

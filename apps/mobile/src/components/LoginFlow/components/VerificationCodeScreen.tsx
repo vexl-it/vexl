@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
@@ -84,6 +85,8 @@ export default function VerificationCodeScreen({
             })
           )
 
+          yield* _(Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate))
+
           yield* _(
             finishLogin({
               verifyPhoneNumberResponse,
@@ -118,6 +121,8 @@ export default function VerificationCodeScreen({
       let refocusTimeout: ReturnType<typeof setTimeout> | undefined
 
       const focusInput = (): void => {
+        if (submitInProgressRef.current) return
+
         inputRef.current?.focus()
       }
 

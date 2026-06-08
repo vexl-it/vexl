@@ -201,7 +201,6 @@ const startExpoGoMode = (
           cwd: mobileAppPath,
           env,
           stdio: 'inherit',
-          shell: true,
         }),
       catch: (error) =>
         new ExpoStartupError({
@@ -273,7 +272,6 @@ export const runNativeBuild = (
           cwd: mobileAppPath,
           env,
           stdio: 'inherit',
-          shell: true,
         }),
       catch: (error) =>
         new ExpoStartupError({
@@ -319,7 +317,6 @@ export const runPrebuildThenNative = (
                 ...expoPublicEnvVars,
               },
               stdio: 'inherit',
-              shell: true,
             }
           )
           prebuild.on('close', (code) => {
@@ -474,7 +471,6 @@ export const startExpoDevServer = (
           cwd: mobileAppPath,
           env,
           stdio: 'inherit', // Pass through to parent console
-          shell: true,
         }),
       catch: (error) =>
         new ExpoStartupError({

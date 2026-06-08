@@ -12,6 +12,7 @@ const execAsync = promisify(exec)
 export interface Device {
   id: string
   name: string
+  expoDeviceName?: string
   type: 'physical' | 'emulator' | 'simulator'
 }
 
@@ -92,13 +93,16 @@ const parseAdbPhysicalDevices = (output: string): Device[] => {
       // Skip emulators - we get those from emulator -list-avds
       if (adbId.startsWith('emulator-')) continue
 
-      // Extract model name if available
+      // Extract model name if available. Expo uses the raw model value from adb
+      // as the Android device name, including underscores.
       const modelMatch = info.match(/model:(\S+)/)
-      const model = modelMatch?.[1]?.replace(/_/g, ' ') ?? adbId
+      const expoDeviceName = modelMatch?.[1] ?? adbId
+      const displayName = expoDeviceName.replace(/_/g, ' ')
 
       devices.push({
         id: adbId,
-        name: model,
+        name: displayName,
+        expoDeviceName,
         type: 'physical',
       })
     }

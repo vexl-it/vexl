@@ -126,7 +126,11 @@ const resolveDevice = (
   return getAvailableDevices(options.platform).pipe(
     Effect.map((devices) => {
       for (const device of devices) {
-        if (device.id === options.device || device.name === options.device) {
+        if (
+          device.id === options.device ||
+          device.name === options.device ||
+          device.expoDeviceName === options.device
+        ) {
           return device
         }
       }
@@ -199,7 +203,7 @@ const runMobile = (options: MobileOptions): Effect.Effect<void, unknown> =>
     const buildMode = getBuildMode(options)
     const expoDevice =
       options.platform === 'android' && selectedDevice?.type === 'physical'
-        ? selectedDevice.name
+        ? (selectedDevice.expoDeviceName ?? selectedDevice.name)
         : selectedDevice?.id
     const config: MobileCommandConfig = {
       platform: options.platform,

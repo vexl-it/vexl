@@ -1,10 +1,16 @@
 import {FlashList, type FlashListRef} from '@shopify/flash-list'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
-import {tokens} from '@vexl-next/ui'
+import {tokens, useScreenFooterHeight} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
 import React, {useCallback, useEffect, useRef} from 'react'
-import {type NativeScrollEvent, type ViewabilityConfig} from 'react-native'
+import {
+  Animated,
+  Easing,
+  type NativeScrollEvent,
+  type ViewabilityConfig,
+} from 'react-native'
+import {KeyboardEvents} from 'react-native-keyboard-controller'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {runAfterAnimationFrame} from '../../../utils/runAfterAnimationFrames'
 import {chatMolecule} from '../atoms'
@@ -16,10 +22,7 @@ import MessageItem, {type MessagesListItem} from './MessageItem'
 const LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD = 0
 const SCROLLED_TO_BOTTOM_THRESHOLD_PX = 48
 const VIEWPORT_HEIGHT_CHANGE_THRESHOLD_PX = 1
-
-const contentStyle = {
-  paddingBottom: tokens.size[4].val,
-}
+const KEYBOARD_SPACER_ANIMATION_FALLBACK_MS = 250
 
 const viewabilityConfig: ViewabilityConfig = {
   itemVisiblePercentThreshold: LIST_ITEM_VISIBILITY_PERCENTAGE_THRESHOLD,
@@ -45,6 +48,8 @@ function MessagesList({
     handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom,
   } = useMolecule(chatMolecule)
   const dataAtoms = useAtomValue(messagesListAtomAtoms)
+  const {footerHeightAtom} = useScreenFooterHeight()
+  const footerHeight = useAtomValue(footerHeightAtom)
   const store = useStore()
   const handleIsRevealIdentityOrContactRevealMessageVisible = useSetAtom(
     handleIsRevealIdentityOrContactRevealMessageVisibleActionAtom
@@ -56,6 +61,8 @@ function MessagesList({
   const contentHeightRef = useRef(0)
   const didInitialScrollToBottomRef = useRef(false)
   const isScrolledToBottomRef = useRef(true)
+  const keyboardAnimationActiveRef = useRef(false)
+  const keyboardBottomSpacerHeightRef = useRef(new Animated.Value(0))
   const latestMessageIdRef = useRef<ChatMessageId | undefined>(undefined)
   const scrolledToTargetMessageIdRef = useRef<ChatMessageId | undefined>(
     undefined
@@ -81,17 +88,26 @@ function MessagesList({
   const scrollToBottom = useCallback(
     (animated: boolean) => {
       runAfterAnimationFrame(() => {
-        listRef.current?.scrollToEnd({animated})
+        listRef.current?.scrollToOffset({
+          animated,
+          offset: Math.max(
+            contentHeightRef.current - viewportHeightRef.current,
+            0
+          ),
+        })
         updateScrollRefsToBottom()
       })
     },
     [updateScrollRefsToBottom]
   )
 
-  const keepScrolledToBottom = useCallback(() => {
-    updateScrollRefsToBottom()
-    scrollToBottom(false)
-  }, [scrollToBottom, updateScrollRefsToBottom])
+  const keepScrolledToBottom = useCallback(
+    (animated: boolean) => {
+      updateScrollRefsToBottom()
+      scrollToBottom(animated)
+    },
+    [scrollToBottom, updateScrollRefsToBottom]
+  )
 
   const updateIsScrolledToBottom = useCallback((event: NativeScrollEvent) => {
     currentScrollOffsetRef.current = event.contentOffset.y
@@ -107,25 +123,50 @@ function MessagesList({
       distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
   }, [])
 
-  const scrollToViewportBottomAnchor = useCallback((anchor: number) => {
-    const maxOffset = Math.max(
-      contentHeightRef.current - viewportHeightRef.current,
-      0
-    )
-    const offset = Math.min(
-      Math.max(anchor - viewportHeightRef.current, 0),
-      maxOffset
-    )
-    const distanceFromBottom = maxOffset - offset
+  const scrollToViewportBottomAnchor = useCallback(
+    (anchor: number, animated: boolean = false) => {
+      const maxOffset = Math.max(
+        contentHeightRef.current - viewportHeightRef.current,
+        0
+      )
+      const offset = Math.min(
+        Math.max(anchor - viewportHeightRef.current, 0),
+        maxOffset
+      )
+      const distanceFromBottom = maxOffset - offset
 
-    currentScrollOffsetRef.current = offset
-    viewportBottomAnchorRef.current = offset + viewportHeightRef.current
-    isScrolledToBottomRef.current =
-      distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
-    listRef.current?.scrollToOffset({
-      animated: false,
-      offset,
-    })
+      currentScrollOffsetRef.current = offset
+      viewportBottomAnchorRef.current = offset + viewportHeightRef.current
+      isScrolledToBottomRef.current =
+        distanceFromBottom <= SCROLLED_TO_BOTTOM_THRESHOLD_PX
+      listRef.current?.scrollToOffset({
+        animated,
+        offset,
+      })
+    },
+    []
+  )
+
+  const animateKeyboardBottomSpacer = useCallback(
+    ({duration, height}: {duration: number; height: number}) => {
+      keyboardAnimationActiveRef.current = true
+      Animated.timing(keyboardBottomSpacerHeightRef.current, {
+        duration:
+          duration > 0 ? duration : KEYBOARD_SPACER_ANIMATION_FALLBACK_MS,
+        easing: Easing.out(Easing.cubic),
+        toValue: height,
+        useNativeDriver: false,
+      }).start(() => {
+        keyboardAnimationActiveRef.current = false
+      })
+    },
+    []
+  )
+
+  const renderKeyboardBottomSpacer = useCallback(() => {
+    return (
+      <Animated.View style={{height: keyboardBottomSpacerHeightRef.current}} />
+    )
   }, [])
 
   const getMessagesListItems = useCallback(() => {
@@ -198,7 +239,10 @@ function MessagesList({
       }
 
       viewportBottomAnchorRef.current = viewportBottomAnchor
-      scrollToViewportBottomAnchor(viewportBottomAnchor)
+      scrollToViewportBottomAnchor(
+        viewportBottomAnchor,
+        keyboardAnimationActiveRef.current
+      )
     },
     [scrollToViewportBottomAnchor, targetMessageId]
   )
@@ -248,12 +292,74 @@ function MessagesList({
     }
   }, [dataAtoms, getLatestMessageListItem, scrollToBottom, targetMessageId])
 
+  useEffect(() => {
+    const keyboardWillShowSubscription = KeyboardEvents.addListener(
+      'keyboardWillShow',
+      (event) => {
+        keyboardAnimationActiveRef.current = true
+
+        animateKeyboardBottomSpacer({
+          duration: event.duration,
+          height: event.height,
+        })
+
+        scrollToBottom(true)
+      }
+    )
+
+    const keyboardDidShowSubscription = KeyboardEvents.addListener(
+      'keyboardDidShow',
+      (event) => {
+        animateKeyboardBottomSpacer({
+          duration: event.duration,
+          height: event.height,
+        })
+        scrollToBottom(true)
+      }
+    )
+
+    const keyboardWillHideSubscription = KeyboardEvents.addListener(
+      'keyboardWillHide',
+      (event) => {
+        keyboardAnimationActiveRef.current = true
+
+        animateKeyboardBottomSpacer({
+          duration: event.duration,
+          height: 0,
+        })
+
+        scrollToBottom(true)
+      }
+    )
+
+    const keyboardDidHideSubscription = KeyboardEvents.addListener(
+      'keyboardDidHide',
+      (event) => {
+        animateKeyboardBottomSpacer({
+          duration: event.duration,
+          height: 0,
+        })
+        scrollToBottom(true)
+      }
+    )
+
+    return () => {
+      keyboardWillShowSubscription.remove()
+      keyboardDidShowSubscription.remove()
+      keyboardWillHideSubscription.remove()
+      keyboardDidHideSubscription.remove()
+    }
+  }, [animateKeyboardBottomSpacer, scrollToBottom])
+
   return (
     <FlashList
       ref={listRef}
       data={dataAtoms}
-      contentContainerStyle={contentStyle}
+      contentContainerStyle={{
+        paddingBottom: footerHeight + tokens.size[4].val,
+      }}
       keyExtractor={atomKeyExtractor}
+      ListFooterComponent={renderKeyboardBottomSpacer}
       maintainVisibleContentPosition={{
         autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
         startRenderingFromBottom: !targetMessageId,
@@ -268,12 +374,15 @@ function MessagesList({
         if (height <= viewportHeightRef.current) {
           updateScrollRefsToBottom()
         } else if (!targetMessageId && wasScrolledToBottom) {
-          keepScrolledToBottom()
+          keepScrolledToBottom(keyboardAnimationActiveRef.current)
         } else if (
           !targetMessageId &&
           viewportBottomAnchorRef.current !== undefined
         ) {
-          scrollToViewportBottomAnchor(viewportBottomAnchorRef.current)
+          scrollToViewportBottomAnchor(
+            viewportBottomAnchorRef.current,
+            keyboardAnimationActiveRef.current
+          )
         }
         tryInitialScrollToBottom()
       }}

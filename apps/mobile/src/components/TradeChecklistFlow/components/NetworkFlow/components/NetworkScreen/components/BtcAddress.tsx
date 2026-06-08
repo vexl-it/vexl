@@ -9,6 +9,7 @@ import {
   btcNetworkAtom,
   displayParsingErrorAtom,
 } from '../../../atoms'
+import NetworkInfo from './NetworkInfo'
 
 function BtcAddress(): React.ReactElement | null {
   const {t} = useTranslation()
@@ -33,6 +34,7 @@ function BtcAddress(): React.ReactElement | null {
         </InputHint>
       )}
       <AnonymizationNotice als="flex-start" mt="$1" mb="$0" />
+      <NetworkInfo />
     </YStack>
   )
 }

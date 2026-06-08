@@ -5,6 +5,7 @@ import {
   longitudeDeltaToKilometers,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
+  KeyboardStickyView,
   RadiusSlider,
   Stack,
   Typography,
@@ -485,20 +486,22 @@ export default function MapLocationWithRadiusSelect({
         >
           <Stack onLayout={handleTopOverlayLayout}>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
-          <Stack onLayout={handleBottomOverlayLayout}>
-            {hideSlider !== true ? (
-              <Stack mb="$4" mx="$4">
-                <RadiusSlider
-                  value={zoom}
-                  step={0.2}
-                  onValueChange={handleZoomChange}
-                  max={MAX_ZOOM}
-                  min={MIN_ZOOM}
-                />
-              </Stack>
-            ) : null}
-            {bottomChildren}
-          </Stack>
+          <KeyboardStickyView pointerEvents="box-none">
+            <Stack onLayout={handleBottomOverlayLayout}>
+              {hideSlider !== true ? (
+                <Stack mb="$4" mx="$4">
+                  <RadiusSlider
+                    value={zoom}
+                    step={0.2}
+                    onValueChange={handleZoomChange}
+                    max={MAX_ZOOM}
+                    min={MIN_ZOOM}
+                  />
+                </Stack>
+              ) : null}
+              {bottomChildren}
+            </Stack>
+          </KeyboardStickyView>
         </Stack>
       </Stack>
     </Stack>

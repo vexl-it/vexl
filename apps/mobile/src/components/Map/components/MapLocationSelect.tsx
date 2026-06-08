@@ -1,5 +1,12 @@
 import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {Stack, Typography, YStack, useTheme, useVexlTheme} from '@vexl-next/ui'
+import {
+  KeyboardStickyView,
+  Stack,
+  Typography,
+  YStack,
+  useTheme,
+  useVexlTheme,
+} from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
@@ -228,14 +235,16 @@ export default function MapLocationSelect({
             {topChildren}
           </YStack>
           <Stack pointerEvents="none" flex={1}></Stack>
-          <Stack>
-            {bottomChildren}
-            <Stack
-              width="100%"
-              height={safeAreaInsets.bottom}
-              backgroundColor="$backgroundPrimary"
-            />
-          </Stack>
+          <KeyboardStickyView pointerEvents="box-none">
+            <Stack>
+              {bottomChildren}
+              <Stack
+                width="100%"
+                height={safeAreaInsets.bottom}
+                backgroundColor="$backgroundPrimary"
+              />
+            </Stack>
+          </KeyboardStickyView>
         </Stack>
       </Stack>
     </Stack>

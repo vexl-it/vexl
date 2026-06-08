@@ -1,3 +1,12 @@
+export {
+  KeyboardAwareScrollView,
+  KeyboardStickyView,
+} from 'react-native-keyboard-controller'
+export type {
+  KeyboardAwareScrollViewProps,
+  KeyboardAwareScrollViewRef,
+  KeyboardStickyViewProps,
+} from 'react-native-keyboard-controller'
 export {AnimatedNavigationBar, navBarHeightAtom} from './AnimatedNavigationBar'
 export type {
   AnimatedNavigationBarAction,

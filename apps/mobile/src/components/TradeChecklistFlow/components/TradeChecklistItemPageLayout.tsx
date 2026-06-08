@@ -2,11 +2,11 @@ import {
   Button,
   ChevronLeft,
   NavigationBar,
+  Screen,
+  YStack,
   type NavigationBarAction,
 } from '@vexl-next/ui'
 import React from 'react'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
-import {ScrollView, Stack, YStack} from 'tamagui'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 
@@ -36,8 +36,8 @@ export function TradeChecklistItemPageLayout({
   contentPadding?: boolean
   children: React.ReactNode
 }): React.ReactNode {
-  const {top, bottom} = useSafeAreaInsets()
   const goBack = useSafeGoBack()
+
   const content = contentPadding ? (
     <YStack f={1} p="$5">
       {children}
@@ -46,46 +46,36 @@ export function TradeChecklistItemPageLayout({
     children
   )
 
-  return (
-    <YStack f={1} pt={top} pb={bottom}>
-      {!!header && (
-        <NavigationBar
-          style="back"
-          title={header.title}
-          leftAction={
-            !hideLeftChevron
-              ? {
-                  icon: ChevronLeft,
-                  onPress: () => {
-                    void dismissKeyboardAndResolveOnLayoutUpdate().then(
-                      header.onBackPress ?? goBack
-                    )
-                  },
-                }
-              : undefined
-          }
-          rightActions={header.rightActions?.map((action) => ({
-            ...action,
-            onPress: () => {
-              void dismissKeyboardAndResolveOnLayoutUpdate().then(
-                action.onPress
-              )
-            },
-          }))}
-        />
-      )}
-      <Stack f={1}>
-        {scrollable ? (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {content}
-          </ScrollView>
-        ) : (
-          content
-        )}
-      </Stack>
-      {footer}
-      {!!bottomButton && (
-        <YStack p="$5">
+  const navigationBar = header ? (
+    <NavigationBar
+      style="back"
+      title={header.title}
+      leftAction={
+        !hideLeftChevron
+          ? {
+              icon: ChevronLeft,
+              onPress: () => {
+                void dismissKeyboardAndResolveOnLayoutUpdate().then(
+                  header.onBackPress ?? goBack
+                )
+              },
+            }
+          : undefined
+      }
+      rightActions={header.rightActions?.map((action) => ({
+        ...action,
+        onPress: () => {
+          void dismissKeyboardAndResolveOnLayoutUpdate().then(action.onPress)
+        },
+      }))}
+    />
+  ) : null
+
+  const footerContent =
+    footer || bottomButton ? (
+      <YStack gap="$5">
+        {footer}
+        {!!bottomButton && (
           <Button
             variant={bottomButton.variant ?? 'primary'}
             disabled={bottomButton.disabled}
@@ -97,8 +87,18 @@ export function TradeChecklistItemPageLayout({
           >
             {bottomButton.text}
           </Button>
-        </YStack>
-      )}
-    </YStack>
+        )}
+      </YStack>
+    ) : undefined
+
+  return (
+    <Screen
+      navigationBar={navigationBar}
+      scrollable={scrollable}
+      noHorizontalPadding
+      footer={footerContent}
+    >
+      {content}
+    </Screen>
   )
 }

@@ -8,7 +8,7 @@ import {type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
 import {type LoggingFunction} from '../../utils'
-import {type GetExchangeRateInput} from './contracts'
+import {GetExchangeRateError, type GetExchangeRateInput} from './contracts'
 import {BtcExchangeRateApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -59,7 +59,24 @@ export function api({
 
     return {
       getExchangeRate: (exchangeRateInput: GetExchangeRateInput) =>
-        client.getExchangeRate({urlParams: exchangeRateInput.query}),
+        client.getExchangeRate({urlParams: exchangeRateInput.query}).pipe(
+          Effect.catchTags({
+            HttpApiDecodeError: () =>
+              Effect.fail(
+                new GetExchangeRateError({
+                  reason: 'YadioError',
+                  status: 502,
+                })
+              ),
+            ParseError: () =>
+              Effect.fail(
+                new GetExchangeRateError({
+                  reason: 'YadioError',
+                  status: 502,
+                })
+              ),
+          })
+        ),
     }
   })
 }

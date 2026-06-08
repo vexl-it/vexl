@@ -3,7 +3,7 @@ import {
   DefaultTheme,
   NavigationContainer,
 } from '@react-navigation/native'
-import {KeyboardAvoidingView, useVexlTheme} from '@vexl-next/ui'
+import {useVexlTheme} from '@vexl-next/ui'
 import * as NavigationBar from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
 import React from 'react'
@@ -95,9 +95,7 @@ function App(): React.ReactElement {
                     backgroundColor: theme.backgroundPrimary.get(),
                   }}
                 >
-                  <KeyboardAvoidingView>
-                    <RootNavigation />
-                  </KeyboardAvoidingView>
+                  <RootNavigation />
                   {/* <InAppLoadingTasksIndicator /> */}
                 </GestureHandlerRootView>
               </OverlayInfoScreen>

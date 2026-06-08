@@ -101,7 +101,6 @@ function NetworkScreen({
       header={{
         title: t('tradeChecklist.network.network'),
       }}
-      footer={<NetworkInfo />}
       bottomButton={{
         disabled: false,
         onPress: onFooterButtonPress,
@@ -111,6 +110,7 @@ function NetworkScreen({
     >
       <YStack flex={1} gap="$6" pt="$4">
         <LightningOrOnChain />
+        {btcNetwork === 'LIGHTING' ? <NetworkInfo /> : null}
         <BtcAddress />
       </YStack>
     </TradeChecklistItemPageLayout>

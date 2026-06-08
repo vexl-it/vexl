@@ -16,8 +16,6 @@ function NetworkInfo(): React.ReactElement {
       gap="$3"
       backgroundColor="$backgroundSecondary"
       borderRadius="$5"
-      mx="$5"
-      mb="$1"
       p="$5"
     >
       <Stack pt="$0.5">

@@ -1,7 +1,7 @@
 import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {Array, Option, pipe} from 'effect'
 
-const LABEL_LETTER_REGEX = /[A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ȳЀ-ӿἀ-῿]/
+const LABEL_LETTER_REGEX = /\p{L}/u
 
 function getMeaningfulLocationLabelPart(label: string): string | null {
   const trimmed = label.trim()

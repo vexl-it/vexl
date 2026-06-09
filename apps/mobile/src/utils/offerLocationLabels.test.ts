@@ -27,6 +27,15 @@ describe('offerLocationLabels', () => {
     expect(getLocationFullDisplayLabel(location)).toBe('Prague')
   })
 
+  it('treats non-Latin location labels as meaningful', () => {
+    const location: LocationLabelInput = {
+      address: '東京都, 日本',
+      shortAddress: '東京都',
+    }
+
+    expect(getLocationCompactDisplayLabel(location)).toBe('東京都')
+  })
+
   it('keeps compact extra-location suffixes', () => {
     const location: LocationLabelInput = {
       address: 'Prague, Czech Republic',

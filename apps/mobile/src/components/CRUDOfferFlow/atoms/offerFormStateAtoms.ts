@@ -33,8 +33,6 @@ import {
   MINIMAL_DATE,
 } from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {deepEqual} from 'fast-equals'
 import {focusAtom} from 'jotai-optics'
@@ -691,37 +689,6 @@ export const offerFormMolecule = molecule(() => {
   const saveSelectedSpokenLanguagesActionAtom = atom(null, (get, set) => {
     set(spokenLanguagesAtom, get(selectedSpokenLanguagesAtom))
   })
-
-  const setOfferLocationActionAtom = atom(
-    null,
-    (get, set, locationSuggestion: LocationSuggestion) => {
-      const location = get(locationAtom)
-
-      if (
-        !location?.some(
-          (offerLocation) =>
-            offerLocation.placeId === locationSuggestion.userData.placeId
-        )
-      ) {
-        set(locationAtom, [
-          ...(location ?? []),
-          {
-            placeId: locationSuggestion.userData.placeId,
-            address:
-              locationSuggestion.userData.suggestFirstRow +
-              ', ' +
-              locationSuggestion.userData.suggestSecondRow,
-            shortAddress: locationSuggestion.userData.suggestFirstRow,
-            latitude: locationSuggestion.userData.latitude,
-            longitude: locationSuggestion.userData.longitude,
-            radius: calculateViewportRadius(
-              locationSuggestion.userData.viewport
-            ),
-          },
-        ])
-      }
-    }
-  )
 
   const offerFormDraftSnapshotAtom = atom<OfferFormDraftSnapshot | undefined>(
     undefined
@@ -1649,7 +1616,6 @@ export const offerFormMolecule = molecule(() => {
     checkAmountExceedsLimitAndShowDialogActionAtom,
     initializeValuesForOfferFormActionAtom,
     resetOfferFormActionAtom,
-    setOfferLocationActionAtom,
     offerTypeOrDummyValueAtom,
     spokenLanguagesAtom,
     spokenLanguagesAtomsAtom,

@@ -10,6 +10,7 @@ import {formatFullCurrencyAmount} from './localization/currency'
 import {formattingLocaleAtom} from './localization/formattingLocaleAtom'
 import {translationAtom} from './localization/I18nProvider'
 import spokenLanguageToFlagEmoji from './localization/spokenLanguageToFlagEmoji'
+import {getLocationFullDisplayLabels} from './offerLocationLabels'
 import {getUserFacingOfferType} from './offerTypeSemantics'
 
 export {getUserFacingOfferType} from './offerTypeSemantics'
@@ -63,10 +64,7 @@ export const getAmountLabelActionAtom = atom(
 )
 
 export function getLocationLabels(offer: OneOfferInState): readonly string[] {
-  return pipe(
-    offer.offerInfo.publicPart.location,
-    Array.map((loc) => loc.shortAddress || loc.address)
-  )
+  return getLocationFullDisplayLabels(offer.offerInfo.publicPart.location)
 }
 
 export function getPaymentMethodLabel(

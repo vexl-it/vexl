@@ -11,8 +11,6 @@ import {
   type Sort,
   type SpokenLanguage,
 } from '@vexl-next/domain/src/general/offers'
-import {calculateViewportRadius} from '@vexl-next/domain/src/utility/geoCoordinates'
-import {type LocationSuggestion} from '@vexl-next/rest-api/src/services/location/contracts'
 import {toggleValueInSet} from '@vexl-next/ui'
 import {Array, Effect, pipe} from 'effect'
 import {
@@ -428,26 +426,6 @@ export const isThisLanguageSelectedAtomFamily = atomFamily(
         }
       }
     )
-)
-
-export const setOfferLocationActionAtom = atom(
-  null,
-  (get, set, locationSuggestion: LocationSuggestion) => {
-    set(locationAtom, (prev) => [
-      ...(prev ?? []),
-      {
-        placeId: locationSuggestion.userData.placeId,
-        address:
-          locationSuggestion.userData.suggestFirstRow +
-          ', ' +
-          locationSuggestion.userData.suggestSecondRow,
-        shortAddress: locationSuggestion.userData.suggestFirstRow,
-        latitude: locationSuggestion.userData.latitude,
-        longitude: locationSuggestion.userData.longitude,
-        radius: calculateViewportRadius(locationSuggestion.userData.viewport),
-      },
-    ])
-  }
 )
 
 export const setClubsInFilterActionAtom = atom(

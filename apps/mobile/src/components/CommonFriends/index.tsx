@@ -28,7 +28,7 @@ interface Props {
 }
 
 function trimClubName(name: string): string {
-  return name.length > 25 ? name.slice(0, 25) : name
+  return name.length > 25 ? `${name.slice(0, 25)}...` : name
 }
 
 const resolveContactImage = (

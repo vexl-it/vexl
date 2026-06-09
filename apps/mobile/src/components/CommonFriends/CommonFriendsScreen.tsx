@@ -257,6 +257,11 @@ function CommonFriendsScreen({
   const data = useCommonFriendsListData({contactsHashes, verifiedHashes, clubs})
   const hasCommonFriends = contactsHashes.length > 0
 
+  const ListHeaderWithProps = useCallback(
+    () => <ListHeader hasCommonFriends={hasCommonFriends} />,
+    [hasCommonFriends]
+  )
+
   const renderItem = useCallback(({item}: {item: ListItem}) => {
     if (item.type === 'friend') {
       return <MemoizedFriendListItem friend={item.friend} />
@@ -291,7 +296,7 @@ function CommonFriendsScreen({
         data={data}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        ListHeaderComponent={<ListHeader hasCommonFriends={hasCommonFriends} />}
+        ListHeaderComponent={ListHeaderWithProps}
         ItemSeparatorComponent={ItemSeparator}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: bottom}}

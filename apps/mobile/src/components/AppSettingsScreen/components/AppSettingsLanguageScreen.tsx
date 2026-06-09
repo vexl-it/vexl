@@ -13,7 +13,6 @@ import {
 import {Array, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
-import {getTokens} from 'tamagui'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {currentAppLanguageAtom} from '../../../utils/preferences'
@@ -25,6 +24,7 @@ import {
   getAppSettingsLanguageLabel,
   type AppSettingsLanguage,
 } from '../atoms'
+import {useKeyboardAwareFooterListPadding} from '../useKeyboardAwareFooterListPadding'
 
 const defaultLanguage: AppSettingsLanguage = 'en'
 
@@ -37,6 +37,30 @@ function toAppSettingsLanguage(
     availableLanguages,
     Array.findFirst((supportedLanguage) => supportedLanguage === language),
     Option.getOrElse(() => defaultLanguage)
+  )
+}
+
+function LanguageList({
+  languagesToDisplay,
+  renderItem,
+}: {
+  readonly languagesToDisplay: readonly AppSettingsLanguage[]
+  readonly renderItem: (props: {
+    readonly item: AppSettingsLanguage
+  }) => React.ReactElement
+}): React.ReactElement {
+  const listPaddingBottom = useKeyboardAwareFooterListPadding()
+
+  return (
+    <FlashList
+      data={languagesToDisplay}
+      renderItem={renderItem}
+      keyExtractor={(item) => item}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingBottom: listPaddingBottom,
+      }}
+    />
   )
 }
 
@@ -108,14 +132,9 @@ function AppSettingsLanguageScreen({
         marginBottom="$4"
       />
       {Array.isNonEmptyArray(languagesToDisplay) ? (
-        <FlashList
-          data={languagesToDisplay}
+        <LanguageList
+          languagesToDisplay={languagesToDisplay}
           renderItem={renderItem}
-          keyExtractor={(item) => item}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: getTokens().space.$13.val,
-          }}
         />
       ) : (
         <Stack alignItems="center" gap="$4" padding="$6">

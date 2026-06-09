@@ -21,6 +21,7 @@ import {type JoinClubFlowStackScreenProps} from '../../../navigationTypes'
 import {enableHiddenFeatures} from '../../../utils/environment'
 import {handleCameraPermissionsActionAtom} from '../../../utils/handleCameraPermissions'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {getQrScannerLayout} from '../../ScanQrCodeScreen/getQrScannerLayout'
 import {accessCodeMolecule} from '../atoms'
 import {showClubAccessDialogActionAtom} from '../utils/showClubAccessDialogActionAtom'
 
@@ -51,14 +52,20 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
     getClubQrCodeFromDeviceImageLibraryActionAtom
   )
 
-  const scanWindow = useMemo(() => {
-    const size = Math.min(width - 96, height * 0.38)
-    return {
-      size,
-      x: (width - size) / 2,
-      y: height * 0.33,
-    }
-  }, [height, width])
+  const {scanWindow, titleTop, titleHeight} = useMemo(
+    () =>
+      getQrScannerLayout({
+        width,
+        height,
+        safeAreaTop: top,
+        safeAreaBottom: bottom,
+        horizontalPadding: 96,
+        sizeHeightRatio: 0.38,
+        preferredVerticalPosition: 0.33,
+        bottomControlsHeight: tokens.space[13].val * 2 + tokens.space[3].val,
+      }),
+    [bottom, height, top, width]
+  )
 
   const close = useCallback(() => {
     navigation.goBack()
@@ -197,16 +204,26 @@ function ScanClubQrCodeScreen({navigation}: Props): React.ReactElement {
         />
       </Stack>
 
-      <Typography
-        variant="heading3"
-        color="$white100"
+      <YStack
         pos="absolute"
-        top={Math.max(top + 88, scanWindow.y - 128)}
-        als="center"
-        textAlign="center"
+        t={titleTop}
+        l={24}
+        r={24}
+        h={titleHeight}
+        jc="flex-end"
+        pointerEvents="none"
       >
-        {t('clubs.scanCodeAndJoinVexlClub')}
-      </Typography>
+        <Typography
+          variant="heading3"
+          color="$white100"
+          textAlign="center"
+          numberOfLines={3}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+        >
+          {t('clubs.scanCodeAndJoinVexlClub')}
+        </Typography>
+      </YStack>
 
       <YStack pos="absolute" l={0} r={0} px="$5" b={bottom + 12} gap="$3">
         <Button

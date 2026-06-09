@@ -5,6 +5,7 @@ import {
   Typography,
   XmarkCancelClose,
   YStack,
+  tokens,
   useTheme,
 } from '@vexl-next/ui'
 import {Effect} from 'effect'
@@ -19,6 +20,7 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {handleDeepLinkActionAtom} from '../../../utils/deepLinks'
 import {handleCameraPermissionsActionAtom} from '../../../utils/handleCameraPermissions'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import {getQrScannerLayout} from '../../ScanQrCodeScreen/getQrScannerLayout'
 
 type Props = RootStackScreenProps<'ScanClubAdmissionQrCode'>
 
@@ -42,14 +44,19 @@ export function ScanClubAdmissionQrCodeScreen({
   const handleCameraPermissions = useSetAtom(handleCameraPermissionsActionAtom)
   const handleDeepLinkAction = useSetAtom(handleDeepLinkActionAtom)
 
-  const scanWindow = useMemo(() => {
-    const size = Math.min(width - 96, height * 0.38)
-    return {
-      size,
-      x: (width - size) / 2,
-      y: height * 0.33,
-    }
-  }, [height, width])
+  const {scanWindow, titleTop, titleHeight} = useMemo(
+    () =>
+      getQrScannerLayout({
+        width,
+        height,
+        safeAreaTop: top,
+        safeAreaBottom: bottom,
+        horizontalPadding: 96,
+        sizeHeightRatio: 0.38,
+        preferredVerticalPosition: 0.33,
+      }),
+    [bottom, height, top, width]
+  )
 
   const requestPermissions = useCallback(() => {
     void Effect.runPromise(handleCameraPermissions()).then((result) => {
@@ -132,20 +139,25 @@ export function ScanClubAdmissionQrCodeScreen({
         }}
       >
         <Mask id="clubAdmissionQrScannerMask">
-          <Rect width={width} height={height} fill="white" />
+          <Rect
+            width={width}
+            height={height}
+            fill={tokens.color.white100.val}
+          />
           <G transform={`translate(${scanWindow.x} ${scanWindow.y})`}>
             <Rect
               width={scanWindow.size}
               height={scanWindow.size}
               rx={32}
-              fill="black"
+              fill={tokens.color.black100.val}
             />
           </G>
         </Mask>
         <Rect
           width={width}
           height={height}
-          fill="rgba(16, 16, 16, 0.82)"
+          fill={tokens.color.black100.val}
+          fillOpacity={0.82}
           mask="url(#clubAdmissionQrScannerMask)"
         />
         <G transform={`translate(${scanWindow.x} ${scanWindow.y})`}>
@@ -169,17 +181,26 @@ export function ScanClubAdmissionQrCodeScreen({
         />
       </Stack>
 
-      <Typography
-        variant="heading3"
-        color="$white100"
+      <YStack
         pos="absolute"
-        top={Math.max(top + 88, scanWindow.y - 128)}
-        als="center"
-        textAlign="center"
-        px="$5"
+        t={titleTop}
+        l={24}
+        r={24}
+        h={titleHeight}
+        jc="flex-end"
+        pointerEvents="none"
       >
-        {error ?? t('clubs.admition.scan')}
-      </Typography>
+        <Typography
+          variant="heading3"
+          color="$white100"
+          textAlign="center"
+          numberOfLines={3}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+        >
+          {error ?? t('clubs.admition.scan')}
+        </Typography>
+      </YStack>
 
       <YStack pos="absolute" l={0} r={0} px="$5" b={bottom + 12}>
         <Button variant="primary" onPress={close}>

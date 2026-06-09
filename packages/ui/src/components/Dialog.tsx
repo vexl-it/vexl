@@ -237,7 +237,7 @@ export function createDialogAtom(): DialogAtom {
         }
 
         function closeWithResult(confirmed: boolean): void {
-          if (result != null) return
+          if (result !== undefined) return
 
           result = confirmed
           set(stateAtom, null)

@@ -200,7 +200,8 @@ export interface DialogAtomConfig {
 }
 
 interface DialogAtomInternalState extends DialogAtomConfig {
-  readonly onResult: (confirmed: boolean) => void
+  readonly closeWithResult: (confirmed: boolean) => void
+  readonly resolveAfterHidden: () => void
   readonly createdStack?: string
 }
 
@@ -217,7 +218,7 @@ export function createDialogAtom(): DialogAtom {
     (get) => get(stateAtom),
     (get, set, config: DialogAtomConfig | null): Effect.Effect<boolean> => {
       const existing = get(stateAtom)
-      existing?.onResult(false)
+      existing?.closeWithResult(false)
 
       if (config == null) {
         set(stateAtom, null)
@@ -225,12 +226,27 @@ export function createDialogAtom(): DialogAtom {
       }
 
       return Effect.async<boolean>((resolve) => {
+        let result: boolean | undefined
+        let resolved = false
+
+        function resolveAfterHidden(): void {
+          if (resolved) return
+
+          resolved = true
+          resolve(Effect.succeed(result ?? false))
+        }
+
+        function closeWithResult(confirmed: boolean): void {
+          if (result != null) return
+
+          result = confirmed
+          set(stateAtom, null)
+        }
+
         set(stateAtom, {
           ...config,
-          onResult: (confirmed: boolean) => {
-            set(stateAtom, null)
-            resolve(Effect.succeed(confirmed))
-          },
+          closeWithResult,
+          resolveAfterHidden,
         })
       })
     }
@@ -255,6 +271,7 @@ export function DialogFromAtom({
 
   useEffect(() => {
     if (state == null) {
+      pendingStateRef.current?.resolveAfterHidden()
       pendingStateRef.current = null
 
       if (displayedStateRef.current != null) {
@@ -272,12 +289,15 @@ export function DialogFromAtom({
     }
 
     if (displayedStateRef.current !== state) {
+      pendingStateRef.current?.resolveAfterHidden()
       pendingStateRef.current = state
       setVisible(false)
     }
   }, [state])
 
   const handleHidden = useCallback(() => {
+    displayedStateRef.current?.resolveAfterHidden()
+
     const pendingState = pendingStateRef.current
 
     if (pendingState != null) {
@@ -308,7 +328,7 @@ export function DialogFromAtom({
       onClose={
         displayState?.disableClose
           ? undefined
-          : () => displayState?.onResult(false)
+          : () => displayState?.closeWithResult(false)
       }
       onHidden={handleHidden}
       avoidKeyboard={displayState?.avoidKeyboard}
@@ -321,7 +341,7 @@ export function DialogFromAtom({
                 size="large"
                 flex={1}
                 onPress={() => {
-                  displayState?.onResult(false)
+                  displayState?.closeWithResult(false)
                 }}
               >
                 {displayState.negativeButtonText}
@@ -334,7 +354,7 @@ export function DialogFromAtom({
                 flex={1}
                 disabled={positiveButtonDisabled}
                 onPress={() => {
-                  displayState?.onResult(true)
+                  displayState?.closeWithResult(true)
                 }}
               >
                 {displayState.positiveButtonText}

@@ -1,6 +1,8 @@
 import {
   Input,
+  KeyboardAvoidingView,
   NavigationBar,
+  Screen,
   SearchMagnifyGlass,
   tokens,
   Typography,
@@ -10,9 +12,8 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import React, {useCallback, useMemo, useState} from 'react'
-import {FlatList} from 'react-native'
+import {FlatList, Platform} from 'react-native'
 import {getAllCountries, type ICountry} from 'react-native-country-select'
-import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useTranslation} from '../utils/localization/I18nProvider'
 
 interface Props {
@@ -138,7 +139,6 @@ export default function CountryPickerScreenContent({
   const {t} = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const countriesToDisplay = getCountriesToDisplay(searchQuery)
   const rightActions = useMemo(
     () => [{icon: XmarkCancelClose, onPress: onClose}],
@@ -153,60 +153,74 @@ export default function CountryPickerScreenContent({
   )
 
   const keyExtractor = useCallback((item: ICountry) => item.cca2, [])
+  const listBottomPadding =
+    tokens.space[8].val + (Platform.OS === 'android' ? tokens.size[11].val : 0)
+
+  const countryList = (
+    <FlatList
+      automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+      contentContainerStyle={{
+        paddingBottom: listBottomPadding,
+        paddingHorizontal: tokens.space[5].val,
+        paddingTop: tokens.space[5].val,
+      }}
+      data={countriesToDisplay}
+      keyExtractor={keyExtractor}
+      keyboardShouldPersistTaps="handled"
+      renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
+      style={{flex: 1}}
+    />
+  )
 
   return (
-    <YStack
-      backgroundColor="$backgroundPrimary"
-      flex={1}
-      paddingBottom={insets.bottom}
-      paddingTop={insets.top + tokens.space[5].val}
+    <Screen
+      noHorizontalPadding
+      navigationBar={
+        <NavigationBar
+          style="back"
+          title={t('loginFlow.phoneNumber.enterYourCountry')}
+          rightActions={rightActions}
+        />
+      }
+      safeAreasBackgroundColor="$backgroundPrimary"
     >
-      <NavigationBar
-        style="back"
-        title={t('loginFlow.phoneNumber.enterYourCountry')}
-        rightActions={rightActions}
-      />
-      <XStack
-        alignItems="center"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$9"
-        gap="$3"
-        height="$11"
-        marginHorizontal="$5"
-        paddingHorizontal="$5"
-      >
-        <SearchMagnifyGlass
-          color={theme.foregroundPrimary.get()}
-          size={tokens.size[7].val}
-        />
-        <Input
-          unstyled
-          autoCorrect={false}
-          color="$foregroundPrimary"
-          flex={1}
-          fontFamily="$body"
-          fontSize="$5"
-          fontWeight="500"
-          onChangeText={setSearchQuery}
-          padding={0}
-          placeholder={t('common.search')}
-          placeholderTextColor={theme.foregroundSecondary.get()}
-          selectionColor={theme.accentYellowPrimary.get()}
-          value={searchQuery}
-        />
-      </XStack>
-      <FlatList
-        contentContainerStyle={{
-          paddingBottom: tokens.space[8].val,
-          paddingHorizontal: tokens.space[5].val,
-          paddingTop: tokens.space[5].val,
-        }}
-        data={countriesToDisplay}
-        keyExtractor={keyExtractor}
-        keyboardShouldPersistTaps="handled"
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-      />
-    </YStack>
+      <YStack backgroundColor="$backgroundPrimary" flex={1}>
+        <XStack
+          alignItems="center"
+          backgroundColor="$backgroundSecondary"
+          borderRadius="$9"
+          gap="$3"
+          height="$11"
+          marginHorizontal="$5"
+          paddingHorizontal="$5"
+        >
+          <SearchMagnifyGlass
+            color={theme.foregroundPrimary.get()}
+            size={tokens.size[7].val}
+          />
+          <Input
+            unstyled
+            autoCorrect={false}
+            color="$foregroundPrimary"
+            flex={1}
+            fontFamily="$body"
+            fontSize="$5"
+            fontWeight="500"
+            onChangeText={setSearchQuery}
+            padding={0}
+            placeholder={t('common.search')}
+            placeholderTextColor={theme.foregroundSecondary.get()}
+            selectionColor={theme.accentYellowPrimary.get()}
+            value={searchQuery}
+          />
+        </XStack>
+        {Platform.OS === 'android' ? (
+          <KeyboardAvoidingView>{countryList}</KeyboardAvoidingView>
+        ) : (
+          countryList
+        )}
+      </YStack>
+    </Screen>
   )
 }

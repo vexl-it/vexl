@@ -1,10 +1,4 @@
-import {
-  Button,
-  KeyboardStickyView,
-  Stack,
-  XStack,
-  type FilterBarItem,
-} from '@vexl-next/ui'
+import {Button, Stack, XStack, type FilterBarItem} from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
 import {useAtomValue} from 'jotai'
@@ -13,6 +7,7 @@ import {type LayoutChangeEvent} from 'react-native'
 import {normalizedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
+import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import PreparingContactsOverlay from '../PreparingContactsOverlay'
 import {contactSelectMolecule, ContactsSelectScope} from './atom'
@@ -57,6 +52,11 @@ function ContactsListSelect({
     submitBarHeightRef.current = measuredSubmitBarHeight
     setSubmitBarHeight(measuredSubmitBarHeight)
   }, [])
+  const keyboardBottomSpacerHeight = useKeyboardAwareFooterListPadding({
+    footerHeight: 0,
+    footerHeightFallback: 0,
+    keyboardHeightOffset: submitBarHeight,
+  })
 
   const shouldShowEmptyContactsState =
     !Array.isNonEmptyArray(normalizedContacts) && addContactRequestId === 0
@@ -111,13 +111,13 @@ function ContactsListSelect({
           onSelectedFilterChange={setSelectedFilter}
         />
         <Stack f={1} pos="relative">
-          <FilteredContacts />
+          <FilteredContacts
+            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+          />
           <PreparingContactsOverlay visible={isContactsPreparing} zIndex={10} />
         </Stack>
       </Stack>
-      <KeyboardStickyView
-        style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
-      >
+      <Stack position="absolute" left={0} right={0} bottom={0}>
         <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
           <Button
             disabled={isSubmittingContacts}
@@ -126,7 +126,7 @@ function ContactsListSelect({
             {t('common.submit')}
           </Button>
         </Stack>
-      </KeyboardStickyView>
+      </Stack>
       <PreparingContactsOverlay
         labelKey="contacts.processingContacts"
         visible={isSubmittingContacts}

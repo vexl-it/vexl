@@ -17,12 +17,12 @@ import React, {useCallback, useState} from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {defaultCurrencyAtom} from '../../../utils/preferences'
+import {useKeyboardAwareFooterListPadding} from '../../../utils/useKeyboardAwareFooterListPadding'
 import {
   appSettingsCurrenciesToDisplayAtom,
   appSettingsCurrencySearchTextAtom,
   type AppSettingsCurrencyCode,
 } from '../atoms'
-import {useKeyboardAwareFooterListPadding} from '../useKeyboardAwareFooterListPadding'
 
 function CurrencyList({
   currenciesToDisplay,

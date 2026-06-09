@@ -16,6 +16,7 @@ import React, {useCallback, useState} from 'react'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {currentAppLanguageAtom} from '../../../utils/preferences'
+import {useKeyboardAwareFooterListPadding} from '../../../utils/useKeyboardAwareFooterListPadding'
 import {
   appSettingsLanguagesAtom,
   appSettingsLanguageSearchTextAtom,
@@ -24,7 +25,6 @@ import {
   getAppSettingsLanguageLabel,
   type AppSettingsLanguage,
 } from '../atoms'
-import {useKeyboardAwareFooterListPadding} from '../useKeyboardAwareFooterListPadding'
 
 const defaultLanguage: AppSettingsLanguage = 'en'
 

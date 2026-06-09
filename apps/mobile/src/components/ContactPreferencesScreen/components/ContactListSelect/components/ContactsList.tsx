@@ -8,6 +8,7 @@ import ContactItem from './ContactItem'
 
 interface Props {
   readonly contacts: ReadonlyArray<Atom<StoredContactWithComputedValues>>
+  readonly keyboardBottomSpacerHeight: number
 }
 
 function renderItem({
@@ -22,17 +23,21 @@ function ItemSeparatorComponent(): React.ReactElement {
   return <Separator borderColor="$backgroundTertiary" />
 }
 
-function ListFooterComponent(): React.ReactElement {
-  return <Stack h={16} />
-}
+function ContactsList({
+  contacts,
+  keyboardBottomSpacerHeight,
+}: Props): React.ReactElement {
+  const listFooterComponent = React.useCallback(
+    () => <Stack h={keyboardBottomSpacerHeight + 16} />,
+    [keyboardBottomSpacerHeight]
+  )
 
-function ContactsList({contacts}: Props): React.ReactElement {
   return (
     <Stack f={1}>
       <FlashList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
-        ListFooterComponent={ListFooterComponent}
+        ListFooterComponent={listFooterComponent}
         data={contacts}
         ItemSeparatorComponent={ItemSeparatorComponent}
         keyExtractor={atomKeyExtractor}

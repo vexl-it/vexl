@@ -14,7 +14,6 @@ import {
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
-import {getTokens} from 'tamagui'
 import {type AppSettingsStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {defaultCurrencyAtom} from '../../../utils/preferences'
@@ -23,6 +22,31 @@ import {
   appSettingsCurrencySearchTextAtom,
   type AppSettingsCurrencyCode,
 } from '../atoms'
+import {useKeyboardAwareFooterListPadding} from '../useKeyboardAwareFooterListPadding'
+
+function CurrencyList({
+  currenciesToDisplay,
+  renderItem,
+}: {
+  readonly currenciesToDisplay: readonly CurrencyInfo[]
+  readonly renderItem: (props: {
+    readonly item: CurrencyInfo
+  }) => React.ReactElement
+}): React.ReactElement {
+  const listPaddingBottom = useKeyboardAwareFooterListPadding()
+
+  return (
+    <FlashList
+      data={currenciesToDisplay}
+      renderItem={renderItem}
+      keyExtractor={(item) => item.code}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingBottom: listPaddingBottom,
+      }}
+    />
+  )
+}
 
 function AppSettingsCurrencyScreen({
   navigation,
@@ -87,14 +111,9 @@ function AppSettingsCurrencyScreen({
         marginBottom="$4"
       />
       {Array.isNonEmptyArray(currenciesToDisplay) ? (
-        <FlashList
-          data={currenciesToDisplay}
+        <CurrencyList
+          currenciesToDisplay={currenciesToDisplay}
           renderItem={renderItem}
-          keyExtractor={(item) => item.code}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: getTokens().space.$13.val,
-          }}
         />
       ) : (
         <Stack alignItems="center" gap="$4" padding="$6">

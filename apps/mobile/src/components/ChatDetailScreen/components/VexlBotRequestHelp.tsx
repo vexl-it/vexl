@@ -5,6 +5,7 @@ import {useAtomValue} from 'jotai'
 import {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
+import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {chatMolecule} from '../atoms'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
@@ -24,11 +25,14 @@ export function VexlBotRequestHelp({
     chatStateAtom,
     verifiedConnectionsHashesAtom,
     canBeRerequestedAtom,
+    otherSideClubsIdsAtom,
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const commonConnectionsHashes = useAtomValue(commonConnectionsHashesAtom)
   const verifiedConnectionsHashes = useAtomValue(verifiedConnectionsHashesAtom)
+  const otherSideClubsIds = useAtomValue(otherSideClubsIdsAtom)
+  const otherSideClubs = useGetAllClubsForIds(otherSideClubsIds ?? [])
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const chatState = useAtomValue(chatStateAtom)
 
@@ -43,8 +47,14 @@ export function VexlBotRequestHelp({
     navigation.navigate('CommonFriends', {
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
+      clubs: otherSideClubs,
     })
-  }, [commonConnectionsHashes, navigation, verifiedConnectionsHashes])
+  }, [
+    commonConnectionsHashes,
+    navigation,
+    otherSideClubs,
+    verifiedConnectionsHashes,
+  ])
 
   if (
     message.message.messageType === 'APPROVE_MESSAGING' &&

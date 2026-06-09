@@ -25,6 +25,7 @@ import {
   canChatBeRequested,
   getRequestState,
 } from '../../state/chat/utils/offerStates'
+import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
@@ -139,6 +140,11 @@ function OfferDetailScrollContent({
   const {footerHeightAtom} = useScreenFooterHeight()
   const footerHeight = useAtomValue(footerHeightAtom)
   const commonFriendsCount = offer.offerInfo.privatePart.commonFriends.length
+  const otherSideClubs = useGetAllClubsForIds(
+    offer.offerInfo.privatePart.clubIds
+  )
+  const clubsCount = otherSideClubs.length
+  const hasCommonFriendsOrClubs = commonFriendsCount > 0 || clubsCount > 0
   const isClubOffer =
     offer.offerInfo.privatePart.friendLevel.length === 1 &&
     offer.offerInfo.privatePart.friendLevel[0] === 'CLUB'
@@ -162,13 +168,13 @@ function OfferDetailScrollContent({
 
         <OfferPropertiesCard offer={offer} />
 
-        {commonFriendsCount > 0 ? (
+        {hasCommonFriendsOrClubs ? (
           <CommonFriends
             commonConnectionsHashes={offer.offerInfo.privatePart.commonFriends}
             verifiedConnectionsHashes={
               offer.offerInfo.privatePart.verifiedCommonFriends
             }
-            otherSideClubs={[]}
+            otherSideClubs={otherSideClubs}
           />
         ) : (
           <XStack

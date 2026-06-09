@@ -2,7 +2,6 @@ It's important to make UI / UX of vexl mobile app consistend and aligned.
 
 When creating or modifying any UI components in the app you should prefer using components in the @vexl-next/ui package. If there is not a component for your use case, you should consider creating a new one or modifying already existing one. If you stumble upon repeating pattern you are encouraged to extract it to a separate component in the @vexl-next/ui package and reuse it across the app.
 
-
 ## Important principles
 
 - UI theme colors: when a component needs a concrete color string for icons, SVG props, React Native props, gradients, or other non-token props, read it with `const theme = useTheme()` and call `.get()` (for example `theme.foregroundPrimary.get()`). Do not use `.val` for theme colors; keep `.val` for non-color tokens such as spacing and size.
@@ -14,3 +13,4 @@ When creating or modifying any UI components in the app you should prefer using 
 - On Tamagui components, prefer Tamagui shorthand props that resolve to the shared tokens.
 - On non-Tamagui components, read from the shared theme/tokens objects instead of hardcoding values.
 - Use icon components from `@vexl-next/ui` / `packages/ui` instead of loading icon artwork through `Image` or external SVG sources.
+- When updating any screen component, prefer using the shared Screen component from `packages/ui` where possible, to keep layout, safe-area handling, footers, and keyboard behavior consistent across the app.

@@ -20,7 +20,7 @@ export function useKeyboardAwareFooterListPadding({
     state.isVisible ? state.height : 0
   )
   const resolvedFooterHeight = footerHeight ?? screenFooterHeight
-  const footerListPadding = resolvedFooterHeight || footerHeightFallback
+  const footerListPadding = resolvedFooterHeight ?? footerHeightFallback
   const keyboardListPadding = Math.max(0, keyboardHeight - keyboardHeightOffset)
 
   return footerListPadding + keyboardListPadding

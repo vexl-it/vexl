@@ -223,6 +223,7 @@ export default function VerificationCodeScreen({
                 setUserCode(code)
                 submitVerificationCode(code)
               }}
+              pointerEvents="none"
               ref={inputRef}
               style={{
                 height: codeBoxHeight,

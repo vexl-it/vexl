@@ -1,4 +1,10 @@
-import {Button, Stack, XStack, type FilterBarItem} from '@vexl-next/ui'
+import {
+  Button,
+  KeyboardStickyView,
+  Stack,
+  XStack,
+  type FilterBarItem,
+} from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
 import {useAtomValue} from 'jotai'
@@ -117,7 +123,9 @@ function ContactsListSelect({
           <PreparingContactsOverlay visible={isContactsPreparing} zIndex={10} />
         </Stack>
       </Stack>
-      <Stack position="absolute" left={0} right={0} bottom={0}>
+      <KeyboardStickyView
+        style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
+      >
         <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
           <Button
             disabled={isSubmittingContacts}
@@ -126,7 +134,7 @@ function ContactsListSelect({
             {t('common.submit')}
           </Button>
         </Stack>
-      </Stack>
+      </KeyboardStickyView>
       <PreparingContactsOverlay
         labelKey="contacts.processingContacts"
         visible={isSubmittingContacts}

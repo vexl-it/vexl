@@ -95,6 +95,7 @@ import {
   sessionDataOrDummyAtom,
   useSessionAssumeLoggedIn,
 } from '../../state/session'
+import {realUserDataAtom} from '../../state/session/userDataAtoms'
 import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {
   commitHash,
@@ -511,6 +512,7 @@ function DebugScreen(): React.ReactElement {
   const resetPostLoginFlowProgress = useSetAtom(
     resetPostLoginFlowProgressActionAtom
   )
+  const resetUserIdentity = useSetAtom(realUserDataAtom)
   const notificationToken = useAtomValue(vexlNotificationTokenAtom)
 
   if (!isDeveloper) {
@@ -580,6 +582,15 @@ function DebugScreen(): React.ReactElement {
             onPress={() => {
               resetPostLoginFlowProgress()
               Alert.alert('Post-login flow progress reset')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Reset user identity"
+            onPress={() => {
+              resetUserIdentity(undefined)
+              Alert.alert('User identity reset')
             }}
           />
           <Button

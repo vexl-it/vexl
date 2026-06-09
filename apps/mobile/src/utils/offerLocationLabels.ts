@@ -1,26 +1,33 @@
 import {type OfferLocation} from '@vexl-next/domain/src/general/offers'
 import {Array, Option, pipe} from 'effect'
 
-function isMeaningfulShortAddress(shortAddress: string): boolean {
-  const trimmed = shortAddress.trim()
+const LABEL_LETTER_REGEX = /[A-Za-zÀ-ÖØ-öø-ÿĀ-ſƀ-ȳЀ-ӿἀ-῿]/
 
-  if (trimmed.length === 0) return false
+function getMeaningfulLocationLabelPart(label: string): string | null {
+  const trimmed = label.trim()
 
-  return !/^[\d\p{P}\p{S}\s]+$/u.test(trimmed)
+  if (!LABEL_LETTER_REGEX.test(trimmed)) return null
+
+  return trimmed
 }
 
 export function getLocationFullDisplayLabel(
   location: Pick<OfferLocation, 'address' | 'shortAddress'>
 ): string {
-  return location.address.trim() || location.shortAddress.trim()
+  const fallbackLabel = location.address.trim() || location.shortAddress.trim()
+
+  return (
+    getMeaningfulLocationLabelPart(location.address) ??
+    getMeaningfulLocationLabelPart(location.shortAddress) ??
+    fallbackLabel
+  )
 }
 
 export function getLocationCompactDisplayLabel(
   location: Pick<OfferLocation, 'address' | 'shortAddress'>
 ): string {
-  if (isMeaningfulShortAddress(location.shortAddress)) {
-    return location.shortAddress.trim()
-  }
+  const shortAddress = getMeaningfulLocationLabelPart(location.shortAddress)
+  if (shortAddress) return shortAddress
 
   return getLocationFullDisplayLabel(location)
 }

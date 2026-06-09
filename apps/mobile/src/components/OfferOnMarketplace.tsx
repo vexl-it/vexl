@@ -25,6 +25,7 @@ import {
   getIconTagVariant,
   getIsOffering,
 } from '../utils/offerHelpers'
+import {getLocationCompactDisplayLabelForLocations} from '../utils/offerLocationLabels'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
 import {offerRerequestLimitDaysAtom} from '../utils/versionService/atoms'
 import {AnonymousAvatarOrClubImage} from './AnonymousAvatar'
@@ -135,17 +136,10 @@ export default function OfferOnMarketplace({
       }
     }
 
-    if (publicPart.location.length > 0) {
-      const loc = publicPart.location[0]
-      if (loc) {
-        const extra = publicPart.location.length - 1
-        const locationText =
-          extra > 0
-            ? `${loc.shortAddress || loc.address} +${String(extra)}`
-            : loc.shortAddress || loc.address
-        result.push(locationText)
-      }
-    }
+    const locationText = getLocationCompactDisplayLabelForLocations(
+      publicPart.location
+    )
+    if (locationText) result.push(locationText)
 
     if (publicPart.spokenLanguages.length > 0) {
       result.push(

@@ -15,6 +15,7 @@ import {type RootStackScreenProps} from '../../../navigationTypes'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {getLocationCompactDisplayLabelForLocations} from '../../../utils/offerLocationLabels'
 import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
 import {chatMolecule} from '../atoms'
 
@@ -154,7 +155,9 @@ function StickyHeader(): React.ReactElement | null {
   const offerCity = useMemo(() => {
     if (!offer) return null
 
-    return offer.offerInfo.publicPart.location[0]?.shortAddress ?? null
+    return getLocationCompactDisplayLabelForLocations(
+      offer.offerInfo.publicPart.location
+    )
   }, [offer])
 
   const offerLanguageFlags = useMemo(() => {

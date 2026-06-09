@@ -22,6 +22,7 @@ import {useTheme, XStack, YStack} from 'tamagui'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatDecimal} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
+import {getLocationFullDisplayLabel} from '../../../utils/offerLocationLabels'
 import {globalDialogAtom} from '../../GlobalDialog'
 import {LocationPickerMolecule} from '../../LocationPicker/molecule'
 import {offerLocationToMapValueWithRadius} from '../../LocationPicker/utils'
@@ -112,7 +113,7 @@ function LocationStep({
     const radiusKm =
       Math.round(longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10) / 10
 
-    return `${loc.shortAddress ?? loc.address}, ${t(
+    return `${getLocationFullDisplayLabel(loc)}, ${t(
       'map.locationSelect.radius',
       {
         radius: formatDecimal(radiusKm, locale),

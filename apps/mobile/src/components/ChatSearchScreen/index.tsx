@@ -23,7 +23,7 @@ function SectionTitle({children}: {children: string}): React.ReactElement {
   )
 }
 
-// ScrollView is intentional here.
+// Non-virtualized scrolling is intentional here.
 // Search results are already filtered down from the full chat/message dataset,
 // so the rendered list is usually modest. In this screen the heavier work is
 // local filtering and match highlighting, not list virtualization. FlashList

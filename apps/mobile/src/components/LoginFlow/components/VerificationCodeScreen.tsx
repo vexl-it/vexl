@@ -13,6 +13,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native'
+import {getTokens} from 'tamagui'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
@@ -24,6 +25,7 @@ import Countdown from './Countdown'
 import LoginFlowScreen, {LoginFlowTitle} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'VerificationCode'>
+const codeBoxHeight = 48
 
 function CodeBox({
   value,
@@ -36,7 +38,7 @@ function CodeBox({
       borderColor="$backgroundHighlight"
       borderRadius="$3"
       borderWidth={1}
-      height={48}
+      height={codeBoxHeight}
       justifyContent="center"
       width={50}
     >
@@ -222,7 +224,13 @@ export default function VerificationCodeScreen({
                 submitVerificationCode(code)
               }}
               ref={inputRef}
-              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+              style={{
+                height: codeBoxHeight,
+                opacity: 0,
+                position: 'absolute',
+                width: '100%',
+                zIndex: getTokens().zIndex.$5.val,
+              }}
               textContentType="oneTimeCode"
               value={userCode}
             />

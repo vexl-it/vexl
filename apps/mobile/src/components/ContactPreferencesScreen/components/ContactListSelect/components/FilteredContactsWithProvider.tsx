@@ -7,7 +7,11 @@ import {contactSelectMolecule} from '../atom'
 import ContactsList from './ContactsList'
 import ContactsListEmpty from './ContactsListEmpty'
 
-function FilteredContacts(): React.ReactElement {
+function FilteredContacts({
+  keyboardBottomSpacerHeight,
+}: {
+  readonly keyboardBottomSpacerHeight: number
+}): React.ReactElement {
   const {
     contactsFilterAtom,
     searchTextAtom,
@@ -28,7 +32,12 @@ function FilteredContacts(): React.ReactElement {
   return (
     <Stack f={1}>
       <Stack f={1} px="$5">
-        {toDisplay.length > 0 && <ContactsList contacts={toDisplay} />}
+        {toDisplay.length > 0 && (
+          <ContactsList
+            contacts={toDisplay}
+            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+          />
+        )}
         {toDisplay.length === 0 && <ContactsListEmpty />}
       </Stack>
     </Stack>

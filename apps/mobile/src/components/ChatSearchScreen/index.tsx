@@ -9,7 +9,6 @@ import {
 } from '@vexl-next/ui'
 import {atom, useAtom} from 'jotai'
 import React, {useEffect, useMemo} from 'react'
-import {ScrollView} from 'react-native'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import ChatSearchChatResultItem from './components/ChatSearchChatResultItem'
@@ -49,6 +48,7 @@ function ChatSearchScreen(): React.ReactElement {
 
   return (
     <Screen
+      scrollable
       noHorizontalPadding
       navigationBar={
         <NavigationBar
@@ -69,14 +69,7 @@ function ChatSearchScreen(): React.ReactElement {
             placeholder={t('messages.search.placeholder')}
           />
         </YStack>
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingTop: 24,
-            paddingBottom: 24,
-          }}
-        >
+        <YStack f={1} pt="$5" pb="$5">
           {trimmedQuery !== '' && chats.length > 0 ? (
             <YStack gap="$2" mb="$5" px="$4">
               <Stack>
@@ -133,7 +126,7 @@ function ChatSearchScreen(): React.ReactElement {
               </Typography>
             </YStack>
           ) : null}
-        </ScrollView>
+        </YStack>
       </YStack>
     </Screen>
   )

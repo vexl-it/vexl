@@ -20,6 +20,11 @@ const showDonationPromptGiveLoveActionAtom = atom(
     if (!skipTimeCheck && !shouldShowDonationPrompt)
       return Effect.succeed(Effect.void)
 
+    set(
+      lastDisplayOfDonationPromptTimestampAtom,
+      Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
+    )
+
     return Effect.gen(function* (_) {
       yield* _(
         set(askAreYouSureActionAtom, {
@@ -40,11 +45,6 @@ const showDonationPromptGiveLoveActionAtom = atom(
       }
     }).pipe(
       Effect.catchTag('UserDeclinedError', () => {
-        set(
-          lastDisplayOfDonationPromptTimestampAtom,
-          Schema.decodeSync(UnixMilliseconds)(DateTime.now().toMillis())
-        )
-
         return Effect.succeed(Effect.void)
       })
     )

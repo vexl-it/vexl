@@ -17,9 +17,9 @@ import {
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {useKeyboardAwareFooterListPadding} from '../../utils/useKeyboardAwareFooterListPadding'
 import {
   changeCurrenciesToDisplayAtom,
   type ChangeCurrencyConfig,
@@ -51,6 +51,30 @@ const CurrencyItem = React.memo(function CurrencyItem({
     />
   )
 })
+
+function CurrencyList({
+  currenciesToDisplay,
+  keyExtractor,
+  renderItem,
+}: {
+  readonly currenciesToDisplay: readonly CurrencyInfo[]
+  readonly keyExtractor: (item: CurrencyInfo) => string
+  readonly renderItem: ({item}: {item: CurrencyInfo}) => React.JSX.Element
+}): React.JSX.Element {
+  const listPaddingBottom = useKeyboardAwareFooterListPadding()
+
+  return (
+    <FlashList
+      data={currenciesToDisplay}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingBottom: listPaddingBottom,
+      }}
+    />
+  )
+}
 
 function ChangeCurrencyContent({
   selectedCurrencyCode,
@@ -107,14 +131,10 @@ function ChangeCurrencyContent({
         marginBottom="$4"
       />
       {Array.isNonEmptyArray(currenciesToDisplay) ? (
-        <FlashList
-          data={currenciesToDisplay}
+        <CurrencyList
+          currenciesToDisplay={currenciesToDisplay}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: getTokens().space.$13.val,
-          }}
         />
       ) : (
         <Stack ai="center" gap="$4" p="$6">

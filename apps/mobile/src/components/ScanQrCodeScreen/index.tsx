@@ -21,6 +21,7 @@ import {handleDeepLinkActionAtom} from '../../utils/deepLinks'
 import {handleCameraPermissionsActionAtom} from '../../utils/handleCameraPermissions'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {forceHideAskAreYouSureActionAtom} from '../GlobalDialog'
+import {getQrScannerLayout} from './getQrScannerLayout'
 
 type Props = RootStackScreenProps<'ScanQrCode'>
 
@@ -43,14 +44,19 @@ function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
   const handleDeepLinkAction = useSetAtom(handleDeepLinkActionAtom)
   const forceHideAskGlobalDialog = useSetAtom(forceHideAskAreYouSureActionAtom)
 
-  const scanWindow = useMemo(() => {
-    const size = Math.min(width - 48, height * 0.4)
-    return {
-      size,
-      x: (width - size) / 2,
-      y: height * 0.3,
-    }
-  }, [height, width])
+  const {scanWindow, titleTop, titleHeight} = useMemo(
+    () =>
+      getQrScannerLayout({
+        width,
+        height,
+        safeAreaTop: top,
+        safeAreaBottom: bottom,
+        horizontalPadding: 48,
+        sizeHeightRatio: 0.4,
+        preferredVerticalPosition: 0.3,
+      }),
+    [bottom, height, top, width]
+  )
 
   useEffect(() => {
     void Effect.runPromise(handleCameraPermissions()).then((result) => {
@@ -183,10 +189,10 @@ function ScanQrCodeScreen({navigation}: Props): React.ReactElement {
 
       <YStack
         pos="absolute"
-        t={top + 64}
+        t={titleTop}
         l={24}
         r={24}
-        b={height - scanWindow.y + 24}
+        h={titleHeight}
         jc="flex-end"
         pointerEvents="none"
       >

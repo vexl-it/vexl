@@ -10,7 +10,10 @@ import {getContactByIdAsync} from 'expo-contacts'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Platform} from 'react-native'
-import {type RootStackScreenProps} from '../../navigationTypes'
+import {
+  type CommonFriendsClub,
+  type RootStackScreenProps,
+} from '../../navigationTypes'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
@@ -22,6 +25,10 @@ interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
   verifiedConnectionsHashes?: readonly HashedPhoneNumber[]
   otherSideClubs: ClubInfo[]
+}
+
+function trimClubName(name: string): string {
+  return name.length > 25 ? name.slice(0, 25) : name
 }
 
 const resolveContactImage = (
@@ -93,6 +100,20 @@ function CommonFriends({
   const store = useStore()
   const showVerifiedContacts = useAtomValue(showVerifiedContactsAtom)
   const commonFriendsCount = commonConnectionsHashes.length
+  const clubsCount = otherSideClubs.length
+
+  const commonFriendsClubs: readonly CommonFriendsClub[] = useMemo(
+    () =>
+      pipe(
+        otherSideClubs,
+        Array.map((club) => ({
+          uuid: club.uuid,
+          name: club.name,
+          clubImageUrl: club.clubImageUrl,
+        }))
+      ),
+    [otherSideClubs]
+  )
 
   const commonFriends = useMemo(
     () =>
@@ -138,20 +159,26 @@ function CommonFriends({
     navigation.navigate('CommonFriends', {
       contactsHashes: commonConnectionsHashes,
       verifiedHashes: verifiedConnectionsHashes,
+      clubs: commonFriendsClubs,
     })
-  }, [commonConnectionsHashes, navigation, verifiedConnectionsHashes])
+  }, [
+    commonConnectionsHashes,
+    commonFriendsClubs,
+    navigation,
+    verifiedConnectionsHashes,
+  ])
 
   const clubChips: readonly CommonFriend[] = useMemo(
     () =>
       pipe(
-        otherSideClubs,
+        commonFriendsClubs,
         Array.map((club) => ({
           id: club.uuid,
-          name: club.name,
+          name: trimClubName(club.name),
           avatarSource: {uri: club.clubImageUrl},
         }))
       ),
-    [otherSideClubs]
+    [commonFriendsClubs]
   )
 
   const friendChips: readonly CommonFriend[] = useMemo(
@@ -170,17 +197,24 @@ function CommonFriends({
   )
 
   const friends: readonly CommonFriend[] = useMemo(
-    () => Array.appendAll(clubChips, friendChips),
+    () => Array.appendAll(friendChips, clubChips),
     [clubChips, friendChips]
   )
 
-  if (commonFriendsCount === 0) return null
+  if (commonFriendsCount === 0 && clubsCount === 0) return null
 
   return (
     <CommonFriendsUI
-      label={t('offer.numberOfCommon', {
-        number: formatInteger(commonFriendsCount, locale),
-      })}
+      label={
+        clubsCount > 0
+          ? t('offer.numberOfCommonAndClubs', {
+              number: formatInteger(commonFriendsCount, locale),
+              clubs: formatInteger(clubsCount, locale),
+            })
+          : t('offer.numberOfCommon', {
+              number: formatInteger(commonFriendsCount, locale),
+            })
+      }
       friends={friends}
       onPress={handlePress}
     />

@@ -34,6 +34,12 @@ import {type TabType} from './components/TosScreen/useContent'
 import {type ChatIds} from './state/chat/domain'
 import {type ContactsFilter} from './state/contacts/domain'
 
+export interface CommonFriendsClub {
+  readonly uuid: ClubUuid
+  readonly name: string
+  readonly clubImageUrl: UriString
+}
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RootStackParamsList = {
   LoginFlow: NavigatorScreenParams<LoginFlowStackParamsList>
@@ -110,6 +116,7 @@ export type RootStackParamsList = {
   CommonFriends: {
     readonly contactsHashes: readonly HashedPhoneNumber[]
     readonly verifiedHashes?: readonly HashedPhoneNumber[]
+    readonly clubs: readonly CommonFriendsClub[]
   }
 
   ClubDetail: {clubUuid: ClubUuid}

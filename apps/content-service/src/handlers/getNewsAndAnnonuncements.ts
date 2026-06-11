@@ -176,7 +176,7 @@ export const newsAndAnonouncementsHandler = HttpApiBuilder.handler(
             type: 'RED',
             title: 'Update Required',
             description:
-              'For your security and the best app experience, please update Vexl to the latest version (1.35.0 or higher). This update is required to continue using the app.',
+              'For your security and the best app experience, please update Vexl to the latest version. This update is required to continue using the app.',
           }),
           vexlBotNews: [],
         } satisfies NewsAndAnnouncementsResponse

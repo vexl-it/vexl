@@ -120,6 +120,16 @@ function splitNationalNumberIntoGroups(
     currentIndex += groupLength
   }
 
+  while (currentIndex < nationalNumber.length) {
+    groups.push(
+      nationalNumber.substring(
+        currentIndex,
+        currentIndex + FALLBACK_GROUP_LENGTH
+      )
+    )
+    currentIndex += FALLBACK_GROUP_LENGTH
+  }
+
   return groups
 }
 
@@ -138,7 +148,6 @@ export default function PhoneNumberScreen({
   const navigationInProgressRef = useRef(false)
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
-  const phoneNumberMaxLength = getNationalNumberLength(selectedCountry)
   const phoneNumberGroupLengths = getGroupLengths(selectedCountry)
   const selectedCountryCode = useAtomValue(selectedCountryCodeAtom)
   const displayedPhoneNumberGroups = splitNationalNumberIntoGroups(
@@ -247,11 +256,8 @@ export default function PhoneNumberScreen({
           <TextInput
             autoFocus
             keyboardType="number-pad"
-            maxLength={phoneNumberMaxLength}
             onChangeText={(value) => {
-              const digits = value
-                .replace(/\D/g, '')
-                .substring(0, phoneNumberMaxLength)
+              const digits = value.replace(/\D/g, '')
               setNationalNumber(digits)
               setPhoneNumber(toE164PhoneNumber(`${callingCode}${digits}`))
             }}

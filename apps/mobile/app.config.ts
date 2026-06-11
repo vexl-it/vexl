@@ -196,7 +196,7 @@ export default {
   },
   'owner': 'vexlit',
   'runtimeVersion': {
-    'policy': 'sdkVersion',
+    'policy': 'appVersion',
   },
   'plugins': [
     ['react-native-libsodium', {}],

@@ -73,6 +73,25 @@ export type DummyUser = Effect.Effect.Success<
   ReturnType<typeof generateKeysAndHasheForNumber>
 >
 
+export const withPublicImportCountThreshold = async (
+  threshold: string,
+  run: () => Promise<void>
+): Promise<void> => {
+  const previousThreshold = process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD
+
+  process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD = threshold
+
+  try {
+    await run()
+  } finally {
+    if (previousThreshold === undefined) {
+      delete process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD
+    } else {
+      process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD = previousThreshold
+    }
+  }
+}
+
 export const createAndImportUsersFromNetwork = (
   user: DummyUser,
   users: DummyUser[]

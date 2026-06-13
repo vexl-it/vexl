@@ -89,3 +89,14 @@ export const contactActiveWindowDaysConfig = Config.number(
   }),
   Config.withDefault(90)
 )
+
+export const contactPublicImportCountThresholdConfig = Config.number(
+  'CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD'
+).pipe(
+  Config.validate({
+    validation: (d) => Number.isInteger(d) && (d > 0 || d === -1),
+    message:
+      'contactPublicImportCountThresholdConfig must be a positive integer or -1 (if you do not want to use this feature)',
+  }),
+  Config.withDefault(-1)
+)

@@ -5,12 +5,14 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
+import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 import {NotificationTokens} from '../domain'
 
 export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   Schema.Struct({
     importedHashes: Schema.Array(ServerHashedNumber),
     ownerHash: ServerHashedNumber,
+    publicImportCountThreshold: Schema.Int,
   })
 export type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   typeof createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams.Type
@@ -57,6 +59,11 @@ export const createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact =
             OR second_degree_friend.vexl_notification_token IS NOT NULL
           )
           AND second_degree_friend.hash != ${params.ownerHash}
+          AND ${createIsAllowedSharedContactHashFragment({
+          hash: sql`connections_to_imported_contacts.hash_to`,
+          publicImportCountThreshold: params.publicImportCountThreshold,
+          sql,
+        })}
       `,
     })
 

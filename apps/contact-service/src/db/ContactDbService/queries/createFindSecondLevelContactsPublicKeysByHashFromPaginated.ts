@@ -5,6 +5,7 @@ import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Array, Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
+import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
 export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
   Schema.Struct({
@@ -12,6 +13,7 @@ export const FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
     userId: Schema.Int,
     limit: Schema.Int,
     activeWithinDays: Schema.Int,
+    publicImportCountThreshold: Schema.Int,
   })
 export type FindSecondLevelContactsPublicKeysByHashFromPaginatedParams =
   typeof FindSecondLevelContactsPublicKeysByHashFromPaginatedParams.Type
@@ -55,6 +57,11 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
               second_lvl_friend.refreshed_at >= CURRENT_DATE - ${params.activeWithinDays}::int
             `,
           ]),
+          createIsAllowedSharedContactHashFragment({
+            hash: sql`my_contacts.hash_to`,
+            publicImportCountThreshold: params.publicImportCountThreshold,
+            sql,
+          }),
         ])}
         GROUP BY
           second_lvl_friend.public_key,

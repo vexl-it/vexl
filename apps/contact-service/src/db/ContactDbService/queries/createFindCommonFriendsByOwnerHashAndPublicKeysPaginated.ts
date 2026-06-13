@@ -5,6 +5,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
+import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
 export const FindCommonFriendsPaginatedParams = Schema.Struct({
   ownerHash: ServerHashedNumber,
@@ -12,6 +13,7 @@ export const FindCommonFriendsPaginatedParams = Schema.Struct({
   publicKeysV2: Schema.Array(PublicKeyV2),
   userContactId: Schema.Int,
   limit: Schema.Int,
+  publicImportCountThreshold: Schema.Int,
 })
 export type FindCommonFriendsPaginatedParams =
   typeof FindCommonFriendsPaginatedParams.Type
@@ -63,6 +65,11 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
             sql.in('other_side.public_key', hash.publicKeys),
             sql.in('other_side.public_key_v2', hash.publicKeysV2),
           ]),
+          createIsAllowedSharedContactHashFragment({
+            hash: sql`my_contact.hash_to`,
+            publicImportCountThreshold: hash.publicImportCountThreshold,
+            sql,
+          }),
         ])}
         GROUP BY
           other_side.public_key,

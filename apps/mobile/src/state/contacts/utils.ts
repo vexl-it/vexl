@@ -23,7 +23,6 @@ import {
   type DeviceContactsMappingResult,
 } from './contactMapping'
 import {type ContactInfo} from './domain'
-// import toE164PhoneNumberWithDefaultCountryCode from '../../utils/toE164PhoneNumberWithDefaultCountryCode'
 
 export class ContactsPermissionsNotGrantedError extends Schema.TaggedError<ContactsPermissionsNotGrantedError>(
   'ContactsPermissionsNotGrantedError'

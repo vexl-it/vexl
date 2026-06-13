@@ -47,9 +47,15 @@ export default function NormalizeContactsWithLoadingScreen({
             )
           })
         ),
-        Effect.catchAllDefect(() =>
+        Effect.catchAllDefect((defect) =>
           Effect.sync(() => {
-            reportError('error', new Error('Defect while normalizing contacts'))
+            reportError(
+              'error',
+              defect instanceof Error
+                ? defect
+                : new Error('Defect while normalizing contacts'),
+              defect instanceof Error ? undefined : {defect}
+            )
           })
         ),
         Effect.ensuring(

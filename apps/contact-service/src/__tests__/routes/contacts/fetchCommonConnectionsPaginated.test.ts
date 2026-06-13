@@ -19,6 +19,7 @@ import {
   generateKeysAndHasheForNumber,
   importUsersFromNetwork,
   makeTestCommonAndSecurityHeaders,
+  withPublicImportCountThreshold,
   type DummyUser,
 } from './utils'
 
@@ -188,6 +189,74 @@ describe('Common connections paginated', () => {
         }
       })
     )
+  })
+
+  it('Filters unregistered public common friends but keeps popular logged in contacts', async () => {
+    await withPublicImportCountThreshold('2', async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const app = yield* _(NodeTestingApp)
+
+          const alice = yield* _(generateKeysAndHasheForNumber('+420733777001'))
+          const bob = yield* _(generateKeysAndHasheForNumber('+420733777002'))
+          const extraImporter = yield* _(
+            generateKeysAndHasheForNumber('+420733777003')
+          )
+          const publicNumber = yield* _(
+            generateKeysAndHasheForNumber('+420733777004')
+          )
+          const loggedInPopularContact = yield* _(
+            generateKeysAndHasheForNumber('+420733777005')
+          )
+
+          yield* _(createUserOnNetwork(alice))
+          yield* _(createUserOnNetwork(bob))
+          yield* _(createUserOnNetwork(extraImporter))
+          yield* _(createUserOnNetwork(loggedInPopularContact))
+
+          yield* _(
+            importUsersFromNetwork(alice, [
+              publicNumber,
+              loggedInPopularContact,
+            ])
+          )
+          yield* _(
+            importUsersFromNetwork(bob, [publicNumber, loggedInPopularContact])
+          )
+          yield* _(
+            importUsersFromNetwork(extraImporter, [
+              publicNumber,
+              loggedInPopularContact,
+            ])
+          )
+
+          yield* _(setAuthHeaders(alice.authHeaders))
+          const commonAndSecurityHeaders = makeTestCommonAndSecurityHeaders(
+            alice.authHeaders
+          )
+
+          const connections = yield* _(
+            app.Contact.fetchCommonConnectionsPaginated({
+              payload: {
+                publicKeys: [bob.keys.publicKeyPemBase64],
+                limit: 20,
+              },
+              headers: commonAndSecurityHeaders,
+            })
+          )
+
+          expect(connections.items).toHaveLength(1)
+          const bobResult = connections.items[0]
+
+          expect(bobResult.common.hashes).toContain(
+            loggedInPopularContact.serverHashedNumberForClient
+          )
+          expect(bobResult.common.hashes).not.toContain(
+            publicNumber.serverHashedNumberForClient
+          )
+        })
+      )
+    })
   })
 
   it('Returns correct pagination metadata', async () => {

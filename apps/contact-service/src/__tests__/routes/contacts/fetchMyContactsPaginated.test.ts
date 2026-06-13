@@ -12,6 +12,7 @@ import {
   generateKeysAndHasheForNumber,
   importUsersFromNetwork,
   makeTestCommonAndSecurityHeaders,
+  withPublicImportCountThreshold,
   type DummyUser,
 } from './utils'
 
@@ -202,6 +203,51 @@ describe('Fetch my contacts paginated', () => {
         )
       })
     )
+  })
+
+  it('Filters second level contacts connected only through unregistered public imported numbers', async () => {
+    await withPublicImportCountThreshold('2', async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const alice = yield* _(generateKeysAndHasheForNumber('+420733666001'))
+          const bob = yield* _(generateKeysAndHasheForNumber('+420733666002'))
+          const extraImporter = yield* _(
+            generateKeysAndHasheForNumber('+420733666003')
+          )
+          const publicNumber = yield* _(
+            generateKeysAndHasheForNumber('+420733666004')
+          )
+
+          yield* _(createUserOnNetwork(alice))
+          yield* _(createUserOnNetwork(bob))
+          yield* _(createUserOnNetwork(extraImporter))
+
+          yield* _(importUsersFromNetwork(alice, [publicNumber]))
+          yield* _(importUsersFromNetwork(bob, [publicNumber]))
+          yield* _(importUsersFromNetwork(extraImporter, [publicNumber]))
+
+          const app = yield* _(NodeTestingApp)
+          yield* _(setAuthHeaders(alice.authHeaders))
+          const headers = makeTestCommonAndSecurityHeaders(alice.authHeaders)
+          const secondLevel = 'SECOND'
+
+          const response = yield* _(
+            app.Contact.fetchMyContactsPaginated({
+              headers,
+              urlParams: {
+                level: secondLevel,
+                limit: 20,
+              },
+            })
+          )
+
+          expect(response.items).not.toContain(bob.keys.publicKeyPemBase64)
+          expect(response.items).not.toContain(
+            extraImporter.keys.publicKeyPemBase64
+          )
+        })
+      )
+    })
   })
 
   it('Returns correct pagination metadata for FIRST level', async () => {

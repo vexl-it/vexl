@@ -8,25 +8,53 @@ import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
 import sequenceTasksWithAnimationFrames from '../../../utils/sequenceTasksWithAnimationFrames'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
-import {type StoredContact} from '../domain'
+import {type ContactComputedValues, type StoredContact} from '../domain'
 import {hashPhoneNumber} from '../utils'
 import {storedContactsAtom} from './contactsStore'
+
+interface ContactsToNormalize {
+  readonly normalized: StoredContact[]
+  readonly toNormalize: StoredContact[]
+}
+
+const emptyContactsToNormalize: ContactsToNormalize = {
+  normalized: [],
+  toNormalize: [],
+}
+
+function markContactInvalid(contact: StoredContact): StoredContact {
+  return {
+    ...contact,
+    flags: {
+      ...contact.flags,
+      invalidNumber: 'invalid',
+    },
+  }
+}
+
+function markContactValid(
+  contact: StoredContact,
+  computedValues: ContactComputedValues
+): StoredContact {
+  return {
+    ...contact,
+    computedValues: Option.some(computedValues),
+    flags: {
+      ...contact.flags,
+      invalidNumber: 'valid',
+    },
+  }
+}
 
 function normalizeContact(
   contact: StoredContact
 ): Effect.Effect<StoredContact> {
-  return Effect.promise(async () => {
+  return Effect.sync(() => {
     const E164PhoneNumber = toE164PhoneNumberWithDefaultCountryCode(
       contact.info.rawNumber
     )
     if (Option.isNone(E164PhoneNumber)) {
-      return {
-        ...contact,
-        flags: {
-          ...contact.flags,
-          invalidNumber: 'invalid',
-        },
-      }
+      return markContactInvalid(contact)
     }
 
     const hash = hashPhoneNumber(E164PhoneNumber.value)
@@ -37,18 +65,16 @@ function normalizeContact(
       return contact
     }
 
-    return {
-      ...contact,
-      computedValues: Option.some({
-        normalizedNumber: E164PhoneNumber.value,
-        hash: hash.right,
-      }),
-      flags: {
-        ...contact.flags,
-        invalidNumber: 'valid',
-      },
-    }
-  })
+    return markContactValid(contact, {
+      normalizedNumber: E164PhoneNumber.value,
+      hash: hash.right,
+    })
+  }).pipe(
+    Effect.catchAllDefect(() => {
+      reportError('warn', new Error('Error while normalizing contact'))
+      return Effect.succeed(markContactInvalid(contact))
+    })
+  )
 }
 
 const normalizeStoredContactsActionAtom = atom(
@@ -65,15 +91,18 @@ const normalizeStoredContactsActionAtom = atom(
     const measure = startMeasure('Normalizing contacts')
     const storedContacts = get(storedContactsAtom)
 
-    const {normalized, toNormalize} = storedContacts.reduce(
-      (acc, c) => {
-        if (Option.isSome(c.computedValues)) {
+    const {normalized, toNormalize} = pipe(
+      storedContacts,
+      Array.reduce(emptyContactsToNormalize, (acc, c) => {
+        if (
+          Option.isSome(c.computedValues) ||
+          c.flags.invalidNumber === 'invalid'
+        ) {
           return {...acc, normalized: [...acc.normalized, c]}
         } else {
           return {...acc, toNormalize: [...acc.toNormalize, c]}
         }
-      },
-      {normalized: [] as StoredContact[], toNormalize: [] as StoredContact[]}
+      })
     )
 
     if (Array.isEmptyArray(toNormalize)) return Effect.void

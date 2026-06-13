@@ -39,6 +39,21 @@ describe('mapContactsFromSystemToDomain', () => {
     expect(Option.isSome(contact.nonUniqueContactId)).toBe(true)
   })
 
+  it('trims raw phone numbers before using them as contact identity', () => {
+    const result = mapContactsFromSystemToDomain([
+      {
+        name: 'Alice',
+        phoneNumbers: [{number: '  +420 777 111 222  '}],
+      },
+    ])
+
+    const contact = contactAt(result.contacts, 0)
+
+    expect(contact.name).toBe('Alice')
+    expect(contact.numberToDisplay).toBe('+420 777 111 222')
+    expect(contact.rawNumber).toBe('+420 777 111 222')
+  })
+
   it('falls back to phone number when contact has no usable name', () => {
     const result = mapContactsFromSystemToDomain([
       {

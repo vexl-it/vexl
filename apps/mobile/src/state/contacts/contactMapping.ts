@@ -87,7 +87,9 @@ function mapDevicePhoneNumber(
   return pipe(
     decodeDevicePhoneNumber(phoneNumber),
     Option.flatMap((decodedPhoneNumber: DevicePhoneNumber) => {
-      const rawNumber = nonBlankStringFromUnknown(decodedPhoneNumber.number)
+      const rawNumber = trimmedNonBlankStringFromUnknown(
+        decodedPhoneNumber.number
+      )
 
       if (Option.isNone(rawNumber)) return Option.none()
 

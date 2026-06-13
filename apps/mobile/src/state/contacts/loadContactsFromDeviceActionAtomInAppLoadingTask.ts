@@ -1,5 +1,8 @@
 import {Effect} from 'effect/index'
-import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
+import {
+  InAppLoadingTaskError,
+  registerInAppLoadingTask,
+} from '../../utils/inAppLoadingTasks'
 import loadContactsFromDeviceActionAtom, {
   loadingContactsFromDeviceAtom,
 } from './atom/loadContactsFromDeviceActionAtom'
@@ -25,7 +28,18 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
 
         yield* _(
           store.set(loadContactsFromDeviceActionAtom).pipe(
-            Effect.catchAll(() => Effect.succeed('success')),
+            Effect.catchAll((error) => {
+              if (error._tag === 'UnknownContactsError') {
+                return Effect.succeed('success')
+              }
+
+              return Effect.fail(
+                new InAppLoadingTaskError({
+                  message: 'Error while loading contacts from device',
+                  cause: error,
+                })
+              )
+            }),
             Effect.ensuring(
               Effect.sync(() => {
                 store.set(loadingContactsFromDeviceAtom, false)

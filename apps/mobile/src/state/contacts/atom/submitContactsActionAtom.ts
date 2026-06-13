@@ -358,12 +358,13 @@ export const submitContactsActionAtom = atom(
           return 'success'
         },
       }),
-      Effect.tap(() => {
-        if (manageLoadingOverlay) {
-          set(loadingOverlayDisplayedAtom, false)
-        }
-        return Effect.void
-      })
+      Effect.ensuring(
+        Effect.sync(() => {
+          if (manageLoadingOverlay) {
+            set(loadingOverlayDisplayedAtom, false)
+          }
+        })
+      )
     )
   }
 )

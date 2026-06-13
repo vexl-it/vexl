@@ -24,10 +24,14 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
         store.set(loadingContactsFromDeviceAtom, true)
 
         yield* _(
-          store.set(loadContactsFromDeviceActionAtom),
-          Effect.catchAll(() => Effect.succeed('success' as const))
+          store.set(loadContactsFromDeviceActionAtom).pipe(
+            Effect.catchAll(() => Effect.succeed('success')),
+            Effect.ensuring(
+              Effect.sync(() => {
+                store.set(loadingContactsFromDeviceAtom, false)
+              })
+            )
+          )
         )
-
-        store.set(loadingContactsFromDeviceAtom, false)
       }),
   })

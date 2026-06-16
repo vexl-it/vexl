@@ -1,5 +1,6 @@
 import {
   Button,
+  DismissKeyboardOnPressOutside,
   KeyboardStickyView,
   Stack,
   XStack,
@@ -36,6 +37,7 @@ function ContactsListSelect({
 }): React.ReactElement {
   const {t} = useTranslation()
   const {
+    areThereAnySelectedContactsAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
     isContactsPreparingAtom,
     newContactsToDisplayCountAtom,
@@ -45,6 +47,9 @@ function ContactsListSelect({
   const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
   const areThereAnyContactsToDisplayForSelectedTab = useAtomValue(
     areThereAnyContactsToDisplayForSelectedTabAtom
+  )
+  const areThereAnySelectedContacts = useAtomValue(
+    areThereAnySelectedContactsAtom
   )
   const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
   const {isSubmittingContacts, submitSelectedContacts} =
@@ -58,10 +63,13 @@ function ContactsListSelect({
     submitBarHeightRef.current = measuredSubmitBarHeight
     setSubmitBarHeight(measuredSubmitBarHeight)
   }, [])
+  const shouldShowSubmitBar =
+    areThereAnyContactsToDisplayForSelectedTab || areThereAnySelectedContacts
+  const effectiveSubmitBarHeight = shouldShowSubmitBar ? submitBarHeight : 0
   const keyboardBottomSpacerHeight = useKeyboardAwareFooterListPadding({
     footerHeight: 0,
     footerHeightFallback: 0,
-    keyboardHeightOffset: submitBarHeight,
+    keyboardHeightOffset: effectiveSubmitBarHeight,
   })
 
   const shouldShowEmptyContactsState =
@@ -99,7 +107,7 @@ function ContactsListSelect({
 
   return (
     <Stack f={1} pos="relative">
-      <Stack f={1} pb={submitBarHeight}>
+      <Stack f={1} pb={effectiveSubmitBarHeight}>
         <Stack px="$5" pb="$3" gap="$3">
           <ContactsAccessPrivilegesInfoBanner />
           <XStack alignItems="center" gap="$3">
@@ -116,25 +124,32 @@ function ContactsListSelect({
           selectedFilter={selectedFilter}
           onSelectedFilterChange={setSelectedFilter}
         />
-        <Stack f={1} pos="relative">
-          <FilteredContacts
-            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-          />
-          <PreparingContactsOverlay visible={isContactsPreparing} zIndex={10} />
-        </Stack>
+        <DismissKeyboardOnPressOutside>
+          <Stack f={1} pos="relative">
+            <FilteredContacts
+              keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+            />
+            <PreparingContactsOverlay
+              visible={isContactsPreparing}
+              zIndex={10}
+            />
+          </Stack>
+        </DismissKeyboardOnPressOutside>
       </Stack>
-      <KeyboardStickyView
-        style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
-      >
-        <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
-          <Button
-            disabled={isSubmittingContacts}
-            onPress={submitSelectedContacts}
-          >
-            {t('common.submit')}
-          </Button>
-        </Stack>
-      </KeyboardStickyView>
+      {shouldShowSubmitBar ? (
+        <KeyboardStickyView
+          style={{position: 'absolute', left: 0, right: 0, bottom: 0}}
+        >
+          <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
+            <Button
+              disabled={isSubmittingContacts}
+              onPress={submitSelectedContacts}
+            >
+              {t('common.submit')}
+            </Button>
+          </Stack>
+        </KeyboardStickyView>
+      ) : null}
       <PreparingContactsOverlay
         labelKey="contacts.processingContacts"
         visible={isSubmittingContacts}

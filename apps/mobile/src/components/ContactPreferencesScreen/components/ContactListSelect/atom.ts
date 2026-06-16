@@ -260,6 +260,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
     return contactsToDisplay.length !== 0
   })
+  const areThereAnySelectedContactsAtom = atom(
+    (get) => get(selectedNumbersAtom).size > 0
+  )
 
   const selectAllAtom = atom(
     (get) => {
@@ -528,6 +531,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     addNewContactActionAtom,
     contactsFilterAtom,
     areThereAnyContactsToDisplayForSelectedTabAtom,
+    areThereAnySelectedContactsAtom,
     selectedNumbersAtom,
     syncDefaultSelectedContactsActionAtom,
     submitAllSelectedContactsActionAtom,

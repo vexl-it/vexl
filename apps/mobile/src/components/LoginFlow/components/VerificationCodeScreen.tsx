@@ -6,19 +6,15 @@ import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
 import React, {useCallback, useMemo, useRef, useState} from 'react'
-import {
-  Alert,
-  Keyboard,
-  Platform,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native'
+import {Keyboard, Platform, TextInput, TouchableOpacity} from 'react-native'
 import {getTokens} from 'tamagui'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
+import {globalDialogAtom} from '../../GlobalDialog'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
+import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {verifyPhoneNumberAtom} from '../api/verifyPhoneNumberAtom'
 import {finishLoginActionAtom} from '../atoms/finishLoginActionAtom'
 import Countdown from './Countdown'
@@ -57,23 +53,89 @@ export default function VerificationCodeScreen({
   const safeGoBack = useSafeGoBack()
   const inputRef = useRef<TextInput>(null)
   const submitInProgressRef = useRef(false)
+  const resendInProgressRef = useRef(false)
+  const [
+    currentInitPhoneVerificationResponse,
+    setCurrentInitPhoneVerificationResponse,
+  ] = useState(initPhoneVerificationResponse)
   const [userCode, setUserCode] = useState('')
+  const [errorMessage, setErrorMessage] = useState<string | undefined>()
   const [submitInProgress, setSubmitInProgress] = useState(false)
+  const [resendInProgress, setResendInProgress] = useState(false)
   const [countdownFinished, setCountdownFinished] = useState(false)
+  const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
   const verifyPhoneNumber = useSetAtom(verifyPhoneNumberAtom)
   const finishLogin = useSetAtom(finishLoginActionAtom)
+  const showGlobalDialog = useSetAtom(globalDialogAtom)
   const {t} = useTranslation()
   const loadingOverlay = useShowLoadingOverlay()
 
-  const parsedPhoneNumber = useMemo(() => {
-    return parsePhoneNumber(phoneNumber).number?.international
-  }, [phoneNumber])
+  const parsedPhoneNumber = useMemo(
+    () => parsePhoneNumber(phoneNumber).number,
+    [phoneNumber]
+  )
+  const internationalPhoneNumber =
+    parsedPhoneNumber?.international ?? phoneNumber
+  const nationalPhoneNumber =
+    parsedPhoneNumber?.national ?? internationalPhoneNumber
+
+  const showPhoneNumberConfirmationDialog = useCallback(() => {
+    void Effect.runPromise(
+      showGlobalDialog({
+        title: t('loginFlow.v2.verificationCode.phoneNumberDialog.title'),
+        subtitle: t(
+          'loginFlow.v2.verificationCode.phoneNumberDialog.description',
+          {phoneNumber: nationalPhoneNumber}
+        ),
+        negativeButtonText: t('common.change'),
+        positiveButtonText: t(
+          'loginFlow.v2.verificationCode.phoneNumberDialog.looksGood'
+        ),
+        disableClose: true,
+      })
+    )
+      .then((confirmed) => {
+        if (!confirmed) safeGoBack()
+      })
+      .catch(() => undefined)
+  }, [nationalPhoneNumber, safeGoBack, showGlobalDialog, t])
+
+  const resendVerificationCode = useCallback((): void => {
+    if (resendInProgressRef.current || submitInProgressRef.current) return
+
+    resendInProgressRef.current = true
+    setErrorMessage(undefined)
+    setResendInProgress(true)
+    loadingOverlay.show()
+    void Effect.runPromise(initPhoneVerification(phoneNumber))
+      .then((result) => {
+        setCurrentInitPhoneVerificationResponse(result)
+        setCountdownFinished(false)
+        setUserCode('')
+      })
+      .catch((error: unknown) => {
+        setErrorMessage(
+          typeof error === 'string' ? error : t('common.somethingWentWrong')
+        )
+      })
+      .finally(() => {
+        resendInProgressRef.current = false
+        setResendInProgress(false)
+        loadingOverlay.hide()
+      })
+  }, [initPhoneVerification, loadingOverlay, phoneNumber, t])
 
   const submitVerificationCode = useCallback(
     (code: string): void => {
-      if (code.length !== 6 || submitInProgressRef.current) return
+      if (
+        code.length !== 6 ||
+        submitInProgressRef.current ||
+        resendInProgressRef.current
+      )
+        return
 
       submitInProgressRef.current = true
+      setErrorMessage(undefined)
       setSubmitInProgress(true)
       loadingOverlay.show()
       void Effect.runPromise(
@@ -82,7 +144,7 @@ export default function VerificationCodeScreen({
           const verifyPhoneNumberResponse = yield* _(
             verifyPhoneNumber({
               code,
-              id: initPhoneVerificationResponse.verificationId,
+              id: currentInitPhoneVerificationResponse.verificationId,
               userPublicKey: privateKey.publicKeyPemBase64,
             })
           )
@@ -99,7 +161,7 @@ export default function VerificationCodeScreen({
         }).pipe(
           Effect.catchAll((errorMessage) =>
             Effect.sync(() => {
-              Alert.alert(errorMessage)
+              setErrorMessage(errorMessage)
             })
           )
         )
@@ -110,8 +172,8 @@ export default function VerificationCodeScreen({
       })
     },
     [
+      currentInitPhoneVerificationResponse.verificationId,
       finishLogin,
-      initPhoneVerificationResponse.verificationId,
       loadingOverlay,
       phoneNumber,
       verifyPhoneNumber,
@@ -123,7 +185,7 @@ export default function VerificationCodeScreen({
       let refocusTimeout: ReturnType<typeof setTimeout> | undefined
 
       const focusInput = (): void => {
-        if (submitInProgressRef.current) return
+        if (submitInProgressRef.current || resendInProgressRef.current) return
 
         inputRef.current?.focus()
       }
@@ -150,7 +212,7 @@ export default function VerificationCodeScreen({
   return (
     <LoginFlowScreen
       action={{
-        disabled: userCode.length !== 6 || submitInProgress,
+        disabled: userCode.length !== 6 || submitInProgress || resendInProgress,
         label: t('common.continue'),
         onPress: () => {
           submitVerificationCode(userCode)
@@ -158,10 +220,14 @@ export default function VerificationCodeScreen({
       }}
       footer={
         countdownFinished ? (
-          <TouchableOpacity onPress={safeGoBack}>
+          <TouchableOpacity
+            disabled={resendInProgress}
+            onPress={resendVerificationCode}
+          >
             <Typography
               color="$foregroundSecondary"
               textAlign="center"
+              textDecorationLine="underline"
               variant="paragraphSmall"
             >
               {t('loginFlow.v2.verificationCode.retry')}
@@ -175,10 +241,11 @@ export default function VerificationCodeScreen({
           >
             {t('loginFlow.v2.verificationCode.retryCountdown')}{' '}
             <Countdown
-              col="$foregroundSecondary"
+              color="$foregroundSecondary"
               countUntil={DateTime.fromISO(
-                initPhoneVerificationResponse.expirationAt
+                currentInitPhoneVerificationResponse.expirationAt
               )}
+              key={currentInitPhoneVerificationResponse.verificationId}
               onFinished={() => {
                 setCountdownFinished(true)
               }}
@@ -196,8 +263,14 @@ export default function VerificationCodeScreen({
           </LoginFlowTitle>
           <Typography color="$foregroundSecondary" variant="paragraphSmall">
             {t('loginFlow.v2.verificationCode.text')}{' '}
-            <Typography color="$foregroundSecondary" variant="paragraphSmall">
-              {parsedPhoneNumber}
+            <Typography
+              color="$foregroundSecondary"
+              onPress={showPhoneNumberConfirmationDialog}
+              pressStyle={{opacity: 0.8}}
+              textDecorationLine="underline"
+              variant="paragraphSmall"
+            >
+              {internationalPhoneNumber}
             </Typography>
             .
           </Typography>
@@ -215,11 +288,13 @@ export default function VerificationCodeScreen({
               }
               autoFocus
               caretHidden
+              editable={!submitInProgress && !resendInProgress}
               importantForAutofill="yes"
               keyboardType="number-pad"
               maxLength={6}
               onChangeText={(value) => {
                 const code = value.replace(/\D/g, '').substring(0, 6)
+                setErrorMessage(undefined)
                 setUserCode(code)
                 submitVerificationCode(code)
               }}
@@ -245,6 +320,15 @@ export default function VerificationCodeScreen({
             </XStack>
           </YStack>
         </TouchableOpacity>
+        {errorMessage != null ? (
+          <Typography
+            color="$redForeground"
+            textAlign="center"
+            variant="paragraphSmall"
+          >
+            {errorMessage}
+          </Typography>
+        ) : null}
       </YStack>
     </LoginFlowScreen>
   )

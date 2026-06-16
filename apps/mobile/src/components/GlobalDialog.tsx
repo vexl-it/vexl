@@ -22,8 +22,10 @@ type DialogBackgroundColor = React.ComponentProps<
   typeof Stack
 >['backgroundColor']
 
-interface DialogTextInputProps
-  extends Omit<UiInputProps, 'autoFocus' | 'onChangeText' | 'value'> {
+interface DialogTextInputProps extends Omit<
+  UiInputProps,
+  'autoFocus' | 'onChangeText' | 'value'
+> {
   readonly icon?: unknown
   readonly onClearPress?: () => void
   readonly showClearButton?: boolean

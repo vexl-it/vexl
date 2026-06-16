@@ -9,6 +9,7 @@
     "noEmit": true,
     "resolveJsonModule": true,
     "target": "ESNext",
+    "types": ["jest", "node"],
     "strictNullChecks": true,
     "paths": {
       "testUtils": ["./src/testUtils"]

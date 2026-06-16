@@ -8,7 +8,7 @@ import {
   updateContactAsync,
   type Contact,
   type ExistingContact,
-} from 'expo-contacts'
+} from 'expo-contacts/legacy'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'

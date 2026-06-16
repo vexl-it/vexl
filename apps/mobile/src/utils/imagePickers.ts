@@ -50,7 +50,7 @@ export function moveImageToInternalDirectory({
 
       const path = `${parentDirectory}${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
 
-      new FileSystem.File(imagePath).copy(new FileSystem.File(path))
+      await new FileSystem.File(imagePath).copy(new FileSystem.File(path))
       const infoTo = new FileSystem.File(path)
       return Schema.decodeSync(UriString)(infoTo.uri)
     },

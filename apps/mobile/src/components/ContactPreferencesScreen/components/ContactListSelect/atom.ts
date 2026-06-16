@@ -4,7 +4,7 @@ import {Array, Effect, Option, Schema, pipe} from 'effect'
 import {
   getPermissionsAsync,
   type ContactsPermissionResponse,
-} from 'expo-contacts'
+} from 'expo-contacts/legacy'
 import {atom, type Atom, type SetStateAction} from 'jotai'
 import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'

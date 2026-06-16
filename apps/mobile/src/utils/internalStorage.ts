@@ -34,16 +34,17 @@ function copyFileE({
   from: UriString
   to: UriString
 }): Effect.Effect<UriString, FileSystemError> {
-  return Effect.try({
-    try: () => {
-      new FileSystem.File(from).copy(new FileSystem.File(to))
+  return Effect.tryPromise({
+    try: async () => {
+      await new FileSystem.File(from).copy(new FileSystem.File(to))
       return from
     },
     catch(error) {
-      return {
+      const fileSystemError: FileSystemError = {
         _tag: 'fileSystemError',
         error,
-      } as FileSystemError
+      }
+      return fileSystemError
     },
   })
 }

@@ -1,5 +1,5 @@
 import {Option} from 'effect'
-import {getContactByIdAsync} from 'expo-contacts'
+import {getContactByIdAsync} from 'expo-contacts/legacy'
 import React, {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
 import {Image} from 'tamagui'

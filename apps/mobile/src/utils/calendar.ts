@@ -12,9 +12,8 @@ import {
   openEventInCalendarAsync,
   requestCalendarPermissionsAsync,
   updateEventAsync,
-  type Calendar,
   type Source,
-} from 'expo-calendar'
+} from 'expo-calendar/legacy'
 import {left, right} from 'fp-ts/Either'
 import {type TaskEither} from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
@@ -25,6 +24,7 @@ const CALENDAR_TITLE = 'Vexl'
 const DEFAULT_TRADE_CHECKLIST_EVENT_DURATION_MS = 60 * 60 * 1000
 
 type CalendarEventIdType = typeof CalendarEventId.Type
+type Calendar = Awaited<ReturnType<typeof getDefaultCalendarAsync>>
 type CalendarIdResolutionResult =
   | {calendarId: string; isVexlCalendar: true}
   | {calendarId: string; isVexlCalendar: false}

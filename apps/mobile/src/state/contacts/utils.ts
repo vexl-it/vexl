@@ -12,7 +12,7 @@ import {
   getPermissionsAsync,
   requestPermissionsAsync,
   SortTypes,
-} from 'expo-contacts'
+} from 'expo-contacts/legacy'
 import {map, type Either} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {hmacPassword} from '../../utils/environment'

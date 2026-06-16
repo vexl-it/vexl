@@ -6,7 +6,7 @@ import {
   type CommonFriend,
 } from '@vexl-next/ui'
 import {Array, Effect, HashMap, Option, pipe} from 'effect'
-import {getContactByIdAsync} from 'expo-contacts'
+import {getContactByIdAsync} from 'expo-contacts/legacy'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Platform} from 'react-native'

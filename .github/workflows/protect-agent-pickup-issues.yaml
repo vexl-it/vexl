@@ -15,6 +15,11 @@ jobs:
         if: "github.event.action == 'labeled' && github.event.label.name == 'agents: ready for pickup'"
         run: |
           gh api \
+            -X POST \
+            repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+            -f body='This issue has been locked to prevent prompt injections. Only members can comment while it is locked.'
+
+          gh api \
             -X PUT \
             repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/lock \
             -f lock_reason=resolved
@@ -27,5 +32,10 @@ jobs:
           gh api \
             -X DELETE \
             repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/lock
+
+          gh api \
+            -X POST \
+            repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments \
+            -f body='This issue has been unlocked. The prompt-injection protection lock has been removed.'
         env:
           GH_TOKEN: ${{ github.token }}

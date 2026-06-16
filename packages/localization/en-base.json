@@ -1364,6 +1364,7 @@
   "marketplace.noOffersYet": "No offers yet.",
   "marketplace.tryAdjustingFilters": "Try adjusting or clearing your filters.",
   "marketplace.tryAdjustingMapOrClearingFilters": "Try moving the map or adjusting your filters.",
+  "marketplace.fewOffersAfterFiltering": "We found only a few results. Try editing your filters to see more options.",
   "marketplace.editFilters": "Edit filters",
   "marketplace.loadingMap": "Loading map",
   "marketplace.loadingOffers": "Loading offers",

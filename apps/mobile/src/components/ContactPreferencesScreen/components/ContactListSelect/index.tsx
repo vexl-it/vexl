@@ -166,6 +166,7 @@ function ContactsListSelect({
               primaryButton={{
                 label: t('marketplace.importNewContactsSuggestion.button'),
                 onPress: () => {
+                  setNewContactsBannerDismissedForCurrentScreen(true)
                   setSelectedFilter('new')
                 },
               }}

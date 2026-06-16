@@ -5,10 +5,14 @@ import React from 'react'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
 import ContactItem from './ContactItem'
+import ContactsListEmpty, {
+  type ContactsListEmptyVariant,
+} from './ContactsListEmpty'
 
 interface Props {
   readonly contacts: ReadonlyArray<Atom<StoredContactWithComputedValues>>
   readonly keyboardBottomSpacerHeight: number
+  readonly emptyVariant: ContactsListEmptyVariant
 }
 
 function renderItem({
@@ -25,11 +29,16 @@ function ItemSeparatorComponent(): React.ReactElement {
 
 function ContactsList({
   contacts,
+  emptyVariant,
   keyboardBottomSpacerHeight,
 }: Props): React.ReactElement {
   const listFooterComponent = React.useCallback(
     () => <Stack h={keyboardBottomSpacerHeight + 16} />,
     [keyboardBottomSpacerHeight]
+  )
+  const listEmptyComponent = React.useCallback(
+    () => <ContactsListEmpty variant={emptyVariant} />,
+    [emptyVariant]
   )
 
   return (
@@ -37,6 +46,7 @@ function ContactsList({
       <FlashList
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooterComponent}
         data={contacts}
         ItemSeparatorComponent={ItemSeparatorComponent}

@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import type {LayoutChangeEvent, ScrollView as RNScrollView} from 'react-native'
-import {ScrollView} from 'react-native'
+import {ScrollView, type LayoutChangeEvent} from 'react-native'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,6 +8,7 @@ import Animated, {
 import {getTokens, styled} from 'tamagui'
 
 import {SizableText, Stack, XStack} from '../primitives'
+import {Dot} from './Dot'
 
 const UNDERLINE_HEIGHT = 3
 const ANIMATION_DURATION = 300
@@ -31,6 +31,7 @@ interface TabLayout {
 export interface TabItem<T> {
   readonly label: string
   readonly value: T
+  readonly badge?: boolean
 }
 
 export interface TabsProps<T> {
@@ -50,7 +51,7 @@ export function Tabs<T>({
 }: TabsProps<T>): React.JSX.Element {
   const spaceTokens = getTokens().space
 
-  const scrollViewRef = useRef<RNScrollView>(null)
+  const scrollViewRef = useRef<React.ComponentRef<typeof ScrollView>>(null)
   const scrollViewWidth = useRef(0)
   const tabLayouts = useRef<TabLayout[]>([])
   const hasInitialized = useRef(false)
@@ -161,18 +162,21 @@ export function Tabs<T>({
                 handleTabLayout(index, event)
               }}
             >
-              <SizableText
-                fontFamily="$heading"
-                fontSize={size === 'large' ? '$2' : '$1'}
-                fontWeight={isSelected ? '700' : '400'}
-                color={
-                  isSelected
-                    ? '$accentHighlightPrimary'
-                    : '$foregroundSecondary'
-                }
-              >
-                {tab.label}
-              </SizableText>
+              <XStack gap="$1" alignItems="flex-start">
+                <SizableText
+                  fontFamily="$heading"
+                  fontSize={size === 'large' ? '$2' : '$1'}
+                  fontWeight={isSelected ? '700' : '400'}
+                  color={
+                    isSelected
+                      ? '$accentHighlightPrimary'
+                      : '$foregroundSecondary'
+                  }
+                >
+                  {tab.label}
+                </SizableText>
+                {tab.badge === true ? <Dot size="$3" marginTop="$1" /> : null}
+              </XStack>
             </Stack>
           )
         })}

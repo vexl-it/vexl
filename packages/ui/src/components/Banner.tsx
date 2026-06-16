@@ -1,8 +1,9 @@
 import React from 'react'
 import {styled} from 'tamagui'
 
-import {SizableText, Stack, XStack, YStack} from '../primitives'
+import {Stack, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
+import {Typography} from './Typography'
 
 export type BannerColor = 'green' | 'pink'
 
@@ -36,7 +37,7 @@ const BannerFrame = styled(YStack, {
         backgroundColor: '$pinkBackground',
       },
     },
-  } as const,
+  },
 
   defaultVariants: {
     color: 'green',
@@ -48,26 +49,6 @@ const ImageFrame = styled(Stack, {
   borderRadius: '$3',
   overflow: 'hidden',
   alignSelf: 'stretch',
-})
-
-const TitleText = styled(SizableText, {
-  name: 'BannerTitle',
-  fontFamily: '$heading',
-  fontWeight: '700',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundPrimary',
-})
-
-const DescriptionText = styled(SizableText, {
-  name: 'BannerDescription',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundSecondary',
 })
 
 export function Banner({
@@ -82,17 +63,30 @@ export function Banner({
     <BannerFrame color={color}>
       {image != null ? <ImageFrame>{image}</ImageFrame> : null}
       <YStack gap="$3">
-        <TitleText>{title}</TitleText>
-        <DescriptionText>{description}</DescriptionText>
+        <Typography variant="tabSmallBold" color="$foregroundPrimary">
+          {title}
+        </Typography>
+        <Typography variant="description" color="$foregroundSecondary">
+          {description}
+        </Typography>
         {primaryButton != null || secondaryButton != null ? (
           <XStack gap="$3">
             {primaryButton != null ? (
-              <CardButton onPress={primaryButton.onPress}>
+              <CardButton
+                height={36}
+                paddingVertical="$0"
+                onPress={primaryButton.onPress}
+              >
                 {primaryButton.label}
               </CardButton>
             ) : null}
             {secondaryButton != null ? (
-              <CardButton type="text" onPress={secondaryButton.onPress}>
+              <CardButton
+                type="text"
+                height={36}
+                paddingVertical="$0"
+                onPress={secondaryButton.onPress}
+              >
                 {secondaryButton.label}
               </CardButton>
             ) : null}

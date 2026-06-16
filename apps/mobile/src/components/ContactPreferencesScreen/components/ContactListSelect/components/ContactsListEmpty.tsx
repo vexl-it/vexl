@@ -7,8 +7,13 @@ import {Linking} from 'react-native'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {contactSelectMolecule} from '../atom'
 
+export type ContactsListEmptyVariant =
+  | 'noMatchingContacts'
+  | 'noContactsInSelectedFilter'
+  | 'emptyContacts'
+
 interface Props {
-  readonly variant?: 'noMatchingContacts' | 'emptyContacts'
+  readonly variant?: ContactsListEmptyVariant
 }
 
 function ContactsListEmpty({
@@ -22,7 +27,10 @@ function ContactsListEmpty({
     shouldOpenContactsSettingsAtom
   )
 
-  if (variant === 'noMatchingContacts') {
+  if (
+    variant === 'noMatchingContacts' ||
+    variant === 'noContactsInSelectedFilter'
+  ) {
     return (
       <Stack width="100%" pt="$5">
         <Stack width="100%" px="$7" py="$7" gap="$5" alignItems="center">
@@ -32,7 +40,11 @@ function ContactsListEmpty({
             color="$foregroundPrimary"
             variant="heading3"
           >
-            {t('contactPreferences.noMatchingContacts')}
+            {t(
+              variant === 'noContactsInSelectedFilter'
+                ? 'contactPreferences.emptyContacts.noContactsInSelectedFilter.title'
+                : 'contactPreferences.noMatchingContacts'
+            )}
           </Typography>
           <Typography
             width="100%"
@@ -40,7 +52,11 @@ function ContactsListEmpty({
             color="$foregroundSecondary"
             variant="description"
           >
-            {t('postLoginFlow.contactsList.nothingFound.searchOrFiltersText')}
+            {t(
+              variant === 'noContactsInSelectedFilter'
+                ? 'contactPreferences.emptyContacts.noContactsInSelectedFilter.description'
+                : 'postLoginFlow.contactsList.nothingFound.searchOrFiltersText'
+            )}
           </Typography>
         </Stack>
       </Stack>

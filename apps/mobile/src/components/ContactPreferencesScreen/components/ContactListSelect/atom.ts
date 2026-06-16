@@ -170,6 +170,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const allContactsToDisplayCountAtom = atom(
     (get) => get(allContactsToDisplayAtomsAtom).length
   )
+  const contactsToDisplayCountAtom = atom(
+    (get) => get(contactsToDisplayAtomsAtom).length
+  )
   const contactsAccessPrivilegesAtom = atom<
     ContactsPermissionResponse['accessPrivileges'] | undefined
   >()
@@ -261,36 +264,39 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     return contactsToDisplay.length !== 0
   })
 
-  const selectAllAtom = atom(
-    (get) => {
-      const selectedNumbers = get(selectedNumbersAtom)
-      const contactsToDisplay = get(_contactsToDisplayAtom)
-      return (
-        Array.isNonEmptyArray(contactsToDisplay) &&
-        pipe(
-          contactsToDisplay,
-          Array.every((one) =>
-            selectedNumbers.has(one.computedValues.normalizedNumber)
-          )
+  const areAllContactsToDisplaySelectedAtom = atom((get) => {
+    const contactsToDisplay = get(_contactsToDisplayAtom)
+    const selectedNumbers = get(selectedNumbersAtom)
+
+    return (
+      Array.isNonEmptyArray(contactsToDisplay) &&
+      pipe(
+        contactsToDisplay,
+        Array.every((one) =>
+          selectedNumbers.has(one.computedValues.normalizedNumber)
         )
       )
-    },
-    (get, set, update: SetStateAction<boolean>) => {
-      const contactsToDisplay = get(_contactsToDisplayAtom)
-      const shouldSelectAll = getValueFromSetStateActionOfAtom(update)(() =>
-        get(selectAllAtom)
+    )
+  })
+
+  const toggleAllContactsToDisplayActionAtom = atom(null, (get, set) => {
+    const contactsToDisplay = get(_contactsToDisplayAtom)
+    const shouldSelectAll = !get(areAllContactsToDisplaySelectedAtom)
+
+    set(selectedNumbersAtom, (value) => {
+      const newValue = new Set<E164PhoneNumber>(value)
+      pipe(
+        contactsToDisplay,
+        Array.map((one) => one.computedValues.normalizedNumber),
+        Array.forEach((number) => {
+          if (shouldSelectAll) newValue.add(number)
+          else newValue.delete(number)
+        })
       )
 
-      set(selectedNumbersAtom, (value) => {
-        const newValue = new Set<E164PhoneNumber>(value)
-        contactsToDisplay
-          .map((one) => one.computedValues.normalizedNumber)
-          .forEach(shouldSelectAll ? newValue.add : newValue.delete, newValue)
-
-        return newValue
-      })
-    }
-  )
+      return newValue
+    })
+  })
 
   const selectContactAtom = atomFamily((contactNumber: E164PhoneNumber) =>
     atom(
@@ -516,7 +522,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   })
 
   return {
-    selectAllAtom,
+    areAllContactsToDisplaySelectedAtom,
+    toggleAllContactsToDisplayActionAtom,
     searchTextAtom,
     requestedContactsFilterAtom,
     requestedSearchTextAtom,
@@ -538,6 +545,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     newContactsToDisplayAtomsAtom,
     allContactsToDisplayAtomsAtom,
     contactsToDisplayAtomsAtom,
+    contactsToDisplayCountAtom,
     newContactsToDisplayCountAtom,
     submittedContactsToDisplayCountAtom,
     nonSubmittedContactsToDisplayCountAtom,

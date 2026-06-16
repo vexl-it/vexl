@@ -2,13 +2,26 @@ import {Option} from 'effect'
 import {getContactByIdAsync} from 'expo-contacts'
 import React, {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
-import {Image} from 'tamagui'
+import {FilterImage} from 'react-native-svg/filter-image'
+import {getTokens} from 'tamagui'
 import {type NonUniqueContactId} from '../state/contacts/domain'
 
-type Props = React.ComponentProps<typeof Image> & {
+const GRAYSCALE_FILTER = [
+  {name: 'feColorMatrix', type: 'saturate', values: 0},
+] satisfies React.ComponentProps<typeof FilterImage>['filters']
+
+type ObjectFit = 'cover' | 'contain' | 'fill' | 'none' | 'scale-down'
+
+interface Props {
   // undefined to make it easier to use with ContactInfo. TODO remove once nonUniqueContactId is required
-  contactId: Option.Option<NonUniqueContactId>
-  fallback?: React.ReactNode
+  readonly contactId: Option.Option<NonUniqueContactId>
+  readonly fallback?: React.ReactNode
+  readonly grayscale?: boolean
+  readonly width?: number
+  readonly height?: number
+  readonly borderRadius?: number | string
+  readonly br?: number | string
+  readonly objectFit?: ObjectFit
 }
 
 interface ImageDetails {
@@ -16,10 +29,52 @@ interface ImageDetails {
   isABImageOnIos: boolean
 }
 
+function resolveBorderRadius(
+  borderRadius: Props['borderRadius']
+): number | undefined {
+  if (typeof borderRadius === 'number') return borderRadius
+  if (typeof borderRadius !== 'string') return undefined
+
+  const tokens = getTokens()
+  const radiusTokens: Record<string, number> = {
+    $0: tokens.radius[0].val,
+    $1: tokens.radius[1].val,
+    $2: tokens.radius[2].val,
+    '$2.5': tokens.radius[2.5].val,
+    $3: tokens.radius[3].val,
+    $4: tokens.radius[4].val,
+    $5: tokens.radius[5].val,
+    $6: tokens.radius[6].val,
+    $7: tokens.radius[7].val,
+    $8: tokens.radius[8].val,
+    $9: tokens.radius[9].val,
+    $10: tokens.radius[10].val,
+    $11: tokens.radius[11].val,
+    $true: tokens.radius.true.val,
+  }
+
+  return radiusTokens[borderRadius]
+}
+
+function resolveResizeMode(
+  objectFit: ObjectFit | undefined
+): React.ComponentProps<typeof FilterImage>['resizeMode'] {
+  if (objectFit === 'contain') return 'contain'
+  if (objectFit === 'fill') return 'stretch'
+  if (objectFit === 'none' || objectFit === 'scale-down') return 'center'
+
+  return 'cover'
+}
+
 export default function ContactPictureImage({
   contactId,
   fallback,
-  ...props
+  grayscale = false,
+  width,
+  height,
+  borderRadius,
+  br,
+  objectFit,
 }: Props): React.ReactElement | null {
   const [imageDetails, setImageDetails] = useState<ImageDetails | null>(null)
 
@@ -52,5 +107,18 @@ export default function ContactPictureImage({
     return fallback ? <>{fallback}</> : null
   }
 
-  return <Image {...props} source={{uri: imageDetails.uri}} />
+  return (
+    <FilterImage
+      style={{
+        width,
+        height,
+        borderRadius: resolveBorderRadius(borderRadius ?? br),
+      }}
+      resizeMode={resolveResizeMode(objectFit)}
+      filters={grayscale ? GRAYSCALE_FILTER : undefined}
+      width={width}
+      height={height}
+      source={{uri: imageDetails.uri}}
+    />
+  )
 }

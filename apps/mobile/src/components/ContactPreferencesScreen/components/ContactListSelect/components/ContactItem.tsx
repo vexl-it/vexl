@@ -8,6 +8,7 @@ import {
   XStack,
   useTheme,
 } from '@vexl-next/ui'
+import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React from 'react'
 import {getTokens} from 'tamagui'
@@ -15,7 +16,8 @@ import {type RootStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
 import ContactPictureImage from '../../../../ContactPictureImage'
-import IsSelectedCheckbox from './IsSelectedCheckbox'
+import {contactSelectMolecule} from '../atom'
+import IsSelectedSwitch from './IsSelectedSwitch'
 
 interface Props {
   contactAtom: Atom<StoredContactWithComputedValues>
@@ -25,12 +27,21 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
   const contact = useAtomValue(contactAtom)
   const navigation =
     useNavigation<RootStackScreenProps<'ContactPreferences'>['navigation']>()
+  const {selectContactAtom} = useMolecule(contactSelectMolecule)
   const theme = useTheme()
-  const avatarSize = getTokens().size.$9.val
+  const tokens = getTokens()
+  const avatarSize = tokens.size.$9.val
   const {
     info: {nonUniqueContactId, name},
     computedValues: {normalizedNumber},
   } = contact
+  const isSelected = useAtomValue(selectContactAtom(normalizedNumber))
+  const contactTextColor = isSelected
+    ? '$foregroundPrimary'
+    : '$foregroundTertiary'
+  const contactNumberColor = isSelected
+    ? '$foregroundSecondary'
+    : '$foregroundTertiary'
 
   return (
     <XStack testID="@contactItem" ai="center" gap="$3" py="$4" px="$2">
@@ -48,13 +59,20 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
           height={avatarSize}
           borderRadius="$2.5"
           objectFit="cover"
-          fallback={<UserImagePlaceholder size={avatarSize} />}
+          grayscale={!isSelected}
+          fallback={
+            <UserImagePlaceholder
+              size={avatarSize}
+              borderRadius={0}
+              grayscale={!isSelected}
+            />
+          }
         />
       </Stack>
       <Stack f={1} gap="$1" minWidth={0}>
         <Typography
           variant="descriptionBold"
-          color="$foregroundPrimary"
+          color={contactTextColor}
           numberOfLines={1}
         >
           {name}
@@ -62,13 +80,13 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
         <Typography
           testID="@contactItem/normalizedNumber"
           variant="micro"
-          color="$foregroundSecondary"
+          color={contactNumberColor}
           numberOfLines={1}
         >
           {getInternationalPhoneNumber(normalizedNumber)}
         </Typography>
       </Stack>
-      <XStack gap="$2">
+      <XStack gap="$2" ai="center">
         <IconButton
           testID="@contactItem/edit"
           backgroundColor="$backgroundTertiary"
@@ -78,9 +96,9 @@ function ContactItem({contactAtom}: Props): React.ReactElement {
             })
           }}
         >
-          <PencilWriteEdit size={30} color={theme.foregroundPrimary.get()} />
+          <PencilWriteEdit size={24} color={theme.foregroundPrimary.get()} />
         </IconButton>
-        <IsSelectedCheckbox contactNumber={normalizedNumber} />
+        <IsSelectedSwitch contactNumber={normalizedNumber} />
       </XStack>
     </XStack>
   )

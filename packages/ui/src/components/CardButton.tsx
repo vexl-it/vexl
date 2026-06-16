@@ -1,7 +1,8 @@
 import React from 'react'
 import {styled} from 'tamagui'
 
-import {SizableText, Stack} from '../primitives'
+import {Stack} from '../primitives'
+import {Typography, type TypographyProps} from './Typography'
 
 type CardButtonType = 'filled' | 'outlined' | 'text'
 
@@ -45,39 +46,7 @@ const CardButtonFrame = styled(Stack, {
         backgroundColor: 'transparent',
       },
     },
-  } as const,
-
-  defaultVariants: {
-    variant: 'filled',
   },
-})
-
-const CardButtonLabel = styled(SizableText, {
-  name: 'CardButtonLabel',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-
-  variants: {
-    variant: {
-      filled: {
-        color: '$white100',
-      },
-      filledContrast: {
-        color: '$backgroundPrimary',
-      },
-      outlined: {
-        color: '$foregroundPrimary',
-      },
-      outlinedContrast: {
-        color: '$backgroundPrimary',
-      },
-      text: {
-        color: '$foregroundPrimary',
-      },
-    },
-  } as const,
 
   defaultVariants: {
     variant: 'filled',
@@ -100,6 +69,14 @@ function resolveVariant(
   return contrast ? 'filledContrast' : 'filled'
 }
 
+function resolveLabelColor(variant: InternalVariant): TypographyProps['color'] {
+  if (variant === 'filled') return '$white100'
+  if (variant === 'filledContrast') return '$backgroundPrimary'
+  if (variant === 'outlinedContrast') return '$backgroundPrimary'
+
+  return '$foregroundPrimary'
+}
+
 type CardButtonFrameProps = React.ComponentProps<typeof CardButtonFrame>
 
 interface CardButtonProps extends Omit<CardButtonFrameProps, 'children'> {
@@ -118,7 +95,9 @@ export function CardButton({
 
   return (
     <CardButtonFrame variant={variant} {...rest}>
-      <CardButtonLabel variant={variant}>{children}</CardButtonLabel>
+      <Typography variant="descriptionBold" color={resolveLabelColor(variant)}>
+        {children}
+      </Typography>
     </CardButtonFrame>
   )
 }

@@ -1,15 +1,18 @@
 import {
+  Banner,
   Button,
   KeyboardStickyView,
   Stack,
+  Typography,
+  useTheme,
   XStack,
-  type FilterBarItem,
+  type TabItem,
 } from '@vexl-next/ui'
 import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
-import {useAtomValue} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo, useState} from 'react'
-import {type LayoutChangeEvent} from 'react-native'
+import {Pressable, type LayoutChangeEvent} from 'react-native'
 import {normalizedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
@@ -22,7 +25,6 @@ import ContactsFilterBar from './components/ContactsFilterBar'
 import ContactsListEmpty from './components/ContactsListEmpty'
 import FilteredContacts from './components/FilteredContactsWithProvider'
 import SearchBar from './components/SearchBar'
-import SelectAllContactsCheckbox from './components/SelectAllContactsCheckbox'
 import useContactListSelectLifecycle from './hooks/useContactListSelectLifecycle'
 import usePreparedContactsFilter from './hooks/usePreparedContactsFilter'
 import useSubmitSelectedContacts from './hooks/useSubmitSelectedContacts'
@@ -37,20 +39,35 @@ function ContactsListSelect({
   const {t} = useTranslation()
   const {
     areThereAnyContactsToDisplayForSelectedTabAtom,
+    areAllContactsToDisplaySelectedAtom,
+    contactsToDisplayCountAtom,
     isContactsPreparingAtom,
     newContactsToDisplayCountAtom,
+    toggleAllContactsToDisplayActionAtom,
   } = useMolecule(contactSelectMolecule)
+  const theme = useTheme()
   const normalizedContacts = useContactListSelectLifecycle()
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
   const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
+  const contactsToDisplayCount = useAtomValue(contactsToDisplayCountAtom)
+  const areAllContactsToDisplaySelected = useAtomValue(
+    areAllContactsToDisplaySelectedAtom
+  )
   const areThereAnyContactsToDisplayForSelectedTab = useAtomValue(
     areThereAnyContactsToDisplayForSelectedTabAtom
+  )
+  const toggleAllContactsToDisplay = useSetAtom(
+    toggleAllContactsToDisplayActionAtom
   )
   const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
   const {isSubmittingContacts, submitSelectedContacts} =
     useSubmitSelectedContacts()
   const submitBarHeightRef = React.useRef(0)
   const [submitBarHeight, setSubmitBarHeight] = React.useState(0)
+  const [
+    newContactsBannerDismissedForCurrentScreen,
+    setNewContactsBannerDismissedForCurrentScreen,
+  ] = React.useState(false)
   const handleSubmitBarLayout = React.useCallback((e: LayoutChangeEvent) => {
     const measuredSubmitBarHeight = e.nativeEvent.layout.height
     if (submitBarHeightRef.current === measuredSubmitBarHeight) return
@@ -68,7 +85,7 @@ function ContactsListSelect({
     !Array.isNonEmptyArray(normalizedContacts) && addContactRequestId === 0
 
   const contactsFilterItems = useMemo(
-    (): ReadonlyArray<FilterBarItem<ContactsFilter>> => [
+    (): ReadonlyArray<TabItem<ContactsFilter>> => [
       {
         label: t('postLoginFlow.contactsList.all'),
         value: 'all',
@@ -79,12 +96,12 @@ function ContactsListSelect({
         badge: newContactsToDisplayCount > 0,
       },
       {
-        label: t('postLoginFlow.contactsList.nonSubmitted'),
-        value: 'nonSubmitted',
+        label: t('postLoginFlow.contactsList.active'),
+        value: 'submitted',
       },
       {
-        label: t('postLoginFlow.contactsList.submitted'),
-        value: 'submitted',
+        label: t('postLoginFlow.contactsList.hidden'),
+        value: 'nonSubmitted',
       },
     ],
     [newContactsToDisplayCount, t]
@@ -94,28 +111,74 @@ function ContactsListSelect({
     return <ContactsListEmpty variant="emptyContacts" />
   }
 
-  const isSelectAllContactsCheckboxDisabled =
+  const isActivateAllButtonDisabled =
     !areThereAnyContactsToDisplayForSelectedTab || isContactsPreparing
+  const shouldShowNewContactsBanner =
+    selectedFilter === 'all' &&
+    newContactsToDisplayCount > 0 &&
+    !newContactsBannerDismissedForCurrentScreen
+  const bulkToggleLabel = t(
+    areAllContactsToDisplaySelected
+      ? 'postLoginFlow.contactsList.deactivateAll'
+      : 'postLoginFlow.contactsList.activateAll'
+  )
 
   return (
     <Stack f={1} pos="relative">
       <Stack f={1} pb={submitBarHeight}>
-        <Stack px="$5" pb="$3" gap="$3">
-          <ContactsAccessPrivilegesInfoBanner />
-          <XStack alignItems="center" gap="$3">
-            <Stack flex={1}>
-              <SearchBar addContactRequestId={addContactRequestId} />
-            </Stack>
-            <SelectAllContactsCheckbox
-              disabled={isSelectAllContactsCheckboxDisabled}
-            />
-          </XStack>
-        </Stack>
         <ContactsFilterBar
           items={contactsFilterItems}
           selectedFilter={selectedFilter}
           onSelectedFilterChange={setSelectedFilter}
         />
+        <Stack px="$5" pb="$3" gap="$3">
+          <XStack alignItems="center" gap="$3">
+            <Stack flex={1}>
+              <SearchBar addContactRequestId={addContactRequestId} />
+            </Stack>
+          </XStack>
+          <XStack alignItems="center" justifyContent="space-between" px="$1">
+            <Typography variant="description" color="$foregroundSecondary">
+              {t('account.contactsCount', {count: contactsToDisplayCount})}
+            </Typography>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={bulkToggleLabel}
+              disabled={isActivateAllButtonDisabled}
+              onPress={toggleAllContactsToDisplay}
+            >
+              <Typography
+                variant="descriptionBold"
+                color={theme.accentHighlightPrimary.get()}
+                opacity={isActivateAllButtonDisabled ? 0.45 : 1}
+              >
+                {bulkToggleLabel}
+              </Typography>
+            </Pressable>
+          </XStack>
+          {shouldShowNewContactsBanner ? (
+            <Banner
+              color="pink"
+              title={t('marketplace.importNewContactsSuggestion.title')}
+              description={t(
+                'marketplace.importNewContactsSuggestion.description'
+              )}
+              primaryButton={{
+                label: t('marketplace.importNewContactsSuggestion.button'),
+                onPress: () => {
+                  setSelectedFilter('new')
+                },
+              }}
+              secondaryButton={{
+                label: t('marketplace.importNewContactsSuggestion.dismiss'),
+                onPress: () => {
+                  setNewContactsBannerDismissedForCurrentScreen(true)
+                },
+              }}
+            />
+          ) : null}
+          <ContactsAccessPrivilegesInfoBanner />
+        </Stack>
         <Stack f={1} pos="relative">
           <FilteredContacts
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}

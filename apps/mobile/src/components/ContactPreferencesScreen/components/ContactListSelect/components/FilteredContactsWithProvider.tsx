@@ -5,7 +5,6 @@ import React, {useEffect} from 'react'
 import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 import {contactSelectMolecule} from '../atom'
 import ContactsList from './ContactsList'
-import ContactsListEmpty from './ContactsListEmpty'
 
 function FilteredContacts({
   keyboardBottomSpacerHeight,
@@ -28,17 +27,19 @@ function FilteredContacts({
       setReadyContactsQuery({contactsFilter, searchText})
     })
   }, [contactsFilter, searchText, setReadyContactsQuery, toDisplay])
+  const emptyVariant =
+    searchText.trim().length === 0
+      ? 'noContactsInSelectedFilter'
+      : 'noMatchingContacts'
 
   return (
     <Stack f={1}>
       <Stack f={1} px="$5">
-        {toDisplay.length > 0 && (
-          <ContactsList
-            contacts={toDisplay}
-            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-          />
-        )}
-        {toDisplay.length === 0 && <ContactsListEmpty />}
+        <ContactsList
+          contacts={toDisplay}
+          emptyVariant={emptyVariant}
+          keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+        />
       </Stack>
     </Stack>
   )

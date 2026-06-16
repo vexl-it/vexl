@@ -4,8 +4,10 @@ import React, {useEffect, useState} from 'react'
 
 type TypographyProps = React.ComponentProps<typeof Typography>
 
-interface Props
-  extends Omit<TypographyProps, 'children' | 'color' | 'variant'> {
+interface Props extends Omit<
+  TypographyProps,
+  'children' | 'color' | 'variant'
+> {
   countUntil: Luxon.DateTime
   onFinished: () => void
   color?: TypographyProps['color']

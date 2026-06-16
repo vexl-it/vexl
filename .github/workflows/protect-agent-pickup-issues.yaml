@@ -1,0 +1,31 @@
+name: Protect agent pickup issues
+
+on:
+  issues:
+    types: [labeled, unlabeled]
+
+permissions:
+  issues: write
+
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lock when ready for pickup
+        if: "github.event.action == 'labeled' && github.event.label.name == 'agents: ready for pickup'"
+        run: |
+          gh api \
+            -X PUT \
+            repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/lock \
+            -f lock_reason=resolved
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Unlock when label is removed
+        if: "github.event.action == 'unlabeled' && github.event.label.name == 'agents: ready for pickup'"
+        run: |
+          gh api \
+            -X DELETE \
+            repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/lock
+        env:
+          GH_TOKEN: ${{ github.token }}

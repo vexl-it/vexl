@@ -27,8 +27,10 @@ import {formatDecimal} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {localizedDateTimeActionAtom} from '../utils/localization/localizedNumbersAtoms'
 
-interface Props
-  extends Omit<TypographyProps, 'children' | 'color' | 'variant'> {
+interface Props extends Omit<
+  TypographyProps,
+  'children' | 'color' | 'variant'
+> {
   customBtcPriceAtom?: PrimitiveAtom<number> | undefined
   currencyAtom: Atom<CurrencyCode | undefined>
   disabled?: boolean

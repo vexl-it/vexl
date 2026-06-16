@@ -33,6 +33,21 @@ beforeEach(() => {
   checkVerificationMock.mockClear()
 })
 
+const smsProviderErrorReasonMatrix: ReadonlyArray<{
+  reason: UnableToSendVerificationSmsError['reason']
+  shouldReturnVerificationData: boolean
+}> = [
+  {reason: 'InvalidPhoneNumber', shouldReturnVerificationData: false},
+  {reason: 'CarrierError', shouldReturnVerificationData: true},
+  {reason: 'UnsupportedCarrier', shouldReturnVerificationData: true},
+  {reason: 'AntiFraudBlock', shouldReturnVerificationData: false},
+  {reason: 'AntiFraudBlock12h', shouldReturnVerificationData: false},
+  {reason: 'AntiFraudBlockGeo', shouldReturnVerificationData: false},
+  {reason: 'MaxAttemptsReached', shouldReturnVerificationData: false},
+  {reason: 'NumberDoesNotSupportSms', shouldReturnVerificationData: false},
+  {reason: 'Other', shouldReturnVerificationData: true},
+]
+
 describe('Initialize verification', () => {
   it('Issues sms code when requested', async () => {
     await runPromiseInMockedEnvironment(
@@ -202,36 +217,51 @@ describe('Initialize verification', () => {
     )
   })
 
-  it('Properly report error when twilio call fails', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-        const challenge = yield* _(generateAndSignChallenge)
+  it.each(smsProviderErrorReasonMatrix)(
+    'returns expected verification data for $reason provider errors',
+    async ({reason, shouldReturnVerificationData}) => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const client = yield* _(NodeTestingApp)
+          const challenge = yield* _(generateAndSignChallenge)
 
-        createVerificationMock.mockReturnValue(
-          Effect.fail(
-            new UnableToSendVerificationSmsError({
-              reason: 'InvalidPhoneNumber',
-              status: 400,
-            })
+          createVerificationMock.mockReturnValue(
+            Effect.fail(
+              new UnableToSendVerificationSmsError({
+                reason,
+                status: 400,
+              })
+            )
           )
-        )
 
-        const result = yield* _(
-          client.Login.initVerification({
-            headers: Schema.decodeSync(CommonHeaders)({
-              'user-agent': 'Vexl/2 (1.0.0) IOS',
+          const result = yield* _(
+            client.Login.initVerification({
+              headers: Schema.decodeSync(CommonHeaders)({
+                'user-agent': 'Vexl/2 (1.0.0) IOS',
+              }),
+              payload: {
+                challenge,
+                phoneNumber:
+                  Schema.decodeSync(E164PhoneNumber)('+420733333333'),
+              },
             }),
-            payload: {
-              challenge,
-              phoneNumber: Schema.decodeSync(E164PhoneNumber)('+420733333333'),
-            },
-          }),
-          Effect.either
-        )
+            Effect.either
+          )
 
-        expectErrorResponse(UnableToSendVerificationSmsError)(result)
-      })
-    )
-  })
+          expectErrorResponse(UnableToSendVerificationSmsError)(result)
+
+          if (result._tag !== 'Left') return
+          if (!Schema.is(UnableToSendVerificationSmsError)(result.left)) return
+
+          if (shouldReturnVerificationData) {
+            expect(result.left.verificationId).toBeDefined()
+            expect(result.left.expirationAt).toBeDefined()
+          } else {
+            expect(result.left.verificationId).toBeUndefined()
+            expect(result.left.expirationAt).toBeUndefined()
+          }
+        })
+      )
+    }
+  )
 })

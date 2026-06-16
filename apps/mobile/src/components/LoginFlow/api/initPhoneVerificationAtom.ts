@@ -1,7 +1,7 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
 import {
-  type InitPhoneVerificationResponse,
+  InitPhoneVerificationResponse,
   type UnableToSendVerificationSmsError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Schema, type Option} from 'effect'
@@ -16,11 +16,25 @@ import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {showErrorAlert} from '../../ErrorAlert'
+import {askAreYouSureActionAtom} from '../../GlobalDialog'
 import {reportIssueDialogAtom} from '../../ReportIssue'
 
 class TooManyLoginAttemptsError extends Schema.TaggedError<TooManyLoginAttemptsError>(
   'TooManyLoginAttemptsError'
 )('TooManyLoginAttemptsError', {}) {}
+
+function initPhoneVerificationResponseFromSmsError(
+  error: UnableToSendVerificationSmsError
+): InitPhoneVerificationResponse | undefined {
+  if (error.verificationId === undefined || error.expirationAt === undefined) {
+    return undefined
+  }
+
+  return new InitPhoneVerificationResponse({
+    verificationId: error.verificationId,
+    expirationAt: error.expirationAt,
+  })
+}
 
 export const initPhoneVerificationAtom = atom(
   null,
@@ -34,6 +48,17 @@ export const initPhoneVerificationAtom = atom(
     never
   > => {
     const {t} = get(translationAtom)
+    const failWithSmsProviderErrorDialog = (
+      subtitle: string
+    ): Effect.Effect<never, string> =>
+      Effect.zipRight(
+        set(reportIssueDialogAtom, {
+          title: t('loginFlow.phoneNumber.errors.smsProviderEncounteredError'),
+          subtitle,
+        }),
+        Effect.fail(subtitle)
+      )
+
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
 
@@ -61,7 +86,73 @@ export const initPhoneVerificationAtom = atom(
       return toReturn
     })
       .pipe(
+        Effect.catchTags({
+          UnsupportedVersionToLoginError: (e) =>
+            Effect.fail(
+              t('loginFlow.phoneNumber.errors.unsuportedVersion', {
+                version: String(e.lowestRequiredVersion),
+              })
+            ),
+          PreviousCodeNotExpiredError: () =>
+            Effect.fail(
+              t('loginFlow.phoneNumber.errors.previousCodeNotExpired')
+            ),
+          UnableToSendVerificationSmsError: (e) => {
+            if (e.reason === 'Other') {
+              reportError(
+                'warn',
+                new Error('Unable to send verification sms'),
+                {
+                  e,
+                }
+              )
+            }
+
+            const verificationResponse =
+              initPhoneVerificationResponseFromSmsError(e)
+
+            if (verificationResponse !== undefined) {
+              const areYouOnVpnMessage = t(
+                'loginFlow.phoneNumber.errors.areYouOnVpn'
+              )
+
+              return set(askAreYouSureActionAtom, {
+                variant: 'info',
+                steps: [
+                  {
+                    type: 'StepWithText',
+                    title: t(
+                      'loginFlow.phoneNumber.errors.smsProviderEncounteredError'
+                    ),
+                    description: t(
+                      'loginFlow.phoneNumber.errors.continueWithSmsCodeDescription'
+                    ),
+                    positiveButtonText: t(
+                      'loginFlow.phoneNumber.errors.continueWithSmsCode'
+                    ),
+                    negativeButtonText: t(
+                      'loginFlow.phoneNumber.errors.smsCodeNotReceived'
+                    ),
+                  },
+                ],
+              }).pipe(
+                Effect.map(() => verificationResponse),
+                Effect.catchAll(() =>
+                  failWithSmsProviderErrorDialog(areYouOnVpnMessage)
+                )
+              )
+            }
+
+            return failWithSmsProviderErrorDialog(
+              t('loginFlow.phoneNumber.errors.areYouOnVpn')
+            )
+          },
+          TooManyLoginAttemptsError: () =>
+            Effect.fail(t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')),
+        }),
         Effect.catchAll((e) => {
+          if (isString(e)) return Effect.fail(e)
+
           reportError(
             'error',
             new Error('Unexpected error while initializing phone verification'),
@@ -75,50 +166,6 @@ export const initPhoneVerificationAtom = atom(
               t('common.somethingWentWrongDescription'),
             error: e,
           })
-
-          return Effect.fail(e)
-        }),
-        Effect.catchTags({
-          UnsupportedVersionToLoginError: (e) =>
-            Effect.fail(
-              t('loginFlow.phoneNumber.errors.unsuportedVersion', {
-                version: String(e.lowestRequiredVersion),
-              })
-            ),
-          PreviousCodeNotExpiredError: () =>
-            Effect.fail(
-              t('loginFlow.phoneNumber.errors.previousCodeNotExpired')
-            ),
-          UnableToSendVerificationSmsError: (e) => {
-            const reasonsToReport: Array<
-              UnableToSendVerificationSmsError['reason']
-            > = ['Other']
-
-            if (reasonsToReport.includes(e.reason)) {
-              reportError(
-                'warn',
-                new Error('Unable to send verification sms'),
-                {
-                  e,
-                }
-              )
-            }
-            return Effect.fail(t('loginFlow.phoneNumber.errors.areYouOnVpn'))
-          },
-          TooManyLoginAttemptsError: () =>
-            Effect.fail(t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')),
-        }),
-        Effect.catchAll((e) => {
-          if (isString(e))
-            return Effect.zipRight(
-              set(reportIssueDialogAtom, {
-                title: t(
-                  'loginFlow.phoneNumber.errors.smsProviderEncounteredError'
-                ),
-                subtitle: e,
-              }),
-              Effect.fail(e)
-            )
 
           return Effect.fail(t('common.somethingWentWrong'))
         })

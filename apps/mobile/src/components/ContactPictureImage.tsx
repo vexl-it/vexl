@@ -29,14 +29,10 @@ interface ImageDetails {
   isABImageOnIos: boolean
 }
 
-function resolveBorderRadius(
-  borderRadius: Props['borderRadius']
-): number | undefined {
-  if (typeof borderRadius === 'number') return borderRadius
-  if (typeof borderRadius !== 'string') return undefined
-
+function buildRadiusTokenMap(): Record<string, number> {
   const tokens = getTokens()
-  const radiusTokens: Record<string, number> = {
+
+  return {
     $0: tokens.radius[0].val,
     $1: tokens.radius[1].val,
     $2: tokens.radius[2].val,
@@ -52,8 +48,17 @@ function resolveBorderRadius(
     $11: tokens.radius[11].val,
     $true: tokens.radius.true.val,
   }
+}
 
-  return radiusTokens[borderRadius]
+const RADIUS_TOKEN_MAP = buildRadiusTokenMap()
+
+function resolveBorderRadius(
+  borderRadius: Props['borderRadius']
+): number | undefined {
+  if (typeof borderRadius === 'number') return borderRadius
+  if (typeof borderRadius !== 'string') return undefined
+
+  return RADIUS_TOKEN_MAP[borderRadius]
 }
 
 function resolveResizeMode(

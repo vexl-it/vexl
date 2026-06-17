@@ -13,7 +13,7 @@ import {getTokens} from 'tamagui'
 import {useIsSessionLoaded} from './state/session'
 import {loadSession} from './state/session/loadSession'
 import {subscribeToGeneralTopic} from './utils/notifications'
-import reportError from './utils/reportError'
+import reportError, {reportErrorE} from './utils/reportError'
 import useSetupVersionServiceState from './utils/versionService/useSetupVersionServiceState'
 
 const styles = StyleSheet.create({
@@ -41,8 +41,27 @@ function loadSessionForSplashScreen(): Effect.Effect<boolean> {
     Effect.flatMap((sessionLoaded) => {
       if (sessionLoaded) return Effect.succeed(true)
 
-      return Effect.sleep(SESSION_LOAD_RETRY_DELAY_MS).pipe(
-        Effect.zipRight(loadSession({forceReload: true, showErrorAlert: true}))
+      return Effect.zipRight(
+        reportErrorE(
+          'info',
+          new Error(
+            'Session not loaded on first attempt. Retrying after delay. This is a fallback and should not happen'
+          )
+        ),
+        Effect.sleep(SESSION_LOAD_RETRY_DELAY_MS)
+      ).pipe(
+        Effect.zipRight(loadSession({forceReload: true, showErrorAlert: true})),
+        Effect.tap((loaded2ndTime) => {
+          if (loaded2ndTime)
+            return reportErrorE(
+              'info',
+              new Error('Session login attempt succeeded')
+            )
+          return reportErrorE(
+            'error',
+            new Error('Session login attempt failed after retry')
+          )
+        })
       )
     })
   )
@@ -66,6 +85,7 @@ function AnimatedSplashScreen({
   children: React.ReactNode
 }): React.ReactElement | null {
   const [isAppReady, setIsAppReady] = useState(false)
+  const [sessionLoadFinished, setSessionLoadFinished] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
   const [fontsLoaded] = useFonts(vexlFonts)
@@ -73,7 +93,15 @@ function AnimatedSplashScreen({
   useSetupVersionServiceState()
 
   useEffect(() => {
-    Effect.runFork(loadSessionForSplashScreen())
+    Effect.runFork(
+      loadSessionForSplashScreen().pipe(
+        Effect.ensuring(
+          Effect.sync(() => {
+            setSessionLoadFinished(true)
+          })
+        )
+      )
+    )
     void subscribeToGeneralTopic()
   }, [])
 
@@ -103,10 +131,12 @@ function AnimatedSplashScreen({
   }, [setIsSplashAnimationComplete, isAppReady])
 
   useEffect(() => {
-    if (fontsLoaded && sessionLoaded) {
+    // `sessionLoaded` becomes true even after the first failed attempt sets
+    // `loggedOut`; wait for the splash retry sequence to finish as well.
+    if (fontsLoaded && sessionLoaded && sessionLoadFinished) {
       setIsAppReady(true)
     }
-  }, [fontsLoaded, sessionLoaded])
+  }, [fontsLoaded, sessionLoaded, sessionLoadFinished])
 
   useEffect(() => {
     void SplashScreen.hideAsync()

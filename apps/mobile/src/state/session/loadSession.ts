@@ -85,13 +85,18 @@ function handleSessionStorageError(
     return
   }
 
-  reportError(
-    'error',
-    new Error(
-      '‼️ Error while reading or parsing user data from secure storage.'
-    ),
-    {loadingError}
-  )
+  if (
+    showErrorAlert &&
+    loadingError._tag === 'V2SecretReadFailedAfterBeingWritten'
+  ) {
+    reportError(
+      'error',
+      new Error(
+        '‼️ V2 session secret was previously written but could not be read from secure storage.'
+      ),
+      {loadingError}
+    )
+  }
   getDefaultStore().set(
     clearPersistentDataAboutReachAndImportedContactsActionAtom
   )

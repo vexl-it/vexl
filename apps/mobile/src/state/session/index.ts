@@ -19,6 +19,7 @@ import {
 } from '../../utils/errorSanitization'
 import {replaceAll} from '../../utils/replaceAll'
 import {dummySession} from './dummySesssion'
+import {clearV2SecretWasWrittenFlag} from './utils/v2SecretStorageFlag'
 import writeSessionToStorage, {
   SECRET_TOKEN_KEY,
   SECRET_TOKEN_KEY_V2,
@@ -115,6 +116,7 @@ export const sessionAtom: WritableAtom<
       // V2 keys are now stored in session, so they are cleared automatically
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY_V2)
+      clearV2SecretWasWrittenFlag()
 
       set(sessionHolderAtom, {state: 'loggedOut'})
       return
@@ -135,6 +137,7 @@ export const sessionAtom: WritableAtom<
             void AsyncStorage.removeItem(SESSION_KEY)
             void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
             void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY_V2)
+            clearV2SecretWasWrittenFlag()
             set(sessionHolderAtom, {state: 'loggedOut'})
           })
         )

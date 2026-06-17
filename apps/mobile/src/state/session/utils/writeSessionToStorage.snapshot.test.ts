@@ -7,6 +7,10 @@ import {
   type Session,
   Session as SessionSchema,
 } from '../../../brands/Session.brand'
+import {
+  clearV2SecretWasWrittenFlag,
+  wasV2SecretWritten,
+} from './v2SecretStorageFlag'
 import writeSessionToStorage from './writeSessionToStorage'
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -24,6 +28,32 @@ jest.mock('expo-secure-store', () => ({
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
 }))
+
+jest.mock('react-native-mmkv', () => {
+  class MMKV {
+    private readonly data = new Map<string, boolean | number | string>()
+
+    set(key: string, value: boolean | number | string): void {
+      this.data.set(key, value)
+    }
+
+    getString(key: string): string | undefined {
+      const value = this.data.get(key)
+      return typeof value === 'string' ? value : undefined
+    }
+
+    getBoolean(key: string): boolean | undefined {
+      const value = this.data.get(key)
+      return typeof value === 'boolean' ? value : undefined
+    }
+
+    delete(key: string): void {
+      this.data.delete(key)
+    }
+  }
+
+  return {MMKV}
+})
 
 const asyncStorageSetItemMock = jest.mocked(AsyncStorage.setItem)
 const secretStoreSetItemAsyncMock = jest.mocked(SecretStore.setItemAsync)
@@ -48,6 +78,7 @@ const deterministicSession: Session = Schema.decodeSync(SessionSchema)({
 describe('writeSessionToStorage snapshot', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    clearV2SecretWasWrittenFlag()
   })
 
   it('saves exact values into async and secret storage', async () => {
@@ -58,6 +89,7 @@ describe('writeSessionToStorage snapshot', () => {
     expect(Either.isRight(taskResult)).toBe(true)
     expect(asyncStorageSetItemMock).toHaveBeenCalledTimes(1)
     expect(secretStoreSetItemAsyncMock).toHaveBeenCalledTimes(1)
+    expect(wasV2SecretWritten()).toBe(true)
 
     expect({
       asyncStorage: {

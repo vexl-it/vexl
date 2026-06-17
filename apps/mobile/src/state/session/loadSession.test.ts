@@ -13,6 +13,7 @@ import {
   type SessionV2,
   Session as SessionSchema,
 } from '../../brands/Session.brand'
+import reportError from '../../utils/reportError'
 import {storage} from '../../utils/mmkv/effectMmkv'
 import {
   PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
@@ -20,6 +21,11 @@ import {
 } from '../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {dummySession} from './dummySesssion'
 import {loadSession} from './loadSession'
+import {
+  clearV2SecretWasWrittenFlag,
+  markV2SecretAsWritten,
+  wasV2SecretWritten,
+} from './utils/v2SecretStorageFlag'
 import {
   SECRET_TOKEN_KEY,
   SECRET_TOKEN_KEY_V2,
@@ -62,16 +68,32 @@ jest.mock('@notifee/react-native', () => ({
   },
 }))
 
+jest.mock('../../utils/reportError', () => {
+  const {Effect} = jest.requireActual('effect/index')
+
+  return {
+    __esModule: true,
+    default: jest.fn(),
+    reportErrorE: jest.fn(() => Effect.succeed(undefined)),
+  }
+})
+
 jest.mock('react-native-mmkv', () => {
   class MMKV {
-    private readonly data = new Map<string, string>()
+    private readonly data = new Map<string, boolean | number | string>()
 
-    set(key: string, value: string): void {
+    set(key: string, value: boolean | number | string): void {
       this.data.set(key, value)
     }
 
     getString(key: string): string | undefined {
-      return this.data.get(key)
+      const value = this.data.get(key)
+      return typeof value === 'string' ? value : undefined
+    }
+
+    getBoolean(key: string): boolean | undefined {
+      const value = this.data.get(key)
+      return typeof value === 'boolean' ? value : undefined
     }
 
     delete(key: string): void {
@@ -181,6 +203,7 @@ jest.mock('@vexl-next/rest-api/src', () => {
 const asyncStorageGetItemMock = jest.mocked(AsyncStorage.getItem)
 const secretStoreGetItemAsyncMock = jest.mocked(SecretStore.getItemAsync)
 const secretStoreSetItemAsyncMock = jest.mocked(SecretStore.setItemAsync)
+const reportErrorMock = jest.mocked(reportError)
 const deterministicKeyPairV2 = Schema.decodeSync(KeyPairV2Schema)({
   publicKey: mockPublicKeyV2,
   privateKey: mockPrivateKeyV2,
@@ -284,6 +307,7 @@ describe('loadSession', () => {
     )
     asyncStorageGetItemMock.mockResolvedValue(null)
     secretStoreGetItemAsyncMock.mockResolvedValue(null)
+    clearV2SecretWasWrittenFlag()
   })
 
   afterEach(() => {
@@ -375,6 +399,7 @@ describe('loadSession', () => {
       secretToken,
       SECRET_TOKEN_KEY_V2_OPTIONS
     )
+    expect(wasV2SecretWritten()).toBe(true)
   })
 
   it('sets loggedOut when there is no session in async storage', async () => {
@@ -424,6 +449,41 @@ describe('loadSession', () => {
     ).toEqual({
       reach: 0,
       numberOfImportedContacts: 0,
+    })
+    expect(reportErrorMock).not.toHaveBeenCalled()
+  })
+
+  it('reports secure store read failure when encrypted session exists and v2 secret marker is set', async () => {
+    const loadedSession = buildSession(dummySession.version + 34)
+    const {encryptedSession} = encryptSessionForStorage(loadedSession)
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
+
+    markV2SecretAsWritten()
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockRejectedValueOnce(
+      new Error('secure store failed')
+    )
+
+    const result = await Effect.runPromise(
+      loadSession({showErrorAlert: true, forceReload: false})
+    )
+
+    expect(result).toBe(false)
+    expect(alertSpy).toHaveBeenCalledTimes(1)
+    expect(reportErrorMock).toHaveBeenCalledTimes(1)
+
+    const call = reportErrorMock.mock.calls.at(0)
+    expect(call).toBeDefined()
+    if (!call) {
+      throw new Error('Expected reportError to be called')
+    }
+
+    expect(call[0]).toBe('error')
+    expect(call[1].message).toContain('V2 session secret')
+    expect(call[2]).toMatchObject({
+      loadingError: {
+        _tag: 'V2SecretReadFailedAfterBeingWritten',
+      },
     })
   })
 

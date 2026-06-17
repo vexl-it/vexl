@@ -8,8 +8,8 @@ import {newOffersNotificationBackgroundTask} from '../newOffersNotificationBackg
 export async function processBackgroundTask(): Promise<BackgroundTask.BackgroundTaskResult> {
   try {
     console.log('Running background task, first loading session')
-    const isSessionReady = await Effect.runPromise(loadSession())
-    if (!isSessionReady) {
+    const loadSessionResult = await Effect.runPromise(loadSession())
+    if (!loadSessionResult.sessionLoaded) {
       console.log('Session not ready, skipping background task')
       return BackgroundTask.BackgroundTaskResult.Success
     }

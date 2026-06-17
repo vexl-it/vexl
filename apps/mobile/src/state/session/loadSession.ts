@@ -54,9 +54,65 @@ const sessionLoadedPromise = new Promise<void>(
 )
 
 type SessionState = 'initial' | 'loading' | 'loggedOut' | 'loggedIn'
-type SessionStorageError = Effect.Effect.Error<
+export type SessionStorageError = Effect.Effect.Error<
   ReturnType<typeof readSessionFromStorage>
 >
+
+export type LoadSessionResult =
+  | {
+      readonly sessionLoaded: true
+    }
+  | {
+      readonly sessionLoaded: false
+      readonly loadingError?: SessionStorageError
+      readonly blockingRecoveryRequired: boolean
+    }
+
+interface LoadSessionOptions {
+  readonly showErrorAlert: boolean
+  readonly forceReload: boolean
+}
+
+interface ReadSessionFromStorageResult {
+  readonly sessionFromStorage: Option.Option<Session>
+  readonly loadingError: Option.Option<SessionStorageError>
+}
+
+function sessionLoadedResult(): LoadSessionResult {
+  return {sessionLoaded: true}
+}
+
+function sessionNotLoadedResult(
+  loadingError: Option.Option<SessionStorageError> = Option.none()
+): LoadSessionResult {
+  if (Option.isSome(loadingError)) {
+    return {
+      sessionLoaded: false,
+      loadingError: loadingError.value,
+      blockingRecoveryRequired: isBlockingRecoveryError(loadingError.value),
+    }
+  }
+
+  return {sessionLoaded: false, blockingRecoveryRequired: false}
+}
+
+function readSessionFromStorageSuccess(
+  sessionFromStorage: Session
+): ReadSessionFromStorageResult {
+  return {
+    sessionFromStorage: Option.some(sessionFromStorage),
+    loadingError: Option.none(),
+  }
+}
+
+function readSessionFromStorageFailure(
+  loadingError: SessionStorageError
+): ReadSessionFromStorageResult {
+  return {
+    sessionFromStorage: Option.none(),
+    loadingError: Option.some(loadingError),
+  }
+}
 
 function shouldWaitForLoadingToFinish(
   sessionState: SessionState,
@@ -75,6 +131,16 @@ function shouldSkipLoading(
   return !canStartLoad
 }
 
+function isBlockingRecoveryError(loadingError: SessionStorageError): boolean {
+  return (
+    loadingError._tag === 'StoredSessionSecretUnavailable' ||
+    loadingError._tag === 'ErrorReadingFromSecureStorage' ||
+    loadingError._tag === 'V2SecretReadFailedAfterBeingWritten' ||
+    loadingError._tag === 'CryptoError' ||
+    loadingError._tag === 'ParseError'
+  )
+}
+
 function handleSessionStorageError(
   loadingError: SessionStorageError,
   showErrorAlert: boolean
@@ -85,10 +151,7 @@ function handleSessionStorageError(
     return
   }
 
-  if (
-    showErrorAlert &&
-    loadingError._tag === 'V2SecretReadFailedAfterBeingWritten'
-  ) {
+  if (loadingError._tag === 'V2SecretReadFailedAfterBeingWritten') {
     reportError(
       'error',
       new Error(
@@ -123,21 +186,22 @@ function handleSessionStorageError(
 
 function readSessionFromStorageHandleErrors(
   showErrorAlert: boolean
-): Effect.Effect<Option.Option<Session>> {
+): Effect.Effect<ReadSessionFromStorageResult> {
   return readSessionFromStorage({
     asyncStorageKey: SESSION_KEY,
     secretStorageKey: SECRET_TOKEN_KEY,
     secretStorageKeyV2: SECRET_TOKEN_KEY_V2,
   }).pipe(
-    Effect.tapError((e) =>
+    Effect.map(readSessionFromStorageSuccess),
+    Effect.catchAll((e) =>
       Effect.sync(() => {
         logLoadSessionProgress(
           `Error while loading session ${JSON.stringify(e)}`
         )
         handleSessionStorageError(e, showErrorAlert)
+        return readSessionFromStorageFailure(e)
       })
-    ),
-    Effect.option
+    )
   )
 }
 
@@ -161,7 +225,7 @@ const waitForLoadingSessionFinished = (
   )
 }
 
-function waitForAlreadyLoadingSessionResult(): Effect.Effect<boolean> {
+function waitForAlreadyLoadingSessionResult(): Effect.Effect<LoadSessionResult> {
   return Effect.gen(function* () {
     logLoadSessionProgress('Session is already loading. Waiting for result')
 
@@ -174,6 +238,8 @@ function waitForAlreadyLoadingSessionResult(): Effect.Effect<boolean> {
     )
 
     return sessionStateCurrent === 'loggedIn'
+      ? sessionLoadedResult()
+      : sessionNotLoadedResult()
   })
 }
 
@@ -241,17 +307,11 @@ const ensureV2SessionIfNotCreateAndWrite = (
     return session
   })
 export function loadSession(
-  {
-    showErrorAlert,
-    forceReload,
-  }: {
-    showErrorAlert: boolean
-    forceReload: boolean
-  } = {
+  {showErrorAlert, forceReload}: LoadSessionOptions = {
     showErrorAlert: false,
     forceReload: false,
   }
-): Effect.Effect<boolean> {
+): Effect.Effect<LoadSessionResult> {
   return Effect.gen(function* (_) {
     const store = getDefaultStore()
     const sessionState = store.get(sessionHolderAtom).state
@@ -273,23 +333,25 @@ export function loadSession(
         `Skipping loadSession. Result: ${sessionState === 'loggedIn'}`
       )
       return store.get(sessionHolderAtom).state === 'loggedIn'
+        ? sessionLoadedResult()
+        : sessionNotLoadedResult()
     }
 
     logLoadSessionProgress('Trying to find session in storage')
     store.set(sessionHolderAtom, {state: 'loading'})
 
-    const sessionFromStorage = yield* _(
+    const readSessionResult = yield* _(
       readSessionFromStorageHandleErrors(showErrorAlert)
     )
 
-    if (Option.isNone(sessionFromStorage)) {
+    if (Option.isNone(readSessionResult.sessionFromStorage)) {
       // We don't have a session. User is logged out.
       getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
-      return false
+      return sessionNotLoadedResult(readSessionResult.loadingError)
     }
 
     const session = yield* ensureV2SessionIfNotCreateAndWrite(
-      sessionFromStorage.value
+      readSessionResult.sessionFromStorage.value
     )
 
     if (!sanityCheckSessionV2(session)) {
@@ -313,7 +375,7 @@ export function loadSession(
 
     resolveSessionLoaded()
 
-    return true
+    return sessionLoadedResult()
   }).pipe(
     Effect.catchAll((e) =>
       Effect.zipRight(
@@ -326,7 +388,7 @@ export function loadSession(
         ),
         Effect.sync(() => {
           getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
-          return false
+          return sessionNotLoadedResult()
         })
       )
     )

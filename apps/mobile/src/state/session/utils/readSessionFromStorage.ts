@@ -22,6 +22,12 @@ export class V2SecretReadFailedAfterBeingWritten extends Schema.TaggedError<V2Se
   cause: Schema.Unknown,
 }) {}
 
+export class StoredSessionSecretUnavailable extends Schema.TaggedError<StoredSessionSecretUnavailable>(
+  'StoredSessionSecretUnavailable'
+)('StoredSessionSecretUnavailable', {
+  cause: Schema.Unknown,
+}) {}
+
 function mapV2SecretReadError(
   loadingError: StoreEmpty | ErrorReadingFromSecureStorage
 ):
@@ -38,6 +44,16 @@ function mapV2SecretReadError(
   return loadingError
 }
 
+function mapLegacySecretReadError(
+  loadingError: StoreEmpty | ErrorReadingFromSecureStorage
+): StoredSessionSecretUnavailable | ErrorReadingFromSecureStorage {
+  if (loadingError._tag === 'StoreEmpty') {
+    return new StoredSessionSecretUnavailable({cause: loadingError})
+  }
+
+  return loadingError
+}
+
 function getSecretToken({
   secretStorageKey,
   secretStorageKeyV2,
@@ -48,6 +64,7 @@ function getSecretToken({
   string,
   | StoreEmpty
   | V2SecretReadFailedAfterBeingWritten
+  | StoredSessionSecretUnavailable
   | ErrorReadingFromSecureStorage
   | ErrorWritingToStore
 > {
@@ -55,6 +72,7 @@ function getSecretToken({
     Effect.mapError(mapV2SecretReadError),
     Effect.catchTag('StoreEmpty', () =>
       getItemFromSecretStorage(secretStorageKey).pipe(
+        Effect.mapError(mapLegacySecretReadError),
         Effect.tap((secretToken) =>
           saveItemToSecretStorage(
             secretStorageKeyV2,
@@ -80,6 +98,7 @@ export function readSessionFromStorage({
   Session,
   | StoreEmpty
   | V2SecretReadFailedAfterBeingWritten
+  | StoredSessionSecretUnavailable
   | ErrorReadingFromSecureStorage
   | ErrorReadingFromAsyncStorage
   | ErrorWritingToStore

@@ -6,15 +6,14 @@ import {VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {Effect, Schema} from 'effect/index'
 import * as SecretStore from 'expo-secure-store'
 import {getDefaultStore} from 'jotai'
-import {Alert, Linking} from 'react-native'
 import {sessionHolderAtom} from '.'
 import {
   type Session,
   type SessionV2,
   Session as SessionSchema,
 } from '../../brands/Session.brand'
-import reportError from '../../utils/reportError'
 import {storage} from '../../utils/mmkv/effectMmkv'
+import reportError from '../../utils/reportError'
 import {
   PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
   persistentDataAboutReachAndImportedContactsAtom,
@@ -201,8 +200,10 @@ jest.mock('@vexl-next/rest-api/src', () => {
 })
 
 const asyncStorageGetItemMock = jest.mocked(AsyncStorage.getItem)
+const asyncStorageRemoveItemMock = jest.mocked(AsyncStorage.removeItem)
 const secretStoreGetItemAsyncMock = jest.mocked(SecretStore.getItemAsync)
 const secretStoreSetItemAsyncMock = jest.mocked(SecretStore.setItemAsync)
+const secretStoreDeleteItemAsyncMock = jest.mocked(SecretStore.deleteItemAsync)
 const reportErrorMock = jest.mocked(reportError)
 const deterministicKeyPairV2 = Schema.decodeSync(KeyPairV2Schema)({
   publicKey: mockPublicKeyV2,
@@ -355,9 +356,7 @@ describe('loadSession', () => {
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
     secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
@@ -381,9 +380,7 @@ describe('loadSession', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(secretToken)
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
@@ -442,9 +439,7 @@ describe('loadSession', () => {
       new Error('secure store failed')
     )
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result).toMatchObject({
       sessionLoaded: false,
@@ -474,9 +469,7 @@ describe('loadSession', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null)
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result).toMatchObject({
       sessionLoaded: false,
@@ -495,9 +488,7 @@ describe('loadSession', () => {
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
     secretStoreGetItemAsyncMock.mockResolvedValueOnce('wrong-secret-token')
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result).toMatchObject({
       sessionLoaded: false,
@@ -509,10 +500,9 @@ describe('loadSession', () => {
     expect(reportErrorMock).not.toHaveBeenCalled()
   })
 
-  it('reports secure store read failure when encrypted session exists and v2 secret marker is set', async () => {
+  it('requires blocking recovery when v2 secret marker is set but secure store read fails, without reporting or erasing data', async () => {
     const loadedSession = buildSession(dummySession.version + 34)
     const {encryptedSession} = encryptSessionForStorage(loadedSession)
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
 
     markV2SecretAsWritten()
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
@@ -520,9 +510,7 @@ describe('loadSession', () => {
       new Error('secure store failed')
     )
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: true, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result).toMatchObject({
       sessionLoaded: false,
@@ -531,98 +519,57 @@ describe('loadSession', () => {
         _tag: 'V2SecretReadFailedAfterBeingWritten',
       },
     })
-    expect(alertSpy).toHaveBeenCalledTimes(1)
-    expect(reportErrorMock).toHaveBeenCalledTimes(1)
-
-    const call = reportErrorMock.mock.calls.at(0)
-    expect(call).toBeDefined()
-    if (!call) {
-      throw new Error('Expected reportError to be called')
-    }
-
-    expect(call[0]).toBe('error')
-    expect(call[1].message).toContain('V2 session secret')
-    expect(call[2]).toMatchObject({
-      loadingError: {
-        _tag: 'V2SecretReadFailedAfterBeingWritten',
-      },
-    })
+    // loadSession is no longer the per-attempt reporting point: the splash
+    // layer reports the final blocking outcome exactly once per startup.
+    expect(reportErrorMock).not.toHaveBeenCalled()
+    // PRIME DIRECTIVE: a transient blocking failure must NEVER erase data.
+    expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+    expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
   })
 
-  it('reports v2 secret read failure without showing a native alert', async () => {
-    const loadedSession = buildSession(dummySession.version + 35)
-    const {encryptedSession} = encryptSessionForStorage(loadedSession)
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
-    markV2SecretAsWritten()
-    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
-    secretStoreGetItemAsyncMock.mockRejectedValueOnce(
-      new Error('secure store failed')
-    )
-
-    const result = await Effect.runPromise(
-      loadSession({
-        showErrorAlert: false,
-        forceReload: false,
-      })
-    )
-
-    expect(result).toMatchObject({
-      sessionLoaded: false,
-      blockingRecoveryRequired: true,
-      loadingError: {
-        _tag: 'V2SecretReadFailedAfterBeingWritten',
-      },
-    })
-    expect(alertSpy).not.toHaveBeenCalled()
-    expect(reportErrorMock).toHaveBeenCalledTimes(1)
-
-    const call = reportErrorMock.mock.calls.at(0)
-    expect(call).toBeDefined()
-    if (!call) {
-      throw new Error('Expected reportError to be called')
-    }
-
-    expect(call[0]).toBe('error')
-    expect(call[2]).toMatchObject({
-      loadingError: {
-        _tag: 'V2SecretReadFailedAfterBeingWritten',
-      },
-    })
-  })
-
-  it('shows an alert when secure store read fails and showErrorAlert is true', async () => {
-    const loadedSession = buildSession(dummySession.version + 33)
-    const {encryptedSession} = encryptSessionForStorage(loadedSession)
-    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
-    const openUrlSpy = jest
-      .spyOn(Linking, 'openURL')
-      .mockResolvedValueOnce(undefined)
+  it('does not fail the read or erase data when the v2 backfill write fails on a legacy secret', async () => {
+    const loadedSession = buildLoggedInSession(dummySession.version + 50)
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(loadedSession)
 
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
-    secretStoreGetItemAsyncMock.mockRejectedValueOnce(
-      new Error('secure store failed')
+    secretStoreGetItemAsyncMock
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(secretToken)
+    secretStoreSetItemAsyncMock.mockRejectedValueOnce(
+      new Error('secure store write failed')
     )
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: true, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
-    expect(result.sessionLoaded).toBe(false)
-    expect(alertSpy).toHaveBeenCalledTimes(1)
-    const alertButtons = alertSpy.mock.calls.at(0)?.[2]
-    expect(alertButtons).toBeDefined()
-    expect(alertButtons?.at(0)?.onPress).toBeDefined()
-
-    const firstButton = alertButtons?.at(0)
-    if (!firstButton?.onPress) {
-      throw new Error('Support contact button is missing onPress callback')
-    }
-    firstButton.onPress()
-
-    expect(openUrlSpy).toHaveBeenCalledWith('mailto:support@vexl.test')
+    // Backfill write failure is best-effort: a valid legacy secret still logs in.
+    expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
-      state: 'loggedOut',
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(loadedSession),
     })
+    // The failed write must not have marked the v2 secret as written.
+    expect(wasV2SecretWritten()).toBe(false)
+    expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+    expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
+  })
+
+  it('treats a transient async storage read failure as blocking without erasing data', async () => {
+    asyncStorageGetItemMock.mockRejectedValueOnce(
+      new Error('async storage failed')
+    )
+
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
+
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'ErrorReadingFromAsyncStorage',
+      },
+    })
+    expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+    expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
   })
 
   it('returns current value and skips storage calls when already loggedIn', async () => {
@@ -662,9 +609,7 @@ describe('loadSession', () => {
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
     secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: true})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: true}))
 
     expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
@@ -676,9 +621,7 @@ describe('loadSession', () => {
   it('does not reload when forceReload is true but session is currently loading', async () => {
     getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: true})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: true}))
 
     expect(result.sessionLoaded).toBe(false)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
@@ -696,9 +639,7 @@ describe('loadSession', () => {
       snapshotSavedSecretStorageValue
     )
 
-    const result = await Effect.runPromise(
-      loadSession({showErrorAlert: false, forceReload: false})
-    )
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
 
     expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({

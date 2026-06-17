@@ -33,18 +33,44 @@ const styles = StyleSheet.create({
 })
 
 const SESSION_LOAD_RETRY_DELAY_MS = 2_000
+const FALLBACK_SESSION_RECOVERY_ERROR_CODE = 'SessionLoadFailed'
 
 function loadSessionOnceForSplashScreen(): Effect.Effect<LoadSessionResult> {
   return loadSession({
     forceReload: true,
-    showErrorAlert: false,
   })
+}
+
+function shouldRetryAfterDelay(result: LoadSessionResult): boolean {
+  return !result.sessionLoaded && result.blockingRecoveryRequired
+}
+
+function sessionRecoveryErrorCode(result: LoadSessionResult): string {
+  if (result.sessionLoaded) return FALLBACK_SESSION_RECOVERY_ERROR_CODE
+  return result.loadingError?._tag ?? FALLBACK_SESSION_RECOVERY_ERROR_CODE
+}
+
+function reportFinalBlockingOutcome(
+  result: LoadSessionResult
+): Effect.Effect<void> {
+  if (result.sessionLoaded || !result.blockingRecoveryRequired)
+    return Effect.succeed(undefined)
+
+  return reportErrorE(
+    'error',
+    new Error(
+      `Session load requires blocking recovery. tag: ${sessionRecoveryErrorCode(
+        result
+      )}`
+    )
+  )
 }
 
 function loadSessionForSplashScreen(): Effect.Effect<LoadSessionResult> {
   return loadSessionOnceForSplashScreen().pipe(
     Effect.flatMap((firstLoadResult) => {
-      if (firstLoadResult.sessionLoaded) return Effect.succeed(firstLoadResult)
+      if (!shouldRetryAfterDelay(firstLoadResult))
+        return Effect.succeed(firstLoadResult)
 
       return Effect.zipRight(
         reportErrorE(
@@ -56,23 +82,11 @@ function loadSessionForSplashScreen(): Effect.Effect<LoadSessionResult> {
         Effect.sleep(SESSION_LOAD_RETRY_DELAY_MS)
       ).pipe(
         Effect.zipRight(loadSessionOnceForSplashScreen()),
-        Effect.tap((secondLoadResult) => {
-          if (secondLoadResult.sessionLoaded)
-            return reportErrorE(
-              'info',
-              new Error('Session login attempt succeeded')
-            )
-          if (
-            !secondLoadResult.sessionLoaded &&
-            secondLoadResult.blockingRecoveryRequired
-          ) {
-            return Effect.succeed(undefined)
-          }
-          return reportErrorE(
-            'error',
-            new Error('Session login attempt failed after retry')
-          )
-        })
+        Effect.tap((secondLoadResult) =>
+          secondLoadResult.sessionLoaded
+            ? reportErrorE('info', new Error('Session login attempt succeeded'))
+            : reportFinalBlockingOutcome(secondLoadResult)
+        )
       )
     })
   )
@@ -99,6 +113,9 @@ function AnimatedSplashScreen({
   const [sessionLoadFinished, setSessionLoadFinished] = useState(false)
   const [blockingRecoveryRequired, setBlockingRecoveryRequired] =
     useState(false)
+  const [recoveryErrorCode, setRecoveryErrorCode] = useState(
+    FALLBACK_SESSION_RECOVERY_ERROR_CODE
+  )
   const [isReloadingSession, setIsReloadingSession] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
@@ -112,20 +129,22 @@ function AnimatedSplashScreen({
       // Recovery screen reloads are one-shot; only the initial splash load owns
       // the delayed retry.
       loadSessionOnceForSplashScreen().pipe(
-        Effect.tap((sessionLoadResult) => {
-          if (!sessionLoadResult.sessionLoaded) return Effect.succeed(undefined)
-
-          return reportErrorE(
-            'info',
-            new Error('Blocking session recovery reload succeeded')
-          )
-        }),
+        Effect.tap((sessionLoadResult) =>
+          sessionLoadResult.sessionLoaded
+            ? reportErrorE(
+                'info',
+                new Error('Blocking session recovery reload succeeded')
+              )
+            : reportFinalBlockingOutcome(sessionLoadResult)
+        ),
         Effect.tap((sessionLoadResult) =>
           Effect.sync(() => {
-            setBlockingRecoveryRequired(
+            const stillBlocking =
               !sessionLoadResult.sessionLoaded &&
-                sessionLoadResult.blockingRecoveryRequired
-            )
+              sessionLoadResult.blockingRecoveryRequired
+            setBlockingRecoveryRequired(stillBlocking)
+            if (stillBlocking)
+              setRecoveryErrorCode(sessionRecoveryErrorCode(sessionLoadResult))
             setSessionLoadFinished(true)
           })
         ),
@@ -143,10 +162,12 @@ function AnimatedSplashScreen({
       loadSessionForSplashScreen().pipe(
         Effect.tap((sessionLoadResult) =>
           Effect.sync(() => {
-            setBlockingRecoveryRequired(
+            const stillBlocking =
               !sessionLoadResult.sessionLoaded &&
-                sessionLoadResult.blockingRecoveryRequired
-            )
+              sessionLoadResult.blockingRecoveryRequired
+            setBlockingRecoveryRequired(stillBlocking)
+            if (stillBlocking)
+              setRecoveryErrorCode(sessionRecoveryErrorCode(sessionLoadResult))
           })
         ),
         Effect.ensuring(
@@ -214,6 +235,7 @@ function AnimatedSplashScreen({
         <SessionRecoveryScreen
           isReloadingSession={isReloadingSession}
           onReloadSession={reloadSessionFromRecoveryScreen}
+          errorCode={recoveryErrorCode}
         />
       )}
       {!blockingRecoveryRequired && !isSplashAnimationComplete && (

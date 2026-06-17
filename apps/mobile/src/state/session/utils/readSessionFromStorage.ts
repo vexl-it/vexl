@@ -10,7 +10,6 @@ import {
   saveItemToSecretStorage,
   type ErrorReadingFromAsyncStorage,
   type ErrorReadingFromSecureStorage,
-  type ErrorWritingToStore,
   type StoreEmpty,
 } from '../../../utils/fpUtils'
 import {markV2SecretAsWritten, wasV2SecretWritten} from './v2SecretStorageFlag'
@@ -66,7 +65,6 @@ function getSecretToken({
   | V2SecretReadFailedAfterBeingWritten
   | StoredSessionSecretUnavailable
   | ErrorReadingFromSecureStorage
-  | ErrorWritingToStore
 > {
   return getItemFromSecretStorage(secretStorageKeyV2).pipe(
     Effect.mapError(mapV2SecretReadError),
@@ -78,7 +76,8 @@ function getSecretToken({
             secretStorageKeyV2,
             SECRET_TOKEN_KEY_V2_OPTIONS
           )(secretToken).pipe(
-            Effect.tap(() => Effect.sync(markV2SecretAsWritten))
+            Effect.tap(() => Effect.sync(markV2SecretAsWritten)),
+            Effect.ignore
           )
         )
       )
@@ -101,7 +100,6 @@ export function readSessionFromStorage({
   | StoredSessionSecretUnavailable
   | ErrorReadingFromSecureStorage
   | ErrorReadingFromAsyncStorage
-  | ErrorWritingToStore
   | CryptoError
   | ParseResult.ParseError
 > {

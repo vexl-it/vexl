@@ -12,14 +12,14 @@ const styles = StyleSheet.create({
   },
 })
 
-const SESSION_RECOVERY_ERROR_CODE = 'V2SecretReadFailedAfterBeingWritten'
-
 export function SessionRecoveryScreen({
   isReloadingSession,
   onReloadSession,
+  errorCode,
 }: {
   readonly isReloadingSession: boolean
   readonly onReloadSession: () => void
+  readonly errorCode: string
 }): React.ReactElement {
   const {t} = useTranslation()
   const contactSupport = useSetAtom(contactSupportActionAtom)
@@ -63,7 +63,7 @@ export function SessionRecoveryScreen({
             textAlign="center"
           >
             {t('errorGettingSession.text', {
-              errorCode: SESSION_RECOVERY_ERROR_CODE,
+              errorCode,
             })}
           </Typography>
         </YStack>

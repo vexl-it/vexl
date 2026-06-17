@@ -258,7 +258,7 @@
   "currency.ZMW": "Zambijská kwacha",
   "currency.ZWL": "Zimbabwský dolar",
   "errorGettingSession.title": "Chyba při spouštění Vexlu",
-  "errorGettingSession.text": "Při načítání relace došlo k chybě. Chybový kód: {{errorCode}}. Aplikaci nelze spustit bez vymazání tvých dat. Obrať se na podporu a zkus vyřešit problém nebo restartovat aplikaci.",
+  "errorGettingSession.text": "Při načítání relace došlo k chybě. Chybový kód: {{errorCode}}. Tvá data jsou v bezpečí a nepřišel jsi o ně — pravděpodobně šlo o dočasný problém. Zkus to prosím znovu. Pokud potíže přetrvávají, obrať se na podporu.",
   "errorGettingSession.contactSupport": "Kontaktovat podporu",
   "common.noResults": "Žádné výsledky",
   "loginFlow.start.termsOfUse": "podmínkami užití",

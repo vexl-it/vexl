@@ -352,9 +352,18 @@ describe('loadSession', () => {
   it('returns false and sets state to loggedOut when secure store read fails', async () => {
     const loadedSession = buildSession(dummySession.version + 3)
     const {encryptedSession} = encryptSessionForStorage(loadedSession)
+    const staleReachData = {
+      reach: 100,
+      numberOfImportedContacts: 5,
+    }
+
     storage._storage.set(
       PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
-      'stale-reach-data'
+      JSON.stringify({data: staleReachData})
+    )
+    getDefaultStore().set(
+      persistentDataAboutReachAndImportedContactsAtom,
+      staleReachData
     )
 
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)

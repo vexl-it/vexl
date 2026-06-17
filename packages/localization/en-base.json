@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "Drop in reach detected",
   "unexpectedReachDrop.description": "Something may have affected your reach. To get your offers fully visible again, re-import your contacts and re-encrypt your offers.",
   "unexpectedReachDrop.actionTitle": "Fix all problems",
+  "unexpectedReachDrop.reimportDescription": "Something may have affected your reach. If you continue, Vexl will re-import your contacts and re-encrypt your offers so they can become visible to your network again.",
+  "unexpectedReachDrop.reimportActionTitle": "Re-import contacts",
   "changeCurrency.trySearchingByCurrencyName": "Try searching by currency name or code.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl connects you with people you know and trust. Add your contacts to see what's available.",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "Make sure to turn on notifications - we’ll let you know once your friends start popping up.",

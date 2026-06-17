@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "检测到可达性下降",
   "unexpectedReachDrop.description": "检测到意外问题，可能影响了您的可达性。为恢复完整可见性并确保您的报价正常工作，请重新导入联系人并重新加密您的报价。",
   "unexpectedReachDrop.actionTitle": "修复所有问题",
+  "unexpectedReachDrop.reimportDescription": "某些情况可能影响了你的可达范围。如果继续，Vexl 将重新导入你的联系人并重新加密你的报价，以便它们再次对你的网络可见。",
+  "unexpectedReachDrop.reimportActionTitle": "重新导入联系人",
   "changeCurrency.trySearchingByCurrencyName": "试试按货币名称或代码搜索。",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl 会把你和认识、信任的人连接起来。添加联系人，看看有什么可用出价。",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "记得开启通知——一旦你的朋友出现，我们会告诉你。",

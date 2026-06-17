@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "Drop in reach detected",
   "unexpectedReachDrop.description": "We’ve detected an unexpected issue that may have affected your reach. To restore full visibility and ensure your offers work as expected, please re-import your contacts and re-encrypt your offers.",
   "unexpectedReachDrop.actionTitle": "Fix all problems",
+  "unexpectedReachDrop.reimportDescription": "Sesuatu mungkin telah memengaruhi jangkauanmu. Jika kamu melanjutkan, Vexl akan mengimpor ulang kontakmu dan mengenkripsi ulang penawaranmu agar bisa terlihat lagi oleh jaringanmu.",
+  "unexpectedReachDrop.reimportActionTitle": "Impor ulang kontak",
   "changeCurrency.trySearchingByCurrencyName": "Coba cari berdasarkan nama atau kode mata uang.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl menghubungkanmu dengan orang yang kamu kenal dan percaya. Tambahkan kontakmu untuk melihat apa yang tersedia.",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "Pastikan untuk mengaktifkan notifikasi - kami akan memberitahumu begitu teman-temanmu mulai muncul.",

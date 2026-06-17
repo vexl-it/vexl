@@ -1336,7 +1336,7 @@
   "unexpectedReachDrop.title": "Baisse de portée détectée",
   "unexpectedReachDrop.description": "Nous avons détecté un problème inattendu qui a pu affecter votre portée. Pour rétablir la visibilité complète et garantir le bon fonctionnement de vos offres, veuillez réimporter vos contacts et les ré-encrypter.",
   "unexpectedReachDrop.actionTitle": "Résoudre tous les problèmes",
-  "unexpectedReachDrop.reimportDescription": "Quelque chose a peut-être affecté votre portée. Si vous continuez, Vexl réimportera vos contacts et rechiffrera vos offres afin qu’elles puissent redevenir visibles par votre réseau.",
+  "unexpectedReachDrop.reimportDescription": "Quelque chose a peut-être affecté ta portée. Si tu continues, Vexl réimportera tes contacts et rechiffrera tes offres afin qu’elles puissent redevenir visibles par ton réseau.",
   "unexpectedReachDrop.reimportActionTitle": "Réimporter les contacts",
   "changeCurrency.trySearchingByCurrencyName": "Essaie de chercher par nom ou code de devise.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl te connecte avec des personnes que tu connais et en qui tu as confiance. Ajoute tes contacts pour voir ce qui est disponible.",

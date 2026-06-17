@@ -12,7 +12,11 @@ export const SESSION_KEY = 'session'
 export const SECRET_TOKEN_KEY = 'secretToken'
 export const SECRET_TOKEN_KEY_V2 = 'secretToken_V2'
 export const SECRET_TOKEN_KEY_V2_OPTIONS: SecretStore.SecureStoreOptions = {
-  keychainAccessible: SecretStore.AFTER_FIRST_UNLOCK,
+  // THIS_DEVICE_ONLY keeps the secret out of iCloud Keychain / encrypted
+  // backups: the key that decrypts the user's identity never leaves the device.
+  // AFTER_FIRST_UNLOCK (vs WHEN_UNLOCKED) is what fixes the bug - it stays
+  // readable for background launches that happen before the first unlock.
+  keychainAccessible: SecretStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
 }
 
 export class SessionWriteError extends Schema.TaggedError<SessionWriteError>(

@@ -145,6 +145,7 @@ function AnimatedSplashScreen({
             setBlockingRecoveryRequired(stillBlocking)
             if (stillBlocking)
               setRecoveryErrorCode(sessionRecoveryErrorCode(sessionLoadResult))
+            if (!stillBlocking) setIsSplashAnimationComplete(true)
             setSessionLoadFinished(true)
           })
         ),

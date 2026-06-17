@@ -100,6 +100,10 @@ function sessionNotLoadedResult(
   return {sessionLoaded: false, blockingRecoveryRequired: false}
 }
 
+function sessionBlockingRecoveryResult(): LoadSessionResult {
+  return {sessionLoaded: false, blockingRecoveryRequired: true}
+}
+
 function readSessionFromStorageSuccess(
   sessionFromStorage: Session
 ): ReadSessionFromStorageResult {
@@ -168,7 +172,7 @@ function readSessionFromStorageHandleErrors(): Effect.Effect<ReadSessionFromStor
         // We are deliberately logging this. The notification logging is disabled
         // by default so this does not pose risk of leaking user data
         logLoadSessionProgress(
-          `Error while loading session. ${JSON.stringify(e)}`
+          `Error while loading session. tag: ${safeErrorTag(e)}`
         )
         return readSessionFromStorageFailure(e)
       })
@@ -366,7 +370,7 @@ export function loadSession(
         ),
         Effect.sync(() => {
           getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
-          return sessionNotLoadedResult()
+          return sessionBlockingRecoveryResult()
         })
       )
     ),

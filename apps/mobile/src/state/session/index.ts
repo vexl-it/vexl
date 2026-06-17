@@ -21,6 +21,7 @@ import {replaceAll} from '../../utils/replaceAll'
 import {dummySession} from './dummySesssion'
 import writeSessionToStorage, {
   SECRET_TOKEN_KEY,
+  SECRET_TOKEN_KEY_V2,
   SESSION_KEY,
 } from './utils/writeSessionToStorage'
 
@@ -113,6 +114,7 @@ export const sessionAtom: WritableAtom<
       void AsyncStorage.removeItem(SESSION_KEY)
       // V2 keys are now stored in session, so they are cleared automatically
       void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
+      void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY_V2)
 
       set(sessionHolderAtom, {state: 'loggedOut'})
       return
@@ -132,6 +134,7 @@ export const sessionAtom: WritableAtom<
             )
             void AsyncStorage.removeItem(SESSION_KEY)
             void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY)
+            void SecretStorage.deleteItemAsync(SECRET_TOKEN_KEY_V2)
             set(sessionHolderAtom, {state: 'loggedOut'})
           })
         )

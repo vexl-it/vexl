@@ -20,7 +20,12 @@ import {
 } from '../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {dummySession} from './dummySesssion'
 import {loadSession} from './loadSession'
-import {SECRET_TOKEN_KEY, SESSION_KEY} from './utils/writeSessionToStorage'
+import {
+  SECRET_TOKEN_KEY,
+  SECRET_TOKEN_KEY_V2,
+  SECRET_TOKEN_KEY_V2_OPTIONS,
+  SESSION_KEY,
+} from './utils/writeSessionToStorage'
 
 const mockPublicKeyV2 = 'V2_PUB_mock-public-key'
 const mockPrivateKeyV2 = 'V2_PRIV_mock-private-key'
@@ -37,6 +42,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }))
 
 jest.mock('expo-secure-store', () => ({
+  AFTER_FIRST_UNLOCK: 1,
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
@@ -174,6 +180,7 @@ jest.mock('@vexl-next/rest-api/src', () => {
 
 const asyncStorageGetItemMock = jest.mocked(AsyncStorage.getItem)
 const secretStoreGetItemAsyncMock = jest.mocked(SecretStore.getItemAsync)
+const secretStoreSetItemAsyncMock = jest.mocked(SecretStore.setItemAsync)
 const deterministicKeyPairV2 = Schema.decodeSync(KeyPairV2Schema)({
   publicKey: mockPublicKeyV2,
   privateKey: mockPrivateKeyV2,
@@ -317,7 +324,7 @@ describe('loadSession', () => {
   })
 
   it('loads session from storage and sets loggedIn state', async () => {
-    const loadedSession = buildSession(dummySession.version + 2)
+    const loadedSession = buildLoggedInSession(dummySession.version + 2)
     const {encryptedSession, secretToken} =
       encryptSessionForStorage(loadedSession)
 
@@ -334,7 +341,40 @@ describe('loadSession', () => {
       session: withExpectedSessionUpgrades(loadedSession),
     })
     expect(asyncStorageGetItemMock).toHaveBeenCalledWith(SESSION_KEY)
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledWith(
+      SECRET_TOKEN_KEY_V2
+    )
+    expect(secretStoreSetItemAsyncMock).not.toHaveBeenCalled()
+  })
+
+  it('falls back to legacy secret storage and backfills v2 key', async () => {
+    const loadedSession = buildLoggedInSession(dummySession.version + 20)
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(loadedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(secretToken)
+
+    const result = await Effect.runPromise(
+      loadSession({showErrorAlert: false, forceReload: false})
+    )
+
+    expect(result).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(loadedSession),
+    })
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledWith(
+      SECRET_TOKEN_KEY_V2
+    )
     expect(secretStoreGetItemAsyncMock).toHaveBeenCalledWith(SECRET_TOKEN_KEY)
+    expect(secretStoreSetItemAsyncMock).toHaveBeenCalledWith(
+      SECRET_TOKEN_KEY_V2,
+      secretToken,
+      SECRET_TOKEN_KEY_V2_OPTIONS
+    )
   })
 
   it('sets loggedOut when there is no session in async storage', async () => {

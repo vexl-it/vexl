@@ -1,5 +1,6 @@
 import {aesCTREncrypt} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {Effect, Schema} from 'effect/index'
+import * as SecretStore from 'expo-secure-store'
 import {Session} from '../../../brands/Session.brand'
 import {
   saveItemToAsyncStorage,
@@ -8,6 +9,10 @@ import {
 
 export const SESSION_KEY = 'session'
 export const SECRET_TOKEN_KEY = 'secretToken'
+export const SECRET_TOKEN_KEY_V2 = 'secretToken_V2'
+export const SECRET_TOKEN_KEY_V2_OPTIONS: SecretStore.SecureStoreOptions = {
+  keychainAccessible: SecretStore.AFTER_FIRST_UNLOCK,
+}
 
 export class SessionWriteError extends Schema.TaggedError<SessionWriteError>(
   'SessionPersistenceError'
@@ -30,9 +35,10 @@ export default function writeSessionToStorage(
 
     yield* _(saveItemToAsyncStorage(SESSION_KEY)(encryptedSessionJson))
     yield* _(
-      saveItemToSecretStorage(SECRET_TOKEN_KEY)(
-        session.privateKey.privateKeyPemBase64
-      )
+      saveItemToSecretStorage(
+        SECRET_TOKEN_KEY_V2,
+        SECRET_TOKEN_KEY_V2_OPTIONS
+      )(session.privateKey.privateKeyPemBase64)
     )
   }).pipe(
     Effect.mapError(

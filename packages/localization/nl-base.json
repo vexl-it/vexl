@@ -258,7 +258,7 @@
   "currency.ZMW": "Zambiaanse kwacha",
   "currency.ZWL": "Zimbabwaanse dollar",
   "errorGettingSession.title": "Fout tijdens Vexl opstarten",
-  "errorGettingSession.text": "Er was een probleem bij het laden van uw sessie. Foutcode: {{errorCode}}. Uw gegevens zijn veilig en niet verloren — dit was waarschijnlijk een tijdelijk probleem. Probeer het opnieuw. Neem contact op met support als het probleem aanhoudt.",
+  "errorGettingSession.text": "Er was een probleem bij het laden van uw sessie. Uw gegevens zijn veilig en niet verloren — dit was waarschijnlijk een tijdelijk probleem. Probeer het opnieuw. Neem contact op met support als het probleem aanhoudt.",
   "errorGettingSession.contactSupport": "Support contacteren",
   "common.noResults": "Er zijn geen resultaten",
   "loginFlow.start.termsOfUse": "Gebruikersvoorwaarden",

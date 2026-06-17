@@ -258,7 +258,7 @@
   "currency.ZMW": "赞比亚克瓦查",
   "currency.ZWL": "津巴布韦元",
   "errorGettingSession.title": "启动 Vexl 时出错",
-  "errorGettingSession.text": "加载您的会话时出错 ErrorCode: {{errorCode}}. 无法在不删除数据的情况下启动应用程序。请联系客服尝试解决问题或重新启动应用程序。",
+  "errorGettingSession.text": "加载您的会话时出错。无法在不删除数据的情况下启动应用程序。请联系客服尝试解决问题或重新启动应用程序。",
   "errorGettingSession.contactSupport": "联系客服",
   "common.noResults": "无结果",
   "loginFlow.start.termsOfUse": "使用条款",

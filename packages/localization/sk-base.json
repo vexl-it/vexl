@@ -258,7 +258,7 @@
   "currency.ZMW": "Zambijská kwacha",
   "currency.ZWL": "Zimbabwiansky dolár",
   "errorGettingSession.title": "Chyba pri spustení aplikácie Vexl",
-  "errorGettingSession.text": "Pri načítaní relácie došlo k problému. Kód chyby: {{errorCode}}. Vaše údaje sú v bezpečí a neprišli ste o ne — pravdepodobne išlo o dočasný problém. Skúste to prosím znova. Ak problém pretrváva, kontaktujte podporu.",
+  "errorGettingSession.text": "Pri načítaní relácie došlo k problému. Vaše údaje sú v bezpečí a neprišli ste o ne — pravdepodobne išlo o dočasný problém. Skúste to prosím znova. Ak problém pretrváva, kontaktujte podporu.",
   "errorGettingSession.contactSupport": "Kontaktovať podporu",
   "common.noResults": "Žiadne výsledky",
   "loginFlow.start.termsOfUse": "podmienkami používania",

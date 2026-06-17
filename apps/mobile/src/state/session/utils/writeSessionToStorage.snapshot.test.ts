@@ -19,6 +19,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }))
 
 jest.mock('expo-secure-store', () => ({
+  AFTER_FIRST_UNLOCK: 1,
   getItemAsync: jest.fn(),
   setItemAsync: jest.fn(),
   deleteItemAsync: jest.fn(),
@@ -66,6 +67,7 @@ describe('writeSessionToStorage snapshot', () => {
       secretStorage: {
         key: secretStoreSetItemAsyncMock.mock.calls.at(0)?.[0],
         value: secretStoreSetItemAsyncMock.mock.calls.at(0)?.[1],
+        options: secretStoreSetItemAsyncMock.mock.calls.at(0)?.[2],
       },
     }).toMatchSnapshot()
   })

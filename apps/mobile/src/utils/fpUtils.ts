@@ -95,20 +95,22 @@ export class ErrorWritingToStore extends Schema.TaggedError<ErrorWritingToStore>
 }) {}
 
 export function saveItemToSecretStorage(
-  key: string
-): (value: string) => Effect.Effect<true, ErrorWritingToStore> {
+  key: string,
+  options?: SecretStore.SecureStoreOptions
+): (value: string) => Effect.Effect<boolean, ErrorWritingToStore> {
   return (value: string) =>
     Effect.tryPromise({
       try: async () => {
-        await SecretStore.setItemAsync(key, value)
-        return true as const
+        if (options) await SecretStore.setItemAsync(key, value, options)
+        else await SecretStore.setItemAsync(key, value)
+        return true
       },
       catch: (e) => new ErrorWritingToStore({cause: e}),
     })
 }
 export const saveItemToSecretStorageFp =
   (key: string) =>
-  (value: string): TE.TaskEither<ErrorWritingToStore, true> =>
+  (value: string): TE.TaskEither<ErrorWritingToStore, boolean> =>
     effectToTaskEither(saveItemToSecretStorage(key)(value))
 
 export function saveItemToAsyncStorage(

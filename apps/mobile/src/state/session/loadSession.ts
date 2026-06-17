@@ -30,6 +30,7 @@ import {migrateOwnerPrivatePartsToV2Keys} from './utils/migrateOwnerPrivateParts
 import {readSessionFromStorage} from './utils/readSessionFromStorage'
 import writeSessionToStorage, {
   SECRET_TOKEN_KEY,
+  SECRET_TOKEN_KEY_V2,
   SESSION_KEY,
   type SessionWriteError,
 } from './utils/writeSessionToStorage'
@@ -121,6 +122,7 @@ function readSessionFromStorageHandleErrors(
   return readSessionFromStorage({
     asyncStorageKey: SESSION_KEY,
     secretStorageKey: SECRET_TOKEN_KEY,
+    secretStorageKeyV2: SECRET_TOKEN_KEY_V2,
   }).pipe(
     Effect.tapError((e) =>
       Effect.sync(() => {

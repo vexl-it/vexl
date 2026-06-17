@@ -1,8 +1,7 @@
 import {FetchHttpClient} from '@effect/platform/index'
 import {contact, offer} from '@vexl-next/rest-api'
-import {Data, Effect, Option} from 'effect/index'
+import {Data, Effect, Option, Schema} from 'effect/index'
 import {getDefaultStore} from 'jotai'
-import {Alert, Linking} from 'react-native'
 import {sessionHolderAtom} from '.'
 import {apiEnv} from '../../api'
 import {
@@ -22,7 +21,7 @@ import {
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {isDeveloperAtom} from '../../utils/preferences'
-import reportError, {reportErrorE} from '../../utils/reportError'
+import {reportErrorE} from '../../utils/reportError'
 import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from '../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {upgradeSession, type UpgradeSessionError} from './upgradeSession'
 import {migrateClubsToV2Keys} from './utils/migrateClubsToV2Keys'
@@ -38,6 +37,12 @@ import writeSessionToStorage, {
 export class SessionSanityCheckFailed extends Data.TaggedError(
   'SessionSanityCheckFailed'
 )<{cause: unknown; message: string}> {}
+
+const ErrorWithTag = Schema.Struct({_tag: Schema.String})
+
+function safeErrorTag(e: unknown): string {
+  return Schema.is(ErrorWithTag)(e) ? e._tag : 'unknown'
+}
 
 function logLoadSessionProgress(text: string): void {
   console.log('🔑 loading session', text)
@@ -69,7 +74,6 @@ export type LoadSessionResult =
     }
 
 interface LoadSessionOptions {
-  readonly showErrorAlert: boolean
   readonly forceReload: boolean
 }
 
@@ -131,62 +135,28 @@ function shouldSkipLoading(
   return !canStartLoad
 }
 
+const BLOCKING_RECOVERY_ERROR_TAGS = new Set<string>([
+  'StoredSessionSecretUnavailable',
+  'ErrorReadingFromSecureStorage',
+  'ErrorReadingFromAsyncStorage',
+  // ErrorWritingToStore is never surfaced by readSessionFromStorage today (V2
+  // backfill writes are best-effort), but treat any storage write failure as
+  // blocking so a transient failure never silently routes to LoginFlow.
+  'ErrorWritingToStore',
+  'V2SecretReadFailedAfterBeingWritten',
+  // CryptoError / ParseError are deliberately blocking: never auto-logout on
+  // possibly-misclassified corruption.
+  'CryptoError',
+  'ParseError',
+])
+
 function isBlockingRecoveryError(loadingError: SessionStorageError): boolean {
-  return (
-    loadingError._tag === 'StoredSessionSecretUnavailable' ||
-    loadingError._tag === 'ErrorReadingFromSecureStorage' ||
-    loadingError._tag === 'V2SecretReadFailedAfterBeingWritten' ||
-    loadingError._tag === 'CryptoError' ||
-    loadingError._tag === 'ParseError'
-  )
+  // StoreEmpty is intentionally NOT blocking: genuinely logged-out users must
+  // still reach the login flow.
+  return BLOCKING_RECOVERY_ERROR_TAGS.has(loadingError._tag)
 }
 
-function handleSessionStorageError(
-  loadingError: SessionStorageError,
-  showErrorAlert: boolean
-): void {
-  if (loadingError._tag === 'StoreEmpty') {
-    logLoadSessionProgress('No session in storage. User is logged out')
-    getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
-    return
-  }
-
-  if (loadingError._tag === 'V2SecretReadFailedAfterBeingWritten') {
-    reportError(
-      'error',
-      new Error(
-        '‼️ V2 session secret was previously written but could not be read from secure storage.'
-      ),
-      {loadingError}
-    )
-  }
-  getDefaultStore().set(
-    clearPersistentDataAboutReachAndImportedContactsActionAtom
-  )
-
-  if (showErrorAlert) {
-    const {t} = getDefaultStore().get(translationAtom)
-    Alert.alert(
-      t('errorGettingSession.title'),
-      t('errorGettingSession.text', {errorCode: loadingError._tag}),
-      [
-        {
-          text: t('errorGettingSession.contactSupport'),
-          onPress: () => {
-            void Linking.openURL(`mailto:${t('settings.items.supportEmail')}`)
-          },
-        },
-      ]
-    )
-    return
-  }
-
-  getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
-}
-
-function readSessionFromStorageHandleErrors(
-  showErrorAlert: boolean
-): Effect.Effect<ReadSessionFromStorageResult> {
+function readSessionFromStorageHandleErrors(): Effect.Effect<ReadSessionFromStorageResult> {
   return readSessionFromStorage({
     asyncStorageKey: SESSION_KEY,
     secretStorageKey: SECRET_TOKEN_KEY,
@@ -195,10 +165,11 @@ function readSessionFromStorageHandleErrors(
     Effect.map(readSessionFromStorageSuccess),
     Effect.catchAll((e) =>
       Effect.sync(() => {
+        // We are deliberately logging this. The notification logging is disabled
+        // by default so this does not pose risk of leaking user data
         logLoadSessionProgress(
-          `Error while loading session ${JSON.stringify(e)}`
+          `Error while loading session. ${JSON.stringify(e)}`
         )
-        handleSessionStorageError(e, showErrorAlert)
         return readSessionFromStorageFailure(e)
       })
     )
@@ -216,7 +187,7 @@ const waitForLoadingSessionFinished = (
     Effect.catchTag('TimeoutException', (e) =>
       Effect.zipRight(
         reportErrorE(
-          'error',
+          'warn',
           new Error('Waiting for sessionfinished timeout', {cause: e})
         ),
         Effect.succeed(false)
@@ -307,8 +278,7 @@ const ensureV2SessionIfNotCreateAndWrite = (
     return session
   })
 export function loadSession(
-  {showErrorAlert, forceReload}: LoadSessionOptions = {
-    showErrorAlert: false,
+  {forceReload}: LoadSessionOptions = {
     forceReload: false,
   }
 ): Effect.Effect<LoadSessionResult> {
@@ -318,7 +288,6 @@ export function loadSession(
 
     logLoadSessionProgress(
       `LoadingSession: ${JSON.stringify({
-        showErrorAlert,
         forceReload,
         sessionState,
       })}`
@@ -340,13 +309,25 @@ export function loadSession(
     logLoadSessionProgress('Trying to find session in storage')
     store.set(sessionHolderAtom, {state: 'loading'})
 
-    const readSessionResult = yield* _(
-      readSessionFromStorageHandleErrors(showErrorAlert)
-    )
+    const readSessionResult = yield* _(readSessionFromStorageHandleErrors())
 
     if (Option.isNone(readSessionResult.sessionFromStorage)) {
       // We don't have a session. User is logged out.
+      // NOTE: data is NOT erased here - this only flips the in-memory atom.
       getDefaultStore().set(sessionHolderAtom, {state: 'loggedOut'})
+
+      // If the session became unreadable due to a storage error (not a clean
+      // empty store), reset the cached reach / imported-contacts baseline so a
+      // stale value can't trigger a false "drop in reach detected" dialog.
+      if (
+        Option.isSome(readSessionResult.loadingError) &&
+        readSessionResult.loadingError.value._tag !== 'StoreEmpty'
+      ) {
+        getDefaultStore().set(
+          clearPersistentDataAboutReachAndImportedContactsActionAtom
+        )
+      }
+
       return sessionNotLoadedResult(readSessionResult.loadingError)
     }
 
@@ -373,24 +354,22 @@ export function loadSession(
       session,
     })
 
-    resolveSessionLoaded()
-
     return sessionLoadedResult()
   }).pipe(
     Effect.catchAll((e) =>
       Effect.zipRight(
         reportErrorE(
           'error',
-          new Error('Unexpected error while loading session', {cause: e}),
-          {
-            error: e,
-          }
+          new Error(
+            `Unexpected error while loading session. tag: ${safeErrorTag(e)}`
+          )
         ),
         Effect.sync(() => {
           getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
           return sessionNotLoadedResult()
         })
       )
-    )
+    ),
+    Effect.ensuring(Effect.sync(resolveSessionLoaded))
   )
 }

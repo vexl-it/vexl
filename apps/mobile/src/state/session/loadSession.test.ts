@@ -337,8 +337,8 @@ describe('loadSession', () => {
       secondLoadPromise,
     ])
 
-    expect(firstLoadResult).toBe(true)
-    expect(secondLoadResult).toBe(true)
+    expect(firstLoadResult.sessionLoaded).toBe(true)
+    expect(secondLoadResult.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedIn',
       session: withExpectedSessionUpgrades(loadedSession),
@@ -359,7 +359,7 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: false, forceReload: false})
     )
 
-    expect(result).toBe(true)
+    expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedIn',
       session: withExpectedSessionUpgrades(loadedSession),
@@ -385,7 +385,7 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: false, forceReload: false})
     )
 
-    expect(result).toBe(true)
+    expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedIn',
       session: withExpectedSessionUpgrades(loadedSession),
@@ -407,14 +407,20 @@ describe('loadSession', () => {
 
     const result = await Effect.runPromise(loadSession())
 
-    expect(result).toBe(false)
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: false,
+      loadingError: {
+        _tag: 'StoreEmpty',
+      },
+    })
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedOut',
     })
     expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
   })
 
-  it('returns false and sets state to loggedOut when secure store read fails', async () => {
+  it('returns not-loaded result and sets state to loggedOut when secure store read fails', async () => {
     const loadedSession = buildSession(dummySession.version + 3)
     const {encryptedSession} = encryptSessionForStorage(loadedSession)
     const staleReachData = {
@@ -440,7 +446,13 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: false, forceReload: false})
     )
 
-    expect(result).toBe(false)
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'ErrorReadingFromSecureStorage',
+      },
+    })
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedOut',
     })
@@ -449,6 +461,50 @@ describe('loadSession', () => {
     ).toEqual({
       reach: 0,
       numberOfImportedContacts: 0,
+    })
+    expect(reportErrorMock).not.toHaveBeenCalled()
+  })
+
+  it('requires blocking recovery when encrypted session exists but stored secret is missing', async () => {
+    const loadedSession = buildSession(dummySession.version + 36)
+    const {encryptedSession} = encryptSessionForStorage(loadedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+
+    const result = await Effect.runPromise(
+      loadSession({showErrorAlert: false, forceReload: false})
+    )
+
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'StoredSessionSecretUnavailable',
+      },
+    })
+    expect(reportErrorMock).not.toHaveBeenCalled()
+  })
+
+  it('requires blocking recovery when encrypted session exists but can not be decrypted into a session', async () => {
+    const loadedSession = buildSession(dummySession.version + 37)
+    const {encryptedSession} = encryptSessionForStorage(loadedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce('wrong-secret-token')
+
+    const result = await Effect.runPromise(
+      loadSession({showErrorAlert: false, forceReload: false})
+    )
+
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'ParseError',
+      },
     })
     expect(reportErrorMock).not.toHaveBeenCalled()
   })
@@ -468,7 +524,13 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: true, forceReload: false})
     )
 
-    expect(result).toBe(false)
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'V2SecretReadFailedAfterBeingWritten',
+      },
+    })
     expect(alertSpy).toHaveBeenCalledTimes(1)
     expect(reportErrorMock).toHaveBeenCalledTimes(1)
 
@@ -480,6 +542,47 @@ describe('loadSession', () => {
 
     expect(call[0]).toBe('error')
     expect(call[1].message).toContain('V2 session secret')
+    expect(call[2]).toMatchObject({
+      loadingError: {
+        _tag: 'V2SecretReadFailedAfterBeingWritten',
+      },
+    })
+  })
+
+  it('reports v2 secret read failure without showing a native alert', async () => {
+    const loadedSession = buildSession(dummySession.version + 35)
+    const {encryptedSession} = encryptSessionForStorage(loadedSession)
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
+    markV2SecretAsWritten()
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockRejectedValueOnce(
+      new Error('secure store failed')
+    )
+
+    const result = await Effect.runPromise(
+      loadSession({
+        showErrorAlert: false,
+        forceReload: false,
+      })
+    )
+
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'V2SecretReadFailedAfterBeingWritten',
+      },
+    })
+    expect(alertSpy).not.toHaveBeenCalled()
+    expect(reportErrorMock).toHaveBeenCalledTimes(1)
+
+    const call = reportErrorMock.mock.calls.at(0)
+    expect(call).toBeDefined()
+    if (!call) {
+      throw new Error('Expected reportError to be called')
+    }
+
+    expect(call[0]).toBe('error')
     expect(call[2]).toMatchObject({
       loadingError: {
         _tag: 'V2SecretReadFailedAfterBeingWritten',
@@ -504,7 +607,7 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: true, forceReload: false})
     )
 
-    expect(result).toBe(false)
+    expect(result.sessionLoaded).toBe(false)
     expect(alertSpy).toHaveBeenCalledTimes(1)
     const alertButtons = alertSpy.mock.calls.at(0)?.[2]
     expect(alertButtons).toBeDefined()
@@ -531,7 +634,7 @@ describe('loadSession', () => {
 
     const result = await Effect.runPromise(loadSession())
 
-    expect(result).toBe(true)
+    expect(result.sessionLoaded).toBe(true)
     expect(asyncStorageGetItemMock).not.toHaveBeenCalled()
     expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
   })
@@ -541,7 +644,7 @@ describe('loadSession', () => {
 
     const result = await Effect.runPromise(loadSession())
 
-    expect(result).toBe(false)
+    expect(result.sessionLoaded).toBe(false)
     expect(asyncStorageGetItemMock).not.toHaveBeenCalled()
     expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
   })
@@ -563,7 +666,7 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: false, forceReload: true})
     )
 
-    expect(result).toBe(true)
+    expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedIn',
       session: withExpectedSessionUpgrades(updatedSession),
@@ -577,7 +680,7 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: false, forceReload: true})
     )
 
-    expect(result).toBe(false)
+    expect(result.sessionLoaded).toBe(false)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loading',
     })
@@ -597,7 +700,7 @@ describe('loadSession', () => {
       loadSession({showErrorAlert: false, forceReload: false})
     )
 
-    expect(result).toBe(true)
+    expect(result.sessionLoaded).toBe(true)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedIn',
       session: withExpectedSessionUpgrades(

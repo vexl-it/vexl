@@ -138,9 +138,9 @@ const processChatNotificationActionAtom = atom(
   ): Effect.Effect<boolean> => {
     return Effect.gen(function* (_) {
       console.info(`📩 Refreshing inbox`)
-      const sessionLoaded = yield* _(loadSession())
+      const loadSessionResult = yield* _(loadSession())
 
-      if (!sessionLoaded) {
+      if (!loadSessionResult.sessionLoaded) {
         yield* _(
           reportErrorE(
             'warn',

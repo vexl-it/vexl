@@ -2,16 +2,14 @@ import {vexlFonts} from '@vexl-next/ui'
 import {Effect} from 'effect/index'
 import {useFonts} from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {AppState, StyleSheet} from 'react-native'
-import Animated, {
-  BounceOut,
-  runOnJS,
-  SlideOutLeft,
-} from 'react-native-reanimated'
+import Animated, {BounceOut, SlideOutLeft} from 'react-native-reanimated'
+import {scheduleOnRN} from 'react-native-worklets'
 import {getTokens} from 'tamagui'
+import {SessionRecoveryScreen} from './components/SessionRecoveryScreen'
 import {useIsSessionLoaded} from './state/session'
-import {loadSession} from './state/session/loadSession'
+import {loadSession, type LoadSessionResult} from './state/session/loadSession'
 import {subscribeToGeneralTopic} from './utils/notifications'
 import reportError, {reportErrorE} from './utils/reportError'
 import useSetupVersionServiceState from './utils/versionService/useSetupVersionServiceState'
@@ -36,10 +34,17 @@ const styles = StyleSheet.create({
 
 const SESSION_LOAD_RETRY_DELAY_MS = 2_000
 
-function loadSessionForSplashScreen(): Effect.Effect<boolean> {
-  return loadSession({forceReload: true, showErrorAlert: false}).pipe(
-    Effect.flatMap((sessionLoaded) => {
-      if (sessionLoaded) return Effect.succeed(true)
+function loadSessionOnceForSplashScreen(): Effect.Effect<LoadSessionResult> {
+  return loadSession({
+    forceReload: true,
+    showErrorAlert: false,
+  })
+}
+
+function loadSessionForSplashScreen(): Effect.Effect<LoadSessionResult> {
+  return loadSessionOnceForSplashScreen().pipe(
+    Effect.flatMap((firstLoadResult) => {
+      if (firstLoadResult.sessionLoaded) return Effect.succeed(firstLoadResult)
 
       return Effect.zipRight(
         reportErrorE(
@@ -50,13 +55,19 @@ function loadSessionForSplashScreen(): Effect.Effect<boolean> {
         ),
         Effect.sleep(SESSION_LOAD_RETRY_DELAY_MS)
       ).pipe(
-        Effect.zipRight(loadSession({forceReload: true, showErrorAlert: true})),
-        Effect.tap((loaded2ndTime) => {
-          if (loaded2ndTime)
+        Effect.zipRight(loadSessionOnceForSplashScreen()),
+        Effect.tap((secondLoadResult) => {
+          if (secondLoadResult.sessionLoaded)
             return reportErrorE(
               'info',
               new Error('Session login attempt succeeded')
             )
+          if (
+            !secondLoadResult.sessionLoaded &&
+            secondLoadResult.blockingRecoveryRequired
+          ) {
+            return Effect.succeed(undefined)
+          }
           return reportErrorE(
             'error',
             new Error('Session login attempt failed after retry')
@@ -86,15 +97,58 @@ function AnimatedSplashScreen({
 }): React.ReactElement | null {
   const [isAppReady, setIsAppReady] = useState(false)
   const [sessionLoadFinished, setSessionLoadFinished] = useState(false)
+  const [blockingRecoveryRequired, setBlockingRecoveryRequired] =
+    useState(false)
+  const [isReloadingSession, setIsReloadingSession] = useState(false)
   const [isSplashAnimationComplete, setIsSplashAnimationComplete] =
     useState(false)
   const [fontsLoaded] = useFonts(vexlFonts)
   const sessionLoaded = useIsSessionLoaded()
   useSetupVersionServiceState()
 
+  const reloadSessionFromRecoveryScreen = useCallback(() => {
+    setIsReloadingSession(true)
+    Effect.runFork(
+      // Recovery screen reloads are one-shot; only the initial splash load owns
+      // the delayed retry.
+      loadSessionOnceForSplashScreen().pipe(
+        Effect.tap((sessionLoadResult) => {
+          if (!sessionLoadResult.sessionLoaded) return Effect.succeed(undefined)
+
+          return reportErrorE(
+            'info',
+            new Error('Blocking session recovery reload succeeded')
+          )
+        }),
+        Effect.tap((sessionLoadResult) =>
+          Effect.sync(() => {
+            setBlockingRecoveryRequired(
+              !sessionLoadResult.sessionLoaded &&
+                sessionLoadResult.blockingRecoveryRequired
+            )
+            setSessionLoadFinished(true)
+          })
+        ),
+        Effect.ensuring(
+          Effect.sync(() => {
+            setIsReloadingSession(false)
+          })
+        )
+      )
+    )
+  }, [])
+
   useEffect(() => {
     Effect.runFork(
       loadSessionForSplashScreen().pipe(
+        Effect.tap((sessionLoadResult) =>
+          Effect.sync(() => {
+            setBlockingRecoveryRequired(
+              !sessionLoadResult.sessionLoaded &&
+                sessionLoadResult.blockingRecoveryRequired
+            )
+          })
+        ),
         Effect.ensuring(
           Effect.sync(() => {
             setSessionLoadFinished(true)
@@ -108,6 +162,8 @@ function AnimatedSplashScreen({
   useEffect(() => {
     // Fallback to hide splash screen after 5 seconds
     const id = setTimeout(() => {
+      if (blockingRecoveryRequired) return
+
       if (!isAppReady) {
         reportError('warn', new Error('App is taking too long to load'))
         return
@@ -128,15 +184,25 @@ function AnimatedSplashScreen({
     return () => {
       clearTimeout(id)
     }
-  }, [setIsSplashAnimationComplete, isAppReady])
+  }, [blockingRecoveryRequired, setIsSplashAnimationComplete, isAppReady])
 
   useEffect(() => {
     // `sessionLoaded` becomes true even after the first failed attempt sets
     // `loggedOut`; wait for the splash retry sequence to finish as well.
-    if (fontsLoaded && sessionLoaded && sessionLoadFinished) {
+    if (
+      fontsLoaded &&
+      sessionLoaded &&
+      sessionLoadFinished &&
+      !blockingRecoveryRequired
+    ) {
       setIsAppReady(true)
     }
-  }, [fontsLoaded, sessionLoaded, sessionLoadFinished])
+  }, [
+    blockingRecoveryRequired,
+    fontsLoaded,
+    sessionLoaded,
+    sessionLoadFinished,
+  ])
 
   useEffect(() => {
     void SplashScreen.hideAsync()
@@ -144,7 +210,13 @@ function AnimatedSplashScreen({
 
   return (
     <>
-      {!isSplashAnimationComplete && (
+      {!!blockingRecoveryRequired && (
+        <SessionRecoveryScreen
+          isReloadingSession={isReloadingSession}
+          onReloadSession={reloadSessionFromRecoveryScreen}
+        />
+      )}
+      {!blockingRecoveryRequired && !isSplashAnimationComplete && (
         <Animated.View
           style={styles.container}
           exiting={SlideOutLeft.duration(400)}
@@ -153,13 +225,13 @@ function AnimatedSplashScreen({
             style={styles.image}
             resizeMode="contain"
             entering={BounceOut.duration(1000).withCallback((finished) => {
-              runOnJS(setIsSplashAnimationComplete)(finished)
+              scheduleOnRN(setIsSplashAnimationComplete, finished)
             })}
             source={require('./images/sunglasses.png')}
           />
         </Animated.View>
       )}
-      {!!isAppReady && <>{children}</>}
+      {!!isAppReady && !blockingRecoveryRequired && <>{children}</>}
     </>
   )
 }

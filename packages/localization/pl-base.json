@@ -258,7 +258,7 @@
   "currency.ZMW": "Kwacha zambijska",
   "currency.ZWL": "Dolar zimbabwe",
   "errorGettingSession.title": "Błąd podczas uruchamiania Vexl",
-  "errorGettingSession.text": "Wystąpił problem podczas wczytywania błędu twojej sesji: {{errorCode}}. Nie można uruchomić aplikacji bez usuwania danych. Skontaktuj się z pomocą techniczną, aby rozwiązać problemy lub uruchomić ponownie aplikację.",
+  "errorGettingSession.text": "Wystąpił problem podczas wczytywania twojej sesji. Kod błędu: {{errorCode}}. Twoje dane są bezpieczne i nie zostały utracone — prawdopodobnie był to tymczasowy problem. Spróbuj ponownie. Jeśli problem będzie się powtarzać, skontaktuj się z pomocą techniczną.",
   "errorGettingSession.contactSupport": "Pomoc techniczna",
   "common.noResults": "Brak wyników",
   "loginFlow.start.termsOfUse": "Warunki użytkowania",

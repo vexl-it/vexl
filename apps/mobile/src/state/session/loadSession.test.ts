@@ -572,6 +572,42 @@ describe('loadSession', () => {
     expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
   })
 
+  it('requires blocking recovery and resets to initial without erasing data when an unexpected error happens after the session was read (failing session sanity check)', async () => {
+    // A complete V2 session that decodes fine (so the read succeeds and no
+    // upgrade runs), but whose stored public key no longer matches its private
+    // key. sanityCheckSessionV2 fails, which raises SessionSanityCheckFailed
+    // AFTER the session was read - exactly the unexpected-error path handled by
+    // loadSession's top-level catchAll (VEXL-APP-1AA).
+    const sane = buildLoggedInSession(dummySession.version + 60)
+    const corruptedSession: SessionV2 = {
+      ...sane,
+      sessionCredentials: {
+        ...sane.sessionCredentials,
+        // snapshotSavedPrivateKey's public key differs from this session's
+        // private key, so the third sanity condition no longer holds.
+        publicKey: snapshotSavedPrivateKey.publicKeyPemBase64,
+      },
+    }
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(corruptedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
+
+    expect(result).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+    })
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'initial',
+    })
+    // PRIME DIRECTIVE: an unexpected error must NEVER erase data.
+    expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+    expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
+  })
+
   it('returns current value and skips storage calls when already loggedIn', async () => {
     const existingSession = buildLoggedInSession(dummySession.version + 4)
     getDefaultStore().set(sessionHolderAtom, {

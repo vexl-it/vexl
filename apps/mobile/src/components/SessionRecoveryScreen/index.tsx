@@ -29,6 +29,7 @@ export function SessionRecoveryScreen({
       <Screen
         navigationBar={null}
         safeAreasBackgroundColor="$backgroundPrimary"
+        footerAvoidsKeyboard={false}
         footer={
           <YStack gap="$3">
             <Button

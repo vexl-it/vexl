@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "Wykryto spadek zasięgu",
   "unexpectedReachDrop.description": "Wykryliśmy nieoczekiwany problem, który mógł wpłynąć na Twój zasięg. Aby przywrócić pełną widoczność i upewnić się, że Twoje oferty działają zgodnie z oczekiwaniami, zaimportuj ponownie swoje kontakty i ponownie zaszyfruj swoje oferty.",
   "unexpectedReachDrop.actionTitle": "Napraw wszystkie problemy",
+  "unexpectedReachDrop.reimportDescription": "Coś mogło wpłynąć na Twój zasięg. Jeśli przejdziesz dalej, Vexl ponownie zaimportuje Twoje kontakty i ponownie zaszyfruje Twoje oferty, aby znów mogły być widoczne dla Twojej sieci.",
+  "unexpectedReachDrop.reimportActionTitle": "Zaimportuj kontakty ponownie",
   "changeCurrency.trySearchingByCurrencyName": "Spróbuj wyszukać po nazwie lub kodzie waluty.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl łączy Cię z ludźmi, których znasz i którym ufasz. Dodaj kontakty, żeby zobaczyć, co jest dostępne.",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "Upewnij się, że masz włączone powiadomienia - damy Ci znać, gdy Twoi znajomi zaczną się pojawiać.",

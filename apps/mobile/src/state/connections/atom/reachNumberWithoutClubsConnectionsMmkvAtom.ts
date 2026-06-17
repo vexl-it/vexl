@@ -5,6 +5,9 @@ import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsed
 import {importedContactsCountAtom} from '../../contacts/atom/contactsStore'
 import {fistAndSecondLevelConnectionsReachAtom} from './connectionStateAtom'
 
+export const PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY =
+  'persistedDataAboutReachAndImportedContacts'
+
 const PersistentDataAboutReachAndImportedContacts = Schema.Struct({
   data: Schema.Struct({
     reach: Schema.Int,
@@ -14,10 +17,13 @@ const PersistentDataAboutReachAndImportedContacts = Schema.Struct({
 type PersistentDataAboutReachAndImportedContacts =
   typeof PersistentDataAboutReachAndImportedContacts.Type
 
+const defaultPersistentDataAboutReachAndImportedContacts: PersistentDataAboutReachAndImportedContacts =
+  {data: {reach: 0, numberOfImportedContacts: 0}}
+
 const persistentDataAboutReachAndImportedContactsMmkvAtom =
   atomWithParsedMmkvStorage(
-    'persistedDataAboutReachAndImportedContacts',
-    {data: {reach: 0, numberOfImportedContacts: 0}},
+    PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
+    defaultPersistentDataAboutReachAndImportedContacts,
     PersistentDataAboutReachAndImportedContacts
   )
 
@@ -71,9 +77,9 @@ export const fixReachAndReencryptOffersIfNeededActionAtom = atom(
 export const clearPersistentDataAboutReachAndImportedContactsActionAtom = atom(
   null,
   (get, set): void => {
-    set(persistentDataAboutReachAndImportedContactsAtom, {
-      reach: 0,
-      numberOfImportedContacts: 0,
-    })
+    set(
+      persistentDataAboutReachAndImportedContactsMmkvAtom,
+      defaultPersistentDataAboutReachAndImportedContacts
+    )
   }
 )

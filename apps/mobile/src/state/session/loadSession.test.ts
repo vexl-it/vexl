@@ -13,6 +13,11 @@ import {
   type SessionV2,
   Session as SessionSchema,
 } from '../../brands/Session.brand'
+import {storage} from '../../utils/mmkv/effectMmkv'
+import {
+  PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
+  persistentDataAboutReachAndImportedContactsAtom,
+} from '../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {dummySession} from './dummySesssion'
 import {loadSession} from './loadSession'
 import {SECRET_TOKEN_KEY, SESSION_KEY} from './utils/writeSessionToStorage'
@@ -62,6 +67,10 @@ jest.mock('react-native-mmkv', () => {
     getString(key: string): string | undefined {
       return this.data.get(key)
     }
+
+    delete(key: string): void {
+      this.data.delete(key)
+    }
   }
 
   return {MMKV}
@@ -71,6 +80,7 @@ jest.mock('../../utils/localization/I18nProvider', () => {
   const {atom: createAtom} = jest.requireActual('jotai')
 
   return {
+    getCurrentLocale: () => 'en',
     translationAtom: createAtom({
       t: (
         key: string,
@@ -262,6 +272,9 @@ describe('loadSession', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
+    storage._storage.delete(
+      PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY
+    )
     asyncStorageGetItemMock.mockResolvedValue(null)
     secretStoreGetItemAsyncMock.mockResolvedValue(null)
   })
@@ -339,6 +352,10 @@ describe('loadSession', () => {
   it('returns false and sets state to loggedOut when secure store read fails', async () => {
     const loadedSession = buildSession(dummySession.version + 3)
     const {encryptedSession} = encryptSessionForStorage(loadedSession)
+    storage._storage.set(
+      PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
+      'stale-reach-data'
+    )
 
     asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
     secretStoreGetItemAsyncMock.mockRejectedValueOnce(
@@ -352,6 +369,12 @@ describe('loadSession', () => {
     expect(result).toBe(false)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedOut',
+    })
+    expect(
+      getDefaultStore().get(persistentDataAboutReachAndImportedContactsAtom)
+    ).toEqual({
+      reach: 0,
+      numberOfImportedContacts: 0,
     })
   })
 

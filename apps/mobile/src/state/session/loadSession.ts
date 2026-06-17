@@ -23,6 +23,7 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import {showDebugNotificationIfEnabled} from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {isDeveloperAtom} from '../../utils/preferences'
 import reportError, {reportErrorE} from '../../utils/reportError'
+import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from '../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {upgradeSession, type UpgradeSessionError} from './upgradeSession'
 import {migrateClubsToV2Keys} from './utils/migrateClubsToV2Keys'
 import {migrateOwnerPrivatePartsToV2Keys} from './utils/migrateOwnerPrivatePartsToV2Keys'
@@ -89,6 +90,9 @@ function handleSessionStorageError(
       '‼️ Error while reading or parsing user data from secure storage.'
     ),
     {loadingError}
+  )
+  getDefaultStore().set(
+    clearPersistentDataAboutReachAndImportedContactsActionAtom
   )
 
   if (showErrorAlert) {

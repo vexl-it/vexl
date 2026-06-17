@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "Se detecta una caída en el alcance",
   "unexpectedReachDrop.description": "Hemos detectado un problema inesperado que puede haber afectado a tu alcance. Para restaurar la visibilidad completa y garantizar que tus ofertas funcionen según lo previsto, vuelva a importar tus contactos y vuelva a cifrar tus ofertas.",
   "unexpectedReachDrop.actionTitle": "Arreglar todos los problemas",
+  "unexpectedReachDrop.reimportDescription": "Algo puede haber afectado a tu alcance. Si continúas, Vexl volverá a importar tus contactos y volverá a cifrar tus ofertas para que puedan ser visibles de nuevo para tu red.",
+  "unexpectedReachDrop.reimportActionTitle": "Reimportar contactos",
   "changeCurrency.trySearchingByCurrencyName": "Prueba a buscar por nombre o código de moneda.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl te conecta con personas que conoces y en quienes confías. Añade tus contactos para ver qué hay disponible.",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "Asegúrate de activar las notificaciones: te avisaremos cuando tus amigos empiecen a aparecer.",

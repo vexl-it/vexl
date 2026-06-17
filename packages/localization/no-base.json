@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "Drop in reach detected",
   "unexpectedReachDrop.description": "We’ve detected an unexpected issue that may have affected your reach. To restore full visibility and ensure your offers work as expected, please re-import your contacts and re-encrypt your offers.",
   "unexpectedReachDrop.actionTitle": "Fix all problems",
+  "unexpectedReachDrop.reimportDescription": "Noe kan ha påvirket rekkevidden din. Hvis du fortsetter, importerer Vexl kontaktene dine på nytt og krypterer tilbudene dine på nytt, slik at de kan bli synlige for nettverket ditt igjen.",
+  "unexpectedReachDrop.reimportActionTitle": "Importer kontakter på nytt",
   "changeCurrency.trySearchingByCurrencyName": "Prøv å søke etter valutanavn eller kode.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl kobler deg til folk du kjenner og stoler på. Legg til kontaktene dine for å se hva som finnes.",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "Sørg for å slå på varsler - vi gir deg beskjed når vennene dine begynner å dukke opp.",

@@ -1336,6 +1336,8 @@
   "unexpectedReachDrop.title": "Drop in reach detected",
   "unexpectedReachDrop.description": "We’ve detected an unexpected issue that may have affected your reach. To restore full visibility and ensure your offers work as expected, please re-import your contacts and re-encrypt your offers.",
   "unexpectedReachDrop.actionTitle": "Fix all problems",
+  "unexpectedReachDrop.reimportDescription": "Kuna jambo linaweza kuwa limeathiri ufikiaji wako. Ukiendelea, Vexl itaingiza tena anwani zako na kusimba tena ofa zako ili ziweze kuonekana tena kwenye mtandao wako.",
+  "unexpectedReachDrop.reimportActionTitle": "Ingiza tena anwani",
   "changeCurrency.trySearchingByCurrencyName": "Jaribu kutafuta kwa jina la sarafu au msimbo.",
   "emptyMarketplace.vexlConnectsYouWithPeopleYouKnowAndTrust": "Vexl hukuunganisha na watu unaowajua na kuwaamini. Ongeza anwani zako kuona kinachopatikana.",
   "emptyMarketplace.weWillLetYouKnowOnceYourFriends": "Hakikisha umewasha arifa - tutakujulisha mara marafiki zako watakapoanza kuonekana.",

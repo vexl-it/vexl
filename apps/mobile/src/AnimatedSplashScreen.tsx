@@ -34,6 +34,20 @@ const styles = StyleSheet.create({
   },
 })
 
+const SESSION_LOAD_RETRY_DELAY_MS = 2_000
+
+function loadSessionForSplashScreen(): Effect.Effect<boolean> {
+  return loadSession({forceReload: true, showErrorAlert: false}).pipe(
+    Effect.flatMap((sessionLoaded) => {
+      if (sessionLoaded) return Effect.succeed(true)
+
+      return Effect.sleep(SESSION_LOAD_RETRY_DELAY_MS).pipe(
+        Effect.zipRight(loadSession({forceReload: true, showErrorAlert: true}))
+      )
+    })
+  )
+}
+
 void SplashScreen.preventAutoHideAsync().catch((e) => {
   if (
     AppState.currentState !== 'active' &&
@@ -59,7 +73,7 @@ function AnimatedSplashScreen({
   useSetupVersionServiceState()
 
   useEffect(() => {
-    Effect.runFork(loadSession({forceReload: true, showErrorAlert: true}))
+    Effect.runFork(loadSessionForSplashScreen())
     void subscribeToGeneralTopic()
   }, [])
 

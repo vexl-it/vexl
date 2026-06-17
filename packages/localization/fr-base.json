@@ -258,7 +258,7 @@
   "currency.ZMW": "kwacha zambien",
   "currency.ZWL": "dollar zimbabwéen",
   "errorGettingSession.title": "Erreur lors du démarrage de Vexl",
-  "errorGettingSession.text": "Un problème est survenu lors du chargement de votre session. Code d'erreur : {{errorCode}}. Vos données sont en sécurité et n'ont pas été perdues — il s'agit probablement d'un problème temporaire. Veuillez réessayer. Si le problème persiste, contactez le support.",
+  "errorGettingSession.text": "Un problème est survenu lors du chargement de votre session. Vos données sont en sécurité et n'ont pas été perdues — il s'agit probablement d'un problème temporaire. Veuillez réessayer. Si le problème persiste, contactez le support.",
   "errorGettingSession.contactSupport": "Signaler un problème",
   "common.noResults": "Aucun résultat",
   "loginFlow.start.termsOfUse": "Conditions d'utilisation",

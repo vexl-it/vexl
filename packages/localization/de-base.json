@@ -258,7 +258,7 @@
   "currency.ZMW": "Sambischer Kwacha",
   "currency.ZWL": "Simbabwe-Dollar",
   "errorGettingSession.title": "Fehler beim Starten von Vexl",
-  "errorGettingSession.text": "Beim Laden deiner Session ist ein Problem aufgetreten. Fehlercode: {{errorCode}}. Deine Daten sind sicher und nicht verloren — wahrscheinlich war es nur ein vorübergehendes Problem. Bitte versuche es erneut. Falls es weiterhin auftritt, kontaktiere den Support.",
+  "errorGettingSession.text": "Beim Laden deiner Session ist ein Problem aufgetreten. Deine Daten sind sicher und nicht verloren — wahrscheinlich war es nur ein vorübergehendes Problem. Bitte versuche es erneut. Falls es weiterhin auftritt, kontaktiere den Support.",
   "errorGettingSession.contactSupport": "Problem melden",
   "common.noResults": "Keine Ergebnisse",
   "loginFlow.start.termsOfUse": "Nutzungsbedingungen",

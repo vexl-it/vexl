@@ -258,7 +258,7 @@
   "currency.ZMW": "Zambian Kwacha",
   "currency.ZWL": "Zimbabwean Dollar",
   "errorGettingSession.title": "Error starting Vexl",
-  "errorGettingSession.text": "There was a problem loading your session. Error code: {{errorCode}}. Your data is safe and hasn't been lost — this was likely a temporary issue. Please try again. If it keeps happening, contact support.",
+  "errorGettingSession.text": "There was a problem loading your session. Your data is safe and hasn't been lost — this was likely a temporary issue. Please try again. If it keeps happening, contact support.",
   "errorGettingSession.contactSupport": "Contact support",
   "common.noResults": "No results",
   "loginFlow.start.termsOfUse": "Terms of use",

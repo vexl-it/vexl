@@ -258,7 +258,7 @@
   "currency.ZMW": "Zambian Kwacha",
   "currency.ZWL": "Zimbabwean Dollar",
   "errorGettingSession.title": "Hitilafu kuanzisha Vexl",
-  "errorGettingSession.text": "Kulikuwa na tatizo la kupakia kikao chako. Nambari ya Hitilafu: {{errorCode}}. Huwezi kuanzisha programu bila kufuta data zako. Tafadhali wasiliana na msaada ili kujaribu kutatua tatizo au anza upya programu.",
+  "errorGettingSession.text": "Kulikuwa na tatizo la kupakia kikao chako. Huwezi kuanzisha programu bila kufuta data zako. Tafadhali wasiliana na msaada ili kujaribu kutatua tatizo au anza upya programu.",
   "errorGettingSession.contactSupport": "Wasiliana na msaada",
   "common.noResults": "Hakuna matokeo",
   "loginFlow.start.termsOfUse": "Masharti ya Matumizi",

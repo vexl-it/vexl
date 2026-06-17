@@ -258,7 +258,7 @@
   "currency.ZMW": "Kwacha de Zambia",
   "currency.ZWL": "Dólar Zimbabuense",
   "errorGettingSession.title": "Error al iniciar Vexl",
-  "errorGettingSession.text": "Hubo un problema al cargar tu sesión. Código de error: {{errorCode}}. Tus datos están a salvo y no se han perdido: probablemente fue un problema temporal. Vuelve a intentarlo. Si sigue ocurriendo, ponte en contacto con el servicio de asistencia.",
+  "errorGettingSession.text": "Hubo un problema al cargar tu sesión. Tus datos están a salvo y no se han perdido: probablemente fue un problema temporal. Vuelve a intentarlo. Si sigue ocurriendo, ponte en contacto con el servicio de asistencia.",
   "errorGettingSession.contactSupport": "Ponerse en contacto con el servicio de asistencia",
   "common.noResults": "No hay resultados",
   "loginFlow.start.termsOfUse": "Términos de uso",

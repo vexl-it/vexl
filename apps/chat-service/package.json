@@ -5,8 +5,7 @@
   "scripts": {
     "test": "yarn jest",
     "test:watch": "yarn jest --watch",
-    "build": "yarn typecheck && yarn build:esbuild",
-    "build:esbuild": "node esbuild.config.js",
+    "build": "node esbuild.config.js",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf ./dist",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",

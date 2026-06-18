@@ -22,6 +22,9 @@ tsconfig.tsbuildinfo
 node_modules
 .turbo
 
+# turbo prune output (Docker builds)
+/out
+
 /local/*
 
 .env

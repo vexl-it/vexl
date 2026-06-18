@@ -15,10 +15,10 @@ if [ -z "$APP" ]; then
     exit 1;
 fi
 
-# check if ./apps/$APP/Dockerfile exists
-if [ ! -f "./apps/$APP/Dockerfile" ]; then
-    echo "Dockerfile for $APP (./apps/$APP/Dockerfile) does not exist";
+# check if ./apps/$APP directory exists
+if [ ! -d "./apps/$APP" ]; then
+    echo "App $APP (./apps/$APP) does not exist";
     exit 1;
 fi
 
-docker build --platform linux/amd64 -t $TAG . -f ./apps/$APP/Dockerfile
+docker build --platform linux/amd64 -t $TAG . -f ./Dockerfile --build-arg APP=$APP

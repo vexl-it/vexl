@@ -14,7 +14,7 @@ import {
   updateEventAsync,
   type Calendar,
   type Source,
-} from 'expo-calendar'
+} from 'expo-calendar/legacy'
 import {left, right} from 'fp-ts/Either'
 import {type TaskEither} from 'fp-ts/TaskEither'
 import {atom} from 'jotai'

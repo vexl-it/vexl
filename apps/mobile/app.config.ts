@@ -266,6 +266,7 @@ export default {
           'useFrameworks': 'static',
         },
         'android': {
+          'targetSdkVersion': 35,
           'packagingOptions': {
             'pickFirst': [
               'lib/x86/libcrypto.so',
@@ -292,14 +293,6 @@ export default {
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',
-    [
-      'expo-build-properties',
-      {
-        android: {
-          targetSdkVersion: 35,
-        },
-      },
-    ],
     'expo-camera',
     [
       'react-native-capture-protection',

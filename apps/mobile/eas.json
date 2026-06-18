@@ -6,10 +6,12 @@
   "build": {
     "staging": {
       "android": {
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "resourceClass": "large"
       },
       "ios": {
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "resourceClass": "large"
       },
       "env": {
         "ENV_PRESET": "stage"
@@ -40,10 +42,12 @@
     },
     "production": {
       "android": {
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "resourceClass": "large"
       },
       "ios": {
-        "credentialsSource": "remote"
+        "credentialsSource": "remote",
+        "resourceClass": "large"
       },
       "env": {
         "ENV_PRESET": "prod"

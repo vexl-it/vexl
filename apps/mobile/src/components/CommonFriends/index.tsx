@@ -6,7 +6,7 @@ import {
   type CommonFriend,
 } from '@vexl-next/ui'
 import {Array, Effect, HashMap, Option, pipe} from 'effect'
-import {getContactByIdAsync} from 'expo-contacts'
+import {Contact, ContactField} from 'expo-contacts'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Platform} from 'react-native'
@@ -38,15 +38,17 @@ const resolveContactImage = (
     onNone: () => Effect.succeed(null),
     onSome: (id) =>
       pipe(
-        Effect.tryPromise(() => getContactByIdAsync(id)),
+        Effect.tryPromise(() =>
+          new Contact(id).getDetails([ContactField.IMAGE])
+        ),
         Effect.map((resolved) => {
-          const uri = resolved?.image?.uri
+          const uri = resolved.image
 
           // TODO: lets monitor this issue in https://github.com/vexl-it/vexl/issues/1984
           // and then change back to previous behaviour once fixed
           if (
             !uri ||
-            (Platform.OS === 'ios' && resolved.id?.includes(':ABPerson'))
+            (Platform.OS === 'ios' && resolved.id.includes(':ABPerson'))
           )
             return null
           return {hash: contact.computedValues.hash, uri}

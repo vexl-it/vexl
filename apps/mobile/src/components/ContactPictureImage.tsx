@@ -1,5 +1,5 @@
 import {Option} from 'effect'
-import {getContactByIdAsync} from 'expo-contacts'
+import {Contact, ContactField} from 'expo-contacts'
 import React, {useEffect, useState} from 'react'
 import {Platform} from 'react-native'
 import {FilterImage} from 'react-native-svg/filter-image'
@@ -88,15 +88,16 @@ export default function ContactPictureImage({
 
     setImageDetails(null)
 
-    void getContactByIdAsync(contactId.value)
+    void new Contact(contactId.value)
+      .getDetails([ContactField.IMAGE])
       .then((contact) => {
-        const contactImageUri = contact?.image?.uri
+        const contactImageUri = contact.image
 
         if (contactImageUri) {
           setImageDetails({
             uri: contactImageUri,
             isABImageOnIos: !!(
-              Platform.OS === 'ios' && contact.id?.includes(':ABPerson')
+              Platform.OS === 'ios' && contact.id.includes(':ABPerson')
             ),
           })
         }

@@ -1,6 +1,5 @@
 import {Socket} from '@effect/platform'
 import {RpcClient, RpcSerialization} from '@effect/rpc'
-import notifee, {AndroidImportance} from '@notifee/react-native'
 import {VexlProductNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
@@ -25,6 +24,7 @@ import {
   Schedule,
   Stream,
 } from 'effect'
+import {AndroidNotificationPriority} from 'expo-notifications'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {apiAtom, getApiPreset} from '../../api'
@@ -53,6 +53,7 @@ import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import {reportErrorE} from '../reportError'
 import {useAppState} from '../useAppState'
+import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {processVexlProductNotificationActionAtom} from './processVexlProductNotification'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
@@ -227,17 +228,13 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
       if (clubInfo) {
         yield* _(
           Effect.promise(async () => {
-            await notifee.displayNotification({
-              title: t(`notifications.CLUB_DEACTIVATED.${reason}.title`),
-              body: t(`notifications.CLUB_DEACTIVATED.${reason}.body`, {
-                name: clubInfo.clubInfo.name,
-              }),
-              android: {
-                smallIcon: 'notification_icon',
-                channelId: await getDefaultChannel(),
-                pressAction: {
-                  id: 'default',
-                },
+            await displayLocalNotification({
+              channelId: await getDefaultChannel(),
+              content: {
+                title: t(`notifications.CLUB_DEACTIVATED.${reason}.title`),
+                body: t(`notifications.CLUB_DEACTIVATED.${reason}.body`, {
+                  name: clubInfo.clubInfo.name,
+                }),
               },
             })
           })
@@ -274,16 +271,11 @@ const processUserInactivityNotificationActionAtom = atom(null, (get, set) =>
 
     yield* _(
       Effect.promise(async () => {
-        void notifee.displayNotification({
-          title: t(`notifications.INACTIVITY_REMINDER.title`),
-          body: t(`notifications.INACTIVITY_REMINDER.body`),
-          // data,
-          android: {
-            smallIcon: 'notification_icon',
-            channelId: await getDefaultChannel(),
-            pressAction: {
-              id: 'default',
-            },
+        void displayLocalNotification({
+          channelId: await getDefaultChannel(),
+          content: {
+            title: t(`notifications.INACTIVITY_REMINDER.title`),
+            body: t(`notifications.INACTIVITY_REMINDER.body`),
           },
         })
       })
@@ -299,18 +291,12 @@ const processUserLoginOnDifferentDeviceNotificationActionAtom = atom(
 
       yield* _(
         Effect.promise(async () => {
-          void notifee.displayNotification({
-            title: t('notifications.loggingOnDifferentDevice.title'),
-            body: t('notifications.loggingOnDifferentDevice.body'),
-            // data,
-            android: {
-              smallIcon: 'notification_icon',
-              channelId: await getDefaultChannel(),
-              importance: AndroidImportance.HIGH,
-              lightUpScreen: true,
-              pressAction: {
-                id: 'default',
-              },
+          void displayLocalNotification({
+            channelId: await getDefaultChannel(),
+            content: {
+              title: t('notifications.loggingOnDifferentDevice.title'),
+              body: t('notifications.loggingOnDifferentDevice.body'),
+              priority: AndroidNotificationPriority.HIGH,
             },
           })
         })

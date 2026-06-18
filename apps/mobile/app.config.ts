@@ -200,7 +200,6 @@ export default {
   },
   'plugins': [
     ['react-native-libsodium', {}],
-    './expo-plugins/notifee-mod.js',
     'expo-background-task',
     [
       'expo-navigation-bar',
@@ -267,10 +266,6 @@ export default {
           'useFrameworks': 'static',
         },
         'android': {
-          // Notifee workaround: https://github.com/invertase/notifee/issues/808
-          'extraMavenRepos': [
-            '../../node_modules/@notifee/react-native/android/libs',
-          ],
           'packagingOptions': {
             'pickFirst': [
               'lib/x86/libcrypto.so',

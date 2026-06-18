@@ -1,4 +1,3 @@
-import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import {
   UnixMilliseconds0,
   unixMillisecondsNow,
@@ -6,8 +5,10 @@ import {
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect} from 'effect'
+import {PermissionStatus} from 'expo'
+import {getPermissionsAsync, requestPermissionsAsync} from 'expo-notifications'
 import {atom, getDefaultStore, type Getter, type Setter} from 'jotai'
-import {Alert, Platform} from 'react-native'
+import {Alert} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {toastNotificationAtom} from '../../components/ToastNotification/atom'
 import {translationAtom} from '../localization/I18nProvider'
@@ -16,21 +17,16 @@ import {areNotificationsEnabledAtom} from './areNotificaitonsEnabledAtom'
 
 const ALLOW_ASKING_EVERY_MILLIS = 10 * 60 * 1000
 
-const isPermissionsGranted = Effect.promise(() =>
-  notifee.getNotificationSettings()
-)
+const notificationSettings = Effect.promise(() => getPermissionsAsync())
 
 export const requestPermissions = Effect.promise(() =>
-  notifee.requestPermission()
+  requestPermissionsAsync()
 ).pipe(
   Effect.tap((e) => {
-    getDefaultStore().set(
-      areNotificationsEnabledAtom,
-      e.authorizationStatus === AuthorizationStatus.AUTHORIZED
-    )
+    getDefaultStore().set(areNotificationsEnabledAtom, e.granted)
   }),
   Effect.filterOrFail(
-    (e) => e.authorizationStatus === AuthorizationStatus.AUTHORIZED,
+    (e) => e.granted,
     () => ({_tag: 'UserDeclined'}) as const
   )
 )
@@ -49,20 +45,17 @@ const setAskedForNotificationsNow = (set: Setter): Effect.Effect<void> =>
     set(lastTimeNotificationsAskedAtom, unixMillisecondsNow())
   })
 
-const openSettings =
-  Platform.OS === 'ios'
-    ? Effect.sync(() => {
-        NotificationSetting.open()
-      })
-    : Effect.promise(() => notifee.openNotificationSettings())
+const openSettings = Effect.sync(() => {
+  NotificationSetting.open()
+})
 
 const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
   null,
   (get, set, {force}: {force: boolean} = {force: false}) =>
     Effect.gen(function* (_) {
-      const {authorizationStatus} = yield* _(isPermissionsGranted)
+      const {status} = yield* _(notificationSettings)
 
-      if (authorizationStatus === AuthorizationStatus.AUTHORIZED) {
+      if (status === PermissionStatus.GRANTED) {
         return 'granted' as const
       }
 
@@ -114,8 +107,8 @@ const checkNotificationPermissionsAndAskIfPossibleActionAtom = atom(
       })
 
       if (
-        authorizationStatus === AuthorizationStatus.NOT_DETERMINED ||
-        authorizationStatus === AuthorizationStatus.DENIED
+        status === PermissionStatus.UNDETERMINED ||
+        status === PermissionStatus.DENIED
       ) {
         return yield* _(
           showDialog,

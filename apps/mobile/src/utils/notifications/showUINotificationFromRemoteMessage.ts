@@ -1,8 +1,9 @@
-import notifee, {AndroidImportance} from '@notifee/react-native'
+import {AndroidNotificationPriority} from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import checkAndShowCreateOfferPrompt from './checkAndShowCreateOfferPrompt'
+import {displayLocalNotification} from './displayLocalNotification'
 import {type NotificationData} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {
@@ -27,18 +28,12 @@ export async function showUINotificationFromRemoteMessage(
   }
 
   if (type === LOGGING_ON_DIFFERENT_DEVICE) {
-    void notifee.displayNotification({
-      title: t('notifications.loggingOnDifferentDevice.title'),
-      body: t('notifications.loggingOnDifferentDevice.body'),
-      // data,
-      android: {
-        smallIcon: 'notification_icon',
-        channelId: await getDefaultChannel(),
-        importance: AndroidImportance.HIGH,
-        lightUpScreen: true,
-        pressAction: {
-          id: 'default',
-        },
+    void displayLocalNotification({
+      channelId: await getDefaultChannel(),
+      content: {
+        title: t('notifications.loggingOnDifferentDevice.title'),
+        body: t('notifications.loggingOnDifferentDevice.body'),
+        priority: AndroidNotificationPriority.HIGH,
       },
     })
     return true
@@ -52,16 +47,11 @@ export async function showUINotificationFromRemoteMessage(
       return true
     }
 
-    void notifee.displayNotification({
-      title: t(`notifications.INACTIVITY_REMINDER.title`),
-      body: t(`notifications.INACTIVITY_REMINDER.body`),
-      // data,
-      android: {
-        smallIcon: 'notification_icon',
-        channelId: await getDefaultChannel(),
-        pressAction: {
-          id: 'default',
-        },
+    void displayLocalNotification({
+      channelId: await getDefaultChannel(),
+      content: {
+        title: t(`notifications.INACTIVITY_REMINDER.title`),
+        body: t(`notifications.INACTIVITY_REMINDER.body`),
       },
     })
 

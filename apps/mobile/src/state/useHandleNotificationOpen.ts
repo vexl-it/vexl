@@ -1,4 +1,3 @@
-import notifee, {EventType, type Notification} from '@notifee/react-native'
 import {
   ChatNotificationData,
   NewChatMessageNoticeNotificationData,
@@ -24,53 +23,25 @@ import {TradeReminderNotificationData} from '../utils/notifications/tradeReminde
 import reportError from '../utils/reportError'
 import {useAppState} from '../utils/useAppState'
 
-const lastNotificationIdHandledAtom = atom<string | undefined>(undefined)
-
 const lastHandledExpoNotificationDateAtom = atom<number | undefined>(undefined)
 
-const handleExpoNotificationResponseAtom = atom(
+const reactOnNotificationOpenAtom = atom(
   null,
   (get, set, response: Notifications.NotificationResponse) =>
     Effect.gen(function* (_) {
       const notificationDate = response.notification.date
 
-      // Prevent re-navigation on app resume
-      // Notifications.getLastNotificationResponse() returns the last opened notification every time
-      // until the app is killed
+      // Prevent re-navigation on app resume.
+      // Notifications.getLastNotificationResponse() returns the last opened
+      // notification every time until the app is killed.
       if (get(lastHandledExpoNotificationDateAtom) === notificationDate) return
       set(lastHandledExpoNotificationDateAtom, notificationDate)
 
-      const vexlProductNotificationO = Schema.decodeUnknownOption(
-        VexlProductNotificationData
-      )(response.notification.request.content.data)
-
-      if (Option.isSome(vexlProductNotificationO) && navigationRef.isReady()) {
-        navigationRef.navigate('Notifications')
-        return
-      }
-
-      const newChatMessageNoticeO = Schema.decodeUnknownOption(
-        NewChatMessageNoticeNotificationData
-      )(response.notification.request.content.data)
-
-      if (Option.isSome(newChatMessageNoticeO) && navigationRef.isReady()) {
-        if (!isOnMessagesList(navigationRef.getState())) {
-          navigationRef.navigate('InsideTabs', {screen: 'Messages'})
-        }
-      }
-    })
-)
-
-const reactOnNotificationOpenAtom = atom(
-  null,
-  (get, set, notification: Notification) =>
-    Effect.gen(function* (_) {
-      if (get(lastNotificationIdHandledAtom) === notification.id) return
-      set(lastNotificationIdHandledAtom, notification.id)
+      const data = response.notification.request.content.data
 
       const vexlProductNotificationO = Schema.decodeUnknownOption(
         VexlProductNotificationData
-      )(notification.data)
+      )(data)
 
       if (Option.isSome(vexlProductNotificationO) && navigationRef.isReady()) {
         navigationRef.navigate('Notifications')
@@ -83,7 +54,7 @@ const reactOnNotificationOpenAtom = atom(
           ClubAdmissionInternalNotificationData,
           TradeReminderNotificationData
         )
-      )(notification.data)
+      )(data)
 
       if (
         Option.isSome(knownNotificationDataO) &&
@@ -127,14 +98,12 @@ const reactOnNotificationOpenAtom = atom(
           console.log('[TradeReminder] Navigating to ChatDetail', keys)
           navigationRef.navigate('ChatDetail', keys)
         }
-      } else if (notification.data?.type === NEW_OFFERS_IN_MARKETPLACE) {
+      } else if (data?.type === NEW_OFFERS_IN_MARKETPLACE) {
         navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
-      } else if (notification.data?.type === NEW_CONTACTS_TO_SYNC) {
+      } else if (data?.type === NEW_CONTACTS_TO_SYNC) {
         navigationRef.navigate('ContactPreferences', {})
-      } else if (notification.data?.inbox && notification.data?.sender) {
-        Schema.decodeUnknownEither(ChatNotificationData)(
-          notification.data
-        ).pipe(
+      } else if (data?.inbox && data?.sender) {
+        Schema.decodeUnknownEither(ChatNotificationData)(data).pipe(
           Either.match({
             onLeft: (l) => {
               reportError(
@@ -167,7 +136,7 @@ const reactOnNotificationOpenAtom = atom(
 
       const newChatMessageNoticeNotificationO = Schema.decodeUnknownOption(
         NewChatMessageNoticeNotificationData
-      )(notification.data)
+      )(data)
       if (
         Option.isSome(newChatMessageNoticeNotificationO) &&
         navigationRef.isReady()
@@ -180,52 +149,31 @@ const reactOnNotificationOpenAtom = atom(
 
 export default function useHandleNotificationOpen(): void {
   const reactOnNotificationOpen = useSetAtom(reactOnNotificationOpenAtom)
-  const handleExpoNotificationResponse = useSetAtom(
-    handleExpoNotificationResponseAtom
-  )
 
   useAppState(
     useCallback(
       (appState) => {
         if (appState !== 'active') return
         void (async () => {
-          const initialNotification = await notifee.getInitialNotification()
-
-          if (initialNotification) {
-            await Effect.runPromise(
-              reactOnNotificationOpen(initialNotification.notification)
-            )
-            return
-          }
-
           const lastResponse = Notifications.getLastNotificationResponse()
 
           if (lastResponse) {
-            await Effect.runPromise(
-              handleExpoNotificationResponse(lastResponse)
-            )
+            await Effect.runPromise(reactOnNotificationOpen(lastResponse))
           }
         })()
       },
-      [reactOnNotificationOpen, handleExpoNotificationResponse]
+      [reactOnNotificationOpen]
     )
   )
 
   useEffect(() => {
-    return notifee.onForegroundEvent(({type, detail}) => {
-      if (type === EventType.PRESS && detail.notification)
-        Effect.runFork(reactOnNotificationOpen(detail.notification))
-    })
-  }, [reactOnNotificationOpen])
-
-  useEffect(() => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
-        Effect.runFork(handleExpoNotificationResponse(response))
+        Effect.runFork(reactOnNotificationOpen(response))
       }
     )
     return (): void => {
       subscription.remove()
     }
-  }, [handleExpoNotificationResponse])
+  }, [reactOnNotificationOpen])
 }

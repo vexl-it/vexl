@@ -1,4 +1,3 @@
-import notifee from '@notifee/react-native'
 import {
   AdmitedToClubNetworkNotificationData,
   ClubDeactivatedNotificationData,
@@ -16,6 +15,7 @@ import {AppState, Platform} from 'react-native'
 import {apiAtom} from '../api'
 import {addNotificationToCenterActionAtom} from '../components/NotificationsScreen/state'
 import {translationAtom} from '../utils/localization/I18nProvider'
+import {displayLocalNotification} from '../utils/notifications/displayLocalNotification'
 import {extractDataPayloadFromNotification} from '../utils/notifications/extractDataFromNotification'
 import {getDefaultChannel} from '../utils/notifications/notificationChannels'
 import {processVexlProductNotificationActionAtom} from '../utils/notifications/processVexlProductNotification'
@@ -243,20 +243,16 @@ export function useHandleReceivedNotifications(): void {
             )
           )
           if (clubInfo) {
-            await notifee.displayNotification({
-              title: t(
-                `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
-              ),
-              body: t(
-                `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
-                {name: clubInfo.clubInfo.name}
-              ),
-              android: {
-                smallIcon: 'notification_icon',
-                channelId: await getDefaultChannel(),
-                pressAction: {
-                  id: 'default',
-                },
+            await displayLocalNotification({
+              channelId: await getDefaultChannel(),
+              content: {
+                title: t(
+                  `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
+                ),
+                body: t(
+                  `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
+                  {name: clubInfo.clubInfo.name}
+                ),
               },
             })
 

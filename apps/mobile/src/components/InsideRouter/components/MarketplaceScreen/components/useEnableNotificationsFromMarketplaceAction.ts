@@ -1,23 +1,18 @@
-import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import {Effect} from 'effect'
+import {PermissionStatus} from 'expo'
+import {getPermissionsAsync} from 'expo-notifications'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
-import {Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {checkAreNotificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 
 function openNotificationSettings(): void {
-  if (Platform.OS === 'ios') {
-    NotificationSetting.open()
-    return
-  }
-
-  void notifee.openNotificationSettings()
+  NotificationSetting.open()
 }
 
 const getNotificationSettingsOrUndefined = Effect.tryPromise({
-  try: async () => await notifee.getNotificationSettings(),
+  try: async () => await getPermissionsAsync(),
   catch: () => undefined,
 }).pipe(Effect.catchAll(() => Effect.succeed(undefined)))
 
@@ -34,7 +29,7 @@ export default function useEnableNotificationsFromMarketplaceAction(): () => voi
       Effect.gen(function* (_) {
         const settings = yield* _(getNotificationSettingsOrUndefined)
 
-        if (settings?.authorizationStatus === AuthorizationStatus.DENIED) {
+        if (settings?.status === PermissionStatus.DENIED) {
           openNotificationSettings()
           yield* _(checkAreNotificationsEnabled())
           return
@@ -47,10 +42,7 @@ export default function useEnableNotificationsFromMarketplaceAction(): () => voi
 
         const updatedSettings = yield* _(getNotificationSettingsOrUndefined)
 
-        if (
-          updatedSettings?.authorizationStatus !==
-          AuthorizationStatus.AUTHORIZED
-        ) {
+        if (updatedSettings?.status !== PermissionStatus.GRANTED) {
           openNotificationSettings()
         }
 

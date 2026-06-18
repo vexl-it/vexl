@@ -1,4 +1,3 @@
-import notifee, {AuthorizationStatus} from '@notifee/react-native'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Effect, Schema} from 'effect'
@@ -30,14 +29,10 @@ export function useRequestNotificationPermissions(): TE.TaskEither<
 
   return async () =>
     await new Promise((resolve) => {
-      notifee
-        .requestPermission()
+      Notifications.requestPermissionsAsync()
         .then((result) => {
-          getDefaultStore().set(
-            areNotificationsEnabledAtom,
-            result.authorizationStatus === AuthorizationStatus.AUTHORIZED
-          )
-          if (result.authorizationStatus === AuthorizationStatus.AUTHORIZED) {
+          getDefaultStore().set(areNotificationsEnabledAtom, result.granted)
+          if (result.granted) {
             resolve(E.right('granted' as const))
             return
           }
@@ -131,12 +126,11 @@ export function areNotificationsEnabled(): TE.TaskEither<
 > {
   return TE.tryCatch(
     async () => {
-      const settings = await notifee.getNotificationSettings()
+      const settings = await Notifications.getPermissionsAsync()
       const backgroundFetchStatus = await getStatusAsync()
 
       return {
-        notifications:
-          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
+        notifications: settings.granted,
         backgroundTasks:
           backgroundFetchStatus === BackgroundTaskStatus.Available,
       }
@@ -154,12 +148,11 @@ export function areNotificationsEnabledE(): Effect.Effect<
 > {
   return Effect.tryPromise({
     try: async () => {
-      const settings = await notifee.getNotificationSettings()
+      const settings = await Notifications.getPermissionsAsync()
       const backgroundFetchStatus = await getStatusAsync()
 
       return {
-        notifications:
-          settings.authorizationStatus === AuthorizationStatus.AUTHORIZED,
+        notifications: settings.granted,
         backgroundTasks:
           backgroundFetchStatus === BackgroundTaskStatus.Available,
       }
@@ -185,10 +178,8 @@ export function useNotificationsEnabled(): boolean {
 
   useEffect(() => {
     void (async () => {
-      const settings = await notifee.getNotificationSettings()
-      setNotificationsEnabled(
-        settings.authorizationStatus === AuthorizationStatus.AUTHORIZED
-      )
+      const settings = await Notifications.getPermissionsAsync()
+      setNotificationsEnabled(settings.granted)
     })()
   }, [setNotificationsEnabled])
 

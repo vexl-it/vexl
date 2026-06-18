@@ -2,6 +2,10 @@
 import './globals'
 import './src/utils/backgroundTask/defineBackgroundTask'
 import './src/utils/notifications/defineBackgroundNotificationTask'
+// Registers the global expo-notifications foreground handler. Order matters: it
+// must run before any notification can be presented so foreground notifications
+// are shown.
+import './src/utils/notifications/displayLocalNotification'
 import './src/utils/setupCrypto'
 
 import './src/utils/setupSentry'

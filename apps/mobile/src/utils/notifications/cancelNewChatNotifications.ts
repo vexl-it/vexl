@@ -1,7 +1,11 @@
-import Notifee, {type DisplayedNotification} from '@notifee/react-native'
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
+import {
+  dismissNotificationAsync,
+  getPresentedNotificationsAsync,
+  type Notification,
+} from 'expo-notifications'
 import {atom, getDefaultStore} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {Platform} from 'react-native'
@@ -28,32 +32,49 @@ const alreadyReportedNotificationsIdsAtom = focusAtom(
   (o) => o.prop('alreadyReportedIds')
 )
 
-const isPlaceholderNotificationForChat = (
-  n: DisplayedNotification
-): Option.Option<SystemNotificationId> => {
-  // On Android we dont have data field available, so just remove all the FCM tokens
+// On Android the FCM data payload is exposed under the push trigger's
+// remoteMessage, on iOS the data lives directly on the content data field. We
+// validate both shapes instead of relying on library internals.
+const AndroidRemoteMessageBody = Schema.Struct({
+  request: Schema.Struct({
+    trigger: Schema.Struct({
+      remoteMessage: Schema.Struct({
+        data: Schema.Struct({
+          body: Schema.String,
+        }),
+      }),
+    }),
+  }),
+})
+
+const extractChatNoticeBody = (
+  n: Notification
+): Option.Option<typeof NewChatMessageNoticeNotificationData.Type> => {
   if (Platform.OS === 'android') {
-    if (
-      n.notification.id === '0' &&
-      n.notification.android?.tag &&
-      (n.notification.android?.tag?.startsWith(`FCM-`) ?? false)
-    )
-      return Schema.decodeOption(SystemNotificationId)(
-        n.notification.android.tag
+    return pipe(
+      Schema.decodeUnknownOption(AndroidRemoteMessageBody)(n),
+      Option.flatMap((parsed) =>
+        Schema.decodeOption(
+          Schema.parseJson(NewChatMessageNoticeNotificationData)
+        )(parsed.request.trigger.remoteMessage.data.body)
       )
+    )
   }
 
-  const chatMessageNotificationO = Schema.decodeUnknownOption(
-    NewChatMessageNoticeNotificationData
-  )(n.notification.data?.body)
+  return Schema.decodeUnknownOption(NewChatMessageNoticeNotificationData)(
+    n.request.content.data?.body
+  )
+}
+
+const isPlaceholderNotificationForChat = (
+  n: Notification
+): Option.Option<SystemNotificationId> => {
+  const chatMessageNotificationO = extractChatNoticeBody(n)
   if (
     Option.isSome(chatMessageNotificationO) &&
     chatMessageNotificationO.value.includesSystemNotification
   ) {
-    return pipe(
-      Option.fromNullable(n.id),
-      Option.flatMap(Schema.decodeOption(SystemNotificationId))
-    )
+    return Schema.decodeOption(SystemNotificationId)(n.request.identifier)
   }
 
   return Option.none()
@@ -61,7 +82,7 @@ const isPlaceholderNotificationForChat = (
 
 const getNonReportedSystemNotificationsIdsActionAtom = atom(
   null,
-  (get, set, allNotifications: DisplayedNotification[]) => {
+  (get, set, allNotifications: Notification[]) => {
     const systemNotificationsIds = Array.filterMap(
       allNotifications,
       isPlaceholderNotificationForChat
@@ -79,7 +100,7 @@ export async function cancelNewChatNotifications(): Promise<void> {
 
   const notificationIdsToCancel = getDefaultStore().set(
     getNonReportedSystemNotificationsIdsActionAtom,
-    await Notifee.getDisplayedNotifications()
+    await getPresentedNotificationsAsync()
   )
 
   if (!Array.isNonEmptyArray(notificationIdsToCancel)) return
@@ -122,13 +143,7 @@ export async function cancelNewChatNotifications(): Promise<void> {
     )
   }).pipe(Effect.runFork)
 
-  if (Platform.OS === 'android') {
-    Array.forEach(notificationIdsToCancel, (n) => {
-      void Notifee.cancelNotification('0', n)
-    })
-  } else {
-    Array.forEach(notificationIdsToCancel, (n) => {
-      void Notifee.cancelNotification(n)
-    })
-  }
+  Array.forEach(notificationIdsToCancel, (n) => {
+    void dismissNotificationAsync(n)
+  })
 }

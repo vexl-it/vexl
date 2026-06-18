@@ -1,4 +1,3 @@
-import notifee, {AndroidGroupAlertBehavior} from '@notifee/react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
@@ -44,6 +43,7 @@ import {
 } from 'effect'
 import * as BackgroundTask from 'expo-background-task'
 import {getInstallationSource} from 'expo-installation-source'
+import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {isTestFlight} from 'expo-testflight'
 import * as T from 'fp-ts/Task'
@@ -107,6 +107,7 @@ import {
 } from '../../utils/environment'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {getNotificationTokenE} from '../../utils/notifications'
+import {displayLocalNotification} from '../../utils/notifications/displayLocalNotification'
 import {getChannelForMessages} from '../../utils/notifications/notificationChannels'
 import {
   getShowDebugNotifications,
@@ -922,32 +923,12 @@ function DebugScreen(): React.ReactElement {
             text="show not"
             onPress={() => {
               void (async () => {
-                if (Platform.OS === 'android') {
-                  await notifee.displayNotification({
-                    id: 'some',
-                    title: 'summary',
-                    subtitle: 'some summary',
-                    android: {
-                      smallIcon: 'notification_icon',
-                      channelId: await getChannelForMessages(),
-                      groupSummary: true,
-                      groupId: 'some',
-                      groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
-                    },
-                  })
-                }
-                await notifee.displayNotification({
+                await displayLocalNotification({
                   id: 'nnn',
-                  title: `title ${Date.now()}`,
-                  subtitle: 'some notification',
-                  ios: {
-                    threadId: 'some',
-                  },
-                  android: {
-                    smallIcon: 'notification_icon',
-                    channelId: await getChannelForMessages(),
-                    groupId: 'some',
-                    groupAlertBehavior: AndroidGroupAlertBehavior.CHILDREN,
+                  channelId: await getChannelForMessages(),
+                  content: {
+                    title: `title ${Date.now()}`,
+                    subtitle: 'some notification',
                   },
                 })
               })()
@@ -959,7 +940,8 @@ function DebugScreen(): React.ReactElement {
             text="cancel all not"
             onPress={() => {
               void (async () => {
-                await notifee.cancelAllNotifications()
+                await Notifications.dismissAllNotificationsAsync()
+                await Notifications.cancelAllScheduledNotificationsAsync()
               })()
             }}
           />
@@ -969,7 +951,8 @@ function DebugScreen(): React.ReactElement {
             text="print all not"
             onPress={() => {
               void (async () => {
-                const nots = await notifee.getDisplayedNotifications()
+                const nots =
+                  await Notifications.getPresentedNotificationsAsync()
                 console.log(JSON.stringify(nots, null, 2))
               })()
             }}

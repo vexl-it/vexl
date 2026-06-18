@@ -1,4 +1,3 @@
-import notifee from '@notifee/react-native'
 import {
   AdmitedToClubNetworkNotificationData,
   ClubDeactivatedNotificationData,
@@ -35,6 +34,7 @@ import {reportNewConnectionNotificationForked} from '../../state/notifications/r
 import {translationAtom} from '../localization/I18nProvider'
 import reportError from '../reportError'
 import {BACKGROUND_NOTIFICATION_TASK} from './defineBackgroundNotificationTask'
+import {displayLocalNotification} from './displayLocalNotification'
 import {extractDataPayloadFromNotification} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
@@ -228,20 +228,16 @@ export async function processBackgroundMessage(
       )
 
       if (clubInfo) {
-        await notifee.displayNotification({
-          title: t(
-            `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
-          ),
-          body: t(
-            `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
-            {name: clubInfo.clubInfo.name}
-          ),
-          android: {
-            smallIcon: 'notification_icon',
-            channelId: await getDefaultChannel(),
-            pressAction: {
-              id: 'default',
-            },
+        await displayLocalNotification({
+          channelId: await getDefaultChannel(),
+          content: {
+            title: t(
+              `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.title`
+            ),
+            body: t(
+              `notifications.CLUB_DEACTIVATED.${ClubDeactivatedNotificationDataO.value.reason}.body`,
+              {name: clubInfo.clubInfo.name}
+            ),
           },
         })
 

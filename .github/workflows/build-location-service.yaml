@@ -30,8 +30,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -57,14 +55,18 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ./apps/location-service/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          file: ./Dockerfile
+          platforms: linux/amd64
           push: true
           provenance: false
+          cache-from: type=gha,scope=location-service
+          cache-to: type=gha,mode=max,scope=location-service
           tags: |
             ghcr.io/vexl-it/location-service:latest
             ghcr.io/vexl-it/location-service:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/location-service:${{inputs.env}}-${{ github.sha }}
           build-args: |
+            APP=location-service
+            SERVICE_DISPLAY_NAME=Location service
             SERVICE_VERSION=${{ github.sha }}
             ENVIRONMENT=${{ inputs.env }}

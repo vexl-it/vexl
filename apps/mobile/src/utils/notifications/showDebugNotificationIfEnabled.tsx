@@ -1,7 +1,11 @@
-import notifee, {AndroidImportance} from '@notifee/react-native'
+import {
+  AndroidImportance,
+  setNotificationChannelAsync,
+} from 'expo-notifications'
 import {getOrElse} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {storage} from '../mmkv/effectMmkv'
+import {displayLocalNotification} from './displayLocalNotification'
 
 const DEBUG_NOTIFICATIONS_ENABLED_KEY = 'debugNotificationsEnabled'
 
@@ -18,14 +22,12 @@ export function getShowDebugNotifications(): boolean {
   )
 }
 
-async function groupNotificationDisplayed(groupId: string): Promise<boolean> {
-  const notifications = await notifee.getDisplayedNotifications()
-  const groupNotification = notifications.find(
-    (one) =>
-      one.notification.android?.groupSummary &&
-      one.notification.android?.groupId
-  )
-  return !!groupNotification
+async function getDebugChannel(): Promise<string> {
+  await setNotificationChannelAsync('test', {
+    name: 'Testing notifications',
+    importance: AndroidImportance.HIGH,
+  })
+  return 'test'
 }
 
 export async function showDebugNotificationIfEnabled({
@@ -41,36 +43,14 @@ export async function showDebugNotificationIfEnabled({
 }): Promise<void> {
   if (!force && !getShowDebugNotifications()) return
 
-  const channelId = await notifee.createChannel({
-    id: 'test',
-    name: 'Testing notifications',
-    importance: AndroidImportance.HIGH,
-  })
+  const channelId = await getDebugChannel()
 
-  if (subtitle && !(await groupNotificationDisplayed(subtitle))) {
-    await notifee.displayNotification({
-      title: subtitle,
-      body: `${subtitle} logs`,
-      android: {
-        smallIcon: 'notification_icon',
-        groupId: subtitle ?? 'general-debug',
-        channelId,
-        groupSummary: true,
-      },
-    })
-  }
-
-  await notifee.displayNotification({
-    title,
-    body,
-    subtitle,
-    android: {
-      smallIcon: 'notification_icon',
-      groupId: subtitle ?? 'general-debug',
-      channelId,
-      pressAction: {
-        id: 'default',
-      },
+  await displayLocalNotification({
+    channelId,
+    content: {
+      title,
+      body,
+      subtitle,
     },
   })
 }

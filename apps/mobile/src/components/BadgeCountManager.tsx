@@ -1,4 +1,4 @@
-import notifee from '@notifee/react-native'
+import {setBadgeCountAsync} from 'expo-notifications'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {unreadChatsCountAtom} from '../state/chat/atoms/unreadChatsCountAtom'
@@ -9,11 +9,11 @@ export const refreshNotificationBadgeCountActionAtom = atom(null, (get) => {
   const unreadChatsCount = get(unreadChatsCountAtom)
   const notSeenNotificationsCount = get(notSeenNotificationCountAtom)
 
-  notifee
-    .setBadgeCount(unreadChatsCount + notSeenNotificationsCount)
-    .catch((err) => {
+  setBadgeCountAsync(unreadChatsCount + notSeenNotificationsCount).catch(
+    (err) => {
       reportError('warn', new Error('Failed to set badge count'), {err})
-    })
+    }
+  )
 })
 
 function BadgeCountManager(): null {

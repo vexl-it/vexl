@@ -1,13 +1,13 @@
-import notifee from '@notifee/react-native'
 import type {VexlProductNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {addNotificationToCenterActionAtom} from '../../components/NotificationsScreen/state'
+import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
 
 const handledVexlProductNotificationUuidsAtom = atom<readonly string[]>([])
 
-export const getVexlProductNotificationNotifeeId = (uuid: string): string =>
+export const getVexlProductNotificationId = (uuid: string): string =>
   `vexl-product-notification-${uuid}`
 
 export const processVexlProductNotificationActionAtom = atom(
@@ -29,17 +29,13 @@ export const processVexlProductNotificationActionAtom = atom(
 
       yield* _(
         Effect.promise(async () => {
-          await notifee.displayNotification({
-            id: getVexlProductNotificationNotifeeId(uuid),
-            title: data.title,
-            body: data.description,
-            data: data.toData(),
-            android: {
-              smallIcon: 'notification_icon',
-              channelId: await getDefaultChannel(),
-              pressAction: {
-                id: 'default',
-              },
+          await displayLocalNotification({
+            id: getVexlProductNotificationId(uuid),
+            channelId: await getDefaultChannel(),
+            content: {
+              title: data.title,
+              body: data.description,
+              data: data.toData(),
             },
           })
         })

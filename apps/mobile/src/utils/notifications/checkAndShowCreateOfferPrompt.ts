@@ -1,4 +1,3 @@
-import notifee from '@notifee/react-native'
 import {Effect} from 'effect'
 import {type getDefaultStore} from 'jotai'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
@@ -8,6 +7,7 @@ import {userLoggedInAtom} from '../../state/session'
 import {loadSession} from '../../state/session/loadSession'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
+import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {CREATE_OFFER_PROMPT} from './notificationTypes'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
@@ -69,17 +69,13 @@ export default async function checkAndShowCreateOfferPrompt(
   }
 
   const {t} = store.get(translationAtom)
-  await notifee.displayNotification({
-    title: t('notifications.createOfferPrompt.title'),
-    body: t('notifications.createOfferPrompt.body'),
-    data: {
-      type: CREATE_OFFER_PROMPT,
-    },
-    android: {
-      smallIcon: 'notification_icon',
-      channelId: await getDefaultChannel(),
-      pressAction: {
-        id: 'default',
+  await displayLocalNotification({
+    channelId: await getDefaultChannel(),
+    content: {
+      title: t('notifications.createOfferPrompt.title'),
+      body: t('notifications.createOfferPrompt.body'),
+      data: {
+        type: CREATE_OFFER_PROMPT,
       },
     },
   })

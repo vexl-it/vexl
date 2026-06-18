@@ -1,15 +1,16 @@
-import notifee, {
-  AndroidImportance,
-  type TimestampTrigger,
-  TriggerType,
-} from '@notifee/react-native'
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
 import {
   type UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Duration} from 'effect/index'
+import {
+  cancelScheduledNotificationAsync,
+  SchedulableTriggerInputTypes,
+  scheduleNotificationAsync,
+} from 'expo-notifications'
 import {getDefaultStore} from 'jotai'
+import {Platform} from 'react-native'
 import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {translationAtom} from '../localization/I18nProvider'
 import {formatDateTime} from '../localization/formatting'
@@ -62,13 +63,11 @@ export async function scheduleTradeReminder({
     formattedTime,
   })
 
-  const trigger: TimestampTrigger = {
-    type: TriggerType.TIMESTAMP,
-    timestamp: notificationTime,
-  }
+  // Ensure the trade reminder channel exists on Android before scheduling.
+  const channelId = await getChannelForTradeReminders()
 
-  const notificationId = await notifee.createTriggerNotification(
-    {
+  const notificationId = await scheduleNotificationAsync({
+    content: {
       title: t('notifications.TRADE_REMINDER.title', {userName}),
       body: t('notifications.TRADE_REMINDER.body', {
         userName,
@@ -78,20 +77,14 @@ export async function scheduleTradeReminder({
         inbox: chat.inbox.privateKey.publicKeyPemBase64,
         sender: chat.otherSide.publicKey,
       }).encoded,
-      android: {
-        smallIcon: 'notification_icon',
-        channelId: await getChannelForTradeReminders(),
-        importance: AndroidImportance.DEFAULT,
-        pressAction: {
-          id: 'default',
-        },
-      },
-      ios: {
-        sound: 'default',
-      },
+      sound: 'default',
     },
-    trigger
-  )
+    trigger: {
+      type: SchedulableTriggerInputTypes.DATE,
+      date: notificationTime,
+      ...(Platform.OS === 'android' ? {channelId} : {}),
+    },
+  })
 
   console.log('[TradeReminder] Notification scheduled successfully', {
     chatId: chat.id,
@@ -105,7 +98,7 @@ export async function cancelTradeReminder(
   notificationId: string
 ): Promise<void> {
   console.log('[TradeReminder] Cancelling notification', {notificationId})
-  await notifee.cancelNotification(notificationId)
+  await cancelScheduledNotificationAsync(notificationId)
   console.log('[TradeReminder] Notification cancelled successfully', {
     notificationId,
   })

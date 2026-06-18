@@ -1,7 +1,8 @@
-import notifee, {AndroidImportance} from '@notifee/react-native'
 import {ClubUuid, type ClubInfo} from '@vexl-next/domain/src/general/clubs'
 import {Effect, Schema} from 'effect'
+import {AndroidNotificationPriority} from 'expo-notifications'
 import {type TFunction} from '../localization/I18nProvider'
+import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
 
 export class ClubAdmissionInternalNotificationData extends Schema.TaggedClass<ClubAdmissionInternalNotificationData>(
@@ -19,21 +20,16 @@ export function showInternalNotificationForClubAdmission(
   clubInfo: ClubInfo
 ): Effect.Effect<void> {
   return Effect.promise(async () => {
-    await notifee.displayNotification({
+    await displayLocalNotification({
       id: `${clubInfo.uuid}-admission`,
-      title: t('clubs.addmittedNotificationText'),
-      body: t('clubs.addmittedNotificationTitle', {name: clubInfo.name}),
-      data: new ClubAdmissionInternalNotificationData({
-        clubUuid: clubInfo.uuid,
-      }).encoded,
-      android: {
-        smallIcon: 'notification_icon',
-        lightUpScreen: true,
-        importance: AndroidImportance.HIGH,
-        pressAction: {
-          id: 'default',
-        },
-        channelId: await getDefaultChannel(),
+      channelId: await getDefaultChannel(),
+      content: {
+        title: t('clubs.addmittedNotificationText'),
+        body: t('clubs.addmittedNotificationTitle', {name: clubInfo.name}),
+        data: new ClubAdmissionInternalNotificationData({
+          clubUuid: clubInfo.uuid,
+        }).encoded,
+        priority: AndroidNotificationPriority.HIGH,
       },
     })
   })

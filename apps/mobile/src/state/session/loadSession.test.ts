@@ -57,14 +57,15 @@ jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
 }))
 
-jest.mock('@notifee/react-native', () => ({
+jest.mock('expo-notifications', () => ({
   __esModule: true,
-  AndroidImportance: {HIGH: 1},
-  default: {
-    createChannel: jest.fn(async () => 'debug-channel'),
-    displayNotification: jest.fn(async () => undefined),
-    getDisplayedNotifications: jest.fn(async () => []),
-  },
+  AndroidImportance: {DEFAULT: 5, HIGH: 6},
+  AndroidNotificationPriority: {DEFAULT: 'default', HIGH: 'high'},
+  setNotificationHandler: jest.fn(),
+  setNotificationChannelAsync: jest.fn(async () => null),
+  scheduleNotificationAsync: jest.fn(async () => 'notification-id'),
+  getPresentedNotificationsAsync: jest.fn(async () => []),
+  dismissNotificationAsync: jest.fn(async () => undefined),
 }))
 
 jest.mock('../../utils/reportError', () => {

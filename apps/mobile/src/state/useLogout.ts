@@ -1,4 +1,3 @@
-import notifee from '@notifee/react-native'
 import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {Array, Effect, Option, pipe, Record} from 'effect'
 import * as Notifications from 'expo-notifications'
@@ -90,7 +89,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     await failSilently(effectToTaskEither(get(apiAtom).user.deleteUser())())
 
     // Notification badge
-    await failSilently(notifee.setBadgeCount(0))
+    await failSilently(Notifications.setBadgeCountAsync(0))
 
     // Invalidate vexl notification secret on server (before clearing local storage)
     await failSilently(Effect.runPromise(set(invalidateVexlSecretActionAtom)))

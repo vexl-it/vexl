@@ -30,8 +30,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
@@ -58,10 +56,12 @@ jobs:
         with:
           context: .
           file: ./apps/account-deletion-website/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           provenance: false
           tags: |
             ghcr.io/vexl-it/web-app:latest
             ghcr.io/vexl-it/web-app:${{inputs.env}}-${{ github.sha }}
             ${{ steps.login-ecr.outputs.registry }}/web-app:${{inputs.env}}-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

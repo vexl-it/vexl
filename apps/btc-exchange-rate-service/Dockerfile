@@ -24,4 +24,4 @@ COPY --from=builder /app/package.json /app/package.json
 
 WORKDIR /app/apps/btc-exchange-rate-service
 
-CMD ["node", "dist/index.cjs"]
+CMD ["node", "--enable-source-maps", "dist/index.js"]

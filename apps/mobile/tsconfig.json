@@ -5,6 +5,7 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "lib": ["DOM", "ESNext"],
+    "types": ["node", "jest"],
     "moduleResolution": "node",
     "noEmit": true,
     "resolveJsonModule": true,

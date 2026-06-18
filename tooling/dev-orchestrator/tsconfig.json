@@ -7,7 +7,8 @@
     "moduleResolution": "NodeNext",
     "target": "ES2022",
     "noEmit": false,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["node"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

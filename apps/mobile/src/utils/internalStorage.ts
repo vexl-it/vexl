@@ -36,7 +36,7 @@ function copyFileE({
 }): Effect.Effect<UriString, FileSystemError> {
   return Effect.try({
     try: () => {
-      new FileSystem.File(from).copy(new FileSystem.File(to))
+      new FileSystem.File(from).copySync(new FileSystem.File(to))
       return from
     },
     catch(error) {

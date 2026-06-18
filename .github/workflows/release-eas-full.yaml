@@ -1,0 +1,42 @@
+name: "[Release] Full app (stores + APK)"
+run-name: "Full app release on ${{ github.sha }}${{ inputs.skip_production && ' (staging only)' || '' }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_production:
+        description: "Skip production (release to staging only)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # ---- Staging ----
+  staging-store:
+    uses: ./.github/workflows/release-eas-store.yaml
+    secrets: inherit
+    with:
+      environment: staging
+      platform: all
+
+  staging-apk:
+    uses: ./.github/workflows/build-eas-apk.yaml
+    secrets: inherit
+    with:
+      environment: staging
+
+  # ---- Production (skipped when skip_production is checked) ----
+  production-store:
+    if: ${{ !inputs.skip_production }}
+    uses: ./.github/workflows/release-eas-store.yaml
+    secrets: inherit
+    with:
+      environment: production
+      platform: all
+
+  production-apk:
+    if: ${{ !inputs.skip_production }}
+    uses: ./.github/workflows/build-eas-apk.yaml
+    secrets: inherit
+    with:
+      environment: production

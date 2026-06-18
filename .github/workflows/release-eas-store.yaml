@@ -1,0 +1,60 @@
+name: "[Release] Build & submit to store"
+run-name: "Build & submit ${{ inputs.platform }} (${{ inputs.environment }}) on ${{ github.sha }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to build & submit"
+        required: true
+        type: choice
+        default: staging
+        options:
+          - staging
+          - production
+      platform:
+        description: "Platform to build & submit"
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - android
+          - ios
+  workflow_call:
+    inputs:
+      environment:
+        description: "Environment to build & submit"
+        required: true
+        type: string
+      platform:
+        description: "Platform to build & submit (all|android|ios)"
+        required: false
+        type: string
+        default: all
+
+jobs:
+  build-submit:
+    name: Build & submit to store
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+          cache: yarn
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install dependencies
+        run: yarn workspaces focus @vexl-next/mobile-app
+      - name: Decode Google Service Account key
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+        run: |
+          mkdir -p apps/mobile/credentials && echo "$GOOGLE_SERVICE_ACCOUNT" > apps/mobile/credentials/google.json
+      - name: Build on EAS and submit to store
+        run: eas build --platform ${{ inputs.platform }} --profile ${{ inputs.environment }} --auto-submit --non-interactive --no-wait
+        working-directory: apps/mobile

@@ -19,7 +19,6 @@
     "e2e-test-build-android": "npx eas build --platform android --profile build-and-maestro-test --non-interactive --no-wait"
   },
   "dependencies": {
-    "@alexzunik/react-native-money-input": "^0.5.3",
     "@bam.tech/react-native-image-resizer": "^3.0.5",
     "@effect/platform": "^0.93.6",
     "@effect/rpc": "^0.72.2",

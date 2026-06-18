@@ -15,16 +15,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@alexzunik/react-native-money-input@npm:^0.5.3":
-  version: 0.5.3
-  resolution: "@alexzunik/react-native-money-input@npm:0.5.3"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: cb51b6501293bcdb0630a23b6e421ab60cd596177b145ab75d4fd732f16bb8831b7389e6916e795e7889d415f1c0fde103fbfee492a586135031aeef0900088c
-  languageName: node
-  linkType: hard
-
 "@alloc/quick-lru@npm:^5.2.0":
   version: 5.2.0
   resolution: "@alloc/quick-lru@npm:5.2.0"
@@ -11757,7 +11747,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@vexl-next/mobile-app@workspace:apps/mobile"
   dependencies:
-    "@alexzunik/react-native-money-input": ^0.5.3
     "@babel/plugin-proposal-nullish-coalescing-operator": ^7.18.6
     "@babel/plugin-proposal-optional-chaining": ^7.21.0
     "@babel/preset-react": ^7.18.6

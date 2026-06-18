@@ -1,7 +1,7 @@
 {
   "name": "@vexl-next/notification-service",
   "version": "0.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "devDependencies": {
     "@types/jest": "^29.4.0",
@@ -24,6 +24,7 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "typecheck": "tsc --noEmit",
     "build": "node esbuild.config.js",
+    "start": "node --enable-source-maps dist/index.js",
     "dev": "npx tsx -r dotenv/config src/index.ts",
     "dev:watch": "npx tsx --watch src/index.ts",
     "test": "yarn jest",

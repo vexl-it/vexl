@@ -1,4 +1,4 @@
-import {Config, Effect, Schema} from 'effect'
+import {Config} from 'effect'
 
 export {
   cryptoConfig,
@@ -14,10 +14,6 @@ export {
   secretPrivateKey,
   secretPublicKey,
 } from '@vexl-next/server-utils/src/commonConfigs'
-
-export const firebaseCredentialsConfig = Config.string(
-  'FIREBASE_CREDENTIALS'
-).pipe(Effect.flatMap(Schema.decode(Schema.parseJson())))
 
 export const inactivityNotificationAfterDaysConfig = Config.number(
   'INACTIVITY_NOTIFICATION_AFTER_DAYS'

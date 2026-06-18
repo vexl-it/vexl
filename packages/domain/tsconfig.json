@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "checkJs": false
+    "checkJs": false,
+    "types": ["node"]
   },
   "exclude": ["./dist/**", "./tests/**", "node_modules"],
   "include": ["./src", "../../apps/mobile/src/state/chat/tradeChecklist.ts"]

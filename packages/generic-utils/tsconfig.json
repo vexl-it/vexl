@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "stripInternal": true
+    "stripInternal": true,
+    "types": ["node"]
   },
   "exclude": ["./dist/**", "./tests/**", "node_modules"],
   "include": ["./src"]

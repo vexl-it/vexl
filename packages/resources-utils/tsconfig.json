@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
-    "types": ["*"],
+    "types": ["node", "jest"],
     "rootDir": ".",
     "outDir": "./dist",
     "lib": ["ESNext"],

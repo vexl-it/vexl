@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "types": ["*"],
     "baseUrl": "./",
     "paths": {
       "react-native-ecdh-platform-native-utils": [

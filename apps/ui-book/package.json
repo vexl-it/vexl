@@ -37,7 +37,7 @@
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^9.20.0",
     "prettier": "^3.3.2",
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.3"
   },
   "prettier": "@vexl-next/prettier-config"
 }

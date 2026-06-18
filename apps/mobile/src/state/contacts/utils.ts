@@ -7,12 +7,7 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {hmacSign} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Effect, Schema} from 'effect'
-import {
-  getContactsAsync,
-  getPermissionsAsync,
-  requestPermissionsAsync,
-  SortTypes,
-} from 'expo-contacts'
+import {getPermissionsAsync, requestPermissionsAsync} from 'expo-contacts'
 import {map, type Either} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {hmacPassword} from '../../utils/environment'
@@ -23,6 +18,7 @@ import {
   type DeviceContactsMappingResult,
 } from './contactMapping'
 import {type ContactInfo} from './domain'
+import {getDeviceContactsFromSystem} from './getDeviceContactsFromSystem'
 
 export class ContactsPermissionsNotGrantedError extends Schema.TaggedError<ContactsPermissionsNotGrantedError>(
   'ContactsPermissionsNotGrantedError'
@@ -103,10 +99,7 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
 
     const contacts = yield* _(
       Effect.tryPromise({
-        try: async () =>
-          await getContactsAsync({
-            sort: SortTypes.UserDefault,
-          }),
+        try: async () => await getDeviceContactsFromSystem(),
         catch: (e) => new UnknownContactsError({cause: e}),
       })
     )
@@ -115,7 +108,7 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
 
     const measure = startMeasure('Mapping contacts from system to our domain')
     const mappingResult: DeviceContactsMappingResult =
-      mapContactsFromSystemToDomain(contacts.data)
+      mapContactsFromSystemToDomain(contacts)
 
     if (
       mappingResult.malformedContactsCount > 0 ||

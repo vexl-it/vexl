@@ -1,24 +1,22 @@
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Option, Schema} from 'effect/index'
-import * as Contacts from 'expo-contacts'
-import {SortTypes} from 'expo-contacts'
+import {getPermissionsAsync} from 'expo-contacts'
 import {getDefaultStore} from 'jotai'
 import {difference} from 'set-operations'
 import {importedContactsAtom} from '../state/contacts/atom/contactsStore'
+import {getDeviceContactsFromSystem} from '../state/contacts/getDeviceContactsFromSystem'
 import notEmpty from './notEmpty'
 
 export default async function checkContactSync(
   store: ReturnType<typeof getDefaultStore> = getDefaultStore()
 ): Promise<'allSynced' | 'notAllContactsImported' | 'noPermissions'> {
-  if (!(await Contacts.getPermissionsAsync()).granted) {
+  if (!(await getPermissionsAsync()).granted) {
     console.info('Contact permissions not granted. Unable to check')
     return 'noPermissions'
   }
 
-  const deviceContacts = await Contacts.getContactsAsync({
-    sort: SortTypes.UserDefault,
-  })
-  const deviceContactsNumbers = deviceContacts.data
+  const deviceContacts = await getDeviceContactsFromSystem()
+  const deviceContactsNumbers = deviceContacts
     .map((one) =>
       one.phoneNumbers?.map((one) => {
         const parseResult = Schema.decodeUnknownOption(E164PhoneNumber)(

@@ -205,8 +205,8 @@ export default {
       'expo-navigation-bar',
       {
         enforceContrast: false,
-        barStyle: 'light',
-        visibility: 'visible',
+        style: 'light',
+        hidden: false,
       },
     ],
     [

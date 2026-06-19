@@ -8,7 +8,7 @@ import {feedbackMolecule} from '../atoms'
 import {
   resultFromFeedback,
   type UserFeedbackResult,
-} from '../UserFeedbackDialog'
+} from '../resultFromFeedback'
 
 interface Props {
   buttonSize?: 'large' | 'medium' | 'small'

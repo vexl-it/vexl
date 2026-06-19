@@ -1,10 +1,5 @@
 import {Array, pipe} from 'effect'
-import {
-  Contact,
-  ContactField,
-  ContactsSortOrder,
-  type PartialContactDetails,
-} from 'expo-contacts'
+import {Contact, ContactField, type PartialContactDetails} from 'expo-contacts'
 
 /**
  * Fields requested from the device for each contact when importing/syncing.
@@ -53,9 +48,7 @@ function toLegacyDeviceContact(
 export async function getDeviceContactsFromSystem(): Promise<
   LegacyDeviceContact[]
 > {
-  const contacts = await Contact.getAllDetails(DEVICE_CONTACT_FIELDS, {
-    sortOrder: ContactsSortOrder.UserDefault,
-  })
+  const contacts = await Contact.getAllDetails(DEVICE_CONTACT_FIELDS)
 
   return pipe(contacts, Array.map(toLegacyDeviceContact))
 }

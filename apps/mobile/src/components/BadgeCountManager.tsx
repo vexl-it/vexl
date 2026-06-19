@@ -3,7 +3,7 @@ import {atom, useAtomValue, useSetAtom} from 'jotai'
 import {useEffect} from 'react'
 import {unreadChatsCountAtom} from '../state/chat/atoms/unreadChatsCountAtom'
 import reportError from '../utils/reportError'
-import {notSeenNotificationCountAtom} from './NotificationsScreen/state'
+import {notSeenNotificationCountAtom} from './NotificationsScreen/state/notificationScreenDataAtoms'
 
 export const refreshNotificationBadgeCountActionAtom = atom(null, (get) => {
   const unreadChatsCount = get(unreadChatsCountAtom)

@@ -8,10 +8,10 @@ import React, {useMemo} from 'react'
 import {FeedbackScope, generateInitialFeedback} from './atoms'
 import FeedbackBannerActions from './components/FeedbackBannerActions'
 import FeedbackBannerContent from './components/FeedbackBannerContent'
+import {type UserFeedbackResult} from './resultFromFeedback'
 import {
   showUserFeedbackDialogAtom,
   UserFeedbackDialog,
-  type UserFeedbackResult,
 } from './UserFeedbackDialog'
 
 const empty = (userFeedbackResult: UserFeedbackResult): void => {}

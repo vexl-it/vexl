@@ -1,5 +1,6 @@
-import {NodeSdk} from '@effect/opentelemetry'
-import {NodeContext, NodeRuntime} from '@effect/platform-node'
+import * as NodeSdk from '@effect/opentelemetry/NodeSdk'
+import * as NodeContext from '@effect/platform-node/NodeContext'
+import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
 import {type Teardown} from '@effect/platform/Runtime'
 import {PrometheusExporter} from '@opentelemetry/exporter-prometheus'
 import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'

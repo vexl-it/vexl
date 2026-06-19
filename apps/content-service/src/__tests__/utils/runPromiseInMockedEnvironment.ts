@@ -1,4 +1,5 @@
-import {NodeContext, NodeHttpServer} from '@effect/platform-node/index'
+import * as NodeContext from '@effect/platform-node/NodeContext'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type SqlClient} from '@effect/sql/SqlClient'

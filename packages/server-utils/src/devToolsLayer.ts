@@ -1,5 +1,5 @@
 import {DevTools} from '@effect/experimental'
-import {NodeSocket} from '@effect/platform-node'
+import * as NodeSocket from '@effect/platform-node/NodeSocket'
 import {Effect, Layer, Option, type Config, type ConfigError} from 'effect'
 import {disableDevToolsInDevelopmentConfig} from './commonConfigs'
 

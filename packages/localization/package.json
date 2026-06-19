@@ -20,7 +20,6 @@
     "eslint": "^9.20.0",
     "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
-    "ts-jest": "^29.2.0",
     "typescript": "~6.0.3"
   },
   "files": [

@@ -4,7 +4,7 @@ import {
   HttpServer,
   HttpServerResponse,
 } from '@effect/platform'
-import {NodeHttpServer} from '@effect/platform-node'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {Effect, Layer, PubSub, Ref, Stream} from 'effect'
 import {createServer} from 'http'
 import {updatesServerPortConfig} from './configs'

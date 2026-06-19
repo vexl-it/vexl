@@ -1,4 +1,4 @@
-import {NodeHttpServer} from '@effect/platform-node/index'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type HttpClient} from '@effect/platform/HttpClient'
 import {HttpApiBuilder} from '@effect/platform/index'
 import {type RateLimitingService} from '@vexl-next/server-utils/src/RateLimiting'

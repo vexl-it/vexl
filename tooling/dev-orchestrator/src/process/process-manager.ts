@@ -1,5 +1,5 @@
 import type {CommandExecutor, Error as PlatformError} from '@effect/platform'
-import {NodeContext} from '@effect/platform-node'
+import * as NodeContext from '@effect/platform-node/NodeContext'
 import type {Scope} from 'effect'
 import {Array as A, Effect, Option} from 'effect'
 import type {ServiceConfig} from '../config/services.js'

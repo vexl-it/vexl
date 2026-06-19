@@ -4,7 +4,7 @@ import {
   HttpServerResponse,
   type HttpServerError,
 } from '@effect/platform'
-import {NodeHttpServer} from '@effect/platform-node'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {PgClient} from '@effect/sql-pg'
 import {Config, Effect, Layer, Option} from 'effect'
 import {type ConfigError} from 'effect/ConfigError'

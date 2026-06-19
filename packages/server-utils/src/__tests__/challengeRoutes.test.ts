@@ -1,5 +1,5 @@
 import {HttpApiBuilder, HttpApiClient, type HttpClient} from '@effect/platform'
-import {NodeHttpServer} from '@effect/platform-node'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {cryptobox} from '@vexl-next/cryptography'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'

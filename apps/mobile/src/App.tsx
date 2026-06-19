@@ -4,7 +4,7 @@ import {
   NavigationContainer,
 } from '@react-navigation/native'
 import {useVexlTheme} from '@vexl-next/ui'
-import * as NavigationBar from 'expo-navigation-bar'
+import {NavigationBar} from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
 import React from 'react'
 import {Platform} from 'react-native'

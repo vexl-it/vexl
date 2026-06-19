@@ -1,4 +1,4 @@
-import {NodeHttpServer} from '@effect/platform-node'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {Context, Effect, Layer} from 'effect/index'
 import {createServer, type Server} from 'http'
 import {

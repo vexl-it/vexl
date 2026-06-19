@@ -1,5 +1,6 @@
 import {FileSystem} from '@effect/platform'
-import {NodeFileSystem, NodeRuntime} from '@effect/platform-node'
+import * as NodeFileSystem from '@effect/platform-node/NodeFileSystem'
+import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
 import {importKeyPair} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   PrivateKeyPemBase64,

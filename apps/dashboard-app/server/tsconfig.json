@@ -14,10 +14,6 @@
     "checkJs": false,
     "allowJs": true
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "lib": ["esnext"],
   "include": ["."],
   "references": [{"path": "../common/tsconfig.json"}]

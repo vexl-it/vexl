@@ -5,7 +5,7 @@ import {
   HttpServerRequest,
   HttpServerResponse,
 } from '@effect/platform'
-import {NodeHttpServer} from '@effect/platform-node'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {type ServeError} from '@effect/platform/HttpServerError'
 import {Effect, Layer, type Config, type ConfigError, type Option} from 'effect'
 import {createServer} from 'http'

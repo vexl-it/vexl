@@ -19,7 +19,6 @@
   "dependencies": {
     "@effect/platform": "^0.93.6",
     "@effect/platform-node": "^0.103.0",
-    "@inkjs/ui": "^2.0.0",
     "commander": "^14.0.2",
     "detect-port": "^2.0.0",
     "dotenv-mono": "^1.3.14",

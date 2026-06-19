@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {NodeRuntime} from '@effect/platform-node'
+import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
 import {Command} from 'commander'
 import {Cause, Effect} from 'effect'
 import type {ChildProcess} from 'node:child_process'

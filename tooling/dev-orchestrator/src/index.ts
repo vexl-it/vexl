@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import {NodeContext, NodeRuntime} from '@effect/platform-node'
+import * as NodeContext from '@effect/platform-node/NodeContext'
+import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
 import {Command} from 'commander'
 import {Cause, Deferred, Effect, Queue} from 'effect'
 import type {ChildProcess} from 'node:child_process'

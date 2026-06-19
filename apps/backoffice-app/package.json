@@ -34,7 +34,6 @@
     "@types/react-dom": "~19.2.3",
     "@vexl-next/eslint-config": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
-    "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^9.20.0",
     "postcss": "^8.5.10",
     "prettier": "^3.3.2",

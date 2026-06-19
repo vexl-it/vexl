@@ -7,7 +7,7 @@ import {
   HttpClient,
   HttpClientRequest,
 } from '@effect/platform'
-import {NodeHttpServer} from '@effect/platform-node'
+import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import {RateLimitedError} from '@vexl-next/domain/src/general/commonErrors'
 import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '@vexl-next/rest-api/src/rateLimititing'

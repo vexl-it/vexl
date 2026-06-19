@@ -14,10 +14,6 @@
     "allowJs": true,
     "noEmit": true
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "lib": ["esnext"],
   "exclude": ["vite.config.ts"],
   "include": ["**.ts", "**.js"],

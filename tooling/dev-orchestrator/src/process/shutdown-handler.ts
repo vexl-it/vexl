@@ -1,4 +1,4 @@
-import {NodeContext} from '@effect/platform-node'
+import * as NodeContext from '@effect/platform-node/NodeContext'
 import {Effect} from 'effect'
 import {stopInfrastructure} from '../infrastructure/docker.js'
 import {logSuccess, logWithPrefix} from '../ui/logger.js'

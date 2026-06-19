@@ -1,5 +1,5 @@
 import {Command} from '@effect/platform'
-import {NodeContext} from '@effect/platform-node'
+import * as NodeContext from '@effect/platform-node/NodeContext'
 import {Chunk, Effect, Array as EffectArray, Option, pipe, Stream} from 'effect'
 import {findProjectRoot} from '../config/env-loader.js'
 import {getStartupState} from '../process/startup-state.js'

@@ -31,6 +31,7 @@ import {
 } from '../../state/notifications/NotificationProcessingReports'
 import processChatNotificationActionAtom from '../../state/notifications/processChatNotification'
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
+import {loadSession} from '../../state/session/loadSession'
 import {translationAtom} from '../localization/I18nProvider'
 import reportError from '../reportError'
 import {BACKGROUND_NOTIFICATION_TASK} from './defineBackgroundNotificationTask'
@@ -39,6 +40,28 @@ import {extractDataPayloadFromNotification} from './extractDataFromNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
 import {showUINotificationFromRemoteMessage} from './showUINotificationFromRemoteMessage'
+
+async function ensureSessionLoadedForBackgroundNotification(): Promise<boolean> {
+  const loadSessionResult = await Effect.runPromise(loadSession())
+
+  if (loadSessionResult.sessionLoaded) return true
+
+  console.info(
+    '📳 Got background notification but no session was loaded. Skipping processing.'
+  )
+  void showDebugNotificationIfEnabled({
+    title: 'Background notification skipped',
+    subtitle: 'notifInBackgroundHandler',
+    body: 'Session is not loaded.',
+  })
+  reportError(
+    'warn',
+    new Error(
+      'Got background notification but no session in storage. Skipping processing.'
+    )
+  )
+  return false
+}
 
 export async function processBackgroundMessage(
   data: Notifications.NotificationTaskPayload
@@ -127,6 +150,8 @@ export async function processBackgroundMessage(
       console.info(
         '📳 Received notification about new user. Checking and updating offers accordingly.'
       )
+      if (!(await ensureSessionLoadedForBackgroundNotification())) return
+
       await Effect.runPromise(
         reportNewConnectionNotificationForked(
           getDefaultStore().get(apiAtom).metrics,
@@ -152,6 +177,8 @@ export async function processBackgroundMessage(
       console.info(
         `📳 Received notification about new user in club ${newClubConnectionNotificationO.value.clubUuids.join(',')}. Checking and updating offers accordingly.`
       )
+      if (!(await ensureSessionLoadedForBackgroundNotification())) return
+
       await Effect.runPromise(
         getDefaultStore().set(syncAllClubsHandleStateWhenNotFoundActionAtom, {
           updateOnlyUuids: newClubConnectionNotificationO.value.clubUuids,
@@ -175,6 +202,8 @@ export async function processBackgroundMessage(
       console.info(
         `📳 Received notification about beeing added to club ${admitedToClubNetworkNotificationDataO.value.publicKey}`
       )
+      if (!(await ensureSessionLoadedForBackgroundNotification())) return
+
       await Effect.runPromise(
         getDefaultStore().set(checkForClubsAdmissionActionAtom)
       )
@@ -186,6 +215,8 @@ export async function processBackgroundMessage(
       ClubDeactivatedNotificationData
     )(payload)
     if (Option.isSome(ClubDeactivatedNotificationDataO)) {
+      if (!(await ensureSessionLoadedForBackgroundNotification())) return
+
       const store = getDefaultStore()
       const {t} = store.get(translationAtom)
       const publicKeyO = Record.get(

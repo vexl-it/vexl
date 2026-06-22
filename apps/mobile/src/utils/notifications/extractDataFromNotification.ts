@@ -78,7 +78,7 @@ export function extractDataPayloadFromNotification(
         Schema.decodeUnknownOption(BackgroundNotificationSchema)(data.data),
         Option.map((one) => ({
           payload: one.data.dataString ?? {},
-          isHeadless: !!one.notification,
+          isHeadless: !one.notification,
         })),
         Option.filter((one): boolean => !!one.payload)
       )

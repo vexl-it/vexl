@@ -1,6 +1,7 @@
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {isVexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
+  DebugMessage,
   type NotificationStreamError,
   type NotificationStreamMessage,
   Rpcs,
@@ -142,6 +143,14 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
               keepAliveAsLongAsScopeInRedisRegistry(connectionId, clientInfo)
             )
 
+            // Heartbeat to prevent connection from timing out.
+            yield* _(
+              send(new DebugMessage({})).pipe(
+                Effect.schedule(Schedule.spaced('30 seconds')),
+                Effect.forkScoped
+              )
+            )
+
             const notificationsWaitingThrottled = yield* _(
               throttledPushNotificationService.getPendingNotificationsAndCancelThrottleTimeout(
                 clientInfo.notificationToken
@@ -158,7 +167,9 @@ export const NotificationRpcsHandlers = Rpcs.toLayer(
 
             return Stream.fromQueue(queue).pipe(
               Stream.tap((e) =>
-                Effect.log('Sending event to client', e, connectionInfo)
+                Either.isRight(e) && e.right._tag === 'DebugMessage'
+                  ? Effect.void
+                  : Effect.log('Sending event to client', e, connectionInfo)
               ),
               Stream.mapEffect(identity),
               Stream.prepend(Chunk.fromIterable(notificationsWaitingThrottled))

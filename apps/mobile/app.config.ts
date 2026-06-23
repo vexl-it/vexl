@@ -1,5 +1,5 @@
-const VERSION_CODE = 790
-const VERSION = '1.43.5'
+const VERSION_CODE = 800
+const VERSION = '1.43.6'
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
@@ -290,6 +290,7 @@ export default {
       ? ['./expo-plugins/android-manifest-local-cleartext-plugin.js']
       : []),
     './expo-plugins/android-eas-signing-plugin.js',
+    './expo-plugins/android-install-release-plugin.js',
     './expo-plugins/android-manifest-nfc-action-plugin.js',
     'expo-font',
     'expo-secure-store',

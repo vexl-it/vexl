@@ -1,5 +1,5 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Array} from 'effect'
+import {Array, pipe} from 'effect'
 
 export function isProductOfferMissingCategory(offer: OneOfferInState): boolean {
   const {listingType, productCategory, productCategories} =
@@ -8,6 +8,6 @@ export function isProductOfferMissingCategory(offer: OneOfferInState): boolean {
   return (
     listingType === 'PRODUCT' &&
     productCategory === undefined &&
-    !Array.isNonEmptyReadonlyArray(productCategories ?? [])
+    !pipe(productCategories ?? [], Array.fromIterable, Array.isNonEmptyArray)
   )
 }

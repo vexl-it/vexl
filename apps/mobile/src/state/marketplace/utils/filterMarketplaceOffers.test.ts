@@ -20,6 +20,7 @@ function makeOffer({
   amountBottomLimit,
   amountTopLimit,
   offerType = 'SELL',
+  productCategory,
   productCategories,
 }: {
   readonly id: string
@@ -28,6 +29,7 @@ function makeOffer({
   readonly amountBottomLimit: number
   readonly amountTopLimit: number
   readonly offerType?: OfferType
+  readonly productCategory?: ProductCategory
   readonly productCategories?: readonly ProductCategory[]
 }): Schema.Schema.Type<typeof OneOfferInState> {
   return Schema.decodeSync(OneOfferInState)({
@@ -61,6 +63,7 @@ function makeOffer({
         active: true,
         groupUuids: [],
         listingType,
+        productCategory,
         productCategories,
       },
       createdAt: '2026-01-01T00:00:00.000Z',
@@ -172,6 +175,28 @@ describe('filterMarketplaceOffers product category filter', () => {
         },
       })
     ).toEqual([])
+  })
+
+  test('matches product offers by legacy singular productCategory', () => {
+    expect(
+      filterOfferIdsFromOffers({
+        offers: [
+          makeOffer({
+            id: 'legacy-product-electronics',
+            listingType: 'PRODUCT',
+            currency: 'CZK',
+            amountBottomLimit: 20_000,
+            amountTopLimit: 20_000,
+            productCategory: 'ELECTRONICS',
+          }),
+        ],
+        filter: {
+          filterBarOptions: new Set(),
+          spokenLanguages: [],
+          productCategories: ['ELECTRONICS'],
+        },
+      })
+    ).toEqual(['legacy-product-electronics'])
   })
 
   test('excludes product offers missing categories when category filter is active', () => {

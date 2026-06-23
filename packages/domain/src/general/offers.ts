@@ -196,6 +196,7 @@ export const OfferPublicPart = Schema.Struct({
   active: Schema.Boolean,
   groupUuids: Schema.Array(Schema.String),
   listingType: Schema.optional(ListingType),
+  productCategory: Schema.optional(ProductCategory),
   productCategories: Schema.optional(Schema.Array(ProductCategory)),
   // Accepts both NotificationCypher (legacy encrypted) and VexlNotificationToken (new system)
   // For backwards compatibility, vexlNotificationToken is also stored here

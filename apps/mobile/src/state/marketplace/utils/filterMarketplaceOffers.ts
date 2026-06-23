@@ -93,13 +93,15 @@ function offerMatchesProductCategoryFilter({
   if (!Array.isNonEmptyReadonlyArray(selectedProductCategories)) return true
   if (offer.offerInfo.publicPart.listingType !== 'PRODUCT') return true
 
-  const offerProductCategories =
-    offer.offerInfo.publicPart.productCategories ?? []
+  const {productCategory, productCategories: offerProductCategories} =
+    offer.offerInfo.publicPart
+  const categories =
+    offerProductCategories ?? (productCategory ? [productCategory] : [])
 
   return (
-    Array.isNonEmptyReadonlyArray(offerProductCategories) &&
+    Array.isNonEmptyReadonlyArray(categories) &&
     pipe(
-      offerProductCategories,
+      categories,
       Array.some((productCategory) =>
         pipe(selectedProductCategories, Array.contains(productCategory))
       )

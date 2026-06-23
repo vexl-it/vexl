@@ -88,25 +88,18 @@ function offerMatchesProductCategoryFilter({
   offer: OneOfferInState
   productCategories: readonly ProductCategory[] | undefined
 }): boolean {
-  const selectedProductCategories = pipe(
-    productCategories ?? [],
-    Array.fromIterable
-  )
+  const selectedProductCategories = productCategories ?? []
 
-  if (!Array.isNonEmptyArray(selectedProductCategories)) return true
+  if (!Array.isNonEmptyReadonlyArray(selectedProductCategories)) return true
   if (offer.offerInfo.publicPart.listingType !== 'PRODUCT') return true
 
-  const {productCategory, productCategories: offerProductCategories} =
-    offer.offerInfo.publicPart
-  const categories = pipe(
-    offerProductCategories ?? (productCategory ? [productCategory] : []),
-    Array.fromIterable
-  )
+  const offerProductCategories =
+    offer.offerInfo.publicPart.productCategories ?? []
 
   return (
-    Array.isNonEmptyArray(categories) &&
+    Array.isNonEmptyReadonlyArray(offerProductCategories) &&
     pipe(
-      categories,
+      offerProductCategories,
       Array.some((productCategory) =>
         pipe(selectedProductCategories, Array.contains(productCategory))
       )

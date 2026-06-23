@@ -75,20 +75,15 @@ export default function OfferPropertiesCard({
 }): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
-  const {
-    feeAmount,
-    expirationDate,
-    listingType,
-    productCategory,
-    productCategories,
-  } = offer.offerInfo.publicPart
+  const {feeAmount, expirationDate, listingType, productCategories} =
+    offer.offerInfo.publicPart
   const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
 
   const rows = useMemo(() => {
     const productCategoryLabels =
       listingType === 'PRODUCT'
         ? pipe(
-            productCategories ?? (productCategory ? [productCategory] : []),
+            productCategories ?? [],
             Array.map((category) =>
               t(`filterOffers.productCategory.${category}`)
             )
@@ -148,7 +143,6 @@ export default function OfferPropertiesCard({
     listingType,
     locale,
     offer,
-    productCategory,
     productCategories,
     t,
   ])

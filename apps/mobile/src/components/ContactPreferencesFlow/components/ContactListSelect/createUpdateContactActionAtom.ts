@@ -15,7 +15,7 @@ import {globalDialogAtom} from '../../../GlobalDialog'
 import {showContactExistsDialogAtom} from './components/showContactExistsDialogAtom'
 import {
   buildUpdatedContact,
-  findImportedContactWithNumber,
+  findContactWithNumber,
   removeContactsWithNumbers,
   renameComputedContact,
   replaceContactByNumber,
@@ -179,7 +179,7 @@ export function createUpdateContactActionAtom({
 
       return Effect.gen(function* (_) {
         const existingContactWithNumber = numberChanged
-          ? findImportedContactWithNumber(
+          ? findContactWithNumber(
               get(storedContactsAtom),
               normalizedNumber.value
             )

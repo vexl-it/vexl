@@ -10,6 +10,7 @@ import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
 import {Linking} from 'react-native'
 import {addContactToPhoneActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
+import {CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS} from '../../../../state/contacts/atom/contactImportUtils'
 import {
   normalizedContactsAtom,
   storedContactsAtom,
@@ -236,6 +237,16 @@ export const contactSelectMolecule = molecule((_, getScope) => {
       )
     }
   )
+  // Large contact sets are processed in chunks behind the stepped progress
+  // dialog instead of the static "preparing" overlay. Single source of truth
+  // shared by the submit action and the screen (to suppress its overlay).
+  const shouldShowContactImportProgressDialogAtom = atom(
+    (get) =>
+      get(selectedNumbersAtom).size >=
+        CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS ||
+      get(normalizedContactsAtom).length >=
+        CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS
+  )
   const knownContactNumbersAtom = atom(new Set<E164PhoneNumber>())
   const syncDefaultSelectedContactsActionAtom = atom(null, (get, set) => {
     if (get(selectedNumbersStateAtom) === undefined) {
@@ -341,6 +352,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     (get, set): Effect.Effect<boolean> => {
       const {t} = get(translationAtom)
       const selectedNumbers = Array.fromIterable(get(selectedNumbersAtom))
+      const showContactImportProgressDialog = get(
+        shouldShowContactImportProgressDialogAtom
+      )
 
       return Effect.gen(function* (_) {
         const result = yield* _(
@@ -349,6 +363,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             normalizeAndImportAll: false,
             showOfferReencryptionDialog: selectedNumbers.length > 0,
             manageLoadingOverlay: false,
+            showContactImportProgressDialog,
           })
         )
 
@@ -577,6 +592,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     areThereAnyContactsToDisplayForSelectedTabAtom,
     areThereAnySelectedContactsAtom,
     selectedNumbersAtom,
+    shouldShowContactImportProgressDialogAtom,
     syncDefaultSelectedContactsActionAtom,
     submitAllSelectedContactsActionAtom,
     importContactsFromPhoneActionAtom,

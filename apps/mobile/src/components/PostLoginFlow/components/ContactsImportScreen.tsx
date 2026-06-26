@@ -46,6 +46,8 @@ export default function ContactsImportScreen({
             submitContacts({
               normalizeAndImportAll: true,
               showOfferReencryptionDialog: false,
+              showContactImportProgressDialog: true,
+              manageLoadingOverlay: false,
             })
           )
             .then((result) => {

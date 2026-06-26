@@ -1,3 +1,5 @@
+import {Effect} from 'effect'
+
 function runAfterAnimationFrames({
   callback,
   frames,
@@ -33,6 +35,22 @@ function runAfterAnimationFrames({
 
 export function runAfterAnimationFrame(callback: () => void): () => void {
   return runAfterAnimationFrames({callback, frames: 1})
+}
+
+export function waitForNextAnimationFramePromise(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    runAfterAnimationFrame(resolve)
+  })
+}
+
+export function waitForNextAnimationFrameEffect(): Effect.Effect<void> {
+  return Effect.async((resolve) => {
+    const cancelAnimationFrame = runAfterAnimationFrame(() => {
+      resolve(Effect.void)
+    })
+
+    return Effect.sync(cancelAnimationFrame)
+  })
 }
 
 export function runAfterTwoAnimationFrames(callback: () => void): () => void {

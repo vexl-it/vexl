@@ -1,14 +1,17 @@
-import {Typography} from '@vexl-next/ui'
+import {Loader, Typography} from '@vexl-next/ui'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue} from 'jotai'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import {styled} from 'tamagui'
-import {uploadingProgressDataForProgressIndicatorElementAtom} from '../atoms'
+import {styled, useTheme} from 'tamagui'
+import {
+  type ProgressIndication,
+  uploadingProgressDataForProgressIndicatorElementAtom,
+} from '../atoms'
 
 const ProgressFill = styled(Stack, {
   name: 'ProgressFill',
@@ -23,31 +26,44 @@ const ProgressFill = styled(Stack, {
 const AnimatedProgressFill = Animated.createAnimatedComponent(ProgressFill)
 
 function percentageFromIndicateProgress(
-  indicateProgress:
-    | {type: 'intermediate'}
-    | {type: 'progress'; percentage: number}
-    | {type: 'done'}
+  indicateProgress: ProgressIndication
 ): number {
   if (indicateProgress.type === 'intermediate') return 0
+  if (indicateProgress.type === 'loader') return 0
   if (indicateProgress.type === 'done') return 100
   return indicateProgress.percentage
 }
 
 function ProgressIndicator(): React.JSX.Element {
+  const theme = useTheme()
   const data = useAtomValue(
     uploadingProgressDataForProgressIndicatorElementAtom
   )
   const [trackWidth, setTrackWidth] = useState(0)
   const percentage = percentageFromIndicateProgress(data.indicateProgress)
   const progress = useSharedValue(percentage)
+  const previousPercentage = useRef(percentage)
 
   useEffect(() => {
-    progress.value = withTiming(percentage)
+    if (percentage < previousPercentage.current) {
+      progress.value = percentage
+    } else {
+      progress.value = withTiming(percentage)
+    }
+    previousPercentage.current = percentage
   }, [percentage, progress])
 
   const animatedStyle = useAnimatedStyle(() => ({
     width: (progress.value * trackWidth) / 100,
   }))
+
+  if (data.indicateProgress.type === 'loader') {
+    return (
+      <YStack alignItems="center" justifyContent="center" height="$5">
+        <Loader size="medium" color={theme.foregroundPrimary.get()} />
+      </YStack>
+    )
+  }
 
   return (
     <YStack gap="$3">

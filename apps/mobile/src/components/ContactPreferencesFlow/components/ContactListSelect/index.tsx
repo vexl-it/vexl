@@ -44,6 +44,7 @@ function ContactsListSelect({
     contactsToDisplayCountAtom,
     isContactsPreparingAtom,
     newContactsToDisplayCountAtom,
+    shouldShowContactImportProgressDialogAtom,
     toggleAllContactsToDisplayActionAtom,
   } = useMolecule(contactSelectMolecule)
   const theme = useTheme()
@@ -51,6 +52,9 @@ function ContactsListSelect({
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
   const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
   const contactsToDisplayCount = useAtomValue(contactsToDisplayCountAtom)
+  const shouldShowContactImportProgressDialog = useAtomValue(
+    shouldShowContactImportProgressDialogAtom
+  )
   const areAllContactsToDisplaySelected = useAtomValue(
     areAllContactsToDisplaySelectedAtom
   )
@@ -120,6 +124,8 @@ function ContactsListSelect({
     selectedFilter === 'all' &&
     newContactsToDisplayCount > 0 &&
     !newContactsBannerDismissedForCurrentScreen
+  const shouldShowSubmittingContactsOverlay =
+    isSubmittingContacts && !shouldShowContactImportProgressDialog
   const bulkToggleLabel = t(
     areAllContactsToDisplaySelected
       ? 'postLoginFlow.contactsList.deactivateAll'
@@ -211,7 +217,7 @@ function ContactsListSelect({
       ) : null}
       <PreparingContactsOverlay
         labelKey="contacts.processingContacts"
-        visible={isSubmittingContacts}
+        visible={shouldShowSubmittingContactsOverlay}
         zIndex={20}
       />
     </Stack>

@@ -5,16 +5,19 @@ import {translationAtom} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
 
+export type ProgressIndication =
+  | {type: 'intermediate'}
+  | {type: 'loader'}
+  | {type: 'progress'; percentage: number}
+  | {type: 'done'}
+
 export interface ShownData {
   mode: 'shown'
   title: string
   bottomText?: string
   belowProgressLeft?: string
   belowProgressRight?: string
-  indicateProgress:
-    | {type: 'intermediate'}
-    | {type: 'progress'; percentage: number}
-    | {type: 'done'}
+  indicateProgress: ProgressIndication
 }
 
 export interface HiddenData {
@@ -44,10 +47,7 @@ export const uploadingProgressDataForRootElement = atom<{
 export const uploadingProgressDataForProgressIndicatorElementAtom = atom<{
   belowProgressRight?: string
   belowProgressLeft?: string
-  indicateProgress:
-    | {type: 'intermediate'}
-    | {type: 'progress'; percentage: number}
-    | {type: 'done'}
+  indicateProgress: ProgressIndication
 }>((get) => {
   const modalData = get(dataAtom)
   if (modalData.mode === 'hidden') return {indicateProgress: {type: 'done'}}

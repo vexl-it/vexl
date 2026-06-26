@@ -54,8 +54,10 @@ const InfoBoxFrame = styled(XStack, {
 
 type InfoBoxFrameProps = React.ComponentProps<typeof InfoBoxFrame>
 
-export interface InfoBoxProps
-  extends Omit<InfoBoxFrameProps, 'children' | 'variant'> {
+export interface InfoBoxProps extends Omit<
+  InfoBoxFrameProps,
+  'children' | 'variant'
+> {
   readonly children: string
   readonly variant?: InfoBoxVariant
   readonly iconSize?: number

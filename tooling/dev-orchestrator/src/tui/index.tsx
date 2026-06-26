@@ -90,7 +90,9 @@ export const renderTui = (
     unmount: () => {
       instance.unmount()
     },
-    waitUntilExit: () => instance.waitUntilExit(),
+    waitUntilExit: async () => {
+      await instance.waitUntilExit()
+    },
   }
 }
 

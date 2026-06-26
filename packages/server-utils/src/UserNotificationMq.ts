@@ -4,8 +4,8 @@ import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {makeMqService} from '@vexl-next/server-utils/src/mqService'
 import {Data, type Effect, Schema} from 'effect/index'
+import {makeMqService} from './mqService'
 
 export class ProcessNewUserNotificationsError extends Data.TaggedError(
   'ProcessNewUserNotificationsError'

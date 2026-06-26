@@ -7,14 +7,8 @@
 # VSCode
 .vscode/
 
-# Yarn
-.yarn/*
-!.yarn/cache
-!.yarn/releases
-!.yarn/plugins
-!.yarn/patches
-!.yarn/sdks
-!.yarn/versions
+# pnpm
+.pnpm-store/
 
 dist
 tsconfig.tsbuildinfo

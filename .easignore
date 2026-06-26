@@ -2,17 +2,17 @@
 # .easignore — controls which files EAS Build uploads in the build archive.
 #
 # Why this lives at the MONOREPO ROOT: when you run `eas build` from
-# apps/mobile, EAS archives the WHOLE repository root (so yarn-workspaces
-# dependencies resolve and `yarn install` can run at the root). Only a
-# root-level ignore file can exclude root-level heavy paths like .yarn/cache.
+# apps/mobile, EAS archives the WHOLE repository root (so pnpm workspace
+# dependencies resolve and `pnpm install` can run at the root). Only a
+# root-level ignore file can exclude root-level heavy dependency caches.
 #
 # IMPORTANT: .easignore REPLACES .gitignore (it does not extend it). So this
 # file must re-list everything from .gitignore that should stay out, PLUS the
 # committed/working-tree artifacts that aren't needed to build the app.
 #
-# Do NOT exclude: any workspace package.json, the root yarn.lock / .yarnrc.yml,
-# the Yarn binary/plugins/patches (.yarn/releases|plugins|patches|sdks), or
-# apps/mobile/{assets,creds,src,expo-plugins,app.config.ts,...} — EAS needs
+# Do NOT exclude: any workspace package.json, pnpm-workspace.yaml,
+# pnpm-lock.yaml, patches/, or
+# apps/mobile/{assets,creds,src,expo-plugins,app.config.ts,...} - EAS needs
 # them to install deps, run `expo prebuild`, and bundle.
 # =============================================================================
 
@@ -20,14 +20,8 @@
 node_modules
 .turbo
 
-# Yarn: drop the heavy checked-in zero-install cache (~580 MB), but KEEP the
-# Yarn binary, plugins, and patches that `yarn install` needs on the server.
-.yarn/*
-!.yarn/releases
-!.yarn/plugins
-!.yarn/patches
-!.yarn/sdks
-!.yarn/versions
+# pnpm store is a local cache and is never needed in the EAS archive.
+.pnpm-store/
 
 # --- Build outputs / generated ---
 dist

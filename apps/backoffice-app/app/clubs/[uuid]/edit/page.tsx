@@ -63,7 +63,7 @@ export default function EditClubPage() {
           return
         }
 
-        setFormData(club as any)
+        setFormData(club)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load club')
       } finally {

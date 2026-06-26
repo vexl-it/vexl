@@ -39,17 +39,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v6
         with:
           node-version: 24.x
-          cache: yarn
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
       - name: Setup Expo and EAS
         uses: expo/expo-github-action@v9
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
-        run: yarn workspaces focus @vexl-next/mobile-app
+        run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
       - name: Decode Google Service Account key
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}

@@ -43,7 +43,7 @@ function copyFileE({
       return {
         _tag: 'fileSystemError',
         error,
-      } as FileSystemError
+      }
     },
   })
 }

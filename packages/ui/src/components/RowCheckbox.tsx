@@ -75,8 +75,10 @@ const RowCheckboxDescription = styled(SizableText, {
 
 type RowCheckboxFrameProps = React.ComponentProps<typeof RowCheckboxFrame>
 
-export interface RowCheckboxProps
-  extends Omit<RowCheckboxFrameProps, 'children' | 'selected'> {
+export interface RowCheckboxProps extends Omit<
+  RowCheckboxFrameProps,
+  'children' | 'selected'
+> {
   readonly label: string
   readonly description?: string
   readonly checked?: boolean

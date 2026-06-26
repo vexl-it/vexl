@@ -21,10 +21,10 @@
     "typecheck": "tsc --noEmit",
     "build": "node esbuild.config.js",
     "start": "node --enable-source-maps dist/index.js",
-    "dev": "npx tsx -r dotenv/config src/index.ts",
-    "dev:watch": "npx tsx --watch src/index.ts",
-    "test": "yarn jest",
-    "test:watch": "yarn jest --watch"
+    "dev": "tsx -r dotenv/config src/index.ts",
+    "dev:watch": "tsx --watch src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "prettier": "@vexl-next/prettier-config",
   "dependencies": {
@@ -35,6 +35,7 @@
     "@effect/sql": "^0.48.6",
     "@effect/sql-pg": "^0.49.7",
     "@vexl-next/cryptography": "0.0.0",
+    "@vexl-next/domain": "0.0.0",
     "@vexl-next/esbuild": "0.0.0",
     "@vexl-next/localization": "0.0.0",
     "@vexl-next/resources-utils": "0.0.0",

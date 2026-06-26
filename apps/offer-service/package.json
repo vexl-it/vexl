@@ -3,15 +3,15 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test": "yarn jest",
-    "test:watch": "yarn jest --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "build": "node esbuild.config.js",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf ./dist",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "lint": "eslint src",
-    "dev": "npx tsx -r dotenv/config src/index.ts",
+    "dev": "tsx -r dotenv/config src/index.ts",
     "start": "node --enable-source-maps dist/index.js"
   },
   "dependencies": {

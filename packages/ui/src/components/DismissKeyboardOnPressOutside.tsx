@@ -5,11 +5,10 @@ import {
   type TouchableWithoutFeedbackProps,
 } from 'react-native'
 
-export interface DismissKeyboardOnPressOutsideProps
-  extends Omit<
-    TouchableWithoutFeedbackProps,
-    'accessible' | 'children' | 'onPress'
-  > {
+export interface DismissKeyboardOnPressOutsideProps extends Omit<
+  TouchableWithoutFeedbackProps,
+  'accessible' | 'children' | 'onPress'
+> {
   readonly children: React.ReactNode
 }
 

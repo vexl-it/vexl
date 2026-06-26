@@ -1,0 +1,26 @@
+diff --git a/index.js b/index.js
+index 44a2edf627df2a3242143f7e55d121d1c14ff389..a1680dc73a47e08f991d439edefe77b6600b99a4 100644
+--- a/index.js
++++ b/index.js
+@@ -3,6 +3,21 @@
+ // eslint-disable-next-line no-multi-assign
+ exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes');
+ 
++// Delegate to the browser-native Web Crypto API (a CSPRNG). This shim is only
++// used in browser bundles, where globalThis.crypto is always available. Never
++// fall back to a non-cryptographic source such as Math.random.
++if (!exports.getRandomValues) {
++	exports.getRandomValues = function (typedArray) {
++		return globalThis.crypto.getRandomValues(typedArray);
++	};
++}
++
++if (!exports.randomUUID) {
++	exports.randomUUID = function () {
++		return globalThis.crypto.randomUUID();
++	};
++}
++
+ // eslint-disable-next-line no-multi-assign
+ exports.createHash = exports.Hash = require('create-hash');
+ 

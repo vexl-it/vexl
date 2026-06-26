@@ -4,7 +4,7 @@ import {
   UnexpectedServerError,
 } from '@vexl-next/domain/src/general/commonErrors'
 
-import {MaxExpectedDailyCall} from '@vexl-next/rest-api/src/MaxExpectedDailyCountAnnotation'
+import {MaxExpectedDailyCall} from '../MaxExpectedDailyCountAnnotation'
 import {
   CreateChallengeRequest,
   CreateChallengeResponse,

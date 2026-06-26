@@ -7,14 +7,14 @@ This website can be accessed on https://app.vexl.it.
 ## How to run
 
 ```sh
-yarn
-yarn workspace account-deletion-website dev
+pnpm install
+pnpm --filter account-deletion-website dev
 ```
 
 ## How to build
 
 ```sh
-yarn workspace account-deletion-website build
+pnpm --filter account-deletion-website build
 ```
 
 `BE_ENV` is resolved at runtime by the Next.js server and defaults to `stage` unless `BE_ENV=prod` is set.

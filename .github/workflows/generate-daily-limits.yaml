@@ -23,17 +23,21 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v6
         with:
           node-version: 24.x
-          cache: "yarn"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: yarn workspaces focus @vexl-next/generate-api-call-limits
+        run: pnpm install --frozen-lockfile --filter @vexl-next/generate-api-call-limits...
 
       - name: Run export
-        run: yarn workspace @vexl-next/generate-api-call-limits print-api-call-limits --output=${{ github.event.inputs.env }} > daily-limits.${{ github.event.inputs.env }}
+        run: pnpm --filter @vexl-next/generate-api-call-limits print-api-call-limits --output=${{ github.event.inputs.env }} > daily-limits.${{ github.event.inputs.env }}
 
       - name: Upload daily limits file
         uses: actions/upload-artifact@v7

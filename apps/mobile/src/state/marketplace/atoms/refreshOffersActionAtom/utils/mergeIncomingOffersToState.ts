@@ -60,7 +60,7 @@ export const mergeIncomingOffersToState = ({
           flags: {
             reported: false,
           },
-        } as OneOfferInState)
+        } satisfies OneOfferInState)
       }
 
       return offerInStateO

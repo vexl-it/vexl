@@ -66,5 +66,5 @@ jobs:
           build-args: |
             SERVICE_VERSION=${{ github.sha }}
             ENVIRONMENT=${{ inputs.env }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=dashboard-app
+          cache-to: type=gha,mode=max,scope=dashboard-app

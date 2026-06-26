@@ -33,7 +33,7 @@ function mockedDbEffect(
   ParseResult.ParseError | UnexpectedServerError
 > {
   return Effect.gen(function* (_) {
-    return data.slice(startIndex) as readonly MockedDataSchema[]
+    return data.slice(startIndex)
   })
 }
 

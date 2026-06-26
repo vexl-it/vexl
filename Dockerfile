@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Single parameterized Dockerfile for all backend services.
 # Select the service via the APP build arg (directory name under apps/),
 # e.g. --build-arg APP=content-service
@@ -6,11 +7,12 @@
 # Produces a minimal, deterministic subset of the monorepo for the target app:
 #   /app/out/json  -> only the package.json manifests (cacheable install input)
 #   /app/out/full  -> full source of the pruned package set
-#   /app/out/yarn.lock -> lockfile scoped to the pruned set
+#   /app/out/pnpm-lock.yaml -> lockfile scoped to the pruned set
 # Running turbo prune here means no host/CI prework is required.
 FROM node:24 as pruner
 
 ARG APP
+ARG TURBO_VERSION=2.10.0
 
 WORKDIR /app
 
@@ -18,7 +20,7 @@ COPY . .
 
 # node_modules is not installed in this stage (it is in .dockerignore), so run
 # turbo via npx from a globally installed, version-pinned copy.
-RUN npm install -g turbo@2.9.14
+RUN npm install -g turbo@${TURBO_VERSION}
 RUN turbo prune @vexl-next/${APP} --docker
 
 
@@ -30,22 +32,23 @@ ARG APP
 WORKDIR /app
 
 # Install layer: depends only on the manifests, the lockfile and the committed
-# Yarn zero-install cache (under .yarn/). Because none of these change when only
-# source changes, this expensive layer is cached across source-only rebuilds.
+# Because none of these change when only source changes, this expensive layer is
+# cached across source-only rebuilds.
 COPY --from=pruner /app/out/json/ ./
-COPY --from=pruner /app/out/yarn.lock ./yarn.lock
-COPY --from=pruner /app/.yarn/ ./.yarn/
-COPY --from=pruner /app/.yarnrc.yml ./.yarnrc.yml
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-# Immutable installs are disabled because the pruned lockfile may need to be
-# reconciled in-image; nothing is fetched from the network — the committed
-# .yarn/cache already contains every package zip (zero-installs).
-RUN YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn workspaces focus @vexl-next/${APP}
+# Shared pnpm store cache mount: the builder and prod-deps stages install from
+# the same store (deduped downloads), and on persistent builders it survives
+# across builds even when the lockfile changes.
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    corepack enable && \
+    pnpm config set store-dir /pnpm/store && \
+    pnpm install --frozen-lockfile
 
 # Build layer: full source of the pruned set. Changes here do NOT invalidate the
 # install layer above.
 COPY --from=pruner /app/out/full/ ./
-RUN yarn workspace @vexl-next/${APP} build
+RUN pnpm --filter @vexl-next/${APP} build
 
 
 # --- Production deps stage --------------------------------------------------
@@ -60,11 +63,12 @@ ARG APP
 WORKDIR /app
 
 COPY --from=pruner /app/out/json/ ./
-COPY --from=pruner /app/out/yarn.lock ./yarn.lock
-COPY --from=pruner /app/.yarn/ ./.yarn/
-COPY --from=pruner /app/.yarnrc.yml ./.yarnrc.yml
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 
-RUN YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn workspaces focus --production @vexl-next/${APP}
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    corepack enable && \
+    pnpm config set store-dir /pnpm/store && \
+    pnpm install --prod --frozen-lockfile
 
 
 # --- Runner stage -----------------------------------------------------------

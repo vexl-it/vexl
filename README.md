@@ -22,10 +22,10 @@ ENV_PRESET=prod
 To run the app in dev mode run following commands
 
 ```
-yarn
-yarn expo prebuild --clean
-yarn expo run:ios  ## for ios
-yarn expo run:android ## for android
+pnpm install
+pnpm --filter @vexl-next/mobile-app expo prebuild --clean
+pnpm --filter @vexl-next/mobile-app expo run:ios  ## for ios
+pnpm --filter @vexl-next/mobile-app expo run:android ## for android
 ```
 
 ## Help us translate the app

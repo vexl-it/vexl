@@ -34,7 +34,7 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 
 ## Verification
 IMPORTANT -- Verification steps (do this to verify your code changes. Not all bugs / errors will be caught by CI, but the most obvious ones will):
-1. Run `yarn turbo:typecheck` in the affected workspace. Read the output and fix all errors.
-2. Run `yarn turbo:format`. If it fails, run `yarn turbo:format:fix` first, then re-run.
-3. Run `yarn turbo:lint`. Fix any errors.
+1. Run `pnpm turbo:typecheck` in the affected workspace. Read the output and fix all errors.
+2. Run `pnpm turbo:format`. If it fails, run `pnpm turbo:format:fix` first, then re-run.
+3. Run `pnpm turbo:lint`. Fix any errors.
 4. Do NOT consider your work done until all three pass cleanly.

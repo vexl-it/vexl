@@ -4,7 +4,7 @@ const path = require('path')
 
 // Find the project and workspace directories
 const projectRoot = __dirname
-// This can be replaced with `find-yarn-workspace-root`
+// This can be replaced with a workspace-root resolver if Metro needs it.
 // const workspaceRoot = path.resolve(projectRoot, '../..')
 
 const config = getSentryExpoConfig(projectRoot)

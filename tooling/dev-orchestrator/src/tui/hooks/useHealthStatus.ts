@@ -2,7 +2,7 @@ import {Effect} from 'effect'
 import {useEffect, useRef, useState} from 'react'
 import {SERVICES} from '../../config/services.js'
 import {checkAllServicesHealth} from '../../health/status-checker.js'
-import type {InfraStatus, ServiceStatus, ServiceStatusValue} from '../types.js'
+import type {InfraStatus, ServiceStatus} from '../types.js'
 
 interface UseHealthStatusOptions {
   pollIntervalMs?: number
@@ -29,7 +29,7 @@ export const useHealthStatus = (
     services: SERVICES.map((s) => ({
       name: s.name,
       displayName: s.displayName,
-      status: 'stopped' as ServiceStatusValue,
+      status: 'stopped',
       port: s.port,
       healthPort: s.healthPort,
     })),

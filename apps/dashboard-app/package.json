@@ -8,14 +8,14 @@
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "lint": "eslint .",
     "typecheck": "tsc -p server/tsconfig.typecheck.json --pretty false && tsc -p client/tsconfig.typecheck.json --pretty false && tsc -p common/tsconfig.typecheck.json --pretty false && tsc -p vite.tsconfig.typecheck.json --pretty false",
-    "build": "yarn build:server && yarn build:client",
+    "build": "pnpm run build:server && pnpm run build:client",
     "build:client": "vite build",
     "build:server": "node esbuild.config.js",
-    "dev": "yarn dev:server & yarn dev:client",
-    "dev:server": "npx tsx server/index.ts",
+    "dev": "pnpm run dev:server & pnpm run dev:client",
+    "dev:server": "tsx server/index.ts",
     "dev:client": "vite dev",
     "dev:client:preview": "vite preview --port 5173",
-    "dev:watch": "npx tsx --watch server/index.ts & vite dev",
+    "dev:watch": "tsx --watch server/index.ts & vite dev",
     "start": "node dist/server/index.cjs"
   },
   "dependencies": {

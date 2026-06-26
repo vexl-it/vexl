@@ -4,7 +4,7 @@
  * Script to find and cleanup unused translation keys in the codebase.
  *
  * Usage:
- *   yarn workspace @vexl-next/handy-scripts cleanup-unused-translations
+ *   pnpm --filter @vexl-next/handy-scripts cleanup-unused-translations
  *
  * What it does:
  *   1. Reads all keys from packages/localization/base.json

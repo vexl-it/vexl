@@ -300,6 +300,19 @@ function encryptSessionForStorage(session: Session): {
   return {encryptedSession, secretToken}
 }
 
+function buildSessionFailingSanityCheck(version: number): SessionV2 {
+  // A complete V2 session that decodes fine, but whose stored public key no
+  // longer matches its private key. sanityCheckSessionV2 fails after the read.
+  const sane = buildLoggedInSession(version)
+  return {
+    ...sane,
+    sessionCredentials: {
+      ...sane.sessionCredentials,
+      publicKey: snapshotSavedPrivateKey.publicKeyPemBase64,
+    },
+  }
+}
+
 describe('loadSession', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -347,6 +360,99 @@ describe('loadSession', () => {
     })
     expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(1)
     expect(secretStoreGetItemAsyncMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('waiters return the blocking recovery result from a failed in-flight load', async () => {
+    const loadedSession = buildSession(dummySession.version + 93)
+    const {encryptedSession} = encryptSessionForStorage(loadedSession)
+    const encryptedSessionDeferred = deferredValue<string | null>()
+
+    asyncStorageGetItemMock.mockImplementationOnce(
+      () => encryptedSessionDeferred.promise
+    )
+    secretStoreGetItemAsyncMock.mockRejectedValueOnce(
+      new Error('secure store failed')
+    )
+
+    const firstLoadPromise = Effect.runPromise(loadSession())
+    const waitingLoadPromise = Effect.runPromise(loadSession())
+
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+    encryptedSessionDeferred.resolve(encryptedSession)
+
+    const [firstLoadResult, waitingLoadResult] = await Promise.all([
+      firstLoadPromise,
+      waitingLoadPromise,
+    ])
+
+    expect(firstLoadResult).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'ErrorReadingFromSecureStorage',
+      },
+    })
+    expect(waitingLoadResult).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+      loadingError: {
+        _tag: 'ErrorReadingFromSecureStorage',
+      },
+    })
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedOut',
+    })
+    expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(1)
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('returns blocking recovery when waiting for an in-flight load times out', async () => {
+    jest.useFakeTimers()
+
+    try {
+      const loadedSession = buildSession(dummySession.version + 92)
+      const {encryptedSession, secretToken} =
+        encryptSessionForStorage(loadedSession)
+      const encryptedSessionDeferred = deferredValue<string | null>()
+
+      asyncStorageGetItemMock.mockImplementationOnce(
+        () => encryptedSessionDeferred.promise
+      )
+      secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+      const firstLoadPromise = Effect.runPromise(loadSession())
+      const waiterPromise = Effect.runPromise(loadSession())
+
+      expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+      await jest.advanceTimersByTimeAsync(5_000)
+
+      const waiterResult = await waiterPromise
+
+      expect(waiterResult).toMatchObject({
+        sessionLoaded: false,
+        blockingRecoveryRequired: true,
+        loadingError: {
+          _tag: 'SessionLoadWaitTimedOut',
+        },
+      })
+      expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+      encryptedSessionDeferred.resolve(encryptedSession)
+
+      const firstLoadResult = await firstLoadPromise
+
+      expect(firstLoadResult.sessionLoaded).toBe(true)
+      expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+        state: 'loggedIn',
+        session: withExpectedSessionUpgrades(loadedSession),
+      })
+      expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(1)
+      expect(secretStoreGetItemAsyncMock).toHaveBeenCalledTimes(1)
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   it('loads session from storage and sets loggedIn state', async () => {
@@ -574,21 +680,9 @@ describe('loadSession', () => {
   })
 
   it('requires blocking recovery and resets to initial without erasing data when an unexpected error happens after the session was read (failing session sanity check)', async () => {
-    // A complete V2 session that decodes fine (so the read succeeds and no
-    // upgrade runs), but whose stored public key no longer matches its private
-    // key. sanityCheckSessionV2 fails, which raises SessionSanityCheckFailed
-    // AFTER the session was read - exactly the unexpected-error path handled by
-    // loadSession's top-level catchAll (VEXL-APP-1AA).
-    const sane = buildLoggedInSession(dummySession.version + 60)
-    const corruptedSession: SessionV2 = {
-      ...sane,
-      sessionCredentials: {
-        ...sane.sessionCredentials,
-        // snapshotSavedPrivateKey's public key differs from this session's
-        // private key, so the third sanity condition no longer holds.
-        publicKey: snapshotSavedPrivateKey.publicKeyPemBase64,
-      },
-    }
+    const corruptedSession = buildSessionFailingSanityCheck(
+      dummySession.version + 60
+    )
     const {encryptedSession, secretToken} =
       encryptSessionForStorage(corruptedSession)
 
@@ -604,6 +698,51 @@ describe('loadSession', () => {
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'initial',
     })
+    // PRIME DIRECTIVE: an unexpected error must NEVER erase data.
+    expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+    expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
+  })
+
+  it('returns blocking recovery to concurrent waiters when sanity check fails after storage read', async () => {
+    const corruptedSession = buildSessionFailingSanityCheck(
+      dummySession.version + 61
+    )
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(corruptedSession)
+    const encryptedSessionDeferred = deferredValue<string | null>()
+
+    asyncStorageGetItemMock.mockImplementationOnce(
+      () => encryptedSessionDeferred.promise
+    )
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+    const firstLoadPromise = Effect.runPromise(
+      loadSession({forceReload: false})
+    )
+    const waiterLoadPromise = Effect.runPromise(loadSession())
+
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+    encryptedSessionDeferred.resolve(encryptedSession)
+
+    const [firstLoadResult, waiterLoadResult] = await Promise.all([
+      firstLoadPromise,
+      waiterLoadPromise,
+    ])
+
+    expect(firstLoadResult).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+    })
+    expect(waiterLoadResult).toMatchObject({
+      sessionLoaded: false,
+      blockingRecoveryRequired: true,
+    })
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'initial',
+    })
+    expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(1)
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledTimes(1)
     // PRIME DIRECTIVE: an unexpected error must NEVER erase data.
     expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
     expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
@@ -655,7 +794,10 @@ describe('loadSession', () => {
     })
   })
 
-  it('does not reload when forceReload is true but session is currently loading', async () => {
+  it('does not start a second read when forceReload is true but a load is already in flight', async () => {
+    // 'loading' without an armed in-flight latch (no real loader running): the
+    // forceReload caller must not kick off its own storage read. It joins the
+    // (already-settled) wait and returns the current state.
     getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
 
     const result = await Effect.runPromise(loadSession({forceReload: true}))
@@ -666,6 +808,145 @@ describe('loadSession', () => {
     })
     expect(asyncStorageGetItemMock).not.toHaveBeenCalled()
     expect(secretStoreGetItemAsyncMock).not.toHaveBeenCalled()
+  })
+
+  it('forceReload caller waits for an in-flight load instead of starting a second read', async () => {
+    const loadedSession = buildSession(dummySession.version + 70)
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(loadedSession)
+    const encryptedSessionDeferred = deferredValue<string | null>()
+
+    asyncStorageGetItemMock.mockImplementationOnce(
+      () => encryptedSessionDeferred.promise
+    )
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+    const firstLoadPromise = Effect.runPromise(loadSession())
+    const forceReloadPromise = Effect.runPromise(
+      loadSession({forceReload: true})
+    )
+
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+    encryptedSessionDeferred.resolve(encryptedSession)
+
+    const [firstLoadResult, forceReloadResult] = await Promise.all([
+      firstLoadPromise,
+      forceReloadPromise,
+    ])
+
+    expect(firstLoadResult.sessionLoaded).toBe(true)
+    expect(forceReloadResult.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(loadedSession),
+    })
+    // The forceReload caller joined the in-flight load - exactly one read.
+    expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(1)
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('re-arms the in-flight wait for each load cycle so a later concurrent load still waits', async () => {
+    // First cycle: a full load to completion. The old one-shot latch would stay
+    // resolved forever after this, breaking waiting on every subsequent cycle.
+    const firstSession = buildSession(dummySession.version + 80)
+    const firstEncrypted = encryptSessionForStorage(firstSession)
+    asyncStorageGetItemMock.mockResolvedValueOnce(
+      firstEncrypted.encryptedSession
+    )
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(
+      firstEncrypted.secretToken
+    )
+
+    await Effect.runPromise(loadSession())
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loggedIn')
+
+    // Second cycle: a forced reload whose read is deferred, with a concurrent
+    // caller. The concurrent caller must wait for THIS cycle's read to finish,
+    // not return immediately off a stale latch.
+    const secondSession = buildSession(dummySession.version + 81)
+    const secondEncrypted = encryptSessionForStorage(secondSession)
+    const secondDeferred = deferredValue<string | null>()
+    asyncStorageGetItemMock.mockImplementationOnce(() => secondDeferred.promise)
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(
+      secondEncrypted.secretToken
+    )
+
+    const reloadPromise = Effect.runPromise(loadSession({forceReload: true}))
+    const waiterPromise = Effect.runPromise(loadSession())
+
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+    secondDeferred.resolve(secondEncrypted.encryptedSession)
+
+    const [reloadResult, waiterResult] = await Promise.all([
+      reloadPromise,
+      waiterPromise,
+    ])
+
+    expect(reloadResult.sessionLoaded).toBe(true)
+    expect(waiterResult.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(secondSession),
+    })
+  })
+
+  it('does not let a stale load settlement clear a newer in-flight latch', async () => {
+    const firstSession = buildSession(dummySession.version + 90)
+    const firstEncrypted = encryptSessionForStorage(firstSession)
+    const firstDeferred = deferredValue<string | null>()
+    const secondSession = buildSession(dummySession.version + 91)
+    const secondEncrypted = encryptSessionForStorage(secondSession)
+    const secondDeferred = deferredValue<string | null>()
+
+    asyncStorageGetItemMock
+      .mockImplementationOnce(() => firstDeferred.promise)
+      .mockImplementationOnce(() => secondDeferred.promise)
+    secretStoreGetItemAsyncMock
+      .mockResolvedValueOnce(firstEncrypted.secretToken)
+      .mockResolvedValueOnce(secondEncrypted.secretToken)
+
+    const firstLoadPromise = Effect.runPromise(loadSession())
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+    // Simulate the state being reset while the first load is still in flight,
+    // allowing a newer load to arm its own latch before the stale one settles.
+    getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
+    const secondLoadPromise = Effect.runPromise(loadSession())
+    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+    firstDeferred.resolve(firstEncrypted.encryptedSession)
+    const firstLoadResult = await firstLoadPromise
+    expect(firstLoadResult.sessionLoaded).toBe(true)
+
+    getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
+    const waiterPromise = Effect.runPromise(loadSession())
+    const waiterResultPromise = waiterPromise.then((result) => result)
+
+    const waiterResolvedBeforeSecondLoad = await Promise.race([
+      waiterResultPromise.then(() => true),
+      new Promise<boolean>((resolve) => {
+        setTimeout(() => {
+          resolve(false)
+        }, 0)
+      }),
+    ])
+
+    expect(waiterResolvedBeforeSecondLoad).toBe(false)
+
+    secondDeferred.resolve(secondEncrypted.encryptedSession)
+    const [secondLoadResult, waiterResult] = await Promise.all([
+      secondLoadPromise,
+      waiterResultPromise,
+    ])
+
+    expect(secondLoadResult.sessionLoaded).toBe(true)
+    expect(waiterResult.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(secondSession),
+    })
   })
 
   it('loads session from approved snapshot storage strings', async () => {

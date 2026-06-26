@@ -15,7 +15,7 @@ export const expoAccessToken = Config.string('EXPO_ACCESS_TOKEN')
 
 export const notificationThrottleTtlMinutesConfig = Config.number(
   'NOTIFICATION_THROTTLE_TTL_MINUTES'
-).pipe(Config.withDefault(10))
+).pipe(Config.withDefault(-1))
 
 export const vexlProductNotificationBatchSendIntervalMsConfig = Config.number(
   'VEXL_PRODUCT_NOTIFICATION_BATCH_SEND_INTERVAL_MS'

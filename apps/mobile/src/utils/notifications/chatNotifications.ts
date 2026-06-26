@@ -19,7 +19,6 @@ import {translationAtom} from '../localization/I18nProvider'
 import randomName from '../randomName'
 import {useAppState} from '../useAppState'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
-import {cancelNewChatNotifications} from './cancelNewChatNotifications'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getChannelForMessages} from './notificationChannels'
 
@@ -54,8 +53,6 @@ export async function showChatNotification({
   newMessage: ChatMessageWithState
   inbox: InboxInState
 }): Promise<void> {
-  await cancelNewChatNotifications()
-
   if (
     (await getPresentedNotificationsAsync()).some(
       (one) => one.request.identifier === newMessage.message.uuid

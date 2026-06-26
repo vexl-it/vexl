@@ -5,7 +5,10 @@ import {Effect, Fiber} from 'effect'
 import type {DevConfig} from '../config/dev-config-schema.js'
 import {toScreamingSnake, toServiceKey} from '../config/dev-config-schema.js'
 import {findProjectRoot} from '../config/env-loader.js'
-import type {ServiceConfig} from '../config/services.js'
+import {
+  getDatabaseNameForService,
+  type ServiceConfig,
+} from '../config/services.js'
 import {
   ServiceStartupFailure,
   type ServiceStartupTimeout,
@@ -23,9 +26,27 @@ import {getStartupState} from './startup-state.js'
  */
 const generateServiceDbUrl = (baseUrl: string, serviceName: string): string => {
   const url = new URL(baseUrl)
-  const dbName = `vexl_${serviceName.replace(/-/g, '_')}`
-  url.pathname = `/${dbName}`
+  url.pathname = `/${getDatabaseNameForService(serviceName)}`
   return url.toString()
+}
+
+interface DatabaseEnv {
+  readonly DB_HOST: string
+  readonly DB_PORT: string
+  readonly DB_NAME: string
+}
+
+const buildDatabaseEnv = (dbUrl: string): DatabaseEnv => {
+  const url = new URL(dbUrl)
+  const databaseName = url.pathname.startsWith('/')
+    ? url.pathname.slice(1)
+    : url.pathname
+
+  return {
+    DB_HOST: url.hostname,
+    DB_PORT: url.port || '5432',
+    DB_NAME: databaseName.length > 0 ? databaseName : 'postgres',
+  }
 }
 
 const applyRuntimePortConfig = (config: ServiceConfig): ServiceConfig => {
@@ -113,6 +134,7 @@ const buildServiceEnv = (
   const serviceDbUrl = config.needsDatabase
     ? generateServiceDbUrl(baseDbUrl, config.name)
     : baseDbUrl
+  const databaseEnv = config.needsDatabase ? buildDatabaseEnv(serviceDbUrl) : {}
 
   return {
     // Base: existing process.env (includes .env.local secrets)
@@ -127,6 +149,7 @@ const buildServiceEnv = (
     SERVICE_NAME: toScreamingSnake(config.name),
     // Override: service-specific DB_URL (if needs database)
     DB_URL: serviceDbUrl,
+    ...databaseEnv,
   }
 }
 

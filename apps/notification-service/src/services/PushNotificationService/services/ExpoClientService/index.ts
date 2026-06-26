@@ -46,7 +46,6 @@ export class ExpoClientService extends Context.Tag('ExpoClientService')<
                   to: notification.token,
                   data: notification.data,
                   priority: 'high' as const,
-                  mutableContent: true,
                   _contentAvailable: true,
                 }
           ),

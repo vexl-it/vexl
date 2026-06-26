@@ -94,6 +94,7 @@ export default function LoginFlowScreen({
           keyboardShouldPersistTaps="handled"
           style={{backgroundColor: theme.backgroundPrimary.get(), flex: 1}}
           bottomOffset={footerHeight}
+          mode="layout"
         >
           {content}
         </KeyboardAwareScrollView>

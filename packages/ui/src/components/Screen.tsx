@@ -134,6 +134,7 @@ export function Screen({
             }}
             bottomOffset={footer ? footerHeight : 0}
             keyboardShouldPersistTaps="handled"
+            mode="layout"
           >
             {content}
           </KeyboardAwareScrollView>

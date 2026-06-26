@@ -8,7 +8,6 @@ import {type RootStackParamsList} from '../../navigationTypes'
 import {useManageTypingIndications} from '../../state/chat/atoms/typingIndication'
 import {useIsUserLoggedIn} from '../../state/session'
 import useHandleNotificationOpen from '../../state/useHandleNotificationOpen'
-import {useHandleReceivedNotifications} from '../../state/useHandleReceivedNotifications'
 import {useSetupBackgroundTask} from '../../utils/backgroundTask'
 import {useHandleUniversalAndAppLinks} from '../../utils/deepLinks'
 import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notifications/chatNotifications'
@@ -84,7 +83,6 @@ const slideFromBottomContainedModalOptions: NativeStackNavigationOptions = {
 
 function LoggedInHookGroup(): null {
   // Notifications
-  useHandleReceivedNotifications()
   useHandleNotificationOpen()
   useHideInnactivityReminderNotificationsOnResume()
   useSetupBackgroundTask()

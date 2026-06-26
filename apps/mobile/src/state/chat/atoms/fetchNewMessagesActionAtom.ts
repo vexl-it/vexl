@@ -3,6 +3,7 @@ import {
   type PublicKeyPemBase64,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds0,
@@ -19,7 +20,7 @@ import {
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Effect, Record} from 'effect/index'
+import {Array, Effect, Option, Record, Schema} from 'effect/index'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -28,13 +29,17 @@ import {flow, pipe} from 'fp-ts/function'
 import {group} from 'group-items'
 import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
+import {Platform} from 'react-native'
 import {apiAtom} from '../../../api'
 import {refreshNotificationBadgeCountActionAtom} from '../../../components/BadgeCountManager'
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
 import {isOnSpecificChat} from '../../../utils/navigation'
 import {getNotificationToken} from '../../../utils/notifications'
-import {cancelNewChatNotifications} from '../../../utils/notifications/cancelNewChatNotifications'
+import {
+  cancelNewChatNotifications,
+  cancelNewChatNotificationsForTargetTokens,
+} from '../../../utils/notifications/cancelNewChatNotifications'
 import {showChatNotification} from '../../../utils/notifications/chatNotifications'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
@@ -44,6 +49,7 @@ import {
   focusOfferByPublicKeyAtom,
   singleOfferAtom,
 } from '../../marketplace/atoms/offersState'
+import {vexlTokenToKeyHolderAtom} from '../../notifications/vexlTokenToKeyHolderAtom'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
@@ -494,6 +500,20 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
 
     if (!updates) return undefined
 
+    if (Platform.OS === 'ios') {
+      const targetTokens = pipe(
+        get(vexlTokenToKeyHolderAtom).data,
+        Record.toEntries,
+        Array.filterMap(([targetToken, keyHolder]) =>
+          keyHolder.publicKeyPemBase64 === key
+            ? Schema.decodeOption(VexlNotificationToken)(targetToken)
+            : Option.none()
+        )
+      )
+
+      void cancelNewChatNotificationsForTargetTokens(targetTokens)
+    }
+
     const {newMessages, updatedInbox: inbox} = updates
     if (newMessages.length === 0) return undefined
 
@@ -504,7 +524,6 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
           inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
         })
       ) {
-        void cancelNewChatNotifications()
         return
       }
       void showChatNotification({
@@ -541,6 +560,10 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
       Effect.allWith({concurrency: 'unbounded'}),
       effectWithEnsuredBenchmark('Fetch all inboxes')
     )
+
+    if (Platform.OS === 'ios') {
+      void cancelNewChatNotifications()
+    }
 
     measure()
     return 'done' as const

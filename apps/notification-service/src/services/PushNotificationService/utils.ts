@@ -23,7 +23,7 @@ import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import * as translations from '@vexl-next/localization/src/translations'
 import {type PlatformName} from '@vexl-next/rest-api'
 import {type InvalidFcmCypherError} from '@vexl-next/rest-api/src/services/notification/contract'
-import {type Array, Data, Effect, Option, Schema} from 'effect'
+import {Data, Effect, Option, Schema} from 'effect'
 import {type ExpoPushToken} from 'expo-server-sdk'
 import type {
   ClubExpiredNoticeSendTask,
@@ -52,9 +52,7 @@ interface Metadata {
 }
 
 interface PushNotificationGeneratorResult {
-  notificationToSend:
-    | NotificationToSend
-    | Array.NonEmptyArray<NotificationToSend>
+  notificationToSend: NotificationToSend | NotificationToSend[]
   trackingId: NotificationTrackingId
   // todo #2124: Remove optional once moving fully to vexl notification token
   metadata: Option.Option<Metadata>
@@ -142,8 +140,6 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
 
     yield* _(Effect.logInfo('Sending notification'))
 
-    // eventually we need to handle more task types
-
     const targetCypher = task.targetCypher
 
     const metadata = yield* _(
@@ -166,7 +162,10 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
 
     const trackingId = createNotificationTrackingId()
 
+    // We are sending system notifications only for iOS devices.
+    // On Android we can rely on background notifications.
     const sendSystemNotification = task.sendNewChatMessageNotification
+
     const systemNotification: NotificationToSend = {
       token,
       ...getNotificationContentByLocale(metadata.value.locale),
@@ -204,9 +203,14 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
       ),
     }
 
-    const notificationToSend: Array.NonEmptyArray<NotificationToSend> = [
-      backgroundNotification,
-      ...(sendSystemNotification ? [systemNotification] : []),
+    const notificationToSend = [
+      // on iOS we send just the system notification.
+      ...(metadata.value.clientPlatform !== 'IOS'
+        ? [backgroundNotification]
+        : []),
+      ...(sendSystemNotification && metadata.value.clientPlatform === 'IOS'
+        ? [systemNotification]
+        : []),
     ]
 
     return {notificationToSend, trackingId, metadata}

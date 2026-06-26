@@ -10,7 +10,10 @@ import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
 import {Linking} from 'react-native'
 import {addContactToPhoneActionAtom} from '../../../../state/contacts/atom/addContactToPhoneWithUIFeedbackAtom'
-import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
+import {
+  normalizedContactsAtom,
+  storedContactsAtom,
+} from '../../../../state/contacts/atom/contactsStore'
 import loadContactsFromDeviceActionAtom, {
   loadingContactsFromDeviceAtom,
 } from '../../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
@@ -34,17 +37,13 @@ import {toastNotificationAtom} from '../../../ToastNotification/atom'
 import {createUpdateContactActionAtom} from './createUpdateContactActionAtom'
 
 export const ContactsSelectScope = createScope<{
-  normalizedContacts: StoredContactWithComputedValues[]
   reloadContacts: () => void
 }>({
   reloadContacts: () => {},
-  normalizedContacts: [],
 })
 
 const matchSorterKeys = ['info.name', 'info.numberToDisplay']
 const matchSorterThreshold = rankings.CONTAINS
-
-const addNewContactSelectedCountryCodeAtom = atom<string | undefined>(undefined)
 
 interface ContactsQuery {
   readonly contactsFilter: ContactsFilter
@@ -62,8 +61,11 @@ function isContactDefaultSelected(
 }
 
 export const contactSelectMolecule = molecule((_, getScope) => {
-  const {normalizedContacts, reloadContacts} = getScope(ContactsSelectScope)
+  const {reloadContacts} = getScope(ContactsSelectScope)
 
+  const addNewContactSelectedCountryCodeAtom = atom<string | undefined>(
+    undefined
+  )
   const searchTextAtom = atom('')
   const contactsFilterAtom = atom<ContactsFilter>('all')
   const requestedContactsFilterAtom = atom<ContactsFilter>('all')
@@ -99,7 +101,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     atom((get) => {
       const searchText = get(searchTextAtom)
       const contactsToShow = pipe(
-        normalizedContacts,
+        get(normalizedContactsAtom),
         Array.filter(shouldDisplayContact),
         (contacts) =>
           deduplicateBy(contacts, (one) => one.computedValues.normalizedNumber)
@@ -212,52 +214,67 @@ export const contactSelectMolecule = molecule((_, getScope) => {
 
   const displayContactsCountAtom = atom((get) => !!get(searchTextAtom))
 
-  const selectedNumbersAtom = atom(
-    new Set(
-      normalizedContacts
-        .filter(isContactDefaultSelected)
-        .map((one) => one.computedValues.normalizedNumber)
-    )
-  )
-  const knownContactNumbersAtom = atom(
-    new Set(
-      normalizedContacts.map((one) => one.computedValues.normalizedNumber)
-    )
-  )
-  const syncDefaultSelectedContactsActionAtom = atom(
-    null,
-    (get, set, latestNormalizedContacts: StoredContactWithComputedValues[]) => {
-      const knownContactNumbers = get(knownContactNumbersAtom)
-      const currentContactNumbers = new Set(
+  const defaultSelectedNumbersAtom = atom(
+    (get) =>
+      new Set(
         pipe(
-          latestNormalizedContacts,
+          get(normalizedContactsAtom),
+          Array.filter(isContactDefaultSelected),
           Array.map((one) => one.computedValues.normalizedNumber)
         )
       )
-      const newDefaultSelectedNumbers = pipe(
-        latestNormalizedContacts,
-        Array.filter(
-          (one) =>
-            isContactDefaultSelected(one) &&
-            !knownContactNumbers.has(one.computedValues.normalizedNumber)
-        ),
-        Array.map((one) => one.computedValues.normalizedNumber)
+  )
+  const selectedNumbersStateAtom = atom<Set<E164PhoneNumber> | undefined>(
+    undefined
+  )
+  const selectedNumbersAtom = atom(
+    (get) => get(selectedNumbersStateAtom) ?? get(defaultSelectedNumbersAtom),
+    (get, set, value: SetStateAction<Set<E164PhoneNumber>>): void => {
+      set(
+        selectedNumbersStateAtom,
+        getValueFromSetStateActionOfAtom(value)(() => get(selectedNumbersAtom))
       )
-
-      if (newDefaultSelectedNumbers.length > 0) {
-        set(selectedNumbersAtom, (selectedNumbers) => {
-          const nextSelectedNumbers = new Set(selectedNumbers)
-          newDefaultSelectedNumbers.forEach((number) => {
-            nextSelectedNumbers.add(number)
-          })
-          return nextSelectedNumbers
-        })
-      }
-
-      set(knownContactNumbersAtom, currentContactNumbers)
     }
   )
+  const knownContactNumbersAtom = atom(new Set<E164PhoneNumber>())
+  const syncDefaultSelectedContactsActionAtom = atom(null, (get, set) => {
+    if (get(selectedNumbersStateAtom) === undefined) {
+      set(selectedNumbersStateAtom, get(defaultSelectedNumbersAtom))
+    }
 
+    const latestNormalizedContacts = get(normalizedContactsAtom)
+    const knownContactNumbers = get(knownContactNumbersAtom)
+    const currentContactNumbers = new Set(
+      pipe(
+        latestNormalizedContacts,
+        Array.map((one) => one.computedValues.normalizedNumber)
+      )
+    )
+    const newDefaultSelectedNumbers = pipe(
+      latestNormalizedContacts,
+      Array.filter(
+        (one) =>
+          isContactDefaultSelected(one) &&
+          !knownContactNumbers.has(one.computedValues.normalizedNumber)
+      ),
+      Array.map((one) => one.computedValues.normalizedNumber)
+    )
+
+    if (newDefaultSelectedNumbers.length > 0) {
+      set(selectedNumbersAtom, (selectedNumbers) => {
+        const nextSelectedNumbers = new Set(selectedNumbers)
+        pipe(
+          newDefaultSelectedNumbers,
+          Array.forEach((number) => {
+            nextSelectedNumbers.add(number)
+          })
+        )
+        return nextSelectedNumbers
+      })
+    }
+
+    set(knownContactNumbersAtom, currentContactNumbers)
+  })
   const areThereAnyContactsToDisplayForSelectedTabAtom = atom((get) => {
     const contactsToDisplay = get(_contactsToDisplayAtom)
 
@@ -539,7 +556,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     syncDefaultSelectedContactsActionAtom,
     submitAllSelectedContactsActionAtom,
     importContactsFromPhoneActionAtom,
-    normalizedContacts,
+    normalizedContactsAtom,
     nonSubmittedContactsToDisplayAtomsAtom,
     submittedContactsToDisplayAtomsAtom,
     newContactsToDisplayAtomsAtom,

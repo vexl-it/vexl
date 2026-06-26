@@ -1,12 +1,11 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Effect, Option, pipe} from 'effect'
-import {atom, type PrimitiveAtom, type WritableAtom} from 'jotai'
-import {storedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
-import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
+import {atom, type SetStateAction, type WritableAtom} from 'jotai'
 import {
-  type StoredContact,
-  type StoredContactWithComputedValues,
-} from '../../../../state/contacts/domain'
+  needsFullContactsReplaceAfterContactEditAtom,
+  storedContactsAtom,
+} from '../../../../state/contacts/atom/contactsStore'
+import {type StoredContactWithComputedValues} from '../../../../state/contacts/domain'
 import {hashPhoneNumberE} from '../../../../state/contacts/utils'
 import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPhoneNumber'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
@@ -17,23 +16,16 @@ import {showContactExistsDialogAtom} from './components/showContactExistsDialogA
 import {
   buildUpdatedContact,
   findImportedContactWithNumber,
-  importedNumbersAfterReplacement,
-  importedNumbersWithout,
   removeContactsWithNumbers,
   renameComputedContact,
   replaceContactByNumber,
   replaceSelectedNumber,
 } from './updateContactContactHelpers'
-import {
-  saveContactToPhoneIfRequestedActionAtom,
-  showContactUpdateSavedDialogActionAtom,
-} from './updateContactPhoneActions'
 
 interface UpdateContactParams {
   readonly contact: StoredContactWithComputedValues
   readonly contactName: string
   readonly phoneNumber: string
-  readonly saveToPhone: boolean
 }
 
 export function createUpdateContactActionAtom({
@@ -41,7 +33,11 @@ export function createUpdateContactActionAtom({
   selectedNumbersAtom,
 }: {
   readonly reloadContacts: () => void
-  readonly selectedNumbersAtom: PrimitiveAtom<Set<E164PhoneNumber>>
+  readonly selectedNumbersAtom: WritableAtom<
+    Set<E164PhoneNumber>,
+    [SetStateAction<Set<E164PhoneNumber>>],
+    void
+  >
 }): WritableAtom<null, [UpdateContactParams], Effect.Effect<boolean>> {
   return atom(
     null,
@@ -58,20 +54,6 @@ export function createUpdateContactActionAtom({
       }
 
       const numberChanged = normalizedNumber.value !== originalNumber
-      const saveToPhoneAndShowResult = (
-        saveToPhone: boolean
-      ): Effect.Effect<void> =>
-        pipe(
-          set(saveContactToPhoneIfRequestedActionAtom, {
-            name: contactName,
-            number: normalizedNumber.value,
-            phoneContactId: params.contact.info.nonUniqueContactId,
-            saveToPhone,
-          }),
-          Effect.flatMap((phoneSaveResult) =>
-            set(showContactUpdateSavedDialogActionAtom, phoneSaveResult)
-          )
-        )
 
       const confirmNumberReplacement = (): Effect.Effect<boolean> =>
         numberChanged
@@ -86,21 +68,11 @@ export function createUpdateContactActionAtom({
             })
           : Effect.succeed(true)
 
-      const submitUpdatedImportedNumbers = (
-        contactsBeforeUpdate: StoredContact[]
-      ): Effect.Effect<boolean> =>
-        pipe(
-          set(submitContactsActionAtom, {
-            numbersToImport: importedNumbersAfterReplacement({
-              contacts: contactsBeforeUpdate,
-              newNumber: normalizedNumber.value,
-              originalNumber,
-            }),
-            normalizeAndImportAll: false,
-            showOfferReencryptionDialog: false,
-          }),
-          Effect.map((result) => result === 'success')
-        )
+      const markNumberReplacementForNextSubmit = (): void => {
+        if (params.contact.flags.imported) {
+          set(needsFullContactsReplaceAfterContactEditAtom, true)
+        }
+      }
 
       const replaceWithExistingContact = (
         existingContact: StoredContactWithComputedValues
@@ -109,41 +81,15 @@ export function createUpdateContactActionAtom({
           const dialogResult = yield* _(
             set(showContactExistsDialogAtom, {
               existingContact,
-              saveToPhone: params.saveToPhone,
             })
           )
 
-          if (Option.isNone(dialogResult)) return false
+          if (!dialogResult) return false
 
-          const contactsBeforeUpdate = get(storedContactsAtom)
           const updatedExistingContact = renameComputedContact({
             contact: existingContact,
             contactName,
           })
-
-          set(storedContactsAtom, (contacts) =>
-            replaceContactByNumber({
-              contacts,
-              number: normalizedNumber.value,
-              updatedContact: updatedExistingContact,
-            })
-          )
-
-          const submitContactsSuccess = yield* _(
-            set(submitContactsActionAtom, {
-              numbersToImport: importedNumbersWithout(
-                contactsBeforeUpdate,
-                originalNumber
-              ),
-              normalizeAndImportAll: false,
-              showOfferReencryptionDialog: false,
-            })
-          )
-
-          if (submitContactsSuccess !== 'success') {
-            set(storedContactsAtom, contactsBeforeUpdate)
-            return false
-          }
 
           set(storedContactsAtom, (contacts) =>
             pipe(
@@ -155,6 +101,7 @@ export function createUpdateContactActionAtom({
             )
           )
 
+          markNumberReplacementForNextSubmit()
           set(selectedNumbersAtom, (selectedNumbers) =>
             replaceSelectedNumber({
               selectedNumbers,
@@ -164,13 +111,17 @@ export function createUpdateContactActionAtom({
           )
           reloadContacts()
 
-          yield* _(saveToPhoneAndShowResult(dialogResult.value.saveToPhone))
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('addContactDialog.changesSaved'),
+            }),
+            Effect.asVoid
+          )
           return true
         })
 
       const updateContact = (): Effect.Effect<boolean, unknown> =>
         Effect.gen(function* (_) {
-          const contactsBeforeUpdate = get(storedContactsAtom)
           const confirmedReplacement = yield* _(confirmNumberReplacement())
 
           if (!confirmedReplacement) return false
@@ -192,7 +143,7 @@ export function createUpdateContactActionAtom({
               ? pipe(
                   removeContactsWithNumbers({
                     contacts,
-                    numbers: new Set([normalizedNumber.value]),
+                    numbers: new Set([originalNumber, normalizedNumber.value]),
                   }),
                   Array.append(updatedContact)
                 )
@@ -204,21 +155,7 @@ export function createUpdateContactActionAtom({
           )
 
           if (numberChanged) {
-            const submitContactsSuccess = yield* _(
-              submitUpdatedImportedNumbers(contactsBeforeUpdate)
-            )
-
-            if (!submitContactsSuccess) {
-              set(storedContactsAtom, contactsBeforeUpdate)
-              return false
-            }
-
-            set(storedContactsAtom, (contacts) =>
-              removeContactsWithNumbers({
-                contacts,
-                numbers: new Set([originalNumber]),
-              })
-            )
+            markNumberReplacementForNextSubmit()
             set(selectedNumbersAtom, (selectedNumbers) =>
               replaceSelectedNumber({
                 selectedNumbers,
@@ -230,7 +167,12 @@ export function createUpdateContactActionAtom({
 
           reloadContacts()
 
-          yield* _(saveToPhoneAndShowResult(params.saveToPhone))
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('addContactDialog.changesSaved'),
+            }),
+            Effect.asVoid
+          )
 
           return true
         })

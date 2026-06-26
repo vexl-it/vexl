@@ -12,7 +12,7 @@ export default function ContactsFilterBar({
   readonly onSelectedFilterChange: (filter: ContactsFilter) => void
 }): React.ReactElement {
   return (
-    <Stack pl="$5">
+    <Stack pl="$5" mb="$4">
       <Tabs
         tabs={items}
         activeTab={selectedFilter}

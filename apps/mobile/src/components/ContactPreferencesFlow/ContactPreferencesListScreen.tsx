@@ -8,16 +8,16 @@ import {
 import {deepEqual} from 'fast-equals'
 import {useAtomValue} from 'jotai'
 import React, {memo, useCallback, useEffect, useState} from 'react'
-import {type RootStackScreenProps} from '../../navigationTypes'
+import {type ContactPreferencesStackScreenProps} from '../../navigationTypes'
 import {loadingContactsFromDeviceAtom} from '../../state/contacts/atom/loadContactsFromDeviceActionAtom'
 import {type ContactsFilter} from '../../state/contacts/domain'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {runAfterAnimationFrame} from '../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import ContactsListSelect from './components/ContactListSelect'
-import ContactPreferencesLoadingOverlay from './components/ContactPreferencesLoadingOverlay'
+import PreparingContactsOverlay from './components/PreparingContactsOverlay'
 
-type Props = RootStackScreenProps<'ContactPreferences'>
+type Props = ContactPreferencesStackScreenProps<'ContactPreferencesList'>
 
 function ContactPreferencesNavigationBar({
   loading,
@@ -66,7 +66,7 @@ function ContactPreferencesContent({
   return <ContactsListSelect addContactRequestId={0} filter={filter} />
 }
 
-function ContactPreferencesScreen({
+function ContactPreferencesListScreen({
   navigation,
   route: {params},
 }: Props): React.ReactElement {
@@ -104,12 +104,10 @@ function ContactPreferencesScreen({
             onReady={handleContactsContentReady}
           />
         ) : null}
-        <ContactPreferencesLoadingOverlay
-          visible={isContactPreferencesLoading}
-        />
+        <PreparingContactsOverlay visible={isContactPreferencesLoading} />
       </Stack>
     </Screen>
   )
 }
 
-export default memo(ContactPreferencesScreen, deepEqual)
+export default memo(ContactPreferencesListScreen, deepEqual)

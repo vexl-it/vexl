@@ -14,8 +14,6 @@ import {useHideInnactivityReminderNotificationsOnResume} from '../../utils/notif
 import {useConsumeNotificationStream} from '../../utils/notifications/useConsumeNotificationStream'
 import {showTextDebugButtonAtom} from '../../utils/preferences'
 import AccountScreen from '../AccountScreen'
-import AddNewContactScreen from '../AddNewContactScreen'
-import AddNewContactCountryPickerScreen from '../AddNewContactScreen/AddNewContactCountryPickerScreen'
 import AppLogsScreen from '../AppLogsScreen'
 import AppSettingsScreen from '../AppSettingsScreen'
 import CRUDOfferFlow from '../CRUDOfferFlow'
@@ -35,7 +33,7 @@ import ClubDetail from '../ClubDetail'
 import {ScanClubAdmissionQrCodeScreen} from '../ClubDetail/components/ScanClubAdmissionQrCodeScreen'
 import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
-import ContactPreferencesScreen from '../ContactPreferencesScreen'
+import ContactPreferencesFlow from '../ContactPreferencesFlow'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import DonationsFlow from '../DonationsFlow'
@@ -209,15 +207,7 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen name="WhatAreClubs" component={WhatAreClubsScreen} />
             <Stack.Screen
               name="ContactPreferences"
-              component={ContactPreferencesScreen}
-            />
-            <Stack.Screen
-              name="AddNewContact"
-              component={AddNewContactScreen}
-            />
-            <Stack.Screen
-              name="AddNewContactCountryPicker"
-              component={AddNewContactCountryPickerScreen}
+              component={ContactPreferencesFlow}
             />
             <Stack.Screen name="DonationsFlow" component={DonationsFlow} />
             {/* <Stack.Screen

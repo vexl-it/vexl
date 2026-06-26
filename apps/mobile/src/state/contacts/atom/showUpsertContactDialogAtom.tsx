@@ -50,8 +50,8 @@ function UpsertContactDialogBody({
   fallbackContactName?: string
   placeholder: string
   profileImage?: SvgStringOrImageUri
-  saveToPhoneAtom: BooleanAtom
-  saveToPhoneLabel: string
+  saveToPhoneAtom?: BooleanAtom
+  saveToPhoneLabel?: string
   phoneContactId?: Option.Option<NonUniqueContactId>
 }): React.JSX.Element {
   const currentContactName = useAtomValue(contactNameAtom).trim()
@@ -72,13 +72,15 @@ function UpsertContactDialogBody({
         placeholder={placeholder}
         onCheckmarkPress={Keyboard.dismiss}
       />
-      <Selector
-        variant="switch"
-        backgroundColor="$backgroundPrimary"
-        label={saveToPhoneLabel}
-        icon={CellPhoneMobileDevice}
-        valueAtom={saveToPhoneAtom}
-      />
+      {saveToPhoneAtom !== undefined && saveToPhoneLabel !== undefined ? (
+        <Selector
+          variant="switch"
+          backgroundColor="$backgroundPrimary"
+          label={saveToPhoneLabel}
+          icon={CellPhoneMobileDevice}
+          valueAtom={saveToPhoneAtom}
+        />
+      ) : null}
     </YStack>
   )
 }
@@ -189,6 +191,8 @@ export const showUpsertContactDialogAtom = atom(
     const isAlreadyInPhoneContacts = Option.isSome(
       phoneContactId ?? Option.none()
     )
+    const shouldShowSaveToPhoneSelector =
+      type === 'create' && !isAlreadyInPhoneContacts
     const contactNameAtom = atom(contactName ?? '')
     const saveToPhoneAtom = atom(true)
     const positiveButtonDisabledAtom = atom(
@@ -223,11 +227,13 @@ export const showUpsertContactDialogAtom = atom(
               }
               phoneContactId={phoneContactId}
               profileImage={profileImage}
-              saveToPhoneAtom={saveToPhoneAtom}
+              saveToPhoneAtom={
+                shouldShowSaveToPhoneSelector ? saveToPhoneAtom : undefined
+              }
               saveToPhoneLabel={
-                isAlreadyInPhoneContacts
-                  ? t('addContactDialog.updateInYourPhoneContacts')
-                  : t('addContactDialog.alsoSaveToYourPhone')
+                shouldShowSaveToPhoneSelector
+                  ? t('addContactDialog.alsoSaveToYourPhone')
+                  : undefined
               }
             />
           ),
@@ -243,7 +249,9 @@ export const showUpsertContactDialogAtom = atom(
       return {
         contactName:
           get(contactNameAtom).trim() || contactName || contactNumber,
-        saveToPhone: get(saveToPhoneAtom),
+        saveToPhone: shouldShowSaveToPhoneSelector
+          ? get(saveToPhoneAtom)
+          : false,
       } satisfies UpsertContactDialogResult
     })
   }

@@ -8,18 +8,17 @@ import {
   XStack,
   type TabItem,
 } from '@vexl-next/ui'
-import {ScopeProvider, useMolecule} from 'bunshi/dist/react'
+import {useMolecule} from 'bunshi/dist/react'
 import {Array} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useMemo, useState} from 'react'
+import React, {useMemo} from 'react'
 import {Pressable, type LayoutChangeEvent} from 'react-native'
-import {normalizedContactsAtom} from '../../../../state/contacts/atom/contactsStore'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
 import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import PreparingContactsOverlay from '../PreparingContactsOverlay'
-import {contactSelectMolecule, ContactsSelectScope} from './atom'
+import {contactSelectMolecule} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
 import ContactsFilterBar from './components/ContactsFilterBar'
 import ContactsListEmpty from './components/ContactsListEmpty'
@@ -208,39 +207,6 @@ function ContactsListSelect({
   )
 }
 
-function ContactListSelectWithProviderComponent({
-  addContactRequestId,
-  filter,
-}: {
-  readonly addContactRequestId: number
-  readonly filter?: ContactsFilter
-}): React.ReactElement {
-  const normalizedContacts = useAtomValue(normalizedContactsAtom)
-  const [, setReloadContacts] = useState(0)
-
-  return (
-    <ScopeProvider
-      scope={ContactsSelectScope}
-      value={{
-        normalizedContacts,
-        reloadContacts: () => {
-          setReloadContacts((v) => v + 1)
-        },
-      }}
-    >
-      <ContactsListSelect
-        addContactRequestId={addContactRequestId}
-        filter={filter}
-      />
-    </ScopeProvider>
-  )
-}
-
-// This rerenders in PROD only therefore needs memo
-export const ContactListSelectWithProvider = React.memo(
-  ContactListSelectWithProviderComponent
-)
-
 export default function ContactListWithLoadStep({
   addContactRequestId,
   filter,
@@ -250,7 +216,7 @@ export default function ContactListWithLoadStep({
 }): React.ReactElement {
   return (
     <NormalizeContactsWithLoadingScreen>
-      <ContactListSelectWithProvider
+      <ContactsListSelect
         addContactRequestId={addContactRequestId}
         filter={filter}
       />

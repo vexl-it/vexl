@@ -1,7 +1,6 @@
 // import './src/utils/wdyr'
 import './globals'
 import './src/utils/backgroundTask/defineBackgroundTask'
-import './src/utils/notifications/defineBackgroundNotificationTask'
 // Registers the global expo-notifications foreground handler. Order matters: it
 // must run before any notification can be presented so foreground notifications
 // are shown.
@@ -14,7 +13,7 @@ import '@vexl-next/ui/src/config/tamagui.config'
 // Order matters
 import './src/components/AppLogsScreen/setupAppLogs'
 // Order matters
-import './src/utils/notifications/backgroundHandler'
+import './src/utils/notifications/notificationReceivedHandler'
 // Order matters
 import './src/utils/setupCryptoImplementation'
 // order matters

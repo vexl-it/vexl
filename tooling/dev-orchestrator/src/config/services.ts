@@ -125,7 +125,7 @@ export const SERVICES: readonly ServiceConfig[] = [
     port: 3011,
     healthPort: 3011,
     tier: 3,
-    needsDatabase: false,
+    needsDatabase: true,
     runner: 'workspace-dev',
     portEnvVar: 'BACKOFFICE_APP_PORT',
   },
@@ -151,6 +151,9 @@ export const getServiceByName = (name: string): ServiceConfig | undefined => {
   return Option.isSome(result) ? result.value : undefined
 }
 
+export const getDatabaseNameForService = (serviceName: string): string =>
+  `vexl_${serviceName.replace(/-/g, '_')}`
+
 /**
  * Get database names for services that need databases.
  * Database naming convention: vexl_{service_name} with hyphens replaced by underscores.
@@ -158,6 +161,6 @@ export const getServiceByName = (name: string): ServiceConfig | undefined => {
 export const getDatabaseNames = (): readonly string[] =>
   Array.filterMap(SERVICES, (s) =>
     s.needsDatabase
-      ? Option.some(`vexl_${s.name.replace(/-/g, '_')}`)
+      ? Option.some(getDatabaseNameForService(s.name))
       : Option.none()
   )

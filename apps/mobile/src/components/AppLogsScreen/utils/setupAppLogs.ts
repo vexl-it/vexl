@@ -1,4 +1,4 @@
-import {isStaging} from '../../../utils/environment'
+import {isProd} from '../../../utils/environment'
 import isString from '../../../utils/isString'
 import safeToJson from './safeToJson'
 import {getCustomLoggingEnabled, storeLog} from './storage'
@@ -46,7 +46,7 @@ export function setupAppLogs(): void {
     console.error = (...args: unknown[]) => {
       log('error', ...args)
     }
-  } else if (__DEV__ || isStaging) {
+  } else if (__DEV__ || !isProd) {
     // Log to console only in dev mode
     console.log = initialLogMethods.log
     console.info = initialLogMethods.info

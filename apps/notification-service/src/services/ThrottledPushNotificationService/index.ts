@@ -75,8 +75,12 @@ export class ThrottledPushNotificationService extends Context.Tag(
               )
             )
 
-            // Notification was issued recently, so we throttle it
-            if (lastTimeIssued + throttleTtlMs > Date.now()) {
+            if (
+              // If throttling is disabled remove it
+              throttleTtlMs !== -1 &&
+              // Notification was issued recently, so we throttle it
+              lastTimeIssued + throttleTtlMs > Date.now()
+            ) {
               yield* _(
                 notificationWaitingToBeIssuedForNotificationTokenDb.addNotificationToWaitingList(
                   task

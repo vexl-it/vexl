@@ -1,4 +1,5 @@
 import {NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
+import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
@@ -47,6 +48,18 @@ const AndroidRemoteMessageBody = Schema.Struct({
   }),
 })
 
+const decodeChatNoticeBody = (
+  data: unknown
+): Option.Option<typeof NewChatMessageNoticeNotificationData.Type> => {
+  if (typeof data === 'string') {
+    return Schema.decodeOption(
+      Schema.parseJson(NewChatMessageNoticeNotificationData)
+    )(data)
+  }
+
+  return Schema.decodeUnknownOption(NewChatMessageNoticeNotificationData)(data)
+}
+
 const extractChatNoticeBody = (
   n: Notification
 ): Option.Option<typeof NewChatMessageNoticeNotificationData.Type> => {
@@ -54,16 +67,13 @@ const extractChatNoticeBody = (
     return pipe(
       Schema.decodeUnknownOption(AndroidRemoteMessageBody)(n),
       Option.flatMap((parsed) =>
-        Schema.decodeOption(
-          Schema.parseJson(NewChatMessageNoticeNotificationData)
-        )(parsed.request.trigger.remoteMessage.data.body)
+        decodeChatNoticeBody(parsed.request.trigger.remoteMessage.data.body)
       )
     )
   }
 
-  return Schema.decodeUnknownOption(NewChatMessageNoticeNotificationData)(
-    n.request.content.data?.body
-  )
+  // On iOS the chat-notice payload lives directly on content.data.
+  return decodeChatNoticeBody(n.request.content.data)
 }
 
 const isPlaceholderNotificationForChat = (
@@ -80,70 +90,141 @@ const isPlaceholderNotificationForChat = (
   return Option.none()
 }
 
-const getNonReportedSystemNotificationsIdsActionAtom = atom(
+const isPlaceholderNotificationForChatTargetTokens =
+  (targetTokens: readonly VexlNotificationToken[]) =>
+  (n: Notification): Option.Option<SystemNotificationId> => {
+    const chatMessageNotificationO = extractChatNoticeBody(n)
+    if (Option.isNone(chatMessageNotificationO)) return Option.none()
+
+    const {targetToken} = chatMessageNotificationO.value
+    if (!targetToken) return Option.none()
+
+    if (
+      chatMessageNotificationO.value.includesSystemNotification &&
+      Array.contains(targetTokens, targetToken)
+    ) {
+      return Schema.decodeOption(SystemNotificationId)(n.request.identifier)
+    }
+
+    return Option.none()
+  }
+
+const getSystemNotificationsIdsActionAtom = atom(
   null,
-  (get, set, allNotifications: Notification[]) => {
+  (
+    get,
+    set,
+    {
+      allNotifications,
+      filterNotification,
+    }: {
+      allNotifications: Notification[]
+      filterNotification: (
+        n: Notification
+      ) => Option.Option<SystemNotificationId>
+    }
+  ) => {
     const systemNotificationsIds = Array.filterMap(
+      allNotifications,
+      filterNotification
+    )
+    const allSystemNotificationsIds = Array.filterMap(
       allNotifications,
       isPlaceholderNotificationForChat
     )
     const reportedIds = get(alreadyReportedNotificationsIdsAtom)
     const notReportedIds = Array.difference(systemNotificationsIds, reportedIds)
 
-    set(alreadyReportedNotificationsIdsAtom, systemNotificationsIds)
-    return notReportedIds
+    set(
+      alreadyReportedNotificationsIdsAtom,
+      Array.union(
+        Array.intersection(reportedIds, allSystemNotificationsIds),
+        systemNotificationsIds
+      )
+    )
+    return {
+      idsToCancel: systemNotificationsIds,
+      idsToReport: notReportedIds,
+    }
   }
 )
 
-export async function cancelNewChatNotifications(): Promise<void> {
+async function cancelNewChatNotificationsMatching({
+  filterNotification,
+}: {
+  filterNotification: (n: Notification) => Option.Option<SystemNotificationId>
+}): Promise<void> {
   const {metrics} = getDefaultStore().get(apiAtom)
 
-  const notificationIdsToCancel = getDefaultStore().set(
-    getNonReportedSystemNotificationsIdsActionAtom,
-    await getPresentedNotificationsAsync()
+  const {idsToCancel, idsToReport} = getDefaultStore().set(
+    getSystemNotificationsIdsActionAtom,
+    {
+      allNotifications: await getPresentedNotificationsAsync(),
+      filterNotification,
+    }
   )
 
-  if (!Array.isNonEmptyArray(notificationIdsToCancel)) return
-
-  Effect.gen(function* (_) {
-    const notificationsEnabled = yield* _(
-      areNotificationsEnabledE(),
-      Effect.option
-    )
-    yield* _(
-      metrics
-        .reportNotificationInteraction({
-          count: notificationIdsToCancel.length,
-          notificationType: 'Chat',
-          type: 'UINotificationReceived',
-          uuid: generateUuid(),
-          ...(Option.isSome(notificationsEnabled)
-            ? {
-                notificationsEnabled: notificationsEnabled.value.notifications,
-                backgroundTaskEnabled:
-                  notificationsEnabled.value.backgroundTasks,
-              }
-            : {}),
-        })
-        .pipe(
-          Effect.timeout(500),
-          Effect.retry({times: 3}),
-          Effect.tapError((e) =>
-            reportErrorE(
-              'warn',
-              new Error(
-                'Error while sending UI notification received to metrics service'
-              ),
-              {
-                e,
-              }
+  if (Array.isNonEmptyArray(idsToReport)) {
+    Effect.gen(function* (_) {
+      const notificationsEnabled = yield* _(
+        areNotificationsEnabledE(),
+        Effect.option
+      )
+      yield* _(
+        metrics
+          .reportNotificationInteraction({
+            count: idsToReport.length,
+            notificationType: 'Chat',
+            type: 'UINotificationReceived',
+            uuid: generateUuid(),
+            ...(Option.isSome(notificationsEnabled)
+              ? {
+                  notificationsEnabled:
+                    notificationsEnabled.value.notifications,
+                  backgroundTaskEnabled:
+                    notificationsEnabled.value.backgroundTasks,
+                }
+              : {}),
+          })
+          .pipe(
+            Effect.timeout(500),
+            Effect.retry({times: 3}),
+            Effect.tapError((e) =>
+              reportErrorE(
+                'warn',
+                new Error(
+                  'Error while sending UI notification received to metrics service'
+                ),
+                {
+                  e,
+                }
+              )
             )
           )
-        )
-    )
-  }).pipe(Effect.runFork)
+      )
+    }).pipe(Effect.runFork)
+  }
 
-  Array.forEach(notificationIdsToCancel, (n) => {
+  Array.forEach(idsToCancel, (n) => {
     void dismissNotificationAsync(n)
+  })
+}
+
+export async function cancelNewChatNotifications(): Promise<void> {
+  await cancelNewChatNotificationsMatching({
+    filterNotification: isPlaceholderNotificationForChat,
+  })
+}
+
+export async function cancelNewChatNotificationsForTargetTokens(
+  targetTokens: readonly VexlNotificationToken[]
+): Promise<void> {
+  // iOS-only is enforced at the call sites (the only place generic system
+  // notifications exist); here we just skip the empty case.
+  if (!Array.isNonEmptyReadonlyArray(targetTokens)) return
+
+  await cancelNewChatNotificationsMatching({
+    filterNotification:
+      isPlaceholderNotificationForChatTargetTokens(targetTokens),
   })
 }

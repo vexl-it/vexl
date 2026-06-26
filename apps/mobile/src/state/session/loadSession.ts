@@ -38,6 +38,12 @@ export class SessionSanityCheckFailed extends Data.TaggedError(
   'SessionSanityCheckFailed'
 )<{cause: unknown; message: string}> {}
 
+export class SessionLoadWaitTimedOut extends Schema.TaggedError<SessionLoadWaitTimedOut>(
+  'SessionLoadWaitTimedOut'
+)('SessionLoadWaitTimedOut', {
+  cause: Schema.Unknown,
+}) {}
+
 const ErrorWithTag = Schema.Struct({_tag: Schema.String})
 
 function safeErrorTag(e: unknown): string {
@@ -53,15 +59,48 @@ function logLoadSessionProgress(text: string): void {
   })
 }
 
-let resolveSessionLoaded: () => void = () => {}
-const sessionLoadedPromise = new Promise<void>(
-  (resolve) => (resolveSessionLoaded = resolve)
-)
+// Tracks the single in-flight storage load, or null when none is running. A
+// fresh promise is created for each real load (beginInFlightLoad) and resolved
+// only when THAT load settles (settleInFlightLoad). Callers that arrive while a
+// load is running await this exact promise, so they wake when the real load
+// finishes - never on an unrelated no-op/skip call.
+//
+// This replaces a module-level one-shot promise that was created once and
+// resolved by whichever loadSession call finished first - including a no-op skip
+// - which woke parked waiters while the real read was still in flight, and then
+// stayed resolved forever so it never blocked again on later load cycles.
+interface InFlightLoad {
+  readonly promise: Promise<LoadSessionResult>
+  readonly settle: (result: LoadSessionResult) => void
+}
+
+let inFlightLoad: InFlightLoad | null = null
+
+function beginInFlightLoad(): InFlightLoad {
+  let settle: (result: LoadSessionResult) => void = () => {}
+  const promise = new Promise<LoadSessionResult>((resolve) => {
+    settle = resolve
+  })
+  const handle = {promise, settle}
+  inFlightLoad = handle
+  return handle
+}
+
+function settleInFlightLoad(
+  handle: InFlightLoad,
+  result: LoadSessionResult
+): void {
+  handle.settle(result)
+  if (inFlightLoad === handle) {
+    inFlightLoad = null
+  }
+}
 
 type SessionState = 'initial' | 'loading' | 'loggedOut' | 'loggedIn'
 export type SessionStorageError = Effect.Effect.Error<
   ReturnType<typeof readSessionFromStorage>
 >
+export type LoadSessionError = SessionStorageError | SessionLoadWaitTimedOut
 
 export type LoadSessionResult =
   | {
@@ -69,7 +108,7 @@ export type LoadSessionResult =
     }
   | {
       readonly sessionLoaded: false
-      readonly loadingError?: SessionStorageError
+      readonly loadingError?: LoadSessionError
       readonly blockingRecoveryRequired: boolean
     }
 
@@ -87,7 +126,7 @@ function sessionLoadedResult(): LoadSessionResult {
 }
 
 function sessionNotLoadedResult(
-  loadingError: Option.Option<SessionStorageError> = Option.none()
+  loadingError: Option.Option<LoadSessionError> = Option.none()
 ): LoadSessionResult {
   if (Option.isSome(loadingError)) {
     return {
@@ -102,6 +141,12 @@ function sessionNotLoadedResult(
 
 function sessionBlockingRecoveryResult(): LoadSessionResult {
   return {sessionLoaded: false, blockingRecoveryRequired: true}
+}
+
+function resultFromCurrentSessionState(): LoadSessionResult {
+  return getDefaultStore().get(sessionHolderAtom).state === 'loggedIn'
+    ? sessionLoadedResult()
+    : sessionNotLoadedResult()
 }
 
 function readSessionFromStorageSuccess(
@@ -122,11 +167,13 @@ function readSessionFromStorageFailure(
   }
 }
 
-function shouldWaitForLoadingToFinish(
-  sessionState: SessionState,
-  forceReload: boolean
-): boolean {
-  return sessionState === 'loading' && !forceReload
+function shouldWaitForLoadingToFinish(sessionState: SessionState): boolean {
+  // Any caller arriving while a load is in flight waits for it - including
+  // forceReload callers. A load that is already running is, by definition,
+  // reading fresh data from storage, which is exactly what forceReload wants.
+  // Starting a second concurrent read instead would race the in-flight one
+  // (duplicate V2-secret backfill / session-upgrade writes) and risk corruption.
+  return sessionState === 'loading'
 }
 
 function shouldSkipLoading(
@@ -152,12 +199,17 @@ const BLOCKING_RECOVERY_ERROR_TAGS = new Set<string>([
   // possibly-misclassified corruption.
   'CryptoError',
   'ParseError',
+  'SessionLoadWaitTimedOut',
 ])
 
-function isBlockingRecoveryError(loadingError: SessionStorageError): boolean {
+function isBlockingRecoveryError(loadingError: LoadSessionError): boolean {
   // StoreEmpty is intentionally NOT blocking: genuinely logged-out users must
   // still reach the login flow.
   return BLOCKING_RECOVERY_ERROR_TAGS.has(loadingError._tag)
+}
+
+function sessionLoadWaitTimedOut(cause: unknown): SessionLoadWaitTimedOut {
+  return new SessionLoadWaitTimedOut({cause})
 }
 
 function readSessionFromStorageHandleErrors(): Effect.Effect<ReadSessionFromStorageResult> {
@@ -180,21 +232,23 @@ function readSessionFromStorageHandleErrors(): Effect.Effect<ReadSessionFromStor
   )
 }
 
-const waitForLoadingSessionFinished = (
+function waitForLoadingSessionFinished(
+  loadToWaitFor: InFlightLoad | null,
   timeoutMillis: number = 5_000
-): Effect.Effect<boolean> => {
-  return Effect.promise(async () => {
-    await sessionLoadedPromise
-  }).pipe(
-    Effect.zipRight(Effect.succeed(true)),
+): Effect.Effect<LoadSessionResult> {
+  if (loadToWaitFor === null) return Effect.sync(resultFromCurrentSessionState)
+
+  return Effect.promise(() => loadToWaitFor.promise).pipe(
     Effect.timeout(timeoutMillis),
     Effect.catchTag('TimeoutException', (e) =>
       Effect.zipRight(
         reportErrorE(
           'warn',
-          new Error('Waiting for sessionfinished timeout', {cause: e})
+          new Error('Waiting for session load to finish timed out', {cause: e})
         ),
-        Effect.succeed(false)
+        Effect.succeed(
+          sessionNotLoadedResult(Option.some(sessionLoadWaitTimedOut(e)))
+        )
       )
     )
   )
@@ -204,7 +258,7 @@ function waitForAlreadyLoadingSessionResult(): Effect.Effect<LoadSessionResult> 
   return Effect.gen(function* () {
     logLoadSessionProgress('Session is already loading. Waiting for result')
 
-    yield* waitForLoadingSessionFinished()
+    const loadSessionResult = yield* waitForLoadingSessionFinished(inFlightLoad)
 
     const sessionStateCurrent = getDefaultStore().get(sessionHolderAtom).state
 
@@ -212,9 +266,7 @@ function waitForAlreadyLoadingSessionResult(): Effect.Effect<LoadSessionResult> 
       `Loading finished after callback. Result: ${sessionStateCurrent}`
     )
 
-    return sessionStateCurrent === 'loggedIn'
-      ? sessionLoadedResult()
-      : sessionNotLoadedResult()
+    return loadSessionResult
   })
 }
 
@@ -281,36 +333,16 @@ const ensureV2SessionIfNotCreateAndWrite = (
 
     return session
   })
-export function loadSession(
-  {forceReload}: LoadSessionOptions = {
-    forceReload: false,
-  }
-): Effect.Effect<LoadSessionResult> {
+function performSessionLoad(): Effect.Effect<LoadSessionResult> {
+  let inFlightLoadHandle: InFlightLoad | null = null
+
   return Effect.gen(function* (_) {
     const store = getDefaultStore()
-    const sessionState = store.get(sessionHolderAtom).state
-
-    logLoadSessionProgress(
-      `LoadingSession: ${JSON.stringify({
-        forceReload,
-        sessionState,
-      })}`
-    )
-
-    if (shouldWaitForLoadingToFinish(sessionState, forceReload)) {
-      return yield* _(waitForAlreadyLoadingSessionResult())
-    }
-
-    if (shouldSkipLoading(sessionState, forceReload)) {
-      logLoadSessionProgress(
-        `Skipping loadSession. Result: ${sessionState === 'loggedIn'}`
-      )
-      return store.get(sessionHolderAtom).state === 'loggedIn'
-        ? sessionLoadedResult()
-        : sessionNotLoadedResult()
-    }
 
     logLoadSessionProgress('Trying to find session in storage')
+    // Arm the in-flight latch before flipping to 'loading' so any caller that
+    // observes 'loading' is guaranteed to also observe inFlightLoad set.
+    inFlightLoadHandle = beginInFlightLoad()
     store.set(sessionHolderAtom, {state: 'loading'})
 
     const readSessionResult = yield* _(readSessionFromStorageHandleErrors())
@@ -374,6 +406,62 @@ export function loadSession(
         })
       )
     ),
-    Effect.ensuring(Effect.sync(resolveSessionLoaded))
+    Effect.tap((loadSessionResult) =>
+      Effect.sync(() => {
+        if (inFlightLoadHandle !== null) {
+          settleInFlightLoad(inFlightLoadHandle, loadSessionResult)
+        }
+      })
+    ),
+    // Settle only after the state has been resolved (loggedIn / loggedOut /
+    // initial) by the body or the catchAll above, so a parked waiter that wakes
+    // here never observes a stale 'loading'. Runs on success, failure and
+    // interruption.
+    Effect.ensuring(
+      Effect.sync(() => {
+        if (
+          inFlightLoadHandle !== null &&
+          inFlightLoad === inFlightLoadHandle
+        ) {
+          settleInFlightLoad(
+            inFlightLoadHandle,
+            resultFromCurrentSessionState()
+          )
+        }
+      })
+    )
   )
+}
+
+export function loadSession(
+  {forceReload}: LoadSessionOptions = {
+    forceReload: false,
+  }
+): Effect.Effect<LoadSessionResult> {
+  return Effect.gen(function* (_) {
+    const store = getDefaultStore()
+    const sessionState = store.get(sessionHolderAtom).state
+
+    logLoadSessionProgress(
+      `LoadingSession: ${JSON.stringify({
+        forceReload,
+        sessionState,
+      })}`
+    )
+
+    if (shouldWaitForLoadingToFinish(sessionState)) {
+      return yield* _(waitForAlreadyLoadingSessionResult())
+    }
+
+    if (shouldSkipLoading(sessionState, forceReload)) {
+      logLoadSessionProgress(
+        `Skipping loadSession. Result: ${sessionState === 'loggedIn'}`
+      )
+      return store.get(sessionHolderAtom).state === 'loggedIn'
+        ? sessionLoadedResult()
+        : sessionNotLoadedResult()
+    }
+
+    return yield* _(performSessionLoad())
+  })
 }

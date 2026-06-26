@@ -158,3 +158,12 @@ export class VexlProductNotificationData extends Schema.TaggedClass<VexlProductN
   toData = (): typeof VexlProductNotificationData.Encoded =>
     Schema.encodeSync(VexlProductNotificationData)(this)
 }
+
+export class DebugDummyNotificationData extends Schema.TaggedClass<DebugDummyNotificationData>(
+  'DebugDummyNotificationData'
+)('DebugDummyNotificationData', {
+  acknowleadgeOnReceive: Schema.BooleanFromString,
+}) {
+  toData = (): typeof DebugDummyNotificationData.Encoded =>
+    Schema.encodeSync(DebugDummyNotificationData)(this)
+}

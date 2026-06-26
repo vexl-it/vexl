@@ -4,14 +4,13 @@ import {generateUuid, Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {type MetricsApi} from '@vexl-next/rest-api/src/services/metrics'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, Option, Schema} from 'effect/index'
-import {atom} from 'jotai'
+import {getDefaultStore} from 'jotai'
 import {AppState} from 'react-native'
-import {apiAtom} from '../../api'
-import {areNotificationsEnabledE} from '../../utils/notifications'
-import reportError, {reportErrorE} from '../../utils/reportError'
-import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../chat/atoms/fetchNewMessagesActionAtom'
-import {loadSession} from '../session/loadSession'
-import {getKeyHolderForNotificationTokenOrCypherActionAtom} from './fcmCypherToKeyHolderAtom'
+import {areNotificationsEnabledE} from '../..'
+import {apiAtom} from '../../../../api'
+import {fetchAndStoreMessagesForInboxHandleNotificationsActionAtom} from '../../../../state/chat/atoms/fetchNewMessagesActionAtom'
+import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../../../state/notifications/fcmCypherToKeyHolderAtom'
+import reportError, {reportErrorE} from '../../../reportError'
 
 const processChatNotificationProcessed = (
   notificationTrackingId: NotificationTrackingId,
@@ -129,65 +128,49 @@ const processChatNotificationProcessed = (
   })
 }
 
-const processChatNotificationActionAtom = atom(
-  null,
-  (
-    get,
-    set,
-    notification: NewChatMessageNoticeNotificationData
-  ): Effect.Effect<boolean> => {
-    return Effect.gen(function* (_) {
-      console.info(`📩 Refreshing inbox`)
-      const loadSessionResult = yield* _(loadSession())
+export function handleNewChatMessageNoticeNotification(
+  notificationData: NewChatMessageNoticeNotificationData
+): Effect.Effect<void> {
+  // If app is open, we can skipp this. There is already a scoket connected + we fetch the notifications on start
+  if (AppState.currentState === 'active') return Effect.void
 
-      if (!loadSessionResult.sessionLoaded) {
-        yield* _(
-          reportErrorE(
-            'warn',
-            new Error(
-              'Got notification but no session in storage. Skipping refreshing inbox'
-            )
-          )
+  return Effect.gen(function* (_) {
+    console.info(`Refreshing inbox`)
+
+    const store = getDefaultStore()
+    const api = store.get(apiAtom)
+
+    if (Option.isSome(notificationData.trackingId))
+      yield* _(
+        processChatNotificationProcessed(
+          notificationData.trackingId.value,
+          api.notification,
+          api.metrics,
+          notificationData
         )
-        return false
-      }
-
-      const api = get(apiAtom)
-      if (Option.isSome(notification.trackingId))
-        yield* _(
-          processChatNotificationProcessed(
-            notification.trackingId.value,
-            api.notification,
-            api.metrics,
-            notification
-          )
-        )
-
-      // Disable for now
-      // if (notification.includesSystemNotification) return false
-
-      const inboxForCypher = set(
-        getKeyHolderForNotificationTokenOrCypherActionAtom,
-        notification.targetToken ?? notification.targetCypher
       )
-      if (!inboxForCypher) {
-        reportError(
-          'warn',
-          new Error(
-            'Error decrypting notification FCM - unable to find private key for cypher'
-          )
+
+    // Disable for now
+    // if (notificationData.includesSystemNotification) return false
+
+    const inboxForCypher = store.set(
+      getKeyHolderForNotificationTokenOrCypherActionAtom,
+      notificationData.targetToken ?? notificationData.targetCypher
+    )
+    if (!inboxForCypher) {
+      reportError(
+        'warn',
+        new Error(
+          'Error decrypting notification FCM - unable to find private key for cypher'
         )
-        return false
-      }
-
-      const updates = yield* _(
-        set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-          key: inboxForCypher.publicKeyPemBase64,
-        })
       )
-      return !!updates
-    })
-  }
-)
+      return
+    }
 
-export default processChatNotificationActionAtom
+    yield* _(
+      store.set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+        key: inboxForCypher.publicKeyPemBase64,
+      })
+    )
+  })
+}

@@ -101,8 +101,8 @@ const processNotification = (
         )
       )
     ),
-    Effect.mapError(
-      (e) => Notifications.BackgroundNotificationTaskResult.Failed
+    Effect.catchAll(() =>
+      Effect.succeed(Notifications.BackgroundNotificationTaskResult.Failed)
     ),
     Effect.runPromise
   )
@@ -117,7 +117,7 @@ const processNotification = (
 TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   TASK,
   async ({data}) => {
-    await processNotification({source: 'backgroundTask', data})
+    return await processNotification({source: 'backgroundTask', data})
   }
 )
 

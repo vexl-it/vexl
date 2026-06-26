@@ -15,25 +15,23 @@ function contactHasNormalizedNumber(
   )
 }
 
-export function findImportedContactWithNumber(
+export function findContactWithNumber(
   contacts: StoredContact[],
   number: E164PhoneNumber
 ): Option.Option<StoredContactWithComputedValues> {
   return pipe(
     contacts,
     Array.filterMap((contact) =>
-      contact.flags.imported
-        ? pipe(
-            contact.computedValues,
-            Option.filter(
-              (computedValues) => computedValues.normalizedNumber === number
-            ),
-            Option.map((computedValues) => ({
-              ...contact,
-              computedValues,
-            }))
-          )
-        : Option.none()
+      pipe(
+        contact.computedValues,
+        Option.filter(
+          (computedValues) => computedValues.normalizedNumber === number
+        ),
+        Option.map((computedValues) => ({
+          ...contact,
+          computedValues,
+        }))
+      )
     ),
     Array.head
   )

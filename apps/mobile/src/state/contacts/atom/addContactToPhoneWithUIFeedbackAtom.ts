@@ -1,6 +1,13 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
-import {Contact, ContactField, type CreateContactRecord} from 'expo-contacts'
+import {
+  Contact,
+  ContactField,
+  type ContactPatch,
+  type CreateContactRecord,
+  type ExistingPhone,
+  type NewPhone,
+} from 'expo-contacts'
 import {atom} from 'jotai'
 import {Platform} from 'react-native'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
@@ -30,17 +37,22 @@ function addContactsToPhoneContacts({
 
 function updateContactInPhoneContacts({
   id,
-  contact,
+  customName,
+  number,
 }: {
   id: string
-  contact: CreateContactRecord
+  customName: string
+  number: E164PhoneNumber
 }): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
   return Effect.tryPromise({
     try: async () => {
       if (Platform.OS === 'android') {
         await new Contact(id).editWithForm()
       } else {
-        await new Contact(id).update(contact)
+        const contact = new Contact(id)
+
+        await contact.patch(createContactNamePatch({customName}))
+        await updatePhoneNumberInContact({contact, number})
       }
     },
     catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
@@ -76,16 +88,7 @@ function findPhoneContactByNumber({
         contacts,
         Array.findFirst((contact) =>
           Array.some(contact.phones, (phoneNumber) =>
-            pipe(
-              Option.fromNullable(phoneNumber.number),
-              Option.flatMap((rawNumber) =>
-                toE164PhoneNumberWithDefaultCountryCode(rawNumber)
-              ),
-              Option.match({
-                onNone: () => false,
-                onSome: (normalizedNumber) => normalizedNumber === number,
-              })
-            )
+            phoneNumberMatches({phoneNumber, number})
           )
         ),
         Option.map((contact) => contact.id)
@@ -107,12 +110,75 @@ function createContactPayload({
   return {
     givenName: firstName,
     ...(lastName && {familyName: lastName}),
-    phones: [
-      {
-        number,
-        label: 'main',
-      },
-    ],
+    phones: [createContactPhonePayload({number})],
+  }
+}
+
+function createContactNamePatch({
+  customName,
+}: {
+  customName: string
+}): ContactPatch {
+  const {firstName, lastName} = parseFirstAndLastName(customName)
+
+  return {
+    givenName: firstName,
+    familyName: lastName ?? null,
+  }
+}
+
+function createContactPhonePayload({
+  number,
+}: {
+  number: E164PhoneNumber
+}): NewPhone {
+  return {
+    number,
+    label: 'main',
+  }
+}
+
+function phoneNumberMatches({
+  phoneNumber,
+  number,
+}: {
+  phoneNumber: ExistingPhone
+  number: E164PhoneNumber
+}): boolean {
+  return pipe(
+    Option.fromNullable(phoneNumber.number),
+    Option.flatMap((rawNumber) =>
+      toE164PhoneNumberWithDefaultCountryCode(rawNumber)
+    ),
+    Option.match({
+      onNone: () => false,
+      onSome: (normalizedNumber) => normalizedNumber === number,
+    })
+  )
+}
+
+async function updatePhoneNumberInContact({
+  contact,
+  number,
+}: {
+  contact: Contact
+  number: E164PhoneNumber
+}): Promise<void> {
+  const newPhoneNumber = createContactPhonePayload({number})
+  const existingPhoneNumbers = await contact.getPhones()
+  const matchingPhoneNumber = pipe(
+    existingPhoneNumbers,
+    Array.findFirst((phoneNumber) => phoneNumberMatches({phoneNumber, number}))
+  )
+
+  if (Option.isSome(matchingPhoneNumber)) {
+    await contact.updatePhone({
+      ...matchingPhoneNumber.value,
+      number,
+      label: matchingPhoneNumber.value.label ?? newPhoneNumber.label,
+    })
+  } else {
+    await contact.addPhone(newPhoneNumber)
   }
 }
 
@@ -197,7 +263,8 @@ export const addContactToPhoneActionAtom = atom(
         yield* _(
           updateContactInPhoneContacts({
             id: linkedPhoneContactId,
-            contact,
+            customName,
+            number,
           })
         )
 
@@ -210,7 +277,8 @@ export const addContactToPhoneActionAtom = atom(
         yield* _(
           updateContactInPhoneContacts({
             id: existingContactId.value,
-            contact,
+            customName,
+            number,
           })
         )
       } else {

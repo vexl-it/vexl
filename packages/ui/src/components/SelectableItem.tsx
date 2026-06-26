@@ -51,8 +51,10 @@ const SelectableItemNote = styled(SizableText, {
 
 type SelectableItemFrameProps = React.ComponentProps<typeof SelectableItemFrame>
 
-export interface SelectableItemProps
-  extends Omit<SelectableItemFrameProps, 'children'> {
+export interface SelectableItemProps extends Omit<
+  SelectableItemFrameProps,
+  'children'
+> {
   readonly label: string
   readonly note?: string
   readonly selected?: boolean

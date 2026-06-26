@@ -85,11 +85,10 @@ const IconPressable = styled(Stack, {
 
 type TextFieldFrameProps = React.ComponentProps<typeof TextFieldFrame>
 
-export interface TextFieldProps
-  extends Omit<
-    TextFieldFrameProps,
-    'children' | 'layout' | 'highlighted' | 'backgroundColor'
-  > {
+export interface TextFieldProps extends Omit<
+  TextFieldFrameProps,
+  'children' | 'layout' | 'highlighted' | 'backgroundColor'
+> {
   readonly valueAtom: WritableAtom<string, [SetStateAction<string>], void>
   readonly placeholder?: string
   readonly autoFocus?: boolean

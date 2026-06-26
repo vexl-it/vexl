@@ -31,14 +31,18 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v6
         with:
           node-version: 24.x
-          cache: "yarn"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install --frozen-lockfile
 
       - name: Wait for PostgreSQL to be ready
         run: |
@@ -52,4 +56,4 @@ jobs:
       - name: Run tests
         env:
           TEST_DB_HOST: "localhost"
-        run: yarn turbo:test
+        run: pnpm turbo:test

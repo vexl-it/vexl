@@ -254,7 +254,7 @@ const devConfig = {
   /**
    * Mobile App Configuration
    *
-   * Controls Expo dev server startup when running `yarn dev:local`.
+   * Controls Expo dev server startup when running `pnpm dev:local`.
    * Set enabled: false to run backend services only.
    */
   mobile: {

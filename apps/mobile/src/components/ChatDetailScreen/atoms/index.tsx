@@ -544,19 +544,19 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         TE.chainEitherK((confirmed) => {
           if (!confirmed) {
             if (type === 'RESPOND_REVEAL') {
-              return E.right(
-                'DISAPPROVE_CONTACT_REVEAL' as RevealContactMessageType
-              )
+              const revealType: RevealContactMessageType =
+                'DISAPPROVE_CONTACT_REVEAL'
+              return E.right(revealType)
             }
 
             return E.left(userDeclinedError)
           }
 
-          return E.right(
+          const revealType: RevealContactMessageType =
             type === 'RESPOND_REVEAL'
-              ? ('APPROVE_CONTACT_REVEAL' as RevealContactMessageType)
-              : ('REQUEST_CONTACT_REVEAL' as RevealContactMessageType)
-          )
+              ? 'APPROVE_CONTACT_REVEAL'
+              : 'REQUEST_CONTACT_REVEAL'
+          return E.right(revealType)
         }),
         TE.map((revealType) => {
           set(loadingOverlayDisplayedAtom, true)

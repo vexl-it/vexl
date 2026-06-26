@@ -71,7 +71,7 @@ export default function sendMessageActionAtom(
         return serverMessage
       }).pipe(
         Effect.match({
-          onFailure(e) {
+          onFailure(e): ChatMessageWithState {
             if (
               e._tag === 'ReceiverInboxDoesNotExistError' ||
               e._tag === 'NotPermittedToSendMessageToTargetInboxError'
@@ -86,21 +86,21 @@ export default function sendMessageActionAtom(
                   myVersion: version,
                   text: 'Inbox deleted',
                 },
-              } as ChatMessageWithState
+              }
             }
 
             return {
               state: 'sendingError',
               error: e,
               message,
-            } as ChatMessageWithState
+            }
           },
-          onSuccess(serverMessage) {
+          onSuccess(serverMessage): ChatMessageWithState {
             return {
               state: 'sent',
               message,
               receivedByServerAt: serverMessage.receivedByServerAt,
-            } satisfies ChatMessageWithState
+            }
           },
         }),
         Effect.map((message) => {

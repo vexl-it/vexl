@@ -56,26 +56,23 @@ export default function createSubmitChecklistUpdateActionAtom(
         taskToEffect(replaceIdentityImageFileUriWithBase64(update.identity))
       )
 
-      const toSend = updateKeys.map(
-        (key) =>
-          ({
-            text: 'Checklist updated',
-            messageType: 'TRADE_CHECKLIST_UPDATE',
-            tradeChecklistUpdate:
-              key === 'identity'
-                ? {
-                    identity: identityRevealChatMessageOrUndefined,
-                  }
-                : {
-                    [key]: update[key],
-                  },
-            time: unixMillisecondsNow(),
-            uuid: generateChatMessageId(),
-            myVersion: version,
-            senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
-            minimalRequiredVersion: MINIMAL_REQUIRED_VERSION,
-          }) as ChatMessage
-      )
+      const toSend: ChatMessage[] = updateKeys.map((key) => ({
+        text: 'Checklist updated',
+        messageType: 'TRADE_CHECKLIST_UPDATE',
+        tradeChecklistUpdate:
+          key === 'identity'
+            ? {
+                identity: identityRevealChatMessageOrUndefined,
+              }
+            : {
+                [key]: update[key],
+              },
+        time: unixMillisecondsNow(),
+        uuid: generateChatMessageId(),
+        myVersion: version,
+        senderPublicKey: chatWithMessages.chat.otherSide.publicKey,
+        minimalRequiredVersion: MINIMAL_REQUIRED_VERSION,
+      }))
 
       const sentMessages = yield* _(
         Array.map(toSend, (message) =>

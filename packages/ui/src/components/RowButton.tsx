@@ -31,8 +31,10 @@ const RowButtonFrame = styled(XStack, {
 type RowButtonFrameProps = React.ComponentProps<typeof RowButtonFrame>
 export type RowButtonVariant = 'default' | 'red'
 
-interface RowButtonBaseProps
-  extends Omit<RowButtonFrameProps, 'children' | 'onPress'> {
+interface RowButtonBaseProps extends Omit<
+  RowButtonFrameProps,
+  'children' | 'onPress'
+> {
   readonly label: string
   readonly selected?: boolean
   readonly icon?: React.ComponentType<IconProps>

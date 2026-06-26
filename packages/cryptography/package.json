@@ -4,8 +4,8 @@
   "type": "module",
   "main": "src/index",
   "scripts": {
-    "test": "yarn jest",
-    "test:watch": "yarn jest --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",

@@ -17,4 +17,4 @@ Read the component source in `src/components/<Name>/` for full props, tokens, an
 - Do NOT copy from the existing mobile app tamagui config — the new design system is separate.
 - Always re-export the tamagui config from `src/config/tamagui.config.ts` so consuming apps can reference it in their Babel plugin.
 - Use `React.JSX.Element` return type (not bare `JSX.Element`) — the generic-esm tsconfig doesn't provide the global JSX namespace.
-- After changes, run `yarn workspace @vexl-next/ui typecheck` to verify.
+- After changes, run `pnpm --filter @vexl-next/ui typecheck` to verify.

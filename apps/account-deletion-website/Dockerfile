@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Optimized multi-stage build for the account-deletion-website Next.js app.
 # Mirrors the backend pipeline: turbo prune -> cacheable install -> build -> slim runner.
 
@@ -5,29 +6,31 @@
 # Produces a minimal, deterministic subset of the monorepo for this app:
 #   /app/out/json -> only the package.json manifests (cacheable install input)
 #   /app/out/full -> full source of the pruned package set
-#   /app/out/yarn.lock -> lockfile scoped to the pruned set
+#   /app/out/pnpm-lock.yaml -> lockfile scoped to the pruned set
 FROM node:24 AS pruner
+ARG TURBO_VERSION=2.10.0
 WORKDIR /app
 COPY . .
 # node_modules is in .dockerignore, so install turbo globally to run prune.
-RUN npm install -g turbo@2.9.14
+RUN npm install -g turbo@${TURBO_VERSION}
 RUN turbo prune account-deletion-website --docker
 
 # --- Builder stage ----------------------------------------------------------
 FROM node:24-alpine AS builder
 WORKDIR /app
 
-# Install layer: depends only on the manifests, the lockfile and the committed
-# Yarn zero-install cache. Source-only changes do NOT invalidate this layer.
+# Install layer: depends only on the manifests, the lockfile and patch files.
+# Source-only changes do NOT invalidate this layer.
 COPY --from=pruner /app/out/json/ ./
-COPY --from=pruner /app/out/yarn.lock ./yarn.lock
-COPY --from=pruner /app/.yarn/ ./.yarn/
-COPY --from=pruner /app/.yarnrc.yml ./.yarnrc.yml
-RUN YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn workspaces focus account-deletion-website
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    corepack enable && \
+    pnpm config set store-dir /pnpm/store && \
+    pnpm install --frozen-lockfile
 
 # Build layer: full source of the pruned set.
 COPY --from=pruner /app/out/full/ ./
-RUN yarn workspace account-deletion-website build
+RUN pnpm --filter account-deletion-website build
 
 # Copy static assets INTO the standalone folder (not included by default).
 WORKDIR /app/apps/account-deletion-website

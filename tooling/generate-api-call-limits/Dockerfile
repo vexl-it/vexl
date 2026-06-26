@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:24 as builder
 
 WORKDIR /app
@@ -6,8 +7,11 @@ COPY . .
 
 WORKDIR /app/tooling/generate-api-call-limits
 
-RUN yarn workspaces focus @vexl-next/generate-api-call-limits
-RUN yarn build
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    corepack enable && \
+    pnpm config set store-dir /pnpm/store && \
+    pnpm install --frozen-lockfile --filter @vexl-next/generate-api-call-limits...
+RUN pnpm build
 # RUN npx @sentry/wizard@latest -i sourcemaps
 
 
@@ -20,4 +24,3 @@ COPY --from=builder /app/package.json /app/package.json
 
 
 WORKDIR /app/tooling/generate-api-call-limits
-

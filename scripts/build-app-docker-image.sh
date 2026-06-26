@@ -1,5 +1,11 @@
 #!/bin/zsh
 
+# The Dockerfiles use BuildKit features (# syntax directive + RUN --mount=type=cache
+# for the pnpm store), so BuildKit must be enabled. It is the default on modern
+# Docker, but we set it explicitly so older local Docker versions don't fall back
+# to the legacy builder and fail on the cache mounts.
+export DOCKER_BUILDKIT=1
+
 APP=$1;
 TAG=$2;
 

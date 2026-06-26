@@ -202,7 +202,7 @@ describe('Fetch all paginated data tests', () => {
           nextPageToken: hasNext ? endIndex.toString() : 'final-token',
           hasNext,
           limit: pageSize,
-          items: pageData as readonly MockedDataSchema[],
+          items: pageData,
         }
       })
     }

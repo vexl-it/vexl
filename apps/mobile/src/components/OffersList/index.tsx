@@ -24,8 +24,10 @@ function renderItem(
   return <OffersListItem isFirst={info.index === 0} offerAtom={info.item} />
 }
 
-export interface Props
-  extends Omit<FlashListProps<Atom<OneOfferInState>>, 'renderItem' | 'data'> {
+export interface Props extends Omit<
+  FlashListProps<Atom<OneOfferInState>>,
+  'renderItem' | 'data'
+> {
   readonly offersAtoms: Array<Atom<OneOfferInState>>
   readonly scrollToTopRef?: React.RefObject<(() => void) | null>
 }

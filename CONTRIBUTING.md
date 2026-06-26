@@ -101,7 +101,7 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/vexl-i
 
 ### Your First Code Contribution
 
-We recommend using VScode to edit the code. Please run `yarn turbo:check-code` script to check for formatting and `yarn turbo:test` to run tests across the full repository before submitting PR (without those two commands passing, the PR won't be merged).
+We recommend using VScode to edit the code. Please run `pnpm turbo:check-code` script to check for formatting and `pnpm turbo:test` to run tests across the full repository before submitting PR (without those two commands passing, the PR won't be merged).
 
 ## Styleguides
 

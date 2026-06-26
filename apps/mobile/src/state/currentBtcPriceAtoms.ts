@@ -32,7 +32,7 @@ type PriceDataStored = typeof PriceDataStored.Type
 
 const btcPriceMmkvAtom = atomWithParsedMmkvStorage(
   'brcPrice',
-  {data: {} as Record<CurrencyCode, BtcPriceDataWithState>},
+  {data: {}},
   PriceDataStored
 )
 

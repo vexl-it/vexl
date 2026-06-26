@@ -7,11 +7,10 @@ import {useTheme} from 'tamagui'
 
 import {Stack} from '../primitives'
 
-export interface SwitchProps
-  extends Omit<
-    RNSwitchProps,
-    'value' | 'onValueChange' | 'trackColor' | 'thumbColor'
-  > {
+export interface SwitchProps extends Omit<
+  RNSwitchProps,
+  'value' | 'onValueChange' | 'trackColor' | 'thumbColor'
+> {
   readonly valueAtom: WritableAtom<boolean, [SetStateAction<boolean>], void>
 }
 

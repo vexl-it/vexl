@@ -82,7 +82,7 @@ const checkBackendAndWarn = (): Effect.Effect<void> =>
       console.log('')
       logWithPrefix(
         'mobile',
-        'Run "yarn dev:backend" in another terminal to start backend'
+        'Run "pnpm dev:backend" in another terminal to start backend'
       )
       console.log('')
     } else {

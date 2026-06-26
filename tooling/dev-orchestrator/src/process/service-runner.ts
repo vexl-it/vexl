@@ -175,7 +175,7 @@ export interface ServiceProcess {
 
 /**
  * Spawn a single service using tsx watch for hot reload.
- * Per RESEARCH.md: invoke tsx watch directly, not yarn dev.
+ * Per RESEARCH.md: invoke tsx watch directly, not package manager dev.
  * Per CONTEXT.md: orchestrator delegates file watching to tsx.
  *
  * Returns a ServiceProcess handle for monitoring and cleanup.
@@ -216,13 +216,14 @@ export const spawnService = (
     const command =
       runtimeConfig.runner === 'workspace-dev'
         ? Command.make(
-            'yarn',
-            'workspace',
+            'pnpm',
+            '--filter',
             runtimeConfig.workspaceName,
             'dev'
           ).pipe(Command.workingDirectory(projectRoot), Command.env(env))
         : Command.make(
-            'npx',
+            'pnpm',
+            'exec',
             'tsx',
             'watch',
             '-r',

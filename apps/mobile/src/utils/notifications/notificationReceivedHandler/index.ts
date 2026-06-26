@@ -137,6 +137,8 @@ const processNotification = (
 TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   TASK,
   async ({data}) => {
+    if (!data) return Notifications.BackgroundNotificationTaskResult.NoData
+
     return await processNotification({source: 'backgroundTask', data})
   }
 )

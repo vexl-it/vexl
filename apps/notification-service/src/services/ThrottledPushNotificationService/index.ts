@@ -58,8 +58,9 @@ export class ThrottledPushNotificationService extends Context.Tag(
 
       const redisService = yield* _(RedisService)
 
-      const throttleTtlMs =
-        (yield* _(notificationThrottleTtlMinutesConfig)) * 60 * 1000
+      const throttleTtlMinutes = yield* _(notificationThrottleTtlMinutesConfig)
+      const throttleEnabled = throttleTtlMinutes !== -1
+      const throttleTtlMs = throttleTtlMinutes * 60 * 1000
 
       const scheduleThrottleSend = yield* _(EnqueueProcessNotifications)
 
@@ -76,8 +77,7 @@ export class ThrottledPushNotificationService extends Context.Tag(
             )
 
             if (
-              // If throttling is disabled remove it
-              throttleTtlMs !== -1 &&
+              throttleEnabled &&
               // Notification was issued recently, so we throttle it
               lastTimeIssued + throttleTtlMs > Date.now()
             ) {
@@ -104,17 +104,19 @@ export class ThrottledPushNotificationService extends Context.Tag(
               )
             }
 
-            yield* _(
-              scheduleThrottleSend(
-                {token: task.notificationToken},
-                {
-                  delay: throttleTtlMs,
-                  jobId: processThrottledNotificationsJobId(
-                    task.notificationToken
-                  ),
-                }
+            if (throttleEnabled) {
+              yield* _(
+                scheduleThrottleSend(
+                  {token: task.notificationToken},
+                  {
+                    delay: throttleTtlMs,
+                    jobId: processThrottledNotificationsJobId(
+                      task.notificationToken
+                    ),
+                  }
+                )
               )
-            )
+            }
           }).pipe(
             lockOnNotificationToken(task.notificationToken),
             Effect.provideService(RedisService, redisService)

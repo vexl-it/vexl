@@ -121,6 +121,7 @@ TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   }
 )
 
+// LEt's disable it for now. We use socket to deliver notifications in foreground
 // Only on iOS. On android we can rely on background handler
 // if (Platform.OS === 'ios')
 //   Notifications.addNotificationReceivedListener((data) => {

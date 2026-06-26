@@ -208,6 +208,7 @@ export const generatePushNotificationsFromNewChatMessageNoticeSendTask = (
       ...(metadata.value.clientPlatform !== 'IOS'
         ? [backgroundNotification]
         : []),
+      // In case of ios we don't send any notification if sendSystemNotification is false. That is ok
       ...(sendSystemNotification && metadata.value.clientPlatform === 'IOS'
         ? [systemNotification]
         : []),

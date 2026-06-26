@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {loadSession} from '../../../state/session/loadSession'
 import {reportErrorE} from '../../reportError'
-import {ErrorLoadingSession} from './domain'
+import {ErrorLoadingSession, type AcceptedNotificationTypes} from './domain'
 import {extractDataFromNotification} from './extractDataFromNotification'
 import {handleAdmitedToClubNetworkNotification} from './handlers/admitedToClubNetwork'
 import {handleClubDeactivatedNotification} from './handlers/clubDeactivated'
@@ -29,6 +29,24 @@ const isLocalNotification = (
   return !(trigger != null && 'type' in trigger && trigger.type === 'push')
 }
 
+const notificationRequiresLoadedSession = (
+  notificationData: AcceptedNotificationTypes
+): boolean => {
+  switch (notificationData._tag) {
+    case 'NewChatMessageNoticeNotificationData':
+    case 'NewSocialNetworkConnectionNotificationData':
+    case 'NewClubConnectionNotificationData':
+    case 'AdmitedToClubNetworkNotificationData':
+    case 'ClubDeactivatedNotificationData':
+      return true
+    case 'UserLoginOnDifferentDeviceNotificationData':
+    case 'UserInactivityNotificationData':
+    case 'VexlProductNotificationData':
+    case 'DebugDummyNotificationData':
+      return false
+  }
+}
+
 const processNotification = (
   input:
     | {
@@ -49,9 +67,11 @@ const processNotification = (
     const notificationData = yield* extractDataFromNotification(input)
     yield* Effect.log('Got notificaiton', input.source, notificationData)
 
-    const session = yield* loadSession()
-    if (!session.sessionLoaded)
-      return yield* Effect.fail(new ErrorLoadingSession())
+    if (notificationRequiresLoadedSession(notificationData)) {
+      const session = yield* loadSession()
+      if (!session.sessionLoaded)
+        return yield* Effect.fail(new ErrorLoadingSession())
+    }
 
     if (notificationData._tag === 'NewChatMessageNoticeNotificationData') {
       yield* handleNewChatMessageNoticeNotification(notificationData)

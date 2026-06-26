@@ -14,7 +14,10 @@ import {
 import {type SupportedPushNotificationTask} from '../../domain'
 import {NotificationMetricsService} from '../../metrics'
 import {VexlNotificationTokenService} from '../VexlNotificationTokenService'
-import {ExpoClientService} from './services/ExpoClientService'
+import {
+  ExpoClientService,
+  type NotificationToSend,
+} from './services/ExpoClientService'
 import {type ExpoSdkError} from './services/ExpoClientService/utils'
 import {
   generatePushNotificationFromVexlProductNotificationNoticeSendTask,
@@ -33,6 +36,22 @@ export class NoExpoTokenError extends Data.TaggedError('NoExpoTokenError')<{
   message: string
   vexlToken: VexlNotificationToken
 }> {}
+
+const notificationsToArray = (
+  notificationToSend: NotificationToSend | readonly NotificationToSend[]
+): readonly NotificationToSend[] =>
+  'token' in notificationToSend ? [notificationToSend] : notificationToSend
+
+const systemNotificationSent = (
+  notificationToSend: NotificationToSend | readonly NotificationToSend[]
+): boolean =>
+  pipe(
+    notificationsToArray(notificationToSend),
+    Array.some(
+      (notification: NotificationToSend) =>
+        notification.title !== undefined && notification.body !== undefined
+    )
+  )
 
 export interface PushNotificationServiceOperations {
   sendNotificationViaExpoNotification: (
@@ -140,9 +159,9 @@ export class PushNotificationService extends Context.Tag(
                   id: d.trackingId,
                   clientPlatform: d.metadata.value.clientPlatform,
                   clientVersion: d.metadata.value.clientVersion,
-                  systemNotificationSent:
-                    Array.isArray(d.notificationToSend) &&
-                    d.notificationToSend.length > 1,
+                  systemNotificationSent: systemNotificationSent(
+                    d.notificationToSend
+                  ),
                   sentAt: unixMillisecondsNow(),
                 })
               })

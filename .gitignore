@@ -19,6 +19,7 @@
 dist
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+next-env.d.ts
 node_modules
 .turbo
 

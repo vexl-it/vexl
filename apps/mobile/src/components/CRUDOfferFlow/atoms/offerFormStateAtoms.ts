@@ -838,7 +838,9 @@ export const offerFormMolecule = molecule(() => {
         set(progressModal.show, {
           title: t('offerForm.offerEncryption.encryptingYourOffer'),
           belowProgressLeft: belowProgressLeft.loadingText,
-          bottomText: t('offerForm.offerEncryption.dontCloseTheApp'),
+          bottomText: t(
+            'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+          ),
           indicateProgress: {type: 'intermediate'},
         })
 
@@ -870,7 +872,9 @@ export const offerFormMolecule = molecule(() => {
                 textData: {
                   title: t('offerForm.offerEncryption.encryptingYourOffer'),
                   belowProgressLeft: belowProgressLeft.loadingText,
-                  bottomText: t('offerForm.offerEncryption.dontCloseTheApp'),
+                  bottomText: t(
+                    'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+                  ),
                 },
               })
             },
@@ -1269,7 +1273,9 @@ export const offerFormMolecule = molecule(() => {
               textData: {
                 title: t('offerForm.offerEncryption.encryptingYourOffer'),
                 belowProgressLeft: belowProgressLeft.loadingText,
-                bottomText: t('offerForm.offerEncryption.dontCloseTheApp'),
+                bottomText: t(
+                  'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+                ),
               },
             })
           },

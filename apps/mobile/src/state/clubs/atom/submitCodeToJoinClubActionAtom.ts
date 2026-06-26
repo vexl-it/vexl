@@ -191,7 +191,9 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
 
           set(offerProgressModalActionAtoms.show, {
             title: t('clubs.publishOffersToJoinedClub.progressTitle'),
-            bottomText: t('offerForm.offerEncryption.dontCloseTheApp'),
+            bottomText: t(
+              'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+            ),
             belowProgressLeft: t(
               'clubs.publishOffersToJoinedClub.progressStatus',
               {
@@ -223,7 +225,7 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
                           'clubs.publishOffersToJoinedClub.progressTitle'
                         ),
                         bottomText: t(
-                          'offerForm.offerEncryption.dontCloseTheApp'
+                          'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
                         ),
                         belowProgressLeft: t(
                           'clubs.publishOffersToJoinedClub.progressStatus',

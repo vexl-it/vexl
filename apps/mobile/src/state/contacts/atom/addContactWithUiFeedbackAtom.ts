@@ -44,7 +44,7 @@ const editExistingContactActionAtom: ActionAtomType<
     return Effect.gen(function* (_) {
       const importedContacts = get(importedContactsAtom)
 
-      const {contactName, saveToPhone} = yield* _(
+      const {contactName} = yield* _(
         set(showUpsertContactDialogAtom, {
           type: 'edit',
           contactName: existingContact.info.name,
@@ -67,20 +67,6 @@ const editExistingContactActionAtom: ActionAtomType<
         )
       )
 
-      if (saveToPhone) {
-        yield* _(
-          areContactsPermissionsGranted(),
-          Effect.flatMap((contactsPermissionsGranted) =>
-            contactsPermissionsGranted
-              ? set(addContactToPhoneActionAtom, {
-                  customName: contactName,
-                  number: existingContact.computedValues.normalizedNumber,
-                })
-              : Effect.succeed(false)
-          )
-        )
-      }
-
       yield* _(
         set(globalDialogAtom, {
           title: t('addContactDialog.changesSaved'),
@@ -91,14 +77,6 @@ const editExistingContactActionAtom: ActionAtomType<
       Effect.match({
         onSuccess: (success) => success,
         onFailure(e) {
-          if (e._tag === 'ErrorAddingContactToPhoneContacts') {
-            showErrorAlert({
-              title: t('contacts.errorAddingContactToYourPhoneContacts'),
-              error: e,
-            })
-            return false
-          }
-
           if (e._tag === 'UserDeclinedError') {
             return false
           }

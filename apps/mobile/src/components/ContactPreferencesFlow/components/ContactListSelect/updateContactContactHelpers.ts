@@ -4,7 +4,6 @@ import type {
   StoredContact,
   StoredContactWithComputedValues,
 } from '../../../../state/contacts/domain'
-import deduplicate from '../../../../utils/deduplicate'
 
 function contactHasNormalizedNumber(
   contact: StoredContact,
@@ -40,39 +39,6 @@ export function findImportedContactWithNumber(
   )
 }
 
-export function importedNumbersWithout(
-  contacts: StoredContact[],
-  numberToRemove: E164PhoneNumber
-): E164PhoneNumber[] {
-  return pipe(
-    contacts,
-    Array.filter((contact) => contact.flags.imported),
-    Array.filterMap((contact) =>
-      pipe(
-        contact.computedValues,
-        Option.map((computedValues) => computedValues.normalizedNumber)
-      )
-    ),
-    Array.filter((number) => number !== numberToRemove)
-  )
-}
-
-export function importedNumbersAfterReplacement({
-  contacts,
-  newNumber,
-  originalNumber,
-}: {
-  readonly contacts: StoredContact[]
-  readonly newNumber: E164PhoneNumber
-  readonly originalNumber: E164PhoneNumber
-}): E164PhoneNumber[] {
-  return pipe(
-    importedNumbersWithout(contacts, originalNumber),
-    Array.append(newNumber),
-    deduplicate
-  )
-}
-
 export function replaceSelectedNumber({
   newNumber,
   originalNumber,
@@ -83,8 +49,9 @@ export function replaceSelectedNumber({
   readonly selectedNumbers: Set<E164PhoneNumber>
 }): Set<E164PhoneNumber> {
   const newSelectedNumbers = new Set(selectedNumbers)
+  const originalWasSelected = newSelectedNumbers.has(originalNumber)
   newSelectedNumbers.delete(originalNumber)
-  newSelectedNumbers.add(newNumber)
+  if (originalWasSelected) newSelectedNumbers.add(newNumber)
   return newSelectedNumbers
 }
 
@@ -129,6 +96,9 @@ export function buildUpdatedContact({
       ...contact.flags,
       imported: numberChanged ? false : contact.flags.imported,
     },
+    serverHashToClient: numberChanged
+      ? Option.none()
+      : contact.serverHashToClient,
     info: {
       ...contact.info,
       name: contactName,

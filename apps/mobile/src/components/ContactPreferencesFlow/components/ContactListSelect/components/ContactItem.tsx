@@ -12,7 +12,7 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, type Atom} from 'jotai'
 import React from 'react'
 import {getTokens} from 'tamagui'
-import {type RootStackScreenProps} from '../../../../../navigationTypes'
+import {type ContactPreferencesStackScreenProps} from '../../../../../navigationTypes'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {getInternationalPhoneNumber} from '../../../../../utils/getInternationalPhoneNumber'
 import ContactPictureImage from '../../../../ContactPictureImage'
@@ -26,7 +26,9 @@ interface Props {
 function ContactItem({contactAtom}: Props): React.ReactElement {
   const contact = useAtomValue(contactAtom)
   const navigation =
-    useNavigation<RootStackScreenProps<'ContactPreferences'>['navigation']>()
+    useNavigation<
+      ContactPreferencesStackScreenProps<'ContactPreferencesList'>['navigation']
+    >()
   const {selectContactAtom} = useMolecule(contactSelectMolecule)
   const theme = useTheme()
   const tokens = getTokens()

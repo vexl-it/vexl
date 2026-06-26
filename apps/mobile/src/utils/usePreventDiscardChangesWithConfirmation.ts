@@ -4,6 +4,7 @@ import {
   type NavigationAction,
 } from '@react-navigation/native'
 import {useCallback, useRef} from 'react'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from './dismissKeyboardPromise'
 
 interface Params {
   enabled: boolean
@@ -57,7 +58,8 @@ export default function usePreventDiscardChangesWithConfirmation({
     }
 
     pendingNavigationActionRef.current = data.action
-    void confirmLeave()
+    void dismissKeyboardAndResolveOnLayoutUpdate()
+      .then(confirmLeave)
       .then((confirmed) => {
         if (confirmed) {
           leaveWithoutConfirmation()

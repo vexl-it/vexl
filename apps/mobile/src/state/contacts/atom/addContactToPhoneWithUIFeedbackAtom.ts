@@ -3,18 +3,15 @@ import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   Contact,
   ContactField,
-  type ContactPatch,
   type CreateContactRecord,
   type ExistingPhone,
   type NewPhone,
 } from 'expo-contacts'
 import {atom} from 'jotai'
-import {Platform} from 'react-native'
 import {askAreYouSureActionAtom} from '../../../components/GlobalDialog'
 import userSvg from '../../../components/images/userSvg'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../utils/toE164PhoneNumberWithDefaultCountryCode'
-import {type NonUniqueContactId} from '../domain'
 
 export class ErrorAddingContactToPhoneContacts extends Schema.TaggedError<ErrorAddingContactToPhoneContacts>(
   'ErrorAddingContactToPhoneContacts'
@@ -33,109 +30,6 @@ function addContactsToPhoneContacts({
     },
     catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
   })
-}
-
-function updateContactInPhoneContacts({
-  id,
-  customName,
-  number,
-}: {
-  id: string
-  customName: string
-  number: E164PhoneNumber
-}): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
-  return Effect.tryPromise({
-    try: async () => {
-      if (Platform.OS === 'android') {
-        await new Contact(id).editWithForm()
-      } else {
-        const contact = new Contact(id)
-
-        await contact.patch(createContactNamePatch({customName}))
-        await updatePhoneNumberInContact({contact, number})
-      }
-    },
-    catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
-  })
-}
-
-function parseFirstAndLastName(customName: string): {
-  firstName: string
-  lastName?: string | undefined
-} {
-  const parts = customName.trim().split(' ')
-
-  if (parts.length > 1) {
-    const [firstName, ...rest] = parts
-    return {firstName: firstName ?? customName, lastName: rest.join(' ')}
-  } else if (parts.length === 1) {
-    return {firstName: parts[0] ?? customName}
-  }
-
-  return {firstName: customName}
-}
-
-function findPhoneContactByNumber({
-  number,
-}: {
-  number: E164PhoneNumber
-}): Effect.Effect<Option.Option<string>, ErrorAddingContactToPhoneContacts> {
-  return Effect.tryPromise({
-    try: async () => {
-      const contacts = await Contact.getAllDetails([ContactField.PHONES])
-
-      return pipe(
-        contacts,
-        Array.findFirst((contact) =>
-          Array.some(contact.phones, (phoneNumber) =>
-            phoneNumberMatches({phoneNumber, number})
-          )
-        ),
-        Option.map((contact) => contact.id)
-      )
-    },
-    catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
-  })
-}
-
-function createContactPayload({
-  customName,
-  number,
-}: {
-  customName: string
-  number: E164PhoneNumber
-}): CreateContactRecord {
-  const {firstName, lastName} = parseFirstAndLastName(customName)
-
-  return {
-    givenName: firstName,
-    ...(lastName && {familyName: lastName}),
-    phones: [createContactPhonePayload({number})],
-  }
-}
-
-function createContactNamePatch({
-  customName,
-}: {
-  customName: string
-}): ContactPatch {
-  const {firstName, lastName} = parseFirstAndLastName(customName)
-
-  return {
-    givenName: firstName,
-    familyName: lastName ?? null,
-  }
-}
-
-function createContactPhonePayload({
-  number,
-}: {
-  number: E164PhoneNumber
-}): NewPhone {
-  return {
-    number,
-    label: 'main',
-  }
 }
 
 function phoneNumberMatches({
@@ -157,28 +51,95 @@ function phoneNumberMatches({
   )
 }
 
-async function updatePhoneNumberInContact({
+function contactHasPhoneNumber({
   contact,
   number,
 }: {
-  contact: Contact
+  contact: {phones: ExistingPhone[]}
   number: E164PhoneNumber
-}): Promise<void> {
-  const newPhoneNumber = createContactPhonePayload({number})
-  const existingPhoneNumbers = await contact.getPhones()
-  const matchingPhoneNumber = pipe(
-    existingPhoneNumbers,
-    Array.findFirst((phoneNumber) => phoneNumberMatches({phoneNumber, number}))
+}): boolean {
+  return Array.some(contact.phones, (phoneNumber) =>
+    phoneNumberMatches({phoneNumber, number})
   )
+}
 
-  if (Option.isSome(matchingPhoneNumber)) {
-    await contact.updatePhone({
-      ...matchingPhoneNumber.value,
-      number,
-      label: matchingPhoneNumber.value.label ?? newPhoneNumber.label,
-    })
-  } else {
-    await contact.addPhone(newPhoneNumber)
+function findPhoneContactByNumber({
+  number,
+}: {
+  number: E164PhoneNumber
+}): Effect.Effect<
+  Option.Option<{phones: ExistingPhone[]}>,
+  ErrorAddingContactToPhoneContacts
+> {
+  return Effect.tryPromise({
+    try: async () => {
+      const contacts = await Contact.getAllDetails([ContactField.PHONES])
+
+      return pipe(
+        contacts,
+        Array.findFirst((contact) => contactHasPhoneNumber({contact, number}))
+      )
+    },
+    catch: (e) => new ErrorAddingContactToPhoneContacts({cause: e}),
+  })
+}
+
+function addPhoneContactIfMissing({
+  contact,
+  number,
+}: {
+  contact: CreateContactRecord
+  number: E164PhoneNumber
+}): Effect.Effect<void, ErrorAddingContactToPhoneContacts> {
+  return Effect.gen(function* (_) {
+    const existingContact = yield* _(findPhoneContactByNumber({number}))
+
+    if (Option.isNone(existingContact)) {
+      yield* _(addContactsToPhoneContacts({contact}))
+    }
+  })
+}
+
+function parseFirstAndLastName(customName: string): {
+  firstName: string
+  lastName?: string | undefined
+} {
+  const parts = customName.trim().split(' ')
+
+  if (parts.length > 1) {
+    const [firstName, ...rest] = parts
+    return {firstName: firstName ?? customName, lastName: rest.join(' ')}
+  } else if (parts.length === 1) {
+    return {firstName: parts[0] ?? customName}
+  }
+
+  return {firstName: customName}
+}
+
+function createContactPayload({
+  customName,
+  number,
+}: {
+  customName: string
+  number: E164PhoneNumber
+}): CreateContactRecord {
+  const {firstName, lastName} = parseFirstAndLastName(customName)
+
+  return {
+    givenName: firstName,
+    ...(lastName && {familyName: lastName}),
+    phones: [createContactPhonePayload({number})],
+  }
+}
+
+function createContactPhonePayload({
+  number,
+}: {
+  number: E164PhoneNumber
+}): NewPhone {
+  return {
+    number,
+    label: 'main',
   }
 }
 
@@ -228,10 +189,9 @@ export const addContactToPhoneWithUIFeedbackActionAtom = atom(
         dialogActionResult[1]?.type === 'inputResult'
           ? dialogActionResult[1].value
           : customName
-
       const contact = createContactPayload({customName: resolvedName, number})
 
-      yield* _(addContactsToPhoneContacts({contact}))
+      yield* _(addPhoneContactIfMissing({contact, number}))
 
       return true
     })
@@ -243,47 +203,11 @@ export const addContactToPhoneActionAtom = atom(
   (
     _get,
     _set,
-    {
-      customName,
-      number,
-      phoneContactId,
-    }: {
-      customName: string
-      number: E164PhoneNumber
-      phoneContactId?: Option.Option<NonUniqueContactId>
-    }
+    {customName, number}: {customName: string; number: E164PhoneNumber}
   ) => {
     return Effect.gen(function* (_) {
       const contact = createContactPayload({customName, number})
-      const linkedPhoneContactId = Option.getOrUndefined(
-        phoneContactId ?? Option.none()
-      )
-
-      if (linkedPhoneContactId !== undefined) {
-        yield* _(
-          updateContactInPhoneContacts({
-            id: linkedPhoneContactId,
-            customName,
-            number,
-          })
-        )
-
-        return true
-      }
-
-      const existingContactId = yield* _(findPhoneContactByNumber({number}))
-
-      if (Option.isSome(existingContactId)) {
-        yield* _(
-          updateContactInPhoneContacts({
-            id: existingContactId.value,
-            customName,
-            number,
-          })
-        )
-      } else {
-        yield* _(addContactsToPhoneContacts({contact}))
-      }
+      yield* _(addPhoneContactIfMissing({contact, number}))
 
       return true
     })

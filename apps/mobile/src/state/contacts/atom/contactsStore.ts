@@ -9,15 +9,26 @@ import {StoredContact, type StoredContactWithComputedValues} from '../domain'
 
 export const contactsStoreAtom = atomWithParsedMmkvStorage(
   'storedContacts',
-  {contacts: []},
+  {contacts: [], needsFullContactsReplaceAfterContactEdit: false},
   Schema.Struct({
     contacts: Schema.Array(StoredContact).pipe(Schema.mutable),
     lastImport: Schema.optional(IsoDatetimeString),
+    needsFullContactsReplaceAfterContactEdit: Schema.optionalWith(
+      Schema.Boolean,
+      {
+        default: () => false,
+      }
+    ),
   })
 )
 
 export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>
   o.prop('contacts')
+)
+
+export const needsFullContactsReplaceAfterContactEditAtom = focusAtom(
+  contactsStoreAtom,
+  (o) => o.prop('needsFullContactsReplaceAfterContactEdit')
 )
 
 export const newPhoneContactsToReviewRawNumbersAtom = atom((get) =>
@@ -111,13 +122,18 @@ export const importedContactsCountAtom = atom(
 )
 
 export const eraseStoreActionAtom = atom(null, (get, set) => {
-  set(contactsStoreAtom, {contacts: [], lastImport: undefined})
+  set(contactsStoreAtom, {
+    contacts: [],
+    lastImport: undefined,
+    needsFullContactsReplaceAfterContactEdit: false,
+  })
 })
 
 export const eraseImportedContacts = atom(null, (get, set) => {
   set(contactsStoreAtom, (o) => ({
     contacts: o.contacts.filter((one) => one.flags.importedManually),
     lastImport: undefined,
+    needsFullContactsReplaceAfterContactEdit: false,
   }))
 })
 

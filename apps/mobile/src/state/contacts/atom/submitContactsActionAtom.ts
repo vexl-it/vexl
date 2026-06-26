@@ -30,6 +30,7 @@ import {areThereAnyMyOffersAtom} from '../../marketplace/atoms/myOffers'
 import {type StoredContactWithComputedValues} from '../domain'
 import {
   lastImportOfContactsAtom,
+  needsFullContactsReplaceAfterContactEditAtom,
   normalizedContactsAtom,
   storedContactsAtom,
 } from './contactsStore'
@@ -77,6 +78,9 @@ export const submitContactsActionAtom = atom(
       }
 
       const allContacts = get(normalizedContactsAtom)
+      const needsFullContactsReplaceAfterContactEdit = get(
+        needsFullContactsReplaceAfterContactEditAtom
+      )
 
       const numbersToImport = !params.normalizeAndImportAll
         ? params.numbersToImport
@@ -119,6 +123,7 @@ export const submitContactsActionAtom = atom(
 
       const doIncrementalUpdate =
         // If there are no contacts to remove, we can do an incremental import
+        !needsFullContactsReplaceAfterContactEdit &&
         HashSet.size(contactsThatShouldBeRemovedFromImport) === 0
 
       const newContactsToImport = doIncrementalUpdate
@@ -316,6 +321,7 @@ export const submitContactsActionAtom = atom(
         lastImportOfContactsAtom,
         Schema.decodeSync(IsoDatetimeString)(new Date().toISOString())
       )
+      set(needsFullContactsReplaceAfterContactEditAtom, false)
 
       set(updatePersistentDataAboutNumberOfImportedContactsActionAtom)
       set(updatePersistentDataAboutReachActionAtom)

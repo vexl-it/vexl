@@ -1,6 +1,6 @@
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
-import {useSetAtom} from 'jotai'
+import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
@@ -11,8 +11,9 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
   const {
     checkContactsAccessPrivilegesActionAtom,
     syncDefaultSelectedContactsActionAtom,
-    normalizedContacts,
+    normalizedContactsAtom,
   } = useMolecule(contactSelectMolecule)
+  const normalizedContacts = useAtomValue(normalizedContactsAtom)
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
   )
@@ -36,7 +37,7 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
   )
 
   useEffect(() => {
-    syncDefaultSelectedContacts(normalizedContacts)
+    syncDefaultSelectedContacts()
   }, [normalizedContacts, syncDefaultSelectedContacts])
 
   return normalizedContacts

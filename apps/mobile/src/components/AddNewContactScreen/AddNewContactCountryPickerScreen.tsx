@@ -2,11 +2,11 @@ import {useMolecule} from 'bunshi/dist/react'
 import {useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {type ICountry} from 'react-native-country-select'
-import {type RootStackScreenProps} from '../../navigationTypes'
-import {contactSelectMolecule} from '../ContactPreferencesScreen/components/ContactListSelect/atom'
+import {type ContactPreferencesStackScreenProps} from '../../navigationTypes'
+import {contactSelectMolecule} from '../ContactPreferencesFlow/components/ContactListSelect/atom'
 import CountryPickerScreenContent from '../CountryPickerScreenContent'
 
-type Props = RootStackScreenProps<'AddNewContactCountryPicker'>
+type Props = ContactPreferencesStackScreenProps<'AddNewContactCountryPicker'>
 
 export default function AddNewContactCountryPickerScreen({
   navigation,

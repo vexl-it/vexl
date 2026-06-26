@@ -148,12 +148,6 @@ export type RootStackParamsList = {
   DonationsFlow: NavigatorScreenParams<DonationsFlowParamsList>
 
   ContactPreferences: {filter?: ContactsFilter | undefined} | undefined
-  AddNewContact:
-    | {
-        readonly editContactNumber?: E164PhoneNumber | undefined
-      }
-    | undefined
-  AddNewContactCountryPicker: undefined
 
   NotificationSettings: undefined
 
@@ -234,6 +228,24 @@ export type AppSettingsStackScreenProps<
 
 export type RootStackScreenProps<T extends keyof RootStackParamsList> =
   NativeStackScreenProps<RootStackParamsList, T>
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ContactPreferencesStackParamsList = {
+  ContactPreferencesList: {filter?: ContactsFilter | undefined} | undefined
+  AddNewContact:
+    | {
+        readonly editContactNumber?: E164PhoneNumber | undefined
+      }
+    | undefined
+  AddNewContactCountryPicker: undefined
+}
+
+export type ContactPreferencesStackScreenProps<
+  T extends keyof ContactPreferencesStackParamsList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<ContactPreferencesStackParamsList, T>,
+  RootStackScreenProps<'ContactPreferences'>
+>
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type LoginStackParamsList = {

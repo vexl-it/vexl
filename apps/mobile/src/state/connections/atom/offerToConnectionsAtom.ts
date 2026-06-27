@@ -1,7 +1,10 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type OfferAdminId} from '@vexl-next/domain/src/general/offers'
+import {
+  type IntendedConnectionLevel,
+  type OfferAdminId,
+} from '@vexl-next/domain/src/general/offers'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
@@ -237,10 +240,14 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
     set,
     {
       adminId,
+      intendedClubs,
+      intendedConnectionLevel,
       stopProcessingAfter,
       onProgress,
     }: {
       adminId: OfferAdminId
+      intendedClubs?: readonly ClubUuid[]
+      intendedConnectionLevel?: IntendedConnectionLevel
       stopProcessingAfter?: UnixMilliseconds
       onProgress?: (status: OfferEncryptionProgress) => void
     }
@@ -255,7 +262,8 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
 
       const offer = get(singleOfferByAdminIdAtom(adminId))
 
-      const clubIdsToEncryptFor = offer?.ownershipInfo?.intendedClubs
+      const clubIdsToEncryptFor =
+        intendedClubs ?? offer?.ownershipInfo?.intendedClubs
 
       const clubsData = get(clubsWithMembersAtom)
       const targetClubIdWithMembersArray = pipe(
@@ -267,8 +275,10 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
         Record.fromEntries
       )
 
-      const intendedConnectionLevel =
-        offer?.ownershipInfo?.intendedConnectionLevel ?? 'ALL'
+      const connectionLevel =
+        intendedConnectionLevel ??
+        offer?.ownershipInfo?.intendedConnectionLevel ??
+        'ALL'
 
       if (
         !!stopProcessingAfter &&
@@ -293,9 +303,7 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
           targetConnections: {
             firstLevel: connectionState.firstLevel,
             secondLevel:
-              intendedConnectionLevel === 'ALL'
-                ? connectionState.secondLevel
-                : [],
+              connectionLevel === 'ALL' ? connectionState.secondLevel : [],
             clubs: targetClubIdWithMembersArray,
           },
           adminId: oneOfferConnections.adminId,
@@ -342,7 +350,7 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
             removedConnections
           ),
           secondLevel:
-            intendedConnectionLevel === 'ALL'
+            connectionLevel === 'ALL'
               ? subtractArrays(
                   [
                     ...(val.connections.secondLevel ?? []),

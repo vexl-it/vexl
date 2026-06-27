@@ -27,6 +27,7 @@ const editExistingContactActionAtom: ActionAtomType<
   [
     existingContact: StoredContactWithComputedValues & {
       avatar?: SvgStringOrImageUri
+      existingContactName: string
     },
   ],
   Effect.Effect<boolean, never>
@@ -37,6 +38,7 @@ const editExistingContactActionAtom: ActionAtomType<
     set,
     existingContact: StoredContactWithComputedValues & {
       avatar?: SvgStringOrImageUri
+      existingContactName: string
     }
   ) => {
     const {t} = get(translationAtom)
@@ -48,6 +50,7 @@ const editExistingContactActionAtom: ActionAtomType<
         set(showUpsertContactDialogAtom, {
           type: 'edit',
           contactName: existingContact.info.name,
+          existingContactName: existingContact.existingContactName,
           contactNumber: existingContact.computedValues.normalizedNumber,
           phoneContactId: existingContact.info.nonUniqueContactId,
           profileImage: existingContact.avatar,
@@ -273,6 +276,8 @@ export const addContactWithUiFeedbackActionAtom: ActionAtomType<
       ? set(editExistingContactActionAtom, {
           ...existingContact.value,
           computedValues: existingContact.value.computedValues,
+          info: {...existingContact.value.info, name: newContact.info.name},
+          existingContactName: existingContact.value.info.name,
           avatar: newContact.avatar,
         })
       : set(createContactWithUiFeedbackActionAtom, {

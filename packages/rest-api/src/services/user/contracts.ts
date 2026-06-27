@@ -86,6 +86,12 @@ export class PreviousCodeNotExpiredError extends Schema.TaggedError<PreviousCode
   reason: Schema.Literal('PreviousCodeNotExpired'),
 }) {}
 
+export const PhoneNumberVerificationId = Schema.Int.pipe(
+  Schema.greaterThan(0),
+  Schema.brand('PhoneNumberVerificationId')
+)
+export type PhoneNumberVerificationId = typeof PhoneNumberVerificationId.Type
+
 export class UnableToSendVerificationSmsError extends Schema.TaggedError<UnableToSendVerificationSmsError>(
   'UnableToSendVerificationSmsError'
 )('UnableToSendVerificationSmsError', {
@@ -101,6 +107,8 @@ export class UnableToSendVerificationSmsError extends Schema.TaggedError<UnableT
     'Other'
   ),
   status: Schema.Literal(400),
+  verificationId: Schema.optional(PhoneNumberVerificationId),
+  expirationAt: Schema.optional(IsoDatetimeString),
 }) {}
 
 export class UnableToVerifySmsCodeError extends Schema.TaggedError<UnableToVerifySmsCodeError>(
@@ -178,12 +186,6 @@ export class UnsupportedVersionToLoginError extends Schema.TaggedError<Unsupport
   status: Schema.Literal(400),
   lowestRequiredVersion: VersionCode,
 }) {}
-
-export const PhoneNumberVerificationId = Schema.Int.pipe(
-  Schema.greaterThan(0),
-  Schema.brand('PhoneNumberVerificationId')
-)
-export type PhoneNumberVerificationId = typeof PhoneNumberVerificationId.Type
 
 export class InitPhoneVerificationResponse extends Schema.Class<InitPhoneVerificationResponse>(
   'InitPhoneVerificationResponse'

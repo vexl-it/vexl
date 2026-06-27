@@ -20,14 +20,66 @@ import {
   loginCodeDummyForAll,
   lowestSupportVersionToLoginConfig,
 } from '../../../configs'
+import {SmsVerificationSid} from '../../../utils/SmsVerificationSid.brand'
 import {createVerification} from '../../../utils/smsVerificationUtils'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../constants'
 import {VerificationStateDbService} from '../db/verificationStateDb'
+import {type PhoneVerificationState} from '../domain'
+
+type StaticCodeVerificationState = Extract<
+  PhoneVerificationState,
+  {type: 'staticCodeVerification'}
+>
+type TwilioSmsVerificationState = Extract<
+  PhoneVerificationState,
+  {type: 'twilioSmsVerification'}
+>
 
 const generateVerificationId = (): PhoneNumberVerificationId =>
   Schema.decodeSync(PhoneNumberVerificationId)(
     Math.round(Number(`${Date.now()}${Math.round(Math.random() * 100)}`))
   )
+
+const makeStaticCodeVerificationState = (
+  args: Omit<StaticCodeVerificationState, 'type'>
+): StaticCodeVerificationState => ({
+  ...args,
+  type: 'staticCodeVerification',
+})
+
+const makeTwilioSmsVerificationState = (
+  args: Omit<TwilioSmsVerificationState, 'type'>
+): TwilioSmsVerificationState => ({
+  ...args,
+  type: 'twilioSmsVerification',
+})
+
+const mayHaveDeliveredSmsDespiteProviderError = (
+  reason: UnableToSendVerificationSmsError['reason']
+): boolean => {
+  switch (reason) {
+    case 'CarrierError':
+    case 'UnsupportedCarrier':
+    case 'Other':
+      return true
+    default:
+      return false
+  }
+}
+
+const addVerificationStateToSmsError = ({
+  error,
+  verificationState,
+}: {
+  error: UnableToSendVerificationSmsError
+  verificationState: TwilioSmsVerificationState
+}): UnableToSendVerificationSmsError =>
+  new UnableToSendVerificationSmsError({
+    reason: error.reason,
+    status: error.status,
+    verificationId: verificationState.id,
+    expirationAt: fromMilliseconds(verificationState.expiresAt),
+  })
 
 const checkClientVersion = (
   clientVersion: Option.Option<VersionCode>
@@ -124,14 +176,13 @@ export const initVerificationHandler = HttpApiBuilder.handler(
       const dummyCodeForAll = yield* _(loginCodeDummyForAll)
 
       if (Option.isSome(dummyCodeForAll)) {
-        const verificationState = {
-          type: 'staticCodeVerification' as const,
+        const verificationState = makeStaticCodeVerificationState({
           id: generateVerificationId(),
           expiresAt: expirationAt,
           countryPrefix,
           phoneNumber: phoneNumberHashed,
           code: dummyCodeForAll.value,
-        }
+        })
 
         yield* _(loginDbService.storePhoneVerificationState(verificationState))
 
@@ -147,14 +198,13 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         Option.isSome(dummyNumbers) &&
         dummyNumbers.value.numbers.includes(req.payload.phoneNumber)
       ) {
-        const verificationState = {
-          type: 'staticCodeVerification' as const,
+        const verificationState = makeStaticCodeVerificationState({
           id: generateVerificationId(),
           expiresAt: expirationAt,
           phoneNumber: phoneNumberHashed,
           countryPrefix,
           code: dummyNumbers.value.code,
-        }
+        })
 
         yield* _(loginDbService.storePhoneVerificationState(verificationState))
         return new InitPhoneVerificationResponse({
@@ -163,17 +213,46 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         })
       }
 
-      const sid = yield* _(
-        createVerification(req.payload.phoneNumber, req.headers)
-      )
-      const verificationState = {
+      const verificationStateBase = {
         id: generateVerificationId(),
-        type: 'twilioSmsVerification' as const,
         expiresAt: expirationAt,
         phoneNumber: phoneNumberHashed,
         countryPrefix,
-        sid,
       }
+
+      const sid = yield* _(
+        createVerification(req.payload.phoneNumber, req.headers).pipe(
+          Effect.catchTag('UnableToSendVerificationSmsError', (e) => {
+            if (!mayHaveDeliveredSmsDespiteProviderError(e.reason)) {
+              return Effect.fail(e)
+            }
+
+            const verificationState = makeTwilioSmsVerificationState({
+              ...verificationStateBase,
+              sid: Schema.decodeSync(SmsVerificationSid)(
+                req.payload.phoneNumber
+              ),
+            })
+
+            return loginDbService
+              .storePhoneVerificationState(verificationState)
+              .pipe(
+                Effect.zipRight(
+                  Effect.fail(
+                    addVerificationStateToSmsError({
+                      error: e,
+                      verificationState,
+                    })
+                  )
+                )
+              )
+          })
+        )
+      )
+      const verificationState = makeTwilioSmsVerificationState({
+        ...verificationStateBase,
+        sid,
+      })
 
       yield* _(loginDbService.storePhoneVerificationState(verificationState))
 

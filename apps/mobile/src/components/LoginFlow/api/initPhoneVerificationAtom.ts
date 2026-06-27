@@ -1,6 +1,9 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
-import {type InitPhoneVerificationResponse} from '@vexl-next/rest-api/src/services/user/contracts'
+import {
+  InitPhoneVerificationResponse,
+  type UnableToSendVerificationSmsError,
+} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
@@ -12,10 +15,25 @@ import isString from '../../../utils/isString'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
+import {askAreYouSureActionAtom} from '../../GlobalDialog'
+import {reportIssueDialogAtom} from '../../ReportIssue'
 
 class TooManyLoginAttemptsError extends Schema.TaggedError<TooManyLoginAttemptsError>(
   'TooManyLoginAttemptsError'
 )('TooManyLoginAttemptsError', {}) {}
+
+function initPhoneVerificationResponseFromSmsError(
+  error: UnableToSendVerificationSmsError
+): InitPhoneVerificationResponse | undefined {
+  if (error.verificationId === undefined || error.expirationAt === undefined) {
+    return undefined
+  }
+
+  return new InitPhoneVerificationResponse({
+    verificationId: error.verificationId,
+    expirationAt: error.expirationAt,
+  })
+}
 
 export const initPhoneVerificationAtom = atom(
   null,
@@ -25,6 +43,17 @@ export const initPhoneVerificationAtom = atom(
     phoneNumber: E164PhoneNumber
   ): Effect.Effect<InitPhoneVerificationResponse, string, never> => {
     const {t} = get(translationAtom)
+    const failWithSmsProviderErrorDialog = (
+      subtitle: string
+    ): Effect.Effect<never, string> =>
+      Effect.zipRight(
+        set(reportIssueDialogAtom, {
+          title: t('loginFlow.phoneNumber.errors.smsProviderEncounteredError'),
+          subtitle,
+        }),
+        Effect.fail(subtitle)
+      )
+
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
 
@@ -61,6 +90,41 @@ export const initPhoneVerificationAtom = atom(
         PreviousCodeNotExpiredError: () =>
           Effect.fail(t('loginFlow.phoneNumber.errors.previousCodeNotExpired')),
         UnableToSendVerificationSmsError: (e) => {
+          const verificationResponse =
+            initPhoneVerificationResponseFromSmsError(e)
+
+          if (verificationResponse !== undefined) {
+            const areYouOnVpnMessage = t(
+              'loginFlow.phoneNumber.errors.areYouOnVpn'
+            )
+
+            return set(askAreYouSureActionAtom, {
+              variant: 'info',
+              steps: [
+                {
+                  type: 'StepWithText',
+                  title: t(
+                    'loginFlow.phoneNumber.errors.smsProviderEncounteredError'
+                  ),
+                  description: t(
+                    'loginFlow.phoneNumber.errors.continueWithSmsCodeDescription'
+                  ),
+                  positiveButtonText: t(
+                    'loginFlow.phoneNumber.errors.continueWithSmsCode'
+                  ),
+                  negativeButtonText: t(
+                    'loginFlow.phoneNumber.errors.smsCodeNotReceived'
+                  ),
+                },
+              ],
+            }).pipe(
+              Effect.map(() => verificationResponse),
+              Effect.catchAll(() =>
+                failWithSmsProviderErrorDialog(areYouOnVpnMessage)
+              )
+            )
+          }
+
           switch (e.reason) {
             case 'InvalidPhoneNumber':
             case 'NumberDoesNotSupportSms':
@@ -84,8 +148,8 @@ export const initPhoneVerificationAtom = atom(
                   e,
                 }
               )
-              return Effect.fail(
-                t('loginFlow.phoneNumber.errors.smsProviderEncounteredError')
+              return failWithSmsProviderErrorDialog(
+                t('loginFlow.phoneNumber.errors.areYouOnVpn')
               )
             case 'Other':
               reportError(
@@ -95,8 +159,8 @@ export const initPhoneVerificationAtom = atom(
                   e,
                 }
               )
-              return Effect.fail(
-                t('loginFlow.phoneNumber.errors.smsProviderEncounteredError')
+              return failWithSmsProviderErrorDialog(
+                t('loginFlow.phoneNumber.errors.areYouOnVpn')
               )
           }
         },

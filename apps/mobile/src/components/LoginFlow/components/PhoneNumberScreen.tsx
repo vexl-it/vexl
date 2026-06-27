@@ -1,20 +1,10 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {
-  toE164PhoneNumber,
-  type E164PhoneNumber,
-} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
+import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import type {CountryCode} from 'libphonenumber-js'
-import {
-  AsYouType,
-  getExampleNumber,
-  isSupportedCountry,
-} from 'libphonenumber-js'
-import examples from 'libphonenumber-js/examples.mobile.json'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Keyboard, TextInput} from 'react-native'
+import {Keyboard, StyleSheet, TextInput} from 'react-native'
 import {getCountryByCca2, type ICountry} from 'react-native-country-select'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
 import {
@@ -25,12 +15,16 @@ import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {useShowLoadingOverlay} from '../../LoadingOverlayProvider'
 import {initPhoneVerificationAtom} from '../api/initPhoneVerificationAtom'
 import {selectedCountryCodeAtom} from '../atoms/selectedCountryCodeAtom'
+import {
+  DEFAULT_COUNTRY,
+  countryCallingCode,
+  getGroupLengths,
+  parsePhoneNumberInput,
+  splitNationalNumberIntoGroups,
+} from '../utils/phoneNumberInput'
 import LoginFlowScreen, {LoginFlowText, LoginFlowTitle} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'PhoneNumber'>
-const FALLBACK_NATIONAL_NUMBER_LENGTH = 15
-const FALLBACK_GROUP_LENGTH = 3
-const DEFAULT_COUNTRY = getCountryByCca2('CZ')
 
 function NumberGroup({
   length,
@@ -49,90 +43,6 @@ function NumberGroup({
   )
 }
 
-function supportedCountryCode(
-  country: ICountry | undefined
-): CountryCode | undefined {
-  if (country === undefined) return undefined
-  return isSupportedCountry(country.cca2) ? country.cca2 : undefined
-}
-
-function countryCallingCode(country: ICountry | undefined): string {
-  return country?.idd.root ?? '+420'
-}
-
-function getNationalNumberLength(country: ICountry | undefined): number {
-  const countryCode = supportedCountryCode(country)
-  if (countryCode === undefined) return FALLBACK_NATIONAL_NUMBER_LENGTH
-
-  return (
-    getExampleNumber(countryCode, examples)?.nationalNumber.length ??
-    FALLBACK_NATIONAL_NUMBER_LENGTH
-  )
-}
-
-function getGroupLengths(country: ICountry | undefined): readonly number[] {
-  const countryCode = supportedCountryCode(country)
-  const exampleNumber =
-    countryCode === undefined
-      ? undefined
-      : getExampleNumber(countryCode, examples)
-
-  if (exampleNumber === undefined) {
-    const groups: number[] = []
-    const maxLength = getNationalNumberLength(country)
-
-    for (let remainingDigits = maxLength; remainingDigits > 0; ) {
-      const groupLength = Math.min(FALLBACK_GROUP_LENGTH, remainingDigits)
-      groups.push(groupLength)
-      remainingDigits -= groupLength
-    }
-
-    return groups
-  }
-
-  const formattedExample = new AsYouType().input(exampleNumber.number)
-  const nationalExample = formattedExample
-    .substring(countryCallingCode(country).length)
-    .trim()
-  const groups = nationalExample.match(/\d+/g)
-
-  if (groups === null) return [exampleNumber.nationalNumber.length]
-
-  const groupLengths: number[] = []
-  for (const group of groups) {
-    groupLengths.push(group.length)
-  }
-
-  return groupLengths
-}
-
-function splitNationalNumberIntoGroups(
-  nationalNumber: string,
-  country: ICountry | undefined
-): readonly string[] {
-  const groups: string[] = []
-  let currentIndex = 0
-
-  for (const groupLength of getGroupLengths(country)) {
-    groups.push(
-      nationalNumber.substring(currentIndex, currentIndex + groupLength)
-    )
-    currentIndex += groupLength
-  }
-
-  while (currentIndex < nationalNumber.length) {
-    groups.push(
-      nationalNumber.substring(
-        currentIndex,
-        currentIndex + FALLBACK_GROUP_LENGTH
-      )
-    )
-    currentIndex += FALLBACK_GROUP_LENGTH
-  }
-
-  return groups
-}
-
 export default function PhoneNumberScreen({
   navigation,
 }: Props): React.ReactElement {
@@ -146,12 +56,17 @@ export default function PhoneNumberScreen({
     Option.Option<E164PhoneNumber>
   >(Option.none())
   const [errorMessage, setErrorMessage] = useState<string | undefined>()
+  // Prevent atom sync from clearing a number that came from the phone input.
+  const pendingCountryCodeFromPhoneInputRef = useRef<string | undefined>(
+    undefined
+  )
   const navigationInProgressRef = useRef(false)
   const initPhoneVerificationInProgressRef = useRef(false)
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
   const phoneNumberGroupLengths = getGroupLengths(selectedCountry)
   const selectedCountryCode = useAtomValue(selectedCountryCodeAtom)
+  const setSelectedCountryCode = useSetAtom(selectedCountryCodeAtom)
   const displayedPhoneNumberGroups = splitNationalNumberIntoGroups(
     nationalNumber,
     selectedCountry
@@ -202,12 +117,20 @@ export default function PhoneNumberScreen({
 
   useEffect(() => {
     if (selectedCountryCode === undefined) return
-    if (selectedCountry?.cca2 === selectedCountryCode) return
+    if (selectedCountry?.cca2 === selectedCountryCode) {
+      pendingCountryCodeFromPhoneInputRef.current = undefined
+      return
+    }
 
     const country = getCountryByCca2(selectedCountryCode)
     if (country === undefined) return
 
     setSelectedCountry(country)
+    if (pendingCountryCodeFromPhoneInputRef.current === selectedCountryCode) {
+      pendingCountryCodeFromPhoneInputRef.current = undefined
+      return
+    }
+
     setNationalNumber('')
     setErrorMessage(undefined)
     setPhoneNumber(Option.none())
@@ -268,20 +191,6 @@ export default function PhoneNumberScreen({
             pressStyle={{opacity: 0.8}}
             width="100%"
           >
-            <TextInput
-              autoFocus
-              keyboardType="number-pad"
-              onChangeText={(value) => {
-                const digits = value.replace(/\D/g, '')
-                setErrorMessage(undefined)
-                setNationalNumber(digits)
-                setPhoneNumber(toE164PhoneNumber(`${callingCode}${digits}`))
-              }}
-              ref={inputRef}
-              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
-              submitBehavior="submit"
-              value={nationalNumber}
-            />
             <Typography
               color="$foregroundPrimary"
               onPress={() => {
@@ -297,7 +206,42 @@ export default function PhoneNumberScreen({
             >
               {callingCode}
             </Typography>
-            {phoneNumberGroupElements}
+            <XStack
+              alignItems="center"
+              gap="$4"
+              justifyContent="center"
+              pos="relative"
+            >
+              <TextInput
+                autoComplete="tel"
+                autoFocus
+                caretHidden
+                keyboardType="phone-pad"
+                onChangeText={(value) => {
+                  const parsedInput = parsePhoneNumberInput(
+                    value,
+                    selectedCountry
+                  )
+                  const parsedCountryCode = parsedInput.selectedCountry?.cca2
+
+                  setErrorMessage(undefined)
+                  setNationalNumber(parsedInput.nationalNumber)
+                  setPhoneNumber(parsedInput.phoneNumber)
+                  setSelectedCountry(parsedInput.selectedCountry)
+                  if (parsedCountryCode !== selectedCountry?.cca2) {
+                    pendingCountryCodeFromPhoneInputRef.current =
+                      parsedCountryCode
+                    setSelectedCountryCode(parsedCountryCode)
+                  }
+                }}
+                ref={inputRef}
+                style={styles.phoneNumberInput}
+                submitBehavior="submit"
+                textContentType="telephoneNumber"
+                value={nationalNumber}
+              />
+              {phoneNumberGroupElements}
+            </XStack>
           </XStack>
           {errorMessage != null ? (
             <Typography
@@ -313,3 +257,20 @@ export default function PhoneNumberScreen({
     </LoginFlowScreen>
   )
 }
+
+const styles = StyleSheet.create({
+  phoneNumberInput: {
+    backgroundColor: 'transparent',
+    bottom: 0,
+    color: 'transparent',
+    left: 0,
+    minWidth: '100%',
+    opacity: 0.01,
+    position: 'absolute',
+    right: 0,
+    textAlign: 'center',
+    top: 0,
+    width: '100%',
+    zIndex: 1,
+  },
+})

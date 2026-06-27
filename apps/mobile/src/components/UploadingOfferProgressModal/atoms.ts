@@ -120,9 +120,15 @@ export const offerProgressModalActionAtoms = {
           ...textData,
         })
       } else {
+        const belowProgressRight =
+          progress.type === 'CONSTRUCTING_PRIVATE_PAYLOADS' ||
+          progress.type === 'CONSTRUCTING_PUBLIC_PAYLOAD'
+            ? t('progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS')
+            : t(`progressBar.${progress.type}`)
+
         set(dataAtom, {
           mode: 'shown',
-          belowProgressRight: t(`progressBar.${progress.type}`),
+          belowProgressRight,
           indicateProgress: ['SENDING_OFFER_TO_NETWORK', 'DONE'].includes(
             progress.type
           )

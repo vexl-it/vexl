@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "プライベートペイロードを作成中",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "公開ペイロードを作成と暗号化中",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "暗号化されたオファー詳細を準備中",
   "progressBar.SENDING_OFFER_TO_NETWORK": "オファーをアップロード中",
   "progressBar.DONE": "完了",
   "commonFriends.commonFriends": "共通の友達",

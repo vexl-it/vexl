@@ -355,7 +355,7 @@ function DiscoverScreen({navigation}: Props): React.JSX.Element {
               title={t('clubs.joinAClub')}
               description={t('clubs.joinAClubDescription')}
               primaryButton={{
-                label: t('clubs.joinNewClub'),
+                label: t('clubs.joinClub'),
                 onPress: handleJoinClubPress,
               }}
               secondaryButton={{

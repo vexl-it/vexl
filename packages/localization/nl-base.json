@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Maken van persoonlijke payloads",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Constructie en codering van publieke payload",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Versleutelde aanbodgegevens voorbereiden",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Aanbieding uploaden",
   "progressBar.DONE": "Gereed",
   "commonFriends.commonFriends": "Gemeenschappelijke vrienden",

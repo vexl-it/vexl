@@ -18,7 +18,7 @@ import updateOffer, {
 import {type PublicPartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptOfferPublicPayload'
 import {type PrivatePartEncryptionError} from '@vexl-next/resources-utils/src/offers/utils/encryptPrivatePart'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
-import {Effect, pipe, Schema} from 'effect'
+import {Array, Effect, pipe, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../clubs/atom/refreshClubsActionAtom'
@@ -44,6 +44,7 @@ export const updateOfferActionAtom = atom<
       intendedConnectionLevel: IntendedConnectionLevel
       intendedClubs: readonly ClubUuid[]
       updatePrivateParts: boolean
+      updateLocalStateAfterPrivateParts?: boolean
       onProgress?: (s: OfferEncryptionProgress) => void
     },
   ],
@@ -113,12 +114,25 @@ export const updateOfferActionAtom = atom<
       offerInfo,
     }
 
-    set(offersAtom, (oldState) => [
-      ...oldState.filter(
-        (offer) => offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
-      ),
-      createdOffer,
-    ])
+    const updateLocalState = Effect.sync(() => {
+      set(offersAtom, (oldState) => [
+        ...pipe(
+          oldState,
+          Array.filter(
+            (offer) =>
+              offer.offerInfo.offerId !== createdOffer.offerInfo.offerId
+          )
+        ),
+        createdOffer,
+      ])
+    })
+
+    const shouldUpdateLocalStateAfterPrivateParts =
+      params.updatePrivateParts && params.updateLocalStateAfterPrivateParts
+
+    if (!shouldUpdateLocalStateAfterPrivateParts) {
+      yield* _(updateLocalState)
+    }
 
     if (params.updatePrivateParts) {
       yield* _(set(syncAllClubsHandleStateWhenNotFoundActionAtom))
@@ -127,10 +141,16 @@ export const updateOfferActionAtom = atom<
       yield* _(
         set(updateAndReencryptSingleOfferConnectionActionAtom, {
           adminId,
+          intendedClubs,
+          intendedConnectionLevel,
           onProgress: params.onProgress,
         }),
         Effect.mapError((e) => new ErrorReencryptingOfferInUpdate({cause: e}))
       )
+    }
+
+    if (shouldUpdateLocalStateAfterPrivateParts) {
+      yield* _(updateLocalState)
     }
 
     return createdOffer

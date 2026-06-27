@@ -1,6 +1,7 @@
 import {Option} from 'effect'
 import {getCountryByCca2, type ICountry} from 'react-native-country-select'
 import {
+  countryCallingCode,
   parsePhoneNumberInput,
   splitNationalNumberIntoGroups,
 } from './phoneNumberInput'
@@ -17,6 +18,16 @@ function phoneNumberValue(
 ): string | undefined {
   return Option.isSome(phoneNumber) ? phoneNumber.value : undefined
 }
+
+describe('countryCallingCode', () => {
+  it('builds the full calling code from root and suffix', () => {
+    expect(countryCallingCode(country('AI'))).toBe('+1264')
+  })
+
+  it('keeps the fallback for a missing country', () => {
+    expect(countryCallingCode(undefined)).toBe('+420')
+  })
+})
 
 describe('parsePhoneNumberInput', () => {
   it('keeps typed national digits under the selected country', () => {

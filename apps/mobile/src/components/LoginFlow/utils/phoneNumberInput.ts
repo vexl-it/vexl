@@ -33,7 +33,11 @@ export function supportedCountryCode(
 }
 
 export function countryCallingCode(country: ICountry | undefined): string {
-  return country?.idd.root ?? '+420'
+  const idd = country?.idd
+  if (idd === undefined) return '+420'
+
+  const suffix = idd.suffixes[0]
+  return suffix === undefined ? idd.root : `${idd.root}${suffix}`
 }
 
 function digitsOnly(value: string): string {

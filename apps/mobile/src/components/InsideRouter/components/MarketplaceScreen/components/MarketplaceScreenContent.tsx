@@ -5,6 +5,7 @@ import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo, useRef} from 'react'
 import {Stack} from 'tamagui'
 import {useAreOffersLoading} from '../../../../../state/marketplace'
+import {isMarketplaceNarrowingActiveAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {myOffersSortedAtomsAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
@@ -18,6 +19,9 @@ import OffersList from '../../../../OffersList'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import {type MarketplaceTab} from '../index'
 import AllOffersListHeader from './AllOffersListHeader'
+import FewFilteredOffersNotice, {
+  shouldShowFewFilteredOffersNotice,
+} from './FewFilteredOffersNotice'
 import FilteredOffersEmptyState from './FilteredOffersEmptyState'
 import MissingProductCategoriesMarketplaceSuggestion from './MissingProductCategoriesMarketplaceSuggestion'
 import MyOffersEmptyList from './MyOffersEmptyList'
@@ -96,6 +100,9 @@ function MarketplaceScreenContent({
   const areThereOffersWithoutFilters = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
+  const isMarketplaceNarrowingActive = useAtomValue(
+    isMarketplaceNarrowingActiveAtom
+  )
   const loading = useAreOffersLoading()
 
   useHandleRedirectToContactsScreen()
@@ -143,6 +150,18 @@ function MarketplaceScreenContent({
         : undefined
       : MyOffersEmptyList
 
+  const listFooterComponent = useMemo(
+    () =>
+      activeTab === 'allOffers' &&
+      shouldShowFewFilteredOffersNotice({
+        isMarketplaceNarrowingActive,
+        offersCount: allOffersAtoms.length,
+      }) ? (
+        <FewFilteredOffersNotice />
+      ) : null,
+    [activeTab, allOffersAtoms.length, isMarketplaceNarrowingActive]
+  )
+
   useAppState(
     useCallback(
       (state) => {
@@ -176,6 +195,7 @@ function MarketplaceScreenContent({
         scrollToTopRef={scrollToTopRef}
         ListHeaderComponent={listHeaderComponent}
         ListEmptyComponent={listEmptyComponent}
+        ListFooterComponent={listFooterComponent}
         offersAtoms={offersAtoms}
         onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
         refreshing={

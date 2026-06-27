@@ -57,9 +57,6 @@ function ContactsListSelect({
   const areThereAnyContactsToDisplayForSelectedTab = useAtomValue(
     areThereAnyContactsToDisplayForSelectedTabAtom
   )
-  const areThereAnySelectedContacts = useAtomValue(
-    areThereAnySelectedContactsAtom
-  )
   const toggleAllContactsToDisplay = useSetAtom(
     toggleAllContactsToDisplayActionAtom
   )
@@ -79,8 +76,7 @@ function ContactsListSelect({
     submitBarHeightRef.current = measuredSubmitBarHeight
     setSubmitBarHeight(measuredSubmitBarHeight)
   }, [])
-  const shouldShowSubmitBar =
-    areThereAnyContactsToDisplayForSelectedTab || areThereAnySelectedContacts
+  const shouldShowSubmitBar = areThereAnyContactsToDisplayForSelectedTab
   const effectiveSubmitBarHeight = shouldShowSubmitBar ? submitBarHeight : 0
   const keyboardBottomSpacerHeight = useKeyboardAwareFooterListPadding({
     footerHeight: 0,

@@ -1,10 +1,7 @@
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
-import {
-  type InitPhoneVerificationResponse,
-  type UnableToSendVerificationSmsError,
-} from '@vexl-next/rest-api/src/services/user/contracts'
-import {Effect, Schema, type Option} from 'effect'
+import {type InitPhoneVerificationResponse} from '@vexl-next/rest-api/src/services/user/contracts'
+import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {
@@ -15,8 +12,6 @@ import isString from '../../../utils/isString'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
-import {showErrorAlert} from '../../ErrorAlert'
-import {reportIssueDialogAtom} from '../../ReportIssue'
 
 class TooManyLoginAttemptsError extends Schema.TaggedError<TooManyLoginAttemptsError>(
   'TooManyLoginAttemptsError'
@@ -28,11 +23,7 @@ export const initPhoneVerificationAtom = atom(
     get,
     set,
     phoneNumber: E164PhoneNumber
-  ): Effect.Effect<
-    Option.Option<InitPhoneVerificationResponse>,
-    string,
-    never
-  > => {
+  ): Effect.Effect<InitPhoneVerificationResponse, string, never> => {
     const {t} = get(translationAtom)
     return Effect.gen(function* (_) {
       const api = get(apiAtom)
@@ -59,42 +50,33 @@ export const initPhoneVerificationAtom = atom(
       )
 
       return toReturn
-    })
-      .pipe(
-        Effect.catchAll((e) => {
-          reportError(
-            'error',
-            new Error('Unexpected error while initializing phone verification'),
-            {e}
-          )
-
-          showErrorAlert({
-            title: t('common.somethingWentWrong'),
-            description:
-              toCommonErrorMessage(e, t) ??
-              t('common.somethingWentWrongDescription'),
-            error: e,
-          })
-
-          return Effect.fail(e)
-        }),
-        Effect.catchTags({
-          UnsupportedVersionToLoginError: (e) =>
-            Effect.fail(
-              t('loginFlow.phoneNumber.errors.unsuportedVersion', {
-                version: String(e.lowestRequiredVersion),
-              })
-            ),
-          PreviousCodeNotExpiredError: () =>
-            Effect.fail(
-              t('loginFlow.phoneNumber.errors.previousCodeNotExpired')
-            ),
-          UnableToSendVerificationSmsError: (e) => {
-            const reasonsToReport: Array<
-              UnableToSendVerificationSmsError['reason']
-            > = ['Other']
-
-            if (reasonsToReport.includes(e.reason)) {
+    }).pipe(
+      Effect.catchTags({
+        UnsupportedVersionToLoginError: (e) =>
+          Effect.fail(
+            t('loginFlow.phoneNumber.errors.unsuportedVersion', {
+              version: String(e.lowestRequiredVersion),
+            })
+          ),
+        PreviousCodeNotExpiredError: () =>
+          Effect.fail(t('loginFlow.phoneNumber.errors.previousCodeNotExpired')),
+        UnableToSendVerificationSmsError: (e) => {
+          switch (e.reason) {
+            case 'InvalidPhoneNumber':
+            case 'NumberDoesNotSupportSms':
+            case 'UnsupportedCarrier':
+              return Effect.fail(
+                t('loginFlow.v2.phoneNumber.errors.doesNotLookRight')
+              )
+            case 'MaxAttemptsReached':
+              return Effect.fail(
+                t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')
+              )
+            case 'AntiFraudBlock':
+            case 'AntiFraudBlock12h':
+            case 'AntiFraudBlockGeo':
+              return Effect.fail(t('loginFlow.phoneNumber.errors.areYouOnVpn'))
+            case 'CarrierError':
               reportError(
                 'warn',
                 new Error('Unable to send verification sms'),
@@ -102,27 +84,39 @@ export const initPhoneVerificationAtom = atom(
                   e,
                 }
               )
-            }
-            return Effect.fail(t('loginFlow.phoneNumber.errors.areYouOnVpn'))
-          },
-          TooManyLoginAttemptsError: () =>
-            Effect.fail(t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')),
-        }),
-        Effect.catchAll((e) => {
-          if (isString(e))
-            return Effect.zipRight(
-              set(reportIssueDialogAtom, {
-                title: t(
-                  'loginFlow.phoneNumber.errors.smsProviderEncounteredError'
-                ),
-                subtitle: e,
-              }),
-              Effect.fail(e)
-            )
+              return Effect.fail(
+                t('loginFlow.phoneNumber.errors.smsProviderEncounteredError')
+              )
+            case 'Other':
+              reportError(
+                'warn',
+                new Error('Unable to send verification sms'),
+                {
+                  e,
+                }
+              )
+              return Effect.fail(
+                t('loginFlow.phoneNumber.errors.smsProviderEncounteredError')
+              )
+          }
+        },
+        TooManyLoginAttemptsError: () =>
+          Effect.fail(t('loginFlow.phoneNumber.errors.tooManyLoginAttempts')),
+      }),
+      Effect.catchAll((e) => {
+        if (isString(e)) return Effect.fail(e)
 
-          return Effect.fail(t('common.somethingWentWrong'))
-        })
-      )
-      .pipe(Effect.option)
+        reportError(
+          'error',
+          new Error('Unexpected error while initializing phone verification'),
+          {e}
+        )
+
+        return Effect.fail(
+          toCommonErrorMessage(e, t) ??
+            t('common.somethingWentWrongDescription')
+        )
+      })
+    )
   }
 )

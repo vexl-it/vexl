@@ -23,9 +23,9 @@ To run the app in dev mode run following commands
 
 ```
 pnpm install
-pnpm --filter @vexl-next/mobile-app expo prebuild --clean
-pnpm --filter @vexl-next/mobile-app expo run:ios  ## for ios
-pnpm --filter @vexl-next/mobile-app expo run:android ## for android
+pnpm --filter @vexl-next/mobile-app exec expo prebuild --clean
+pnpm --filter @vexl-next/mobile-app ios  ## for ios
+pnpm --filter @vexl-next/mobile-app android ## for android
 ```
 
 ## Help us translate the app

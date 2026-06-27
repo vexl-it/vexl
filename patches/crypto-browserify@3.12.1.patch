@@ -2,7 +2,7 @@ diff --git a/index.js b/index.js
 index 44a2edf627df2a3242143f7e55d121d1c14ff389..a1680dc73a47e08f991d439edefe77b6600b99a4 100644
 --- a/index.js
 +++ b/index.js
-@@ -3,6 +3,21 @@
+@@ -3,6 +3,52 @@
  // eslint-disable-next-line no-multi-assign
  exports.randomBytes = exports.rng = exports.pseudoRandomBytes = exports.prng = require('randombytes');
  
@@ -17,7 +17,38 @@ index 44a2edf627df2a3242143f7e55d121d1c14ff389..a1680dc73a47e08f991d439edefe77b6
 +
 +if (!exports.randomUUID) {
 +	exports.randomUUID = function () {
-+		return globalThis.crypto.randomUUID();
++		var bytes = new Uint8Array(16);
++		exports.getRandomValues(bytes);
++
++		bytes[6] = (bytes[6] & 0x0f) | 0x40;
++		bytes[8] = (bytes[8] & 0x3f) | 0x80;
++
++		var hex = function (byte) {
++			return (byte + 0x100).toString(16).slice(1);
++		};
++
++		return (
++			hex(bytes[0]) +
++			hex(bytes[1]) +
++			hex(bytes[2]) +
++			hex(bytes[3]) +
++			"-" +
++			hex(bytes[4]) +
++			hex(bytes[5]) +
++			"-" +
++			hex(bytes[6]) +
++			hex(bytes[7]) +
++			"-" +
++			hex(bytes[8]) +
++			hex(bytes[9]) +
++			"-" +
++			hex(bytes[10]) +
++			hex(bytes[11]) +
++			hex(bytes[12]) +
++			hex(bytes[13]) +
++			hex(bytes[14]) +
++			hex(bytes[15])
++		);
 +	};
 +}
 +

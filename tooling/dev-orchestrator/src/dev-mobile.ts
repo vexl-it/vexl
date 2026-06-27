@@ -19,6 +19,7 @@ import {
   selectDeviceInteractively,
   startExpoWithMode,
 } from './mobile/index.js'
+import {installGracefulSignalHandling} from './process/graceful-signals.js'
 import {logError, logSuccess, logWithPrefix} from './ui/logger.js'
 
 /**
@@ -317,6 +318,10 @@ program
       console.error('Error: --release-mode requires --build')
       process.exit(1)
     }
+
+    // Keep us alive across the duplicate SIGINT the parent pnpm forwards, so
+    // the graceful shutdown can run to completion (see graceful-signals.ts).
+    installGracefulSignalHandling()
 
     NodeRuntime.runMain(
       runMobile(options).pipe(

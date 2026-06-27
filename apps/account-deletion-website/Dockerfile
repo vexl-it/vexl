@@ -23,6 +23,7 @@ WORKDIR /app
 # Source-only changes do NOT invalidate this layer.
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     corepack enable && \
     pnpm config set store-dir /pnpm/store && \
@@ -50,8 +51,10 @@ ENV SERVICE_VERSION=${SERVICE_VERSION}
 ENV SERVICE_NAME="Account Deletion Website - ${ENVIRONMENT}"
 ENV PORT=3000
 
-COPY --from=builder /app/apps/account-deletion-website/.next/standalone ./
+COPY --chown=node:node --from=builder /app/apps/account-deletion-website/.next/standalone ./
 
 EXPOSE 3000
+
+USER node
 
 CMD ["node", "apps/account-deletion-website/server.js"]

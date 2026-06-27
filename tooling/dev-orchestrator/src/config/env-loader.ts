@@ -4,23 +4,17 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 
 /**
- * Find project root by looking for root package.json with workspaces
+ * Find project root by looking for the pnpm-workspace.yaml marker
  */
 export const findProjectRoot = (): string => {
   let dir = process.cwd()
   while (dir !== '/') {
-    const pkgPath = path.join(dir, 'package.json')
-    if (fs.existsSync(pkgPath)) {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
-      if (pkg.workspaces) {
-        return dir
-      }
+    if (fs.existsSync(path.join(dir, 'pnpm-workspace.yaml'))) {
+      return dir
     }
     dir = path.dirname(dir)
   }
-  throw new Error(
-    'Could not find project root (no package.json with workspaces)'
-  )
+  throw new Error('Could not find project root (no pnpm-workspace.yaml)')
 }
 
 export class EnvLocalNotFound {

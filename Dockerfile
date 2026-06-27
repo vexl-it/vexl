@@ -31,11 +31,12 @@ ARG APP
 
 WORKDIR /app
 
-# Install layer: depends only on the manifests, the lockfile and the committed
+# Install layer: depends only on manifests, the lockfile and patch files.
 # Because none of these change when only source changes, this expensive layer is
 # cached across source-only rebuilds.
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
 
 # Shared pnpm store cache mount: the builder and prod-deps stages install from
 # the same store (deduped downloads), and on persistent builders it survives
@@ -64,6 +65,7 @@ WORKDIR /app
 
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
 
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     corepack enable && \
@@ -88,11 +90,13 @@ ENV SERVICE_NAME="${SERVICE_DISPLAY_NAME} - ${ENVIRONMENT}"
 
 WORKDIR /app
 
-COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=prod-deps /app/package.json /app/package.json
-COPY --from=builder /app/apps/${APP}/dist /app/apps/${APP}/dist
-COPY --from=builder /app/apps/${APP}/package.json /app/apps/${APP}/package.json
+COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
+COPY --chown=node:node --from=prod-deps /app/package.json /app/package.json
+COPY --chown=node:node --from=builder /app/apps/${APP}/dist /app/apps/${APP}/dist
+COPY --chown=node:node --from=builder /app/apps/${APP}/package.json /app/apps/${APP}/package.json
 
 WORKDIR /app/apps/${APP}
+
+USER node
 
 CMD ["node", "--enable-source-maps", "dist/index.js"]

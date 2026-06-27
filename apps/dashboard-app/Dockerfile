@@ -23,6 +23,7 @@ WORKDIR /app
 # Source-only changes do NOT invalidate this layer.
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     corepack enable && \
     pnpm config set store-dir /pnpm/store && \
@@ -41,6 +42,7 @@ FROM node:24 as prod-deps
 WORKDIR /app
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=pruner /app/patches ./patches
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     corepack enable && \
     pnpm config set store-dir /pnpm/store && \
@@ -58,11 +60,13 @@ ARG ENVIRONMENT
 ENV SERVICE_VERSION=${SERVICE_VERSION}
 ENV SERVICE_NAME="Dashboard app service - ${ENVIRONMENT}"
 
-COPY --from=prod-deps /app/node_modules /app/node_modules
-COPY --from=prod-deps /app/package.json /app/package.json
-COPY --from=builder /app/apps/dashboard-app/dist /app/apps/dashboard-app/dist
-COPY --from=builder /app/apps/dashboard-app/package.json /app/apps/dashboard-app/package.json
+COPY --chown=node:node --from=prod-deps /app/node_modules /app/node_modules
+COPY --chown=node:node --from=prod-deps /app/package.json /app/package.json
+COPY --chown=node:node --from=builder /app/apps/dashboard-app/dist /app/apps/dashboard-app/dist
+COPY --chown=node:node --from=builder /app/apps/dashboard-app/package.json /app/apps/dashboard-app/package.json
 
 WORKDIR /app/apps/dashboard-app
+
+USER node
 
 CMD ["node", "dist/server/index.cjs"]

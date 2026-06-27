@@ -5,10 +5,10 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "dev:backend": "tsx src/dev-backend.ts",
+    "dev": "node --import tsx src/index.ts",
+    "dev:backend": "node --import tsx src/dev-backend.ts",
     "health": "tsx src/health.ts",
-    "dev:mobile": "tsx src/dev-mobile.ts",
+    "dev:mobile": "node --import tsx src/dev-mobile.ts",
     "clear-db": "tsx src/clear-db.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",

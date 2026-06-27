@@ -20,6 +20,7 @@ import {
   startInfrastructure,
 } from './infrastructure/docker.js'
 import {startExpoDevServer} from './mobile/index.js'
+import {installGracefulSignalHandling} from './process/graceful-signals.js'
 import {clearLogBridge, createLogBridge} from './process/log-bridge.js'
 import {prepareBackendLogDirectory} from './process/log-files.js'
 import {
@@ -434,6 +435,10 @@ const runOrchestrator = async (opts: {tui: boolean}): Promise<void> => {
 
   // Select main based on TUI mode
   const main = useTui ? mainTui : mainPlain
+
+  // Keep us alive across the duplicate SIGINT the parent pnpm forwards, so the
+  // graceful shutdown below can run to completion (see graceful-signals.ts).
+  installGracefulSignalHandling()
 
   // Run with NodeRuntime for proper signal handling
   // Per RESEARCH.md: NodeRuntime.runMain handles SIGINT/SIGTERM gracefully

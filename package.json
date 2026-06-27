@@ -1,11 +1,6 @@
 {
   "name": "vexl-next",
   "packageManager": "pnpm@11.9.0",
-  "workspaces": [
-    "packages/*",
-    "apps/*",
-    "tooling/*"
-  ],
   "scripts": {
     "turbo:clean": "turbo clean && rm -rf ./node_modules/.cache",
     "turbo:format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",
@@ -14,9 +9,7 @@
     "turbo:lint": "turbo lint --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
     "turbo:lint:fix": "turbo lint --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
     "turbo:typecheck": "turbo typecheck",
-    "turbo:check-code": "turbo format lint typecheck",
-    "utils:sync-translations": "pnpm --filter @vexl-next/localization utils:sync",
-    "utils:add-translation": "pnpm --filter @vexl-next/localization utils:add",
+    "turbo:check-code": "turbo format lint typecheck && manypkg check",
     "notification-service:build-docker-image": "./scripts/build-app-docker-image.sh notification-service",
     "location-service:build-docker-image": "./scripts/build-app-docker-image.sh location-service",
     "btc-exchange-rate-service:build-docker-image": "./scripts/build-app-docker-image.sh btc-exchange-rate-service",

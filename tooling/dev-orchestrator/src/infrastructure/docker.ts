@@ -156,6 +156,70 @@ const removeExistingInfrastructureContainers = (
 }
 
 /**
+ * Run the one-shot `minio-init` service to completion and surface its real
+ * exit code.
+ *
+ * `minio-init` lives behind the "init" compose profile so it is excluded from
+ * the `docker compose up --wait` below — `--wait` reports the whole `up` as
+ * failed when any container exits, even a one-shot that exits 0. Running it
+ * separately here lets us wait for the bucket setup and still detect a genuine
+ * failure via this container's own exit code.
+ */
+const runMinioInit = (
+  composeFile: string,
+  projectRoot: string
+): Effect.Effect<void, DockerStartupError, never> =>
+  Effect.gen(function* () {
+    const command = pipe(
+      Command.make(
+        'docker',
+        'compose',
+        '-f',
+        composeFile,
+        'run',
+        '--rm',
+        'minio-init'
+      ),
+      Command.workingDirectory(projectRoot)
+    )
+
+    const [exitCode, stderrChunks] = yield* pipe(
+      Command.start(command),
+      Effect.flatMap((process) =>
+        Effect.all(
+          [
+            process.exitCode,
+            pipe(process.stderr, Stream.decodeText(), Stream.runCollect),
+          ],
+          {concurrency: 2}
+        )
+      ),
+      Effect.scoped,
+      Effect.provide(NodeContext.layer),
+      Effect.mapError(
+        (error) =>
+          new DockerStartupError(
+            `MinIO bucket initialization could not be started: ${String(error)}`,
+            1
+          )
+      )
+    )
+
+    if (exitCode !== 0) {
+      const stderr = Chunk.toArray(stderrChunks).join('').trim()
+      if (stderr) {
+        logError('docker', stderr)
+      }
+      return yield* Effect.fail(
+        new DockerStartupError(
+          `MinIO bucket initialization failed with exit code ${exitCode}`,
+          exitCode
+        )
+      )
+    }
+  })
+
+/**
  * Check if Docker infrastructure is already running.
  * Postgres and Redis must be healthy; observability containers must be running.
  */
@@ -368,6 +432,10 @@ export const startInfrastructure = Effect.gen(function* () {
   if (stdout.trim()) {
     logWithPrefix('docker', stdout.trim())
   }
+
+  // Set up the MinIO bucket. Runs after `up --wait` so MinIO is up; the init
+  // container is idempotent and retries until MinIO accepts connections.
+  yield* runMinioInit(composeFile, projectRoot)
 
   // Emit 'ready' phase for infrastructure (if TUI active)
   const readyTime = new Date()

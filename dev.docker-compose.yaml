@@ -47,6 +47,11 @@ services:
   minio-init:
     image: minio/mc:RELEASE.2025-08-13T08-35-41Z
     container_name: vexl-minio-init
+    # One-shot bucket setup. Kept behind a profile so `docker compose up --wait`
+    # does not include it: `--wait` treats a container that exits (even with
+    # code 0) as a failure. The orchestrator runs this service explicitly via
+    # `docker compose run` after the infra is up. See dev-orchestrator docker.ts.
+    profiles: ["init"]
     depends_on:
       - minio
     environment:

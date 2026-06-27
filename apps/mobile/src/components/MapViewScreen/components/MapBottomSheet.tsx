@@ -20,9 +20,16 @@ import Animated, {
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {scheduleOnRN} from 'react-native-worklets'
 import {getTokens} from 'tamagui'
-import {filteredOffersForVisibleMapRegionAtom} from '../../../state/marketplace/atoms/filteredOffers'
+import {isMarketplaceNarrowingActiveAtom} from '../../../state/marketplace/atoms/filterAtoms'
+import {
+  filteredOffersForMapAtom,
+  filteredOffersForVisibleMapRegionAtom,
+} from '../../../state/marketplace/atoms/filteredOffers'
 import atomKeyExtractor from '../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
+import FewFilteredOffersNotice, {
+  shouldShowFewFilteredOffersNotice,
+} from '../../InsideRouter/components/MarketplaceScreen/components/FewFilteredOffersNotice'
 import SearchOffers from '../../InsideRouter/components/MarketplaceScreen/components/SearchOffers'
 import OfferOnMarketplace from '../../OfferOnMarketplace'
 import {selectMapViewOfferActionAtom} from '../atoms'
@@ -143,6 +150,16 @@ function renderOfferItem({
 function BottomSheetOfferList(): React.JSX.Element {
   const [listLoaded, setListLoaded] = useState(false)
   const offerAtoms = useAtomValue(mapOffersSplitAtom)
+  const filteredMapOffers = useAtomValue(filteredOffersForMapAtom)
+  const isMarketplaceNarrowingActive = useAtomValue(
+    isMarketplaceNarrowingActiveAtom
+  )
+  const showFewFilteredOffersNotice =
+    offerAtoms.length > 0 &&
+    shouldShowFewFilteredOffersNotice({
+      isMarketplaceNarrowingActive,
+      offersCount: filteredMapOffers.length,
+    })
 
   const handleListLoad = useCallback(() => {
     setListLoaded(true)
@@ -160,6 +177,11 @@ function BottomSheetOfferList(): React.JSX.Element {
         keyExtractor={atomKeyExtractor}
         ItemSeparatorComponent={BottomSheetItemSeparator}
         ListEmptyComponent={OffersListEmptyState}
+        ListFooterComponent={
+          showFewFilteredOffersNotice ? (
+            <FewFilteredOffersNotice withHorizontalPadding={false} />
+          ) : null
+        }
         onLoad={handleListLoad}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{

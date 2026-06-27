@@ -146,7 +146,15 @@ export const resetLocationFilterActionAtom = atom(null, (get, set) => {
   }))
 })
 
-export const isFilterActiveAtom = atom((get) => {
+function isOffersFilterActive({
+  allClubsCount,
+  filter,
+  includeSort,
+}: {
+  readonly allClubsCount: number
+  readonly filter: OffersFilter
+  readonly includeSort: boolean
+}): boolean {
   // singlePriceCurrency and singlePrice are used only to calculate Product and Other offers filter SATS value for Price component
   // this value is stored, but it's not one of the filtering conditions
   // those values are used to calculate SATS value when filtering Product/Other offers
@@ -160,19 +168,22 @@ export const isFilterActiveAtom = atom((get) => {
     currency,
     amountBottomLimit,
     amountTopLimit,
+    sort,
     ...offersFilterFromStorage
-  } = get(offersFilterFromStorageAtom)
+  } = filter
 
   const {
     singlePriceCurrency: spc,
     text: t,
     filterBarOptions: fbo,
+    sort: initialSort,
     ...filterInitialState
   } = offersFilterInitialState
 
   return !OffersFilterEquals(
     {
       ...offersFilterFromStorage,
+      ...(includeSort ? {sort} : {}),
       filterBarOptions: fbo,
       currency: isAmountFilterEnabled({amountBottomLimit, amountTopLimit})
         ? currency
@@ -191,18 +202,46 @@ export const isFilterActiveAtom = atom((get) => {
         : undefined,
       location: location?.length === 0 ? undefined : location,
       clubsUuids:
-        offersFilterFromStorage.clubsUuids?.length ===
-        Record.values(get(clubsToKeyHolderAtom)).length
+        offersFilterFromStorage.clubsUuids?.length === allClubsCount
           ? undefined
           : offersFilterFromStorage.clubsUuids,
     } satisfies OffersFilter,
-    {...filterInitialState, filterBarOptions: fbo}
+    {
+      ...filterInitialState,
+      ...(includeSort ? {sort: initialSort} : {}),
+      filterBarOptions: fbo,
+    }
   )
+}
+
+export const isFilterActiveAtom = atom((get) => {
+  return isOffersFilterActive({
+    allClubsCount: Record.values(get(clubsToKeyHolderAtom)).length,
+    filter: get(offersFilterFromStorageAtom),
+    includeSort: true,
+  })
 })
 
 export const isTextFilterActiveAtom = atom(
   (get) => !!get(offersFilterFromStorageAtom).text
 )
+
+export const isMarketplaceNarrowingActiveAtom = atom((get) => {
+  const selectedFilterBarOptions = get(filterBarOptionsAtom)
+  const isFilterBarNarrowingActive =
+    selectedFilterBarOptions.size > 0 &&
+    selectedFilterBarOptions.size < MarketplaceFilterBarOption.literals.length
+
+  return (
+    isOffersFilterActive({
+      allClubsCount: Record.values(get(clubsToKeyHolderAtom)).length,
+      filter: get(offersFilterFromStorageAtom),
+      includeSort: false,
+    }) ||
+    get(isTextFilterActiveAtom) ||
+    isFilterBarNarrowingActive
+  )
+})
 
 export const resetFilterInStorageActionAtom = atom(null, (get, set) => {
   const {filterBarOptions, ...restOfOffersFilterInitialState} =

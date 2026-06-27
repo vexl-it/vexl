@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Construire des charges utiles privées",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Construire et crypter la charge utile publique",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Préparation des détails chiffrés de l'offre",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Téléchargement de l'offre",
   "progressBar.DONE": "Terminé",
   "commonFriends.commonFriends": "Amis communs",

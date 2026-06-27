@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "构建私人有效载荷",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "构建并加密公共有效载荷",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "正在准备加密的报价详情",
   "progressBar.SENDING_OFFER_TO_NETWORK": "正在上传报价",
   "progressBar.DONE": "完成",
   "commonFriends.commonFriends": "共同好友",

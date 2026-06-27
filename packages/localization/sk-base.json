@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Konštruovanie súkromného nákladu",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Konštruovanie a šifrovanie verejného užitočného zaťaženia",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Pripravujeme šifrované údaje ponuky",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Odosielanie ponuky",
   "progressBar.DONE": "Hotovo",
   "commonFriends.commonFriends": "Spoloční priatelia",

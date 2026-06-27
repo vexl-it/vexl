@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Konstruowanie prywatnych pakietów danych",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Konstruowanie i szyfrowanie publicznego pakietu danych",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Przygotowywanie zaszyfrowanych szczegółów oferty",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Wysyłam ofertę",
   "progressBar.DONE": "Gotowe",
   "commonFriends.commonFriends": "Wspólni znajomi",

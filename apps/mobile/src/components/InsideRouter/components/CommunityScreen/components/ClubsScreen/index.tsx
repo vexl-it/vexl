@@ -21,7 +21,7 @@ function ClubsScreen({navigation}: Props): React.JSX.Element {
           title={t('clubs.joinAClub')}
           description={t('clubs.joinAClubDescription')}
           primaryButton={{
-            label: t('clubs.joinNewClub'),
+            label: t('clubs.joinClub'),
             onPress: () => {
               navigation.navigate('JoinClubFlow', {
                 screen: 'ScanClubQrCodeScreen',

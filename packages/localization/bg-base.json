@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Конструиране на частни полезни товари",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Конструиране и криптиране на публичен полезен товар",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Подготвяне на шифрованите данни за офертата",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Качване на оферта",
   "progressBar.DONE": "Готово",
   "commonFriends.commonFriends": "Общи приятели",

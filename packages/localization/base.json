@@ -929,6 +929,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Constructing private payloads",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Constructing and encrypting public payload",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Preparing encrypted offer details",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Uploading offer",
   "progressBar.DONE": "Done",
   "commonFriends.commonFriends": "Common friends",

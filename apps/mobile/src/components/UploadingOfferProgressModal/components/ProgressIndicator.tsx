@@ -79,11 +79,23 @@ function ProgressIndicator(): React.JSX.Element {
       >
         <AnimatedProgressFill style={animatedStyle} />
       </XStack>
-      <XStack alignItems="center" justifyContent="space-between">
-        <Typography variant="descriptionBold" color="$foregroundPrimary">
+      <XStack alignItems="center" justifyContent="space-between" gap="$2">
+        <Typography
+          variant="descriptionBold"
+          color="$foregroundPrimary"
+          flexShrink={0}
+        >
           {data.belowProgressLeft ?? ''}
         </Typography>
-        <Typography variant="description" color="$foregroundSecondary">
+        <Typography
+          variant="description"
+          color="$foregroundSecondary"
+          ellipsizeMode="tail"
+          flexShrink={1}
+          minWidth={0}
+          numberOfLines={2}
+          textAlign="right"
+        >
           {data.belowProgressRight ?? ''}
         </Typography>
       </XStack>

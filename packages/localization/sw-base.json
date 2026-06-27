@@ -922,6 +922,7 @@
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Inajenga mzigo wa kibinafsi",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Inajenga na kuimarisha mzigo wa umma",
+  "progressBar.PREPARING_ENCRYPTED_OFFER_DETAILS": "Inaandaa maelezo ya ofa yaliyosimbwa",
   "progressBar.SENDING_OFFER_TO_NETWORK": "Inapakia ofa",
   "progressBar.DONE": "Imemalizika",
   "commonFriends.commonFriends": "Marafiki wa kawaida",

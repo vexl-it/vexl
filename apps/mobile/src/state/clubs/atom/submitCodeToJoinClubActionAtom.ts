@@ -2,6 +2,7 @@ import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {
   type MyOfferInState,
   type OfferAdminId,
+  type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {eitherToEffect} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
@@ -26,6 +27,7 @@ import {getNotificationTokenE} from '../../../utils/notifications'
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {myActiveOffersAtom} from '../../marketplace/atoms/myOffers'
+import {offersAtom} from '../../marketplace/atoms/offersState'
 import {updateOfferActionAtom} from '../../marketplace/atoms/updateOfferActionAtom'
 import {generateVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {SelectOffersToPublishToClubComponent} from './SelectOffersToPublishToClubComponent'
@@ -78,6 +80,22 @@ function getFailedOffers(
     Array.filter((result) => result._tag === 'Failure'),
     Array.map((result) => result.offer)
   )
+}
+
+function restoreOfferInState(
+  offers: readonly OneOfferInState[],
+  offerToRestore: MyOfferInState
+): OneOfferInState[] {
+  return [
+    ...pipe(
+      offers,
+      Array.map((offer) =>
+        offer.offerInfo.offerId === offerToRestore.offerInfo.offerId
+          ? offerToRestore
+          : offer
+      )
+    ),
+  ]
 }
 
 function getPublishedOffersCountKey(
@@ -237,7 +255,12 @@ const publishSelectedOffersToJoinedClubActionAtom = atom(
                 }).pipe(
                   Effect.as(publishOfferSuccess(offer)),
                   Effect.catchAll(() =>
-                    Effect.succeed(publishOfferFailure(offer))
+                    Effect.sync(() => {
+                      set(offersAtom, (offers) =>
+                        restoreOfferInState(offers, offer)
+                      )
+                      return publishOfferFailure(offer)
+                    })
                   )
                 ),
               {concurrency: 1}

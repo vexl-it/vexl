@@ -33,19 +33,18 @@ beforeEach(() => {
   checkVerificationMock.mockClear()
 })
 
-const smsProviderErrorReasonMatrix: ReadonlyArray<{
-  reason: UnableToSendVerificationSmsError['reason']
-  shouldReturnVerificationData: boolean
-}> = [
-  {reason: 'InvalidPhoneNumber', shouldReturnVerificationData: false},
-  {reason: 'CarrierError', shouldReturnVerificationData: true},
-  {reason: 'UnsupportedCarrier', shouldReturnVerificationData: true},
-  {reason: 'AntiFraudBlock', shouldReturnVerificationData: false},
-  {reason: 'AntiFraudBlock12h', shouldReturnVerificationData: false},
-  {reason: 'AntiFraudBlockGeo', shouldReturnVerificationData: false},
-  {reason: 'MaxAttemptsReached', shouldReturnVerificationData: false},
-  {reason: 'NumberDoesNotSupportSms', shouldReturnVerificationData: false},
-  {reason: 'Other', shouldReturnVerificationData: true},
+const smsProviderErrorReasons: ReadonlyArray<
+  UnableToSendVerificationSmsError['reason']
+> = [
+  'InvalidPhoneNumber',
+  'CarrierError',
+  'UnsupportedCarrier',
+  'AntiFraudBlock',
+  'AntiFraudBlock12h',
+  'AntiFraudBlockGeo',
+  'MaxAttemptsReached',
+  'NumberDoesNotSupportSms',
+  'Other',
 ]
 
 describe('Initialize verification', () => {
@@ -217,9 +216,9 @@ describe('Initialize verification', () => {
     )
   })
 
-  it.each(smsProviderErrorReasonMatrix)(
-    'returns expected verification data for $reason provider errors',
-    async ({reason, shouldReturnVerificationData}) => {
+  it.each(smsProviderErrorReasons)(
+    'does not return verification data for %s provider errors',
+    async (reason) => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -253,13 +252,8 @@ describe('Initialize verification', () => {
           if (result._tag !== 'Left') return
           if (!Schema.is(UnableToSendVerificationSmsError)(result.left)) return
 
-          if (shouldReturnVerificationData) {
-            expect(result.left.verificationId).toBeDefined()
-            expect(result.left.expirationAt).toBeDefined()
-          } else {
-            expect(result.left.verificationId).toBeUndefined()
-            expect(result.left.expirationAt).toBeUndefined()
-          }
+          expect(result.left.verificationId).toBeUndefined()
+          expect(result.left.expirationAt).toBeUndefined()
         })
       )
     }

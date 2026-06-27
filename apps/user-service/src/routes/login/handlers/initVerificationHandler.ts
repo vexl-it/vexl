@@ -20,7 +20,6 @@ import {
   loginCodeDummyForAll,
   lowestSupportVersionToLoginConfig,
 } from '../../../configs'
-import {SmsVerificationSid} from '../../../utils/SmsVerificationSid.brand'
 import {createVerification} from '../../../utils/smsVerificationUtils'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../constants'
 import {VerificationStateDbService} from '../db/verificationStateDb'
@@ -53,33 +52,6 @@ const makeTwilioSmsVerificationState = (
   ...args,
   type: 'twilioSmsVerification',
 })
-
-const mayHaveDeliveredSmsDespiteProviderError = (
-  reason: UnableToSendVerificationSmsError['reason']
-): boolean => {
-  switch (reason) {
-    case 'CarrierError':
-    case 'UnsupportedCarrier':
-    case 'Other':
-      return true
-    default:
-      return false
-  }
-}
-
-const addVerificationStateToSmsError = ({
-  error,
-  verificationState,
-}: {
-  error: UnableToSendVerificationSmsError
-  verificationState: TwilioSmsVerificationState
-}): UnableToSendVerificationSmsError =>
-  new UnableToSendVerificationSmsError({
-    reason: error.reason,
-    status: error.status,
-    verificationId: verificationState.id,
-    expirationAt: fromMilliseconds(verificationState.expiresAt),
-  })
 
 const checkClientVersion = (
   clientVersion: Option.Option<VersionCode>
@@ -221,33 +193,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
       }
 
       const sid = yield* _(
-        createVerification(req.payload.phoneNumber, req.headers).pipe(
-          Effect.catchTag('UnableToSendVerificationSmsError', (e) => {
-            if (!mayHaveDeliveredSmsDespiteProviderError(e.reason)) {
-              return Effect.fail(e)
-            }
-
-            const verificationState = makeTwilioSmsVerificationState({
-              ...verificationStateBase,
-              sid: Schema.decodeSync(SmsVerificationSid)(
-                req.payload.phoneNumber
-              ),
-            })
-
-            return loginDbService
-              .storePhoneVerificationState(verificationState)
-              .pipe(
-                Effect.zipRight(
-                  Effect.fail(
-                    addVerificationStateToSmsError({
-                      error: e,
-                      verificationState,
-                    })
-                  )
-                )
-              )
-          })
-        )
+        createVerification(req.payload.phoneNumber, req.headers)
       )
       const verificationState = makeTwilioSmsVerificationState({
         ...verificationStateBase,

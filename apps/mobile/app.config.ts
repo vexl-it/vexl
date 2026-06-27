@@ -298,7 +298,7 @@ export default {
     [
       'react-native-capture-protection',
       {
-        'captureType': 'fullMediaCapture',
+        'captureType': 'base',
       },
     ],
     [

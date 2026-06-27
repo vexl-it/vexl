@@ -97,7 +97,7 @@
     "react-native": "0.85.3",
     "react-native-autolink": "^4.2.0",
     "react-native-calendars": "^1.1313.0",
-    "react-native-capture-protection": "^2.1.1",
+    "react-native-capture-protection": "2.4.1",
     "react-native-country-select": "^0.2.6",
     "react-native-draggable": "3.3.0",
     "react-native-gesture-handler": "~2.31.1",

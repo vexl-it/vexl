@@ -145,7 +145,9 @@ export default function PhoneNumberScreen({
   const [phoneNumber, setPhoneNumber] = useState<
     Option.Option<E164PhoneNumber>
   >(Option.none())
+  const [errorMessage, setErrorMessage] = useState<string | undefined>()
   const navigationInProgressRef = useRef(false)
+  const initPhoneVerificationInProgressRef = useRef(false)
   const loadingOverlay = useShowLoadingOverlay()
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
   const phoneNumberGroupLengths = getGroupLengths(selectedCountry)
@@ -207,6 +209,7 @@ export default function PhoneNumberScreen({
 
     setSelectedCountry(country)
     setNationalNumber('')
+    setErrorMessage(undefined)
     setPhoneNumber(Option.none())
   }, [selectedCountryCode, selectedCountry?.cca2])
 
@@ -220,20 +223,31 @@ export default function PhoneNumberScreen({
         label: t('common.continue'),
         onPress: () => {
           if (Option.isNone(phoneNumber)) return
+          if (initPhoneVerificationInProgressRef.current) return
 
+          initPhoneVerificationInProgressRef.current = true
+          setErrorMessage(undefined)
           loadingOverlay.show()
           void Effect.runPromise(initPhoneVerification(phoneNumber.value))
             .then(async (result) => {
-              if (result._tag === 'Some') {
-                navigationInProgressRef.current = true
-                await dismissKeyboardAndResolveOnLayoutUpdate()
-                navigation.navigate('VerificationCode', {
-                  phoneNumber: phoneNumber.value,
-                  initPhoneVerificationResponse: result.value,
-                })
-              }
+              navigationInProgressRef.current = true
+              await dismissKeyboardAndResolveOnLayoutUpdate()
+              navigation.navigate('VerificationCode', {
+                phoneNumber: phoneNumber.value,
+                initPhoneVerificationResponse: result,
+              })
             })
-            .finally(loadingOverlay.hide)
+            .catch((error: unknown) => {
+              setErrorMessage(
+                typeof error === 'string'
+                  ? error
+                  : t('common.somethingWentWrong')
+              )
+            })
+            .finally(() => {
+              initPhoneVerificationInProgressRef.current = false
+              loadingOverlay.hide()
+            })
         },
       }}
       scroll
@@ -243,45 +257,58 @@ export default function PhoneNumberScreen({
           <LoginFlowTitle>{t('loginFlow.v2.phoneNumber.title')}</LoginFlowTitle>
           <LoginFlowText>{t('loginFlow.v2.phoneNumber.text')}</LoginFlowText>
         </YStack>
-        <XStack
-          alignItems="center"
-          gap="$4"
-          justifyContent="center"
-          onPress={() => {
-            inputRef.current?.focus()
-          }}
-          pressStyle={{opacity: 0.8}}
-          width="100%"
-        >
-          <TextInput
-            autoFocus
-            keyboardType="number-pad"
-            onChangeText={(value) => {
-              const digits = value.replace(/\D/g, '')
-              setNationalNumber(digits)
-              setPhoneNumber(toE164PhoneNumber(`${callingCode}${digits}`))
-            }}
-            ref={inputRef}
-            style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
-            submitBehavior="submit"
-            value={nationalNumber}
-          />
-          <Typography
-            color="$foregroundPrimary"
+        <YStack alignItems="center" gap="$3" width="100%">
+          <XStack
+            alignItems="center"
+            gap="$4"
+            justifyContent="center"
             onPress={() => {
-              navigationInProgressRef.current = true
-              runAfterKeyboardDismiss(() => {
-                navigation.navigate('CountryPicker')
-              })
+              inputRef.current?.focus()
             }}
             pressStyle={{opacity: 0.8}}
-            textDecorationLine="underline"
-            variant="heading3"
+            width="100%"
           >
-            {callingCode}
-          </Typography>
-          {phoneNumberGroupElements}
-        </XStack>
+            <TextInput
+              autoFocus
+              keyboardType="number-pad"
+              onChangeText={(value) => {
+                const digits = value.replace(/\D/g, '')
+                setErrorMessage(undefined)
+                setNationalNumber(digits)
+                setPhoneNumber(toE164PhoneNumber(`${callingCode}${digits}`))
+              }}
+              ref={inputRef}
+              style={{height: 1, opacity: 0, position: 'absolute', width: 1}}
+              submitBehavior="submit"
+              value={nationalNumber}
+            />
+            <Typography
+              color="$foregroundPrimary"
+              onPress={() => {
+                setErrorMessage(undefined)
+                navigationInProgressRef.current = true
+                runAfterKeyboardDismiss(() => {
+                  navigation.navigate('CountryPicker')
+                })
+              }}
+              pressStyle={{opacity: 0.8}}
+              textDecorationLine="underline"
+              variant="heading3"
+            >
+              {callingCode}
+            </Typography>
+            {phoneNumberGroupElements}
+          </XStack>
+          {errorMessage != null ? (
+            <Typography
+              color="$redForeground"
+              textAlign="center"
+              variant="paragraphSmall"
+            >
+              {errorMessage}
+            </Typography>
+          ) : null}
+        </YStack>
       </YStack>
     </LoginFlowScreen>
   )

@@ -6,7 +6,6 @@ import {
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
   KeyboardStickyView,
-  RadiusSlider,
   Stack,
   Typography,
   tokens,
@@ -17,7 +16,7 @@ import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useMemo, useState} from 'react'
 import {StyleSheet, type LayoutChangeEvent} from 'react-native'
 import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
@@ -38,7 +37,6 @@ import {
   calculateAvailableSelectionFrame,
   calculateLongitudeRadiusDelta,
   calculateRingDiameter,
-  calculateZoomFromLongitudeDelta,
 } from './MapLocationWithRadiusSelect.geometry'
 import {MapPinAsset, RadiusRingAsset} from './MapSvgAssets'
 
@@ -47,9 +45,8 @@ type Props = React.ComponentProps<typeof Stack> & {
   bottomChildren?: React.ReactNode
   initialValue: MapValue
   onPick: (place: MapValueWithRadius | null) => void
-  hideSlider?: boolean
+  onMapGesture?: () => void
   mapRef: React.RefObject<MapView | null>
-  onMapZoomChange?: (zoom: number) => void
 }
 
 const circleMargin = tokens.space[2].val
@@ -61,19 +58,12 @@ const styles = StyleSheet.create({
   },
 })
 
-const MIN_ZOOM = 7
-const MAX_ZOOM = 16
-
 interface SelectedMapState {
   center: {
     latitude: number
     longitude: number
   }
   radius: number
-}
-
-function clampZoom(value: number): number {
-  return Math.max(MIN_ZOOM, Math.min(value, MAX_ZOOM))
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -191,37 +181,13 @@ function PickedLocationText({
   )
 }
 
-export function calculateZoom(
-  latitude: number,
-  latitudeDelta: number,
-  longitudeDelta: number,
-  minDelta = 0.001,
-  maxDelta = 50
-): number {
-  // Adjust longitudeDelta based on latitude
-  const adjustedLongitudeDelta =
-    longitudeDelta * Math.cos((latitude * Math.PI) / 180)
-
-  // Determine the effective delta
-  const effectiveDelta = Math.max(latitudeDelta, adjustedLongitudeDelta)
-
-  // Clamp the delta within minDelta and maxDelta
-  const clampedDelta = Math.max(minDelta, Math.min(effectiveDelta, maxDelta))
-
-  // Normalize and calculate zoom
-  const zoom = 99 - ((clampedDelta - minDelta) / (maxDelta - minDelta)) * 99
-
-  return Math.round(zoom) // Round to nearest integer
-}
-
 export default function MapLocationWithRadiusSelect({
   onPick,
   initialValue,
   topChildren,
   bottomChildren,
-  hideSlider,
+  onMapGesture,
   mapRef,
-  onMapZoomChange,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
@@ -234,18 +200,6 @@ export default function MapLocationWithRadiusSelect({
     [initialValue]
   )
 
-  const initialZoom = useMemo(
-    () =>
-      clampZoom(
-        calculateZoom(
-          initialRegion.latitude,
-          initialRegion.latitudeDelta,
-          initialRegion.longitudeDelta
-        )
-      ),
-    [initialRegion]
-  )
-  const [zoom, setZoom] = useState(initialZoom)
   const initialSelectedMapState = useMemo(
     () => ({
       center: {
@@ -256,7 +210,6 @@ export default function MapLocationWithRadiusSelect({
     }),
     [initialRegion]
   )
-  const selectedCenterRef = useRef(initialSelectedMapState.center)
   const [containerSize, setContainerSize] = useState({width: 0, height: 0})
   const [topOverlayHeight, setTopOverlayHeight] = useState(0)
   const [bottomOverlayHeight, setBottomOverlayHeight] = useState(0)
@@ -294,26 +247,11 @@ export default function MapLocationWithRadiusSelect({
     [selectionFrame]
   )
 
-  useEffect(() => {
-    setZoom(initialZoom)
-    selectedCenterRef.current = initialSelectedMapState.center
-  }, [initialSelectedMapState, initialZoom])
-
   const atoms = useAtoms({
     initialSelectedMapState,
     onPick,
   })
   const setSelectedMapState = useSetAtom(atoms.selectedMapStateAtom)
-  const handleZoomChange = useCallback(
-    (value: number) => {
-      setZoom(value)
-      mapRef.current?.setCamera({
-        center: selectedCenterRef.current,
-        zoom: value,
-      })
-    },
-    [mapRef]
-  )
   const handleContainerLayout = useCallback((event: LayoutChangeEvent) => {
     const {width, height} = event.nativeEvent.layout
 
@@ -332,19 +270,16 @@ export default function MapLocationWithRadiusSelect({
     setIsMapReady(true)
   }, [])
   const handleRegionChangeComplete = useCallback(
-    (region: Region) => {
+    (_region: Region, details: {isGesture?: boolean}) => {
+      if (details.isGesture === true && isMapReady) {
+        onMapGesture?.()
+      }
+
       if (!isContainerMeasured) return
       if (ringDiameter <= 0) return
 
       const map = mapRef.current
       if (!map) return
-
-      const regionZoom = calculateZoomFromLongitudeDelta({
-        longitudeDelta: region.longitudeDelta,
-        mapWidth: containerSize.width,
-      })
-      setZoom(clampZoom(regionZoom))
-      onMapZoomChange?.(regionZoom)
 
       const centerPoint = {
         x: selectionFrame.centerX,
@@ -371,7 +306,6 @@ export default function MapLocationWithRadiusSelect({
             }),
           }
 
-          selectedCenterRef.current = selectedMapState.center
           setSelectedMapState(selectedMapState)
         })
         .catch((error: unknown) => {
@@ -385,10 +319,10 @@ export default function MapLocationWithRadiusSelect({
         })
     },
     [
-      containerSize.width,
       isContainerMeasured,
+      isMapReady,
       mapRef,
-      onMapZoomChange,
+      onMapGesture,
       ringDiameter,
       selectionFrame,
       setSelectedMapState,
@@ -487,20 +421,7 @@ export default function MapLocationWithRadiusSelect({
           <Stack onLayout={handleTopOverlayLayout}>{topChildren}</Stack>
           <Stack pointerEvents="none" flex={1}></Stack>
           <KeyboardStickyView pointerEvents="box-none">
-            <Stack onLayout={handleBottomOverlayLayout}>
-              {hideSlider !== true ? (
-                <Stack mb="$4" mx="$4">
-                  <RadiusSlider
-                    value={zoom}
-                    step={0.2}
-                    onValueChange={handleZoomChange}
-                    max={MAX_ZOOM}
-                    min={MIN_ZOOM}
-                  />
-                </Stack>
-              ) : null}
-              {bottomChildren}
-            </Stack>
+            <Stack onLayout={handleBottomOverlayLayout}>{bottomChildren}</Stack>
           </KeyboardStickyView>
         </Stack>
       </Stack>

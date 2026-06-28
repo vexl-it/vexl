@@ -518,7 +518,6 @@
   "offerForm.location.setAreaDescription": "حدّد المنطقة التي ترغب في اللقاء فيها للتداول. هذا يساعدنا على إظهار عروض قريبة ومناسبة لك.",
   "offerForm.location.changeRadius": "غيّر النطاق",
   "offerForm.location.meetingAreaDescription": "حدّد المكان الذي ترغب في اللقاء فيه. سترى العروض التي تتداخل منطقة اللقاء فيها مع منطقتك.",
-  "offerForm.location.setMeetingArea": "حدّد منطقة اللقاء",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

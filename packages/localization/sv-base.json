@@ -518,7 +518,6 @@
   "offerForm.location.setAreaDescription": "Ange området där du kan tänka dig att mötas för en affär. Det hjälper oss visa relevanta erbjudanden i närheten.",
   "offerForm.location.changeRadius": "Ändra radien",
   "offerForm.location.meetingAreaDescription": "Ange var du kan tänka dig att mötas. Du ser erbjudanden vars mötesområde överlappar ditt.",
-  "offerForm.location.setMeetingArea": "Ange mötesområde",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

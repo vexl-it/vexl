@@ -1,4 +1,4 @@
-import {useNavigation} from '@react-navigation/native'
+import {useIsFocused, useNavigation} from '@react-navigation/native'
 import {
   Button,
   FaqStayAnonymous,
@@ -10,7 +10,8 @@ import {
 } from '@vexl-next/ui'
 import {Effect, Option} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {AppState} from 'react-native'
 import {
   fistAndSecondLevelConnectionsReachAtom,
   reachNumberAtom,
@@ -28,6 +29,7 @@ import {notificationsEnabledAtom} from '../../../../../state/notifications/areNo
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
+import {useAppState} from '../../../../../utils/useAppState'
 import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
@@ -183,23 +185,45 @@ function EmptyList(): React.ReactElement {
     newOfferButtonVisibleOnLoadingMarketplaceAtom
   )
   const loading = useAreOffersLoading()
+  const loadingRef = useRef(loading)
+  const isFocused = useIsFocused()
+  const [isAppActive, setIsAppActive] = useState(
+    AppState.currentState === 'active'
+  )
   const [loadingOffersTimedOut, setLoadingOffersTimedOut] = useState(false)
   const isLoadingOffersVisible =
     shouldShowLoadingOffers && (!loadingOffersTimedOut || loading)
+  const shouldPollEmptyMarketplace = isAppActive && isFocused
 
   useEffect(() => {
-    if (!shouldShowLoadingOffers || loadingOffersTimedOut || loading) {
+    loadingRef.current = loading
+  }, [loading])
+
+  useAppState(
+    useCallback((state) => {
+      setIsAppActive(state === 'active')
+    }, [])
+  )
+
+  useEffect(() => {
+    if (!shouldPollEmptyMarketplace) {
       return undefined
     }
 
-    const intervalId = setInterval(() => {
+    if (!loadingRef.current) {
       Effect.runFork(refreshOffers())
+    }
+
+    const intervalId = setInterval(() => {
+      if (!loadingRef.current) {
+        Effect.runFork(refreshOffers())
+      }
     }, EMPTY_MARKETPLACE_REFRESH_INTERVAL_MS)
 
     return () => {
       clearInterval(intervalId)
     }
-  }, [loading, loadingOffersTimedOut, refreshOffers, shouldShowLoadingOffers])
+  }, [refreshOffers, shouldPollEmptyMarketplace])
 
   useEffect(() => {
     if (!shouldShowLoadingOffers) {

@@ -1205,9 +1205,9 @@ export const offerFormMolecule = molecule(() => {
             negativeButtonText: t('common.cancel'),
           })
         )
-        if (!confirmed) return
+        if (!confirmed) return false
       }
-      yield* _(set(toggleOfferActiveAtom))
+      return yield* _(set(toggleOfferActiveAtom))
     })
   })
 

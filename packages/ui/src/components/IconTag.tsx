@@ -35,7 +35,6 @@ const IconTagFrame = styled(XStack, {
     neutral: {
       true: {
         backgroundColor: '$backgroundHighlight',
-        height: '$7',
       },
     },
   } as const,
@@ -61,7 +60,7 @@ export function IconTag({
       ? theme.accentHighlightSecondary.get()
       : theme.foregroundPrimary.get()
   const Icon = iconMap[variant]
-  const iconSize = neutral ? sizeTokens.$6.val : sizeTokens.$7.val
+  const iconSize = sizeTokens.$7.val
   const frameVariant = neutral ? undefined : variant
 
   return (

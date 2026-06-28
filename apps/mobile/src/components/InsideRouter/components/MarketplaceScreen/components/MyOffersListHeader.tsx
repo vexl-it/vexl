@@ -1,10 +1,8 @@
 import {ArrowsVerticalSort, Typography} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
-import {selectAtom} from 'jotai/utils'
 import React, {useCallback} from 'react'
 import {Stack, useTheme, XStack} from 'tamagui'
 import {
-  myActiveOffersAtom,
   myOffersSortedAtomsAtom,
   selectedMyOffersSortingOptionAtom,
 } from '../../../../../state/marketplace/atoms/myOffers'
@@ -14,14 +12,12 @@ import {formattingLocaleAtom} from '../../../../../utils/localization/formatting
 import ReencryptOffersSuggestion from '../../../../ReencryptOffersSuggestion'
 import MarketplaceInlineButton from './MarketplaceInlineButton'
 
-const myActiveOffers = selectAtom(myActiveOffersAtom, (offers) => offers.length)
-
 function MyOffersListHeader(): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const theme = useTheme()
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
-  const activeOffersCount = useAtomValue(myActiveOffers)
+  const allOffersCount = myOffersSortedAtoms.length
   const [sortingOption, setSortingOption] = useAtom(
     selectedMyOffersSortingOptionAtom
   )
@@ -53,7 +49,7 @@ function MyOffersListHeader(): React.ReactElement | null {
         >
           <Typography variant="description" color="$foregroundSecondary">
             {t('marketplace.offersCountFormatted', {
-              localizedString: formatInteger(activeOffersCount, locale),
+              localizedString: formatInteger(allOffersCount, locale),
             })}
           </Typography>
           <MarketplaceInlineButton

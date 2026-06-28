@@ -16,6 +16,7 @@ import {
 } from '../state/clubs/atom/clubsWithMembersAtom'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
+import {isOfferExpired} from '../utils/isOfferExpired'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -46,6 +47,8 @@ export default function OfferOnMarketplace({
   const {ownershipInfo} = offer
   const isMine = !!ownershipInfo?.adminId
   const isMyOffer = !!ownershipInfo
+  const isExpiredMyOffer = isMine && isOfferExpired(publicPart.expirationDate)
+  const isPausedMyOffer = isMine && !publicPart.active
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
 
@@ -103,10 +106,19 @@ export default function OfferOnMarketplace({
     : undefined
 
   const price = getAmountLabel(offer)
-  const statusLabel =
+  const isMissingProductCategory =
     isMine && isProductOfferMissingCategory(offer)
-      ? t('marketplace.missingProductCategoriesSuggestion.cardLabel')
-      : undefined
+  const statusLabel = isMissingProductCategory
+    ? t('marketplace.missingProductCategoriesSuggestion.cardLabel')
+    : isExpiredMyOffer && isPausedMyOffer
+      ? t('editOffer.expiredAndPausedOffer')
+      : isExpiredMyOffer
+        ? t('editOffer.expiredOffer')
+        : isPausedMyOffer
+          ? t('editOffer.pausedOffer')
+          : undefined
+  const statusVariant =
+    isMissingProductCategory || isExpiredMyOffer ? 'warning' : 'waiting'
 
   const premiumLabel = useMemo(
     () =>
@@ -194,6 +206,7 @@ export default function OfferOnMarketplace({
       description={publicPart.offerDescription}
       details={details}
       statusLabel={statusLabel}
+      statusVariant={statusVariant}
       onPress={onPress}
       actionButton={actionButton}
     />

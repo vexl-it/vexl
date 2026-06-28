@@ -8,6 +8,7 @@ import {useAreOffersLoading} from '../../../../../state/marketplace'
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {myOffersSortedAtomsAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
+import {shouldShowMissingProductCategoriesInMyOffersSuggestionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {showMarketplaceIntroDialogIfNeededActionAtom} from '../../../../../state/marketplace/atoms/showMarketplaceIntroDialogIfNeededActionAtom'
 import {useHandleRedirectToContactsScreen} from '../../../../../state/useHandleRedirectToContactsScreen'
@@ -18,6 +19,7 @@ import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import {type MarketplaceTab} from '../index'
 import AllOffersListHeader from './AllOffersListHeader'
 import FilteredOffersEmptyState from './FilteredOffersEmptyState'
+import MissingProductCategoriesMarketplaceSuggestion from './MissingProductCategoriesMarketplaceSuggestion'
 import MyOffersEmptyList from './MyOffersEmptyList'
 import MyOffersListHeader from './MyOffersListHeader'
 
@@ -45,6 +47,10 @@ function MarketplaceListHeader({
   readonly onTabPress: (tab: MarketplaceTab) => void
   readonly tabs: ReadonlyArray<TabItem<MarketplaceTab>>
 }): React.ReactElement {
+  const shouldShowMissingProductCategoriesSuggestion = useAtomValue(
+    shouldShowMissingProductCategoriesInMyOffersSuggestionAtom
+  )
+
   return (
     <InsideScreenListHeader>
       <Stack paddingLeft="$5">
@@ -56,7 +62,14 @@ function MarketplaceListHeader({
           onFilterChange={onFilterChange}
         />
       ) : (
-        <MyOffersListHeader />
+        <>
+          <MyOffersListHeader />
+          {shouldShowMissingProductCategoriesSuggestion ? (
+            <Stack paddingTop="$5" paddingBottom="$5" paddingHorizontal="$5">
+              <MissingProductCategoriesMarketplaceSuggestion placement="myOffers" />
+            </Stack>
+          ) : null}
+        </>
       )}
     </InsideScreenListHeader>
   )

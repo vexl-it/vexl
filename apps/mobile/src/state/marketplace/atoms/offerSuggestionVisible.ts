@@ -12,7 +12,10 @@ import {newPhoneContactsToReviewRawNumbersAtom} from '../../contacts/atom/contac
 import {notificationsEnabledAtom} from '../../notifications/areNotificationsEnabledAtom'
 import {REACH_NUMBER_THRESHOLD} from '../domain'
 import {filteredOffersIncludingLocationFilterAtomsAtom} from './filteredOffers'
-import {areThereAnyMyOffersAtom} from './myOffers'
+import {
+  areThereAnyMyOffersAtom,
+  myProductOffersMissingCategoryAtom,
+} from './myOffers'
 
 export const addMoreContactsSuggestionVisibleAtom = atom<boolean>(true)
 export const resetFilterSuggestionVisibleAtom = atom<boolean>(true)
@@ -107,25 +110,41 @@ export const shouldShowEnableNotificationsInMarketplaceSuggestionAtom = atom(
   }
 )
 
-const marketplaceSuggestionDismissedThisSessionAtom = atom<boolean>(false)
+// Prevents another marketplace suggestion banner from appearing immediately
+// after the user dismisses one. Reset after offers refresh.
+export const anyMarketplaceSuggestionDismissedInThisSessionAtom =
+  atom<boolean>(false)
+const missingProductCategoriesSuggestionDismissedThisSessionAtom =
+  atom<boolean>(false)
+
+export const shouldShowMissingProductCategoriesInMyOffersSuggestionAtom = atom(
+  (get) =>
+    Array.isNonEmptyArray(get(myProductOffersMissingCategoryAtom)) &&
+    !get(missingProductCategoriesSuggestionDismissedThisSessionAtom)
+)
 
 export const marketplaceFirstOfferBannerAtom = atom<
+  | 'missingProductCategories'
   | 'importNewContacts'
   | 'importContacts'
   | 'enableNotifications'
   | 'createOffer'
   | null
 >((get) => {
+  if (get(anyMarketplaceSuggestionDismissedInThisSessionAtom)) {
+    return null
+  }
+
+  if (get(shouldShowMissingProductCategoriesInMyOffersSuggestionAtom)) {
+    return 'missingProductCategories'
+  }
+
   if (get(shouldShowImportNewContactsInMarketplaceSuggestionAtom)) {
     return 'importNewContacts'
   }
 
   if (get(shouldShowImportContactsInMarketplaceSuggestionAtom)) {
     return 'importContacts'
-  }
-
-  if (get(marketplaceSuggestionDismissedThisSessionAtom)) {
-    return null
   }
 
   if (get(shouldShowEnableNotificationsInMarketplaceSuggestionAtom)) {
@@ -143,6 +162,7 @@ export const dismissCreateOfferInMarketplaceSuggestionActionAtom = atom(
   null,
   (get, set) => {
     set(showCreateOfferInMarketplaceSuggestionAtom, false)
+    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
   }
 )
 
@@ -150,7 +170,7 @@ export const dismissImportContactsInMarketplaceSuggestionActionAtom = atom(
   null,
   (get, set) => {
     set(showImportContactsInMarketplaceSuggestionAtom, false)
-    set(marketplaceSuggestionDismissedThisSessionAtom, true)
+    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
   }
 )
 
@@ -167,7 +187,7 @@ export const dismissImportNewContactsInMarketplaceSuggestionActionAtom = atom(
         Array.dedupe
       ),
     }))
-    set(marketplaceSuggestionDismissedThisSessionAtom, true)
+    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
   }
 )
 
@@ -175,13 +195,12 @@ export const dismissEnableNotificationsInMarketplaceSuggestionActionAtom = atom(
   null,
   (get, set) => {
     set(showEnableNotificationsInMarketplaceSuggestionAtom, false)
-    set(marketplaceSuggestionDismissedThisSessionAtom, true)
+    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
   }
 )
 
-export const resetImportContactsMarketplaceSuggestionSessionActionAtom = atom(
-  null,
-  (get, set) => {
-    set(marketplaceSuggestionDismissedThisSessionAtom, false)
-  }
-)
+export const dismissMissingProductCategoriesInMarketplaceSuggestionActionAtom =
+  atom(null, (get, set) => {
+    set(missingProductCategoriesSuggestionDismissedThisSessionAtom, true)
+    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
+  })

@@ -13,6 +13,7 @@ import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {sessionDataOrDummyAtom} from '../../session'
+import {isProductOfferMissingCategory} from '../utils/isProductOfferMissingCategory'
 import sortOffers from '../utils/sortOffers'
 import {offersAtom} from './offersState'
 
@@ -41,6 +42,10 @@ export const myOffersSortedAtomsAtom = splitAtom(
 
 export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)
+)
+
+export const myProductOffersMissingCategoryAtom = atom((get) =>
+  pipe(get(myOffersAtom), Array.filter(isProductOfferMissingCategory))
 )
 
 const accountActionStepsStorageAtom = atomWithParsedMmkvStorage(

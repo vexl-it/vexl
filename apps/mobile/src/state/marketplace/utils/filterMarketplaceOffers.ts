@@ -2,6 +2,7 @@ import {
   type OfferLocation,
   type OfferType,
   type OneOfferInState,
+  type ProductCategory,
 } from '@vexl-next/domain/src/general/offers'
 import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, pipe} from 'effect'
@@ -78,6 +79,39 @@ function offerMatchesAmountFilter({
     return false
 
   return true
+}
+
+function offerMatchesProductCategoryFilter({
+  offer,
+  productCategories,
+}: {
+  offer: OneOfferInState
+  productCategories: readonly ProductCategory[] | undefined
+}): boolean {
+  const selectedProductCategories = pipe(
+    productCategories ?? [],
+    Array.fromIterable
+  )
+
+  if (!Array.isNonEmptyArray(selectedProductCategories)) return true
+  if (offer.offerInfo.publicPart.listingType !== 'PRODUCT') return true
+
+  const {productCategory, productCategories: offerProductCategories} =
+    offer.offerInfo.publicPart
+  const categories = pipe(
+    offerProductCategories ?? (productCategory ? [productCategory] : []),
+    Array.fromIterable
+  )
+
+  return (
+    Array.isNonEmptyArray(categories) &&
+    pipe(
+      categories,
+      Array.some((productCategory) =>
+        pipe(selectedProductCategories, Array.contains(productCategory))
+      )
+    )
+  )
 }
 
 export function offerMatchesMarketplaceFilterBarOption(
@@ -217,13 +251,10 @@ export function filterMarketplaceOffers({
         return false
 
       if (
-        filter.productCategories &&
-        filter.productCategories.length > 0 &&
-        offer.offerInfo.publicPart.listingType === 'PRODUCT' &&
-        offer.offerInfo.publicPart.productCategory &&
-        !filter.productCategories.includes(
-          offer.offerInfo.publicPart.productCategory
-        )
+        !offerMatchesProductCategoryFilter({
+          offer,
+          productCategories: filter.productCategories,
+        })
       )
         return false
 

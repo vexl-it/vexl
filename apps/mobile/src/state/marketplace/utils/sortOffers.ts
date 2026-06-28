@@ -3,10 +3,10 @@ import {
   type Sort,
 } from '@vexl-next/domain/src/general/offers'
 
-export default function sortOffers(
-  offers: readonly OneOfferInState[],
+export default function sortOffers<T extends OneOfferInState>(
+  offers: readonly T[],
   sort: Sort
-): OneOfferInState[] {
+): T[] {
   const toReturn = [...offers]
 
   toReturn.sort((a, b) => {

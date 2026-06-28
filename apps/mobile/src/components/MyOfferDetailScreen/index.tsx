@@ -24,7 +24,7 @@ import {
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect, Option} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useLayoutEffect} from 'react'
+import React, {useCallback, useLayoutEffect, useMemo} from 'react'
 import {BackHandler} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens, ScrollView, XStack, YStack} from 'tamagui'
@@ -34,6 +34,7 @@ import {
   useGetAllClubsNamesForIds,
 } from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
+import {isOfferMissingProductCategoryAtom} from '../../state/marketplace/atoms/offersState'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
@@ -94,6 +95,9 @@ function MyOfferDetailScreen({
   const numberOfFriends = useAtomValue(numberOfFriendsAtom)
   const selectedClubNames = useGetAllClubsNamesForIds(selectedClubsUuids)
   const allClubsWithMembers = useAtomValue(clubsWithMembersAtom)
+  const isMissingProductCategory = useAtomValue(
+    useMemo(() => isOfferMissingProductCategoryAtom(offerId), [offerId])
+  )
 
   useLayoutEffect(() => {
     setOfferForm(offerId)
@@ -161,7 +165,6 @@ function MyOfferDetailScreen({
       }
     )})`
   })()
-
   if (Option.isNone(offerOption)) {
     return (
       <Screen
@@ -248,6 +251,8 @@ function MyOfferDetailScreen({
             <ProductCategoryStep
               active={false}
               icon={BoxProduct}
+              missing={isMissingProductCategory}
+              missingHeadline={t('editOffer.categoryRequired')}
               overline={t('editOffer.detail.productCategory')}
               onEdit={() => {
                 navigateToEdit('productCategory')

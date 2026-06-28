@@ -17,6 +17,7 @@ import CreateOfferMarketplaceSuggestion from '../InsideRouter/components/Marketp
 import EnableNotificationsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/EnableNotificationsMarketplaceSuggestion'
 import ImportContactsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/ImportContactsMarketplaceSuggestion'
 import ImportNewContactsMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/ImportNewContactsMarketplaceSuggestion'
+import MissingProductCategoriesMarketplaceSuggestion from '../InsideRouter/components/MarketplaceScreen/components/MissingProductCategoriesMarketplaceSuggestion'
 import OfferOnMarketplace from '../OfferOnMarketplace'
 
 interface Props {
@@ -39,6 +40,8 @@ function MarketplaceFirstOfferBanner(): React.ReactElement | null {
           <ImportNewContactsMarketplaceSuggestion />
         ) : marketplaceFirstOfferBanner === 'importContacts' ? (
           <ImportContactsMarketplaceSuggestion />
+        ) : marketplaceFirstOfferBanner === 'missingProductCategories' ? (
+          <MissingProductCategoriesMarketplaceSuggestion placement="allOffers" />
         ) : marketplaceFirstOfferBanner === 'enableNotifications' ? (
           <EnableNotificationsMarketplaceSuggestion />
         ) : (

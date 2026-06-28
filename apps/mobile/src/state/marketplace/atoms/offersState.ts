@@ -16,6 +16,7 @@ import {type SetStateAction} from 'react'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {OffersState} from '../domain'
+import {isProductOfferMissingCategory} from '../utils/isProductOfferMissingCategory'
 import {offerWithoutSourceOrNone} from '../utils/offerWithoutSourceOrNone'
 
 export const offersStateAtom = atomWithParsedMmkvStorage(
@@ -51,6 +52,17 @@ export function singleOfferAtom(
   return focusAtom(offersAtom, (optic) =>
     optic.find((offer) => offer.offerInfo.offerId === offerId)
   )
+}
+
+export function isOfferMissingProductCategoryAtom(
+  offerId: OfferId | undefined
+): Atom<boolean> {
+  const offerAtom = singleOfferAtom(offerId)
+
+  return atom((get) => {
+    const offer = get(offerAtom)
+    return offer ? isProductOfferMissingCategory(offer) : false
+  })
 }
 
 export function createSingleOfferReportedFlagAtom(

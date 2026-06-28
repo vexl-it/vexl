@@ -8,7 +8,7 @@ import type {IconProps} from '../icons/types'
 import {Stack, XStack, YStack} from '../primitives'
 import type {AvatarProps} from './Avatar'
 import {Avatar} from './Avatar'
-import {Typography} from './Typography'
+import {Typography, type TypographyProps} from './Typography'
 
 export type EditRowState = 'initial' | 'editing' | 'completed' | 'profile'
 
@@ -74,6 +74,7 @@ interface EditRowBaseProps {
   readonly subheadline?: string
   readonly overline?: string
   readonly optionalLabel?: string
+  readonly headlineColor?: TypographyProps['color']
   readonly showEditButton?: boolean
   readonly showInitialIcon?: boolean
   readonly onPress?: () => void
@@ -95,9 +96,11 @@ export type EditRowProps = EditRowIconProps | EditRowProfileProps
 
 function HeadlineWithSuffix({
   headline,
+  headlineColor,
   suffix,
 }: {
   readonly headline: string
+  readonly headlineColor: TypographyProps['color']
   readonly suffix: string
 }): React.JSX.Element {
   const lines = headline.split('\n')
@@ -110,7 +113,7 @@ function HeadlineWithSuffix({
           <XStack key={i} gap="$2" alignItems="center">
             <Typography
               variant="descriptionBold"
-              color="$foregroundPrimary"
+              color={headlineColor}
               numberOfLines={1}
               flexShrink={1}
             >
@@ -118,7 +121,7 @@ function HeadlineWithSuffix({
             </Typography>
             <Typography
               variant="descriptionBold"
-              color="$foregroundPrimary"
+              color={headlineColor}
               flexShrink={0}
             >
               {suffix}
@@ -128,7 +131,7 @@ function HeadlineWithSuffix({
           <Typography
             key={i}
             variant="descriptionBold"
-            color="$foregroundPrimary"
+            color={headlineColor}
             numberOfLines={1}
           >
             {line}
@@ -146,6 +149,7 @@ export function EditRow({
   subheadline,
   overline,
   optionalLabel,
+  headlineColor = '$foregroundPrimary',
   showEditButton = state !== 'initial',
   showInitialIcon = true,
   onPress,
@@ -218,11 +222,15 @@ export function EditRow({
           </Typography>
         ) : null}
         {headlineSuffix ? (
-          <HeadlineWithSuffix headline={headline} suffix={headlineSuffix} />
+          <HeadlineWithSuffix
+            headline={headline}
+            headlineColor={headlineColor}
+            suffix={headlineSuffix}
+          />
         ) : (
           <Typography
             variant={isInitial ? 'paragraphDemibold' : 'descriptionBold'}
-            color="$foregroundPrimary"
+            color={headlineColor}
             numberOfLines={2}
           >
             {headline}

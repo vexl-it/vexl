@@ -429,7 +429,6 @@ function createDebugFilterTestOfferPublicPart({
       : amount
   const productCategoryPayload = spec.productCategory
     ? {
-        productCategory: spec.productCategory,
         productCategories: [spec.productCategory],
       }
     : {}

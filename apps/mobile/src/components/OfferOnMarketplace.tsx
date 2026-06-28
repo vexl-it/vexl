@@ -14,6 +14,7 @@ import {
   smallestClubForIdsAtom,
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
+import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
@@ -102,6 +103,10 @@ export default function OfferOnMarketplace({
     : undefined
 
   const price = getAmountLabel(offer)
+  const statusLabel =
+    isMine && isProductOfferMissingCategory(offer)
+      ? t('marketplace.missingProductCategoriesSuggestion.cardLabel')
+      : undefined
 
   const premiumLabel = useMemo(
     () =>
@@ -188,6 +193,7 @@ export default function OfferOnMarketplace({
       premiumLabel={premiumLabel.length > 0 ? premiumLabel : undefined}
       description={publicPart.offerDescription}
       details={details}
+      statusLabel={statusLabel}
       onPress={onPress}
       actionButton={actionButton}
     />

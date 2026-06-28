@@ -62,8 +62,6 @@ const TextTagFrame = styled(XStack, {
       },
       neutral: {
         backgroundColor: '$backgroundHighlight',
-        height: '$7',
-        paddingVertical: '$2',
         ...leftShape,
       },
     },
@@ -97,9 +95,6 @@ const TextTagLabel = styled(SizableText, {
       },
       neutral: {
         color: '$foregroundSecondary',
-        fontSize: typographyVariantStyles.micro.fontSize,
-        lineHeight: typographyVariantStyles.micro.lineHeight,
-        letterSpacing: typographyVariantStyles.micro.letterSpacing,
       },
     },
   } as const,

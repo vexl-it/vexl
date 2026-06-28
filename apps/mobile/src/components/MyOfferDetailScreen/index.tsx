@@ -35,6 +35,7 @@ import {
 } from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
 import {isOfferMissingProductCategoryAtom} from '../../state/marketplace/atoms/offersState'
+import {isOfferExpired} from '../../utils/isOfferExpired'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
@@ -192,6 +193,23 @@ function MyOfferDetailScreen({
     )
   }
 
+  const isExpiredOffer = isOfferExpired(
+    offerOption.value.offerInfo.publicPart.expirationDate
+  )
+  const offerStatusLabel =
+    isExpiredOffer && !offerActive
+      ? t('editOffer.expiredAndPausedOffer')
+      : isExpiredOffer
+        ? t('editOffer.expiredOffer')
+        : offerActive
+          ? t('editOffer.activeOffer')
+          : t('editOffer.pausedOffer')
+  const offerStatusVariant = isExpiredOffer
+    ? 'warning'
+    : offerActive
+      ? 'approved'
+      : 'waiting'
+
   return (
     <Screen
       navigationBar={
@@ -204,7 +222,17 @@ function MyOfferDetailScreen({
               icon: offerActive ? Pause : Play,
               disabled: hasUnsavedChanges,
               onPress: () => {
-                void Effect.runPromise(pauseOrResumeOffer())
+                void Effect.runPromise(pauseOrResumeOffer()).then((success) => {
+                  if (success) {
+                    navigation.popTo('InsideTabs', {
+                      screen: 'Marketplace',
+                      params: {
+                        initialTab: 'myOffers',
+                        tabSwitchRequestId: String(Date.now()),
+                      },
+                    })
+                  }
+                })
               },
             },
             {
@@ -237,14 +265,7 @@ function MyOfferDetailScreen({
             >
               {offerTitle}
             </Typography>
-            <TextTag
-              variant={offerActive ? 'approved' : 'waiting'}
-              label={
-                offerActive
-                  ? t('editOffer.activeOffer')
-                  : t('editOffer.pausedOffer')
-              }
-            />
+            <TextTag variant={offerStatusVariant} label={offerStatusLabel} />
           </XStack>
 
           {listingType === 'PRODUCT' ? (

@@ -1,5 +1,7 @@
 import {type ListingType} from '@vexl-next/domain/src/general/offers'
+import {type JSDateString} from '@vexl-next/domain/src/utility/JSDateString.brand'
 import {Array, pipe} from 'effect'
+import {isOfferExpired} from './isOfferExpired'
 import {type TFunction} from './localization/I18nProvider'
 import {formatDate, formatDecimal} from './localization/formatting'
 
@@ -42,7 +44,7 @@ export function getOfferFeeLabel({
 }
 
 export function formatOfferExpirationDate(
-  expirationDate: string | undefined,
+  expirationDate: JSDateString | undefined,
   locale: string
 ): string {
   return expirationDate
@@ -61,7 +63,7 @@ export function getOfferAmountDetailsLabel({
 }: {
   readonly feeAmount?: number
   readonly listingType?: ListingType
-  readonly expirationDate?: string
+  readonly expirationDate?: JSDateString
   readonly locale: string
   readonly t: TFunction
 }): string {
@@ -71,9 +73,14 @@ export function getOfferAmountDetailsLabel({
     locale
   )
   const expirationLabel = formattedExpirationDate
-    ? t('offerForm.expiration.expiresOn', {
-        expirationDate: formattedExpirationDate,
-      })
+    ? t(
+        isOfferExpired(expirationDate)
+          ? 'offerForm.expiration.expiredOn'
+          : 'offerForm.expiration.expiresOn',
+        {
+          expirationDate: formattedExpirationDate,
+        }
+      )
     : ''
 
   return pipe(

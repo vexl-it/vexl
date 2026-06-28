@@ -5,7 +5,7 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {Circle, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
-import {TextTag} from './TextTag'
+import {TextTag, type TextTagVariant} from './TextTag'
 import {Typography} from './Typography'
 
 export interface OfferCardActionButton {
@@ -25,6 +25,7 @@ export interface OfferCardProps {
   readonly description: string
   readonly details: readonly string[]
   readonly statusLabel?: string
+  readonly statusVariant?: TextTagVariant
   readonly onPress?: () => void
   readonly actionButton?: OfferCardActionButton
 }
@@ -78,6 +79,7 @@ export function OfferCard({
   description,
   details,
   statusLabel,
+  statusVariant = 'warning',
   onPress,
   actionButton,
 }: OfferCardProps): React.JSX.Element {
@@ -221,7 +223,7 @@ export function OfferCard({
         {statusLabel != null ? (
           <TextTag
             alignSelf="flex-start"
-            variant="warning"
+            variant={statusVariant}
             label={statusLabel}
           />
         ) : null}

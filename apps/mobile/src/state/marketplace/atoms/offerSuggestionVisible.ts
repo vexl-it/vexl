@@ -204,11 +204,3 @@ export const dismissMissingProductCategoriesInMarketplaceSuggestionActionAtom =
     set(missingProductCategoriesSuggestionDismissedThisSessionAtom, true)
     set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
   })
-
-export const resetImportContactsMarketplaceSuggestionSessionActionAtom = atom(
-  null,
-  (get, set) => {
-    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, false)
-    set(missingProductCategoriesSuggestionDismissedThisSessionAtom, false)
-  }
-)

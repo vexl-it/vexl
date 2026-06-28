@@ -106,7 +106,7 @@ function CalculateAmountScreen({
         onPress: onFooterButtonPress,
         text: isOtherSideAmountDataNewerThanMine
           ? t('common.accept')
-          : t('common.send'),
+          : t('common.save'),
         variant: isOtherSideAmountDataNewerThanMine ? 'secondary' : 'primary',
       }}
     >

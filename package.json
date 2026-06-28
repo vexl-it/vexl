@@ -19,10 +19,7 @@
     "offer-service:build-docker-image": "./scripts/build-app-docker-image.sh offer-service",
     "metrics-service:build-docker-image": "./scripts/build-app-docker-image.sh metrics-service",
     "content-service:build-docker-image": "./scripts/build-app-docker-image.sh content-service",
-    "postinstall": "manypkg check",
-    "dev:health": "pnpm --filter @vexl-next/dev-orchestrator health",
-    "dev:backend": "pnpm --filter @vexl-next/dev-orchestrator dev:backend",
-    "dev:mobile": "pnpm --filter @vexl-next/dev-orchestrator dev:mobile"
+    "postinstall": "manypkg check"
   },
   "private": true,
   "dependencies": {

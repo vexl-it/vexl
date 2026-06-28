@@ -14,5 +14,6 @@ export const checkAreNotificationsEnabledAtom = atom(null, (get, set) => {
     const status = yield* _(areNotificationsEnabledE(), Effect.option)
 
     set(notificationsEnabledAtom, status)
+    return status
   })
 })

@@ -5,6 +5,7 @@ import {getTokens, styled, useTheme} from 'tamagui'
 import {PeopleUsers} from '../icons/PeopleUsers'
 import {Circle, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
+import {TextTag} from './TextTag'
 import {Typography} from './Typography'
 
 export interface OfferCardActionButton {
@@ -23,6 +24,7 @@ export interface OfferCardProps {
   readonly price: string
   readonly description: string
   readonly details: readonly string[]
+  readonly statusLabel?: string
   readonly onPress?: () => void
   readonly actionButton?: OfferCardActionButton
 }
@@ -75,6 +77,7 @@ export function OfferCard({
   price,
   description,
   details,
+  statusLabel,
   onPress,
   actionButton,
 }: OfferCardProps): React.JSX.Element {
@@ -215,6 +218,13 @@ export function OfferCard({
             </React.Fragment>
           ))}
         </XStack>
+        {statusLabel != null ? (
+          <TextTag
+            alignSelf="flex-start"
+            variant="warning"
+            label={statusLabel}
+          />
+        ) : null}
         {actionButton != null ? (
           <CardButton contrast width="100%" onPress={handleActionButtonPress}>
             {actionButton.label}

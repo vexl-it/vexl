@@ -1,14 +1,23 @@
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {PermissionStatus} from 'expo'
 import {getPermissionsAsync} from 'expo-notifications'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import NotificationSetting from 'react-native-open-notification'
+import {dismissEnableNotificationsInMarketplaceSuggestionActionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {checkAreNotificationsEnabledAtom} from '../../../../../state/notifications/areNotificationsEnabledAtom'
 import checkNotificationPermissionsAndAskIfPossibleActionAtom from '../../../../../utils/notifications/checkAndAskForPermissionsActionAtom'
 
 function openNotificationSettings(): void {
   NotificationSetting.open()
+}
+
+function areNotificationsEnabled(
+  status: Option.Option<{
+    readonly notifications: boolean
+  }>
+): boolean {
+  return Option.isSome(status) && status.value.notifications
 }
 
 const getNotificationSettingsOrUndefined = Effect.tryPromise({
@@ -23,6 +32,9 @@ export default function useEnableNotificationsFromMarketplaceAction(): () => voi
   const checkAreNotificationsEnabled = useSetAtom(
     checkAreNotificationsEnabledAtom
   )
+  const dismissEnableNotificationsSuggestion = useSetAtom(
+    dismissEnableNotificationsInMarketplaceSuggestionActionAtom
+  )
 
   return useCallback(() => {
     Effect.runFork(
@@ -31,7 +43,10 @@ export default function useEnableNotificationsFromMarketplaceAction(): () => voi
 
         if (settings?.status === PermissionStatus.DENIED) {
           openNotificationSettings()
-          yield* _(checkAreNotificationsEnabled())
+          const status = yield* _(checkAreNotificationsEnabled())
+          if (areNotificationsEnabled(status)) {
+            dismissEnableNotificationsSuggestion()
+          }
           return
         }
 
@@ -40,14 +55,18 @@ export default function useEnableNotificationsFromMarketplaceAction(): () => voi
           Effect.catchAll(() => Effect.void)
         )
 
-        const updatedSettings = yield* _(getNotificationSettingsOrUndefined)
+        const status = yield* _(checkAreNotificationsEnabled())
 
-        if (updatedSettings?.status !== PermissionStatus.GRANTED) {
+        if (areNotificationsEnabled(status)) {
+          dismissEnableNotificationsSuggestion()
+        } else {
           openNotificationSettings()
         }
-
-        yield* _(checkAreNotificationsEnabled())
       })
     )
-  }, [checkAndAskForNotificationPermissions, checkAreNotificationsEnabled])
+  }, [
+    checkAndAskForNotificationPermissions,
+    checkAreNotificationsEnabled,
+    dismissEnableNotificationsSuggestion,
+  ])
 }

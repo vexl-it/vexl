@@ -1,6 +1,6 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
-import {Array, Option, pipe} from 'effect'
+import {Array, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {useTranslation} from '../utils/localization/I18nProvider'
@@ -85,19 +85,21 @@ export default function OfferPropertiesCard({
   const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
 
   const rows = useMemo(() => {
-    const productCategoryToDisplay =
+    const productCategoryLabels =
       listingType === 'PRODUCT'
-        ? (pipe(productCategories ?? [], Array.head, Option.getOrUndefined) ??
-          productCategory)
-        : undefined
+        ? pipe(
+            productCategories ?? (productCategory ? [productCategory] : []),
+            Array.map((category) =>
+              t(`filterOffers.productCategory.${category}`)
+            )
+          )
+        : []
 
     return pipe(
       [
         {
           label: t('editOffer.detail.productCategory'),
-          value: productCategoryToDisplay
-            ? t(`filterOffers.productCategory.${productCategoryToDisplay}`)
-            : '',
+          value: productCategoryLabels,
         },
         {
           label: t('offerForm.amountOfTransaction.amountOfTransaction'),
@@ -146,8 +148,8 @@ export default function OfferPropertiesCard({
     listingType,
     locale,
     offer,
-    productCategories,
     productCategory,
+    productCategories,
     t,
   ])
 

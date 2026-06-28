@@ -1,6 +1,7 @@
 import {
   OneOfferInState,
   type OfferType,
+  type ProductCategory,
 } from '@vexl-next/domain/src/general/offers'
 import {Array, pipe, Schema} from 'effect'
 import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
@@ -19,6 +20,8 @@ function makeOffer({
   amountBottomLimit,
   amountTopLimit,
   offerType = 'SELL',
+  productCategory,
+  productCategories,
 }: {
   readonly id: string
   readonly listingType: 'BITCOIN' | 'PRODUCT' | 'OTHER'
@@ -26,6 +29,8 @@ function makeOffer({
   readonly amountBottomLimit: number
   readonly amountTopLimit: number
   readonly offerType?: OfferType
+  readonly productCategory?: ProductCategory
+  readonly productCategories?: readonly ProductCategory[]
 }): Schema.Schema.Type<typeof OneOfferInState> {
   return Schema.decodeSync(OneOfferInState)({
     offerInfo: {
@@ -58,12 +63,30 @@ function makeOffer({
         active: true,
         groupUuids: [],
         listingType,
+        productCategory,
+        productCategories,
       },
       createdAt: '2026-01-01T00:00:00.000Z',
       modifiedAt: '2026-01-01T00:00:00.000Z',
     },
     flags: {},
   })
+}
+
+function filterOfferIdsFromOffers({
+  offers,
+  filter,
+}: {
+  readonly offers: OneOfferInState[]
+  readonly filter: OffersFilter
+}): readonly string[] {
+  return pipe(
+    filterMarketplaceOffers({
+      offers,
+      filter,
+    }),
+    Array.map((offer) => offer.offerInfo.offerId)
+  )
 }
 
 function filterOfferIds({
@@ -108,6 +131,95 @@ function filterOfferIds({
     Array.map((offer) => offer.offerInfo.offerId)
   )
 }
+
+describe('filterMarketplaceOffers product category filter', () => {
+  test('matches product offers by plural productCategories', () => {
+    expect(
+      filterOfferIdsFromOffers({
+        offers: [
+          makeOffer({
+            id: 'product-electronics',
+            listingType: 'PRODUCT',
+            currency: 'CZK',
+            amountBottomLimit: 20_000,
+            amountTopLimit: 20_000,
+            productCategories: ['ELECTRONICS'],
+          }),
+        ],
+        filter: {
+          filterBarOptions: new Set(),
+          spokenLanguages: [],
+          productCategories: ['ELECTRONICS'],
+        },
+      })
+    ).toEqual(['product-electronics'])
+  })
+
+  test('excludes product offers when plural productCategories do not match', () => {
+    expect(
+      filterOfferIdsFromOffers({
+        offers: [
+          makeOffer({
+            id: 'product-produce',
+            listingType: 'PRODUCT',
+            currency: 'CZK',
+            amountBottomLimit: 20_000,
+            amountTopLimit: 20_000,
+            productCategories: ['PRODUCE'],
+          }),
+        ],
+        filter: {
+          filterBarOptions: new Set(),
+          spokenLanguages: [],
+          productCategories: ['ELECTRONICS'],
+        },
+      })
+    ).toEqual([])
+  })
+
+  test('matches product offers by legacy singular productCategory', () => {
+    expect(
+      filterOfferIdsFromOffers({
+        offers: [
+          makeOffer({
+            id: 'legacy-product-electronics',
+            listingType: 'PRODUCT',
+            currency: 'CZK',
+            amountBottomLimit: 20_000,
+            amountTopLimit: 20_000,
+            productCategory: 'ELECTRONICS',
+          }),
+        ],
+        filter: {
+          filterBarOptions: new Set(),
+          spokenLanguages: [],
+          productCategories: ['ELECTRONICS'],
+        },
+      })
+    ).toEqual(['legacy-product-electronics'])
+  })
+
+  test('excludes product offers missing categories when category filter is active', () => {
+    expect(
+      filterOfferIdsFromOffers({
+        offers: [
+          makeOffer({
+            id: 'product-missing-category',
+            listingType: 'PRODUCT',
+            currency: 'CZK',
+            amountBottomLimit: 20_000,
+            amountTopLimit: 20_000,
+          }),
+        ],
+        filter: {
+          filterBarOptions: new Set(),
+          spokenLanguages: [],
+          productCategories: ['OTHERS'],
+        },
+      })
+    ).toEqual([])
+  })
+})
 
 describe('filterMarketplaceOffers amount filter', () => {
   test('matches BTC, product, and service offers by currency and range overlap', () => {

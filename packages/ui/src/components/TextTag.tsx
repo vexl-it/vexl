@@ -15,6 +15,7 @@ export type TextTagVariant =
   | 'accepted'
   | 'waitingForConfirmation'
   | 'outdated'
+  | 'warning'
   | 'neutral'
 
 const leftShape = {
@@ -53,6 +54,12 @@ const TextTagFrame = styled(XStack, {
         ...rightShape,
       },
       outdated: {backgroundColor: '$backgroundHighlight', ...rightShape},
+      warning: {
+        backgroundColor: '$accentYellowSecondary',
+        height: '$7',
+        paddingVertical: '$2',
+        ...leftShape,
+      },
       neutral: {
         backgroundColor: '$backgroundHighlight',
         height: '$7',
@@ -82,6 +89,12 @@ const TextTagLabel = styled(SizableText, {
       accepted: {color: '$greenForeground'},
       waitingForConfirmation: {color: '$pinkForeground'},
       outdated: {color: '$foregroundPrimary'},
+      warning: {
+        color: '$accentHighlightPrimary',
+        fontSize: typographyVariantStyles.micro.fontSize,
+        lineHeight: typographyVariantStyles.micro.lineHeight,
+        letterSpacing: typographyVariantStyles.micro.letterSpacing,
+      },
       neutral: {
         color: '$foregroundSecondary',
         fontSize: typographyVariantStyles.micro.fontSize,

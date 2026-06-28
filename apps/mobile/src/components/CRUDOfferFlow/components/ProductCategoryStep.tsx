@@ -37,6 +37,8 @@ interface ProductCategoryStepProps {
   readonly onComplete: () => void
   readonly ctaLabel?: string
   readonly icon?: React.ComponentType<IconProps>
+  readonly missing?: boolean
+  readonly missingHeadline?: string
   readonly overline?: string
   readonly showInitialIcon?: boolean
 }
@@ -47,6 +49,8 @@ function ProductCategoryStep({
   onComplete,
   ctaLabel,
   icon,
+  missing = false,
+  missingHeadline,
   overline,
   showInitialIcon,
 }: ProductCategoryStepProps): React.ReactElement {
@@ -61,16 +65,20 @@ function ProductCategoryStep({
     Option.flatMap(Array.head)
   )
   const hasSelection = Option.isSome(selectedCategoryOption)
+  const showMissingState = missing && !hasSelection
   const headline = pipe(
     selectedCategoryOption,
     Option.match({
-      onNone: () => t('offerForm.selectTypeOfProduct'),
+      onNone: () =>
+        showMissingState
+          ? (missingHeadline ?? t('offerForm.selectTypeOfProduct'))
+          : t('offerForm.selectTypeOfProduct'),
       onSome: (category) => t(`filterOffers.productCategory.${category}`),
     })
   )
 
   if (!active) {
-    return (
+    const row = (
       <EditRow
         state="completed"
         icon={icon}
@@ -79,8 +87,19 @@ function ProductCategoryStep({
           (hasSelection ? t('offerForm.selectTypeOfProduct') : undefined)
         }
         headline={headline}
+        headlineColor={
+          showMissingState ? '$accentHighlightSecondary' : '$foregroundPrimary'
+        }
         onPress={onEdit}
       />
+    )
+
+    return showMissingState ? (
+      <YStack borderWidth={1} borderColor="$accentHighlightSecondary" br="$5">
+        {row}
+      </YStack>
+    ) : (
+      row
     )
   }
 

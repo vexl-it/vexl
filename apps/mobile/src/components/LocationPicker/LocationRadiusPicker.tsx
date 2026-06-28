@@ -1,32 +1,20 @@
 import {useNavigation} from '@react-navigation/native'
-import {Button, NavigationBar, RadiusSlider, Typography} from '@vexl-next/ui'
+import {Button, NavigationBar, Typography} from '@vexl-next/ui'
 import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {useWindowDimensions} from 'react-native'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import type MapView from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type MapValueWithRadius} from '../Map/brands'
 import MapLocationWithRadiusSelect from '../Map/components/MapLocationWithRadiusSelect'
-import {
-  calculateNormalizedSliderValueFromZoom,
-  calculateZoomFromLongitudeDelta,
-  calculateZoomFromNormalizedSliderValue,
-} from '../Map/components/MapLocationWithRadiusSelect.geometry'
-import mapValueToRegion from '../Map/utils/mapValueToRegion'
+import PinchZoomHint from '../Map/components/PinchZoomHint'
 import {pragueCenterLocation} from '../Map/utils/pragueCenterLocation'
 import {LocationPickerMolecule} from './molecule'
 
-const MIN_ZOOM = 0
-const MAX_ZOOM = 20
-const SLIDER_MIN = 0
-const SLIDER_CENTER = 0.5
-const SLIDER_MAX = 1
-const MAX_ZOOM_OUT_FROM_INITIAL = 0.8
-const MAX_ZOOM_IN_FROM_INITIAL = 6
+const PINCH_HINT_VISIBLE_MS = 3000
 
 interface Props {
   readonly onConfirm: (pickedLocation: MapValueWithRadius) => void
@@ -40,87 +28,39 @@ export default function LocationRadiusPicker({
   const {selectedMapValueAtom} = useMolecule(LocationPickerMolecule)
   const selectedMapValue = useAtomValue(selectedMapValueAtom)
   const initialValue = selectedMapValue ?? pragueCenterLocation
-  const {width: windowWidth} = useWindowDimensions()
-  const initialRegion = useMemo(
-    () => mapValueToRegion(initialValue),
-    [initialValue]
-  )
-  const initialZoom = useMemo(
-    () =>
-      calculateZoomFromLongitudeDelta({
-        longitudeDelta: initialRegion.longitudeDelta,
-        mapWidth: windowWidth,
-      }),
-    [initialRegion.longitudeDelta, windowWidth]
-  )
   const mapRef = useRef<MapView>(null)
 
   const [pickedLocation, setPickedLocation] =
     useState<MapValueWithRadius | null>(null)
-  const selectedCenterRef = useRef({
-    latitude: initialRegion.latitude,
-    longitude: initialRegion.longitude,
-  })
-
-  const [sliderValue, setSliderValue] = useState(SLIDER_CENTER)
+  const [isPinchHintMounted, setIsPinchHintMounted] = useState(true)
+  const [isPinchHintVisible, setIsPinchHintVisible] = useState(true)
 
   useEffect(() => {
-    setSliderValue(SLIDER_CENTER)
-    selectedCenterRef.current = {
-      latitude: initialRegion.latitude,
-      longitude: initialRegion.longitude,
-    }
-  }, [initialRegion.latitude, initialRegion.longitude])
+    const timeoutId = setTimeout(() => {
+      setIsPinchHintVisible(false)
+    }, PINCH_HINT_VISIBLE_MS)
 
-  const handlePick = useCallback((location: MapValueWithRadius | null) => {
-    setPickedLocation(location)
-
-    if (location) {
-      selectedCenterRef.current = {
-        latitude: location.latitude,
-        longitude: location.longitude,
-      }
+    return () => {
+      clearTimeout(timeoutId)
     }
   }, [])
 
-  const handleSliderValueChange = useCallback(
-    (value: number) => {
-      setSliderValue(value)
-      mapRef.current?.setCamera({
-        center: selectedCenterRef.current,
-        zoom: calculateZoomFromNormalizedSliderValue({
-          sliderValue: value,
-          initialZoom,
-          zoomOut: MAX_ZOOM_OUT_FROM_INITIAL,
-          zoomIn: MAX_ZOOM_IN_FROM_INITIAL,
-          minZoom: MIN_ZOOM,
-          maxZoom: MAX_ZOOM,
-        }),
-      })
-    },
-    [initialZoom]
-  )
-
-  const handleMapZoomChange = useCallback(
-    (zoom: number) => {
-      setSliderValue(
-        calculateNormalizedSliderValueFromZoom({
-          zoom,
-          initialZoom,
-          zoomOut: MAX_ZOOM_OUT_FROM_INITIAL,
-          zoomIn: MAX_ZOOM_IN_FROM_INITIAL,
-          minZoom: MIN_ZOOM,
-          maxZoom: MAX_ZOOM,
-        })
-      )
-    },
-    [initialZoom]
-  )
+  const handlePick = useCallback((location: MapValueWithRadius | null) => {
+    setPickedLocation(location)
+  }, [])
 
   const handleConfirm = useCallback(() => {
     if (!pickedLocation) return
     onConfirm(pickedLocation)
   }, [onConfirm, pickedLocation])
+
+  const handleMapGesture = useCallback(() => {
+    setIsPinchHintVisible(false)
+  }, [])
+
+  const handlePinchHintHidden = useCallback(() => {
+    setIsPinchHintMounted(false)
+  }, [])
 
   const insets = useSafeAreaInsets()
 
@@ -154,41 +94,32 @@ export default function LocationRadiusPicker({
         <MapLocationWithRadiusSelect
           initialValue={initialValue}
           onPick={handlePick}
-          hideSlider
           mapRef={mapRef}
-          onMapZoomChange={handleMapZoomChange}
+          onMapGesture={handleMapGesture}
           bottomChildren={
-            <Stack paddingBottom="$8" paddingHorizontal="$3">
-              <YStack
-                backgroundColor="$backgroundPrimary"
-                borderRadius="$7"
-                padding="$3"
-                gap="$3"
-              >
-                <XStack paddingHorizontal="$2" paddingVertical="$3">
-                  <Typography
-                    variant="paragraphDemibold"
-                    color="$foregroundPrimary"
-                  >
-                    {t('offerForm.location.setMeetingArea')}
-                  </Typography>
-                </XStack>
-                <Stack paddingHorizontal="$5">
-                  <RadiusSlider
-                    min={SLIDER_MIN}
-                    max={SLIDER_MAX}
-                    value={sliderValue}
-                    onValueChange={handleSliderValueChange}
-                    step={0.01}
-                  />
-                </Stack>
-                <Button variant="primary" size="large" onPress={handleConfirm}>
-                  {t('common.confirm')}
-                </Button>
-              </YStack>
+            <Stack paddingBottom="$4" paddingHorizontal="$3">
+              <Button variant="primary" size="large" onPress={handleConfirm}>
+                {t('common.confirm')}
+              </Button>
             </Stack>
           }
         />
+        {isPinchHintMounted ? (
+          <Stack
+            pointerEvents="none"
+            position="absolute"
+            top="$5"
+            left={0}
+            right={0}
+            alignItems="center"
+            paddingHorizontal="$5"
+          >
+            <PinchZoomHint
+              visible={isPinchHintVisible}
+              onHidden={handlePinchHintHidden}
+            />
+          </Stack>
+        ) : null}
       </Stack>
     </YStack>
   )

@@ -518,7 +518,6 @@
   "offerForm.location.setAreaDescription": "Aseta alue, jolla olet valmis tapaamaan kauppaa varten. Tämä auttaa näyttämään sinulle lähellä olevia olennaisia tarjouksia.",
   "offerForm.location.changeRadius": "Muuta sädettä",
   "offerForm.location.meetingAreaDescription": "Aseta, missä olet valmis tapaamaan. Näet tarjoukset, joiden tapaamisalue on päällekkäin omasi kanssa.",
-  "offerForm.location.setMeetingArea": "Aseta tapaamisalue",
   "offerForm.inPerson": "In person",
   "offerForm.online": "Online",
   "offerForm.deliveryMethod": "Delivery method",

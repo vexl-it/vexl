@@ -30,11 +30,17 @@ export class S3Service extends Context.Tag('S3Service')<
   static readonly Live = Layer.effect(
     S3Service,
     Effect.gen(function* (_) {
-      const {region, bucketName} = yield* _(s3Config)
-      // Create S3 client with appropriate credentials
+      const {region, bucketName, endpoint, forcePathStyle} = yield* _(s3Config)
+      // Create S3 client. When S3_ENDPOINT is set (e.g. MinIO in local dev) we
+      // target it with path-style addressing; otherwise the AWS SDK default
+      // endpoint is used. Credentials come from the standard AWS_* env vars.
       const s3Client = yield* _(
         Effect.sync(() => {
-          return new S3Client({region})
+          return new S3Client({
+            region,
+            endpoint: endpoint.length > 0 ? endpoint : undefined,
+            forcePathStyle,
+          })
         })
       )
 

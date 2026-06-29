@@ -7,13 +7,13 @@ import {OTLPTraceExporter} from '@opentelemetry/exporter-trace-otlp-http'
 import {BatchSpanProcessor} from '@opentelemetry/sdk-trace-base'
 import {Effect, Layer, Logger} from 'effect'
 import {
-  isRunningInProductionConfig,
   memoryDebugIntervalMsConfig,
   metricsConfig,
   nodeEnvConfig,
   otlpTraceExporterUrlConfig,
   serviceNameConfig,
   serviceVersionConfig,
+  useJsonLogsConfig,
 } from './commonConfigs'
 import {devToolsLayer} from './devToolsLayer'
 import {makeMemoryDebugLayer} from './makeMemoryDebugLayer'
@@ -48,11 +48,11 @@ const jsonLoggerThatHandlesUnserializableValues = Logger.map(
   stringifyCircular
 )
 
-const logger = isRunningInProductionConfig.pipe(
-  Effect.map((inProd) =>
+const logger = useJsonLogsConfig.pipe(
+  Effect.map((useJson) =>
     Logger.replace(
       Logger.defaultLogger,
-      inProd
+      useJson
         ? jsonLoggerThatHandlesUnserializableValues.pipe(
             Logger.withSpanAnnotations,
             Logger.withConsoleLog

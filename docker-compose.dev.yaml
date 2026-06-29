@@ -1,0 +1,132 @@
+# Local dev INFRA + OBSERVABILITY only. The 10 backend services and the 3 web
+# apps run as HOST node processes supervised by tooling/dev/dev-backend.ts.
+#
+# Ports default to dev.config.ts values and are overridable via .env.local
+# (the supervisor passes the resolved values through as ${VAR}).
+services:
+  postgres:
+    image: postgres:13
+    container_name: vexl-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # One database per service (spec §5.1). Init runs only on an empty volume.
+      - ./tooling/dev/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  redis:
+    image: redis:6
+    container_name: vexl-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+    container_name: vexl-minio
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-vexl}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-vexl-local-secret}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+
+  minio-init:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+    container_name: vexl-minio-init
+    # One-shot bucket setup. Kept behind a profile so `up --wait` does not include
+    # it (--wait treats an exited container, even code 0, as a failure). The
+    # supervisor runs it explicitly via `docker compose run --rm minio-init`.
+    profiles: ["init"]
+    depends_on:
+      - minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-vexl}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-vexl-local-secret}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-vexl-resources}
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        'until mc alias set local http://minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"; do sleep 1; done && mc mb --ignore-existing local/"$${S3_BUCKET_NAME}" && mc anonymous set download local/"$${S3_BUCKET_NAME}"',
+      ]
+
+  loki:
+    image: grafana/loki:3.6.0
+    container_name: vexl-loki
+    user: "0"
+    command: ["-config.file=/etc/loki/config.yaml"]
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./tooling/dev/observability/loki-config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    container_name: vexl-tempo
+    user: "0"
+    command: ["-config.file=/etc/tempo/config.yaml"]
+    ports:
+      - "${TEMPO_PORT:-3200}:3200"
+      - "${TEMPO_OTLP_HTTP_PORT:-4318}:4318"
+      - "${TEMPO_OTLP_GRPC_PORT:-4317}:4317"
+    volumes:
+      - ./tooling/dev/observability/tempo-config.yaml:/etc/tempo/config.yaml:ro
+      - tempo_data:/var/tempo
+
+  grafana:
+    image: grafana/grafana:12.4.0
+    container_name: vexl-grafana
+    depends_on:
+      - loki
+      - tempo
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "${GRAFANA_PORT:-3030}:3000"
+    volumes:
+      - ./tooling/dev/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  loki_data:
+    driver: local
+  tempo_data:
+    driver: local
+  grafana_data:
+    driver: local

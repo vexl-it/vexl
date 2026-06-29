@@ -39,3 +39,8 @@ node_modules
 .planning/
 
 *.local
+
+# Dev tooling: per-process JSONL logs live under local/ (already ignored above).
+# These two are COMMITTED templates and must survive the *.local rule above.
+!example.env.local
+!dev.config.ts

@@ -14,7 +14,7 @@ export const queryMaxIdConnections = PgContactClient.pipe(
   Effect.flatMap(
     (sql) => sql`
       SELECT
-        max(id) AS "max"
+        COALESCE(max(id), 0) AS "max"
       FROM
         user_contact
     `

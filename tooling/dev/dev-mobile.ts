@@ -17,13 +17,14 @@
  * Dry run (no expo launched): `DEV_MOBILE_DRY_RUN=1 tsx tooling/dev/dev-mobile.ts ...`
  * prints the resolved env + the command(s) it WOULD run and exits 0.
  */
+import {Array, pipe} from 'effect'
 import {spawn} from 'node:child_process'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {networkInterfaces} from 'node:os'
 import {dirname, join} from 'node:path'
 import devConfig, {devCryptoKeys} from '../../dev.config'
-import {resolvePorts} from './ports'
-import {loadSecrets, repoRoot} from './secrets'
+import {isValidTcpPort, resolvePorts} from './ports'
+import {loadRawEnvLocal, repoRoot} from './secrets'
 
 // ---------------------------------------------------------------------------
 // Service URL map — the EXACT env vars apps/mobile/src/api/index.ts reads,
@@ -108,7 +109,7 @@ function parseBackend(value: string | undefined): BackendTarget {
     const host = value.slice(0, lastColon)
     const portText = value.slice(lastColon + 1)
     const basePort = Number(portText)
-    if (Number.isFinite(basePort) && portText.length > 0) {
+    if (portText.length > 0 && isValidTcpPort(basePort)) {
       return {kind: 'host', host, basePort}
     }
   }
@@ -203,27 +204,33 @@ function detectLanIp(): string {
   const interfaces = networkInterfaces()
   // Prefer the conventional primary interfaces (macOS Wi-Fi/Ethernet, Linux).
   const preferred = ['en0', 'en1', 'eth0', 'wlan0']
-  const candidates: Array<{readonly name: string; readonly address: string}> =
-    []
+  const candidates = pipe(
+    Object.entries(interfaces),
+    Array.flatMap(([name, addresses]) =>
+      addresses === undefined
+        ? []
+        : pipe(
+            addresses,
+            Array.filter(
+              (address) => address.family === 'IPv4' && !address.internal
+            ),
+            Array.map((address) => ({name, address: address.address}))
+          )
+    )
+  )
 
-  for (const [name, addresses] of Object.entries(interfaces)) {
-    if (!addresses) continue
-    for (const address of addresses) {
-      if (address.family === 'IPv4' && !address.internal) {
-        candidates.push({name, address: address.address})
-      }
-    }
-  }
-
-  if (candidates.length === 0) {
+  if (!Array.isNonEmptyReadonlyArray(candidates)) {
     throw new Error(
       'Could not auto-detect a LAN IPv4 address. Pass --host <ip> explicitly.'
     )
   }
 
-  for (const name of preferred) {
-    const match = candidates.find((candidate) => candidate.name === name)
-    if (match) return match.address
+  for (const interfaceName of preferred) {
+    const match = pipe(
+      candidates,
+      Array.findFirst((candidate) => candidate.name === interfaceName)
+    )
+    if (match._tag === 'Some') return match.value.address
   }
   return candidates[0].address
 }
@@ -282,23 +289,26 @@ function generateEnv(options: CliOptions): GeneratedEnv {
   // so the app points at exactly the ports the backend is published on.
   const overrideEnv: Record<string, string | undefined> = {
     ...process.env,
-    ...loadSecrets(),
+    ...loadRawEnvLocal(),
   }
   const ports = resolvePorts(devConfig.ports, overrideEnv)
   const defaultBasePort = ports.userService
 
-  const serviceUrls = SERVICE_URL_MAP.map(({envVar, portKey}) => {
-    const defaultPort = ports[portKey]
-    // With an explicit `ip:basePort`, shift every service by the same offset it
-    // has from the default user-service port, preserving the port layout.
-    const port =
-      backend.kind === 'host' && backend.basePort !== undefined
-        ? backend.basePort + (defaultPort - defaultBasePort)
-        : defaultPort
-    const url = `http://${resolvedHost.host}:${port}`
-    const pair: readonly [string, string] = [envVar, url]
-    return pair
-  })
+  const serviceUrls = pipe(
+    SERVICE_URL_MAP,
+    Array.map(({envVar, portKey}) => {
+      const defaultPort = ports[portKey]
+      // With an explicit `ip:basePort`, shift every service by the same offset it
+      // has from the default user-service port, preserving the port layout.
+      const port =
+        backend.kind === 'host' && backend.basePort !== undefined
+          ? backend.basePort + (defaultPort - defaultBasePort)
+          : defaultPort
+      const url = `http://${resolvedHost.host}:${port}`
+      const pair: readonly [string, string] = [envVar, url]
+      return pair
+    })
+  )
 
   const vars: Record<string, string> = {ENV_PRESET: 'local'}
   for (const [envVar, url] of serviceUrls) {
@@ -443,7 +453,7 @@ function printSummary(
     console.log(`  NOTE:        ${forcedPrebuildReason}`)
   }
 
-  if (generated.serviceUrls.length > 0) {
+  if (Array.isNonEmptyReadonlyArray(generated.serviceUrls)) {
     console.log('  service URLs:')
     for (const [envVar, url] of generated.serviceUrls) {
       console.log(`    ${envVar}=${url}`)
@@ -503,7 +513,7 @@ async function main(): Promise<void> {
     for (const [key, value] of Object.entries(generated.vars)) {
       console.log(`  ${key}=${value}`)
     }
-    if (Object.keys(generated.vars).length === 1) {
+    if (!Array.isNonEmptyReadonlyArray(generated.serviceUrls)) {
       console.log('  (no EXPO_PUBLIC_LOCAL_* vars — stage uses committed URLs)')
     }
     console.log('\nNot launching expo (dry run). Exiting 0.')

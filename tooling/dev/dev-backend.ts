@@ -9,6 +9,7 @@
  *
  * Run: `pnpm dev:backend [options]` — see parseArgs() for flags.
  */
+import {Array, pipe} from 'effect'
 import {spawn, type ChildProcess} from 'node:child_process'
 import {join} from 'node:path'
 import devConfig from '../../dev.config'
@@ -21,6 +22,7 @@ import {loadRawEnvLocal, loadSecrets, repoRoot, type Secrets} from './secrets'
 import {
   ALL_APPS,
   buildFinalEnv,
+  findApp,
   SERVICES,
   WEB_APPS,
   type EnvContext,
@@ -46,20 +48,29 @@ function parseArgs(argv: readonly string[]): CliOptions {
   let freshDb = false
   let detachInfra = false
 
-  const splitList = (value: string | undefined): string[] =>
-    (value ?? '')
-      .split(',')
-      .map((part) => part.trim())
-      .filter((part) => part.length > 0)
+  const splitList = (value: string): string[] =>
+    pipe(
+      value.split(','),
+      Array.map((part) => part.trim()),
+      Array.filter((part) => part.length > 0)
+    )
+
+  const nextListValue = (i: number): string => {
+    const value = argv[i]
+    if (value === undefined || value.startsWith('--')) {
+      throw new Error(`Missing value after ${argv[i - 1]}`)
+    }
+    return value
+  }
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (arg === '--only') {
       i += 1
-      only = splitList(argv[i])
+      only = splitList(nextListValue(i))
     } else if (arg === '--skip') {
       i += 1
-      skip = splitList(argv[i])
+      skip = splitList(nextListValue(i))
     } else if (arg === '--no-web') {
       web = false
     } else if (arg === '--no-observability') {
@@ -102,12 +113,38 @@ function printHelp(): void {
 // --- selection -------------------------------------------------------------
 
 function selectApps(options: CliOptions): readonly RunnableApp[] {
-  const candidates =
-    options.only.length > 0
-      ? ALL_APPS.filter((app) => options.only.includes(app.name))
-      : [...SERVICES, ...(options.web ? WEB_APPS : [])]
+  const validateNames = (
+    names: readonly string[],
+    optionName: string
+  ): void => {
+    const unknown = pipe(
+      names,
+      Array.filter((name) => findApp(name) === undefined)
+    )
+    if (Array.isNonEmptyReadonlyArray(unknown)) {
+      throw new Error(
+        `Unknown app name in ${optionName}: ${unknown.join(', ')}. Known apps: ${pipe(
+          ALL_APPS,
+          Array.map((app) => app.name)
+        ).join(', ')}`
+      )
+    }
+  }
 
-  return candidates.filter((app) => !options.skip.includes(app.name))
+  validateNames(options.only, '--only')
+  validateNames(options.skip, '--skip')
+
+  const candidates = Array.isNonEmptyReadonlyArray(options.only)
+    ? pipe(
+        ALL_APPS,
+        Array.filter((app) => options.only.includes(app.name))
+      )
+    : [...SERVICES, ...(options.web ? WEB_APPS : [])]
+
+  return pipe(
+    candidates,
+    Array.filter((app) => !options.skip.includes(app.name))
+  )
 }
 
 // --- env -------------------------------------------------------------------
@@ -123,6 +160,7 @@ function buildDockerEnv(ctx: EnvContext, secrets: Secrets): docker.DockerEnv {
     ...process.env,
     POSTGRES_USER: infra.postgres.user,
     POSTGRES_PASSWORD: infra.postgres.password,
+    POSTGRES_DB: 'postgres',
     POSTGRES_PORT: String(ctx.ports.postgres),
     REDIS_PORT: String(ctx.ports.redis),
     MINIO_ROOT_USER: infra.minio.rootUser,
@@ -135,7 +173,7 @@ function buildDockerEnv(ctx: EnvContext, secrets: Secrets): docker.DockerEnv {
     TEMPO_PORT: String(ctx.ports.tempo),
     TEMPO_OTLP_HTTP_PORT: String(ctx.ports.tempoOtlpHttp),
     TEMPO_OTLP_GRPC_PORT: String(ctx.ports.tempoOtlpGrpc),
-    // .env.local still wins (e.g. overriding a credential or port).
+    // Optional docker credentials from .env.local may override local defaults.
     ...secrets,
   }
 }
@@ -158,19 +196,40 @@ async function validatePorts(
     'tempoOtlpGrpc',
   ]
 
+  const appPortAssignments = (
+    app: RunnableApp
+  ): ReadonlyArray<{
+    readonly label: string
+    readonly port: number
+  }> => [
+    {label: app.name, port: ctx.ports[app.portKey]},
+    ...pipe(
+      app.extraPortKeys ?? [],
+      Array.map((portKey) => ({
+        label: `${app.name} (${portKey})`,
+        port: ctx.ports[portKey],
+      }))
+    ),
+    ...(app.healthPortKey !== undefined
+      ? [
+          {
+            label: `${app.name} (health)`,
+            port: ctx.healthPorts[app.healthPortKey],
+          },
+        ]
+      : []),
+  ]
+
   const assignments = [
-    ...infraPortKeys.map((key) => ({label: key, port: ctx.ports[key]})),
-    ...apps.map((app) => ({label: app.name, port: ctx.ports[app.portKey]})),
-    ...apps
-      .filter((app) => app.healthPortKey !== undefined)
-      .map((app) => ({
-        label: `${app.name} (health)`,
-        port: ctx.healthPorts[app.healthPortKey ?? ''],
-      })),
+    ...pipe(
+      infraPortKeys,
+      Array.map((key) => ({label: key, port: ctx.ports[key]}))
+    ),
+    ...pipe(apps, Array.flatMap(appPortAssignments)),
   ]
 
   const duplicates = findDuplicatePorts(assignments)
-  if (duplicates.length > 0) {
+  if (Array.isNonEmptyReadonlyArray(duplicates)) {
     for (const {port, labels} of duplicates) {
       console.error(
         `Port ${port} is assigned to multiple: ${labels.join(', ')}`
@@ -181,21 +240,13 @@ async function validatePorts(
 
   // Only host-bound ports are checked for freeness; docker manages infra ports
   // (and may already hold them when re-running with --detach-infra).
-  const hostPorts = [
-    ...apps.map((app) => ({label: app.name, port: ctx.ports[app.portKey]})),
-    ...apps
-      .filter((app) => app.healthPortKey !== undefined)
-      .map((app) => ({
-        label: `${app.name} (health)`,
-        port: ctx.healthPorts[app.healthPortKey ?? ''],
-      })),
-  ]
+  const hostPorts = pipe(apps, Array.flatMap(appPortAssignments))
 
   const inUse: string[] = []
   for (const {label, port} of hostPorts) {
     if (!(await isPortFree(port))) inUse.push(`${label} -> ${port}`)
   }
-  if (inUse.length > 0) {
+  if (Array.isNonEmptyArray(inUse)) {
     throw new Error(
       `These host ports are already in use:\n  ${inUse.join('\n  ')}\nStop the other process or override the port in .env.local.`
     )
@@ -286,7 +337,13 @@ interface SummaryRow {
 
 function printSummary(rows: readonly SummaryRow[]): void {
   const widthOf = (pick: (row: SummaryRow) => string, header: string): number =>
-    Math.max(header.length, ...rows.map((row) => pick(row).length))
+    Math.max(
+      header.length,
+      ...pipe(
+        rows,
+        Array.map((row) => pick(row).length)
+      )
+    )
 
   const cw = widthOf((r) => r.component, 'COMPONENT')
   const uw = widthOf((r) => r.url, 'URL')
@@ -321,12 +378,17 @@ async function main(): Promise<void> {
   }
 
   const apps = selectApps(options)
-  if (apps.length === 0) {
+  if (!Array.isNonEmptyReadonlyArray(apps)) {
     console.error('No apps selected. Check --only/--skip.')
     process.exit(1)
   }
 
-  console.log(`Selected: ${apps.map((app) => app.name).join(', ')}`)
+  console.log(
+    `Selected: ${pipe(
+      apps,
+      Array.map((app) => app.name)
+    ).join(', ')}`
+  )
 
   await validatePorts(ctx, apps)
   ensureLogsDir()
@@ -367,31 +429,31 @@ async function main(): Promise<void> {
       )
     : undefined
 
-  const shutdown = async (signal: string): Promise<void> => {
+  const shutdown = async (signal: string, exitCode = 0): Promise<void> => {
     if (shuttingDown) return
     shuttingDown = true
     console.log(`\nReceived ${signal}, shutting down...`)
 
     await Promise.all(
-      supervised.map(async ({app, child, logger}) => {
-        await new Promise<void>((resolve) => {
-          if (child.exitCode !== null || child.signalCode !== null) {
-            logger.close()
-            resolve()
-            return
+      pipe(
+        supervised,
+        Array.map(async ({app, child, logger}) => {
+          if (child.exitCode === null && child.signalCode === null) {
+            await new Promise<void>((resolve) => {
+              const force = setTimeout(() => {
+                killTree(child, 'SIGKILL')
+              }, 5000)
+              child.once('exit', () => {
+                clearTimeout(force)
+                resolve()
+              })
+              logger.note(`Stopping ${app.name}...`)
+              killTree(child, 'SIGTERM')
+            })
           }
-          const force = setTimeout(() => {
-            killTree(child, 'SIGKILL')
-          }, 5000)
-          child.once('exit', () => {
-            clearTimeout(force)
-            logger.close()
-            resolve()
-          })
-          logger.note(`Stopping ${app.name}...`)
-          killTree(child, 'SIGTERM')
+          await logger.close()
         })
-      })
+      )
     )
 
     // Flush remaining logs to Loki before the container goes away.
@@ -405,7 +467,7 @@ async function main(): Promise<void> {
     } else {
       console.log('Leaving docker infra running (--detach-infra).')
     }
-    process.exit(0)
+    process.exit(exitCode)
   }
 
   process.on('SIGINT', () => {
@@ -416,9 +478,14 @@ async function main(): Promise<void> {
   })
 
   // Spawn all selected apps.
-  apps.forEach((app, index) => {
+  for (const [index, app] of apps.entries()) {
     const logger = createServiceLogger(app.name, index, lokiPusher)
     const child = spawnApp(app, ctx, secrets, options.watch, logger)
+    child.once('error', (error) => {
+      if (shuttingDown) return
+      logger.note(`Spawn failed: ${error.message}`)
+      void shutdown(`spawn error in ${app.name}`, 1)
+    })
     child.once('exit', (code, signal) => {
       if (shuttingDown) return
       logger.note(
@@ -426,29 +493,35 @@ async function main(): Promise<void> {
       )
     })
     supervised.push({app, child, logger})
-  })
+  }
 
   // Poll readiness for each app (concurrently).
   console.log('\nWaiting for services to become ready...')
   const results = await Promise.all(
-    apps.map(async (app) => {
-      const target = readinessTarget(app, ctx)
-      const ready = await waitUntilReady(target, {
-        timeoutMs: 90_000,
-        intervalMs: 1000,
+    pipe(
+      apps,
+      Array.map(async (app) => {
+        const target = readinessTarget(app, ctx)
+        const ready = await waitUntilReady(target, {
+          timeoutMs: 90_000,
+          intervalMs: 1000,
+        })
+        return {app, target, ready}
       })
-      return {app, target, ready}
-    })
+    )
   )
 
-  const rows: SummaryRow[] = results.map(({app, target, ready}) => ({
-    component: app.name,
-    url:
-      target.kind === 'http'
-        ? `http://${ctx.cfg.infra.host}:${ctx.ports[app.portKey]}`
-        : `tcp://${target.host}:${target.port}`,
-    status: ready ? 'ready' : 'NOT READY',
-  }))
+  const rows: SummaryRow[] = pipe(
+    results,
+    Array.map(({app, target, ready}) => ({
+      component: app.name,
+      url:
+        target.kind === 'http'
+          ? `http://${ctx.cfg.infra.host}:${ctx.ports[app.portKey]}`
+          : `tcp://${target.host}:${target.port}`,
+      status: ready ? 'ready' : 'NOT READY',
+    }))
+  )
 
   if (options.observability) {
     rows.push({

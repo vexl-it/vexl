@@ -11,6 +11,7 @@
  * METRICS_QUEUE_NAME, OTLP_TRACE_EXPORTER_URL, SERVICE_NAME/VERSION and NODE_ENV
  * (via `commonServiceEnv`). Each service's `buildEnv` only adds its own extras.
  */
+import {Array, pipe} from 'effect'
 import devConfig, {type DevConfig} from '../../dev.config'
 import {type Secrets} from './secrets'
 
@@ -39,9 +40,11 @@ export interface RunnableApp {
   readonly dir: string
   readonly kind: ServiceKind
   readonly portKey: string
+  readonly extraPortKeys?: readonly string[]
   readonly healthPortKey?: string
   readonly needs: ServiceNeeds
   readonly run: RunSpec
+  readonly secretKeys?: readonly string[]
   /**
    * Service-specific env extras. The shared backend block is added separately
    * for `kind: 'service'` apps; `kind: 'web'` apps return their full env here.
@@ -55,7 +58,10 @@ const stringifyValues = (
   obj: Record<string, string | number | boolean>
 ): Record<string, string> =>
   Object.fromEntries(
-    Object.entries(obj).map(([key, value]) => [key, String(value)])
+    pipe(
+      Object.entries(obj),
+      Array.map(([key, value]) => [key, String(value)])
+    )
   )
 
 const serviceNameOf = (name: string): string =>
@@ -122,6 +128,11 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'userService',
     needs: {db: dbn.user, redis: true, s3: false},
     run: tsxService('src/index.ts'),
+    secretKeys: [
+      'PRELUDE_API_TOKEN',
+      'TURNSTILE_SECRET_KEY',
+      'TURNSTILE_EXPECTED_HOSTNAME',
+    ],
     buildEnv: (ctx) => ({
       FEEDBACK_URL_TO_REDIRECT_TO: httpUrl(ctx, 'feedbackService'),
       // Existing webhook mechanism: notify the dashboard's updates server when a
@@ -140,6 +151,11 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'contactService',
     needs: {db: dbn.contact, redis: true, s3: true},
     run: tsxService('src/index.ts'),
+    secretKeys: [
+      'EXPO_ACCESS_TOKEN',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY',
+    ],
     buildEnv: (ctx) => ({
       // Optional feature; real token via .env.local enables Expo push.
       EXPO_ACCESS_TOKEN: '',
@@ -181,6 +197,7 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'locationService',
     needs: {redis: false, s3: false},
     run: tsxService('src/index.ts'),
+    secretKeys: ['GOOGLE_PLACES_API_KEY'],
     buildEnv: (ctx) => ({
       // Optional feature; real key via .env.local enables autocomplete.
       GOOGLE_PLACES_API_KEY: '',
@@ -199,6 +216,11 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'notificationService',
     needs: {db: dbn.notification, redis: true, s3: false},
     run: tsxService('src/index.ts'),
+    secretKeys: [
+      'EXPO_ACCESS_TOKEN',
+      'FCM_TOKEN_PUBLIC_KEY',
+      'FCM_TOKEN_PRIVATE_KEY',
+    ],
     buildEnv: (ctx) => ({
       EXPO_ACCESS_TOKEN: '',
       // Reuse the dev ECDSA pair for notification-token signing in dev. Override
@@ -238,6 +260,17 @@ export const SERVICES: readonly RunnableApp[] = [
     healthPortKey: 'contentService',
     needs: {db: dbn.content, redis: false, s3: false},
     run: tsxService('src/index.ts'),
+    secretKeys: [
+      'WEBFLOW_TOKEN',
+      'WEBFLOW_EVENTS_COLLECTION_ID',
+      'WEBFLOW_SPEAKERS_COLLECTION_ID',
+      'WEBFLOW_BLOG_COLLECTION_ID',
+      'CLEAR_CACHE_TOKEN_HASH',
+      'BTC_PAY_SERVER_URL',
+      'BTC_PAY_SERVER_API_KEY',
+      'BTC_PAY_SERVER_STORE_ID',
+      'BTC_PAY_SERVER_WEBHOOK_SECRET',
+    ],
     buildEnv: () => ({
       ...stringifyValues(sc.contentService),
       // Optional integrations — empty by default, set in .env.local to enable.
@@ -274,6 +307,7 @@ export const WEB_APPS: readonly RunnableApp[] = [
     portKey: 'backofficeApp',
     needs: {db: dbn.backoffice, redis: false, s3: true},
     run: {type: 'pnpm-script', script: 'dev'},
+    secretKeys: ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY'],
     buildEnv: (ctx) => ({
       NODE_ENV: ctx.cfg.common.NODE_ENV,
       SERVICE_NAME: 'BACKOFFICE_APP',
@@ -310,6 +344,12 @@ export const WEB_APPS: readonly RunnableApp[] = [
     // The UI is served by the vite dev server (the `dev` script runs both the
     // node server and `vite dev`); display/validate that port.
     portKey: 'dashboardUi',
+    extraPortKeys: [
+      'dashboardClient',
+      'dashboardUpdates',
+      'dashboardSocket',
+      'dashboardHealth',
+    ],
     needs: {db: dbn.contact, redis: false, s3: false},
     // `dev` = `dev:server` (tsx server/index.ts) + `dev:client` (vite dev). The
     // server reads the contact db read-only; vite serves the UI and proxies
@@ -333,7 +373,10 @@ export const WEB_APPS: readonly RunnableApp[] = [
 export const ALL_APPS: readonly RunnableApp[] = [...SERVICES, ...WEB_APPS]
 
 const APP_BY_NAME: Record<string, RunnableApp> = Object.fromEntries(
-  ALL_APPS.map((app) => [app.name, app])
+  pipe(
+    ALL_APPS,
+    Array.map((app) => [app.name, app])
+  )
 )
 
 export const findApp = (name: string): RunnableApp | undefined =>
@@ -343,9 +386,23 @@ export const findApp = (name: string): RunnableApp | undefined =>
 export const allDatabaseNames = (): readonly string[] =>
   Object.values(devConfig.dbNames)
 
+const pickSecrets = (
+  keys: readonly string[] | undefined,
+  secrets: Secrets
+): Secrets => {
+  const result: Secrets = {}
+  if (keys === undefined) return result
+
+  for (const key of keys) {
+    const value = secrets[key]
+    if (value !== undefined) result[key] = value
+  }
+  return result
+}
+
 /**
  * Build the final env for one app: shared backend block (services only) + the
- * app's own extras + `.env.local` secrets layered on top (secrets win).
+ * app's own extras + declared `.env.local` secrets layered on top (secrets win).
  */
 export const buildFinalEnv = (
   app: RunnableApp,
@@ -356,6 +413,6 @@ export const buildFinalEnv = (
   return {
     ...base,
     ...app.buildEnv(ctx),
-    ...secrets,
+    ...pickSecrets(app.secretKeys, secrets),
   }
 }

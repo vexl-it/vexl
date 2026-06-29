@@ -8,6 +8,7 @@
  * first line), which silently dropped everything after the startup line. Pushing
  * from the host avoids that entirely and works the same on every platform.
  */
+import {Array, pipe} from 'effect'
 
 interface PendingEntry {
   readonly streamKey: string
@@ -28,6 +29,7 @@ export function createLokiPusher(pushUrl: string): LokiPusher {
   // increasing (Date.now() is ms-precision; many lines share a millisecond).
   const lastNsByStream = new Map<string, bigint>()
   let warned = false
+  let activeFlush: Promise<void> = Promise.resolve()
 
   const nextNs = (streamKey: string): string => {
     let ns = BigInt(Date.now()) * 1_000_000n
@@ -48,8 +50,8 @@ export function createLokiPusher(pushUrl: string): LokiPusher {
     console.warn(`[loki] ${message} — logs may be missing in Grafana.`)
   }
 
-  const flush = async (): Promise<void> => {
-    if (buffer.length === 0) return
+  const flushOnce = async (): Promise<void> => {
+    if (!Array.isNonEmptyArray(buffer)) return
     const batch = buffer
     buffer = []
 
@@ -68,10 +70,13 @@ export function createLokiPusher(pushUrl: string): LokiPusher {
         })
       }
     }
-    const streams = Array.from(byStream.values()).map((stream) => ({
-      stream: stream.labels,
-      values: stream.values,
-    }))
+    const streams = pipe(
+      globalThis.Array.from(byStream.values()),
+      Array.map((stream) => ({
+        stream: stream.labels,
+        values: stream.values,
+      }))
+    )
 
     try {
       const response = await fetch(pushUrl, {
@@ -89,6 +94,11 @@ export function createLokiPusher(pushUrl: string): LokiPusher {
     }
   }
 
+  const flush = async (): Promise<void> => {
+    activeFlush = activeFlush.then(flushOnce, flushOnce)
+    await activeFlush
+  }
+
   const timer = setInterval(() => {
     void flush()
   }, 1000)
@@ -101,6 +111,7 @@ export function createLokiPusher(pushUrl: string): LokiPusher {
     close: async () => {
       clearInterval(timer)
       await flush()
+      await activeFlush
     },
   }
 }

@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "You fit edit this contact anytime.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Contact add only for Vexl",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl no fit save this contact for your phone because Contacts access dey off. Open settings make you allow access.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "Di contact no add for Vexl because e no fit save for your phone contacts. Try again, or off \"Also save to your phone\" make e add only for Vexl.",
   "addContactDialog.contactAlreadyAddedTitle": "Contact don already add",
   "addContactDialog.contactAlreadyAddedDescription": "This phone number dey your Vexl contacts already. You fit edit am from your contact list.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change the name for {{name}}?",

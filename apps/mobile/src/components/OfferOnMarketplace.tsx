@@ -14,6 +14,7 @@ import {
   smallestClubForIdsAtom,
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
+import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {isProductOfferMissingCategory} from '../state/marketplace/utils/isProductOfferMissingCategory'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {isOfferExpired} from '../utils/isOfferExpired'
@@ -51,6 +52,7 @@ export default function OfferOnMarketplace({
   const isPausedMyOffer = isMine && !publicPart.active
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
+  const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
 
   const smallestClub = useAtomValue(
     useMemo(
@@ -88,7 +90,7 @@ export default function OfferOnMarketplace({
     : (getOtherSideFriendLevel({offerInfo: offer.offerInfo, t}) ??
       t('offer.friendOfFriend'))
 
-  const commonFriendsCount = privatePart.commonFriends.length
+  const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const commonFriendsText = !isMine
     ? t('marketplace.commonFriendsFormatted', {
         localizedString: formatInteger(commonFriendsCount, locale),

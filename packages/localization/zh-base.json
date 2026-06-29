@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "你随时都可以编辑这个联系人。",
   "addContactDialog.contactAddedToVexlOnlyTitle": "联系人仅已添加到 Vexl",
   "addContactDialog.contactAddedToVexlOnlyDescription": "由于通讯录访问权限已关闭，Vexl 无法把这个联系人保存到你的手机。打开设置来允许访问。",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "联系人未添加到 Vexl，因为无法保存到你的手机通讯录。请重试，或关闭“也保存到手机”以仅添加到 Vexl。",
   "addContactDialog.contactAlreadyAddedTitle": "联系人已添加",
   "addContactDialog.contactAlreadyAddedDescription": "这个手机号已经在你的 Vexl 联系人里了。你可以从联系人列表里编辑它。",
   "addContactDialog.wouldYouLikeToChangeTheName": "您想要更改 {{name}} 的名称吗？",

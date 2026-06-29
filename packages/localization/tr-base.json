@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "Bu kişiyi istediğin zaman düzenleyebilirsin.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Kişi yalnızca Vexl'e eklendi",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Kişiler erişimi kapalı olduğu için Vexl bu kişiyi telefonuna kaydedemedi. Erişime izin vermek için ayarları aç.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "Kişi, telefon rehberine kaydedilemediği için Vexl’e eklenmedi. Tekrar deneyin veya yalnızca Vexl’e eklemek için \"Telefonuna da kaydet\" seçeneğini kapatın.",
   "addContactDialog.contactAlreadyAddedTitle": "Kişi zaten eklendi",
   "addContactDialog.contactAlreadyAddedDescription": "Bu telefon numarası zaten Vexl kişilerinde var. Kişi listenden düzenleyebilirsin.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change the name for {{name}}?",

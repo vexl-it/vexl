@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "هر وقت خواستی می‌تونی این مخاطب رو ویرایش کنی.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "مخاطب فقط به Vexl اضافه شد",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl نتونست این مخاطب رو توی گوشی‌ات ذخیره کنه چون دسترسی به مخاطبین غیرفعاله. تنظیمات رو باز کن تا دسترسی رو بدی.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "مخاطب به Vexl اضافه نشد، چون امکان ذخیره آن در مخاطبین تلفن شما وجود نداشت. دوباره تلاش کنید، یا گزینه «همچنین در تلفن شما ذخیره شود» را خاموش کنید تا فقط به Vexl اضافه شود.",
   "addContactDialog.contactAlreadyAddedTitle": "این مخاطب قبلاً اضافه شده",
   "addContactDialog.contactAlreadyAddedDescription": "این شماره تلفن همین حالا هم توی مخاطبین Vexl تو هست. می‌تونی از فهرست مخاطبینت ویرایشش کنی.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change the name for {{name}}?",

@@ -7,7 +7,7 @@ import {
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Stack, tokens, useTheme} from '@vexl-next/ui'
 import {type Atom} from 'jotai'
-import React, {useEffect, useMemo, useRef} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {RefreshControl} from 'react-native'
 import Animated from 'react-native-reanimated'
 import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
@@ -15,20 +15,26 @@ import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import OffersListItem from './OffersListItem'
 
 const ItemSeparatorComponent = (): React.ReactElement => <Stack h="$5" />
+interface ItemSeparatorProps {
+  readonly leadingItem?: Atom<OneOfferInState>
+}
+
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
 
 function renderItem(
   info: ListRenderItemInfo<Atom<OneOfferInState>>
 ): React.ReactElement {
-  return <OffersListItem isFirst={info.index === 0} offerAtom={info.item} />
+  return <OffersListItem offerAtom={info.item} />
 }
 
 export interface Props extends Omit<
   FlashListProps<Atom<OneOfferInState>>,
-  'renderItem' | 'data'
+  'renderItem' | 'data' | 'ListFooterComponent'
 > {
   readonly offersAtoms: Array<Atom<OneOfferInState>>
+  readonly itemAfterFirstOffer?: React.ReactElement | null
+  readonly ListFooterComponent?: React.ReactElement | null
   readonly scrollToTopRef?: React.RefObject<(() => void) | null>
 }
 
@@ -36,6 +42,7 @@ function OffersList({
   onRefresh,
   refreshing,
   offersAtoms,
+  itemAfterFirstOffer,
   scrollToTopRef,
   ListEmptyComponent,
   ListHeaderComponent,
@@ -54,6 +61,40 @@ function OffersList({
     }),
     [bottomOffset, externalContentContainerStyle]
   )
+
+  const firstOfferAtom = offersAtoms[0]
+
+  const itemSeparatorComponent = useCallback(
+    ({leadingItem}: ItemSeparatorProps): React.ReactElement => {
+      if (itemAfterFirstOffer != null && leadingItem === firstOfferAtom) {
+        return (
+          <>
+            <Stack h="$5" />
+            <Stack px="$5">{itemAfterFirstOffer}</Stack>
+            <Stack h="$5" />
+          </>
+        )
+      }
+
+      return <ItemSeparatorComponent />
+    },
+    [firstOfferAtom, itemAfterFirstOffer]
+  )
+
+  const listFooterComponent = useMemo((): React.ReactElement | null => {
+    if (itemAfterFirstOffer == null || offersAtoms.length !== 1) {
+      return ListFooterComponent ?? null
+    }
+
+    return (
+      <>
+        <Stack h="$5" />
+        <Stack px="$5">{itemAfterFirstOffer}</Stack>
+        <Stack h="$5" />
+        {ListFooterComponent}
+      </>
+    )
+  }, [ListFooterComponent, itemAfterFirstOffer, offersAtoms.length])
 
   useEffect(() => {
     if (!scrollToTopRef) return
@@ -81,10 +122,10 @@ function OffersList({
           tintColor={theme.foregroundSecondary.get()}
         />
       }
-      ItemSeparatorComponent={ItemSeparatorComponent}
+      ItemSeparatorComponent={itemSeparatorComponent}
       progressViewOffset={20}
       ListHeaderComponent={ListHeaderComponent}
-      ListFooterComponent={ListFooterComponent}
+      ListFooterComponent={listFooterComponent}
       ListEmptyComponent={ListEmptyComponent}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={contentContainerStyle}

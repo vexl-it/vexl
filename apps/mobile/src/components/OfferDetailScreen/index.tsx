@@ -27,6 +27,7 @@ import {
 } from '../../state/chat/utils/offerStates'
 import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
+import {useVisibleCommonFriendsForOffer} from '../../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
@@ -139,7 +140,8 @@ function OfferDetailScrollContent({
   const theme = useTheme()
   const {footerHeightAtom} = useScreenFooterHeight()
   const footerHeight = useAtomValue(footerHeightAtom)
-  const commonFriendsCount = offer.offerInfo.privatePart.commonFriends.length
+  const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
+  const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const otherSideClubs = useGetAllClubsForIds(
     offer.offerInfo.privatePart.clubIds
   )
@@ -170,9 +172,9 @@ function OfferDetailScrollContent({
 
         {hasCommonFriendsOrClubs ? (
           <CommonFriends
-            commonConnectionsHashes={offer.offerInfo.privatePart.commonFriends}
+            commonConnectionsHashes={visibleCommonFriends.commonFriends}
             verifiedConnectionsHashes={
-              offer.offerInfo.privatePart.verifiedCommonFriends
+              visibleCommonFriends.verifiedCommonFriends
             }
             otherSideClubs={otherSideClubs}
           />

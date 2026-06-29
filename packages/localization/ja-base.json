@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "この連絡先はいつでも編集できるよ。",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Vexlにだけ連絡先を追加したよ",
   "addContactDialog.contactAddedToVexlOnlyDescription": "連絡先へのアクセスがオフになっているため、Vexlはこの連絡先をスマホに保存できませんでした。設定を開いてアクセスを許可してね。",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "電話の連絡先に保存できなかったため、この連絡先はVexlに追加されませんでした。もう一度試すか、「電話にも保存」をオフにしてVexlにのみ追加してください。",
   "addContactDialog.contactAlreadyAddedTitle": "連絡先はすでに追加済み",
   "addContactDialog.contactAlreadyAddedDescription": "この電話番号はすでにVexlの連絡先に入っているよ。連絡先リストから編集できるよ。",
   "addContactDialog.wouldYouLikeToChangeTheName": "{{name}} の名前を変更しますか。",

@@ -1,13 +1,32 @@
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
   type OneOfferInState,
   type Sort,
 } from '@vexl-next/domain/src/general/offers'
+import {deriveVisibleCommonFriendsForOffer} from './visibleCommonFriends'
 
 export default function sortOffers<T extends OneOfferInState>(
   offers: readonly T[],
-  sort: Sort
+  sort: Sort,
+  importedContactsHashes?: readonly HashedPhoneNumber[]
 ): T[] {
   const toReturn = [...offers]
+  const commonFriendsCounts =
+    sort === 'MOST_CONNECTIONS' ? new Map<OneOfferInState, number>() : undefined
+
+  if (commonFriendsCounts !== undefined) {
+    for (const offer of toReturn) {
+      commonFriendsCounts.set(
+        offer,
+        importedContactsHashes === undefined
+          ? 0
+          : deriveVisibleCommonFriendsForOffer({
+              offerInfo: offer.offerInfo,
+              importedContactsHashes,
+            }).commonFriends.length
+      )
+    }
+  }
 
   toReturn.sort((a, b) => {
     const aIsMyOffer = !!a.ownershipInfo
@@ -38,10 +57,9 @@ export default function sortOffers<T extends OneOfferInState>(
         a.offerInfo.publicPart.amountTopLimit
       )
     if (sort === 'MOST_CONNECTIONS') {
-      return (
-        b.offerInfo.privatePart.commonFriends.length -
-        a.offerInfo.privatePart.commonFriends.length
-      )
+      const aCommonFriendsCount = commonFriendsCounts?.get(a) ?? 0
+      const bCommonFriendsCount = commonFriendsCounts?.get(b) ?? 0
+      return bCommonFriendsCount - aCommonFriendsCount
     }
     // default ordering: NEWEST_OFFER
     return b.offerInfo.id - a.offerInfo.id

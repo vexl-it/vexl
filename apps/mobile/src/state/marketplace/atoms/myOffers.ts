@@ -12,6 +12,7 @@ import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
 import {sessionDataOrDummyAtom} from '../../session'
 import {isProductOfferMissingCategory} from '../utils/isProductOfferMissingCategory'
 import sortOffers from '../utils/sortOffers'
@@ -32,7 +33,13 @@ export const myOffersSortedAtom = atom((get) => {
   const sortingOptions = get(selectedMyOffersSortingOptionAtom)
   const myOffers = get(myOffersAtom)
 
-  return sortOffers(myOffers, sortingOptions)
+  return sortOffers(
+    myOffers,
+    sortingOptions,
+    sortingOptions === 'MOST_CONNECTIONS'
+      ? get(importedContactsHashesAtom)
+      : undefined
+  )
 })
 
 export const myOffersSortedAtomsAtom = splitAtom(

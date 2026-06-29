@@ -456,6 +456,42 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           },
         })
 
+        const contactsPermissionsGranted = params.saveToPhone
+          ? yield* _(areContactsPermissionsGranted())
+          : false
+
+        const addContactToPhoneSuccess =
+          params.saveToPhone && contactsPermissionsGranted
+            ? yield* _(
+                set(addContactToPhoneActionAtom, {
+                  customName: contactName,
+                  number: normalizedNumber.value,
+                }),
+                Effect.catchTag('ErrorAddingContactToPhoneContacts', () =>
+                  pipe(
+                    set(globalDialogAtom, {
+                      title: t(
+                        'contacts.errorAddingContactToYourPhoneContacts'
+                      ),
+                      subtitle: t(
+                        'addContactDialog.contactCouldNotBeSavedToPhoneDescription'
+                      ),
+                      positiveButtonText: t('common.close'),
+                    }),
+                    Effect.as(false)
+                  )
+                )
+              )
+            : false
+
+        if (
+          params.saveToPhone &&
+          contactsPermissionsGranted &&
+          !addContactToPhoneSuccess
+        ) {
+          return false
+        }
+
         set(storedContactsAtom, (prev) => [
           ...pipe(
             prev,
@@ -471,27 +507,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
             computedValues: Option.some(manualContact.computedValues),
           },
         ])
-
-        const contactsPermissionsGranted = params.saveToPhone
-          ? yield* _(areContactsPermissionsGranted())
-          : false
-
-        if (params.saveToPhone && contactsPermissionsGranted) {
-          yield* _(
-            set(addContactToPhoneActionAtom, {
-              customName: contactName,
-              number: normalizedNumber.value,
-            }),
-            Effect.catchTag('ErrorAddingContactToPhoneContacts', (e) => {
-              showErrorAlert({
-                title: t('contacts.errorAddingContactToYourPhoneContacts'),
-                error: e,
-              })
-
-              return Effect.succeed(false)
-            })
-          )
-        }
+        set(selectedNumbersAtom, (selectedNumbers) => {
+          const nextSelectedNumbers = new Set(selectedNumbers)
+          nextSelectedNumbers.add(normalizedNumber.value)
+          return nextSelectedNumbers
+        })
 
         set(searchTextAtom, '')
         reloadContacts()

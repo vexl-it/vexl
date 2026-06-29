@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "Unaweza kuhariri mwasiliani huyu wakati wowote.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Mwasiliani ameongezwa kwenye Vexl pekee",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl haikuweza kuhifadhi mwasiliani huyu kwenye simu yako kwa sababu ruhusa ya Contacts imezimwa. Fungua mipangilio ili kuruhusu ufikiaji.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "Anwani haikuongezwa kwenye Vexl kwa sababu haikuweza kuhifadhiwa kwenye anwani za simu yako. Jaribu tena, au zima \"Hifadhi pia kwenye simu yako\" ili kuiongeza kwenye Vexl pekee.",
   "addContactDialog.contactAlreadyAddedTitle": "Mwasiliani tayari ameongezwa",
   "addContactDialog.contactAlreadyAddedDescription": "Namba hii ya simu tayari iko kwenye mawasiliano yako ya Vexl. Unaweza kuihariri kutoka kwenye orodha yako ya mawasiliano.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Je, ungependa kubadilisha jina la {{name}}?",

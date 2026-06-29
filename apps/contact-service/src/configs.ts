@@ -66,6 +66,13 @@ export const secretSaltForServerContact = Config.string(
 export const s3Config = Config.all({
   region: Config.string('AWS_REGION').pipe(Config.withDefault('eu-west-1')),
   bucketName: Config.string('S3_BUCKET_NAME'),
+  // Optional custom endpoint + path-style addressing for S3-compatible stores
+  // (e.g. MinIO in local dev). Empty endpoint -> use the AWS SDK default.
+  // Mirrors apps/backoffice-app/src/server/slideshows/config.ts.
+  endpoint: Config.string('S3_ENDPOINT').pipe(Config.withDefault('')),
+  forcePathStyle: Config.boolean('S3_FORCE_PATH_STYLE').pipe(
+    Config.withDefault(false)
+  ),
 })
 
 export const appVersionSupportingV2KeysConfig = Config.number(

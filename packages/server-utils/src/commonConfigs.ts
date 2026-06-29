@@ -35,6 +35,27 @@ export const isRunningInProductionConfig = nodeEnvConfig.pipe(
   Config.map((env) => env === 'production')
 )
 
+/**
+ * Log output format. `json` emits structured JSON logs (parsed into fields by
+ * Loki/Grafana), `pretty` emits human-readable colored logs. When unset it
+ * defaults to JSON in production and pretty otherwise, preserving prior
+ * behavior. Lets the dev stack get Grafana-friendly JSON logs without flipping
+ * NODE_ENV (which would also enable rate limiting, disable dev tools, etc.).
+ */
+export const logFormatConfig = Config.literal(
+  'json',
+  'pretty'
+)('LOG_FORMAT').pipe(Config.option)
+
+export const useJsonLogsConfig = Effect.map(
+  Effect.all([isRunningInProductionConfig, logFormatConfig]),
+  ([inProd, format]) =>
+    Option.match(format, {
+      onSome: (selected) => selected === 'json',
+      onNone: () => inProd,
+    })
+)
+
 export const portConfig = Config.number('PORT')
 export const healthServerPortConfig = Config.option(
   Config.number('HEALTH_PORT')

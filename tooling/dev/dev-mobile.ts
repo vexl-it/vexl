@@ -357,11 +357,11 @@ function buildServeCommand(): Command {
 
 // --- process execution -----------------------------------------------------
 
-function runToCompletion(
+async function runToCompletion(
   command: Command,
   env: Record<string, string | undefined>
 ): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
+  return await new Promise<number>((resolve, reject) => {
     const child = spawn(EXPO_BIN, [...command.args], {
       cwd: MOBILE_DIR,
       env,
@@ -374,11 +374,11 @@ function runToCompletion(
   })
 }
 
-function runAttached(
+async function runAttached(
   command: Command,
   env: Record<string, string | undefined>
 ): Promise<number> {
-  return new Promise<number>((resolve, reject) => {
+  return await new Promise<number>((resolve, reject) => {
     const child = spawn(EXPO_BIN, [...command.args], {
       cwd: MOBILE_DIR,
       env,

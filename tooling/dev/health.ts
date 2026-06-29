@@ -87,8 +87,11 @@ export async function checkOnce(
     : await tcpReady(target.host, target.port, timeoutMs)
 }
 
-const delay = async (ms: number): Promise<void> =>
-  await new Promise<void>((resolve) => setTimeout(resolve, ms))
+const delay = async (ms: number): Promise<void> => {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
 
 export async function waitUntilReady(
   target: ReadinessTarget,

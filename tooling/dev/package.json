@@ -1,0 +1,19 @@
+{
+  "name": "@vexl-next/dev",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,yaml}\"",
+    "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json,yaml}\"",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/prettier-config": "0.0.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.3.2",
+    "typescript": "~6.0.3"
+  },
+  "prettier": "@vexl-next/prettier-config"
+}

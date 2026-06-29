@@ -91,7 +91,7 @@ function printHelp(): void {
       '  --only <a,b>        run only these services/apps',
       '  --skip <a,b>        run everything except these',
       '  --no-web            skip the web apps (backoffice/account-deletion/dashboard)',
-      '  --no-observability  skip Loki/Tempo/Grafana/Alloy',
+      '  --no-observability  skip Loki/Tempo/Grafana',
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',
       '  --detach-infra      leave docker infra running on exit',
@@ -373,26 +373,25 @@ async function main(): Promise<void> {
     console.log(`\nReceived ${signal}, shutting down...`)
 
     await Promise.all(
-      supervised.map(
-        async ({app, child, logger}) =>
-          await new Promise<void>((resolve) => {
-            if (child.exitCode !== null || child.signalCode !== null) {
-              logger.close()
-              resolve()
-              return
-            }
-            const force = setTimeout(() => {
-              killTree(child, 'SIGKILL')
-            }, 5000)
-            child.once('exit', () => {
-              clearTimeout(force)
-              logger.close()
-              resolve()
-            })
-            logger.note(`Stopping ${app.name}...`)
-            killTree(child, 'SIGTERM')
+      supervised.map(async ({app, child, logger}) => {
+        await new Promise<void>((resolve) => {
+          if (child.exitCode !== null || child.signalCode !== null) {
+            logger.close()
+            resolve()
+            return
+          }
+          const force = setTimeout(() => {
+            killTree(child, 'SIGKILL')
+          }, 5000)
+          child.once('exit', () => {
+            clearTimeout(force)
+            logger.close()
+            resolve()
           })
-      )
+          logger.note(`Stopping ${app.name}...`)
+          killTree(child, 'SIGTERM')
+        })
+      })
     )
 
     // Flush remaining logs to Loki before the container goes away.

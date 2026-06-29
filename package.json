@@ -21,7 +21,7 @@
     "content-service:build-docker-image": "./scripts/build-app-docker-image.sh content-service",
     "dev:backend": "tsx tooling/dev/dev-backend.ts",
     "dev:mobile": "tsx tooling/dev/dev-mobile.ts",
-    "dev:infra": "docker compose -f docker-compose.dev.yaml up -d --wait postgres redis minio loki tempo alloy grafana",
+    "dev:infra": "docker compose -f docker-compose.dev.yaml up -d --wait postgres redis minio loki tempo grafana",
     "postinstall": "manypkg check"
   },
   "private": true,

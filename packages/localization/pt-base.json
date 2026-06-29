@@ -918,7 +918,7 @@
   "messages.youHaveChattedWithThisPartyBefore": "Parece que já falaste sobre esta oferta, mas saíste e eliminaste a conversa.",
   "messages.areYouSureYouWantToDeleteChat": "Are you sure you want to delete this chat? All messages will be lost.",
   "progressBar.ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}} Concluído",
-  "progressBar.percentDone": "{{percentDone}} Concluído",
+  "progressBar.percentDone": "{{percentDone}}% concluído",
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Construir cargas úteis privadas",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Construir e encriptar a carga útil pública",

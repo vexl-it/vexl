@@ -918,7 +918,7 @@
   "messages.youHaveChattedWithThisPartyBefore": "Parece que ya chateaste sobre esta oferta, pero saliste y eliminaste la conversación.",
   "messages.areYouSureYouWantToDeleteChat": "¿Estás seguro de que quieres borrar este chat? Se borrarán todos los mensajes.",
   "progressBar.ENCRYPTING_PRIVATE_PAYLOADS": "{{percentDone}} Hecho",
-  "progressBar.percentDone": "{{percentDone}} Hecho",
+  "progressBar.percentDone": "{{percentDone}}% hecho",
   "progressBar.FETCHING_CONTACTS": "",
   "progressBar.CONSTRUCTING_PRIVATE_PAYLOADS": "Construyendo cargas privadas",
   "progressBar.CONSTRUCTING_PUBLIC_PAYLOAD": "Construyendo y cifrando carga pública",

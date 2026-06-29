@@ -92,7 +92,7 @@
     "luxon": "^3.3.0",
     "match-sorter": "^6.3.4",
     "optics-ts": "^2.4.0",
-    "react": "19.2.3",
+    "react": "19.2.7",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
     "react-native-autolink": "^4.2.0",

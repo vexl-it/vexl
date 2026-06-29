@@ -14,6 +14,11 @@ import {spawn, type ChildProcess} from 'node:child_process'
 import {join} from 'node:path'
 import devConfig from '../../dev.config'
 import * as docker from './docker'
+import {
+  buildDockerEnv,
+  INFRA_SERVICES,
+  OBSERVABILITY_SERVICES,
+} from './docker-env'
 import {checkOnce, readinessTarget, waitUntilReady} from './health'
 import {createServiceLogger, ensureLogsDir, type ServiceLogger} from './logging'
 import {createLokiPusher, type LokiPusher} from './loki'
@@ -148,35 +153,6 @@ function selectApps(options: CliOptions): readonly RunnableApp[] {
 }
 
 // --- env -------------------------------------------------------------------
-
-// Alloy is intentionally gone: the supervisor pushes logs to Loki directly (see
-// loki.ts) instead of an in-container agent tailing host files.
-const OBSERVABILITY_SERVICES = ['loki', 'tempo', 'grafana']
-const INFRA_SERVICES = ['postgres', 'redis', 'minio']
-
-function buildDockerEnv(ctx: EnvContext, secrets: Secrets): docker.DockerEnv {
-  const {infra} = ctx.cfg
-  return {
-    ...process.env,
-    POSTGRES_USER: infra.postgres.user,
-    POSTGRES_PASSWORD: infra.postgres.password,
-    POSTGRES_DB: 'postgres',
-    POSTGRES_PORT: String(ctx.ports.postgres),
-    REDIS_PORT: String(ctx.ports.redis),
-    MINIO_ROOT_USER: infra.minio.rootUser,
-    MINIO_ROOT_PASSWORD: infra.minio.rootPassword,
-    MINIO_API_PORT: String(ctx.ports.minioApi),
-    MINIO_CONSOLE_PORT: String(ctx.ports.minioConsole),
-    S3_BUCKET_NAME: infra.minio.bucket,
-    GRAFANA_PORT: String(ctx.ports.grafana),
-    LOKI_PORT: String(ctx.ports.loki),
-    TEMPO_PORT: String(ctx.ports.tempo),
-    TEMPO_OTLP_HTTP_PORT: String(ctx.ports.tempoOtlpHttp),
-    TEMPO_OTLP_GRPC_PORT: String(ctx.ports.tempoOtlpGrpc),
-    // Optional docker credentials from .env.local may override local defaults.
-    ...secrets,
-  }
-}
 
 // --- port validation -------------------------------------------------------
 

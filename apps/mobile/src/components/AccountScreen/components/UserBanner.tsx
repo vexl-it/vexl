@@ -1,5 +1,12 @@
 import {useNavigation} from '@react-navigation/native'
-import {Avatar, Button, tokens, Typography, XStack, YStack} from '@vexl-next/ui'
+import {
+  Avatar,
+  CardButton,
+  tokens,
+  Typography,
+  XStack,
+  YStack,
+} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
@@ -70,12 +77,12 @@ function UserBanner(): React.ReactElement {
         </Typography>
       </YStack>
       <XStack gap="$3">
-        <Button size="small" variant="tertiary" onPress={handleSharePress}>
+        <CardButton contrast onPress={handleSharePress}>
           {t('common.share')}
-        </Button>
-        <Button size="small" variant="tertiary" onPress={handleEditPress}>
+        </CardButton>
+        <CardButton contrast onPress={handleEditPress}>
           {t('common.edit')}
-        </Button>
+        </CardButton>
       </XStack>
     </XStack>
   )

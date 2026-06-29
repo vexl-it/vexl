@@ -19,6 +19,7 @@ import {
   useGetAllClubsForIds,
   useGetAllClubsNamesForIds,
 } from '../state/clubs/atom/clubsWithMembersAtom'
+import {useVisibleCommonFriendsForOffer} from '../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {getOtherSideFriendLevel} from '../utils/chat/getOtherSideFriendLevel'
 import {formatInteger} from '../utils/localization/formatting'
 import {formattingLocaleAtom} from '../utils/localization/formattingLocaleAtom'
@@ -43,7 +44,8 @@ function OfferAuthorBanner({
 }): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
-  const commonFriendsCount = offer.offerInfo.privatePart.commonFriends.length
+  const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
+  const commonFriendsCount = visibleCommonFriends.commonFriends.length
   const locale = useAtomValue(formattingLocaleAtom)
   const localizedCommonFriendsCount = formatInteger(commonFriendsCount, locale)
   const clubsForOffer = useGetAllClubsForIds(

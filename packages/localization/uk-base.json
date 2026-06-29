@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "Ти можеш відредагувати цей контакт будь-коли.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Контакт додано лише у Vexl",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl не зміг зберегти цей контакт у твоєму телефоні, бо доступ до Контактів вимкнено. Відкрий налаштування, щоб дозволити доступ.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "Контакт не було додано до Vexl, бо його не вдалося зберегти в контактах телефону. Спробуй ще раз або вимкни «Також зберегти в телефоні», щоб додати його лише до Vexl.",
   "addContactDialog.contactAlreadyAddedTitle": "Контакт уже додано",
   "addContactDialog.contactAlreadyAddedDescription": "Цей номер телефону вже є у твоїх контактах Vexl. Ти можеш відредагувати його зі списку контактів.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change the name for {{name}}?",

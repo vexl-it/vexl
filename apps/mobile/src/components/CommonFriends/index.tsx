@@ -126,7 +126,7 @@ function CommonFriends({
   const verifiedHashesSet = useMemo(
     () =>
       showVerifiedContacts
-        ? new Set(verifiedConnectionsHashes ?? [])
+        ? new Set(verifiedConnectionsHashes)
         : new Set<HashedPhoneNumber>(),
     [showVerifiedContacts, verifiedConnectionsHashes]
   )

@@ -47,8 +47,13 @@ import {
   type ChatWithMessages,
 } from '../../../state/chat/domain'
 import {getChatState} from '../../../state/chat/utils/offerStates'
+import {importedContactsHashesAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
 import {offerForChatOriginAtom} from '../../../state/marketplace/atoms/offersState'
+import {
+  deriveVisibleCommonFriendsForChat,
+  deriveVisibleCommonFriendsForOffer,
+} from '../../../state/marketplace/utils/visibleCommonFriends'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
@@ -323,28 +328,65 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
 
   const commonConnectionsHashesAtom = atom((get) => {
     const offer = get(offerForChatAtom)
+    const importedContactsHashes = get(importedContactsHashesAtom)
+    const requestMessage = get(requestMessageAtom)
     const commonFriendsForMyOffer = pipe(
-      get(requestMessageAtom),
-      Option.map((message) => message.message.commonFriends),
-      Option.getOrElse(() => [] as const)
+      requestMessage,
+      Option.flatMap((message) =>
+        Option.fromNullable(message.message.commonFriends)
+      ),
+      Option.getOrElse(() => [])
+    )
+    const verifiedCommonFriendsForMyOffer = pipe(
+      requestMessage,
+      Option.flatMap((message) =>
+        Option.fromNullable(message.message.verifiedCommonFriends)
+      ),
+      Option.getOrElse(() => [])
     )
 
-    return offer?.ownershipInfo
-      ? (commonFriendsForMyOffer ?? [])
-      : (offer?.offerInfo.privatePart.commonFriends ?? [])
+    if (!offer) return []
+
+    if (offer.ownershipInfo) {
+      return deriveVisibleCommonFriendsForChat({
+        commonFriends: commonFriendsForMyOffer,
+        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
+        importedContactsHashes,
+      }).commonFriends
+    }
+
+    return deriveVisibleCommonFriendsForOffer({
+      offerInfo: offer.offerInfo,
+      importedContactsHashes,
+    }).commonFriends
   })
 
   const verifiedConnectionsHashesAtom = atom((get) => {
     const offer = get(offerForChatAtom)
+    const commonConnectionsHashes = get(commonConnectionsHashesAtom)
+    const importedContactsHashes = get(importedContactsHashesAtom)
     const verifiedCommonFriendsForMyOffer = pipe(
       get(requestMessageAtom),
-      Option.map((message) => message.message.verifiedCommonFriends),
-      Option.getOrElse(() => [] as const)
+      Option.flatMap((message) =>
+        Option.fromNullable(message.message.verifiedCommonFriends)
+      ),
+      Option.getOrElse(() => [])
     )
 
-    return offer?.ownershipInfo
-      ? verifiedCommonFriendsForMyOffer
-      : (offer?.offerInfo.privatePart.verifiedCommonFriends ?? [])
+    if (!offer) return []
+
+    if (offer.ownershipInfo) {
+      return deriveVisibleCommonFriendsForChat({
+        commonFriends: commonConnectionsHashes,
+        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
+        importedContactsHashes,
+      }).verifiedCommonFriends
+    }
+
+    return deriveVisibleCommonFriendsForOffer({
+      offerInfo: offer.offerInfo,
+      importedContactsHashes,
+    }).verifiedCommonFriends
   })
 
   const commonConnectionsCountAtom = selectAtom(

@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "Tenhle kontakt můžeš kdykoli upravit.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Kontakt přidán jen do Vexlu",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl nemohl uložit tenhle kontakt do tvého telefonu, protože je vypnutý přístup ke Kontaktům. Otevři nastavení a povol přístup.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "Kontakt nebyl přidán do Vexlu, protože se ho nepodařilo uložit do kontaktů telefonu. Zkus to znovu, nebo vypni „Uložit také do telefonu“ a přidej ho jen do Vexlu.",
   "addContactDialog.contactAlreadyAddedTitle": "Kontakt už je přidaný",
   "addContactDialog.contactAlreadyAddedDescription": "Tohle telefonní číslo už máš ve svých kontaktech ve Vexlu. Můžeš ho upravit v seznamu kontaktů.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Chceš pro toto číslo změnit jméno z uloženého {{name}}?",

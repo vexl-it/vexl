@@ -9,7 +9,10 @@ import {isMarketplaceNarrowingActiveAtom} from '../../../../../state/marketplace
 import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
 import {myOffersSortedAtomsAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
-import {shouldShowMissingProductCategoriesInMyOffersSuggestionAtom} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
+import {
+  marketplaceFirstOfferBannerAtom,
+  shouldShowMissingProductCategoriesInMyOffersSuggestionAtom,
+} from '../../../../../state/marketplace/atoms/offerSuggestionVisible'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {showMarketplaceIntroDialogIfNeededActionAtom} from '../../../../../state/marketplace/atoms/showMarketplaceIntroDialogIfNeededActionAtom'
 import {useHandleRedirectToContactsScreen} from '../../../../../state/useHandleRedirectToContactsScreen'
@@ -23,6 +26,7 @@ import FewFilteredOffersNotice, {
   shouldShowFewFilteredOffersNotice,
 } from './FewFilteredOffersNotice'
 import FilteredOffersEmptyState from './FilteredOffersEmptyState'
+import MarketplaceFirstOfferBanner from './MarketplaceFirstOfferBanner'
 import MissingProductCategoriesMarketplaceSuggestion from './MissingProductCategoriesMarketplaceSuggestion'
 import MyOffersEmptyList from './MyOffersEmptyList'
 import MyOffersListHeader from './MyOffersListHeader'
@@ -103,6 +107,9 @@ function MarketplaceScreenContent({
   const isMarketplaceNarrowingActive = useAtomValue(
     isMarketplaceNarrowingActiveAtom
   )
+  const marketplaceFirstOfferBanner = useAtomValue(
+    marketplaceFirstOfferBannerAtom
+  )
   const loading = useAreOffersLoading()
 
   useHandleRedirectToContactsScreen()
@@ -162,6 +169,16 @@ function MarketplaceScreenContent({
     [activeTab, allOffersAtoms.length, isMarketplaceNarrowingActive]
   )
 
+  const itemAfterFirstOffer = useMemo(
+    () =>
+      activeTab === 'allOffers' && marketplaceFirstOfferBanner != null ? (
+        <MarketplaceFirstOfferBanner
+          marketplaceFirstOfferBanner={marketplaceFirstOfferBanner}
+        />
+      ) : null,
+    [activeTab, marketplaceFirstOfferBanner]
+  )
+
   useAppState(
     useCallback(
       (state) => {
@@ -197,6 +214,7 @@ function MarketplaceScreenContent({
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooterComponent}
         offersAtoms={offersAtoms}
+        itemAfterFirstOffer={itemAfterFirstOffer}
         onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
         refreshing={
           activeTab === 'allOffers' && !isAllOffersEmptyStateVisible

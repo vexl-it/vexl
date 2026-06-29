@@ -1,6 +1,8 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
+import {Array, Option, pipe} from 'effect'
 
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
+import {deriveVisibleCommonFriendsForOffer} from './visibleCommonFriends'
 
 const DIVIDER = ' ## '
 export default function filterOffersByText({
@@ -14,36 +16,78 @@ export default function filterOffersByText({
 }): OneOfferInState[] {
   // TODO - better search. This is just a placeholder
 
-  const wordsToSearchFor = text.toUpperCase().trim().split(' ').filter(Boolean)
+  const wordsToSearchFor = pipe(
+    text.toUpperCase().trim().split(' '),
+    Array.filter(Boolean)
+  )
+  const importedContactsHashes = pipe(
+    importedContacts,
+    Array.map((contact) => contact.computedValues.hash)
+  )
+  const contactsByHash = new Map<
+    StoredContactWithComputedValues['computedValues']['hash'],
+    StoredContactWithComputedValues[]
+  >()
 
-  const offersWithSearchableString = offers.map((offer) => ({
-    offer,
-    searchableString: [
-      offer.offerInfo.publicPart.listingType,
-      offer.offerInfo.publicPart.offerDescription,
-      offer.offerInfo.privatePart.commonFriends
-        .map((hash) =>
-          importedContacts
-            .filter((one) => one.computedValues.hash === hash)
-            .map((o) =>
-              [o.info.name, o.computedValues.normalizedNumber].join(DIVIDER)
-            )
-            .join(DIVIDER)
-        )
-        .join(DIVIDER),
-      offer.offerInfo.publicPart.location
-        ?.map((one) => one.address ?? '')
-        .join(DIVIDER),
-    ]
-      .join(DIVIDER)
-      .toUpperCase(),
-  }))
-
-  return offersWithSearchableString
-    .filter((oneOffer) =>
-      wordsToSearchFor.every((oneWordToSearchFor) =>
-        oneOffer.searchableString.includes(oneWordToSearchFor)
-      )
+  for (const contact of importedContacts) {
+    const contactsForHash = pipe(
+      Option.fromNullable(contactsByHash.get(contact.computedValues.hash)),
+      Option.getOrElse((): StoredContactWithComputedValues[] => [])
     )
-    .map((one) => one.offer)
+    contactsByHash.set(contact.computedValues.hash, [
+      ...contactsForHash,
+      contact,
+    ])
+  }
+
+  const offersWithSearchableString = pipe(
+    offers,
+    Array.map((offer) => {
+      const visibleCommonFriends = deriveVisibleCommonFriendsForOffer({
+        offerInfo: offer.offerInfo,
+        importedContactsHashes,
+      })
+
+      return {
+        offer,
+        searchableString: [
+          offer.offerInfo.publicPart.listingType,
+          offer.offerInfo.publicPart.offerDescription,
+          pipe(
+            visibleCommonFriends.commonFriends,
+            Array.flatMap((hash) =>
+              pipe(
+                Option.fromNullable(contactsByHash.get(hash)),
+                Option.getOrElse((): StoredContactWithComputedValues[] => [])
+              )
+            ),
+            Array.map((contact) =>
+              [contact.info.name, contact.computedValues.normalizedNumber].join(
+                DIVIDER
+              )
+            )
+          ).join(DIVIDER),
+          pipe(
+            offer.offerInfo.publicPart.location ?? [],
+            Array.map((one) => one.address ?? '')
+          ).join(DIVIDER),
+        ]
+          .join(DIVIDER)
+          .toUpperCase(),
+      }
+    })
+  )
+
+  return pipe(
+    offersWithSearchableString,
+    Array.filter((oneOffer) =>
+      pipe(
+        wordsToSearchFor,
+        Array.every((oneWordToSearchFor) =>
+          oneOffer.searchableString.includes(oneWordToSearchFor)
+        )
+      )
+    ),
+    Array.map((one) => one.offer)
+  )
 }

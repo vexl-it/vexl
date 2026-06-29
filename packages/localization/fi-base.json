@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "Voit muokata tätä yhteystietoa milloin vain.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Yhteystieto lisätty vain Vexliin",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl ei voinut tallentaa tätä yhteystietoa puhelimeesi, koska Yhteystiedot-käyttöoikeus on pois päältä. Avaa asetukset ja salli käyttö.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "Yhteystietoa ei lisätty Vexliin, koska sitä ei voitu tallentaa puhelimesi yhteystietoihin. Yritä uudelleen tai poista käytöstä \"Tallenna myös puhelimeesi\", jotta se lisätään vain Vexliin.",
   "addContactDialog.contactAlreadyAddedTitle": "Yhteystieto on jo lisätty",
   "addContactDialog.contactAlreadyAddedDescription": "Tämä puhelinnumero on jo Vexl-yhteystiedoissasi. Voit muokata sitä yhteystietolistastasi.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change the name for {{name}}?",

@@ -973,6 +973,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "You can edit this contact anytime.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "Contact added to Vexl only",
   "addContactDialog.contactAddedToVexlOnlyDescription": "Vexl could not save this contact to your phone because Contacts access is disabled. Open settings to allow access.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "The contact was not added to Vexl because it could not be saved to your phone contacts. Try again, or turn off \"Also save to your phone\" to add it only to Vexl.",
   "addContactDialog.contactAlreadyAddedTitle": "Contact already added",
   "addContactDialog.contactAlreadyAddedDescription": "This phone number is already in your Vexl contacts. You can edit it from your contact list.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change {{name}}'s name?",

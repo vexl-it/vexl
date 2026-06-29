@@ -2,7 +2,10 @@ import {Latitude, Longitude} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, Schema} from 'effect'
 import {atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import {importedContactsAtom} from '../../contacts/atom/contactsStore'
+import {
+  importedContactsAtom,
+  importedContactsHashesAtom,
+} from '../../contacts/atom/contactsStore'
 import {
   filterMarketplaceOffers,
   filterOffersByCircularLocation,
@@ -40,8 +43,13 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
     offers: filtered,
     importedContacts: get(importedContactsAtom),
   })
+  const sort = filter.sort ?? 'NEWEST_OFFER'
 
-  return sortOffers(filteredByText, filter.sort ?? 'NEWEST_OFFER')
+  return sortOffers(
+    filteredByText,
+    sort,
+    sort === 'MOST_CONNECTIONS' ? get(importedContactsHashesAtom) : undefined
+  )
 })
 
 export const filteredOffersForMapAtom = atom((get) => {

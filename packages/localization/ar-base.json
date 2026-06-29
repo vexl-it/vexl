@@ -966,6 +966,7 @@
   "addContactDialog.youCanEditThisContactAnytime": "تقدر تعدّل جهة الاتصال هذه في أي وقت.",
   "addContactDialog.contactAddedToVexlOnlyTitle": "تمت إضافة جهة الاتصال إلى Vexl فقط",
   "addContactDialog.contactAddedToVexlOnlyDescription": "ما قدر Vexl يحفظ جهة الاتصال هذه على هاتفك لأن الوصول إلى جهات الاتصال معطّل. افتح الإعدادات للسماح بالوصول.",
+  "addContactDialog.contactCouldNotBeSavedToPhoneDescription": "لم تتم إضافة جهة الاتصال إلى Vexl لأنه تعذّر حفظها في جهات اتصال هاتفك. حاول مرة أخرى، أو أوقف خيار \"الحفظ أيضًا على هاتفك\" لإضافتها إلى Vexl فقط.",
   "addContactDialog.contactAlreadyAddedTitle": "جهة الاتصال مضافة بالفعل",
   "addContactDialog.contactAlreadyAddedDescription": "رقم الهاتف هذا موجود بالفعل في جهات اتصال Vexl عندك. تقدر تعدّله من قائمة جهات الاتصال.",
   "addContactDialog.wouldYouLikeToChangeTheName": "Would you like to change the name for {{name}}?",

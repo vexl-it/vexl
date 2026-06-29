@@ -1,9 +1,11 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
+import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
+import {deriveVisibleCommonFriendsForOffer} from '../utils/visibleCommonFriends'
 import {offersAtom} from './offersState'
 
 export function alertAndReportInPersonOffersWithoutLocation(
@@ -52,28 +54,49 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
     offers.map((one) => one.offerInfo)
   )
 
-  return offers.filter(
-    (oneOffer) =>
-      // only active offers
-      oneOffer.offerInfo.publicPart.active &&
-      // only not expired offers
-      !isOfferExpired(oneOffer.offerInfo.publicPart.expirationDate) &&
-      // Not mine offers
-      !oneOffer.ownershipInfo &&
-      // Not reported offers
-      !oneOffer.flags.reported &&
-      // Offers that has at least one common contact or are first degree
-      (oneOffer.offerInfo.privatePart.commonFriends.some((one) =>
-        importedContactsHashes.includes(one)
-      ) ||
-        oneOffer.offerInfo.privatePart.friendLevel.includes('FIRST_DEGREE') ||
-        oneOffer.offerInfo.privatePart.friendLevel.includes('CLUB')) &&
-      // Filter offers that are set to be in person but have no location
-      (isDeveloper ||
-        oneOffer.offerInfo.publicPart.locationState.length === 0 ||
-        oneOffer.offerInfo.publicPart.locationState.includes('ONLINE') ||
-        (oneOffer.offerInfo.publicPart.locationState.includes('IN_PERSON') &&
-          oneOffer.offerInfo.publicPart.location.length > 0))
+  return pipe(
+    offers,
+    Array.filter((oneOffer) => {
+      const visibleCommonFriends = deriveVisibleCommonFriendsForOffer({
+        offerInfo: oneOffer.offerInfo,
+        importedContactsHashes,
+      })
+
+      return (
+        // only active offers
+        oneOffer.offerInfo.publicPart.active &&
+        // only not expired offers
+        !isOfferExpired(oneOffer.offerInfo.publicPart.expirationDate) &&
+        // Not mine offers
+        !oneOffer.ownershipInfo &&
+        // Not reported offers
+        !oneOffer.flags.reported &&
+        // Offers that has at least one visible common contact or are first degree
+        (Array.isNonEmptyReadonlyArray(visibleCommonFriends.commonFriends) ||
+          pipe(
+            oneOffer.offerInfo.privatePart.friendLevel,
+            Array.some((one) => one === 'FIRST_DEGREE')
+          ) ||
+          pipe(
+            oneOffer.offerInfo.privatePart.friendLevel,
+            Array.some((one) => one === 'CLUB')
+          )) &&
+        // Filter offers that are set to be in person but have no location
+        (isDeveloper ||
+          oneOffer.offerInfo.publicPart.locationState.length === 0 ||
+          pipe(
+            oneOffer.offerInfo.publicPart.locationState,
+            Array.some((one) => one === 'ONLINE')
+          ) ||
+          (pipe(
+            oneOffer.offerInfo.publicPart.locationState,
+            Array.some((one) => one === 'IN_PERSON')
+          ) &&
+            Array.isNonEmptyReadonlyArray(
+              oneOffer.offerInfo.publicPart.location
+            )))
+      )
+    })
   )
 })
 

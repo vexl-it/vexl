@@ -36,7 +36,7 @@ export interface ServiceLogger {
   /** Log a supervisor-level line for this service. */
   readonly note: (message: string) => void
   /** Flush any buffered partial lines and close the file. */
-  readonly close: () => void
+  readonly close: () => Promise<void>
 }
 
 /** Best-effort log level for the Loki `level` label, parsed from JSON logs. */
@@ -99,7 +99,7 @@ export function createServiceLogger(
     for (const line of lines) emit(stream, line)
   }
 
-  const close = (): void => {
+  const close = async (): Promise<void> => {
     const streams: readonly LogStream[] = ['stdout', 'stderr']
     for (const stream of streams) {
       const remainder = buffers[stream]
@@ -108,7 +108,11 @@ export function createServiceLogger(
         buffers[stream] = ''
       }
     }
-    file.end()
+    await new Promise<void>((resolve, reject) => {
+      file.once('finish', resolve)
+      file.once('error', reject)
+      file.end()
+    })
   }
 
   return {

@@ -20,6 +20,10 @@ export function portEnvVar(key: string): string {
   return `${camelToScreamingSnake(key)}_PORT`
 }
 
+export function isValidTcpPort(port: number): boolean {
+  return Number.isInteger(port) && port >= 1 && port <= 65_535
+}
+
 export function resolvePorts(
   base: Record<string, number>,
   env: Record<string, string | undefined>
@@ -27,8 +31,11 @@ export function resolvePorts(
   const resolved: Record<string, number> = {}
   for (const [key, value] of Object.entries(base)) {
     const override = env[portEnvVar(key)]
-    const parsed = override !== undefined ? Number(override) : Number.NaN
-    resolved[key] = Number.isFinite(parsed) ? parsed : value
+    const parsed =
+      override !== undefined && override.trim().length > 0
+        ? Number(override)
+        : Number.NaN
+    resolved[key] = isValidTcpPort(parsed) ? parsed : value
   }
   return resolved
 }

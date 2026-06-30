@@ -34,7 +34,7 @@
     "@sentry/react-native": "~7.11.0",
     "@shopify/flash-list": "2.0.2",
     "@tamagui/babel-plugin": "^1.137.0",
-    "@tamagui/shorthands": "^2.4.0",
+    "@tamagui/shorthands": "^1.144.4",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/domain": "0.0.0",
     "@vexl-next/fix-brorand-for-expo": "0.0.0",

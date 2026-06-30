@@ -1,18 +1,18 @@
 version: 2
+
+# We only want Dependabot *security* updates — PRs that fix known
+# vulnerabilities. Those are enabled in the repo security settings and are NOT
+# affected by `open-pull-requests-limit`. Setting the limit to 0 disables
+# routine *version* updates, so Dependabot won't open a PR for every new
+# release; it will still open PRs to remediate security advisories.
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-      time: "03:00"
-      timezone: "Europe/Prague"
-    groups:
-      github-actions:
-        patterns:
-          - "*"
+    open-pull-requests-limit: 0
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
-      time: "03:00"
-      timezone: "Europe/Prague"
+    open-pull-requests-limit: 0

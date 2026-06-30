@@ -889,7 +889,7 @@ importers:
         specifier: ^1.137.0
         version: 1.144.4(react-dom@19.2.7(react@19.2.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.2.7))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
       '@tamagui/shorthands':
-        specifier: ^1.137.0
+        specifier: ^1.144.4
         version: 1.144.4(react-dom@19.2.7(react@19.2.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.2.7))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
       '@vexl-next/cryptography':
         specifier: 0.0.0
@@ -1950,7 +1950,7 @@ importers:
   packages/ui:
     dependencies:
       '@tamagui/shorthands':
-        specifier: ^1.137.0
+        specifier: ^1.144.4
         version: 1.144.4(react-dom@19.2.7(react@19.2.7))(react-native@0.85.3(@babel/core@7.29.7)(@react-native/jest-preset@0.85.3(@babel/core@7.29.7)(react@19.2.7))(@react-native/metro-config@0.85.3(@babel/core@7.29.7))(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
       tamagui:
         specifier: ^1.137.0

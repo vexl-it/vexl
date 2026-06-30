@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tamagui/shorthands": "^1.137.0",
+    "@tamagui/shorthands": "^1.144.4",
     "tamagui": "^1.137.0"
   },
   "devDependencies": {

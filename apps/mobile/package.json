@@ -22,7 +22,7 @@
     "@effect/platform": "^0.93.6",
     "@effect/rpc": "^0.72.2",
     "@likashefqet/react-native-image-zoom": "^4.3.0",
-    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-async-storage/async-storage": "3.1.1",
     "@react-native-clipboard/clipboard": "^1.11.2",
     "@react-native-community/blur": "^4.4.1",
     "@react-native-masked-view/masked-view": "0.3.2",
@@ -149,6 +149,7 @@
     "jest": "^29.7.0",
     "prettier": "^3.3.2",
     "react-test-renderer": "^18.2.0",
+    "ts-node": "^10.9.1",
     "typescript": "~6.0.3"
   },
   "prettier": "@vexl-next/prettier-config",

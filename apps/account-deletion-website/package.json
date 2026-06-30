@@ -32,7 +32,7 @@
     "vm-browserify": "^1.1.2"
   },
   "devDependencies": {
-    "@types/node": "^22.10.5",
+    "@types/node": "^24.13.2",
     "@types/react": "~19.2.14",
     "@types/react-dom": "~19.2.3",
     "@vexl-next/eslint-config": "0.0.0",
@@ -43,7 +43,7 @@
     "typescript": "~6.0.3"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.0.0"
   },
   "prettier": "@vexl-next/prettier-config"
 }

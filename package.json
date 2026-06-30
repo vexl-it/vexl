@@ -28,7 +28,7 @@
   "dependencies": {
     "@manypkg/cli": "^0.21.0",
     "@types/jest": "^29.4.0",
-    "@types/node": "^22.10.5",
+    "@types/node": "^24.13.2",
     "eslint": "^9.20.0",
     "prettier": "^3.3.2",
     "tsx": "^4.16.0",

@@ -22,6 +22,7 @@ import {
 import dayjs from 'dayjs'
 import {Array, Context, Effect, flow, Layer, Option, pipe} from 'effect/index'
 import {
+  contactPublicImportCountThresholdConfig,
   inactivityNotificationAfterDaysConfig,
   newContentNotificationAfterConfig,
 } from '../configs'
@@ -72,6 +73,9 @@ export class UserNotificationService extends Context.Tag(
     UserNotificationService,
     Effect.gen(function* (_) {
       const userDbService = yield* _(UserDbService)
+      const publicImportCountThreshold = yield* _(
+        contactPublicImportCountThresholdConfig
+      )
       const enqueueUserNotification = yield* _(EnqueueUserNotification)
       const clubMemberDb = yield* _(ClubMembersDbService)
       const clubsDb = yield* _(ClubsDbService)
@@ -113,6 +117,7 @@ export class UserNotificationService extends Context.Tag(
                 {
                   importedHashes,
                   ownerHash,
+                  publicImportCountThreshold,
                 }
               )
             )
@@ -124,6 +129,7 @@ export class UserNotificationService extends Context.Tag(
                 {
                   importedHashes,
                   ownerHash,
+                  publicImportCountThreshold,
                 }
               ),
               Effect.map(

@@ -6,7 +6,10 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import createPaginatedResponse from '@vexl-next/server-utils/src/createPaginatedResponse'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {Array, Effect, Option, pipe, Schema} from 'effect'
-import {appVersionSupportingV2KeysConfig} from '../../configs'
+import {
+  appVersionSupportingV2KeysConfig,
+  contactPublicImportCountThresholdConfig,
+} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {type FindCommonFriendsPaginatedResult} from '../../db/ContactDbService/queries/createFindCommonFriendsByOwnerHashAndPublicKeysPaginated'
 import {
@@ -31,6 +34,9 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
         Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash))
       )
       const contactDb = yield* _(ContactDbService)
+      const publicImportCountThreshold = yield* _(
+        contactPublicImportCountThresholdConfig
+      )
       const pubKeysToLookFor = pipe(
         req.payload.publicKeys,
         Array.dedupe,
@@ -68,6 +74,7 @@ export const fetchCommonConnectionsPaginated = HttpApiBuilder.handler(
               publicKeysV2: pubKeysV2,
               limit,
               userContactId: decodedNextPageToken?.lastUserContactId,
+              publicImportCountThreshold,
             }),
         })
       )

@@ -1,6 +1,7 @@
 import {
   Button,
   ClubCard,
+  ClubReachCard,
   Stack,
   Typography,
   useTheme,
@@ -18,6 +19,7 @@ import {
 } from '../../../../../../../state/clubs/atom/clubsWithMembersAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../../../../../../../state/clubs/atom/refreshClubsActionAtom'
 import {type ClubWithMembers} from '../../../../../../../state/clubs/domain'
+import {clubsConnectionsReachAtom} from '../../../../../../../state/connections/atom/connectionStateAtom'
 import atomKeyExtractor from '../../../../../../../utils/atomUtils/atomKeyExtractor'
 import {useTranslation} from '../../../../../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../../../../../utils/localization/formatting'
@@ -99,6 +101,24 @@ function Separator(): React.JSX.Element {
   return <Stack height="$3" />
 }
 
+function ClubsReachFooter(): React.JSX.Element {
+  const {t} = useTranslation()
+  const clubsReach = useAtomValue(clubsConnectionsReachAtom)
+  const locale = useAtomValue(formattingLocaleAtom)
+
+  return (
+    <YStack paddingTop="$3" gap="$2">
+      <ClubReachCard
+        title="Clubs reach"
+        reachLabel={t('offerForm.friendLevel.reachPeopleFormatted', {
+          localizedString: formatInteger(clubsReach, locale),
+        })}
+      />
+      <Stack height="$2" />
+    </YStack>
+  )
+}
+
 export function ClubsList({
   navigation,
 }: {
@@ -151,7 +171,7 @@ export function ClubsList({
         />
       }
       ListFooterComponent={
-        isNonEmptyArray(clubsAtoms) ? <Stack height="$2" /> : null
+        isNonEmptyArray(clubsAtoms) ? <ClubsReachFooter /> : null
       }
     />
   )

@@ -35,7 +35,7 @@
     "prettier": "^3.3.2",
     "react": "19.2.7",
     "react-native": "0.85.3",
-    "react-native-builder-bob": "^0.20.0",
+    "react-native-builder-bob": "^0.43.0",
     "rimraf": "^4.4.0",
     "typescript": "~6.0.3"
   },

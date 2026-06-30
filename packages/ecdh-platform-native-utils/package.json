@@ -33,7 +33,7 @@
     "eslint": "^9.20.0",
     "pod-install": "^0.1.0",
     "prettier": "^3.3.2",
-    "react": "19.2.7",
+    "react": "19.2.3",
     "react-native": "0.85.3",
     "react-native-builder-bob": "^0.43.0",
     "rimraf": "^4.4.0",

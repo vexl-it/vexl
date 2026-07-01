@@ -506,6 +506,35 @@ describe('loadSession', () => {
     expect(wasV2SecretWritten()).toBe(true)
   })
 
+  it('falls back to legacy secret when stale v2 secret can not decrypt the session', async () => {
+    const loadedSession = buildLoggedInSession(dummySession.version + 21)
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(loadedSession)
+
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock
+      .mockResolvedValueOnce('stale-v2-secret-token')
+      .mockResolvedValueOnce(secretToken)
+
+    const result = await Effect.runPromise(loadSession({forceReload: false}))
+
+    expect(result.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(loadedSession),
+    })
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledWith(
+      SECRET_TOKEN_KEY_V2
+    )
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledWith(SECRET_TOKEN_KEY)
+    expect(secretStoreSetItemAsyncMock).toHaveBeenCalledWith(
+      SECRET_TOKEN_KEY_V2,
+      secretToken,
+      SECRET_TOKEN_KEY_V2_OPTIONS
+    )
+    expect(wasV2SecretWritten()).toBe(true)
+  })
+
   it('sets loggedOut when there is no session in async storage', async () => {
     asyncStorageGetItemMock.mockResolvedValueOnce(null)
 

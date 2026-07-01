@@ -1,4 +1,4 @@
-import {Either, Schema, pipe, type ParseResult} from 'effect'
+import {Array, Either, Schema, pipe, type ParseResult} from 'effect'
 import {atom, type PrimitiveAtom} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {type WritingToStoreError} from '../mmkv/domain'
@@ -8,6 +8,44 @@ import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom
 
 const AUTHOR_ID_KEY = '___author_id' as const
 export const CLEAR_STORAGE_KEY = '__clear_storage'
+
+// TODO: Temporary diagnostic to track atom initialization results on startup.
+// Remove once the root cause of user data loss is identified.
+type InitResult = 'loaded' | 'valueNotSet' | 'parseError'
+const atomInitResults = new Map<string, InitResult>()
+let startupReportScheduled = false
+
+function scheduleStartupReport(): void {
+  if (startupReportScheduled) return
+  startupReportScheduled = true
+
+  setTimeout(() => {
+    try {
+      const entries = Array.fromIterable(atomInitResults.entries())
+      const keysWithResult = (result: InitResult): string[] =>
+        pipe(
+          entries,
+          Array.filter(([, v]) => v === result),
+          Array.map(([k]) => k)
+        )
+      const valueNotSetKeys = keysWithResult('valueNotSet')
+      const parseErrorKeys = keysWithResult('parseError')
+      const loadedKeys = keysWithResult('loaded')
+
+      if (
+        Array.isNonEmptyArray(parseErrorKeys) ||
+        Array.isNonEmptyArray(valueNotSetKeys)
+      ) {
+        reportError('warn', new Error('MMKV atom initialization summary'), {
+          loaded: loadedKeys,
+          valueNotSet: valueNotSetKeys,
+          parseError: parseErrorKeys,
+          totalKeys: storage._storage.getAllKeys().length,
+        })
+      }
+    } catch {}
+  }, 5000)
+}
 
 const AuthorKeySchema = Schema.Struct({
   [AUTHOR_ID_KEY]: Schema.String,
@@ -59,7 +97,7 @@ function toShadowStorageAtom<A, I extends object>(
               reportError(
                 'warn',
                 new Error(`Error while saving value to storage. Key: ${key}`),
-                {l}
+                {errorTag: l._tag}
               )
             })
           )
@@ -77,19 +115,53 @@ function getInitialValue<A, I extends object>({
   key: string
   defaultValue: A
 }): A {
+  scheduleStartupReport()
+
   return pipe(
     storage.getVerified(key, schema),
-    Either.getOrElse((l) => {
-      if (l._tag !== 'ValueNotSet') {
-        reportError(
-          'warn',
-          new Error(
-            `Error while parsing stored value. Using provided default. Key: ${key}`
-          ),
-          {l}
-        )
-      }
-      return defaultValue
+    Either.match({
+      onRight: (value) => {
+        atomInitResults.set(key, 'loaded')
+        return value
+      },
+      onLeft: (l) => {
+        if (l._tag === 'ValueNotSet') {
+          atomInitResults.set(key, 'valueNotSet')
+        } else {
+          atomInitResults.set(key, 'parseError')
+          try {
+            const rawValue = storage._storage.getString(key)
+            reportError(
+              'warn',
+              new Error(
+                `Error while parsing stored value. Using provided default. Key: ${key}`
+              ),
+              {
+                errorTag: l._tag,
+                rawValueLength: rawValue?.length ?? 0,
+                rawValueIsValidJson: (() => {
+                  if (!rawValue) return false
+                  try {
+                    JSON.parse(rawValue)
+                    return true
+                  } catch {
+                    return false
+                  }
+                })(),
+              }
+            )
+          } catch {
+            reportError(
+              'warn',
+              new Error(
+                `Error while parsing stored value. Using provided default. Key: ${key}`
+              ),
+              {errorTag: l._tag}
+            )
+          }
+        }
+        return defaultValue
+      },
     })
   )
 }
@@ -157,7 +229,7 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
                   new Error(
                     `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
                   ),
-                  {e}
+                  {errorTag: e._tag}
                 )
               },
               onRight: setAtom,

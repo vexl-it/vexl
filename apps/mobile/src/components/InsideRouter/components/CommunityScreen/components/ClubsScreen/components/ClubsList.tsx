@@ -109,7 +109,7 @@ function ClubsReachFooter(): React.JSX.Element {
   return (
     <YStack paddingTop="$3" gap="$2">
       <ClubReachCard
-        title="Clubs reach"
+        title={t('clubs.clubsReach')}
         reachLabel={t('offerForm.friendLevel.reachPeopleFormatted', {
           localizedString: formatInteger(clubsReach, locale),
         })}

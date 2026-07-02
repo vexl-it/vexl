@@ -1,5 +1,10 @@
 import {Array, Either, Schema, pipe, type ParseResult} from 'effect'
-import {atom, type PrimitiveAtom, type SetStateAction} from 'jotai'
+import {
+  atom,
+  type PrimitiveAtom,
+  type SetStateAction,
+  type WritableAtom,
+} from 'jotai'
 import {InteractionManager} from 'react-native'
 import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
@@ -168,6 +173,21 @@ function getInitialValue<A>({
   )
 }
 
+export interface AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
+  readonly atom: FlushablePrimitiveAtom<A>
+  /**
+   * Sets the atom and persists the new value to MMKV synchronously, instead of
+   * deferring the write with InteractionManager as regular sets do. Use when
+   * the value must be readable from storage right away. Persist errors are
+   * reported, not thrown.
+   */
+  readonly setAndSaveImmediatelyAtom: WritableAtom<
+    null,
+    [update: SetStateAction<A>],
+    void
+  >
+}
+
 /**
  * Creates a primitive atom persisted in MMKV under the given key.
  *
@@ -188,12 +208,15 @@ function getInitialValue<A>({
  * still contain it decode fine — effect Schema structs ignore excess
  * properties by default.
  */
-export function atomWithParsedMmkvStorage<A, I extends object>(
+export function atomWithParsedMmkvStorageWithImmediateSaveOption<
+  A,
+  I extends object,
+>(
   key: string,
   defaultValue: A,
   schema: Schema.Schema<A, I, never>,
   debugLabel?: string
-): FlushablePrimitiveAtom<A> {
+): AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
   const decodeRawValue = Schema.decodeEither(Schema.parseJson(schema))
   const persistValue = storage.saveVerified(key, schema)
 
@@ -330,8 +353,56 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
     return listener.remove
   }
 
+  const flushableAtom = Object.assign(mmkvAtom, {flushNow: flushPendingWrite})
+
+  const setAndSaveImmediatelyAtom = atom(
+    null,
+    (get, set, update: SetStateAction<A>): void => {
+      const newValue = getValueFromSetStateActionOfAtom(update)(() =>
+        get(coreAtom)
+      )
+      set(coreAtom, newValue)
+
+      pendingWrite = undefined
+
+      isPersistingOwnValue = true
+      try {
+        pipe(
+          persistValue(newValue),
+          Either.getOrElse((l) => {
+            reportError(
+              'warn',
+              new Error(
+                `Error while immediately saving value to storage. Key: ${key}`
+              ),
+              {errorTag: l._tag}
+            )
+          })
+        )
+      } finally {
+        isPersistingOwnValue = false
+      }
+    }
+  )
+
   // `flushPendingWrite` already reads-and-clears the pending write, no-ops when
   // nothing is queued, and drops the write when the clear-generation moved on —
-  // exactly the semantics `flushNow` needs — so expose it directly.
-  return Object.assign(mmkvAtom, {flushNow: flushPendingWrite})
+  // exactly the semantics `flushNow` needs.
+  return {atom: flushableAtom, setAndSaveImmediatelyAtom}
+}
+
+export function atomWithParsedMmkvStorage<A, I extends object>(
+  key: string,
+  defaultValue: A,
+  schema: Schema.Schema<A, I, never>,
+  debugLabel?: string
+): FlushablePrimitiveAtom<A> {
+  const storageAtom = atomWithParsedMmkvStorageWithImmediateSaveOption(
+    key,
+    defaultValue,
+    schema,
+    debugLabel
+  )
+
+  return storageAtom.atom
 }

@@ -4,13 +4,13 @@ import {Array, Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {RefreshControl} from 'react-native-gesture-handler'
-import {
-  myDonationsSortedAtom,
-  myDonationsStateAtom,
-} from '../../../../../state/donations/atom'
+import {myDonationsSortedAtom} from '../../../../../state/donations/atom'
 import {type MyDonation} from '../../../../../state/donations/domain'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
-import {updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom} from '../../../../DonationPrompt/atoms'
+import {
+  myDonationsRefreshingAtom,
+  refreshMyDonationsActionAtom,
+} from '../../../../DonationPrompt/atoms'
 import DonationsListItem from './DonationsListItem'
 import EmptyListPlaceholder from './EmptyListPlaceholder'
 
@@ -30,10 +30,8 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
   const myDonationsSorted = useAtomValue(myDonationsSortedAtom)
-  const myDonationsLoading = useAtomValue(myDonationsStateAtom) === 'loading'
-  const updateAllNonSettledOrExpiredInvoicesStatusTypes = useSetAtom(
-    updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom
-  )
+  const myDonationsRefreshing = useAtomValue(myDonationsRefreshingAtom)
+  const refreshMyDonations = useSetAtom(refreshMyDonationsActionAtom)
 
   if (!Array.isNonEmptyArray(myDonationsSorted)) {
     return <EmptyListPlaceholder onDonatePress={onDonatePress} />
@@ -65,10 +63,8 @@ function DonationsList({onDonatePress}: Props): React.ReactElement {
       indicatorStyle="white"
       refreshControl={
         <RefreshControl
-          refreshing={myDonationsLoading ?? false}
-          onRefresh={() =>
-            Effect.runFork(updateAllNonSettledOrExpiredInvoicesStatusTypes())
-          }
+          refreshing={myDonationsRefreshing}
+          onRefresh={() => Effect.runFork(refreshMyDonations())}
           tintColor={theme.foregroundTertiary.get()}
         />
       }

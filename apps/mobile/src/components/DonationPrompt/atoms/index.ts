@@ -13,6 +13,7 @@ import {DateTime} from 'luxon'
 import {apiAtom} from '../../../api'
 import {
   myDonationsAtom,
+  setMyDonationsAndSaveImmediatelyActionAtom,
   singleDonationAtom,
 } from '../../../state/donations/atom'
 import {type MyDonation} from '../../../state/donations/domain'
@@ -85,22 +86,25 @@ export const createDonationInvoiceRequestActionAtom = atom(
         )
       )
 
-      set(myDonationsAtom, (prev) => [
+      const newDonation: MyDonation = {
+        invoiceId: resp.invoiceId,
+        storeId: resp.storeId,
+        status: resp.status,
+        paymentMethod: resp.paymentMethod,
+        fiatAmount: resp.fiatAmount,
+        btcAmount: resp.btcAmount,
+        currency: resp.currency,
+        exchangeRate: resp.exchangeRate,
+        createdTime: resp.createdTime,
+        expirationTime: resp.expirationTime,
+        paymentLink: resp.paymentLink,
+      }
+      // Persist synchronously so the donation is already in storage when
+      // the details screen mounts the atom and re-reads it from MMKV.
+      set(setMyDonationsAndSaveImmediatelyActionAtom, (prev) => ({
         ...prev,
-        {
-          invoiceId: resp.invoiceId,
-          storeId: resp.storeId,
-          status: resp.status,
-          paymentMethod: resp.paymentMethod,
-          fiatAmount: resp.fiatAmount,
-          btcAmount: resp.btcAmount,
-          currency: resp.currency,
-          exchangeRate: resp.exchangeRate,
-          createdTime: resp.createdTime,
-          expirationTime: resp.expirationTime,
-          paymentLink: resp.paymentLink,
-        },
-      ])
+        data: pipe(prev.data, Array.append(newDonation)),
+      }))
 
       set(
         lastDisplayOfDonationPromptTimestampAtom,
@@ -251,4 +255,19 @@ export const updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom = atom(
         })
       )
     })
+)
+
+export const myDonationsRefreshingAtom = atom<boolean>(false)
+
+export const refreshMyDonationsActionAtom = atom(null, (get, set) =>
+  Effect.gen(function* (_) {
+    set(myDonationsRefreshingAtom, true)
+    yield* _(set(updateAllNonSettledOrExpiredInvoicesStatusTypesActionAtom))
+  }).pipe(
+    Effect.ensuring(
+      Effect.sync(() => {
+        set(myDonationsRefreshingAtom, false)
+      })
+    )
+  )
 )

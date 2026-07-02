@@ -1287,6 +1287,7 @@
   "clubs.moreInfo": "More info",
   "clubs.commonFriends": "{{count}} common friends",
   "clubs.commonFriendsFormatted": "{{localizedString}} common friends",
+  "clubs.clubsReach": "Clubs reach",
   "clubs.expiresOn": "Expires on {{expirationDate}}",
   "clubs.moderator.inviteCodeLabel": "Invite code",
   "clubs.joinClub": "Join club",

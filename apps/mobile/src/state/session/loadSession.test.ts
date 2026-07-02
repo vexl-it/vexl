@@ -823,13 +823,33 @@ describe('loadSession', () => {
     })
   })
 
-  it('does not start a second read when forceReload is true but a load is already in flight', async () => {
-    // 'loading' without an armed in-flight latch (no real loader running): the
-    // forceReload caller must not kick off its own storage read. It joins the
-    // (already-settled) wait and returns the current state.
+  it('self-heals a stale loading state (no load in flight) by starting a real read on forceReload', async () => {
+    // A 'loading' state with no in-flight load means a previous loader died
+    // without finalizing the state (only possible through external
+    // interference). The in-flight promise - not the atom - decides whether a
+    // load is running, so a forceReload caller starts a real read instead of
+    // returning the stale state forever.
     getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
 
+    const loadedSession = buildSession(dummySession.version + 71)
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(loadedSession)
+    asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
     const result = await Effect.runPromise(loadSession({forceReload: true}))
+
+    expect(result.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(loadedSession),
+    })
+  })
+
+  it('returns current state without reading storage on a stale loading state when not forcing', async () => {
+    getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
+
+    const result = await Effect.runPromise(loadSession())
 
     expect(result.sessionLoaded).toBe(false)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
@@ -921,60 +941,40 @@ describe('loadSession', () => {
     })
   })
 
-  it('does not let a stale load settlement clear a newer in-flight latch', async () => {
-    const firstSession = buildSession(dummySession.version + 90)
-    const firstEncrypted = encryptSessionForStorage(firstSession)
-    const firstDeferred = deferredValue<string | null>()
-    const secondSession = buildSession(dummySession.version + 91)
-    const secondEncrypted = encryptSessionForStorage(secondSession)
-    const secondDeferred = deferredValue<string | null>()
+  it('joins the in-flight load even when the session state atom was externally reset', async () => {
+    const loadedSession = buildSession(dummySession.version + 90)
+    const {encryptedSession, secretToken} =
+      encryptSessionForStorage(loadedSession)
+    const encryptedSessionDeferred = deferredValue<string | null>()
 
-    asyncStorageGetItemMock
-      .mockImplementationOnce(() => firstDeferred.promise)
-      .mockImplementationOnce(() => secondDeferred.promise)
-    secretStoreGetItemAsyncMock
-      .mockResolvedValueOnce(firstEncrypted.secretToken)
-      .mockResolvedValueOnce(secondEncrypted.secretToken)
+    asyncStorageGetItemMock.mockImplementationOnce(
+      () => encryptedSessionDeferred.promise
+    )
+    secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
 
     const firstLoadPromise = Effect.runPromise(loadSession())
     expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
 
-    // Simulate the state being reset while the first load is still in flight,
-    // allowing a newer load to arm its own latch before the stale one settles.
+    // External interference: the atom is reset while the load is still in
+    // flight. The in-flight promise - not the atom - decides concurrency, so
+    // the second caller must join the running load, never start a second read.
     getDefaultStore().set(sessionHolderAtom, {state: 'initial'})
     const secondLoadPromise = Effect.runPromise(loadSession())
-    expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
 
-    firstDeferred.resolve(firstEncrypted.encryptedSession)
-    const firstLoadResult = await firstLoadPromise
-    expect(firstLoadResult.sessionLoaded).toBe(true)
+    encryptedSessionDeferred.resolve(encryptedSession)
 
-    getDefaultStore().set(sessionHolderAtom, {state: 'loading'})
-    const waiterPromise = Effect.runPromise(loadSession())
-    const waiterResultPromise = waiterPromise.then((result) => result)
-
-    const waiterResolvedBeforeSecondLoad = await Promise.race([
-      waiterResultPromise.then(() => true),
-      new Promise<boolean>((resolve) => {
-        setTimeout(() => {
-          resolve(false)
-        }, 0)
-      }),
-    ])
-
-    expect(waiterResolvedBeforeSecondLoad).toBe(false)
-
-    secondDeferred.resolve(secondEncrypted.encryptedSession)
-    const [secondLoadResult, waiterResult] = await Promise.all([
+    const [firstLoadResult, secondLoadResult] = await Promise.all([
+      firstLoadPromise,
       secondLoadPromise,
-      waiterResultPromise,
     ])
 
+    expect(firstLoadResult.sessionLoaded).toBe(true)
     expect(secondLoadResult.sessionLoaded).toBe(true)
-    expect(waiterResult.sessionLoaded).toBe(true)
+    expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(1)
+    expect(secretStoreGetItemAsyncMock).toHaveBeenCalledTimes(1)
     expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
       state: 'loggedIn',
-      session: withExpectedSessionUpgrades(secondSession),
+      session: withExpectedSessionUpgrades(loadedSession),
     })
   })
 
@@ -995,5 +995,48 @@ describe('loadSession', () => {
         expectedSessionFromSnapshotSavedValues
       ),
     })
+  })
+
+  it('migrates a device coming from 1.43.4 (release 780): legacy secret only, no v2 key, no flag', async () => {
+    // Storage layout written by app version 1.43.4: AsyncStorage 'session'
+    // holds the approved snapshot value, SecureStore has ONLY the legacy
+    // 'secretToken' (written with default keychain options), 'secretToken_V2'
+    // was never written and the mmkv marker flag is unset. The upgraded app
+    // must log the user in, backfill the v2 secret, and never erase data.
+    expect(wasV2SecretWritten()).toBe(false)
+    asyncStorageGetItemMock.mockResolvedValueOnce(
+      snapshotSavedAsyncStorageValue
+    )
+    secretStoreGetItemAsyncMock
+      .mockResolvedValueOnce(null) // secretToken_V2 - never written by 1.43.4
+      .mockResolvedValueOnce(snapshotSavedSecretStorageValue) // legacy secretToken
+
+    const result = await Effect.runPromise(loadSession())
+
+    expect(result.sessionLoaded).toBe(true)
+    expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+      state: 'loggedIn',
+      session: withExpectedSessionUpgrades(
+        expectedSessionFromSnapshotSavedValues
+      ),
+    })
+    expect(secretStoreGetItemAsyncMock).toHaveBeenNthCalledWith(
+      1,
+      SECRET_TOKEN_KEY_V2
+    )
+    expect(secretStoreGetItemAsyncMock).toHaveBeenNthCalledWith(
+      2,
+      SECRET_TOKEN_KEY
+    )
+    // The legacy secret gets backfilled under the v2 key so future background
+    // launches can read it before the first unlock.
+    expect(secretStoreSetItemAsyncMock).toHaveBeenCalledWith(
+      SECRET_TOKEN_KEY_V2,
+      snapshotSavedSecretStorageValue,
+      SECRET_TOKEN_KEY_V2_OPTIONS
+    )
+    expect(wasV2SecretWritten()).toBe(true)
+    expect(asyncStorageRemoveItemMock).not.toHaveBeenCalled()
+    expect(secretStoreDeleteItemAsyncMock).not.toHaveBeenCalled()
   })
 })

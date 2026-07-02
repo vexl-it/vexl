@@ -3,20 +3,19 @@ import {Schema} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
-import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageWithImmediateSaveOption} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {type FocusAtomType} from '../../utils/atomUtils/FocusAtomType'
 import {MyDonation} from './domain'
 
-const myDonationsStorageAtom = atomWithParsedMmkvStorage(
+const myDonationsStorage = atomWithParsedMmkvStorageWithImmediateSaveOption(
   'myDonations',
-  {data: [], state: 'loaded'},
+  {data: []},
   Schema.Struct({
     data: Schema.Array(MyDonation).pipe(Schema.mutable),
-    state: Schema.Literal('loading', 'loaded'),
   })
 )
 
-export const myDonationsAtom = focusAtom(myDonationsStorageAtom, (optic) =>
+export const myDonationsAtom = focusAtom(myDonationsStorage.atom, (optic) =>
   optic.prop('data')
 )
 
@@ -26,10 +25,6 @@ export const myDonationsSortedAtom = atom((get) =>
 
 export const myDonationsAtomsAtom = splitAtom(myDonationsSortedAtom)
 
-export const myDonationsStateAtom = focusAtom(myDonationsStorageAtom, (optic) =>
-  optic.prop('state')
-)
-
 export function singleDonationAtom(
   invoiceid: InvoiceId
 ): FocusAtomType<MyDonation | undefined> {
@@ -37,3 +32,6 @@ export function singleDonationAtom(
     optic.find((myDonation) => myDonation.invoiceId === invoiceid)
   )
 }
+
+export const setMyDonationsAndSaveImmediatelyActionAtom =
+  myDonationsStorage.setAndSaveImmediatelyAtom

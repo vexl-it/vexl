@@ -394,7 +394,6 @@ export type TradeChecklistStackParamsList = {
   Network: {
     readonly networkData: NetworkData | undefined
   }
-  BtcAddress: undefined
 
   LocationMapPreview: {
     readonly selectedLocation: MeetingLocationData

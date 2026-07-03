@@ -137,7 +137,7 @@ export const addNetworkActionAtom = atom(
     set(updatesToBeSentAtom, (updates) => ({
       ...updates,
       network: {
-        ...networkData,
+        btcNetwork: networkData.btcNetwork,
         timestamp: unixMillisecondsNow(),
       },
     }))

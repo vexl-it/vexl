@@ -101,6 +101,12 @@ export function getMessagePreviewText({
   if (message.messageType === 'VERSION_UPDATE') {
     return {text: t(`messages.textMessageTypes.VERSION_UPDATE`)}
   }
+  if (message.messageType === 'INACTIVITY_REMINDER') {
+    return {
+      text: t('messages.inactivityReminder.title'),
+      variant: 'highlighted',
+    }
+  }
   if (message.messageType === 'MESSAGE') {
     if (message.text.trim() === '' && message.image !== undefined) {
       return {

@@ -864,6 +864,8 @@
   "messages.messagePreviews.outgoing.TRADE_CHECKLIST_UPDATE": "You updated the trade checklist",
   "messages.deleteChat": "Delete chat",
   "messages.deleteConversation": "Delete conversation",
+  "messages.inactivityReminder.title": "This chat has been quiet for a while",
+  "messages.inactivityReminder.subtitle": "You might want to clear it out to keep things tidy",
   "messages.askToReveal": "Ask to reveal identity",
   "messages.sending": "Sending...",
   "messages.tapToResent": "Tap to resend.",

@@ -19,6 +19,7 @@ import MessageIncompatibleItem from './MessageIncompatibleItem'
 import {OtherSideLeftVexlBot} from './OtherSideLeftVexlBot'
 import TextMessage from './TextMessage'
 import VexlBotMessageItem from './VexlbotMessageItem'
+import InactivityReminder from './VexlbotMessageItem/components/InactivityReminder'
 import TradeChecklistAmountView from './VexlbotMessageItem/components/TradeChecklistAmountView'
 import TradeChecklistDateAndTimeView from './VexlbotMessageItem/components/TradeChecklistDateAndTimeView'
 import TradeChecklistMeetingLocationView from './VexlbotMessageItem/components/TradeChecklistMeetingLocationView'
@@ -235,6 +236,10 @@ function MessageItem({
           {!!item.isLatest && <LastMessageTime message={item.message} />}
         </>
       )
+    }
+
+    if (item.message.message.messageType === 'INACTIVITY_REMINDER') {
+      return <InactivityReminder messageId={item.message.message.uuid} />
     }
 
     if (item.message.message.messageType === 'CANCEL_REQUEST_MESSAGING') {

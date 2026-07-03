@@ -358,11 +358,13 @@ export const finishLoginActionAtom = atom(
                 })
               })
           ),
-          Match.tag(
+          Match.when(
             // Offline (transport-level failure). Don't report - it's a
-            // user-side condition, not an app fault. `ResponseError` (server
-            // responded) falls through to the generic handler below.
-            'RequestError',
+            // user-side condition, not an app fault. Other `RequestError`
+            // reasons ('Encode'/'InvalidUrl') are app-side bugs and fall
+            // through to the generic handler below, as does `ResponseError`
+            // (server responded).
+            {_tag: 'RequestError', reason: 'Transport'},
             (e): Effect.Effect<void> => {
               return Effect.sync(() => {
                 showErrorAlert({

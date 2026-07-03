@@ -17,10 +17,11 @@ import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSe
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Layer} from 'effect'
+import {CleanupWorkersLayer} from './cleanupWorkers'
 import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
+import {NoteDbService} from './db/NoteDbService'
 import {OfferDbService} from './db/OfferDbService'
 import DbLayer from './db/layer'
-import {InternalServerLive} from './internalServer'
 import {reportMetricsLayer} from './metrics'
 import {createNewOffer} from './routes/createNewOffer'
 import {createPrivatePart} from './routes/createPrivatePart'
@@ -30,6 +31,14 @@ import {getClubOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getClu
 import {getOffersForMeModifiedOrCreatedAfterPaginated} from './routes/getOffersForMeModifiedOrCreatedAfterPaginated'
 import {getRemovedClubOffers} from './routes/getRemovedClubOffers'
 import {getRemovedOffers} from './routes/getRemovedOffers'
+import {createNewNote} from './routes/notes/createNewNote'
+import {createNotePrivatePart} from './routes/notes/createNotePrivatePart'
+import {deleteNote} from './routes/notes/deleteNote'
+import {getNotesForMeModifiedOrCreatedAfterPaginated} from './routes/notes/getNotesForMeModifiedOrCreatedAfterPaginated'
+import {getRemovedNotes} from './routes/notes/getRemovedNotes'
+import {reportNote} from './routes/notes/reportNote'
+import {repostNote} from './routes/notes/repostNote'
+import {undoRepostNote} from './routes/notes/undoRepostNote'
 import {refreshOffer} from './routes/refreshOffer'
 import {reportClubOffer} from './routes/reportClubOffer'
 import {reportOffer} from './routes/reportOffer'
@@ -66,9 +75,28 @@ const ChallengeApiGroupLive = HttpApiBuilder.group(
       .handle('createChallengeBatch', createChallenges)
 )
 
+const NotesApiGroupLive = HttpApiBuilder.group(
+  OfferApiSpecification,
+  'Notes',
+  (h) =>
+    h
+      .handle('createNewNote', createNewNote)
+      .handle('createNotePrivatePart', createNotePrivatePart)
+      .handle('deleteNote', deleteNote)
+      .handle('repostNote', repostNote)
+      .handle('undoRepostNote', undoRepostNote)
+      .handle(
+        'getNotesForMeModifiedOrCreatedAfterPaginated',
+        getNotesForMeModifiedOrCreatedAfterPaginated
+      )
+      .handle('getRemovedNotes', getRemovedNotes)
+      .handle('reportNote', reportNote)
+)
+
 export const OfferApiLive = HttpApiBuilder.api(OfferApiSpecification).pipe(
   Layer.provide(RootGroupLive),
   Layer.provide(ChallengeApiGroupLive),
+  Layer.provide(NotesApiGroupLive),
   Layer.provide(rateLimitingMiddlewareLayer(OfferApiSpecification)),
   Layer.provide(ServerSecurityMiddlewareLive)
 )
@@ -84,10 +112,11 @@ export const HttpServerLive = Layer.empty.pipe(
   Layer.provideMerge(ApiServerLive),
   Layer.provideMerge(reportMetricsLayer),
   Layer.provideMerge(RateLimitingService.Live),
-  Layer.provideMerge(InternalServerLive),
+  Layer.provideMerge(CleanupWorkersLayer),
   Layer.provideMerge(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(healthServerLayer({port: healthServerPortConfig})),
   Layer.provideMerge(OfferDbService.Live),
+  Layer.provideMerge(NoteDbService.Live),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(RedisService.Live),
   Layer.provideMerge(MetricsClientService.Live),

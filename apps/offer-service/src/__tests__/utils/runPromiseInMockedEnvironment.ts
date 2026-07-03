@@ -17,6 +17,7 @@ import {
 } from '@vexl-next/server-utils/src/tests/testDb'
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
+import {NoteDbService} from '../../db/NoteDbService'
 import {OfferDbService} from '../../db/OfferDbService'
 import DbLayer from '../../db/layer'
 import {OfferApiLive} from '../../httpServer'
@@ -25,6 +26,7 @@ export type MockedContexts =
   | RedisService
   | ServerCrypto
   | OfferDbService
+  | NoteDbService
   | SqlClient
   | MetricsClientService
   | HttpClient
@@ -44,6 +46,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(OfferDbService.Live),
+  Layer.provideMerge(NoteDbService.Live),
   Layer.provideMerge(mockedRateLimitingLayer),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(DbLayer),

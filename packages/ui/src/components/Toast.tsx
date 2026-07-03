@@ -43,12 +43,39 @@ const ToastLabel = styled(SizableText, {
   fontSize: '$2',
   letterSpacing: '$2',
   color: '$backgroundPrimary',
+  textAlign: 'center',
 })
+
+const ToastDescription = styled(SizableText, {
+  name: 'ToastDescription',
+  fontFamily: '$body',
+  fontWeight: '500',
+  fontSize: '$1',
+  letterSpacing: '$1',
+  color: '$backgroundPrimary',
+  opacity: 0.8,
+  textAlign: 'center',
+})
+
+/**
+ * A toast can either be a plain single-line message (backwards compatible) or
+ * a richer notification with a title and an optional description line.
+ */
+export type ToastMessage =
+  | string
+  | {readonly title: string; readonly description?: string}
+
+function normalizeToastMessage(message: ToastMessage): {
+  title: string
+  description?: string
+} {
+  return typeof message === 'string' ? {title: message} : message
+}
 
 export interface ToastProps {
   readonly messageAtom: WritableAtom<
-    string | null,
-    [SetStateAction<string | null>],
+    ToastMessage | null,
+    [SetStateAction<ToastMessage | null>],
     void
   >
   readonly topOffset?: number
@@ -59,7 +86,9 @@ export function Toast({
   topOffset = 0,
 }: ToastProps): React.JSX.Element {
   const [message, setMessage] = useAtom(messageAtom)
-  const [displayedMessage, setDisplayedMessage] = useState<string | null>(null)
+  const [displayedMessage, setDisplayedMessage] = useState<ToastMessage | null>(
+    null
+  )
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const animationCycleRef = useRef(0)
 
@@ -154,7 +183,20 @@ export function Toast({
         style={animatedStyle}
       >
         <ToastPill>
-          <ToastLabel>{displayedMessage ?? ''}</ToastLabel>
+          {displayedMessage ? (
+            <>
+              <ToastLabel>
+                {normalizeToastMessage(displayedMessage).title}
+              </ToastLabel>
+              {normalizeToastMessage(displayedMessage).description ? (
+                <ToastDescription>
+                  {normalizeToastMessage(displayedMessage).description}
+                </ToastDescription>
+              ) : null}
+            </>
+          ) : (
+            <ToastLabel />
+          )}
         </ToastPill>
       </Animated.View>
     </ToastViewport>

@@ -25,6 +25,8 @@ interface Props {
   commonConnectionsHashes: readonly HashedPhoneNumber[]
   verifiedConnectionsHashes?: readonly HashedPhoneNumber[]
   otherSideClubs: ClubInfo[]
+  // Optional override for the card label. Falls back to the offer wording.
+  label?: string
 }
 
 function trimClubName(name: string): string {
@@ -94,6 +96,7 @@ function CommonFriends({
   commonConnectionsHashes,
   verifiedConnectionsHashes,
   otherSideClubs,
+  label,
 }: Props): React.ReactElement | null {
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
@@ -208,14 +211,15 @@ function CommonFriends({
   return (
     <CommonFriendsUI
       label={
-        clubsCount > 0
+        label ??
+        (clubsCount > 0
           ? t('offer.numberOfCommonAndClubs', {
               number: formatInteger(commonFriendsCount, locale),
               clubs: formatInteger(clubsCount, locale),
             })
           : t('offer.numberOfCommon', {
               number: formatInteger(commonFriendsCount, locale),
-            })
+            }))
       }
       friends={friends}
       onPress={handlePress}

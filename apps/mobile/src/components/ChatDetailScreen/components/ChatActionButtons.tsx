@@ -14,6 +14,7 @@ import RerequestOrCancelButton from './RerequestOrCancelButton'
 function ActionsToRender(): React.ReactElement {
   const {
     chatStateAtom,
+    chatAtom,
     deleteChatWithUiFeedbackAtom,
     showOfferDeletedWithOptionToDeleteActionAtom,
     offerForChatAtom,
@@ -21,6 +22,9 @@ function ActionsToRender(): React.ReactElement {
   } = useMolecule(chatMolecule)
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const {t} = useTranslation()
+  const chat = useAtomValue(chatAtom)
+  const isNoteOrigin =
+    chat.origin.type === 'myNote' || chat.origin.type === 'theirNote'
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const safeGoBack = useSafeGoBack()
   const navigation =
@@ -36,7 +40,9 @@ function ActionsToRender(): React.ReactElement {
     return (
       <>
         <InfoBox variant="naked">
-          {t('messages.waitingForYourResponseRequest')}
+          {isNoteOrigin
+            ? t('notes.request.newConversation')
+            : t('messages.waitingForYourResponseRequest')}
         </InfoBox>
         <AcceptDeclineButtons f="unset" />
       </>

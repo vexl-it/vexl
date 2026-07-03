@@ -14,6 +14,7 @@ import {
   clubsWithMembersAtom,
   updateChatsPeakCountStatActionAtom,
 } from '../../clubs/atom/clubsWithMembersAtom'
+import {singleNoteAtom} from '../../notes/atoms/notesState'
 import {createEmptyTradeChecklistInState} from '../../tradeChecklist/domain'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import compareMessages from '../utils/compareMessages'
@@ -93,7 +94,13 @@ export default function createNewChatsFromFirstMessagesActionAtom({
               inbox,
               origin: inbox.offerId
                 ? {type: 'myOffer', offerId: inbox.offerId, offer: inboxOffer}
-                : {type: 'unknown'},
+                : inbox.noteId
+                  ? {
+                      type: 'myNote',
+                      noteId: inbox.noteId,
+                      note: get(singleNoteAtom(inbox.noteId)),
+                    }
+                  : {type: 'unknown'},
               otherSide: {
                 publicKey: senderPublicKey,
                 goldenAvatarType,

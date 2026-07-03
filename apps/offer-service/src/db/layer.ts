@@ -9,6 +9,7 @@ import createChallengeTableAndAddIndex from './migrations/0004_create_challenge_
 import removeUnusedTables from './migrations/0005_remove_unused_tables'
 import dropChallengeTable from './migrations/0006_drop_challenge_table'
 import addOfferChangeCounter from './migrations/0007_add_offer_change_counter'
+import createNotesTables from './migrations/0008_create_notes_tables'
 
 const migrations = [
   {
@@ -45,6 +46,11 @@ const migrations = [
     id: 7,
     name: 'Add offer change counter',
     migrationEffect: addOfferChangeCounter,
+  },
+  {
+    id: 8,
+    name: 'Create notes tables',
+    migrationEffect: createNotesTables,
   },
 ] as const
 

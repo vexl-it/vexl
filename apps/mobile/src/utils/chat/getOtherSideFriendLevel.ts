@@ -1,4 +1,5 @@
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {
   type FriendLevel,
   type OfferInfo,
@@ -10,6 +11,7 @@ import {type TFunction} from '../localization/I18nProvider'
 interface GetOtherSideFriendLevelParams {
   friendLevel?: readonly FriendLevel[]
   offerInfo?: OfferInfo
+  note?: OneNoteInState
   chat?: Chat | ChatWithMessages
   t: TFunction
 }
@@ -18,7 +20,11 @@ function getFriendLevelFromRequestMessage(
   chat?: Chat | ChatWithMessages
 ): readonly FriendLevel[] | undefined {
   if (!chat || !('messages' in chat)) return undefined
-  if (chat?.chat.origin.type !== 'myOffer') return undefined
+  if (
+    chat?.chat.origin.type !== 'myOffer' &&
+    chat?.chat.origin.type !== 'myNote'
+  )
+    return undefined
 
   return pipe(
     chat.messages,
@@ -36,13 +42,15 @@ function getFriendLevelFromRequestMessage(
 export function getOtherSideFriendLevel({
   friendLevel,
   offerInfo,
+  note,
   chat,
   t,
 }: GetOtherSideFriendLevelParams): string | undefined {
   const friendLevelToUse =
     friendLevel ??
     getFriendLevelFromRequestMessage(chat) ??
-    offerInfo?.privatePart.friendLevel
+    offerInfo?.privatePart.friendLevel ??
+    note?.noteInfo.privatePart.friendLevel
 
   if (!friendLevelToUse) return undefined
 
@@ -51,7 +59,8 @@ export function getOtherSideFriendLevel({
     return t('offer.friendOfFriend')
   if (friendLevelToUse.includes('CLUB')) return t('offer.clubMember')
 
-  return 'Unknown'
+  // NOT_SPECIFIED (e.g. reposted notes) - let callers fall back to a name.
+  return undefined
 }
 
 function getChat(chat: Chat | ChatWithMessages): Chat {

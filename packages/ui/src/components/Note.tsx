@@ -1,16 +1,25 @@
 import React from 'react'
 import {styled, useTheme} from 'tamagui'
 
-import {Calendar} from '../icons/Calendar'
 import {PeopleUsers} from '../icons/PeopleUsers'
-import {SizableText, XStack, YStack} from '../primitives'
+import {SandWatch} from '../icons/SandWatch'
+import {type IconProps} from '../icons/types'
+import {XStack, YStack} from '../primitives'
+import {Typography} from './Typography'
+
+export interface NoteTag {
+  readonly icon?: React.ComponentType<IconProps>
+  readonly label: string
+}
 
 export interface NoteProps {
   readonly avatar: React.ReactNode
-  readonly name: string
-  readonly commonFriends: string
+  readonly name?: string
+  readonly commonFriends?: string
   readonly expiration: string
   readonly message: string
+  readonly messageNumberOfLines?: number
+  readonly tag?: NoteTag
   readonly onPress?: () => void
 }
 
@@ -29,6 +38,19 @@ const CardFrame = styled(YStack, {
   } as const,
 })
 
+const TagFrame = styled(XStack, {
+  name: 'NoteTag',
+  backgroundColor: '$backgroundTertiary',
+  paddingHorizontal: '$4',
+  paddingVertical: '$2',
+  borderTopLeftRadius: '$5',
+  borderTopRightRadius: '$5',
+  borderBottomLeftRadius: '$2',
+  borderBottomRightRadius: '$2',
+  alignItems: 'center',
+  gap: '$2',
+})
+
 const HeaderFrame = styled(XStack, {
   name: 'NoteHeader',
   backgroundColor: '$backgroundTertiary',
@@ -39,6 +61,15 @@ const HeaderFrame = styled(XStack, {
   borderBottomRightRadius: '$2',
   alignItems: 'center',
   gap: '$3',
+
+  variants: {
+    belowTag: {
+      true: {
+        borderTopLeftRadius: '$2',
+        borderTopRightRadius: '$2',
+      },
+    },
+  } as const,
 })
 
 const ContentFrame = styled(YStack, {
@@ -52,69 +83,66 @@ const ContentFrame = styled(YStack, {
   overflow: 'hidden',
 })
 
-const NameText = styled(SizableText, {
-  name: 'NoteName',
-  fontFamily: '$body',
-  fontWeight: '600',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundPrimary',
-  numberOfLines: 1,
-})
-
-const DetailText = styled(SizableText, {
-  name: 'NoteDetailText',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$1',
-  letterSpacing: '$1',
-  lineHeight: '$1',
-  color: '$foregroundSecondary',
-})
-
-const MessageText = styled(SizableText, {
-  name: 'NoteMessage',
-  fontFamily: '$body',
-  fontWeight: '500',
-  fontSize: '$2',
-  letterSpacing: '$2',
-  lineHeight: '$2',
-  color: '$foregroundSecondary',
-})
-
 export function Note({
   avatar,
   name,
   commonFriends,
   expiration,
   message,
+  messageNumberOfLines,
+  tag,
   onPress,
 }: NoteProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = theme.foregroundSecondary.get()
   const isPressable = !!onPress
+  const TagIcon = tag?.icon
 
   return (
     <CardFrame pressable={isPressable} onPress={onPress}>
-      <HeaderFrame>
+      {tag ? (
+        <TagFrame>
+          {TagIcon ? <TagIcon size={16} color={iconColor} /> : null}
+          <Typography variant="micro" color="$foregroundSecondary">
+            {tag.label}
+          </Typography>
+        </TagFrame>
+      ) : null}
+      <HeaderFrame belowTag={!!tag}>
         {avatar}
-        <YStack gap="$1" flexShrink={1}>
-          <NameText>{name}</NameText>
+        <YStack gap="$1" flexShrink={1} flexGrow={1}>
+          {name ? (
+            <Typography variant="descriptionBold" color="$foregroundPrimary">
+              {name}
+            </Typography>
+          ) : null}
           <XStack gap="$3" alignItems="center">
+            {commonFriends ? (
+              <XStack gap="$1" alignItems="center">
+                <PeopleUsers size={16} color={iconColor} />
+                <Typography variant="micro" color="$foregroundSecondary">
+                  {commonFriends}
+                </Typography>
+              </XStack>
+            ) : null}
             <XStack gap="$1" alignItems="center">
-              <PeopleUsers size={16} color={iconColor} />
-              <DetailText>{commonFriends}</DetailText>
-            </XStack>
-            <XStack gap="$1" alignItems="center">
-              <Calendar size={16} color={iconColor} />
-              <DetailText>{expiration}</DetailText>
+              <SandWatch size={16} color={iconColor} />
+              <Typography variant="micro" color="$foregroundSecondary">
+                {expiration}
+              </Typography>
             </XStack>
           </XStack>
         </YStack>
       </HeaderFrame>
       <ContentFrame>
-        <MessageText>{message}</MessageText>
+        <Typography
+          variant="description"
+          color="$foregroundSecondary"
+          numberOfLines={messageNumberOfLines}
+          ellipsizeMode={messageNumberOfLines ? 'tail' : undefined}
+        >
+          {message}
+        </Typography>
       </ContentFrame>
     </CardFrame>
   )

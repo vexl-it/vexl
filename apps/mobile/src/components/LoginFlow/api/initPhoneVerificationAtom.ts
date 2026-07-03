@@ -170,11 +170,15 @@ export const initPhoneVerificationAtom = atom(
       Effect.catchAll((e) => {
         if (isString(e)) return Effect.fail(e)
 
-        reportError(
-          'error',
-          new Error('Unexpected error while initializing phone verification'),
-          {e}
-        )
+        // Offline (RequestError) is a user-side condition, not an app fault -
+        // don't report it to Sentry.
+        if (e._tag !== 'RequestError') {
+          reportError(
+            'error',
+            new Error('Unexpected error while initializing phone verification'),
+            {e}
+          )
+        }
 
         return Effect.fail(
           toCommonErrorMessage(e, t) ??

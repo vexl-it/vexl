@@ -16,13 +16,21 @@ export default function useCommonErrorMessages(
   return toCommonErrorMessage(error, t)
 }
 
-// TODO extend to include HttpClientErrors
 export function toCommonErrorMessage(
   error: SomeError | undefined,
   t: TFunction,
   fallbackToNull?: boolean
 ): string | null {
   if (!error) return null
+
+  // `@effect/platform`'s fetch client fails with a `RequestError` when the
+  // device is offline (transport-level failure, no server response). Map it to
+  // the network-error message so offline users get an actionable hint instead
+  // of the generic fallback. `ResponseError` (server responded) intentionally
+  // keeps the generic fallback below.
+  if (error._tag === 'RequestError') {
+    return t('common.NetworkError')
+  }
 
   if (
     error._tag === 'NetworkError' ||

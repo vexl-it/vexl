@@ -359,8 +359,10 @@ export const finishLoginActionAtom = atom(
               })
           ),
           Match.tag(
+            // Offline (transport-level failure). Don't report - it's a
+            // user-side condition, not an app fault. `ResponseError` (server
+            // responded) falls through to the generic handler below.
             'RequestError',
-            'ResponseError',
             (e): Effect.Effect<void> => {
               return Effect.sync(() => {
                 showErrorAlert({

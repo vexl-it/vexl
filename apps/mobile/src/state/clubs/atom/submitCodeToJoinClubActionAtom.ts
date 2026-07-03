@@ -456,11 +456,13 @@ export const submitCodeToJoinClubActionAtom = atom(
           )
         }
 
+        // RequestError (offline) is excluded on purpose - it's a user-side
+        // condition, not an app fault, so we don't report it to Sentry.
+        // toCommonErrorMessage maps it to the network-error message below.
         if (
           e._tag === 'InvalidChallengeError' ||
           e._tag === 'HttpApiDecodeError' ||
           e._tag === 'ResponseError' ||
-          e._tag === 'RequestError' ||
           e._tag === 'UnexpectedServerError' ||
           e._tag === 'CryptoError'
         ) {
@@ -517,11 +519,13 @@ export const validateCodeToJoinClubActionAtom = atom(
           })
         }
 
+        // RequestError (offline) is excluded on purpose - it's a user-side
+        // condition, not an app fault, so we don't report it to Sentry.
+        // toCommonErrorMessage maps it to the network-error message below.
         if (
           e._tag === 'InvalidChallengeError' ||
           e._tag === 'HttpApiDecodeError' ||
           e._tag === 'ResponseError' ||
-          e._tag === 'RequestError' ||
           e._tag === 'UnexpectedServerError' ||
           e._tag === 'CryptoError'
         ) {

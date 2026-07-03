@@ -46,8 +46,8 @@ export const realUserImageAtom = atom(
 )
 
 export const areRealUserDataSet = atom((get) => {
-  const {userName, image} = get(realUserDataAtom) ?? {}
-  return !!userName && !!image
+  const {userName} = get(realUserDataAtom) ?? {}
+  return !!userName
 })
 
 export const realUserNameAtom = atom(

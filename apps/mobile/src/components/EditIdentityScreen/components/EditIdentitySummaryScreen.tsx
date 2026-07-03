@@ -70,7 +70,7 @@ function EditIdentitySummaryScreen({navigation}: Props): React.ReactElement {
             {t('editProfileScreen.identitySummary.infoBox')}
           </InfoBox>
           <Button
-            disabled={!imageUri || !nickname.trim()}
+            disabled={!nickname.trim()}
             onPress={() => {
               const wasSaved = saveDraft()
 

@@ -3,14 +3,22 @@ import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import allChatsAtom from './atoms/allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './atoms/focusChatByInboxKeyAndSenderKey'
 import {insertInactivityReminderActionAtom} from './atoms/insertInactivityReminderActionAtom'
+import {fetchMessagesForAllInboxesInAppLoadingTaskId} from './fetchMessagesForAllInboxesInAppLoadingTask'
 import chatShouldBeVisible from './utils/isChatActive'
 
 export const checkInactiveChatsInAppLoadingTaskId = registerInAppLoadingTask({
   name: 'checkInactiveChats',
   requirements: {
     requiresUserLoggedIn: true,
-    runOn: 'start',
+    // Runs on `resume` (which also fires on cold start) so it can depend on the
+    // message fetch below. Otherwise it would scan stale local chat state and
+    // insert a now-timed reminder that masks an older, newly fetched real
+    // message once the fetch completes.
+    runOn: 'resume',
   },
+  // Must run after messages are fetched so the inactivity check sees the fresh
+  // last message instead of stale local state.
+  dependsOn: [{id: fetchMessagesForAllInboxesInAppLoadingTaskId}],
   task: (store) =>
     Effect.sync(() => {
       const visibleChats = pipe(

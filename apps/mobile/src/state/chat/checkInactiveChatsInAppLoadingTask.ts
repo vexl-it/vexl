@@ -1,4 +1,4 @@
-import {Array, Effect, pipe} from 'effect/index'
+import {Array, Effect, pipe} from 'effect'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import allChatsAtom from './atoms/allChatsAtom'
 import focusChatByInboxKeyAndSenderKey from './atoms/focusChatByInboxKeyAndSenderKey'

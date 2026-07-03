@@ -38,14 +38,9 @@ function SetNetworkCell(): React.ReactElement {
     navigation.navigate('Network', {
       networkData: {
         btcNetwork: tradeChecklistNetworkData.sent?.btcNetwork,
-        btcAddress: tradeChecklistNetworkData.sent?.btcAddress,
       },
     })
-  }, [
-    navigation,
-    tradeChecklistNetworkData.sent?.btcAddress,
-    tradeChecklistNetworkData.sent?.btcNetwork,
-  ])
+  }, [navigation, tradeChecklistNetworkData.sent?.btcNetwork])
 
   const isDisabled =
     (!!originOffer?.ownershipInfo &&

@@ -17,7 +17,6 @@ import PickTimeFromSuggestions from './components/DateAndTimeFlow/components/Pic
 import LocationMapPreview from './components/MeetingLocation/components/LocationMapPreview'
 import LocationMapSelect from './components/MeetingLocation/components/LocationMapSelect'
 import LocationSearch from './components/MeetingLocation/components/LocationSearch'
-import BtcAddressScreen from './components/NetworkFlow/components/BtcAddressScreen'
 import NetworkScreen from './components/NetworkFlow/components/NetworkScreen'
 import RevealIdentityNicknameScreen from './components/RevealIdentityFlow/RevealIdentityNicknameScreen'
 import RevealIdentityPhotoScreen from './components/RevealIdentityFlow/RevealIdentityPhotoScreen'
@@ -91,7 +90,6 @@ export default function TradeChecklistFlow({
           component={PremiumOrDiscountScreen}
         />
         <StackNavigator.Screen name="Network" component={NetworkScreen} />
-        <StackNavigator.Screen name="BtcAddress" component={BtcAddressScreen} />
         <StackNavigator.Screen
           name="LocationSearch"
           component={LocationSearch}

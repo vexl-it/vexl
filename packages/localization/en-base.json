@@ -1265,6 +1265,7 @@
   "clubs.publishOffersToJoinedClub.retryFailedAction": "Retry failed",
   "clubs.publishOffersToJoinedClub.errorTitle": "Could not publish offers to club",
   "clubs.joiningUnsucessful": "Joining unsuccessful",
+  "clubs.youAreAlreadyMemberOfThisClub": "You are already a member",
   "clubs.youAreAlreadyMemberOfThisClubDescription": "You are already a member of this club. You can't join it again.",
   "clubs.members": "{{membersCount}} members",
   "clubs.showOffers": "Show offers",

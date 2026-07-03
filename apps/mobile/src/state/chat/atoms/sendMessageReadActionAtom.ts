@@ -58,8 +58,13 @@ export const sendMessageReadActionAtom = atom(
         chat.inbox.privateKey.publicKeyPemBase64
       )
 
-      if (lastMessage?.state === 'receivedButRequiresNewerVersion')
-        return Effect.void
+      // Only acknowledge a message we actually received from the other side.
+      // Our own sent messages and local-only messages (e.g. the inactivity
+      // reminder, which sets `isUnread` purely for the chat-list dot) must
+      // never trigger a read receipt - that would leak our activity to the peer
+      // even though they sent nothing new. This also covers messages that
+      // require a newer app version, which we cannot properly read.
+      if (lastMessage?.state !== 'received') return Effect.void
 
       if (
         !chat.otherSideVersion ||

@@ -1,8 +1,8 @@
-const VERSION_CODE = 830
-const VERSION = '1.43.9'
+const VERSION_CODE = 840
+const VERSION = '1.44.0'
 // Dev-client builds share the staging bundle id with release staging builds.
-// A fractional suffix (e.g. "830.12") keeps their TestFlight build numbers
-// unique while still sorting below the next release build number (831).
+// A fractional suffix (e.g. "840.12") keeps their TestFlight build numbers
+// unique while still sorting below the next release build number (841).
 const IOS_BUILD_NUMBER_SUFFIX = process.env.IOS_BUILD_NUMBER_SUFFIX ?? ''
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'

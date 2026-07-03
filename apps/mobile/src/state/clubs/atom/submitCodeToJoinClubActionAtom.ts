@@ -445,9 +445,14 @@ export const submitCodeToJoinClubActionAtom = atom(
             return t('common.somethingWentWrong')
           })()
 
+          const title =
+            e._tag === 'MemberAlreadyInClubError'
+              ? t('clubs.youAreAlreadyMemberOfThisClub')
+              : t('clubs.joiningUnsucessful')
+
           return Effect.zipRight(
             set(globalDialogAtom, {
-              title: t('clubs.joiningUnsucessful'),
+              title,
               subtitle: description,
               positiveButtonText: t('common.close'),
               positiveButtonVariant: 'destructive',

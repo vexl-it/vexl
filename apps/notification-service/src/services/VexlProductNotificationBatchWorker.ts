@@ -1,9 +1,6 @@
-import {RedisConnectionService} from '@vexl-next/server-utils/src/RedisConnection'
-import {withRedisLock} from '@vexl-next/server-utils/src/RedisService'
+import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
 import {EnqueueUserNotification} from '@vexl-next/server-utils/src/UserNotificationMq'
-import {RedisNamespacePrefixConfig} from '@vexl-next/server-utils/src/commonConfigs'
-import {Queue, Worker} from 'bullmq'
-import {Array, Effect, Layer, Option, pipe, Schema, Stream} from 'effect'
+import {Array, Effect, Option, pipe, Schema} from 'effect'
 import {
   vexlProductNotificationBatchSendIntervalMsConfig,
   vexlProductNotificationBatchSizeConfig,
@@ -88,98 +85,11 @@ export const issueNotificationBatch = Effect.gen(function* (_) {
   Effect.withSpan('issueNotificationBatch')
 )
 
-const issueNotificationBatchWithLock = pipe(
-  issueNotificationBatch,
-  withRedisLock(
-    ISSUE_NOTIFICATION_BATCH_LOCK_RESOURCE,
-    ISSUE_NOTIFICATION_BATCH_LOCK_DURATION
-  ),
-  Effect.catchTag('RedisLockError', () =>
-    Effect.logInfo(
-      'Skipping Vexl product notification batch because another worker holds the lock'
-    )
-  )
-)
-
-const jobsStream = Stream.asyncScoped<undefined, never, RedisConnectionService>(
-  (emit) =>
-    Effect.gen(function* (_) {
-      const redisConnection = yield* _(RedisConnectionService)
-      const prefix = yield* _(RedisNamespacePrefixConfig)
-      const intervalMs = yield* _(
-        vexlProductNotificationBatchSendIntervalMsConfig
-      )
-
-      const queue = yield* _(
-        Effect.acquireRelease(
-          Effect.try({
-            try: () =>
-              new Queue(REPEAT_QUEUE_NAME, {
-                connection: redisConnection,
-                prefix,
-                defaultJobOptions: {
-                  removeOnComplete: true,
-                  removeOnFail: true,
-                },
-              }),
-            catch: (e) => e,
-          }),
-          (queue) =>
-            Effect.promise(async () => {
-              await queue.close()
-            })
-        )
-      )
-
-      yield* _(
-        Effect.tryPromise({
-          try: async () =>
-            await queue.upsertJobScheduler(
-              ISSUE_NOTIFICATION_BATCH_JOB_NAME,
-              {every: intervalMs},
-              {
-                name: ISSUE_NOTIFICATION_BATCH_JOB_NAME,
-                data: {},
-                opts: {removeOnComplete: true, removeOnFail: true},
-              }
-            ),
-          catch: (e) => e,
-        })
-      )
-
-      yield* _(
-        Effect.acquireRelease(
-          Effect.try({
-            try: () =>
-              new Worker(
-                REPEAT_QUEUE_NAME,
-                async () => {
-                  await emit.single(undefined)
-                },
-                {
-                  connection: redisConnection,
-                  prefix,
-                  concurrency: 1,
-                }
-              ),
-            catch: (e) => e,
-          }),
-          (worker) =>
-            Effect.promise(async () => {
-              await worker.close()
-            })
-        )
-      )
-    }).pipe(
-      Effect.catchAll((e) =>
-        Effect.logError(
-          'Failed to start Vexl product notification batch worker',
-          e
-        )
-      )
-    )
-)
-
-export const VexlProductNotificationBatchWorkerLayer = Layer.effectDiscard(
-  Stream.runForEach(jobsStream, () => issueNotificationBatchWithLock)
-)
+export const VexlProductNotificationBatchWorkerLayer = makeRepeatingTaskLayer({
+  queueName: REPEAT_QUEUE_NAME,
+  jobName: ISSUE_NOTIFICATION_BATCH_JOB_NAME,
+  intervalMs: vexlProductNotificationBatchSendIntervalMsConfig,
+  lockResource: ISSUE_NOTIFICATION_BATCH_LOCK_RESOURCE,
+  lockDuration: ISSUE_NOTIFICATION_BATCH_LOCK_DURATION,
+  task: issueNotificationBatch,
+})

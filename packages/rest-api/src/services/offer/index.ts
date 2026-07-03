@@ -28,6 +28,16 @@ import {
   type ReportOfferRequest,
   type UpdateOfferRequest,
 } from './contracts'
+import {
+  type CreateNewNoteRequest,
+  type CreateNotePrivatePartRequest,
+  type DeleteNoteRequest,
+  type GetNotesForMeCreatedOrModifiedAfterPaginatedRequest,
+  type RemovedNoteIdsRequest,
+  type ReportNoteRequest,
+  type RepostNoteRequest,
+  type UndoRepostNoteRequest,
+} from './notesContracts'
 import {OfferApiSpecification} from './specification'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -157,6 +167,42 @@ export function api({
             })
           )
         ),
+      // ----------------------
+      // 👇 Notes
+      // ----------------------
+      getNotesForMeModifiedOrCreatedAfterPaginated: (
+        req: GetNotesForMeCreatedOrModifiedAfterPaginatedRequest
+      ) =>
+        client.Notes.getNotesForMeModifiedOrCreatedAfterPaginated({
+          urlParams: req,
+          headers: commonAndSecurityHeaders,
+        }),
+      createNewNote: (body: CreateNewNoteRequest) =>
+        client.Notes.createNewNote({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
+      deleteNote: (req: DeleteNoteRequest) =>
+        client.Notes.deleteNote({urlParams: req}),
+      createNotePrivatePart: (body: CreateNotePrivatePartRequest) =>
+        client.Notes.createNotePrivatePart({payload: body}),
+      repostNote: (body: RepostNoteRequest) =>
+        client.Notes.repostNote({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
+      undoRepostNote: (req: UndoRepostNoteRequest) =>
+        client.Notes.undoRepostNote({urlParams: req}),
+      getRemovedNotes: (body: RemovedNoteIdsRequest) =>
+        client.Notes.getRemovedNotes({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
+      reportNote: (body: ReportNoteRequest) =>
+        client.Notes.reportNote({
+          payload: body,
+          headers: commonAndSecurityHeaders,
+        }),
       // ----------------------
       // 👇 Challenge
       // ----------------------

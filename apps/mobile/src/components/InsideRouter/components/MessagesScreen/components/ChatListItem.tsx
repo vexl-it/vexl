@@ -1,5 +1,9 @@
 import {useNavigation} from '@react-navigation/native'
-import {ChatMessageItem, Stack} from '@vexl-next/ui'
+import {
+  ChatMessageItem,
+  Stack,
+  type ChatMessageItemVariant,
+} from '@vexl-next/ui'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {selectAtom} from 'jotai/utils'
 import React, {useMemo, useRef} from 'react'
@@ -13,6 +17,7 @@ import {
   type ChatWithMessages,
 } from '../../../../../state/chat/domain'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
+import {noteForChatOriginAtom} from '../../../../../state/notes/atoms/notesState'
 import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {formattingLocaleAtom} from '../../../../../utils/localization/formattingLocaleAtom'
@@ -77,17 +82,33 @@ function ChatListItem({
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
+  const note = useAtomValue(
+    useMemo(() => noteForChatOriginAtom(chatInfo.origin), [chatInfo.origin])
+  )
   const deleteChatFromList = useSetAtom(deleteChatFromListActionAtom)
-  const displayName = getOtherSideRealNameOrFriendLevel({
-    offerInfo: offer?.offerInfo,
-    chat,
-    t,
-  })
-  const preview = getMessagePreviewText({
-    messageWithState: lastMessage,
-    name: userName,
-    t,
-  })
+  const displayName =
+    getOtherSideRealNameOrFriendLevel({
+      offerInfo: offer?.offerInfo,
+      note,
+      chat,
+      t,
+    }) ?? userName
+  const isNoteChat =
+    chatInfo.origin.type === 'myNote' || chatInfo.origin.type === 'theirNote'
+  const preview: {text: string; variant?: ChatMessageItemVariant} =
+    isNoteChat && lastMessage.message.messageType === 'REQUEST_MESSAGING'
+      ? {
+          text:
+            chatInfo.origin.type === 'myNote'
+              ? t('notes.chat.respondedToYourNote')
+              : t('notes.chat.respondedToTheirNote'),
+          variant: 'highlighted',
+        }
+      : getMessagePreviewText({
+          messageWithState: lastMessage,
+          name: userName,
+          t,
+        })
   const time = formatChatTime(
     unixMillisecondsToLocaleDateTime(lastMessage.message.time),
     locale
@@ -122,7 +143,7 @@ function ChatListItem({
                 />
               </Stack>
             }
-            name={displayName ?? ''}
+            name={displayName}
             message={preview.text}
             time={time}
             unread={isUnread}

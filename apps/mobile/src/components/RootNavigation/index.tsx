@@ -25,6 +25,7 @@ import ChatDetailScreen from '../ChatDetailScreen'
 import ChatImagePreviewScreen from '../ChatDetailScreen/ChatImagePreviewScreen'
 import ChatInfoJsonDebugScreen from '../ChatDetailScreen/ChatInfoJsonDebugScreen'
 import ChatInfoScreen from '../ChatDetailScreen/ChatInfoScreen'
+import ChatNoteDetailScreen from '../ChatDetailScreen/ChatNoteDetailScreen'
 import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMessagesDebugScreen'
 import DeclineChatRequestScreen from '../ChatDetailScreen/DeclineChatRequestScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
@@ -34,6 +35,7 @@ import {ScanClubAdmissionQrCodeScreen} from '../ClubDetail/components/ScanClubAd
 import {ClubOffersScreen} from '../ClubOffersScreen'
 import CommonFriendsScreen from '../CommonFriends/CommonFriendsScreen'
 import ContactPreferencesFlow from '../ContactPreferencesFlow'
+import CreateNoteScreen from '../CreateNoteScreen'
 import DebugScreen from '../DebugScreen'
 import DevTranslationFloatingButton from '../DevTranslationFloatingButtons'
 import DonationsFlow from '../DonationsFlow'
@@ -52,12 +54,14 @@ import JoinClubFlow from '../JoinClubFlow'
 import LoginFlow from '../LoginFlow'
 import MapViewScreen from '../MapViewScreen'
 import MyOfferDetailScreen from '../MyOfferDetailScreen'
+import NoteDetailScreen from '../NoteDetailScreen'
 import NotificationSettingsScreen from '../NotificationSettingsScreen'
 import NotificationsScreen from '../NotificationsScreen'
 import OfferDetailScreen from '../OfferDetailScreen'
 import PostLoginFlow from '../PostLoginFlow'
 import ScanQrCodeScreen from '../ScanQrCodeScreen'
 import SendMessageScreen from '../SendMessageScreen'
+import SendMessageToNoteScreen from '../SendMessageToNoteScreen'
 import ShareProfileScreen from '../ShareProfileScreen'
 import TaskRegistryOverviewScreen from '../TaskRegistryOverviewScreen'
 import TodoScreen from '../TodoScreen'
@@ -127,6 +131,12 @@ function RootNavigation(): React.ReactElement {
               component={EditOfferFieldScreen}
             />
             <Stack.Screen name="SendMessage" component={SendMessageScreen} />
+            <Stack.Screen name="CreateNote" component={CreateNoteScreen} />
+            <Stack.Screen name="NoteDetail" component={NoteDetailScreen} />
+            <Stack.Screen
+              name="SendMessageToNote"
+              component={SendMessageToNoteScreen}
+            />
             <Stack.Screen name="CRUDOfferFlow" component={CRUDOfferFlow} />
             <Stack.Screen
               name="OfferExpirationDate"
@@ -177,6 +187,11 @@ function RootNavigation(): React.ReactElement {
               name="ChatOfferDetail"
               options={slideFromBottomCardOptions}
               component={ChatOfferDetailScreen}
+            />
+            <Stack.Screen
+              name="ChatNoteDetail"
+              options={slideFromBottomCardOptions}
+              component={ChatNoteDetailScreen}
             />
             <Stack.Screen
               name="ChatReceivedMessagesDebug"

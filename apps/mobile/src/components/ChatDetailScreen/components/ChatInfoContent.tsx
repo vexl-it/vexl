@@ -242,15 +242,15 @@ export default function ChatInfoContent({
         : undefined
 
   const connectionTitle = useMemo(() => {
-    if (!offer) return otherSideData.userName ?? t('offer.title')
-
     return (
       getOtherSideRealNameOrFriendLevel({
         friendLevel: friendLevelInfo,
-        offerInfo: offer.offerInfo,
+        offerInfo: offer?.offerInfo,
         chat,
         t,
-      }) ?? t('offer.title')
+      }) ??
+      otherSideData.userName ??
+      t('offer.title')
     )
   }, [chat, friendLevelInfo, offer, otherSideData.userName, t])
 

@@ -1,4 +1,5 @@
 import {type PrivateKeyHolder} from '@vexl-next/cryptography/src/KeyHolder'
+import {type NoteId} from '@vexl-next/domain/src/general/notes'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {generateKeyPairE} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Array, Effect, Option} from 'effect/index'
@@ -15,6 +16,7 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
     set,
     request:
       | {for: 'myOffer' | 'offerRequest'; offerId: OfferId}
+      | {for: 'myNote' | 'noteRequest'; noteId: NoteId}
       | {for: 'userSesssion'; key: PrivateKeyHolder}
   ) =>
     Effect.gen(function* (_) {
@@ -26,6 +28,9 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
           return one.inbox.offerId === request.offerId
         if (request.for === 'offerRequest')
           return one.inbox.requestOfferId === request.offerId
+        if (request.for === 'myNote') return one.inbox.noteId === request.noteId
+        if (request.for === 'noteRequest')
+          return one.inbox.requestNoteId === request.noteId
         if (request.for === 'userSesssion')
           return (
             one.inbox.privateKey.publicKeyPemBase64 ===
@@ -61,6 +66,9 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
           offerId: request.for === 'myOffer' ? request.offerId : undefined,
           requestOfferId:
             request.for === 'offerRequest' ? request.offerId : undefined,
+          noteId: request.for === 'myNote' ? request.noteId : undefined,
+          requestNoteId:
+            request.for === 'noteRequest' ? request.noteId : undefined,
         },
         chats: [],
       }

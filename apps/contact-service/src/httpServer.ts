@@ -19,6 +19,7 @@ import {ServerSecurityMiddlewareLive} from '@vexl-next/server-utils/src/serverSe
 import {createChallenge} from '@vexl-next/server-utils/src/services/challenge/routes/createChalenge'
 import {createChallenges} from '@vexl-next/server-utils/src/services/challenge/routes/createChallenges'
 import {Config, Layer, Option} from 'effect'
+import {CleanReportedClubRecordsWorkerLayer} from './cleanReportedClubRecordsWorker'
 import {
   cryptoConfig,
   dashboardContactsImportedHookConfig,
@@ -170,6 +171,7 @@ export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
   reportGaguesLayer,
   internalServerLive,
+  CleanReportedClubRecordsWorkerLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provide(RateLimitingService.Live),

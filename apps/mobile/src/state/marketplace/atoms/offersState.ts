@@ -103,12 +103,17 @@ export function offerFlagsAtom(
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function offerForChatOriginAtom(chatOrigin: ChatOrigin) {
-  const singleOfferAtomOrNull =
-    chatOrigin.type !== 'unknown' ? singleOfferAtom(chatOrigin.offerId) : null
+export function offerForChatOriginAtom(
+  chatOrigin: ChatOrigin
+): Atom<OneOfferInState | undefined> {
+  const isOfferOrigin =
+    chatOrigin.type === 'myOffer' || chatOrigin.type === 'theirOffer'
+  const singleOfferAtomOrNull = isOfferOrigin
+    ? singleOfferAtom(chatOrigin.offerId)
+    : null
   return atom((get) => {
-    if (chatOrigin.type === 'unknown') return undefined
+    if (chatOrigin.type !== 'myOffer' && chatOrigin.type !== 'theirOffer')
+      return undefined
 
     if (chatOrigin.offer) return chatOrigin.offer
     return singleOfferAtomOrNull ? get(singleOfferAtomOrNull) : undefined

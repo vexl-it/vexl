@@ -45,6 +45,7 @@ import {
   UpdateOfferRequest,
   UpdateOfferResponse,
 } from './contracts'
+import {NotesApiGroup} from './notesSpecification'
 
 export const GetOffersForMeModifiedOrCreatedAfterPaginatedEndpoint =
   HttpApiEndpoint.get(
@@ -215,5 +216,6 @@ export const OfferApiSpecification = HttpApi.make('Offer API')
   .middleware(RateLimitingMiddleware)
   .add(RootGroup)
   .add(ChallengeApiGroup)
+  .add(NotesApiGroup)
   .addError(NotFoundError, {status: 404})
   .addError(UnexpectedServerError, {status: 500})

@@ -1,3 +1,4 @@
+import {type ToastMessage} from '@vexl-next/ui'
 import {atom} from 'jotai'
 
-export const toastAtom = atom<string | null>(null)
+export const toastAtom = atom<ToastMessage | null>(null)

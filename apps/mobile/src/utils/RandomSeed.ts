@@ -1,4 +1,5 @@
 import {type Chat} from '@vexl-next/domain/src/general/messaging'
+import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {Schema} from 'effect'
 
@@ -19,4 +20,8 @@ export function randomSeedFromChat(chat: Chat): RandomSeed {
   return brandRandomSeed(
     chat.otherSide.publicKey + chat.inbox.privateKey.publicKeyPemBase64
   )
+}
+
+export function randomSeedFromNote(note: OneNoteInState): RandomSeed {
+  return brandRandomSeed(note.noteInfo.publicPart.notePublicKey)
 }

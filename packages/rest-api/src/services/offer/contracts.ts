@@ -11,10 +11,11 @@ import {
 import {IdNumeric} from '@vexl-next/domain/src/utility/IdNumeric'
 import {IsoDatetimeString} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Schema} from 'effect'
+import {Schema} from 'effect'
 import {RequestBaseWithChallenge} from '../../challenges/contracts'
 import {NoContentResponse} from '../../NoContentResponse.brand'
 import {createPageResponse, PageRequestMeta} from '../../Pagination.brand'
+import {CommaSeparatedDedupedStrings} from '../../utils'
 
 export class ReportOfferLimitReachedError extends Schema.TaggedError<ReportOfferLimitReachedError>(
   'ReportOfferLimitReachedError'
@@ -100,21 +101,7 @@ export const RefreshOfferResponse = Schema.Array(OfferId)
 export type RefreshOfferResponse = typeof RefreshOfferResponse.Type
 
 export const DeleteOfferRequest = Schema.Struct({
-  adminIds: Schema.split(',').pipe(
-    Schema.compose(
-      Schema.transform(
-        Schema.Array(Schema.String),
-        Schema.Array(Schema.String),
-        {
-          encode: (a) => a,
-          decode: (a) => {
-            if (a.length === 1 && a[0] === '') return []
-
-            return Array.dedupe(a)
-          },
-        }
-      )
-    ),
+  adminIds: CommaSeparatedDedupedStrings.pipe(
     Schema.compose(Schema.Array(OfferAdminId))
   ),
 })

@@ -4,6 +4,7 @@ import {apiAtom} from '../../api'
 import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
 import reportError from '../../utils/reportError'
 import {myOffersAtom} from '../marketplace/atoms/myOffers'
+import {myNotesAtom} from '../notes/atoms/notesState'
 import {sessionDataOrDummyAtom} from '../session'
 import messagingStateAtom from './atoms/messagingStateAtom'
 
@@ -20,6 +21,9 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
         const myOffersIds = store
           .get(myOffersAtom)
           .map((offer) => offer.offerInfo.offerId)
+        const myNotesIds = store
+          .get(myNotesAtom)
+          .map((note) => note.noteInfo.noteId)
         const session = store.get(sessionDataOrDummyAtom)
 
         store.set(
@@ -35,6 +39,10 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
 
               // Inbox is for my offer that exists
               if (one.inbox.offerId && myOffersIds.includes(one.inbox.offerId))
+                return true
+
+              // Inbox is for my note that exists
+              if (one.inbox.noteId && myNotesIds.includes(one.inbox.noteId))
                 return true
 
               // In all other cases, inbox is valid only if there are open chats

@@ -101,6 +101,9 @@ export const Preferences = Schema.Struct({
   showMarketplaceIntroDialog: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),
+  showNotesBoardIntroSheet: Schema.optionalWith(Schema.Boolean, {
+    default: () => true,
+  }),
   lastUsedOfferSpokenLanguages: Schema.optionalWith(
     Schema.Array(SpokenLanguage),
     {

@@ -15,6 +15,7 @@ import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {UserName} from './UserName.brand'
 import {RealLifeInfo} from './UserNameAndAvatar.brand'
 import {ClubUuid} from './clubs'
+import {NoteId, OneNoteInState} from './notes'
 import {NotificationCypher} from './notifications/NotificationCypher.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, GoldenAvatarType, OfferId, OneOfferInState} from './offers'
@@ -155,6 +156,10 @@ export const Inbox = Schema.Struct({
   offerId: Schema.optional(OfferId),
   // If the user has requested the offer
   requestOfferId: Schema.optional(OfferId),
+  // if the user is author of the note
+  noteId: Schema.optional(NoteId),
+  // If the user has responded to the note
+  requestNoteId: Schema.optional(NoteId),
 })
 export type Inbox = typeof Inbox.Type
 
@@ -168,6 +173,16 @@ export const ChatOrigin = Schema.Union(
     type: Schema.Literal('theirOffer'),
     offerId: OfferId,
     offer: Schema.optional(OneOfferInState),
+  }),
+  Schema.Struct({
+    type: Schema.Literal('myNote'),
+    noteId: NoteId,
+    note: Schema.optional(OneNoteInState),
+  }),
+  Schema.Struct({
+    type: Schema.Literal('theirNote'),
+    noteId: NoteId,
+    note: Schema.optional(OneNoteInState),
   }),
   Schema.Struct({type: Schema.Literal('unknown')})
 )

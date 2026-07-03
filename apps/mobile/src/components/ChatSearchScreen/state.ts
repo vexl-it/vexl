@@ -2,6 +2,7 @@ import {
   type Chat,
   type ChatMessageId,
 } from '@vexl-next/domain/src/general/messaging'
+import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {useAtomValue} from 'jotai'
@@ -12,6 +13,7 @@ import {type ChatMessageWithState} from '../../state/chat/domain'
 import compareMessages from '../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../state/chat/utils/isChatActive'
 import {offersAtom} from '../../state/marketplace/atoms/offersState'
+import {notesAtom} from '../../state/notes/atoms/notesState'
 import {getOtherSideRealNameOrFriendLevel} from '../../utils/chat/getOtherSideFriendLevel'
 import {type TFunction} from '../../utils/localization/I18nProvider'
 import {getMessagePreviewText} from '../InsideRouter/components/MessagesScreen/utils/getMessagePreviewText'
@@ -43,10 +45,26 @@ function getOfferForChat({
 }): OneOfferInState | undefined {
   const {origin} = chat
 
-  if (origin.type === 'unknown') return undefined
+  if (origin.type !== 'myOffer' && origin.type !== 'theirOffer')
+    return undefined
   if (origin.offer) return origin.offer
 
   return offers.find((one) => one.offerInfo.offerId === origin.offerId)
+}
+
+function getNoteForChat({
+  chat,
+  notes,
+}: {
+  chat: Chat
+  notes: readonly OneNoteInState[]
+}): OneNoteInState | undefined {
+  const {origin} = chat
+
+  if (origin.type !== 'myNote' && origin.type !== 'theirNote') return undefined
+  if (origin.note) return origin.note
+
+  return notes.find((one) => one.noteInfo.noteId === origin.noteId)
 }
 
 export function useChatSearchResults({
@@ -61,6 +79,7 @@ export function useChatSearchResults({
 } {
   const messagingState = useAtomValue(messagingStateAtom)
   const offers = useAtomValue(offersAtom)
+  const notes = useAtomValue(notesAtom)
 
   const searchableChats = useMemo(() => {
     return messagingState
@@ -74,12 +93,14 @@ export function useChatSearchResults({
 
         const otherSideData = getOtherSideData(chat.chat)
         const offer = getOfferForChat({chat: chat.chat, offers})
+        const note = getNoteForChat({chat: chat.chat, notes})
         const displayName =
           getOtherSideRealNameOrFriendLevel({
             offerInfo: offer?.offerInfo,
+            note,
             chat,
             t,
-          }) ?? ''
+          }) ?? otherSideData.userName
 
         return [
           {
@@ -98,7 +119,7 @@ export function useChatSearchResults({
         ]
       })
       .sort((a, b) => compareMessages(b.lastMessage, a.lastMessage))
-  }, [messagingState, offers, t])
+  }, [messagingState, notes, offers, t])
 
   return useMemo(() => {
     const trimmedQuery = query.trim()

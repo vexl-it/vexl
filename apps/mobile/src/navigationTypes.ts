@@ -12,6 +12,7 @@ import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
+import {type NoteId} from '@vexl-next/domain/src/general/notes'
 import {
   type LocationPlaceId,
   type OfferId,
@@ -76,6 +77,10 @@ export type RootStackParamsList = {
 
   SendMessage: {offerId: OfferId; mode?: 'request' | 'rerequest'}
 
+  CreateNote: undefined
+  NoteDetail: {noteId: NoteId}
+  SendMessageToNote: {noteId: NoteId}
+
   ChatDetail: {
     otherSideKey: PublicKeyPemBase64
     inboxKey: PublicKeyPemBase64
@@ -107,6 +112,11 @@ export type RootStackParamsList = {
   }
 
   ChatOfferDetail: {
+    otherSideKey: PublicKeyPemBase64
+    inboxKey: PublicKeyPemBase64
+  }
+
+  ChatNoteDetail: {
     otherSideKey: PublicKeyPemBase64
     inboxKey: PublicKeyPemBase64
   }

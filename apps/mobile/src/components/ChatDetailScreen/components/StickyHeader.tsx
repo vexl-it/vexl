@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {
+  InfoCircle,
   NavButton,
   Typography,
   XmarkCancelClose,
@@ -93,10 +94,16 @@ function StickyHeader(): React.ReactElement | null {
   const {t} = useTranslation()
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
-  const {chatAtom, offerForChatAtom, publicKeyPemBase64Atom, showInfoBarAtom} =
-    useMolecule(chatMolecule)
+  const {
+    chatAtom,
+    offerForChatAtom,
+    noteForChatAtom,
+    publicKeyPemBase64Atom,
+    showInfoBarAtom,
+  } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
   const offer = useAtomValue(offerForChatAtom)
+  const note = useAtomValue(noteForChatAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const showInfoBar = useAtomValue(showInfoBarAtom)
   const currentLocale = useAtomValue(formattingLocaleAtom)
@@ -104,6 +111,16 @@ function StickyHeader(): React.ReactElement | null {
 
   const openOfferDetail = useCallback(() => {
     navigation.navigate('ChatOfferDetail', {
+      inboxKey,
+      otherSideKey: chat.otherSide.publicKey,
+    })
+  }, [chat.otherSide.publicKey, inboxKey, navigation])
+
+  const isNoteOrigin =
+    chat.origin.type === 'myNote' || chat.origin.type === 'theirNote'
+
+  const openNoteDetail = useCallback(() => {
+    navigation.navigate('ChatNoteDetail', {
       inboxKey,
       otherSideKey: chat.otherSide.publicKey,
     })
@@ -194,6 +211,48 @@ function StickyHeader(): React.ReactElement | null {
 
     return result
   }, [offerAmount, offerCity, offerLanguageFlags, offerLocationTypeText, t])
+
+  if (isNoteOrigin) {
+    if (!note || !showInfoBar) return null
+
+    const noteStripTitle =
+      chat.origin.type === 'myNote'
+        ? t('notes.chat.usersResponseToNote')
+        : t('notes.chat.yourResponseToNote')
+
+    return (
+      <XStack
+        justifyContent="space-between"
+        alignItems="center"
+        gap="$3"
+        py="$4"
+        px="$5"
+        backgroundColor="$backgroundSecondary"
+        onPress={openNoteDetail}
+      >
+        <YStack flex={1} gap="$2">
+          <Typography color="$foregroundPrimary" variant="paragraphSmallBold">
+            {noteStripTitle}
+          </Typography>
+          <Typography
+            color="$foregroundSecondary"
+            variant="description"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {note.noteInfo.publicPart.text}
+          </Typography>
+        </YStack>
+        <Stack>
+          <NavButton
+            variant="tetriary"
+            icon={InfoCircle}
+            onPress={openNoteDetail}
+          />
+        </Stack>
+      </XStack>
+    )
+  }
 
   if (!offer || !showInfoBar) return null
   return (

@@ -54,6 +54,7 @@ import {
   deriveVisibleCommonFriendsForChat,
   deriveVisibleCommonFriendsForOffer,
 } from '../../../state/marketplace/utils/visibleCommonFriends'
+import {noteForChatOriginAtom} from '../../../state/notes/atoms/notesState'
 import * as amount from '../../../state/tradeChecklist/utils/amount'
 import {getLatestAmountDataMessage} from '../../../state/tradeChecklist/utils/amount'
 import * as dateAndTime from '../../../state/tradeChecklist/utils/dateAndTime'
@@ -109,6 +110,11 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   const offerForChatAtom = atom((get) => {
     const origin = get(chatAtom)?.origin
     return origin ? get(offerForChatOriginAtom(origin)) : null
+  })
+
+  const noteForChatAtom = atom((get) => {
+    const origin = get(chatAtom)?.origin
+    return origin ? get(noteForChatOriginAtom(origin)) : undefined
   })
 
   const tradeChecklistAtom = focusAtom(chatWithMessagesAtom, (o) =>
@@ -345,7 +351,22 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       Option.getOrElse(() => [])
     )
 
-    if (!offer) return []
+    if (!offer) {
+      const note = get(noteForChatAtom)
+      if (!note) return []
+
+      // My note - the responder sent their common friends in the request
+      // message. Their note - common friends are in the note's private part.
+      return deriveVisibleCommonFriendsForChat({
+        commonFriends: note.ownershipInfo
+          ? commonFriendsForMyOffer
+          : note.noteInfo.privatePart.commonFriends,
+        verifiedCommonFriends: note.ownershipInfo
+          ? verifiedCommonFriendsForMyOffer
+          : [],
+        importedContactsHashes,
+      }).commonFriends
+    }
 
     if (offer.ownershipInfo) {
       return deriveVisibleCommonFriendsForChat({
@@ -373,7 +394,18 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       Option.getOrElse(() => [])
     )
 
-    if (!offer) return []
+    if (!offer) {
+      const note = get(noteForChatAtom)
+      // Notes carry no verified common friends; for my note the responder
+      // may have sent theirs in the request message.
+      if (!note?.ownershipInfo) return []
+
+      return deriveVisibleCommonFriendsForChat({
+        commonFriends: commonConnectionsHashes,
+        verifiedCommonFriends: verifiedCommonFriendsForMyOffer,
+        importedContactsHashes,
+      }).verifiedCommonFriends
+    }
 
     if (offer.ownershipInfo) {
       return deriveVisibleCommonFriendsForChat({
@@ -665,8 +697,16 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     if (originOffer?.ownershipInfo?.adminId) {
       return get(friendLevelForMyOfferAtom)
     }
+    if (originOffer) return originOffer.offerInfo.privatePart?.friendLevel ?? []
 
-    return originOffer?.offerInfo.privatePart?.friendLevel ?? []
+    const originNote = get(noteForChatAtom)
+    // My note - the responder reported their friend level in the request
+    // message. Their note - the level is in the note's private part.
+    if (originNote?.ownershipInfo?.adminId) {
+      return get(friendLevelForMyOfferAtom)
+    }
+
+    return originNote?.noteInfo.privatePart.friendLevel ?? []
   })
 
   const theirOfferAndNotReportedAtom = selectAtom(
@@ -1042,6 +1082,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     commonConnectionsCountAtom,
     messagesAtom,
     offerForChatAtom,
+    noteForChatAtom,
     sendMessageAtom: sendMessageActionAtom(chatWithMessagesAtom),
     otherSideDataAtom,
     identityRevealStatusAtom,

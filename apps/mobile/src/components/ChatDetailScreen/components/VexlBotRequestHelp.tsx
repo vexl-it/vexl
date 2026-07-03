@@ -43,6 +43,13 @@ export function VexlBotRequestHelp({
     })
   }, [chat.otherSide.publicKey, inboxKey, navigation])
 
+  const handleNoteDetailPress = useCallback(() => {
+    navigation.navigate('ChatNoteDetail', {
+      inboxKey,
+      otherSideKey: chat.otherSide.publicKey,
+    })
+  }, [chat.otherSide.publicKey, inboxKey, navigation])
+
   const handleCommonFriendsPress = useCallback(() => {
     navigation.navigate('CommonFriends', {
       contactsHashes: commonConnectionsHashes,
@@ -90,22 +97,30 @@ export function VexlBotRequestHelp({
 
   if (message.message.messageType === 'REQUEST_MESSAGING') {
     if (message.state === 'received') {
+      const isNoteChat = chat.origin.type === 'myNote'
+
       // Other side sent the request messaging
       return (
         <VexlbotActionCard
           title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
-          description={t(
-            'messages.vexlBot.welcomeToTheTradeChat.receiverDescription'
-          )}
+          description={
+            isNoteChat
+              ? t('notes.chat.welcomeReceiverDescription')
+              : t('messages.vexlBot.welcomeToTheTradeChat.receiverDescription')
+          }
         >
           <XStack gap="$3">
             <Button
               f={1}
               variant="secondary"
               size="medium"
-              onPress={handleOfferDetailsPress}
+              onPress={
+                isNoteChat ? handleNoteDetailPress : handleOfferDetailsPress
+              }
             >
-              {t('common.offerDetails')}
+              {isNoteChat
+                ? t('notes.chat.noteDetail')
+                : t('common.offerDetails')}
             </Button>
 
             <Button

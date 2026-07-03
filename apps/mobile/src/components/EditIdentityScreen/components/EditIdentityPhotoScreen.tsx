@@ -57,7 +57,6 @@ function EditIdentityPhotoScreen({navigation}: Props): React.ReactElement {
       }
       footer={
         <Button
-          disabled={!imageUri}
           onPress={() => {
             navigation.navigate('EditIdentityNickname')
           }}

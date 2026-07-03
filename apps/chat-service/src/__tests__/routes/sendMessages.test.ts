@@ -524,6 +524,29 @@ describe('Send messages', () => {
           Effect.either
         )
         expectErrorResponse(ForbiddenMessageTyperror)(errorResponse4)
+
+        const errorResponse5 = yield* _(
+          client.Messages.sendMessages({
+            payload: {
+              data: [
+                yield* _(
+                  user2.inbox1.addChallenge({
+                    senderPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                    messages: [
+                      {
+                        receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+                        message: '1fromUser2inbox1' as MessageCypher,
+                        messageType: 'INACTIVITY_REMINDER' as const,
+                      },
+                    ],
+                  })
+                ),
+              ],
+            },
+          }),
+          Effect.either
+        )
+        expectErrorResponse(ForbiddenMessageTyperror)(errorResponse5)
       })
     )
   })

@@ -299,6 +299,18 @@ describe('Send message', () => {
         )
 
         expectErrorResponse(ForbiddenMessageTyperror)(response4)
+
+        const response5 = yield* _(
+          client.Messages.sendMessage({
+            payload: {
+              ...messageToSend,
+              messageType: 'INACTIVITY_REMINDER',
+            },
+          }),
+          Effect.either
+        )
+
+        expectErrorResponse(ForbiddenMessageTyperror)(response5)
       })
     )
   })

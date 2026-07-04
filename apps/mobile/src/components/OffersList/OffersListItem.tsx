@@ -88,9 +88,7 @@ function OffersListItem({offerAtom}: Props): React.ReactElement {
   } => {
     if (isMine) {
       return {
-        buttonText: offer.offerInfo.publicPart.listingType
-          ? t('myOffers.editOffer')
-          : t('myOffers.updateOffer'),
+        buttonText: t('myOffers.editOffer'),
         actionableUI: true,
         onPress: navigateToOffer,
       }
@@ -190,15 +188,7 @@ function OffersListItem({offerAtom}: Props): React.ReactElement {
       actionableUI: true,
       onPress: navigateToOffer,
     }
-  }, [
-    canBeRequested,
-    chatForOffer,
-    isMine,
-    navigateToChat,
-    navigateToOffer,
-    offer.offerInfo.publicPart.listingType,
-    t,
-  ])
+  }, [canBeRequested, chatForOffer, isMine, navigateToChat, navigateToOffer, t])
 
   return (
     <>

@@ -77,23 +77,6 @@ export const hasPostedFirstOfferActionStepAtom = atom((get) => {
   )
 })
 
-export const displayAddListingTypeAtom = atom<boolean>(true)
-
-export const shouldDisplaySuggestionToAddListingTypeAtom = atom(
-  (get) => {
-    const myOffers = get(myOffersAtom)
-    const displayAddListingType = get(displayAddListingTypeAtom)
-    const anyOfferWithoutListingType = myOffers.some(
-      (offer) => !offer.offerInfo.publicPart.listingType
-    )
-
-    return displayAddListingType && anyOfferWithoutListingType
-  },
-  (get, set, visible: boolean) => {
-    set(displayAddListingTypeAtom, visible)
-  }
-)
-
 export const selectedMyOffersSortingOptionAtom = atom<Sort>('NEWEST_OFFER')
 
 export const updateMyOfferPrivatePayloadActionAtom = atom(

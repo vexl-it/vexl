@@ -49,10 +49,19 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   const importedContactsHashes = get(importedContactsHashesAtom)
   const isDeveloper = get(isDeveloperAtom)
 
-  const offers = get(offersAtom)
+  const offersWithListingType = pipe(
+    get(offersAtom),
+    Array.filter((one) => !!one.offerInfo.publicPart.listingType)
+  )
+  alertAndReportInPersonOffersWithoutLocation(
+    pipe(
+      offersWithListingType,
+      Array.map((one) => one.offerInfo)
+    )
+  )
 
   return pipe(
-    offers,
+    offersWithListingType,
     Array.filter((oneOffer) => {
       // Cheap checks first, common-friends derivation only when still needed
       if (

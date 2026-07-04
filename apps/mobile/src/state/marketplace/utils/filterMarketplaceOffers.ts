@@ -46,10 +46,7 @@ export function shouldCombineOnlineOffersWithLocationFilter(
 }
 
 export function isBtcOffer(offer: OneOfferInState): boolean {
-  return (
-    !offer.offerInfo.publicPart.listingType ||
-    offer.offerInfo.publicPart.listingType === 'BITCOIN'
-  )
+  return offer.offerInfo.publicPart.listingType === 'BITCOIN'
 }
 
 function offerMatchesAmountFilter({

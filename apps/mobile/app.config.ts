@@ -199,8 +199,11 @@ export default {
     'sk': '../../packages/localization/sk-infoPlist.json',
   },
   'owner': 'vexlit',
+  // Runtime version is a hash of the native project (dependencies, config
+  // plugins, native config). Updates only load into builds with a matching
+  // hash. See fingerprint.config.js for what is excluded from the hash.
   'runtimeVersion': {
-    'policy': 'appVersion',
+    'policy': 'fingerprint',
   },
   'plugins': [
     ['react-native-libsodium', {}],

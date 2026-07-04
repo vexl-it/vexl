@@ -6,6 +6,7 @@ import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {AppSource} from '@vexl-next/rest-api/src/commonHeaders'
 import {Schema} from 'effect'
+import * as Application from 'expo-application'
 import Constants from 'expo-constants'
 import * as Device from 'expo-device'
 import {getInstallationSource} from 'expo-installation-source'
@@ -37,9 +38,16 @@ export const packageName = String(
 export const isStaging = apiPreset === 'stageEnv'
 export const isProd = apiPreset === 'prodEnv'
 
+// version, versionCode and commitHash come from the JS bundle's manifest, so
+// after an OTA update they describe the bundle, not the binary. These two
+// always describe the installed binary.
+export const nativeVersion = Application.nativeApplicationVersion ?? 'unknown'
+export const nativeBuildNumber = Application.nativeBuildVersion ?? 'unknown'
+
 export const commitHash = String(
   Constants.expoConfig?.extra?.commitHash ?? 'local'
 )
+export const commitHashShort = commitHash.slice(0, 7)
 
 export const platform =
   Platform.OS === 'android' ? PLATFORM_ANDROID : PLATFORM_IOS

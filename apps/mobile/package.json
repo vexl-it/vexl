@@ -52,6 +52,7 @@
     "effect": "^3.20.0",
     "entities": "~2.0.0",
     "expo": "~56.0.12",
+    "expo-application": "~56.0.3",
     "expo-background-task": "~56.0.19",
     "expo-build-properties": "~56.0.19",
     "expo-calendar": "~56.0.8",

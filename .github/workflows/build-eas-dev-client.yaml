@@ -1,0 +1,70 @@
+name: "[Build] Dev client"
+run-name: "Build dev client (${{ inputs.platform }}) on ${{ github.sha }}"
+
+# Builds the expo-dev-client variant of the staging app. Testers install it
+# from the staging TestFlight (iOS) or the APK artifact (Android) and use it
+# to load PR preview bundles published by pr-preview.yaml. Rebuild whenever
+# the app version or native code (dependencies, config plugins) changes,
+# otherwise PR previews will not match the dev client's runtime version.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform to build"
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - android
+          - ios
+
+jobs:
+  build:
+    name: Build dev client
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
+      - name: Set unique iOS build number suffix
+        # Dev clients share the staging bundle id, so each upload needs a
+        # build number TestFlight has not seen for this version yet.
+        run: |
+          jq --arg suffix ".${{ github.run_number }}" \
+            '.build.development.env.IOS_BUILD_NUMBER_SUFFIX = $suffix' \
+            eas.json > eas.json.tmp && mv eas.json.tmp eas.json
+        working-directory: apps/mobile
+      - name: Build iOS on EAS and submit to TestFlight
+        if: inputs.platform == 'all' || inputs.platform == 'ios'
+        run: eas build --platform ios --profile development --auto-submit-with-profile staging --non-interactive --no-wait
+        working-directory: apps/mobile
+      - name: Build Android APK on EAS and download it
+        if: inputs.platform == 'all' || inputs.platform == 'android'
+        run: |
+          eas build --platform android --profile development --non-interactive --wait --json > build.json
+          APK_URL="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' build.json)"
+          test "$APK_URL" != "null"
+          curl -L "$APK_URL" -o vexl-dev-client.apk
+        working-directory: apps/mobile
+      - name: Upload dev client APK
+        if: inputs.platform == 'all' || inputs.platform == 'android'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: vexl-dev-client-apk
+          path: apps/mobile/vexl-dev-client.apk

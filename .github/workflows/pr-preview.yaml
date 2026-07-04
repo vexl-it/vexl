@@ -1,0 +1,86 @@
+name: "[Preview] PR stage bundle"
+run-name: "PR #${{ github.event.number }} preview (${{ github.event.action }})"
+
+# Publishes the PR's JS bundle as an EAS Update on branch "pr-<number>" and
+# comments a QR code on the PR. Team members scan it with the staging dev
+# client (built by build-eas-dev-client.yaml) to preview the PR on stage.
+# When the PR closes, the EAS Update branch is deleted.
+#
+# Gated to branches of this repo: PRs from forks have no access to
+# EXPO_TOKEN, so they skip these jobs entirely.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish preview bundle
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
+      - name: Publish EAS Update and comment QR code
+        uses: expo/expo-github-action/preview@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          command: eas update --branch pr-${{ github.event.number }} --message "PR #${{ github.event.number }} (${{ github.event.pull_request.head.sha }})" --non-interactive
+          working-directory: apps/mobile
+        env:
+          ENV_PRESET: stage
+          # Baked into the bundle as extra.commitHash and shown in the app's
+          # version footer. Set explicitly — EAS only provides it on its own
+          # build servers, not on GitHub runners.
+          EAS_BUILD_GIT_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
+
+  cleanup:
+    name: Delete preview bundle
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
+      - name: Delete EAS Update branch
+        # The branch does not exist when a PR closes before any preview was
+        # published (e.g. a fork PR) — that must not fail the workflow.
+        run: |
+          eas branch:delete pr-${{ github.event.number }} --non-interactive \
+            || echo "No preview branch to delete"
+        working-directory: apps/mobile

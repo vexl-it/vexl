@@ -1,5 +1,9 @@
 const VERSION_CODE = 830
 const VERSION = '1.43.9'
+// Dev-client builds share the staging bundle id with release staging builds.
+// A fractional suffix (e.g. "830.12") keeps their TestFlight build numbers
+// unique while still sorting below the next release build number (831).
+const IOS_BUILD_NUMBER_SUFFIX = process.env.IOS_BUILD_NUMBER_SUFFIX ?? ''
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
@@ -83,7 +87,7 @@ export default {
   },
   'assetBundlePatterns': ['**/*'],
   'ios': {
-    buildNumber: String(VERSION_CODE),
+    buildNumber: `${VERSION_CODE}${IOS_BUILD_NUMBER_SUFFIX}`,
     // 'icon': extra.iconV2, // Does not work due to this: https://github.com/expo/expo/issues/39782
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,

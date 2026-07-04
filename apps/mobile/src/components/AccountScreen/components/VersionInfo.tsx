@@ -2,7 +2,13 @@ import {useNavigation} from '@react-navigation/native'
 import {Typography} from '@vexl-next/ui'
 import React, {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
-import {version, versionCode} from '../../../utils/environment'
+import {
+  commitHashShort,
+  nativeBuildNumber,
+  nativeVersion,
+  version,
+  versionCode,
+} from '../../../utils/environment'
 import SecretDoor from '../../SecretDoor'
 
 function VersionInfo(): React.ReactElement {
@@ -20,7 +26,14 @@ function VersionInfo(): React.ReactElement {
         variant="description"
         color="$foregroundSecondary"
       >
-        {version} ({versionCode})
+        {nativeVersion} ({nativeBuildNumber})
+      </Typography>
+      <Typography
+        textAlign="center"
+        variant="description"
+        color="$foregroundSecondary"
+      >
+        JS {version} ({versionCode}) · {commitHashShort}
       </Typography>
     </SecretDoor>
   )

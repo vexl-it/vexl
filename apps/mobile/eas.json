@@ -18,6 +18,22 @@
       },
       "channel": "staging"
     },
+    "development": {
+      "developmentClient": true,
+      "android": {
+        "credentialsSource": "remote",
+        "buildType": "apk",
+        "resourceClass": "large"
+      },
+      "ios": {
+        "credentialsSource": "remote",
+        "resourceClass": "large"
+      },
+      "env": {
+        "ENV_PRESET": "stage"
+      },
+      "channel": "development"
+    },
     "development-simulator": {
       "developmentClient": true,
       "distribution": "internal",

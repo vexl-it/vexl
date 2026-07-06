@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
     "format:fix": "prettier --write \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
+    "generate:nse-vectors": "tsx src/testVectors/generateNseTestVectors.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "rimraf": "^4.4.0",
     "ts-jest": "^29.2.0",
     "ts-node": "^10.9.1",
+    "tsx": "^4.16.0",
     "typescript": "~6.0.3"
   },
   "prettier": "@vexl-next/prettier-config"

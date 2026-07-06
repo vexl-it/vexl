@@ -52,6 +52,11 @@ jobs:
           working-directory: apps/mobile
         env:
           ENV_PRESET: stage
+          # Must match the dev-client build profile env: the flag changes the
+          # expo-dev-client plugin props, which are part of the runtime
+          # fingerprint — without it PR updates would never load in the dev
+          # client.
+          IS_DEV_CLIENT_BUILD: 'true'
           # Baked into the bundle as extra.commitHash and shown in the app's
           # version footer. Set explicitly — EAS only provides it on its own
           # build servers, not on GitHub runners.

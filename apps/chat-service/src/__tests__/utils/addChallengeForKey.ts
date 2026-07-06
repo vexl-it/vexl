@@ -38,6 +38,7 @@ export const addChallengeForKey =
     T &
       RequestBaseWithChallenge & {
         readonly senderPublicKey: PublicKeyPemBase64 // Make this compatible with all requests is ignored when ot used
+        readonly markAsPulled: boolean // Make this compatible with retrieveMessages request, ignored when not used
       },
     AddingChallengeError,
     HttpClient.HttpClient | TestRequestHeaders
@@ -64,6 +65,7 @@ export const addChallengeForKey =
 
       yield* _(TestRequestHeaders.setHeaders(initHeaders))
       return {
+        markAsPulled: true,
         ...request,
         publicKey: key.publicKeyPemBase64,
         publicKeyV2: Option.none(),

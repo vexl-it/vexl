@@ -206,6 +206,18 @@ export default {
     'policy': 'fingerprint',
   },
   'plugins': [
+    // Explicit registration to control the generated exp+vexl deep-link
+    // scheme. Only dev-client builds may register it — when left to the
+    // auto-applied plugin, store builds register it too and can hijack the
+    // PR-preview QR codes (iOS scheme resolution between two apps is
+    // undefined). IS_DEV_CLIENT_BUILD is set by the development build
+    // profile and by the PR-preview publish workflow; it affects the
+    // fingerprint, so dev clients and PR updates share a runtime that is
+    // distinct from release builds.
+    [
+      'expo-dev-client',
+      {addGeneratedScheme: Boolean(process.env.IS_DEV_CLIENT_BUILD)},
+    ],
     ['react-native-libsodium', {}],
     'expo-background-task',
     [

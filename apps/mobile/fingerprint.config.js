@@ -8,6 +8,18 @@ const config = {
     // that really affect the native app (env like ENV_PRESET) still show
     // up in the fingerprint through the evaluated expo config.
     'eas.json',
+    // react-native-libsodium's postinstall extracts libsodium/build.tgz,
+    // an archive created on macOS that carries AppleDouble metadata. GNU
+    // tar on Linux (CI runners publishing updates) materializes it as
+    // literal `._*` files while bsdtar on macOS (EAS build workers) turns
+    // it into invisible xattrs, so the extracted tree hashes differently
+    // per OS and runtime versions never match. The extracted output is
+    // fully derived from build.tgz, which is still fingerprinted, so
+    // ignoring it loses nothing.
+    '**/node_modules/react-native-libsodium/libsodium/build/**',
+    // ...and the AppleDouble entry for the build dir itself, which GNU tar
+    // materializes as a literal file next to it.
+    '**/node_modules/react-native-libsodium/**/._*',
   ],
   sourceSkips: [
     // `extra` carries commitHash (EAS_BUILD_GIT_COMMIT_HASH), which differs

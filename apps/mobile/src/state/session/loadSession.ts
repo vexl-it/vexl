@@ -77,14 +77,23 @@ interface LoadSessionOptions {
 
 // The promise of the currently running storage load is the SINGLE source of
 // truth for "a load is in flight". It is published synchronously when a load
-// starts and cleared when that load's promise settles, so it is non-null
-// exactly while a load runs and a caller that sees it always joins a live
-// load. The 'loading' value in sessionHolderAtom is UI state derived from it
-// and is never used for concurrency decisions - keeping those two in sync by
-// hand is what caused race conditions here in the past.
+// starts and cleared when it settles - which is guaranteed to happen: the
+// published promise is the load raced against a watchdog timer, so even a
+// load hung on a dead native storage call settles (as abandoned) and frees
+// the slot for a fresh load. It is therefore non-null exactly while a live
+// (non-abandoned) load runs. The 'loading' value in sessionHolderAtom is UI
+// state derived from it and is never used for concurrency decisions -
+// keeping those two in sync by hand is what caused race conditions here in
+// the past.
 let inFlightLoad: Promise<LoadSessionResult> | null = null
 
 const JOIN_IN_FLIGHT_LOAD_TIMEOUT_MILLIS = 5_000
+
+// Upper bound on how long a single load may stay in flight. Generous enough
+// for a slow v1 -> v2 session upgrade (which makes network calls), but
+// finite so a load hung on a dead native storage bridge cannot hold the
+// in-flight slot forever - without it the only recovery is an app restart.
+const SESSION_LOAD_WATCHDOG_TIMEOUT_MILLIS = 30_000
 
 function sessionLoadedResult(): LoadSessionResult {
   return {sessionLoaded: true}
@@ -339,13 +348,46 @@ export function loadSession(
     // read, so publishing the promise and flipping the UI state below happen
     // before anything else can observe the load.
     const loadPromise = Effect.runPromise(performSessionLoad())
-    inFlightLoad = loadPromise
-    store.set(sessionHolderAtom, {state: 'loading'})
-    void loadPromise.finally(() => {
-      // Only the load that owns the slot may free it.
-      if (inFlightLoad === loadPromise) inFlightLoad = null
+
+    // Watchdog: if storage hangs forever (e.g. a dead native bridge), the
+    // load promise never settles. Racing it against a timer guarantees the
+    // published promise always settles, so every caller - the initiator and
+    // joiners alike - gets a result and the slot is always freed for a fresh
+    // load. The abandoned load is deliberately NOT interrupted (interrupting
+    // could tear a half-finished storage write): it keeps running in the
+    // background, still settles the session atom if it ever finishes, and
+    // the ownership check below keeps it from touching a newer load's slot.
+    let watchdogTimer: ReturnType<typeof setTimeout> | undefined
+    const watchdogPromise = new Promise<LoadSessionResult>((resolve) => {
+      watchdogTimer = setTimeout(() => {
+        void Effect.runPromise(
+          reportErrorE(
+            'warn',
+            new Error(
+              'Session load did not settle within the watchdog timeout. Abandoning it.'
+            )
+          )
+        )
+        const watchdogStore = getDefaultStore()
+        if (watchdogStore.get(sessionHolderAtom).state === 'loading')
+          watchdogStore.set(sessionHolderAtom, {state: 'initial'})
+        resolve(
+          sessionNotLoadedResult(
+            new SessionLoadWaitTimedOut({cause: 'SessionLoadWatchdogTimedOut'})
+          )
+        )
+      }, SESSION_LOAD_WATCHDOG_TIMEOUT_MILLIS)
     })
 
-    return Effect.promise(() => loadPromise)
+    const publishedLoad = Promise.race([loadPromise, watchdogPromise])
+    inFlightLoad = publishedLoad
+    store.set(sessionHolderAtom, {state: 'loading'})
+    void publishedLoad.finally(() => {
+      clearTimeout(watchdogTimer)
+      // Only the load that owns the slot may free it.
+      if (inFlightLoad === publishedLoad) inFlightLoad = null
+    })
+
+    return Effect.promise(() => publishedLoad)
   })
 }

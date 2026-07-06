@@ -3,7 +3,10 @@ import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironm
 
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
-import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
+import {
+  MessageCypher,
+  MessageType,
+} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
@@ -195,6 +198,152 @@ describe('Retrieve messages', () => {
         `)
         expect(data[0].platform).toBe('IOS')
         expect(data[0].clientVersion).toBe(2)
+      })
+    )
+  })
+
+  it('Does not mark messages as pulled when markAsPulled is false', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const messageToSend = (yield* _(
+          user2.inbox1.addChallenge({
+            message: Schema.decodeSync(MessageCypher)(
+              'messageRetrievedWithoutPull'
+            ),
+            messageType: Schema.decodeSync(MessageType)('MESSAGE'),
+            receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+          })
+        )) satisfies SendMessageRequest
+
+        yield* _(setAuthHeaders(user2.authHeaders))
+        yield* _(
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
+        )
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+        const messagesWithoutPulling = yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(
+              user1.addChallengeForMainInbox({markAsPulled: false})
+            ),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
+        )
+        expect(
+          messagesWithoutPulling.messages.map((one) => one.message)
+        ).toContain('messageRetrievedWithoutPull')
+
+        yield* _(
+          client.Inboxes.deletePulledMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+          })
+        )
+
+        // Message was not marked as pulled so it must still be retrievable
+        const messagesAfterDelete = yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
+        )
+        expect(
+          messagesAfterDelete.messages.map((one) => one.message)
+        ).toContain('messageRetrievedWithoutPull')
+
+        // The previous retrieve marked it as pulled so now it gets deleted
+        yield* _(
+          client.Inboxes.deletePulledMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+          })
+        )
+        const messagesAfterSecondDelete = yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(user1.addChallengeForMainInbox({})),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+            }),
+          })
+        )
+        expect(
+          messagesAfterSecondDelete.messages.map((one) => one.message)
+        ).not.toContain('messageRetrievedWithoutPull')
+      })
+    )
+  })
+
+  it('Read-only retrieve (markAsPulled false) works without a Vexl user-agent and does not touch inbox metadata', async () => {
+    // Mirrors the iOS notification service extension: it sends no Vexl
+    // user-agent and no client-version header (clientVersionOrNone resolves
+    // to Option.none()), so the handler must not run updateInboxMetadata -
+    // otherwise it would write NULL into the NOT NULL client_version column
+    // and the whole request would fail with a 500.
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const client = yield* _(NodeTestingApp)
+
+        const messageToSend = (yield* _(
+          user2.inbox1.addChallenge({
+            message: Schema.decodeSync(MessageCypher)('messageRetrievedByNse'),
+            messageType: Schema.decodeSync(MessageType)('MESSAGE'),
+            receiverPublicKey: user1.mainKeyPair.publicKeyPemBase64,
+          })
+        )) satisfies SendMessageRequest
+
+        yield* _(setAuthHeaders(user2.authHeaders))
+        yield* _(
+          client.Messages.sendMessage({
+            payload: messageToSend,
+          })
+        )
+
+        yield* _(setAuthHeaders(user1.authHeaders))
+        const messages = yield* _(
+          client.Messages.retrieveMessages({
+            payload: yield* _(
+              user1.addChallengeForMainInbox({markAsPulled: false})
+            ),
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'VexlNSE/1 CFNetwork/1494.0.7 Darwin/23.4.0',
+            }),
+          })
+        )
+        expect(messages.messages.map((one) => one.message)).toContain(
+          'messageRetrievedByNse'
+        )
+
+        // Message must not be marked as pulled by the read-only retrieve.
+        const sql = yield* _(SqlClient.SqlClient)
+        const messageRows = yield* _(sql`
+          SELECT
+            pulled
+          FROM
+            message
+          WHERE
+            message = 'messageRetrievedByNse'
+        `)
+        expect(messageRows[0]?.pulled).toBe(false)
+
+        // Inbox metadata must stay untouched (NOT NULL column intact).
+        const inboxHash = yield* _(
+          hashPublicKey(user1.mainKeyPair.publicKeyPemBase64)
+        )
+        const inboxRows = yield* _(sql`
+          SELECT
+            client_version
+          FROM
+            inbox
+          WHERE
+            public_key = ${inboxHash}
+        `)
+        expect(inboxRows[0]?.clientVersion).not.toBeNull()
       })
     )
   })

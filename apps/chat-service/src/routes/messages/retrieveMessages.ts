@@ -19,14 +19,22 @@ export const retrieveMessages = HttpApiBuilder.handler(
       yield* _(validateChallengeInBody(req.payload))
 
       const inbox = yield* _(ensureInboxExists(req.payload.publicKey))
-      const inboxDb = yield* _(InboxDbService)
-      yield* _(
-        inboxDb.updateInboxMetadata({
-          clientVersion: req.headers.clientVersionOrNone,
-          platform: req.headers.clientPlatformOrNone,
-          id: inbox.id,
-        })
-      )
+
+      // markAsPulled=false is the strictly read-only path used by the iOS
+      // notification service extension. It must not write anything: no
+      // pulled flags and no inbox metadata (the NSE sends no Vexl
+      // user-agent/client-version, so writing here would overwrite the
+      // app-reported metadata with NULL and violate the NOT NULL column).
+      if (req.payload.markAsPulled) {
+        const inboxDb = yield* _(InboxDbService)
+        yield* _(
+          inboxDb.updateInboxMetadata({
+            clientVersion: req.headers.clientVersionOrNone,
+            platform: req.headers.clientPlatformOrNone,
+            id: inbox.id,
+          })
+        )
+      }
 
       const messagesDb = yield* _(MessagesDbService)
       const messages = yield* _(messagesDb.findMessagesByInboxId(inbox.id))
@@ -61,15 +69,17 @@ export const retrieveMessages = HttpApiBuilder.handler(
         )
       )
 
-      yield* _(
-        messagesToReturn,
-        Array.map((message) =>
-          messagesDb.updateMessageAsPulledByMessageRecord(
-            message.messageRecord.id
-          )
-        ),
-        (effects) => Effect.all(effects, {batching: true})
-      )
+      if (req.payload.markAsPulled) {
+        yield* _(
+          messagesToReturn,
+          Array.map((message) =>
+            messagesDb.updateMessageAsPulledByMessageRecord(
+              message.messageRecord.id
+            )
+          ),
+          (effects) => Effect.all(effects, {batching: true})
+        )
+      }
 
       return {
         messages: Array.map(

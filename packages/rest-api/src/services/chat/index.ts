@@ -192,13 +192,16 @@ export function api({
       // ----------------------
       // 👇 Message
       // ----------------------
-      retrieveMessages: (
-        retrieveMessagesRequest: RequestWithGeneratableChallenge<RetrieveMessagesRequest>
-      ) =>
+      retrieveMessages: ({
+        markAsPulled = true,
+        ...retrieveMessagesRequest
+      }: RequestWithGeneratableChallenge<
+        Omit<RetrieveMessagesRequest, 'markAsPulled'>
+      > & {markAsPulled?: boolean}) =>
         addChallenge(retrieveMessagesRequest).pipe(
           Effect.flatMap((body) =>
             client.Messages.retrieveMessages({
-              payload: body,
+              payload: {...body, markAsPulled},
               headers: commonHeaders,
             })
           )

@@ -189,6 +189,18 @@ export type DeleteInboxesResponse = typeof DeleteInboxesResponse.Type
 
 export const RetrieveMessagesRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
+  /**
+   * false = strictly read-only retrieve (used by the iOS notification
+   * service extension): messages are NOT marked pulled and inbox metadata is
+   * not updated. Absent/true = current app behavior.
+   *
+   * DEPLOYMENT ORDERING: a chat-service with this field MUST be deployed
+   * before any app build containing the NSE ships. An old server silently
+   * ignores the field and marks the messages pulled, which races the app's
+   * deletePulledMessages call and can permanently delete messages the app
+   * never received.
+   */
+  markAsPulled: Schema.optionalWith(Schema.Boolean, {default: () => true}),
 })
 export type RetrieveMessagesRequest = typeof RetrieveMessagesRequest.Type
 

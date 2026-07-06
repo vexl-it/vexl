@@ -19,9 +19,9 @@ export default Effect.flatMap(
       update_counter bigint NOT NULL DEFAULT nextval('note_change_counter_seq')
     );
 
-    CREATE INDEX note_public_admin_id_ix ON note_public (admin_id);
+    CREATE UNIQUE INDEX note_public_admin_id_ix ON note_public (admin_id);
 
-    CREATE INDEX note_public_note_id_ix ON note_public (note_id);
+    CREATE UNIQUE INDEX note_public_note_id_ix ON note_public (note_id);
 
     CREATE INDEX note_public_expires_at_ix ON note_public (expires_at);
 

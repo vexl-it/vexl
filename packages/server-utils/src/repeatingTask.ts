@@ -105,9 +105,17 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
         )
       )
     }).pipe(
-      Effect.catchAll((e) =>
+      // Setup failures (Redis connection, config, Queue/Worker creation,
+      // upsertJobScheduler) must not be swallowed: doing so would leave the
+      // stream open but silent, permanently disabling the task while the
+      // service still reports healthy. Log for context, then die so the layer
+      // build fails and the process crashes/restarts under supervision.
+      // Per-tick task failures are handled separately in `taskWithLock` below
+      // and stay non-fatal by design.
+      Effect.tapError((e) =>
         Effect.logError(`Failed to start repeating task ${jobName}`, e)
-      )
+      ),
+      Effect.orDie
     )
   )
 

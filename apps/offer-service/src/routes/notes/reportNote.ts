@@ -5,6 +5,7 @@ import {ReportNoteLimitReachedError} from '@vexl-next/rest-api/src/services/offe
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {withRedisLockFromEffect} from '@vexl-next/server-utils/src/RedisService'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {reportLimitCountConfig} from '../../configs'
 import {NoteDbService} from '../../db/NoteDbService'
@@ -55,6 +56,7 @@ export const reportNote = HttpApiBuilder.handler(
 
       return {}
     }).pipe(
+      withDbTransaction,
       withRedisLockFromEffect(
         CurrentSecurity.pipe(
           Effect.map((security) => `reportNote:${security.publicKey}`)

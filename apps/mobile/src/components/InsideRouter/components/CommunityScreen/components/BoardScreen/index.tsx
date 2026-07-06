@@ -4,6 +4,7 @@ import {
   Button,
   FabButton,
   FilterBar,
+  type FilterBarItem,
   PlusAdd,
   Stack,
   Typography,
@@ -90,10 +91,10 @@ function BoardScreen({navigation}: Props): React.JSX.Element {
     [navigation]
   )
 
-  const filterItems = useMemo(
+  const filterItems: ReadonlyArray<FilterBarItem<BoardFilter>> = useMemo(
     () => [
-      {label: t('notes.board.allNotes'), value: 'all' as const},
-      {label: t('notes.board.myNotes'), value: 'mine' as const},
+      {label: t('notes.board.allNotes'), value: 'all'},
+      {label: t('notes.board.myNotes'), value: 'mine'},
     ],
     [t]
   )

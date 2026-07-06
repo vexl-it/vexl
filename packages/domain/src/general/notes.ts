@@ -9,20 +9,20 @@ import {HashedPhoneNumber} from './HashedPhoneNumber.brand'
 import {VexlNotificationToken} from './notifications/VexlNotificationToken'
 import {FriendLevel, SymmetricKey} from './offers'
 
-export const NoteId = Schema.String.pipe(Schema.brand('NoteId'))
+export const NoteId = Schema.UUID.pipe(Schema.brand('NoteId'))
 export type NoteId = typeof NoteId.Type
 
 export const newNoteId = (): NoteId =>
   Schema.decodeSync(NoteId)(getCrypto().randomUUID())
 
-export const NoteAdminId = Schema.String.pipe(Schema.brand('NoteAdminId'))
+export const NoteAdminId = Schema.UUID.pipe(Schema.brand('NoteAdminId'))
 export type NoteAdminId = typeof NoteAdminId.Type
 
 export function generateNoteAdminId(): NoteAdminId {
   return Schema.decodeSync(NoteAdminId)(getCrypto().randomUUID())
 }
 
-export const NoteRepostId = Schema.String.pipe(Schema.brand('NoteRepostId'))
+export const NoteRepostId = Schema.UUID.pipe(Schema.brand('NoteRepostId'))
 export type NoteRepostId = typeof NoteRepostId.Type
 
 export function generateNoteRepostId(): NoteRepostId {

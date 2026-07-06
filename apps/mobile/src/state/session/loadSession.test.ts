@@ -455,6 +455,54 @@ describe('loadSession', () => {
     }
   })
 
+  it('abandons a load hung on storage after the watchdog timeout so a fresh load can start', async () => {
+    jest.useFakeTimers()
+
+    try {
+      // The storage read never settles - e.g. a dead native bridge.
+      asyncStorageGetItemMock.mockImplementationOnce(
+        async () => await new Promise<string | null>(() => {})
+      )
+
+      const hungLoadPromise = Effect.runPromise(loadSession())
+
+      expect(getDefaultStore().get(sessionHolderAtom).state).toBe('loading')
+
+      await jest.advanceTimersByTimeAsync(30_000)
+
+      // The initiating caller is released with a blocking recovery result
+      // instead of waiting forever.
+      const hungLoadResult = await hungLoadPromise
+      expect(hungLoadResult).toMatchObject({
+        sessionLoaded: false,
+        blockingRecoveryRequired: true,
+        loadingError: {
+          _tag: 'SessionLoadWaitTimedOut',
+        },
+      })
+      expect(getDefaultStore().get(sessionHolderAtom).state).toBe('initial')
+
+      // The abandoned load no longer holds the in-flight slot: the next
+      // caller starts a fresh storage read and can log in.
+      const loadedSession = buildSession(dummySession.version + 95)
+      const {encryptedSession, secretToken} =
+        encryptSessionForStorage(loadedSession)
+      asyncStorageGetItemMock.mockResolvedValueOnce(encryptedSession)
+      secretStoreGetItemAsyncMock.mockResolvedValueOnce(secretToken)
+
+      const freshLoadResult = await Effect.runPromise(loadSession())
+
+      expect(freshLoadResult.sessionLoaded).toBe(true)
+      expect(getDefaultStore().get(sessionHolderAtom)).toEqual({
+        state: 'loggedIn',
+        session: withExpectedSessionUpgrades(loadedSession),
+      })
+      expect(asyncStorageGetItemMock).toHaveBeenCalledTimes(2)
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   it('loads session from storage and sets loggedIn state', async () => {
     const loadedSession = buildLoggedInSession(dummySession.version + 2)
     const {encryptedSession, secretToken} =

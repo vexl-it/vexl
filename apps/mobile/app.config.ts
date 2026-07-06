@@ -1,5 +1,5 @@
-const VERSION_CODE = 840
-const VERSION = '1.44.0'
+const VERSION_CODE = 841
+const VERSION = '1.44.1'
 // Dev-client builds share the staging bundle id with release staging builds.
 // A fractional suffix (e.g. "840.12") keeps their TestFlight build numbers
 // unique while still sorting below the next release build number (841).

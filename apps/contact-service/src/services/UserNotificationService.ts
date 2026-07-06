@@ -73,9 +73,6 @@ export class UserNotificationService extends Context.Tag(
     UserNotificationService,
     Effect.gen(function* (_) {
       const userDbService = yield* _(UserDbService)
-      const publicImportCountThreshold = yield* _(
-        contactPublicImportCountThresholdConfig
-      )
       const enqueueUserNotification = yield* _(EnqueueUserNotification)
       const clubMemberDb = yield* _(ClubMembersDbService)
       const clubsDb = yield* _(ClubsDbService)
@@ -86,6 +83,9 @@ export class UserNotificationService extends Context.Tag(
           ownerHash: ServerHashedNumber
         ) =>
           Effect.gen(function* (_) {
+            const publicImportCountThreshold = yield* _(
+              contactPublicImportCountThresholdConfig
+            )
             // todo #2142 - remove after moving to vexlNotificationToken
             const firstLevelTokens = yield* _(
               userDbService.findFirebaseTokensOfUsersWhoDirectlyImportedHash({

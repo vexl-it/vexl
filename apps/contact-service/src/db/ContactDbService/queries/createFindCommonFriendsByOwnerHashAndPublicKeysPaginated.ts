@@ -66,7 +66,7 @@ export const createFindCommonFriendsByOwnerHashAndPublicKeysPaginated =
             sql.in('other_side.public_key_v2', hash.publicKeysV2),
           ]),
           createIsAllowedSharedContactHashFragment({
-            hash: sql`my_contact.hash_to`,
+            hashColumn: sql`my_contact.hash_to`,
             publicImportCountThreshold: hash.publicImportCountThreshold,
             sql,
           }),

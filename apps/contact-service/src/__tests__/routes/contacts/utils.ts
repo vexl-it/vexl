@@ -74,12 +74,12 @@ export type DummyUser = Effect.Effect.Success<
 >
 
 export const withPublicImportCountThreshold = async (
-  threshold: string,
+  threshold: number,
   run: () => Promise<void>
 ): Promise<void> => {
   const previousThreshold = process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD
 
-  process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD = threshold
+  process.env.CONTACT_PUBLIC_IMPORT_COUNT_THRESHOLD = String(threshold)
 
   try {
     await run()

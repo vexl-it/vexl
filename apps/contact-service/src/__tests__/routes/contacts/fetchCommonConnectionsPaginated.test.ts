@@ -192,7 +192,7 @@ describe('Common connections paginated', () => {
   })
 
   it('Filters unregistered public common friends but keeps popular logged in contacts', async () => {
-    await withPublicImportCountThreshold('2', async () => {
+    await withPublicImportCountThreshold(2, async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const app = yield* _(NodeTestingApp)

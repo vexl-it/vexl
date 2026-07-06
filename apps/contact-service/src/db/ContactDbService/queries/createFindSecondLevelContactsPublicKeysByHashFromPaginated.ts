@@ -58,7 +58,7 @@ export const createFindSecondLevelContactsPublicKeysByHashFromPaginated =
             `,
           ]),
           createIsAllowedSharedContactHashFragment({
-            hash: sql`my_contacts.hash_to`,
+            hashColumn: sql`my_contacts.hash_to`,
             publicImportCountThreshold: params.publicImportCountThreshold,
             sql,
           }),

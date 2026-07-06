@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications'
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
+import {clear as clearNseBridge} from '../../modules/vexl-nse-bridge'
 import {apiAtom} from '../api'
 import {offerProgressModalActionAtoms} from '../components/UploadingOfferProgressModal/atoms'
 import clearMmkvStorageAndEmptyAtoms from '../utils/clearMmkvStorageAndEmptyAtoms'
@@ -186,6 +187,10 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     // session
     set(sessionAtom, O.none)
 
+    // NSE bridge (inbox keys + metadata shared with the iOS notification
+    // service extension)
+    await failSilently(clearNseBridge())
+
     // Local storage
     await clearMmkvStorageAndEmptyAtoms()
 
@@ -210,6 +215,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
 
     try {
       set(sessionAtom, O.none)
+      await failSilently(clearNseBridge())
       await clearMmkvStorageAndEmptyAtoms()
       await failSilently(Notifications.unregisterForNotificationsAsync())
       await failSilently(set(clearBackgroundNotificationSocketActionAtom))

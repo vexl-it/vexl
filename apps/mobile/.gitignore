@@ -83,3 +83,8 @@ dist/
 
 # Maestro
 !.eas/build/build-and-maestro-test.yml
+
+# SwiftPM build artifacts of the local NSE core package (also keeps
+# prettier out of the vendored dependency checkouts - prettier v3 respects
+# this .gitignore)
+/native/VexlNotificationCore/.build/

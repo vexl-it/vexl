@@ -31,6 +31,7 @@ import {conversationId, toAndroidAvatar} from './conversationShortcuts'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getChatNotificationName} from './getChatNotificationName'
 import {getChannelForMessages} from './notificationChannels'
+import {dismissNseEnrichedNotificationsForChat} from './nseEnrichedNotifications'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
 
 // All messaging requests share one Android group / iOS thread; everything else
@@ -182,6 +183,13 @@ export async function showChatNotification({
   )
   const channelId = await getChannelForMessages()
   const conversation = conversationId({
+    inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+    sender: newMessage.message.senderPublicKey,
+  })
+
+  // The iOS notification service extension may already show an enriched copy
+  // of the push for this conversation; replace it so the message isn't shown twice.
+  await dismissNseEnrichedNotificationsForChat({
     inbox: inbox.inbox.privateKey.publicKeyPemBase64,
     sender: newMessage.message.senderPublicKey,
   })

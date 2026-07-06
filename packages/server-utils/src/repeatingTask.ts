@@ -1,5 +1,5 @@
 import {Queue, Worker} from 'bullmq'
-import {type Duration, Effect, Layer, Stream} from 'effect'
+import {type Duration, Effect, Layer, Runtime} from 'effect'
 import {RedisNamespacePrefixConfig} from './commonConfigs'
 import {RedisConnectionService} from './RedisConnection'
 import {type RedisService, withRedisLock} from './RedisService'
@@ -34,11 +34,20 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
   never,
   R1 | R2 | RedisConnectionService | RedisService
 > => {
-  const jobsStream = Stream.asyncScoped<
-    undefined,
-    never,
-    RedisConnectionService | R1
-  >((emit) =>
+  const taskWithLock = task.pipe(
+    Effect.catchAll((e) =>
+      Effect.logError(`Repeating task ${jobName} failed`, e)
+    ),
+    withRedisLock(lockResource, lockDuration),
+    Effect.catchTag('RedisLockError', () =>
+      Effect.logInfo(
+        `Skipping repeating task ${jobName} because another worker holds the lock`
+      )
+    ),
+    Effect.withSpan(`RepeatingTask/${jobName}`)
+  )
+
+  return Layer.scopedDiscard(
     Effect.gen(function* (_) {
       const redisConnection = yield* _(RedisConnectionService)
       const prefix = yield* _(RedisNamespacePrefixConfig)
@@ -81,6 +90,13 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
         })
       )
 
+      // The worker callback runs each tick's task through the captured
+      // runtime. This keeps the layer build finite — it completes once the
+      // worker is registered — instead of blocking on an infinite stream,
+      // which would stall every layer depending on this one (e.g. the HTTP
+      // server never binding its port).
+      const runtime = yield* _(Effect.runtime<R2 | RedisService>())
+
       yield* _(
         Effect.acquireRelease(
           Effect.try({
@@ -88,7 +104,7 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
               new Worker(
                 queueName,
                 async () => {
-                  await emit.single(undefined)
+                  await Runtime.runPromise(runtime)(taskWithLock)
                 },
                 {
                   connection: redisConnection,
@@ -107,30 +123,15 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
     }).pipe(
       // Setup failures (Redis connection, config, Queue/Worker creation,
       // upsertJobScheduler) must not be swallowed: doing so would leave the
-      // stream open but silent, permanently disabling the task while the
-      // service still reports healthy. Log for context, then die so the layer
-      // build fails and the process crashes/restarts under supervision.
-      // Per-tick task failures are handled separately in `taskWithLock` below
-      // and stay non-fatal by design.
+      // task permanently disabled while the service still reports healthy.
+      // Log for context, then die so the layer build fails and the process
+      // crashes/restarts under supervision. Per-tick task failures are
+      // handled separately in `taskWithLock` above and stay non-fatal by
+      // design.
       Effect.tapError((e) =>
         Effect.logError(`Failed to start repeating task ${jobName}`, e)
       ),
       Effect.orDie
     )
   )
-
-  const taskWithLock = task.pipe(
-    Effect.catchAll((e) =>
-      Effect.logError(`Repeating task ${jobName} failed`, e)
-    ),
-    withRedisLock(lockResource, lockDuration),
-    Effect.catchTag('RedisLockError', () =>
-      Effect.logInfo(
-        `Skipping repeating task ${jobName} because another worker holds the lock`
-      )
-    ),
-    Effect.withSpan(`RepeatingTask/${jobName}`)
-  )
-
-  return Layer.effectDiscard(Stream.runForEach(jobsStream, () => taskWithLock))
 }

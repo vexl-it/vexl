@@ -10,10 +10,6 @@ export const checkInactiveChatsInAppLoadingTaskId = registerInAppLoadingTask({
   name: 'checkInactiveChats',
   requirements: {
     requiresUserLoggedIn: true,
-    // Runs on `resume` (which also fires on cold start) so it can depend on the
-    // message fetch below. Otherwise it would scan stale local chat state and
-    // insert a now-timed reminder that masks an older, newly fetched real
-    // message once the fetch completes.
     runOn: 'resume',
   },
   // Must run after messages are fetched so the inactivity check sees the fresh

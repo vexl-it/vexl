@@ -16,13 +16,9 @@ import compareMessages from '../utils/compareMessages'
 export const INACTIVITY_REMINDER_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 /**
- * Decides whether a local `INACTIVITY_REMINDER` should be inserted into the
- * given chat. The reminder is inserted at most once per inactivity episode:
- *  - never when the newest message already is the reminder (still shown),
- *  - never before the chat has been quiet for the threshold,
- *  - never twice for the same "quiet since" message (tracked on the chat so a
- *    dismissed reminder is not re-added). A newer real message starts a fresh
- *    episode because its time differs from the stored one.
+ * The reminder is inserted at most once per inactivity episode -
+ * `inactivityReminderInsertedForMessageTime` tracks the "quiet since" message
+ * so a dismissed reminder is not re-added until a newer real message arrives.
  */
 export function shouldInsertInactivityReminder(
   chat: ChatWithMessages,
@@ -39,11 +35,9 @@ export function shouldInsertInactivityReminder(
 }
 
 /**
- * Inserts a local-only `INACTIVITY_REMINDER` message into a single chat when it
- * has been inactive for {@link INACTIVITY_REMINDER_THRESHOLD_MS}. The message is
- * NEVER sent to the server or the other side - it is only added to the local
- * chat state here and rendered as a Vexlbot bubble. Returns `true` when a
- * reminder was inserted.
+ * Inserts a local-only `INACTIVITY_REMINDER` message into a chat that has been
+ * inactive for {@link INACTIVITY_REMINDER_THRESHOLD_MS}. Never sent to the
+ * server or the other side. Returns `true` when a reminder was inserted.
  */
 export const insertInactivityReminderActionAtom = atom(
   null,
@@ -64,8 +58,7 @@ export const insertInactivityReminderActionAtom = atom(
 
     const reminderMessage: ChatMessage = {
       uuid: generateChatMessageId(),
-      // Local-only placeholder text. The bubble and list preview render fixed
-      // localized strings, so this value is never displayed.
+      // never displayed - the bubble and list preview render localized strings
       text: '-',
       messageType: 'INACTIVITY_REMINDER',
       time: currentTime,

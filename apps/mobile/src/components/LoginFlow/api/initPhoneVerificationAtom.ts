@@ -170,9 +170,7 @@ export const initPhoneVerificationAtom = atom(
       Effect.catchAll((e) => {
         if (isString(e)) return Effect.fail(e)
 
-        // Offline (transport-level RequestError) is a user-side condition, not
-        // an app fault - don't report it to Sentry. Other RequestError reasons
-        // ('Encode'/'InvalidUrl') are app-side bugs and are still reported.
+        // Don't report offline (transport-level RequestError) to Sentry
         if (!(e._tag === 'RequestError' && e.reason === 'Transport')) {
           reportError(
             'error',

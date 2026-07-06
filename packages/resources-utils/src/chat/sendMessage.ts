@@ -83,10 +83,8 @@ export default function sendMessage({
   | ParseResult.ParseError
 > {
   return Effect.gen(function* (_) {
-    // INACTIVITY_REMINDER is a local-only message used to nudge the user to
-    // clean up inactive chats. It must NEVER be sent to the server or the other
-    // side. Guarding here (in addition to never calling this function with it)
-    // also narrows `message.messageType` to the handled, sendable types below.
+    // INACTIVITY_REMINDER is local-only and must never be sent. The guard also
+    // narrows `message.messageType` to the sendable types below.
     if (message.messageType === 'INACTIVITY_REMINDER') {
       return yield* _(
         Effect.die(

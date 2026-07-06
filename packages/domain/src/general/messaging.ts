@@ -40,9 +40,8 @@ export const MessageType = Schema.Literal(
   'VERSION_UPDATE',
   'FCM_CYPHER_UPDATE',
   'MESSAGE_READ',
-  // Local-only message. It is inserted into the chat thread on the client to
-  // nudge the user to clean up a chat that has been inactive for a while. It
-  // MUST NEVER be sent to the server or the other side - it is purely local.
+  // Local-only nudge to clean up an inactive chat. MUST NEVER be sent to the
+  // server or the other side.
   'INACTIVITY_REMINDER'
 )
 export type MessageType = typeof MessageType.Type
@@ -219,9 +218,8 @@ export const Chat = Schema.Struct({
   otherSideVexlToken: Schema.optional(VexlNotificationToken),
   lastReportedVexlToken: Schema.optional(VexlNotificationToken),
   lastReadByOtherSide: Schema.optional(UnixMilliseconds),
-  // Time of the last real message for which a local `INACTIVITY_REMINDER` was
-  // already inserted. Used to make sure the reminder is inserted at most once
-  // per inactivity episode - a newer real message starts a fresh episode.
+  // Time of the last real message for which an INACTIVITY_REMINDER was already
+  // inserted - ensures the reminder is inserted at most once per episode.
   inactivityReminderInsertedForMessageTime: Schema.optional(UnixMilliseconds),
 })
 export type Chat = typeof Chat.Type

@@ -183,9 +183,7 @@ export const reportOfferActionAtom = atom(
       Effect.catchAll((e) => {
         set(loadingOverlayDisplayedAtom, false)
 
-        // RequestError (offline) is excluded on purpose - it's a user-side
-        // condition, not an app fault, so we don't report it to Sentry.
-        // toCommonErrorMessage maps it to the network-error message below.
+        // RequestError (offline) is excluded on purpose - not reported to Sentry
         if (
           e._tag === 'NotFoundError' ||
           e._tag === 'UnauthorizedError' ||

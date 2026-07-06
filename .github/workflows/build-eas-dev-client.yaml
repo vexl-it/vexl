@@ -25,6 +25,8 @@ jobs:
     name: Build dev client
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
@@ -52,7 +54,14 @@ jobs:
         working-directory: apps/mobile
       - name: Build iOS on EAS and submit to TestFlight
         if: inputs.platform == 'all' || inputs.platform == 'ios'
-        run: eas build --platform ios --profile development --auto-submit-with-profile staging --non-interactive --no-wait
+        # --no-wait keeps runner minutes low; the echoed dashboard link is
+        # where to check build/submission status.
+        run: |
+          eas build --platform ios --profile development --auto-submit-with-profile staging --non-interactive --no-wait --json > build-ios.json
+          BUILD_ID="$(jq -r 'if type == "array" then .[0].id else .id end' build-ios.json)"
+          BUILD_URL="https://expo.dev/accounts/vexlit/projects/vexl/builds/${BUILD_ID}"
+          echo "iOS build queued: ${BUILD_URL}"
+          echo "iOS build queued (auto-submits to TestFlight when it finishes): [${BUILD_ID}](${BUILD_URL})" >> "$GITHUB_STEP_SUMMARY"
         working-directory: apps/mobile
       - name: Build Android APK on EAS and download it
         if: inputs.platform == 'all' || inputs.platform == 'android'
@@ -60,7 +69,7 @@ jobs:
           eas build --platform android --profile development --non-interactive --wait --json > build.json
           APK_URL="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' build.json)"
           test "$APK_URL" != "null"
-          curl -L "$APK_URL" -o vexl-dev-client.apk
+          curl -fL --retry 3 "$APK_URL" -o vexl-dev-client.apk
         working-directory: apps/mobile
       - name: Upload dev client APK
         if: inputs.platform == 'all' || inputs.platform == 'android'

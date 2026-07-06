@@ -20,6 +20,7 @@
     },
     "development": {
       "developmentClient": true,
+      "distribution": "store",
       "android": {
         "credentialsSource": "remote",
         "buildType": "apk",

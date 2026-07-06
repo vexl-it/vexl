@@ -1,0 +1,289 @@
+{
+  "metadata": {
+    "description": "Crypto test vectors for the iOS Notification Service Extension (NSE). They pin the wire formats of the reference TypeScript implementation in packages/cryptography so a Swift implementation can be validated against it. NOTE: chat messages on the wire are encrypted with eciesLegacy (see packages/resources-utils/src/chat/utils/chatCrypto.ts -> eciesLegacyEncrypt/Decrypt), while eciesGTM is used for notification token cyphers.",
+    "generator": "packages/cryptography/src/testVectors/generateNseTestVectors.ts (pnpm generate:nse-vectors)",
+    "curve": "secp256k1 (all vectors; the app also supports legacy secp224r1 keys which are out of scope for the NSE)",
+    "keyFormats": {
+      "privateKeyPemBase64": "base64 (standard, padded) of the full PEM text of a PKCS#8 \"BEGIN PRIVATE KEY\" EC private key (this is the PrivateKeyHolder.privateKeyPemBase64 field). NOTE: the DER OCTET STRING scalar has leading zero bytes STRIPPED (~1/256 real keys are shorter than 32 bytes) - decoders must left-pad to 32 bytes (pinned by the key4-leading-zero-* key)",
+      "publicKeyPemBase64": "base64 (standard, padded) of the full PEM text of an SPKI \"BEGIN PUBLIC KEY\" EC public key (this is the PrivateKeyHolder.publicKeyPemBase64 field)",
+      "privateKeyRawHex": "32-byte big-endian scalar, lowercase hex",
+      "publicKeyRawUncompressedHex": "uncompressed SEC1 point 0x04 || X(32) || Y(32), 65 bytes, lowercase hex"
+    },
+    "eciesGTM": {
+      "usedFor": "notification token cyphers (NOT chat messages; chat messages use eciesLegacy)",
+      "payloadFormat": "'000' '.' base64(ciphertext) '.' base64(hmac) '.' base64(ephemeralPublicKey) '.' base64(gcmAuthTag) - a single ASCII string joined by dots",
+      "versionPrefix": "3-digit zero-padded decimal of (version - 1); current version is 1 so the prefix is literally '000'",
+      "sharedSecret": "ECDH over secp256k1 between the ephemeral private key and the recipient public key; the shared secret is the 32-byte big-endian X coordinate of the resulting point (Node crypto ECDH.computeSecret semantics)",
+      "cipherKeyAndIv": "PBKDF2-HMAC-SHA1(password = sharedSecret, salt = 'vexlvexl' (utf8), iterations = 2000, dkLen = 44); AES key = bytes [0, 32), GCM IV = bytes [32, 44) (12 bytes)",
+      "cipher": "AES-256-GCM, 12-byte IV, 16-byte auth tag, no AAD",
+      "hmac": "HMAC-SHA256 keyed with PBKDF2-HMAC-SHA256(password = sharedSecret, salt = 'vexlvexl' (utf8), iterations = 2000, dkLen = 108) bytes [44, 108) (64 bytes); the HMAC input is the ASCII bytes of the base64 ciphertext string (NOT the raw ciphertext bytes); MAC must be checked before decrypting",
+      "ephemeralPublicKey": "uncompressed SEC1 point (0x04 || X || Y, 65 bytes), base64 encoded",
+      "base64": "standard alphabet (+/) with = padding everywhere",
+      "emptyPlaintext": "NOT decryptable: an empty plaintext produces an empty ciphertext segment which the reference parser rejects with \"Bad data\" - implementations must fail gracefully on it"
+    },
+    "eciesLegacy": {
+      "usedFor": "chat messages on the wire (packages/resources-utils/src/chat/utils/chatCrypto.ts). This is the scheme the NSE needs to decrypt chat message previews.",
+      "payloadFormat": "concatenation of three length-prefixed parts, each encoded as <base64Length>A<base64> where <base64Length> is the decimal character count of the base64 string and 'A' is a literal separator; part order: ciphertext, hmac, ephemeralPublicKey",
+      "sharedSecret": "ECDH over secp256k1 between the ephemeral private key and the recipient public key; the shared secret is the 32-byte big-endian X coordinate of the resulting point (Node crypto ECDH.computeSecret semantics)",
+      "cipherKeyAndIv": "PBKDF2-HMAC-SHA1(password = sharedSecret, salt = 'vexlvexl' (utf8), iterations = 2000, dkLen = 108); AES key = bytes [0, 32); CTR IV (16 bytes) = bytes [32, 44) || 0x00 0x00 0x00 0x02",
+      "cipher": "AES-256-CTR with the 16-byte IV described above",
+      "hmac": "HMAC-SHA256 keyed with PBKDF2-HMAC-SHA256(password = sharedSecret, salt = 'vexlvexl' (utf8), iterations = 2000, dkLen = 108) bytes [44, 108) (64 bytes); the HMAC input is the ASCII bytes of the base64 ciphertext string; MAC must be checked before decrypting",
+      "ephemeralPublicKey": "uncompressed SEC1 point (0x04 || X || Y, 65 bytes), base64 encoded",
+      "base64": "standard alphabet (+/) with = padding everywhere",
+      "trailingZeroBytes": "after decryption the reference implementation strips ALL trailing 0x00 bytes from the plaintext (removeEmptyBytesAtTheEnd) before utf8-decoding; Swift must do the same for byte-exact parity"
+    },
+    "ecdsa": {
+      "hash": "SHA-256 over the UTF-8 bytes of the challenge string",
+      "signatureEncoding": "ASN.1 DER SEQUENCE of two INTEGERs (r, s), base64 encoded (standard alphabet, padded). The signer trims the byte buffer to the length declared in the DER header before base64-encoding; verifiers must accept plain DER. Signatures are NOT low-s normalized (OpenSSL default).",
+      "keys": "privateKey / publicKey fields use the same PEM-base64 encodings as the keys block"
+    }
+  },
+  "keys": [
+    {
+      "id": "key1",
+      "curve": "secp256k1",
+      "privateKeyPemBase64": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKeyPemBase64": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "privateKeyRawHex": "0268f5a281c23d124d5ef35476b2d764d54961712af7e3703b33e129930bbdb2",
+      "publicKeyRawUncompressedHex": "04174aac3691dc392fe9ef8cc3ee97346f9a2cd2b32c53cd6a2a201f1052066943e77ee3fd250e6591a3d34aff0c3c7787643d31875aeb373064e2e7c9a495499d"
+    },
+    {
+      "id": "key2",
+      "curve": "secp256k1",
+      "privateKeyPemBase64": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnWnJDK1JxSjBpQ1hwVi9VbFAzSHAKZ3pNOE8ySCtHeGhQbkt0M2s3cldtT0NoUkFOQ0FBUUtEMjR3eHo2UVJkNm0yeVpvRXlPT2ZkQmtULzVNQ1dZVgpnYTlOS1pIaXpTdkIyVDA1WnVSZDFlSEYxdzdvVkJIbGhVZ1VndGp0UkN1ZzFNREpuNVhvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKeyPemBase64": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVDZzl1TU1jK2tFWGVwdHNtYUJNampuM1FaRS8rVEFsbQpGWUd2VFNtUjRzMHJ3ZGs5T1dia1hkWGh4ZGNPNkZRUjVZVklGSUxZN1VRcm9OVEF5WitWNkE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "privateKeyRawHex": "66b0be46a2748825e957f5253f71e983333c3b61fe1b184f9cab7793bad698e0",
+      "publicKeyRawUncompressedHex": "040a0f6e30c73e9045dea6db266813238e7dd0644ffe4c09661581af4d2991e2cd2bc1d93d3966e45dd5e1c5d70ee85411e585481482d8ed442ba0d4c0c99f95e8"
+    },
+    {
+      "id": "key3",
+      "curve": "secp256k1",
+      "privateKeyPemBase64": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnR05GaDRhZzFQV0lRbm5mUm1MM3QKTVhmT1QwV0RaWUtqc0QwVGVEZGc2d3VoUkFOQ0FBVHF4OVFUY2ZBWVJFUVE3MlJqZWxwMXk2RTgyMDV1U1B4TgorSG91VXY5S29iRzJUS2xhUm9xZU4wdjlwdGl3WlUrdTYraWlYSVNWemZiL0d1M0doWjE1Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKeyPemBase64": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUU2c2ZVRTNId0dFUkVFTzlrWTNwYWRjdWhQTnRPYmtqOApUZmg2TGxML1NxR3h0a3lwV2thS25qZEwvYWJZc0dWUHJ1dm9vbHlFbGMzMi94cnR4b1dkZVE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "privateKeyRawHex": "18d161e1a8353d62109e77d198bded3177ce4f45836582a3b03d13783760eb0b",
+      "publicKeyRawUncompressedHex": "04eac7d41371f018444410ef64637a5a75cba13cdb4e6e48fc4df87a2e52ff4aa1b1b64ca95a468a9e374bfda6d8b0654faeebe8a25c8495cdf6ff1aedc6859d79"
+    },
+    {
+      "id": "key4-leading-zero-109",
+      "curve": "secp256k1",
+      "privateKeyPemBase64": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0RBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkd3d2FnSUJBUVFmbFlkbnkvcjBuWkMxcjNPeUtDTUoKcnNwbmdyVm4wVWpINW1lSjFLMmwzYUZFQTBJQUJQbXBZS0k5ZmhKU0RoRFdWOHl0SnVtcGNKT2MzUVFzcDFZYQpGazZtVHk4R2IwWEdNdTE4YWZpTUZiczVLSWNobzVjRDBnRGs5SFljcUsxMHU0QlFUSXM9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKeyPemBase64": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUUrYWxnb2oxK0VsSU9FTlpYekswbTZhbHdrNXpkQkN5bgpWaG9XVHFaUEx3WnZSY1l5N1h4cCtJd1Z1emtvaHlHamx3UFNBT1QwZGh5b3JYUzdnRkJNaXc9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "privateKeyRawHex": "00958767cbfaf49d90b5af73b2282309aeca6782b567d148c7e66789d4ada5dd",
+      "publicKeyRawUncompressedHex": "04f9a960a23d7e12520e10d657ccad26e9a970939cdd042ca7561a164ea64f2f066f45c632ed7c69f88c15bb39288721a39703d200e4f4761ca8ad74bb80504c8b"
+    }
+  ],
+  "eciesGTMDecrypt": [
+    {
+      "id": "gtm-emptyString",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000..+AscciY8z67vrcf0NQHGdb+NMqIAmou5ZjJEEdz7qbc=.BOYcZoP421xN5UqGm4oAClpD8M17U0luAimlhUvsNBbj4VYCHGGb1jHHnUO2hQQN4RIXkQ4XsTSCnQftCHcG4kI=.LP7pxAixnVHX9kRvka+CBA==",
+      "expectedPlaintext": "",
+      "valid": false,
+      "note": "Reference TS parser rejects the empty ciphertext segment (\"Bad data\"). Decryption must fail gracefully."
+    },
+    {
+      "id": "gtm-shortAscii",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000.IMjDcMBsStDCal8=.fdoPa0O+uxmSa6zPAiSdYZ6T1K6kVLpgCsu/m7RMqK0=.BKwMPVA0tQiWVbK5acfpgv1xghs0jrFz6yQw0nJ5WSMpNcgLKd2erhCe/zhY9eARUEyRzXjbg36mdYbYyD2vKNk=.riQAf/v1/bIPy/jiJ/GqAw==",
+      "expectedPlaintext": "Hello Vexl!",
+      "valid": true
+    },
+    {
+      "id": "gtm-longUnicode",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000.dl+BT0soKfa10dEwxXN7GIq2GMVZMz44o9nHDwsRpS/kMch9yae615XLUbZR/EA09TCfGQQoBBrg3AuCW8N0rVnwb5s+/48mRpstRKnRbkyrPPKbpmJd+nl7e0uskIOLZpZzrvd8emWp+tYrQuFxb2fR+S0jO3IOliM4SgN2IQPXK4dst9QflN2bLMyFhVwi0OQlXnn4tm+Tbft3X4t2TPaRcmSm0WCGOxD8wCXy+EgHrMeK4X1pO4vQpfDWNgu3MuBsfFu9G61klgSLd0gIfB0GAT9DQxK/Sgh0TbKkvZ7KCeeoPhMK/JQZDUU9//cOxychPNDChKQxKKfN6SOmkyD/WkM3vhLMv8Ddz2MwJrYpgJqMgdPZ27T7m58ZEvk3xIHuKCuNLPjZJM70iN/xTDyawBH06AFZFPWVITdt2E3KM1zAt5htzA7yHczoAzWkd1XiA9xo6DOrzAsC4piSw/a3DWECPAO5n/rkwB48KqnWEf1W9jkv43pxkFnV+dcB7xNk9C8LhNFHE9kTK0z48x7m5EA4SdPyvZGHMrF7+zeJ70ogOrWwraYp0iJeiwfEaj6l4Wm7g59WeBQDQj6znAq2JcjuejzKVksb+4r1vYv9/eAC26BjnjX5oDkmxmx7pJeGUiYFadY2pCDuqumTTrM+7IQo0BR8CB/Znddv3vMkgs94zm8IY/IfjgUQg/aOHidDvyWdZKY0HWo7o3QamQHIPUeAzNaerVTEbIs7QtpaUA8aKBb8VCm+2eEsFGTEt+i0HfdI5gzoRQVJccSU2GY5DIWljhTB3huDqCO8xGzn/o3sjw1KxrNZiU2ftzXDKzOF/DjgwbixxG9IwGLGMQ05o3/ymis+N5piiBI+dvOdVb7UNldBEpyjtwX5Xigd3ufcbX1TCgIrN3bG4xn7m+KsDOub+xG7GjlLOGUrCwQ2oJh3XNY6Qos9F9sF1ZnfXQFUAZlxKPV3eoV2xBNuhPTkDOZvEMT4a7WsZOyRUyr2p7B8xivPjWvRDKPKECtmedImzTBVgFwFoj8cIlkfc5UD2b8DyRaE1fOl3Ys5gRaqG4McHMWMlVQ01QLUr1ei42KOo8IwgLntVWZ0+hf0pIkdxF8a0RK8VzREZM+DS7VWi3+XyJjdHFGjkQg7Ifif59WCDAdlMnzspTkgcGtOySVwA2loGBAyCy4cSq/6Q5p/oNGkNu23ZVDC4MjFsSY2UyA184jxnTczLTJ3Vxxo56lXejxNXiBeJUQec6PjtOYBNCxzA6kKWYW0EfZBrpzh3cbVL4XybF5TOWT+LrR8j16Jj1mxVnKhztF76QkO/g5AdILC+kpkpKgb7XBAidb0855W8kUfP8oXx3qrkc0+qJsj/lZ/Gb9XqaUIx/GUrwOw8eIzAVGYw45nBeSgNxqaTWYMa0lk8C7OtMMEz9XyHD0DO8eZuopv4iMy57Y8cTdJnTFuuEpc6nHWPm/Tsk6tcHJBZC7Fg75kv3BVLzJoK3zqG5RThNx/1d6iT2Hx85/NSuucKyPw1KLhq5pMQ62olUyY/d08O0GLjRhF2DmEgrKQ1ovdf+tk5S2GnKRcm0Nh6D5UHpAuqm4rnw/5Wk5wqrxYkyL81HccJ5Q/tCn6rKZNUrrDViHb2QQc06tx9KsO+oGD0dfgTDexj8SaVqfRgb5ndJB1cdUXDfzlHeRixLUHNew/dRghmRW9TgwyfcCxPWEBtxT326q9k9+kKCzpDMozoptv1Liltrb/eydPUYBwAgjJuXQ1UaWEHZTd+cs4Vmt2mUJH+fT4jKVLHzbHMML8NzXB+JUp9xdFpDL7DhazW5azdnLOT87z+Kig+p7JWhaCT+RdZpb6uUr08+1oihoh44WKUU1kntWqfsWWMtP47VEhzaibO8NkrWbLjvsjv9MotquJlVw6qKh6WLeAyFpb2NWcf4yEZktXy691aV6aD+DtdmoYfc8YLuXu/oM1ibS0BiLKq6dd6k8gb85NfG7zfihBqr4KiKw7uoLdmA75G09tgFeqpRetxRECZu8ZNGUyFSxQCr1MPX1nA1RxThwOs5qFEulGJC0hm5oB7TXxQEt3jP5tTgQg/EraW4pXRsZbnH+Q60r7BqJSUUwH+HzMDvRO9/zm06FBPxK25WapoNpROxiyF0rTphzfb/koIpJEUHRfY1JKDqprME/4rkEWDXmHoyNsNPrPlYrL8M03+xaan1GCBrfJ2gUwfDb86B6YtRabQ/4QbQjtjJrlIbexrYA2TumDdCM/moaRUbHZ5Hu6dLyQI/Bc9AYONNyv+xj+M0vChWHB2s+aErbN4RG/oZqSSel8bsVdjY8TLnBLG9mJbrINOyeMM8buP7rLOm4jfa284h0JYhFIhL9MRqgF2ZiscaHo0PtOYHeV+BQJHQ3prBhyttTFFcd5rrT39t33b5qmiTW2onw6fmyj66p5eMQOGABIk4fsumsnscJeOafgWxyzGJl5saE8f3trMcRaAuCHnCIwwtZ7TEfAQnrFJLXIBPLmR2A48Hx9Sud6IpB+ZPgkE2UmeCqAJ0TmsYtEq3ICKM1tdXPLchhgs3PKipHC/tjkXR+Mu/FQCfkVmelIsIXb+N2SjiSo6C9UFomizaQlcaNH20xESaJZ3bHGE/IO62S3Yxs+QQJv4tzBTLvBPVC4y+3n9vj/dpqFgBEIoXfzHDr66st8Hy8E.TjDW1JmckfvpghL9zdaZ+kGlYTrXCZ/tswoba+gnegI=.BKJ/qKn/DF6NokVH2NGMmJTKjLir8hmx52Am6ZjNlppYnHnhWkhfL3v/cIiWBYhpwz0eMrnyPJ/gz800C0dK5V0=.DszxAv/14GyOwoacXQxkEg==",
+      "expectedPlaintext": "Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם ",
+      "valid": true
+    },
+    {
+      "id": "gtm-chatMessageJson",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000.ZDc/hzn46pZN9qd3mi0z/C+74r99/lZymUrNwLO6xg8o85Zve2jwW4M62UV20UdU9gWvnXSoC34dVpbsMk98gpe+3QnIgdLve0DDuAePih3cNQwDgD8flGI4QlliO4zufF7SNCOCB+UVJ0lPvpSJ0V2g93OnuqmE7fdRtI1nmtXsnjWyb3YCq0HRaaRJzSJhvWbG55Bk39ar4EA8e08BGGOKtZx2j+YWyRhISVo1RQHNebrPzoL7iMPqO7h5uPWYcOXjEfRMqj+o5I+WnpdQvynfSEaLabm4b613GeXFtQKUUwTytNs8sKxbRjq2DI4O28rAO545Q85uwS5KF990CHy1lV+JI4M=.ULI/4po9UZgYCaoYihyDhGrqRlLftBisOJA4UDuLL3A=.BJjmU3n2Barxwj3OLjkIMxclM3hbxNoIxBQTWvRQm9Cvp9SydGI/O69zQ2zueNDgQF8KIATKPA46hm/RG/3QrWI=.O1HjvrxufDkejU6Z2LaD4A==",
+      "expectedPlaintext": "{\"uuid\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\"text\":\"Ahoj! Are we still on for tomorrow at 18:30? 🤝₿\",\"time\":1751808000000,\"messageType\":\"MESSAGE\",\"myVersion\":\"1.44.0\",\"lastReceivedVersion\":\"1.43.1\",\"myVexlToken\":\"vexl_nt_3J5j2mYQF3v8mS1kWq0dQgZk9t2yBcE4\"}",
+      "valid": true
+    },
+    {
+      "id": "gtm-chatMessageJsonOlder",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000.Hqc7otB5/ZAIjMQhMknDUClG/WccejYD1UyZd2kD0Yf/SWbNdYIuRHpw8kZMhSgnLK+R6DdZgzcoVTva/F86fLDJKBfkwGfNa4myRYc0xi+eFkpW7d9xqprQ93liNfniDJJi/9cRkLRgnJL0+dc+f+Mb4qJE2Dcreo+W56Q1HpPK0r+hP9CNEWjCh5asEbDw1FIHSXqhYDLKj8q75uO9B07VE01BMVCbIgs1qjiGrCaCmw==.lPA6/ZYmQYtuC4Nm1ZGRE91Yvvi8BatdViii/Q+yBhU=.BLTWyB0o0iaU2PQcVmF6B7xBJusRJJcum1t1FIMHz1OaPpPEicXLE0D9ADxU38ZkwiT3HfGpjBj45/00C+57dJ0=.SN+u380qsHPcImqK7WiA3A==",
+      "expectedPlaintext": "{\"uuid\":\"9b2d5c1e-7f3a-4d08-9c66-1a2b3c4d5e6f\",\"text\":\"Older message - must only preview for its own push 🙂\",\"time\":1751704000000,\"messageType\":\"MESSAGE\",\"myVersion\":\"1.44.0\"}",
+      "valid": true
+    },
+    {
+      "id": "gtm-tampered-ciphertext",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000.aEPL4Pxw0YqvMlk=.1aJygLXJNjbG/I7kbEitA1lfa70vJSCMIYx5Xl88BOM=.BJdk+U3tgTpRcw5fkoeLmvQRup7IBdz9CUCOyEz5AAIC69tqGMFTOjNKttykCdBe3nugc/k4mH6ycOI3GkVeh8w=.dtgwozIBB8p5sNbCdephDw==",
+      "expectedPlaintext": "Hello Vexl!",
+      "valid": false,
+      "note": "Ciphertext bytes were tampered with after encryption. MAC check must fail."
+    },
+    {
+      "id": "gtm-wrong-recipient-key",
+      "keyId": "key2",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnWnJDK1JxSjBpQ1hwVi9VbFAzSHAKZ3pNOE8ySCtHeGhQbkt0M2s3cldtT0NoUkFOQ0FBUUtEMjR3eHo2UVJkNm0yeVpvRXlPT2ZkQmtULzVNQ1dZVgpnYTlOS1pIaXpTdkIyVDA1WnVSZDFlSEYxdzdvVkJIbGhVZ1VndGp0UkN1ZzFNREpuNVhvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVDZzl1TU1jK2tFWGVwdHNtYUJNampuM1FaRS8rVEFsbQpGWUd2VFNtUjRzMHJ3ZGs5T1dia1hkWGh4ZGNPNkZRUjVZVklGSUxZN1VRcm9OVEF5WitWNkE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "000.ueGol7Ch0WgXIjM=.FCQ0XNKDMheqbe0oD4JKlnDWNO4KC0NM8U94aHLY708=.BPLMpeBOnD1EFBhtRTJqxf+lXIewf1/xWmpEhmZc4lRG2WtC5J/qyQZ5jpc9b3syt1Z5UKSGp/E6vvcRXy+UODw=.Rz8zFhC5G6Z4YXWDb29t7A==",
+      "expectedPlaintext": "Hello Vexl!",
+      "valid": false,
+      "note": "Ciphertext was encrypted for a different recipient. MAC check must fail."
+    }
+  ],
+  "eciesLegacyDecrypt": [
+    {
+      "id": "legacy-emptyString",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "0A44APtN9vRKAMMa2j2hEKbKeI1oxJLi7FjYaP3Iyl199C8c=88ABMZ9P5cYbVQDl3qiqdhxjfHIlzdp7T4eEPWgcGW6L6L19nPsl0Q3bchemER3oE3gGBvPT0JZASAKRZq+cAdPrx8=",
+      "expectedPlaintext": "",
+      "valid": true
+    },
+    {
+      "id": "legacy-shortAscii",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "16AeWf2zKvXsY4imqg=44AYsv4+c6m51fu5qhPS4jlzVxyDKqumJ1h6ncS+wQo1wk=88ABLqlkCM3LqtOS+URsGO02xKmK2Ohq/RS/jESJakDGZAHbMmyXRbRjlaYZxsitictP20JrlBnOwZkXL80JRVQueM=",
+      "expectedPlaintext": "Hello Vexl!",
+      "valid": true
+    },
+    {
+      "id": "legacy-longUnicode",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "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",
+      "expectedPlaintext": "Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם Dlouhá zpráva s diakritikou: Příliš žluťoučký kůň úpěl ďábelské ódy. Emoji: 🚀🔐₿🤝🇨🇿👍🏻😅🧡 CJK: こんにちは世界、你好世界、안녕하세요 세계。 RTL: مرحبا بالعالم שלום עולם ",
+      "valid": true
+    },
+    {
+      "id": "legacy-chatMessageJson",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "352AyfEZoUxiqkVapS5b7b71CoVc3uGYc8EcKPWkV6xfOAtKuc/U29hUY0poyxlLjJcs2KNAmiWG/W55krNUx9DGHKzGqlOeE8ltwwsyBzQkr4v4bEDLysuqS881fWPbIr8i8nUw46y2NQ09sCKVA6fo8N/JWhZOj9WxQSs6Un316xufmLWRJXfcGTfYI39ggL/diQCJAlBsIABw3wMBH4eRGs3CCqAeNIfz6Beh4DmO6mNmXEkA+ZQCtKXsIWa0Q6kmfKhbk3vP0PJteOtbjekCKfmjQh1tXs19Fu14ynKk28MULgaqXRo5n+vDq9UrJ9MQGaOXMoqLM64oBldNh7MXLrR3M3Vip1U=44A+lHzI5kjujv7mYdEBvg8YvzcKq9mG9ivIfy2dwkKB28=88ABBD2io1AZMnUiUI1RSUYvEVS+dyfqdU7ZP9eAfJNKacBgzCs9LY122KAhNz3oLFAdIH7x0WyphY6ne+Q2pg7auI=",
+      "expectedPlaintext": "{\"uuid\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\"text\":\"Ahoj! Are we still on for tomorrow at 18:30? 🤝₿\",\"time\":1751808000000,\"messageType\":\"MESSAGE\",\"myVersion\":\"1.44.0\",\"lastReceivedVersion\":\"1.43.1\",\"myVexlToken\":\"vexl_nt_3J5j2mYQF3v8mS1kWq0dQgZk9t2yBcE4\"}",
+      "valid": true
+    },
+    {
+      "id": "legacy-chatMessageJsonOlder",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "240Afas23LC3/unY00atm6Tu35lQ7+CnAIGNmkxSCjfuTj+WqOn4OXOjZpjaNG/TjFS7w0pH8zFMqY10AprlnIb39Lz1IP8ygKzGZ2/DMh1f2g2iVqcQ3BAWP0Ss3ZVqwxrt2hv8GEmquOOXKtpyBOnzn7hhujpUhXunkLZam0HWxVSdzfzpcUiNPP/75EGLsIDYabMnOcmbdRQWATsuDfeSunn4b33NGxdrL0ym5ikJxYQaEw==44A/j/aNT2r2UQreg8Yd/k66RVqmVM5gDI49H/TWlIlpkc=88ABLp8+5qv/zseUKtQoQOfZWNOv+GxNdp/Vz61BwLwbzppa1W7EZMx6LJgNczZbca1WFyUzBxCGCa9E4aYu9duKvs=",
+      "expectedPlaintext": "{\"uuid\":\"9b2d5c1e-7f3a-4d08-9c66-1a2b3c4d5e6f\",\"text\":\"Older message - must only preview for its own push 🙂\",\"time\":1751704000000,\"messageType\":\"MESSAGE\",\"myVersion\":\"1.44.0\"}",
+      "valid": true
+    },
+    {
+      "id": "legacy-tampered-ciphertext",
+      "keyId": "key1",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "16AFpk+XSMH3GUpJgM=44ASrtujeeKZ2Xu45cYMSboJZMMmkMQvhb67ZHK6zIhWb0=88ABF8bAzq075++477f9dcJfkEE6Bedb6+E8CbOZiOPR0m2S4c1nHtPSHk5C3lOBjIbuwIXIeOhk7aE0XbRUd9ndWQ=",
+      "expectedPlaintext": "Hello Vexl!",
+      "valid": false,
+      "note": "Ciphertext bytes were tampered with after encryption. MAC check must fail."
+    },
+    {
+      "id": "legacy-wrong-recipient-key",
+      "keyId": "key3",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnR05GaDRhZzFQV0lRbm5mUm1MM3QKTVhmT1QwV0RaWUtqc0QwVGVEZGc2d3VoUkFOQ0FBVHF4OVFUY2ZBWVJFUVE3MlJqZWxwMXk2RTgyMDV1U1B4TgorSG91VXY5S29iRzJUS2xhUm9xZU4wdjlwdGl3WlUrdTYraWlYSVNWemZiL0d1M0doWjE1Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUU2c2ZVRTNId0dFUkVFTzlrWTNwYWRjdWhQTnRPYmtqOApUZmg2TGxML1NxR3h0a3lwV2thS25qZEwvYWJZc0dWUHJ1dm9vbHlFbGMzMi94cnR4b1dkZVE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "16Aaqh48TM/kYSKO/0=44AkiEw5YZMiP9ytKSUBzx01SwFB3nhzC+j51MBFgiP51k=88ABNRqkTX86mmcGXSlHp+jor4dU5t1dTl7EWORQw+WaWH8C6DcpmKckf63qQ0Pz+Ezu/HJIk38U7iu+l2+cLZIA2s=",
+      "expectedPlaintext": "Hello Vexl!",
+      "valid": false,
+      "note": "Ciphertext was encrypted for a different recipient. MAC check must fail."
+    },
+    {
+      "id": "legacy-leading-zero-scalar-key",
+      "keyId": "key4-leading-zero-109",
+      "recipientPrivateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0RBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkd3d2FnSUJBUVFmbFlkbnkvcjBuWkMxcjNPeUtDTUoKcnNwbmdyVm4wVWpINW1lSjFLMmwzYUZFQTBJQUJQbXBZS0k5ZmhKU0RoRFdWOHl0SnVtcGNKT2MzUVFzcDFZYQpGazZtVHk4R2IwWEdNdTE4YWZpTUZiczVLSWNobzVjRDBnRGs5SFljcUsxMHU0QlFUSXM9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "recipientPublicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUUrYWxnb2oxK0VsSU9FTlpYekswbTZhbHdrNXpkQkN5bgpWaG9XVHFaUEx3WnZSY1l5N1h4cCtJd1Z1emtvaHlHamx3UFNBT1QwZGh5b3JYUzdnRkJNaXc9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "ciphertext": "352A8dZDf5WKzlqRFDD7KZCC72pOijAACB6OP03C+wOfa0hnCLWZGcbe44afDjZdEcbs0Z8S7kz6xPMqNYDM2ZKBShM8TqgpyGYpEseL5GfZumpxHd1ni/QxeFZwtI2ViGjlX/rNcKaEM5PC7rqBPC8mVkxc0fz9FPCczzAit/1NwwyRgbnB8Y1ysMq+Qg/bD5fxX4JscQD5kGTvQbw+hbaFA5RB/p6fCr9iRfqbEoq8ZTnL+RD51b/0KBtE4zU1JXKjeaYh9V/tHAFL7AuttXtRi79jP+sghOXfoZaRvJJn2l7r9pglE+W2Ek1Cx1ZZRDu6I8n/zbeijYSoZaMCoDhzLoXv+92bAtQ=44AaZF00Nhvj83AMBNRLu/XbuZ/o6k2U4AGaD2MWlUA0MM=88ABK1U9WFFAvzpprHrBEWGPBXaGppcDkSJD/YprAZ2vxie5s7E4dJaEZmDUAh9iuZDqwzHq1zNKp028/mgRFubWyo=",
+      "expectedPlaintext": "{\"uuid\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\"text\":\"Ahoj! Are we still on for tomorrow at 18:30? 🤝₿\",\"time\":1751808000000,\"messageType\":\"MESSAGE\",\"myVersion\":\"1.44.0\",\"lastReceivedVersion\":\"1.43.1\",\"myVexlToken\":\"vexl_nt_3J5j2mYQF3v8mS1kWq0dQgZk9t2yBcE4\"}",
+      "valid": true,
+      "note": "The recipient/signer private scalar starts with 0x00, so its PEM DER stores a stripped 31-byte OCTET STRING scalar. Decoders must left-pad it back to 32 bytes before use."
+    }
+  ],
+  "ecdsaVerify": [
+    {
+      "id": "ecdsa-valid-1",
+      "keyId": "key1",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "O/xqkjuyO2WLe9ccc03SR1hAjvphNbtT+f9xUqodIKc=",
+      "signature": "MEUCIQCO9os2kMZyHXA6DENnWlmg8VFDWuh8K5GLV3/AqiJcWAIgBoy9WJhhfmJOWqmdHqVIkN8vbT/9e6VaedWK4PZt+Jw=",
+      "valid": true
+    },
+    {
+      "id": "ecdsa-valid-2",
+      "keyId": "key2",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnWnJDK1JxSjBpQ1hwVi9VbFAzSHAKZ3pNOE8ySCtHeGhQbkt0M2s3cldtT0NoUkFOQ0FBUUtEMjR3eHo2UVJkNm0yeVpvRXlPT2ZkQmtULzVNQ1dZVgpnYTlOS1pIaXpTdkIyVDA1WnVSZDFlSEYxdzdvVkJIbGhVZ1VndGp0UkN1ZzFNREpuNVhvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVDZzl1TU1jK2tFWGVwdHNtYUJNampuM1FaRS8rVEFsbQpGWUd2VFNtUjRzMHJ3ZGs5T1dia1hkWGh4ZGNPNkZRUjVZVklGSUxZN1VRcm9OVEF5WitWNkE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "y5nJ/Mb2o6QgARg8z1y4OIjCIO78WGpoW25AGnsn6eA=",
+      "signature": "MEQCIBHcIpZis3kNH02yTUQ8S/YxCGrqyZvLUVuPQLMcG6B0AiBAJ4ioyTlFqk7M+XLtQjS5ma+7CLyxu0O9p6yLm66c4Q==",
+      "valid": true
+    },
+    {
+      "id": "ecdsa-valid-3",
+      "keyId": "key1",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "LDhggeU041I/Bpe9wvzbDO+uUV5dyxpjfm8Msc/UKYI=",
+      "signature": "MEUCIArb3SFIehlDX/Qky9jnt7TnPTDu47ZOf5mT1W46DlgXAiEA0qmI4H+98fGbfRWEeSlEGodh20KbGLwlrIFdmbvbtR0=",
+      "valid": true
+    },
+    {
+      "id": "ecdsa-tampered-message",
+      "keyId": "key1",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "qDUN0dQSRWMgpMKlDFuRtQz+A3hVqJERa9EpnN3gSjs=",
+      "signature": "MEUCIQCO9os2kMZyHXA6DENnWlmg8VFDWuh8K5GLV3/AqiJcWAIgBoy9WJhhfmJOWqmdHqVIkN8vbT/9e6VaedWK4PZt+Jw=",
+      "valid": false,
+      "note": "Signature was created over a different message."
+    },
+    {
+      "id": "ecdsa-tampered-signature",
+      "keyId": "key1",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnQW1qMW9vSENQUkpOWHZOVWRyTFgKWk5WSllYRXE5K053T3pQaEtaTUx2YktoUkFOQ0FBUVhTcXcya2R3NUwrbnZqTVB1bHpSdm1pelNzeXhUeldvcQpJQjhRVWdacFErZCs0LzBsRG1XUm85Tksvd3c4ZDRka1BUR0hXdXMzTUdUaTU4bWtsVW1kCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVGMHFzTnBIY09TL3A3NHpEN3BjMGI1b3Mwck1zVTgxcQpLaUFmRUZJR2FVUG5mdVA5SlE1bGthUFRTdjhNUEhlSFpEMHhoMXJyTnpCazR1ZkpwSlZKblE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "O/xqkjuyO2WLe9ccc03SR1hAjvphNbtT+f9xUqodIKc=",
+      "signature": "MEUCIQCOCYs2kMZyHXA6DENnWlmg8VFDWuh8K5GLV3/AqiJcWAIgBoy9WJhhfmJOWqmdHqVIkN8vbT/9e6VaedWK4PZt+Jw=",
+      "valid": false,
+      "note": "One byte of the DER signature (inside r) was flipped."
+    },
+    {
+      "id": "ecdsa-wrong-public-key",
+      "keyId": "key2",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0VBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkcwd2F3SUJBUVFnWnJDK1JxSjBpQ1hwVi9VbFAzSHAKZ3pNOE8ySCtHeGhQbkt0M2s3cldtT0NoUkFOQ0FBUUtEMjR3eHo2UVJkNm0yeVpvRXlPT2ZkQmtULzVNQ1dZVgpnYTlOS1pIaXpTdkIyVDA1WnVSZDFlSEYxdzdvVkJIbGhVZ1VndGp0UkN1ZzFNREpuNVhvCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUVDZzl1TU1jK2tFWGVwdHNtYUJNampuM1FaRS8rVEFsbQpGWUd2VFNtUjRzMHJ3ZGs5T1dia1hkWGh4ZGNPNkZRUjVZVklGSUxZN1VRcm9OVEF5WitWNkE9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "O/xqkjuyO2WLe9ccc03SR1hAjvphNbtT+f9xUqodIKc=",
+      "signature": "MEUCIQCO9os2kMZyHXA6DENnWlmg8VFDWuh8K5GLV3/AqiJcWAIgBoy9WJhhfmJOWqmdHqVIkN8vbT/9e6VaedWK4PZt+Jw=",
+      "valid": false,
+      "note": "Signature was created with a different private key than the public key provided."
+    },
+    {
+      "id": "ecdsa-valid-leading-zero-scalar-key",
+      "keyId": "key4-leading-zero-109",
+      "privateKey": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR0RBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFLQkd3d2FnSUJBUVFmbFlkbnkvcjBuWkMxcjNPeUtDTUoKcnNwbmdyVm4wVWpINW1lSjFLMmwzYUZFQTBJQUJQbXBZS0k5ZmhKU0RoRFdWOHl0SnVtcGNKT2MzUVFzcDFZYQpGazZtVHk4R2IwWEdNdTE4YWZpTUZiczVLSWNobzVjRDBnRGs5SFljcUsxMHU0QlFUSXM9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K",
+      "publicKey": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZZd0VBWUhLb1pJemowQ0FRWUZLNEVFQUFvRFFnQUUrYWxnb2oxK0VsSU9FTlpYekswbTZhbHdrNXpkQkN5bgpWaG9XVHFaUEx3WnZSY1l5N1h4cCtJd1Z1emtvaHlHamx3UFNBT1QwZGh5b3JYUzdnRkJNaXc9PQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K",
+      "message": "cDFlu0PMVx1uKJHGgOhY0jR3pIvUUmDXuA5W0GzVTSQ=",
+      "signature": "MEUCIQCUCef304+TSPMulebsJ0+XJKattdMGnvn1/oeq7kDUBgIgCGwFPvZITbbOs1LpzeeY13Rrh3ArW1ajIIZPjvhgdeE=",
+      "valid": true,
+      "note": "The recipient/signer private scalar starts with 0x00, so its PEM DER stores a stripped 31-byte OCTET STRING scalar. Decoders must left-pad it back to 32 bytes before use."
+    }
+  ]
+}

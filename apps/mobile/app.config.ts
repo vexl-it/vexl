@@ -91,6 +91,8 @@ export default {
     // 'icon': extra.iconV2, // Does not work due to this: https://github.com/expo/expo/issues/39782
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,
+    // Required by @bacons/apple-targets for signing the NSE extension target.
+    'appleTeamId': 'KQNTW88PVA',
     'config': {
       'usesNonExemptEncryption': false,
     },
@@ -101,6 +103,9 @@ export default {
       'CFBundleAllowMixedLocalizations': true,
       'NSLocationWhenInUseUsageDescription':
         'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
+      // App Group shared with the notification service extension (NSE). Read
+      // at runtime by the vexl-nse-bridge local module and the NSE itself.
+      'VexlAppGroup': `group.${extra.packageName}.shared`,
       // 'NSAppTransportSecurity': {'NSAllowsArbitraryLoads': true},
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,
@@ -122,6 +127,12 @@ export default {
     'entitlements': {
       'aps-environment':
         process.env.NODE_ENV === 'development' ? 'development' : 'production',
+      // Shared container + keychain access group for the notification
+      // service extension (targets/vexl-nse). On iOS an app-group id is a
+      // valid keychain access group as-is, so one entitlement covers both.
+      'com.apple.security.application-groups': [
+        `group.${extra.packageName}.shared`,
+      ],
     },
   },
   'android': {
@@ -336,6 +347,14 @@ export default {
         'androidGoogleMapsApiKey': process.env.ANDROID_MAP_API_KEY,
       },
     ],
+    // Links the local VexlNotificationCore Swift package to the VexlNSE
+    // target. MUST stay listed before @bacons/apple-targets: config-plugin
+    // mods run last-registered-first, so apple-targets (which creates the
+    // target) has to execute before this plugin's action can find it.
+    './expo-plugins/with-nse-local-spm.js',
+    // Generates the iOS notification service extension target from
+    // targets/vexl-nse (rich chat notification previews).
+    '@bacons/apple-targets',
   ],
   'extra': {
     'eas': {

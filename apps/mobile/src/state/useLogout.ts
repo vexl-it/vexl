@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications'
 import * as O from 'fp-ts/Option'
 import {atom, useSetAtom} from 'jotai'
 import {useCallback} from 'react'
+import {clear as clearNseBridge} from '../../modules/vexl-nse-bridge'
 import {apiAtom} from '../api'
 import {loadingOverlayDisplayedAtom} from '../components/LoadingOverlayProvider'
 import clearMmkvStorageAndEmptyAtoms from '../utils/clearMmkvStorageAndEmptyAtoms'
@@ -97,6 +98,10 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     // session
     set(sessionAtom, O.none)
 
+    // NSE bridge (inbox keys + metadata shared with the iOS notification
+    // service extension)
+    await failSilently(clearNseBridge())
+
     // Local storage
     clearMmkvStorageAndEmptyAtoms()
 
@@ -109,6 +114,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
     reportError('error', new Error('Critical error while logging out'), {e})
 
     set(sessionAtom, O.none)
+    await failSilently(clearNseBridge())
     clearMmkvStorageAndEmptyAtoms()
     await failSilently(Notifications.unregisterForNotificationsAsync())
   } finally {

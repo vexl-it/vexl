@@ -21,6 +21,7 @@ import {useAppState} from '../useAppState'
 import {SystemChatNotificationData} from './SystemNotificationData.brand'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getChannelForMessages} from './notificationChannels'
+import {dismissNseEnrichedNotificationsForChat} from './nseEnrichedNotifications'
 
 async function getNotificationsForChat({
   inbox,
@@ -107,6 +108,16 @@ export async function showChatNotification({
           inbox.inbox.privateKey.publicKeyPemBase64 +
             newMessage.message.senderPublicKey
         )
+
+  // The iOS notification service extension may have already presented an
+  // enriched copy of the remote push for this conversation (the placeholder
+  // cancellation deliberately skips enriched notifications - decision 7).
+  // Replace it with the richer per-message local notification so the user
+  // never sees the same message twice.
+  await dismissNseEnrichedNotificationsForChat({
+    inbox: inbox.inbox.privateKey.publicKeyPemBase64,
+    sender: newMessage.message.senderPublicKey,
+  })
 
   if (type === 'MESSAGE') {
     await displayLocalNotification({

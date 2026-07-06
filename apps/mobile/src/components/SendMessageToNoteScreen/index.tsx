@@ -87,9 +87,15 @@ export default function SendMessageToNoteScreen({
       }).pipe(
         Effect.catchAll((e) => {
           if (e._tag === 'ReceiverInboxDoesNotExistError') {
-            Alert.alert(t('common.error'), t('offer.offerNotFound'), [
+            Alert.alert(t('common.error'), t('notes.detail.noteNotFound'), [
               {text: t('common.close')},
             ])
+            return Effect.void
+          }
+
+          // ApiErrorCreatingInbox is already surfaced by
+          // sendRequestForNoteHandleUIActionAtom, so avoid a second alert.
+          if (e._tag === 'ApiErrorCreatingInbox') {
             return Effect.void
           }
 
@@ -129,7 +135,7 @@ export default function SendMessageToNoteScreen({
             color="$foregroundPrimary"
             textAlign="center"
           >
-            {t('offer.offerNotFound')}
+            {t('notes.detail.noteNotFound')}
           </Typography>
           <Button variant="primary" onPress={safeGoBack} width="100%">
             {t('common.back')}

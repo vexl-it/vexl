@@ -109,14 +109,12 @@ const upsertChatForTheirNoteActionAtom = atom(
     const existingChat = get(existingChatAtom)
 
     if (existingChat) {
-      set(
-        existingChatAtom,
-        flow(
-          addMessageToChat(initialMessage),
-          updateMyNotificationTokenInfoInChat(sentVexlNotificationToken)
-        )
-      )
-      return existingChat.chat
+      const updatedChat = flow(
+        addMessageToChat(initialMessage),
+        updateMyNotificationTokenInfoInChat(sentVexlNotificationToken)
+      )(existingChat)
+      set(existingChatAtom, updatedChat)
+      return updatedChat.chat
     } else {
       const newChat = createNewChat({
         inbox,

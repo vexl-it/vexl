@@ -1,5 +1,6 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
+import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {DuplicatedPublicKeyError} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {type ServerNotePrivatePart} from '@vexl-next/rest-api/src/services/offer/notesContracts'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
@@ -26,6 +27,7 @@ export const repostNote = HttpApiBuilder.handler(
   'repostNote',
   (req) =>
     Effect.gen(function* (_) {
+      const security = yield* _(CurrentSecurity)
       const noteDb = yield* _(NoteDbService)
 
       if (!isWithoutDuplicates(req.payload.notePrivateList)) {
@@ -35,7 +37,11 @@ export const repostNote = HttpApiBuilder.handler(
       }
 
       const note = yield* _(
-        noteDb.queryNotePublicPartByNoteId(req.payload.noteId)
+        noteDb.queryNoteByPublicKeyAndNoteId({
+          userPublicKey: security.publicKey,
+          userPublicKeyV2: security.publicKeyV2,
+          id: req.payload.noteId,
+        })
       )
       if (Option.isNone(note)) {
         return yield* _(Effect.fail(new NotFoundError()))
@@ -52,7 +58,7 @@ export const repostNote = HttpApiBuilder.handler(
           (privatePart) =>
             noteDb.insertNotePrivatePart({
               ...privatePart,
-              noteId: note.value.id,
+              noteId: note.value.publicPart.id,
               repostId: hashedRepostId,
             }),
           {batching: true}

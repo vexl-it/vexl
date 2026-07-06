@@ -92,6 +92,24 @@ export default function NoteDetailScreen({
   const adminId = note?.ownershipInfo?.adminId
   const isMine = !!adminId
 
+  const runNoteAction = useCallback(
+    <A,>(effect: Effect.Effect<A, unknown>, onSuccess?: (value: A) => void) => {
+      setLoading(true)
+      void Effect.runPromise(effect.pipe(Effect.either)).then((result) => {
+        setLoading(false)
+        if (Either.isRight(result)) {
+          onSuccess?.(result.right)
+        } else {
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            error: result.left,
+          })
+        }
+      })
+    },
+    [setLoading, t]
+  )
+
   const handleDelete = useCallback(() => {
     if (!adminId) return
     void Effect.runPromise(
@@ -104,57 +122,22 @@ export default function NoteDetailScreen({
       })
     ).then((confirmed) => {
       if (!confirmed) return
-      setLoading(true)
-      void Effect.runPromise(
-        deleteNote({adminIds: [adminId]}).pipe(Effect.either)
-      ).then((result) => {
-        setLoading(false)
-        if (Either.isRight(result)) {
-          goBack()
-        } else {
-          showErrorAlert({
-            title: t('common.somethingWentWrong'),
-            error: result.left,
-          })
-        }
-      })
+      runNoteAction(deleteNote({adminIds: [adminId]}), goBack)
     })
-  }, [adminId, askDialog, deleteNote, goBack, setLoading, t])
+  }, [adminId, askDialog, deleteNote, goBack, runNoteAction, t])
 
   const handleRepost = useCallback(() => {
-    setLoading(true)
-    void Effect.runPromise(repostNote({noteId}).pipe(Effect.either)).then(
-      (result) => {
-        setLoading(false)
-        if (Either.isRight(result)) {
-          setToast({
-            title: t('notes.repost.toastTitle'),
-            description: t('notes.repost.toastDescription'),
-          })
-        } else {
-          showErrorAlert({
-            title: t('common.somethingWentWrong'),
-            error: result.left,
-          })
-        }
-      }
-    )
-  }, [noteId, repostNote, setLoading, setToast, t])
+    runNoteAction(repostNote({noteId}), () => {
+      setToast({
+        title: t('notes.repost.toastTitle'),
+        description: t('notes.repost.toastDescription'),
+      })
+    })
+  }, [noteId, repostNote, runNoteAction, setToast, t])
 
   const handleUndoRepost = useCallback(() => {
-    setLoading(true)
-    void Effect.runPromise(undoRepostNote({noteId}).pipe(Effect.either)).then(
-      (result) => {
-        setLoading(false)
-        if (Either.isLeft(result)) {
-          showErrorAlert({
-            title: t('common.somethingWentWrong'),
-            error: result.left,
-          })
-        }
-      }
-    )
-  }, [noteId, setLoading, t, undoRepostNote])
+    runNoteAction(undoRepostNote({noteId}))
+  }, [noteId, runNoteAction, undoRepostNote])
 
   const handleReport = useCallback(() => {
     void Effect.runPromise(reportNoteWithPrompt({noteId}))

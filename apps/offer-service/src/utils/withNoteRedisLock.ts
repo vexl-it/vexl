@@ -31,7 +31,10 @@ export const withNoteAdminActionRedisLock =
     ).pipe(
       Effect.map((hashedIds) =>
         withRedisLock<A, E, R>(
-          Array.map(hashedIds, (id) => `noteAdminAction:${id}`),
+          pipe(
+            Array.map(hashedIds, (id) => `noteAdminAction:${id}`),
+            Array.dedupe
+          ),
           10_000
         )
       ),
@@ -57,7 +60,10 @@ export const withNoteRepostActionRedisLock =
     ).pipe(
       Effect.map((hashedIds) =>
         withRedisLock<A, E, R>(
-          Array.map(hashedIds, (id) => `noteRepostAction:${id}`),
+          pipe(
+            Array.map(hashedIds, (id) => `noteRepostAction:${id}`),
+            Array.dedupe
+          ),
           10_000
         )
       ),

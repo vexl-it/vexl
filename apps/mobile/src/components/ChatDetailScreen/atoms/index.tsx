@@ -744,8 +744,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   const cancelRequestActionAtom = atom(null, (get, set) => {
+    const originType = get(chatAtom)?.origin.type
+    const isNoteOrigin = originType === 'theirNote' || originType === 'myNote'
     const offerInfo = get(offerForChatAtom)?.offerInfo
-    if (!offerInfo) {
+    // Note-origin chats have no backing offer, so the "offer deleted" gate
+    // must not block cancelling a pending note request.
+    if (!isNoteOrigin && !offerInfo) {
       return Effect.sync(() => {
         set(showOfferDeletedWithOptionToDeleteActionAtom)
       }).pipe(Effect.as(false))

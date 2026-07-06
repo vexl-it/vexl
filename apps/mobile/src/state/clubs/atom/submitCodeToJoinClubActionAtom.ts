@@ -461,9 +461,7 @@ export const submitCodeToJoinClubActionAtom = atom(
           )
         }
 
-        // RequestError (offline) is excluded on purpose - it's a user-side
-        // condition, not an app fault, so we don't report it to Sentry.
-        // toCommonErrorMessage maps it to the network-error message below.
+        // RequestError (offline) is excluded on purpose - not reported to Sentry
         if (
           e._tag === 'InvalidChallengeError' ||
           e._tag === 'HttpApiDecodeError' ||
@@ -524,9 +522,7 @@ export const validateCodeToJoinClubActionAtom = atom(
           })
         }
 
-        // RequestError (offline) is excluded on purpose - it's a user-side
-        // condition, not an app fault, so we don't report it to Sentry.
-        // toCommonErrorMessage maps it to the network-error message below.
+        // RequestError (offline) is excluded on purpose - not reported to Sentry
         if (
           e._tag === 'InvalidChallengeError' ||
           e._tag === 'HttpApiDecodeError' ||

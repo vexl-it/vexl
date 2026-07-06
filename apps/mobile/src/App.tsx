@@ -24,11 +24,13 @@ import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import {UserFeedbackDialog} from './components/UserFeedback/UserFeedbackDialog'
+import {useSyncNseBridge} from './state/notifications/nseBridge/useSyncNseBridge'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
 import {useInAppLoadingTasks} from './utils/inAppLoadingTasks/useInAppLoadingTasks'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
+import {useRegisterNseChatPreviewCategory} from './utils/notifications/nseEnrichedNotifications'
 import {useAppState} from './utils/useAppState'
 
 function App(): React.ReactElement {
@@ -41,6 +43,8 @@ function App(): React.ReactElement {
 
   useSetRelativeDateFormatting()
   useInAppLoadingTasks()
+  useSyncNseBridge()
+  useRegisterNseChatPreviewCategory()
 
   return (
     <SafeAreaProvider>

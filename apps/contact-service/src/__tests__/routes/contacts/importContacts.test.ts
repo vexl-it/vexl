@@ -21,8 +21,11 @@ import {NodeTestingApp} from '../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../utils/runPromiseInMockedEnvironment'
 import {
   createAndImportUsersFromNetwork,
+  createUserOnNetwork,
   generateKeysAndHasheForNumber,
+  importUsersFromNetwork,
   makeTestCommonAndSecurityHeaders,
+  withPublicImportCountThreshold,
   type DummyUser,
 } from './utils'
 
@@ -821,5 +824,78 @@ describe('Notification', () => {
         `)
       })
     )
+  })
+
+  it('Does not enqueue second level notifications for connections through unregistered public numbers', async () => {
+    await withPublicImportCountThreshold(2, async () => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const alice = yield* _(generateKeysAndHasheForNumber('+420733555001'))
+          const bob = yield* _(generateKeysAndHasheForNumber('+420733555002'))
+          const carol = yield* _(generateKeysAndHasheForNumber('+420733555003'))
+          const extraImporterOne = yield* _(
+            generateKeysAndHasheForNumber('+420733555004')
+          )
+          const extraImporterTwo = yield* _(
+            generateKeysAndHasheForNumber('+420733555005')
+          )
+          const publicNumber = yield* _(
+            generateKeysAndHasheForNumber('+420733555006')
+          )
+          const loggedInPopularContact = yield* _(
+            generateKeysAndHasheForNumber('+420733555007')
+          )
+
+          yield* _(createUserOnNetwork(alice))
+          yield* _(createUserOnNetwork(bob))
+          yield* _(createUserOnNetwork(carol))
+          yield* _(createUserOnNetwork(extraImporterOne))
+          yield* _(createUserOnNetwork(extraImporterTwo))
+          yield* _(createUserOnNetwork(loggedInPopularContact))
+
+          // bob is connected to alice only through the unregistered public
+          // number, carol only through the popular but registered contact.
+          // Both shared contacts end up with 3 importers, above the threshold.
+          yield* _(importUsersFromNetwork(bob, [publicNumber]))
+          yield* _(importUsersFromNetwork(carol, [loggedInPopularContact]))
+          yield* _(
+            importUsersFromNetwork(extraImporterOne, [
+              publicNumber,
+              loggedInPopularContact,
+            ])
+          )
+          yield* _(
+            importUsersFromNetwork(extraImporterTwo, [
+              publicNumber,
+              loggedInPopularContact,
+            ])
+          )
+
+          yield* _(Effect.sleep(200))
+          yield* _(clearEnqueuedNotifications)
+
+          yield* _(
+            importUsersFromNetwork(alice, [
+              publicNumber,
+              loggedInPopularContact,
+            ])
+          )
+          yield* _(Effect.sleep(200))
+
+          const enqueuedNotifications = yield* _(getEnqueuedNotifications)
+          const notifiedExpoTokens = pipe(
+            enqueuedNotifications,
+            Array.filterMap((n) =>
+              n.task._tag === 'NewUserNotificationMqEntry'
+                ? Option.fromNullable(n.task.notificationToken)
+                : Option.none()
+            )
+          )
+
+          expect(notifiedExpoTokens).toContain(carol.notificationToken)
+          expect(notifiedExpoTokens).not.toContain(bob.notificationToken)
+        })
+      )
+    })
   })
 })

@@ -4,7 +4,7 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {Effect, flow, Schema} from 'effect'
 import {ServerHashedNumber} from '../../../utils/serverHashContact'
-import {createIsAllowedSharedContactHashFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
+import {createIsInAllowedSharedContactHashesFragment} from '../../utils/createIsAllowedSharedContactHashFragment'
 
 export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContactParams =
   Schema.Struct({
@@ -39,20 +39,17 @@ export const createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelCont
           INNER JOIN users second_degree_friend ON second_degree_friend.hash = connections_to_imported_contacts.hash_from
         WHERE
           TRUE
-          AND ${sql.in(
-          'connections_to_imported_contacts.hash_to',
-          params.importedHashes
-        )}
+          AND ${createIsInAllowedSharedContactHashesFragment({
+          hashColumn: sql`connections_to_imported_contacts.hash_to`,
+          hashes: params.importedHashes,
+          publicImportCountThreshold: params.publicImportCountThreshold,
+          sql,
+        })}
           AND connections_to_imported_contacts.hash_to != connections_to_imported_contacts.hash_from
           AND (
             second_degree_friend.vexl_notification_token IS NOT NULL
           )
           AND second_degree_friend.hash != ${params.ownerHash}
-          AND ${createIsAllowedSharedContactHashFragment({
-          hash: sql`connections_to_imported_contacts.hash_to`,
-          publicImportCountThreshold: params.publicImportCountThreshold,
-          sql,
-        })}
       `,
     })
 

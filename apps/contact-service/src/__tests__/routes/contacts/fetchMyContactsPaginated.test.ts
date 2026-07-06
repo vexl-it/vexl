@@ -206,7 +206,7 @@ describe('Fetch my contacts paginated', () => {
   })
 
   it('Filters second level contacts connected only through unregistered public imported numbers', async () => {
-    await withPublicImportCountThreshold('2', async () => {
+    await withPublicImportCountThreshold(2, async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const alice = yield* _(generateKeysAndHasheForNumber('+420733666001'))

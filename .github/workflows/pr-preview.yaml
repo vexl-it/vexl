@@ -48,7 +48,13 @@ jobs:
         with:
           # Single-quoted on purpose: in a plain YAML scalar the " #" would
           # start a comment and truncate the command mid-string.
-          command: 'eas update --branch pr-${{ github.event.number }} --message "PR #${{ github.event.number }} (${{ github.event.pull_request.head.sha }})" --non-interactive'
+          #
+          # --environment must match the dev-client build profile's
+          # environment (eas.json): it pulls the same EAS env vars (the
+          # react-native-maps API keys) into app config evaluation — they
+          # are part of the runtime fingerprint, so without them the update
+          # would never load in the dev client.
+          command: 'eas update --branch pr-${{ github.event.number }} --environment development --message "PR #${{ github.event.number }} (${{ github.event.pull_request.head.sha }})" --non-interactive'
           working-directory: apps/mobile
         env:
           ENV_PRESET: stage

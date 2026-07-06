@@ -5,6 +5,7 @@
   },
   "build": {
     "staging": {
+      "environment": "production",
       "android": {
         "credentialsSource": "remote",
         "resourceClass": "large"
@@ -19,6 +20,7 @@
       "channel": "staging"
     },
     "development": {
+      "environment": "development",
       "developmentClient": true,
       "distribution": "store",
       "android": {
@@ -37,6 +39,7 @@
       "channel": "development"
     },
     "development-simulator": {
+      "environment": "development",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -47,6 +50,7 @@
       }
     },
     "stagingApk": {
+      "environment": "production",
       "android": {
         "credentialsSource": "remote",
         "buildType": "apk",
@@ -59,6 +63,7 @@
       "channel": "staging-apk"
     },
     "production": {
+      "environment": "production",
       "android": {
         "credentialsSource": "remote",
         "resourceClass": "large"
@@ -73,6 +78,7 @@
       "channel": "production"
     },
     "productionApk": {
+      "environment": "production",
       "android": {
         "credentialsSource": "remote",
         "buildType": "apk"

@@ -85,6 +85,11 @@ jobs:
         # NOT be set here — that flag shifts the fingerprint to the
         # dev-client runtime and the update would target dev clients instead
         # of release apps.
+        #
+        # --environment production matches the store build profiles
+        # (staging and production alike — see eas.json): it pulls the same
+        # EAS env vars (the react-native-maps API keys) into app config
+        # evaluation, which are part of the runtime fingerprint.
         run: |
           {
             echo "## ⚠️ OTA update (${{ inputs.environment }})"
@@ -95,7 +100,7 @@ jobs:
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
           for CHANNEL in "${{ inputs.environment }}" "${{ inputs.environment }}-apk"; do
-            eas update --channel "$CHANNEL" --message "OTA (${REASON}) @ ${GITHUB_SHA::7}" --non-interactive --json > update.json
+            eas update --channel "$CHANNEL" --environment production --message "OTA (${REASON}) @ ${GITHUB_SHA::7}" --non-interactive --json > update.json
             jq -r --arg channel "$CHANNEL" \
               '(if type == "array" then . else [.] end)[] |
                "- channel `\($channel)` / \(.platform) / runtime `\(.runtimeVersion)` → [update group](https://expo.dev/accounts/vexlit/projects/vexl/updates/\(.group))"' \

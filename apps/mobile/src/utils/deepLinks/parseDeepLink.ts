@@ -10,11 +10,13 @@ import {
 import {Effect, flow, Option, Schema} from 'effect'
 import {ImportContactFromLinkPayloadE} from '../../state/contacts/domain'
 import {version} from '../environment'
+import {PreviewChannel} from '../prPreview/domain'
 import {
   LINK_TYPE_GOLDEN_GLASSES,
   LINK_TYPE_IMPORT_CONTACT,
   LINK_TYPE_IMPORT_CONTACT_V2,
   LINK_TYPE_JOIN_CLUB,
+  LINK_TYPE_LOAD_PR_PREVIEW,
   LINK_TYPE_REQUEST_CLUB_ADMITION,
 } from './domain'
 
@@ -84,13 +86,20 @@ export const DeepLinkRequestClubAdmition = Schema.Struct({
 export type DeepLinkRequestClubAdmition =
   typeof DeepLinkRequestClubAdmition.Type
 
+export const DeepLinkLoadPrPreview = Schema.Struct({
+  ...DeeplinkPayloadVersion.fields,
+  type: Schema.Literal(LINK_TYPE_LOAD_PR_PREVIEW),
+  channel: PreviewChannel,
+})
+
 export const DeepLinkData = parseUrlWithSearchParams(
   Schema.Union(
     DeepLinkGoldenGlasses,
     DeepLinkClubJoin,
     DeepLinkImportContact,
     DeepLinkImportContactV2,
-    DeepLinkRequestClubAdmition
+    DeepLinkRequestClubAdmition,
+    DeepLinkLoadPrPreview
   )
 )
 export type DeepLinkData = typeof DeepLinkData.Type

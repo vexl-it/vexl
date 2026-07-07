@@ -19,25 +19,6 @@
       },
       "channel": "staging"
     },
-    "development": {
-      "environment": "development",
-      "developmentClient": true,
-      "distribution": "store",
-      "android": {
-        "credentialsSource": "remote",
-        "buildType": "apk",
-        "resourceClass": "large"
-      },
-      "ios": {
-        "credentialsSource": "remote",
-        "resourceClass": "large"
-      },
-      "env": {
-        "ENV_PRESET": "stage",
-        "IS_DEV_CLIENT_BUILD": "true"
-      },
-      "channel": "development"
-    },
     "development-simulator": {
       "environment": "development",
       "developmentClient": true,

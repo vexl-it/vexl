@@ -1,10 +1,16 @@
 name: "[Preview] PR stage bundle"
 run-name: "PR #${{ github.event.number }} preview (${{ github.event.action }})"
 
-# Publishes the PR's JS bundle as an EAS Update on branch "pr-<number>" and
-# comments a QR code on the PR. Team members scan it with the staging dev
-# client (built by build-eas-dev-client.yaml) to preview the PR on stage.
-# When the PR closes, the EAS Update branch is deleted.
+# Publishes the PR's JS bundle as an EAS Update on channel "pr-<number>" and
+# comments a QR code on the PR. Team members scan it with the regular staging
+# app (TestFlight staging or the staging APK): the app switches its update
+# channel to the PR's channel at runtime, downloads the bundle, and restarts.
+# See apps/mobile/src/utils/prPreview. When the PR closes, the EAS channel
+# and branch are deleted.
+#
+# The preview only loads into staging builds whose runtime fingerprint
+# matches the update — a PR that changes native code (dependencies, config
+# plugins, native config) needs a new staging build first.
 #
 # Gated to branches of this repo: PRs from forks have no access to
 # EXPO_TOKEN, so they skip these jobs entirely.
@@ -16,6 +22,13 @@ on:
 concurrency:
   group: pr-preview-${{ github.event.number }}
   cancel-in-progress: true
+
+env:
+  # Minimum app version that knows the load-pr-preview deep link. Older
+  # bundles show a localized "please update" alert instead of "invalid
+  # link". Keep in sync with MINIMAL_VERSION_LOAD_PR_PREVIEW in
+  # apps/mobile/src/utils/deepLinks/domain.ts.
+  PREVIEW_LINK_MIN_VERSION: 1.44.2
 
 jobs:
   publish:
@@ -43,30 +56,70 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
-      - name: Publish EAS Update and comment QR code
-        uses: expo/expo-github-action/preview@eab7a230208c952974db8c3245cfd78402c7b385 # v9
-        with:
-          # Single-quoted on purpose: in a plain YAML scalar the " #" would
-          # start a comment and truncate the command mid-string.
-          #
-          # --environment must match the dev-client build profile's
-          # environment (eas.json): it pulls the same EAS env vars (the
-          # react-native-maps API keys) into app config evaluation — they
-          # are part of the runtime fingerprint, so without them the update
-          # would never load in the dev client.
-          command: 'eas update --branch pr-${{ github.event.number }} --environment development --message "PR #${{ github.event.number }} (${{ github.event.pull_request.head.sha }})" --non-interactive'
-          working-directory: apps/mobile
+      - name: Publish EAS Update
+        # --channel (not --branch) so the channel "pr-<n>" exists — the app
+        # selects the preview by overriding its expo-channel-name header, and
+        # channels are what the update server resolves. Creates the channel
+        # and branch on first publish.
+        #
+        # The env must produce the same runtime fingerprint as the staging
+        # build profiles (eas.json): ENV_PRESET=stage, and --environment
+        # production pulls the same EAS env vars (the react-native-maps API
+        # keys) into app config evaluation.
+        run: |
+          eas update --channel "pr-${{ github.event.number }}" \
+            --environment production \
+            --message "PR #${{ github.event.number }} (${{ github.event.pull_request.head.sha }})" \
+            --non-interactive --json > update.json
+        working-directory: apps/mobile
         env:
           ENV_PRESET: stage
-          # Must match the dev-client build profile env: the flag changes the
-          # expo-dev-client plugin props, which are part of the runtime
-          # fingerprint — without it PR updates would never load in the dev
-          # client.
-          IS_DEV_CLIENT_BUILD: 'true'
           # Baked into the bundle as extra.commitHash and shown in the app's
-          # version footer. Set explicitly — EAS only provides it on its own
-          # build servers, not on GitHub runners.
+          # version footer and debug screen. Set explicitly — EAS only
+          # provides it on its own build servers, not on GitHub runners.
           EAS_BUILD_GIT_COMMIT_HASH: ${{ github.event.pull_request.head.sha }}
+      - name: Comment QR code on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # staging.app.vexl.it is registered only by non-prod builds, so a
+          # tapped link can never be swallowed by an installed prod app.
+          CHANNEL="pr-${PR_NUMBER}"
+          LINK="https://staging.app.vexl.it/link/?type=load-pr-preview&channel=${CHANNEL}&version=${PREVIEW_LINK_MIN_VERSION}"
+          QR_URL="https://quickchart.io/qr?size=250&text=$(jq -rn --arg v "$LINK" '$v | @uri')"
+          RUNTIME="$(jq -r '(if type == "array" then . else [.] end) | map(.runtimeVersion) | unique | join(", ")' apps/mobile/update.json)"
+          GROUP_ID="$(jq -r '(if type == "array" then .[0] else . end).group' apps/mobile/update.json)"
+
+          BODY_FILE="$(mktemp)"
+          cat > "$BODY_FILE" <<EOF
+          <!-- vexl-pr-preview -->
+          ### 📱 Preview on the staging app
+
+          Open **Vexl (stage)** → Account → Scan QR code and scan this, or open the link on your phone:
+
+          <img src="${QR_URL}" width="250" alt="PR preview QR code" />
+
+          [Load preview in staging app](${LINK})
+
+          | | |
+          | --- | --- |
+          | Channel | \`${CHANNEL}\` |
+          | Commit | ${HEAD_SHA} |
+          | Runtime | \`${RUNTIME}\` |
+          | Dashboard | [update group](https://expo.dev/accounts/vexlit/projects/vexl/updates/${GROUP_ID}) |
+
+          The preview only loads into staging builds with a matching runtime — if this PR changes native code, ship a new staging build first. To go back to the staging channel: debug screen → "Clear PR preview".
+          EOF
+
+          COMMENT_ID="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --paginate --jq '[.[] | select(.body | startswith("<!-- vexl-pr-preview -->"))][0].id // empty')"
+          if [ -n "$COMMENT_ID" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${COMMENT_ID}" -F "body=@${BODY_FILE}" > /dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" -F "body=@${BODY_FILE}" > /dev/null
+          fi
 
   cleanup:
     name: Delete preview bundle
@@ -92,10 +145,14 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
-      - name: Delete EAS Update branch
-        # The branch does not exist when a PR closes before any preview was
-        # published (e.g. a fork PR) — that must not fail the workflow.
+      - name: Delete EAS Update channel and branch
+        # Neither exists when a PR closes before any preview was published
+        # (e.g. a fork PR) — that must not fail the workflow. The channel
+        # must go first: a branch cannot be deleted while a channel points
+        # at it.
         run: |
-          eas branch:delete pr-${{ github.event.number }} --non-interactive \
+          eas channel:delete "pr-${{ github.event.number }}" --non-interactive \
+            || echo "No preview channel to delete"
+          eas branch:delete "pr-${{ github.event.number }}" --non-interactive \
             || echo "No preview branch to delete"
         working-directory: apps/mobile

@@ -50,6 +50,7 @@ import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {isTestFlight} from 'expo-testflight'
+import * as Updates from 'expo-updates'
 import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
@@ -133,6 +134,12 @@ import {
   setShowDebugNotifications,
 } from '../../utils/notifications/showDebugNotificationIfEnabled'
 import {isDeveloperAtom, showTextDebugButtonAtom} from '../../utils/preferences'
+import {
+  clearPreviewChannelActionAtom,
+  loadPreviewChannelWithUiFeedbackActionAtom,
+  previewChannelStorageAtom,
+} from '../../utils/prPreview'
+import {MAIN_PREVIEW_CHANNEL} from '../../utils/prPreview/domain'
 import reportError from '../../utils/reportError'
 import {startMeasure} from '../../utils/reportTime'
 import useSafeGoBack from '../../utils/useSafeGoBack'
@@ -221,6 +228,50 @@ function DebugLabel({
     >
       {children}
     </Typography>
+  )
+}
+
+// Rendered for developers AND regular staging testers (before the
+// !isDeveloper early return): testers load PR/main previews from QR codes
+// and must always be able to get back to the staging channel.
+function PreviewChannelSection(): React.JSX.Element | null {
+  const previewChannel = useAtomValue(previewChannelStorageAtom)
+  const loadPreviewChannel = useSetAtom(
+    loadPreviewChannelWithUiFeedbackActionAtom
+  )
+  const clearPreviewChannel = useSetAtom(clearPreviewChannelActionAtom)
+
+  if (!enableHiddenFeatures) return null
+
+  return (
+    <YStack gap="$3">
+      <DebugLabel>
+        Preview update channel: {previewChannel.activeChannel ?? 'none'}{' '}
+        (runtime channel: {Updates.channel ?? 'unknown'})
+      </DebugLabel>
+      <Button
+        variant="primary"
+        size="small"
+        text="Load latest main bundle"
+        onPress={() => {
+          Effect.runFork(loadPreviewChannel(MAIN_PREVIEW_CHANNEL))
+        }}
+      />
+      {!!(
+        previewChannel.activeChannel !== null ||
+        Updates.channel?.startsWith('pr-') ||
+        Updates.channel === 'main'
+      ) && (
+        <Button
+          variant="primary"
+          size="small"
+          text="Clear preview (back to staging channel)"
+          onPress={() => {
+            Effect.runFork(clearPreviewChannel())
+          }}
+        />
+      )}
+    </YStack>
   )
 }
 
@@ -540,7 +591,6 @@ function DebugScreen(): React.ReactElement {
   )
   const resetUserIdentity = useSetAtom(realUserDataAtom)
   const notificationToken = useAtomValue(vexlNotificationTokenAtom)
-
   if (!isDeveloper) {
     const buttonText = !isDeveloper
       ? 'Show translators debug button'
@@ -556,6 +606,7 @@ function DebugScreen(): React.ReactElement {
         }
       >
         <YStack gap="$4">
+          <PreviewChannelSection />
           <Button
             variant="secondary"
             size="small"
@@ -590,6 +641,7 @@ function DebugScreen(): React.ReactElement {
           </DebugLabel>
           <DebugLabel userSelect="auto">On Commit: {commitHash}</DebugLabel>
           <DebugLabel>__DEV__: {__DEV__}</DebugLabel>
+          <PreviewChannelSection />
           <CryptoBenchmarks />
           <DebugLabel>
             enableHiddenFeatures: {enableHiddenFeatures ? 'true' : 'false'}

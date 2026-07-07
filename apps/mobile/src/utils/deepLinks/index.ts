@@ -11,6 +11,7 @@ import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {translationAtom} from '../localization/I18nProvider'
 import {isPassedImportContactsOutsideReact} from '../navigation'
 import {goldenAvatarTypeAtom} from '../preferences'
+import {loadPreviewChannelWithUiFeedbackActionAtom} from '../prPreview'
 import {reportErrorE} from '../reportError'
 import {handleGoldenGlassesDeepLinkActionAtom} from './goldenGlassesUrl'
 import {handleImportContactFromDeepLinkActionAtom} from './importContactFromDeeplinkWithUiFeedbackActionAtom'
@@ -88,6 +89,11 @@ export const handleDeepLinkActionAtom = atom(
       } else if (linkData.type === 'request-club-admition') {
         yield* _(set(admitUserToClubActionAtom, linkData), mergeToBoolean)
         return true
+      } else if (linkData.type === 'load-pr-preview') {
+        return yield* _(
+          set(loadPreviewChannelWithUiFeedbackActionAtom, linkData.channel),
+          mergeToBoolean
+        )
       }
 
       return yield* _(

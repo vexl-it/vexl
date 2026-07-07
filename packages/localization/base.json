@@ -792,6 +792,7 @@
   "editOffer.deleteOfferDescriptionShort": "Once deleted, it's gone for good. Want to continue?",
   "editOffer.pauseOfferTitle": "Pause offer?",
   "editOffer.pauseOfferDescription": "Your trade will be hidden from the market until you resume it.",
+  "editOffer.pauseOfferDescriptionOffer": "Your offer will be hidden from the market until you resume it.",
   "editOffer.yesPause": "Yes, pause",
   "editOffer.activeOffer": "Active offer",
   "editOffer.pausedOffer": "Paused offer",

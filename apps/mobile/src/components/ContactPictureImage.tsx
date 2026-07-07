@@ -1,10 +1,9 @@
 import {Option} from 'effect'
-import {Contact, ContactField} from 'expo-contacts'
 import React, {useEffect, useState} from 'react'
-import {Platform} from 'react-native'
 import {FilterImage} from 'react-native-svg/filter-image'
 import {getTokens} from 'tamagui'
 import {type NonUniqueContactId} from '../state/contacts/domain'
+import {getContactImageUri} from '../state/contacts/getContactImageUri'
 
 const GRAYSCALE_FILTER = [
   {name: 'feColorMatrix', type: 'saturate', values: 0},
@@ -22,11 +21,6 @@ interface Props {
   readonly borderRadius?: number | string
   readonly br?: number | string
   readonly objectFit?: ObjectFit
-}
-
-interface ImageDetails {
-  uri: string
-  isABImageOnIos: boolean
 }
 
 function buildRadiusTokenMap(): Record<string, number> {
@@ -81,35 +75,28 @@ export default function ContactPictureImage({
   br,
   objectFit,
 }: Props): React.ReactElement | null {
-  const [imageDetails, setImageDetails] = useState<ImageDetails | null>(null)
+  const [imageUri, setImageUri] = useState<string | null>(null)
 
   useEffect(() => {
+    setImageUri(null)
     if (Option.isNone(contactId)) return
 
-    setImageDetails(null)
+    let cancelled = false
 
-    void new Contact(contactId.value)
-      .getDetails([ContactField.IMAGE])
-      .then((contact) => {
-        const contactImageUri = contact.image
-
-        if (contactImageUri) {
-          setImageDetails({
-            uri: contactImageUri,
-            isABImageOnIos: !!(
-              Platform.OS === 'ios' && contact.id.includes(':ABPerson')
-            ),
-          })
-        }
+    void getContactImageUri(contactId.value)
+      .then((uri) => {
+        if (!cancelled) setImageUri(uri)
       })
       .catch((err) => {
-        console.debug('Error loading image', err)
+        if (!cancelled) console.debug('Error loading image', err)
       })
+
+    return () => {
+      cancelled = true
+    }
   }, [contactId])
 
-  // TODO: lets monitor this issue in https://github.com/vexl-it/vexl/issues/1984
-  // and then change back to previous behaviour once fixed
-  if (!imageDetails || imageDetails?.isABImageOnIos) {
+  if (!imageUri) {
     return fallback ? <>{fallback}</> : null
   }
 
@@ -124,7 +111,7 @@ export default function ContactPictureImage({
       filters={grayscale ? GRAYSCALE_FILTER : undefined}
       width={width}
       height={height}
-      source={{uri: imageDetails.uri}}
+      source={{uri: imageUri}}
     />
   )
 }

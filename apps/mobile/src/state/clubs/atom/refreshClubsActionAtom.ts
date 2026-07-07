@@ -64,8 +64,12 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
     }
   ) =>
     Effect.gen(function* (_) {
+      // Time-limited so a hanging push-token fetch can never stall the club
+      // refresh (same treatment as in syncConnectionsActionAtom).
       const notificationToken = yield* _(
         getNotificationTokenE(),
+        Effect.timeout('3 seconds'),
+        Effect.catchTag('TimeoutException', () => Effect.succeed(null)),
         Effect.map(Option.fromNullable)
       )
       const api = get(apiAtom)

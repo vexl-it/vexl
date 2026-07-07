@@ -21,8 +21,12 @@ export const checkForClubsAdmissionActionAtom = atom(null, (get, set) => {
     const api = get(apiAtom)
 
     const keysWaitingForAdmission = get(keysWaitingForAdmissionAtom)
+    // Time-limited so a hanging push-token fetch can never stall the
+    // admission check (same treatment as in syncConnectionsActionAtom).
     const notificationToken = yield* _(
       getNotificationTokenE(),
+      Effect.timeout('3 seconds'),
+      Effect.catchTag('TimeoutException', () => Effect.succeed(null)),
       Effect.map(Option.fromNullable)
     )
 

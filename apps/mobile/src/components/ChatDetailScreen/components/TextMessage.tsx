@@ -286,7 +286,7 @@ function TextMessage({
       messageItem.type === 'message' &&
       messageItem.message.state === 'sendingError'
     ) {
-      void sendMessage({
+      sendMessage({
         ...messageItem.message.message,
         time: unixMillisecondsNow(),
       })

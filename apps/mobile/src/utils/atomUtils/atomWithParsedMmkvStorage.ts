@@ -5,7 +5,6 @@ import {
   type SetStateAction,
   type WritableAtom,
 } from 'jotai'
-import {InteractionManager} from 'react-native'
 import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
@@ -22,9 +21,9 @@ let clearGeneration = 0
 
 /**
  * Invalidates every MMKV write currently scheduled behind the deferred
- * InteractionManager flush. MUST be called before wiping storage on logout so
- * an in-flight write cannot persist — and thereby resurrect — data after the
- * wipe. See `clearMmkvStorageAndEmptyAtoms`.
+ * idle-callback flush. MUST be called before wiping storage on logout so an
+ * in-flight write cannot persist — and thereby resurrect — data after the wipe.
+ * See `clearMmkvStorageAndEmptyAtoms`.
  */
 export function invalidateScheduledMmkvWrites(): void {
   clearGeneration += 1
@@ -86,9 +85,9 @@ interface StoredRead<A> {
 export interface FlushablePrimitiveAtom<A> extends PrimitiveAtom<A> {
   /**
    * Synchronously persists the value currently waiting behind the deferred,
-   * coalesced InteractionManager flush, then clears it. No-op when nothing is
-   * pending. Honors the clear-generation guard: a write queued before a storage
-   * wipe is dropped rather than resurrecting just-cleared data (see
+   * coalesced idle-callback flush, then clears it. No-op when nothing is
+   * pending. Honors the clear-generation guard: a write queued before a
+   * storage wipe is dropped rather than resurrecting just-cleared data (see
    * `invalidateScheduledMmkvWrites`).
    *
    * Use after a batch of writes whose durability must not wait for the deferred
@@ -177,9 +176,9 @@ export interface AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
   readonly atom: FlushablePrimitiveAtom<A>
   /**
    * Sets the atom and persists the new value to MMKV synchronously, instead of
-   * deferring the write with InteractionManager as regular sets do. Use when
-   * the value must be readable from storage right away. Persist errors are
-   * reported, not thrown.
+   * deferring the write with an idle callback as regular sets do. Use when the
+   * value must be readable from storage right away. Persist errors are reported,
+   * not thrown.
    */
   readonly setAndSaveImmediatelyAtom: WritableAtom<
     null,
@@ -192,11 +191,11 @@ export interface AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
  * Creates a primitive atom persisted in MMKV under the given key.
  *
  * - The stored value is validated with the given schema on every read.
- * - Writes are deferred behind `InteractionManager.runAfterInteractions` and
- *   coalesced: when several writes happen before the deferred flush runs, only
- *   the newest value is encoded and persisted (last-write-wins; intermediate
- *   values are never written to storage). Callers that need the pending value
- *   on disk immediately can force a synchronous write via `flushNow`.
+ * - Writes are deferred behind a bounded idle callback and coalesced: when
+ *   several writes happen before the deferred flush runs, only the newest value
+ *   is encoded and persisted (last-write-wins; intermediate values are never
+ *   written to storage). Callers that need the pending value on disk immediately
+ *   can force a synchronous write via `flushNow`.
  * - Writes to the same key made by anyone else (another atom for the same key,
  *   direct storage writes) are picked up via the MMKV change listener while
  *   the atom is mounted.
@@ -281,7 +280,9 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       const flushAlreadyScheduled = pendingWrite !== undefined
       pendingWrite = {value: newValue, generation: clearGeneration}
       if (!flushAlreadyScheduled) {
-        void InteractionManager.runAfterInteractions(flushPendingWrite)
+        // The timeout bounds how long dirty state can wait under continuous
+        // animation/scroll before the idle callback is forced to run.
+        requestIdleCallback(flushPendingWrite, {timeout: 1000})
       }
     }
   )
@@ -323,30 +324,33 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
         // synchronously (the listener runs inside our storage.set call).
         if (isPersistingOwnValue) return
 
-        void InteractionManager.runAfterInteractions(() => {
-          pipe(
-            storage.getVerified(key, schema),
-            Either.match({
-              onLeft: (e) => {
-                if (e._tag === 'ValueNotSet') {
-                  console.info(
-                    `MMKV value for key '${key}' was deleted. Setting atom to default value`
+        requestIdleCallback(
+          () => {
+            pipe(
+              storage.getVerified(key, schema),
+              Either.match({
+                onLeft: (e) => {
+                  if (e._tag === 'ValueNotSet') {
+                    console.info(
+                      `MMKV value for key '${key}' was deleted. Setting atom to default value`
+                    )
+                    setAtom(defaultValue)
+                    return
+                  }
+                  reportError(
+                    'warn',
+                    new Error(
+                      `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
+                    ),
+                    {errorTag: e._tag}
                   )
-                  setAtom(defaultValue)
-                  return
-                }
-                reportError(
-                  'warn',
-                  new Error(
-                    `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
-                  ),
-                  {errorTag: e._tag}
-                )
-              },
-              onRight: setAtom,
-            })
-          )
-        })
+                },
+                onRight: setAtom,
+              })
+            )
+          },
+          {timeout: 1000}
+        )
       }
     )
 

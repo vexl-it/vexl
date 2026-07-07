@@ -75,17 +75,21 @@ export const resolveAllContactsAsSeenActionAtom = atom(
 
 export const normalizedContactsAtom = atom(
   (get): StoredContactWithComputedValues[] => {
+    // Set-keyed dedupe (keeps the first occurrence, same as dedupeWith)
+    // to avoid O(n²) pairwise comparisons on large contact lists.
+    const seenNormalizedNumbers = new Set<string>()
     return pipe(
       get(storedContactsAtom),
       Array.filterMap((contact) =>
         contact.computedValues.pipe(
+          Option.filter((computedValues) => {
+            if (seenNormalizedNumbers.has(computedValues.normalizedNumber))
+              return false
+            seenNormalizedNumbers.add(computedValues.normalizedNumber)
+            return true
+          }),
           Option.map((computedValues) => ({...contact, computedValues}))
         )
-      ),
-      Array.dedupeWith(
-        (first, second) =>
-          first.computedValues.normalizedNumber ===
-          second.computedValues.normalizedNumber
       )
     )
   }

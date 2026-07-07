@@ -97,6 +97,23 @@ export const ChatScope = createScope<
   WritableAtom<ChatWithMessages, [SetStateAction<ChatWithMessages>], void>
 >(atom<ChatWithMessages>(dummyChatWithMessages))
 
+function areMessagesListItemsEquivalent(
+  prev: MessagesListItem,
+  next: MessagesListItem
+): boolean {
+  if (prev.type === 'message' && next.type === 'message')
+    return prev.message === next.message && prev.isLatest === next.isLatest
+  if (prev.type === 'time' && next.type === 'time')
+    return prev.time.toMillis() === next.time.toMillis()
+  if (prev.type === 'vexlBot' && next.type === 'vexlBot')
+    return prev.data === next.data
+  return prev.type === next.type
+}
+
+const referenceArrayEquivalence = Array.getEquivalence(
+  (a: MessagesListItem, b: MessagesListItem) => a === b
+)
+
 export const chatMolecule = molecule((getMolecule, getScope) => {
   const chatWithMessagesAtom = getScope(ChatScope)
 
@@ -140,13 +157,44 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
       }
     )
 
-  const messagesListDataAtom = atom((get) =>
-    buildMessagesListData(
-      get(messagesAtom),
-      get(hiddenMessagesIdsAtom),
-      get(tradeChecklistAtom)
+  // Reuse previous item objects (matched by their stable `key`) so appending
+  // one message does not change the identity of every other list item. Keeps
+  // the keyed splitAtom below (and FlashList rows) stable across updates.
+  let previousMessagesListData: MessagesListItem[] = []
+
+  const messagesListDataAtom = atom((get) => {
+    const items = pipe(
+      buildMessagesListData(
+        get(messagesAtom),
+        get(hiddenMessagesIdsAtom),
+        get(tradeChecklistAtom)
+      ),
+      (nextItems) => {
+        const previousItemsByKey = new Map(
+          pipe(
+            previousMessagesListData,
+            Array.map((item): [string, MessagesListItem] => [item.key, item])
+          )
+        )
+
+        return pipe(
+          nextItems,
+          Array.map((nextItem) => {
+            const previousItem = previousItemsByKey.get(nextItem.key)
+            return previousItem !== undefined &&
+              areMessagesListItemsEquivalent(previousItem, nextItem)
+              ? previousItem
+              : nextItem
+          })
+        )
+      }
     )
-  )
+
+    if (!referenceArrayEquivalence(items, previousMessagesListData))
+      previousMessagesListData = items
+
+    return previousMessagesListData
+  })
 
   const otherSideDataAtom = selectOtherSideDataAtom(chatAtom)
 
@@ -303,7 +351,12 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
     )?.message.uuid
   })
 
-  const messagesListAtomAtoms = splitAtom(messagesListDataAtom)
+  // Keyed by the stable item key so row atoms (and thus FlashList keys)
+  // survive list updates instead of being regenerated per change.
+  const messagesListAtomAtoms = splitAtom(
+    messagesListDataAtom,
+    (item) => item.key
+  )
 
   const deleteChatAtom = deleteChatActionAtom(chatWithMessagesAtom)
 

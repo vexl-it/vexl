@@ -59,7 +59,9 @@ export default function retrieveMessages({
           )
         ),
         Array.map(Effect.either),
-        Effect.all,
+        // Messages are decrypted independently — bounded concurrency instead
+        // of processing them strictly one by one.
+        Effect.allWith({concurrency: 6}),
         Effect.map((eithers) => ({
           errors: pipe(Array.filterMap(eithers, Either.getLeft)),
           messages: pipe(Array.filterMap(eithers, Either.getRight)),

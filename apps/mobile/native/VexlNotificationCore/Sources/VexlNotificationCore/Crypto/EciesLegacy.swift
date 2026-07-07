@@ -44,7 +44,7 @@ struct EciesLegacyPart {
 /// from packages/cryptography/src/operations/eciesLegacy.ts. This is the
 /// cipher used for chat messages on the wire (NOT eciesGTM).
 public func eciesLegacyDecrypt(
-  privateKeyPemBase64: String,
+  privateKey: VexlPrivateKey,
   payload: String
 ) throws -> String {
   // 1. Parse the three length-prefixed parts: ciphertext, mac, epk.
@@ -59,9 +59,8 @@ public func eciesLegacyDecrypt(
     throw EciesError.invalidCiphertextFormat
   }
 
-  // 2. Parse the inbox private key (throws VexlKeyError.unsupportedCurve for
-  //    non-secp256k1 keys) and compute the raw-X ECDH shared secret.
-  let privateKey = try VexlPrivateKey(pemBase64: privateKeyPemBase64)
+  // 2. Compute the raw-X ECDH shared secret from the (already parsed) inbox
+  //    private key.
   let sharedSecret = try ecdhSharedSecretX(
     privateScalar: privateKey.rawScalar,
     peerUncompressedPoint: epk

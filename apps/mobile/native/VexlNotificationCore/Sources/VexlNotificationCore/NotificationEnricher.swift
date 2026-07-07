@@ -53,8 +53,9 @@ public struct NotificationEnricher: Sendable {
     }
 
     // 3. Only secp256k1 inbox keys are supported (design decision 2). Parse
-    //    up front so wrong-curve keys bail before any network traffic.
-    guard (try? VexlPrivateKey(pemBase64: keyPair.privateKeyPemBase64)) != nil else {
+    //    up front so wrong-curve keys bail before any network traffic; the
+    //    parsed key is then threaded through signing and decryption.
+    guard let privateKey = try? VexlPrivateKey(pemBase64: keyPair.privateKeyPemBase64) else {
       return nil
     }
 
@@ -71,7 +72,7 @@ public struct NotificationEnricher: Sendable {
       )
       let signature = try signChallenge(
         challenge: challenge,
-        privateKeyPemBase64: keyPair.privateKeyPemBase64
+        privateKey: privateKey
       )
       serverMessages = try await client.retrieveMessages(
         publicKey: keyPair.publicKeyPemBase64,
@@ -91,7 +92,7 @@ public struct NotificationEnricher: Sendable {
       serverMessages.compactMap { serverMessage in
         guard serverMessage.message.count <= maxCiphertextLength,
               let plaintext = try? eciesLegacyDecrypt(
-                privateKeyPemBase64: keyPair.privateKeyPemBase64,
+                privateKey: privateKey,
                 payload: serverMessage.message
               ),
               let parsed = DecryptedChatMessage.parse(plaintextJson: plaintext),

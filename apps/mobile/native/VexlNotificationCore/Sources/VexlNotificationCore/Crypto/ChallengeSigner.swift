@@ -13,9 +13,8 @@ public enum ChallengeSignError: Error, Equatable {
 /// verify accepts.
 public func signChallenge(
   challenge: String,
-  privateKeyPemBase64: String
+  privateKey: VexlPrivateKey
 ) throws -> String {
-  let privateKey = try VexlPrivateKey(pemBase64: privateKeyPemBase64)
   let signingKey: P256K.Signing.PrivateKey
   do {
     signingKey = try P256K.Signing.PrivateKey(dataRepresentation: privateKey.rawScalar)

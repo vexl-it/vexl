@@ -7,6 +7,24 @@ import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom
 
 export const CLEAR_STORAGE_KEY = '__clear_storage'
 
+// Incremented every time persisted storage is wiped (logout / clear). Writes
+// scheduled behind the deferred flush capture the generation at schedule time;
+// if it no longer matches when the flush finally runs, a wipe happened in
+// between and the write is dropped so just-cleared (sensitive) data cannot be
+// resurrected. Shared across all atoms, so it also invalidates pending writes
+// of atoms that are not currently mounted (their change listener never fires).
+let clearGeneration = 0
+
+/**
+ * Invalidates every MMKV write currently scheduled behind the deferred
+ * InteractionManager flush. MUST be called before wiping storage on logout so
+ * an in-flight write cannot persist — and thereby resurrect — data after the
+ * wipe. See `clearMmkvStorageAndEmptyAtoms`.
+ */
+export function invalidateScheduledMmkvWrites(): void {
+  clearGeneration += 1
+}
+
 // TODO: Temporary diagnostic to track atom initialization results on startup.
 // Remove once the root cause of user data loss is identified.
 type InitResult = 'loaded' | 'valueNotSet' | 'parseError'
@@ -53,6 +71,26 @@ interface StoredRead<A> {
    * stored value changed between atom creation and mount without re-decoding.
    */
   raw: string | undefined
+}
+
+/**
+ * A persisted MMKV atom that additionally exposes {@link
+ * FlushablePrimitiveAtom.flushNow}. Assignable to `PrimitiveAtom<A>`, so
+ * callers that do not need the flush handle can treat it as an ordinary atom.
+ */
+export interface FlushablePrimitiveAtom<A> extends PrimitiveAtom<A> {
+  /**
+   * Synchronously persists the value currently waiting behind the deferred,
+   * coalesced InteractionManager flush, then clears it. No-op when nothing is
+   * pending. Honors the clear-generation guard: a write queued before a storage
+   * wipe is dropped rather than resurrecting just-cleared data (see
+   * `invalidateScheduledMmkvWrites`).
+   *
+   * Use after a batch of writes whose durability must not wait for the deferred
+   * flush — e.g. local state the server was just mutated to match, where a
+   * process kill before the flush would otherwise leave storage stale.
+   */
+  flushNow: () => void
 }
 
 function isValidJson(raw: string): boolean {
@@ -137,7 +175,8 @@ function getInitialValue<A>({
  * - Writes are deferred behind `InteractionManager.runAfterInteractions` and
  *   coalesced: when several writes happen before the deferred flush runs, only
  *   the newest value is encoded and persisted (last-write-wins; intermediate
- *   values are never written to storage).
+ *   values are never written to storage). Callers that need the pending value
+ *   on disk immediately can force a synchronous write via `flushNow`.
  * - Writes to the same key made by anyone else (another atom for the same key,
  *   direct storage writes) are picked up via the MMKV change listener while
  *   the atom is mounted.
@@ -154,7 +193,7 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
   defaultValue: A,
   schema: Schema.Schema<A, I, never>,
   debugLabel?: string
-): PrimitiveAtom<A> {
+): FlushablePrimitiveAtom<A> {
   const decodeRawValue = Schema.decodeEither(Schema.parseJson(schema))
   const persistValue = storage.saveVerified(key, schema)
 
@@ -166,14 +205,19 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
   // blob.
   let isPersistingOwnValue = false
 
-  // Value waiting to be persisted by the scheduled deferred flush.
-  // `undefined` means no flush is scheduled.
-  let pendingWrite: {value: A} | undefined
+  // Value waiting to be persisted by the scheduled deferred flush, together
+  // with the `clearGeneration` captured when it was queued. `undefined` means
+  // no flush is scheduled.
+  let pendingWrite: {value: A; generation: number} | undefined
 
   const flushPendingWrite = (): void => {
     const toPersist = pendingWrite
     pendingWrite = undefined
     if (toPersist === undefined) return
+
+    // Storage was wiped after this write was scheduled — persisting it now
+    // would resurrect just-cleared data. Drop it. See `clearGeneration`.
+    if (toPersist.generation !== clearGeneration) return
 
     isPersistingOwnValue = true
     try {
@@ -212,7 +256,7 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
       set(coreAtom, newValue)
 
       const flushAlreadyScheduled = pendingWrite !== undefined
-      pendingWrite = {value: newValue}
+      pendingWrite = {value: newValue, generation: clearGeneration}
       if (!flushAlreadyScheduled) {
         void InteractionManager.runAfterInteractions(flushPendingWrite)
       }
@@ -286,5 +330,8 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
     return listener.remove
   }
 
-  return mmkvAtom
+  // `flushPendingWrite` already reads-and-clears the pending write, no-ops when
+  // nothing is queued, and drops the write when the clear-generation moved on —
+  // exactly the semantics `flushNow` needs — so expose it directly.
+  return Object.assign(mmkvAtom, {flushNow: flushPendingWrite})
 }

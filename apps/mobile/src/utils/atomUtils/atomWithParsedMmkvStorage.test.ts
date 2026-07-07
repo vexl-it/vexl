@@ -5,6 +5,7 @@ import {storage} from '../mmkv/effectMmkv'
 import {
   CLEAR_STORAGE_KEY,
   atomWithParsedMmkvStorage,
+  invalidateScheduledMmkvWrites,
 } from './atomWithParsedMmkvStorage'
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -246,6 +247,132 @@ describe('atomWithParsedMmkvStorage', () => {
 
     storage._storage.set(CLEAR_STORAGE_KEY, Date.now().toString())
 
+    expect(store.get(testAtom)).toEqual(defaultValue)
+    unsub()
+  })
+
+  it('drops a write scheduled before a storage clear so it cannot resurrect cleared data', () => {
+    const key = 'test-clear-invalidates-pending-write'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    const unsub = store.sub(testAtom, () => {})
+
+    // a sensitive value is written but its deferred flush has not run yet
+    store.set(testAtom, {name: 'sensitive', count: 42})
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    // logout / wipe happens before the flush runs — mirrors the sequence in
+    // clearMmkvStorageAndEmptyAtoms: signal clear, invalidate pending writes,
+    // then wipe storage
+    storage._storage.set(CLEAR_STORAGE_KEY, Date.now().toString())
+    invalidateScheduledMmkvWrites()
+    storage._storage.clearAll()
+
+    // the deferred flush now runs — it must NOT write the old value back
+    flushInteractions()
+
+    expect(storage._storage.getString(key)).toBeUndefined()
+    expect(store.get(testAtom)).toEqual(defaultValue)
+    unsub()
+  })
+
+  it('still persists writes scheduled after a storage clear', () => {
+    const key = 'test-write-after-clear'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    const unsub = store.sub(testAtom, () => {})
+
+    storage._storage.set(CLEAR_STORAGE_KEY, Date.now().toString())
+    invalidateScheduledMmkvWrites()
+    storage._storage.clearAll()
+
+    // a write made after the clear must persist normally
+    store.set(testAtom, {name: 'after', count: 1})
+    flushInteractions()
+
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'after',
+      count: 1,
+    })
+    unsub()
+  })
+
+  it('flushNow persists the pending value synchronously, before the deferred flush', () => {
+    const key = 'test-flush-now'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+
+    const setSpy = jest.spyOn(storage._storage, 'set')
+
+    store.set(testAtom, {name: 'flushed', count: 3})
+    // not persisted yet — the deferred flush has not run
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    testAtom.flushNow()
+
+    // written immediately, without waiting for interactions
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'flushed',
+      count: 3,
+    })
+    expect(setSpy).toHaveBeenCalledTimes(1)
+
+    // the already-scheduled deferred flush is now a no-op (nothing pending)
+    flushInteractions()
+    expect(setSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('flushNow is a no-op when there is nothing pending', () => {
+    const key = 'test-flush-now-nothing-pending'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    createStore()
+
+    const setSpy = jest.spyOn(storage._storage, 'set')
+
+    testAtom.flushNow()
+
+    expect(setSpy).not.toHaveBeenCalled()
+    expect(storage._storage.getString(key)).toBeUndefined()
+  })
+
+  it('flushNow does not write a value that was invalidated by a storage clear', () => {
+    const key = 'test-flush-now-after-clear'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema
+    )
+    const store = createStore()
+    const unsub = store.sub(testAtom, () => {})
+
+    // a sensitive value is written but its flush has not run yet
+    store.set(testAtom, {name: 'sensitive', count: 42})
+
+    // logout / wipe happens before the flush
+    storage._storage.set(CLEAR_STORAGE_KEY, Date.now().toString())
+    invalidateScheduledMmkvWrites()
+    storage._storage.clearAll()
+
+    // forcing a synchronous flush must NOT resurrect the cleared value
+    testAtom.flushNow()
+
+    expect(storage._storage.getString(key)).toBeUndefined()
     expect(store.get(testAtom)).toEqual(defaultValue)
     unsub()
   })

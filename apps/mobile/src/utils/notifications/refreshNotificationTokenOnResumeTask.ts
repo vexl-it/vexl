@@ -7,9 +7,7 @@ import {
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../inAppLoadingTasks'
-import {getNotificationTokenE} from './index'
-
-const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
+import {getNotificationTokenE, NOTIFICATION_TOKEN_CACHE_KEY} from './index'
 
 // todo #2124: remove after migrating to vexl notification token
 export const refreshNotificationTaskId = registerInAppLoadingTask({

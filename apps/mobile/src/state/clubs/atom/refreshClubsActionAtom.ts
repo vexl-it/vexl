@@ -7,7 +7,7 @@ import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifica
 import {Array, Effect, Either, Option, pipe, Record} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {getNotificationTokenE} from '../../../utils/notifications'
+import {getNotificationTokenWithTimeoutE} from '../../../utils/notifications'
 import {ignoreReportErrors} from '../../../utils/reportError'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {removeClubOffersNextPageParamFromStateActionAtom} from '../../marketplace/atoms/offersState'
@@ -66,12 +66,7 @@ const fetchClubWithMembersHandleStateIfNotFoundActionAtom = atom(
     Effect.gen(function* (_) {
       // Time-limited so a hanging push-token fetch can never stall the club
       // refresh (same treatment as in syncConnectionsActionAtom).
-      const notificationToken = yield* _(
-        getNotificationTokenE(),
-        Effect.timeout('3 seconds'),
-        Effect.catchTag('TimeoutException', () => Effect.succeed(null)),
-        Effect.map(Option.fromNullable)
-      )
+      const notificationToken = yield* _(getNotificationTokenWithTimeoutE())
       const api = get(apiAtom)
       const clubAlreadyInStateStats = get(
         clubsWithMembersStorageAtom

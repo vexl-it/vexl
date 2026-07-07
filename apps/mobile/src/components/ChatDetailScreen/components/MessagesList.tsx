@@ -3,11 +3,13 @@ import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {tokens, useScreenFooterHeight} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
-import React, {useCallback, useEffect, useRef} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {
   Animated,
   Easing,
+  type LayoutChangeEvent,
   type NativeScrollEvent,
+  type NativeSyntheticEvent,
   type ViewabilityConfig,
 } from 'react-native'
 import {KeyboardEvents} from 'react-native-keyboard-controller'
@@ -351,54 +353,86 @@ function MessagesList({
     }
   }, [animateKeyboardBottomSpacer, scrollToBottom])
 
+  const contentContainerStyle = useMemo(
+    () => ({
+      paddingBottom: footerHeight + tokens.size[4].val,
+    }),
+    [footerHeight]
+  )
+
+  const maintainVisibleContentPosition = useMemo(
+    () => ({
+      autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
+      startRenderingFromBottom: !targetMessageId,
+    }),
+    [targetMessageId]
+  )
+
+  const onContentSizeChange = useCallback(
+    (_: number, height: number) => {
+      const wasScrolledToBottom =
+        viewportHeightRef.current !== 0 &&
+        isContentScrolledToBottom(contentHeightRef.current)
+
+      contentHeightRef.current = height
+
+      if (height <= viewportHeightRef.current) {
+        updateScrollRefsToBottom()
+      } else if (!targetMessageId && wasScrolledToBottom) {
+        keepScrolledToBottom(keyboardAnimationActiveRef.current)
+      } else if (
+        !targetMessageId &&
+        viewportBottomAnchorRef.current !== undefined
+      ) {
+        scrollToViewportBottomAnchor(
+          viewportBottomAnchorRef.current,
+          keyboardAnimationActiveRef.current
+        )
+      }
+      tryInitialScrollToBottom()
+    },
+    [
+      isContentScrolledToBottom,
+      keepScrolledToBottom,
+      scrollToViewportBottomAnchor,
+      targetMessageId,
+      tryInitialScrollToBottom,
+      updateScrollRefsToBottom,
+    ]
+  )
+
+  const onLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      preserveBottomVisibleContentOnViewportChange(
+        event.nativeEvent.layout.height
+      )
+      if (contentHeightRef.current <= event.nativeEvent.layout.height) {
+        isScrolledToBottomRef.current = true
+      }
+      tryInitialScrollToBottom()
+    },
+    [preserveBottomVisibleContentOnViewportChange, tryInitialScrollToBottom]
+  )
+
+  const onScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      updateIsScrolledToBottom(event.nativeEvent)
+    },
+    [updateIsScrolledToBottom]
+  )
+
   return (
     <FlashList
       ref={listRef}
       data={dataAtoms}
-      contentContainerStyle={{
-        paddingBottom: footerHeight + tokens.size[4].val,
-      }}
+      contentContainerStyle={contentContainerStyle}
       keyExtractor={atomKeyExtractor}
       ListFooterComponent={renderKeyboardBottomSpacer}
-      maintainVisibleContentPosition={{
-        autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
-        startRenderingFromBottom: !targetMessageId,
-      }}
-      onContentSizeChange={(_, height) => {
-        const wasScrolledToBottom =
-          viewportHeightRef.current !== 0 &&
-          isContentScrolledToBottom(contentHeightRef.current)
-
-        contentHeightRef.current = height
-
-        if (height <= viewportHeightRef.current) {
-          updateScrollRefsToBottom()
-        } else if (!targetMessageId && wasScrolledToBottom) {
-          keepScrolledToBottom(keyboardAnimationActiveRef.current)
-        } else if (
-          !targetMessageId &&
-          viewportBottomAnchorRef.current !== undefined
-        ) {
-          scrollToViewportBottomAnchor(
-            viewportBottomAnchorRef.current,
-            keyboardAnimationActiveRef.current
-          )
-        }
-        tryInitialScrollToBottom()
-      }}
-      onLayout={(event) => {
-        preserveBottomVisibleContentOnViewportChange(
-          event.nativeEvent.layout.height
-        )
-        if (contentHeightRef.current <= event.nativeEvent.layout.height) {
-          isScrolledToBottomRef.current = true
-        }
-        tryInitialScrollToBottom()
-      }}
+      maintainVisibleContentPosition={maintainVisibleContentPosition}
+      onContentSizeChange={onContentSizeChange}
+      onLayout={onLayout}
       onLoad={tryInitialScrollToBottom}
-      onScroll={(event) => {
-        updateIsScrolledToBottom(event.nativeEvent)
-      }}
+      onScroll={onScroll}
       renderItem={renderItem}
       scrollEventThrottle={16}
       onViewableItemsChanged={

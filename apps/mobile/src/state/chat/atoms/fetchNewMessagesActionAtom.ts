@@ -539,12 +539,20 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
 
 const lastRefreshAtom = atom<UnixMilliseconds>(UnixMilliseconds0)
 
+// Only meant to collapse duplicate triggers firing in a burst (e.g. resume
+// in-app loading task + background task). Must stay short — this sweep is the
+// only way users without push notifications learn about new messages on
+// resume, so a long window would make briefly-backgrounded messages invisible.
+const REFRESH_ALL_INBOXES_THROTTLE_MS = 5_000
+const FETCH_INBOX_CONCURRENCY = 6
+
 const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
   return Effect.gen(function* (_) {
     const lastRefresh = get(lastRefreshAtom)
 
-    if (unixMillisecondsNow() - lastRefresh < 120) return 'done' as const
-    console.log(`Last refresh before ${unixMillisecondsNow() - lastRefresh}`)
+    if (unixMillisecondsNow() - lastRefresh < REFRESH_ALL_INBOXES_THROTTLE_MS)
+      return 'done' as const
+    console.log(`Last refresh before ${unixMillisecondsNow() - lastRefresh}ms`)
 
     set(lastRefreshAtom, unixMillisecondsNow())
     const measure = startMeasure('Fetch inboxes')
@@ -557,7 +565,7 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
           key: inbox.inbox.privateKey.publicKeyPemBase64,
         }).pipe(Effect.either)
       ),
-      Effect.allWith({concurrency: 'unbounded'}),
+      Effect.allWith({concurrency: FETCH_INBOX_CONCURRENCY}),
       effectWithEnsuredBenchmark('Fetch all inboxes')
     )
 
@@ -567,7 +575,15 @@ const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
 
     measure()
     return 'done' as const
-  })
+  }).pipe(
+    // The throttle timestamp is set before fetching — roll it back when the
+    // sweep does not complete so the next trigger is not silently skipped.
+    Effect.tapErrorCause(() =>
+      Effect.sync(() => {
+        set(lastRefreshAtom, UnixMilliseconds0)
+      })
+    )
+  )
 })
 
 export default fetchMessagesForAllInboxesAtom

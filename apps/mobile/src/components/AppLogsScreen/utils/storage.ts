@@ -1,10 +1,24 @@
 /**
- * We don't use atoms here to make it at least somewhat performant. We assume storing 1_000 log lines
+ * We don't use atoms here to make it at least somewhat performant. Logs are
+ * kept as a ring buffer capped at MAX_LOG_LINES lines (cached in memory so we
+ * don't re-read and re-split the whole blob on every stored line).
  */
 import {storage} from '../../../utils/mmkv/effectMmkv'
 
 export const LOGS_KEY = 'logs'
 export const IS_CUSTOM_LOGGKING_ENABLED_KEY = 'logs_enabled'
+
+const MAX_LOG_LINES = 1_000
+
+let cachedLogLines: string[] | undefined
+
+function getLogLines(): string[] {
+  if (cachedLogLines === undefined) {
+    const raw = storage._storage.getString(LOGS_KEY)
+    cachedLogLines = raw ? raw.split('\n') : []
+  }
+  return cachedLogLines
+}
 
 export function setCustomLoggingEnabled(enabled: boolean): void {
   storage._storage.set(IS_CUSTOM_LOGGKING_ENABLED_KEY, enabled)
@@ -15,23 +29,21 @@ export function getCustomLoggingEnabled(): boolean {
 }
 
 export function readLogs(): string[] {
-  return storage._storage.getString(LOGS_KEY)?.split('\n') ?? []
+  return getLogLines()
 }
 
 export function readLogsRaw(): string {
-  return storage._storage.getString(LOGS_KEY) ?? '[[NO LOGS YET]]'
+  const logs = storage._storage.getString(LOGS_KEY)
+  return logs !== undefined && logs !== '' ? logs : '[[NO LOGS YET]]'
 }
 
 export function storeLog(logMessage: string): void {
-  const logsSoFar = storage._storage.getString(LOGS_KEY)
-  if (logsSoFar) {
-    storage._storage.set(LOGS_KEY, logsSoFar + `\n${logMessage}`)
-  } else {
-    storage._storage.set(LOGS_KEY, logMessage)
-  }
+  cachedLogLines = [...getLogLines(), logMessage].slice(-MAX_LOG_LINES)
+  storage._storage.set(LOGS_KEY, cachedLogLines.join('\n'))
 }
 
 export function clearLogs(): void {
+  cachedLogLines = []
   storage._storage.delete(LOGS_KEY)
 }
 

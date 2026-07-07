@@ -56,7 +56,10 @@ import {useAppState} from '../useAppState'
 import {displayLocalNotification} from './displayLocalNotification'
 import {getDefaultChannel} from './notificationChannels'
 import {processVexlProductNotificationActionAtom} from './processVexlProductNotification'
-import {showDebugNotificationIfEnabled} from './showDebugNotificationIfEnabled'
+import {
+  getShowDebugNotifications,
+  showDebugNotificationIfEnabled,
+} from './showDebugNotificationIfEnabled'
 
 const WebSocketConstructorLive = Layer.succeed(
   Socket.WebSocketConstructor,
@@ -315,17 +318,19 @@ const processNewStreamNotificationActionAtom = atom(
         return
       }
 
-      void showDebugNotificationIfEnabled({
-        title: `Notification ${message._tag}`,
-        subtitle: 'processNewStreamNotificationActionAtom',
-        body: JSON.stringify(
-          {
-            data: message,
-          },
-          null,
-          2
-        ),
-      })
+      // Only pay for the pretty stringify when debug notifications are on.
+      if (getShowDebugNotifications())
+        void showDebugNotificationIfEnabled({
+          title: `Notification ${message._tag}`,
+          subtitle: 'processNewStreamNotificationActionAtom',
+          body: JSON.stringify(
+            {
+              data: message,
+            },
+            null,
+            2
+          ),
+        })
 
       yield* _(
         Match.value(message).pipe(
@@ -377,7 +382,7 @@ const processNewStreamNotificationActionAtom = atom(
         if (e._tag === 'Success')
           return Console.log(
             '✅ Processed notification stream message',
-            JSON.stringify(message, null, 2)
+            message._tag
           )
         return reportErrorE(
           'error',

@@ -263,7 +263,6 @@ function TextMessageActionMenu({
     <Modal
       animationType="fade"
       onRequestClose={onClose}
-      statusBarTranslucent
       transparent
       visible={true}
     >

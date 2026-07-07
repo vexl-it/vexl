@@ -116,6 +116,7 @@ import {
 import {realUserDataAtom} from '../../state/session/userDataAtoms'
 import {andThenExpectVoidNoErrors} from '../../utils/andThenExpectNoErrors'
 import {
+  apiPreset,
   commitHash,
   enableHiddenFeatures,
   packageName,
@@ -148,6 +149,13 @@ import {
   generateTestContacts,
   NUMBER_OF_TEST_CONTACTS,
 } from './utils/generateTestContacts'
+
+// The perf seed buttons upload fake contact hashes and auto-approve real chat
+// requests against whatever backend the app is pointed at. They are meant only
+// for the local seeding workflow (see tooling/dev/README.md), which runs the
+// app against the `local` env preset, so hard-guard them to that preset to
+// prevent polluting real accounts on staging/production.
+const isLocalEnvPreset = apiPreset === 'localEnv'
 
 const DEBUG_EUROPE_OFFERS_PREFIX = 'debug-europe-offer-'
 const DEBUG_FILTER_TEST_OFFERS_PREFIX = 'debug-filter-test-offer-'
@@ -695,176 +703,189 @@ function DebugScreen(): React.ReactElement {
               Alert.alert('Done')
             }}
           />
-          <Button
-            variant="primary"
-            size="small"
-            text="Seed perf: import 200 fake contacts"
-            onPress={() => {
-              // Matches tooling/dev/seed-perf-data.ts: direct fake users are
-              // +420777000000 + i for i < ceil(N_USERS * 2/3) with N_USERS=300
-              // (the `numbersToImportInApp` list of seed-fake-numbers.json).
-              const numbersToImport = effectPipe(
-                Array.makeBy(200, (i) => `+${420777000000 + i}`),
-                Array.map((number) =>
-                  Schema.decodeSync(E164PhoneNumber)(number)
-                )
-              )
-
-              const existingRawNumbers = new Set(
-                store.get(storedContactsAtom).map((c) => c.info.rawNumber)
-              )
-              const newStoredContacts = effectPipe(
-                numbersToImport,
-                Array.filter((number) => !existingRawNumbers.has(number)),
-                Array.filterMap((number): Option.Option<StoredContact> => {
-                  const hash = hashPhoneNumber(number)
-                  if (hash._tag !== 'Right') return Option.none()
-                  return Option.some({
-                    info: {
-                      name: `Seed user ${number.slice(-3)}`,
-                      label: Option.none(),
-                      nonUniqueContactId: Option.none(),
-                      numberToDisplay: number,
-                      rawNumber: number,
-                    },
-                    computedValues: Option.some({
-                      normalizedNumber: number,
-                      hash: hash.right,
-                    }),
-                    serverHashToClient: Option.none(),
-                    flags: {
-                      seen: true,
-                      imported: false,
-                      importedManually: true,
-                      invalidNumber: 'valid',
-                    },
-                  })
-                })
-              )
-              store.set(storedContactsAtom, (existing) => [
-                ...existing,
-                ...newStoredContacts,
-              ])
-
-              Effect.runFork(
-                store
-                  .set(submitContactsActionAtom, {
-                    normalizeAndImportAll: false,
-                    numbersToImport,
-                    showOfferReencryptionDialog: false,
-                    showContactImportProgressDialog: true,
-                  })
-                  .pipe(
-                    Effect.tap((result) =>
-                      Effect.sync(() => {
-                        Alert.alert('Seed contacts import', result)
-                      })
+          {isLocalEnvPreset ? (
+            <>
+              <Button
+                variant="primary"
+                size="small"
+                text="Seed perf: import 200 fake contacts"
+                onPress={() => {
+                  if (!isLocalEnvPreset) {
+                    Alert.alert('Only available on the local env preset')
+                    return
+                  }
+                  // Matches tooling/dev/seed-perf-data.ts: direct fake users are
+                  // +420777000000 + i for i < ceil(N_USERS * 2/3) with N_USERS=300
+                  // (the `numbersToImportInApp` list of seed-fake-numbers.json).
+                  const numbersToImport = effectPipe(
+                    Array.makeBy(200, (i) => `+${420777000000 + i}`),
+                    Array.map((number) =>
+                      Schema.decodeSync(E164PhoneNumber)(number)
                     )
                   )
-              )
-            }}
-          />
-          <Button
-            variant="primary"
-            size="small"
-            text="Seed perf: approve all chat requests"
-            onPress={() => {
-              const pending = effectPipe(
-                store.get(messagingStateAtom),
-                Array.flatMap((inbox) =>
-                  effectPipe(
-                    inbox.chats,
-                    Array.filterMap((chatWithMessages) => {
-                      const lastMessage = chatWithMessages.messages.at(-1)
-                      return lastMessage?.message.messageType ===
-                        'REQUEST_MESSAGING' && lastMessage.state === 'received'
-                        ? Option.some({
-                            inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
-                            senderKey:
-                              chatWithMessages.chat.otherSide.publicKey,
+
+                  const existingRawNumbers = new Set(
+                    store.get(storedContactsAtom).map((c) => c.info.rawNumber)
+                  )
+                  const newStoredContacts = effectPipe(
+                    numbersToImport,
+                    Array.filter((number) => !existingRawNumbers.has(number)),
+                    Array.filterMap((number): Option.Option<StoredContact> => {
+                      const hash = hashPhoneNumber(number)
+                      if (hash._tag !== 'Right') return Option.none()
+                      return Option.some({
+                        info: {
+                          name: `Seed user ${number.slice(-3)}`,
+                          label: Option.none(),
+                          nonUniqueContactId: Option.none(),
+                          numberToDisplay: number,
+                          rawNumber: number,
+                        },
+                        computedValues: Option.some({
+                          normalizedNumber: number,
+                          hash: hash.right,
+                        }),
+                        serverHashToClient: Option.none(),
+                        flags: {
+                          seen: true,
+                          imported: false,
+                          importedManually: true,
+                          invalidNumber: 'valid',
+                        },
+                      })
+                    })
+                  )
+                  store.set(storedContactsAtom, (existing) => [
+                    ...existing,
+                    ...newStoredContacts,
+                  ])
+
+                  Effect.runFork(
+                    store
+                      .set(submitContactsActionAtom, {
+                        normalizeAndImportAll: false,
+                        numbersToImport,
+                        showOfferReencryptionDialog: false,
+                        showContactImportProgressDialog: true,
+                      })
+                      .pipe(
+                        Effect.tap((result) =>
+                          Effect.sync(() => {
+                            Alert.alert('Seed contacts import', result)
                           })
-                        : Option.none()
-                    })
-                  )
-                )
-              )
-
-              if (!Array.isNonEmptyArray(pending)) {
-                Alert.alert('No pending chat requests found')
-                return
-              }
-              Alert.alert(
-                'Started',
-                `Approving ${pending.length} chat requests. Watch console for progress.`
-              )
-
-              Effect.runFork(
-                effectPipe(
-                  Effect.forEach(
-                    pending,
-                    ({inboxKey, senderKey}, i) =>
-                      Effect.gen(function* (_) {
-                        const focusedChatAtom = focusChatByInboxKeyAndSenderKey(
-                          {
-                            inboxKey,
-                            senderKey,
-                          }
                         )
-                        const definiteChatAtom: PrimitiveAtom<ChatWithMessages> =
-                          atom(
-                            (get) =>
-                              get(focusedChatAtom) ?? dummyChatWithMessages,
-                            (
-                              get,
-                              set,
-                              update: SetStateAction<ChatWithMessages>
-                            ) => {
-                              const current = get(focusedChatAtom)
-                              if (current === undefined) return
-                              set(
-                                focusedChatAtom,
-                                typeof update === 'function'
-                                  ? update(current)
-                                  : update
+                      )
+                  )
+                }}
+              />
+              <Button
+                variant="primary"
+                size="small"
+                text="Seed perf: approve all chat requests"
+                onPress={() => {
+                  if (!isLocalEnvPreset) {
+                    Alert.alert('Only available on the local env preset')
+                    return
+                  }
+                  const pending = effectPipe(
+                    store.get(messagingStateAtom),
+                    Array.flatMap((inbox) =>
+                      effectPipe(
+                        inbox.chats,
+                        Array.filterMap((chatWithMessages) => {
+                          const lastMessage = chatWithMessages.messages.at(-1)
+                          return lastMessage?.message.messageType ===
+                            'REQUEST_MESSAGING' &&
+                            lastMessage.state === 'received'
+                            ? Option.some({
+                                inboxKey:
+                                  inbox.inbox.privateKey.publicKeyPemBase64,
+                                senderKey:
+                                  chatWithMessages.chat.otherSide.publicKey,
+                              })
+                            : Option.none()
+                        })
+                      )
+                    )
+                  )
+
+                  if (!Array.isNonEmptyArray(pending)) {
+                    Alert.alert('No pending chat requests found')
+                    return
+                  }
+                  Alert.alert(
+                    'Started',
+                    `Approving ${pending.length} chat requests. Watch console for progress.`
+                  )
+
+                  Effect.runFork(
+                    effectPipe(
+                      Effect.forEach(
+                        pending,
+                        ({inboxKey, senderKey}, i) =>
+                          Effect.gen(function* (_) {
+                            const focusedChatAtom =
+                              focusChatByInboxKeyAndSenderKey({
+                                inboxKey,
+                                senderKey,
+                              })
+                            const definiteChatAtom: PrimitiveAtom<ChatWithMessages> =
+                              atom(
+                                (get) =>
+                                  get(focusedChatAtom) ?? dummyChatWithMessages,
+                                (
+                                  get,
+                                  set,
+                                  update: SetStateAction<ChatWithMessages>
+                                ) => {
+                                  const current = get(focusedChatAtom)
+                                  if (current === undefined) return
+                                  set(
+                                    focusedChatAtom,
+                                    typeof update === 'function'
+                                      ? update(current)
+                                      : update
+                                  )
+                                }
                               )
-                            }
+                            yield* _(
+                              taskEitherToEffect(
+                                store.set(acceptMessagingRequestAtom, {
+                                  chatAtom: definiteChatAtom,
+                                  approve: true,
+                                  text: 'Hi! Sure, let us talk.',
+                                })
+                              )
+                            )
+                            console.log(
+                              `Approved chat request ${i + 1}/${pending.length}`
+                            )
+                          }),
+                        {concurrency: 3}
+                      ),
+                      Effect.tap((results) =>
+                        Effect.sync(() => {
+                          Alert.alert(
+                            'Done',
+                            `Approved ${results.length} chat requests`
                           )
-                        yield* _(
-                          taskEitherToEffect(
-                            store.set(acceptMessagingRequestAtom, {
-                              chatAtom: definiteChatAtom,
-                              approve: true,
-                              text: 'Hi! Sure, let us talk.',
-                            })
+                        })
+                      ),
+                      Effect.tapError((error) =>
+                        Effect.sync(() => {
+                          console.error('Error approving chat requests', error)
+                          Alert.alert(
+                            'Error approving chat requests',
+                            JSON.stringify(error, null, 2).slice(0, 800)
                           )
-                        )
-                        console.log(
-                          `Approved chat request ${i + 1}/${pending.length}`
-                        )
-                      }),
-                    {concurrency: 3}
-                  ),
-                  Effect.tap((results) =>
-                    Effect.sync(() => {
-                      Alert.alert(
-                        'Done',
-                        `Approved ${results.length} chat requests`
+                        })
                       )
-                    })
-                  ),
-                  Effect.tapError((error) =>
-                    Effect.sync(() => {
-                      console.error('Error approving chat requests', error)
-                      Alert.alert(
-                        'Error approving chat requests',
-                        JSON.stringify(error, null, 2).slice(0, 800)
-                      )
-                    })
+                    )
                   )
-                )
-              )
-            }}
-          />
+                }}
+              />
+            </>
+          ) : null}
           <Button
             variant="primary"
             size="small"

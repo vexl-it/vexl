@@ -71,6 +71,17 @@ ideally on a faster device/emulator.
 - **Suggested follow-ups:** measure release-build cold start of the headless background task on a
   low-end device; consider gating the background task's work (it already early-returns when app is
   `active`, but the JS app still fully boots first).
+- **Implemented (this branch):** raised the background task `minimumInterval` from 15 min to
+  4 hours (`apps/mobile/src/utils/backgroundTask/index.ts`) — a 16× cut in headless full-app boots.
+  The task's two jobs (new-offers notification, max 1/24 h; fallback chat-inbox sweep for users
+  without working push) don't need a 15-min cadence, and the OS treats the value as an inexact
+  minimum anyway. Because `registerTaskAsync` is a no-op for an already-registered task,
+  `setupBackgroundTask` now reads the persisted options via `TaskManager.getTaskOptionsAsync` and
+  unregisters + re-registers when the interval differs, so existing installs migrate off 15 min.
+  Deliberately **not** done: registering only when the `newOfferInMarketplace` preference is on —
+  the task also delivers the background chat-message sweep (with local chat notifications), which
+  must keep running regardless of that preference; and lazy-loading the headless boot itself
+  (index.js import graph split) — too invasive pre-release.
 
 ### 3. 🟡 Session read race at startup: "Using dummy session" warning while logged in
 

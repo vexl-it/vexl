@@ -5,11 +5,6 @@ import {
 import {type NewChatMessageNoticeNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {
-  UnixMilliseconds0,
-  unixMillisecondsNow,
-  type UnixMilliseconds,
-} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import retrieveMessages, {
   type ApiErrorRetrievingMessages,
   type RetrievedChatMessage,
@@ -20,7 +15,7 @@ import {
   taskToEffect,
 } from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {Array, Effect, Option, Record, Schema} from 'effect/index'
+import {Array, Effect, Fiber, Option, Record, Schema} from 'effect/index'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
@@ -537,53 +532,59 @@ export const fetchAndStoreMessagesForInboxHandleNotificationsActionAtom = atom<
   })
 )
 
-const lastRefreshAtom = atom<UnixMilliseconds>(UnixMilliseconds0)
-
-// Only meant to collapse duplicate triggers firing in a burst (e.g. resume
-// in-app loading task + background task). Must stay short — this sweep is the
-// only way users without push notifications learn about new messages on
-// resume, so a long window would make briefly-backgrounded messages invisible.
-const REFRESH_ALL_INBOXES_THROTTLE_MS = 5_000
+// Holds the currently running full-inbox sweep so that concurrent triggers
+// join it instead of starting a duplicate. This replaces a wall-clock throttle:
+// de-duping only collapses triggers that overlap an in-progress sweep, while a
+// time window would also skip a sweep that follows a recent one. That matters
+// for users without push notifications, for whom the resume sweep is the only
+// way new messages surface — a throttle would drop it and hide messages that
+// arrived during a brief background.
+const inFlightFetchFiberAtom = atom<Fiber.RuntimeFiber<'done'> | null>(null)
 const FETCH_INBOX_CONCURRENCY = 6
 
 const fetchMessagesForAllInboxesAtom = atom(null, (get, set) => {
   return Effect.gen(function* (_) {
-    const lastRefresh = get(lastRefreshAtom)
+    const inFlightFetch = get(inFlightFetchFiberAtom)
+    if (inFlightFetch) return yield* _(Fiber.join(inFlightFetch))
 
-    if (unixMillisecondsNow() - lastRefresh < REFRESH_ALL_INBOXES_THROTTLE_MS)
-      return 'done' as const
-    console.log(`Last refresh before ${unixMillisecondsNow() - lastRefresh}ms`)
-
-    set(lastRefreshAtom, unixMillisecondsNow())
     const measure = startMeasure('Fetch inboxes')
     console.log('Refreshing all inboxes')
 
-    yield* _(
-      get(messagingStateAtom),
-      Array.map((inbox) =>
-        set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
-          key: inbox.inbox.privateKey.publicKeyPemBase64,
-        }).pipe(Effect.either)
-      ),
-      Effect.allWith({concurrency: FETCH_INBOX_CONCURRENCY}),
-      effectWithEnsuredBenchmark('Fetch all inboxes')
+    // Fork as a daemon so a single sweep runs to completion (and clears the
+    // in-flight marker) even if the trigger that started it is interrupted,
+    // while every joiner still awaits the same real fetch.
+    const fiber = yield* _(
+      Effect.gen(function* (_) {
+        yield* _(
+          get(messagingStateAtom),
+          Array.map((inbox) =>
+            set(fetchAndStoreMessagesForInboxHandleNotificationsActionAtom, {
+              key: inbox.inbox.privateKey.publicKeyPemBase64,
+            }).pipe(Effect.either)
+          ),
+          Effect.allWith({concurrency: FETCH_INBOX_CONCURRENCY}),
+          effectWithEnsuredBenchmark('Fetch all inboxes')
+        )
+
+        if (Platform.OS === 'ios') {
+          void cancelNewChatNotifications()
+        }
+
+        measure()
+        return 'done' as const
+      }).pipe(
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(inFlightFetchFiberAtom, null)
+          })
+        ),
+        Effect.forkDaemon
+      )
     )
 
-    if (Platform.OS === 'ios') {
-      void cancelNewChatNotifications()
-    }
-
-    measure()
-    return 'done' as const
-  }).pipe(
-    // The throttle timestamp is set before fetching — roll it back when the
-    // sweep does not complete so the next trigger is not silently skipped.
-    Effect.tapErrorCause(() =>
-      Effect.sync(() => {
-        set(lastRefreshAtom, UnixMilliseconds0)
-      })
-    )
-  )
+    set(inFlightFetchFiberAtom, fiber)
+    return yield* _(Fiber.join(fiber))
+  })
 })
 
 export default fetchMessagesForAllInboxesAtom

@@ -44,6 +44,13 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
         `Skipping repeating task ${jobName} because another worker holds the lock`
       )
     ),
+    // Defects (thrown exceptions, Effect.die) are not covered by the typed
+    // catches above. Without this they would reject into BullMQ's processor
+    // and vanish as a removed failed job — log them and let the scheduler
+    // fire the next tick.
+    Effect.catchAllDefect((defect) =>
+      Effect.logError(`Repeating task ${jobName} died with a defect`, defect)
+    ),
     Effect.withSpan(`RepeatingTask/${jobName}`)
   )
 
@@ -100,8 +107,8 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
       yield* _(
         Effect.acquireRelease(
           Effect.try({
-            try: () =>
-              new Worker(
+            try: () => {
+              const worker = new Worker(
                 queueName,
                 async () => {
                   await Runtime.runPromise(runtime)(taskWithLock)
@@ -111,7 +118,20 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
                   prefix,
                   concurrency: 1,
                 }
-              ),
+              )
+              // BullMQ emits 'error' for connection-level problems. An
+              // EventEmitter 'error' event with no listener crashes the
+              // process, so a Redis blip must be logged, not fatal.
+              worker.on('error', (error) => {
+                Runtime.runSync(runtime)(
+                  Effect.logError(
+                    `Worker for repeating task ${jobName} emitted an error`,
+                    error
+                  )
+                )
+              })
+              return worker
+            },
             catch: (e) => e,
           }),
           (worker) =>

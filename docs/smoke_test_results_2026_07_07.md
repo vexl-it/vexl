@@ -1,6 +1,8 @@
 # Smoke test results — 2026-07-07 (pre-release, branch `smoke-test`)
 
-Smoke test of the app ahead of the next release (last release tag `1.43.6_800`, ~60 commits since).
+Smoke test of the app ahead of the next release. Baseline: last release `1.43.6_800` (tagged on a
+one-commit release branch off `0f43a4b11`, so the tag itself is not in this history); this branch
+is ~129 commits ahead of that release's branch point.
 Setup: local backend (`pnpm dev:backend`, all services ready), Metro via `pnpm dev:mobile -p android`,
 Android emulator "VexlPerf API 36" (2 GB RAM) with a previously installed dev-client build
 (`it.vexl.nextstaging`, ENV_PRESET=local, seeded perf account with 400 offers).

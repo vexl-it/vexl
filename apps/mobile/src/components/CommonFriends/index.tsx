@@ -6,16 +6,15 @@ import {
   type CommonFriend,
 } from '@vexl-next/ui'
 import {Array, Effect, HashMap, Option, pipe} from 'effect'
-import {Contact, ContactField} from 'expo-contacts'
 import {useAtomValue, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {Platform} from 'react-native'
 import {
   type CommonFriendsClub,
   type RootStackScreenProps,
 } from '../../navigationTypes'
 import createImportedContactsForHashesAtom from '../../state/contacts/atom/createImportedContactsForHashesAtom'
 import {type StoredContactWithComputedValues} from '../../state/contacts/domain'
+import {getContactImageUri} from '../../state/contacts/getContactImageUri'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
@@ -40,21 +39,10 @@ const resolveContactImage = (
     onNone: () => Effect.succeed(null),
     onSome: (id) =>
       pipe(
-        Effect.tryPromise(() =>
-          new Contact(id).getDetails([ContactField.IMAGE])
+        Effect.tryPromise(() => getContactImageUri(id)),
+        Effect.map((uri) =>
+          uri ? {hash: contact.computedValues.hash, uri} : null
         ),
-        Effect.map((resolved) => {
-          const uri = resolved.image
-
-          // TODO: lets monitor this issue in https://github.com/vexl-it/vexl/issues/1984
-          // and then change back to previous behaviour once fixed
-          if (
-            !uri ||
-            (Platform.OS === 'ios' && resolved.id.includes(':ABPerson'))
-          )
-            return null
-          return {hash: contact.computedValues.hash, uri}
-        }),
         Effect.catchAll(() => Effect.succeed(null))
       ),
   })

@@ -70,8 +70,18 @@ export async function dismissNseEnrichedNotificationsForChat({
           )
         )
       ),
+      // A dismiss failure must never block the JS-side local notification that
+      // follows this call, so each rejection is reported and swallowed.
       Array.map(async (notification) => {
-        await dismissNotificationAsync(notification.request.identifier)
+        await dismissNotificationAsync(notification.request.identifier).catch(
+          (error: unknown) => {
+            reportError(
+              'warn',
+              new Error('Failed to dismiss NSE enriched chat notification'),
+              {error}
+            )
+          }
+        )
       })
     )
   )

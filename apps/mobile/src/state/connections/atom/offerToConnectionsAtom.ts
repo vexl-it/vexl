@@ -20,7 +20,6 @@ import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import getValueFromSetStateActionOfAtom from '../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import notEmpty from '../../../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../../../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
@@ -152,12 +151,15 @@ export const upsertOfferToConnectionsActionAtom = atom<
 })
 
 export const deleteOrphanRecordsActionAtom = atom(null, (get, set) => {
-  const adminIds = get(offersStateAtom)
-    .offers.map((one) => one.ownershipInfo?.adminId)
-    .filter(notEmpty)
+  const adminIds = new Set(
+    pipe(
+      get(offersStateAtom).offers,
+      Array.filterMap((one) => Option.fromNullable(one.ownershipInfo?.adminId))
+    )
+  )
   set(offerToConnectionsAtom, (old) => ({
-    offerToConnections: old.offerToConnections.filter((one) =>
-      adminIds.includes(one.adminId)
+    offerToConnections: Array.filter(old.offerToConnections, (one) =>
+      adminIds.has(one.adminId)
     ),
   }))
 })
@@ -233,7 +235,21 @@ const processClubConnections = ({
   )
 }
 
-export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
+interface UpdateSingleOfferConnectionParams {
+  adminId: OfferAdminId
+  intendedClubs?: readonly ClubUuid[]
+  intendedConnectionLevel?: IntendedConnectionLevel
+  stopProcessingAfter?: UnixMilliseconds
+  onProgress?: (status: OfferEncryptionProgress) => void
+}
+
+/**
+ * Uploads new/removed private parts for a single offer and returns an updater
+ * that applies the resulting connection changes to the locally stored
+ * `OfferToConnectionsItem`. Persisting the returned update is left to the
+ * caller so batch flows can coalesce all offers into a single storage write.
+ */
+const computeSingleOfferConnectionUpdateActionAtom = atom(
   null,
   (
     get,
@@ -244,13 +260,7 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
       intendedConnectionLevel,
       stopProcessingAfter,
       onProgress,
-    }: {
-      adminId: OfferAdminId
-      intendedClubs?: readonly ClubUuid[]
-      intendedConnectionLevel?: IntendedConnectionLevel
-      stopProcessingAfter?: UnixMilliseconds
-      onProgress?: (status: OfferEncryptionProgress) => void
-    }
+    }: UpdateSingleOfferConnectionParams
   ) =>
     Effect.gen(function* (_) {
       const offerApi = get(apiAtom).offer
@@ -342,7 +352,7 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
         )
       }
 
-      set(oneOfferConnectionsAtom, (val) => ({
+      return (val: OfferToConnectionsItem): OfferToConnectionsItem => ({
         ...val,
         connections: {
           firstLevel: subtractArrays(
@@ -365,8 +375,21 @@ export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
             removedConnections,
           }),
         },
-      }))
+      })
     })
+)
+
+export const updateAndReencryptSingleOfferConnectionActionAtom = atom(
+  null,
+  (get, set, params: UpdateSingleOfferConnectionParams) =>
+    set(computeSingleOfferConnectionUpdateActionAtom, params).pipe(
+      Effect.map((applyConnectionsUpdate) => {
+        set(
+          createSingleOfferToConnectionsAtom(params.adminId),
+          applyConnectionsUpdate
+        )
+      })
+    )
 )
 
 export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
@@ -415,11 +438,38 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
 
       const offerToConnectionsAtoms = get(offerToConnectionsAtomsAtom)
 
+      // Per-offer results are accumulated in memory and persisted in chunks
+      // (each write re-encodes and re-writes the entire storage blob, so
+      // writing once per offer is prohibitively expensive, while a single
+      // end-of-run write would lose every already-uploaded offer's local
+      // record if the process is hard-killed mid-run). The final flush runs
+      // via `Effect.ensuring` so updates that succeeded are persisted even
+      // on partial failure or interruption.
+      const PERSIST_CONNECTION_UPDATES_CHUNK_SIZE = 10
+      const pendingConnectionUpdates = new Map<
+        OfferAdminId,
+        (val: OfferToConnectionsItem) => OfferToConnectionsItem
+      >()
+      const persistPendingConnectionUpdates = (): void => {
+        if (pendingConnectionUpdates.size === 0) return
+        set(offerToConnectionsAtom, (old) => ({
+          ...old,
+          offerToConnections: Array.map(old.offerToConnections, (one) => {
+            const applyConnectionsUpdate = pendingConnectionUpdates.get(
+              one.adminId
+            )
+            return applyConnectionsUpdate ? applyConnectionsUpdate(one) : one
+          }),
+        }))
+        // The updaters are not idempotent — never apply a flushed one again.
+        pendingConnectionUpdates.clear()
+      }
+
       return yield* _(
         offerToConnectionsAtoms,
         Array.map((oneOfferAtom, i) => {
           const adminId = get(oneOfferAtom).adminId
-          return set(updateAndReencryptSingleOfferConnectionActionAtom, {
+          return set(computeSingleOfferConnectionUpdateActionAtom, {
             adminId,
             onProgress: onProgres
               ? (progress) => {
@@ -432,7 +482,15 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
               : undefined,
             stopProcessingAfter,
           }).pipe(
-            Effect.zipRight(Effect.succeed({adminId, success: true})),
+            Effect.map((applyConnectionsUpdate) => {
+              pendingConnectionUpdates.set(adminId, applyConnectionsUpdate)
+              if (
+                pendingConnectionUpdates.size >=
+                PERSIST_CONNECTION_UPDATES_CHUNK_SIZE
+              )
+                persistPendingConnectionUpdates()
+              return {adminId, success: true}
+            }),
             Effect.catchAll((e) =>
               Effect.sync(() => {
                 if (e._tag === 'SkippedBecauseTimeLimitReached') {
@@ -459,6 +517,7 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
           )
         }),
         Effect.all,
+        Effect.ensuring(Effect.sync(persistPendingConnectionUpdates)),
         Effect.tap((res) =>
           Effect.sync(() => {
             const timePretty = endUpdateOfferConnectionsMeasure()

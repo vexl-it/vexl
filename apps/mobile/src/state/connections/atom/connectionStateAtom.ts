@@ -75,64 +75,79 @@ export const syncConnectionsActionAtom = atom(
       const secondLevel = yield* _(fetchContacts('SECOND', api.contact))
 
       // report difference
+      // Forked and time-limited (like the metrics report below) so a hanging
+      // push-token fetch can never stall the connections sync.
       const connectionState = get(connectionStateAtom)
 
-      if (
-        !!connectionState.lastUpdate &&
-        !!(yield* _(getNotificationTokenE()))
-      ) {
-        const newFirstLevelConnections = Array.difference(firstLevel)(
-          connectionState.firstLevel
-        )
-        const newSecondLevelConnections = Array.difference(secondLevel)(
-          connectionState.secondLevel
-        )
-        const newConnectionsUnique = pipe(
-          newFirstLevelConnections,
-          Array.appendAll(newSecondLevelConnections),
-          Array.dedupe
-        )
+      if (connectionState.lastUpdate) {
+        yield* _(
+          Effect.gen(function* (_) {
+            const notificationToken = yield* _(
+              getNotificationTokenE(),
+              Effect.timeout('3 seconds'),
+              Effect.option
+            )
+            if (
+              Option.isNone(notificationToken) ||
+              notificationToken.value === null
+            )
+              return
 
-        console.log('🦋 New connections:', newConnectionsUnique.length)
+            const newFirstLevelConnections = Array.difference(firstLevel)(
+              connectionState.firstLevel
+            )
+            const newSecondLevelConnections = Array.difference(secondLevel)(
+              connectionState.secondLevel
+            )
+            const newConnectionsUnique = pipe(
+              newFirstLevelConnections,
+              Array.appendAll(newSecondLevelConnections),
+              Array.dedupe
+            )
 
-        // only if notification tracking id has been passed
-        if (notificationTrackingId) {
-          const notificationsEnabled = yield* _(
-            areNotificationsEnabledE(),
-            Effect.option
-          )
+            console.log('🦋 New connections:', newConnectionsUnique.length)
 
-          yield* _(
-            api.metrics
-              .reportNotificationInteraction({
-                count: newConnectionsUnique.length,
-                notificationType: 'Network',
-                ...(Option.isSome(notificationsEnabled)
-                  ? {
-                      notificationsEnabled:
-                        notificationsEnabled.value.notifications,
-                      backgroundTaskEnabled:
-                        notificationsEnabled.value.backgroundTasks,
-                    }
-                  : {}),
-                type: 'NewConnectionsReceived',
-                uuid: generateUuid(),
-                trackingId: notificationTrackingId,
-              })
-              .pipe(
-                Effect.timeout(500),
-                Effect.retry({times: 3}),
-                Effect.tapError((e) =>
-                  reportErrorE(
-                    'warn',
-                    new Error('Error reporting new connections'),
-                    {e}
-                  )
-                ),
-                Effect.forkDaemon
+            // only if notification tracking id has been passed
+            if (notificationTrackingId) {
+              const notificationsEnabled = yield* _(
+                areNotificationsEnabledE(),
+                Effect.option
               )
-          )
-        }
+
+              yield* _(
+                api.metrics
+                  .reportNotificationInteraction({
+                    count: newConnectionsUnique.length,
+                    notificationType: 'Network',
+                    ...(Option.isSome(notificationsEnabled)
+                      ? {
+                          notificationsEnabled:
+                            notificationsEnabled.value.notifications,
+                          backgroundTaskEnabled:
+                            notificationsEnabled.value.backgroundTasks,
+                        }
+                      : {}),
+                    type: 'NewConnectionsReceived',
+                    uuid: generateUuid(),
+                    trackingId: notificationTrackingId,
+                  })
+                  .pipe(
+                    Effect.timeout(500),
+                    Effect.retry({times: 3}),
+                    Effect.tapError((e) =>
+                      reportErrorE(
+                        'warn',
+                        new Error('Error reporting new connections'),
+                        {e}
+                      )
+                    )
+                  )
+              )
+            }
+          }),
+          Effect.ignore,
+          Effect.forkDaemon
+        )
       }
 
       const serverToClientHashesToHashedPhoneNumbersMap = yield* _(

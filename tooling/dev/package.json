@@ -9,8 +9,15 @@
     "typecheck": "tsx check-postgres-init-databases.ts && tsc --noEmit"
   },
   "devDependencies": {
+    "@effect/platform": "^0.93.6",
+    "@vexl-next/cryptography": "0.0.0",
+    "@vexl-next/domain": "0.0.0",
     "@vexl-next/eslint-config": "0.0.0",
+    "@vexl-next/generic-utils": "0.0.0",
     "@vexl-next/prettier-config": "0.0.0",
+    "@vexl-next/resources-utils": "0.0.0",
+    "@vexl-next/rest-api": "0.0.0",
+    "effect": "^3.20.0",
     "eslint": "^9.20.0",
     "prettier": "^3.3.2",
     "typescript": "~6.0.3"

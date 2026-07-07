@@ -142,6 +142,75 @@ const CHAT_URL = Schema.decodeSync(ServiceUrl)(
   process.env.CHAT_MS ?? `http://localhost:${ports.chatService}`
 )
 
+// ---------------------------------------------------------------------------
+// Safety guard: refuse to seed anything but a local backend
+// ---------------------------------------------------------------------------
+
+// This script mass-mutates backends (hundreds of fake users, offers, chats).
+// Pointing it at a shared/staging/prod service via the *_MS overrides would
+// pollute real data, so we hard-fail unless every service host is local.
+const REMOTE_OVERRIDE_ENV = 'I_KNOW_WHAT_I_AM_DOING_SEEDING_REMOTE'
+
+const isLocalHost = (host: string): boolean => {
+  // URL.hostname keeps IPv6 in brackets, e.g. "[::1]"
+  const normalized =
+    host.startsWith('[') && host.endsWith(']') ? host.slice(1, -1) : host
+  return (
+    normalized === 'localhost' ||
+    normalized.endsWith('.localhost') ||
+    normalized === '127.0.0.1' ||
+    normalized === '::1'
+  )
+}
+
+function assertLocalServiceUrls(): void {
+  const services: Array<{name: string; url: ServiceUrl}> = [
+    {name: 'CONTACT_MS', url: CONTACT_URL},
+    {name: 'OFFER_MS', url: OFFER_URL},
+    {name: 'CHAT_MS', url: CHAT_URL},
+  ]
+
+  const nonLocal = pipe(
+    services,
+    Array.filterMap(({name, url}) => {
+      let host: string
+      try {
+        host = new URL(url).hostname
+      } catch {
+        return Option.some(`${name} (${url}) is not a valid URL`)
+      }
+      return isLocalHost(host)
+        ? Option.none()
+        : Option.some(`${name} points at non-local host "${host}" (${url})`)
+    })
+  )
+
+  if (!Array.isNonEmptyArray(nonLocal)) return
+
+  if (process.env[REMOTE_OVERRIDE_ENV] === '1') {
+    console.warn(
+      '\n############################################################\n' +
+        '# WARNING: seeding a NON-LOCAL backend with fake data!\n' +
+        `# ${REMOTE_OVERRIDE_ENV}=1 is set, so the local-only guard\n` +
+        '# is bypassed. This will write hundreds of fake users, offers\n' +
+        '# and chats to:\n' +
+        nonLocal.map((line) => `#   - ${line}`).join('\n') +
+        '\n############################################################\n'
+    )
+    return
+  }
+
+  console.error(
+    'Refusing to run: seed-perf-data.ts may only target a LOCAL backend.\n' +
+      nonLocal.map((line) => `  - ${line}`).join('\n') +
+      '\n\nThis script mass-creates fake users/offers/chats and must never touch\n' +
+      'shared/staging/prod services. Point CONTACT_MS/OFFER_MS/CHAT_MS at\n' +
+      'localhost, or (only if you truly mean it) re-run with ' +
+      `${REMOTE_OVERRIDE_ENV}=1.`
+  )
+  process.exit(1)
+}
+
 const CLIENT_SEMVER = Schema.decodeSync(SemverString)('1.44.0')
 const CLIENT_VERSION = Schema.decodeSync(VersionCode)(841)
 const PLATFORM = Schema.decodeSync(PlatformName)('ANDROID')
@@ -1010,6 +1079,7 @@ async function phaseVerify(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function main(): Promise<void> {
+  assertLocalServiceUrls()
   const targetPhoneRaw = process.env.TARGET_PHONE
   if (PHASE === undefined) {
     throw new Error(

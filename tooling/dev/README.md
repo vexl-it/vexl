@@ -38,16 +38,19 @@ TARGET_PHONE=+420605123456 pnpm exec tsx tooling/dev/seed-perf-data.ts --phase r
 
 Parameters via env vars:
 
-| Variable                              | Default                                        | Meaning                                              |
-| ------------------------------------- | ---------------------------------------------- | ---------------------------------------------------- |
-| `TARGET_PHONE`                        | — (required for `register`)                    | E164 phone of the real emulator user                 |
-| `N_USERS`                             | `300`                                          | Number of fake users (2/3 direct, 1/3 second-degree) |
-| `OFFERS_PER_USER`                     | `2`                                            | Offers each fake user creates in `offers`            |
-| `N_CHATS`                             | `30`                                           | Messaging requests sent to the target in `chats`     |
-| `MSGS_PER_CHAT`                       | `40`                                           | Messages per approved chat in `messages`             |
-| `CONCURRENCY`                         | `10`                                           | Parallel API calls                                   |
-| `SEED_DIR`                            | `<os tmpdir>/vexl-seed-perf-data`              | Where the seed state files are written               |
-| `CONTACT_MS` / `OFFER_MS` / `CHAT_MS` | `http://localhost:<port>` from `dev.config.ts` | Service URL overrides                                |
+| Variable                                | Default                                        | Meaning                                              |
+| --------------------------------------- | ---------------------------------------------- | ---------------------------------------------------- |
+| `TARGET_PHONE`                          | — (required for `register`)                    | E164 phone of the real emulator user                 |
+| `N_USERS`                               | `300`                                          | Number of fake users (2/3 direct, 1/3 second-degree) |
+| `OFFERS_PER_USER`                       | `2`                                            | Offers each fake user creates in `offers`            |
+| `N_CHATS`                               | `30`                                           | Messaging requests sent to the target in `chats`     |
+| `MSGS_PER_CHAT`                         | `40`                                           | Messages per approved chat in `messages`             |
+| `CONCURRENCY`                           | `10`                                           | Parallel API calls                                   |
+| `SEED_DIR`                              | `<os tmpdir>/vexl-seed-perf-data`              | Where the seed state files are written               |
+| `CONTACT_MS` / `OFFER_MS` / `CHAT_MS`   | `http://localhost:<port>` from `dev.config.ts` | Service URL overrides                                |
+| `I_KNOW_WHAT_I_AM_DOING_SEEDING_REMOTE` | — (unset)                                      | Escape hatch to bypass the local-only guard          |
+
+The script refuses to run unless every service URL host is local (`localhost`, `*.localhost`, `127.0.0.1`, or `::1`) — this prevents accidentally seeding hundreds of fake users into a shared/staging/prod backend via the `*_MS` overrides. Set `I_KNOW_WHAT_I_AM_DOING_SEEDING_REMOTE=1` only if you truly intend to target a remote backend; it prints a loud warning and proceeds.
 
 ### Output files
 

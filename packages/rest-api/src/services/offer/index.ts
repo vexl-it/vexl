@@ -3,7 +3,10 @@ import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
-import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {
+  makeCommonAndSecurityHeaders,
+  type CommonAndSecurityHeaders,
+} from '../../apiSecurity'
 import {type CreateChallengeRequest} from '../../challenges/contracts'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
@@ -98,10 +101,10 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
-      getUserSessionCredentials,
-      commonHeaders
-    )
+    // Build security headers per request (not once at api construction) so
+    // every authenticated request reads the current session credentials.
+    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
+      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
 
     const addChallenge = addChallengeToRequest2(
       client.Challenges.createChallenge
@@ -113,7 +116,7 @@ export function api({
       ) =>
         client.getOffersForMeModifiedOrCreatedAfterPaginated({
           urlParams: req,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       getClubOffersForMeModifiedOrCreatedAfterPaginated: (
         body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest>
@@ -128,25 +131,28 @@ export function api({
       createNewOffer: (body: CreateNewOfferRequest) =>
         client.createNewOffer({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       refreshOffer: (body: RefreshOfferRequest) =>
         client.refreshOffer({payload: body}),
       deleteOffer: (req: DeleteOfferRequest) =>
         client.deleteOffer({urlParams: req}),
       updateOffer: (body: UpdateOfferRequest) =>
-        client.updateOffer({payload: body, headers: commonAndSecurityHeaders}),
+        client.updateOffer({
+          payload: body,
+          headers: commonAndSecurityHeaders(),
+        }),
       createPrivatePart: (body: CreatePrivatePartRequest) =>
         client.createPrivatePart({payload: body}),
       deletePrivatePart: (req: DeletePrivatePartRequest) =>
         client.deletePrivatePart({
           payload: req,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       getRemovedOffers: (body: RemovedOfferIdsRequest) =>
         client.getRemovedOffers({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       getRemovedClubOffers: (
         body: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
@@ -155,7 +161,10 @@ export function api({
           Effect.flatMap((body) => client.getRemovedClubOffers({payload: body}))
         ),
       reportOffer: (body: ReportOfferRequest) =>
-        client.reportOffer({payload: body, headers: commonAndSecurityHeaders}),
+        client.reportOffer({
+          payload: body,
+          headers: commonAndSecurityHeaders(),
+        }),
       reportClubOffer: (
         body: RequestWithGeneratableChallenge<ReportClubOfferRequest>
       ) =>
@@ -163,7 +172,7 @@ export function api({
           Effect.flatMap((body) =>
             client.reportClubOffer({
               payload: body,
-              headers: commonAndSecurityHeaders,
+              headers: commonAndSecurityHeaders(),
             })
           )
         ),
@@ -175,12 +184,12 @@ export function api({
       ) =>
         client.Notes.getNotesForMeModifiedOrCreatedAfterPaginated({
           urlParams: req,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       createNewNote: (body: CreateNewNoteRequest) =>
         client.Notes.createNewNote({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       deleteNote: (req: DeleteNoteRequest) =>
         client.Notes.deleteNote({urlParams: req}),
@@ -189,19 +198,19 @@ export function api({
       repostNote: (body: RepostNoteRequest) =>
         client.Notes.repostNote({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       undoRepostNote: (req: UndoRepostNoteRequest) =>
         client.Notes.undoRepostNote({urlParams: req}),
       getRemovedNotes: (body: RemovedNoteIdsRequest) =>
         client.Notes.getRemovedNotes({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       reportNote: (body: ReportNoteRequest) =>
         client.Notes.reportNote({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       // ----------------------
       // 👇 Challenge

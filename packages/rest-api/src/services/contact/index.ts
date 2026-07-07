@@ -3,7 +3,10 @@ import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
-import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {
+  makeCommonAndSecurityHeaders,
+  type CommonAndSecurityHeaders,
+} from '../../apiSecurity'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -99,26 +102,26 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
-      getUserSessionCredentials,
-      commonHeaders
-    )
+    // Build security headers per request (not once at api construction) so
+    // every authenticated request reads the current session credentials.
+    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
+      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
 
     return {
       checkUserExists: (query: CheckUserExistsRequest) =>
         client.User.checkUserExists({
           urlParams: query,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       createUser: (body: CreateUserRequest) =>
         client.User.createUser({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       refreshUser: (body: RefreshUserRequest) =>
         client.User.refreshUser({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       updateNotificationToken: ({
         body,
@@ -127,18 +130,18 @@ export function api({
       }) =>
         client.User.updateNotificationToken({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       deleteUser: () =>
-        client.User.deleteUser({headers: commonAndSecurityHeaders}),
+        client.User.deleteUser({headers: commonAndSecurityHeaders()}),
       importContacts: (body: ImportContactsRequest) =>
         client.Contact.importContacts({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       fetchMyContactsPaginated: (query: FetchMyContactsPaginatedRequest) =>
         client.Contact.fetchMyContactsPaginated({
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
           urlParams: query,
         }),
       fetchCommonConnectionsPaginated: (
@@ -146,7 +149,7 @@ export function api({
       ) =>
         client.Contact.fetchCommonConnectionsPaginated({
           payload: body,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       convertPhoneNumberHashesToServerHashes: (
         body: ConvertPhoneNumberHashesToServerHashesRequest
@@ -238,7 +241,7 @@ export function api({
           Effect.flatMap((body) =>
             client.ClubsMember.setPublicKeyV2({
               payload: body,
-              headers: commonAndSecurityHeaders,
+              headers: commonAndSecurityHeaders(),
             })
           )
         ),
@@ -249,7 +252,7 @@ export function api({
           Effect.flatMap((body) =>
             client.ClubsMember.reportClub({
               payload: body,
-              headers: commonAndSecurityHeaders,
+              headers: commonAndSecurityHeaders(),
             })
           )
         ),

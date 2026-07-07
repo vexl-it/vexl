@@ -517,7 +517,19 @@ export const updateAndReencryptAllOffersConnectionsActionAtom = atom(
           )
         }),
         Effect.all,
-        Effect.ensuring(Effect.sync(persistPendingConnectionUpdates)),
+        Effect.ensuring(
+          Effect.sync(() => {
+            persistPendingConnectionUpdates()
+            // The atom's own MMKV write is deferred behind InteractionManager
+            // and coalesced. By here the server has been mutated for every
+            // processed offer, so a kill before that deferred flush runs would
+            // drop the whole run's local connection records — leaving orphaned
+            // server private parts that the next diff-based sync never removes
+            // (current === target, so nothing is deleted). Force one synchronous
+            // durable write to bound that window to the sync loop itself.
+            offerToConnectionsAtom.flushNow()
+          })
+        ),
         Effect.tap((res) =>
           Effect.sync(() => {
             const timePretty = endUpdateOfferConnectionsMeasure()

@@ -153,5 +153,15 @@
     "typescript": "~6.0.3"
   },
   "prettier": "@vexl-next/prettier-config",
+  "expo": {
+    "autolinking": {
+      "ios": {
+        "buildFromSource": [
+          "react-native-reanimated",
+          "react-native-worklets"
+        ]
+      }
+    }
+  },
   "private": true
 }

@@ -10,12 +10,18 @@ import {BACKGROUND_TASK} from './defineBackgroundTask'
 
 // Every execution of the task boots the whole RN app headlessly (WorkManager
 // on Android), which is expensive on battery and can even trigger ANR kill
-// loops on low-end devices. The task only serves the new-offers notification
-// (sent at most once per 24h) and a fallback chat-inbox sweep for users whose
-// push notifications don't arrive, so a few runs per day are plenty. The
-// interval is an inexact minimum anyway — the OS schedules runs to minimize
-// wakeups (iOS mostly ignores short intervals altogether).
-const BACKGROUND_TASK_INTERVAL_MINS = 4 * 60
+// loops on low-end devices, so the interval should be as long as the product
+// tolerates. The ceiling is the fallback chat-inbox sweep: for users whose
+// push notifications don't arrive at all (e.g. de-googled Android without
+// Play Services — not rare among Vexl's privacy-focused users) this task is
+// the only way a chat message surfaces while the app is backgrounded, and the
+// worst-case notification latency equals this interval (more under Doze — the
+// OS treats the value as an inexact minimum; iOS mostly ignores short
+// intervals altogether). 1 hour keeps that latency tolerable for time
+// -sensitive trade chats while still cutting headless boots 4x vs the old
+// 15 min (max 24/day vs 96/day). The other job served by the task, the
+// new-offers notification, is sent at most once per 24h and doesn't care.
+const BACKGROUND_TASK_INTERVAL_MINS = 60
 
 const RegisteredTaskOptions = Schema.Struct({
   minimumInterval: Schema.optional(Schema.Number),

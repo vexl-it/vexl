@@ -72,16 +72,28 @@ ideally on a faster device/emulator.
   low-end device; consider gating the background task's work (it already early-returns when app is
   `active`, but the JS app still fully boots first).
 - **Implemented (this branch):** raised the background task `minimumInterval` from 15 min to
-  4 hours (`apps/mobile/src/utils/backgroundTask/index.ts`) — a 16× cut in headless full-app boots.
-  The task's two jobs (new-offers notification, max 1/24 h; fallback chat-inbox sweep for users
-  without working push) don't need a 15-min cadence, and the OS treats the value as an inexact
-  minimum anyway. Because `registerTaskAsync` is a no-op for an already-registered task,
+  **1 hour** (`apps/mobile/src/utils/backgroundTask/index.ts`) — a 4× cut in headless full-app
+  boots (max 24/day vs 96/day). Initially raised to 4 hours, then revisited during review (see
+  tradeoff below). Because `registerTaskAsync` is a no-op for an already-registered task,
   `setupBackgroundTask` now reads the persisted options via `TaskManager.getTaskOptionsAsync` and
   unregisters + re-registers when the interval differs, so existing installs migrate off 15 min.
   Deliberately **not** done: registering only when the `newOfferInMarketplace` preference is on —
   the task also delivers the background chat-message sweep (with local chat notifications), which
   must keep running regardless of that preference; and lazy-loading the headless boot itself
   (index.js import graph split) — too invasive pre-release.
+- **Product tradeoff (release note):** every run of this task also performs the fallback
+  chat-inbox sweep (`processBackgroundTask.ts` → `fetchMessagesForAllInboxesAtom`), which is the
+  **only** way a chat message surfaces as a notification while the app is backgrounded for users
+  whose push doesn't work — notably de-googled Android without Play Services/FCM, a real segment
+  of Vexl's privacy-focused user base. The sweep runs unconditionally (there is no "push is
+  broken" signal); for push-working users it's a redundant no-op. Worst-case backgrounded chat
+  notification latency for push-broken users therefore moves from ~15 min to **~1 h nominal**
+  (longer under Doze/app-standby — the OS treats the interval as an inexact minimum). 1 h was
+  chosen over 4 h because the marginal perf win shrank (15 min→1 h removes 72 boots/day; 1 h→4 h
+  only 18 more) while chat latency would quadruple — bad for time-sensitive trade chats, and the
+  ANR kill loop above was primarily the worklets crash (fixed) being restarted by WorkManager,
+  not the interval itself. Opening the app still fetches messages immediately (resume sweep)
+  regardless of this interval.
 
 ### 3. 🟡 Session read race at startup: "Using dummy session" warning while logged in
 

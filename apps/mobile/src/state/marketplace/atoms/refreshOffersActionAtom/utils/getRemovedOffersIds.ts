@@ -22,6 +22,9 @@ export const getRemovedOffersIds = ({
     clubUuid: ClubUuid
     removedIds: readonly OfferId[]
   }>
+  // False when any removed-offer check failed and was swallowed, so callers can
+  // avoid recording a failed reconciliation as successful.
+  succeeded: boolean
 }> => {
   const savedContactOffersIds = pipe(
     Array.filter(
@@ -55,41 +58,54 @@ export const getRemovedOffersIds = ({
     })
   )
 
-  return Effect.all({
-    removedContactOfferIds: pipe(
-      savedContactOffersIds.length > 0
-        ? offersApi
-            .getRemovedOffers({offerIds: savedContactOffersIds})
-            .pipe(Effect.map((one) => one.offerIds))
-        : Effect.succeed([] as readonly OfferId[]),
-      Effect.catchAll((e) => {
-        reportError('error', new Error('Error fetching removed offers'), {
-          e,
-        })
-
-        return Effect.succeed([] as readonly OfferId[])
+  // Each check is turned into an Option: None marks a swallowed failure so the
+  // overall `succeeded` flag can tell an empty-because-successful result apart
+  // from an empty-because-failed one.
+  const removedContactOffers = pipe(
+    Array.isNonEmptyArray(savedContactOffersIds)
+      ? offersApi
+          .getRemovedOffers({offerIds: savedContactOffersIds})
+          .pipe(Effect.map((one) => one.offerIds))
+      : Effect.succeed<readonly OfferId[]>([]),
+    Effect.tapError((e) =>
+      Effect.sync(() => {
+        reportError('error', new Error('Error fetching removed offers'), {e})
       })
     ),
+    Effect.option
+  )
 
-    removedClubsOfferIdsToClubUuid: pipe(
-      clubOffersIds,
-      Array.map(({clubKey, clubUuid, offersIds}) =>
-        offersApi
-          .getRemovedClubOffers({
-            offerIds: offersIds,
-            keyPair: clubKey.oldKeyPair,
-            keyPairV2: clubKey.keyPair,
-          })
-          .pipe(
-            Effect.map((removedIds) => ({
-              clubUuid,
-              removedIds: removedIds.offerIds,
-            })),
-            Effect.option
-          )
-      ),
-      Effect.all,
-      Effect.map(Array.getSomes)
+  const removedClubsOffers = pipe(
+    clubOffersIds,
+    Array.map(({clubKey, clubUuid, offersIds}) =>
+      offersApi
+        .getRemovedClubOffers({
+          offerIds: offersIds,
+          keyPair: clubKey.oldKeyPair,
+          keyPairV2: clubKey.keyPair,
+        })
+        .pipe(
+          Effect.map((removedIds) => ({
+            clubUuid,
+            removedIds: removedIds.offerIds,
+          })),
+          Effect.option
+        )
     ),
-  })
+    Effect.all
+  )
+
+  return Effect.all({
+    contact: removedContactOffers,
+    clubs: removedClubsOffers,
+  }).pipe(
+    Effect.map(({contact, clubs}) => ({
+      removedContactOfferIds: Option.getOrElse(
+        contact,
+        (): readonly OfferId[] => []
+      ),
+      removedClubsOfferIdsToClubUuid: Array.getSomes(clubs),
+      succeeded: Option.isSome(contact) && Array.every(clubs, Option.isSome),
+    }))
+  )
 }

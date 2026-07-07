@@ -1,3 +1,4 @@
+import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Array, Option, pipe} from 'effect'
 
@@ -9,20 +10,18 @@ export default function filterOffersByText({
   text,
   offers,
   importedContacts,
+  importedContactsHashes,
 }: {
   text: string
   offers: OneOfferInState[]
   importedContacts: StoredContactWithComputedValues[]
+  importedContactsHashes: readonly HashedPhoneNumber[]
 }): OneOfferInState[] {
   // TODO - better search. This is just a placeholder
 
   const wordsToSearchFor = pipe(
     text.toUpperCase().trim().split(' '),
     Array.filter(Boolean)
-  )
-  const importedContactsHashes = pipe(
-    importedContacts,
-    Array.map((contact) => contact.computedValues.hash)
   )
   const contactsByHash = new Map<
     StoredContactWithComputedValues['computedValues']['hash'],

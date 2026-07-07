@@ -19,8 +19,10 @@ import {OffersState} from '../domain'
 import {isProductOfferMissingCategory} from '../utils/isProductOfferMissingCategory'
 import {offerWithoutSourceOrNone} from '../utils/offerWithoutSourceOrNone'
 
+export const OFFERS_STORAGE_KEY = 'offers'
+
 export const offersStateAtom = atomWithParsedMmkvStorage(
-  'offers',
+  OFFERS_STORAGE_KEY,
   {
     contactOffersNextPageParam: undefined,
     clubOffersNextPageParam: {},
@@ -31,6 +33,10 @@ export const offersStateAtom = atomWithParsedMmkvStorage(
 )
 export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')
+)
+
+export const areThereAnyStoredOffersAtom = atom((get) =>
+  Array.isNonEmptyReadonlyArray(get(offersAtom))
 )
 
 export const offersIdsAtom = focusAtom(offersAtom, (optic) =>

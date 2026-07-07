@@ -19,6 +19,7 @@ import {
 import {importedContactsCountAtom} from '../../../../../state/contacts/atom/contactsStore'
 import {useAreOffersLoading} from '../../../../../state/marketplace'
 import {hasPostedFirstOfferActionStepAtom} from '../../../../../state/marketplace/atoms/myOffers'
+import {areThereAnyStoredOffersAtom} from '../../../../../state/marketplace/atoms/offersState'
 import {refreshOffersActionAtom} from '../../../../../state/marketplace/atoms/refreshOffersActionAtom'
 import {
   newOfferButtonVisibleOnLoadingMarketplaceAtom,
@@ -33,7 +34,11 @@ import {useAppState} from '../../../../../utils/useAppState'
 import useAddContactsFromMarketplaceAction from './useAddContactsFromMarketplaceAction'
 import useEnableNotificationsFromMarketplaceAction from './useEnableNotificationsFromMarketplaceAction'
 
-const EMPTY_MARKETPLACE_REFRESH_INTERVAL_MS = 5000
+// Poll fast at first so genuinely new users pick up their first offers
+// quickly, then back off to avoid burning network + battery indefinitely.
+const EMPTY_MARKETPLACE_REFRESH_BACKOFF_MS: readonly number[] = [
+  5_000, 30_000, 60_000,
+]
 const LOADING_OFFERS_EMPTY_STATE_TIMEOUT_MS = 15_000
 
 interface EmptyListAction {
@@ -193,7 +198,11 @@ function EmptyList(): React.ReactElement {
   const [loadingOffersTimedOut, setLoadingOffersTimedOut] = useState(false)
   const isLoadingOffersVisible =
     shouldShowLoadingOffers && (!loadingOffersTimedOut || loading)
-  const shouldPollEmptyMarketplace = isAppActive && isFocused
+  // Poll only when there are no offers stored at all — not when stored offers
+  // are merely all hidden (mine / expired / reported / no common friends).
+  const areThereAnyStoredOffers = useAtomValue(areThereAnyStoredOffersAtom)
+  const shouldPollEmptyMarketplace =
+    isAppActive && isFocused && !areThereAnyStoredOffers
 
   useEffect(() => {
     loadingRef.current = loading
@@ -210,18 +219,29 @@ function EmptyList(): React.ReactElement {
       return undefined
     }
 
-    if (!loadingRef.current) {
-      Effect.runFork(refreshOffers())
-    }
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    let refreshCount = 0
 
-    const intervalId = setInterval(() => {
+    const refreshAndScheduleNext = (): void => {
       if (!loadingRef.current) {
         Effect.runFork(refreshOffers())
       }
-    }, EMPTY_MARKETPLACE_REFRESH_INTERVAL_MS)
+
+      const delay =
+        EMPTY_MARKETPLACE_REFRESH_BACKOFF_MS[
+          Math.min(
+            refreshCount,
+            EMPTY_MARKETPLACE_REFRESH_BACKOFF_MS.length - 1
+          )
+        ] ?? 60_000
+      refreshCount += 1
+      timeoutId = setTimeout(refreshAndScheduleNext, delay)
+    }
+
+    refreshAndScheduleNext()
 
     return () => {
-      clearInterval(intervalId)
+      if (timeoutId !== undefined) clearTimeout(timeoutId)
     }
   }, [refreshOffers, shouldPollEmptyMarketplace])
 

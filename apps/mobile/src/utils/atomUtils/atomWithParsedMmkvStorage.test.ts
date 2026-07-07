@@ -1,6 +1,5 @@
 import {Schema} from 'effect'
 import {createStore} from 'jotai'
-import {InteractionManager} from 'react-native'
 import {storage} from '../mmkv/effectMmkv'
 import {
   CLEAR_STORAGE_KEY,
@@ -30,33 +29,53 @@ type TestValue = typeof TestValueSchema.Type
 
 const defaultValue: TestValue = {name: 'default', count: 0}
 
-let interactionQueue: Array<() => void> = []
+let idleCallbackQueue: IdleRequestCallback[] = []
+let idleCallbackHandle = 0
+let hadRequestIdleCallback = false
+let originalRequestIdleCallback:
+  | typeof globalThis.requestIdleCallback
+  | undefined
 
-function flushInteractions(): void {
-  while (interactionQueue.length > 0) {
-    const callback = interactionQueue.shift()
-    if (callback) callback()
+const idleDeadline: IdleDeadline = {
+  didTimeout: false,
+  timeRemaining: () => 50,
+}
+
+function flushIdleCallbacks(): void {
+  while (idleCallbackQueue.length > 0) {
+    const callback = idleCallbackQueue.shift()
+    if (callback) callback(idleDeadline)
   }
 }
 
 beforeEach(() => {
-  interactionQueue = []
-  jest
-    .spyOn(InteractionManager, 'runAfterInteractions')
-    .mockImplementation((task) => {
-      if (typeof task === 'function') {
-        interactionQueue.push(() => {
-          void task()
-        })
-      }
-      return Object.assign(Promise.resolve(), {
-        done: () => {},
-        cancel: () => {},
-      })
-    })
+  idleCallbackQueue = []
+  idleCallbackHandle = 0
+  hadRequestIdleCallback = 'requestIdleCallback' in globalThis
+  originalRequestIdleCallback = hadRequestIdleCallback
+    ? globalThis.requestIdleCallback
+    : undefined
+
+  const requestIdleCallbackStub = (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions
+  ): number => {
+    void options
+    idleCallbackQueue.push(callback)
+    idleCallbackHandle += 1
+    return idleCallbackHandle
+  }
+
+  globalThis.requestIdleCallback = requestIdleCallbackStub
 })
 
 afterEach(() => {
+  if (hadRequestIdleCallback && originalRequestIdleCallback !== undefined) {
+    globalThis.requestIdleCallback = originalRequestIdleCallback
+  } else {
+    Reflect.deleteProperty(globalThis, 'requestIdleCallback')
+  }
+  originalRequestIdleCallback = undefined
   jest.restoreAllMocks()
 })
 
@@ -119,7 +138,7 @@ describe('atomWithParsedMmkvStorage', () => {
     expect(store.get(testAtom)).toEqual({name: 'legacy', count: 2})
   })
 
-  it('persists writes after interactions and coalesces queued writes to the newest value', () => {
+  it('persists writes after an idle callback and coalesces queued writes to the newest value', () => {
     const key = 'test-coalesce-writes'
     const testAtom = atomWithParsedMmkvStorage(
       key,
@@ -138,7 +157,7 @@ describe('atomWithParsedMmkvStorage', () => {
     expect(storage._storage.getString(key)).toBeUndefined()
     expect(store.get(testAtom)).toEqual({name: 'v3', count: 3})
 
-    flushInteractions()
+    flushIdleCallbacks()
 
     // last-write-wins: only the newest value was written, exactly once
     expect(setSpy).toHaveBeenCalledTimes(1)
@@ -158,7 +177,7 @@ describe('atomWithParsedMmkvStorage', () => {
     const store = createStore()
 
     store.set(testAtom, {name: 'clean', count: 1})
-    flushInteractions()
+    flushIdleCallbacks()
 
     expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
       name: 'clean',
@@ -178,7 +197,7 @@ describe('atomWithParsedMmkvStorage', () => {
 
     const written: TestValue = {name: 'own', count: 5}
     store.set(testAtom, written)
-    flushInteractions()
+    flushIdleCallbacks()
 
     // identity preserved — the listener did not re-decode & set the value
     expect(store.get(testAtom)).toBe(written)
@@ -193,7 +212,7 @@ describe('atomWithParsedMmkvStorage', () => {
     const unsub = store.sub(atomA, () => {})
 
     store.set(atomB, {name: 'fromB', count: 7})
-    flushInteractions()
+    flushIdleCallbacks()
 
     expect(store.get(atomA)).toEqual({name: 'fromB', count: 7})
     unsub()
@@ -210,7 +229,7 @@ describe('atomWithParsedMmkvStorage', () => {
     const unsub = store.sub(testAtom, () => {})
 
     storage._storage.set(key, JSON.stringify({name: 'direct', count: 9}))
-    flushInteractions()
+    flushIdleCallbacks()
 
     expect(store.get(testAtom)).toEqual({name: 'direct', count: 9})
     unsub()
@@ -228,7 +247,7 @@ describe('atomWithParsedMmkvStorage', () => {
     const unsub = store.sub(testAtom, () => {})
 
     storage._storage.delete(key)
-    flushInteractions()
+    flushIdleCallbacks()
 
     expect(store.get(testAtom)).toEqual(defaultValue)
     unsub()
@@ -273,7 +292,7 @@ describe('atomWithParsedMmkvStorage', () => {
     storage._storage.clearAll()
 
     // the deferred flush now runs — it must NOT write the old value back
-    flushInteractions()
+    flushIdleCallbacks()
 
     expect(storage._storage.getString(key)).toBeUndefined()
     expect(store.get(testAtom)).toEqual(defaultValue)
@@ -296,7 +315,7 @@ describe('atomWithParsedMmkvStorage', () => {
 
     // a write made after the clear must persist normally
     store.set(testAtom, {name: 'after', count: 1})
-    flushInteractions()
+    flushIdleCallbacks()
 
     expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
       name: 'after',
@@ -322,7 +341,7 @@ describe('atomWithParsedMmkvStorage', () => {
 
     testAtom.flushNow()
 
-    // written immediately, without waiting for interactions
+    // written immediately, without waiting for the idle callback
     expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
       name: 'flushed',
       count: 3,
@@ -330,7 +349,7 @@ describe('atomWithParsedMmkvStorage', () => {
     expect(setSpy).toHaveBeenCalledTimes(1)
 
     // the already-scheduled deferred flush is now a no-op (nothing pending)
-    flushInteractions()
+    flushIdleCallbacks()
     expect(setSpy).toHaveBeenCalledTimes(1)
   })
 

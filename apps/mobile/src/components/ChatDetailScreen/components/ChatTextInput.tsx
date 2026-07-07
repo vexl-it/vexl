@@ -105,7 +105,7 @@ function ChatTextInput(): React.ReactElement | null {
       clearTextInput()
       setReplyToMessage(undefined)
 
-      void sendMessage(message)
+      sendMessage(message)
       void checkNotificationsAndAskIfPossible()()
 
       return true

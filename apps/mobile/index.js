@@ -23,6 +23,7 @@ import './src/utils/backgroundTask'
 import * as Sentry from '@sentry/react-native'
 import {registerRootComponent} from 'expo'
 import App from './src/App'
+import {detectMmkvDataLoss} from './src/utils/mmkv/detectMmkvDataLoss'
 
 // polyfill Array.at() function
 if (![].at) {
@@ -37,5 +38,8 @@ if (![].toSorted) {
     return [...this].sort(...arg)
   }
 }
+
+// TODO: Temporary diagnostic for silent MMKV data wipes. Remove with the sentinel.
+detectMmkvDataLoss()
 
 registerRootComponent(Sentry.wrap(App))

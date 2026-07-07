@@ -6,7 +6,7 @@
     "start": "expo start --dev-client",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "//test": "jest",
+    "test": "jest",
     "lint": "eslint src",
     "typecheck": "tsc --noemit",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",

@@ -81,10 +81,7 @@ jobs:
         run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
       - name: Publish update to both channels
         # Store builds and APK builds listen on separate channels
-        # (<env> and <env>-apk), so publish to both. IS_DEV_CLIENT_BUILD must
-        # NOT be set here — that flag shifts the fingerprint to the
-        # dev-client runtime and the update would target dev clients instead
-        # of release apps.
+        # (<env> and <env>-apk), so publish to both.
         #
         # --environment production matches the store build profiles
         # (staging and production alike — see eas.json): it pulls the same

@@ -1,0 +1,60 @@
+name: "[Preview] Main stage bundle"
+run-name: "main preview (${{ github.sha }})"
+
+# Publishes every push to main as an EAS Update on channel "main". Testers
+# load it in the staging app: debug screen (tap the version footer in
+# Account) → "Load latest main bundle". See apps/mobile/src/utils/prPreview.
+#
+# Same constraint as PR previews: the bundle only loads into staging builds
+# whose runtime fingerprint matches — after native changes land on main, a
+# new staging build is needed before this channel is loadable again.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: main-preview
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publish main preview bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24.x
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
+      - name: Publish EAS Update
+        # The env must produce the same runtime fingerprint as the staging
+        # build profiles (eas.json): ENV_PRESET=stage, and --environment
+        # production pulls the same EAS env vars (the react-native-maps API
+        # keys) into app config evaluation.
+        run: |
+          eas update --channel main \
+            --environment production \
+            --message "main (${{ github.sha }})" \
+            --non-interactive
+        working-directory: apps/mobile
+        env:
+          ENV_PRESET: stage
+          # Baked into the bundle as extra.commitHash and shown in the app's
+          # version footer and debug screen. Set explicitly — EAS only
+          # provides it on its own build servers, not on GitHub runners.
+          EAS_BUILD_GIT_COMMIT_HASH: ${{ github.sha }}

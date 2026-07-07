@@ -1,9 +1,5 @@
 const VERSION_CODE = 850
 const VERSION = '1.44.2'
-// Dev-client builds share the staging bundle id with release staging builds.
-// A fractional suffix (e.g. "840.12") keeps their TestFlight build numbers
-// unique while still sorting below the next release build number (841).
-const IOS_BUILD_NUMBER_SUFFIX = process.env.IOS_BUILD_NUMBER_SUFFIX ?? ''
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'
@@ -69,6 +65,7 @@ const presets = {
 
 // @ts-expect-error there is fallback there.
 const extra = presets[String(ENV_PRESET)] ?? presets.stage
+const IS_PROD_PRESET = extra === presets.prod
 
 export const SPLASH_ICON_SIZE = 685
 export default {
@@ -87,7 +84,7 @@ export default {
   },
   'assetBundlePatterns': ['**/*'],
   'ios': {
-    buildNumber: `${VERSION_CODE}${IOS_BUILD_NUMBER_SUFFIX}`,
+    buildNumber: String(VERSION_CODE),
     // 'icon': extra.iconV2, // Does not work due to this: https://github.com/expo/expo/issues/39782
     'supportsTablet': false,
     'bundleIdentifier': extra.packageName,
@@ -109,6 +106,11 @@ export default {
       'applinks:app.vexl.it',
       'applinks:link.vexl.it',
       'applinks:nextlink.vexl.it',
+      // Preview links (see pr-preview.yaml) live on a domain only non-prod
+      // builds register — the prod app must never swallow a tapped preview
+      // QR link (iOS routing is undefined when two installed apps claim the
+      // same domain).
+      ...(IS_PROD_PRESET ? [] : ['applinks:staging.app.vexl.it']),
     ],
     'privacyManifests': {
       'NSPrivacyAccessedAPITypes': [
@@ -178,6 +180,23 @@ export default {
         ],
         category: ['BROWSABLE', 'DEFAULT'],
       },
+      // Preview links — non-prod builds only, see associatedDomains above.
+      ...(IS_PROD_PRESET
+        ? []
+        : [
+            {
+              'action': 'VIEW',
+              'autoVerify': true,
+              'data': [
+                {
+                  'scheme': 'https',
+                  'host': 'staging.app.vexl.it',
+                  'pathPattern': '.*',
+                },
+              ],
+              'category': ['BROWSABLE', 'DEFAULT'],
+            },
+          ]),
     ],
     permissions: ['READ_CONTACTS', 'READ_CALENDAR', 'WRITE_CALENDAR', 'NFC'],
     blockedPermissions: [
@@ -206,18 +225,12 @@ export default {
     'policy': 'fingerprint',
   },
   'plugins': [
-    // Explicit registration to control the generated exp+vexl deep-link
-    // scheme. Only dev-client builds may register it — when left to the
-    // auto-applied plugin, store builds register it too and can hijack the
-    // PR-preview QR codes (iOS scheme resolution between two apps is
-    // undefined). IS_DEV_CLIENT_BUILD is set by the development build
-    // profile and by the PR-preview publish workflow; it affects the
-    // fingerprint, so dev clients and PR updates share a runtime that is
-    // distinct from release builds.
-    [
-      'expo-dev-client',
-      {addGeneratedScheme: Boolean(process.env.IS_DEV_CLIENT_BUILD)},
-    ],
+    // Explicit registration to suppress the generated exp+vexl deep-link
+    // scheme — when left to the auto-applied plugin, store builds register
+    // it too and can hijack dev-client deep links (iOS scheme resolution
+    // between two apps is undefined). PR previews load into staging builds
+    // via a regular vexl deep link instead (see pr-preview.yaml).
+    ['expo-dev-client', {addGeneratedScheme: false}],
     ['react-native-libsodium', {}],
     'expo-background-task',
     [

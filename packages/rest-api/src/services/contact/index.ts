@@ -3,10 +3,7 @@ import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
-import {
-  makeCommonAndSecurityHeaders,
-  type CommonAndSecurityHeaders,
-} from '../../apiSecurity'
+import {makeRequestWithCommonAndSecurityHeaders} from '../../apiSecurity'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
@@ -102,55 +99,58 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    // Build security headers per request (not once at api construction) so
-    // every authenticated request reads the current session credentials.
-    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
-      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
+    // Security headers are built lazily inside each request effect (not once
+    // at api construction) so every authenticated request reads the current
+    // session credentials and a failing credentials read can never throw
+    // synchronously out of the code constructing the request.
+    const withSecurityHeaders = makeRequestWithCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
+    )
 
     return {
       checkUserExists: (query: CheckUserExistsRequest) =>
-        client.User.checkUserExists({
-          urlParams: query,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.User.checkUserExists({urlParams: query, headers})
+        ),
       createUser: (body: CreateUserRequest) =>
-        client.User.createUser({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.User.createUser({payload: body, headers})
+        ),
       refreshUser: (body: RefreshUserRequest) =>
-        client.User.refreshUser({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.User.refreshUser({payload: body, headers})
+        ),
       updateNotificationToken: ({
         body,
       }: {
         body: UpdateNotificationTokenRequest
       }) =>
-        client.User.updateNotificationToken({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.User.updateNotificationToken({payload: body, headers})
+        ),
       deleteUser: () =>
-        client.User.deleteUser({headers: commonAndSecurityHeaders()}),
+        withSecurityHeaders((headers) => client.User.deleteUser({headers})),
       importContacts: (body: ImportContactsRequest) =>
-        client.Contact.importContacts({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Contact.importContacts({payload: body, headers})
+        ),
       fetchMyContactsPaginated: (query: FetchMyContactsPaginatedRequest) =>
-        client.Contact.fetchMyContactsPaginated({
-          headers: commonAndSecurityHeaders(),
-          urlParams: query,
-        }),
+        withSecurityHeaders((headers) =>
+          client.Contact.fetchMyContactsPaginated({
+            headers,
+            urlParams: query,
+          })
+        ),
       fetchCommonConnectionsPaginated: (
         body: FetchCommonConnectionsPaginatedRequest
       ) =>
-        client.Contact.fetchCommonConnectionsPaginated({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Contact.fetchCommonConnectionsPaginated({
+            payload: body,
+            headers,
+          })
+        ),
       convertPhoneNumberHashesToServerHashes: (
         body: ConvertPhoneNumberHashesToServerHashesRequest
       ) =>
@@ -239,10 +239,9 @@ export function api({
       ) =>
         addChallenge(body).pipe(
           Effect.flatMap((body) =>
-            client.ClubsMember.setPublicKeyV2({
-              payload: body,
-              headers: commonAndSecurityHeaders(),
-            })
+            withSecurityHeaders((headers) =>
+              client.ClubsMember.setPublicKeyV2({payload: body, headers})
+            )
           )
         ),
       reportClub: (
@@ -250,10 +249,9 @@ export function api({
       ) =>
         addChallenge(reportClubRequest).pipe(
           Effect.flatMap((body) =>
-            client.ClubsMember.reportClub({
-              payload: body,
-              headers: commonAndSecurityHeaders(),
-            })
+            withSecurityHeaders((headers) =>
+              client.ClubsMember.reportClub({payload: body, headers})
+            )
           )
         ),
       eraseUserFromNetwork: (request: EraseUserFromNetworkRequest) =>

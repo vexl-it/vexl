@@ -32,6 +32,7 @@ import {
 } from '../utils/environment'
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../utils/preferences'
+import reportError from '../utils/reportError'
 
 export const platform = Schema.decodeSync(PlatformName)(
   Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
@@ -114,8 +115,9 @@ export class SessionNotReadyError extends Schema.TaggedError<SessionNotReadyErro
   sessionState: Schema.String,
 }) {}
 
-// Called per authenticated request (see makeCommonAndSecurityHeaders usages in
-// packages/rest-api services), so it always reads the current session state.
+// Called lazily per authenticated request, while the request effect runs (see
+// makeRequestWithCommonAndSecurityHeaders usages in packages/rest-api
+// services), so it always reads the current session state.
 function getUserSessionCredentials(): UserSessionCredentials {
   const session = getDefaultStore().get(sessionHolderAtom)
 
@@ -133,7 +135,20 @@ function getUserSessionCredentials(): UserSessionCredentials {
   // Building an authenticated request now would send dummy credentials to the
   // backend, so fail fast instead. Callers must wait for the session to
   // settle before calling authenticated endpoints.
-  throw new SessionNotReadyError({sessionState: session.state})
+  //
+  // Because credentials are read lazily inside the request effect, this throw
+  // surfaces as a fiber defect (not a typed failure): Effect.catchAll paths
+  // never see it. Report it explicitly so the tripwire is always visible in
+  // Sentry, whatever the calling fiber does with the defect.
+  const error = new SessionNotReadyError({sessionState: session.state})
+  reportError(
+    'error',
+    new Error(
+      'Tried to build an authenticated request before the session settled'
+    ),
+    {sessionState: session.state}
+  )
+  throw error
 }
 
 export const apiAtom = atom((get) =>

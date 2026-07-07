@@ -58,6 +58,37 @@ final class CryptoVectorTests: XCTestCase {
     }
   }
 
+  /// The traditional SEC1 "EC PRIVATE KEY" form carries the curve OID in its
+  /// [0] parameters. A secp224r1 SEC1 key must be rejected via that OID.
+  /// Fixture: `openssl genpkey -algorithm EC -pkeyopt
+  /// ec_paramgen_curve:secp224r1 | openssl ec` (traditional SEC1 output).
+  func testSecp224r1Sec1PrivateKeyIsRejectedAsUnsupportedCurve() {
+    let secp224r1Sec1PrivatePemBase64 =
+      "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1HZ0NBUUVFSE1saVhqZHBOM3Ywd2xmaTF1b2dsSW9mN0lXaW1UMXV0aWhlMDhlZ0J3WUZLNEVFQUNHaFBBTTYKQUFTN2hjYzBrSEJhMXVjK2pJQ1I1TnhZcExaMzA2NHZ3OWxOdzVvYmR4YXRhWWNNaUgxVUJic0FrdWJWcHdFawoza3poQjVXZ0dlWlJrdz09Ci0tLS0tRU5EIEVDIFBSSVZBVEUgS0VZLS0tLS0K"
+    XCTAssertThrowsError(
+      try VexlPrivateKey(pemBase64: secp224r1Sec1PrivatePemBase64)
+    ) { error in
+      XCTAssertEqual(error as? VexlKeyError, .unsupportedCurve)
+    }
+  }
+
+  /// A SEC1 "EC PRIVATE KEY" whose optional [0] curve parameters are absent
+  /// must be rejected: with no curve OID anywhere we cannot confirm
+  /// secp256k1, so the NSE must bail rather than trust an unverified scalar.
+  /// The TS encoder always emits the OID for this form, so a real Vexl key
+  /// never looks like this. Fixture: a valid secp256k1 SEC1 key with its [0]
+  /// parameters block stripped (leaving only the [1] public key), so the
+  /// scalar itself is a genuine secp256k1 scalar.
+  func testSec1PrivateKeyWithoutCurveParametersIsRejectedAsUnsupportedCurve() {
+    let sec1NoParamsPrivatePemBase64 =
+      "LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1Hc0NBUUVFSU16S01PbnBHcDRCczcrNjJrV0ZiNFN0RERVcDFIREhPTmNqOWljREYzVFZvVVFEUWdBRURObGIKVjd3NVNhRU1COGpndHNGWEw5d3NvendsamhteEtnRzBCOUpXZi9WTkx2K29aRW9vSDFKRWlqVmZtTVNBQVFudwpZcEJOMlRKSlZ0eS9nNXFLZ3c9PQotLS0tLUVORCBFQyBQUklWQVRFIEtFWS0tLS0tCg=="
+    XCTAssertThrowsError(
+      try VexlPrivateKey(pemBase64: sec1NoParamsPrivatePemBase64)
+    ) { error in
+      XCTAssertEqual(error as? VexlKeyError, .unsupportedCurve)
+    }
+  }
+
   func testSecp224r1PublicKeyIsRejectedAsUnsupportedCurve() {
     let secp224r1PublicPemBase64 =
       "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUU0d0VBWUhLb1pJemowQ0FRWUZLNEVFQUNFRE9nQUVvcXYxMkpZMkp3QTJyazBkamZoSlNOQklOclVWSTVNTQpON2I1OUVEMVdlY2NTTjI3THNHdnVWbWtQTXZmRW9mS3kzZVBEekNmRlNBPQotLS0tLUVORCBQVUJMSUMgS0VZLS0tLS0K"

@@ -38,10 +38,20 @@ export interface InAppLoadingTasksRequirements {
   runOn: 'resume' | 'start'
 }
 
+export interface InAppLoadingTaskDependency {
+  id: InAppLoadingTaskId
+  // When true the dependent runs only if this dependency completed
+  // successfully. If the dependency failed (or was itself skipped) the
+  // dependent is skipped instead of run. Use it when running the dependent
+  // against a failed prerequisite would be unsafe (e.g. deleting data based on
+  // state a failed fetch never refreshed).
+  onlyIfSucceeds?: boolean
+}
+
 export interface InAppLoadingTask {
   name: string
   status: InAppLoadingTaskStatus
   task: (store: Store) => Effect.Effect<void, InAppLoadingTaskError>
   requirements: InAppLoadingTasksRequirements
-  dependsOn?: Array<{id: InAppLoadingTaskId; onlyIfSucceeds?: boolean}>
+  dependsOn?: InAppLoadingTaskDependency[]
 }

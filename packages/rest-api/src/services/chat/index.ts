@@ -5,7 +5,10 @@ import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {
+  makeCommonAndSecurityHeaders,
+  type CommonAndSecurityHeaders,
+} from '../../apiSecurity'
 import {
   type CreateChallengeRequest,
   type CreateChallengesRequest,
@@ -94,10 +97,10 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
-      getUserSessionCredentials,
-      commonHeaders
-    )
+    // Build security headers per request (not once at api construction) so
+    // every authenticated request reads the current session credentials.
+    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
+      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
 
     const addChallenge = addChallengeToRequest2(
       client.Challenges.createChallenge
@@ -149,7 +152,7 @@ export function api({
       requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
         client.Inboxes.requestApproval({
           payload: requestApprovalRequest,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       requestApprovalV2: (
         requestApprovalV2Request: RequestWithGeneratableChallenge<RequestApprovalV2Request>
@@ -163,7 +166,7 @@ export function api({
       cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
         client.Inboxes.cancelRequestApproval({
           payload: cancelApprovalRequest,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       cancelRequestApprovalV2: (
         cancelApprovalV2Request: RequestWithGeneratableChallenge<CancelApprovalV2Request>

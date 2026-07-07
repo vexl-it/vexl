@@ -7,7 +7,10 @@ import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand
 import {type LoggingFunction} from '../../utils'
 
 import {Effect, Option} from 'effect/index'
-import {makeCommonAndSecurityHeaders} from '../../apiSecurity'
+import {
+  makeCommonAndSecurityHeaders,
+  type CommonAndSecurityHeaders,
+} from '../../apiSecurity'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
 import {
@@ -81,10 +84,10 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
-      getUserSessionCredentials,
-      commonHeaders
-    )
+    // Build security headers per request (not once at api construction) so
+    // every authenticated request reads the current session credentials.
+    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
+      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
 
     return {
       generateLoginChallenge: () => client.generateLoginChallenge({}),
@@ -97,7 +100,8 @@ export function api({
         client.Login.verifyCode({payload: body}),
       verifyChallenge: (body: VerifyChallengeRequest) =>
         client.Login.verifyChallenge({payload: body}),
-      deleteUser: () => client.logoutUser({headers: commonAndSecurityHeaders}),
+      deleteUser: () =>
+        client.logoutUser({headers: commonAndSecurityHeaders()}),
       getVersionServiceInfo: () =>
         client.getVersionServiceInfo({
           headers: commonHeaders,
@@ -114,12 +118,12 @@ export function api({
       initUpgradeAuth: (request: InitUpgradeAuthRequest) =>
         client.UpgradeAuth.initUpgradeAuth({
           payload: request,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
       submitUpgradeAuth: (request: SubmitUpgradeAuthRequest) =>
         client.UpgradeAuth.submitUpgradeAuth({
           payload: request,
-          headers: commonAndSecurityHeaders,
+          headers: commonAndSecurityHeaders(),
         }),
     }
   })

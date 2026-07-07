@@ -90,13 +90,16 @@ ideally on a faster device/emulator.
   the session was still `loading`, for a logged-in user. Some consumer built an API client before
   session load finished. If a request fires in that window it goes out with dummy credentials
   (401 / garbage auth against backend).
-- `makeCommonAndSecurityHeaders` (`packages/rest-api/src/apiSecurity.ts:59`) reads the credentials
-  getter **per request**, so the two warnings mean two real requests were built with dummy
-  credentials in that window. However, this pattern is long pre-existing (predates the last several
-  releases; `git log -L` traces it back to the TradeChecklist-history era) — **not a regression in
-  this release**. Restructuring API/session wiring is too risky for a pre-release hotfix; left as a
-  follow-up: make request construction wait for `sessionHolderAtom` to settle (or fail fast) instead
-  of substituting `dummySession` credentials.
+- Investigation: the security headers were actually snapshotted **once at API construction**
+  (`makeCommonAndSecurityHeaders` called at construction in the user/contact/offer/chat services),
+  and the two warnings came from `apiAtom` being built at splash time (mounted by
+  `useSetupVersionServiceState` at state `initial`, recomputed at `loading`) — the only request on
+  the wire in that window (`getVersionServiceInfo`) is public, so no dummy auth headers were sent.
+- **Fixed:** security headers are now built lazily per request in the four authenticated services,
+  and the mobile credentials getter (`apps/mobile/src/api/index.ts`) fails fast with a typed
+  `SessionNotReadyError` while the session is `initial`/`loading` (it always settles, see
+  `loadSession`), keeping the dummy-credentials + warning behavior only for the genuine
+  `loggedOut` case (onboarding/public flows unchanged).
 
 ### 4. 🟡 Community events/blogs fail against local backend (config, not code)
 
@@ -143,5 +146,6 @@ ideally on a faster device/emulator.
 1. Rebuild the dev client (`pnpm dev:mobile -p android --build`) and re-verify on device: publish an
    offer end-to-end (no crash after the "done" modal), dismiss the Board onboarding sheet (no crash).
 2. Cover the untested flows: profile edit (optional photo), donations, club join, board note posting.
-3. Decide on issue 3 (dummy-session follow-up) and issue 2 (background-task cold-boot cost) —
-   neither is a regression, both are tracked above.
+3. Issue 3 (dummy-session race) is fixed (per-request security headers + fail-fast while the
+   session loads, see above). Issue 2 (background-task cold-boot cost) is not a regression and
+   remains tracked above.

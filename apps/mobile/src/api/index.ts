@@ -18,7 +18,7 @@ import {
 import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {Effect, Option, Schema} from 'effect'
-import {atom} from 'jotai'
+import {atom, getDefaultStore} from 'jotai'
 import {Platform} from 'react-native'
 import {sessionHolderAtom} from '../state/session'
 import {dummySession} from '../state/session/dummySesssion'
@@ -108,26 +108,36 @@ export const apiEnv = getApiPreset()
 //   chatMs: Schema.decodeSync(ServiceUrl)('http://localhost:8001'),
 // }
 
-const sessionCredentialsAtom = atom<UserSessionCredentials>((get) => {
-  const session = get(sessionHolderAtom)
+export class SessionNotReadyError extends Schema.TaggedError<SessionNotReadyError>(
+  'SessionNotReadyError'
+)('SessionNotReadyError', {
+  sessionState: Schema.String,
+}) {}
 
-  if (session.state !== 'loggedIn') {
+// Called per authenticated request (see makeCommonAndSecurityHeaders usages in
+// packages/rest-api services), so it always reads the current session state.
+function getUserSessionCredentials(): UserSessionCredentials {
+  const session = getDefaultStore().get(sessionHolderAtom)
+
+  if (session.state === 'loggedIn') return session.session.sessionCredentials
+
+  if (session.state === 'loggedOut') {
     console.warn(
-      '👀 User is not logged in. Using dummy session. But user should be logged out.'
+      '👀 Building an authenticated request while logged out. Using dummy session credentials.'
     )
     return dummySession.sessionCredentials
   }
 
-  return session.session.sessionCredentials
-})
+  // 'initial' | 'loading' - the session is still being read from storage
+  // (see loadSession; it always settles to 'loggedIn' or 'loggedOut').
+  // Building an authenticated request now would send dummy credentials to the
+  // backend, so fail fast instead. Callers must wait for the session to
+  // settle before calling authenticated endpoints.
+  throw new SessionNotReadyError({sessionState: session.state})
+}
 
 export const apiAtom = atom((get) =>
   Effect.gen(function* (_) {
-    function getUserSessionCredentials(): UserSessionCredentials {
-      const session = get(sessionCredentialsAtom)
-      return session
-    }
-
     const {t} = get(translationAtom)
     const language = t('localeName')
     const isDeveloper = get(isDeveloperAtom)

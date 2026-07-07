@@ -128,7 +128,7 @@ function MarketplaceScreenContent({
   )
 
   const handleRefresh = useCallback(() => {
-    Effect.runFork(refreshOffers())
+    Effect.runFork(refreshOffers({forceRemovedOffersReconciliation: true}))
   }, [refreshOffers])
 
   const listHeaderComponent = useMemo(

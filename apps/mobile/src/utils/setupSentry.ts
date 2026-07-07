@@ -3,7 +3,7 @@ import {commitHash, isProd, isStaging} from './environment'
 
 const enableSentry = !__DEV__
 
-console.debug(enableSentry ? 'Sentry enabled' : 'Sentry disbaled')
+console.debug(enableSentry ? 'Sentry enabled' : 'Sentry disabled')
 
 Sentry.init({
   dsn: enableSentry

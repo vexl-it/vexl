@@ -167,13 +167,7 @@ export function Dialog({
   )
 
   return (
-    <Modal
-      transparent
-      visible
-      statusBarTranslucent
-      animationType="none"
-      onRequestClose={onClose}
-    >
+    <Modal transparent visible animationType="none" onRequestClose={onClose}>
       {avoidKeyboard !== false ? (
         <KeyboardAvoidingView>{content}</KeyboardAvoidingView>
       ) : (

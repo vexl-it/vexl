@@ -95,6 +95,11 @@ public struct VexlPrivateKey: Equatable, Sendable {
     let version = try sequence.readExpecting(tag: DerTag.integer)
 
     let ecPrivateKeyBody: DerReader
+    // Whether the curve was already validated from the PKCS#8
+    // AlgorithmIdentifier. For plain SEC1 keys it has not been, so the [0]
+    // parameters (see below) are the only place the curve is asserted and are
+    // therefore mandatory.
+    let curveValidatedFromAlgorithmIdentifier: Bool
     if version == [0x00] {
       // PKCS#8: SEQUENCE { INTEGER 0, AlgorithmIdentifier, OCTET STRING { ECPrivateKey } }
       var algorithm = try DerReader(sequence.readExpecting(tag: DerTag.sequence))
@@ -110,10 +115,12 @@ public struct VexlPrivateKey: Equatable, Sendable {
         throw VexlKeyError.invalidDer
       }
       ecPrivateKeyBody = ecPrivateKey
+      curveValidatedFromAlgorithmIdentifier = true
     } else if version == [0x01] {
       // Plain SEC1 (RFC 5915) "EC PRIVATE KEY": the outer sequence IS the
       // ECPrivateKey; curve OID sits in the [0] tagged parameters.
       ecPrivateKeyBody = sequence
+      curveValidatedFromAlgorithmIdentifier = false
     } else {
       throw VexlKeyError.invalidDer
     }
@@ -121,15 +128,26 @@ public struct VexlPrivateKey: Equatable, Sendable {
     var reader = ecPrivateKeyBody
     let scalarBytes = try reader.readExpecting(tag: DerTag.octetString)
 
-    // Optional [0] parameters (curve OID; present in SEC1 form)
+    // The RFC 5915 ECPrivateKey carries the curve OID in its optional [0]
+    // parameters (RFC 5915 orders them right after the private key octet
+    // string). Validate it whenever present. For SEC1 form, where the curve
+    // was not asserted in an AlgorithmIdentifier, those parameters are the
+    // only curve evidence, so an absent OID means we cannot confirm
+    // secp256k1 and must bail (the TS encoder always emits them for
+    // "EC PRIVATE KEY", so a well-formed Vexl key never lacks them).
+    var curveOidFromParameters: [UInt8]?
     var readerCopy = reader
     if !readerCopy.isAtEnd {
       let (tag, content) = try readerCopy.readElement()
       if tag == DerTag.contextSpecific0 {
         var params = DerReader(content)
-        let curveOid = try params.readExpecting(tag: DerTag.objectIdentifier)
-        guard curveOid == CurveOid.secp256k1 else { throw VexlKeyError.unsupportedCurve }
+        curveOidFromParameters = try params.readExpecting(tag: DerTag.objectIdentifier)
       }
+    }
+    if let curveOidFromParameters {
+      guard curveOidFromParameters == CurveOid.secp256k1 else { throw VexlKeyError.unsupportedCurve }
+    } else if !curveValidatedFromAlgorithmIdentifier {
+      throw VexlKeyError.unsupportedCurve
     }
 
     // Left-pad the scalar to 32 bytes (TS encoder strips leading zeros) and

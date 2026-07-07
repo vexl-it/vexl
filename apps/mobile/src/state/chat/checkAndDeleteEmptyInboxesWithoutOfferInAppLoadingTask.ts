@@ -9,6 +9,7 @@ import {OFFERS_STORAGE_KEY, offersAtom} from '../marketplace/atoms/offersState'
 import {myNotesAtom} from '../notes/atoms/notesState'
 import {sessionDataOrDummyAtom} from '../session'
 import messagingStateAtom from './atoms/messagingStateAtom'
+import {fetchMessagesForAllInboxesInAppLoadingTaskId} from './fetchMessagesForAllInboxesInAppLoadingTask'
 
 // Lightweight probe used only to tell whether the persisted offers blob holds
 // any offers. It decodes just the `offers` array shape (elements stay
@@ -24,6 +25,21 @@ export const checkAndDeleteEmptyInboxesWithoutOfferInAppLoadingTaskId =
       requiresUserLoggedIn: true,
       runOn: 'resume',
     },
+    // Deleting an inbox is destructive and server-visible. An inbox with no own
+    // offer/note and no open chats looks deletable, but that "no open chats"
+    // signal is only trustworthy once this session has actually pulled pending
+    // messages from the server - otherwise we could delete an inbox whose first
+    // incoming message is still waiting server-side. Gate cleanup on a
+    // successful full-inbox fetch: onlyIfSucceeds means a failed fetch skips
+    // cleanup entirely (skipping is always safer than deleting early).
+    //
+    // This is correct as long as the fetch task reports completion only after a
+    // real fetch. A throttle that fast-returns a no-op without fetching would
+    // undermine the gate, so the fetch path must await the in-flight fetch
+    // rather than resolve immediately when throttled.
+    dependsOn: [
+      {id: fetchMessagesForAllInboxesInAppLoadingTaskId, onlyIfSucceeds: true},
+    ],
     task: (store) =>
       Effect.gen(function* (_) {
         const api = store.get(apiAtom)

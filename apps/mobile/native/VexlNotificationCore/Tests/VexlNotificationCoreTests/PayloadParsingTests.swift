@@ -167,4 +167,27 @@ final class PayloadParsingTests: XCTestCase {
       DecryptedChatMessage.parse(plaintextJson: #"{"uuid":"a","messageType":"MESSAGE"}"#)
     )
   }
+
+  func testChatMessageParseRejectsBooleanTime() {
+    // A JSON boolean bridges to NSNumber and must not be coerced to a timestamp.
+    XCTAssertNil(
+      DecryptedChatMessage.parse(
+        plaintextJson: #"{"uuid":"a","messageType":"MESSAGE","time":true}"#
+      )
+    )
+    XCTAssertNil(
+      DecryptedChatMessage.parse(
+        plaintextJson: #"{"uuid":"a","messageType":"MESSAGE","time":"1751808000000"}"#
+      )
+    )
+  }
+
+  func testChatMessageParseAcceptsNumericTime() throws {
+    let message = try XCTUnwrap(
+      DecryptedChatMessage.parse(
+        plaintextJson: #"{"uuid":"a","messageType":"MESSAGE","time":1751808000000}"#
+      )
+    )
+    XCTAssertEqual(message.time, 1_751_808_000_000)
+  }
 }

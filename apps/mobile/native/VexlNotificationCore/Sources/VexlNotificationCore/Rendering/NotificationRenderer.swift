@@ -41,7 +41,13 @@ public enum NotificationRenderer {
     let body: String
     if type == .message {
       title = displayName ?? interpolateThem(localized.title, them: them)
-      body = message.text ?? interpolateThem(localized.body, them: them)
+      // Empty or whitespace-only text carries no preview, so fall back to the
+      // localized generic body rather than render a blank notification. The
+      // text comes from decrypted, externally-controlled ciphertext, so an
+      // empty string is reachable.
+      let hasPreviewText =
+        message.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+      body = (hasPreviewText ? message.text : nil) ?? interpolateThem(localized.body, them: them)
     } else {
       title = interpolateThem(localized.title, them: them)
       body = interpolateThem(localized.body, them: them)

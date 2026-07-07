@@ -69,6 +69,16 @@ if (result.en == null) {
   )
 }
 
+// Every renderable type must resolve in the en fallback locale. The Swift
+// renderer falls back per-key to en, so a type missing from en has no fallback
+// anywhere and its preview would be silently dropped at runtime.
+const missingEnKeys = RENDERABLE_TYPES.filter((type) => result.en[type] == null)
+if (missingEnKeys.length > 0) {
+  throw new Error(
+    `en locale is missing title/body for: ${missingEnKeys.join(', ')} - fallback would be broken`
+  )
+}
+
 writeFileSync(outFile, `${JSON.stringify(result, null, 2)}\n`)
 console.log(
   `Wrote ${outFile} (${Object.keys(result).length} locales: ${Object.keys(result).join(', ')})`

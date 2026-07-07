@@ -64,6 +64,33 @@ export const setupBackgroundTask = async (): Promise<void> => {
   }
 }
 
+/**
+ * Headless launches never mount `useSetupBackgroundTask`, so without this the
+ * interval migration above would only run once the user foregrounds the app.
+ * Installs updated in the background (Play auto-update) keep both the
+ * WorkManager chain and the persisted task options across the update, so they
+ * would keep waking the app on a previously registered interval indefinitely.
+ * Called from the background task itself to sync the interval there as well.
+ *
+ * Unlike `setupBackgroundTask` this never registers the task from scratch —
+ * the registration lifecycle stays owned by the hook below, so a task that was
+ * just unregistered (logout) is not resurrected from the headless run.
+ */
+export const migrateBackgroundTaskIntervalIfNeeded =
+  async (): Promise<void> => {
+    try {
+      if (!(await TaskManager.isTaskRegisteredAsync(BACKGROUND_TASK))) return
+    } catch (e) {
+      reportError(
+        'warn',
+        new Error('Error checking background task registration:', {cause: e}),
+        {e}
+      )
+      return
+    }
+    await setupBackgroundTask()
+  }
+
 export function useSetupBackgroundTask(): void {
   const checkAreNotificationEnabled = useSetAtom(
     checkAreNotificationsEnabledAtom

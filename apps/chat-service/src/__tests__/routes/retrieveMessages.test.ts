@@ -304,6 +304,26 @@ describe('Retrieve messages', () => {
           })
         )
 
+        const sql = yield* _(SqlClient.SqlClient)
+        const inboxHash = yield* _(
+          hashPublicKey(user1.mainKeyPair.publicKeyPemBase64)
+        )
+
+        // Snapshot the NOT NULL client_version before the read-only retrieve so
+        // we can prove updateInboxMetadata did not run: it would overwrite this
+        // value, and since the NSE sends no client-version header it would write
+        // NULL and fail the request. Alias the column so the assertion does not
+        // silently depend on the result-name transform config.
+        const clientVersionBefore = (yield* _(sql`
+          SELECT
+            client_version AS "clientVersion"
+          FROM
+            inbox
+          WHERE
+            public_key = ${inboxHash}
+        `))[0]?.clientVersion
+        expect(typeof clientVersionBefore).toBe('number')
+
         yield* _(setAuthHeaders(user1.authHeaders))
         const messages = yield* _(
           client.Messages.retrieveMessages({
@@ -320,7 +340,6 @@ describe('Retrieve messages', () => {
         )
 
         // Message must not be marked as pulled by the read-only retrieve.
-        const sql = yield* _(SqlClient.SqlClient)
         const messageRows = yield* _(sql`
           SELECT
             pulled
@@ -332,18 +351,15 @@ describe('Retrieve messages', () => {
         expect(messageRows[0]?.pulled).toBe(false)
 
         // Inbox metadata must stay untouched (NOT NULL column intact).
-        const inboxHash = yield* _(
-          hashPublicKey(user1.mainKeyPair.publicKeyPemBase64)
-        )
-        const inboxRows = yield* _(sql`
+        const clientVersionAfter = (yield* _(sql`
           SELECT
-            client_version
+            client_version AS "clientVersion"
           FROM
             inbox
           WHERE
             public_key = ${inboxHash}
-        `)
-        expect(inboxRows[0]?.clientVersion).not.toBeNull()
+        `))[0]?.clientVersion
+        expect(clientVersionAfter).toBe(clientVersionBefore)
       })
     )
   })

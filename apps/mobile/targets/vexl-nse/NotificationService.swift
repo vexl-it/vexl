@@ -27,15 +27,18 @@ final class NotificationService: UNNotificationServiceExtension {
     _ request: UNNotificationRequest,
     withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
   ) {
-    stateLock.lock()
-    self.contentHandler = contentHandler
-    self.originalContent = request.content
-    stateLock.unlock()
-
     let userInfo = request.content.userInfo
     let enricher = Self.makeEnricher()
 
-    let task = Task { [weak self] in
+    // Create and store the Task under the same lock as the handler/content so
+    // serviceExtensionTimeWillExpire (which also takes the lock) can never
+    // observe a partially-initialized state where enrichmentTask is still nil
+    // and its cancel() would be a no-op. The Task body's first action is an
+    // await, so it cannot re-enter the lock before we release it here.
+    stateLock.lock()
+    self.contentHandler = contentHandler
+    self.originalContent = request.content
+    self.enrichmentTask = Task { [weak self] in
       let rendered = await Self.enrichWithTimeout(
         enricher: enricher,
         userInfo: userInfo
@@ -53,9 +56,6 @@ final class NotificationService: UNNotificationServiceExtension {
       rendered.apply(to: enrichedContent)
       self.deliver(enrichedContent)
     }
-
-    stateLock.lock()
-    enrichmentTask = task
     stateLock.unlock()
   }
 

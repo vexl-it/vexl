@@ -3,8 +3,12 @@ import Foundation
 import Security
 
 // MARK: - Storage contract shared with the NSE (targets/vexl-nse).
-// The notification service extension reads what this module writes. Keep
-// these constants in sync with VexlNotificationCore (the NSE Swift package).
+// The notification service extension reads what this module writes. These
+// values are the write side of the contract owned by NseBridgeConstants in
+// the VexlNotificationCore Swift package; they are duplicated here because a
+// CocoaPods module cannot link a local SPM package. Any change must be made
+// on both sides in lockstep - BridgeContractTests (VexlNotificationCoreTests)
+// pins the exact strings/versions and fails if the two drift.
 private enum NseBridgeStorage {
   /// Keychain service holding one generic-password item per vexl notification
   /// token. Account = the vexl token ("vexl_nt_..."), value = UTF-8 JSON

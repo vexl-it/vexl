@@ -83,14 +83,14 @@ final class CryptoVectorTests: XCTestCase {
     for vector in vectors.eciesLegacyDecrypt {
       if vector.valid {
         let plaintext = try eciesLegacyDecrypt(
-          privateKeyPemBase64: vector.recipientPrivateKey,
+          privateKey: VexlPrivateKey(pemBase64: vector.recipientPrivateKey),
           payload: vector.ciphertext
         )
         XCTAssertEqual(plaintext, vector.expectedPlaintext, "vector \(vector.id)")
       } else {
         XCTAssertThrowsError(
           try eciesLegacyDecrypt(
-            privateKeyPemBase64: vector.recipientPrivateKey,
+            privateKey: VexlPrivateKey(pemBase64: vector.recipientPrivateKey),
             payload: vector.ciphertext
           ),
           "vector \(vector.id) must fail gracefully"
@@ -101,7 +101,12 @@ final class CryptoVectorTests: XCTestCase {
 
   func testEciesLegacyRejectsMalformedPayloads() {
     let vectors = try? TestVectors.load()
-    let key = vectors?.keys.first?.privateKeyPemBase64 ?? ""
+    guard let key = vectors?.keys.first?.privateKeyPemBase64,
+          let privateKey = try? VexlPrivateKey(pemBase64: key)
+    else {
+      XCTFail("could not load a valid key vector")
+      return
+    }
 
     for malformed in [
       "",
@@ -113,7 +118,7 @@ final class CryptoVectorTests: XCTestCase {
       "9999999999999999999Aabc",
     ] {
       XCTAssertThrowsError(
-        try eciesLegacyDecrypt(privateKeyPemBase64: key, payload: malformed),
+        try eciesLegacyDecrypt(privateKey: privateKey, payload: malformed),
         "payload \(malformed) must be rejected"
       )
     }
@@ -169,10 +174,11 @@ final class CryptoVectorTests: XCTestCase {
       + vectors.ecdsaVerify.map(\.message)
 
     for key in vectors.keys {
+      let privateKey = try VexlPrivateKey(pemBase64: key.privateKeyPemBase64)
       for challenge in challenges {
         let signature = try signChallenge(
           challenge: challenge,
-          privateKeyPemBase64: key.privateKeyPemBase64
+          privateKey: privateKey
         )
 
         // Standard base64 of DER SEQUENCE.

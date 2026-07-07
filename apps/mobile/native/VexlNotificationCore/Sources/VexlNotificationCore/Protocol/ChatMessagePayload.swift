@@ -65,14 +65,13 @@ public struct DecryptedChatMessage: Equatable, Sendable {
       return nil
     }
 
-    let time: Int64
-    if let intTime = dictionary["time"] as? Int64 {
-      time = intTime
-    } else if let doubleTime = dictionary["time"] as? Double {
-      time = Int64(doubleTime)
-    } else {
+    // JSON booleans bridge to NSNumber too - they are not timestamps.
+    guard let timeNumber = dictionary["time"] as? NSNumber,
+          CFGetTypeID(timeNumber) != CFBooleanGetTypeID()
+    else {
       return nil
     }
+    let time = timeNumber.int64Value
 
     return DecryptedChatMessage(
       uuid: uuid,

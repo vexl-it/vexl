@@ -114,6 +114,24 @@ final class RenderingTests: XCTestCase {
     XCTAssertEqual(rendered.body, "Tap to read it.")
   }
 
+  func testMessageTypeFallsBackWhenTextIsEmptyOrWhitespace() throws {
+    // Empty / whitespace-only text is reachable from crafted ciphertext and
+    // must not render a blank body - fall back to the localized generic body.
+    for blank in ["", "   ", "\n", "\t \n"] {
+      let rendered = try XCTUnwrap(
+        try render(message(type: "MESSAGE", text: blank), displayName: "Alice")
+      )
+      XCTAssertEqual(rendered.title, "Alice")
+      XCTAssertEqual(rendered.body, "Tap to read it.", "text \(blank.debugDescription) must fall back")
+    }
+
+    // Real text with surrounding whitespace is preserved verbatim.
+    let padded = try XCTUnwrap(
+      try render(message(type: "MESSAGE", text: "  hi  "), displayName: "Alice")
+    )
+    XCTAssertEqual(padded.body, "  hi  ")
+  }
+
   func testOtherTypesUseLocalizedStringsWithThemInterpolation() throws {
     let requestMessaging = try XCTUnwrap(
       try render(message(type: "REQUEST_MESSAGING"), displayName: "Alice")

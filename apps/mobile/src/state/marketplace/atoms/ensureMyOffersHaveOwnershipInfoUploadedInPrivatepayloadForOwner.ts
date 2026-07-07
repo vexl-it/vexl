@@ -1,37 +1,36 @@
-import updateOwnerPrivatePayload from '@vexl-next/resources-utils/src/offers/updateOwnerPrivatePayload'
 import {Array, Effect, pipe} from 'effect'
 import {atom} from 'jotai'
-import {apiAtom} from '../../../api'
 import {reportErrorE} from '../../../utils/reportError'
-import {sessionDataOrDummyAtom} from '../../session'
-import {myOffersAtom} from './myOffers'
+import {myOffersAtom, updateMyOfferPrivatePayloadActionAtom} from './myOffers'
 
 export const ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner =
-  atom(null, (get, set) =>
-    pipe(
+  atom(null, (get, set) => {
+    const offersToUpdate = pipe(
       get(myOffersAtom),
       Array.filter(
         (one) =>
           !one.offerInfo.privatePart.adminId ||
           !one.offerInfo.privatePart.intendedConnectionLevel
-      ),
-      (offersToUpdate) => {
-        console.log(
-          `Updating offers to include owner info in owner's private payload. Count: ${offersToUpdate.length}`
-        )
-        return offersToUpdate
-      },
-      Array.map((one) =>
-        pipe(
-          updateOwnerPrivatePayload({
-            api: get(apiAtom).offer,
-            ownerCredentials: get(sessionDataOrDummyAtom).privateKey,
-            ownerKeyPairV2: get(sessionDataOrDummyAtom).keyPairV2,
-            symmetricKey: one.offerInfo.privatePart.symmetricKey,
-            adminId: one.ownershipInfo.adminId,
-            intendedConnectionLevel: one.ownershipInfo.intendedConnectionLevel,
-            intendedClubs: one.ownershipInfo.intendedClubs ?? [],
-          }),
+      )
+    )
+
+    if (!Array.isNonEmptyArray(offersToUpdate)) return Effect.void
+
+    console.log(
+      `Updating offers to include owner info in owner's private payload. Count: ${offersToUpdate.length}`
+    )
+
+    // updateMyOfferPrivatePayloadActionAtom re-encrypts + uploads the owner
+    // private payload AND persists the uploaded payload into local offer state,
+    // so this step converges instead of repeating on every refresh.
+    return Effect.forEach(
+      offersToUpdate,
+      (one) =>
+        set(updateMyOfferPrivatePayloadActionAtom, {
+          adminId: one.ownershipInfo.adminId,
+          intendedConnectionLevel: one.ownershipInfo.intendedConnectionLevel,
+          intendedClubs: [...(one.ownershipInfo.intendedClubs ?? [])],
+        }).pipe(
           Effect.tapError((e) =>
             reportErrorE(
               'warn',
@@ -40,8 +39,7 @@ export const ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner =
             )
           ),
           Effect.ignore
-        )
-      ),
-      Effect.all
+        ),
+      {discard: true}
     )
-  )
+  })

@@ -42,6 +42,7 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
     text: textFilter,
     offers: filtered,
     importedContacts: get(importedContactsAtom),
+    importedContactsHashes: get(importedContactsHashesAtom),
   })
   const sort = filter.sort ?? 'NEWEST_OFFER'
 

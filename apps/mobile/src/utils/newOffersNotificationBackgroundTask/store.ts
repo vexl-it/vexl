@@ -3,8 +3,7 @@ import {
   UnixMilliseconds,
   UnixMilliseconds0,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {Array, Schema} from 'effect'
-import {pipe} from 'fp-ts/lib/function'
+import {Array, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {filteredOffersIncludingLocationFilterAtom} from '../../state/marketplace/atoms/filteredOffers'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
@@ -26,6 +25,16 @@ export const refreshLastSeenOffersActionAtom = atom(null, (get, set) => {
     get(filteredOffersIncludingLocationFilterAtom),
     Array.map((offer) => offer.offerInfo.offerId)
   )
+  // Skip the write (a full persisted-store rewrite + derived-atom
+  // invalidation) when the ids did not change — the common case on no-op
+  // refreshes.
+  const {lastSeenOffers} = get(newOfferNotificationsPreferencesStore)
+  if (
+    lastSeenOffers.length === currentOfferIds.length &&
+    Array.every(lastSeenOffers, (id, i) => id === currentOfferIds[i])
+  )
+    return
+
   set(newOfferNotificationsPreferencesStore, (prev) => ({
     ...prev,
     lastSeenOffers: currentOfferIds,

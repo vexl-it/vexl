@@ -50,27 +50,29 @@ export const offersToSeeInMarketplaceAtom = atom((get) => {
   const isDeveloper = get(isDeveloperAtom)
 
   const offers = get(offersAtom)
-  alertAndReportInPersonOffersWithoutLocation(
-    offers.map((one) => one.offerInfo)
-  )
 
   return pipe(
     offers,
     Array.filter((oneOffer) => {
+      // Cheap checks first, common-friends derivation only when still needed
+      if (
+        // only active offers
+        !oneOffer.offerInfo.publicPart.active ||
+        // only not expired offers
+        isOfferExpired(oneOffer.offerInfo.publicPart.expirationDate) ||
+        // Not mine offers
+        !!oneOffer.ownershipInfo ||
+        // Not reported offers
+        oneOffer.flags.reported
+      )
+        return false
+
       const visibleCommonFriends = deriveVisibleCommonFriendsForOffer({
         offerInfo: oneOffer.offerInfo,
         importedContactsHashes,
       })
 
       return (
-        // only active offers
-        oneOffer.offerInfo.publicPart.active &&
-        // only not expired offers
-        !isOfferExpired(oneOffer.offerInfo.publicPart.expirationDate) &&
-        // Not mine offers
-        !oneOffer.ownershipInfo &&
-        // Not reported offers
-        !oneOffer.flags.reported &&
         // Offers that has at least one visible common contact or are first degree
         (Array.isNonEmptyReadonlyArray(visibleCommonFriends.commonFriends) ||
           pipe(

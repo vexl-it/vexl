@@ -1,4 +1,5 @@
-import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
+import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
@@ -13,10 +14,25 @@ import {ensureMyOffersHaveOwnershipInfoUploadedInPrivatepayloadForOwner} from '.
 import {loadingStateAtom} from '../loadingState'
 import {anyMarketplaceSuggestionDismissedInThisSessionAtom} from '../offerSuggestionVisible'
 import {offersAtom, offersStateAtom} from '../offersState'
+import {reportOffersWithoutLocationActionAtom} from '../offersToSeeInMarketplace'
 import {combineIncomingOffers} from './utils/combineIncomingOffers'
 import {fetchOffersReportErrorsActionAtom} from './utils/fetchOffersReportErrorsActionAtom'
 import {getRemovedOffersIds} from './utils/getRemovedOffersIds'
 import {mergeIncomingOffersToState} from './utils/mergeIncomingOffersToState'
+
+// Reconciling removed offers POSTs every stored offer id to the server, so it
+// is throttled instead of running on every refresh (refreshes can be as
+// frequent as every few seconds on an empty marketplace).
+const REMOVED_OFFERS_RECONCILIATION_INTERVAL_MS = 10 * 60 * 1000
+const lastRemovedOffersReconciliationAtAtom = atom(0)
+
+const NO_REMOVED_OFFERS: {
+  removedContactOfferIds: readonly OfferId[]
+  removedClubsOfferIdsToClubUuid: ReadonlyArray<{
+    clubUuid: ClubUuid
+    removedIds: readonly OfferId[]
+  }>
+} = {removedContactOfferIds: [], removedClubsOfferIdsToClubUuid: []}
 
 export const refreshOffersActionAtom = atom(null, (get, set) =>
   Effect.gen(function* (_) {
@@ -26,7 +42,6 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
 
     const endBenchmark = startBenchmark('Refresh offers')
 
-    const updateStartedAt = isoNow()
     const storedOffers = get(offersAtom)
 
     set(loadingStateAtom, {state: 'inProgress'})
@@ -42,14 +57,33 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
       })
     )
 
-    set(updateOffersIdsForClubStateActionAtom, {newOffers: newClubsOffers})
+    // With no new club offers the update is a no-op that would only rewrite
+    // the persisted clubs state, so skip it entirely.
+    if (Array.isNonEmptyReadonlyArray(newClubsOffers))
+      set(updateOffersIdsForClubStateActionAtom, {newOffers: newClubsOffers})
+
+    const shouldReconcileRemovedOffers =
+      Date.now() - get(lastRemovedOffersReconciliationAtAtom) >=
+      REMOVED_OFFERS_RECONCILIATION_INTERVAL_MS
 
     const {removedClubsOfferIdsToClubUuid, removedContactOfferIds} = yield* _(
-      getRemovedOffersIds({
-        offersApi: api.offer,
-        storedOffers,
-        storedClubs: myStoredClubs,
-      })
+      shouldReconcileRemovedOffers
+        ? getRemovedOffersIds({
+            offersApi: api.offer,
+            storedOffers,
+            storedClubs: myStoredClubs,
+          }).pipe(
+            Effect.tap((result) =>
+              Effect.sync(() => {
+                // Only throttle when the reconciliation actually succeeded, so a
+                // transient failure retries on the next refresh instead of
+                // leaving removed offers visible for the full interval.
+                if (result.succeeded)
+                  set(lastRemovedOffersReconciliationAtAtom, Date.now())
+              })
+            )
+          )
+        : Effect.succeed(NO_REMOVED_OFFERS)
     )
 
     const incomingOffers = pipe(
@@ -59,19 +93,24 @@ export const refreshOffersActionAtom = atom(null, (get, set) =>
       Array.filterMap(combineIncomingOffers)
     )
 
-    // Update with callback to ensure no offers from state are lost
-    set(offersStateAtom, (old) => ({
-      ...old,
-      offers: mergeIncomingOffersToState({
-        incomingOffers,
-        storedOffers: old.offers,
-        removedOffersIds: {
-          clubs: removedClubsOfferIdsToClubUuid,
-          contacts: removedContactOfferIds,
-        },
-      }),
-      lastUpdatedAt2: updateStartedAt,
-    }))
+    // Read fresh state right before merging to ensure no offers
+    // written while fetching are lost.
+    const offersBeforeMerge = get(offersAtom)
+    const mergedOffers = mergeIncomingOffersToState({
+      incomingOffers,
+      storedOffers: offersBeforeMerge,
+      removedOffersIds: {
+        clubs: removedClubsOfferIdsToClubUuid,
+        contacts: removedContactOfferIds,
+      },
+    })
+
+    // Skip the state write (and the full persisted-blob rewrite + derived-atom
+    // invalidation it causes) when the refresh changed nothing.
+    if (mergedOffers !== offersBeforeMerge) {
+      set(offersStateAtom, (old) => ({...old, offers: mergedOffers}))
+      set(reportOffersWithoutLocationActionAtom)
+    }
     set(anyMarketplaceSuggestionDismissedInThisSessionAtom, false)
 
     yield* _(

@@ -1204,7 +1204,7 @@ export const offerFormMolecule = molecule(() => {
         const confirmed = yield* _(
           set(globalDialogAtom, {
             title: t('editOffer.pauseOfferTitle'),
-            subtitle: t('editOffer.pauseOfferDescription'),
+            subtitle: t('editOffer.pauseOfferDescriptionOffer'),
             positiveButtonText: t('editOffer.yesPause'),
             negativeButtonText: t('common.cancel'),
           })

@@ -3,10 +3,7 @@ import {type PlatformName} from '@vexl-next/domain/src/utility/PlatformName'
 import {type SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
 import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
-import {
-  makeCommonAndSecurityHeaders,
-  type CommonAndSecurityHeaders,
-} from '../../apiSecurity'
+import {makeRequestWithCommonAndSecurityHeaders} from '../../apiSecurity'
 import {type CreateChallengeRequest} from '../../challenges/contracts'
 import {createClientInstance} from '../../client'
 import {makeCommonHeaders, type AppSource} from '../../commonHeaders'
@@ -101,10 +98,14 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    // Build security headers per request (not once at api construction) so
-    // every authenticated request reads the current session credentials.
-    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
-      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
+    // Security headers are built lazily inside each request effect (not once
+    // at api construction) so every authenticated request reads the current
+    // session credentials and a failing credentials read can never throw
+    // synchronously out of the code constructing the request.
+    const withSecurityHeaders = makeRequestWithCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
+    )
 
     const addChallenge = addChallengeToRequest2(
       client.Challenges.createChallenge
@@ -114,10 +115,12 @@ export function api({
       getOffersForMeModifiedOrCreatedAfterPaginated: (
         req: GetOffersForMeCreatedOrModifiedAfterPaginatedRequest
       ) =>
-        client.getOffersForMeModifiedOrCreatedAfterPaginated({
-          urlParams: req,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.getOffersForMeModifiedOrCreatedAfterPaginated({
+            urlParams: req,
+            headers,
+          })
+        ),
       getClubOffersForMeModifiedOrCreatedAfterPaginated: (
         body: RequestWithGeneratableChallenge<GetClubOffersForMeCreatedOrModifiedAfterPaginatedRequest>
       ) =>
@@ -129,31 +132,27 @@ export function api({
           )
         ),
       createNewOffer: (body: CreateNewOfferRequest) =>
-        client.createNewOffer({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.createNewOffer({payload: body, headers})
+        ),
       refreshOffer: (body: RefreshOfferRequest) =>
         client.refreshOffer({payload: body}),
       deleteOffer: (req: DeleteOfferRequest) =>
         client.deleteOffer({urlParams: req}),
       updateOffer: (body: UpdateOfferRequest) =>
-        client.updateOffer({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.updateOffer({payload: body, headers})
+        ),
       createPrivatePart: (body: CreatePrivatePartRequest) =>
         client.createPrivatePart({payload: body}),
       deletePrivatePart: (req: DeletePrivatePartRequest) =>
-        client.deletePrivatePart({
-          payload: req,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.deletePrivatePart({payload: req, headers})
+        ),
       getRemovedOffers: (body: RemovedOfferIdsRequest) =>
-        client.getRemovedOffers({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.getRemovedOffers({payload: body, headers})
+        ),
       getRemovedClubOffers: (
         body: RequestWithGeneratableChallenge<RemovedClubOfferIdsRequest>
       ) =>
@@ -161,19 +160,17 @@ export function api({
           Effect.flatMap((body) => client.getRemovedClubOffers({payload: body}))
         ),
       reportOffer: (body: ReportOfferRequest) =>
-        client.reportOffer({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.reportOffer({payload: body, headers})
+        ),
       reportClubOffer: (
         body: RequestWithGeneratableChallenge<ReportClubOfferRequest>
       ) =>
         addChallenge(body).pipe(
           Effect.flatMap((body) =>
-            client.reportClubOffer({
-              payload: body,
-              headers: commonAndSecurityHeaders(),
-            })
+            withSecurityHeaders((headers) =>
+              client.reportClubOffer({payload: body, headers})
+            )
           )
         ),
       // ----------------------
@@ -182,36 +179,34 @@ export function api({
       getNotesForMeModifiedOrCreatedAfterPaginated: (
         req: GetNotesForMeCreatedOrModifiedAfterPaginatedRequest
       ) =>
-        client.Notes.getNotesForMeModifiedOrCreatedAfterPaginated({
-          urlParams: req,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Notes.getNotesForMeModifiedOrCreatedAfterPaginated({
+            urlParams: req,
+            headers,
+          })
+        ),
       createNewNote: (body: CreateNewNoteRequest) =>
-        client.Notes.createNewNote({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Notes.createNewNote({payload: body, headers})
+        ),
       deleteNote: (req: DeleteNoteRequest) =>
         client.Notes.deleteNote({urlParams: req}),
       createNotePrivatePart: (body: CreateNotePrivatePartRequest) =>
         client.Notes.createNotePrivatePart({payload: body}),
       repostNote: (body: RepostNoteRequest) =>
-        client.Notes.repostNote({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Notes.repostNote({payload: body, headers})
+        ),
       undoRepostNote: (req: UndoRepostNoteRequest) =>
         client.Notes.undoRepostNote({urlParams: req}),
       getRemovedNotes: (body: RemovedNoteIdsRequest) =>
-        client.Notes.getRemovedNotes({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Notes.getRemovedNotes({payload: body, headers})
+        ),
       reportNote: (body: ReportNoteRequest) =>
-        client.Notes.reportNote({
-          payload: body,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Notes.reportNote({payload: body, headers})
+        ),
       // ----------------------
       // 👇 Challenge
       // ----------------------

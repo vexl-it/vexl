@@ -5,10 +5,7 @@ import {type VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {Effect, Option} from 'effect'
 import {type ServiceUrl} from '../../ServiceUrl.brand'
 import {type GetUserSessionCredentials} from '../../UserSessionCredentials.brand'
-import {
-  makeCommonAndSecurityHeaders,
-  type CommonAndSecurityHeaders,
-} from '../../apiSecurity'
+import {makeRequestWithCommonAndSecurityHeaders} from '../../apiSecurity'
 import {
   type CreateChallengeRequest,
   type CreateChallengesRequest,
@@ -97,10 +94,14 @@ export function api({
       prefix: Option.fromNullable(prefix),
     })
 
-    // Build security headers per request (not once at api construction) so
-    // every authenticated request reads the current session credentials.
-    const commonAndSecurityHeaders = (): CommonAndSecurityHeaders =>
-      makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
+    // Security headers are built lazily inside each request effect (not once
+    // at api construction) so every authenticated request reads the current
+    // session credentials and a failing credentials read can never throw
+    // synchronously out of the code constructing the request.
+    const withSecurityHeaders = makeRequestWithCommonAndSecurityHeaders(
+      getUserSessionCredentials,
+      commonHeaders
+    )
 
     const addChallenge = addChallengeToRequest2(
       client.Challenges.createChallenge
@@ -150,10 +151,12 @@ export function api({
         ),
       /** @deprecated use `requestApprovalV2` */
       requestApproval: (requestApprovalRequest: RequestApprovalRequest) =>
-        client.Inboxes.requestApproval({
-          payload: requestApprovalRequest,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Inboxes.requestApproval({
+            payload: requestApprovalRequest,
+            headers,
+          })
+        ),
       requestApprovalV2: (
         requestApprovalV2Request: RequestWithGeneratableChallenge<RequestApprovalV2Request>
       ) =>
@@ -164,10 +167,12 @@ export function api({
         ),
       /** @deprecated use `cancelRequestApprovalV2` */
       cancelRequestApproval: (cancelApprovalRequest: CancelApprovalRequest) =>
-        client.Inboxes.cancelRequestApproval({
-          payload: cancelApprovalRequest,
-          headers: commonAndSecurityHeaders(),
-        }),
+        withSecurityHeaders((headers) =>
+          client.Inboxes.cancelRequestApproval({
+            payload: cancelApprovalRequest,
+            headers,
+          })
+        ),
       cancelRequestApprovalV2: (
         cancelApprovalV2Request: RequestWithGeneratableChallenge<CancelApprovalV2Request>
       ) =>

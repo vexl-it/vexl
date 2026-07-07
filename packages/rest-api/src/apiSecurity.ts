@@ -7,7 +7,7 @@ import {
 } from '@vexl-next/domain/src/general/commonErrors'
 import {HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {EcdsaSignature} from '@vexl-next/generic-utils/src/effect-helpers/EcdsaSignature.brand'
-import {Context, Schema} from 'effect'
+import {Context, Effect, Schema} from 'effect'
 import {CommonHeaders} from './commonHeaders'
 import {
   HEADER_AUTHORIZATION,
@@ -65,3 +65,28 @@ export const makeCommonAndSecurityHeaders = (
     [HEADER_AUTHORIZATION]: credentials.vexlAuthHeader,
   })
 }
+
+/**
+ * Creates a helper that builds an authenticated request with the security
+ * headers evaluated lazily - when the returned effect runs (once per request),
+ * never while the request is being constructed. Every request therefore reads
+ * the current session credentials, and a throwing `getUserSessionCredentials`
+ * (see the mobile app's SessionNotReadyError tripwire) surfaces as a defect
+ * inside the returned effect instead of a synchronous exception in whatever
+ * code builds the request.
+ */
+export const makeRequestWithCommonAndSecurityHeaders =
+  (
+    getUserSessionCredentials: GetUserSessionCredentials,
+    commonHeaders: CommonHeaders
+  ) =>
+  <A, E, R>(
+    makeRequest: (
+      headers: typeof CommonAndSecurityHeaders.Type
+    ) => Effect.Effect<A, E, R>
+  ): Effect.Effect<A, E, R> =>
+    Effect.suspend(() =>
+      makeRequest(
+        makeCommonAndSecurityHeaders(getUserSessionCredentials, commonHeaders)
+      )
+    )

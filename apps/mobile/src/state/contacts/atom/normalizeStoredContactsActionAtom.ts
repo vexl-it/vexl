@@ -12,16 +12,6 @@ import {type ContactComputedValues, type StoredContact} from '../domain'
 import {hashPhoneNumber} from '../utils'
 import {storedContactsAtom} from './contactsStore'
 
-interface ContactsToNormalize {
-  readonly normalized: StoredContact[]
-  readonly toNormalize: StoredContact[]
-}
-
-const emptyContactsToNormalize: ContactsToNormalize = {
-  normalized: [],
-  toNormalize: [],
-}
-
 function markContactInvalid(contact: StoredContact): StoredContact {
   return {
     ...contact,
@@ -91,18 +81,12 @@ const normalizeStoredContactsActionAtom = atom(
     const measure = startMeasure('Normalizing contacts')
     const storedContacts = get(storedContactsAtom)
 
-    const {normalized, toNormalize} = pipe(
+    const [toNormalize, normalized] = pipe(
       storedContacts,
-      Array.reduce(emptyContactsToNormalize, (acc, c) => {
-        if (
-          Option.isSome(c.computedValues) ||
-          c.flags.invalidNumber === 'invalid'
-        ) {
-          return {...acc, normalized: [...acc.normalized, c]}
-        } else {
-          return {...acc, toNormalize: [...acc.toNormalize, c]}
-        }
-      })
+      Array.partition(
+        (c) =>
+          Option.isSome(c.computedValues) || c.flags.invalidNumber === 'invalid'
+      )
     )
 
     if (Array.isEmptyArray(toNormalize)) return Effect.void
@@ -111,7 +95,6 @@ const normalizeStoredContactsActionAtom = atom(
 
     return pipe(
       toNormalize,
-      Array.filter((c) => Option.isNone(c.computedValues)),
       Array.map(flow(normalizeContact, effectToTask)),
       sequenceTasksWithAnimationFrames(100, (percentage) => {
         onProgress({total: storedContacts.length, percentDone: percentage})

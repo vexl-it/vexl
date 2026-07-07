@@ -7,14 +7,19 @@ import {importedContactsAtom} from './contactsStore'
 export default function createImportedContactsForHashesAtom(
   hashes: readonly HashedPhoneNumber[]
 ): Atom<StoredContactWithComputedValues[]> {
-  return atom((get) =>
-    pipe(
+  const hashesSet = new Set(hashes)
+
+  return atom((get) => {
+    // Single pass keeping the first occurrence per hash (same as dedupeWith)
+    const includedHashes = new Set<HashedPhoneNumber>()
+    return pipe(
       get(importedContactsAtom),
-      Array.filter((contact) => hashes.includes(contact.computedValues.hash)),
-      Array.dedupeWith(
-        (first, second) =>
-          first.computedValues.hash === second.computedValues.hash
-      )
+      Array.filter((contact) => {
+        const hash = contact.computedValues.hash
+        if (!hashesSet.has(hash) || includedHashes.has(hash)) return false
+        includedHashes.add(hash)
+        return true
+      })
     )
-  )
+  })
 }

@@ -120,7 +120,7 @@
     "react-native-svg": "15.15.4",
     "react-native-tab-view": "^3.5.1",
     "react-native-web": "^0.21.2",
-    "react-native-worklets": "0.10.0",
+    "react-native-worklets": "0.10.2",
     "seed-random": "^2.2.0",
     "set-operations": "^2.0.2",
     "stream-browserify": "^3.0.0",

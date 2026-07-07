@@ -375,7 +375,9 @@ const processNewStreamNotificationActionAtom = atom(
         )
       )
 
-      yield* _(Console.log('Received notification stream message', message))
+      yield* _(
+        Console.log('Received notification stream message', message._tag)
+      )
     }).pipe(
       Effect.exit,
       Effect.tap((e) => {

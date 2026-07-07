@@ -1,5 +1,5 @@
 import {ChevronLeft, NavigationBar, Screen, Stack} from '@vexl-next/ui'
-import {Option, pipe} from 'effect'
+import {Effect, Option, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
@@ -46,7 +46,11 @@ export function ClubOffersScreen({route}: Props): React.ReactElement {
       <Stack f={1}>
         <OffersList
           offersAtoms={offersAtom}
-          onRefresh={refreshOffers}
+          onRefresh={() => {
+            Effect.runFork(
+              refreshOffers({forceRemovedOffersReconciliation: true})
+            )
+          }}
           refreshing={loadingOffers}
         />
       </Stack>

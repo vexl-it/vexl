@@ -24,7 +24,7 @@ Android emulator "VexlPerf API 36" (2 GB RAM) with a previously installed dev-cl
 | Suggest amount screen | ✅ has the new **Save** button (#2485); live market price loads |
 | Community → Discover (clubs) | ✅ renders "Join a club" section |
 | Community → Board (new feature #2259) | ✅ onboarding modal + empty board render — but dismissing the onboarding sheet **crashed the app with the same worklets abort as issue 1** |
-| Backend services logs (all 10 services) | ✅ clean except content-service 500s (issue 5) |
+| Backend services logs (all 10 services) | ✅ clean except content-service 500s (issue 4) |
 
 Not covered: profile edit (optional photo, #2489), donations flow (#2557), club join flow, board
 note creation (blocked by the second crash). Recommend covering these after the worklets fix,
@@ -139,7 +139,7 @@ ideally on a faster device/emulator.
   /android directories` on `expo start` (dev-tooling only).
 - `npx expo install --check`: expo 57.0.2 → ~57.0.4 and 3 other packages may need updating.
 
-## Fixes applied (same day, uncommitted working tree)
+## Fixes applied (same day, committed on this branch)
 
 1. **Issue 1 (worklets crash):** bumped `react-native-worklets` 0.10.0 → 0.10.2 in
    `apps/mobile/package.json`, `packages/ui/package.json`, `apps/ui-book/package.json`
@@ -157,8 +157,9 @@ ideally on a faster device/emulator.
 
 ## Still to do before release
 
-1. Rebuild the dev client (`pnpm dev:mobile -p android --build`) and re-verify on device: publish an
-   offer end-to-end (no crash after the "done" modal), dismiss the Board onboarding sheet (no crash).
+1. Rebuild the dev client (`pnpm dev:mobile -p android --build`) — **done**. Re-verify on device:
+   publish an offer end-to-end (no crash after the "done" modal), dismiss the Board onboarding sheet
+   (no crash) — handed over for on-device verification, **not yet confirmed**.
 2. Cover the untested flows: profile edit (optional photo), donations, club join, board note posting.
 3. Issue 3 (dummy-session race) is fixed (per-request security headers + fail-fast while the
    session loads, see above). Issue 2 (background-task cold-boot cost) is not a regression and

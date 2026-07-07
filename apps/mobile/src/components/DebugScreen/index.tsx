@@ -2,6 +2,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {useNavigation} from '@react-navigation/native'
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {type Inbox} from '@vexl-next/domain/src/general/messaging'
 import {
   type BtcNetwork,
@@ -21,7 +22,10 @@ import {
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
-import {effectToTaskEither} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
+import {
+  effectToTaskEither,
+  taskEitherToEffect,
+} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
 import {fetchAndEncryptNotificationToken} from '@vexl-next/resources-utils/src/notifications/fetchAndEncryptNotificationToken'
 import {FeedbackFormId} from '@vexl-next/rest-api/src/services/feedback/contracts'
 import {
@@ -46,21 +50,33 @@ import {getInstallationSource} from 'expo-installation-source'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {isTestFlight} from 'expo-testflight'
+import {pipe} from 'fp-ts/function'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
-import {pipe} from 'fp-ts/function'
-import {useAtomValue, useSetAtom, useStore} from 'jotai'
+import {
+  atom,
+  type PrimitiveAtom,
+  type SetStateAction,
+  useAtomValue,
+  useSetAtom,
+  useStore,
+} from 'jotai'
 import {DateTime} from 'luxon'
 import React from 'react'
 import {Alert, Platform} from 'react-native'
 import {apiAtom, apiEnv} from '../../api'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import acceptMessagingRequestAtom from '../../state/chat/atoms/acceptMessagingRequestAtom'
 import allChatsAtom from '../../state/chat/atoms/allChatsAtom'
 import {sendUpdateNoticeMessageActionAtom} from '../../state/chat/atoms/checkAndReportCurrentVersionToChatsActionAtom'
 import deleteAllInboxesActionAtom from '../../state/chat/atoms/deleteAllInboxesActionAtom'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from '../../state/chat/atoms/focusChatByInboxKeyAndSenderKey'
 import messagingStateAtom from '../../state/chat/atoms/messagingStateAtom'
+import {
+  type ChatWithMessages,
+  dummyChatWithMessages,
+} from '../../state/chat/domain'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../state/chat/hooks/useCreateInbox'
 import {clubsToKeyHolderAtom} from '../../state/clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from '../../state/clubs/atom/clubsWithMembersAtom'
@@ -73,7 +89,9 @@ import offerToConnectionsAtom, {
   updateAndReencryptAllOffersConnectionsActionAtom,
 } from '../../state/connections/atom/offerToConnectionsAtom'
 import {storedContactsAtom} from '../../state/contacts/atom/contactsStore'
+import {submitContactsActionAtom} from '../../state/contacts/atom/submitContactsActionAtom'
 import {StoredContact} from '../../state/contacts/domain'
+import {hashPhoneNumber} from '../../state/contacts/utils'
 import {btcPriceDataAtom} from '../../state/currentBtcPriceAtoms'
 import {createOfferActionAtom} from '../../state/marketplace/atoms/createOfferActionAtom'
 import {myOffersAtom} from '../../state/marketplace/atoms/myOffers'
@@ -675,6 +693,176 @@ function DebugScreen(): React.ReactElement {
                 clubOffersNextPageParam: {},
               })
               Alert.alert('Done')
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Seed perf: import 200 fake contacts"
+            onPress={() => {
+              // Matches tooling/dev/seed-perf-data.ts: direct fake users are
+              // +420777000000 + i for i < ceil(N_USERS * 2/3) with N_USERS=300
+              // (the `numbersToImportInApp` list of seed-fake-numbers.json).
+              const numbersToImport = effectPipe(
+                Array.makeBy(200, (i) => `+${420777000000 + i}`),
+                Array.map((number) =>
+                  Schema.decodeSync(E164PhoneNumber)(number)
+                )
+              )
+
+              const existingRawNumbers = new Set(
+                store.get(storedContactsAtom).map((c) => c.info.rawNumber)
+              )
+              const newStoredContacts = effectPipe(
+                numbersToImport,
+                Array.filter((number) => !existingRawNumbers.has(number)),
+                Array.filterMap((number): Option.Option<StoredContact> => {
+                  const hash = hashPhoneNumber(number)
+                  if (hash._tag !== 'Right') return Option.none()
+                  return Option.some({
+                    info: {
+                      name: `Seed user ${number.slice(-3)}`,
+                      label: Option.none(),
+                      nonUniqueContactId: Option.none(),
+                      numberToDisplay: number,
+                      rawNumber: number,
+                    },
+                    computedValues: Option.some({
+                      normalizedNumber: number,
+                      hash: hash.right,
+                    }),
+                    serverHashToClient: Option.none(),
+                    flags: {
+                      seen: true,
+                      imported: false,
+                      importedManually: true,
+                      invalidNumber: 'valid',
+                    },
+                  })
+                })
+              )
+              store.set(storedContactsAtom, (existing) => [
+                ...existing,
+                ...newStoredContacts,
+              ])
+
+              Effect.runFork(
+                store
+                  .set(submitContactsActionAtom, {
+                    normalizeAndImportAll: false,
+                    numbersToImport,
+                    showOfferReencryptionDialog: false,
+                    showContactImportProgressDialog: true,
+                  })
+                  .pipe(
+                    Effect.tap((result) =>
+                      Effect.sync(() => {
+                        Alert.alert('Seed contacts import', result)
+                      })
+                    )
+                  )
+              )
+            }}
+          />
+          <Button
+            variant="primary"
+            size="small"
+            text="Seed perf: approve all chat requests"
+            onPress={() => {
+              const pending = effectPipe(
+                store.get(messagingStateAtom),
+                Array.flatMap((inbox) =>
+                  effectPipe(
+                    inbox.chats,
+                    Array.filterMap((chatWithMessages) => {
+                      const lastMessage = chatWithMessages.messages.at(-1)
+                      return lastMessage?.message.messageType ===
+                        'REQUEST_MESSAGING' && lastMessage.state === 'received'
+                        ? Option.some({
+                            inboxKey: inbox.inbox.privateKey.publicKeyPemBase64,
+                            senderKey:
+                              chatWithMessages.chat.otherSide.publicKey,
+                          })
+                        : Option.none()
+                    })
+                  )
+                )
+              )
+
+              if (!Array.isNonEmptyArray(pending)) {
+                Alert.alert('No pending chat requests found')
+                return
+              }
+              Alert.alert(
+                'Started',
+                `Approving ${pending.length} chat requests. Watch console for progress.`
+              )
+
+              Effect.runFork(
+                effectPipe(
+                  Effect.forEach(
+                    pending,
+                    ({inboxKey, senderKey}, i) =>
+                      Effect.gen(function* (_) {
+                        const focusedChatAtom = focusChatByInboxKeyAndSenderKey(
+                          {
+                            inboxKey,
+                            senderKey,
+                          }
+                        )
+                        const definiteChatAtom: PrimitiveAtom<ChatWithMessages> =
+                          atom(
+                            (get) =>
+                              get(focusedChatAtom) ?? dummyChatWithMessages,
+                            (
+                              get,
+                              set,
+                              update: SetStateAction<ChatWithMessages>
+                            ) => {
+                              const current = get(focusedChatAtom)
+                              if (current === undefined) return
+                              set(
+                                focusedChatAtom,
+                                typeof update === 'function'
+                                  ? update(current)
+                                  : update
+                              )
+                            }
+                          )
+                        yield* _(
+                          taskEitherToEffect(
+                            store.set(acceptMessagingRequestAtom, {
+                              chatAtom: definiteChatAtom,
+                              approve: true,
+                              text: 'Hi! Sure, let us talk.',
+                            })
+                          )
+                        )
+                        console.log(
+                          `Approved chat request ${i + 1}/${pending.length}`
+                        )
+                      }),
+                    {concurrency: 3}
+                  ),
+                  Effect.tap((results) =>
+                    Effect.sync(() => {
+                      Alert.alert(
+                        'Done',
+                        `Approved ${results.length} chat requests`
+                      )
+                    })
+                  ),
+                  Effect.tapError((error) =>
+                    Effect.sync(() => {
+                      console.error('Error approving chat requests', error)
+                      Alert.alert(
+                        'Error approving chat requests',
+                        JSON.stringify(error, null, 2).slice(0, 800)
+                      )
+                    })
+                  )
+                )
+              )
             }}
           />
           <Button

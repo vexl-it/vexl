@@ -2015,12 +2015,33 @@ importers:
 
   tooling/dev:
     devDependencies:
+      '@effect/platform':
+        specifier: ^0.93.6
+        version: 0.93.8(effect@3.21.4)
+      '@vexl-next/cryptography':
+        specifier: 0.0.0
+        version: link:../../packages/cryptography
+      '@vexl-next/domain':
+        specifier: 0.0.0
+        version: link:../../packages/domain
       '@vexl-next/eslint-config':
         specifier: 0.0.0
         version: link:../eslint
+      '@vexl-next/generic-utils':
+        specifier: 0.0.0
+        version: link:../../packages/generic-utils
       '@vexl-next/prettier-config':
         specifier: 0.0.0
         version: link:../prettier
+      '@vexl-next/resources-utils':
+        specifier: 0.0.0
+        version: link:../../packages/resources-utils
+      '@vexl-next/rest-api':
+        specifier: 0.0.0
+        version: link:../../packages/rest-api
+      effect:
+        specifier: ^3.20.0
+        version: 3.21.4
       eslint:
         specifier: ^9.20.0
         version: 9.39.4(jiti@2.7.0)

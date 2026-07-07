@@ -10,6 +10,8 @@
     "noUncheckedIndexedAccess": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": false,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true

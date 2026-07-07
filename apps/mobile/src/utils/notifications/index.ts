@@ -1,6 +1,6 @@
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {effectToTask} from '@vexl-next/resources-utils/src/effect-helpers/TaskEitherConverter'
-import {Effect, Schema} from 'effect'
+import {Effect, Option, Schema} from 'effect'
 import {BackgroundTaskStatus, getStatusAsync} from 'expo-background-task'
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
@@ -12,6 +12,7 @@ import {useEffect, useState} from 'react'
 import {Alert, Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
 import {useTranslation} from '../localization/I18nProvider'
+import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
 import {areNotificationsEnabledAtom} from './areNotificaitonsEnabledAtom'
 
@@ -113,6 +114,42 @@ export function getNotificationTokenE(): Effect.Effect<ExpoNotificationToken | n
 
 export function getNotificationToken(): T.Task<ExpoNotificationToken | null> {
   return effectToTask(getNotificationTokenE())
+}
+
+// todo #2124: remove after migrating to vexl notification token
+export const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
+
+const getCachedNotificationTokenE: Effect.Effect<
+  Option.Option<ExpoNotificationToken>
+> = Effect.suspend(() =>
+  Option.match(
+    Option.fromNullable(
+      storage._storage.getString(NOTIFICATION_TOKEN_CACHE_KEY)
+    ),
+    {
+      onNone: () => Effect.succeedNone,
+      onSome: (cached) =>
+        Schema.decodeUnknown(ExpoNotificationToken)(cached).pipe(
+          Effect.map(Option.some),
+          Effect.orElseSucceed(() => Option.none<ExpoNotificationToken>())
+        ),
+    }
+  )
+)
+
+// Fetches the Expo push token but never blocks a caller for more than 3s so a
+// hanging fetch can not stall club refresh / admission checks. On timeout we
+// fall back to the last-known cached token (see refreshNotificationTokenOnResume)
+// instead of `null` - otherwise a transient hang would clear the token stored on
+// the server and disable legacy club notifications until the next refresh.
+export function getNotificationTokenWithTimeoutE(): Effect.Effect<
+  Option.Option<ExpoNotificationToken>
+> {
+  return getNotificationTokenE().pipe(
+    Effect.timeout('3 seconds'),
+    Effect.map(Option.fromNullable),
+    Effect.catchTag('TimeoutException', () => getCachedNotificationTokenE)
+  )
 }
 
 export interface NotificationsEnabledSettings {

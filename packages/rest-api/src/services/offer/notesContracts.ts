@@ -79,6 +79,16 @@ export type DeleteNotePrivatePartRequest =
 export const DeleteNotePrivatePartResponse = NoContentResponse
 export type DeleteNotePrivatePartResponse =
   typeof DeleteNotePrivatePartResponse.Type
+export const CreateRepostNotePrivatePartRequest = Schema.Struct({
+  repostId: NoteRepostId,
+  notePrivateList: Schema.Array(ServerNotePrivatePart),
+})
+export type CreateRepostNotePrivatePartRequest =
+  typeof CreateRepostNotePrivatePartRequest.Type
+
+export const CreateRepostNotePrivatePartResponse = NoContentResponse
+export type CreateRepostNotePrivatePartResponse =
+  typeof CreateRepostNotePrivatePartResponse.Type
 
 export const DeleteNoteRequest = Schema.Struct({
   adminIds: CommaSeparatedDedupedStrings.pipe(

@@ -18,6 +18,8 @@ import {
   CreateNewNoteResponse,
   CreateNotePrivatePartRequest,
   CreateNotePrivatePartResponse,
+  CreateRepostNotePrivatePartRequest,
+  CreateRepostNotePrivatePartResponse,
   DeleteNotePrivatePartRequest,
   DeleteNotePrivatePartResponse,
   DeleteNoteRequest,
@@ -74,6 +76,17 @@ export const DeleteNotePrivatePartEndpoint = HttpApiEndpoint.del(
   .setPayload(DeleteNotePrivatePartRequest)
   .addSuccess(DeleteNotePrivatePartResponse)
   .addError(CanNotDeletePrivatePartOfAuthor, {status: 400})
+  .annotate(MaxExpectedDailyCall, 100)
+
+export const CreateRepostNotePrivatePartEndpoint = HttpApiEndpoint.post(
+  'createRepostNotePrivatePart',
+  '/api/v1/notes/repost/private-part'
+)
+  .annotate(OpenApi.Summary, 'Create repost note private part')
+  .setPayload(CreateRepostNotePrivatePartRequest)
+  .addSuccess(CreateRepostNotePrivatePartResponse)
+  .addError(DuplicatedPublicKeyError, {status: 400})
+  .addError(NotFoundError, {status: 404})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteNoteEndpoint = HttpApiEndpoint.del(
@@ -151,6 +164,7 @@ export const NotesApiGroup = HttpApiGroup.make('Notes')
   .add(CreateNewNoteEndpoint)
   .add(CreateNotePrivatePartEndpoint)
   .add(DeleteNotePrivatePartEndpoint)
+  .add(CreateRepostNotePrivatePartEndpoint)
   .add(DeleteNoteEndpoint)
   .add(RepostNoteEndpoint)
   .add(UndoRepostNoteEndpoint)

@@ -674,6 +674,175 @@ describe('Repost and undo repost', () => {
   })
 })
 
+describe('Create repost note private part', () => {
+  it('Adds a new recipient to an existing repost and undo removes it too', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = yield* _(createMockedUser('+420733000141'))
+        const reposter = yield* _(createMockedUser('+420733000142'))
+        const firstRecipient = yield* _(createMockedUser('+420733000143'))
+        const lateRecipient = yield* _(createMockedUser('+420733000144'))
+        const client = yield* _(NodeTestingApp)
+
+        const note = yield* _(
+          createNote({
+            owner: me,
+            privateParts: [
+              privatePartFor(reposter, '0reposter'),
+              privatePartFor(me, '0owner'),
+            ],
+          })
+        )
+
+        const repostId = generateNoteRepostId()
+        yield* _(setAuthHeaders(reposter.authHeaders))
+        yield* _(
+          client.Notes.repostNote({
+            payload: {
+              noteId: note.noteId,
+              repostId,
+              notePrivateList: [privatePartFor(firstRecipient, '0first')],
+            },
+            headers: makeTestCommonAndSecurityHeaders(reposter.authHeaders),
+          })
+        )
+
+        // lateRecipient does not see the note yet.
+        const lateBefore = yield* _(fetchNotesForMe(lateRecipient))
+        expect(
+          lateBefore.items.filter((n: ServerNote) => n.noteId === note.noteId)
+        ).toHaveLength(0)
+
+        // Reposter adds a private part for a newly imported contact.
+        yield* _(setAuthHeaders(reposter.authHeaders))
+        yield* _(
+          client.Notes.createRepostNotePrivatePart({
+            payload: {
+              repostId,
+              notePrivateList: [privatePartFor(lateRecipient, '0late')],
+            },
+          })
+        )
+
+        // lateRecipient now receives the note via the paginated feed.
+        const lateAfter = yield* _(fetchNotesForMe(lateRecipient))
+        const lateMatching = lateAfter.items.filter(
+          (n: ServerNote) => n.noteId === note.noteId
+        )
+        expect(lateMatching).toHaveLength(1)
+        expect(lateMatching[0]?.privatePayload).toEqual('0late')
+
+        // Undo repost removes both the original and the added repost parts.
+        yield* _(setAuthHeaders(reposter.authHeaders))
+        yield* _(
+          client.Notes.undoRepostNote({urlParams: {repostIds: [repostId]}})
+        )
+
+        const firstAfterUndo = yield* _(fetchNotesForMe(firstRecipient))
+        expect(
+          firstAfterUndo.items.filter(
+            (n: ServerNote) => n.noteId === note.noteId
+          )
+        ).toHaveLength(0)
+        const lateAfterUndo = yield* _(fetchNotesForMe(lateRecipient))
+        expect(
+          lateAfterUndo.items.filter(
+            (n: ServerNote) => n.noteId === note.noteId
+          )
+        ).toHaveLength(0)
+
+        const sql = yield* _(SqlClient.SqlClient)
+        const repostPartsInDb = yield* _(sql`
+          SELECT
+            note_private.*
+          FROM
+            note_private
+            INNER JOIN note_public ON note_public.id = note_private.note_id
+          WHERE
+            note_private.repost_id IS NOT NULL
+            AND note_public.note_id = ${note.noteId}
+        `)
+        expect(repostPartsInDb).toHaveLength(0)
+      })
+    )
+  })
+
+  it('Returns 404 for an unknown repostId', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const reposter = yield* _(createMockedUser('+420733000151'))
+        const recipient = yield* _(createMockedUser('+420733000152'))
+        const client = yield* _(NodeTestingApp)
+        yield* _(setAuthHeaders(reposter.authHeaders))
+
+        const response = yield* _(
+          client.Notes.createRepostNotePrivatePart({
+            payload: {
+              repostId: generateNoteRepostId(),
+              notePrivateList: [privatePartFor(recipient, '0recipient')],
+            },
+          }),
+          Effect.either
+        )
+
+        expect(response._tag).toBe('Left')
+        if (response._tag === 'Left') {
+          expect(response.left).toHaveProperty('status', 404)
+        }
+      })
+    )
+  })
+
+  it('Fails when duplicated public key within the request', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = yield* _(createMockedUser('+420733000161'))
+        const reposter = yield* _(createMockedUser('+420733000162'))
+        const recipient = yield* _(createMockedUser('+420733000163'))
+        const client = yield* _(NodeTestingApp)
+
+        const note = yield* _(
+          createNote({
+            owner: me,
+            privateParts: [
+              privatePartFor(reposter, '0reposter'),
+              privatePartFor(me, '0owner'),
+            ],
+          })
+        )
+
+        const repostId = generateNoteRepostId()
+        yield* _(setAuthHeaders(reposter.authHeaders))
+        yield* _(
+          client.Notes.repostNote({
+            payload: {
+              noteId: note.noteId,
+              repostId,
+              notePrivateList: [privatePartFor(recipient, '0recipient')],
+            },
+            headers: makeTestCommonAndSecurityHeaders(reposter.authHeaders),
+          })
+        )
+
+        const response = yield* _(
+          client.Notes.createRepostNotePrivatePart({
+            payload: {
+              repostId,
+              notePrivateList: [
+                privatePartFor(recipient, '0recipient'),
+                privatePartFor(recipient, '0recipientDuplicate'),
+              ],
+            },
+          }),
+          Effect.either
+        )
+
+        expectErrorResponse(DuplicatedPublicKeyError)(response)
+      })
+    )
+  })
+})
+
 describe('Get removed notes', () => {
   it('Reports deleted and expired notes as removed', async () => {
     await runPromiseInMockedEnvironment(

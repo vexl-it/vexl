@@ -1,6 +1,8 @@
 import {
   type KeyPairV2,
   type PrivateKeyHolder,
+  type PublicKeyPemBase64,
+  type PublicKeyV2,
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
 import {
@@ -31,6 +33,12 @@ export type ApiErrorWhileRepostingNote = Effect.Effect.Error<
 export interface RepostNoteResult {
   repostInfo: NoteRepostInfo
   encryptionErrors: NotePrivatePartEncryptionError[]
+  // Connections the repost was successfully encrypted and uploaded for, split
+  // by friend level, so callers can track them for later re-encryption.
+  connections: {
+    firstLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
+    secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
+  }
 }
 
 export default function repostNote({
@@ -128,12 +136,24 @@ export default function repostNote({
       )
     )
 
+    const uploadedKeys = Array.map(notePrivateList, (one) => one.userPublicKey)
+
     return {
       repostInfo: {
         repostId,
         repostedAt: Schema.decodeSync(UnixMilliseconds)(Date.now()),
       },
       encryptionErrors,
+      connections: {
+        firstLevel: Array.intersection(
+          connectionsInfo.firstDegreeConnections,
+          uploadedKeys
+        ),
+        secondLevel: Array.intersection(
+          connectionsInfo.secondDegreeConnections,
+          uploadedKeys
+        ),
+      },
     } satisfies RepostNoteResult
   })
 }

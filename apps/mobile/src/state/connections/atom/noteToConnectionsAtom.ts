@@ -1,9 +1,13 @@
-import {type NoteAdminId} from '@vexl-next/domain/src/general/notes'
+import {
+  type NoteAdminId,
+  type NoteRepostId,
+} from '@vexl-next/domain/src/general/notes'
 import {
   UnixMilliseconds,
   unixMillisecondsNow,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import updateNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateNotePrivateParts'
+import updateRepostNotePrivateParts from '@vexl-next/resources-utils/src/notes/updateRepostNotePrivateParts'
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {subtractArrays} from '@vexl-next/resources-utils/src/utils/array'
 import {Array, Effect, Option, Schema} from 'effect'
@@ -12,10 +16,14 @@ import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import reportError from '../../../utils/reportError'
-import {myNotesAtom} from '../../notes/atoms/notesState'
+import {myNotesAtom, notesAtom} from '../../notes/atoms/notesState'
 import {sessionDataOrDummyAtom} from '../../session'
 import {NoteToConnectionsItems, type NoteToConnectionsItem} from '../domain'
 import connectionStateAtom from './connectionStateAtom'
+import {
+  deleteRepostToConnectionsActionAtom,
+  repostToConnectionsAtom,
+} from './repostToConnectionsAtom'
 
 const BACKGROUND_TIME_LIMIT_MS = 25_000
 
@@ -87,6 +95,29 @@ const ensureConnectionsRecordForEveryMyNoteActionAtom = atom(
   }
 )
 
+// Drops repost records that no longer match a reposted note in the state —
+// the note was deleted/expired locally, the repost was undone, or the note
+// was re-reposted under a new repostId.
+const dropOrphanRepostConnectionsRecordsActionAtom = atom(null, (get, set) => {
+  const notes = get(notesAtom)
+
+  set(repostToConnectionsAtom, (old) => ({
+    repostToConnections: pipe(
+      old.repostToConnections,
+      Array.filter((record) =>
+        pipe(
+          notes,
+          Array.some(
+            (note) =>
+              note.noteInfo.noteId === record.noteId &&
+              note.repostInfo?.repostId === record.repostId
+          )
+        )
+      )
+    ),
+  }))
+})
+
 export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
   null,
   (
@@ -104,10 +135,10 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
       }) => void
     }
   ): Effect.Effect<
-    ReadonlyArray<{
-      readonly adminId: NoteAdminId
-      readonly success: boolean
-    }>
+    ReadonlyArray<
+      | {readonly adminId: NoteAdminId; readonly success: boolean}
+      | {readonly repostId: NoteRepostId; readonly success: boolean}
+    >
   > =>
     Effect.gen(function* (_) {
       const stopProcessingAfter: UnixMilliseconds | undefined = isInBackground
@@ -117,19 +148,22 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
         : undefined
 
       set(ensureConnectionsRecordForEveryMyNoteActionAtom)
+      set(dropOrphanRepostConnectionsRecordsActionAtom)
 
       const noteConnections = get(noteToConnectionsAtom).noteToConnections
-      if (!Array.isNonEmptyArray(noteConnections)) return []
+      const repostConnections = get(repostToConnectionsAtom).repostToConnections
+      const totalRecords = noteConnections.length + repostConnections.length
+      if (totalRecords === 0) return []
 
       console.info(
-        `🗒️ Updating note connections. Total notes to update: ${noteConnections.length}.`
+        `🗒️ Updating note connections. Total notes to update: ${noteConnections.length}. Total reposts to update: ${repostConnections.length}.`
       )
 
       const offerApi = get(apiAtom).offer
       const connectionState = get(connectionStateAtom)
       const session = get(sessionDataOrDummyAtom)
 
-      return yield* _(
+      const processMyNotes = pipe(
         noteConnections,
         Array.map((oneNoteConnections, i) =>
           updateNotePrivateParts({
@@ -151,7 +185,7 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
               ? (progress) => {
                   onProgres({
                     noteI: i,
-                    totalNotes: noteConnections.length,
+                    totalNotes: totalRecords,
                     progress,
                   })
                 }
@@ -224,12 +258,127 @@ export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
             )
           )
         ),
-        Effect.all,
+        Effect.all
+      )
+
+      const processReposts = pipe(
+        repostConnections,
+        Array.map((oneRepostConnections, i) =>
+          updateRepostNotePrivateParts({
+            currentConnections: oneRepostConnections.connections,
+            targetConnections: {
+              firstLevel: connectionState.firstLevel,
+              secondLevel: connectionState.secondLevel,
+            },
+            ownerPublicKeys: [
+              session.privateKey.publicKeyPemBase64,
+              session.keyPairV2.publicKey,
+            ],
+            repostId: oneRepostConnections.repostId,
+            symmetricKey: oneRepostConnections.symmetricKey,
+            stopProcessingAfter,
+            api: offerApi,
+            onProgress: onProgres
+              ? (progress) => {
+                  onProgres({
+                    noteI: noteConnections.length + i,
+                    totalNotes: totalRecords,
+                    progress,
+                  })
+                }
+              : undefined,
+          }).pipe(
+            Effect.map(
+              ({
+                encryptionErrors,
+                newConnections,
+                removedConnections,
+                timeLimitReachedErrors,
+                repostNotFoundOnServer,
+              }) => {
+                if (repostNotFoundOnServer) {
+                  // The reposted note is gone on the server (deleted or
+                  // expired) — drop the local record instead of retrying.
+                  set(deleteRepostToConnectionsActionAtom, [
+                    oneRepostConnections.repostId,
+                  ])
+                  return {
+                    repostId: oneRepostConnections.repostId,
+                    success: true,
+                  }
+                }
+
+                if (encryptionErrors.length > 0) {
+                  reportError(
+                    'error',
+                    new Error(
+                      'Error while encrypting new connections for note repost'
+                    ),
+                    {encryptionErrors}
+                  )
+                }
+                if (timeLimitReachedErrors.length > 0) {
+                  reportError(
+                    'warn',
+                    new Error(
+                      `Note repost did not update fully due to time limit reached. Skipped: ${timeLimitReachedErrors.length}.`
+                    ),
+                    {timeLimitReachedErrors}
+                  )
+                }
+
+                set(repostToConnectionsAtom, (old) => ({
+                  repostToConnections: old.repostToConnections.map((one) =>
+                    one.repostId === oneRepostConnections.repostId
+                      ? {
+                          ...one,
+                          connections: {
+                            firstLevel: subtractArrays(
+                              [
+                                ...one.connections.firstLevel,
+                                ...newConnections.firstLevel,
+                              ],
+                              removedConnections
+                            ),
+                            secondLevel: subtractArrays(
+                              [
+                                ...one.connections.secondLevel,
+                                ...newConnections.secondLevel,
+                              ],
+                              removedConnections
+                            ),
+                          },
+                        }
+                      : one
+                  ),
+                }))
+
+                return {repostId: oneRepostConnections.repostId, success: true}
+              }
+            )
+          )
+        ),
+        Effect.all
+      )
+
+      return yield* _(
+        Effect.zipWith(
+          processMyNotes,
+          processReposts,
+          (
+            noteResults,
+            repostResults
+          ): ReadonlyArray<
+            | {readonly adminId: NoteAdminId; readonly success: boolean}
+            | {readonly repostId: NoteRepostId; readonly success: boolean}
+          > => [...noteResults, ...repostResults]
+        ),
         Effect.ensuring(
           Effect.sync(() => {
             // Server has been mutated for every processed note by now — force a
             // durable write so local records can't fall behind on a hard kill.
             noteToConnectionsAtom.flushNow()
+            repostToConnectionsAtom.flushNow()
           })
         )
       )

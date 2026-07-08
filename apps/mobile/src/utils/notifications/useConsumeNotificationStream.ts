@@ -44,6 +44,7 @@ import {
   markRemovedClubAsNotifiedActionAtom,
 } from '../../state/clubs/atom/removedClubsAtom'
 import {syncConnectionsActionAtom} from '../../state/connections/atom/connectionStateAtom'
+import {updateAndReencryptAllNotesConnectionsActionAtom} from '../../state/connections/atom/noteToConnectionsAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/connections/atom/offerToConnectionsAtom'
 import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
@@ -154,6 +155,11 @@ const processNewUserNotificationActionAtom = atom(
       yield* _(set(syncConnectionsActionAtom))
       yield* _(
         set(updateAndReencryptAllOffersConnectionsActionAtom, {
+          isInBackground: false,
+        })
+      )
+      yield* _(
+        set(updateAndReencryptAllNotesConnectionsActionAtom, {
           isInBackground: false,
         })
       )

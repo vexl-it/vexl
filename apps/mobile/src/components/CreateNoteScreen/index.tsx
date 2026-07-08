@@ -24,8 +24,8 @@ import {createNoteActionAtom} from '../../state/notes/atoms/createNoteActionAtom
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import {showErrorAlert} from '../ErrorAlert'
-import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {toastNotificationAtom} from '../ToastNotification/atom'
+import {offerProgressModalActionAtoms} from '../UploadingOfferProgressModal/atoms'
 
 type Props = RootStackScreenProps<'CreateNote'>
 
@@ -39,7 +39,9 @@ export default function CreateNoteScreen(_props: Props): React.JSX.Element {
   const goBack = useSafeGoBack()
 
   const createNote = useSetAtom(createNoteActionAtom)
-  const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
+  const showProgressModal = useSetAtom(offerProgressModalActionAtoms.show)
+  const showProgressStep = useSetAtom(offerProgressModalActionAtoms.showStep)
+  const hideProgressModal = useSetAtom(offerProgressModalActionAtoms.hide)
   const setToast = useSetAtom(toastNotificationAtom)
 
   const [text, setText] = useState('')
@@ -54,15 +56,30 @@ export default function CreateNoteScreen(_props: Props): React.JSX.Element {
   const handlePost = useCallback(() => {
     if (!canPost) return
 
-    setLoading(true)
+    showProgressModal({
+      title: t('notes.create.encryptingYourNote'),
+      bottomText: t('offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'),
+      indicateProgress: {type: 'intermediate'},
+    })
     void Effect.runPromise(
       createNote({
         text: trimmedText,
         allowRepost,
         expiresAfterDays: Number(expiresValue),
+        onProgress: (progress) => {
+          showProgressStep({
+            progress,
+            textData: {
+              title: t('notes.create.encryptingYourNote'),
+              bottomText: t(
+                'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+              ),
+            },
+          })
+        },
       }).pipe(Effect.either)
     ).then((result) => {
-      setLoading(false)
+      hideProgressModal()
       if (Either.isRight(result)) {
         setToast({
           title: t('notes.create.postedToastTitle'),
@@ -82,8 +99,10 @@ export default function CreateNoteScreen(_props: Props): React.JSX.Element {
     createNote,
     expiresValue,
     goBack,
-    setLoading,
+    hideProgressModal,
     setToast,
+    showProgressModal,
+    showProgressStep,
     t,
     trimmedText,
   ])

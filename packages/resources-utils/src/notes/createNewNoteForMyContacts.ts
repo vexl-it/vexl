@@ -17,6 +17,7 @@ import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseco
 import {type ContactApi} from '@vexl-next/rest-api/src/services/contact'
 import {type OfferApi} from '@vexl-next/rest-api/src/services/offer'
 import {Array, Effect, Either, type HashMap, pipe} from 'effect'
+import {type OfferEncryptionProgress} from '../offers/OfferEncryptionProgress'
 import fetchContactsForOffer, {
   type ApiErrorFetchingContactsForOffer,
   type ConnectionsInfoForOffer,
@@ -62,6 +63,7 @@ export default function createNewNoteForMyContacts({
   serverToClientHashesToHashedPhoneNumbersMap,
   noteId: existingNoteId,
   adminId: existingAdminId,
+  onProgress,
 }: {
   offerApi: OfferApi
   contactApi: ContactApi
@@ -75,6 +77,7 @@ export default function createNewNoteForMyContacts({
   >
   noteId?: NoteId
   adminId?: NoteAdminId
+  onProgress?: (status: OfferEncryptionProgress) => void
 }): Effect.Effect<
   CreateNoteResult,
   | ApiErrorFetchingContactsForOffer
@@ -91,10 +94,12 @@ export default function createNewNoteForMyContacts({
     const adminId = existingAdminId ?? generateNoteAdminId()
     const symmetricKey = yield* _(generateSymmetricKey())
 
+    if (onProgress) onProgress({type: 'CONSTRUCTING_PUBLIC_PAYLOAD'})
     const encryptedPublic = yield* _(
       encryptNotePublicPayload({notePublicPart: publicPart, symmetricKey})
     )
 
+    if (onProgress) onProgress({type: 'FETCHING_CONTACTS'})
     const connectionsInfo = yield* _(
       fetchContactsForOffer({
         contactApi,
@@ -104,6 +109,7 @@ export default function createNewNoteForMyContacts({
       })
     )
 
+    if (onProgress) onProgress({type: 'CONSTRUCTING_PRIVATE_PAYLOADS'})
     const privatePayloads = yield* _(
       constructNotePrivatePayloads({connectionsInfo, symmetricKey})
     )
@@ -124,7 +130,19 @@ export default function createNewNoteForMyContacts({
 
     const encryptionResult = yield* _(
       privatePayloads,
-      Array.map((one) => Effect.either(encryptNotePrivatePart(one))),
+      Array.map((one, i) =>
+        pipe(
+          Effect.sync(() => {
+            if (onProgress)
+              onProgress({
+                type: 'ENCRYPTING_PRIVATE_PAYLOADS',
+                currentlyProcessingIndex: i,
+                totalToEncrypt: privatePayloads.length,
+              })
+          }),
+          Effect.zipRight(Effect.either(encryptNotePrivatePart(one)))
+        )
+      ),
       Effect.all
     )
 
@@ -144,6 +162,7 @@ export default function createNewNoteForMyContacts({
       )
     )
 
+    if (onProgress) onProgress({type: 'SENDING_OFFER_TO_NETWORK'})
     const createResponse = yield* _(
       sendNoteToNetworkBatchPrivateParts({
         offerApi,
@@ -161,6 +180,8 @@ export default function createNewNoteForMyContacts({
     const noteInfo = yield* _(
       decryptNote(ownerKeyPair, ownerKeyPairV2)(createResponse)
     )
+
+    if (onProgress) onProgress({type: 'DONE'})
 
     return {
       adminId,

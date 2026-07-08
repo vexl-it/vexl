@@ -4,6 +4,7 @@ import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import reportError from '../../../utils/reportError'
+import {deleteNoteToConnectionsActionAtom} from '../../connections/atom/noteToConnectionsAtom'
 import {notesAtom} from './notesState'
 
 export const deleteNoteActionAtom = atom<
@@ -27,6 +28,7 @@ export const deleteNoteActionAtom = atom<
           !Array.contains(adminIds, note.ownershipInfo.adminId)
       )
     )
+    set(deleteNoteToConnectionsActionAtom, adminIds)
   }).pipe(
     Effect.mapError((e) => {
       reportError('error', new Error('Error while deleting note'), {e})

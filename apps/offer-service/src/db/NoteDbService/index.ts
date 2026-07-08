@@ -5,6 +5,7 @@ import {Context, Effect, Layer, type Option} from 'effect'
 import {
   type NoteParts,
   type NotePartsWithNoteForUserUpdateCounter,
+  type NotePublicPartId,
   type NotePublicPartRecord,
   type NoteRepostIdHashed,
 } from './domain'
@@ -32,6 +33,10 @@ import {
   createQueryNoteByPublicKeyAndNoteId,
   type QueryNoteByPublicKeyAndNoteIdRequest,
 } from './queries/createQueryNoteByPublicKeyAndNoteId'
+import {
+  createQueryNoteIdByRepostId,
+  type QueryNoteIdByRepostIdRequest,
+} from './queries/createQueryNoteIdByRepostId'
 import {
   createQueryNoteIdsForUser,
   type QueryNoteIdsForUserRequest,
@@ -66,6 +71,10 @@ export interface NoteDbOperations {
   queryNoteIdsForUser: (
     args: QueryNoteIdsForUserRequest
   ) => Effect.Effect<readonly NoteId[], UnexpectedServerError>
+
+  queryNoteIdByRepostId: (
+    args: QueryNoteIdByRepostIdRequest
+  ) => Effect.Effect<Option.Option<NotePublicPartId>, UnexpectedServerError>
 
   queryNumberOfNoteReportsForUser: (
     args: PublicKeyPemBase64
@@ -127,6 +136,7 @@ export class NoteDbService extends Context.Tag('NoteDbService')<
           createQueryNoteByPublicKeyAndNoteId
         ),
         queryNoteIdsForUser: yield* _(createQueryNoteIdsForUser),
+        queryNoteIdByRepostId: yield* _(createQueryNoteIdByRepostId),
         queryNumberOfNoteReportsForUser: yield* _(
           createQueryNumberOfNoteReportsForUser
         ),

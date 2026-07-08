@@ -31,6 +31,7 @@ import {
 import {
   type CreateNewNoteRequest,
   type CreateNotePrivatePartRequest,
+  type CreateRepostNotePrivatePartRequest,
   type DeleteNotePrivatePartRequest,
   type DeleteNoteRequest,
   type GetNotesForMeCreatedOrModifiedAfterPaginatedRequest,
@@ -198,6 +199,8 @@ export function api({
         withSecurityHeaders((headers) =>
           client.Notes.deleteNotePrivatePart({payload: req, headers})
         ),
+      createRepostNotePrivatePart: (body: CreateRepostNotePrivatePartRequest) =>
+        client.Notes.createRepostNotePrivatePart({payload: body}),
       repostNote: (body: RepostNoteRequest) =>
         withSecurityHeaders((headers) =>
           client.Notes.repostNote({payload: body, headers})

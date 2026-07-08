@@ -9,6 +9,10 @@ import {Array, Effect} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import reportError from '../../../utils/reportError'
+import {
+  deleteRepostToConnectionsActionAtom,
+  upsertRepostToConnectionsActionAtom,
+} from '../../connections/atom/repostToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
 import {NoteNotFoundError} from '../domainErrors'
@@ -38,7 +42,7 @@ export const repostNoteActionAtom = atom<
       set(ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom)
     )
 
-    const {repostInfo, encryptionErrors} = yield* _(
+    const {repostInfo, encryptionErrors, connections} = yield* _(
       repostNote({
         offerApi: api.offer,
         contactApi: api.contact,
@@ -62,6 +66,15 @@ export const repostNoteActionAtom = atom<
         one.noteInfo.noteId === noteId ? {...one, repostInfo} : one
       )
     )
+
+    // Track the covered connections so newly imported contacts can get the
+    // repost re-encrypted for them later.
+    set(upsertRepostToConnectionsActionAtom, {
+      repostId: repostInfo.repostId,
+      noteId,
+      symmetricKey: note.noteInfo.privatePart.symmetricKey,
+      connections,
+    })
   })
 })
 
@@ -83,6 +96,8 @@ export const undoRepostNoteActionAtom = atom<
     }
 
     yield* _(api.offer.undoRepostNote({repostIds: [note.repostInfo.repostId]}))
+
+    set(deleteRepostToConnectionsActionAtom, [note.repostInfo.repostId])
 
     set(
       notesAtom,

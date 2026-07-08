@@ -10,7 +10,10 @@ import {
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
 import {unixMillisecondsFromNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {DuplicatedPublicKeyError} from '@vexl-next/rest-api/src/services/offer/contracts'
+import {
+  CanNotDeletePrivatePartOfAuthor,
+  DuplicatedPublicKeyError,
+} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {
   InvalidNoteExpirationError,
   ReportNoteLimitReachedError,
@@ -373,6 +376,194 @@ describe('Delete note', () => {
             urlParams: {adminIds: [generateNoteAdminId()]},
           })
         )
+      })
+    )
+  })
+})
+
+describe('Delete note private part', () => {
+  it('Removes access for the given public key and keeps the other parts', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = yield* _(createMockedUser('+420733000141'))
+        const removedContact = yield* _(createMockedUser('+420733000142'))
+        const keptContact = yield* _(createMockedUser('+420733000143'))
+        const client = yield* _(NodeTestingApp)
+
+        const note = yield* _(
+          createNote({
+            owner: me,
+            privateParts: [
+              privatePartFor(removedContact, '0removed'),
+              privatePartFor(keptContact, '0kept'),
+              privatePartFor(me, '0owner'),
+            ],
+          })
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        yield* _(
+          client.Notes.deleteNotePrivatePart({
+            payload: {
+              adminIds: [note.adminId],
+              publicKeys: [removedContact.mainKeyPair.publicKeyPemBase64],
+            },
+            headers: makeTestCommonAndSecurityHeaders(me.authHeaders),
+          })
+        )
+
+        // Removed contact lost access.
+        const forRemoved = yield* _(fetchNotesForMe(removedContact))
+        expect(
+          forRemoved.items.filter((n: ServerNote) => n.noteId === note.noteId)
+        ).toHaveLength(0)
+
+        // Kept contact still sees the note.
+        const forKept = yield* _(fetchNotesForMe(keptContact))
+        expect(
+          forKept.items.filter((n: ServerNote) => n.noteId === note.noteId)
+        ).toHaveLength(1)
+
+        // Owner part is untouched.
+        const forOwner = yield* _(fetchNotesForMe(me))
+        const ownerMatching = forOwner.items.filter(
+          (n: ServerNote) => n.noteId === note.noteId
+        )
+        expect(ownerMatching).toHaveLength(1)
+        expect(ownerMatching[0]?.privatePayload).toEqual('0owner')
+      })
+    )
+  })
+
+  it('Keeps reposted private parts of the removed public key', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = yield* _(createMockedUser('+420733000151'))
+        const reposter = yield* _(createMockedUser('+420733000152'))
+        const directAndRepost = yield* _(createMockedUser('+420733000153'))
+        const client = yield* _(NodeTestingApp)
+
+        const note = yield* _(
+          createNote({
+            owner: me,
+            privateParts: [
+              privatePartFor(reposter, '0reposter'),
+              privatePartFor(directAndRepost, '0direct'),
+              privatePartFor(me, '0owner'),
+            ],
+          })
+        )
+
+        yield* _(setAuthHeaders(reposter.authHeaders))
+        yield* _(
+          client.Notes.repostNote({
+            payload: {
+              noteId: note.noteId,
+              repostId: generateNoteRepostId(),
+              notePrivateList: [
+                privatePartFor(directAndRepost, '0directViaRepost'),
+              ],
+            },
+            headers: makeTestCommonAndSecurityHeaders(reposter.authHeaders),
+          })
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        yield* _(
+          client.Notes.deleteNotePrivatePart({
+            payload: {
+              adminIds: [note.adminId],
+              publicKeys: [directAndRepost.mainKeyPair.publicKeyPemBase64],
+            },
+            headers: makeTestCommonAndSecurityHeaders(me.authHeaders),
+          })
+        )
+
+        // The direct part is gone but the reposted one remains.
+        const forDirectAndRepost = yield* _(fetchNotesForMe(directAndRepost))
+        const matching = forDirectAndRepost.items.filter(
+          (n: ServerNote) => n.noteId === note.noteId
+        )
+        expect(matching).toHaveLength(1)
+        expect(matching[0]?.privatePayload).toEqual('0directViaRepost')
+      })
+    )
+  })
+
+  it('Refuses to delete the private part of the author', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = yield* _(createMockedUser('+420733000161'))
+        const recipient = yield* _(createMockedUser('+420733000162'))
+        const client = yield* _(NodeTestingApp)
+
+        const note = yield* _(
+          createNote({
+            owner: me,
+            privateParts: [
+              privatePartFor(recipient, '0recipient'),
+              privatePartFor(me, '0owner'),
+            ],
+          })
+        )
+
+        yield* _(setAuthHeaders(me.authHeaders))
+        const response = yield* _(
+          client.Notes.deleteNotePrivatePart({
+            payload: {
+              adminIds: [note.adminId],
+              publicKeys: [me.mainKeyPair.publicKeyPemBase64],
+            },
+            headers: makeTestCommonAndSecurityHeaders(me.authHeaders),
+          }),
+          Effect.either
+        )
+
+        expectErrorResponse(CanNotDeletePrivatePartOfAuthor)(response)
+
+        // Nothing was deleted.
+        const forOwner = yield* _(fetchNotesForMe(me))
+        expect(
+          forOwner.items.filter((n: ServerNote) => n.noteId === note.noteId)
+        ).toHaveLength(1)
+      })
+    )
+  })
+
+  it('Does nothing when the adminId does not match any note', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const me = yield* _(createMockedUser('+420733000171'))
+        const recipient = yield* _(createMockedUser('+420733000172'))
+        const stranger = yield* _(createMockedUser('+420733000173'))
+        const client = yield* _(NodeTestingApp)
+
+        const note = yield* _(
+          createNote({
+            owner: me,
+            privateParts: [
+              privatePartFor(recipient, '0recipient'),
+              privatePartFor(me, '0owner'),
+            ],
+          })
+        )
+
+        // A user without the note's adminId cannot remove anything.
+        yield* _(setAuthHeaders(stranger.authHeaders))
+        yield* _(
+          client.Notes.deleteNotePrivatePart({
+            payload: {
+              adminIds: [generateNoteAdminId()],
+              publicKeys: [recipient.mainKeyPair.publicKeyPemBase64],
+            },
+            headers: makeTestCommonAndSecurityHeaders(stranger.authHeaders),
+          })
+        )
+
+        const forRecipient = yield* _(fetchNotesForMe(recipient))
+        expect(
+          forRecipient.items.filter((n: ServerNote) => n.noteId === note.noteId)
+        ).toHaveLength(1)
       })
     )
   })

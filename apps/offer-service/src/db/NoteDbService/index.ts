@@ -9,6 +9,10 @@ import {
   type NoteRepostIdHashed,
 } from './domain'
 import {createDeleteExpiredNotes} from './queries/createDeleteExpiredNotes'
+import {
+  createDeleteNotePrivatePart,
+  type DeleteNotePrivatePartRequest,
+} from './queries/createDeleteNotePrivatePart'
 import {createDeleteNotePrivatePartsByRepostId} from './queries/createDeleteNotePrivatePartsByRepostId'
 import {createDeleteNotePublicPart} from './queries/createDeleteNotePublicPart'
 import {createDeleteNoteReportedRecordByReportedAtBefore} from './queries/createDeleteNoteReportedRecordByReportedAtBefore'
@@ -95,6 +99,10 @@ export interface NoteDbOperations {
     args: QueryNoteByAdminIdRequest
   ) => Effect.Effect<void, UnexpectedServerError>
 
+  deleteNotePrivatePart: (
+    args: DeleteNotePrivatePartRequest
+  ) => Effect.Effect<void, UnexpectedServerError>
+
   deleteNotePrivatePartsByRepostId: (
     args: NoteRepostIdHashed
   ) => Effect.Effect<void, UnexpectedServerError>
@@ -133,6 +141,7 @@ export class NoteDbService extends Context.Tag('NoteDbService')<
         insertNoteReportedRecord: yield* _(createInsertNoteReportedRecord),
         updateReportNote: yield* _(createUpdateReportNote),
         deleteNotePublicPart: yield* _(createDeleteNotePublicPart),
+        deleteNotePrivatePart: yield* _(createDeleteNotePrivatePart),
         deleteNotePrivatePartsByRepostId: yield* _(
           createDeleteNotePrivatePartsByRepostId
         ),

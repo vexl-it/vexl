@@ -18,12 +18,14 @@ import reportError from '../../../utils/reportError'
 import {waitForNextAnimationFrameEffect} from '../../../utils/runAfterAnimationFrames'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
+import {updateAndReencryptAllNotesConnectionsActionAtom} from '../../connections/atom/noteToConnectionsAtom'
 import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
 import {
   updatePersistentDataAboutNumberOfImportedContactsActionAtom,
   updatePersistentDataAboutReachActionAtom,
 } from '../../connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
 import {areThereAnyMyOffersAtom} from '../../marketplace/atoms/myOffers'
+import {areThereAnyMyNotesAtom} from '../../notes/atoms/notesState'
 import {type StoredContactWithComputedValues} from '../domain'
 import {
   CONTACT_IMPORT_BATCH_SIZE,
@@ -579,9 +581,13 @@ const syncNetworkAfterContactsImportActionAtom = atom(
   ) => {
     const {t} = get(translationAtom)
     const areThereAnyMyOffers = get(areThereAnyMyOffersAtom)
+    const areThereAnyMyNotes = get(areThereAnyMyNotesAtom)
 
     return Effect.gen(function* (_) {
-      if (areThereAnyMyOffers && showOfferReencryptionDialog) {
+      if (
+        (areThereAnyMyOffers || areThereAnyMyNotes) &&
+        showOfferReencryptionDialog
+      ) {
         if (manageLoadingOverlay) {
           set(loadingOverlayDisplayedAtom, false)
         }
@@ -607,6 +613,29 @@ const syncNetworkAfterContactsImportActionAtom = atom(
                       {
                         i: offerI + 1,
                         total: totalOffers,
+                      }
+                    ),
+                    bottomText: t(
+                      'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
+                    ),
+                  },
+                })
+              },
+              isInBackground: false,
+            })
+          ),
+          Effect.zipLeft(
+            set(updateAndReencryptAllNotesConnectionsActionAtom, {
+              onProgres: ({noteI, totalNotes, progress}) => {
+                set(offerProgressModalActionAtoms.showStep, {
+                  progress,
+                  textData: {
+                    title: t('contacts.refreshingNotes.title'),
+                    belowProgressLeft: t(
+                      'contacts.refreshingNotes.belowProgressLeft',
+                      {
+                        i: noteI + 1,
+                        total: totalNotes,
                       }
                     ),
                     bottomText: t(
@@ -644,6 +673,11 @@ const syncNetworkAfterContactsImportActionAtom = atom(
         yield* _(set(syncConnectionsActionAtom))
         yield* _(
           set(updateAndReencryptAllOffersConnectionsActionAtom, {
+            isInBackground: false,
+          })
+        )
+        yield* _(
+          set(updateAndReencryptAllNotesConnectionsActionAtom, {
             isInBackground: false,
           })
         )

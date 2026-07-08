@@ -4,12 +4,14 @@ import {
 } from '@vexl-next/domain/src/general/notes'
 import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import createNewNoteForMyContacts from '@vexl-next/resources-utils/src/notes/createNewNoteForMyContacts'
+import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
 import {Effect, Schema} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import {version} from '../../../utils/environment'
 import reportError from '../../../utils/reportError'
 import {upsertInboxOnBeAndLocallyActionAtom} from '../../chat/hooks/useCreateInbox'
+import {upsertNoteToConnectionsActionAtom} from '../../connections/atom/noteToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {generateAndRegisterVexlTokenActionAtom} from '../../notifications/actions/generateVexlTokenActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
@@ -26,7 +28,13 @@ export const createNoteActionAtom = atom(
       text,
       allowRepost,
       expiresAfterDays,
-    }: {text: string; allowRepost: boolean; expiresAfterDays: number}
+      onProgress,
+    }: {
+      text: string
+      allowRepost: boolean
+      expiresAfterDays: number
+      onProgress?: (status: OfferEncryptionProgress) => void
+    }
   ) =>
     Effect.gen(function* (_) {
       const api = get(apiAtom)
@@ -70,6 +78,7 @@ export const createNoteActionAtom = atom(
           ownerKeyPair: session.privateKey,
           ownerKeyPairV2: session.keyPairV2,
           serverToClientHashesToHashedPhoneNumbersMap,
+          onProgress,
         })
       )
 
@@ -86,6 +95,17 @@ export const createNoteActionAtom = atom(
       }
 
       set(notesAtom, (old) => [...old, createdNote])
+
+      // Track which connections have a private part so contact reimports can
+      // re-encrypt the note for new contacts only.
+      set(upsertNoteToConnectionsActionAtom, {
+        adminId: createNoteResult.adminId,
+        symmetricKey: createNoteResult.symmetricKey,
+        connections: {
+          firstLevel: createNoteResult.encryptedFor.firstDegreeConnections,
+          secondLevel: createNoteResult.encryptedFor.secondDegreeConnections,
+        },
+      })
 
       return createdNote
     })

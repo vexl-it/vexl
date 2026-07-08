@@ -24,6 +24,7 @@ import {
 import {refreshNotesActionAtom} from '../../../../../../state/notes/atoms/refreshNotesActionAtom'
 import {showNotesBoardIntroSheetIfNeededActionAtom} from '../../../../../../state/notes/atoms/showNotesBoardIntroSheetIfNeededActionAtom'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
+import {notesBoardEnabledAtom} from '../../../../../../utils/preferences'
 import {NoteCard} from '../../../../../Notes/NoteCard'
 import {boardFilterAtom, type BoardFilter} from './atoms'
 
@@ -37,7 +38,64 @@ const byNewestFirst = Order.mapInput(
   (note: OneNoteInState) => note.noteInfo.id
 )
 
-function BoardScreen({navigation}: Props): React.JSX.Element {
+function BoardScreen(props: Props): React.JSX.Element {
+  const notesBoardEnabled = useAtomValue(notesBoardEnabledAtom)
+
+  if (!notesBoardEnabled) {
+    return <BoardComingSoon />
+  }
+
+  return <NotesBoard {...props} />
+}
+
+function BoardComingSoon(): React.JSX.Element {
+  const {t} = useTranslation()
+
+  return (
+    <YStack f={1} paddingHorizontal="$5" paddingTop="$5" alignItems="center">
+      <YStack
+        width="100%"
+        maxWidth={360}
+        alignItems="center"
+        gap="$4"
+        paddingHorizontal="$5"
+        paddingVertical="$8"
+        borderRadius="$5"
+        backgroundColor="$backgroundSecondary"
+      >
+        <Stack
+          width={48}
+          height={4}
+          borderRadius="$8"
+          backgroundColor="$accentYellowPrimary"
+        />
+        <Typography
+          variant="tabSmallBold"
+          color="$foregroundSecondary"
+          textAlign="center"
+        >
+          {t('community.tabs.board')}
+        </Typography>
+        <Typography
+          variant="heading3"
+          color="$foregroundPrimary"
+          textAlign="center"
+        >
+          {t('community.board.comingSoon')}
+        </Typography>
+        <Typography
+          variant="paragraphSmall"
+          color="$foregroundSecondary"
+          textAlign="center"
+        >
+          {t('community.board.comingSoonDescription')}
+        </Typography>
+      </YStack>
+    </YStack>
+  )
+}
+
+function NotesBoard({navigation}: Props): React.JSX.Element {
   const {t} = useTranslation()
   const theme = useTheme()
 

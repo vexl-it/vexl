@@ -40,6 +40,7 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     showEnableNotificationsInMarketplaceSuggestion: true,
     showMarketplaceIntroDialog: true,
     showNotesBoardIntroSheet: true,
+    notesBoardEnabled: false,
     lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(),
   },
   Preferences
@@ -136,6 +137,10 @@ export const showMarketplaceIntroDialogAtom = focusAtom(preferencesAtom, (o) =>
 
 export const showNotesBoardIntroSheetAtom = focusAtom(preferencesAtom, (o) =>
   o.prop('showNotesBoardIntroSheet')
+)
+
+export const notesBoardEnabledAtom = focusAtom(preferencesAtom, (o) =>
+  o.prop('notesBoardEnabled')
 )
 
 export const lastUsedOfferSpokenLanguagesAtom = focusAtom(

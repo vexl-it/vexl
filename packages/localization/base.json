@@ -713,6 +713,8 @@
   "community.tabs.clubs": "Clubs",
   "community.tabs.board": "Board",
   "community.tabs.blog": "Blog",
+  "community.board.comingSoon": "Coming soon",
+  "community.board.comingSoonDescription": "We are preparing a new place for community updates. Stay tuned ⏳.",
   "notes.board.allNotes": "All notes",
   "notes.board.myNotes": "My notes",
   "notes.board.newNote": "New note",

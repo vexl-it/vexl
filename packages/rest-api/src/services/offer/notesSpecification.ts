@@ -9,6 +9,7 @@ import {
 } from '../../apiSecurity'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {
+  CanNotDeletePrivatePartOfAuthor,
   DuplicatedPublicKeyError,
   MissingOwnerPrivatePartError,
 } from './contracts'
@@ -17,6 +18,8 @@ import {
   CreateNewNoteResponse,
   CreateNotePrivatePartRequest,
   CreateNotePrivatePartResponse,
+  DeleteNotePrivatePartRequest,
+  DeleteNotePrivatePartResponse,
   DeleteNoteRequest,
   DeleteNoteResponse,
   GetNotesForMeCreatedOrModifiedAfterPaginatedRequest,
@@ -55,6 +58,22 @@ export const CreateNotePrivatePartEndpoint = HttpApiEndpoint.post(
   .setPayload(CreateNotePrivatePartRequest)
   .addSuccess(CreateNotePrivatePartResponse)
   .addError(DuplicatedPublicKeyError, {status: 400})
+  .annotate(MaxExpectedDailyCall, 100)
+
+export const DeleteNotePrivatePartEndpoint = HttpApiEndpoint.del(
+  'deleteNotePrivatePart',
+  '/api/v1/notes/private-part'
+)
+  .annotate(OpenApi.Summary, 'Delete note private part')
+  .annotate(
+    OpenApi.Description,
+    'Removes direct (non repost) private parts of the given public keys. When note for one of adminIds is not found, no error is returned'
+  )
+  .setHeaders(CommonAndSecurityHeaders)
+  .middleware(ServerSecurityMiddleware)
+  .setPayload(DeleteNotePrivatePartRequest)
+  .addSuccess(DeleteNotePrivatePartResponse)
+  .addError(CanNotDeletePrivatePartOfAuthor, {status: 400})
   .annotate(MaxExpectedDailyCall, 100)
 
 export const DeleteNoteEndpoint = HttpApiEndpoint.del(
@@ -131,6 +150,7 @@ export const ReportNoteEndpoint = HttpApiEndpoint.post(
 export const NotesApiGroup = HttpApiGroup.make('Notes')
   .add(CreateNewNoteEndpoint)
   .add(CreateNotePrivatePartEndpoint)
+  .add(DeleteNotePrivatePartEndpoint)
   .add(DeleteNoteEndpoint)
   .add(RepostNoteEndpoint)
   .add(UndoRepostNoteEndpoint)

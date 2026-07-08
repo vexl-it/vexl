@@ -92,9 +92,8 @@ function uploadNotePrivatePartsBatch({
 
 /**
  * Uploads note private parts for connections that are missing them (e.g. newly
- * imported contacts). There is no endpoint to delete note private parts, so
- * removed connections are only dropped from the returned local tracking data —
- * they keep access to the note until it expires.
+ * imported contacts) and deletes the private parts of removed connections so
+ * they lose access to the note — mirroring how offer private parts are updated.
  */
 export default function updateNotePrivateParts({
   currentConnections,
@@ -134,18 +133,24 @@ export default function updateNotePrivateParts({
       secondLevel: Array<PublicKeyPemBase64 | PublicKeyV2>
     }
   },
-  NotePrivatePayloadsConstructionError
+  | NotePrivatePayloadsConstructionError
+  | Effect.Effect.Error<ReturnType<OfferApi['deleteNotePrivatePart']>>
 > {
   return Effect.gen(function* (_) {
+    // The owner keys are excluded defensively — the author's private part
+    // carries the adminId and the server refuses to delete it.
     const removedConnections = subtractArrays(
-      deduplicate([
-        ...currentConnections.firstLevel,
-        ...currentConnections.secondLevel,
-      ]),
-      deduplicate([
-        ...targetConnections.firstLevel,
-        ...targetConnections.secondLevel,
-      ])
+      subtractArrays(
+        deduplicate([
+          ...currentConnections.firstLevel,
+          ...currentConnections.secondLevel,
+        ]),
+        deduplicate([
+          ...targetConnections.firstLevel,
+          ...targetConnections.secondLevel,
+        ])
+      ),
+      ownerPublicKeys
     )
 
     const newFirstLevelConnections = subtractArrays(
@@ -234,6 +239,15 @@ export default function updateNotePrivateParts({
             error: one.error,
           }))
         )
+      )
+    }
+
+    if (removedConnections.length > 0) {
+      yield* _(
+        api.deleteNotePrivatePart({
+          adminIds: [adminId],
+          publicKeys: removedConnections,
+        })
       )
     }
 

@@ -34,6 +34,7 @@ import {getRemovedOffers} from './routes/getRemovedOffers'
 import {createNewNote} from './routes/notes/createNewNote'
 import {createNotePrivatePart} from './routes/notes/createNotePrivatePart'
 import {deleteNote} from './routes/notes/deleteNote'
+import {deleteNotePrivatePart} from './routes/notes/deleteNotePrivatePart'
 import {getNotesForMeModifiedOrCreatedAfterPaginated} from './routes/notes/getNotesForMeModifiedOrCreatedAfterPaginated'
 import {getRemovedNotes} from './routes/notes/getRemovedNotes'
 import {reportNote} from './routes/notes/reportNote'
@@ -82,6 +83,7 @@ const NotesApiGroupLive = HttpApiBuilder.group(
     h
       .handle('createNewNote', createNewNote)
       .handle('createNotePrivatePart', createNotePrivatePart)
+      .handle('deleteNotePrivatePart', deleteNotePrivatePart)
       .handle('deleteNote', deleteNote)
       .handle('repostNote', repostNote)
       .handle('undoRepostNote', undoRepostNote)

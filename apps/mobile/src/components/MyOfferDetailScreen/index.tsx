@@ -139,7 +139,7 @@ function MyOfferDetailScreen({
   )
 
   const friendLevelHeadline = (() => {
-    const level = intendedConnectionLevel ?? 'FIRST'
+    const level = intendedConnectionLevel
     const base =
       level === 'FIRST'
         ? t('offerForm.friendLevel.firstDegree')
@@ -347,15 +347,17 @@ function MyOfferDetailScreen({
               navigateToEdit('friendLevel')
             }}
           />
-          <EditRow
-            state="completed"
-            icon={ConferenceClub}
-            overline={t('editOffer.detail.publishToVexlClub')}
-            headline={clubsHeadline}
-            onPress={() => {
-              navigateToEdit('clubs')
-            }}
-          />
+          {allClubsWithMembers.length > 0 ? (
+            <EditRow
+              state="completed"
+              icon={ConferenceClub}
+              overline={t('editOffer.detail.publishToVexlClub')}
+              headline={clubsHeadline}
+              onPress={() => {
+                navigateToEdit('clubs')
+              }}
+            />
+          ) : null}
           {hasUnsavedChanges ? (
             <Button
               variant="primary"

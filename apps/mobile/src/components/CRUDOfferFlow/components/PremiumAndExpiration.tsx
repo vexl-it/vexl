@@ -32,14 +32,14 @@ function PremiumAndExpiration({
     currencyAtom,
     feeAmountAtom,
     feeStateAtom,
-    offerTypeOrDummyValueAtom,
+    offerTypeAtom,
     expirationDateAtom,
   } = useMolecule(offerFormMolecule)
 
   const currency = useAtomValue(currencyAtom)
   const [feeAmount, setFeeAmount] = useAtom(feeAmountAtom)
   const setFeeState = useSetAtom(feeStateAtom)
-  const offerType = useAtomValue(offerTypeOrDummyValueAtom)
+  const offerType = useAtomValue(offerTypeAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
 
   const [expanded, setExpanded] = useState(false)
@@ -69,7 +69,6 @@ function PremiumAndExpiration({
   const infoText = getInfoText(feeAmount, isBuy, t)
 
   const amountText = useMemo(() => {
-    if (!currency) return ''
     const multiplier = 1 + feeAmount / 100
     const adjustedMin = Math.round(amountMin * multiplier)
     const adjustedMax = Math.round(amountMax * multiplier)

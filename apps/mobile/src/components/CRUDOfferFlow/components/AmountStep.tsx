@@ -46,8 +46,8 @@ function AmountStep({
     maxAmountForCurrencyAtom,
     btcPricesLoadingAtom,
     btcPricesReadyAtom,
-    amountTopLimitForRangeInputAtom,
-    amountBottomLimitForRangeInputAtom,
+    amountTopLimitAtom,
+    amountBottomLimitAtom,
     feeAmountAtom,
     expirationDateAtom,
     btcPriceForOfferWithCurrencyAtom,
@@ -60,8 +60,8 @@ function AmountStep({
   const changePriceCurrency = useSetAtom(changePriceCurrencyActionAtom)
   const retryBtcPrice = useSetAtom(retryBtcPriceForOfferCurrencyActionAtom)
   const openChangeCurrency = useOpenChangeCurrency()
-  const amountMin = useAtomValue(amountBottomLimitForRangeInputAtom)
-  const amountMax = useAtomValue(amountTopLimitForRangeInputAtom)
+  const amountMin = useAtomValue(amountBottomLimitAtom)
+  const amountMax = useAtomValue(amountTopLimitAtom)
   const feeAmount = useAtomValue(feeAmountAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
   const maxLimit = useAtomValue(maxAmountForCurrencyAtom)
@@ -76,7 +76,6 @@ function AmountStep({
   }, [changePriceCurrency, currency, openChangeCurrency])
 
   const amountLabel = useMemo(() => {
-    if (!currency) return ''
     const minAmount = formatDecimal(amountMin, locale, {
       maximumFractionDigits: 0,
     })
@@ -96,8 +95,6 @@ function AmountStep({
       }),
     [expirationDate, feeAmount, locale, t]
   )
-
-  if (!currency) return null
 
   if (!active) {
     return (
@@ -133,8 +130,8 @@ function AmountStep({
           pointerEvents={pricesLoading ? 'none' : 'auto'}
         >
           <PriceRangeInput
-            minValueAtom={amountBottomLimitForRangeInputAtom}
-            maxValueAtom={amountTopLimitForRangeInputAtom}
+            minValueAtom={amountBottomLimitAtom}
+            maxValueAtom={amountTopLimitAtom}
             currency={currencies[currency].code}
             onCurrencyPress={handleCurrencyPress}
             maxLimit={maxLimit}

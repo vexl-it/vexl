@@ -114,9 +114,8 @@ function CRUDOfferFlow(): React.ReactElement {
     }
 
   const friendLevelReachLabel = (() => {
-    const effectiveConnectionLevel = intendedConnectionLevel ?? 'FIRST'
     const friendLevelLabel =
-      effectiveConnectionLevel === 'FIRST'
+      intendedConnectionLevel === 'FIRST'
         ? t('offerForm.friendLevel.firstDegree')
         : t('offerForm.friendLevel.secondDegree')
 
@@ -129,7 +128,7 @@ function CRUDOfferFlow(): React.ReactElement {
     }
 
     const reachCount =
-      effectiveConnectionLevel === 'FIRST'
+      intendedConnectionLevel === 'FIRST'
         ? numberOfFriends.firstLevelFriendsCount
         : numberOfFriends.firstAndSecondLevelFriendsCount
 

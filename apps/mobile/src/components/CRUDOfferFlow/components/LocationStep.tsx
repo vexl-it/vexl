@@ -2,6 +2,7 @@ import {useNavigation} from '@react-navigation/native'
 import {
   type ListingType,
   type LocationState,
+  type OfferLocation,
 } from '@vexl-next/domain/src/general/offers'
 import {longitudeDeltaToKilometers} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {
@@ -101,15 +102,13 @@ function LocationStep({
 
   const isProduct = listingType === 'PRODUCT'
   const isService = listingType === 'OTHER'
-  const isOnline = locationState?.includes('ONLINE') ?? false
+  const isOnline = locationState.includes('ONLINE')
   const activeTab: LocationState = isOnline ? 'ONLINE' : 'IN_PERSON'
   const tabs = useLocationTabs(listingType)
 
-  const hasLocations = (location?.length ?? 0) > 0
+  const hasLocations = location.length > 0
 
-  const formatLocationWithRadius = (
-    loc: NonNullable<typeof location>[number]
-  ): string => {
+  const formatLocationWithRadius = (loc: OfferLocation): string => {
     const radiusKm =
       Math.round(longitudeDeltaToKilometers(loc.radius, loc.latitude) * 10) / 10
 
@@ -140,7 +139,7 @@ function LocationStep({
       )
     }
 
-    const formatted = (location ?? []).map(formatLocationWithRadius)
+    const formatted = location.map(formatLocationWithRadius)
     const remaining = formatted.length - 2
     const headline = formatted.slice(0, 2).join('\n')
 
@@ -173,7 +172,7 @@ function LocationStep({
 
           {!isOnline ? (
             <YStack gap="$3">
-              {location?.map((loc) => {
+              {location.map((loc) => {
                 const displayText = formatLocationWithRadius(loc)
                 return (
                   <LocationRow
@@ -194,7 +193,7 @@ function LocationStep({
                   />
                 )
               })}
-              {!location || location.length < 3 ? (
+              {location.length < 3 ? (
                 <RowButton
                   label={t('offerForm.addLocation')}
                   icon={PlusAdd}

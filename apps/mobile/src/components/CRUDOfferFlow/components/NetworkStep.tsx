@@ -87,9 +87,9 @@ function NetworkStep({
   const btcNetwork = useAtomValue(updateBtcNetworkAtom)
   const updateBtcNetwork = useSetAtom(updateBtcNetworkAtom)
 
-  const isOnline = locationState?.includes('ONLINE') ?? false
-  const lightningSelected = btcNetwork?.includes('LIGHTING') ?? false
-  const onChainSelected = btcNetwork?.includes('ON_CHAIN') ?? false
+  const isOnline = locationState.includes('ONLINE')
+  const lightningSelected = btcNetwork.includes('LIGHTING')
+  const onChainSelected = btcNetwork.includes('ON_CHAIN')
   const hasNetworkSelected = lightningSelected || onChainSelected
 
   if (!active) {

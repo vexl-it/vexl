@@ -8,6 +8,7 @@ import {RedisService} from '@vexl-next/server-utils/src/RedisService'
 import {Context, Effect, Layer, Schema} from 'effect'
 import {DateTime} from 'luxon'
 import {
+  disableImportContactsQuotaConfig,
   importContactsCountQuotaConfig,
   importContactsResetAfterDaysQuotaConfig,
   initialImportContactsCountQuotaConfig,
@@ -44,6 +45,18 @@ export class ImportContactsQuotaService extends Context.Tag(
     Effect.gen(function* (_) {
       const redis = yield* _(RedisService)
       const userDb = yield* _(UserDbService)
+
+      const quotaDisabled = yield* _(disableImportContactsQuotaConfig)
+      if (quotaDisabled) {
+        yield* _(
+          Effect.logWarning(
+            'Import contacts quota is DISABLED (DISABLE_IMPORT_CONTACTS_QUOTA=true)'
+          )
+        )
+        return {
+          checkAndIncrementImportContactsQuota: () => () => Effect.void,
+        }
+      }
 
       return {
         checkAndIncrementImportContactsQuota:

@@ -39,6 +39,10 @@ export const importContactsResetAfterDaysQuotaConfig = Config.number(
   'IMPORT_CONTACTS_RESET_AFTER_DAYS_QUOTA'
 )
 
+export const disableImportContactsQuotaConfig = Config.boolean(
+  'DISABLE_IMPORT_CONTACTS_QUOTA'
+).pipe(Config.withDefault(false))
+
 export const adminTokenConfigHash = Config.string('ADMIN_TOKEN_HASH')
 
 export const expoAccessTokenConfig = Config.string('EXPO_ACCESS_TOKEN')

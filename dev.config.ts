@@ -223,6 +223,7 @@ export const serviceConstants = {
     INITIAL_IMPORT_CONTACTS_COUNT_QUOTA: 500,
     IMPORT_CONTACTS_COUNT_QUOTA: 100,
     IMPORT_CONTACTS_RESET_AFTER_DAYS_QUOTA: 7,
+    DISABLE_IMPORT_CONTACTS_QUOTA: true,
     // Dev admin token hash (sha256 of a dev admin token). Non-secret dev value.
     ADMIN_TOKEN_HASH: "7yYOmqPGc68kDReiZgSANhqOCB0f/soqXtDjIZ/BhWc=",
     CLUB_LINK_TEMPLATE: "vexl://club/{code}",

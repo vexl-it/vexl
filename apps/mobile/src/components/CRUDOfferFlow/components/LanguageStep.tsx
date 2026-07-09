@@ -32,14 +32,10 @@ function LanguageStep({
   showInitialIcon,
 }: LanguageStepProps): React.JSX.Element {
   const {t} = useTranslation()
-  const {
-    selectedSpokenLanguagesAtom,
-    saveSelectedSpokenLanguagesActionAtom,
-    toggleLanguageActionAtom,
-  } = useMolecule(offerFormMolecule)
+  const {spokenLanguagesAtom, toggleLanguageActionAtom} =
+    useMolecule(offerFormMolecule)
 
-  const selectedLanguages = useAtomValue(selectedSpokenLanguagesAtom)
-  const saveLanguages = useSetAtom(saveSelectedSpokenLanguagesActionAtom)
+  const selectedLanguages = useAtomValue(spokenLanguagesAtom)
   const toggleLanguage = useSetAtom(toggleLanguageActionAtom)
 
   const languageNames = selectedLanguages
@@ -79,14 +75,7 @@ function LanguageStep({
               />
             ))}
           </XStack>
-          <Button
-            variant="primary"
-            size="large"
-            onPress={() => {
-              saveLanguages()
-              onComplete()
-            }}
-          >
+          <Button variant="primary" size="large" onPress={onComplete}>
             {ctaLabel ?? t('offerForm.next')}
           </Button>
         </YStack>

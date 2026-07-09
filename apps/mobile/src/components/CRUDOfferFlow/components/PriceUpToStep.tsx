@@ -89,7 +89,7 @@ function PriceUpToStep({
 
   const currency = useAtomValue(currencyAtom)
   const btcPriceData = useAtomValue(btcPriceForOfferWithCurrencyAtom)
-  const amountBottomLimit = useAtomValue(amountBottomLimitAtom) ?? 0
+  const amountBottomLimit = useAtomValue(amountBottomLimitAtom)
   const satsValue = useAtomValue(satsValueAtom)
   const expirationDate = useAtomValue(expirationDateAtom)
   const pricesLoading = useAtomValue(btcPricesLoadingAtom)
@@ -120,8 +120,6 @@ function PriceUpToStep({
       }),
     [expirationDate, locale, t]
   )
-
-  if (!currency) return null
 
   const currencyCode = currencies[currency].code
 

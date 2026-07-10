@@ -18,6 +18,7 @@ import {isAmountFilterEnabled} from '../utils/filterMarketplaceOffers'
 
 export const offersFilterInitialState = {
   sort: undefined,
+  visibleSection: 'ALL',
   friendLevel: undefined,
   currency: undefined,
   location: undefined,

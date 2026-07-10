@@ -2,8 +2,10 @@ import React, {useCallback} from 'react'
 import {type GestureResponderEvent} from 'react-native'
 import {getTokens, styled, useTheme} from 'tamagui'
 
+import {ArchiveInbox} from '../icons/ArchiveInbox'
 import {PeopleUsers} from '../icons/PeopleUsers'
-import {Circle, XStack, YStack} from '../primitives'
+import {StarFilled} from '../icons/StarFilled'
+import {Circle, Stack, XStack, YStack} from '../primitives'
 import {CardButton} from './CardButton'
 import {TextTag, type TextTagVariant} from './TextTag'
 import {Typography} from './Typography'
@@ -13,8 +15,11 @@ export interface OfferCardActionButton {
   readonly onPress: () => void
 }
 
+export type OfferCardMarkBadge = 'favourite' | 'archived'
+
 export interface OfferCardProps {
   readonly avatar?: React.ReactNode
+  readonly markBadge?: OfferCardMarkBadge
   readonly name: string
   readonly premiumLabel?: string
   readonly textTag: React.ReactNode
@@ -69,6 +74,7 @@ const ContentFrame = styled(YStack, {
 
 export function OfferCard({
   avatar,
+  markBadge,
   name,
   premiumLabel,
   textTag,
@@ -134,7 +140,36 @@ export function OfferCard({
 
   return (
     <CardFrame pressable={!!onPress} onPress={onPress}>
-      <HeaderFrame>
+      <HeaderFrame position="relative">
+        {markBadge != null ? (
+          <Stack
+            position="absolute"
+            left="$2"
+            top="$2"
+            padding="$2"
+            borderRadius="$3"
+            zIndex={1}
+            backgroundColor={
+              markBadge === 'favourite'
+                ? '$accentYellowPrimary'
+                : '$backgroundHighlight'
+            }
+          >
+            {markBadge === 'favourite' ? (
+              <StarFilled
+                size={sizeTokens.$4.val}
+                // intentionally not theme-switching - the badge is a
+                // black star on the yellow accent in both themes
+                color={theme.black100.get()}
+              />
+            ) : (
+              <ArchiveInbox
+                size={sizeTokens.$4.val}
+                color={theme.foregroundPrimary.get()}
+              />
+            )}
+          </Stack>
+        ) : null}
         {avatar != null ? (
           <XStack gap="$3" alignItems="flex-start">
             {avatar}

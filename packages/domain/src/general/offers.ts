@@ -237,8 +237,18 @@ export type OfferInfo = typeof OfferInfo.Type
 export const ConnectionLevel = Schema.Literal('FIRST', 'SECOND', 'ALL')
 export type ConnectionLevel = typeof ConnectionLevel.Type
 
+export const OfferMarkType = Schema.Literal('FAVOURITE', 'ARCHIVED')
+export type OfferMarkType = typeof OfferMarkType.Type
+
+export const OfferMark = Schema.Struct({
+  type: OfferMarkType,
+  markedAt: IsoDatetimeString,
+})
+export type OfferMark = typeof OfferMark.Type
+
 export const OfferFlags = Schema.Struct({
   reported: Schema.optionalWith(Schema.Boolean, {default: () => false}),
+  mark: Schema.optional(OfferMark),
 })
 export type OfferFlags = typeof OfferFlags.Type
 

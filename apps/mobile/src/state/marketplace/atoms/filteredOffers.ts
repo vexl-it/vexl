@@ -11,8 +11,10 @@ import {
   filterOffersByCircularLocation,
   filterOffersByPinViewport,
   filterOffersByTextSearch,
+  filterOffersByVisibleSection,
   shouldCombineOnlineOffersWithLocationFilter,
 } from '../utils/filterMarketplaceOffers'
+import {groupOffersByMark} from '../utils/offersByMark'
 import sortOffers from '../utils/sortOffers'
 import {deltasToViewport} from '../utils/toViewport'
 import {locationFilterAtom, offersFilterFromStorageAtom} from './filterAtoms'
@@ -55,9 +57,15 @@ export const filteredOffersIgnoreLocationAtom = atom((get) => {
 
 export const filteredOffersForMapAtom = atom((get) => {
   const locationFilter = get(locationFilterAtom)
+  const visibleSection = get(offersFilterFromStorageAtom).visibleSection
+
+  const offersBySection = filterOffersByVisibleSection({
+    offers: get(filteredOffersIgnoreLocationAtom),
+    visibleSection,
+  })
 
   return filterOffersByCircularLocation({
-    offers: get(filteredOffersIgnoreLocationAtom),
+    offers: offersBySection,
     locationFilter,
     includeOnlineOffers: false,
   })
@@ -81,13 +89,18 @@ const mapViewViewportToFilterByAtom = atom((get) => {
   return undefined
 })
 
-export const filteredOffersForVisibleMapRegionAtom = atom((get) =>
-  filterOffersByPinViewport({
+export const filteredOffersForVisibleMapRegionAtom = atom((get) => {
+  const offersInVisibleMapRegion = filterOffersByPinViewport({
     offers: get(filteredOffersForMapAtom),
     viewport: get(mapViewViewportToFilterByAtom),
     locationFilter: get(locationFilterAtom),
   })
-)
+  const {favourites, browse, archived} = groupOffersByMark(
+    offersInVisibleMapRegion
+  )
+
+  return Array.appendAll(favourites, Array.appendAll(browse, archived))
+})
 
 export const filteredOffersIncludingLocationFilterAtom = atom((get) => {
   const filter = get(offersFilterFromStorageAtom)

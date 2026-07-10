@@ -9,7 +9,11 @@ import {type Viewport} from '@vexl-next/domain/src/utility/geoCoordinates'
 import {Array, pipe} from 'effect'
 import {getUserFacingOfferType} from '../../../utils/offerTypeSemantics'
 import {type StoredContactWithComputedValues} from '../../contacts/domain'
-import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
+import {
+  type MarketplaceFilterBarOption,
+  type MarketplaceVisibleSection,
+  type OffersFilter,
+} from '../domain'
 import areIncluded from './areIncluded'
 import {
   filterLocationsByCircularLocationFilter,
@@ -177,6 +181,28 @@ export function selectOffersByMarketplaceFilterBarOptions({
       )
     )
   )
+}
+
+export function filterOffersByVisibleSection<T extends OneOfferInState>({
+  offers,
+  visibleSection,
+}: {
+  offers: readonly T[]
+  visibleSection: MarketplaceVisibleSection
+}): T[] {
+  if (visibleSection === 'ONLY_FAVOURITES')
+    return pipe(
+      offers,
+      Array.filter((one) => one.flags.mark?.type === 'FAVOURITE')
+    )
+
+  if (visibleSection === 'ONLY_ARCHIVED')
+    return pipe(
+      offers,
+      Array.filter((one) => one.flags.mark?.type === 'ARCHIVED')
+    )
+
+  return pipe(offers, Array.fromIterable)
 }
 
 export function filterMarketplaceOffers({

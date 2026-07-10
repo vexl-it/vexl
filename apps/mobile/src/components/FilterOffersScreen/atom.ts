@@ -37,11 +37,13 @@ import {
 import {offersToSeeInMarketplaceAtom} from '../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {
   type MarketplaceFilterBarOption,
+  type MarketplaceVisibleSection,
   type OffersFilter,
 } from '../../state/marketplace/domain'
 import {
   filterMarketplaceOffers,
   filterOffersByCircularLocation,
+  filterOffersByVisibleSection,
   isAmountFilterEnabled,
   selectOffersByMarketplaceFilterBarOptions,
   shouldCombineOnlineOffersWithLocationFilter,
@@ -72,6 +74,8 @@ const spokenLanguagesAtom = atom<SpokenLanguage[]>(
 export const spokenLanguagesAtomsAtom = splitAtom(spokenLanguagesAtom)
 
 export const sortingAtom = atom<Sort | undefined>(undefined)
+
+export const visibleSectionAtom = atom<MarketplaceVisibleSection>('ALL')
 
 export const intendedConnectionLevelAtom = atom<
   IntendedConnectionLevel | undefined
@@ -490,6 +494,7 @@ const setFilterAtomsActionAtom = atom(
   (get, set, filterValue: OffersFilter) => {
     set(filterBarOptionsAtom, filterValue.filterBarOptions)
     set(sortingAtom, filterValue.sort)
+    set(visibleSectionAtom, filterValue.visibleSection)
     set(clubsFilterEnabledBaseAtom, filterValue.clubsUuids !== undefined)
     set(setClubsInFilterActionAtom, filterValue.clubsUuids)
     set(setConditionallyRenderedFilterElementsActionAtom, filterValue)
@@ -529,6 +534,7 @@ function getDraftOffersFilter(get: Getter): OffersFilter {
 
   return {
     sort: get(sortingAtom),
+    visibleSection: get(visibleSectionAtom),
     filterBarOptions: get(filterBarOptionsAtom),
     currency: amountFilterEnabled ? get(currencyAtom) : undefined,
     location: get(locationAtom),
@@ -593,12 +599,15 @@ function getFilteredOffersPreviewCount({
     filter: draftFilter,
   })
 
-  return filterOffersByCircularLocation({
-    offers: filteredOffers,
-    locationFilter: draftFilter.location,
-    includeOnlineOffers:
-      !Array.isNonEmptyReadonlyArray(draftFilter.location ?? []) ||
-      shouldCombineOnlineOffersWithLocationFilter(draftFilter),
+  return filterOffersByVisibleSection({
+    offers: filterOffersByCircularLocation({
+      offers: filteredOffers,
+      locationFilter: draftFilter.location,
+      includeOnlineOffers:
+        !Array.isNonEmptyReadonlyArray(draftFilter.location ?? []) ||
+        shouldCombineOnlineOffersWithLocationFilter(draftFilter),
+    }),
+    visibleSection: draftFilter.visibleSection,
   }).length
 }
 

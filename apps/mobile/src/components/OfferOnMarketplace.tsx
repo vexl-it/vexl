@@ -27,6 +27,7 @@ import {
   getAmountLabelActionAtom,
   getIconTagVariant,
   getIsOffering,
+  getOfferMarkBadge,
 } from '../utils/offerHelpers'
 import {getLocationCompactDisplayLabelForLocations} from '../utils/offerLocationLabels'
 import {randomSeedFromOfferInfo} from '../utils/RandomSeed'
@@ -108,6 +109,7 @@ export default function OfferOnMarketplace({
     : undefined
 
   const price = getAmountLabel(offer)
+  const markBadge = getOfferMarkBadge(offer.flags.mark?.type)
   const isMissingProductCategory =
     isMine && isProductOfferMissingCategory(offer)
   const statusLabel = isMissingProductCategory
@@ -181,6 +183,7 @@ export default function OfferOnMarketplace({
           />
         )
       }
+      markBadge={markBadge}
       name={name}
       textTag={
         <TextTag

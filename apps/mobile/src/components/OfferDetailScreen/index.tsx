@@ -1,14 +1,17 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {
+  ArchiveInbox,
   Button,
   ConferenceClub,
   FlagReport,
   InfoCircle,
+  Menu,
   MenuItem,
   NavigationBar,
   PeopleUsers,
   Screen,
   Typography,
+  UnarchiveInbox,
   useScreenFooterHeight,
   useTheme,
   XmarkCancelClose,
@@ -27,6 +30,7 @@ import {
 } from '../../state/chat/utils/offerStates'
 import {useGetAllClubsForIds} from '../../state/clubs/atom/clubsWithMembersAtom'
 import {useSingleOffer} from '../../state/marketplace'
+import {toggleOfferMarkActionAtom} from '../../state/marketplace/atoms/offerMarkActionAtoms'
 import {useVisibleCommonFriendsForOffer} from '../../state/marketplace/hooks/useVisibleCommonFriendsForOffer'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
@@ -40,6 +44,7 @@ import {
   reportOfferActionAtom,
   showNoCommonFriendsExplanationActionAtom,
 } from './atoms'
+import {createFavouriteStarNavIcon} from './components/createFavouriteStarNavIcon'
 
 type Props = RootStackScreenProps<'OfferDetail'>
 
@@ -129,10 +134,14 @@ function Footer({
 
 function OfferDetailScrollContent({
   offer,
+  isMyOffer,
+  onArchivePress,
   onReportPress,
   onNoCommonFriendsPress,
 }: {
   readonly offer: OneOfferInState
+  readonly isMyOffer: boolean
+  readonly onArchivePress: () => void
   readonly onReportPress: () => void
   readonly onNoCommonFriendsPress: () => void
 }): React.ReactElement {
@@ -203,15 +212,33 @@ function OfferDetailScrollContent({
           </XStack>
         )}
 
-        {!offer.flags.reported ? (
-          <MenuItem
-            label={t('messages.reportOffer')}
-            icon={FlagReport}
-            variant="danger"
-            showChevron={false}
-            onPress={onReportPress}
-          />
-        ) : null}
+        <Menu>
+          {!isMyOffer ? (
+            <MenuItem
+              label={
+                offer.flags.mark?.type === 'ARCHIVED'
+                  ? t('offer.archive.unarchiveOffer')
+                  : t('offer.archive.archiveOffer')
+              }
+              icon={
+                offer.flags.mark?.type === 'ARCHIVED'
+                  ? UnarchiveInbox
+                  : ArchiveInbox
+              }
+              showChevron={false}
+              onPress={onArchivePress}
+            />
+          ) : null}
+          {!offer.flags.reported ? (
+            <MenuItem
+              label={t('messages.reportOffer')}
+              icon={FlagReport}
+              variant="danger"
+              showChevron={false}
+              onPress={onReportPress}
+            />
+          ) : null}
+        </Menu>
       </YStack>
     </ScrollView>
   )
@@ -227,6 +254,7 @@ function OfferDetailScreen({
   const {t} = useTranslation()
   const locale = useAtomValue(formattingLocaleAtom)
   const reportOffer = useSetAtom(reportOfferActionAtom)
+  const toggleOfferMark = useSetAtom(toggleOfferMarkActionAtom)
   const showNoCommonFriendsExplanation = useSetAtom(
     showNoCommonFriendsExplanationActionAtom
   )
@@ -327,10 +355,45 @@ function OfferDetailScreen({
     )
   }, [reportOffer, offer, safeGoBack])
 
+  const favouriteStarIcon = useMemo(
+    () => createFavouriteStarNavIcon(offerId),
+    [offerId]
+  )
+
+  const handleToggleFavouritePress = useCallback(() => {
+    if (Option.isNone(offer)) return
+    Effect.runFork(
+      toggleOfferMark({
+        offer: offer.value,
+        target: 'FAVOURITE',
+        confirmCrossTransition: true,
+      })
+    )
+  }, [offer, toggleOfferMark])
+
+  const handleArchivePress = useCallback(() => {
+    if (Option.isNone(offer) || isMyOffer) return
+    Effect.runFork(
+      toggleOfferMark({
+        offer: offer.value,
+        target: 'ARCHIVED',
+        confirmCrossTransition: true,
+      })
+    )
+  }, [isMyOffer, offer, toggleOfferMark])
+
   const navigationBar = (
     <NavigationBar
       style="back"
       title={t('offerDetail.offerDetail')}
+      leftAction={
+        Option.isSome(offer) && !isMyOffer
+          ? {
+              icon: favouriteStarIcon,
+              onPress: handleToggleFavouritePress,
+            }
+          : undefined
+      }
       rightActions={[{icon: XmarkCancelClose, onPress: safeGoBack}]}
     />
   )
@@ -361,6 +424,8 @@ function OfferDetailScreen({
     >
       <OfferDetailScrollContent
         offer={offer.value}
+        isMyOffer={isMyOffer}
+        onArchivePress={handleArchivePress}
         onReportPress={handleReportPress}
         onNoCommonFriendsPress={handleNoCommonFriendsPress}
       />

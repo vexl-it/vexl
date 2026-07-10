@@ -90,8 +90,18 @@ export const MarketplaceFilterBarOption = Schema.Literal(
 )
 export type MarketplaceFilterBarOption = typeof MarketplaceFilterBarOption.Type
 
+export const MarketplaceVisibleSection = Schema.Literal(
+  'ALL',
+  'ONLY_FAVOURITES',
+  'ONLY_ARCHIVED'
+)
+export type MarketplaceVisibleSection = typeof MarketplaceVisibleSection.Type
+
 export const OffersFilter = Schema.Struct({
   sort: Schema.optional(Sort),
+  visibleSection: Schema.optionalWith(MarketplaceVisibleSection, {
+    default: () => 'ALL',
+  }),
   currency: Schema.optional(CurrencyCode),
   location: Schema.optional(Schema.Array(OfferLocation)),
   locationState: Schema.optional(Schema.Array(LocationState)),

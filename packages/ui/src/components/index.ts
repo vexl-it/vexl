@@ -104,7 +104,11 @@ export type {NoteProps, NoteTag} from './Note'
 export {NotificationCard} from './NotificationCard'
 export type {NotificationCardProps} from './NotificationCard'
 export {OfferCard} from './OfferCard'
-export type {OfferCardActionButton, OfferCardProps} from './OfferCard'
+export type {
+  OfferCardActionButton,
+  OfferCardMarkBadge,
+  OfferCardProps,
+} from './OfferCard'
 export {Picker} from './Picker'
 export type {PickerItem, PickerProps} from './Picker'
 export {PriceRangeInput, RangeSlider} from './PriceRangeInput'
@@ -139,6 +143,12 @@ export type {
 } from './Selector'
 export {StepperCheck, StepperCheckContainer} from './StepperCheck'
 export type {StepperCheckProps} from './StepperCheck'
+export {SwipeableOfferCard} from './SwipeableOfferCard'
+export type {
+  SwipeableOfferCardLabels,
+  SwipeableOfferCardMark,
+  SwipeableOfferCardProps,
+} from './SwipeableOfferCard'
 export {Switch} from './Switch'
 export {TabBar} from './TabBar'
 export type {TabBarItem, TabBarProps} from './TabBar'

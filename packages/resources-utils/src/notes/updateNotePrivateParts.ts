@@ -48,7 +48,6 @@ function uploadNotePrivatePartsBatch({
           notePrivateList: oneChunk,
         })
         .pipe(
-          Effect.either,
           Effect.tapError((e) =>
             Effect.sync(() => {
               reportErrorFromResourcesUtils(
@@ -58,6 +57,7 @@ function uploadNotePrivatePartsBatch({
               )
             })
           ),
+          Effect.either,
           Effect.map((result) => ({chunk: oneChunk, result}))
         )
     ),

@@ -39,6 +39,11 @@ function uploadNotePrivatePartsBatch({
   adminId: NoteAdminId
   privateParts: readonly ServerNotePrivatePart[]
 }): Effect.Effect<UploadNotePrivatePartsBatchResult> {
+  const emptyResult: UploadNotePrivatePartsBatchResult = {
+    succeeded: [],
+    failed: [],
+  }
+
   return pipe(
     Array.chunksOf(privateParts, PRIVATE_PARTS_BATCH_SIZE),
     Array.map((oneChunk) =>
@@ -64,11 +69,11 @@ function uploadNotePrivatePartsBatch({
     Effect.allWith({concurrency: 'unbounded'}),
     Effect.map(
       Array.reduce(
-        {
-          succeeded: [],
-          failed: [],
-        } as UploadNotePrivatePartsBatchResult,
-        (acc, {chunk, result}) => {
+        emptyResult,
+        (
+          acc: UploadNotePrivatePartsBatchResult,
+          {chunk, result}
+        ): UploadNotePrivatePartsBatchResult => {
           if (Either.isLeft(result))
             return {
               ...acc,

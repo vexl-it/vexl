@@ -14,6 +14,7 @@ import showDonationPromptGiveLoveActionAtom, {
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {version} from '../../../utils/environment'
+import runWhenIdleWithTimeout from '../../../utils/runWhenIdleWithTimeout'
 import {type ChatMessageWithState, type ChatWithMessages} from '../domain'
 import addMessageToChat from '../utils/addMessageToChat'
 import replaceImageFileUrisWithBase64 from '../utils/replaceImageFileUrisWithBase64'
@@ -39,7 +40,7 @@ export default function sendMessageActionAtom(
     const numberOfMessagesInChat = messages.length
 
     // Timeout prevents message sending from starving during continuous interactions.
-    requestIdleCallback(
+    runWhenIdleWithTimeout(
       () => {
         Effect.gen(function* (_) {
           const m = yield* _(

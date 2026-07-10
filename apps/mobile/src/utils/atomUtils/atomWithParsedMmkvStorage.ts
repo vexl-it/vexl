@@ -7,6 +7,7 @@ import {
 } from 'jotai'
 import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
+import runWhenIdleWithTimeout from '../runWhenIdleWithTimeout'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
 
 export const CLEAR_STORAGE_KEY = '__clear_storage'
@@ -282,7 +283,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       if (!flushAlreadyScheduled) {
         // The timeout bounds how long dirty state can wait under continuous
         // animation/scroll before the idle callback is forced to run.
-        requestIdleCallback(flushPendingWrite, {timeout: 1000})
+        runWhenIdleWithTimeout(flushPendingWrite, {timeout: 1000})
       }
     }
   )
@@ -324,7 +325,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
         // synchronously (the listener runs inside our storage.set call).
         if (isPersistingOwnValue) return
 
-        requestIdleCallback(
+        runWhenIdleWithTimeout(
           () => {
             pipe(
               storage.getVerified(key, schema),

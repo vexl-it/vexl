@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Map} from '@vexl-next/ui'
+import {Loader, Map, Typography} from '@vexl-next/ui'
 import {isNone} from 'fp-ts/Option'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
@@ -18,11 +18,13 @@ import TotalOffersCount from './TotalOffersCount'
 
 interface Props {
   readonly filteredOffersCount: number
+  readonly isOffersLoaderVisible: boolean
   readonly onFilterChange: () => void
 }
 
 function AllOffersListHeader({
   filteredOffersCount,
+  isOffersLoaderVisible,
   onFilterChange,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
@@ -60,7 +62,22 @@ function AllOffersListHeader({
         {areThereOffersToSeeInMarketplaceWithoutFilters ? (
           <Stack paddingHorizontal="$5">
             <XStack ai="center" jc="space-between">
-              <TotalOffersCount filteredOffersCount={filteredOffersCount} />
+              {isOffersLoaderVisible ? (
+                <XStack alignItems="center" gap="$2" marginVertical="$2">
+                  <Typography
+                    color="$foregroundSecondary"
+                    variant="description"
+                  >
+                    {t('marketplace.loadingOffers')}
+                  </Typography>
+                  <Loader
+                    color={theme.foregroundSecondary.get()}
+                    size="small"
+                  />
+                </XStack>
+              ) : (
+                <TotalOffersCount filteredOffersCount={filteredOffersCount} />
+              )}
               <MarketplaceInlineButton
                 icon={
                   <Map size={18} color={theme.accentHighlightPrimary.get()} />

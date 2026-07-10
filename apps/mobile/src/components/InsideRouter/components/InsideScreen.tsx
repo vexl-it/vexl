@@ -6,7 +6,8 @@ import {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated'
-import {Stack} from 'tamagui'
+import {useSafeAreaInsets} from 'react-native-safe-area-context'
+import {getTokens, Stack} from 'tamagui'
 import {GraphicHeaderDecoration} from '../../GraphicHeaderDecoration'
 import InsideNavigationBar from './InsideNavigationBar'
 
@@ -32,11 +33,14 @@ export function InsideScreenListHeader({
   readonly children?: React.ReactNode
 }): React.JSX.Element {
   const navBarHeight = useAtomValue(navBarHeightAtom)
+  const insets = useSafeAreaInsets()
+  const initialNavBarHeight =
+    insets.top + getTokens().size.$8.val + getTokens().space.$5.val * 2
 
   return (
     <Stack>
       <GraphicHeaderDecoration />
-      <Stack height={navBarHeight} />
+      <Stack height={Math.max(navBarHeight, initialNavBarHeight)} />
       {children}
     </Stack>
   )

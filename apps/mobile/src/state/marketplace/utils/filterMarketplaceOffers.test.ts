@@ -1,12 +1,18 @@
 import {
   OneOfferInState,
+  type OfferMarkType,
   type OfferType,
   type ProductCategory,
 } from '@vexl-next/domain/src/general/offers'
 import {Array, pipe, Schema} from 'effect'
-import {type MarketplaceFilterBarOption, type OffersFilter} from '../domain'
+import {
+  type MarketplaceFilterBarOption,
+  type MarketplaceVisibleSection,
+  type OffersFilter,
+} from '../domain'
 import {
   filterMarketplaceOffers,
+  filterOffersByVisibleSection,
   selectOffersByMarketplaceFilterBarOptions,
 } from './filterMarketplaceOffers'
 
@@ -22,6 +28,7 @@ function makeOffer({
   offerType = 'SELL',
   productCategory,
   productCategories,
+  markType,
 }: {
   readonly id: string
   readonly listingType: 'BITCOIN' | 'PRODUCT' | 'OTHER'
@@ -31,6 +38,7 @@ function makeOffer({
   readonly offerType?: OfferType
   readonly productCategory?: ProductCategory
   readonly productCategories?: readonly ProductCategory[]
+  readonly markType?: OfferMarkType
 }): Schema.Schema.Type<typeof OneOfferInState> {
   return Schema.decodeSync(OneOfferInState)({
     offerInfo: {
@@ -69,7 +77,10 @@ function makeOffer({
       createdAt: '2026-01-01T00:00:00.000Z',
       modifiedAt: '2026-01-01T00:00:00.000Z',
     },
-    flags: {},
+    flags:
+      markType === undefined
+        ? {}
+        : {mark: {type: markType, markedAt: '2026-01-01T00:00:00.000Z'}},
   })
 }
 
@@ -132,6 +143,64 @@ function filterOfferIds({
   )
 }
 
+function filterOfferIdsByVisibleSection(
+  visibleSection: MarketplaceVisibleSection
+): readonly string[] {
+  return pipe(
+    filterOffersByVisibleSection({
+      offers: [
+        makeOffer({
+          id: 'favourite',
+          listingType: 'BITCOIN',
+          currency: 'CZK',
+          amountBottomLimit: 20_000,
+          amountTopLimit: 20_000,
+          markType: 'FAVOURITE',
+        }),
+        makeOffer({
+          id: 'archived',
+          listingType: 'BITCOIN',
+          currency: 'CZK',
+          amountBottomLimit: 20_000,
+          amountTopLimit: 20_000,
+          markType: 'ARCHIVED',
+        }),
+        makeOffer({
+          id: 'unmarked',
+          listingType: 'BITCOIN',
+          currency: 'CZK',
+          amountBottomLimit: 20_000,
+          amountTopLimit: 20_000,
+        }),
+      ],
+      visibleSection,
+    }),
+    Array.map((offer) => offer.offerInfo.offerId)
+  )
+}
+
+describe('filterOffersByVisibleSection', () => {
+  test('keeps favourite, archived, and unmarked offers for ALL', () => {
+    expect(filterOfferIdsByVisibleSection('ALL')).toEqual([
+      'favourite',
+      'archived',
+      'unmarked',
+    ])
+  })
+
+  test('keeps only favourite offers for ONLY_FAVOURITES', () => {
+    expect(filterOfferIdsByVisibleSection('ONLY_FAVOURITES')).toEqual([
+      'favourite',
+    ])
+  })
+
+  test('keeps only archived offers for ONLY_ARCHIVED', () => {
+    expect(filterOfferIdsByVisibleSection('ONLY_ARCHIVED')).toEqual([
+      'archived',
+    ])
+  })
+})
+
 describe('filterMarketplaceOffers product category filter', () => {
   test('matches product offers by plural productCategories', () => {
     expect(
@@ -148,6 +217,7 @@ describe('filterMarketplaceOffers product category filter', () => {
         ],
         filter: {
           filterBarOptions: new Set(),
+          visibleSection: 'ALL',
           spokenLanguages: [],
           productCategories: ['ELECTRONICS'],
         },
@@ -170,6 +240,7 @@ describe('filterMarketplaceOffers product category filter', () => {
         ],
         filter: {
           filterBarOptions: new Set(),
+          visibleSection: 'ALL',
           spokenLanguages: [],
           productCategories: ['ELECTRONICS'],
         },
@@ -192,6 +263,7 @@ describe('filterMarketplaceOffers product category filter', () => {
         ],
         filter: {
           filterBarOptions: new Set(),
+          visibleSection: 'ALL',
           spokenLanguages: [],
           productCategories: ['ELECTRONICS'],
         },
@@ -213,6 +285,7 @@ describe('filterMarketplaceOffers product category filter', () => {
         ],
         filter: {
           filterBarOptions: new Set(),
+          visibleSection: 'ALL',
           spokenLanguages: [],
           productCategories: ['OTHERS'],
         },
@@ -227,6 +300,7 @@ describe('filterMarketplaceOffers amount filter', () => {
       filterOfferIds({
         filter: {
           filterBarOptions: new Set(),
+          visibleSection: 'ALL',
           spokenLanguages: [],
           currency: 'CZK',
           amountBottomLimit: 10_000,
@@ -241,6 +315,7 @@ describe('filterMarketplaceOffers amount filter', () => {
       filterOfferIds({
         filter: {
           filterBarOptions: new Set(),
+          visibleSection: 'ALL',
           spokenLanguages: [],
         },
       })

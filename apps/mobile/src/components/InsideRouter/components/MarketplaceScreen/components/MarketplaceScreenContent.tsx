@@ -6,7 +6,10 @@ import React, {useCallback, useMemo, useRef} from 'react'
 import {Stack} from 'tamagui'
 import {useAreOffersLoading} from '../../../../../state/marketplace'
 import {isMarketplaceNarrowingActiveAtom} from '../../../../../state/marketplace/atoms/filterAtoms'
-import {filteredOffersIncludingLocationFilterAtomsAtom} from '../../../../../state/marketplace/atoms/filteredOffers'
+import {
+  marketplaceListDataAtom,
+  visibleMarketplaceOffersCountAtom,
+} from '../../../../../state/marketplace/atoms/marketplaceSections'
 import {myOffersSortedAtomsAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {
@@ -19,6 +22,7 @@ import {useHandleRedirectToContactsScreen} from '../../../../../state/useHandleR
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAppState} from '../../../../../utils/useAppState'
 import OffersList from '../../../../OffersList'
+import {offersListItemsFromAtoms} from '../../../../OffersList/offersListItemsFromAtoms'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import {type MarketplaceTab} from '../index'
 import AllOffersListHeader from './AllOffersListHeader'
@@ -102,10 +106,13 @@ function MarketplaceScreenContent({
   const {scrollY, onScroll} = useInsideScreenScroll()
   const scrollToTopRef = useRef<(() => void) | null>(null)
   const tabs = useTabs()
-  const allOffersAtoms = useAtomValue(
-    filteredOffersIncludingLocationFilterAtomsAtom
-  )
+  const marketplaceListData = useAtomValue(marketplaceListDataAtom)
+  const visibleOffersCount = useAtomValue(visibleMarketplaceOffersCountAtom)
   const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
+  const myOffersItems = useMemo(
+    () => offersListItemsFromAtoms(myOffersSortedAtoms),
+    [myOffersSortedAtoms]
+  )
   const areThereOffersWithoutFilters = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )
@@ -140,7 +147,7 @@ function MarketplaceScreenContent({
     () => (
       <MarketplaceListHeader
         activeTab={activeTab}
-        filteredOffersCount={allOffersAtoms.length}
+        filteredOffersCount={visibleOffersCount}
         isOffersLoaderVisible={loading}
         onFilterChange={scrollListToTop}
         onTabPress={handleTabPress}
@@ -149,16 +156,15 @@ function MarketplaceScreenContent({
     ),
     [
       activeTab,
-      allOffersAtoms.length,
-      handleTabPress,
+      visibleOffersCount,
       loading,
+      handleTabPress,
       scrollListToTop,
       tabs,
     ]
   )
 
-  const offersAtoms =
-    activeTab === 'allOffers' ? allOffersAtoms : myOffersSortedAtoms
+  const items = activeTab === 'allOffers' ? marketplaceListData : myOffersItems
 
   const listEmptyComponent =
     activeTab === 'allOffers'
@@ -172,11 +178,11 @@ function MarketplaceScreenContent({
       activeTab === 'allOffers' &&
       shouldShowFewFilteredOffersNotice({
         isMarketplaceNarrowingActive,
-        offersCount: allOffersAtoms.length,
+        offersCount: visibleOffersCount,
       }) ? (
         <FewFilteredOffersNotice />
       ) : null,
-    [activeTab, allOffersAtoms.length, isMarketplaceNarrowingActive]
+    [activeTab, visibleOffersCount, isMarketplaceNarrowingActive]
   )
 
   const itemAfterFirstOffer = useMemo(
@@ -223,7 +229,7 @@ function MarketplaceScreenContent({
         ListHeaderComponent={listHeaderComponent}
         ListEmptyComponent={listEmptyComponent}
         ListFooterComponent={listFooterComponent}
-        offersAtoms={offersAtoms}
+        items={items}
         itemAfterFirstOffer={itemAfterFirstOffer}
         onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
         refreshing={activeTab === 'allOffers' ? loading : false}

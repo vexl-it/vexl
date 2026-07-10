@@ -4,35 +4,52 @@ import {
   type FlashListRef,
   type ListRenderItemInfo,
 } from '@shopify/flash-list'
-import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Stack, tokens, useTheme} from '@vexl-next/ui'
-import {type Atom} from 'jotai'
+import {Array, Option, pipe} from 'effect'
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import {RefreshControl} from 'react-native'
+import {LayoutAnimation, RefreshControl} from 'react-native'
 import Animated from 'react-native-reanimated'
-import atomKeyExtractor from '../../utils/atomUtils/atomKeyExtractor'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import OffersListItem from './OffersListItem'
+import OffersListSectionHeader from './OffersListSectionHeader'
+import {type OffersListItemData} from './domain'
+import {OffersListAnimationProvider} from './offersListAnimation'
 
-const ItemSeparatorComponent = (): React.ReactElement => <Stack h="$5" />
 interface ItemSeparatorProps {
-  readonly leadingItem?: Atom<OneOfferInState>
+  readonly leadingItem?: OffersListItemData
+  readonly trailingItem?: OffersListItemData
 }
 
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
 
 function renderItem(
-  info: ListRenderItemInfo<Atom<OneOfferInState>>
+  info: ListRenderItemInfo<OffersListItemData>
 ): React.ReactElement {
-  return <OffersListItem offerAtom={info.item} />
+  if (info.item.type === 'sectionHeader')
+    return <OffersListSectionHeader section={info.item.section} />
+
+  return (
+    <OffersListItem
+      offerAtom={info.item.offerAtom}
+      swipeEnabled={info.item.swipeEnabled}
+    />
+  )
+}
+
+function keyExtractor(item: OffersListItemData): string {
+  return item.key
+}
+
+function getItemType(item: OffersListItemData): string {
+  return item.type
 }
 
 export interface Props extends Omit<
-  FlashListProps<Atom<OneOfferInState>>,
-  'renderItem' | 'data' | 'ListFooterComponent'
+  FlashListProps<OffersListItemData>,
+  'renderItem' | 'data' | 'ListFooterComponent' | 'keyExtractor' | 'getItemType'
 > {
-  readonly offersAtoms: Array<Atom<OneOfferInState>>
+  readonly items: readonly OffersListItemData[]
   readonly itemAfterFirstOffer?: React.ReactElement | null
   readonly ListFooterComponent?: React.ReactElement | null
   readonly scrollToTopRef?: React.RefObject<(() => void) | null>
@@ -43,7 +60,7 @@ function OffersList({
   onRefresh,
   refreshing,
   hideRefreshIndicator,
-  offersAtoms,
+  items,
   itemAfterFirstOffer,
   scrollToTopRef,
   ListEmptyComponent,
@@ -53,7 +70,7 @@ function OffersList({
   ...props
 }: Props): React.JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
-  const animatedFlashListRef = useRef<FlashListRef<Atom<OneOfferInState>>>(null)
+  const animatedFlashListRef = useRef<FlashListRef<OffersListItemData>>(null)
   const theme = useTheme()
   const refreshIndicatorColor = hideRefreshIndicator
     ? tokens.color.transparent.val
@@ -67,27 +84,58 @@ function OffersList({
     [bottomOffset, externalContentContainerStyle]
   )
 
-  const firstOfferAtom = offersAtoms[0]
+  const firstOfferItemKey = useMemo(
+    () =>
+      pipe(
+        items,
+        Array.findFirst((one) => one.type === 'offer'),
+        Option.map((one) => one.key),
+        Option.getOrUndefined
+      ),
+    [items]
+  )
+
+  const offerItemsCount = useMemo(
+    () =>
+      pipe(
+        items,
+        Array.filter((one) => one.type === 'offer'),
+        Array.length
+      ),
+    [items]
+  )
 
   const itemSeparatorComponent = useCallback(
-    ({leadingItem}: ItemSeparatorProps): React.ReactElement => {
-      if (itemAfterFirstOffer != null && leadingItem === firstOfferAtom) {
+    ({leadingItem, trailingItem}: ItemSeparatorProps): React.ReactElement => {
+      // checked first so the banner is not dropped when the first offer is
+      // also the last offer of its section (trailingItem is a header then)
+      if (
+        itemAfterFirstOffer != null &&
+        leadingItem?.key !== undefined &&
+        leadingItem.key === firstOfferItemKey
+      ) {
         return (
           <>
             <Stack h="$5" />
             <Stack px="$5">{itemAfterFirstOffer}</Stack>
-            <Stack h="$5" />
+            <Stack h={trailingItem?.type === 'sectionHeader' ? '$7' : '$5'} />
           </>
         )
       }
 
-      return <ItemSeparatorComponent />
+      // spacing between the last offer of a section and the next section
+      // header
+      if (trailingItem?.type === 'sectionHeader') return <Stack h="$7" />
+      // spacing between a section header and its first offer
+      if (leadingItem?.type === 'sectionHeader') return <Stack h="$5" />
+
+      return <Stack h="$5" />
     },
-    [firstOfferAtom, itemAfterFirstOffer]
+    [firstOfferItemKey, itemAfterFirstOffer]
   )
 
   const listFooterComponent = useMemo((): React.ReactElement | null => {
-    if (itemAfterFirstOffer == null || offersAtoms.length !== 1) {
+    if (itemAfterFirstOffer == null || offerItemsCount !== 1) {
       return ListFooterComponent ?? null
     }
 
@@ -99,7 +147,23 @@ function OffersList({
         {ListFooterComponent}
       </>
     )
-  }, [ListFooterComponent, itemAfterFirstOffer, offersAtoms.length])
+  }, [ListFooterComponent, itemAfterFirstOffer, offerItemsCount])
+
+  const animateNextListChange = useCallback(() => {
+    animatedFlashListRef.current?.prepareForLayoutAnimationRender()
+    LayoutAnimation.configureNext(
+      LayoutAnimation.create(
+        300,
+        LayoutAnimation.Types.easeInEaseOut,
+        LayoutAnimation.Properties.opacity
+      )
+    )
+  }, [])
+
+  const animationContextValue = useMemo(
+    () => ({animateNextListChange}),
+    [animateNextListChange]
+  )
 
   useEffect(() => {
     if (!scrollToTopRef) return
@@ -117,32 +181,35 @@ function OffersList({
   }, [scrollToTopRef])
 
   return (
-    <ReanimatedFlashList
-      ref={animatedFlashListRef}
-      indicatorStyle="white"
-      refreshControl={
-        <RefreshControl
-          colors={[refreshIndicatorColor]}
-          progressBackgroundColor={
-            hideRefreshIndicator ? tokens.color.transparent.val : undefined
-          }
-          refreshing={refreshing ?? false}
-          onRefresh={onRefresh ?? (() => {})}
-          tintColor={refreshIndicatorColor}
-        />
-      }
-      ItemSeparatorComponent={itemSeparatorComponent}
-      progressViewOffset={20}
-      ListHeaderComponent={ListHeaderComponent}
-      ListFooterComponent={listFooterComponent}
-      ListEmptyComponent={ListEmptyComponent}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={contentContainerStyle}
-      data={offersAtoms}
-      renderItem={renderItem}
-      keyExtractor={atomKeyExtractor}
-      {...props}
-    />
+    <OffersListAnimationProvider value={animationContextValue}>
+      <ReanimatedFlashList
+        ref={animatedFlashListRef}
+        indicatorStyle="white"
+        refreshControl={
+          <RefreshControl
+            colors={[refreshIndicatorColor]}
+            progressBackgroundColor={
+              hideRefreshIndicator ? tokens.color.transparent.val : undefined
+            }
+            refreshing={refreshing ?? false}
+            onRefresh={onRefresh ?? (() => {})}
+            tintColor={refreshIndicatorColor}
+          />
+        }
+        ItemSeparatorComponent={itemSeparatorComponent}
+        progressViewOffset={20}
+        ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={listFooterComponent}
+        ListEmptyComponent={ListEmptyComponent}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={contentContainerStyle}
+        data={items}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemType={getItemType}
+        {...props}
+      />
+    </OffersListAnimationProvider>
   )
 }
 

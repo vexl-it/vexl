@@ -41,6 +41,7 @@ import LocationSection from './components/LocationSection'
 import LookingToSection from './components/LookingToSection'
 import NetworkSection from './components/NetworkSection'
 import ProductCategorySection from './components/ProductCategorySection'
+import ShowOffersSection from './components/ShowOffersSection'
 import Sorting from './components/Sorting'
 import SpokenLanguageTag from './components/SpokenLanguageTag'
 
@@ -125,6 +126,18 @@ function FilterOffersScreen(): React.ReactElement {
             {t('filterOffers.sortBy')}
           </Typography>
           <Sorting />
+
+          <Separator marginVertical="$5" borderColor="$backgroundTertiary" />
+
+          {/* Show offers */}
+          <Typography
+            variant="titlesSmall"
+            color="$foregroundPrimary"
+            paddingVertical="$3"
+          >
+            {t('filterOffers.showOffers')}
+          </Typography>
+          <ShowOffersSection />
 
           <ProductCategorySection />
 

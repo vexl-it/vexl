@@ -1,28 +1,38 @@
 import {useNavigation} from '@react-navigation/native'
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
-import {Option} from 'effect'
-import {useAtomValue, type Atom} from 'jotai'
+import {
+  Stack,
+  SwipeableOfferCard,
+  type SwipeableOfferCardMark,
+} from '@vexl-next/ui'
+import {Effect, Option} from 'effect'
+import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
-import {Stack} from 'tamagui'
 import {chatWithMessagesForOfferAtom} from '../../state/chat/hooks/useChatForOffer'
 import {
   canChatBeRequested,
   getRequestState,
   shouldUseGrayscaleColours,
 } from '../../state/chat/utils/offerStates'
+import {toggleOfferMarkActionAtom} from '../../state/marketplace/atoms/offerMarkActionAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import {getOfferMarkBadge} from '../../utils/offerHelpers'
 import {offerRerequestLimitDaysAtom} from '../../utils/versionService/atoms'
 import OfferOnMarketplace from '../OfferOnMarketplace'
+import {useOffersListAnimation} from './offersListAnimation'
 
 interface Props {
   readonly offerAtom: Atom<OneOfferInState>
+  readonly swipeEnabled?: boolean
 }
 
-function OffersListItem({offerAtom}: Props): React.ReactElement {
+function OffersListItem({offerAtom, swipeEnabled}: Props): React.ReactElement {
   const {t} = useTranslation()
   const navigation = useNavigation()
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
+  const toggleOfferMark = useSetAtom(toggleOfferMarkActionAtom)
+  const {animateNextListChange} = useOffersListAnimation()
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -80,6 +90,20 @@ function OffersListItem({offerAtom}: Props): React.ReactElement {
       inboxKey: chatForOffer.chat.inbox.privateKey.publicKeyPemBase64,
     })
   }, [chatForOffer, navigation])
+
+  const handleToggleOfferMark = useCallback(
+    (target: SwipeableOfferCardMark) => {
+      Effect.runFork(
+        toggleOfferMark({
+          offer,
+          target: target === 'favourite' ? 'FAVOURITE' : 'ARCHIVED',
+          confirmCrossTransition: false,
+          onBeforeCommit: animateNextListChange,
+        })
+      )
+    },
+    [animateNextListChange, offer, toggleOfferMark]
+  )
 
   const content = useMemo((): {
     buttonText: string
@@ -190,20 +214,38 @@ function OffersListItem({offerAtom}: Props): React.ReactElement {
     }
   }, [canBeRequested, chatForOffer, isMine, navigateToChat, navigateToOffer, t])
 
+  const card = (
+    <OfferOnMarketplace
+      offer={offer}
+      onPress={content.onPress}
+      actionButton={
+        shouldShowGoToChatButton
+          ? {label: t('offer.goToChat'), onPress: navigateToChat}
+          : undefined
+      }
+    />
+  )
+
   return (
-    <>
-      <Stack px="$5">
-        <OfferOnMarketplace
-          offer={offer}
-          onPress={content.onPress}
-          actionButton={
-            shouldShowGoToChatButton
-              ? {label: t('offer.goToChat'), onPress: navigateToChat}
-              : undefined
-          }
-        />
-      </Stack>
-    </>
+    <Stack px="$5">
+      {swipeEnabled && !isMine ? (
+        <SwipeableOfferCard
+          offerId={offer.offerInfo.offerId}
+          mark={getOfferMarkBadge(offer.flags.mark?.type)}
+          labels={{
+            favourite: t('offer.favorite.favorite'),
+            removeFavourite: t('offer.favorite.removeFavorite'),
+            archive: t('offer.archive.archive'),
+            unarchive: t('offer.archive.unarchive'),
+          }}
+          onToggleMark={handleToggleOfferMark}
+        >
+          {card}
+        </SwipeableOfferCard>
+      ) : (
+        card
+      )}
+    </Stack>
   )
 }
 

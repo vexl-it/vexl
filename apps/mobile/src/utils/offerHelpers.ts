@@ -1,9 +1,10 @@
 import {
   type ListingType,
+  type OfferMarkType,
   type OfferType,
   type OneOfferInState,
 } from '@vexl-next/domain/src/general/offers'
-import {type IconTagVariant} from '@vexl-next/ui'
+import {type IconTagVariant, type OfferCardMarkBadge} from '@vexl-next/ui'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {formatFullCurrencyAmount} from './localization/currency'
@@ -28,6 +29,14 @@ export function getIconTagVariant(
   if (listingType === 'PRODUCT') return 'product'
   if (listingType === 'OTHER') return 'service'
   return 'bitcoin'
+}
+
+export function getOfferMarkBadge(
+  mark: OfferMarkType | undefined
+): OfferCardMarkBadge | undefined {
+  if (mark === 'FAVOURITE') return 'favourite'
+  if (mark === 'ARCHIVED') return 'archived'
+  return undefined
 }
 
 export const getAmountLabelActionAtom = atom(

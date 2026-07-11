@@ -1,9 +1,11 @@
 import {Array, Option, Schema, pipe} from 'effect/index'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
+import {Platform} from 'react-native'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {
   showCreateOfferInMarketplaceSuggestionAtom,
+  showEnableBackgroundRefreshInMarketplaceSuggestionAtom,
   showEnableNotificationsInMarketplaceSuggestionAtom,
   showImportContactsInMarketplaceSuggestionAtom,
 } from '../../../utils/preferences'
@@ -110,6 +112,22 @@ export const shouldShowEnableNotificationsInMarketplaceSuggestionAtom = atom(
   }
 )
 
+export const shouldShowEnableBackgroundRefreshInMarketplaceSuggestionAtom =
+  atom((get) => {
+    const notificationsEnabled = get(notificationsEnabledAtom)
+
+    return (
+      Platform.OS === 'ios' &&
+      Array.isNonEmptyArray(
+        get(filteredOffersIncludingLocationFilterAtomsAtom)
+      ) &&
+      Option.isSome(notificationsEnabled) &&
+      notificationsEnabled.value.notifications &&
+      !notificationsEnabled.value.backgroundTasks &&
+      get(showEnableBackgroundRefreshInMarketplaceSuggestionAtom)
+    )
+  })
+
 // Prevents another marketplace suggestion banner from appearing immediately
 // after the user dismisses one. Reset after offers refresh.
 export const anyMarketplaceSuggestionDismissedInThisSessionAtom =
@@ -128,6 +146,7 @@ export const marketplaceFirstOfferBannerAtom = atom<
   | 'importNewContacts'
   | 'importContacts'
   | 'enableNotifications'
+  | 'enableBackgroundRefresh'
   | 'createOffer'
   | null
 >((get) => {
@@ -149,6 +168,10 @@ export const marketplaceFirstOfferBannerAtom = atom<
 
   if (get(shouldShowEnableNotificationsInMarketplaceSuggestionAtom)) {
     return 'enableNotifications'
+  }
+
+  if (get(shouldShowEnableBackgroundRefreshInMarketplaceSuggestionAtom)) {
+    return 'enableBackgroundRefresh'
   }
 
   if (get(shouldShowCreateOfferInMarketplaceSuggestionAtom)) {
@@ -198,6 +221,12 @@ export const dismissEnableNotificationsInMarketplaceSuggestionActionAtom = atom(
     set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
   }
 )
+
+export const dismissEnableBackgroundRefreshInMarketplaceSuggestionActionAtom =
+  atom(null, (get, set) => {
+    set(showEnableBackgroundRefreshInMarketplaceSuggestionAtom, false)
+    set(anyMarketplaceSuggestionDismissedInThisSessionAtom, true)
+  })
 
 export const dismissMissingProductCategoriesInMarketplaceSuggestionActionAtom =
   atom(null, (get, set) => {

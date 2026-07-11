@@ -1,5 +1,6 @@
 import React from 'react'
 import CreateOfferMarketplaceSuggestion from './CreateOfferMarketplaceSuggestion'
+import EnableBackgroundRefreshMarketplaceSuggestion from './EnableBackgroundRefreshMarketplaceSuggestion'
 import EnableNotificationsMarketplaceSuggestion from './EnableNotificationsMarketplaceSuggestion'
 import ImportContactsMarketplaceSuggestion from './ImportContactsMarketplaceSuggestion'
 import ImportNewContactsMarketplaceSuggestion from './ImportNewContactsMarketplaceSuggestion'
@@ -11,6 +12,7 @@ interface Props {
     | 'importNewContacts'
     | 'importContacts'
     | 'enableNotifications'
+    | 'enableBackgroundRefresh'
     | 'createOffer'
 }
 
@@ -33,6 +35,10 @@ function MarketplaceFirstOfferBanner({
 
   if (marketplaceFirstOfferBanner === 'enableNotifications') {
     return <EnableNotificationsMarketplaceSuggestion />
+  }
+
+  if (marketplaceFirstOfferBanner === 'enableBackgroundRefresh') {
+    return <EnableBackgroundRefreshMarketplaceSuggestion />
   }
 
   return <CreateOfferMarketplaceSuggestion />

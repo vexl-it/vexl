@@ -98,6 +98,12 @@ export const Preferences = Schema.Struct({
       default: () => true,
     }
   ),
+  showEnableBackgroundRefreshInMarketplaceSuggestion: Schema.optionalWith(
+    Schema.Boolean,
+    {
+      default: () => true,
+    }
+  ),
   showMarketplaceIntroDialog: Schema.optionalWith(Schema.Boolean, {
     default: () => true,
   }),

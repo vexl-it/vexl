@@ -4,13 +4,6 @@ import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Uuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {Effect, flow, Schema} from 'effect'
 
-export class MessageWithUuidAlreadyStoredError extends Schema.TaggedError<MessageWithUuidAlreadyStoredError>(
-  'MessageWithUuidAlreadyStoredError'
-)('MessageWithUuidAlreadyStoredError', {
-  cause: Schema.Unknown,
-  message: Schema.String,
-}) {}
-
 export const InsertMetricsParams = Schema.Struct({
   name: Schema.String,
   uuid: Uuid,
@@ -44,37 +37,18 @@ export const createInsertMetricRecord = Effect.gen(function* (_) {
           ${params.type},
           ${sql.json(params.attributes ?? null)}::jsonb
         )
+      ON CONFLICT (UUID) DO NOTHING
     `,
   })
 
   return flow(
     query,
-    Effect.catchAll(
-      (
-        e
-      ): Effect.Effect<
-        void,
-        MessageWithUuidAlreadyStoredError | UnexpectedServerError
-      > => {
-        if (
-          e._tag === 'SqlError' &&
-          (e.cause as any)?.code === '23505' &&
-          (e.cause as any)?.constraint_name === 'metrics_uuid_key'
-        ) {
-          const cause = e.cause as any
-          return Effect.fail(
-            new MessageWithUuidAlreadyStoredError({
-              message: String(cause.detail),
-              cause: e,
-            })
-          )
-        }
-        return Effect.zipRight(
-          Effect.logError('Error in insertMetricRecord', e),
-          Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
-        )
-      }
-    ),
+    Effect.catchAll((e): Effect.Effect<void, UnexpectedServerError> => {
+      return Effect.zipRight(
+        Effect.logError('Error in insertMetricRecord', e),
+        Effect.fail(new UnexpectedServerError({status: 500, cause: e}))
+      )
+    }),
     Effect.withSpan('insertMetricRecord query')
   )
 })

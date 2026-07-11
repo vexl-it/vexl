@@ -14,12 +14,7 @@ const consumeMessage = (
 
     yield* _(Effect.log('Received message', message))
     const metricsDb = yield* _(MetricsDbService)
-    yield* _(
-      metricsDb.insertMetricRecord(message),
-      Effect.catchTag('MessageWithUuidAlreadyStoredError', (e) =>
-        Effect.logWarning('Message with uuid already stored', message)
-      )
-    )
+    yield* _(metricsDb.insertMetricRecord(message))
 
     yield* _(
       metricsDb.insertLastReportedByService({

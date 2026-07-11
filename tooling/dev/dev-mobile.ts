@@ -228,6 +228,7 @@ function printHelp(): void {
 
 interface DeviceChoice {
   readonly id: string
+  readonly expoName: string
   readonly label: string
   readonly kind: DeviceKind
 }
@@ -292,6 +293,7 @@ function findIosDevices(): readonly DeviceChoice[] {
           Array.map(
             (device): DeviceChoice => ({
               id: device.identifier,
+              expoName: device.identifier,
               label: `[connected] ${device.name} (${device.identifier})`,
               kind: 'physical',
             })
@@ -328,6 +330,7 @@ function findIosDevices(): readonly DeviceChoice[] {
     Array.map(
       (device): DeviceChoice => ({
         id: device.udid,
+        expoName: device.udid,
         label: `[running simulator] ${device.name} (${device.udid})`,
         kind: 'virtual',
       })
@@ -339,6 +342,7 @@ function findIosDevices(): readonly DeviceChoice[] {
     Array.map(
       (device): DeviceChoice => ({
         id: device.udid,
+        expoName: device.udid,
         label: `[simulator] ${device.name} (${device.udid})`,
         kind: 'virtual',
       })
@@ -381,6 +385,7 @@ function findAndroidDevices(): readonly DeviceChoice[] {
     Array.map(
       (device): DeviceChoice => ({
         id: device.id,
+        expoName: device.model ?? `Device ${device.id}`,
         label: `[connected] ${device.model ?? device.id} (${device.id})`,
         kind: 'physical',
       })
@@ -402,6 +407,7 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       ])?.split('\n')[0]
       return {
         id: device.id,
+        expoName: avdName ?? device.model ?? device.id,
         avdName,
         label: `[running emulator] ${avdName ?? device.model ?? device.id} (${device.id})`,
         kind: 'virtual',
@@ -418,6 +424,7 @@ function findAndroidDevices(): readonly DeviceChoice[] {
     Array.map(
       (name): DeviceChoice => ({
         id: name,
+        expoName: name,
         label: `[emulator] ${name}`,
         kind: 'virtual',
       })
@@ -671,7 +678,10 @@ function buildPrebuildCommand(options: CliOptions): Command {
 }
 
 function buildRunCommand(options: CliOptions): Command {
-  const args = [`run:${options.platform}`]
+  // Metro is started explicitly after the native build finishes. Keeping the
+  // build command bundler-free prevents Expo from conditionally starting a
+  // short-lived Metro process whose lifecycle is tied to `expo run:*`.
+  const args = [`run:${options.platform}`, '--no-bundler']
   if (options.device !== undefined) {
     args.push('--device', options.device)
   }
@@ -811,7 +821,7 @@ async function main(): Promise<void> {
       ? parsedOptions
       : {
           ...parsedOptions,
-          device: selectedDevice.id,
+          device: selectedDevice.expoName,
           deviceKind: selectedDevice.kind,
           selectDevice: false,
         }
@@ -833,7 +843,7 @@ async function main(): Promise<void> {
   const commands: Command[] = []
   if (willPrebuild) commands.push(buildPrebuildCommand(options))
   if (willBuild) commands.push(buildRunCommand(options))
-  if (!willBuild) commands.push(buildServeCommand())
+  commands.push(buildServeCommand())
 
   printSummary(
     options,
@@ -873,12 +883,14 @@ async function main(): Promise<void> {
   if (willBuild) {
     // A native build (with no preceding prebuild) still bakes the preset in.
     if (!willPrebuild) writeLastPreset(generated.preset)
-    const code = await runAttached(buildRunCommand(options), env)
-    process.exit(code)
-  } else {
-    const code = await runAttached(buildServeCommand(), env)
-    process.exit(code)
+    const code = await runToCompletion(buildRunCommand(options), env)
+    if (code !== 0) {
+      throw new Error(`expo native build failed (exit ${code}).`)
+    }
   }
+
+  const code = await runAttached(buildServeCommand(), env)
+  process.exit(code)
 }
 
 main().catch((error: unknown) => {

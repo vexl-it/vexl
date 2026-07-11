@@ -12,17 +12,13 @@ import {
 import {
   createInsertMetricRecord,
   type InsertMetricsParams,
-  type MessageWithUuidAlreadyStoredError,
 } from './queries/createInsertMetricRecord'
 import {createQueryAllLastReportedByService} from './queries/createQueryAllLastReportedByService'
 
 export interface MetricsDbOperations {
   insertMetricRecord: (
     record: InsertMetricsParams
-  ) => Effect.Effect<
-    void,
-    UnexpectedServerError | MessageWithUuidAlreadyStoredError
-  >
+  ) => Effect.Effect<void, UnexpectedServerError>
 
   insertDeadMetricRecord: (
     record: InsertDeadMetricsParams

@@ -43,13 +43,7 @@ export const reportNotificationInteraction = HttpApiBuilder.handler(
           uuid: query.uuid,
           value: query.count,
           attributes: dataToSave,
-        }),
-        Effect.catchTag('MessageWithUuidAlreadyStoredError', () =>
-          Effect.zipRight(
-            Effect.logInfo('Message with uuid already exists. Not inserting.'),
-            Effect.void
-          )
-        )
+        })
       )
 
       return {}

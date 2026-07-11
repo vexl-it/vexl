@@ -128,7 +128,7 @@ function HighlightedNavAction({
 }): React.JSX.Element {
   return (
     <NavButton
-      variant="highlighted"
+      variant={action.variant ?? 'highlighted'}
       icon={action.icon}
       onPress={action.onPress}
       disabled={action.disabled}

@@ -30,6 +30,7 @@ import ChatReceivedMessagesDebugScreen from '../ChatDetailScreen/ChatReceivedMes
 import DeclineChatRequestScreen from '../ChatDetailScreen/DeclineChatRequestScreen'
 import ChatOfferDetailScreen from '../ChatDetailScreen/OfferDetailScreen'
 import ChatSearchScreen from '../ChatSearchScreen'
+import ChatTagsScreen from '../ChatTagsScreen'
 import ClubDetail from '../ClubDetail'
 import {ScanClubAdmissionQrCodeScreen} from '../ClubDetail/components/ScanClubAdmissionQrCodeScreen'
 import {ClubOffersScreen} from '../ClubOffersScreen'
@@ -204,6 +205,7 @@ function RootNavigation(): React.ReactElement {
               component={ChatInfoJsonDebugScreen}
             />
             <Stack.Screen name="ChatSearch" component={ChatSearchScreen} />
+            <Stack.Screen name="ChatTags" component={ChatTagsScreen} />
             <Stack.Screen
               name="CommonFriends"
               options={{

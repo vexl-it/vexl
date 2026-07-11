@@ -1,8 +1,10 @@
 import {type PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
+import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {DateTime} from 'luxon'
 import removeFile from '../../../utils/removeFile'
+import {pruneChatTagAssignmentsActionAtom} from '../../chatTags/atoms'
 import {cleanupOldTradeRemindersActionAtom} from '../../tradeReminders/atoms/cleanupOldTradeRemindersActionAtom'
 import chatShouldBeVisible from '../utils/isChatActive'
 import messagingStateAtom from './messagingStateAtom'
@@ -36,6 +38,17 @@ export const checkAndDeleteOldChatsAndDataActionAtom = atom(
         return !isChatDeletedAndExpired
       }),
     }))
+
+    set(
+      pruneChatTagAssignmentsActionAtom,
+      new Set(
+        pipe(
+          get(messagingStateAtom),
+          Array.flatMap((oneInbox) => oneInbox.chats),
+          Array.map((chat) => chat.chat.id)
+        )
+      )
+    )
 
     // Cleanup old trade reminders for deleted or past trades
     void set(cleanupOldTradeRemindersActionAtom)

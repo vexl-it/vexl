@@ -10,12 +10,15 @@ import {getTokens} from 'tamagui'
 
 import {type XStackProps} from 'tamagui'
 
+import type {IconProps} from '../icons/types'
 import {XStack} from '../primitives'
 import {FilterTag} from './FilterTag'
 
 export interface FilterBarItem<T> {
+  readonly key?: string
   readonly label: string
   readonly value: T
+  readonly icon?: React.ComponentType<IconProps>
   readonly badge?: boolean
 }
 
@@ -155,9 +158,10 @@ export function FilterBar<T>({
           const selected = selectedValues.has(item.value)
           return (
             <FilterTag
-              key={item.label}
+              key={item.key ?? item.label}
               label={item.label}
               selected={selected}
+              icon={item.icon}
               badge={item.badge}
               onPress={() => {
                 handlePress(index)

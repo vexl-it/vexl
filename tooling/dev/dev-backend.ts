@@ -106,7 +106,7 @@ function printHelp(): void {
       '',
       '  --only <a,b>        run only these services/apps',
       '  --skip <a,b>        run everything except these',
-      '  --no-web            skip the web apps (backoffice/account-deletion/dashboard)',
+      '  --no-web            skip the web apps (backoffice/web-app/dashboard)',
       '  --no-observability  skip Loki/Tempo/Grafana',
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',

@@ -76,7 +76,9 @@ export default {
   'icon': extra.icon,
   'userInterfaceStyle': 'automatic',
   'jsEngine': 'hermes',
-  'scheme': 'app.vexl.it',
+  'scheme': IS_PROD_PRESET
+    ? 'app.vexl.it'
+    : ['app.vexl.it', 'stagingapp.vexl.it'],
   'platforms': ['ios', 'android'],
   'updates': {
     'fallbackToCacheTimeout': 0,
@@ -106,11 +108,6 @@ export default {
       'applinks:app.vexl.it',
       'applinks:link.vexl.it',
       'applinks:nextlink.vexl.it',
-      // Preview links (see pr-preview.yaml) live on a domain only non-prod
-      // builds register — the prod app must never swallow a tapped preview
-      // QR link (iOS routing is undefined when two installed apps claim the
-      // same domain).
-      ...(IS_PROD_PRESET ? [] : ['applinks:staging.app.vexl.it']),
     ],
     'privacyManifests': {
       'NSPrivacyAccessedAPITypes': [
@@ -180,23 +177,6 @@ export default {
         ],
         category: ['BROWSABLE', 'DEFAULT'],
       },
-      // Preview links — non-prod builds only, see associatedDomains above.
-      ...(IS_PROD_PRESET
-        ? []
-        : [
-            {
-              'action': 'VIEW',
-              'autoVerify': true,
-              'data': [
-                {
-                  'scheme': 'https',
-                  'host': 'staging.app.vexl.it',
-                  'pathPattern': '.*',
-                },
-              ],
-              'category': ['BROWSABLE', 'DEFAULT'],
-            },
-          ]),
     ],
     permissions: ['READ_CONTACTS', 'READ_CALENDAR', 'WRITE_CALENDAR', 'NFC'],
     blockedPermissions: [

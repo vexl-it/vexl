@@ -36,13 +36,9 @@ published bundle — a change to native code (dependencies, config plugins,
 native config) needs a new staging build first. The mechanism lives in
 `src/utils/prPreview`.
 
-Preview links use `https://staging.app.vexl.it/...`, a domain registered
-only by non-prod builds, so a tap can never open the prod app. Scanning from
-inside the app always works; for _tapped_ links (and OS camera scans) to
-open the staging app directly, that subdomain must serve
-`/.well-known/apple-app-site-association` (appID
-`KQNTW88PVA.it.vexl.nextstaging`) and `/.well-known/assetlinks.json` (package
-`it.vexl.nextstaging`) — until then a tap just opens the browser.
+Preview links use the `stagingapp.vexl.it://` custom scheme, which is registered
+only by non-production builds. They therefore do not need a separate
+universal-link domain, and the production app does not claim them.
 
 ## E2E Testing
 

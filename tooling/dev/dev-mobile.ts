@@ -260,7 +260,10 @@ function commandOutput(
   command: string,
   args: readonly string[]
 ): string | undefined {
-  const result = spawnSync(command, [...args], {encoding: 'utf8'})
+  const result = spawnSync(command, [...args], {
+    encoding: 'utf8',
+    timeout: 10_000,
+  })
   return result.status === 0 ? result.stdout.trim() : undefined
 }
 

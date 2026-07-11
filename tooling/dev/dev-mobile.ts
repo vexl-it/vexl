@@ -17,11 +17,17 @@
  * Dry run (no expo launched): `DEV_MOBILE_DRY_RUN=1 tsx tooling/dev/dev-mobile.ts ...`
  * prints the resolved env + the command(s) it WOULD run and exits 0.
  */
-import {Array, pipe} from 'effect'
-import {spawn} from 'node:child_process'
+import {Array, Option, pipe, Schema} from 'effect'
+import {spawn, spawnSync} from 'node:child_process'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {networkInterfaces} from 'node:os'
 import {dirname, join} from 'node:path'
+import {
+  clearScreenDown,
+  emitKeypressEvents,
+  moveCursor,
+  type Key,
+} from 'node:readline'
 import devConfig, {devCryptoKeys} from '../../dev.config'
 import {isValidTcpPort, resolvePorts} from './ports'
 import {loadRawEnvLocal, repoRoot} from './secrets'
@@ -61,6 +67,7 @@ const LAST_PRESET_PATH = join(repoRoot, 'local', '.mobile-last-preset')
 type Platform = 'ios' | 'android'
 type Variant = 'dev' | 'release'
 type EnvPreset = 'stage' | 'local'
+type DeviceKind = 'physical' | 'virtual'
 
 // 'staging' uses committed stage URLs; 'local' uses the dev.config port map with
 // a target-resolved host; 'host' is an explicit IP (optionally ip:basePort).
@@ -76,6 +83,8 @@ type BackendTarget =
 interface CliOptions {
   readonly platform: Platform
   readonly device?: string
+  readonly deviceKind?: DeviceKind
+  readonly selectDevice: boolean
   readonly backend: BackendTarget
   readonly variant: Variant
   readonly prebuild: boolean
@@ -119,6 +128,7 @@ function parseBackend(value: string | undefined): BackendTarget {
 function parseArgs(argv: readonly string[]): CliOptions {
   let platform = parsePlatform(devConfig.mobile.defaultPlatform)
   let device: string | undefined
+  let selectDevice = false
   let backend = parseBackend(devConfig.mobile.defaultBackend)
   let variant: Variant = 'dev'
   let prebuild = false
@@ -139,8 +149,13 @@ function parseArgs(argv: readonly string[]): CliOptions {
       i += 1
       platform = parsePlatform(next(i))
     } else if (arg === '--device' || arg === '-d') {
-      i += 1
-      device = next(i)
+      const possibleDevice = argv[i + 1]
+      if (possibleDevice === undefined || possibleDevice.startsWith('-')) {
+        selectDevice = true
+      } else {
+        i += 1
+        device = possibleDevice
+      }
     } else if (arg === '--backend' || arg === '-b') {
       i += 1
       backend = parseBackend(next(i))
@@ -164,7 +179,16 @@ function parseArgs(argv: readonly string[]): CliOptions {
     }
   }
 
-  return {platform, device, backend, variant, prebuild, build, host}
+  return {
+    platform,
+    device,
+    selectDevice,
+    backend,
+    variant,
+    prebuild,
+    build,
+    host,
+  }
 }
 
 function printHelp(): void {
@@ -173,7 +197,7 @@ function printHelp(): void {
       'Usage: pnpm dev:mobile [options]',
       '',
       '  -p, --platform ios|android     target (default from dev.config.ts)',
-      '  -d, --device <name|udid>       specific simulator/emulator/physical device',
+      '  -d, --device [<name|udid>]     choose a device, or target one by name/ID',
       '  -b, --backend staging|local|<host>  which backend (default: local)',
       '  -v, --variant dev|release      dev-client (debug) vs release build (default: dev)',
       '  -H, --host <ip>                override the resolved host (always wins)',
@@ -189,13 +213,293 @@ function printHelp(): void {
       '              192.168.1.5:3001 to also shift the base port)',
       '',
       'Host resolution (when --host is not given and backend is local):',
-      '  --device given        -> machine LAN IP (physical device assumed)',
+      '  physical device       -> machine LAN IP',
+      '  selected emulator     -> localhost (iOS) or 10.0.2.2 (Android)',
+      '  explicit --device     -> machine LAN IP (physical device assumed)',
       '  iOS, no device        -> localhost',
       '  Android, no device    -> 10.0.2.2 (emulator host alias)',
       '',
       'Dry run: set DEV_MOBILE_DRY_RUN=1 to print the resolved env + command and exit.',
     ].join('\n')
   )
+}
+
+// --- device selection -----------------------------------------------------
+
+interface DeviceChoice {
+  readonly id: string
+  readonly label: string
+  readonly kind: DeviceKind
+}
+
+const IosPhysicalDevices = Schema.Array(
+  Schema.Struct({
+    simulator: Schema.Boolean,
+    available: Schema.Boolean,
+    name: Schema.String,
+    identifier: Schema.String,
+    platform: Schema.optional(Schema.String),
+  })
+)
+
+const IosSimulators = Schema.Struct({
+  devices: Schema.Record({
+    key: Schema.String,
+    value: Schema.Array(
+      Schema.Struct({
+        name: Schema.String,
+        udid: Schema.String,
+        state: Schema.String,
+        isAvailable: Schema.optional(Schema.Boolean),
+      })
+    ),
+  }),
+})
+
+function commandOutput(
+  command: string,
+  args: readonly string[]
+): string | undefined {
+  const result = spawnSync(command, [...args], {encoding: 'utf8'})
+  return result.status === 0 ? result.stdout.trim() : undefined
+}
+
+function findIosDevices(): readonly DeviceChoice[] {
+  const physicalOutput = commandOutput('xcrun', ['xcdevice', 'list'])
+  const physical =
+    physicalOutput === undefined
+      ? []
+      : pipe(
+          Schema.decodeUnknownSync(Schema.parseJson(IosPhysicalDevices))(
+            physicalOutput
+          ),
+          Array.filter(
+            (device) =>
+              !device.simulator &&
+              device.available &&
+              (device.platform === undefined ||
+                device.platform.includes('iphoneos'))
+          ),
+          Array.map(
+            (device): DeviceChoice => ({
+              id: device.identifier,
+              label: `[connected] ${device.name} (${device.identifier})`,
+              kind: 'physical',
+            })
+          )
+        )
+
+  const simulatorOutput = commandOutput('xcrun', [
+    'simctl',
+    'list',
+    'devices',
+    'available',
+    '--json',
+  ])
+  const simulators =
+    simulatorOutput === undefined
+      ? []
+      : pipe(
+          Schema.decodeUnknownSync(Schema.parseJson(IosSimulators))(
+            simulatorOutput
+          ).devices,
+          Object.values,
+          Array.flatten,
+          Array.filter((device) => device.isAvailable !== false)
+        )
+  const running = pipe(
+    simulators,
+    Array.filter((device) => device.state === 'Booted'),
+    Array.map(
+      (device): DeviceChoice => ({
+        id: device.udid,
+        label: `[running simulator] ${device.name} (${device.udid})`,
+        kind: 'virtual',
+      })
+    )
+  )
+  const stopped = pipe(
+    simulators,
+    Array.filter((device) => device.state !== 'Booted'),
+    Array.map(
+      (device): DeviceChoice => ({
+        id: device.udid,
+        label: `[simulator] ${device.name} (${device.udid})`,
+        kind: 'virtual',
+      })
+    )
+  )
+
+  return [...physical, ...running, ...stopped]
+}
+
+function findAndroidDevices(): readonly DeviceChoice[] {
+  const androidSdkRoot =
+    process.env.ANDROID_HOME ?? process.env.ANDROID_SDK_ROOT
+  const sdkAdb =
+    androidSdkRoot === undefined
+      ? undefined
+      : join(androidSdkRoot, 'platform-tools', 'adb')
+  const sdkEmulator =
+    androidSdkRoot === undefined
+      ? undefined
+      : join(androidSdkRoot, 'emulator', 'emulator')
+  const adb = sdkAdb !== undefined && existsSync(sdkAdb) ? sdkAdb : 'adb'
+  const emulator =
+    sdkEmulator !== undefined && existsSync(sdkEmulator)
+      ? sdkEmulator
+      : 'emulator'
+  const adbOutput = commandOutput(adb, ['devices', '-l']) ?? ''
+  const adbDevices = pipe(
+    adbOutput.split('\n'),
+    Array.drop(1),
+    Array.filterMap((line) => {
+      const id = /^(\S+)\s+device\b/.exec(line.trim())?.[1]
+      if (id === undefined) return Option.none()
+      const model = /\bmodel:(\S+)/.exec(line)?.[1]
+      return Option.some({id, model})
+    })
+  )
+  const connected = pipe(
+    adbDevices,
+    Array.filter((device) => !device.id.startsWith('emulator-')),
+    Array.map(
+      (device): DeviceChoice => ({
+        id: device.id,
+        label: `[connected] ${device.model ?? device.id} (${device.id})`,
+        kind: 'physical',
+      })
+    )
+  )
+  interface RunningAndroidDevice extends DeviceChoice {
+    readonly avdName?: string
+  }
+  const running = pipe(
+    adbDevices,
+    Array.filter((device) => device.id.startsWith('emulator-')),
+    Array.map((device): RunningAndroidDevice => {
+      const avdName = commandOutput(adb, [
+        '-s',
+        device.id,
+        'emu',
+        'avd',
+        'name',
+      ])?.split('\n')[0]
+      return {
+        id: device.id,
+        avdName,
+        label: `[running emulator] ${avdName ?? device.model ?? device.id} (${device.id})`,
+        kind: 'virtual',
+      }
+    })
+  )
+  const runningAvdNames = pipe(
+    running,
+    Array.filterMap((device) => Option.fromNullable(device.avdName))
+  )
+  const stopped = pipe(
+    (commandOutput(emulator, ['-list-avds']) ?? '').split('\n'),
+    Array.filter((name) => name.length > 0 && !runningAvdNames.includes(name)),
+    Array.map(
+      (name): DeviceChoice => ({
+        id: name,
+        label: `[emulator] ${name}`,
+        kind: 'virtual',
+      })
+    )
+  )
+
+  return [...connected, ...running, ...stopped]
+}
+
+async function chooseDevice(platform: Platform): Promise<DeviceChoice> {
+  let choices: readonly DeviceChoice[]
+  try {
+    choices = platform === 'ios' ? findIosDevices() : findAndroidDevices()
+  } catch (error: unknown) {
+    throw new Error(
+      `Could not read ${platform} devices: ${error instanceof Error ? error.message : String(error)}`
+    )
+  }
+  if (!Array.isNonEmptyReadonlyArray(choices)) {
+    throw new Error(`No ${platform} devices or emulators found.`)
+  }
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new Error('Device selection requires an interactive terminal.')
+  }
+
+  console.log(`\nSelect an ${platform} device (↑/↓ to move, Enter to select):`)
+
+  return await new Promise<DeviceChoice>((resolve, reject) => {
+    const input = process.stdin
+    const output = process.stdout
+    const wasRaw = input.isRaw
+    const wasPaused = input.isPaused()
+    let selectedIndex = 0
+    let hasRendered = false
+
+    const truncate = (value: string): string => {
+      const availableWidth = Math.max((output.columns ?? 80) - 4, 20)
+      return value.length > availableWidth
+        ? `${value.slice(0, availableWidth - 1)}…`
+        : value
+    }
+
+    const render = (): void => {
+      if (hasRendered) {
+        moveCursor(output, 0, -choices.length)
+        clearScreenDown(output)
+      }
+      const lines = pipe(
+        choices,
+        Array.map((choice, index) => {
+          const label = truncate(choice.label)
+          return index === selectedIndex
+            ? `\u001B[7m> ${label}\u001B[0m`
+            : `  ${label}`
+        })
+      )
+      output.write(`${lines.join('\n')}\n`)
+      hasRendered = true
+    }
+
+    const cleanup = (): void => {
+      input.removeListener('keypress', onKeypress)
+      input.setRawMode(wasRaw)
+      if (wasPaused) input.pause()
+    }
+
+    const finish = (result: DeviceChoice): void => {
+      cleanup()
+      moveCursor(output, 0, -choices.length)
+      clearScreenDown(output)
+      output.write(`Selected: ${result.label}\n`)
+      resolve(result)
+    }
+
+    const onKeypress = (_character: string | undefined, key: Key): void => {
+      if (key.ctrl && key.name === 'c') {
+        cleanup()
+        reject(new Error('Device selection cancelled.'))
+      } else if (key.name === 'up') {
+        selectedIndex =
+          selectedIndex === 0 ? choices.length - 1 : selectedIndex - 1
+        render()
+      } else if (key.name === 'down') {
+        selectedIndex = (selectedIndex + 1) % choices.length
+        render()
+      } else if (key.name === 'return') {
+        const selected = choices[selectedIndex]
+        if (selected !== undefined) finish(selected)
+      }
+    }
+
+    emitKeypressEvents(input)
+    input.setRawMode(true)
+    input.resume()
+    input.on('keypress', onKeypress)
+    render()
+  })
 }
 
 // --- host resolution -------------------------------------------------------
@@ -251,6 +555,11 @@ function resolveHost(
     return {host: backend.host, reason: 'explicit --backend host'}
   }
   // backend.kind === 'local'
+  if (options.deviceKind === 'virtual') {
+    return options.platform === 'android'
+      ? {host: '10.0.2.2', reason: 'selected Android emulator host alias'}
+      : {host: 'localhost', reason: 'selected iOS simulator'}
+  }
   if (options.device !== undefined) {
     return {
       host: detectLanIp(),
@@ -478,7 +787,19 @@ function describeBackend(backend: BackendTarget): string {
 // --- main ------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  const options = parseArgs(process.argv.slice(2))
+  const parsedOptions = parseArgs(process.argv.slice(2))
+  const selectedDevice = parsedOptions.selectDevice
+    ? await chooseDevice(parsedOptions.platform)
+    : undefined
+  const options: CliOptions =
+    selectedDevice === undefined
+      ? parsedOptions
+      : {
+          ...parsedOptions,
+          device: selectedDevice.id,
+          deviceKind: selectedDevice.kind,
+          selectDevice: false,
+        }
   const generated = generateEnv(options)
 
   // Force a prebuild when the native-config preset (stage vs local) changed

@@ -10,6 +10,7 @@ import {
   NavigationBar,
   PeopleUsers,
   Screen,
+  TagLabel,
   TrashBin,
   Typography,
   XStack,
@@ -334,66 +335,62 @@ export default function ChatInfoContent({
             />
           )}
 
-          {showTradeChecklistAction ||
-          showRevealIdentityAction ||
-          showOfferDetailAction ? (
-            <YStack
-              backgroundColor="$backgroundSecondary"
-              borderRadius="$5"
-              px="$5"
-            >
-              {showTradeChecklistAction ? (
-                <>
-                  <ActionRow
-                    showChevron
-                    color="foregroundPrimary"
-                    icon={BulletListMenu}
-                    label={t('messages.tradeChecklist')}
-                    onPress={() => {
-                      if (!otherSideSupportsTradingChecklist) {
-                        Alert.alert(
-                          t('tradeChecklist.notSupportedByOtherSide.title'),
-                          t('tradeChecklist.notSupportedByOtherSide.body')
-                        )
-                        return
-                      }
+          <YStack
+            backgroundColor="$backgroundSecondary"
+            borderRadius="$5"
+            px="$5"
+          >
+            {showTradeChecklistAction ? (
+              <>
+                <ActionRow
+                  showChevron
+                  color="foregroundPrimary"
+                  icon={BulletListMenu}
+                  label={t('messages.tradeChecklist')}
+                  onPress={() => {
+                    if (!otherSideSupportsTradingChecklist) {
+                      Alert.alert(
+                        t('tradeChecklist.notSupportedByOtherSide.title'),
+                        t('tradeChecklist.notSupportedByOtherSide.body')
+                      )
+                      return
+                    }
 
-                      navigation.navigate('TradeChecklistFlow', {
-                        screen: 'AgreeOnTradeDetails',
-                        chatId,
-                        inboxKey,
-                      })
-                    }}
-                  />
-                  {showRevealIdentityAction || showOfferDetailAction ? (
-                    <SectionSeparator />
-                  ) : null}
-                </>
-              ) : null}
+                    navigation.navigate('TradeChecklistFlow', {
+                      screen: 'AgreeOnTradeDetails',
+                      chatId,
+                      inboxKey,
+                    })
+                  }}
+                />
+                <SectionSeparator />
+              </>
+            ) : null}
 
-              {showRevealIdentityAction ? (
-                <>
-                  <ActionRow
-                    showChevron
-                    color="foregroundPrimary"
-                    icon={EyeShut}
-                    label={t('messages.askToReveal')}
-                    onPress={() => {
-                      prepareRevealIdentityDraft()
-                      navigation.navigate('TradeChecklistFlow', {
-                        screen: shouldOpenRevealIdentitySummary
-                          ? 'RevealIdentitySummary'
-                          : 'RevealIdentityPhoto',
-                        chatId,
-                        inboxKey,
-                      })
-                    }}
-                  />
-                  {showOfferDetailAction ? <SectionSeparator /> : null}
-                </>
-              ) : null}
+            {showRevealIdentityAction ? (
+              <>
+                <ActionRow
+                  showChevron
+                  color="foregroundPrimary"
+                  icon={EyeShut}
+                  label={t('messages.askToReveal')}
+                  onPress={() => {
+                    prepareRevealIdentityDraft()
+                    navigation.navigate('TradeChecklistFlow', {
+                      screen: shouldOpenRevealIdentitySummary
+                        ? 'RevealIdentitySummary'
+                        : 'RevealIdentityPhoto',
+                      chatId,
+                      inboxKey,
+                    })
+                  }}
+                />
+                <SectionSeparator />
+              </>
+            ) : null}
 
-              {showOfferDetailAction ? (
+            {showOfferDetailAction ? (
+              <>
                 <ActionRow
                   showChevron
                   color="foregroundPrimary"
@@ -406,9 +403,20 @@ export default function ChatInfoContent({
                     })
                   }}
                 />
-              ) : null}
-            </YStack>
-          ) : null}
+                <SectionSeparator />
+              </>
+            ) : null}
+
+            <ActionRow
+              showChevron
+              color="foregroundPrimary"
+              icon={TagLabel}
+              label={t('messages.tags.action')}
+              onPress={() => {
+                navigation.navigate('ChatTags', {chatId})
+              }}
+            />
+          </YStack>
 
           {showReceivedMessagesDebugAction ? (
             <YStack

@@ -1,7 +1,9 @@
+import {Array, pipe} from 'effect'
 import React from 'react'
 import {View} from 'react-native'
 import {styled, useTheme} from 'tamagui'
 
+import {TagLabel} from '../icons/TagLabel'
 import type {IconProps} from '../icons/types'
 import {SizableText, XStack, YStack} from '../primitives'
 import {Dot} from './Dot'
@@ -23,6 +25,7 @@ export interface ChatMessageItemProps {
   readonly icon?: React.ComponentType<IconProps>
   readonly isTyping?: boolean
   readonly grayscaleAvatar?: boolean
+  readonly tags?: readonly string[]
   readonly onPress: () => void
 }
 
@@ -88,6 +91,17 @@ const TimeText = styled(SizableText, {
   flexShrink: 0,
 })
 
+const TagText = styled(SizableText, {
+  name: 'ChatMessageItemTag',
+  fontFamily: '$body',
+  fontWeight: '500',
+  fontSize: '$1',
+  letterSpacing: '$1',
+  lineHeight: '$1',
+  color: '$foregroundSecondary',
+  flexShrink: 1,
+})
+
 export function ChatMessageItem({
   avatar,
   name,
@@ -98,9 +112,12 @@ export function ChatMessageItem({
   icon: Icon,
   isTyping = false,
   grayscaleAvatar = false,
+  tags = [],
   onPress,
 }: ChatMessageItemProps): React.JSX.Element {
   const theme = useTheme()
+  const visibleTags = pipe(tags, Array.take(2))
+  const remainingTagsCount = Math.max(0, tags.length - visibleTags.length)
 
   const iconColor = (() => {
     switch (variant) {
@@ -140,6 +157,22 @@ export function ChatMessageItem({
           </XStack>
           <TimeText>{time}</TimeText>
         </XStack>
+        {Array.isNonEmptyArray(visibleTags) ? (
+          <XStack alignItems="center" gap="$3" overflow="hidden">
+            {pipe(
+              visibleTags,
+              Array.map((tag) => (
+                <XStack key={tag} alignItems="center" gap="$1" flexShrink={1}>
+                  <TagLabel size={16} color={theme.foregroundSecondary.get()} />
+                  <TagText numberOfLines={1}>{tag}</TagText>
+                </XStack>
+              ))
+            )}
+            {remainingTagsCount > 0 ? (
+              <TagText flexShrink={0}>+{remainingTagsCount}</TagText>
+            ) : null}
+          </XStack>
+        ) : null}
       </YStack>
     </ChatMessageItemFrame>
   )

@@ -270,9 +270,13 @@ function findIosDevices(): readonly DeviceChoice[] {
     physicalOutput === undefined
       ? []
       : pipe(
-          Schema.decodeUnknownSync(Schema.parseJson(IosPhysicalDevices))(
+          Schema.decodeUnknownOption(Schema.parseJson(IosPhysicalDevices))(
             physicalOutput
           ),
+          Option.match({
+            onNone: (): Schema.Schema.Type<typeof IosPhysicalDevices> => [],
+            onSome: (devices) => devices,
+          }),
           Array.filter(
             (device) =>
               !device.simulator &&

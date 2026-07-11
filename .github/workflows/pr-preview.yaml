@@ -84,10 +84,10 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          # staging.app.vexl.it is registered only by non-prod builds, so a
-          # tapped link can never be swallowed by an installed prod app.
+          # Use the staging-only custom scheme so preview QR codes do not
+          # depend on a separately configured universal-link domain.
           CHANNEL="pr-${PR_NUMBER}"
-          LINK="https://staging.app.vexl.it/link/?type=load-pr-preview&channel=${CHANNEL}&version=${PREVIEW_LINK_MIN_VERSION}"
+          LINK="stagingapp.vexl.it://link/?type=load-pr-preview&channel=${CHANNEL}&version=${PREVIEW_LINK_MIN_VERSION}"
           QR_URL="https://quickchart.io/qr?size=250&text=$(jq -rn --arg v "$LINK" '$v | @uri')"
           RUNTIME="$(jq -r '(if type == "array" then . else [.] end) | map(.runtimeVersion) | unique | join(", ")' apps/mobile/update.json)"
           GROUP_ID="$(jq -r '(if type == "array" then .[0] else . end).group' apps/mobile/update.json)"
@@ -97,11 +97,11 @@ jobs:
           <!-- vexl-pr-preview -->
           ### 📱 Preview on the staging app
 
-          Open **Vexl (stage)** → Account → Scan QR code and scan this, or open the link on your phone:
+          Open **Vexl (stage)** → Account → Scan QR code and scan this:
 
           <img src="${QR_URL}" width="250" alt="PR preview QR code" />
 
-          [Load preview in staging app](${LINK})
+          Preview link: \`${LINK}\`
 
           | | |
           | --- | --- |

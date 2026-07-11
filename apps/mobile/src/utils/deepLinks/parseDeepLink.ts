@@ -18,6 +18,7 @@ import {
   LINK_TYPE_JOIN_CLUB,
   LINK_TYPE_LOAD_PR_PREVIEW,
   LINK_TYPE_REQUEST_CLUB_ADMITION,
+  VEXL_LINK_ORIGIN,
 } from './domain'
 
 export class InvalidDeepLinkError extends Schema.TaggedError<InvalidDeepLinkError>(
@@ -120,18 +121,29 @@ const validateLinkVersion = flow(
   )
 )
 
+const VEXL_STAGING_APP_LINK_PREFIX = 'stagingapp.vexl.it://'
+
+function normalizeAppLink(link: string): string {
+  return link.startsWith(VEXL_STAGING_APP_LINK_PREFIX)
+    ? link.replace(VEXL_STAGING_APP_LINK_PREFIX, `${VEXL_LINK_ORIGIN}/`)
+    : link
+}
+
 export const parseDeepLink = (
   link: string
 ): Effect.Effect<
   DeepLinkData,
   InvalidDeepLinkError | DeepLinkMeantForNewerVersionError
-> =>
-  Effect.zipRight(
-    validateLinkVersion(link),
-    Schema.decode(DeepLinkData)(link)
+> => {
+  const normalizedLink = normalizeAppLink(link)
+
+  return Effect.zipRight(
+    validateLinkVersion(normalizedLink),
+    Schema.decode(DeepLinkData)(normalizedLink)
   ).pipe(
     Effect.catchTag(
       'ParseError',
       (e) => new InvalidDeepLinkError({cause: e, originalLink: link})
     )
   )
+}

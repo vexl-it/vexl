@@ -307,8 +307,14 @@ function findIosDevices(): readonly DeviceChoice[] {
           Schema.decodeUnknownSync(Schema.parseJson(IosSimulators))(
             simulatorOutput
           ).devices,
-          Object.values,
-          Array.flatten,
+          (devices) =>
+            pipe(
+              Object.keys(devices),
+              Array.filter((runtime) =>
+                runtime.startsWith('com.apple.CoreSimulator.SimRuntime.iOS-')
+              ),
+              Array.flatMap((runtime) => devices[runtime] ?? [])
+            ),
           Array.filter((device) => device.isAvailable !== false)
         )
   const running = pipe(

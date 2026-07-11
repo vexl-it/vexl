@@ -767,13 +767,14 @@ Before pairing, the destination verifies locally that:
 
 - no session exists in AsyncStorage;
 - no account session secret exists in SecureStore;
-- no account-class MMKV key contains non-default account data;
 - approved account file roots are absent/empty;
 - no unresolved older migration journal exists.
 
-Device-local onboarding/preferences may exist only if the installer has an
-explicit overwrite/reset policy. If any account-bearing data exists, migration
-is blocked and the user must deliberately clear the local installation first.
+The default MMKV store is not part of this precondition. Logged-out state is
+established by the absence of the session, and the installer clears the whole
+default MMKV instance before applying the incoming snapshot. If a session,
+account file, or unresolved migration journal exists, migration is blocked and
+the user must deliberately clear the local installation first.
 
 This check does not contact Vexl.
 

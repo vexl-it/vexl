@@ -1,23 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {DeviceMigrationError} from '@vexl-next/domain/src/general/deviceMigration/errors'
-import {type MigrationKeyPolicy} from '@vexl-next/domain/src/general/deviceMigration/snapshotEntries'
 import {Effect} from 'effect'
 import {Directory, File, Paths} from 'expo-file-system'
 import * as SecretStore from 'expo-secure-store'
-import {wasV2SecretWritten} from '../../../state/session/utils/v2SecretStorageFlag'
 import {
   SECRET_TOKEN_KEY,
   SECRET_TOKEN_KEY_V2,
   SESSION_KEY,
 } from '../../../state/session/utils/writeSessionToStorage'
-import {resolveMmkvKeyPolicy} from '../../atomUtils/mmkvMigrationRegistry'
-import {storage} from '../../mmkv/effectMmkv'
 import {readMigrationControlRecord} from '../controlStore'
-// Imported for its side effects: the check resolves every MMKV key through
-// the migration registry, which must be completely populated regardless of
-// which modules Metro's inline-requires evaluated so far.
 import {STAGING_DIRECTORY_NAME} from './constants'
-import './ensurePersistenceModulesRegistered'
 import {
   APPROVED_MIGRATION_FILE_ROOTS,
   documentDirectory,
@@ -30,10 +22,7 @@ import {LEGACY_ROOT_PROFILE_PICTURE_REGEX} from './uriNormalization'
  * Vexl — that no account exists on this installation:
  *
  * - no encrypted session in AsyncStorage;
- * - no session secret in SecureStore (current or legacy slot) and the
- *   `v2SecretWasWritten` marker is unset;
- * - no MMKV key of policy `account` or `rebuild` holds a value (unknown MMKV
- *   keys fail too — the fresh state cannot be proven for data nobody owns);
+ * - no session secret in SecureStore (current or legacy slot);
  * - the approved account file roots are absent/empty, including legacy
  *   Documents-root `profilePicture*` files;
  * - no unresolved migration control record and no leftover staging
@@ -48,12 +37,6 @@ import {LEGACY_ROOT_PROFILE_PICTURE_REGEX} from './uriNormalization'
  * READ any store also fail — a fresh install cannot be proven.
  */
 
-/** Policies that must not hold any value on a fresh destination. */
-const ACCOUNT_BEARING_POLICIES: readonly MigrationKeyPolicy[] = [
-  'account',
-  'rebuild',
-]
-
 const freshInstallRequired = (): DeviceMigrationError =>
   new DeviceMigrationError({code: 'freshInstallRequired'})
 
@@ -66,24 +49,6 @@ function checkSessionAbsent(): Effect.Effect<void, DeviceMigrationError> {
         throw new Error('v2 secret present')
       if ((await SecretStore.getItemAsync(SECRET_TOKEN_KEY)) !== null)
         throw new Error('legacy secret present')
-      if (wasV2SecretWritten()) throw new Error('v2 marker present')
-    },
-    catch: freshInstallRequired,
-  })
-}
-
-function checkMmkvAccountStateAbsent(): Effect.Effect<
-  void,
-  DeviceMigrationError
-> {
-  return Effect.try({
-    try: () => {
-      for (const key of storage._storage.getAllKeys()) {
-        const resolved = resolveMmkvKeyPolicy(key)
-        if (resolved === undefined) throw new Error('unknown key present')
-        if (ACCOUNT_BEARING_POLICIES.includes(resolved.policy))
-          throw new Error('account key present')
-      }
     },
     catch: freshInstallRequired,
   })
@@ -154,7 +119,6 @@ export function verifyFreshInstallForMigration(): Effect.Effect<
   return Effect.gen(function* (_) {
     yield* _(checkNoUnresolvedMigrationState())
     yield* _(checkSessionAbsent())
-    yield* _(checkMmkvAccountStateAbsent())
     yield* _(checkAccountFileRootsAbsent())
   })
 }

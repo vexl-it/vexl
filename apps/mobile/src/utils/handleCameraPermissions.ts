@@ -17,7 +17,12 @@ export const handleCameraPermissionsActionAtom = atom(null, (get, set) => {
   const {t} = get(translationAtom)
 
   return Effect.tryPromise({
-    try: async () => await Camera.requestCameraPermissionsAsync(),
+    try: async () => {
+      const currentPermission = await Camera.getCameraPermissionsAsync()
+      if (currentPermission.status === 'granted') return currentPermission
+
+      return await Camera.requestCameraPermissionsAsync()
+    },
     catch: () => new UnknownCameraError({}),
   }).pipe(
     Effect.flatMap((permissionResponse) => {

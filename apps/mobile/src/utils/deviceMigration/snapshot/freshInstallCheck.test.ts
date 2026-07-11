@@ -1,16 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {Effect, Either} from 'effect'
 import * as SecretStore from 'expo-secure-store'
-import {
-  clearV2SecretWasWrittenFlag,
-  markV2SecretAsWritten,
-} from '../../../state/session/utils/v2SecretStorageFlag'
-import {registerMmkvKey} from '../../atomUtils/mmkvMigrationRegistry'
 import {storage} from '../../mmkv/effectMmkv'
 import {readMigrationControlRecord} from '../controlStore'
 import {verifyFreshInstallForMigration} from './freshInstallCheck'
-
-jest.mock('./ensurePersistenceModulesRegistered', () => ({}))
 
 jest.mock('expo-file-system', () =>
   jest.requireActual('./inMemoryExpoFileSystem').createInMemoryExpoFileSystem()
@@ -36,12 +29,6 @@ interface FakeFileSystem {
 
 const fileSystem = jest.requireMock<FakeFileSystem>('expo-file-system')
 
-registerMmkvKey({
-  key: 'messagingState',
-  policy: 'account',
-  nativeType: 'string',
-})
-
 async function resultCode(): Promise<string | undefined> {
   const result = await Effect.runPromise(
     verifyFreshInstallForMigration().pipe(Effect.either)
@@ -53,7 +40,6 @@ describe('fresh destination precondition', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     storage._storage.clearAll()
-    clearV2SecretWasWrittenFlag()
     fileSystem.__reset()
     jest.mocked(AsyncStorage.getItem).mockResolvedValue(null)
     jest.mocked(SecretStore.getItemAsync).mockResolvedValue(null)
@@ -77,14 +63,9 @@ describe('fresh destination precondition', () => {
     await expect(resultCode()).resolves.toBe('freshInstallRequired')
   })
 
-  it('rejects the V2 secret-written marker', async () => {
-    markV2SecretAsWritten()
-    await expect(resultCode()).resolves.toBe('freshInstallRequired')
-  })
-
-  it('rejects account-policy MMKV state', async () => {
-    storage._storage.set('messagingState', '{}')
-    await expect(resultCode()).resolves.toBe('freshInstallRequired')
+  it('allows MMKV state when no session exists', async () => {
+    storage._storage.set('preferences', '{}')
+    await expect(resultCode()).resolves.toBeUndefined()
   })
 
   it('rejects approved and legacy account files', async () => {

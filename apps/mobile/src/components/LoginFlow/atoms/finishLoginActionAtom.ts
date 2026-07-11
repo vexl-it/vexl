@@ -1,4 +1,3 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyHolder} from '@vexl-next/cryptography/src'
 import {type PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
@@ -12,6 +11,7 @@ import {Effect, Match, Option, Schema} from 'effect'
 import * as O from 'fp-ts/Option'
 import {atom} from 'jotai'
 import {apiAtom, apiEnv, platform} from '../../../api'
+import {vexlGatedHttpClientLayer} from '../../../api/vexlHttpClientLayer'
 import {type Session, type SessionV2} from '../../../brands/Session.brand'
 import {defaultCurrencyBaseOnCountryCodeActionAtom} from '../../../state/defaultCurrencyBaseOnCountryCodeActionAtom'
 import {createVexlSecretActionAtom} from '../../../state/notifications/actions/createVexlSecretActionAtom'
@@ -277,7 +277,7 @@ export const finishLoginActionAtom = atom(
 
       set(defaultCurrencyBaseOnCountryCodeActionAtom)
     }).pipe(
-      Effect.provide(FetchHttpClient.layer),
+      Effect.provide(vexlGatedHttpClientLayer),
       Effect.as(true),
       Effect.catchAll((e) => {
         const a: (arg: typeof e) => Effect.Effect<void> = Match.type<

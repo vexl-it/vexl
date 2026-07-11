@@ -3,10 +3,22 @@
  * kept as a ring buffer capped at MAX_LOG_LINES lines (cached in memory so we
  * don't re-read and re-split the whole blob on every stored line).
  */
+import {registerMmkvKey} from '../../../utils/atomUtils/mmkvMigrationRegistry'
 import {storage} from '../../../utils/mmkv/effectMmkv'
 
 export const LOGS_KEY = 'logs'
 export const IS_CUSTOM_LOGGKING_ENABLED_KEY = 'logs_enabled'
+
+registerMmkvKey({
+  key: LOGS_KEY,
+  policy: 'deviceLocal',
+  nativeType: 'string',
+})
+registerMmkvKey({
+  key: IS_CUSTOM_LOGGKING_ENABLED_KEY,
+  policy: 'deviceLocal',
+  nativeType: 'boolean',
+})
 
 const MAX_LOG_LINES = 1_000
 

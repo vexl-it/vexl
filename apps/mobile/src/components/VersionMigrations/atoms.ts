@@ -10,7 +10,8 @@ const migrationAtomStorage = atomWithParsedMmkvStorage(
   },
   Schema.Struct({
     contactsMigrated: Schema.Boolean,
-  })
+  }),
+  'lifecycle'
 )
 
 export const contactsMigratedAtom = focusAtom(migrationAtomStorage, (o) =>

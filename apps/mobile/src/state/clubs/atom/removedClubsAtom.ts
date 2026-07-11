@@ -33,7 +33,8 @@ const removedClubsStorageAtom = atomWithParsedMmkvStorage(
     data: Schema.Array(RemovedClubInfo)
       // To work with optics
       .pipe(Schema.mutable),
-  })
+  }),
+  'account'
 )
 
 export const removedClubsAtom = focusAtom(removedClubsStorageAtom, (optic) =>

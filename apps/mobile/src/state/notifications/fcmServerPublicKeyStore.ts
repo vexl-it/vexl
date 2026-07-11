@@ -23,7 +23,8 @@ export const notificationServerKeyStorageAtom = atomWithParsedMmkvStorage(
   Schema.Struct({
     publicKey: Schema.optionalWith(PublicKeyPemBase64, {as: 'Option'}),
     lastRefresh: UnixMilliseconds,
-  })
+  }),
+  'deviceLocal'
 )
 
 export const getOrFetchNotificationServerPublicKeyActionAtomE = atom(

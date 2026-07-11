@@ -24,7 +24,8 @@ const persistentDataAboutReachAndImportedContactsMmkvAtom =
   atomWithParsedMmkvStorage(
     PERSISTENT_DATA_ABOUT_REACH_AND_IMPORTED_CONTACTS_STORAGE_KEY,
     defaultPersistentDataAboutReachAndImportedContacts,
-    PersistentDataAboutReachAndImportedContacts
+    PersistentDataAboutReachAndImportedContacts,
+    'account'
   )
 
 export const persistentDataAboutReachAndImportedContactsAtom = focusAtom(

@@ -149,6 +149,7 @@ import {ActionBenchmarks} from './components/ActionBenchmarks'
 import AfterInteractionTaskDemo from './components/AfterInteractionTaskDemo'
 import CryptoBenchmarks from './components/CryptoBenchmarks'
 import LanguagePicker from './components/LanguagePicker'
+import MigrationCrypto from './components/MigrationCrypto'
 import NewCrypto from './components/NewCrypto'
 import Preferences from './components/Preferences'
 import SimulateMissingOfferInbox from './components/SimulateMissingOfferInbox'
@@ -651,6 +652,7 @@ function DebugScreen(): React.ReactElement {
             notficationSecretState: {JSON.stringify(notificationToken, null, 2)}
           </DebugLabel>
           <NewCrypto />
+          <MigrationCrypto />
           <ActionBenchmarks />
           <LanguagePicker />
           <Button

@@ -24,7 +24,8 @@ const BenchmarkStorage = Schema.Struct({
 const storageAtom = atomWithParsedMmkvStorage(
   'actionsBenchmarks',
   {benchmarks: {}, enabled: false},
-  BenchmarkStorage
+  BenchmarkStorage,
+  'ephemeral'
 )
 
 export const benchmarkAtom = focusAtom(storageAtom, (p) => p.prop('benchmarks'))

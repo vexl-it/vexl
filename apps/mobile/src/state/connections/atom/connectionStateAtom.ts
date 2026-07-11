@@ -36,7 +36,8 @@ const connectionStateAtom = atomWithParsedMmkvStorage(
     commonFriends: HashMap.empty(),
     verifiedFriends: HashMap.empty(),
   },
-  ConnectionsState
+  ConnectionsState,
+  'account'
 )
 
 export default connectionStateAtom

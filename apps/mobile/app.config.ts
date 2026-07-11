@@ -98,6 +98,10 @@ export default {
       'CFBundleAllowMixedLocalizations': true,
       'NSLocationWhenInUseUsageDescription':
         'Vexl needs access to you location to show your position on the map. Location will never be share with anyone (even ourselves).',
+      // Device migration transfers the account over a direct local TCP
+      // connection between the user's two devices — no server involved.
+      'NSLocalNetworkUsageDescription':
+        'Vexl uses your local network to move your account directly and privately to your other device.',
       // 'NSAppTransportSecurity': {'NSAllowsArbitraryLoads': true},
     },
     'googleServicesFile': extra.googleServicesInfoPlistFile,

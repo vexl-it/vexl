@@ -2,6 +2,7 @@ import {Effect} from 'effect/index'
 import * as Notifications from 'expo-notifications'
 import * as TaskManager from 'expo-task-manager'
 import {loadSession} from '../../../state/session/loadSession'
+import {readMigrationControlRecord} from '../../deviceMigration/controlStore'
 import {reportErrorE} from '../../reportError'
 import {ErrorLoadingSession, type AcceptedNotificationTypes} from './domain'
 import {extractDataFromNotification} from './extractDataFromNotification'
@@ -59,6 +60,16 @@ const processNotification = (
       }
 ): Promise<Notifications.BackgroundNotificationTaskResult> =>
   Effect.gen(function* (_) {
+    // Device migration silence gate (spec: "Notification background task and
+    // foreground handlers"): consult the durable control store before
+    // extracting or logging ANY notification data. Every migration mode (and
+    // the corrupt-record quarantine) returns NoData with no decoding,
+    // reporting, local display, storage update, or network request. Returning
+    // here also guarantees the tapError/tapDefect reporters below (which
+    // receive the full notification input) can never run in migration mode.
+    if (readMigrationControlRecord().mode !== 'normal')
+      return Notifications.BackgroundNotificationTaskResult.NoData
+
     if (input.source === 'listener' && isLocalNotification(input.data)) {
       yield* Effect.log('Ignoring locally-presented notification in listener')
       return Notifications.BackgroundNotificationTaskResult.NoData

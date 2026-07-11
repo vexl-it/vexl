@@ -29,7 +29,8 @@ export const createOfferSuggestionVisibleStorageAtom =
     },
     Schema.Struct({
       visible: Schema.Boolean,
-    })
+    }),
+    'preference'
   )
 
 export const createOfferSuggestionVisibleAtom = focusAtom(
@@ -45,7 +46,8 @@ export const importNewContactsSuggestionDismissedStorageAtom =
     },
     Schema.Struct({
       dismissedRawNumbers: Schema.Array(Schema.String).pipe(Schema.mutable),
-    })
+    }),
+    'preference'
   )
 
 export const shouldShowCreateOfferInMarketplaceSuggestionAtom = atom((get) => {

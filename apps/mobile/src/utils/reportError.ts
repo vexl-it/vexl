@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/react-native'
+import {DeviceMigrationError} from '@vexl-next/domain/src/general/deviceMigration/errors'
 import {initReportError} from '@vexl-next/resources-utils/src/reportErrorFromResourcesUtils'
 import {Effect} from 'effect'
+import {readMigrationControlRecord} from './deviceMigration/controlStore'
 import {
   toErrorJsonWithRemovedSensitiveData,
   toErrorWithRemovedSensitiveData,
@@ -39,6 +41,21 @@ function reportError(
   error: Error,
   extra?: Record<string, unknown>
 ): void {
+  // Device migration telemetry silence (spec: "Error reporting and
+  // telemetry"): while a migration is in progress (or the control record is
+  // quarantined) nothing may leave the device — no Sentry event, not even a
+  // success/failure signal that a migration happened. Log locally only, and
+  // only the enumerated code for migration-tagged errors (never messages,
+  // causes, or extras, which could carry migration metadata). Normal-mode
+  // behavior below is unchanged.
+  if (readMigrationControlRecord().mode !== 'normal') {
+    getConsoleLvl(lvl)(
+      '‼️ Error report suppressed while device migration is in progress.',
+      error instanceof DeviceMigrationError ? error.code : error.name
+    )
+    return
+  }
+
   const strippedError = toErrorWithRemovedSensitiveData(error)
   const strippedExtra = extra
     ? toExtraWithRemovedSensitiveData(extra)

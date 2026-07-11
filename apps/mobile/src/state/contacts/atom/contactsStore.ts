@@ -19,7 +19,8 @@ export const contactsStoreAtom = atomWithParsedMmkvStorage(
         default: () => false,
       }
     ),
-  })
+  }),
+  'account'
 )
 
 export const storedContactsAtom = focusAtom(contactsStoreAtom, (o) =>

@@ -13,6 +13,9 @@ export * from './domain'
 // Re-export atoms and functions
 export * from './atoms'
 
+// Re-export the managed fiber registry (device migration quiescence)
+export * from './managedTaskFibers'
+
 export const registerInAppLoadingTask = (
   task: Omit<InAppLoadingTask, 'status'>
 ): InAppLoadingTaskId => {

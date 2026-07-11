@@ -12,7 +12,8 @@ const myDonationsStorage = atomWithParsedMmkvStorageWithImmediateSaveOption(
   {data: []},
   Schema.Struct({
     data: Schema.Array(MyDonation).pipe(Schema.mutable),
-  })
+  }),
+  'account'
 )
 
 export const myDonationsAtom = focusAtom(myDonationsStorage.atom, (optic) =>

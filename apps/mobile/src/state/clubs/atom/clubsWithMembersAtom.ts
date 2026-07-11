@@ -33,7 +33,8 @@ export const clubsWithMembersStorageAtom = atomWithParsedMmkvStorage(
   {data: []},
   Schema.Struct({
     data: Schema.Array(ClubWithMembers).pipe(Schema.mutable),
-  })
+  }),
+  'account'
 )
 
 export const clubsWithMembersAtom = atom(

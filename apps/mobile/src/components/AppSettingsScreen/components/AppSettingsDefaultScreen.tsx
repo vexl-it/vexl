@@ -1,4 +1,5 @@
 import {
+  CellPhoneMobileDevice,
   ChevronLeft,
   DuoToneContrastTheme,
   EuroCurrency,
@@ -37,6 +38,15 @@ function AppSettingsDefaultScreen({
       }
     >
       <YStack gap="$5">
+        <YStack testID="move-account-to-another-device">
+          <MenuItem
+            label={t('deviceMigration.source.entryLabel')}
+            icon={CellPhoneMobileDevice}
+            onPress={() => {
+              navigation.navigate('DeviceMigrationExplainer')
+            }}
+          />
+        </YStack>
         <MenuItem
           label={t('appSettings.changeLanguage')}
           icon={Language}

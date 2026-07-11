@@ -1,5 +1,6 @@
 import {Socket} from '@effect/platform'
 import {RpcClient, RpcSerialization} from '@effect/rpc'
+import {DeviceMigrationError} from '@vexl-next/domain/src/general/deviceMigration/errors'
 import {VexlProductNotificationData} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationTokenSecret} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {
@@ -49,7 +50,9 @@ import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../state/conn
 import {getKeyHolderForNotificationTokenOrCypherActionAtom} from '../../state/notifications/fcmCypherToKeyHolderAtom'
 import {reportNewConnectionNotificationForked} from '../../state/notifications/reportNewConnectionNotification'
 import {vexlNotificationTokenAtom} from '../../state/notifications/vexlNotificationTokenAtom'
+import {readMigrationControlRecord} from '../deviceMigration/controlStore'
 import {platform, versionCode} from '../environment'
+import {registerManagedTaskFiber} from '../inAppLoadingTasks/managedTaskFibers'
 import {translationAtom} from '../localization/I18nProvider'
 import {notificationPreferencesAtom} from '../preferences'
 import {reportErrorE} from '../reportError'
@@ -64,7 +67,16 @@ import {
 
 const WebSocketConstructorLive = Layer.succeed(
   Socket.WebSocketConstructor,
-  (url, protocol) => new WebSocket(url, protocol) as any
+  (url, protocol) => {
+    // Device migration silence gate: while a migration is in progress (or the
+    // control record is quarantined) no notification socket may be created.
+    // Throwing here fails socket creation with a typed error before any
+    // connection attempt; the repeat schedule below stops retrying whenever
+    // the mode is not 'normal', so gate failures cannot cause a retry storm.
+    if (readMigrationControlRecord().mode !== 'normal')
+      throw new DeviceMigrationError({code: 'stateInvalid'})
+    return new WebSocket(url, protocol)
+  }
 )
 
 // Choose which protocol to use
@@ -407,6 +419,12 @@ const startListeningToNotificationStreamActionAtom = atom(
   null,
   (get, set, notificationSecret: VexlNotificationTokenSecret) =>
     Effect.gen(function* (_) {
+      // Device migration silence gate: never even start the stream while a
+      // migration is in progress. It cannot restart until normal mode — the
+      // hook below is only mounted by the normal root and the repeat schedule
+      // stops in migration modes.
+      if (readMigrationControlRecord().mode !== 'normal') return
+
       const rpc = yield* _(makeClient)
       return yield* rpc
         .listenToNotifications({
@@ -429,14 +447,24 @@ const startListeningToNotificationStreamActionAtom = atom(
             schedule: __DEV__
               ? Schedule.spaced(1000) // In dev retry quickly
               : Schedule.exponential(1000).pipe(Schedule.jittered), // In prod exponential backoff with jitter to prevent thundering herd
+            // Device migration silence gate: stop retrying entirely while a
+            // migration is in progress — reconnecting is pointless (the
+            // gated constructor above refuses socket creation) and retrying
+            // through it would be a retry storm.
+            while: () => readMigrationControlRecord().mode === 'normal',
           })
         )
     }).pipe(
       Effect.scoped,
       Effect.provide(ProtocoSocketLive),
       Effect.runFork,
-      (fiber) => () => {
-        Effect.runFork(Fiber.interrupt(fiber))
+      (fiber) => {
+        // Track the stream fiber so device migration quiescence can
+        // interrupt and await it together with in-app loading task fibers.
+        registerManagedTaskFiber(fiber)
+        return () => {
+          Effect.runFork(Fiber.interrupt(fiber))
+        }
       }
     )
 )

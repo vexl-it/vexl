@@ -32,7 +32,8 @@ export const noteToConnectionsAtom = atomWithParsedMmkvStorage(
   {
     noteToConnections: [],
   },
-  NoteToConnectionsItems
+  NoteToConnectionsItems,
+  'account'
 )
 
 export const upsertNoteToConnectionsActionAtom = atom<

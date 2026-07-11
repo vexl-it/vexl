@@ -32,7 +32,8 @@ const vexlProductNotificationsCursorAtom = atomWithParsedMmkvStorage(
     lastFetchedId: Option.none(),
     activeSince: new Date(),
   },
-  VexlProductNotificationsCursorRecord
+  VexlProductNotificationsCursorRecord,
+  'account'
 )
 
 type VexlProductNotificationsFetchState =

@@ -1,9 +1,9 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {contact, offer} from '@vexl-next/rest-api'
 import {Cause, Data, Effect, Either, Option, Schema} from 'effect/index'
 import {getDefaultStore} from 'jotai'
 import {sessionHolderAtom} from '.'
 import {apiEnv} from '../../api'
+import {vexlGatedHttpClientLayer} from '../../api/vexlHttpClientLayer'
 import {
   isSessionV1,
   sanityCheckSessionV2,
@@ -201,11 +201,11 @@ const ensureV2SessionIfNotCreateAndWrite = (
 
     const contactApi = yield* contact
       .api({...commonApiArgs, url: apiEnv.contactMs})
-      .pipe(Effect.provide(FetchHttpClient.layer))
+      .pipe(Effect.provide(vexlGatedHttpClientLayer))
 
     const offerApi = yield* offer
       .api({...commonApiArgs, url: apiEnv.offerMs})
-      .pipe(Effect.provide(FetchHttpClient.layer))
+      .pipe(Effect.provide(vexlGatedHttpClientLayer))
 
     yield* contactApi
       .refreshUser({

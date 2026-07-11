@@ -10,7 +10,8 @@ export const messagingStateAtomStorageAtom = atomWithParsedMmkvStorage(
   Schema.Struct({
     messagingState: MessagingState.pipe(Schema.mutable),
     lastDecodedSemver: Schema.optionalWith(SemverString, {nullable: true}),
-  })
+  }),
+  'account'
 )
 
 const messagingStateAtom = focusAtom(messagingStateAtomStorageAtom, (o) =>

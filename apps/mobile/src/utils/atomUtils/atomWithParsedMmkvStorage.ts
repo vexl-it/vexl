@@ -1,3 +1,4 @@
+import {type MigrationKeyPolicy} from '@vexl-next/domain/src/general/deviceMigration/snapshotEntries'
 import {Array, Either, Schema, pipe, type ParseResult} from 'effect'
 import {
   atom,
@@ -9,8 +10,23 @@ import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
 import runWhenIdleWithTimeout from '../runWhenIdleWithTimeout'
 import getValueFromSetStateActionOfAtom from './getValueFromSetStateActionOfAtom'
+import {isMmkvPersistenceFrozen, registerMmkvKey} from './mmkvMigrationRegistry'
 
 export const CLEAR_STORAGE_KEY = '__clear_storage'
+
+registerMmkvKey({
+  key: CLEAR_STORAGE_KEY,
+  policy: 'ephemeral',
+  nativeType: 'string',
+})
+
+// Error reporting is Vexl egress. During device migration the app must stay
+// telemetry-silent (spec section "Error reporting and telemetry"), so storage
+// errors are swallowed while persistence is frozen.
+function reportStorageError(...args: Parameters<typeof reportError>): void {
+  if (isMmkvPersistenceFrozen()) return
+  reportError(...args)
+}
 
 // Incremented every time persisted storage is wiped (logout / clear). Writes
 // scheduled behind the deferred flush capture the generation at schedule time;
@@ -57,12 +73,16 @@ function scheduleStartupReport(): void {
       // (`valueNotSet`) are expected on every startup, so reporting them
       // unconditionally would fire the summary on every single app start.
       if (Array.isNonEmptyArray(parseErrorKeys)) {
-        reportError('warn', new Error('MMKV atom initialization summary'), {
-          loaded: loadedKeys,
-          valueNotSet: valueNotSetKeys,
-          parseError: parseErrorKeys,
-          totalKeys: storage._storage.getAllKeys().length,
-        })
+        reportStorageError(
+          'warn',
+          new Error('MMKV atom initialization summary'),
+          {
+            loaded: loadedKeys,
+            valueNotSet: valueNotSetKeys,
+            parseError: parseErrorKeys,
+            totalKeys: storage._storage.getAllKeys().length,
+          }
+        )
       }
     } catch {}
   }, 5000)
@@ -134,7 +154,7 @@ function getInitialValue<A>({
           atomInitResults.set(key, 'valueNotSet')
         } else {
           atomInitResults.set(key, 'parseError')
-          reportError(
+          reportStorageError(
             'warn',
             new Error(
               `Error while parsing stored value. Using provided default. Key: ${key}`
@@ -150,7 +170,7 @@ function getInitialValue<A>({
           Either.match({
             onLeft: (e): StoredRead<A> => {
               atomInitResults.set(key, 'parseError')
-              reportError(
+              reportStorageError(
                 'warn',
                 new Error(
                   `Error while parsing stored value. Using provided default. Key: ${key}`
@@ -200,6 +220,14 @@ export interface AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
  * - Writes to the same key made by anyone else (another atom for the same key,
  *   direct storage writes) are picked up via the MMKV change listener while
  *   the atom is mounted.
+ * - Every persisted key must declare a device migration `policy` (spec
+ *   section "Migration policy registry" in docs/device-migration-spec.md).
+ *   The key is registered in the module-level migration registry together
+ *   with the atom's `flushNow`, so `flushAllPendingMmkvWrites` can persist
+ *   every pending deferred write before a migration snapshot is taken. While
+ *   MMKV persistence is frozen for migration (`freezeMmkvPersistence`),
+ *   setters keep updating in-memory state but storage writes are silently
+ *   dropped.
  *
  * Note on backward compatibility: older app versions embedded an
  * `___author_id` field into the persisted blob to tell own writes apart from
@@ -215,6 +243,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
   key: string,
   defaultValue: A,
   schema: Schema.Schema<A, I, never>,
+  policy: MigrationKeyPolicy,
   debugLabel?: string
 ): AtomWithParsedMmkvStorageWithImmediateSaveOption<A> {
   const decodeRawValue = Schema.decodeEither(Schema.parseJson(schema))
@@ -238,6 +267,11 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
     pendingWrite = undefined
     if (toPersist === undefined) return
 
+    // Persistence is frozen for device migration — storage must not change
+    // under the snapshot. Drop the write silently (in-memory state already
+    // holds the value; no reporting, migration requires telemetry silence).
+    if (isMmkvPersistenceFrozen()) return
+
     // Storage was wiped after this write was scheduled — persisting it now
     // would resurrect just-cleared data. Drop it. See `clearGeneration`.
     if (toPersist.generation !== clearGeneration) return
@@ -247,7 +281,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       pipe(
         persistValue(toPersist.value),
         Either.getOrElse((l) => {
-          reportError(
+          reportStorageError(
             'warn',
             new Error(`Error while saving value to storage. Key: ${key}`),
             {errorTag: l._tag}
@@ -258,6 +292,13 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
       isPersistingOwnValue = false
     }
   }
+
+  registerMmkvKey({
+    key,
+    policy,
+    nativeType: 'string',
+    flushNow: flushPendingWrite,
+  })
 
   // Cached module-eval read. Consumed (and freed, so the potentially large
   // raw string can be GCed) on first mount to avoid decoding the same blob
@@ -277,6 +318,10 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
         get(coreAtom)
       )
       set(coreAtom, newValue)
+
+      // Persistence is frozen for device migration — keep the in-memory
+      // update but never schedule a storage write (silently dropped).
+      if (isMmkvPersistenceFrozen()) return
 
       const flushAlreadyScheduled = pendingWrite !== undefined
       pendingWrite = {value: newValue, generation: clearGeneration}
@@ -338,7 +383,7 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
                     setAtom(defaultValue)
                     return
                   }
-                  reportError(
+                  reportStorageError(
                     'warn',
                     new Error(
                       `Error while parsing stored mmkv value in onChange function. Key: '${key}'`
@@ -370,12 +415,16 @@ export function atomWithParsedMmkvStorageWithImmediateSaveOption<
 
       pendingWrite = undefined
 
+      // Persistence is frozen for device migration — keep the in-memory
+      // update but never write to storage (silently dropped).
+      if (isMmkvPersistenceFrozen()) return
+
       isPersistingOwnValue = true
       try {
         pipe(
           persistValue(newValue),
           Either.getOrElse((l) => {
-            reportError(
+            reportStorageError(
               'warn',
               new Error(
                 `Error while immediately saving value to storage. Key: ${key}`
@@ -400,12 +449,14 @@ export function atomWithParsedMmkvStorage<A, I extends object>(
   key: string,
   defaultValue: A,
   schema: Schema.Schema<A, I, never>,
+  policy: MigrationKeyPolicy,
   debugLabel?: string
 ): FlushablePrimitiveAtom<A> {
   const storageAtom = atomWithParsedMmkvStorageWithImmediateSaveOption(
     key,
     defaultValue,
     schema,
+    policy,
     debugLabel
   )
 

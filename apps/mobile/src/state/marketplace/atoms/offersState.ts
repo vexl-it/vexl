@@ -29,7 +29,8 @@ export const offersStateAtom = atomWithParsedMmkvStorage(
     offers: [],
     lastUpdatedAt2: MINIMAL_DATE,
   },
-  OffersState
+  OffersState,
+  'account'
 )
 export const offersAtom = focusAtom(offersStateAtom, (optic) =>
   optic.prop('offers')

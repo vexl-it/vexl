@@ -1,9 +1,10 @@
-import {Array, Effect, HashSet, Option, pipe} from 'effect/index'
+import {Array, HashSet, Option, pipe} from 'effect/index'
 import {useAtomValue, useStore} from 'jotai'
 import {useCallback, useEffect, useRef} from 'react'
 import {userLoggedInAtom} from '../../state/session'
 import {useAppState} from '../useAppState'
 import {executeTasksWithDependencies, taskRegistryAtom} from './index'
+import {runForkManagedTask} from './managedTaskFibers'
 
 // tasks
 import '../../components/FullscreenWarningScreen/loadNewsAndAnnouncementsInAppLoadingTask'
@@ -63,7 +64,9 @@ export const useInAppLoadingTasks = (): void => {
           HashSet.add(acc, taskId)
         )
       )
-      void Effect.runPromise(executeTasksWithDependencies(startTasks))
+      // Forked (not fire-and-forget) so device migration quiescence can
+      // interrupt and await the wave.
+      runForkManagedTask(executeTasksWithDependencies(startTasks))
     }
   }, [store, isLoggedIn])
 
@@ -91,7 +94,9 @@ export const useInAppLoadingTasks = (): void => {
             'InAppLoadingTasks',
             `🔄 Running ${resumeTasks.length} Resume tasks`
           )
-          void Effect.runPromise(executeTasksWithDependencies(resumeTasks))
+          // Forked (not fire-and-forget) so device migration quiescence can
+          // interrupt and await the wave.
+          runForkManagedTask(executeTasksWithDependencies(resumeTasks))
         }
       },
       [store, isLoggedIn]

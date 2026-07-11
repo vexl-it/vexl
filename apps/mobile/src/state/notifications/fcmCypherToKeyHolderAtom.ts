@@ -15,7 +15,8 @@ export const notificationCypherToKeyHolderAtom = atomWithParsedMmkvStorage(
       key: NotificationCypher,
       value: PrivateKeyHolder,
     }),
-  })
+  }),
+  'account'
 )
 
 export const registerNotificationCypherActionAtom = atom(

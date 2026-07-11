@@ -3,10 +3,19 @@ import * as BackgroundTask from 'expo-background-task'
 import {getDefaultStore} from 'jotai'
 import fetchMessagesForAllInboxesAtom from '../../state/chat/atoms/fetchNewMessagesActionAtom'
 import {loadSession} from '../../state/session/loadSession'
+import {readMigrationControlRecord} from '../deviceMigration/controlStore'
 import {newOffersNotificationBackgroundTask} from '../newOffersNotificationBackgroundTask'
 import {migrateBackgroundTaskIntervalIfNeeded} from './index'
 
 export async function processBackgroundTask(): Promise<BackgroundTask.BackgroundTaskResult> {
+  // Device migration silence gate (spec: "Scheduled background task"): the
+  // durable control store is consulted FIRST — before loadSession, before any
+  // account-storage read/write and before any network work. Every migration
+  // mode (and the corrupt-record quarantine) returns Success without doing
+  // anything, including the task-interval migration below.
+  if (readMigrationControlRecord().mode !== 'normal')
+    return BackgroundTask.BackgroundTaskResult.Success
+
   const result = await runBackgroundTaskWork()
   // Headless launches never run useSetupBackgroundTask, so sync the registered
   // interval here as well — otherwise installs that are only ever woken by the

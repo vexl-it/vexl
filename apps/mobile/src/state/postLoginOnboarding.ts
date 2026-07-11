@@ -32,7 +32,8 @@ export const postLoginFlowProgressStorageAtom = atomWithParsedMmkvStorage(
   {completedScreens: []},
   Schema.Struct({
     completedScreens: Schema.Array(PostLoginFlowCompletedScreen),
-  })
+  }),
+  'account'
 )
 
 export const postLoginFlowCompletedScreensAtom = focusAtom(

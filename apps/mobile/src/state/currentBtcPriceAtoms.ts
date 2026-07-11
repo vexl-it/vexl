@@ -33,7 +33,8 @@ type PriceDataStored = typeof PriceDataStored.Type
 const btcPriceMmkvAtom = atomWithParsedMmkvStorage(
   'brcPrice',
   {data: {}},
-  PriceDataStored
+  PriceDataStored,
+  'ephemeral'
 )
 
 export const btcPriceDataAtom: PrimitiveAtom<

@@ -25,7 +25,8 @@ const alreadyReportedNotificationsIdsStorageAtom = atomWithParsedMmkvStorage(
   {alreadyReportedIds: []},
   Schema.Struct({
     alreadyReportedIds: Schema.Array(SystemNotificationId),
-  })
+  }),
+  'deviceLocal'
 )
 
 const alreadyReportedNotificationsIdsAtom = focusAtom(

@@ -1,11 +1,15 @@
 {
   "extends": "@vexl-next/tsconfig/generic-esm.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
     "checkJs": false,
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "exclude": ["./dist/**", "./tests/**", "node_modules"],
-  "include": ["./src", "../../apps/mobile/src/state/chat/tradeChecklist.ts"]
+  "include": [
+    "./src",
+    "./jest.config.ts",
+    "../../apps/mobile/src/state/chat/tradeChecklist.ts"
+  ]
 }

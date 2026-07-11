@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["VexlLocalTransportModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.vexllocaltransport.VexlLocalTransportModule"]
+  }
+}

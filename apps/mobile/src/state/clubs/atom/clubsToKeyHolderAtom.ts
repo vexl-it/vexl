@@ -18,5 +18,6 @@ export const ClubsToKeyHolder = Schema.Struct({
 export const oldClubsKeyHolderStorageAtom = atomWithParsedMmkvStorage(
   'storedClubs',
   {data: {}, waitingForAdmission: []},
-  ClubsToKeyHolder
+  ClubsToKeyHolder,
+  'lifecycle'
 )

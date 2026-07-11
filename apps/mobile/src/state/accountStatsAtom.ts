@@ -14,7 +14,8 @@ export const accountStatsAtom = atomWithParsedMmkvStorage(
     closedChats: 0,
     postedOffers: 0,
   },
-  AccountStats
+  AccountStats,
+  'account'
 )
 
 export const closedChatsAtom = focusAtom(accountStatsAtom, (optic) =>

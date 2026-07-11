@@ -1,0 +1,1259 @@
+diff --git a/cpp/react-native-libsodium.cpp b/cpp/react-native-libsodium.cpp
+index a97e74b23936377c8279bf99defe4389d8e0ff8e..0d008003617a043458318e0c766eee05cb837b0e 100644
+--- a/cpp/react-native-libsodium.cpp
++++ b/cpp/react-native-libsodium.cpp
+@@ -1600,5 +1600,427 @@ namespace ReactNativeLibsodium
+             });
+ 
+         jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kdf_hkdf_sha256_expand", std::move(jsi_crypto_kdf_hkdf_sha256_expand));
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kx_PUBLICKEYBYTES", static_cast<int>(crypto_kx_PUBLICKEYBYTES));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kx_SECRETKEYBYTES", static_cast<int>(crypto_kx_SECRETKEYBYTES));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kx_SESSIONKEYBYTES", static_cast<int>(crypto_kx_SESSIONKEYBYTES));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_ABYTES", static_cast<int>(crypto_secretstream_xchacha20poly1305_ABYTES));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_HEADERBYTES", static_cast<int>(crypto_secretstream_xchacha20poly1305_HEADERBYTES));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_KEYBYTES", static_cast<int>(crypto_secretstream_xchacha20poly1305_KEYBYTES));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_STATEBYTES", static_cast<int>(crypto_secretstream_xchacha20poly1305_statebytes()));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_TAG_MESSAGE", static_cast<int>(crypto_secretstream_xchacha20poly1305_TAG_MESSAGE));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_TAG_PUSH", static_cast<int>(crypto_secretstream_xchacha20poly1305_TAG_PUSH));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_TAG_REKEY", static_cast<int>(crypto_secretstream_xchacha20poly1305_TAG_REKEY));
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_TAG_FINAL", static_cast<int>(crypto_secretstream_xchacha20poly1305_TAG_FINAL));
++
++        auto jsi_crypto_kx_keypair = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_kx_keypair"),
++            0,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_kx_keypair";
++
++                std::vector<uint8_t> publickey(crypto_kx_PUBLICKEYBYTES);
++                std::vector<uint8_t> secretkey(crypto_kx_SECRETKEYBYTES);
++                int result = crypto_kx_keypair(publickey.data(), secretkey.data());
++                throwOnBadResult(functionName, runtime, result);
++
++                jsi::Object returnPublicKeyBufferAsObject = arrayBufferAsObject(runtime, publickey);
++                jsi::Object returnSecretKeyBufferAsObject = arrayBufferAsObject(runtime, secretkey);
++
++                auto object = jsi::Object(runtime);
++                object.setProperty(runtime, "publicKey", returnPublicKeyBufferAsObject);
++                object.setProperty(runtime, "secretKey", returnSecretKeyBufferAsObject);
++                return object;
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kx_keypair", std::move(jsi_crypto_kx_keypair));
++
++        auto jsi_crypto_kx_client_session_keys = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_kx_client_session_keys"),
++            3,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_kx_client_session_keys";
++
++                std::string clientPublicKeyArgumentName = "clientPublicKey";
++                unsigned int clientPublicKeyArgumentPosition = 0;
++                validateIsArrayBuffer(functionName, runtime, arguments[clientPublicKeyArgumentPosition], clientPublicKeyArgumentName, true);
++
++                std::string clientSecretKeyArgumentName = "clientSecretKey";
++                unsigned int clientSecretKeyArgumentPosition = 1;
++                validateIsArrayBuffer(functionName, runtime, arguments[clientSecretKeyArgumentPosition], clientSecretKeyArgumentName, true);
++
++                std::string serverPublicKeyArgumentName = "serverPublicKey";
++                unsigned int serverPublicKeyArgumentPosition = 2;
++                validateIsArrayBuffer(functionName, runtime, arguments[serverPublicKeyArgumentPosition], serverPublicKeyArgumentName, true);
++
++                auto clientPublicKeyArrayBuffer = arguments[clientPublicKeyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                auto clientSecretKeyArrayBuffer = arguments[clientSecretKeyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                auto serverPublicKeyArrayBuffer = arguments[serverPublicKeyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++
++                if (clientPublicKeyArrayBuffer.length(runtime) != crypto_kx_PUBLICKEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid clientPublicKey length");
++                }
++                if (clientSecretKeyArrayBuffer.length(runtime) != crypto_kx_SECRETKEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid clientSecretKey length");
++                }
++                if (serverPublicKeyArrayBuffer.length(runtime) != crypto_kx_PUBLICKEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid serverPublicKey length");
++                }
++
++                std::vector<uint8_t> sharedRx(crypto_kx_SESSIONKEYBYTES);
++                std::vector<uint8_t> sharedTx(crypto_kx_SESSIONKEYBYTES);
++                int result = crypto_kx_client_session_keys(
++                    sharedRx.data(),
++                    sharedTx.data(),
++                    clientPublicKeyArrayBuffer.data(runtime),
++                    clientSecretKeyArrayBuffer.data(runtime),
++                    serverPublicKeyArrayBuffer.data(runtime));
++                throwOnBadResult(functionName, runtime, result);
++
++                jsi::Object returnSharedRxBufferAsObject = arrayBufferAsObject(runtime, sharedRx);
++                jsi::Object returnSharedTxBufferAsObject = arrayBufferAsObject(runtime, sharedTx);
++
++                auto object = jsi::Object(runtime);
++                object.setProperty(runtime, "sharedRx", returnSharedRxBufferAsObject);
++                object.setProperty(runtime, "sharedTx", returnSharedTxBufferAsObject);
++                return object;
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kx_client_session_keys", std::move(jsi_crypto_kx_client_session_keys));
++
++        auto jsi_crypto_kx_server_session_keys = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_kx_server_session_keys"),
++            3,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_kx_server_session_keys";
++
++                std::string serverPublicKeyArgumentName = "serverPublicKey";
++                unsigned int serverPublicKeyArgumentPosition = 0;
++                validateIsArrayBuffer(functionName, runtime, arguments[serverPublicKeyArgumentPosition], serverPublicKeyArgumentName, true);
++
++                std::string serverSecretKeyArgumentName = "serverSecretKey";
++                unsigned int serverSecretKeyArgumentPosition = 1;
++                validateIsArrayBuffer(functionName, runtime, arguments[serverSecretKeyArgumentPosition], serverSecretKeyArgumentName, true);
++
++                std::string clientPublicKeyArgumentName = "clientPublicKey";
++                unsigned int clientPublicKeyArgumentPosition = 2;
++                validateIsArrayBuffer(functionName, runtime, arguments[clientPublicKeyArgumentPosition], clientPublicKeyArgumentName, true);
++
++                auto serverPublicKeyArrayBuffer = arguments[serverPublicKeyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                auto serverSecretKeyArrayBuffer = arguments[serverSecretKeyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                auto clientPublicKeyArrayBuffer = arguments[clientPublicKeyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++
++                if (serverPublicKeyArrayBuffer.length(runtime) != crypto_kx_PUBLICKEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid serverPublicKey length");
++                }
++                if (serverSecretKeyArrayBuffer.length(runtime) != crypto_kx_SECRETKEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid serverSecretKey length");
++                }
++                if (clientPublicKeyArrayBuffer.length(runtime) != crypto_kx_PUBLICKEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid clientPublicKey length");
++                }
++
++                std::vector<uint8_t> sharedRx(crypto_kx_SESSIONKEYBYTES);
++                std::vector<uint8_t> sharedTx(crypto_kx_SESSIONKEYBYTES);
++                int result = crypto_kx_server_session_keys(
++                    sharedRx.data(),
++                    sharedTx.data(),
++                    serverPublicKeyArrayBuffer.data(runtime),
++                    serverSecretKeyArrayBuffer.data(runtime),
++                    clientPublicKeyArrayBuffer.data(runtime));
++                throwOnBadResult(functionName, runtime, result);
++
++                jsi::Object returnSharedRxBufferAsObject = arrayBufferAsObject(runtime, sharedRx);
++                jsi::Object returnSharedTxBufferAsObject = arrayBufferAsObject(runtime, sharedTx);
++
++                auto object = jsi::Object(runtime);
++                object.setProperty(runtime, "sharedRx", returnSharedRxBufferAsObject);
++                object.setProperty(runtime, "sharedTx", returnSharedTxBufferAsObject);
++                return object;
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_kx_server_session_keys", std::move(jsi_crypto_kx_server_session_keys));
++
++        auto jsi_crypto_secretstream_xchacha20poly1305_keygen = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_secretstream_xchacha20poly1305_keygen"),
++            0,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                std::vector<uint8_t> key(crypto_secretstream_xchacha20poly1305_KEYBYTES);
++                crypto_secretstream_xchacha20poly1305_keygen(key.data());
++                return arrayBufferAsObject(runtime, key);
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_keygen", std::move(jsi_crypto_secretstream_xchacha20poly1305_keygen));
++
++        auto jsi_crypto_secretstream_xchacha20poly1305_init_push = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_secretstream_xchacha20poly1305_init_push"),
++            1,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_secretstream_xchacha20poly1305_init_push";
++
++                std::string keyArgumentName = "key";
++                unsigned int keyArgumentPosition = 0;
++                validateIsArrayBuffer(functionName, runtime, arguments[keyArgumentPosition], keyArgumentName, true);
++
++                auto keyArrayBuffer = arguments[keyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                if (keyArrayBuffer.length(runtime) != crypto_secretstream_xchacha20poly1305_KEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid key length");
++                }
++
++                crypto_secretstream_xchacha20poly1305_state state;
++                std::vector<uint8_t> header(crypto_secretstream_xchacha20poly1305_HEADERBYTES);
++                int result = crypto_secretstream_xchacha20poly1305_init_push(&state, header.data(), keyArrayBuffer.data(runtime));
++                throwOnBadResult(functionName, runtime, result);
++
++                std::vector<uint8_t> stateBytes(crypto_secretstream_xchacha20poly1305_statebytes());
++                memcpy(stateBytes.data(), &state, stateBytes.size());
++
++                jsi::Object returnStateBufferAsObject = arrayBufferAsObject(runtime, stateBytes);
++                jsi::Object returnHeaderBufferAsObject = arrayBufferAsObject(runtime, header);
++
++                auto object = jsi::Object(runtime);
++                object.setProperty(runtime, "state", returnStateBufferAsObject);
++                object.setProperty(runtime, "header", returnHeaderBufferAsObject);
++                return object;
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_init_push", std::move(jsi_crypto_secretstream_xchacha20poly1305_init_push));
++
++        auto jsi_crypto_secretstream_xchacha20poly1305_init_pull = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_secretstream_xchacha20poly1305_init_pull"),
++            2,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_secretstream_xchacha20poly1305_init_pull";
++
++                std::string headerArgumentName = "header";
++                unsigned int headerArgumentPosition = 0;
++                validateIsArrayBuffer(functionName, runtime, arguments[headerArgumentPosition], headerArgumentName, true);
++
++                std::string keyArgumentName = "key";
++                unsigned int keyArgumentPosition = 1;
++                validateIsArrayBuffer(functionName, runtime, arguments[keyArgumentPosition], keyArgumentName, true);
++
++                auto headerArrayBuffer = arguments[headerArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                auto keyArrayBuffer = arguments[keyArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++
++                if (headerArrayBuffer.length(runtime) != crypto_secretstream_xchacha20poly1305_HEADERBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid header length");
++                }
++                if (keyArrayBuffer.length(runtime) != crypto_secretstream_xchacha20poly1305_KEYBYTES)
++                {
++                    throw jsi::JSError(runtime, "invalid key length");
++                }
++
++                crypto_secretstream_xchacha20poly1305_state state;
++                int result = crypto_secretstream_xchacha20poly1305_init_pull(&state, headerArrayBuffer.data(runtime), keyArrayBuffer.data(runtime));
++                throwOnBadResult(functionName, runtime, result);
++
++                std::vector<uint8_t> stateBytes(crypto_secretstream_xchacha20poly1305_statebytes());
++                memcpy(stateBytes.data(), &state, stateBytes.size());
++
++                return arrayBufferAsObject(runtime, stateBytes);
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_init_pull", std::move(jsi_crypto_secretstream_xchacha20poly1305_init_pull));
++
++        auto jsi_crypto_secretstream_xchacha20poly1305_push = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_secretstream_xchacha20poly1305_push"),
++            4,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_secretstream_xchacha20poly1305_push";
++
++                std::string stateArgumentName = "state";
++                unsigned int stateArgumentPosition = 0;
++                validateIsArrayBuffer(functionName, runtime, arguments[stateArgumentPosition], stateArgumentName, true);
++
++                std::string messageArgumentName = "message";
++                unsigned int messageArgumentPosition = 1;
++                JsiArgType messageArgType = validateIsStringOrArrayBuffer(functionName, runtime, arguments[messageArgumentPosition], messageArgumentName, true);
++
++                std::string additionalDataArgumentName = "additionalData";
++                unsigned int additionalDataArgumentPosition = 2;
++                JsiArgType additionalDataArgType = validateIsStringOrArrayBuffer(functionName, runtime, arguments[additionalDataArgumentPosition], additionalDataArgumentName, false);
++
++                std::string tagArgumentName = "tag";
++                unsigned int tagArgumentPosition = 3;
++                validateIsNumber(functionName, runtime, arguments[tagArgumentPosition], tagArgumentName, true);
++
++                auto stateArrayBuffer = arguments[stateArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                if (stateArrayBuffer.length(runtime) != crypto_secretstream_xchacha20poly1305_statebytes())
++                {
++                    throw jsi::JSError(runtime, "invalid state length");
++                }
++
++                double tagNumber = arguments[tagArgumentPosition].asNumber();
++                if (tagNumber < 0 || tagNumber != static_cast<double>(static_cast<unsigned char>(tagNumber)))
++                {
++                    throw jsi::JSError(runtime, "tag must be an unsigned integer");
++                }
++                unsigned char tag = static_cast<unsigned char>(tagNumber);
++
++                std::vector<uint8_t> messageData;
++                if (messageArgType == JsiArgType::string)
++                {
++                    std::string messageString = arguments[messageArgumentPosition].asString(runtime).utf8(runtime);
++                    messageData.assign(messageString.begin(), messageString.end());
++                }
++                else
++                {
++                    auto messageArrayBuffer = arguments[messageArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                    messageData.assign(messageArrayBuffer.data(runtime), messageArrayBuffer.data(runtime) + messageArrayBuffer.length(runtime));
++                }
++
++                std::vector<uint8_t> additionalData;
++                bool hasAdditionalData = false;
++                if (additionalDataArgType == JsiArgType::string)
++                {
++                    std::string additionalDataString = arguments[additionalDataArgumentPosition].asString(runtime).utf8(runtime);
++                    additionalData.assign(additionalDataString.begin(), additionalDataString.end());
++                    hasAdditionalData = true;
++                }
++                else if (additionalDataArgType == JsiArgType::arrayBuffer)
++                {
++                    auto additionalDataArrayBuffer = arguments[additionalDataArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                    additionalData.assign(additionalDataArrayBuffer.data(runtime), additionalDataArrayBuffer.data(runtime) + additionalDataArrayBuffer.length(runtime));
++                    hasAdditionalData = true;
++                }
++
++                crypto_secretstream_xchacha20poly1305_state state;
++                memcpy(&state, stateArrayBuffer.data(runtime), crypto_secretstream_xchacha20poly1305_statebytes());
++
++                std::vector<uint8_t> ciphertext(messageData.size() + crypto_secretstream_xchacha20poly1305_ABYTES);
++                unsigned long long ciphertextLength = 0;
++                int result = crypto_secretstream_xchacha20poly1305_push(
++                    &state,
++                    ciphertext.data(),
++                    &ciphertextLength,
++                    messageData.data(),
++                    messageData.size(),
++                    hasAdditionalData ? additionalData.data() : NULL,
++                    additionalData.size(),
++                    tag);
++                throwOnBadResult(functionName, runtime, result);
++
++                memcpy(stateArrayBuffer.data(runtime), &state, crypto_secretstream_xchacha20poly1305_statebytes());
++
++                ciphertext.resize(ciphertextLength);
++                return arrayBufferAsObject(runtime, ciphertext);
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_push", std::move(jsi_crypto_secretstream_xchacha20poly1305_push));
++
++        auto jsi_crypto_secretstream_xchacha20poly1305_pull = jsi::Function::createFromHostFunction(
++            jsiRuntime,
++            jsi::PropNameID::forUtf8(jsiRuntime, "crypto_secretstream_xchacha20poly1305_pull"),
++            3,
++            [](jsi::Runtime &runtime, const jsi::Value &thisValue, const jsi::Value *arguments, size_t count) -> jsi::Value
++            {
++                const std::string functionName = "crypto_secretstream_xchacha20poly1305_pull";
++
++                std::string stateArgumentName = "state";
++                unsigned int stateArgumentPosition = 0;
++                validateIsArrayBuffer(functionName, runtime, arguments[stateArgumentPosition], stateArgumentName, true);
++
++                std::string ciphertextArgumentName = "cipher";
++                unsigned int ciphertextArgumentPosition = 1;
++                JsiArgType ciphertextArgType = validateIsStringOrArrayBuffer(functionName, runtime, arguments[ciphertextArgumentPosition], ciphertextArgumentName, true);
++
++                std::string additionalDataArgumentName = "additionalData";
++                unsigned int additionalDataArgumentPosition = 2;
++                JsiArgType additionalDataArgType = validateIsStringOrArrayBuffer(functionName, runtime, arguments[additionalDataArgumentPosition], additionalDataArgumentName, false);
++
++                auto stateArrayBuffer = arguments[stateArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                if (stateArrayBuffer.length(runtime) != crypto_secretstream_xchacha20poly1305_statebytes())
++                {
++                    throw jsi::JSError(runtime, "invalid state length");
++                }
++
++                std::vector<uint8_t> ciphertextData;
++                if (ciphertextArgType == JsiArgType::string)
++                {
++                    std::string ciphertextString = arguments[ciphertextArgumentPosition].asString(runtime).utf8(runtime);
++                    ciphertextData.assign(ciphertextString.begin(), ciphertextString.end());
++                }
++                else
++                {
++                    auto ciphertextArrayBuffer = arguments[ciphertextArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                    ciphertextData.assign(ciphertextArrayBuffer.data(runtime), ciphertextArrayBuffer.data(runtime) + ciphertextArrayBuffer.length(runtime));
++                }
++
++                if (ciphertextData.size() < crypto_secretstream_xchacha20poly1305_ABYTES)
++                {
++                    throw jsi::JSError(runtime, "cipher is too short");
++                }
++
++                std::vector<uint8_t> additionalData;
++                bool hasAdditionalData = false;
++                if (additionalDataArgType == JsiArgType::string)
++                {
++                    std::string additionalDataString = arguments[additionalDataArgumentPosition].asString(runtime).utf8(runtime);
++                    additionalData.assign(additionalDataString.begin(), additionalDataString.end());
++                    hasAdditionalData = true;
++                }
++                else if (additionalDataArgType == JsiArgType::arrayBuffer)
++                {
++                    auto additionalDataArrayBuffer = arguments[additionalDataArgumentPosition].asObject(runtime).getArrayBuffer(runtime);
++                    additionalData.assign(additionalDataArrayBuffer.data(runtime), additionalDataArrayBuffer.data(runtime) + additionalDataArrayBuffer.length(runtime));
++                    hasAdditionalData = true;
++                }
++
++                crypto_secretstream_xchacha20poly1305_state state;
++                memcpy(&state, stateArrayBuffer.data(runtime), crypto_secretstream_xchacha20poly1305_statebytes());
++
++                std::vector<uint8_t> message(ciphertextData.size() - crypto_secretstream_xchacha20poly1305_ABYTES);
++                unsigned long long messageLength = 0;
++                unsigned char tag = 0;
++                int result = crypto_secretstream_xchacha20poly1305_pull(
++                    &state,
++                    message.data(),
++                    &messageLength,
++                    &tag,
++                    ciphertextData.data(),
++                    ciphertextData.size(),
++                    hasAdditionalData ? additionalData.data() : NULL,
++                    additionalData.size());
++
++                if (result != 0)
++                {
++                    return jsi::Value(false);
++                }
++
++                memcpy(stateArrayBuffer.data(runtime), &state, crypto_secretstream_xchacha20poly1305_statebytes());
++
++                message.resize(messageLength);
++                jsi::Object returnMessageBufferAsObject = arrayBufferAsObject(runtime, message);
++
++                auto object = jsi::Object(runtime);
++                object.setProperty(runtime, "message", returnMessageBufferAsObject);
++                object.setProperty(runtime, "tag", jsi::Value(static_cast<int>(tag)));
++                return object;
++            });
++
++        jsiRuntime.global().setProperty(jsiRuntime, "jsi_crypto_secretstream_xchacha20poly1305_pull", std::move(jsi_crypto_secretstream_xchacha20poly1305_pull));
+     }
+ } // namespace ReactNativeLibsodium
+diff --git a/lib/commonjs/lib.native.js b/lib/commonjs/lib.native.js
+index 2616cac7d4860e7deb844951b0156dd47d2e21a4..3f8c3cf1fda1ad4db97cf125b0c710d380e9451a 100644
+--- a/lib/commonjs/lib.native.js
++++ b/lib/commonjs/lib.native.js
+@@ -47,6 +47,16 @@ exports.randombytes_buf = randombytes_buf;
+ exports.randombytes_uniform = randombytes_uniform;
+ exports.to_base64 = exports.ready = void 0;
+ exports.to_hex = to_hex;
++exports.crypto_kx_keypair = crypto_kx_keypair;
++exports.crypto_kx_client_session_keys = crypto_kx_client_session_keys;
++exports.crypto_kx_server_session_keys = crypto_kx_server_session_keys;
++exports.crypto_secretstream_xchacha20poly1305_keygen = crypto_secretstream_xchacha20poly1305_keygen;
++exports.crypto_secretstream_xchacha20poly1305_init_push = crypto_secretstream_xchacha20poly1305_init_push;
++exports.crypto_secretstream_xchacha20poly1305_init_pull = crypto_secretstream_xchacha20poly1305_init_pull;
++exports.crypto_secretstream_xchacha20poly1305_push = crypto_secretstream_xchacha20poly1305_push;
++exports.crypto_secretstream_xchacha20poly1305_pull = crypto_secretstream_xchacha20poly1305_pull;
++exports.memcmp = memcmp;
++exports.crypto_secretstream_xchacha20poly1305_TAG_FINAL = exports.crypto_secretstream_xchacha20poly1305_TAG_REKEY = exports.crypto_secretstream_xchacha20poly1305_TAG_PUSH = exports.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = exports.crypto_secretstream_xchacha20poly1305_KEYBYTES = exports.crypto_secretstream_xchacha20poly1305_HEADERBYTES = exports.crypto_secretstream_xchacha20poly1305_ABYTES = exports.crypto_kx_SESSIONKEYBYTES = exports.crypto_kx_SECRETKEYBYTES = exports.crypto_kx_PUBLICKEYBYTES = void 0;
+ Object.defineProperty(exports, "to_string", {
+   enumerable: true,
+   get: function () {
+@@ -61,7 +71,13 @@ const toArrayBuffer = input => {
+   if (buffer instanceof ArrayBuffer && input.byteOffset === 0 && input.byteLength === buffer.byteLength) {
+     return buffer;
+   }
+-  return input.slice().buffer;
++  // Copy explicitly. Relying on input.slice() is unsafe: Buffer instances
++  // (Node and the react-native `buffer` polyfill) override slice() to return
++  // a view over the shared pool instead of a copy, which would pass the whole
++  // pool to the native side.
++  const copy = new Uint8Array(input.byteLength);
++  copy.set(input);
++  return copy.buffer;
+ };
+ const Libsodium = _reactNative.NativeModules.Libsodium;
+ if (Libsodium && typeof Libsodium.install === 'function') {
+@@ -279,6 +295,98 @@ function _unstable_crypto_kdf_hkdf_sha256_expand(key, info, length) {
+   return new Uint8Array(global.jsi_crypto_kdf_hkdf_sha256_expand(toArrayBuffer(key), info, length));
+ }
+ 
++const crypto_kx_PUBLICKEYBYTES = exports.crypto_kx_PUBLICKEYBYTES = global.jsi_crypto_kx_PUBLICKEYBYTES;
++const crypto_kx_SECRETKEYBYTES = exports.crypto_kx_SECRETKEYBYTES = global.jsi_crypto_kx_SECRETKEYBYTES;
++const crypto_kx_SESSIONKEYBYTES = exports.crypto_kx_SESSIONKEYBYTES = global.jsi_crypto_kx_SESSIONKEYBYTES;
++const crypto_secretstream_xchacha20poly1305_ABYTES = exports.crypto_secretstream_xchacha20poly1305_ABYTES = global.jsi_crypto_secretstream_xchacha20poly1305_ABYTES;
++const crypto_secretstream_xchacha20poly1305_HEADERBYTES = exports.crypto_secretstream_xchacha20poly1305_HEADERBYTES = global.jsi_crypto_secretstream_xchacha20poly1305_HEADERBYTES;
++const crypto_secretstream_xchacha20poly1305_KEYBYTES = exports.crypto_secretstream_xchacha20poly1305_KEYBYTES = global.jsi_crypto_secretstream_xchacha20poly1305_KEYBYTES;
++const crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = exports.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
++const crypto_secretstream_xchacha20poly1305_TAG_PUSH = exports.crypto_secretstream_xchacha20poly1305_TAG_PUSH = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_PUSH;
++const crypto_secretstream_xchacha20poly1305_TAG_REKEY = exports.crypto_secretstream_xchacha20poly1305_TAG_REKEY = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_REKEY;
++const crypto_secretstream_xchacha20poly1305_TAG_FINAL = exports.crypto_secretstream_xchacha20poly1305_TAG_FINAL = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_FINAL;
++
++function crypto_kx_keypair(outputFormat) {
++  const result = global.jsi_crypto_kx_keypair();
++  return {
++    keyType: 'x25519',
++    publicKey: (0, _utils.convertToOutputFormat)(result.publicKey, outputFormat),
++    privateKey: (0, _utils.convertToOutputFormat)(result.secretKey, outputFormat)
++  };
++}
++function crypto_kx_client_session_keys(clientPublicKey, clientSecretKey, serverPublicKey, outputFormat) {
++  const result = global.jsi_crypto_kx_client_session_keys(toArrayBuffer(clientPublicKey), toArrayBuffer(clientSecretKey), toArrayBuffer(serverPublicKey));
++  return {
++    sharedRx: (0, _utils.convertToOutputFormat)(result.sharedRx, outputFormat),
++    sharedTx: (0, _utils.convertToOutputFormat)(result.sharedTx, outputFormat)
++  };
++}
++function crypto_kx_server_session_keys(serverPublicKey, serverSecretKey, clientPublicKey, outputFormat) {
++  const result = global.jsi_crypto_kx_server_session_keys(toArrayBuffer(serverPublicKey), toArrayBuffer(serverSecretKey), toArrayBuffer(clientPublicKey));
++  return {
++    sharedRx: (0, _utils.convertToOutputFormat)(result.sharedRx, outputFormat),
++    sharedTx: (0, _utils.convertToOutputFormat)(result.sharedTx, outputFormat)
++  };
++}
++const SECRETSTREAM_STATE_NAME = 'crypto_secretstream_xchacha20poly1305_state';
++const toSecretstreamStateAddress = state => ({
++  name: SECRETSTREAM_STATE_NAME,
++  address: 0,
++  _state: state
++});
++const getSecretstreamStateBuffer = stateAddress => {
++  if (!stateAddress || !(stateAddress._state instanceof ArrayBuffer)) {
++    throw new Error('invalid state address');
++  }
++  return stateAddress._state;
++};
++function crypto_secretstream_xchacha20poly1305_keygen(outputFormat) {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_keygen();
++  return (0, _utils.convertToOutputFormat)(result, outputFormat);
++}
++function crypto_secretstream_xchacha20poly1305_init_push(key, outputFormat) {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_init_push(toArrayBuffer(key));
++  return {
++    state: toSecretstreamStateAddress(result.state),
++    header: (0, _utils.convertToOutputFormat)(result.header, outputFormat)
++  };
++}
++function crypto_secretstream_xchacha20poly1305_init_pull(header, key) {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_init_pull(toArrayBuffer(header), toArrayBuffer(key));
++  return toSecretstreamStateAddress(result);
++}
++function crypto_secretstream_xchacha20poly1305_push(state_address, message_chunk, ad, tag, outputFormat) {
++  const messageParam = typeof message_chunk === 'string' ? message_chunk : toArrayBuffer(message_chunk);
++  const adParam = ad === null || ad === undefined ? null : typeof ad === 'string' ? ad : toArrayBuffer(ad);
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_push(getSecretstreamStateBuffer(state_address), messageParam, adParam, tag);
++  return (0, _utils.convertToOutputFormat)(result, outputFormat);
++}
++function crypto_secretstream_xchacha20poly1305_pull(state_address, cipher, ad, outputFormat) {
++  const cipherParam = typeof cipher === 'string' ? cipher : toArrayBuffer(cipher);
++  const adParam = ad === null || ad === undefined ? null : typeof ad === 'string' ? ad : toArrayBuffer(ad);
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_pull(getSecretstreamStateBuffer(state_address), cipherParam, adParam);
++  if (result === false) {
++    return false;
++  }
++  return {
++    message: (0, _utils.convertToOutputFormat)(result.message, outputFormat),
++    tag: result.tag
++  };
++}
++function memcmp(b1, b2) {
++  if (!(b1 instanceof Uint8Array && b2 instanceof Uint8Array)) {
++    throw new TypeError('Only Uint8Array instances can be compared');
++  }
++  if (b1.length !== b2.length) {
++    throw new TypeError('Only instances of identical length can be compared');
++  }
++  let different = 0;
++  for (let i = 0; i < b1.length; i++) {
++    different |= (b1[i] ?? 0) ^ (b2[i] ?? 0);
++  }
++  return different === 0;
++}
++
+ // add no-op ready to match the libsodium-wrappers API
+ const ready = exports.ready = new Promise(resolve => resolve());
+ 
+@@ -342,6 +450,25 @@ var _default = exports.default = {
+   _unstable_crypto_kdf_hkdf_sha256_BYTES_MIN,
+   _unstable_crypto_kdf_hkdf_sha256_KEYBYTES,
+   _unstable_crypto_kdf_hkdf_sha256_extract,
+-  _unstable_crypto_kdf_hkdf_sha256_expand
++  _unstable_crypto_kdf_hkdf_sha256_expand,
++  crypto_kx_keypair,
++  crypto_kx_client_session_keys,
++  crypto_kx_server_session_keys,
++  crypto_kx_PUBLICKEYBYTES,
++  crypto_kx_SECRETKEYBYTES,
++  crypto_kx_SESSIONKEYBYTES,
++  crypto_secretstream_xchacha20poly1305_keygen,
++  crypto_secretstream_xchacha20poly1305_init_push,
++  crypto_secretstream_xchacha20poly1305_init_pull,
++  crypto_secretstream_xchacha20poly1305_push,
++  crypto_secretstream_xchacha20poly1305_pull,
++  crypto_secretstream_xchacha20poly1305_ABYTES,
++  crypto_secretstream_xchacha20poly1305_HEADERBYTES,
++  crypto_secretstream_xchacha20poly1305_KEYBYTES,
++  crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
++  crypto_secretstream_xchacha20poly1305_TAG_PUSH,
++  crypto_secretstream_xchacha20poly1305_TAG_REKEY,
++  crypto_secretstream_xchacha20poly1305_TAG_FINAL,
++  memcmp,
+ };
+ //# sourceMappingURL=lib.native.js.map
+\ No newline at end of file
+diff --git a/lib/module/lib.native.js b/lib/module/lib.native.js
+index 94afc7cc5b0ed3b02e490f2c654b8fc225d013e5..58b21093ed13f6e19239bf8336e1d3c2e2e70986 100644
+--- a/lib/module/lib.native.js
++++ b/lib/module/lib.native.js
+@@ -9,7 +9,13 @@ const toArrayBuffer = input => {
+   if (buffer instanceof ArrayBuffer && input.byteOffset === 0 && input.byteLength === buffer.byteLength) {
+     return buffer;
+   }
+-  return input.slice().buffer;
++  // Copy explicitly. Relying on input.slice() is unsafe: Buffer instances
++  // (Node and the react-native `buffer` polyfill) override slice() to return
++  // a view over the shared pool instead of a copy, which would pass the whole
++  // pool to the native side.
++  const copy = new Uint8Array(input.byteLength);
++  copy.set(input);
++  return copy.buffer;
+ };
+ const Libsodium = NativeModules.Libsodium;
+ if (Libsodium && typeof Libsodium.install === 'function') {
+@@ -225,6 +231,98 @@ export function _unstable_crypto_kdf_hkdf_sha256_expand(key, info, length) {
+   return new Uint8Array(global.jsi_crypto_kdf_hkdf_sha256_expand(toArrayBuffer(key), info, length));
+ }
+ 
++export const crypto_kx_PUBLICKEYBYTES = global.jsi_crypto_kx_PUBLICKEYBYTES;
++export const crypto_kx_SECRETKEYBYTES = global.jsi_crypto_kx_SECRETKEYBYTES;
++export const crypto_kx_SESSIONKEYBYTES = global.jsi_crypto_kx_SESSIONKEYBYTES;
++export const crypto_secretstream_xchacha20poly1305_ABYTES = global.jsi_crypto_secretstream_xchacha20poly1305_ABYTES;
++export const crypto_secretstream_xchacha20poly1305_HEADERBYTES = global.jsi_crypto_secretstream_xchacha20poly1305_HEADERBYTES;
++export const crypto_secretstream_xchacha20poly1305_KEYBYTES = global.jsi_crypto_secretstream_xchacha20poly1305_KEYBYTES;
++export const crypto_secretstream_xchacha20poly1305_TAG_MESSAGE = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
++export const crypto_secretstream_xchacha20poly1305_TAG_PUSH = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_PUSH;
++export const crypto_secretstream_xchacha20poly1305_TAG_REKEY = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_REKEY;
++export const crypto_secretstream_xchacha20poly1305_TAG_FINAL = global.jsi_crypto_secretstream_xchacha20poly1305_TAG_FINAL;
++
++export function crypto_kx_keypair(outputFormat) {
++  const result = global.jsi_crypto_kx_keypair();
++  return {
++    keyType: 'x25519',
++    publicKey: convertToOutputFormat(result.publicKey, outputFormat),
++    privateKey: convertToOutputFormat(result.secretKey, outputFormat)
++  };
++}
++export function crypto_kx_client_session_keys(clientPublicKey, clientSecretKey, serverPublicKey, outputFormat) {
++  const result = global.jsi_crypto_kx_client_session_keys(toArrayBuffer(clientPublicKey), toArrayBuffer(clientSecretKey), toArrayBuffer(serverPublicKey));
++  return {
++    sharedRx: convertToOutputFormat(result.sharedRx, outputFormat),
++    sharedTx: convertToOutputFormat(result.sharedTx, outputFormat)
++  };
++}
++export function crypto_kx_server_session_keys(serverPublicKey, serverSecretKey, clientPublicKey, outputFormat) {
++  const result = global.jsi_crypto_kx_server_session_keys(toArrayBuffer(serverPublicKey), toArrayBuffer(serverSecretKey), toArrayBuffer(clientPublicKey));
++  return {
++    sharedRx: convertToOutputFormat(result.sharedRx, outputFormat),
++    sharedTx: convertToOutputFormat(result.sharedTx, outputFormat)
++  };
++}
++const SECRETSTREAM_STATE_NAME = 'crypto_secretstream_xchacha20poly1305_state';
++const toSecretstreamStateAddress = state => ({
++  name: SECRETSTREAM_STATE_NAME,
++  address: 0,
++  _state: state
++});
++const getSecretstreamStateBuffer = stateAddress => {
++  if (!stateAddress || !(stateAddress._state instanceof ArrayBuffer)) {
++    throw new Error('invalid state address');
++  }
++  return stateAddress._state;
++};
++export function crypto_secretstream_xchacha20poly1305_keygen(outputFormat) {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_keygen();
++  return convertToOutputFormat(result, outputFormat);
++}
++export function crypto_secretstream_xchacha20poly1305_init_push(key, outputFormat) {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_init_push(toArrayBuffer(key));
++  return {
++    state: toSecretstreamStateAddress(result.state),
++    header: convertToOutputFormat(result.header, outputFormat)
++  };
++}
++export function crypto_secretstream_xchacha20poly1305_init_pull(header, key) {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_init_pull(toArrayBuffer(header), toArrayBuffer(key));
++  return toSecretstreamStateAddress(result);
++}
++export function crypto_secretstream_xchacha20poly1305_push(state_address, message_chunk, ad, tag, outputFormat) {
++  const messageParam = typeof message_chunk === 'string' ? message_chunk : toArrayBuffer(message_chunk);
++  const adParam = ad === null || ad === undefined ? null : typeof ad === 'string' ? ad : toArrayBuffer(ad);
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_push(getSecretstreamStateBuffer(state_address), messageParam, adParam, tag);
++  return convertToOutputFormat(result, outputFormat);
++}
++export function crypto_secretstream_xchacha20poly1305_pull(state_address, cipher, ad, outputFormat) {
++  const cipherParam = typeof cipher === 'string' ? cipher : toArrayBuffer(cipher);
++  const adParam = ad === null || ad === undefined ? null : typeof ad === 'string' ? ad : toArrayBuffer(ad);
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_pull(getSecretstreamStateBuffer(state_address), cipherParam, adParam);
++  if (result === false) {
++    return false;
++  }
++  return {
++    message: convertToOutputFormat(result.message, outputFormat),
++    tag: result.tag
++  };
++}
++export function memcmp(b1, b2) {
++  if (!(b1 instanceof Uint8Array && b2 instanceof Uint8Array)) {
++    throw new TypeError('Only Uint8Array instances can be compared');
++  }
++  if (b1.length !== b2.length) {
++    throw new TypeError('Only instances of identical length can be compared');
++  }
++  let different = 0;
++  for (let i = 0; i < b1.length; i++) {
++    different |= (b1[i] ?? 0) ^ (b2[i] ?? 0);
++  }
++  return different === 0;
++}
++
+ // add no-op ready to match the libsodium-wrappers API
+ export const ready = new Promise(resolve => resolve());
+ 
+@@ -287,6 +385,25 @@ export default {
+   _unstable_crypto_kdf_hkdf_sha256_BYTES_MIN,
+   _unstable_crypto_kdf_hkdf_sha256_KEYBYTES,
+   _unstable_crypto_kdf_hkdf_sha256_extract,
+-  _unstable_crypto_kdf_hkdf_sha256_expand
++  _unstable_crypto_kdf_hkdf_sha256_expand,
++  crypto_kx_keypair,
++  crypto_kx_client_session_keys,
++  crypto_kx_server_session_keys,
++  crypto_kx_PUBLICKEYBYTES,
++  crypto_kx_SECRETKEYBYTES,
++  crypto_kx_SESSIONKEYBYTES,
++  crypto_secretstream_xchacha20poly1305_keygen,
++  crypto_secretstream_xchacha20poly1305_init_push,
++  crypto_secretstream_xchacha20poly1305_init_pull,
++  crypto_secretstream_xchacha20poly1305_push,
++  crypto_secretstream_xchacha20poly1305_pull,
++  crypto_secretstream_xchacha20poly1305_ABYTES,
++  crypto_secretstream_xchacha20poly1305_HEADERBYTES,
++  crypto_secretstream_xchacha20poly1305_KEYBYTES,
++  crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
++  crypto_secretstream_xchacha20poly1305_TAG_PUSH,
++  crypto_secretstream_xchacha20poly1305_TAG_REKEY,
++  crypto_secretstream_xchacha20poly1305_TAG_FINAL,
++  memcmp,
+ };
+ //# sourceMappingURL=lib.native.js.map
+\ No newline at end of file
+diff --git a/lib/typescript/lib.native.d.ts b/lib/typescript/lib.native.d.ts
+index dca093170ca8fbda158aaeb357bd6f82f6e506a6..e7e278e171f2c6c08a3d07514935d1eef7492882 100644
+--- a/lib/typescript/lib.native.d.ts
++++ b/lib/typescript/lib.native.d.ts
+@@ -1,5 +1,5 @@
+ export { base64_variants, to_string } from './libsodium-js-utils';
+-import type { KeyPair, StringKeyPair } from './libsodium-types';
++import type { CryptoKX, KeyPair, MessageTag, StringCryptoKX, StringKeyPair, StringMessageTag } from './libsodium-types';
+ import type { StringOutputFormat, Uint8ArrayOutputFormat } from 'libsodium-wrappers';
+ import { base64_variants } from './libsodium-js-utils';
+ declare global {
+@@ -32,6 +32,17 @@ declare global {
+     var jsi_crypto_kdf_hkdf_sha256_BYTES_MIN: number;
+     var jsi_crypto_kdf_hkdf_sha256_KEYBYTES: number;
+     var jsi_crypto_pwhash_ALG_ARGON2ID13: number;
++    var jsi_crypto_kx_PUBLICKEYBYTES: number;
++    var jsi_crypto_kx_SECRETKEYBYTES: number;
++    var jsi_crypto_kx_SESSIONKEYBYTES: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_ABYTES: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_HEADERBYTES: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_KEYBYTES: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_STATEBYTES: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_TAG_MESSAGE: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_TAG_PUSH: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_TAG_REKEY: number;
++    var jsi_crypto_secretstream_xchacha20poly1305_TAG_FINAL: number;
+     function jsi_crypto_auth(message: string | ArrayBuffer, key: ArrayBuffer): ArrayBuffer;
+     function jsi_crypto_auth_verify(tag: ArrayBuffer, message: string | ArrayBuffer, key: ArrayBuffer): boolean;
+     function jsi_crypto_auth_keygen(): ArrayBuffer;
+@@ -76,6 +87,29 @@ declare global {
+     function jsi_crypto_aead_xchacha20poly1305_ietf_decrypt(ciphertext: string | ArrayBuffer, additionalData: string, public_nonce: ArrayBuffer, key: ArrayBuffer): ArrayBuffer;
+     function jsi_crypto_kdf_hkdf_sha256_extract(key: ArrayBuffer, salt: ArrayBuffer): ArrayBuffer;
+     function jsi_crypto_kdf_hkdf_sha256_expand(key: ArrayBuffer, info: string, length: number): ArrayBuffer;
++    function jsi_crypto_kx_keypair(): {
++        publicKey: ArrayBuffer;
++        secretKey: ArrayBuffer;
++    };
++    function jsi_crypto_kx_client_session_keys(clientPublicKey: ArrayBuffer, clientSecretKey: ArrayBuffer, serverPublicKey: ArrayBuffer): {
++        sharedRx: ArrayBuffer;
++        sharedTx: ArrayBuffer;
++    };
++    function jsi_crypto_kx_server_session_keys(serverPublicKey: ArrayBuffer, serverSecretKey: ArrayBuffer, clientPublicKey: ArrayBuffer): {
++        sharedRx: ArrayBuffer;
++        sharedTx: ArrayBuffer;
++    };
++    function jsi_crypto_secretstream_xchacha20poly1305_keygen(): ArrayBuffer;
++    function jsi_crypto_secretstream_xchacha20poly1305_init_push(key: ArrayBuffer): {
++        state: ArrayBuffer;
++        header: ArrayBuffer;
++    };
++    function jsi_crypto_secretstream_xchacha20poly1305_init_pull(header: ArrayBuffer, key: ArrayBuffer): ArrayBuffer;
++    function jsi_crypto_secretstream_xchacha20poly1305_push(state: ArrayBuffer, message: string | ArrayBuffer, additionalData: string | ArrayBuffer | null, tag: number): ArrayBuffer;
++    function jsi_crypto_secretstream_xchacha20poly1305_pull(state: ArrayBuffer, ciphertext: string | ArrayBuffer, additionalData: string | ArrayBuffer | null): {
++        message: ArrayBuffer;
++        tag: number;
++    } | false;
+ }
+ export declare const crypto_auth_BYTES: number;
+ export declare const crypto_auth_KEYBYTES: number;
+@@ -159,6 +193,43 @@ export declare function crypto_aead_xchacha20poly1305_ietf_decrypt(secret_nonce:
+ export declare function crypto_aead_xchacha20poly1305_ietf_decrypt(secret_nonce: string | Uint8Array | null, ciphertext: string | Uint8Array, additional_data: string | Uint8Array | null, public_nonce: Uint8Array, key: Uint8Array, outputFormat: StringOutputFormat): string;
+ export declare function _unstable_crypto_kdf_hkdf_sha256_extract(key: Uint8Array, salt: Uint8Array): Uint8Array<ArrayBuffer>;
+ export declare function _unstable_crypto_kdf_hkdf_sha256_expand(key: Uint8Array, info: string, length: number): Uint8Array<ArrayBuffer>;
++export declare const crypto_kx_PUBLICKEYBYTES: number;
++export declare const crypto_kx_SECRETKEYBYTES: number;
++export declare const crypto_kx_SESSIONKEYBYTES: number;
++export declare const crypto_secretstream_xchacha20poly1305_ABYTES: number;
++export declare const crypto_secretstream_xchacha20poly1305_HEADERBYTES: number;
++export declare const crypto_secretstream_xchacha20poly1305_KEYBYTES: number;
++export declare const crypto_secretstream_xchacha20poly1305_TAG_MESSAGE: number;
++export declare const crypto_secretstream_xchacha20poly1305_TAG_PUSH: number;
++export declare const crypto_secretstream_xchacha20poly1305_TAG_REKEY: number;
++export declare const crypto_secretstream_xchacha20poly1305_TAG_FINAL: number;
++export declare function crypto_kx_keypair(outputFormat?: Uint8ArrayOutputFormat | null): KeyPair;
++export declare function crypto_kx_keypair(outputFormat: StringOutputFormat): StringKeyPair;
++export declare function crypto_kx_client_session_keys(clientPublicKey: Uint8Array, clientSecretKey: Uint8Array, serverPublicKey: Uint8Array, outputFormat?: Uint8ArrayOutputFormat | null): CryptoKX;
++export declare function crypto_kx_client_session_keys(clientPublicKey: Uint8Array, clientSecretKey: Uint8Array, serverPublicKey: Uint8Array, outputFormat: StringOutputFormat): StringCryptoKX;
++export declare function crypto_kx_server_session_keys(serverPublicKey: Uint8Array, serverSecretKey: Uint8Array, clientPublicKey: Uint8Array, outputFormat?: Uint8ArrayOutputFormat | null): CryptoKX;
++export declare function crypto_kx_server_session_keys(serverPublicKey: Uint8Array, serverSecretKey: Uint8Array, clientPublicKey: Uint8Array, outputFormat: StringOutputFormat): StringCryptoKX;
++export type SecretstreamStateAddress = {
++    name: string;
++    address: number;
++    _state: ArrayBuffer;
++};
++export declare function crypto_secretstream_xchacha20poly1305_keygen(outputFormat?: Uint8ArrayOutputFormat | null): Uint8Array;
++export declare function crypto_secretstream_xchacha20poly1305_keygen(outputFormat: StringOutputFormat): string;
++export declare function crypto_secretstream_xchacha20poly1305_init_push(key: Uint8Array, outputFormat?: Uint8ArrayOutputFormat | null): {
++    state: SecretstreamStateAddress;
++    header: Uint8Array;
++};
++export declare function crypto_secretstream_xchacha20poly1305_init_push(key: Uint8Array, outputFormat: StringOutputFormat): {
++    state: SecretstreamStateAddress;
++    header: string;
++};
++export declare function crypto_secretstream_xchacha20poly1305_init_pull(header: Uint8Array, key: Uint8Array): SecretstreamStateAddress;
++export declare function crypto_secretstream_xchacha20poly1305_push(state_address: SecretstreamStateAddress, message_chunk: string | Uint8Array, ad: string | Uint8Array | null, tag: number, outputFormat?: Uint8ArrayOutputFormat | null): Uint8Array;
++export declare function crypto_secretstream_xchacha20poly1305_push(state_address: SecretstreamStateAddress, message_chunk: string | Uint8Array, ad: string | Uint8Array | null, tag: number, outputFormat: StringOutputFormat): string;
++export declare function crypto_secretstream_xchacha20poly1305_pull(state_address: SecretstreamStateAddress, cipher: string | Uint8Array, ad?: string | Uint8Array | null, outputFormat?: Uint8ArrayOutputFormat | null): MessageTag | false;
++export declare function crypto_secretstream_xchacha20poly1305_pull(state_address: SecretstreamStateAddress, cipher: string | Uint8Array, ad: string | Uint8Array | null, outputFormat: StringOutputFormat): StringMessageTag | false;
++export declare function memcmp(b1: Uint8Array, b2: Uint8Array): boolean;
+ export declare const ready: Promise<void>;
+ export declare const loadSumoVersion: () => undefined;
+ declare const _default: {
+@@ -219,6 +290,25 @@ declare const _default: {
+     _unstable_crypto_kdf_hkdf_sha256_KEYBYTES: number;
+     _unstable_crypto_kdf_hkdf_sha256_extract: typeof _unstable_crypto_kdf_hkdf_sha256_extract;
+     _unstable_crypto_kdf_hkdf_sha256_expand: typeof _unstable_crypto_kdf_hkdf_sha256_expand;
++    crypto_kx_keypair: typeof crypto_kx_keypair;
++    crypto_kx_client_session_keys: typeof crypto_kx_client_session_keys;
++    crypto_kx_server_session_keys: typeof crypto_kx_server_session_keys;
++    crypto_kx_PUBLICKEYBYTES: number;
++    crypto_kx_SECRETKEYBYTES: number;
++    crypto_kx_SESSIONKEYBYTES: number;
++    crypto_secretstream_xchacha20poly1305_keygen: typeof crypto_secretstream_xchacha20poly1305_keygen;
++    crypto_secretstream_xchacha20poly1305_init_push: typeof crypto_secretstream_xchacha20poly1305_init_push;
++    crypto_secretstream_xchacha20poly1305_init_pull: typeof crypto_secretstream_xchacha20poly1305_init_pull;
++    crypto_secretstream_xchacha20poly1305_push: typeof crypto_secretstream_xchacha20poly1305_push;
++    crypto_secretstream_xchacha20poly1305_pull: typeof crypto_secretstream_xchacha20poly1305_pull;
++    crypto_secretstream_xchacha20poly1305_ABYTES: number;
++    crypto_secretstream_xchacha20poly1305_HEADERBYTES: number;
++    crypto_secretstream_xchacha20poly1305_KEYBYTES: number;
++    crypto_secretstream_xchacha20poly1305_TAG_MESSAGE: number;
++    crypto_secretstream_xchacha20poly1305_TAG_PUSH: number;
++    crypto_secretstream_xchacha20poly1305_TAG_REKEY: number;
++    crypto_secretstream_xchacha20poly1305_TAG_FINAL: number;
++    memcmp: typeof memcmp;
+ };
+ export default _default;
+ //# sourceMappingURL=lib.native.d.ts.map
+\ No newline at end of file
+diff --git a/src/lib.native.ts b/src/lib.native.ts
+index bfa7ea8ba73ed71b544b5c6de90296e4b9055321..7622ac0011a04aae9395e163986ca67d3ede9188 100644
+--- a/src/lib.native.ts
++++ b/src/lib.native.ts
+@@ -1,5 +1,12 @@
+ export { base64_variants, to_string } from './libsodium-js-utils';
+-import type { KeyPair, StringKeyPair } from './libsodium-types';
++import type {
++  CryptoKX,
++  KeyPair,
++  MessageTag,
++  StringCryptoKX,
++  StringKeyPair,
++  StringMessageTag,
++} from './libsodium-types';
+ import type {
+   StringOutputFormat,
+   Uint8ArrayOutputFormat,
+@@ -19,7 +26,13 @@ const toArrayBuffer = (input: Uint8Array): ArrayBuffer => {
+   ) {
+     return buffer;
+   }
+-  return input.slice().buffer;
++  // Copy explicitly. Relying on input.slice() is unsafe: Buffer instances
++  // (Node and the react-native `buffer` polyfill) override slice() to return
++  // a view over the shared pool instead of a copy, which would pass the whole
++  // pool to the native side.
++  const copy = new Uint8Array(input.byteLength);
++  copy.set(input);
++  return copy.buffer;
+ };
+ 
+ const Libsodium = NativeModules.Libsodium;
+@@ -63,6 +76,17 @@ declare global {
+   var jsi_crypto_kdf_hkdf_sha256_BYTES_MIN: number;
+   var jsi_crypto_kdf_hkdf_sha256_KEYBYTES: number;
+   var jsi_crypto_pwhash_ALG_ARGON2ID13: number;
++  var jsi_crypto_kx_PUBLICKEYBYTES: number;
++  var jsi_crypto_kx_SECRETKEYBYTES: number;
++  var jsi_crypto_kx_SESSIONKEYBYTES: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_ABYTES: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_HEADERBYTES: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_KEYBYTES: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_STATEBYTES: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_TAG_MESSAGE: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_TAG_PUSH: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_TAG_REKEY: number;
++  var jsi_crypto_secretstream_xchacha20poly1305_TAG_FINAL: number;
+ 
+   function jsi_crypto_auth(
+     message: string | ArrayBuffer,
+@@ -193,6 +217,53 @@ declare global {
+     info: string,
+     length: number
+   ): ArrayBuffer;
++  function jsi_crypto_kx_keypair(): {
++    publicKey: ArrayBuffer;
++    secretKey: ArrayBuffer;
++  };
++  function jsi_crypto_kx_client_session_keys(
++    clientPublicKey: ArrayBuffer,
++    clientSecretKey: ArrayBuffer,
++    serverPublicKey: ArrayBuffer
++  ): {
++    sharedRx: ArrayBuffer;
++    sharedTx: ArrayBuffer;
++  };
++  function jsi_crypto_kx_server_session_keys(
++    serverPublicKey: ArrayBuffer,
++    serverSecretKey: ArrayBuffer,
++    clientPublicKey: ArrayBuffer
++  ): {
++    sharedRx: ArrayBuffer;
++    sharedTx: ArrayBuffer;
++  };
++  function jsi_crypto_secretstream_xchacha20poly1305_keygen(): ArrayBuffer;
++  function jsi_crypto_secretstream_xchacha20poly1305_init_push(
++    key: ArrayBuffer
++  ): {
++    state: ArrayBuffer;
++    header: ArrayBuffer;
++  };
++  function jsi_crypto_secretstream_xchacha20poly1305_init_pull(
++    header: ArrayBuffer,
++    key: ArrayBuffer
++  ): ArrayBuffer;
++  function jsi_crypto_secretstream_xchacha20poly1305_push(
++    state: ArrayBuffer,
++    message: string | ArrayBuffer,
++    additionalData: string | ArrayBuffer | null,
++    tag: number
++  ): ArrayBuffer;
++  function jsi_crypto_secretstream_xchacha20poly1305_pull(
++    state: ArrayBuffer,
++    ciphertext: string | ArrayBuffer,
++    additionalData: string | ArrayBuffer | null
++  ):
++    | {
++        message: ArrayBuffer;
++        tag: number;
++      }
++    | false;
+ }
+ 
+ export const crypto_auth_BYTES = global.jsi_crypto_auth_BYTES;
+@@ -868,6 +939,258 @@ export function _unstable_crypto_kdf_hkdf_sha256_expand(
+   );
+ }
+ 
++export const crypto_kx_PUBLICKEYBYTES = global.jsi_crypto_kx_PUBLICKEYBYTES;
++export const crypto_kx_SECRETKEYBYTES = global.jsi_crypto_kx_SECRETKEYBYTES;
++export const crypto_kx_SESSIONKEYBYTES = global.jsi_crypto_kx_SESSIONKEYBYTES;
++export const crypto_secretstream_xchacha20poly1305_ABYTES =
++  global.jsi_crypto_secretstream_xchacha20poly1305_ABYTES;
++export const crypto_secretstream_xchacha20poly1305_HEADERBYTES =
++  global.jsi_crypto_secretstream_xchacha20poly1305_HEADERBYTES;
++export const crypto_secretstream_xchacha20poly1305_KEYBYTES =
++  global.jsi_crypto_secretstream_xchacha20poly1305_KEYBYTES;
++export const crypto_secretstream_xchacha20poly1305_TAG_MESSAGE =
++  global.jsi_crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
++export const crypto_secretstream_xchacha20poly1305_TAG_PUSH =
++  global.jsi_crypto_secretstream_xchacha20poly1305_TAG_PUSH;
++export const crypto_secretstream_xchacha20poly1305_TAG_REKEY =
++  global.jsi_crypto_secretstream_xchacha20poly1305_TAG_REKEY;
++export const crypto_secretstream_xchacha20poly1305_TAG_FINAL =
++  global.jsi_crypto_secretstream_xchacha20poly1305_TAG_FINAL;
++
++export function crypto_kx_keypair(
++  outputFormat?: Uint8ArrayOutputFormat | null
++): KeyPair;
++export function crypto_kx_keypair(outputFormat: StringOutputFormat): StringKeyPair;
++export function crypto_kx_keypair(outputFormat: OutputFormat): unknown {
++  const result = global.jsi_crypto_kx_keypair();
++  return {
++    keyType: 'x25519',
++    publicKey: convertToOutputFormat(result.publicKey, outputFormat),
++    privateKey: convertToOutputFormat(result.secretKey, outputFormat),
++  };
++}
++
++export function crypto_kx_client_session_keys(
++  clientPublicKey: Uint8Array,
++  clientSecretKey: Uint8Array,
++  serverPublicKey: Uint8Array,
++  outputFormat?: Uint8ArrayOutputFormat | null
++): CryptoKX;
++export function crypto_kx_client_session_keys(
++  clientPublicKey: Uint8Array,
++  clientSecretKey: Uint8Array,
++  serverPublicKey: Uint8Array,
++  outputFormat: StringOutputFormat
++): StringCryptoKX;
++export function crypto_kx_client_session_keys(
++  clientPublicKey: Uint8Array,
++  clientSecretKey: Uint8Array,
++  serverPublicKey: Uint8Array,
++  outputFormat: OutputFormat
++): unknown {
++  const result = global.jsi_crypto_kx_client_session_keys(
++    toArrayBuffer(clientPublicKey),
++    toArrayBuffer(clientSecretKey),
++    toArrayBuffer(serverPublicKey)
++  );
++  return {
++    sharedRx: convertToOutputFormat(result.sharedRx, outputFormat),
++    sharedTx: convertToOutputFormat(result.sharedTx, outputFormat),
++  };
++}
++
++export function crypto_kx_server_session_keys(
++  serverPublicKey: Uint8Array,
++  serverSecretKey: Uint8Array,
++  clientPublicKey: Uint8Array,
++  outputFormat?: Uint8ArrayOutputFormat | null
++): CryptoKX;
++export function crypto_kx_server_session_keys(
++  serverPublicKey: Uint8Array,
++  serverSecretKey: Uint8Array,
++  clientPublicKey: Uint8Array,
++  outputFormat: StringOutputFormat
++): StringCryptoKX;
++export function crypto_kx_server_session_keys(
++  serverPublicKey: Uint8Array,
++  serverSecretKey: Uint8Array,
++  clientPublicKey: Uint8Array,
++  outputFormat: OutputFormat
++): unknown {
++  const result = global.jsi_crypto_kx_server_session_keys(
++    toArrayBuffer(serverPublicKey),
++    toArrayBuffer(serverSecretKey),
++    toArrayBuffer(clientPublicKey)
++  );
++  return {
++    sharedRx: convertToOutputFormat(result.sharedRx, outputFormat),
++    sharedTx: convertToOutputFormat(result.sharedTx, outputFormat),
++  };
++}
++
++export type SecretstreamStateAddress = {
++  name: string;
++  address: number;
++  _state: ArrayBuffer;
++};
++
++const SECRETSTREAM_STATE_NAME = 'crypto_secretstream_xchacha20poly1305_state';
++
++const toSecretstreamStateAddress = (
++  state: ArrayBuffer
++): SecretstreamStateAddress => ({
++  name: SECRETSTREAM_STATE_NAME,
++  address: 0,
++  _state: state,
++});
++
++const getSecretstreamStateBuffer = (
++  stateAddress: SecretstreamStateAddress
++): ArrayBuffer => {
++  if (!stateAddress || !(stateAddress._state instanceof ArrayBuffer)) {
++    throw new Error('invalid state address');
++  }
++  return stateAddress._state;
++};
++
++export function crypto_secretstream_xchacha20poly1305_keygen(
++  outputFormat?: Uint8ArrayOutputFormat | null
++): Uint8Array;
++export function crypto_secretstream_xchacha20poly1305_keygen(
++  outputFormat: StringOutputFormat
++): string;
++export function crypto_secretstream_xchacha20poly1305_keygen(
++  outputFormat: OutputFormat
++): unknown {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_keygen();
++  return convertToOutputFormat(result, outputFormat);
++}
++
++export function crypto_secretstream_xchacha20poly1305_init_push(
++  key: Uint8Array,
++  outputFormat?: Uint8ArrayOutputFormat | null
++): { state: SecretstreamStateAddress; header: Uint8Array };
++export function crypto_secretstream_xchacha20poly1305_init_push(
++  key: Uint8Array,
++  outputFormat: StringOutputFormat
++): { state: SecretstreamStateAddress; header: string };
++export function crypto_secretstream_xchacha20poly1305_init_push(
++  key: Uint8Array,
++  outputFormat: OutputFormat
++): unknown {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_init_push(
++    toArrayBuffer(key)
++  );
++  return {
++    state: toSecretstreamStateAddress(result.state),
++    header: convertToOutputFormat(result.header, outputFormat),
++  };
++}
++
++export function crypto_secretstream_xchacha20poly1305_init_pull(
++  header: Uint8Array,
++  key: Uint8Array
++): SecretstreamStateAddress {
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_init_pull(
++    toArrayBuffer(header),
++    toArrayBuffer(key)
++  );
++  return toSecretstreamStateAddress(result);
++}
++
++export function crypto_secretstream_xchacha20poly1305_push(
++  state_address: SecretstreamStateAddress,
++  message_chunk: string | Uint8Array,
++  ad: string | Uint8Array | null,
++  tag: number,
++  outputFormat?: Uint8ArrayOutputFormat | null
++): Uint8Array;
++export function crypto_secretstream_xchacha20poly1305_push(
++  state_address: SecretstreamStateAddress,
++  message_chunk: string | Uint8Array,
++  ad: string | Uint8Array | null,
++  tag: number,
++  outputFormat: StringOutputFormat
++): string;
++export function crypto_secretstream_xchacha20poly1305_push(
++  state_address: SecretstreamStateAddress,
++  message_chunk: string | Uint8Array,
++  ad: string | Uint8Array | null,
++  tag: number,
++  outputFormat: OutputFormat
++): unknown {
++  const messageParam =
++    typeof message_chunk === 'string'
++      ? message_chunk
++      : toArrayBuffer(message_chunk);
++  const adParam =
++    ad === null || ad === undefined
++      ? null
++      : typeof ad === 'string'
++        ? ad
++        : toArrayBuffer(ad);
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_push(
++    getSecretstreamStateBuffer(state_address),
++    messageParam,
++    adParam,
++    tag
++  );
++  return convertToOutputFormat(result, outputFormat);
++}
++
++export function crypto_secretstream_xchacha20poly1305_pull(
++  state_address: SecretstreamStateAddress,
++  cipher: string | Uint8Array,
++  ad?: string | Uint8Array | null,
++  outputFormat?: Uint8ArrayOutputFormat | null
++): MessageTag | false;
++export function crypto_secretstream_xchacha20poly1305_pull(
++  state_address: SecretstreamStateAddress,
++  cipher: string | Uint8Array,
++  ad: string | Uint8Array | null,
++  outputFormat: StringOutputFormat
++): StringMessageTag | false;
++export function crypto_secretstream_xchacha20poly1305_pull(
++  state_address: SecretstreamStateAddress,
++  cipher: string | Uint8Array,
++  ad?: string | Uint8Array | null,
++  outputFormat?: OutputFormat
++): unknown {
++  const cipherParam = typeof cipher === 'string' ? cipher : toArrayBuffer(cipher);
++  const adParam =
++    ad === null || ad === undefined
++      ? null
++      : typeof ad === 'string'
++        ? ad
++        : toArrayBuffer(ad);
++  const result = global.jsi_crypto_secretstream_xchacha20poly1305_pull(
++    getSecretstreamStateBuffer(state_address),
++    cipherParam,
++    adParam
++  );
++  if (result === false) {
++    return false;
++  }
++  return {
++    message: convertToOutputFormat(result.message, outputFormat),
++    tag: result.tag,
++  };
++}
++
++export function memcmp(b1: Uint8Array, b2: Uint8Array): boolean {
++  if (!(b1 instanceof Uint8Array && b2 instanceof Uint8Array)) {
++    throw new TypeError('Only Uint8Array instances can be compared');
++  }
++  if (b1.length !== b2.length) {
++    throw new TypeError('Only instances of identical length can be compared');
++  }
++  let different = 0;
++  for (let i = 0; i < b1.length; i++) {
++    different |= (b1[i] ?? 0) ^ (b2[i] ?? 0);
++  }
++  return different === 0;
++}
++
+ // add no-op ready to match the libsodium-wrappers API
+ export const ready: Promise<void> = new Promise((resolve) => resolve());
+ 
+@@ -932,4 +1255,23 @@ export default {
+   _unstable_crypto_kdf_hkdf_sha256_KEYBYTES,
+   _unstable_crypto_kdf_hkdf_sha256_extract,
+   _unstable_crypto_kdf_hkdf_sha256_expand,
++  crypto_kx_keypair,
++  crypto_kx_client_session_keys,
++  crypto_kx_server_session_keys,
++  crypto_kx_PUBLICKEYBYTES,
++  crypto_kx_SECRETKEYBYTES,
++  crypto_kx_SESSIONKEYBYTES,
++  crypto_secretstream_xchacha20poly1305_keygen,
++  crypto_secretstream_xchacha20poly1305_init_push,
++  crypto_secretstream_xchacha20poly1305_init_pull,
++  crypto_secretstream_xchacha20poly1305_push,
++  crypto_secretstream_xchacha20poly1305_pull,
++  crypto_secretstream_xchacha20poly1305_ABYTES,
++  crypto_secretstream_xchacha20poly1305_HEADERBYTES,
++  crypto_secretstream_xchacha20poly1305_KEYBYTES,
++  crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
++  crypto_secretstream_xchacha20poly1305_TAG_PUSH,
++  crypto_secretstream_xchacha20poly1305_TAG_REKEY,
++  crypto_secretstream_xchacha20poly1305_TAG_FINAL,
++  memcmp,
+ };

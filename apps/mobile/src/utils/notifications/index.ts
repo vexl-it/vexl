@@ -11,6 +11,7 @@ import {getDefaultStore} from 'jotai'
 import {useEffect, useState} from 'react'
 import {Alert, Platform} from 'react-native'
 import NotificationSetting from 'react-native-open-notification'
+import {registerMmkvKey} from '../atomUtils/mmkvMigrationRegistry'
 import {useTranslation} from '../localization/I18nProvider'
 import {storage} from '../mmkv/effectMmkv'
 import reportError from '../reportError'
@@ -118,6 +119,14 @@ export function getNotificationToken(): T.Task<ExpoNotificationToken | null> {
 
 // todo #2124: remove after migrating to vexl notification token
 export const NOTIFICATION_TOKEN_CACHE_KEY = 'notificationToken'
+
+// Cached Expo push token of THIS device. Must never migrate — a stale source
+// token on the destination would be re-uploaded by the token refresh task.
+registerMmkvKey({
+  key: NOTIFICATION_TOKEN_CACHE_KEY,
+  policy: 'deviceLocal',
+  nativeType: 'string',
+})
 
 const getCachedNotificationTokenE: Effect.Effect<
   Option.Option<ExpoNotificationToken>

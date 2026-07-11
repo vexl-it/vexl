@@ -39,20 +39,27 @@ export function moveImageToInternalDirectory({
         mode === 'cache' ? FileSystem.Paths.cache : FileSystem.Paths.document
       if (!rootDirectory) throw new Error('document dir not found')
 
-      const parentDirectory = directory
-        ? `${rootDirectory.uri}${directory}`
+      // Note: this used to concatenate `${rootDirectory.uri}${directory}` and
+      // `${parentDirectory}${fileName}` without '/' separators, which placed
+      // files like 'profilePicture<uuid>.jpeg' directly into the root
+      // directory instead of into '<root>/profilePicture/'. Paths.join keeps
+      // the segments properly separated.
+      const parentDirectoryUri = directory
+        ? FileSystem.Paths.join(rootDirectory.uri, directory)
         : rootDirectory.uri
 
-      const dirInfo = FileSystem.Paths.info(parentDirectory)
-      if (!dirInfo.exists) {
-        new FileSystem.Directory(parentDirectory).create()
+      const parentDirectory = new FileSystem.Directory(parentDirectoryUri)
+      if (!parentDirectory.exists) {
+        parentDirectory.create({intermediates: true})
       }
 
-      const path = `${parentDirectory}${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
+      const fileName = `${generateUuid()}.${imagePath.split('.').at(-1) ?? 'jpeg'}`
+      const destinationFile = new FileSystem.File(
+        FileSystem.Paths.join(parentDirectoryUri, fileName)
+      )
 
-      new FileSystem.File(imagePath).copySync(new FileSystem.File(path))
-      const infoTo = new FileSystem.File(path)
-      return Schema.decodeSync(UriString)(infoTo.uri)
+      new FileSystem.File(imagePath).copySync(destinationFile)
+      return Schema.decodeSync(UriString)(destinationFile.uri)
     },
     catch(error) {
       return new ImagePickerError({reason: 'FileError', error})

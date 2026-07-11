@@ -19,7 +19,8 @@ export const notesStateAtom = atomWithParsedMmkvStorage(
     notes: [],
     lastUpdatedAt: MINIMAL_DATE,
   },
-  NotesState
+  NotesState,
+  'account'
 )
 
 export const notesAtom = focusAtom(notesStateAtom, (optic) =>

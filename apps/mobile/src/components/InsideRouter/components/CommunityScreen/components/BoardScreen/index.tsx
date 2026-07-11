@@ -1,3 +1,4 @@
+import {useFocusEffect} from '@react-navigation/native'
 import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list'
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {
@@ -132,6 +133,12 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
     })
   }, [refreshNotes])
 
+  useFocusEffect(
+    useCallback(() => {
+      handleRefresh()
+    }, [handleRefresh])
+  )
+
   const goToCreateNote = useCallback(() => {
     navigation.navigate('CreateNote')
   }, [navigation])
@@ -175,8 +182,6 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
     [filter, setFilter]
   )
 
-  const isEmpty = visibleNotes.length === 0
-
   return (
     <Stack flex={1}>
       <YStack paddingHorizontal="$4" paddingTop="$4" paddingBottom="$2">
@@ -187,59 +192,58 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
         />
       </YStack>
 
-      {isEmpty ? (
-        <YStack
-          flex={1}
-          pt="$5"
-          alignItems="center"
-          justifyContent="flex-start"
-          gap="$4"
-          paddingHorizontal="$6"
-        >
-          <Typography
-            variant="heading3"
-            color="$foregroundPrimary"
-            textAlign="center"
+      <FlashList
+        data={visibleNotes}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ItemSeparatorComponent={NoteCardSeparator}
+        ListEmptyComponent={
+          <YStack
+            flex={1}
+            pt="$5"
+            alignItems="center"
+            justifyContent="flex-start"
+            gap="$4"
+            paddingHorizontal="$6"
           >
-            {filter === 'mine'
-              ? t('notes.board.emptyMyTitle')
-              : t('notes.board.emptyAllTitle')}
-          </Typography>
-          <Typography
-            variant="description"
-            color="$foregroundSecondary"
-            textAlign="center"
-          >
-            {filter === 'mine'
-              ? t('notes.board.emptyMyDescription')
-              : t('notes.board.emptyAllDescription')}
-          </Typography>
-          <Button
-            variant="tertiary"
-            alignSelf="stretch"
-            size="small"
-            onPress={goToCreateNote}
-          >
-            {t('notes.board.newNote')}
-          </Button>
-        </YStack>
-      ) : (
-        <FlashList
-          data={visibleNotes}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          ItemSeparatorComponent={NoteCardSeparator}
-          contentContainerStyle={LIST_CONTENT_STYLE}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={theme.foregroundSecondary.get()}
-            />
-          }
-        />
-      )}
+            <Typography
+              variant="heading3"
+              color="$foregroundPrimary"
+              textAlign="center"
+            >
+              {filter === 'mine'
+                ? t('notes.board.emptyMyTitle')
+                : t('notes.board.emptyAllTitle')}
+            </Typography>
+            <Typography
+              variant="description"
+              color="$foregroundSecondary"
+              textAlign="center"
+            >
+              {filter === 'mine'
+                ? t('notes.board.emptyMyDescription')
+                : t('notes.board.emptyAllDescription')}
+            </Typography>
+            <Button
+              variant="tertiary"
+              alignSelf="stretch"
+              size="small"
+              onPress={goToCreateNote}
+            >
+              {t('notes.board.newNote')}
+            </Button>
+          </YStack>
+        }
+        contentContainerStyle={LIST_CONTENT_STYLE}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.foregroundSecondary.get()}
+          />
+        }
+      />
 
       <FabButton
         position="absolute"
@@ -258,6 +262,7 @@ function NoteCardSeparator(): React.JSX.Element {
 }
 
 const LIST_CONTENT_STYLE = {
+  flexGrow: 1,
   paddingHorizontal: getTokens().space.$4.val,
   paddingTop: getTokens().space.$2.val,
   paddingBottom: getTokens().space.$12.val,

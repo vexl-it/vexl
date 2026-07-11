@@ -12,7 +12,7 @@ export const AppSource = Schema.String.pipe(Schema.brand('AppSource'))
 //   'altStore',
 //   'APK',
 //   'local',
-//   'account-deletion-page',
+//   'web-app',
 //   'unknown'
 // )
 export type AppSource = typeof AppSource.Type

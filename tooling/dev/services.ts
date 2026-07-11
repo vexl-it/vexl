@@ -322,16 +322,16 @@ export const WEB_APPS: readonly RunnableApp[] = [
     }),
   },
   {
-    name: 'account-deletion-website',
-    workspaceName: 'account-deletion-website',
-    dir: 'apps/account-deletion-website',
+    name: 'web-app',
+    workspaceName: 'web-app',
+    dir: 'apps/web-app',
     kind: 'web',
-    portKey: 'accountDeletionWebsite',
+    portKey: 'webApp',
     needs: {redis: false, s3: false},
     run: {type: 'pnpm-script', script: 'dev'},
     buildEnv: (ctx) => ({
       NODE_ENV: ctx.cfg.common.NODE_ENV,
-      PORT: String(ctx.ports.accountDeletionWebsite),
+      PORT: String(ctx.ports.webApp),
       // NOTE: this site has no `local` backend preset — getEnvPreset() only
       // switches prod vs stage. With BE_ENV unset it talks to the STAGE backend.
     }),

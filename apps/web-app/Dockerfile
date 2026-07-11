@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Optimized multi-stage build for the account-deletion-website Next.js app.
+# Optimized multi-stage build for the web-app Next.js app.
 # Mirrors the backend pipeline: turbo prune -> cacheable install -> build -> slim runner.
 
 # --- Pruner stage -----------------------------------------------------------
@@ -13,7 +13,7 @@ WORKDIR /app
 COPY . .
 # node_modules is in .dockerignore, so install turbo globally to run prune.
 RUN npm install -g turbo@${TURBO_VERSION}
-RUN turbo prune account-deletion-website --docker
+RUN turbo prune web-app --docker
 
 # --- Builder stage ----------------------------------------------------------
 FROM node:24-alpine AS builder
@@ -31,12 +31,12 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 
 # Build layer: full source of the pruned set.
 COPY --from=pruner /app/out/full/ ./
-RUN pnpm --filter account-deletion-website build
+RUN pnpm --filter web-app build
 
 # Copy static assets INTO the standalone folder (not included by default).
-WORKDIR /app/apps/account-deletion-website
-RUN mkdir -p .next/standalone/apps/account-deletion-website/.next && cp -r .next/static .next/standalone/apps/account-deletion-website/.next/
-RUN if [ -d "public" ]; then cp -r public .next/standalone/apps/account-deletion-website/; fi
+WORKDIR /app/apps/web-app
+RUN mkdir -p .next/standalone/apps/web-app/.next && cp -r .next/static .next/standalone/apps/web-app/.next/
+RUN if [ -d "public" ]; then cp -r public .next/standalone/apps/web-app/; fi
 
 # --- Runner stage -----------------------------------------------------------
 # Next.js standalone output already bundles a minimal traced node_modules.
@@ -48,13 +48,13 @@ ARG ENVIRONMENT
 
 ENV NODE_ENV=production
 ENV SERVICE_VERSION=${SERVICE_VERSION}
-ENV SERVICE_NAME="Account Deletion Website - ${ENVIRONMENT}"
+ENV SERVICE_NAME="Web App - ${ENVIRONMENT}"
 ENV PORT=3000
 
-COPY --chown=node:node --from=builder /app/apps/account-deletion-website/.next/standalone ./
+COPY --chown=node:node --from=builder /app/apps/web-app/.next/standalone ./
 
 EXPOSE 3000
 
 USER node
 
-CMD ["node", "apps/account-deletion-website/server.js"]
+CMD ["node", "apps/web-app/server.js"]

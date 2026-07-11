@@ -50,7 +50,7 @@ importers:
         specifier: ^2.10.0
         version: 2.10.0
 
-  apps/account-deletion-website:
+  apps/web-app:
     dependencies:
       '@effect/platform':
         specifier: ^0.93.6

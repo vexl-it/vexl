@@ -11,7 +11,10 @@ import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneN
 import {type UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {type RealLifeInfo} from '@vexl-next/domain/src/general/UserNameAndAvatar.brand'
 import {type ClubCode, type ClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
+import {
+  type ChatId,
+  type ChatMessageId,
+} from '@vexl-next/domain/src/general/messaging'
 import {type NoteId} from '@vexl-next/domain/src/general/notes'
 import {
   type LocationPlaceId,
@@ -122,6 +125,8 @@ export type RootStackParamsList = {
   }
 
   ChatSearch: undefined
+
+  ChatTags: {chatId: ChatId}
 
   CommonFriends: {
     readonly contactsHashes: readonly HashedPhoneNumber[]

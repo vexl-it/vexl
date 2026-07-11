@@ -26,11 +26,13 @@ import formatChatTime from '../../../../ChatDetailScreen/utils/formatChatTime'
 import UserAvatar from '../../../../UserAvatar'
 import {deleteChatFromListActionAtom} from '../atoms'
 import {getMessagePreviewText} from '../utils/getMessagePreviewText'
+import ChatListItemLeftSwipeActions from './ChatListItemLeftSwipeActions'
 import ChatListItemRightSwipeActions from './ChatListItemRightSwipeActions'
 
 export interface ChatListData {
   chat: ChatWithMessages
   lastMessage: ChatMessageWithState
+  tagLabels: readonly string[]
 }
 
 function ChatListItem({
@@ -50,6 +52,7 @@ function ChatListItem({
     isUnreadAtom,
     otherSideInfoAtom,
     otherSideLeftAtom,
+    tagLabelsAtom,
   } = useMemo(() => {
     const chatInfoAtom = selectAtom(dataAtom, (data) => data.chat.chat)
     const chatWithMessagesAtom = selectAtom(dataAtom, (data) => data.chat)
@@ -61,6 +64,7 @@ function ChatListItem({
         lastMessage.message.messageType
       )
     )
+    const tagLabelsAtom = selectAtom(dataAtom, (data) => data.tagLabels)
 
     return {
       chatInfoAtom,
@@ -69,6 +73,7 @@ function ChatListItem({
       isUnreadAtom,
       otherSideLeftAtom,
       otherSideInfoAtom,
+      tagLabelsAtom,
     }
   }, [dataAtom])
 
@@ -81,6 +86,7 @@ function ChatListItem({
   const isUnread = useAtomValue(isUnreadAtom)
   const {userName, image: userAvatar} = useAtomValue(otherSideInfoAtom)
   const otherSideLeft = useAtomValue(otherSideLeftAtom)
+  const tagLabels = useAtomValue(tagLabelsAtom)
   const offer = useOfferForChatOrigin(chatInfo.origin)
   const note = useAtomValue(
     useMemo(() => noteForChatOriginAtom(chatInfo.origin), [chatInfo.origin])
@@ -118,6 +124,14 @@ function ChatListItem({
     <Stack>
       <Swipeable
         ref={swipeableRef}
+        renderLeftActions={() => (
+          <ChatListItemLeftSwipeActions
+            onPress={() => {
+              swipeableRef.current?.close()
+              navigation.navigate('ChatTags', {chatId: chatInfo.id})
+            }}
+          />
+        )}
         renderRightActions={() => (
           <ChatListItemRightSwipeActions
             onPress={() => {
@@ -149,6 +163,7 @@ function ChatListItem({
             unread={isUnread}
             variant={preview.variant}
             isTyping={isTyping}
+            tags={tagLabels}
             onPress={() => {
               navigation.navigate('ChatDetail', {
                 otherSideKey: chatInfo.otherSide.publicKey,

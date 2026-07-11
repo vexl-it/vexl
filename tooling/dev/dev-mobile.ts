@@ -264,7 +264,9 @@ function commandOutput(
     encoding: 'utf8',
     timeout: 10_000,
   })
-  return result.status === 0 ? result.stdout.trim() : undefined
+  return result.status === 0
+    ? result.stdout.trim().replaceAll('\r\n', '\n')
+    : undefined
 }
 
 function findIosDevices(): readonly DeviceChoice[] {

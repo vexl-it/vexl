@@ -6,6 +6,7 @@ import {Effect, Either, Schema} from 'effect'
 import {
   acceptEraseCommand,
   awaitSourceOutcome,
+  continueSourceRecovery,
   prepareEraseCommand,
   retireSourceAndOfferReceipt,
   runDestinationInstall,
@@ -25,18 +26,45 @@ export type MigrationUiPhase =
   | 'sourceStarting'
   | 'sourcePairing'
   | 'sourceAuthCode'
+  | 'sourceAwaitingPeerApproval'
   | 'sourceTransfer'
   | 'sourceAwaitingErase'
   | 'sourceRetiring'
   | 'sourceCancellationQr'
   | 'destinationConnecting'
   | 'destinationAuthCode'
+  | 'destinationAwaitingPeerApproval'
   | 'destinationReceiving'
   | 'destinationStagedWarning'
   | 'destinationEraseQr'
   | 'destinationAwaitingOutcome'
   | 'destinationReceiptScanner'
   | 'destinationInstalling'
+
+export type MigrationTraceEvent =
+  | 'sourceStarted'
+  | 'pairingReady'
+  | 'destinationConnecting'
+  | 'verificationCodeReady'
+  | 'localCodeApproved'
+  | 'waitingForPeerApproval'
+  | 'bothCodesApproved'
+  | 'transferStarted'
+  | 'transferVerified'
+  | 'eraseCommandReady'
+  | 'eraseCommandAccepted'
+  | 'sourceErasing'
+  | 'sourceErased'
+  | 'waitingForSourceOutcome'
+  | 'sourceOutcomeVerified'
+  | 'installing'
+  | 'completed'
+  | 'failed'
+
+export interface MigrationTraceEntry {
+  readonly id: number
+  readonly event: MigrationTraceEvent
+}
 
 export interface MigrationUiState {
   readonly phase: MigrationUiPhase
@@ -45,17 +73,31 @@ export interface MigrationUiState {
   readonly humanAuthCode?: string
   readonly errorCode?: typeof DeviceMigrationErrorCode.Type
   readonly cancellationQrString?: string
+  readonly trace?: readonly MigrationTraceEntry[]
 }
 
-let state: MigrationUiState = {phase: 'idle'}
+const MAX_TRACE_ENTRIES = 12
+let traceEntryId = 0
+let state: MigrationUiState = {phase: 'idle', trace: []}
 const listeners = new Set<() => void>()
 let sourceSession: ActiveSourceSession | undefined
 let destinationSession: ActiveDestinationSession | undefined
 let resolveConfirmation: ((confirmed: boolean) => void) | undefined
 
 function publish(next: MigrationUiState): void {
-  state = next
+  state = {...next, trace: next.trace ?? state.trace}
   for (const listener of listeners) listener()
+}
+
+function beginTrace(phase: MigrationUiPhase, event: MigrationTraceEvent): void {
+  traceEntryId = 1
+  publish({phase, trace: [{id: traceEntryId, event}]})
+}
+
+function appendTrace(event: MigrationTraceEvent): void {
+  traceEntryId += 1
+  const entries = [...(state.trace ?? []), {id: traceEntryId, event}]
+  publish({...state, trace: entries.slice(-MAX_TRACE_ENTRIES)})
 }
 
 function errorCodeFromUnknown(
@@ -104,11 +146,12 @@ export function leaveDestinationMigrationUi(): void {
 }
 
 export function startSourceMigrationUi(): void {
-  publish({phase: 'sourceStarting'})
+  beginTrace('sourceStarting', 'sourceStarted')
   void runMigrationEffect(
     startSourceSession({
       confirmCode: confirmationEffect(),
       onPairingReady: (pairing) => {
+        appendTrace('pairingReady')
         publish({
           phase: 'sourcePairing',
           qrString: pairing.qrString,
@@ -116,14 +159,20 @@ export function startSourceMigrationUi(): void {
         })
       },
       onHumanAuthCode: (humanAuthCode) => {
+        appendTrace('verificationCodeReady')
         publish({phase: 'sourceAuthCode', humanAuthCode})
+      },
+      onBothCodesConfirmed: () => {
+        appendTrace('bothCodesApproved')
+        appendTrace('transferStarted')
+        publish({phase: 'sourceTransfer'})
       },
     })
   )
     .then(async (session) => {
       sourceSession = session
-      publish({phase: 'sourceTransfer'})
       await runMigrationEffect(sendSourceSnapshotAndAwaitStaging(session))
+      appendTrace('transferVerified')
       publish({phase: 'sourceAwaitingErase'})
     })
     .catch((error: unknown) => {
@@ -132,6 +181,7 @@ export function startSourceMigrationUi(): void {
         cancelSourceMigrationUi()
         return
       }
+      appendTrace('failed')
       publish({...state, errorCode: code})
     })
 }
@@ -140,19 +190,26 @@ export function startDestinationMigrationUi(
   qrString: string,
   sourceEndpointHostOverride?: EmulatorMigrationEndpointHost
 ): void {
-  publish({phase: 'destinationConnecting'})
+  beginTrace('destinationConnecting', 'destinationConnecting')
   void runMigrationEffect(
     startDestinationSession({
       qrString,
       confirmCode: confirmationEffect(),
       onHumanAuthCode: (humanAuthCode) => {
+        appendTrace('verificationCodeReady')
         publish({phase: 'destinationAuthCode', humanAuthCode})
+      },
+      onBothCodesConfirmed: () => {
+        appendTrace('bothCodesApproved')
+        appendTrace('transferStarted')
+        publish({phase: 'destinationReceiving'})
       },
       sourceEndpointHostOverride,
     })
   )
     .then((session) => {
       destinationSession = session
+      appendTrace('transferVerified')
       publish({phase: 'destinationStagedWarning'})
     })
     .catch((error: unknown) => {
@@ -161,20 +218,24 @@ export function startDestinationMigrationUi(
         cancelDestinationMigrationUi()
         return
       }
+      appendTrace('failed')
       publish({...state, errorCode: code})
     })
-  publish({phase: 'destinationReceiving'})
 }
 
 export function confirmMigrationCode(confirmed: boolean): void {
+  const authPhase = state.phase
   resolveConfirmation?.(confirmed)
-  if (confirmed)
+  if (confirmed) {
+    appendTrace('localCodeApproved')
+    appendTrace('waitingForPeerApproval')
     publish({
       phase:
-        state.phase === 'sourceAuthCode'
-          ? 'sourceTransfer'
-          : 'destinationReceiving',
+        authPhase === 'sourceAuthCode'
+          ? 'sourceAwaitingPeerApproval'
+          : 'destinationAwaitingPeerApproval',
     })
+  }
 }
 
 export function cancelSourceMigrationUi(): void {
@@ -208,6 +269,8 @@ export function cancelDestinationMigrationUi(): void {
 export function acceptEraseCommandUi(qrString: string): void {
   void runMigrationEffect(acceptEraseCommand(qrString, sourceSession?.channel))
     .then(() => {
+      appendTrace('eraseCommandAccepted')
+      appendTrace('sourceErasing')
       publish({phase: 'sourceRetiring'})
       return runMigrationEffect(
         retireSourceAndOfferReceipt(sourceSession?.channel)
@@ -215,6 +278,7 @@ export function acceptEraseCommandUi(qrString: string): void {
     })
     .then(() => {
       sourceSession = undefined
+      appendTrace('sourceErased')
       publish({phase: 'idle'})
     })
     .catch((error: unknown) => {
@@ -225,6 +289,7 @@ export function acceptEraseCommandUi(qrString: string): void {
 export function displayEraseCommandUi(): void {
   void runMigrationEffect(prepareEraseCommand())
     .then((command) => {
+      appendTrace('eraseCommandReady')
       publish({phase: 'destinationEraseQr', qrString: command.qrString})
     })
     .catch((error: unknown) => {
@@ -236,13 +301,17 @@ export function displayEraseCommandUi(): void {
 }
 
 export function awaitSourceOutcomeUi(): void {
+  appendTrace('waitingForSourceOutcome')
   publish({phase: 'destinationAwaitingOutcome'})
   void runMigrationEffect(
     awaitSourceOutcome({channel: destinationSession?.channel})
   )
     .then((outcome) => {
       if (outcome === 'cancelled') publish({phase: 'idle'})
-      else installDestinationUi()
+      else {
+        appendTrace('sourceOutcomeVerified')
+        installDestinationUi()
+      }
     })
     .catch((error: unknown) => {
       publish({
@@ -264,7 +333,10 @@ export function acceptReceiptUi(qrString: string): void {
   void runMigrationEffect(awaitSourceOutcome({scannedQrString: qrString}))
     .then((outcome) => {
       if (outcome === 'cancelled') publish({phase: 'idle'})
-      else installDestinationUi()
+      else {
+        appendTrace('sourceOutcomeVerified')
+        installDestinationUi()
+      }
     })
     .catch((error: unknown) => {
       publish({...state, errorCode: errorCodeFromUnknown(error)})
@@ -272,15 +344,29 @@ export function acceptReceiptUi(qrString: string): void {
 }
 
 export function installDestinationUi(): void {
+  appendTrace('installing')
   publish({phase: 'destinationInstalling'})
   void runMigrationEffect(
     runDestinationInstall({channel: destinationSession?.channel})
   )
     .then(() => {
       destinationSession = undefined
+      appendTrace('completed')
       publish({phase: 'idle'})
     })
     .catch((error: unknown) => {
+      publish({...state, errorCode: errorCodeFromUnknown(error)})
+    })
+}
+
+export function finishSourceMigrationUi(): void {
+  appendTrace('completed')
+  void runMigrationEffect(continueSourceRecovery())
+    .then(() => {
+      publish({phase: 'idle', trace: []})
+    })
+    .catch((error: unknown) => {
+      appendTrace('failed')
       publish({...state, errorCode: errorCodeFromUnknown(error)})
     })
 }

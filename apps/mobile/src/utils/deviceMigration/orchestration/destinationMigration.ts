@@ -74,6 +74,7 @@ export function startDestinationSession(args: {
   readonly qrString: string
   readonly confirmCode: Effect.Effect<boolean, never>
   readonly onHumanAuthCode?: (code: string) => void
+  readonly onBothCodesConfirmed?: () => void
   /** Dev-only TCP routing aid for emulator port forwarding. Never persisted. */
   readonly sourceEndpointHostOverride?: string
 }): Effect.Effect<ActiveDestinationSession, DeviceMigrationError> {
@@ -139,6 +140,7 @@ export function startDestinationSession(args: {
         ),
         confirmCode: args.confirmCode,
         onHumanAuthCode: args.onHumanAuthCode,
+        onBothCodesConfirmed: args.onBothCodesConfirmed,
       })
     )
     yield* _(

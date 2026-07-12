@@ -23,10 +23,7 @@ export function dispatchRequiredRecovery(
   record: MigrationControlReadResult
 ): Effect.Effect<void, DeviceMigrationError> {
   const action = resolveRequiredRecoveryTransition(record)
-  if (
-    action === 'sourceResumeRetirement' ||
-    action === 'sourceFinalizeCompletion'
-  )
+  if (action === 'sourceResumeRetirement')
     return continueSourceRecovery().pipe(Effect.asVoid)
   if (
     action === 'destinationResumeInstall' ||

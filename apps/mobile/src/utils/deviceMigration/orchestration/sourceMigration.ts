@@ -97,6 +97,7 @@ export function startSourceSession(args: {
   readonly confirmCode: Effect.Effect<boolean, never>
   readonly onPairingReady?: (pairing: CreatedPairingQr) => void
   readonly onHumanAuthCode?: (code: string) => void
+  readonly onBothCodesConfirmed?: () => void
 }): Effect.Effect<ActiveSourceSession, DeviceMigrationError> {
   return Effect.gen(function* (_) {
     yield* _(
@@ -154,6 +155,7 @@ export function startSourceSession(args: {
         singleUse: createSingleUsePairingCapability(),
         confirmCode: args.confirmCode,
         onHumanAuthCode: args.onHumanAuthCode,
+        onBothCodesConfirmed: args.onBothCodesConfirmed,
       })
     )
     yield* _(

@@ -9,7 +9,7 @@ import {
   YStack,
   useTheme,
 } from '@vexl-next/ui'
-import {Effect, Either} from 'effect'
+import {Effect, Array as EffectArray, Either} from 'effect'
 import {useKeepAwake} from 'expo-keep-awake'
 import {addEventListener, getInitialURL} from 'expo-linking'
 import React, {useEffect, useState, useSyncExternalStore} from 'react'
@@ -24,8 +24,8 @@ import SvgQRCode from 'react-native-qrcode-svg'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {acquireCaptureProtectionLease} from '../../utils/captureProtectionLease'
 import {
-  type MigrationControlReadResult,
   needsManualRecovery,
+  type MigrationControlReadResult,
 } from '../../utils/deviceMigration/controlStore/domain'
 import {
   continueSourceRecovery,
@@ -45,12 +45,14 @@ import {
   clearMigrationUiError,
   confirmMigrationCode,
   displayEraseCommandUi,
+  finishSourceMigrationUi,
   getMigrationUiState,
   installDestinationUi,
   leaveDestinationMigrationUi,
   openReceiptScannerUi,
   startDestinationMigrationUi,
   subscribeToMigrationUiState,
+  type MigrationTraceEvent,
 } from './coordinator'
 import {parseEmulatorMigrationDeepLink} from './emulatorDeepLink'
 
@@ -140,8 +142,81 @@ function ContentScreen({
             </Button>
           )}
         </YStack>
+        <MigrationTracePanel />
       </YStack>
     </Screen>
+  )
+}
+
+function TraceEventText({
+  event,
+}: {
+  readonly event: MigrationTraceEvent
+}): React.ReactElement {
+  const {t} = useTranslation()
+  switch (event) {
+    case 'sourceStarted':
+      return <>{t('deviceMigration.trace.sourceStarted')}</>
+    case 'pairingReady':
+      return <>{t('deviceMigration.trace.pairingReady')}</>
+    case 'destinationConnecting':
+      return <>{t('deviceMigration.trace.destinationConnecting')}</>
+    case 'verificationCodeReady':
+      return <>{t('deviceMigration.trace.verificationCodeReady')}</>
+    case 'localCodeApproved':
+      return <>{t('deviceMigration.trace.localCodeApproved')}</>
+    case 'waitingForPeerApproval':
+      return <>{t('deviceMigration.trace.waitingForPeerApproval')}</>
+    case 'bothCodesApproved':
+      return <>{t('deviceMigration.trace.bothCodesApproved')}</>
+    case 'transferStarted':
+      return <>{t('deviceMigration.trace.transferStarted')}</>
+    case 'transferVerified':
+      return <>{t('deviceMigration.trace.transferVerified')}</>
+    case 'eraseCommandReady':
+      return <>{t('deviceMigration.trace.eraseCommandReady')}</>
+    case 'eraseCommandAccepted':
+      return <>{t('deviceMigration.trace.eraseCommandAccepted')}</>
+    case 'sourceErasing':
+      return <>{t('deviceMigration.trace.sourceErasing')}</>
+    case 'sourceErased':
+      return <>{t('deviceMigration.trace.sourceErased')}</>
+    case 'waitingForSourceOutcome':
+      return <>{t('deviceMigration.trace.waitingForSourceOutcome')}</>
+    case 'sourceOutcomeVerified':
+      return <>{t('deviceMigration.trace.sourceOutcomeVerified')}</>
+    case 'installing':
+      return <>{t('deviceMigration.trace.installing')}</>
+    case 'completed':
+      return <>{t('deviceMigration.trace.completed')}</>
+    case 'failed':
+      return <>{t('deviceMigration.trace.failed')}</>
+  }
+}
+
+function MigrationTracePanel(): React.ReactElement | null {
+  const {t} = useTranslation()
+  const ui = useSyncExternalStore(
+    subscribeToMigrationUiState,
+    getMigrationUiState
+  )
+  const entries = ui.trace ?? []
+  if (entries.length === 0) return null
+  return (
+    <YStack bg="$backgroundSecondary" borderRadius="$4" gap="$2" p="$3">
+      <Typography variant="paragraphSmall" color="$foregroundPrimary">
+        {t('deviceMigration.trace.title')}
+      </Typography>
+      {EffectArray.map(entries, (entry) => (
+        <Typography
+          key={entry.id}
+          variant="paragraphSmall"
+          color="$foregroundSecondary"
+        >
+          <TraceEventText event={entry.event} />
+        </Typography>
+      ))}
+    </YStack>
   )
 }
 
@@ -512,6 +587,24 @@ function DeviceMigrationContent({
         </Typography>
       </ContentScreen>
     )
+  if (
+    ui.phase === 'sourceAwaitingPeerApproval' ||
+    ui.phase === 'destinationAwaitingPeerApproval'
+  )
+    return (
+      <ContentScreen
+        title={t('deviceMigration.auth.waitingTitle')}
+        body={t('deviceMigration.auth.waitingBody')}
+        progress
+        secondary={{
+          label: t('deviceMigration.common.cancel'),
+          onPress:
+            ui.phase === 'sourceAwaitingPeerApproval'
+              ? cancelSourceMigrationUi
+              : cancelDestinationMigrationUi,
+        }}
+      />
+    )
   if (ui.phase === 'sourceStarting' || ui.phase === 'sourceTransfer')
     return (
       <ContentScreen
@@ -571,6 +664,17 @@ function DeviceMigrationContent({
         />
       )
   }
+  if (controlRecord.mode === 'sourceComplete')
+    return (
+      <ContentScreen
+        title={t('deviceMigration.complete.sourceTitle')}
+        body={t('deviceMigration.complete.sourceBody')}
+        primary={{
+          label: t('common.finish'),
+          onPress: finishSourceMigrationUi,
+        }}
+      />
+    )
   if (ui.phase === 'sourceRetiring' || recovery === 'sourceResumeRetirement')
     return (
       <ContentScreen

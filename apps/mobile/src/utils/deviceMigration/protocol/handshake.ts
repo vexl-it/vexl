@@ -20,7 +20,10 @@ import {
   utf8Encode,
 } from '@vexl-next/domain/src/general/deviceMigration/encoding'
 import {DeviceMigrationError} from '@vexl-next/domain/src/general/deviceMigration/errors'
-import {HANDSHAKE_INACTIVITY_TIMEOUT_MS} from '@vexl-next/domain/src/general/deviceMigration/limits'
+import {
+  HANDSHAKE_INACTIVITY_TIMEOUT_MS,
+  HUMAN_CODE_CONFIRMATION_TIMEOUT_MS,
+} from '@vexl-next/domain/src/general/deviceMigration/limits'
 import {
   ClientHello,
   HumanCodeConfirmed,
@@ -75,9 +78,10 @@ function sendPlaintext<A, I>(
 
 function receivePlaintext<A, I>(
   channel: TransportChannel,
-  schema: Schema.Schema<A, I, never>
+  schema: Schema.Schema<A, I, never>,
+  timeoutMs = HANDSHAKE_INACTIVITY_TIMEOUT_MS
 ): Effect.Effect<A, DeviceMigrationError> {
-  return channel.nextFrame(HANDSHAKE_INACTIVITY_TIMEOUT_MS).pipe(
+  return channel.nextFrame(timeoutMs).pipe(
     Effect.flatMap((bytes) =>
       Effect.try({
         try: () => new TextDecoder().decode(bytes),
@@ -162,6 +166,7 @@ export function runDestinationHandshake(args: {
   readonly ownKeyPair?: MigrationKxKeyPair
   readonly confirmCode: Effect.Effect<boolean, never>
   readonly onHumanAuthCode?: (code: string) => void
+  readonly onBothCodesConfirmed?: () => void
 }): Effect.Effect<HandshakeResult, DeviceMigrationError> {
   return Effect.gen(function* (_) {
     const ownKeyPair =
@@ -251,13 +256,18 @@ export function runDestinationHandshake(args: {
     })
     yield* _(sendPlaintext(args.channel, HumanCodeConfirmed, confirmation))
     const sourceConfirmation = yield* _(
-      receivePlaintext(args.channel, HumanCodeConfirmed)
+      receivePlaintext(
+        args.channel,
+        HumanCodeConfirmed,
+        HUMAN_CODE_CONFIRMATION_TIMEOUT_MS
+      )
     )
     if (
       sourceConfirmation.sender !== 'source' ||
       sourceConfirmation.transferId !== args.transferId
     )
       return yield* _(Effect.fail(fail('roleInvalid')))
+    args.onBothCodesConfirmed?.()
     return {
       keys,
       humanAuthCode: keys.humanAuthCode,
@@ -283,6 +293,7 @@ export function runSourceHandshake(args: {
   readonly singleUse: SingleUsePairingCapability
   readonly confirmCode: Effect.Effect<boolean, never>
   readonly onHumanAuthCode?: (code: string) => void
+  readonly onBothCodesConfirmed?: () => void
 }): Effect.Effect<HandshakeResult, DeviceMigrationError> {
   return Effect.gen(function* (_) {
     const clientHello = yield* _(receivePlaintext(args.channel, ClientHello))
@@ -351,14 +362,6 @@ export function runSourceHandshake(args: {
       })
     )
     args.onHumanAuthCode?.(keys.humanAuthCode)
-    const destinationConfirmation = yield* _(
-      receivePlaintext(args.channel, HumanCodeConfirmed)
-    )
-    if (
-      destinationConfirmation.sender !== 'destination' ||
-      destinationConfirmation.transferId !== args.transferId
-    )
-      return yield* _(Effect.fail(fail('roleInvalid')))
     if (!(yield* _(args.confirmCode)))
       return yield* _(Effect.fail(fail('cancelled')))
     yield* _(
@@ -371,6 +374,19 @@ export function runSourceHandshake(args: {
         })
       )
     )
+    const destinationConfirmation = yield* _(
+      receivePlaintext(
+        args.channel,
+        HumanCodeConfirmed,
+        HUMAN_CODE_CONFIRMATION_TIMEOUT_MS
+      )
+    )
+    if (
+      destinationConfirmation.sender !== 'destination' ||
+      destinationConfirmation.transferId !== args.transferId
+    )
+      return yield* _(Effect.fail(fail('roleInvalid')))
+    args.onBothCodesConfirmed?.()
     return {
       keys,
       humanAuthCode: keys.humanAuthCode,

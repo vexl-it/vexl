@@ -248,16 +248,21 @@ export type SourceOutcome = SourceErased | SourceCancellationConfirmed
 export function awaitSourceOutcome(
   channel: EncryptedProtocolChannel
 ): Effect.Effect<SourceOutcome, DeviceMigrationError> {
-  return channel
-    .nextMessage()
-    .pipe(
-      Effect.flatMap((message: DeviceMigrationProtocolMessage) =>
-        message._tag === 'SourceErased' ||
-        message._tag === 'SourceCancellationConfirmed'
-          ? Effect.succeed(message)
-          : Effect.fail(fail('stateInvalid'))
-      )
-    )
+  return Effect.gen(function* (_) {
+    const first = yield* _(channel.nextMessage())
+    // The source durably commits retirement before erasing and announces that
+    // commitment first. The authenticated erasure receipt that follows is the
+    // authoritative outcome and is validated against the issued command by
+    // the orchestration layer.
+    const outcome: DeviceMigrationProtocolMessage =
+      first._tag === 'EraseCommandAccepted'
+        ? yield* _(channel.nextMessage())
+        : first
+    return outcome._tag === 'SourceErased' ||
+      outcome._tag === 'SourceCancellationConfirmed'
+      ? outcome
+      : yield* _(Effect.fail(fail('stateInvalid')))
+  })
 }
 
 export const sendDestinationReceiptStored = (

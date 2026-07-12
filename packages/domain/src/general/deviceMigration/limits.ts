@@ -50,6 +50,9 @@ export const MAX_TOTAL_SNAPSHOT_BYTES = 1 * GIB
 /** Handshake inactivity timeout: 15 seconds. */
 export const HANDSHAKE_INACTIVITY_TIMEOUT_MS = 15 * SECOND_MS
 
+/** Human verification timeout after the authenticated pairing proof: 5 minutes. */
+export const HUMAN_CODE_CONFIRMATION_TIMEOUT_MS = 5 * MINUTE_MS
+
 /** Stream inactivity timeout: 30 seconds. */
 export const STREAM_INACTIVITY_TIMEOUT_MS = 30 * SECOND_MS
 

@@ -9,7 +9,7 @@ import {
   CURRENT_SNAPSHOT_STORAGE_SCHEMA_VERSION,
 } from '@vexl-next/domain/src/general/deviceMigration/version'
 import {SemverString} from '@vexl-next/domain/src/utility/SmeverString.brand'
-import {Effect, Schema} from 'effect'
+import {Deferred, Effect, Schema} from 'effect'
 import {createInMemoryChannelPair} from './channel'
 import {createEncryptedProtocolChannel} from './encryptedChannel'
 import {
@@ -83,6 +83,78 @@ describe('device migration handshake and encrypted channel', () => {
     expect(message._tag).toBe('DestinationActivated')
     expect(sourceChannel.peerFinished()).toBe(true)
   })
+
+  it.each(['source', 'destination'])(
+    'completes when the %s device approves first',
+    async (firstApproval) => {
+      const pair = createInMemoryChannelPair()
+      const sourceKeys = await generateEphemeralKxKeyPair()
+      const sourceApproval = Effect.runSync(Deferred.make<boolean>())
+      const destinationApproval = Effect.runSync(Deferred.make<boolean>())
+      const sourceCodeReady = Effect.runSync(Deferred.make<void>())
+      const destinationCodeReady = Effect.runSync(Deferred.make<void>())
+      const sourceBothApproved = Effect.runSync(Deferred.make<void>())
+      const destinationBothApproved = Effect.runSync(Deferred.make<void>())
+
+      const source = Effect.runPromise(
+        runSourceHandshake({
+          channel: pair.first,
+          version,
+          transferId,
+          pairingCapability: capability,
+          ownKeyPair: sourceKeys,
+          singleUse: createSingleUsePairingCapability(),
+          confirmCode: Deferred.await(sourceApproval),
+          onHumanAuthCode: () => {
+            Effect.runSync(Deferred.succeed(sourceCodeReady, undefined))
+          },
+          onBothCodesConfirmed: () => {
+            Effect.runSync(Deferred.succeed(sourceBothApproved, undefined))
+          },
+        })
+      )
+      const destination = Effect.runPromise(
+        runDestinationHandshake({
+          channel: pair.second,
+          version,
+          transferId,
+          pairingCapability: capability,
+          sourcePublicKey: sourceKeys.publicKey,
+          confirmCode: Deferred.await(destinationApproval),
+          onHumanAuthCode: () => {
+            Effect.runSync(Deferred.succeed(destinationCodeReady, undefined))
+          },
+          onBothCodesConfirmed: () => {
+            Effect.runSync(Deferred.succeed(destinationBothApproved, undefined))
+          },
+        })
+      )
+
+      await Promise.all([
+        Effect.runPromise(Deferred.await(sourceCodeReady)),
+        Effect.runPromise(Deferred.await(destinationCodeReady)),
+      ])
+      if (firstApproval === 'source') {
+        Effect.runSync(Deferred.succeed(sourceApproval, true))
+        expect(Effect.runSync(Deferred.isDone(sourceBothApproved))).toBe(false)
+        Effect.runSync(Deferred.succeed(destinationApproval, true))
+      } else {
+        Effect.runSync(Deferred.succeed(destinationApproval, true))
+        expect(Effect.runSync(Deferred.isDone(destinationBothApproved))).toBe(
+          false
+        )
+        Effect.runSync(Deferred.succeed(sourceApproval, true))
+      }
+
+      const [sourceResult, destinationResult] = await Promise.all([
+        source,
+        destination,
+        Effect.runPromise(Deferred.await(sourceBothApproved)),
+        Effect.runPromise(Deferred.await(destinationBothApproved)),
+      ])
+      expect(sourceResult.humanAuthCode).toBe(destinationResult.humanAuthCode)
+    }
+  )
 
   it('rejects a wrong pairing capability', async () => {
     const pair = createInMemoryChannelPair()

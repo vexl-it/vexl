@@ -535,6 +535,7 @@ boundary tests:
 - One file: 25 MiB.
 - Total uncompressed snapshot: 1 GiB.
 - Handshake inactivity timeout: 15 seconds.
+- Human verification timeout after authenticated pairing: 5 minutes.
 - Stream inactivity timeout: 30 seconds.
 - Time to initiate after scanning: 5 minutes.
 - Maximum connected migration duration: 15 minutes.

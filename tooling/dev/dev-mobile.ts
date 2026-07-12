@@ -83,6 +83,7 @@ type BackendTarget =
 interface CliOptions {
   readonly platform: Platform
   readonly device?: string
+  readonly androidSerial?: string
   readonly deviceKind?: DeviceKind
   readonly selectDevice: boolean
   readonly backend: BackendTarget
@@ -229,6 +230,7 @@ function printHelp(): void {
 interface DeviceChoice {
   readonly id: string
   readonly expoName: string
+  readonly androidSerial?: string
   readonly label: string
   readonly kind: DeviceKind
 }
@@ -386,6 +388,7 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       (device): DeviceChoice => ({
         id: device.id,
         expoName: device.model ?? `Device ${device.id}`,
+        androidSerial: device.id,
         label: `[connected] ${device.model ?? device.id} (${device.id})`,
         kind: 'physical',
       })
@@ -408,6 +411,7 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       return {
         id: device.id,
         expoName: avdName ?? device.model ?? device.id,
+        androidSerial: device.id,
         avdName,
         label: `[running emulator] ${avdName ?? device.model ?? device.id} (${device.id})`,
         kind: 'virtual',
@@ -768,6 +772,9 @@ function printSummary(
   console.log('dev:mobile')
   console.log(`  platform:    ${options.platform}`)
   console.log(`  device:      ${options.device ?? '(default)'}`)
+  if (options.androidSerial !== undefined) {
+    console.log(`  adb serial:  ${options.androidSerial}`)
+  }
   console.log(`  variant:     ${options.variant}`)
   console.log(
     `  backend:     ${describeBackend(options.backend)} → ENV_PRESET=${generated.preset}`
@@ -822,6 +829,7 @@ async function main(): Promise<void> {
       : {
           ...parsedOptions,
           device: selectedDevice.expoName,
+          androidSerial: selectedDevice.androidSerial,
           deviceKind: selectedDevice.kind,
           selectDevice: false,
         }
@@ -869,6 +877,11 @@ async function main(): Promise<void> {
   const env: Record<string, string | undefined> = {
     ...process.env,
     ...generated.vars,
+    // Expo resolves Android's --device by display/AVD name, but the custom
+    // release Gradle installer targets devices through ANDROID_SERIAL.
+    ...(options.androidSerial === undefined
+      ? {}
+      : {ANDROID_SERIAL: options.androidSerial}),
   }
 
   if (willPrebuild) {

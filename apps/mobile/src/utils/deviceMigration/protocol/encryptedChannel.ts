@@ -18,7 +18,10 @@ import {type TransportChannel} from './channel'
  * Raw payload bytes that fit inside a JSON/base64 DataChunk while keeping
  * the entire secretstream plaintext below the 64 KiB control-frame limit.
  */
-export const MAX_ENCRYPTED_DATA_CHUNK_BYTES = 48 * 1024
+// 48 KiB expands to exactly 64 KiB in Base64, leaving no room for the JSON
+// message envelope. Keep explicit headroom for field names and sequence
+// numbers while retaining large, bounded transfer chunks.
+export const MAX_ENCRYPTED_DATA_CHUNK_BYTES = 46 * 1024
 
 export interface EncryptedProtocolChannel {
   readonly sendMessage: (

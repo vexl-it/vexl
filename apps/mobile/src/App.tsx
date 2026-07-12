@@ -4,6 +4,7 @@ import {
   NavigationContainer,
 } from '@react-navigation/native'
 import {useVexlTheme} from '@vexl-next/ui'
+import {addEventListener} from 'expo-linking'
 import {NavigationBar} from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
 import React, {useSyncExternalStore} from 'react'
@@ -50,6 +51,24 @@ function App(): React.ReactElement {
   useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()
   useInAppLoadingTasks()
+
+  React.useEffect(() => {
+    if (!__DEV__) return
+
+    const subscription = addEventListener('url', ({url}) => {
+      if (!navigationRef.isReady()) return
+      if (url === 'app.vexl.it://emulator-test/debug') {
+        navigationRef.navigate('DebugScreen')
+      } else if (url === 'app.vexl.it://emulator-test/account') {
+        navigationRef.navigate('Account')
+      } else if (url === 'app.vexl.it://emulator-test/home') {
+        navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
+      }
+    })
+    return () => {
+      subscription.remove()
+    }
+  }, [])
 
   return (
     <SafeAreaProvider>

@@ -14,10 +14,7 @@ import {
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {Effect, Option, Schema} from 'effect'
 import {Base64} from 'js-base64'
-import {
-  VexlLocalTransport,
-  type ConnectionAcceptedEvent,
-} from '../../../../modules/vexl-local-transport'
+import {VexlLocalTransport} from '../../../../modules/vexl-local-transport'
 import {reopenVexlRequests} from '../../../api/vexlHttpClientLayer'
 import {unfreezeMmkvPersistence} from '../../atomUtils/mmkvMigrationRegistry'
 import {
@@ -70,14 +67,21 @@ export interface ActiveSourceSession {
 }
 
 function waitForInboundConnection(): Effect.Effect<
-  ConnectionAcceptedEvent,
+  TransportChannel,
   DeviceMigrationError
 > {
-  return Effect.async((resume) => {
+  return Effect.async<TransportChannel, DeviceMigrationError>((resume) => {
     const unsubscribe = VexlLocalTransport.addConnectionAcceptedListener(
       (event) => {
         unsubscribe()
-        resume(Effect.succeed(event))
+        // Attach data listeners before yielding back to the Effect runtime.
+        // The peer may send ClientHello immediately after its connect promise
+        // resolves, and native events emitted in this gap are not replayed.
+        resume(
+          Effect.succeed(
+            createNativeTransportChannel({connectionId: event.connectionId})
+          )
+        )
       },
       () => {
         unsubscribe()
@@ -133,16 +137,13 @@ export function startSourceSession(args: {
       })
     )
     args.onPairingReady?.(pairing)
-    const accepted = yield* _(waitForInboundConnection())
+    const transport = yield* _(waitForInboundConnection())
     yield* _(
       Effect.tryPromise({
         try: VexlLocalTransport.stopListener,
         catch: () => error('transportFailed'),
       })
     )
-    const transport: TransportChannel = createNativeTransportChannel({
-      connectionId: accepted.connectionId,
-    })
     const handshake = yield* _(
       runSourceHandshake({
         channel: transport,
@@ -291,6 +292,15 @@ export function safeCancelSource(
           )
         )
     }
+    // Pairing cancellation can happen before an ActiveSourceSession exists,
+    // while the native listener is still waiting for its first connection.
+    // Always stop it best-effort so the next migration can bind a fresh port.
+    yield* _(
+      Effect.tryPromise({
+        try: VexlLocalTransport.stopListener,
+        catch: () => error('transportFailed'),
+      }).pipe(Effect.ignore)
+    )
     // Keep the source quiescent if secret deletion cannot be verified.
     yield* _(deleteMigrationSecretsVerified())
     yield* _(
@@ -372,45 +382,55 @@ export function retireSourceAndOfferReceipt(
     const completed = yield* _(runSourceRetirement())
     if (channel === undefined) return
     const receipt = completed.sourceErasedReceipt
+    // Retirement is already committed and the signed receipt is durable.
+    // LAN acknowledgement is an optimization from this point on: any loss
+    // falls back to scanning the receipt and must not cover it with an error.
     yield* _(
-      sendSourceErased(
-        channel,
-        new SourceErased({
-          sender: 'source',
-          qrSchemaVersion: receipt.qrSchemaVersion,
-          version: receipt.version,
-          transferId: receipt.transferId,
-          manifestDigest: receipt.manifestDigest,
-          snapshotContentDigest: receipt.snapshotContentDigest,
-          acceptedEraseCommandDigest: receipt.acceptedEraseCommandDigest,
-          acceptedEraseCommandNonce: receipt.acceptedEraseCommandNonce,
-          receiptNonce: receipt.receiptNonce,
-          cleanupResultDigest: receipt.cleanupResultDigest,
-          issuedAt: receipt.issuedAt,
-          mac: receipt.mac,
-        })
-      )
-    )
-    const stored = yield* _(awaitDestinationReceiptStored(channel))
-    if (
-      stored.transferId !== completed.transferId ||
-      stored.receiptNonce !== receipt.receiptNonce
-    )
-      return yield* _(Effect.fail(error('receiptInvalid')))
-    const activated = yield* _(awaitDestinationActivated(channel))
-    if (activated.transferId !== completed.transferId)
-      return yield* _(Effect.fail(error('stateInvalid')))
-    yield* _(
-      Effect.try({
-        try: () => {
-          transitionMigrationControl(['sourceErasedAwaitingDestinationAck'], {
-            mode: 'sourceComplete',
-            enteredAt: unixMillisecondsNow(),
-            transferId: completed.transferId,
+      Effect.gen(function* (_) {
+        yield* _(
+          sendSourceErased(
+            channel,
+            new SourceErased({
+              sender: 'source',
+              qrSchemaVersion: receipt.qrSchemaVersion,
+              version: receipt.version,
+              transferId: receipt.transferId,
+              manifestDigest: receipt.manifestDigest,
+              snapshotContentDigest: receipt.snapshotContentDigest,
+              acceptedEraseCommandDigest: receipt.acceptedEraseCommandDigest,
+              acceptedEraseCommandNonce: receipt.acceptedEraseCommandNonce,
+              receiptNonce: receipt.receiptNonce,
+              cleanupResultDigest: receipt.cleanupResultDigest,
+              issuedAt: receipt.issuedAt,
+              mac: receipt.mac,
+            })
+          )
+        )
+        const stored = yield* _(awaitDestinationReceiptStored(channel))
+        if (
+          stored.transferId !== completed.transferId ||
+          stored.receiptNonce !== receipt.receiptNonce
+        )
+          return yield* _(Effect.fail(error('receiptInvalid')))
+        const activated = yield* _(awaitDestinationActivated(channel))
+        if (activated.transferId !== completed.transferId)
+          return yield* _(Effect.fail(error('stateInvalid')))
+        yield* _(
+          Effect.try({
+            try: () => {
+              transitionMigrationControl(
+                ['sourceErasedAwaitingDestinationAck'],
+                {
+                  mode: 'sourceComplete',
+                  enteredAt: unixMillisecondsNow(),
+                  transferId: completed.transferId,
+                }
+              )
+            },
+            catch: () => error('stateInvalid'),
           })
-        },
-        catch: () => error('stateInvalid'),
-      })
+        )
+      }).pipe(Effect.catchAll(() => Effect.void))
     )
   })
 }

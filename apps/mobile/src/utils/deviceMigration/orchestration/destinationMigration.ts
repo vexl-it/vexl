@@ -33,6 +33,7 @@ import {
   loadMigrationSecret,
   saveMigrationSecret,
 } from '../controlStore/secrets'
+import {resolveMigrationEndpointHost} from '../emulatorEndpointOverride'
 import {
   createNativeTransportChannel,
   type TransportChannel,
@@ -73,6 +74,8 @@ export function startDestinationSession(args: {
   readonly qrString: string
   readonly confirmCode: Effect.Effect<boolean, never>
   readonly onHumanAuthCode?: (code: string) => void
+  /** Dev-only TCP routing aid for emulator port forwarding. Never persisted. */
+  readonly sourceEndpointHostOverride?: string
 }): Effect.Effect<ActiveDestinationSession, DeviceMigrationError> {
   return Effect.gen(function* (_) {
     yield* _(verifyFreshInstallForMigration())
@@ -106,7 +109,10 @@ export function startDestinationSession(args: {
         Effect.tryPromise({
           try: async () =>
             await VexlLocalTransport.connect(
-              endpoint.host,
+              resolveMigrationEndpointHost(
+                endpoint.host,
+                args.sourceEndpointHostOverride
+              ),
               endpoint.port,
               15_000
             ),
@@ -459,8 +465,23 @@ export function runDestinationInstall(args?: {
 }): Effect.Effect<void, DeviceMigrationError> {
   return Effect.gen(function* (_) {
     const beforeInstall = readMigrationControlRecord()
-    if (beforeInstall.mode !== 'destinationActivating')
+    if (beforeInstall.mode !== 'destinationActivating') {
       yield* _(installStagedSnapshot())
+      // Persisted MMKV atoms were constructed from the fresh-install state in
+      // this JavaScript runtime. Reload at the durable activation checkpoint
+      // so reconciliation reads the newly installed atoms from storage.
+      if (args?.activation === undefined) {
+        yield* _(
+          Effect.tryPromise({
+            try: async () => {
+              await (args?.reload ?? reloadAppAsync)()
+            },
+            catch: () => error('stateInvalid'),
+          })
+        )
+        return
+      }
+    }
     const activating = readMigrationControlRecord()
     if (activating.mode !== 'destinationActivating')
       return yield* _(Effect.fail(error('stateInvalid')))

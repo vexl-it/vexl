@@ -1,5 +1,8 @@
-import {DeviceMigrationErrorCode} from '@vexl-next/domain/src/general/deviceMigration/errors'
-import {Effect, Schema} from 'effect'
+import {
+  DeviceMigrationErrorCode,
+  type DeviceMigrationError,
+} from '@vexl-next/domain/src/general/deviceMigration/errors'
+import {Effect, Either, Schema} from 'effect'
 import {
   acceptEraseCommand,
   awaitSourceOutcome,
@@ -14,6 +17,7 @@ import {
   type ActiveDestinationSession,
   type ActiveSourceSession,
 } from '../../utils/deviceMigration/orchestration'
+import {type EmulatorMigrationEndpointHost} from './emulatorDeepLink'
 
 export type MigrationUiPhase =
   | 'idle'
@@ -62,6 +66,17 @@ function errorCodeFromUnknown(
   return 'stateInvalid'
 }
 
+function runMigrationEffect<A>(
+  effect: Effect.Effect<A, DeviceMigrationError>
+): Promise<A> {
+  return Effect.runPromise(Effect.either(effect)).then(
+    Either.match({
+      onLeft: (error) => Promise.reject(error),
+      onRight: (value) => value,
+    })
+  )
+}
+
 function confirmationEffect(): Effect.Effect<boolean, never> {
   return Effect.async<boolean>((resume) => {
     resolveConfirmation = (confirmed) => {
@@ -90,7 +105,7 @@ export function leaveDestinationMigrationUi(): void {
 
 export function startSourceMigrationUi(): void {
   publish({phase: 'sourceStarting'})
-  void Effect.runPromise(
+  void runMigrationEffect(
     startSourceSession({
       confirmCode: confirmationEffect(),
       onPairingReady: (pairing) => {
@@ -108,7 +123,7 @@ export function startSourceMigrationUi(): void {
     .then(async (session) => {
       sourceSession = session
       publish({phase: 'sourceTransfer'})
-      await Effect.runPromise(sendSourceSnapshotAndAwaitStaging(session))
+      await runMigrationEffect(sendSourceSnapshotAndAwaitStaging(session))
       publish({phase: 'sourceAwaitingErase'})
     })
     .catch((error: unknown) => {
@@ -121,15 +136,19 @@ export function startSourceMigrationUi(): void {
     })
 }
 
-export function startDestinationMigrationUi(qrString: string): void {
+export function startDestinationMigrationUi(
+  qrString: string,
+  sourceEndpointHostOverride?: EmulatorMigrationEndpointHost
+): void {
   publish({phase: 'destinationConnecting'})
-  void Effect.runPromise(
+  void runMigrationEffect(
     startDestinationSession({
       qrString,
       confirmCode: confirmationEffect(),
       onHumanAuthCode: (humanAuthCode) => {
         publish({phase: 'destinationAuthCode', humanAuthCode})
       },
+      sourceEndpointHostOverride,
     })
   )
     .then((session) => {
@@ -160,7 +179,7 @@ export function confirmMigrationCode(confirmed: boolean): void {
 
 export function cancelSourceMigrationUi(): void {
   resolveConfirmation?.(false)
-  void Effect.runPromise(safeCancelSource(sourceSession?.channel))
+  void runMigrationEffect(safeCancelSource(sourceSession?.channel))
     .then((cancellationQrString) => {
       sourceSession = undefined
       publish(
@@ -176,7 +195,7 @@ export function cancelSourceMigrationUi(): void {
 
 export function cancelDestinationMigrationUi(): void {
   resolveConfirmation?.(false)
-  void Effect.runPromise(safeCancelDestination())
+  void runMigrationEffect(safeCancelDestination())
     .then(() => {
       destinationSession = undefined
       publish({phase: 'idle'})
@@ -187,12 +206,16 @@ export function cancelDestinationMigrationUi(): void {
 }
 
 export function acceptEraseCommandUi(qrString: string): void {
-  void Effect.runPromise(acceptEraseCommand(qrString, sourceSession?.channel))
+  void runMigrationEffect(acceptEraseCommand(qrString, sourceSession?.channel))
     .then(() => {
       publish({phase: 'sourceRetiring'})
-      return Effect.runPromise(
+      return runMigrationEffect(
         retireSourceAndOfferReceipt(sourceSession?.channel)
       )
+    })
+    .then(() => {
+      sourceSession = undefined
+      publish({phase: 'idle'})
     })
     .catch((error: unknown) => {
       publish({...state, errorCode: errorCodeFromUnknown(error)})
@@ -200,7 +223,7 @@ export function acceptEraseCommandUi(qrString: string): void {
 }
 
 export function displayEraseCommandUi(): void {
-  void Effect.runPromise(prepareEraseCommand())
+  void runMigrationEffect(prepareEraseCommand())
     .then((command) => {
       publish({phase: 'destinationEraseQr', qrString: command.qrString})
     })
@@ -214,7 +237,7 @@ export function displayEraseCommandUi(): void {
 
 export function awaitSourceOutcomeUi(): void {
   publish({phase: 'destinationAwaitingOutcome'})
-  void Effect.runPromise(
+  void runMigrationEffect(
     awaitSourceOutcome({channel: destinationSession?.channel})
   )
     .then((outcome) => {
@@ -238,7 +261,7 @@ export function openReceiptScannerUi(): void {
 }
 
 export function acceptReceiptUi(qrString: string): void {
-  void Effect.runPromise(awaitSourceOutcome({scannedQrString: qrString}))
+  void runMigrationEffect(awaitSourceOutcome({scannedQrString: qrString}))
     .then((outcome) => {
       if (outcome === 'cancelled') publish({phase: 'idle'})
       else installDestinationUi()
@@ -250,11 +273,16 @@ export function acceptReceiptUi(qrString: string): void {
 
 export function installDestinationUi(): void {
   publish({phase: 'destinationInstalling'})
-  void Effect.runPromise(
+  void runMigrationEffect(
     runDestinationInstall({channel: destinationSession?.channel})
-  ).catch((error: unknown) => {
-    publish({...state, errorCode: errorCodeFromUnknown(error)})
-  })
+  )
+    .then(() => {
+      destinationSession = undefined
+      publish({phase: 'idle'})
+    })
+    .catch((error: unknown) => {
+      publish({...state, errorCode: errorCodeFromUnknown(error)})
+    })
 }
 
 export function clearMigrationUiError(): void {

@@ -1,3 +1,4 @@
+import Clipboard from '@react-native-clipboard/clipboard'
 import {type DeviceMigrationErrorCode} from '@vexl-next/domain/src/general/deviceMigration/errors'
 import {
   Button,
@@ -10,6 +11,7 @@ import {
 } from '@vexl-next/ui'
 import {Effect, Either} from 'effect'
 import {useKeepAwake} from 'expo-keep-awake'
+import {addEventListener, getInitialURL} from 'expo-linking'
 import React, {useEffect, useState, useSyncExternalStore} from 'react'
 import {
   ActivityIndicator,
@@ -50,8 +52,12 @@ import {
   startDestinationMigrationUi,
   subscribeToMigrationUiState,
 } from './coordinator'
+import {parseEmulatorMigrationDeepLink} from './emulatorDeepLink'
 
-const styles = StyleSheet.create({root: {flex: 1}})
+const styles = StyleSheet.create({
+  root: {flex: 1},
+  emulatorPayload: {width: 300, height: 20},
+})
 
 function MigrationCaptureGuard(): null {
   useEffect(() => acquireCaptureProtectionLease(), [])
@@ -162,14 +168,39 @@ function QrVisual({value}: {readonly value: string}): React.ReactElement {
   const {width} = useWindowDimensions()
   const size = Math.min(width - 96, 360)
   return (
-    <Stack alignSelf="center" bg="$backgroundOnBar" p="$4" borderRadius="$4">
-      <SvgQRCode
-        value={value}
-        size={size}
-        color={theme.foregroundPrimary.get()}
-        backgroundColor={theme.backgroundOnBar.get()}
-      />
-    </Stack>
+    <YStack alignItems="center" gap="$4">
+      <Stack alignSelf="center" bg="$backgroundOnBar" p="$4" borderRadius="$4">
+        <SvgQRCode
+          value={value}
+          size={size}
+          color={theme.foregroundPrimary.get()}
+          backgroundColor={theme.backgroundOnBar.get()}
+        />
+      </Stack>
+      {__DEV__ ? (
+        <>
+          <Typography
+            aria-label={value}
+            testID="emulator-qr-payload"
+            variant="paragraphSmall"
+            color="$backgroundPrimary"
+            style={styles.emulatorPayload}
+            numberOfLines={1}
+          >
+            {value}
+          </Typography>
+          <Button
+            size="small"
+            variant="secondary"
+            onPress={() => {
+              Clipboard.setString(value)
+            }}
+          >
+            Copy emulator QR payload
+          </Button>
+        </>
+      ) : null}
+    </YStack>
   )
 }
 
@@ -277,10 +308,48 @@ function DeviceMigrationContent({
   const recovery = resolveRequiredRecoveryTransition(controlRecord)
 
   useEffect(() => {
+    if (!__DEV__) return
+
+    const handleLink = (link: string): void => {
+      const parsed = parseEmulatorMigrationDeepLink(link)
+      if (parsed === undefined) return
+
+      if (parsed.action === 'pairing' && ui.phase === 'destinationEntry') {
+        startDestinationMigrationUi(parsed.qrString, parsed.endpointHost)
+      } else if (
+        parsed.action === 'erase' &&
+        (ui.phase === 'sourceAwaitingErase' ||
+          controlRecord.mode === 'sourceAwaitingEraseCommand')
+      ) {
+        setSourceEraseScanner(false)
+        acceptEraseCommandUi(parsed.qrString)
+      } else if (
+        parsed.action === 'receipt' &&
+        ui.phase === 'destinationReceiptScanner'
+      ) {
+        acceptReceiptUi(parsed.qrString)
+      }
+    }
+
+    // This listener is deliberately independent of useHandleUniversalAndAppLinks:
+    // that tree is unmounted during migration and it persists initial links.
+    void getInitialURL().then((initialLink) => {
+      if (initialLink !== null) handleLink(initialLink)
+    })
+    const subscription = addEventListener('url', ({url}) => {
+      handleLink(url)
+    })
+    return () => {
+      subscription.remove()
+    }
+  }, [controlRecord.mode, ui.phase])
+
+  useEffect(() => {
+    if (ui.phase !== 'idle') return
     void Effect.runPromise(
       dispatchRequiredRecovery(controlRecord).pipe(Effect.ignore)
     )
-  }, [controlRecord])
+  }, [controlRecord, ui.phase])
 
   useEffect(() => {
     if (controlRecord.mode !== 'sourceErasedAwaitingDestinationAck') return
@@ -290,6 +359,11 @@ function DeviceMigrationContent({
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       if (nextState === 'active') return
+      // Emulator QR delivery uses a platform deep-link command, which emits a
+      // transient background/inactive state before the URL event. Explicit
+      // cancellation remains available in development; production keeps the
+      // background-safety behavior below.
+      if (__DEV__) return
       if (
         controlRecord.mode === 'sourceQuiescing' ||
         controlRecord.mode === 'sourceServing' ||
@@ -347,7 +421,10 @@ function DeviceMigrationContent({
       <MigrationQrScanner
         title={t('deviceMigration.eraseScanner.title')}
         body={t('deviceMigration.eraseScanner.body')}
-        onScan={acceptEraseCommandUi}
+        onScan={(qrString) => {
+          setSourceEraseScanner(false)
+          acceptEraseCommandUi(qrString)
+        }}
         onCancel={() => {
           setSourceEraseScanner(false)
         }}
@@ -483,14 +560,6 @@ function DeviceMigrationContent({
         }}
       />
     )
-  if (ui.phase === 'sourceRetiring' || recovery === 'sourceResumeRetirement')
-    return (
-      <ContentScreen
-        title={t('deviceMigration.retirement.title')}
-        body={t('deviceMigration.retirement.body')}
-        progress
-      />
-    )
   if (controlRecord.mode === 'sourceErasedAwaitingDestinationAck') {
     const encoded = controlRecord.sourceErasedReceipt.encodeToQrString()
     if (Either.isRight(encoded))
@@ -502,6 +571,14 @@ function DeviceMigrationContent({
         />
       )
   }
+  if (ui.phase === 'sourceRetiring' || recovery === 'sourceResumeRetirement')
+    return (
+      <ContentScreen
+        title={t('deviceMigration.retirement.title')}
+        body={t('deviceMigration.retirement.body')}
+        progress
+      />
+    )
   if (
     ui.phase === 'destinationStagedWarning' ||
     controlRecord.mode === 'destinationStaged'

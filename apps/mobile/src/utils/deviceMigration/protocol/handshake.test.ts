@@ -91,10 +91,10 @@ describe('device migration handshake and encrypted channel', () => {
       const sourceKeys = await generateEphemeralKxKeyPair()
       const sourceApproval = Effect.runSync(Deferred.make<boolean>())
       const destinationApproval = Effect.runSync(Deferred.make<boolean>())
-      const sourceCodeReady = Effect.runSync(Deferred.make<void>())
-      const destinationCodeReady = Effect.runSync(Deferred.make<void>())
-      const sourceBothApproved = Effect.runSync(Deferred.make<void>())
-      const destinationBothApproved = Effect.runSync(Deferred.make<void>())
+      const sourceCodeReady = Effect.runSync(Deferred.make<undefined>())
+      const destinationCodeReady = Effect.runSync(Deferred.make<undefined>())
+      const sourceBothApproved = Effect.runSync(Deferred.make<undefined>())
+      const destinationBothApproved = Effect.runSync(Deferred.make<undefined>())
 
       const source = Effect.runPromise(
         runSourceHandshake({

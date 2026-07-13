@@ -6,7 +6,7 @@ import {
 import {isoNow} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
 import decryptNote from '@vexl-next/resources-utils/src/notes/decryptNote'
 import fetchAllPaginatedData from '@vexl-next/rest-api/src/fetchAllPaginatedData'
-import {Array, Effect, Either, Option, pipe} from 'effect'
+import {Array, Effect, Either, Fiber, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
 import reportError from '../../../utils/reportError'
@@ -103,7 +103,7 @@ const mergeIncomingNotesToState = ({
     )
   )
 
-export const refreshNotesActionAtom = atom(null, (get, set) =>
+const runRefreshNotesActionAtom = atom(null, (get, set) =>
   Effect.gen(function* (_) {
     const api = get(apiAtom)
     const session = get(sessionDataOrDummyAtom)
@@ -181,4 +181,27 @@ export const refreshNotesActionAtom = atom(null, (get, set) =>
       return Effect.void
     })
   )
+)
+
+const inFlightRefreshFiberAtom = atom<Fiber.RuntimeFiber<void> | null>(null)
+
+export const refreshNotesActionAtom = atom(null, (get, set) =>
+  Effect.gen(function* (_) {
+    const inFlightRefresh = get(inFlightRefreshFiberAtom)
+    if (inFlightRefresh) return yield* _(Fiber.join(inFlightRefresh))
+
+    const refreshFiber = yield* _(
+      set(runRefreshNotesActionAtom).pipe(
+        Effect.ensuring(
+          Effect.sync(() => {
+            set(inFlightRefreshFiberAtom, null)
+          })
+        ),
+        Effect.forkDaemon
+      )
+    )
+
+    set(inFlightRefreshFiberAtom, refreshFiber)
+    return yield* _(Fiber.join(refreshFiber))
+  })
 )

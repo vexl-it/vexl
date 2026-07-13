@@ -45,12 +45,14 @@ function useTabs(): ReadonlyArray<TabItem<MarketplaceTab>> {
 function MarketplaceListHeader({
   activeTab,
   filteredOffersCount,
+  isOffersLoaderVisible,
   onFilterChange,
   onTabPress,
   tabs,
 }: {
   readonly activeTab: MarketplaceTab
   readonly filteredOffersCount: number
+  readonly isOffersLoaderVisible: boolean
   readonly onFilterChange: () => void
   readonly onTabPress: (tab: MarketplaceTab) => void
   readonly tabs: ReadonlyArray<TabItem<MarketplaceTab>>
@@ -65,10 +67,13 @@ function MarketplaceListHeader({
         <Tabs tabs={tabs} activeTab={activeTab} onTabPress={onTabPress} />
       </Stack>
       {activeTab === 'allOffers' ? (
-        <AllOffersListHeader
-          filteredOffersCount={filteredOffersCount}
-          onFilterChange={onFilterChange}
-        />
+        <>
+          <AllOffersListHeader
+            filteredOffersCount={filteredOffersCount}
+            isOffersLoaderVisible={isOffersLoaderVisible}
+            onFilterChange={onFilterChange}
+          />
+        </>
       ) : (
         <>
           <MyOffersListHeader />
@@ -136,19 +141,24 @@ function MarketplaceScreenContent({
       <MarketplaceListHeader
         activeTab={activeTab}
         filteredOffersCount={allOffersAtoms.length}
+        isOffersLoaderVisible={loading}
         onFilterChange={scrollListToTop}
         onTabPress={handleTabPress}
         tabs={tabs}
       />
     ),
-    [activeTab, allOffersAtoms.length, handleTabPress, scrollListToTop, tabs]
+    [
+      activeTab,
+      allOffersAtoms.length,
+      handleTabPress,
+      loading,
+      scrollListToTop,
+      tabs,
+    ]
   )
 
   const offersAtoms =
     activeTab === 'allOffers' ? allOffersAtoms : myOffersSortedAtoms
-
-  const isAllOffersEmptyStateVisible =
-    activeTab === 'allOffers' && !areThereOffersWithoutFilters
 
   const listEmptyComponent =
     activeTab === 'allOffers'
@@ -216,10 +226,9 @@ function MarketplaceScreenContent({
         offersAtoms={offersAtoms}
         itemAfterFirstOffer={itemAfterFirstOffer}
         onRefresh={activeTab === 'allOffers' ? handleRefresh : undefined}
-        refreshing={
-          activeTab === 'allOffers' && !isAllOffersEmptyStateVisible
-            ? loading
-            : false
+        refreshing={activeTab === 'allOffers' ? loading : false}
+        hideRefreshIndicator={
+          activeTab === 'allOffers' && areThereOffersWithoutFilters
         }
         onScroll={onScroll}
         scrollEventThrottle={16}

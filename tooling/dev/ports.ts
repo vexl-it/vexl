@@ -20,6 +20,10 @@ export function portEnvVar(key: string): string {
   return `${camelToScreamingSnake(key)}_PORT`
 }
 
+const legacyPortEnvVars: Readonly<Record<string, string>> = {
+  webApp: 'ACCOUNT_DELETION_WEBSITE_PORT',
+}
+
 export function isValidTcpPort(port: number): boolean {
   return Number.isInteger(port) && port >= 1 && port <= 65_535
 }
@@ -30,7 +34,10 @@ export function resolvePorts(
 ): Record<string, number> {
   const resolved: Record<string, number> = {}
   for (const [key, value] of Object.entries(base)) {
-    const override = env[portEnvVar(key)]
+    const legacyEnvVar = legacyPortEnvVars[key]
+    const override =
+      env[portEnvVar(key)] ??
+      (legacyEnvVar !== undefined ? env[legacyEnvVar] : undefined)
     const parsed =
       override !== undefined && override.trim().length > 0
         ? Number(override)

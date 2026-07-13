@@ -164,6 +164,8 @@ export type RootStackParamsList = {
 
   ContactPreferences: {filter?: ContactsFilter | undefined} | undefined
 
+  VexlOnlyContacts: undefined
+
   NotificationSettings: undefined
 
   Notifications: undefined

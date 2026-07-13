@@ -1,5 +1,6 @@
 import {useNavigation} from '@react-navigation/native'
 import {
+  ArchiveInbox,
   CellPhoneMobileDevice,
   DocumentsFiles,
   Gift,
@@ -18,6 +19,7 @@ import {Effect} from 'effect'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {importedContactsCountAtom} from '../../state/contacts/atom/contactsStore'
+import {vexlOnlyContactsCountAtom} from '../../state/contacts/atom/vexlOnlyContactsAtoms'
 import {useLogout} from '../../state/useLogout'
 import {contactSupportActionAtom} from '../../utils/contactSupportActionAtom'
 import {useTranslation as useTranslations} from '../../utils/localization/I18nProvider'
@@ -48,6 +50,7 @@ export function useContent(): AccountMenus {
   const {t} = useTranslations()
   const navigation = useNavigation()
   const numberOfContacts = useAtomValue(importedContactsCountAtom)
+  const numberOfVexlOnlyContacts = useAtomValue(vexlOnlyContactsCountAtom)
   const locale = useAtomValue(formattingLocaleAtom)
   const showDialog = useSetAtom(globalDialogAtom)
   const contactSupport = useSetAtom(contactSupportActionAtom)
@@ -55,6 +58,9 @@ export function useContent(): AccountMenus {
   return useMemo((): AccountMenus => {
     const contactsCount = t('account.contactsCountFormatted', {
       localizedString: formatDecimal(numberOfContacts, locale),
+    })
+    const vexlOnlyContactsCount = t('account.contactsCountFormatted', {
+      localizedString: formatDecimal(numberOfVexlOnlyContacts, locale),
     })
 
     return [
@@ -68,6 +74,14 @@ export function useContent(): AccountMenus {
             icon: PeopleUsers,
             onPress: () => {
               navigation.navigate('ContactPreferences')
+            },
+          },
+          {
+            label: t('account.contactBackup'),
+            note: vexlOnlyContactsCount,
+            icon: ArchiveInbox,
+            onPress: () => {
+              navigation.navigate('VexlOnlyContacts')
             },
           },
         ],
@@ -218,6 +232,7 @@ export function useContent(): AccountMenus {
     logout,
     navigation,
     numberOfContacts,
+    numberOfVexlOnlyContacts,
     showDialog,
     t,
   ])

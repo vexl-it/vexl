@@ -5,6 +5,7 @@ import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {ContactInfoE, type ContactInfo, type StoredContact} from '../domain'
 import {getContactsAndTryToResolveThePermissionsAlongTheWay} from '../utils'
 import {storedContactsAtom} from './contactsStore'
+import {setDeviceContactsSnapshotFromContactsActionAtom} from './vexlOnlyContactsAtoms'
 
 const contactInfoEquivalence = Schema.equivalence(ContactInfoE)
 
@@ -16,6 +17,10 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
       getContactsAndTryToResolveThePermissionsAlongTheWay()
     )
     const storedContacts = get(storedContactsAtom)
+
+    yield* _(
+      set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
+    )
 
     const contactsFromDeviceByRawNumber = new Map<string, ContactInfo>(
       Array.map(contactsFromDevice, (c) => [c.rawNumber, c])

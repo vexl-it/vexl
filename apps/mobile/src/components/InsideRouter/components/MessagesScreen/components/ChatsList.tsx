@@ -149,6 +149,19 @@ function ChatsList(): React.ReactElement | null {
   )
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
   const {onScroll} = useInsideScreenScroll()
+  React.useEffect(() => {
+    const nextSelectedTagIds = new Set(
+      pipe(
+        selectedTagIds,
+        ReadonlyArray.fromIterable,
+        ReadonlyArray.filter((tagId) => filterableTagIds.has(tagId))
+      )
+    )
+
+    if (nextSelectedTagIds.size !== selectedTagIds.size) {
+      setSelectedTagIds(nextSelectedTagIds)
+    }
+  }, [filterableTagIds, selectedTagIds, setSelectedTagIds])
   const filterableTags = React.useMemo(
     () =>
       pipe(

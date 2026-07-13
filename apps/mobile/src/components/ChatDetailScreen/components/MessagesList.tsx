@@ -90,13 +90,7 @@ function MessagesList({
   const scrollToBottom = useCallback(
     (animated: boolean) => {
       runAfterAnimationFrame(() => {
-        listRef.current?.scrollToOffset({
-          animated,
-          offset: Math.max(
-            contentHeightRef.current - viewportHeightRef.current,
-            0
-          ),
-        })
+        listRef.current?.scrollToEnd({animated})
         updateScrollRefsToBottom()
       })
     },
@@ -363,7 +357,6 @@ function MessagesList({
   const maintainVisibleContentPosition = useMemo(
     () => ({
       autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
-      startRenderingFromBottom: !targetMessageId,
     }),
     [targetMessageId]
   )
@@ -421,6 +414,13 @@ function MessagesList({
     [updateIsScrolledToBottom]
   )
 
+  const onLoad = useCallback(() => {
+    if (tryScrollToTargetMessage()) return
+
+    didInitialScrollToBottomRef.current = true
+    scrollToBottom(false)
+  }, [scrollToBottom, tryScrollToTargetMessage])
+
   return (
     <FlashList
       ref={listRef}
@@ -431,7 +431,7 @@ function MessagesList({
       maintainVisibleContentPosition={maintainVisibleContentPosition}
       onContentSizeChange={onContentSizeChange}
       onLayout={onLayout}
-      onLoad={tryInitialScrollToBottom}
+      onLoad={onLoad}
       onScroll={onScroll}
       renderItem={renderItem}
       scrollEventThrottle={16}

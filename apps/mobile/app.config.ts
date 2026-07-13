@@ -1,5 +1,5 @@
-const VERSION_CODE = 852
-const VERSION = '1.44.2'
+const VERSION_CODE = 860
+const VERSION = '1.45.0'
 const ENV_PRESET = process.env.ENV_PRESET
 const IS_LOCAL_ENV = ENV_PRESET === 'local'
 const COMMIT_HASH = process.env.EAS_BUILD_GIT_COMMIT_HASH ?? 'local'

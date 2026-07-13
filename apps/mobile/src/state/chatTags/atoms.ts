@@ -1,6 +1,7 @@
 import {Array, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
+import allChatsAtom from '../chat/atoms/allChatsAtom'
 import {
   addChatTag,
   type ChatTagId,
@@ -67,6 +68,13 @@ export const setTagsForChatActionAtom = atom(
       readonly tagIds: ReadonlySet<ChatTagId>
     }
   ) => {
+    const chatExists = pipe(
+      get(allChatsAtom),
+      Array.flatten,
+      Array.some((chat) => chat.chat.id === args.chatId)
+    )
+    if (!chatExists) return
+
     set(
       chatTagsStateAtom,
       setTagsForChat({

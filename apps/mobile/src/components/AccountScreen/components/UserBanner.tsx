@@ -10,6 +10,7 @@ import {
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {useAtomValue} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
+import {Pressable} from 'react-native'
 import {SvgXml} from 'react-native-svg'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {
@@ -46,20 +47,27 @@ function UserBanner(): React.ReactElement {
 
   return (
     <XStack alignItems="center" gap="$3" paddingVertical="$4">
-      {profileImage.type === 'svgXml' ? (
-        <Avatar size="$9">
-          <SvgXml
-            width={tokens.size[9].val}
-            height={tokens.size[9].val}
-            xml={profileImage.svgXml.xml}
+      <Pressable
+        accessibilityLabel={t('editProfileScreen.title')}
+        accessibilityRole="button"
+        hitSlop={tokens.space[2].val}
+        onPress={handleEditPress}
+      >
+        {profileImage.type === 'svgXml' ? (
+          <Avatar size="$9">
+            <SvgXml
+              width={tokens.size[9].val}
+              height={tokens.size[9].val}
+              xml={profileImage.svgXml.xml}
+            />
+          </Avatar>
+        ) : (
+          <Avatar
+            size="$9"
+            source={{uri: resolveLocalUri(profileImage.imageUri)}}
           />
-        </Avatar>
-      ) : (
-        <Avatar
-          size="$9"
-          source={{uri: resolveLocalUri(profileImage.imageUri)}}
-        />
-      )}
+        )}
+      </Pressable>
       <YStack flex={1} minWidth={0} gap="$2">
         <Typography
           variant="paragraphSmallBold"

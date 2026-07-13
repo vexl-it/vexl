@@ -6,7 +6,8 @@ export const showVexlbotInitialMessageForAllChatsStorageAtom =
   atomWithParsedMmkvStorage(
     'showVexlbotInitialMessageForAllChats',
     {visible: true},
-    Schema.Struct({visible: Schema.Boolean})
+    Schema.Struct({visible: Schema.Boolean}),
+    'preference'
   )
 
 export const showVexlbotInitialMessageForAllChatsAtom = focusAtom(

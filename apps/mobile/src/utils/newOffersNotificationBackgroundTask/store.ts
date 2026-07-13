@@ -17,7 +17,8 @@ export const newOfferNotificationsPreferencesStore = atomWithParsedMmkvStorage(
   Schema.Struct({
     lastSentNotificationAt: UnixMilliseconds,
     lastSeenOffers: Schema.Array(OfferId),
-  })
+  }),
+  'ephemeral'
 )
 
 export const refreshLastSeenOffersActionAtom = atom(null, (get, set) => {

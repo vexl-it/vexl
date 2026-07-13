@@ -4,6 +4,7 @@ import {type ReadonlyArray} from 'effect/Array'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import {registerMmkvKey} from '../../../utils/atomUtils/mmkvMigrationRegistry'
 import getDefaultCurrency from '../../../utils/getDefaultCurrency'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {storage} from '../../../utils/mmkv/effectMmkv'
@@ -37,6 +38,15 @@ export const offersFilterInitialState = {
 
 const OFFERS_FILTER_STORAGE_KEY = 'offersFilterV2'
 const LEGACY_OFFERS_FILTER_STORAGE_KEY = 'offersFilter'
+
+// Legacy V1 key: copy-migrated into `offersFilterV2` at module import and
+// never deleted, so long-lived accounts still carry it. Registered so the
+// migration exporter can resolve it; 'lifecycle' keys are not exported.
+registerMmkvKey({
+  key: LEGACY_OFFERS_FILTER_STORAGE_KEY,
+  policy: 'lifecycle',
+  nativeType: 'string',
+})
 const OffersFilterStorage = Schema.Struct({filter: OffersFilter})
 interface OffersFilterStorage {
   readonly filter: OffersFilter
@@ -111,7 +121,8 @@ function readOffersFilterInitialStorageValue(): OffersFilterStorage {
 export const offersFilterStorageAtom = atomWithParsedMmkvStorage(
   OFFERS_FILTER_STORAGE_KEY,
   readOffersFilterInitialStorageValue(),
-  OffersFilterStorage
+  OffersFilterStorage,
+  'preference'
 )
 
 export const offersFilterFromStorageAtom = focusAtom(

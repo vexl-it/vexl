@@ -1,0 +1,3 @@
+<!-- Raw TCP sockets only need android.permission.INTERNET, which the app
+     manifest already declares. Deliberately no extra permissions here. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" />

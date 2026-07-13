@@ -5,6 +5,7 @@ import AppSettingsAppearanceScreen from './components/AppSettingsAppearanceScree
 import AppSettingsCurrencyScreen from './components/AppSettingsCurrencyScreen'
 import AppSettingsDefaultScreen from './components/AppSettingsDefaultScreen'
 import AppSettingsLanguageScreen from './components/AppSettingsLanguageScreen'
+import DeviceMigrationExplainerScreen from './components/DeviceMigrationExplainerScreen'
 
 const Stack = createNativeStackNavigator<AppSettingsStackParamsList>()
 
@@ -32,6 +33,10 @@ function AppSettingsScreen(): React.ReactElement {
       <Stack.Screen
         name="AppSettingsAppearance"
         component={AppSettingsAppearanceScreen}
+      />
+      <Stack.Screen
+        name="DeviceMigrationExplainer"
+        component={DeviceMigrationExplainerScreen}
       />
     </Stack.Navigator>
   )

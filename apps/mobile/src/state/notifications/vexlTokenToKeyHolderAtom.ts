@@ -12,7 +12,8 @@ export const vexlTokenToKeyHolderAtom = atomWithParsedMmkvStorage(
       key: VexlNotificationToken,
       value: PrivateKeyHolder,
     }),
-  })
+  }),
+  'account'
 )
 
 export const registerVexlTokenActionAtom = atom(

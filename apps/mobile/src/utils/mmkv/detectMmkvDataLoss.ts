@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import {File, Paths} from 'expo-file-system'
 import {AppState} from 'react-native'
+import {registerMmkvKey} from '../atomUtils/mmkvMigrationRegistry'
 import reportError from '../reportError'
 import {storage} from './effectMmkv'
 
@@ -12,6 +13,12 @@ import {storage} from './effectMmkv'
 // create a require cycle back to effectMmkv).
 const MMKV_SENTINEL_KEY = '__mmkv_data_exists'
 export const ASYNC_SENTINEL_KEY = '__mmkv_was_populated'
+
+registerMmkvKey({
+  key: MMKV_SENTINEL_KEY,
+  policy: 'ephemeral',
+  nativeType: 'string',
+})
 
 function getMmkvFilesDiagnostics(): Record<string, unknown> {
   const docDir = Paths.document

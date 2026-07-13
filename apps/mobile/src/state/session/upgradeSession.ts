@@ -1,4 +1,3 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {type KeyPairV2} from '@vexl-next/cryptography/src/KeyHolder'
 import {
   cryptoBoxSign,
@@ -9,6 +8,7 @@ import {type VexlAuthHeader} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {Effect, Schema} from 'effect'
 import {getDefaultStore} from 'jotai'
 import {apiEnv, platform} from '../../api'
+import {vexlGatedHttpClientLayer} from '../../api/vexlHttpClientLayer'
 import {type SessionV1, type SessionV2} from '../../brands/Session.brand'
 import {
   appSource,
@@ -94,7 +94,7 @@ function fetchVexlAuthHeaderFromServer(
     )
 
     return submitResponse.vexlAuthHeader
-  }).pipe(Effect.provide(FetchHttpClient.layer))
+  }).pipe(Effect.provide(vexlGatedHttpClientLayer))
 }
 
 export const upgradeSession = (

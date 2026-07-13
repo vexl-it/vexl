@@ -39,7 +39,8 @@ const offerToConnectionsAtom = atomWithParsedMmkvStorage(
   {
     offerToConnections: [],
   },
-  OfferToConnectionsItems
+  OfferToConnectionsItems,
+  'account'
 )
 
 export default offerToConnectionsAtom

@@ -25,7 +25,8 @@ import {PreviewChannel, PreviewError} from './domain'
 export const previewChannelStorageAtom = atomWithParsedMmkvStorage(
   'previewChannel',
   {activeChannel: null},
-  Schema.Struct({activeChannel: Schema.NullOr(PreviewChannel)})
+  Schema.Struct({activeChannel: Schema.NullOr(PreviewChannel)}),
+  'deviceLocal'
 )
 
 // Prod builds must never switch channels; dev builds running from Metro have

@@ -9,7 +9,8 @@ const wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom =
     },
     Schema.Struct({
       value: Schema.Boolean,
-    })
+    }),
+    'deviceLocal'
   )
 
 export default wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom

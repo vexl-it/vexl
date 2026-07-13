@@ -7,7 +7,8 @@ const vexlCalendarStorageAtom = atomWithParsedMmkvStorage(
   {id: Option.none()},
   Schema.Struct({
     id: Schema.optionalWith(Schema.String, {as: 'Option'}),
-  })
+  }),
+  'deviceLocal'
 )
 
 export default vexlCalendarStorageAtom

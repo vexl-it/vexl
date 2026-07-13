@@ -1,4 +1,3 @@
-import {FetchHttpClient} from '@effect/platform/index'
 import {countryPrefixFromNumber} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {
   ENV_PRESETS,
@@ -33,6 +32,7 @@ import {
 import {translationAtom} from '../utils/localization/I18nProvider'
 import {isDeveloperAtom} from '../utils/preferences'
 import reportError from '../utils/reportError'
+import {vexlGatedHttpClientLayer} from './vexlHttpClientLayer'
 
 export const platform = Schema.decodeSync(PlatformName)(
   Platform.OS === 'ios' ? 'IOS' : 'ANDROID'
@@ -315,5 +315,5 @@ export const apiAtom = atom((get) =>
         })
       ),
     }
-  }).pipe(Effect.provide(FetchHttpClient.layer), Effect.runSync)
+  }).pipe(Effect.provide(vexlGatedHttpClientLayer), Effect.runSync)
 )

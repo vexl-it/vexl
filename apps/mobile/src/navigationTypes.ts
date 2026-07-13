@@ -227,6 +227,7 @@ export type AppSettingsStackParamsList = {
   AppSettingsLanguage: undefined
   AppSettingsCurrency: undefined
   AppSettingsAppearance: undefined
+  DeviceMigrationExplainer: undefined
 }
 
 export type AppSettingsStackScreenProps<

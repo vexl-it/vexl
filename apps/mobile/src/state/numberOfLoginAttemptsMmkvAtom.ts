@@ -22,7 +22,8 @@ type LoginAttemptsDataStored = typeof LoginAttemptsDataStored.Type
 const loginAttemptsPhoneNumbersMmkvAtom = atomWithParsedMmkvStorage(
   'numberOfLoginAttempts',
   {data: {phoneNumbers: [], timestamp: UnixMilliseconds0}},
-  LoginAttemptsDataStored
+  LoginAttemptsDataStored,
+  'ephemeral'
 )
 
 export const loginAttemptsPhoneNumbersAtom = focusAtom(

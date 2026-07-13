@@ -9,6 +9,7 @@ import {
   screenshotsDisabledAtom,
   showYouDidNotAllowTakingScreenshotsActionAtom,
 } from '../state/showYouDidNotAllowScreenshotsActionAtom'
+import {setBaselineCaptureProtection} from '../utils/captureProtectionLease'
 
 function PreventScreenshots(): null {
   const screenshotsDisabled = useAtomValue(screenshotsDisabledAtom)
@@ -17,8 +18,11 @@ function PreventScreenshots(): null {
   )
 
   useEffect(() => {
-    if (screenshotsDisabled) void CaptureProtection.prevent()
-    if (!screenshotsDisabled) void CaptureProtection.allow()
+    // Never calls CaptureProtection.prevent()/allow() directly — all writers
+    // go through utils/captureProtectionLease so device-migration leases can
+    // force protection on regardless of this preference (conflicts always
+    // resolve in favor of protection).
+    setBaselineCaptureProtection(screenshotsDisabled)
   }, [screenshotsDisabled])
 
   useEffect(() => {

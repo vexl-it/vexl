@@ -4,6 +4,8 @@
   "type": "module",
   "main": "src/index",
   "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
     "clean": "rimraf .turbo node_modules",
     "lint": "eslint .",
     "format": "prettier --check \"**/*.{js,mjs,cjs,jsx,ts,tsx,md,json}\"",
@@ -16,11 +18,15 @@
     "@vexl-next/prettier-config": "0.0.0",
     "@vexl-next/tsconfig": "0.0.0",
     "eslint": "^9.20.0",
+    "jest": "^29.7.0",
     "prettier": "^3.3.2",
     "rimraf": "^4.4.0",
+    "ts-jest": "^29.2.0",
+    "ts-node": "^10.9.1",
     "typescript": "~6.0.3"
   },
   "dependencies": {
+    "@noble/hashes": "^1.8.0",
     "@vexl-next/cryptography": "0.0.0",
     "@vexl-next/generic-utils": "0.0.0",
     "awesome-phonenumber": "^7.4.0",

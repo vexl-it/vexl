@@ -9,7 +9,8 @@ export const repostToConnectionsAtom = atomWithParsedMmkvStorage(
   {
     repostToConnections: [],
   },
-  RepostToConnectionsItems
+  RepostToConnectionsItems,
+  'account'
 )
 
 export const upsertRepostToConnectionsActionAtom = atom<

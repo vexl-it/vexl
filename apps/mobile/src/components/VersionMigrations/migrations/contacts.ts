@@ -39,7 +39,8 @@ const oldImportedContactsStorageAtom = atomWithParsedMmkvStorage(
   Schema.Struct({
     importedContacts: Schema.Array(ContactNormalized).pipe(Schema.mutable),
     lastImport: Schema.optional(IsoDatetimeString),
-  })
+  }),
+  'lifecycle'
 )
 
 function oldToNewContactManuallyImported(

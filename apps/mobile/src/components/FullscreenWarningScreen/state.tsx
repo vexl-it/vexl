@@ -31,7 +31,8 @@ const cancelledIdsMmkv = atomWithParsedMmkvStorage(
   {ids: []},
   Schema.Struct({
     ids: Schema.Array(Uuid),
-  })
+  }),
+  'preference'
 )
 
 export const loadNewsAndAnnouncementsActionAtom = atom(null, (get, set) => {

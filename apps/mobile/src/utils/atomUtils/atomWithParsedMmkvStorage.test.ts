@@ -4,8 +4,15 @@ import {storage} from '../mmkv/effectMmkv'
 import {
   CLEAR_STORAGE_KEY,
   atomWithParsedMmkvStorage,
+  atomWithParsedMmkvStorageWithImmediateSaveOption,
   invalidateScheduledMmkvWrites,
 } from './atomWithParsedMmkvStorage'
+import {
+  flushAllPendingMmkvWrites,
+  freezeMmkvPersistence,
+  isMmkvPersistenceFrozen,
+  unfreezeMmkvPersistence,
+} from './mmkvMigrationRegistry'
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,
@@ -76,6 +83,8 @@ afterEach(() => {
     Reflect.deleteProperty(globalThis, 'requestIdleCallback')
   }
   originalRequestIdleCallback = undefined
+  // Never leak the migration write-freeze into other tests.
+  unfreezeMmkvPersistence()
   jest.restoreAllMocks()
 })
 
@@ -87,7 +96,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -100,7 +110,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -114,7 +125,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -131,7 +143,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -143,7 +156,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -172,7 +186,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -190,7 +205,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -206,8 +222,18 @@ describe('atomWithParsedMmkvStorage', () => {
 
   it('picks up foreign writes from another atom for the same key', () => {
     const key = 'test-foreign-atom-write'
-    const atomA = atomWithParsedMmkvStorage(key, defaultValue, TestValueSchema)
-    const atomB = atomWithParsedMmkvStorage(key, defaultValue, TestValueSchema)
+    const atomA = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
+    const atomB = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
     const store = createStore()
     const unsub = store.sub(atomA, () => {})
 
@@ -223,7 +249,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -241,7 +268,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -259,7 +287,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -275,7 +304,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -304,7 +334,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -329,7 +360,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -358,7 +390,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     createStore()
 
@@ -375,7 +408,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
     const unsub = store.sub(testAtom, () => {})
@@ -402,7 +436,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     const store = createStore()
 
@@ -420,7 +455,8 @@ describe('atomWithParsedMmkvStorage', () => {
     const testAtom = atomWithParsedMmkvStorage(
       key,
       defaultValue,
-      TestValueSchema
+      TestValueSchema,
+      'ephemeral'
     )
     // no listener yet — atom was created but never mounted
     storage._storage.set(key, JSON.stringify({name: 'changed', count: 2}))
@@ -430,5 +466,136 @@ describe('atomWithParsedMmkvStorage', () => {
 
     expect(store.get(testAtom)).toEqual({name: 'changed', count: 2})
     unsub()
+  })
+})
+
+describe('mmkv persistence freeze', () => {
+  it('keeps updating in-memory state while frozen but never writes to storage', () => {
+    const key = 'test-freeze-deferred-write'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
+    const store = createStore()
+
+    freezeMmkvPersistence()
+    expect(isMmkvPersistenceFrozen()).toBe(true)
+
+    store.set(testAtom, {name: 'frozen', count: 1})
+
+    // in-memory state updated, storage untouched — even after the deferred
+    // flush would have run
+    expect(store.get(testAtom)).toEqual({name: 'frozen', count: 1})
+    flushIdleCallbacks()
+    expect(storage._storage.getString(key)).toBeUndefined()
+  })
+
+  it('flushNow does not write to storage while frozen', () => {
+    const key = 'test-freeze-flush-now'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
+    const store = createStore()
+
+    // queue a deferred write, then freeze before it lands
+    store.set(testAtom, {name: 'pending', count: 1})
+    freezeMmkvPersistence()
+
+    testAtom.flushNow()
+
+    expect(storage._storage.getString(key)).toBeUndefined()
+  })
+
+  it('setAndSaveImmediatelyAtom does not write to storage while frozen', () => {
+    const key = 'test-freeze-immediate-save'
+    const {atom: testAtom, setAndSaveImmediatelyAtom} =
+      atomWithParsedMmkvStorageWithImmediateSaveOption(
+        key,
+        defaultValue,
+        TestValueSchema,
+        'ephemeral'
+      )
+    const store = createStore()
+
+    freezeMmkvPersistence()
+    store.set(setAndSaveImmediatelyAtom, {name: 'frozen', count: 2})
+
+    expect(store.get(testAtom)).toEqual({name: 'frozen', count: 2})
+    expect(storage._storage.getString(key)).toBeUndefined()
+  })
+
+  it('persists sets made after unfreezing again', () => {
+    const key = 'test-freeze-unfreeze'
+    const testAtom = atomWithParsedMmkvStorage(
+      key,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
+    const store = createStore()
+
+    freezeMmkvPersistence()
+    store.set(testAtom, {name: 'dropped', count: 1})
+    flushIdleCallbacks()
+    expect(storage._storage.getString(key)).toBeUndefined()
+
+    unfreezeMmkvPersistence()
+    expect(isMmkvPersistenceFrozen()).toBe(false)
+
+    store.set(testAtom, {name: 'persisted', count: 2})
+    flushIdleCallbacks()
+
+    expect(JSON.parse(storage._storage.getString(key) ?? '')).toEqual({
+      name: 'persisted',
+      count: 2,
+    })
+  })
+})
+
+describe('flushAllPendingMmkvWrites', () => {
+  it('synchronously persists every pending deferred write', () => {
+    const keyA = 'test-flush-all-a'
+    const keyB = 'test-flush-all-b'
+    const atomA = atomWithParsedMmkvStorage(
+      keyA,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
+    const atomB = atomWithParsedMmkvStorage(
+      keyB,
+      defaultValue,
+      TestValueSchema,
+      'ephemeral'
+    )
+    const store = createStore()
+
+    store.set(atomA, {name: 'a', count: 1})
+    store.set(atomB, {name: 'b', count: 2})
+
+    // nothing persisted yet — the deferred flushes have not run
+    expect(storage._storage.getString(keyA)).toBeUndefined()
+    expect(storage._storage.getString(keyB)).toBeUndefined()
+
+    flushAllPendingMmkvWrites()
+
+    expect(JSON.parse(storage._storage.getString(keyA) ?? '')).toEqual({
+      name: 'a',
+      count: 1,
+    })
+    expect(JSON.parse(storage._storage.getString(keyB) ?? '')).toEqual({
+      name: 'b',
+      count: 2,
+    })
+
+    // the already-scheduled deferred flushes are now no-ops
+    const setSpy = jest.spyOn(storage._storage, 'set')
+    flushIdleCallbacks()
+    expect(setSpy).not.toHaveBeenCalled()
   })
 })

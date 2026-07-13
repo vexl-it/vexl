@@ -1,0 +1,12 @@
+# Android build artifacts
+/android/.cxx/
+/android/.gradle/
+/android/build/
+/android/local.properties
+
+# iOS build artifacts
+/ios/Pods/
+/ios/build/
+/ios/DerivedData/
+/ios/xcuserdata/
+*.xcuserstate

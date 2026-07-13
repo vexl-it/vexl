@@ -276,13 +276,29 @@ export default function VerificationCodeScreen({
           </Typography>
         </YStack>
         <TouchableOpacity
+          accessibilityLabel={
+            __DEV__ ? 'Focus verification code input' : undefined
+          }
           activeOpacity={1}
+          accessible={__DEV__}
+          onLongPress={
+            __DEV__
+              ? () => {
+                  setUserCode('222222')
+                  submitVerificationCode('222222')
+                }
+              : undefined
+          }
           onPress={() => {
             inputRef.current?.focus()
           }}
         >
           <YStack>
             <TextInput
+              accessibilityLabel={
+                __DEV__ ? 'Verification code input' : undefined
+              }
+              accessible={__DEV__}
               autoComplete={
                 Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'
               }
@@ -298,15 +314,16 @@ export default function VerificationCodeScreen({
                 setUserCode(code)
                 submitVerificationCode(code)
               }}
-              pointerEvents="none"
+              pointerEvents={__DEV__ ? 'auto' : 'none'}
               ref={inputRef}
               style={{
                 height: codeBoxHeight,
-                opacity: 0,
+                opacity: __DEV__ ? 0.01 : 0,
                 position: 'absolute',
                 width: '100%',
                 zIndex: getTokens().zIndex.$5.val,
               }}
+              testID={__DEV__ ? 'verification-code-input' : undefined}
               textContentType="oneTimeCode"
               value={userCode}
             />

@@ -1,3 +1,4 @@
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {
   Button,
   Camera,
@@ -6,6 +7,8 @@ import {
   Typography,
   XmarkCancelClose,
 } from '@vexl-next/ui'
+import {Schema} from 'effect'
+import {Paths} from 'expo-file-system'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback} from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
@@ -36,6 +39,14 @@ function EditIdentityPhotoScreen({navigation}: Props): React.ReactElement {
   const theme = useTheme()
   const imageUri = useAtomValue(editProfileIdentityImageUriAtom)
   const selectImage = useSetAtom(selectImageActionAtom)
+  const setImageUri = useSetAtom(editProfileIdentityImageUriAtom)
+  const useEmulatorProfileImage = (): void => {
+    setImageUri(
+      Schema.decodeSync(UriString)(
+        Paths.join(Paths.document.uri, 'profilePictureMigrationTest.png')
+      )
+    )
+  }
 
   const closeFlow = useCallback(() => {
     navigation.getParent()?.goBack()
@@ -87,13 +98,27 @@ function EditIdentityPhotoScreen({navigation}: Props): React.ReactElement {
               >
                 {t('editProfileScreen.identityPhoto.changePhotoButton')}
               </Button>
+              {__DEV__ ? (
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onPress={useEmulatorProfileImage}
+                >
+                  Use emulator profile image
+                </Button>
+              ) : null}
             </>
           ) : (
             <TouchableOpacity
+              accessibilityLabel={
+                __DEV__ ? 'Use emulator profile image' : undefined
+              }
+              accessible={__DEV__}
               style={{
                 alignItems: 'center',
                 alignSelf: 'stretch',
               }}
+              onLongPress={__DEV__ ? useEmulatorProfileImage : undefined}
               onPress={() => {
                 selectImage(editProfileIdentityImageUriAtom)
               }}

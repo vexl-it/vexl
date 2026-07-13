@@ -4,9 +4,10 @@ import {
   NavigationContainer,
 } from '@react-navigation/native'
 import {useVexlTheme} from '@vexl-next/ui'
+import {addEventListener} from 'expo-linking'
 import {NavigationBar} from 'expo-navigation-bar'
 import {StatusBar} from 'expo-status-bar'
-import React from 'react'
+import React, {useSyncExternalStore} from 'react'
 import {Platform} from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
@@ -14,6 +15,11 @@ import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {useTheme} from 'tamagui'
 import AnimatedSplashScreen from './AnimatedSplashScreen'
 import BadgeCountManager from './components/BadgeCountManager'
+import DeviceMigrationRoot from './components/DeviceMigrationRoot'
+import {
+  getMigrationUiState,
+  subscribeToMigrationUiState,
+} from './components/DeviceMigrationRoot/coordinator'
 import DisableLogBoxForTests from './components/DisableLogBoxForTests'
 import ErrorAlert from './components/ErrorAlert'
 import {OverlayInfoScreen} from './components/FullscreenWarningScreen'
@@ -28,6 +34,7 @@ import VersionMigrations from './components/VersionMigrations'
 import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
+import {useMigrationControlRecord} from './utils/deviceMigration/controlStore/useMigrationControlRecord'
 import {useInAppLoadingTasks} from './utils/inAppLoadingTasks/useInAppLoadingTasks'
 import {setLastTimeAppWasRunningToNow} from './utils/lastTimeAppWasRunning'
 import {navigationRef} from './utils/navigation'
@@ -44,6 +51,24 @@ function App(): React.ReactElement {
   useSetAppLanguageFromStore()
   useSetRelativeDateFormatting()
   useInAppLoadingTasks()
+
+  React.useEffect(() => {
+    if (!__DEV__) return
+
+    const subscription = addEventListener('url', ({url}) => {
+      if (!navigationRef.isReady()) return
+      if (url === 'app.vexl.it://emulator-test/debug') {
+        navigationRef.navigate('DebugScreen')
+      } else if (url === 'app.vexl.it://emulator-test/account') {
+        navigationRef.navigate('Account')
+      } else if (url === 'app.vexl.it://emulator-test/home') {
+        navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
+      }
+    })
+    return () => {
+      subscription.remove()
+    }
+  }, [])
 
   return (
     <SafeAreaProvider>
@@ -126,12 +151,30 @@ const AppStatusBar = (): React.ReactElement => {
   return <StatusBar style={isDarkTheme ? 'light' : 'dark'} />
 }
 
-export default function _(): React.ReactElement {
+export default function Root(): React.ReactElement {
+  // Boot gate (spec section "Application execution modes"): the durable
+  // migration control record is read synchronously BEFORE the normal
+  // splash/session loader mounts. In any migration mode the migration-only
+  // root replaces the entire normal tree, keeping out loadSession, loading
+  // tasks, version migrations, notification handling and every other
+  // account-state writer. The record is subscribed, so a safe cancellation
+  // back to 'normal' swaps the normal root back in without an app restart.
+  const migrationControlRecord = useMigrationControlRecord()
+  const migrationUiState = useSyncExternalStore(
+    subscribeToMigrationUiState,
+    getMigrationUiState
+  )
+  const migrationUiActive = migrationUiState.phase !== 'idle'
+
   return (
     <ThemeProvider>
-      <AnimatedSplashScreen>
-        <App />
-      </AnimatedSplashScreen>
+      {migrationControlRecord.mode === 'normal' && !migrationUiActive ? (
+        <AnimatedSplashScreen>
+          <App />
+        </AnimatedSplashScreen>
+      ) : (
+        <DeviceMigrationRoot controlRecord={migrationControlRecord} />
+      )}
     </ThemeProvider>
   )
 }

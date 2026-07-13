@@ -10,7 +10,8 @@ const notificationScreenDataStorageAtom = atomWithParsedMmkvStorage(
   {notifications: []},
   Schema.Struct({
     notifications: Schema.Array(NotificationCenterRecord),
-  })
+  }),
+  'account'
 )
 
 export const notificationScreenData = atom(

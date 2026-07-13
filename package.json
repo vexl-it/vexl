@@ -1,6 +1,6 @@
 {
   "name": "vexl-next",
-  "packageManager": "pnpm@11.9.0",
+  "packageManager": "pnpm@11.11.0+sha512.4463f65fd80ed80d69bc1d4bf163ee94f605c7380fc318bb5b2ebe15f8cd12d49c51a4d59e951b401e764d3b6ca751cbf51bc50ed7001a6bcb4935e684c34882",
   "scripts": {
     "turbo:clean": "turbo clean && rm -rf ./node_modules/.cache",
     "turbo:format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache'",

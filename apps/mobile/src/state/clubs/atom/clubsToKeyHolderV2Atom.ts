@@ -26,7 +26,8 @@ export type ClubsToKeyHolderV2 = typeof ClubsToKeyHolderV2.Type
 export const clubsKeyHolderStorageAtom = atomWithParsedMmkvStorage(
   'storedClubsV2',
   {data: {}, waitingForAdmission: []},
-  ClubsToKeyHolderV2
+  ClubsToKeyHolderV2,
+  'account'
 )
 
 export const clubsToKeyHolderAtom = focusAtom(clubsKeyHolderStorageAtom, (o) =>

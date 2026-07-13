@@ -62,7 +62,8 @@ const accountActionStepsStorageAtom = atomWithParsedMmkvStorage(
   },
   Schema.Struct({
     postedFirstOffer: Schema.Boolean,
-  })
+  }),
+  'account'
 )
 
 export const postedFirstOfferAtom = focusAtom(

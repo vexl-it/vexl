@@ -25,13 +25,15 @@ import {
 export const lastInitialLinkStorageAtom = atomWithParsedMmkvStorage(
   'lastInitialLink',
   {lastLinkImported: null},
-  Schema.Struct({lastLinkImported: Schema.NullOr(Schema.String)})
+  Schema.Struct({lastLinkImported: Schema.NullOr(Schema.String)}),
+  'deviceLocal'
 )
 
 export const lastUniversalOrAppLinkStorageAtom = atomWithParsedMmkvStorage(
   'lastUniversalOrAppLink',
   {lastUniversalOrAppLinkImported: null},
-  Schema.Struct({lastUniversalOrAppLinkImported: Schema.NullOr(Schema.String)})
+  Schema.Struct({lastUniversalOrAppLinkImported: Schema.NullOr(Schema.String)}),
+  'deviceLocal'
 )
 
 export class InvalidDeepLinkTypeError extends Schema.TaggedError<InvalidDeepLinkTypeError>(

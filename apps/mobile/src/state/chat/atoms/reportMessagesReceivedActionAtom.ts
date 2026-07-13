@@ -26,7 +26,8 @@ const reportedMessagesStorage = atomWithParsedMmkvStorage(
         reportedAt: UnixMilliseconds,
       })
     ),
-  })
+  }),
+  'account'
 )
 const reportedMessagesAtom = focusAtom(reportedMessagesStorage, (p) =>
   p.prop('uuids')

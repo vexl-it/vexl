@@ -30,7 +30,8 @@ export const offersMissingOnServerStorageAtom = atomWithParsedMmkvStorage(
   {offerIds: []},
   Schema.Struct({
     offerIds: Schema.Array(OfferId),
-  })
+  }),
+  'account'
 )
 
 export const unmarkOfferAsMissingActionAtom = atom(

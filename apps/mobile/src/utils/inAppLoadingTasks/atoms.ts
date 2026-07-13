@@ -3,6 +3,7 @@ import {Array, Effect, HashMap, HashSet, Option, pipe} from 'effect'
 import {atom, getDefaultStore} from 'jotai'
 import {type Store} from 'jotai/vanilla/store'
 import {startBenchmark} from '../../state/ActionBenchmarks'
+import {readMigrationControlRecord} from '../deviceMigration/controlStore'
 import {preferencesAtom} from '../preferences'
 import {reportErrorE} from '../reportError'
 import {
@@ -66,6 +67,13 @@ const executeSingleTask = (
   task: InAppLoadingTask
 ): Effect.Effect<void, never> =>
   Effect.gen(function* (_) {
+    // Device migration silence gate: never start a task while a migration is
+    // in progress (or the control record is quarantined). Checked here as
+    // well as in executeTasksWithDependencies so an already-running wave
+    // cannot start its next task after quiescence began. Deliberately silent
+    // — migration must not produce logs/telemetry.
+    if (readMigrationControlRecord().mode !== 'normal') return
+
     const endBenchmark = startBenchmark(`InAppLoadingTask: ${task.name}`)
     const startedAt = unixMillisecondsNow()
 
@@ -135,6 +143,10 @@ export const executeTasksWithDependencies = (
   taskIds: InAppLoadingTaskId[]
 ): Effect.Effect<void> =>
   Effect.gen(function* (_) {
+    // Device migration silence gate: skip whole waves while a migration is in
+    // progress. Deliberately before any logging.
+    if (readMigrationControlRecord().mode !== 'normal') return
+
     console.log(
       'InAppLoadingTasks',
       'Executing tasks with dependencies:',

@@ -4,6 +4,11 @@ import {currencies} from '../localization/currency'
 import getDefaultSpokenLanguage from '../localization/getDefaultSpokenLanguage'
 import {Preferences} from './domain'
 
+// Policy 'account': user-facing preferences follow the account. Developer /
+// diagnostic fields (`isDeveloper`, `showTextDebugButton`,
+// `enableNewOffersNotificationDevMode`, task-debug settings) are device-local —
+// the migration EXPORTER resets them before the snapshot is taken; the split
+// is not represented here.
 export const preferencesAtom = atomWithParsedMmkvStorage(
   'preferences',
   {
@@ -43,7 +48,8 @@ export const preferencesAtom = atomWithParsedMmkvStorage(
     notesBoardEnabled: false,
     lastUsedOfferSpokenLanguages: getDefaultSpokenLanguage(),
   },
-  Preferences
+  Preferences,
+  'account'
 )
 
 export const notificationPreferencesAtom = focusAtom(preferencesAtom, (o) =>

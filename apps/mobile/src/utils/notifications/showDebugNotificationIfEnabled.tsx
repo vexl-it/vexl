@@ -4,10 +4,17 @@ import {
 } from 'expo-notifications'
 import {getOrElse} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
+import {registerMmkvKey} from '../atomUtils/mmkvMigrationRegistry'
 import {storage} from '../mmkv/effectMmkv'
 import {displayLocalNotification} from './displayLocalNotification'
 
 const DEBUG_NOTIFICATIONS_ENABLED_KEY = 'debugNotificationsEnabled'
+
+registerMmkvKey({
+  key: DEBUG_NOTIFICATIONS_ENABLED_KEY,
+  policy: 'deviceLocal',
+  nativeType: 'string',
+})
 
 export function setShowDebugNotifications(value: boolean): void {
   storage.set(DEBUG_NOTIFICATIONS_ENABLED_KEY)(value ? 'true' : 'false')

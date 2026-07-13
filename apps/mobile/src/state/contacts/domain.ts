@@ -91,7 +91,8 @@ export const ContactsFilterE = Schema.Literal(
   'submitted',
   'nonSubmitted',
   'new',
-  'all'
+  'all',
+  'vexlOnly'
 )
 export type ContactsFilter = typeof ContactsFilterE.Type
 

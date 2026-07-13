@@ -12,6 +12,7 @@ import notEmpty from '../utils/notEmpty'
 import {showDebugNotificationIfEnabled} from '../utils/notifications/showDebugNotificationIfEnabled'
 import reportError from '../utils/reportError'
 import deleteAllInboxesActionAtom from './chat/atoms/deleteAllInboxesActionAtom'
+import {selectedChatTagFiltersAtom} from './chatTags/atoms'
 import {clubsToKeyHolderAtom} from './clubs/atom/clubsToKeyHolderV2Atom'
 import {clubsWithMembersAtom} from './clubs/atom/clubsWithMembersAtom'
 import {clearPersistentDataAboutReachAndImportedContactsActionAtom} from './connections/atom/reachNumberWithoutClubsConnectionsMmkvAtom'
@@ -42,6 +43,7 @@ export const logoutActionAtom = atom(null, async (get, set) => {
   })
 
   set(loadingOverlayDisplayedAtom, true)
+  set(selectedChatTagFiltersAtom, new Set())
 
   // Clear connections reach and imported contacts count from persistent storage
   set(clearPersistentDataAboutReachAndImportedContactsActionAtom)

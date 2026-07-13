@@ -133,8 +133,12 @@ afterEvaluate {
                         return match.find() ? match.group(1) : null
                     }
                     androidSerial = emulatorSerials.find { serial ->
-                        def avdNameOutput = vexlCommandOutput([adbExecutable, "-s", serial, "emu", "avd", "name"])
-                        return avdNameOutput.readLines().find { line -> line.trim() }?.trim() == androidAvdName
+                        try {
+                            def avdNameOutput = vexlCommandOutput([adbExecutable, "-s", serial, "emu", "avd", "name"])
+                            return avdNameOutput.readLines().find { line -> line.trim() }?.trim() == androidAvdName
+                        } catch (Exception ignored) {
+                            return false
+                        }
                     }
                     if (androidSerial == null) {
                         throw new GradleException("Could not find the selected Android emulator " + androidAvdName + " after Expo started it.")

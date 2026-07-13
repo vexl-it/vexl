@@ -118,6 +118,12 @@ function printHelp(): void {
 // --- selection -------------------------------------------------------------
 
 function selectApps(options: CliOptions): readonly RunnableApp[] {
+  const includesApp = (names: readonly string[], app: RunnableApp): boolean =>
+    pipe(
+      names,
+      Array.some((name) => findApp(name) === app)
+    )
+
   const validateNames = (
     names: readonly string[],
     optionName: string
@@ -142,13 +148,13 @@ function selectApps(options: CliOptions): readonly RunnableApp[] {
   const candidates = Array.isNonEmptyReadonlyArray(options.only)
     ? pipe(
         ALL_APPS,
-        Array.filter((app) => options.only.includes(app.name))
+        Array.filter((app) => includesApp(options.only, app))
       )
     : [...SERVICES, ...(options.web ? WEB_APPS : [])]
 
   return pipe(
     candidates,
-    Array.filter((app) => !options.skip.includes(app.name))
+    Array.filter((app) => !includesApp(options.skip, app))
   )
 }
 

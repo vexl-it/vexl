@@ -3,7 +3,7 @@ import {type ChatMessageId} from '@vexl-next/domain/src/general/messaging'
 import {tokens, useScreenFooterHeight} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom, useStore, type Atom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useRef} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {
   Animated,
   Easing,
@@ -68,6 +68,20 @@ function MessagesList({
   const latestMessageIdRef = useRef<ChatMessageId | undefined>(undefined)
   const scrolledToTargetMessageIdRef = useRef<ChatMessageId | undefined>(
     undefined
+  )
+  const [isListLoaded, setIsListLoaded] = useState(false)
+  const [isContentShorterThanViewport, setIsContentShorterThanViewport] =
+    useState(false)
+
+  const updateIsContentShorterThanViewport = useCallback(
+    (contentHeight: number, viewportHeight: number) => {
+      setIsContentShorterThanViewport(
+        contentHeight !== 0 &&
+          viewportHeight !== 0 &&
+          contentHeight <= viewportHeight
+      )
+    },
+    []
   )
 
   const updateScrollRefsToBottom = useCallback(() => {
@@ -357,8 +371,11 @@ function MessagesList({
   const maintainVisibleContentPosition = useMemo(
     () => ({
       autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
+      // Let onLoad own the initial scroll while long lists are still measuring.
+      startRenderingFromBottom:
+        isListLoaded && !targetMessageId && isContentShorterThanViewport,
     }),
-    [targetMessageId]
+    [isContentShorterThanViewport, isListLoaded, targetMessageId]
   )
 
   const onContentSizeChange = useCallback(
@@ -368,6 +385,7 @@ function MessagesList({
         isContentScrolledToBottom(contentHeightRef.current)
 
       contentHeightRef.current = height
+      updateIsContentShorterThanViewport(height, viewportHeightRef.current)
 
       if (height <= viewportHeightRef.current) {
         updateScrollRefsToBottom()
@@ -390,6 +408,7 @@ function MessagesList({
       scrollToViewportBottomAnchor,
       targetMessageId,
       tryInitialScrollToBottom,
+      updateIsContentShorterThanViewport,
       updateScrollRefsToBottom,
     ]
   )
@@ -402,9 +421,17 @@ function MessagesList({
       if (contentHeightRef.current <= event.nativeEvent.layout.height) {
         isScrolledToBottomRef.current = true
       }
+      updateIsContentShorterThanViewport(
+        contentHeightRef.current,
+        event.nativeEvent.layout.height
+      )
       tryInitialScrollToBottom()
     },
-    [preserveBottomVisibleContentOnViewportChange, tryInitialScrollToBottom]
+    [
+      preserveBottomVisibleContentOnViewportChange,
+      tryInitialScrollToBottom,
+      updateIsContentShorterThanViewport,
+    ]
   )
 
   const onScroll = useCallback(
@@ -415,6 +442,7 @@ function MessagesList({
   )
 
   const onLoad = useCallback(() => {
+    setIsListLoaded(true)
     if (tryScrollToTargetMessage()) return
 
     didInitialScrollToBottomRef.current = true

@@ -2,6 +2,7 @@ import {Array, Option, pipe} from 'effect'
 import {atom} from 'jotai'
 import {atomWithParsedMmkvStorage} from '../../utils/atomUtils/atomWithParsedMmkvStorage'
 import allChatsAtom from '../chat/atoms/allChatsAtom'
+import chatShouldBeVisible from '../chat/utils/isChatActive'
 import {
   addChatTag,
   type ChatTagId,
@@ -71,7 +72,9 @@ export const setTagsForChatActionAtom = atom(
     const chatExists = pipe(
       get(allChatsAtom),
       Array.flatten,
-      Array.some((chat) => chat.chat.id === args.chatId)
+      Array.some(
+        (chat) => chat.chat.id === args.chatId && chatShouldBeVisible(chat)
+      )
     )
     if (!chatExists) return
 

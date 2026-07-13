@@ -105,7 +105,7 @@ function ContactsListSelect({
         value: 'submitted',
       },
       {
-        label: t('postLoginFlow.contactsList.hidden'),
+        label: t('postLoginFlow.contactsList.unused'),
         value: 'nonSubmitted',
       },
     ],
@@ -126,8 +126,8 @@ function ContactsListSelect({
     isSubmittingContacts && !shouldShowContactImportProgressDialog
   const bulkToggleLabel = t(
     areAllContactsToDisplaySelected
-      ? 'postLoginFlow.contactsList.deactivateAll'
-      : 'postLoginFlow.contactsList.activateAll'
+      ? 'postLoginFlow.contactsList.useNone'
+      : 'postLoginFlow.contactsList.useAll'
   )
 
   return (

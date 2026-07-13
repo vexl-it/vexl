@@ -1,19 +1,38 @@
-import {NavigationBar, Screen, Stack, XmarkCancelClose} from '@vexl-next/ui'
-import {useAtomValue} from 'jotai'
-import React, {useEffect} from 'react'
+import {
+  ChevronLeft,
+  FileImport,
+  NavigationBar,
+  Screen,
+  Stack,
+} from '@vexl-next/ui'
+import {useMolecule} from 'bunshi/dist/react'
+import {Effect} from 'effect'
+import {useAtomValue, useSetAtom} from 'jotai'
+import React, {useCallback, useEffect} from 'react'
 import {type ContactPreferencesStackScreenProps} from '../../navigationTypes'
 import {contactByNormalizedNumberAtom} from '../../state/contacts/atom/contactsStore'
+import {dismissKeyboardAndResolveOnLayoutUpdate} from '../../utils/dismissKeyboardPromise'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
+import {contactSelectMolecule} from '../ContactPreferencesFlow/components/ContactListSelect/atom'
 import AddNewContactForm from '../ContactPreferencesFlow/components/ContactListSelect/components/AddNewContactForm'
 
 type Props = ContactPreferencesStackScreenProps<'AddNewContact'>
 
 export default function AddNewContactScreen({
   route: {params},
+  navigation,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const safeGoBack = useSafeGoBack()
+  const {
+    importVexlOnlyContactsActionAtom,
+    resetContactsFilterFromRouteActionAtom,
+  } = useMolecule(contactSelectMolecule)
+  const importVexlOnlyContacts = useSetAtom(importVexlOnlyContactsActionAtom)
+  const resetContactsFilterFromRoute = useSetAtom(
+    resetContactsFilterFromRouteActionAtom
+  )
   const editContactNumber = params?.editContactNumber
   const contactToEditFromStore = useAtomValue(
     contactByNormalizedNumberAtom(editContactNumber)
@@ -34,6 +53,23 @@ export default function AddNewContactScreen({
     }
   }, [contactToEditFromStore, editContactNumber])
 
+  const handleImportFromFile = useCallback(() => {
+    Effect.runFork(
+      Effect.promise(dismissKeyboardAndResolveOnLayoutUpdate).pipe(
+        Effect.andThen(() => importVexlOnlyContacts()),
+        Effect.andThen((importSuccessful) =>
+          Effect.sync(() => {
+            if (!importSuccessful) return
+            // land on the "New" tab with this screen popped off the stack so
+            // the back button won't return to the import screen
+            resetContactsFilterFromRoute('new')
+            navigation.popToTop()
+          })
+        )
+      )
+    )
+  }, [importVexlOnlyContacts, navigation, resetContactsFilterFromRoute])
+
   return (
     <Screen
       navigationBar={
@@ -44,12 +80,20 @@ export default function AddNewContactScreen({
               ? 'addContactDialog.editContact'
               : 'contactPreferences.addContactManually.title'
           )}
-          rightActions={[
-            {
-              icon: XmarkCancelClose,
-              onPress: safeGoBack,
-            },
-          ]}
+          leftAction={{
+            icon: ChevronLeft,
+            onPress: safeGoBack,
+          }}
+          rightActions={
+            isEditingContact
+              ? undefined
+              : [
+                  {
+                    icon: FileImport,
+                    onPress: handleImportFromFile,
+                  },
+                ]
+          }
         />
       }
       noHorizontalPadding

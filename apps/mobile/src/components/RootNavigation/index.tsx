@@ -69,6 +69,7 @@ import TodoScreen from '../TodoScreen'
 import TosScreen from '../TosScreen'
 import TradeCalculatorRouter from '../TradeCalculatorRouter'
 import TradeChecklistFlow from '../TradeChecklistFlow'
+import VexlOnlyContactsScreen from '../VexlOnlyContactsScreen'
 import WhatAreClubsScreen from '../WhatAreClubsScreen'
 import {useHandlePostLoginFlowRedirect} from './utils'
 
@@ -225,6 +226,10 @@ function RootNavigation(): React.ReactElement {
             <Stack.Screen
               name="ContactPreferences"
               component={ContactPreferencesFlow}
+            />
+            <Stack.Screen
+              name="VexlOnlyContacts"
+              component={VexlOnlyContactsScreen}
             />
             <Stack.Screen name="DonationsFlow" component={DonationsFlow} />
             {/* <Stack.Screen

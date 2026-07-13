@@ -5,6 +5,8 @@ import {
   getPermissionsAsync,
   type ContactsPermissionResponse,
 } from 'expo-contacts'
+import {getDocumentAsync} from 'expo-document-picker'
+import {File} from 'expo-file-system'
 import {atom, type Atom, type SetStateAction} from 'jotai'
 import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
@@ -28,6 +30,7 @@ import {
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {parseVcardString} from '../../../../utils/vCard'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {globalDialogAtom} from '../../../GlobalDialog'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
@@ -38,6 +41,16 @@ export const ContactsSelectScope = createScope<{
 }>({
   reloadContacts: () => {},
 })
+
+class ContactsImportError extends Schema.TaggedError<ContactsImportError>(
+  'ContactsImportError'
+)('ContactsImportError', {
+  cause: Schema.Unknown,
+}) {}
+
+// Hard caps for untrusted .vcf input
+const MAX_VCF_FILE_SIZE_BYTES = 2 * 1024 * 1024
+const MAX_CONTACTS_PER_VCF_IMPORT = 5000
 
 const matchSorterKeys = ['info.name', 'info.numberToDisplay']
 const matchSorterThreshold = rankings.CONTAINS
@@ -546,6 +559,209 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
+  const importVexlOnlyContactsActionAtom = atom(
+    null,
+    (get, set): Effect.Effect<boolean> => {
+      const {t} = get(translationAtom)
+
+      return Effect.gen(function* (_) {
+        const pickerResult = yield* _(
+          Effect.tryPromise({
+            try: async () =>
+              await getDocumentAsync({
+                type: ['text/vcard', 'text/x-vcard'],
+                copyToCacheDirectory: true,
+                multiple: false,
+              }),
+            catch: (e) => new ContactsImportError({cause: e}),
+          })
+        )
+
+        if (pickerResult.canceled) return false
+        const pickedAsset = pickerResult.assets[0]
+        if (pickedAsset === undefined) return false
+
+        const vcardString = yield* _(
+          Effect.tryPromise({
+            try: async () => {
+              const pickedFile = new File(pickedAsset.uri)
+              try {
+                if (pickedFile.size > MAX_VCF_FILE_SIZE_BYTES) return undefined
+                return await pickedFile.text()
+              } finally {
+                // remove the cache copy created by the document picker
+                if (pickedFile.info().exists) pickedFile.delete()
+              }
+            },
+            catch: (e) => new ContactsImportError({cause: e}),
+          })
+        )
+
+        if (vcardString === undefined) {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('contactPreferences.importVcf.invalidFileTitle'),
+              subtitle: t(
+                'contactPreferences.importVcf.fileTooLargeDescription'
+              ),
+              positiveButtonText: t('common.close'),
+            })
+          )
+          return false
+        }
+
+        const parsedContacts = parseVcardString(vcardString)
+
+        if (!Array.isNonEmptyArray(parsedContacts)) {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('contactPreferences.importVcf.noContactsFoundTitle'),
+              subtitle: t(
+                'contactPreferences.importVcf.noContactsFoundDescription'
+              ),
+              positiveButtonText: t('common.close'),
+            })
+          )
+          return false
+        }
+
+        const existingNormalizedNumbers = new Set(
+          pipe(
+            get(normalizedContactsAtom),
+            Array.map((one) => one.computedValues.normalizedNumber)
+          )
+        )
+        const seenNumbers = new Set<E164PhoneNumber>()
+        let skippedCount = 0
+        const contactsToImport: Array<{
+          name: string
+          normalizedNumber: E164PhoneNumber
+        }> = []
+
+        for (const parsedContact of parsedContacts) {
+          for (const phoneNumber of parsedContact.phoneNumbers) {
+            const normalizedNumber =
+              toE164PhoneNumberWithDefaultCountryCode(phoneNumber)
+            if (Option.isNone(normalizedNumber)) {
+              skippedCount++
+              continue
+            }
+            if (seenNumbers.has(normalizedNumber.value)) continue
+            seenNumbers.add(normalizedNumber.value)
+            if (existingNormalizedNumbers.has(normalizedNumber.value)) {
+              skippedCount++
+              continue
+            }
+            if (contactsToImport.length >= MAX_CONTACTS_PER_VCF_IMPORT) {
+              skippedCount++
+              continue
+            }
+            contactsToImport.push({
+              name: parsedContact.name,
+              normalizedNumber: normalizedNumber.value,
+            })
+          }
+        }
+
+        if (!Array.isNonEmptyArray(contactsToImport)) {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('contactPreferences.importVcf.nothingNewTitle'),
+              subtitle: t('contactPreferences.importVcf.nothingNewDescription'),
+              positiveButtonText: t('common.close'),
+            })
+          )
+          return false
+        }
+
+        const importConfirmed = yield* _(
+          set(globalDialogAtom, {
+            title: t('contactPreferences.importVcf.confirmTitle', {
+              count: contactsToImport.length,
+            }),
+            subtitle:
+              skippedCount > 0
+                ? t('contactPreferences.importVcf.confirmDescriptionSkipped', {
+                    count: skippedCount,
+                  })
+                : t('contactPreferences.importVcf.confirmDescription'),
+            positiveButtonText: t('contactPreferences.importVcf.confirmButton'),
+            negativeButtonText: t('common.cancel'),
+          })
+        )
+        if (!importConfirmed) return false
+
+        const newStoredContacts = yield* _(
+          Effect.forEach(contactsToImport, ({name, normalizedNumber}) =>
+            hashPhoneNumberE(normalizedNumber).pipe(
+              Effect.map((hash) =>
+                Schema.decodeSync(StoredContactWithComputedValues)({
+                  info: {
+                    name,
+                    numberToDisplay: normalizedNumber,
+                    rawNumber: normalizedNumber,
+                  },
+                  computedValues: {
+                    hash,
+                    normalizedNumber,
+                  },
+                  // seen: false so restored contacts surface on the "New" tab
+                  // (they get resolved as seen when the list screen unmounts)
+                  flags: {
+                    seen: false,
+                    imported: false,
+                    importedManually: true,
+                    invalidNumber: 'valid',
+                  },
+                })
+              )
+            )
+          )
+        )
+
+        set(storedContactsAtom, (prev) => [
+          ...prev,
+          ...pipe(
+            newStoredContacts,
+            Array.map((one) => ({
+              ...one,
+              computedValues: Option.some(one.computedValues),
+            }))
+          ),
+        ])
+        set(selectedNumbersAtom, (selectedNumbers) => {
+          const nextSelectedNumbers = new Set(selectedNumbers)
+          pipe(
+            contactsToImport,
+            Array.forEach(({normalizedNumber}) => {
+              nextSelectedNumbers.add(normalizedNumber)
+            })
+          )
+          return nextSelectedNumbers
+        })
+        reloadContacts()
+
+        set(
+          toastNotificationAtom,
+          t('contactPreferences.importVcf.success', {
+            count: contactsToImport.length,
+          })
+        )
+
+        return true
+      }).pipe(
+        Effect.catchAll((e) => {
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            error: e,
+          })
+
+          return Effect.succeed(false)
+        })
+      )
+    }
+  )
+
   const updateContactActionAtom = createUpdateContactActionAtom({
     reloadContacts,
     selectedNumbersAtom,
@@ -582,6 +798,7 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     submittedContactsToDisplayCountAtom,
     nonSubmittedContactsToDisplayCountAtom,
     allContactsToDisplayCountAtom,
+    importVexlOnlyContactsActionAtom,
     displayContactsCountAtom,
     updateContactActionAtom,
     contactsAccessPrivilegesAtom,

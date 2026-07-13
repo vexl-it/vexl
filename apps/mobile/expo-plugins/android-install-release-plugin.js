@@ -73,6 +73,18 @@ def vexlRunCommand = { List command ->
     }
 }
 
+def vexlCommandOutput = { List command ->
+    def process = new ProcessBuilder(command.collect { item -> item.toString() }).redirectErrorStream(true).start()
+    def output = process.inputStream.getText("UTF-8")
+    def exitCode = process.waitFor()
+
+    if (exitCode != 0) {
+        throw new GradleException("Command failed with exit code " + exitCode + ": " + command.join(" ") + "\\n" + output)
+    }
+
+    return output
+}
+
 afterEvaluate {
     if (tasks.findByName("installRelease") == null) {
         tasks.register("installRelease") {
@@ -109,10 +121,29 @@ afterEvaluate {
                     apkToInstall = signedApk
                 }
 
-                def adbArguments = []
+                def adbExecutable = vexlResolveExistingExecutable(new File(vexlAndroidSdkDir(), "platform-tools/adb")).absolutePath
                 def androidSerial = System.getenv("ANDROID_SERIAL")
-                if (androidSerial != null && androidSerial.trim()) {
-                    adbArguments.addAll(["-s", androidSerial.trim()])
+                androidSerial = androidSerial != null ? androidSerial.trim() : null
+
+                def androidAvdName = System.getenv("VEXL_ANDROID_AVD_NAME")
+                androidAvdName = androidAvdName != null ? androidAvdName.trim() : null
+                if (!androidSerial && androidAvdName) {
+                    def emulatorSerials = vexlCommandOutput([adbExecutable, "devices"]).readLines().findResults { line ->
+                        def match = line =~ /^(emulator-[0-9]+)\\s+device\\b/
+                        return match.find() ? match.group(1) : null
+                    }
+                    androidSerial = emulatorSerials.find { serial ->
+                        def avdNameOutput = vexlCommandOutput([adbExecutable, "-s", serial, "emu", "avd", "name"])
+                        return avdNameOutput.readLines().find { line -> line.trim() }?.trim() == androidAvdName
+                    }
+                    if (androidSerial == null) {
+                        throw new GradleException("Could not find the selected Android emulator " + androidAvdName + " after Expo started it.")
+                    }
+                }
+
+                def adbArguments = []
+                if (androidSerial) {
+                    adbArguments.addAll(["-s", androidSerial])
                 }
 
                 adbArguments.addAll(["install", "-r", "-d"])
@@ -125,7 +156,7 @@ afterEvaluate {
                 adbArguments << apkToInstall.absolutePath
 
                 println "Installing " + apkToInstall.absolutePath
-                vexlRunCommand([vexlResolveExistingExecutable(new File(vexlAndroidSdkDir(), "platform-tools/adb")).absolutePath] + adbArguments)
+                vexlRunCommand([adbExecutable] + adbArguments)
             }
         }
     }

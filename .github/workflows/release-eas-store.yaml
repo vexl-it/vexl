@@ -1,5 +1,5 @@
 name: "[Release] Build & submit to store"
-run-name: "Build & submit ${{ inputs.platform }} (${{ inputs.environment }}) on ${{ github.sha }}"
+run-name: "Build & submit ${{ inputs.platform }} (${{ inputs.environment }}) ${{ inputs.app_version }} on ${{ github.sha }}"
 
 on:
   workflow_dispatch:
@@ -21,6 +21,10 @@ on:
           - all
           - android
           - ios
+      app_version:
+        description: "App version in the format 1.2.3 (520); must match apps/mobile/app.config.ts"
+        required: true
+        type: string
   workflow_call:
     inputs:
       environment:
@@ -32,6 +36,10 @@ on:
         required: false
         type: string
         default: all
+      app_version:
+        description: "App version in the format 1.2.3 (520)"
+        required: true
+        type: string
 
 jobs:
   build-submit:
@@ -54,6 +62,10 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
+      - name: Resolve mobile app version
+        uses: ./.github/actions/resolve-mobile-app-version
+        with:
+          app_version: ${{ inputs.app_version }}
       - name: Decode Google Service Account key
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}

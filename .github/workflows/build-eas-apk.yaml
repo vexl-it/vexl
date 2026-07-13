@@ -1,5 +1,5 @@
 name: "[Build] APK"
-run-name: "Build APK (${{ inputs.environment }}) on ${{ github.sha }}"
+run-name: "Build APK (${{ inputs.environment }}) ${{ inputs.app_version }} on ${{ github.sha }}"
 
 on:
   workflow_dispatch:
@@ -12,10 +12,18 @@ on:
         options:
           - staging
           - production
+      app_version:
+        description: "App version in the format 1.2.3 (520); must match apps/mobile/app.config.ts"
+        required: true
+        type: string
   workflow_call:
     inputs:
       environment:
         description: "Environment to build"
+        required: true
+        type: string
+      app_version:
+        description: "App version in the format 1.2.3 (520)"
         required: true
         type: string
 
@@ -41,6 +49,11 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter @vexl-next/mobile-app...
+      - name: Resolve mobile app version
+        id: app-version
+        uses: ./.github/actions/resolve-mobile-app-version
+        with:
+          app_version: ${{ inputs.app_version }}
       - name: Resolve APK build profile
         id: profile
         run: |
@@ -54,10 +67,10 @@ jobs:
           eas build --platform android --profile ${{ steps.profile.outputs.name }} --non-interactive --wait --json > build.json
           APK_URL="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' build.json)"
           test "$APK_URL" != "null"
-          curl -L "$APK_URL" -o vexl-${{ inputs.environment }}.apk
+          curl -L "$APK_URL" -o vexl-${{ inputs.environment }}-${{ steps.app-version.outputs.filename_suffix }}.apk
         working-directory: apps/mobile
       - name: Upload signed APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: vexl-${{ inputs.environment }}-signed-apk
-          path: apps/mobile/vexl-${{ inputs.environment }}.apk
+          name: vexl-${{ inputs.environment }}-${{ steps.app-version.outputs.filename_suffix }}-signed-apk
+          path: apps/mobile/vexl-${{ inputs.environment }}-${{ steps.app-version.outputs.filename_suffix }}.apk

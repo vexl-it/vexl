@@ -1,5 +1,5 @@
 name: "[Release] Full app (stores + APK)"
-run-name: "Full app release on ${{ github.sha }}${{ inputs.skip_production && ' (staging only)' || '' }}"
+run-name: "Full app release ${{ inputs.app_version }} on ${{ github.sha }}${{ inputs.skip_production && ' (staging only)' || '' }}"
 
 on:
   workflow_dispatch:
@@ -9,6 +9,10 @@ on:
         required: false
         type: boolean
         default: false
+      app_version:
+        description: "App version in the format 1.2.3 (520); must match apps/mobile/app.config.ts"
+        required: true
+        type: string
 
 jobs:
   # ---- Staging ----
@@ -18,12 +22,14 @@ jobs:
     with:
       environment: staging
       platform: all
+      app_version: ${{ inputs.app_version }}
 
   staging-apk:
     uses: ./.github/workflows/build-eas-apk.yaml
     secrets: inherit
     with:
       environment: staging
+      app_version: ${{ inputs.app_version }}
 
   # ---- Production (skipped when skip_production is checked) ----
   production-store:
@@ -33,6 +39,7 @@ jobs:
     with:
       environment: production
       platform: all
+      app_version: ${{ inputs.app_version }}
 
   production-apk:
     if: ${{ !inputs.skip_production }}
@@ -40,3 +47,4 @@ jobs:
     secrets: inherit
     with:
       environment: production
+      app_version: ${{ inputs.app_version }}

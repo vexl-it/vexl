@@ -1,0 +1,41 @@
+name: Resolve mobile app version
+description: Validate and expose the mobile app version from the Expo config
+
+inputs:
+  app_version:
+    description: App version in the format 1.2.3 (520)
+    required: true
+
+outputs:
+  version:
+    description: Semantic app version
+    value: ${{ steps.resolve.outputs.version }}
+  version_code:
+    description: Native app build number
+    value: ${{ steps.resolve.outputs.version_code }}
+  filename_suffix:
+    description: App version formatted for artifact filenames
+    value: ${{ steps.resolve.outputs.filename_suffix }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve and validate app version
+      id: resolve
+      shell: bash
+      env:
+        INPUT_APP_VERSION: ${{ inputs.app_version }}
+      run: |
+        CONFIG="$(pnpm --dir apps/mobile exec expo config --json)"
+        VERSION="$(jq -er '.version' <<< "$CONFIG")"
+        VERSION_CODE="$(jq -er '.android.versionCode | tostring' <<< "$CONFIG")"
+        RESOLVED_APP_VERSION="$VERSION ($VERSION_CODE)"
+
+        if [ "$INPUT_APP_VERSION" != "$RESOLVED_APP_VERSION" ]; then
+          echo "::error::Expected app version '$RESOLVED_APP_VERSION', got '$INPUT_APP_VERSION'."
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+        echo "filename_suffix=${VERSION}_${VERSION_CODE}" >> "$GITHUB_OUTPUT"

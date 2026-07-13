@@ -84,6 +84,7 @@ interface CliOptions {
   readonly platform: Platform
   readonly device?: string
   readonly androidSerial?: string
+  readonly androidAvdName?: string
   readonly deviceKind?: DeviceKind
   readonly selectDevice: boolean
   readonly backend: BackendTarget
@@ -231,6 +232,7 @@ interface DeviceChoice {
   readonly id: string
   readonly expoName: string
   readonly androidSerial?: string
+  readonly androidAvdName?: string
   readonly label: string
   readonly kind: DeviceKind
 }
@@ -429,6 +431,7 @@ function findAndroidDevices(): readonly DeviceChoice[] {
       (name): DeviceChoice => ({
         id: name,
         expoName: name,
+        androidAvdName: name,
         label: `[emulator] ${name}`,
         kind: 'virtual',
       })
@@ -830,6 +833,7 @@ async function main(): Promise<void> {
           ...parsedOptions,
           device: selectedDevice.expoName,
           androidSerial: selectedDevice.androidSerial,
+          androidAvdName: selectedDevice.androidAvdName,
           deviceKind: selectedDevice.kind,
           selectDevice: false,
         }
@@ -882,6 +886,9 @@ async function main(): Promise<void> {
     ...(options.androidSerial === undefined
       ? {}
       : {ANDROID_SERIAL: options.androidSerial}),
+    // Do not inherit a stale selector from the parent shell. This is only set
+    // for a stopped AVD selected by this picker.
+    VEXL_ANDROID_AVD_NAME: options.androidAvdName,
   }
 
   if (willPrebuild) {

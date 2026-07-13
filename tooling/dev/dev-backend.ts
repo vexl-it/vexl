@@ -106,7 +106,7 @@ function printHelp(): void {
       '',
       '  --only <a,b>        run only these services/apps',
       '  --skip <a,b>        run everything except these',
-      '  --no-web            skip the web apps (backoffice/account-deletion/dashboard)',
+      '  --no-web            skip the web apps (backoffice/web-app/dashboard)',
       '  --no-observability  skip Loki/Tempo/Grafana',
       '  --watch             hot-reload services via tsx watch (default off)',
       '  --fresh-db          recreate databases from scratch (docker compose down -v)',
@@ -118,6 +118,12 @@ function printHelp(): void {
 // --- selection -------------------------------------------------------------
 
 function selectApps(options: CliOptions): readonly RunnableApp[] {
+  const includesApp = (names: readonly string[], app: RunnableApp): boolean =>
+    pipe(
+      names,
+      Array.some((name) => findApp(name) === app)
+    )
+
   const validateNames = (
     names: readonly string[],
     optionName: string
@@ -142,13 +148,13 @@ function selectApps(options: CliOptions): readonly RunnableApp[] {
   const candidates = Array.isNonEmptyReadonlyArray(options.only)
     ? pipe(
         ALL_APPS,
-        Array.filter((app) => options.only.includes(app.name))
+        Array.filter((app) => includesApp(options.only, app))
       )
     : [...SERVICES, ...(options.web ? WEB_APPS : [])]
 
   return pipe(
     candidates,
-    Array.filter((app) => !options.skip.includes(app.name))
+    Array.filter((app) => !includesApp(options.skip, app))
   )
 }
 

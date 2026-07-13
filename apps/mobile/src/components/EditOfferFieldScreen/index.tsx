@@ -7,7 +7,6 @@ import {
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {Effect} from 'effect'
-import {deepEqual} from 'fast-equals'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useLayoutEffect} from 'react'
 import {YStack} from 'tamagui'
@@ -70,15 +69,14 @@ function EditOfferFieldScreen({
     productCategoriesAtom,
     updateBtcNetworkAtom,
     offerDescriptionAtom,
-    selectedSpokenLanguagesAtom,
+    spokenLanguagesAtom,
     checkAmountExceedsLimitAndShowDialogActionAtom,
     intendedConnectionLevelAtom,
     createSelectClubAtom,
     discardLocationIfNotInPersonActionAtom,
-    offerFormDraftSnapshotAtom,
-    currentOfferFormDraftSnapshotAtom,
-    takeOfferFormDraftSnapshotActionAtom,
-    restoreOfferFormDraftSnapshotActionAtom,
+    commitFieldChangesActionAtom,
+    discardFieldChangesActionAtom,
+    fieldHasUnsavedChangesAtoms,
   } = useMolecule(offerFormMolecule)
   const listingType = useAtomValue(listingTypeAtom)
   const locationState = useAtomValue(locationStateAtom)
@@ -88,35 +86,28 @@ function EditOfferFieldScreen({
   const productCategories = useAtomValue(productCategoriesAtom)
   const btcNetwork = useAtomValue(updateBtcNetworkAtom)
   const offerDescription = useAtomValue(offerDescriptionAtom)
-  const selectedSpokenLanguages = useAtomValue(selectedSpokenLanguagesAtom)
-  const initialSnapshot = useAtomValue(offerFormDraftSnapshotAtom)
-  const currentSnapshot = useAtomValue(currentOfferFormDraftSnapshotAtom)
+  const spokenLanguages = useAtomValue(spokenLanguagesAtom)
+  const hasStepUnsavedChanges = useAtomValue(fieldHasUnsavedChangesAtoms[field])
   const clubsWithMembersAtoms = useAtomValue(clubsWithMembersAtomsAtom)
   const discardLocationIfNotInPerson = useSetAtom(
     discardLocationIfNotInPersonActionAtom
   )
-  const takeOfferFormDraftSnapshot = useSetAtom(
-    takeOfferFormDraftSnapshotActionAtom
-  )
-  const restoreOfferFormDraftSnapshot = useSetAtom(
-    restoreOfferFormDraftSnapshotActionAtom
-  )
+  const commitFieldChanges = useSetAtom(commitFieldChangesActionAtom)
+  const discardFieldChanges = useSetAtom(discardFieldChangesActionAtom)
   const checkAmountExceedsLimit = useSetAtom(
     checkAmountExceedsLimitAndShowDialogActionAtom
   )
   const showDialog = useSetAtom(globalDialogAtom)
 
   useLayoutEffect(() => {
-    takeOfferFormDraftSnapshot()
-  }, [field, takeOfferFormDraftSnapshot])
-
-  const hasStepUnsavedChanges =
-    !!initialSnapshot && !deepEqual(initialSnapshot, currentSnapshot)
+    // makes sure the field's draft starts from the last saved values
+    discardFieldChanges(field)
+  }, [field, discardFieldChanges])
 
   const getLocationValidationError = useCallback((): string | undefined => {
     if (field !== 'location') return undefined
-    if (!(locationState?.includes('IN_PERSON') ?? false)) return undefined
-    if ((location?.length ?? 0) > 0) return undefined
+    if (!locationState.includes('IN_PERSON')) return undefined
+    if (location.length > 0) return undefined
 
     if (listingType === 'PRODUCT') {
       return t('offerForm.errorPickupLocationNotFilled')
@@ -127,13 +118,13 @@ function EditOfferFieldScreen({
     }
 
     return t('offerForm.errorLocationNotFilled')
-  }, [field, listingType, location?.length, locationState, t])
+  }, [field, listingType, location.length, locationState, t])
 
   const getMandatoryFieldValidationError = useCallback(():
     | string
     | undefined => {
     if (field === 'amount' && listingType !== 'BITCOIN') {
-      if ((amountBottomLimit ?? 0) <= 0 && satsValue <= 0) {
+      if (amountBottomLimit <= 0 && satsValue <= 0) {
         return t('offerForm.errorPriceNotFilled')
       }
     }
@@ -142,7 +133,7 @@ function EditOfferFieldScreen({
       return getLocationValidationError()
     }
 
-    if (field === 'network' && (btcNetwork?.length ?? 0) === 0) {
+    if (field === 'network' && btcNetwork.length === 0) {
       return t('offerForm.selectPaymentDetails')
     }
 
@@ -150,7 +141,7 @@ function EditOfferFieldScreen({
       return t('offerForm.errorDescriptionNotFilled')
     }
 
-    if (field === 'language' && (selectedSpokenLanguages?.length ?? 0) === 0) {
+    if (field === 'language' && spokenLanguages.length === 0) {
       return t('offerForm.chooseOfferLanguage')
     }
 
@@ -165,14 +156,14 @@ function EditOfferFieldScreen({
     return undefined
   }, [
     amountBottomLimit,
-    btcNetwork?.length,
+    btcNetwork.length,
     field,
     getLocationValidationError,
     listingType,
     offerDescription,
     productCategories?.length,
     satsValue,
-    selectedSpokenLanguages?.length,
+    spokenLanguages.length,
     t,
   ])
 
@@ -210,18 +201,21 @@ function EditOfferFieldScreen({
       discardLocationIfNotInPerson()
     }
 
-    if (!shouldSave) {
-      restoreOfferFormDraftSnapshot()
+    if (shouldSave) {
+      commitFieldChanges(field)
+    } else {
+      discardFieldChanges(field)
     }
 
     return true
   }, [
     checkAmountExceedsLimit,
+    commitFieldChanges,
+    discardFieldChanges,
     discardLocationIfNotInPerson,
     field,
     getMandatoryFieldValidationError,
     listingType,
-    restoreOfferFormDraftSnapshot,
     showDialog,
     t,
   ])
@@ -233,13 +227,20 @@ function EditOfferFieldScreen({
   })
 
   const handleComplete = useCallback((): void => {
+    commitFieldChanges(field)
     leaveWithoutConfirmation()
-  }, [leaveWithoutConfirmation])
+  }, [commitFieldChanges, field, leaveWithoutConfirmation])
 
   const handleLocationComplete = useCallback((): void => {
     discardLocationIfNotInPerson()
+    commitFieldChanges(field)
     leaveWithoutConfirmation()
-  }, [discardLocationIfNotInPerson, leaveWithoutConfirmation])
+  }, [
+    commitFieldChanges,
+    discardLocationIfNotInPerson,
+    field,
+    leaveWithoutConfirmation,
+  ])
 
   const saveLabel = t('common.save')
   const showInitialIcon = false

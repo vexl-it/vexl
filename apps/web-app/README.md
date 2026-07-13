@@ -1,4 +1,4 @@
-# Account deletion website
+# Web app
 
 The purpose of this website is to allow user to remove their account from the web as per [Google Play Store requirements](https://support.google.com/googleplay/android-developer/answer/13327111?hl=en). Deleting account using this website won't delete user's offers, since they are not connected to the phone number. The keys to remove the offers are stored only at user's device and there is no other way how to authorize author of the offer...
 
@@ -8,19 +8,19 @@ This website can be accessed on https://app.vexl.it.
 
 ```sh
 pnpm install
-pnpm --filter account-deletion-website dev
+pnpm --filter web-app dev
 ```
 
 ## How to build
 
 ```sh
-pnpm --filter account-deletion-website build
+pnpm --filter web-app build
 ```
 
 `BE_ENV` is resolved at runtime by the Next.js server and defaults to `stage` unless `BE_ENV=prod` is set.
 
 Turnstile protection for SMS initiation uses:
 
-- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `account-deletion-website`
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in `web-app`
 - `TURNSTILE_SECRET_KEY` in `user-service`
 - optional `TURNSTILE_EXPECTED_HOSTNAME` in `user-service` for hostname pinning

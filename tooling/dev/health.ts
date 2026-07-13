@@ -34,7 +34,7 @@ export function readinessTarget(
       url: `http://${host}:${ctx.ports.dashboardHealth}/`,
     }
   }
-  // account-deletion-website and any other web app: plain TCP connect.
+  // web-app and any other web app: plain TCP connect.
   return {kind: 'tcp', host, port: ctx.ports[app.portKey]}
 }
 

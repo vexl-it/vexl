@@ -75,7 +75,7 @@ export const ports = {
 
   // Web apps
   backofficeApp: 3011,
-  accountDeletionWebsite: 3012,
+  webApp: 3012,
   dashboardClient: 3013,
   dashboardUpdates: 3014,
   dashboardSocket: 3015,

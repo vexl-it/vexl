@@ -15,7 +15,7 @@ export function getEnvPreset() {
 }
 
 export const apiMeta = {
-  appSource: Schema.decodeUnknownSync(AppSource)('account-deletion-page'),
+  appSource: Schema.decodeUnknownSync(AppSource)('web-app'),
   clientSemver: Schema.decodeUnknownSync(SemverString)('0.0.1'),
   clientVersion: Schema.decodeUnknownSync(VersionCode)(0),
   isDeveloper: false,

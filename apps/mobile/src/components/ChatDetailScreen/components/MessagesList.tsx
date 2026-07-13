@@ -69,19 +69,21 @@ function MessagesList({
   const scrolledToTargetMessageIdRef = useRef<ChatMessageId | undefined>(
     undefined
   )
-  const [isListLoaded, setIsListLoaded] = useState(false)
-  const [isContentShorterThanViewport, setIsContentShorterThanViewport] =
-    useState(false)
+  const [contentTopPadding, setContentTopPadding] = useState(0)
 
-  const updateIsContentShorterThanViewport = useCallback(
+  const updateContentTopPadding = useCallback(
     (contentHeight: number, viewportHeight: number) => {
-      setIsContentShorterThanViewport(
-        contentHeight !== 0 &&
-          viewportHeight !== 0 &&
-          contentHeight <= viewportHeight
+      setContentTopPadding(
+        targetMessageId || contentHeight === 0 || viewportHeight === 0
+          ? 0
+          : Math.max(
+              // Content size already includes the currently applied top padding.
+              viewportHeight - (contentHeight - contentTopPadding),
+              0
+            )
       )
     },
-    []
+    [contentTopPadding, targetMessageId]
   )
 
   const updateScrollRefsToBottom = useCallback(() => {
@@ -364,18 +366,16 @@ function MessagesList({
   const contentContainerStyle = useMemo(
     () => ({
       paddingBottom: footerHeight + tokens.size[4].val,
+      paddingTop: targetMessageId ? 0 : contentTopPadding,
     }),
-    [footerHeight]
+    [contentTopPadding, footerHeight, targetMessageId]
   )
 
   const maintainVisibleContentPosition = useMemo(
     () => ({
       autoscrollToBottomThreshold: targetMessageId ? undefined : 0.2,
-      // Let onLoad own the initial scroll while long lists are still measuring.
-      startRenderingFromBottom:
-        isListLoaded && !targetMessageId && isContentShorterThanViewport,
     }),
-    [isContentShorterThanViewport, isListLoaded, targetMessageId]
+    [targetMessageId]
   )
 
   const onContentSizeChange = useCallback(
@@ -385,7 +385,7 @@ function MessagesList({
         isContentScrolledToBottom(contentHeightRef.current)
 
       contentHeightRef.current = height
-      updateIsContentShorterThanViewport(height, viewportHeightRef.current)
+      updateContentTopPadding(height, viewportHeightRef.current)
 
       if (height <= viewportHeightRef.current) {
         updateScrollRefsToBottom()
@@ -408,7 +408,7 @@ function MessagesList({
       scrollToViewportBottomAnchor,
       targetMessageId,
       tryInitialScrollToBottom,
-      updateIsContentShorterThanViewport,
+      updateContentTopPadding,
       updateScrollRefsToBottom,
     ]
   )
@@ -421,7 +421,7 @@ function MessagesList({
       if (contentHeightRef.current <= event.nativeEvent.layout.height) {
         isScrolledToBottomRef.current = true
       }
-      updateIsContentShorterThanViewport(
+      updateContentTopPadding(
         contentHeightRef.current,
         event.nativeEvent.layout.height
       )
@@ -430,7 +430,7 @@ function MessagesList({
     [
       preserveBottomVisibleContentOnViewportChange,
       tryInitialScrollToBottom,
-      updateIsContentShorterThanViewport,
+      updateContentTopPadding,
     ]
   )
 
@@ -442,7 +442,6 @@ function MessagesList({
   )
 
   const onLoad = useCallback(() => {
-    setIsListLoaded(true)
     if (tryScrollToTargetMessage()) return
 
     didInitialScrollToBottomRef.current = true

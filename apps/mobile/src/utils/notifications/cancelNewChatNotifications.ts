@@ -14,6 +14,7 @@ import {areNotificationsEnabledE} from '.'
 import {apiAtom} from '../../api'
 import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
 import {reportErrorE} from '../reportError'
+import {isNseEnrichedNotification} from './nseEnrichedNotifications'
 
 const SystemNotificationId = Schema.String.pipe(
   Schema.brand('SystemNotificationId')
@@ -128,6 +129,15 @@ const getSystemNotificationsIdsActionAtom = atom(
       allNotifications,
       filterNotification
     )
+    // Notifications the iOS notification service extension already enriched
+    // with real message content must never be cancelled (decision 7) - only
+    // the generic un-enriched placeholders get dismissed after the JS side
+    // fetched and displayed the messages itself. They still count for the
+    // UINotificationReceived metric (idsToReport): an enriched chat
+    // notification reached the device all the same.
+    const idsToCancel = Array.filterMap(allNotifications, (n) =>
+      isNseEnrichedNotification(n) ? Option.none() : filterNotification(n)
+    )
     const allSystemNotificationsIds = Array.filterMap(
       allNotifications,
       isPlaceholderNotificationForChat
@@ -143,7 +153,7 @@ const getSystemNotificationsIdsActionAtom = atom(
       )
     )
     return {
-      idsToCancel: systemNotificationsIds,
+      idsToCancel,
       idsToReport: notReportedIds,
     }
   }

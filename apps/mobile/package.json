@@ -18,6 +18,7 @@
     "e2e-test-build-android": "pnpm dlx eas-cli build --platform android --profile build-and-maestro-test --non-interactive --no-wait"
   },
   "dependencies": {
+    "@bacons/apple-targets": "~4.0.7",
     "@bam.tech/react-native-image-resizer": "^3.0.5",
     "@effect/platform": "^0.93.6",
     "@effect/rpc": "^0.72.2",
@@ -130,6 +131,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.18.6",
+    "@bacons/xcode": "1.0.0-alpha.32",
     "@react-native/jest-preset": "0.86.0",
     "@testing-library/jest-native": "^5.3.0",
     "@testing-library/react-native": "^11.5.0",

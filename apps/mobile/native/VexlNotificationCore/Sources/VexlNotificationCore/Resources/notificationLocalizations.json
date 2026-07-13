@@ -1,0 +1,1428 @@
+{
+  "ar": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "bg": {
+    "MESSAGE": {
+      "title": "Ново съобщение",
+      "body": "Получихте ново съобщение."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Получено е искане за идентификация",
+      "body": "От вас беше поискано да разкриете самоличността си."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Самоличността е разкрита!",
+      "body": "Вашето искане за разкриване на самоличности беше одобрено."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Искането за разкриване на самоличността е отказано",
+      "body": "Вашето искане за разкриване на самоличността беше отказано."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Ново искане!",
+      "body": "Получихте ново искане."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Искането е одобрено!",
+      "body": "Вашето искане беше одобрено."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Искането е отказано",
+      "body": "Вашето искане беше отказано."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} отмени искане за чат",
+      "body": "{{them}} отмени искане за чат"
+    },
+    "DELETE_CHAT": {
+      "title": "Разговорът е изтрит",
+      "body": "Един от вашите разговори е изтрит."
+    },
+    "BLOCK_CHAT": {
+      "title": "Блокирани сте",
+      "body": "Някой току що ви блокира."
+    },
+    "INBOX_DELETED": {
+      "title": "Разговорът е изтрит",
+      "body": "Един от вашите разговори е изтрит."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Телефонният номер споделен!",
+      "body": "Вашето искане за размяна на телефонни номера беше одобрено."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Искането е отказано!",
+      "body": "Вашето искане за размяна на телефонни номера беше отказано."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Телефонният номер е поискан",
+      "body": "От вас поискаха да споделите телефонния си номер."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Актуализиран контролен търговски списък"
+    }
+  },
+  "cs": {
+    "MESSAGE": {
+      "title": "Nová zpráva",
+      "body": "Dostal jsi novou zprávu."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Žádost o odhalení identity",
+      "body": "Byl jsi požádán o odhalení tvé identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identita odhalena!",
+      "body": "Tvoje žádost o odhalení identity byla schválena."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Žádost zamítnuta!",
+      "body": "Tvoje žádost o odhalení identity byla zamítnuta."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nová žádost!",
+      "body": "Máš novou žádost."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Žádost schválena!",
+      "body": "Tvoje žádost byla schválena."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Žádost zamítnuta!",
+      "body": "Tvoje žádost byla zamítnuta."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} zrušil požadavek na chat",
+      "body": "{{them}} zrušil požadavek na chat"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat byl smazán",
+      "body": "Jeden z tvých chatů byl smazán."
+    },
+    "BLOCK_CHAT": {
+      "title": "Byl jsi zablokován!",
+      "body": "Někdo tě právě zablokoval."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat byl smazán",
+      "body": "Jeden z tvých chatů byl smazán."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Telefonní číslo odhaleno!",
+      "body": "Tvá žádost o odhalení telefonního čísla byla schválena."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Žádost zamítnuta!",
+      "body": "Tvá žádost o odhalení telefonního čísla byla zamítnuta."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Žádost o telefonní číslo",
+      "body": "Byl jsi požádán o sdělení svého telefonního čísla."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} aktualizoval trading checklist"
+    }
+  },
+  "de": {
+    "MESSAGE": {
+      "title": "Neue Nachricht",
+      "body": "Du hast eine neue Nachricht erhalten."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identitätsanfrage erhalten",
+      "body": "Du bist aufgefordert worden, deine Identität preiszugeben."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identität aufgedeckt!",
+      "body": "Dein Antrag auf Preisgeben der Identität wurde genehmigt."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Antrag auf Preisgeben der Identität abgelehnt",
+      "body": "Dein Antrag auf Preisgeben der Identität abgelehnt"
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Neue Anfrage!",
+      "body": "Du hast eine neue Anfrage erhalten."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Antrag genehmigt!",
+      "body": "Dein Antrag war genehmigt!"
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Antrag abgelehnt",
+      "body": "Dein Antrag war abgelehnt"
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} Stornierte Chatanfrage",
+      "body": "{{them}} Stornierte Chatanfrage"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat gelöscht",
+      "body": "Einer deiner Chats wurde gelöscht."
+    },
+    "BLOCK_CHAT": {
+      "title": "Du bist blockiert worden",
+      "body": "Jemand hat dich gerade blockiert."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat gelöscht",
+      "body": "Einer deiner Chats wurde gelöscht."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Telefonnummer enthüllt!",
+      "body": "Dein Antrag auf Austausch von Telefonnummern wurde genehmigt."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Antrag abgelehnt!",
+      "body": "Dein Antrag auf Austausch von Telefonnummern wurde abgelehnt."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Antrag auf Weitergabe der Telefonnummer",
+      "body": "Du bist aufgefordert worden, deine Telefonnummer mitzuteilen."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Aktualisiert Handelscheckliste"
+    }
+  },
+  "en": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "Tap to read it."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request",
+      "body": "Someone wants to know who you are."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "You can now see each other's identity."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request declined",
+      "body": "They chose to stay anonymous."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New response to your offer",
+      "body": "Someone wants to connect with you."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "You're connected!",
+      "body": "Start the conversation."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "{{them}} declined to connect",
+      "body": "You can keep browsing for other offers."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled their message",
+      "body": "The conversation won't be started."
+    },
+    "DELETE_CHAT": {
+      "title": "Conversation deleted",
+      "body": "The other person left."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "You won't be able to message them anymore."
+    },
+    "INBOX_DELETED": {
+      "title": "Conversation deleted",
+      "body": "The other person left."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "You've exchanged phone numbers."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Phone number declined",
+      "body": "They chose not to share their number."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number request",
+      "body": "Someone wants to exchange phone numbers."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} updated the trade checklist."
+    }
+  },
+  "es": {
+    "MESSAGE": {
+      "title": "Nuevo mensaje",
+      "body": "Has recibido un nuevo mensaje."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Solicitud de revelación de identidad recibida",
+      "body": "Se te ha solicitado que reveles tu identidad."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identidad revelada!",
+      "body": "Tu solicitud de revelar identidades ha sido aprobada."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Solicitud de revelación de identidad denegada",
+      "body": "Tu solicitud de revelar identidades ha sido denegada."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nueva solicitud!",
+      "body": "Has recibido una nueva solicitud."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Solicitud aprobada!",
+      "body": "Tu solicitud ha sido aprobada."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Solicitud rechazada",
+      "body": "Tu solicitud ha sido rechazada."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} canceló la solicitud de chat",
+      "body": "{{them}} canceló la solicitud de chat"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat borrado",
+      "body": "Uno de tus chats ha sido borrado."
+    },
+    "BLOCK_CHAT": {
+      "title": "Te han bloqueado",
+      "body": "Alguien te ha bloqueado."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat borrado",
+      "body": "Uno de tus chats ha sido borrado."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "¡Número de teléfono compartido!",
+      "body": "Tu solicitud para intercambiar números de teléfono ha sido aprobada."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Solicitud rechazada!",
+      "body": "Tu solicitud para intercambiar números de teléfono ha sido rechazada."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Número de teléfono solicitado",
+      "body": "Se le ha pedido que comparta su número de teléfono."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Actualizó la lista de verificación de comercio"
+    }
+  },
+  "fa": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "fi": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "fr": {
+    "MESSAGE": {
+      "title": "Nouveau message",
+      "body": "Vous avez reçu un nouveau message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Demande de révélation d'identité reçue",
+      "body": "Votre interlocuteur demande à ce que vous révéliez votre identité avant de conclure l’échange."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identité révélée !",
+      "body": "Votre demande de révélation d’identités a été approuvée."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Demande d'identité refusée",
+      "body": "Votre demande de révélation d’identités a été refusée."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nouvelle demande !",
+      "body": "Vous avez reçu une nouvelle demande."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Demande acceptée !",
+      "body": "Votre demande a été acceptée."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Demande refusée",
+      "body": "Votre demande a été refusée."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "Demande de chat annulée par {{them}}",
+      "body": "Demande de chat annulée par {{them}}"
+    },
+    "DELETE_CHAT": {
+      "title": "Discussion supprimée",
+      "body": "L'une de vos discussions a été supprimée."
+    },
+    "BLOCK_CHAT": {
+      "title": "Vous avez été bloqué",
+      "body": "Quelqu'un vient de vous bloquer."
+    },
+    "INBOX_DELETED": {
+      "title": "Discussion supprimée",
+      "body": "L'une de vos discussions a été supprimée."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number revealed!",
+      "body": "Your request to reveal phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Demande refusée",
+      "body": "Your request to reveal phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Demande du numéro de téléphone",
+      "body": "You have been requested to reveal your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} A mis à jour la checklist de l'échange"
+    }
+  },
+  "id": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "it": {
+    "MESSAGE": {
+      "title": "Nuovo messaggio",
+      "body": "Hai ricevuto un nuovo messaggio."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Ricevuta richiesta di rivelare la propria identità",
+      "body": "Hai ricevuto una richiesta di rivelare la tua identità."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identità rivelata!",
+      "body": "La tua richiesta di rivelare l'identità è stata approvata."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Richiesta rifiutata di rivelare l'identità",
+      "body": "La tua richiesta di rivelare l'identità è stata rifiutata."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nuova richiesta!",
+      "body": "Hai ricevuto una nuova richiesta."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Richiesta approvata!",
+      "body": "La tua richiesta è stata approvata."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Richiesta negata",
+      "body": "La richiesta è stata rifiutata."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} ha annullato la richiesta di chat",
+      "body": "{{them}} ha annullato la richiesta di chat"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat eliminata",
+      "body": "Una delle tue chat è stata eliminata."
+    },
+    "BLOCK_CHAT": {
+      "title": "Sei stato bloccato",
+      "body": "Qualcuno ti ha appena bloccato."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat eliminata",
+      "body": "Una delle tue chat è stata eliminata."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number revealed!",
+      "body": "Your request to reveal phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Richiesta rifiutata!",
+      "body": "Your request to reveal phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Richiesto numero di telefono",
+      "body": "You have been requested to reveal your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Checklist dell'operazione aggiornata"
+    }
+  },
+  "ja": {
+    "MESSAGE": {
+      "title": "新着メッセージ",
+      "body": "新しいメッセージが届きました。"
+    },
+    "REQUEST_REVEAL": {
+      "title": "身分の公開要求を受信しました",
+      "body": "本人確認が要請されました。"
+    },
+    "APPROVE_REVEAL": {
+      "title": "身分が明らかになりました！",
+      "body": "本人確認依頼が承認されました。"
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "身分の公開要請が拒否されました",
+      "body": "本人確認の公開要請が拒否されました。"
+    },
+    "REQUEST_MESSAGING": {
+      "title": "新規要請",
+      "body": "新しい要求が届きました。"
+    },
+    "APPROVE_MESSAGING": {
+      "title": "要請が承認されました。",
+      "body": "要求が承認されました"
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "要請は拒否されました",
+      "body": "取引要請が拒否されました。"
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "チャットが削除されました",
+      "body": "チャットの一つが削除されました。"
+    },
+    "BLOCK_CHAT": {
+      "title": "ブロックされました",
+      "body": "誰かがあなたをブロックしました。"
+    },
+    "INBOX_DELETED": {
+      "title": "チャットが削除されました",
+      "body": "チャットの一つが削除されました。"
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "電話番号を共有しました！",
+      "body": "電話番号の交換要求が承認されました。"
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "要請は拒否されました",
+      "body": "電話番号の交換要求が拒否されました。"
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "電話番号が要求されました",
+      "body": "電話番号の共有が要求されました。"
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "nl": {
+    "MESSAGE": {
+      "title": "Nieuw bericht",
+      "body": "U heeft een nieuw bericht ontvangen."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identiteitsaanvraag ontvangen",
+      "body": "U bent gevraagd om uw identiteit te onthullen."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identiteit onthuld!",
+      "body": "Uw verzoek om identiteiten te onthullen is goedgekeurd."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identiteitsaanvraag geweigerd",
+      "body": "Uw verzoek om identiteiten te onthullen is geweigerd."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nieuwe aanvraag!",
+      "body": "U heeft een nieuw bericht ontvangen."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Aanvraag goedgekeurd!",
+      "body": "Uw aanvraag werd goedgekeurd"
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Aanvraag geweigerd",
+      "body": "Uw aanvraag is geweigerd"
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} heeft de chataanvraag geannuleerd",
+      "body": "{{them}} heeft de chataanvraag geannuleerd"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat is verwijderd",
+      "body": "Een van uw chats is verwijderd."
+    },
+    "BLOCK_CHAT": {
+      "title": "U bent geblokkeerd",
+      "body": "Iemand heeft jou zojuist geblokkeerd."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat is verwijderd",
+      "body": "Een van uw chats is verwijderd."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Telefoonnummer gedeeld!",
+      "body": "Je verzoek om telefoonnummers te ruilen is goedgekeurd."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Aanvraag geweigerd!",
+      "body": "Je verzoek om telefoonnummers te ruilen is goedgekeurd."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Telefoonnummer aangevraagd",
+      "body": "Er is u verzocht om uw telefoonnummer te delen."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Heeft trading checklist bijgewerkt"
+    }
+  },
+  "no": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "pcm": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "pl": {
+    "MESSAGE": {
+      "title": "Nowa wiadomość",
+      "body": "Masz nową wiadomość."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Otrzymano żądanie tożsamości",
+      "body": "Poproszono Cię o ujawnienie swojej tożsamości."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Tożsamość ujawniona!",
+      "body": "Twoja prośba o ujawnienie tożsamości została zatwierdzona."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Żądanie tożsamości odrzucone",
+      "body": "Twoja prośba o ujawnienie tożsamości została odrzucona."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nowa prośba!",
+      "body": "Otrzymałeś nowe żądanie."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Prośba zatwierdzona!",
+      "body": "Twoja prośba została zatwierdzona."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Prośba odrzucona",
+      "body": "Twoja prośba została odrzucona."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} anulował żądanie czatu",
+      "body": "{{them}} anulował żądanie czatu"
+    },
+    "DELETE_CHAT": {
+      "title": "Czat usunięty",
+      "body": "Jeden z Twoich czatów został usunięty."
+    },
+    "BLOCK_CHAT": {
+      "title": "Zostałeś zablokowany",
+      "body": "Ktoś właśnie Cię zablokował."
+    },
+    "INBOX_DELETED": {
+      "title": "Czat usunięty",
+      "body": "Jeden z Twoich czatów został usunięty."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Numer telefonu udostępniony!",
+      "body": "Twoja prośba o wymianę numerów telefonów została zatwierdzona."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Prośba odrzucona!",
+      "body": "Twoja prośba o wymianę numerów telefonów została odrzucona."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Zażądano numeru telefonu",
+      "body": "Zostałeś poproszony o udostępnienie numeru telefonu."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} zaktualizował listę kontrolną transakcji"
+    }
+  },
+  "pt": {
+    "MESSAGE": {
+      "title": "Nova mensagem",
+      "body": "Recebeu uma nova mensagem."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Requisição de identidade recebida",
+      "body": "Foi solicitado que você revele a sua identidade."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identidade revelada!",
+      "body": "A sua solicitação para revelar as identidades foi aprovada."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Requisição de identidade rejeitada",
+      "body": "A sua requisição para revelar as identidades foi aprovada."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nova Requisição!",
+      "body": "Recebeu uma nova requisição."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Requisição aprovada!",
+      "body": "A sua requisição foi aprovada."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Requisição recusada",
+      "body": "A sua requisição foi rejeitada."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat apagado",
+      "body": "Um dos seus chats foi apagado."
+    },
+    "BLOCK_CHAT": {
+      "title": "Você foi bloqueado",
+      "body": "Alguém acabou de te bloquear."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat apagado",
+      "body": "Um dos seus chats foi apagado."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number revealed!",
+      "body": "Your request to reveal phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Requisição recusada!",
+      "body": "Your request to reveal phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Número de telefone solicitado",
+      "body": "You have been requested to reveal your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "sk": {
+    "MESSAGE": {
+      "title": "Nová správa",
+      "body": "Dostal si novú správu."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Žiadosť o odhalenie identity",
+      "body": "Bol si požiadaný odhaliť svoju identitu."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identita odhalená!",
+      "body": "Tvoja žiadosť na odhalenie identity bola schválená."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Žiadosť zamietnutá!",
+      "body": "Tvoja žiadosť o odhalenie identity bola zamietnutá."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Nová žiadosť!",
+      "body": "Máš novú žiadosť."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Žiadosť schválená!",
+      "body": "Tvoja žiadosť bola schválená."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Žiadosť zamietnutá!",
+      "body": "Tvoja žiadosť bola zamietnutá."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} zrušil žiadosť o chat",
+      "body": "{{them}} zrušil žiadosť o chat"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat bol zmazaný",
+      "body": "Jeden z tvojich chatov bol vymazaný."
+    },
+    "BLOCK_CHAT": {
+      "title": "Bol si zablokovaný!",
+      "body": "Niekto ťa práve zablokoval."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat bol zmazaný",
+      "body": "Jeden z tvojich chatov bol vymazaný."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Telefónne číslo odhalené!",
+      "body": "Tvoja žiadosť o odhalenie telefónneho čísla bola schválená."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Žiadosť zamietnutá!",
+      "body": "Tvoja žiadosť o odhalenie telefónneho čísla bola zamietnutá."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Žiadosť o telefónne číslo",
+      "body": "Dostal si žiadosť o odhalenie telefónneho čísla"
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} aktualizoval trade checklist"
+    }
+  },
+  "sv": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "sw": {
+    "MESSAGE": {
+      "title": "Ujumbe mpya",
+      "body": "Umepokea ujumbe mpya."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Ombi la kufichua utambulisho limepokelewa",
+      "body": "Umeombwa kufichua utambulisho wako."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Utambulisho umefichuliwa!",
+      "body": "Ombi lako la kufichua utambulisho limekubaliwa."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Ombi la kufichua utambulisho limekataliwa",
+      "body": "Ombi lako la kufichua utambulisho limekataliwa."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "Ombi jipya!",
+      "body": "Umepokea ombi jipya."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Ombi limekubaliwa!",
+      "body": "Ombi lako limekubaliwa."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Ombi limekataliwa",
+      "body": "Ombi lako limekataliwa."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} ameghairi ombi la gumzo",
+      "body": "{{them}} ameghairi ombi la gumzo"
+    },
+    "DELETE_CHAT": {
+      "title": "Gumzo limefutwa",
+      "body": "Moja ya gumzo zako limefutwa."
+    },
+    "BLOCK_CHAT": {
+      "title": "Umezuiwa",
+      "body": "Mtu amekuzuiwa."
+    },
+    "INBOX_DELETED": {
+      "title": "Gumzo limefutwa",
+      "body": "Moja ya gumzo zako limefutwa."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Namba ya simu imepatikana!",
+      "body": "Ombi lako la kubadilishana namba za simu limekubaliwa."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Ombi limekataliwa!",
+      "body": "Ombi lako la kubadilishana namba za simu limekataliwa."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Nambari ya simu imeombwa",
+      "body": "Umeombwa kushiriki nambari yako ya simu."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Imesasisha orodha ya biashara"
+    }
+  },
+  "tr": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "uk": {
+    "MESSAGE": {
+      "title": "New message",
+      "body": "You have received a new message."
+    },
+    "REQUEST_REVEAL": {
+      "title": "Identity request received",
+      "body": "You have been requested to reveal your identity."
+    },
+    "APPROVE_REVEAL": {
+      "title": "Identity revealed!",
+      "body": "Your request to reveal identities was approved."
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "Identity request denied",
+      "body": "Your request to reveal identities was denied."
+    },
+    "REQUEST_MESSAGING": {
+      "title": "New request!",
+      "body": "You have received a new request."
+    },
+    "APPROVE_MESSAGING": {
+      "title": "Request approved!",
+      "body": "Your request was approved."
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "Request denied",
+      "body": "Your request was denied."
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} cancelled chat request",
+      "body": "{{them}} cancelled chat request"
+    },
+    "DELETE_CHAT": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "BLOCK_CHAT": {
+      "title": "You've been blocked",
+      "body": "Someone has just blocked you."
+    },
+    "INBOX_DELETED": {
+      "title": "Chat deleted",
+      "body": "One of your chats has been deleted."
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "Phone number shared!",
+      "body": "Your request to exchange phone numbers was approved."
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "Request denied!",
+      "body": "Your request to exchange phone numbers was denied."
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "Phone number requested",
+      "body": "You have been requested to share your phone number."
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} Updated trade checklist"
+    }
+  },
+  "zh": {
+    "MESSAGE": {
+      "title": "新的消息",
+      "body": "您收到了一条新的消息。"
+    },
+    "REQUEST_REVEAL": {
+      "title": "已收到身份请求",
+      "body": "您已被要求透露您的身份。"
+    },
+    "APPROVE_REVEAL": {
+      "title": "身份已被透露！",
+      "body": "您要求透露身份的请求已被批准。"
+    },
+    "DISAPPROVE_REVEAL": {
+      "title": "身份请求已被拒绝",
+      "body": "您要求透露身份的请求已被拒绝。"
+    },
+    "REQUEST_MESSAGING": {
+      "title": "新的请求！",
+      "body": "您已收到一个新的请求。"
+    },
+    "APPROVE_MESSAGING": {
+      "title": "请求已被批准！",
+      "body": "您的请求已被批准。"
+    },
+    "DISAPPROVE_MESSAGING": {
+      "title": "请求已被拒绝",
+      "body": "您的请求已被拒绝。"
+    },
+    "CANCEL_REQUEST_MESSAGING": {
+      "title": "{{them}} 取消了聊天请求",
+      "body": "{{them}} 取消了聊天请求"
+    },
+    "DELETE_CHAT": {
+      "title": "聊天记录已被删除",
+      "body": "您的一条聊天记录已被删除。"
+    },
+    "BLOCK_CHAT": {
+      "title": "您已被拉黑",
+      "body": "有人刚刚拉黑了您"
+    },
+    "INBOX_DELETED": {
+      "title": "聊天记录已被删除",
+      "body": "您的一条聊天记录已被删除。"
+    },
+    "APPROVE_CONTACT_REVEAL": {
+      "title": "已分享手机号码！",
+      "body": "您的手机号码交换的请求已被批准。"
+    },
+    "DISAPPROVE_CONTACT_REVEAL": {
+      "title": "请求已被拒绝!",
+      "body": "您的手机号码交换的请求已被拒绝。"
+    },
+    "REQUEST_CONTACT_REVEAL": {
+      "title": "已请求手机号码",
+      "body": "您已被请求分享您的手机号码。"
+    },
+    "TRADE_CHECKLIST_UPDATE": {
+      "title": "{{them}}",
+      "body": "{{them}} 已更新交易清单"
+    }
+  }
+}

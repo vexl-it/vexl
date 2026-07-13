@@ -883,9 +883,7 @@ async function main(): Promise<void> {
     ...generated.vars,
     // Expo resolves Android's --device by display/AVD name, but the custom
     // release Gradle installer targets devices through ANDROID_SERIAL.
-    ...(options.androidSerial === undefined
-      ? {}
-      : {ANDROID_SERIAL: options.androidSerial}),
+    ANDROID_SERIAL: options.androidSerial,
     // Do not inherit a stale selector from the parent shell. This is only set
     // for a stopped AVD selected by this picker.
     VEXL_ANDROID_AVD_NAME: options.androidAvdName,

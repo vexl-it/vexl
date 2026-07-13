@@ -12,7 +12,7 @@ import deBase from '../de-base.json'
 import deChildAbusePrevention from '../de-childSafetyAndSexAbusePrevention.json'
 import dePrivacyPolicyDev from '../de-privacyPolicy.json'
 import deTermsOfUse from '../de-termsOfUse.json'
-import enBase from '../en-base.json'
+import enBaseJson from '../en-base.json'
 import enChildAbusePrevention from '../en-childSafetyAndSexAbusePrevention.json'
 import enPrivacyPolicyDev from '../en-privacyPolicy.json'
 import enTermsOfUse from '../en-termsOfUse.json'
@@ -58,6 +58,8 @@ import zhBase from '../zh-base.json'
 import zhChildAbusePrevention from '../zh-childSafetyAndSexAbusePrevention.json'
 import zhPrivacyPolicyDev from '../zh-privacyPolicy.json'
 import zhTermsOfUse from '../zh-termsOfUse.json'
+
+const enBase: Record<keyof typeof base, string> = enBaseJson
 
 export const dev = {
   localeName: 'en_dev',

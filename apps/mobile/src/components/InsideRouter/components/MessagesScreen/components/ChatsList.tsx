@@ -25,6 +25,7 @@ import {
   chatMatchesTagFilters,
   type ChatTag,
   type ChatTagId,
+  tagIdsAssignedToChats,
   tagLabelsForChat,
 } from '../../../../../state/chatTags/domain'
 import atomKeyExtractor from '../../../../../utils/atomUtils/atomKeyExtractor'
@@ -48,14 +49,20 @@ const chatsListDataEquivalence = ReadonlyArray.getEquivalence<ChatListData>(
     tagLabelsEquivalence(a.tagLabels, b.tagLabels)
 )
 
+const visibleChatsAtom = atom((get) =>
+  pipe(
+    get(messagingStateAtom),
+    ReadonlyArray.flatMap((inbox) => inbox.chats),
+    ReadonlyArray.filter(chatShouldBeVisible)
+  )
+)
+
 const chatsListDataSourceAtom = atom((get): ChatListData[] => {
   const tagState = get(chatTagsStateAtom)
   const selectedTagIds = get(selectedChatTagFiltersAtom)
 
   return pipe(
-    get(messagingStateAtom),
-    ReadonlyArray.flatMap((inbox) => inbox.chats),
-    ReadonlyArray.filter(chatShouldBeVisible),
+    get(visibleChatsAtom),
     ReadonlyArray.filter((chat) =>
       chatMatchesTagFilters({
         state: tagState,
@@ -81,6 +88,19 @@ const chatsListDataAtom = selectAtom(
   (chats): ChatListData[] => chats,
   chatsListDataEquivalence
 )
+
+// Tags that aren't assigned to any currently visible chat wouldn't change
+// the list if selected, so they're hidden from the filter bar.
+const filterableChatTagIdsAtom = atom((get) => {
+  const visibleChatIds = new Set(
+    pipe(
+      get(visibleChatsAtom),
+      ReadonlyArray.map((chat) => chat.chat.id)
+    )
+  )
+
+  return tagIdsAssignedToChats(get(chatTagsStateAtom), visibleChatIds)
+})
 
 type ChatTagFilterValue = 'all' | ChatTagId
 
@@ -123,18 +143,27 @@ function ChatsList(): React.ReactElement | null {
   const navigation = useNavigation()
   const elementAtoms = useAtomValue(chatsListDataAtomsAtom)
   const tags = useAtomValue(chatTagsAtom)
+  const filterableTagIds = useAtomValue(filterableChatTagIdsAtom)
   const [selectedTagIds, setSelectedTagIds] = useAtom(
     selectedChatTagFiltersAtom
   )
   const tabBarEndsAt = usePixelsFromBottomWhereTabsEnd()
   const {onScroll} = useInsideScreenScroll()
+  const filterableTags = React.useMemo(
+    () =>
+      pipe(
+        tags,
+        ReadonlyArray.filter((tag) => filterableTagIds.has(tag.id))
+      ),
+    [tags, filterableTagIds]
+  )
   const filterItems = React.useMemo(
     () =>
       chatTagFilterItems({
         allChatsLabel: t('messages.tags.allChats'),
-        tags,
+        tags: filterableTags,
       }),
-    [t, tags]
+    [t, filterableTags]
   )
   const selectedFilterValues = React.useMemo(() => {
     const values = new Set<ChatTagFilterValue>(selectedTagIds)
@@ -145,7 +174,7 @@ function ChatsList(): React.ReactElement | null {
   const listHeaderComponent = (
     <InsideScreenListHeader>
       {elementAtoms.length > 0 ||
-      ReadonlyArray.isNonEmptyReadonlyArray(tags) ? (
+      ReadonlyArray.isNonEmptyReadonlyArray(filterableTags) ? (
         <Stack marginHorizontal="$5" marginBottom="$6">
           <SearchBar
             placeholder={t('messages.search.placeholder')}
@@ -156,7 +185,7 @@ function ChatsList(): React.ReactElement | null {
           />
         </Stack>
       ) : null}
-      {ReadonlyArray.isNonEmptyReadonlyArray(tags) ? (
+      {ReadonlyArray.isNonEmptyReadonlyArray(filterableTags) ? (
         <Stack marginBottom="$6">
           <FilterBar
             items={filterItems}

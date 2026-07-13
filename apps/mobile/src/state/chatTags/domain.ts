@@ -182,6 +182,19 @@ export function tagLabelsForChat(
   )
 }
 
+export function tagIdsAssignedToChats(
+  state: ChatTagsState,
+  chatIds: ReadonlySet<ChatId>
+): ReadonlySet<ChatTagId> {
+  return new Set(
+    pipe(
+      state.assignments,
+      Array.filter((assignment) => chatIds.has(assignment.chatId)),
+      Array.flatMap((assignment) => assignment.tagIds)
+    )
+  )
+}
+
 export function pruneChatTagAssignments(
   state: ChatTagsState,
   validChatIds: ReadonlySet<ChatId>

@@ -11,6 +11,7 @@ import {
   emptyChatTagsState,
   pruneChatTagAssignments,
   setTagsForChat,
+  tagIdsAssignedToChats,
   tagIdsForChat,
 } from './domain'
 
@@ -122,6 +123,19 @@ describe('chat tag domain', () => {
         selectedTagIds: new Set(),
       })
     ).toBe(true)
+  })
+
+  test('reports only tag ids assigned within a given set of chats', () => {
+    const assignedState = setTagsForChat({
+      state: stateWithTags,
+      chatId,
+      tagIds: new Set([firstTagId]),
+    })
+
+    expect(tagIdsAssignedToChats(assignedState, new Set([chatId]))).toEqual(
+      new Set([firstTagId])
+    )
+    expect(tagIdsAssignedToChats(assignedState, new Set())).toEqual(new Set())
   })
 
   test('prunes assignments after chat data is physically removed', () => {

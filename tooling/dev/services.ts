@@ -379,8 +379,12 @@ const APP_BY_NAME: Record<string, RunnableApp> = Object.fromEntries(
   )
 )
 
+const LEGACY_APP_NAMES: Record<string, string> = {
+  'account-deletion-website': 'web-app',
+}
+
 export const findApp = (name: string): RunnableApp | undefined =>
-  APP_BY_NAME[name]
+  APP_BY_NAME[LEGACY_APP_NAMES[name] ?? name]
 
 /** All databases the Postgres init script must create. */
 export const allDatabaseNames = (): readonly string[] =>

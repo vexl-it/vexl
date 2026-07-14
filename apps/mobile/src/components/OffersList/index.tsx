@@ -6,9 +6,12 @@ import {
 } from '@shopify/flash-list'
 import {Stack, tokens, useTheme} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
-import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import {LayoutAnimation, RefreshControl} from 'react-native'
-import Animated from 'react-native-reanimated'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {RefreshControl, type View, type ViewProps} from 'react-native'
+import Animated, {
+  LinearTransition,
+  type AnimatedProps,
+} from 'react-native-reanimated'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import OffersListItem from './OffersListItem'
 import OffersListSectionHeader from './OffersListSectionHeader'
@@ -22,6 +25,27 @@ interface ItemSeparatorProps {
 
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
+
+const offersListLayoutTransition = LinearTransition.duration(300)
+// FlashList repositions recycled cells while scrolling. Keeping a layout
+// transition mounted continuously would animate those recycling updates, so
+// this context enables it only for the explicitly armed mark-change render.
+const OffersListLayoutAnimationContext = React.createContext(false)
+
+const AnimatedCellContainer = React.forwardRef<
+  View,
+  AnimatedProps<ViewProps> & {readonly index: number}
+>(function AnimatedCellContainer({index: _index, ...props}, ref) {
+  const shouldAnimateLayout = React.useContext(OffersListLayoutAnimationContext)
+
+  return (
+    <Animated.View
+      ref={ref}
+      layout={shouldAnimateLayout ? offersListLayoutTransition : undefined}
+      {...props}
+    />
+  )
+})
 
 function renderItem(
   info: ListRenderItemInfo<OffersListItemData>
@@ -47,7 +71,12 @@ function getItemType(item: OffersListItemData): string {
 
 export interface Props extends Omit<
   FlashListProps<OffersListItemData>,
-  'renderItem' | 'data' | 'ListFooterComponent' | 'keyExtractor' | 'getItemType'
+  | 'renderItem'
+  | 'data'
+  | 'ListFooterComponent'
+  | 'keyExtractor'
+  | 'getItemType'
+  | 'CellRendererComponent'
 > {
   readonly items: readonly OffersListItemData[]
   readonly itemAfterFirstOffer?: React.ReactElement | null
@@ -67,10 +96,16 @@ function OffersList({
   ListHeaderComponent,
   ListFooterComponent,
   contentContainerStyle: externalContentContainerStyle,
+  onCommitLayoutEffect,
   ...props
 }: Props): React.JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
   const animatedFlashListRef = useRef<FlashListRef<OffersListItemData>>(null)
+  const currentItemsRef = useRef(items)
+  const itemsBeforeAnimationRef = useRef<readonly OffersListItemData[] | null>(
+    null
+  )
+  const [shouldAnimateListLayout, setShouldAnimateListLayout] = useState(false)
   const theme = useTheme()
   const refreshIndicatorColor = hideRefreshIndicator
     ? tokens.color.transparent.val
@@ -150,15 +185,25 @@ function OffersList({
   }, [ListFooterComponent, itemAfterFirstOffer, offerItemsCount])
 
   const animateNextListChange = useCallback(() => {
+    itemsBeforeAnimationRef.current = currentItemsRef.current
     animatedFlashListRef.current?.prepareForLayoutAnimationRender()
-    LayoutAnimation.configureNext(
-      LayoutAnimation.create(
-        300,
-        LayoutAnimation.Types.easeInEaseOut,
-        LayoutAnimation.Properties.opacity
-      )
-    )
+    setShouldAnimateListLayout(true)
   }, [])
+
+  currentItemsRef.current = items
+
+  const handleCommitLayoutEffect = useCallback(() => {
+    onCommitLayoutEffect?.()
+
+    if (!shouldAnimateListLayout || items === itemsBeforeAnimationRef.current) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      setShouldAnimateListLayout(false)
+      itemsBeforeAnimationRef.current = null
+    })
+  }, [items, onCommitLayoutEffect, shouldAnimateListLayout])
 
   const animationContextValue = useMemo(
     () => ({animateNextListChange}),
@@ -182,33 +227,39 @@ function OffersList({
 
   return (
     <OffersListAnimationProvider value={animationContextValue}>
-      <ReanimatedFlashList
-        ref={animatedFlashListRef}
-        indicatorStyle="white"
-        refreshControl={
-          <RefreshControl
-            colors={[refreshIndicatorColor]}
-            progressBackgroundColor={
-              hideRefreshIndicator ? tokens.color.transparent.val : undefined
-            }
-            refreshing={refreshing ?? false}
-            onRefresh={onRefresh ?? (() => {})}
-            tintColor={refreshIndicatorColor}
-          />
-        }
-        ItemSeparatorComponent={itemSeparatorComponent}
-        progressViewOffset={20}
-        ListHeaderComponent={ListHeaderComponent}
-        ListFooterComponent={listFooterComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={contentContainerStyle}
-        data={items}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        getItemType={getItemType}
-        {...props}
-      />
+      <OffersListLayoutAnimationContext.Provider
+        value={shouldAnimateListLayout}
+      >
+        <ReanimatedFlashList
+          ref={animatedFlashListRef}
+          indicatorStyle="white"
+          refreshControl={
+            <RefreshControl
+              colors={[refreshIndicatorColor]}
+              progressBackgroundColor={
+                hideRefreshIndicator ? tokens.color.transparent.val : undefined
+              }
+              refreshing={refreshing ?? false}
+              onRefresh={onRefresh ?? (() => {})}
+              tintColor={refreshIndicatorColor}
+            />
+          }
+          ItemSeparatorComponent={itemSeparatorComponent}
+          progressViewOffset={20}
+          ListHeaderComponent={ListHeaderComponent}
+          ListFooterComponent={listFooterComponent}
+          ListEmptyComponent={ListEmptyComponent}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={contentContainerStyle}
+          data={items}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          getItemType={getItemType}
+          CellRendererComponent={AnimatedCellContainer}
+          onCommitLayoutEffect={handleCommitLayoutEffect}
+          {...props}
+        />
+      </OffersListLayoutAnimationContext.Provider>
     </OffersListAnimationProvider>
   )
 }

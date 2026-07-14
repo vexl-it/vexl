@@ -3,6 +3,7 @@ import {Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {useCallback, useEffect} from 'react'
 import {resolveAllContactsAsSeenActionAtom} from '../../../../../state/contacts/atom/contactsStore'
+import {refreshDeviceContactsSnapshotActionAtom} from '../../../../../state/contacts/atom/vexlOnlyContactsAtoms'
 import {type StoredContactWithComputedValues} from '../../../../../state/contacts/domain'
 import {useOnFocusAndAppState} from '../../../../../utils/useFocusAndAppState'
 import {contactSelectMolecule} from '../atom'
@@ -20,6 +21,9 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
   const checkContactsAccessPrivileges = useSetAtom(
     checkContactsAccessPrivilegesActionAtom
   )
+  const refreshDeviceContactsSnapshot = useSetAtom(
+    refreshDeviceContactsSnapshotActionAtom
+  )
   const syncDefaultSelectedContacts = useSetAtom(
     syncDefaultSelectedContactsActionAtom
   )
@@ -33,7 +37,8 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
   useOnFocusAndAppState(
     useCallback(() => {
       Effect.runFork(checkContactsAccessPrivileges())
-    }, [checkContactsAccessPrivileges])
+      Effect.runFork(refreshDeviceContactsSnapshot())
+    }, [checkContactsAccessPrivileges, refreshDeviceContactsSnapshot])
   )
 
   useEffect(() => {

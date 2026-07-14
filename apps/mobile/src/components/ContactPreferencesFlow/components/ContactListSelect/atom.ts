@@ -5,7 +5,10 @@ import {
   getPermissionsAsync,
   type ContactsPermissionResponse,
 } from 'expo-contacts'
-import {atom, type Atom, type SetStateAction} from 'jotai'
+import {getDocumentAsync} from 'expo-document-picker'
+import {File, Paths} from 'expo-file-system'
+import {shareAsync} from 'expo-sharing'
+import {atom, type Atom, type Getter, type SetStateAction} from 'jotai'
 import {atomFamily, splitAtom} from 'jotai/utils'
 import {matchSorter, rankings} from 'match-sorter'
 import {Linking} from 'react-native'
@@ -21,6 +24,11 @@ import loadContactsFromDeviceActionAtom, {
 import normalizeStoredContactsActionAtom from '../../../../state/contacts/atom/normalizeStoredContactsActionAtom'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
+  isVexlOnlyContact,
+  normalizedNumbersOnDeviceAtom,
+  vexlOnlyContactsAtom,
+} from '../../../../state/contacts/atom/vexlOnlyContactsAtoms'
+import {
   StoredContactWithComputedValues,
   type ContactsFilter,
 } from '../../../../state/contacts/domain'
@@ -32,6 +40,7 @@ import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getVal
 import {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
+import {contactsToVcardString, parseVcardString} from '../../../../utils/vCard'
 import {showErrorAlert} from '../../../ErrorAlert'
 import {globalDialogAtom} from '../../../GlobalDialog'
 import {toastNotificationAtom} from '../../../ToastNotification/atom'
@@ -42,6 +51,22 @@ export const ContactsSelectScope = createScope<{
 }>({
   reloadContacts: () => {},
 })
+
+class ContactsExportError extends Schema.TaggedError<ContactsExportError>(
+  'ContactsExportError'
+)('ContactsExportError', {
+  cause: Schema.Unknown,
+}) {}
+
+class ContactsImportError extends Schema.TaggedError<ContactsImportError>(
+  'ContactsImportError'
+)('ContactsImportError', {
+  cause: Schema.Unknown,
+}) {}
+
+// Hard caps for untrusted .vcf input
+const MAX_VCF_FILE_SIZE_BYTES = 2 * 1024 * 1024
+const MAX_CONTACTS_PER_VCF_IMPORT = 5000
 
 const matchSorterKeys = ['info.name', 'info.numberToDisplay']
 const matchSorterThreshold = rankings.CONTAINS
@@ -97,13 +122,16 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
   const createContactsToDisplayAtom = (
-    shouldDisplayContact: (contact: StoredContactWithComputedValues) => boolean
+    shouldDisplayContact: (
+      contact: StoredContactWithComputedValues,
+      get: Getter
+    ) => boolean
   ): Atom<StoredContactWithComputedValues[]> =>
     atom((get) => {
       const searchText = get(searchTextAtom)
       const contactsToShow = pipe(
         get(normalizedContactsAtom),
-        Array.filter(shouldDisplayContact),
+        Array.filter((one) => shouldDisplayContact(one, get)),
         (contacts) =>
           deduplicateBy(contacts, (one) => one.computedValues.normalizedNumber)
       )
@@ -124,6 +152,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     (one) => !one.flags.imported && one.flags.seen
   )
   const allContactsToDisplayAtom = createContactsToDisplayAtom(() => true)
+  const vexlOnlyContactsToDisplayAtom = createContactsToDisplayAtom(
+    (one, get) => isVexlOnlyContact(one, get(normalizedNumbersOnDeviceAtom))
+  )
 
   const _contactsToDisplayAtom = atom((get) => {
     const contactsFilter = get(contactsFilterAtom)
@@ -135,7 +166,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           ? nonSubmittedContactsToDisplayAtom
           : contactsFilter === 'new'
             ? newContactsToDisplayAtom
-            : allContactsToDisplayAtom
+            : contactsFilter === 'vexlOnly'
+              ? vexlOnlyContactsToDisplayAtom
+              : allContactsToDisplayAtom
     )
   })
 
@@ -147,6 +180,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     nonSubmittedContactsToDisplayAtom
   )
   const allContactsToDisplayAtomsAtom = splitAtom(allContactsToDisplayAtom)
+  const vexlOnlyContactsToDisplayAtomsAtom = splitAtom(
+    vexlOnlyContactsToDisplayAtom
+  )
   const contactsToDisplayAtomsAtom = atom((get) => {
     const contactsFilter = get(contactsFilterAtom)
 
@@ -157,7 +193,9 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           ? nonSubmittedContactsToDisplayAtomsAtom
           : contactsFilter === 'new'
             ? newContactsToDisplayAtomsAtom
-            : allContactsToDisplayAtomsAtom
+            : contactsFilter === 'vexlOnly'
+              ? vexlOnlyContactsToDisplayAtomsAtom
+              : allContactsToDisplayAtomsAtom
     )
   })
 
@@ -172,6 +210,13 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   )
   const allContactsToDisplayCountAtom = atom(
     (get) => get(allContactsToDisplayAtomsAtom).length
+  )
+  const vexlOnlyContactsToDisplayCountAtom = atom(
+    (get) => get(vexlOnlyContactsToDisplayAtomsAtom).length
+  )
+  // unaffected by search - drives the backup/restore banner variant
+  const vexlOnlyContactsCountAtom = atom(
+    (get) => get(vexlOnlyContactsAtom).length
   )
   const contactsToDisplayCountAtom = atom(
     (get) => get(contactsToDisplayAtomsAtom).length
@@ -571,6 +616,259 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
+  const exportVexlOnlyContactsActionAtom = atom(
+    null,
+    (get): Effect.Effect<boolean> => {
+      const {t} = get(translationAtom)
+      const vexlOnlyContacts = get(vexlOnlyContactsAtom)
+
+      if (!Array.isNonEmptyArray(vexlOnlyContacts)) {
+        return Effect.succeed(false)
+      }
+
+      const vcardString = contactsToVcardString(
+        pipe(
+          vexlOnlyContacts,
+          Array.map((one) => ({
+            name: one.info.name,
+            phoneNumber: one.computedValues.normalizedNumber,
+          }))
+        )
+      )
+
+      return Effect.tryPromise({
+        try: async () => {
+          const backupFile = new File(Paths.cache, 'vexl-contacts-backup.vcf')
+          if (backupFile.info().exists) backupFile.delete()
+          backupFile.write(vcardString, {encoding: 'utf8'})
+          try {
+            await shareAsync(backupFile.uri, {
+              mimeType: 'text/vcard',
+              UTI: 'public.vcard',
+              dialogTitle: t('contactPreferences.vexlOnlyBackup.title'),
+            })
+          } finally {
+            // don't leave a plaintext dump of the user's contacts in the cache
+            if (backupFile.info().exists) backupFile.delete()
+          }
+        },
+        catch: (e) => new ContactsExportError({cause: e}),
+      }).pipe(
+        Effect.as(true),
+        Effect.catchAll((e) =>
+          Effect.sync(() => {
+            showErrorAlert({
+              title: t('common.somethingWentWrong'),
+              error: e,
+            })
+            return false
+          })
+        )
+      )
+    }
+  )
+
+  const importVexlOnlyContactsActionAtom = atom(
+    null,
+    (get, set): Effect.Effect<boolean> => {
+      const {t} = get(translationAtom)
+
+      return Effect.gen(function* (_) {
+        const pickerResult = yield* _(
+          Effect.tryPromise({
+            try: async () =>
+              await getDocumentAsync({
+                type: ['text/vcard', 'text/x-vcard'],
+                copyToCacheDirectory: true,
+                multiple: false,
+              }),
+            catch: (e) => new ContactsImportError({cause: e}),
+          })
+        )
+
+        if (pickerResult.canceled) return false
+        const pickedAsset = pickerResult.assets[0]
+        if (pickedAsset === undefined) return false
+
+        const vcardString = yield* _(
+          Effect.tryPromise({
+            try: async () => {
+              const pickedFile = new File(pickedAsset.uri)
+              try {
+                if (pickedFile.size > MAX_VCF_FILE_SIZE_BYTES) return undefined
+                return await pickedFile.text()
+              } finally {
+                // remove the cache copy created by the document picker
+                if (pickedFile.info().exists) pickedFile.delete()
+              }
+            },
+            catch: (e) => new ContactsImportError({cause: e}),
+          })
+        )
+
+        if (vcardString === undefined) {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('contactPreferences.importVcf.invalidFileTitle'),
+              subtitle: t(
+                'contactPreferences.importVcf.fileTooLargeDescription'
+              ),
+              positiveButtonText: t('common.close'),
+            })
+          )
+          return false
+        }
+
+        const parsedContacts = parseVcardString(vcardString)
+
+        if (!Array.isNonEmptyArray(parsedContacts)) {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('contactPreferences.importVcf.noContactsFoundTitle'),
+              subtitle: t(
+                'contactPreferences.importVcf.noContactsFoundDescription'
+              ),
+              positiveButtonText: t('common.close'),
+            })
+          )
+          return false
+        }
+
+        const existingNormalizedNumbers = new Set(
+          pipe(
+            get(normalizedContactsAtom),
+            Array.map((one) => one.computedValues.normalizedNumber)
+          )
+        )
+        const seenNumbers = new Set<E164PhoneNumber>()
+        let skippedCount = 0
+        const contactsToImport: Array<{
+          name: string
+          normalizedNumber: E164PhoneNumber
+        }> = []
+
+        for (const parsedContact of parsedContacts) {
+          for (const phoneNumber of parsedContact.phoneNumbers) {
+            const normalizedNumber =
+              toE164PhoneNumberWithDefaultCountryCode(phoneNumber)
+            if (Option.isNone(normalizedNumber)) {
+              skippedCount++
+              continue
+            }
+            if (seenNumbers.has(normalizedNumber.value)) continue
+            seenNumbers.add(normalizedNumber.value)
+            if (existingNormalizedNumbers.has(normalizedNumber.value)) {
+              skippedCount++
+              continue
+            }
+            if (contactsToImport.length >= MAX_CONTACTS_PER_VCF_IMPORT) {
+              skippedCount++
+              continue
+            }
+            contactsToImport.push({
+              name: parsedContact.name,
+              normalizedNumber: normalizedNumber.value,
+            })
+          }
+        }
+
+        if (!Array.isNonEmptyArray(contactsToImport)) {
+          yield* _(
+            set(globalDialogAtom, {
+              title: t('contactPreferences.importVcf.nothingNewTitle'),
+              subtitle: t('contactPreferences.importVcf.nothingNewDescription'),
+              positiveButtonText: t('common.close'),
+            })
+          )
+          return false
+        }
+
+        const importConfirmed = yield* _(
+          set(globalDialogAtom, {
+            title: t('contactPreferences.importVcf.confirmTitle', {
+              count: contactsToImport.length,
+            }),
+            subtitle:
+              skippedCount > 0
+                ? t('contactPreferences.importVcf.confirmDescriptionSkipped', {
+                    count: skippedCount,
+                  })
+                : t('contactPreferences.importVcf.confirmDescription'),
+            positiveButtonText: t('contactPreferences.importVcf.confirmButton'),
+            negativeButtonText: t('common.cancel'),
+          })
+        )
+        if (!importConfirmed) return false
+
+        const newStoredContacts = yield* _(
+          Effect.forEach(contactsToImport, ({name, normalizedNumber}) =>
+            hashPhoneNumberE(normalizedNumber).pipe(
+              Effect.map((hash) =>
+                Schema.decodeSync(StoredContactWithComputedValues)({
+                  info: {
+                    name,
+                    numberToDisplay: normalizedNumber,
+                    rawNumber: normalizedNumber,
+                  },
+                  computedValues: {
+                    hash,
+                    normalizedNumber,
+                  },
+                  flags: {
+                    seen: true,
+                    imported: false,
+                    importedManually: true,
+                    invalidNumber: 'valid',
+                  },
+                })
+              )
+            )
+          )
+        )
+
+        set(storedContactsAtom, (prev) => [
+          ...prev,
+          ...pipe(
+            newStoredContacts,
+            Array.map((one) => ({
+              ...one,
+              computedValues: Option.some(one.computedValues),
+            }))
+          ),
+        ])
+        set(selectedNumbersAtom, (selectedNumbers) => {
+          const nextSelectedNumbers = new Set(selectedNumbers)
+          pipe(
+            contactsToImport,
+            Array.forEach(({normalizedNumber}) => {
+              nextSelectedNumbers.add(normalizedNumber)
+            })
+          )
+          return nextSelectedNumbers
+        })
+        reloadContacts()
+
+        set(
+          toastNotificationAtom,
+          t('contactPreferences.importVcf.success', {
+            count: contactsToImport.length,
+          })
+        )
+
+        return true
+      }).pipe(
+        Effect.catchAll((e) => {
+          showErrorAlert({
+            title: t('common.somethingWentWrong'),
+            error: e,
+          })
+
+          return Effect.succeed(false)
+        })
+      )
+    }
+  )
+
   const updateContactActionAtom = createUpdateContactActionAtom({
     reloadContacts,
     selectedNumbersAtom,
@@ -601,12 +899,17 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     submittedContactsToDisplayAtomsAtom,
     newContactsToDisplayAtomsAtom,
     allContactsToDisplayAtomsAtom,
+    vexlOnlyContactsToDisplayAtomsAtom,
     contactsToDisplayAtomsAtom,
     contactsToDisplayCountAtom,
     newContactsToDisplayCountAtom,
     submittedContactsToDisplayCountAtom,
     nonSubmittedContactsToDisplayCountAtom,
     allContactsToDisplayCountAtom,
+    vexlOnlyContactsToDisplayCountAtom,
+    vexlOnlyContactsCountAtom,
+    exportVexlOnlyContactsActionAtom,
+    importVexlOnlyContactsActionAtom,
     displayContactsCountAtom,
     updateContactActionAtom,
     contactsAccessPrivilegesAtom,

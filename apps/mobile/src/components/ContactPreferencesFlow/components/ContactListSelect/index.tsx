@@ -10,7 +10,7 @@ import {
   type TabItem,
 } from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
-import {Array} from 'effect'
+import {Array, Effect} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useMemo} from 'react'
 import {Pressable, type LayoutChangeEvent} from 'react-native'
@@ -46,6 +46,9 @@ function ContactsListSelect({
     newContactsToDisplayCountAtom,
     shouldShowContactImportProgressDialogAtom,
     toggleAllContactsToDisplayActionAtom,
+    vexlOnlyContactsCountAtom,
+    exportVexlOnlyContactsActionAtom,
+    importVexlOnlyContactsActionAtom,
   } = useMolecule(contactSelectMolecule)
   const theme = useTheme()
   const normalizedContacts = useContactListSelectLifecycle()
@@ -64,6 +67,9 @@ function ContactsListSelect({
   const toggleAllContactsToDisplay = useSetAtom(
     toggleAllContactsToDisplayActionAtom
   )
+  const vexlOnlyContactsCount = useAtomValue(vexlOnlyContactsCountAtom)
+  const exportVexlOnlyContacts = useSetAtom(exportVexlOnlyContactsActionAtom)
+  const importVexlOnlyContacts = useSetAtom(importVexlOnlyContactsActionAtom)
   const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
   const {isSubmittingContacts, submitSelectedContacts} =
     useSubmitSelectedContacts()
@@ -110,6 +116,10 @@ function ContactsListSelect({
         label: t('postLoginFlow.contactsList.hidden'),
         value: 'nonSubmitted',
       },
+      {
+        label: t('postLoginFlow.contactsList.vexlOnly'),
+        value: 'vexlOnly',
+      },
     ],
     [newContactsToDisplayCount, t]
   )
@@ -124,6 +134,7 @@ function ContactsListSelect({
     selectedFilter === 'all' &&
     newContactsToDisplayCount > 0 &&
     !newContactsBannerDismissedForCurrentScreen
+  const shouldShowVexlOnlyBackupBanner = selectedFilter === 'vexlOnly'
   const shouldShowSubmittingContactsOverlay =
     isSubmittingContacts && !shouldShowContactImportProgressDialog
   const bulkToggleLabel = t(
@@ -186,6 +197,39 @@ function ContactsListSelect({
                 },
               }}
             />
+          ) : null}
+          {shouldShowVexlOnlyBackupBanner ? (
+            vexlOnlyContactsCount > 0 ? (
+              <Banner
+                title={t('contactPreferences.vexlOnlyBackup.title')}
+                description={t('contactPreferences.vexlOnlyBackup.description')}
+                primaryButton={{
+                  label: t('contactPreferences.vexlOnlyBackup.exportButton'),
+                  onPress: () => {
+                    Effect.runFork(exportVexlOnlyContacts())
+                  },
+                }}
+                secondaryButton={{
+                  label: t('contactPreferences.vexlOnlyBackup.importButton'),
+                  onPress: () => {
+                    Effect.runFork(importVexlOnlyContacts())
+                  },
+                }}
+              />
+            ) : (
+              <Banner
+                title={t('contactPreferences.vexlOnlyBackup.restoreTitle')}
+                description={t(
+                  'contactPreferences.vexlOnlyBackup.restoreDescription'
+                )}
+                primaryButton={{
+                  label: t('contactPreferences.vexlOnlyBackup.importButton'),
+                  onPress: () => {
+                    Effect.runFork(importVexlOnlyContacts())
+                  },
+                }}
+              />
+            )
           ) : null}
           <ContactsAccessPrivilegesInfoBanner />
         </Stack>

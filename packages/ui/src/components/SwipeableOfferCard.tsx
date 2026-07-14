@@ -121,7 +121,10 @@ function SwipeActionPanel({
             >
               <Icon size={24} color={iconColor} />
               <Typography
-                variant="micro"
+                variant="descriptionBold"
+                alignSelf="center"
+                width={PANEL_WIDTH}
+                textAlign="center"
                 color={
                   variant === 'accent'
                     ? '$accentHighlightPrimary'
@@ -165,14 +168,6 @@ export function SwipeableOfferCard({
     opacity: cardOpacity.get(),
   }))
 
-  const performMarkToggle = useCallback(
-    (target: SwipeableOfferCardMark) => {
-      onToggleMark(target)
-      cardOpacity.set(withTiming(1, {duration: CARD_FADE_IN_DURATION_MS}))
-    },
-    [cardOpacity, onToggleMark]
-  )
-
   const commit = useCallback(
     (target: SwipeableOfferCardMark) => {
       // One-shot per gesture cycle. The action panel stays tappable while the
@@ -182,14 +177,18 @@ export function SwipeableOfferCard({
       committedRef.current = true
 
       swipeableRef.current?.close()
-      cardOpacity.set(
-        withTiming(0, {duration: CARD_FADE_OUT_DURATION_MS}, () => {
-          'worklet'
-          scheduleOnRN(performMarkToggle, target)
-        })
-      )
+      cardOpacity.set(withTiming(0, {duration: CARD_FADE_OUT_DURATION_MS}))
+
+      // A JS timer keeps the commit independent from the animation callback:
+      // that callback can be skipped if FlashList recycles the closing row.
+      // Waiting for the fade still leaves a clear visual marker of where the
+      // offer moved from before the list closes the gap.
+      setTimeout(() => {
+        onToggleMark(target)
+        cardOpacity.set(withTiming(1, {duration: CARD_FADE_IN_DURATION_MS}))
+      }, CARD_FADE_OUT_DURATION_MS)
     },
-    [cardOpacity, performMarkToggle]
+    [cardOpacity, onToggleMark]
   )
 
   const resetCommitGuard = useCallback(() => {

@@ -71,8 +71,15 @@ export const syncConnectionsActionAtom = atom(
       console.log('🦋 Refreshing connections state')
       const updateStarted = unixMillisecondsNow()
 
-      const firstLevel = yield* _(fetchContacts('FIRST', api.contact))
-      const secondLevel = yield* _(fetchContacts('SECOND', api.contact))
+      const {firstLevel, secondLevel} = yield* _(
+        Effect.all(
+          {
+            firstLevel: fetchContacts('FIRST', api.contact),
+            secondLevel: fetchContacts('SECOND', api.contact),
+          },
+          {concurrency: 'unbounded'}
+        )
+      )
 
       // report difference
       // Forked and time-limited (like the metrics report below) so a hanging

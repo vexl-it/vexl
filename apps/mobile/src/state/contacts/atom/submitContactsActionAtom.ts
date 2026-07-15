@@ -596,6 +596,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
           bottomText: t(
             'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
           ),
+          belowProgressLeft: t('contacts.importProgress.titleUpdatingNetwork'),
           indicateProgress: {type: 'intermediate'},
         })
 
@@ -605,6 +606,10 @@ const syncNetworkAfterContactsImportActionAtom = atom(
             set(updateAndReencryptAllOffersConnectionsActionAtom, {
               onProgres: ({offerI, totalOffers, progress}) => {
                 set(offerProgressModalActionAtoms.showStep, {
+                  aggregateProgress: {
+                    processingIndex: offerI,
+                    totalToProcess: totalOffers,
+                  },
                   progress,
                   textData: {
                     title: t('contacts.refreshingOffers.title'),
@@ -628,6 +633,10 @@ const syncNetworkAfterContactsImportActionAtom = atom(
             set(updateAndReencryptAllNotesConnectionsActionAtom, {
               onProgres: ({noteI, totalNotes, progress}) => {
                 set(offerProgressModalActionAtoms.showStep, {
+                  aggregateProgress: {
+                    processingIndex: noteI,
+                    totalToProcess: totalNotes,
+                  },
                   progress,
                   textData: {
                     title: t('contacts.refreshingNotes.title'),

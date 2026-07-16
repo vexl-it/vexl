@@ -52,6 +52,17 @@ function ContactsList({
         ItemSeparatorComponent={ItemSeparatorComponent}
         keyExtractor={atomKeyExtractor}
         renderItem={renderItem}
+        // FlashList v2 enables maintainVisibleContentPosition (scroll
+        // anchoring) by default — a documented source of stuck scrolling.
+        // This list has no chat-like prepending, so anchoring adds nothing.
+        maintainVisibleContentPosition={{disabled: true}}
+        // Keyboard dismissal without a touchable wrapper around the list:
+        // wrapping scrollables in TouchableWithoutFeedback blocks the drag
+        // gesture on RN 0.86/Fabric (JS responder never hands off to the
+        // native scroll). Dragging dismisses the keyboard; taps handled by
+        // rows go through, taps on empty list area dismiss.
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
       />
     </Stack>
   )

@@ -1,7 +1,6 @@
 import {
   Banner,
   Button,
-  DismissKeyboardOnPressOutside,
   KeyboardStickyView,
   Stack,
   Typography,
@@ -189,17 +188,18 @@ function ContactsListSelect({
           ) : null}
           <ContactsAccessPrivilegesInfoBanner />
         </Stack>
-        <DismissKeyboardOnPressOutside>
-          <Stack f={1} pos="relative">
-            <FilteredContacts
-              keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-            />
-            <PreparingContactsOverlay
-              visible={isContactsPreparing}
-              zIndex={10}
-            />
-          </Stack>
-        </DismissKeyboardOnPressOutside>
+        {/* Deliberately NOT wrapped in DismissKeyboardOnPressOutside: the
+            TouchableWithoutFeedback injects JS-responder handlers into the
+            list's parent, and on RN 0.86/Fabric the responder handoff blocks
+            the ScrollView's drag gesture entirely (list refuses to scroll).
+            Keyboard dismissal is handled by the FlashList itself via
+            keyboardDismissMode/keyboardShouldPersistTaps in ContactsList. */}
+        <Stack f={1} pos="relative">
+          <FilteredContacts
+            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+          />
+          <PreparingContactsOverlay visible={isContactsPreparing} zIndex={10} />
+        </Stack>
       </Stack>
       {shouldShowSubmitBar ? (
         <KeyboardStickyView

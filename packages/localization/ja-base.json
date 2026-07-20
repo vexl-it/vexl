@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "端末の連絡先に追加できませんでした",
   "contacts.limitedAccessToContacts": "連絡先へのアクセスが制限されています",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl の連絡先へのアクセスは制限されています。さらに連絡先を追加するには、Vexl にフルアクセスを許可するか、端末の設定から手動で追加してください。",
-  "migrations.migrating": "Vexl を更新中",
   "notificationPrompt.errorAlert.title": "Unable to obtain notification permissions",
   "notificationPrompt.errorAlert.description": "最新情報を受け取るには、設定で通知をオンにしてください。",
   "notificationPrompt.successMessage": "Notifications enabled",

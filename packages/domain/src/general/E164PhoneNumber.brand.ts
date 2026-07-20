@@ -35,7 +35,9 @@ export function toE164PhoneNumber(
   )
 
   if (valid && number?.e164) {
-    return Option.some(Schema.decodeSync(E164PhoneNumber)(number.e164))
+    // parsePhoneNumber already validated the number; decoding through the
+    // full E164PhoneNumber schema would run parsePhoneNumber a second time.
+    return Option.some(Schema.decodeSync(E164PhoneNumberUnsafe)(number.e164))
   }
   return Option.none()
 }

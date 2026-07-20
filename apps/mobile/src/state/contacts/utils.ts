@@ -7,12 +7,14 @@ import {
 } from '@vexl-next/generic-utils/src/effect-helpers/crypto'
 import {hmacSign} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Effect, Schema} from 'effect'
+import {chunksOf} from 'effect/Array'
 import {getPermissionsAsync, requestPermissionsAsync} from 'expo-contacts'
 import {map, type Either} from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {hmacPassword} from '../../utils/environment'
 import reportError from '../../utils/reportError'
 import {startMeasure} from '../../utils/reportTime'
+import {waitForNextAnimationFrameEffect} from '../../utils/runAfterAnimationFrames'
 import {
   mapContactsFromSystemToDomain,
   type DeviceContactsMappingResult,
@@ -82,6 +84,40 @@ export function areContactsPermissionsAlreadyGranted(): Effect.Effect<
   })
 }
 
+const DEVICE_CONTACTS_MAPPING_CHUNK_SIZE = 500
+
+/**
+ * Runs {@link mapContactsFromSystemToDomain} in chunks, yielding an animation
+ * frame between them. This runs on every app resume — one synchronous pass
+ * over thousands of contacts would block the JS thread right when the user is
+ * re-engaging with the app.
+ */
+function mapContactsFromSystemToDomainChunked(
+  contacts: readonly unknown[]
+): Effect.Effect<DeviceContactsMappingResult> {
+  return Effect.gen(function* (_) {
+    const mappedContacts: ContactInfo[] = []
+    let malformedContactsCount = 0
+    let malformedPhoneNumbersCount = 0
+
+    const chunks = chunksOf(contacts, DEVICE_CONTACTS_MAPPING_CHUNK_SIZE)
+    for (const [i, chunk] of chunks.entries()) {
+      if (i > 0) yield* _(waitForNextAnimationFrameEffect())
+
+      const chunkResult = mapContactsFromSystemToDomain(chunk)
+      mappedContacts.push(...chunkResult.contacts)
+      malformedContactsCount += chunkResult.malformedContactsCount
+      malformedPhoneNumbersCount += chunkResult.malformedPhoneNumbersCount
+    }
+
+    return {
+      contacts: mappedContacts,
+      malformedContactsCount,
+      malformedPhoneNumbersCount,
+    }
+  })
+}
+
 export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Effect<
   ContactInfo[],
   ContactsPermissionsNotGrantedError | UnknownContactsError
@@ -107,8 +143,9 @@ export function getContactsAndTryToResolveThePermissionsAlongTheWay(): Effect.Ef
     measureAsyncCall()
 
     const measure = startMeasure('Mapping contacts from system to our domain')
-    const mappingResult: DeviceContactsMappingResult =
-      mapContactsFromSystemToDomain(contacts)
+    const mappingResult: DeviceContactsMappingResult = yield* _(
+      mapContactsFromSystemToDomainChunked(contacts)
+    )
 
     if (
       mappingResult.malformedContactsCount > 0 ||

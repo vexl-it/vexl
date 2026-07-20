@@ -1,5 +1,8 @@
 import {Effect} from 'effect'
-import {registerInAppLoadingTask} from '../../utils/inAppLoadingTasks'
+import {
+  FIVE_MINUTES_MS,
+  registerInAppLoadingTask,
+} from '../../utils/inAppLoadingTasks'
 import {checkForClubsAdmissionActionAtom} from '../clubs/atom/checkForClubsAdmissionActionAtom'
 import {syncAllClubsHandleStateWhenNotFoundActionAtom} from '../clubs/atom/refreshClubsActionAtom'
 import {checkUserNeedsToImportContactsAndReencryptOffersActionAtom} from './atom/checkUserNeedsToImportAndReencryptOffersActionAtom'
@@ -12,6 +15,7 @@ export const syncConnectionsInAppTaskId = registerInAppLoadingTask({
   requirements: {
     requiresUserLoggedIn: true,
     runOn: 'resume',
+    minTimeBetweenRunsMs: FIVE_MINUTES_MS,
   },
   task: (store) =>
     Effect.gen(function* (_) {

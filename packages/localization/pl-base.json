@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "Błąd podczas dodawania osoby do kontaktów w telefonie",
   "contacts.limitedAccessToContacts": "Ograniczony dostęp do kontaktów",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl ma ograniczony dostęp do Twoich kontaktów. Aby dodać więcej kontaktów, udziel pełnego dostępu do Vexl lub dodaj kontakty ręcznie w ustawieniach telefonu.",
-  "migrations.migrating": "Aktualizowanie vexl",
   "notificationPrompt.errorAlert.title": "Nie można uzyskać uprawnień do powiadomień",
   "notificationPrompt.errorAlert.description": "Musisz włączyć powiadomienia w ustawieniach.",
   "notificationPrompt.successMessage": "Powiadomienia włączone",

@@ -66,6 +66,23 @@ const executeSingleTask = (
   task: InAppLoadingTask
 ): Effect.Effect<void, never> =>
   Effect.gen(function* (_) {
+    // Throttled tasks keep their previous 'completed' status (and its
+    // finishedAt), so a skipped run still counts as succeeded for dependents.
+    const minTimeBetweenRunsMs = task.requirements.minTimeBetweenRunsMs
+    if (
+      minTimeBetweenRunsMs !== undefined &&
+      task.status._tag === 'completed' &&
+      unixMillisecondsNow() - task.status.finishedAt < minTimeBetweenRunsMs
+    ) {
+      console.log(
+        'InAppLoadingTasks',
+        `⏭️ Skipping task ${task.name} — completed ${Math.round(
+          (unixMillisecondsNow() - task.status.finishedAt) / 1000
+        )}s ago (throttle: ${Math.round(minTimeBetweenRunsMs / 1000)}s)`
+      )
+      return
+    }
+
     const endBenchmark = startBenchmark(`InAppLoadingTask: ${task.name}`)
     const startedAt = unixMillisecondsNow()
 

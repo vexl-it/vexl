@@ -16,7 +16,6 @@ import {Pressable, type LayoutChangeEvent} from 'react-native'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
-import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import PreparingContactsOverlay from '../PreparingContactsOverlay'
 import {contactSelectMolecule} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
@@ -232,11 +231,9 @@ export default function ContactListWithLoadStep({
   readonly filter?: ContactsFilter
 }): React.ReactElement {
   return (
-    <NormalizeContactsWithLoadingScreen>
-      <ContactsListSelect
-        addContactRequestId={addContactRequestId}
-        filter={filter}
-      />
-    </NormalizeContactsWithLoadingScreen>
+    <ContactsListSelect
+      addContactRequestId={addContactRequestId}
+      filter={filter}
+    />
   )
 }

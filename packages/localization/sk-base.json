@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "Chyba pri pridávaní kontaktu do kontaktov v telefóne",
   "contacts.limitedAccessToContacts": "Obmedzený prístup ku kontaktom",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl má obmedzený prístup k tvojim kontaktom. Ak chceš pridať ďalšie, povoľ Vexlu úplný prístup alebo pridaj kontakty ručne v nastaveniach telefónu.",
-  "migrations.migrating": "Aktualizácia vexl",
   "notificationPrompt.errorAlert.title": "Nie je možné získať povolenia na oznamovanie",
   "notificationPrompt.errorAlert.description": "Upozornenia musíte povoliť v nastaveniach.",
   "notificationPrompt.successMessage": "Povolené notifikácie",

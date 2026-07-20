@@ -35,7 +35,6 @@ import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {showErrorAlert} from '../../ErrorAlert'
 import {globalDialogAtom} from '../../GlobalDialog'
-import {contactsMigratedAtom} from '../../VersionMigrations/atoms'
 
 const TARGET_TIME_MILLISECONDS = 3000
 
@@ -191,8 +190,6 @@ export const finishLoginActionAtom = atom(
   ) => {
     const {t} = get(translationAtom)
     const api = get(apiAtom)
-
-    set(contactsMigratedAtom, true)
 
     return Effect.gen(function* (_) {
       const signature = yield* _(

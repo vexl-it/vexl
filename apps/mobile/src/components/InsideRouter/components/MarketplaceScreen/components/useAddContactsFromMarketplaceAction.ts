@@ -3,16 +3,15 @@ import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback} from 'react'
 import {Linking} from 'react-native'
-import loadContactsFromDeviceActionAtom, {
-  loadingContactsFromDeviceAtom,
-} from '../../../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
+import loadAndNormalizeContactsFromDeviceActionAtom from '../../../../../state/contacts/atom/loadAndNormalizeContactsFromDeviceActionAtom'
 import {areContactsPermissionsGranted} from '../../../../../state/contacts/utils'
 import wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom from '../../../../../state/lastRouteMmkvAtom'
 
 export default function useAddContactsFromMarketplaceAction(): () => void {
   const navigation = useNavigation()
-  const loadContactsFromDevice = useSetAtom(loadContactsFromDeviceActionAtom)
-  const setLoadingContactsFromDevice = useSetAtom(loadingContactsFromDeviceAtom)
+  const loadAndNormalizeContactsFromDevice = useSetAtom(
+    loadAndNormalizeContactsFromDeviceActionAtom
+  )
   const setWasLastRouteBeforeRedirectOnContactsScreen = useSetAtom(
     wasLastRouteBeforeRedirectOnContactsScreenMmkvAtom
   )
@@ -30,20 +29,17 @@ export default function useAddContactsFromMarketplaceAction(): () => void {
         return
       }
 
-      setLoadingContactsFromDevice(true)
       void Effect.runPromise(
-        loadContactsFromDevice().pipe(
-          Effect.catchAll(() => Effect.succeed('success'))
+        loadAndNormalizeContactsFromDevice().pipe(
+          Effect.catchAll(() => Effect.succeed(false))
         )
       ).finally(() => {
-        setLoadingContactsFromDevice(false)
         navigation.navigate('ContactPreferences', {filter: 'new'})
       })
     })
   }, [
-    loadContactsFromDevice,
+    loadAndNormalizeContactsFromDevice,
     navigation,
-    setLoadingContactsFromDevice,
     setWasLastRouteBeforeRedirectOnContactsScreen,
   ])
 }

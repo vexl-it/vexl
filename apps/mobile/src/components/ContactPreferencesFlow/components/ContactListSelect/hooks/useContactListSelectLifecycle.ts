@@ -9,7 +9,7 @@ import {contactSelectMolecule} from '../atom'
 
 export default function useContactListSelectLifecycle(): StoredContactWithComputedValues[] {
   const {
-    checkContactsAccessPrivilegesActionAtom,
+    importContactsFromPhoneActionAtom,
     syncDefaultSelectedContactsActionAtom,
     normalizedContactsAtom,
   } = useMolecule(contactSelectMolecule)
@@ -17,9 +17,7 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
   const resolveAllContactsAsSeen = useSetAtom(
     resolveAllContactsAsSeenActionAtom
   )
-  const checkContactsAccessPrivileges = useSetAtom(
-    checkContactsAccessPrivilegesActionAtom
-  )
+  const importContactsFromPhone = useSetAtom(importContactsFromPhoneActionAtom)
   const syncDefaultSelectedContacts = useSetAtom(
     syncDefaultSelectedContactsActionAtom
   )
@@ -32,8 +30,8 @@ export default function useContactListSelectLifecycle(): StoredContactWithComput
 
   useOnFocusAndAppState(
     useCallback(() => {
-      Effect.runFork(checkContactsAccessPrivileges())
-    }, [checkContactsAccessPrivileges])
+      Effect.runFork(importContactsFromPhone())
+    }, [importContactsFromPhone])
   )
 
   useEffect(() => {

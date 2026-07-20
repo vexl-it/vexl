@@ -16,6 +16,7 @@ import {
 } from '../utils/navigation'
 import {ClubAdmissionInternalNotificationData} from '../utils/notifications/clubNotifications'
 import {
+  MARKETPLACE_READY,
   NEW_CONTACTS_TO_SYNC,
   NEW_OFFERS_IN_MARKETPLACE,
 } from '../utils/notifications/notificationTypes'
@@ -98,7 +99,10 @@ const reactOnNotificationOpenAtom = atom(
           console.log('[TradeReminder] Navigating to ChatDetail', keys)
           navigationRef.navigate('ChatDetail', keys)
         }
-      } else if (data?.type === NEW_OFFERS_IN_MARKETPLACE) {
+      } else if (
+        data?.type === NEW_OFFERS_IN_MARKETPLACE ||
+        data?.type === MARKETPLACE_READY
+      ) {
         navigationRef.navigate('InsideTabs', {screen: 'Marketplace'})
       } else if (data?.type === NEW_CONTACTS_TO_SYNC) {
         navigationRef.navigate('ContactPreferences', {})

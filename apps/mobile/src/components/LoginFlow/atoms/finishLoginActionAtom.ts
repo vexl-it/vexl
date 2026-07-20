@@ -28,13 +28,13 @@ import {
   versionCode,
 } from '../../../utils/environment'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
+import {beginMarketplaceReadyNotificationFlowActionAtom} from '../../../utils/marketplaceReadyNotification/store'
 import {navigationRef} from '../../../utils/navigation'
 import {getNotificationTokenE} from '../../../utils/notifications'
 import {isDeveloperAtom} from '../../../utils/preferences'
 import reportError from '../../../utils/reportError'
 import {showErrorAlert} from '../../ErrorAlert'
 import {globalDialogAtom} from '../../GlobalDialog'
-import {contactsMigratedAtom} from '../../VersionMigrations/atoms'
 
 const TARGET_TIME_MILLISECONDS = 3000
 
@@ -88,6 +88,7 @@ const handleUserCreationActionAtom = atom(
         )
       }
 
+      set(beginMarketplaceReadyNotificationFlowActionAtom)
       set(sessionAtom, O.some(session))
     }).pipe(
       Effect.tapError((e) => {
@@ -189,8 +190,6 @@ export const finishLoginActionAtom = atom(
   ) => {
     const {t} = get(translationAtom)
     const api = get(apiAtom)
-
-    set(contactsMigratedAtom, true)
 
     return Effect.gen(function* (_) {
       const signature = yield* _(

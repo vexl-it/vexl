@@ -17,6 +17,14 @@
  *      the target's 2nd-degree connections). Writes key material to
  *      seed-users.json and the phone list to seed-fake-numbers.json.
  *
+ *   1b. `--phase android-contacts` (optional, Android emulator over adb)
+ *      Seeds the connected emulator's DEVICE contacts with
+ *      N_DEVICE_CONTACTS (2500) random Czech mobile numbers plus the direct
+ *      fake users' numbers from step 1, via a generated vCard imported
+ *      through the Contacts app. WIPE_DEVICE_CONTACTS=1 clears existing
+ *      device contacts first. With this, the normal in-app contact import
+ *      covers the fake-number import of step 2.
+ *
  *   2. IN APP: log the emulator user in with TARGET_PHONE (dummy OTP 222222 on
  *      local backend) and make the app import the fake numbers (the
  *      `numbersToImportInApp` array of seed-fake-numbers.json — e.g. via the
@@ -109,6 +117,7 @@ import {ServiceUrl} from '@vexl-next/rest-api/src/ServiceUrl.brand'
 import {type UserSessionCredentials} from '@vexl-next/rest-api/src/UserSessionCredentials.brand'
 import {UserDataShape} from '@vexl-next/rest-api/src/VexlAuthHeader'
 import {Array, Effect, HashMap, Option, pipe, Schema} from 'effect'
+import {execFileSync} from 'node:child_process'
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
@@ -131,6 +140,13 @@ const SEED_DIR = process.env.SEED_DIR ?? join(tmpdir(), 'vexl-seed-perf-data')
 
 const SEED_USERS_FILE = join(SEED_DIR, 'seed-users.json')
 const SEED_NUMBERS_FILE = join(SEED_DIR, 'seed-fake-numbers.json')
+
+// --phase android-contacts params
+const N_DEVICE_CONTACTS = Number(process.env.N_DEVICE_CONTACTS ?? 2500)
+const WIPE_DEVICE_CONTACTS = process.env.WIPE_DEVICE_CONTACTS === '1'
+const DEVICE_CONTACTS_SEED = Number(process.env.DEVICE_CONTACTS_SEED ?? 424242)
+const SEED_DEVICE_NUMBERS_FILE = join(SEED_DIR, 'seed-device-numbers.json')
+const SEED_DEVICE_VCF_FILE = join(SEED_DIR, 'seed-device-contacts.vcf')
 
 const CONTACT_URL = Schema.decodeSync(ServiceUrl)(
   process.env.CONTACT_MS ?? `http://localhost:${ports.contactService}`
@@ -1075,6 +1091,370 @@ async function phaseVerify(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Phase: android-contacts (seed the emulator's device contacts over adb)
+//
+// Generates N_DEVICE_CONTACTS random Czech mobile numbers (reproducible via
+// DEVICE_CONTACTS_SEED) plus — when seed-fake-numbers.json exists from
+// `--phase register` — the direct fake users' numbers, so importing device
+// contacts in the app creates real 1st-degree connections. The numbers are
+// written to a vCard file which is pushed to the device and imported through
+// the Contacts app (the only fast, supported bulk path; per-row `content
+// insert` spawns a JVM per call and takes hours for thousands of rows).
+// The import confirmation dialogs are driven via uiautomator + input tap.
+//
+// Set WIPE_DEVICE_CONTACTS=1 to clear the device contacts DB first.
+// ---------------------------------------------------------------------------
+
+function adb(...adbArgs: string[]): string {
+  return execFileSync('adb', adbArgs, {
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
+}
+
+// mulberry32 — tiny deterministic PRNG so re-runs produce the same numbers
+function makeRng(seed: number): () => number {
+  let a = seed >>> 0
+  return () => {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+// Real Czech mobile prefixes, deliberately excluding 777 — the fake backend
+// users from `--phase register` live in +420777000xxx and must not collide.
+const CZ_MOBILE_PREFIXES = [
+  '601',
+  '602',
+  '603',
+  '604',
+  '605',
+  '606',
+  '607',
+  '608',
+  '702',
+  '703',
+  '704',
+  '705',
+  '720',
+  '721',
+  '722',
+  '723',
+  '724',
+  '725',
+  '726',
+  '727',
+  '728',
+  '729',
+  '730',
+  '731',
+  '732',
+  '733',
+  '734',
+  '735',
+  '736',
+  '737',
+  '738',
+  '739',
+  '770',
+  '771',
+  '772',
+  '773',
+  '774',
+  '775',
+  '776',
+  '778',
+  '779',
+  '790',
+  '791',
+  '792',
+  '793',
+  '797',
+  '799',
+]
+
+const CZ_FIRST_NAMES = [
+  'Jan',
+  'Petr',
+  'Martin',
+  'Josef',
+  'Pavel',
+  'Jaroslav',
+  'Tomáš',
+  'Miroslav',
+  'Eva',
+  'Anna',
+  'Marie',
+  'Lucie',
+  'Jana',
+  'Petra',
+  'Kateřina',
+  'Hana',
+  'Veronika',
+  'Lenka',
+  'Adéla',
+  'Tereza',
+  'Jakub',
+  'Ondřej',
+  'Vojtěch',
+  'Filip',
+]
+const CZ_LAST_NAMES = [
+  'Novák',
+  'Svoboda',
+  'Novotný',
+  'Dvořák',
+  'Černý',
+  'Procházka',
+  'Kučera',
+  'Veselý',
+  'Horák',
+  'Němec',
+  'Marek',
+  'Pokorný',
+  'Pospíšil',
+  'Hájek',
+  'Král',
+  'Jelínek',
+  'Růžička',
+  'Beneš',
+  'Fiala',
+  'Sedláček',
+]
+
+interface DeviceContact {
+  name: string
+  phone: string
+}
+
+function generateRandomCzechDeviceContacts(count: number): DeviceContact[] {
+  const rng = makeRng(DEVICE_CONTACTS_SEED)
+  const numbers = new Set<string>()
+  while (numbers.size < count) {
+    const prefix =
+      CZ_MOBILE_PREFIXES[Math.floor(rng() * CZ_MOBILE_PREFIXES.length)]
+    const suffix = String(Math.floor(rng() * 1000000)).padStart(6, '0')
+    numbers.add(`+420${prefix}${suffix}`)
+  }
+  return [...numbers].map((phone) => ({
+    name: `${CZ_FIRST_NAMES[Math.floor(rng() * CZ_FIRST_NAMES.length)]} ${
+      CZ_LAST_NAMES[Math.floor(rng() * CZ_LAST_NAMES.length)]
+    }`,
+    phone,
+  }))
+}
+
+function contactsToVcf(contacts: DeviceContact[]): string {
+  return contacts
+    .map(({name, phone}) =>
+      [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `FN:${name}`,
+        `N:${name.split(' ').slice(1).join(' ')};${name.split(' ')[0]};;;`,
+        `TEL;TYPE=CELL:${phone}`,
+        'END:VCARD',
+      ].join('\n')
+    )
+    .join('\n')
+}
+
+function countDevicePhoneRows(): number {
+  const out = adb(
+    'shell',
+    'content',
+    'query',
+    '--uri',
+    'content://com.android.contacts/data',
+    '--projection',
+    '_id',
+    '--where',
+    `"mimetype='vnd.android.cursor.item/phone_v2'"`
+  )
+  if (out.includes('No result found')) return 0
+  return out.split('\n').filter((line) => line.startsWith('Row: ')).length
+}
+
+/** Finds a visible UI element by exact text and taps its center. */
+function tapButtonWithText(label: string): boolean {
+  const xml = adb('exec-out', 'uiautomator', 'dump', '/dev/tty')
+  const match = new RegExp(
+    `text="${label}"[^>]*bounds="\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]"`
+  ).exec(xml)
+  if (match === null) return false
+  const x = Math.round((Number(match[1]) + Number(match[3])) / 2)
+  const y = Math.round((Number(match[2]) + Number(match[4])) / 2)
+  adb('shell', 'input', 'tap', String(x), String(y))
+  return true
+}
+
+const sleep = async (ms: number): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function phaseAndroidContacts(): Promise<void> {
+  const devices = adb('devices')
+    .split('\n')
+    .slice(1)
+    .filter((line) => line.trim().endsWith('device'))
+  if (devices.length === 0) {
+    throw new Error('No Android device/emulator connected (adb devices).')
+  }
+
+  // Direct fake users (from --phase register) go into device contacts too, so
+  // the in-app import step creates the seeded 1st-degree connections.
+  let fakeDirectContacts: DeviceContact[] = []
+  if (existsSync(SEED_NUMBERS_FILE)) {
+    const fakeNumbers = Schema.decodeUnknownSync(
+      Schema.parseJson(
+        Schema.Struct({numbersToImportInApp: Schema.Array(E164PhoneNumber)})
+      )
+    )(readFileSync(SEED_NUMBERS_FILE, 'utf8'))
+    fakeDirectContacts = fakeNumbers.numbersToImportInApp.map((phone, i) => ({
+      name: `Vexl Direct ${String(i + 1).padStart(4, '0')}`,
+      phone,
+    }))
+    console.log(
+      `Including ${fakeDirectContacts.length} direct fake-user numbers from ${SEED_NUMBERS_FILE}`
+    )
+  } else {
+    console.warn(
+      `${SEED_NUMBERS_FILE} not found — seeding only random numbers. ` +
+        'Run --phase register first if you want the fake network reachable.'
+    )
+  }
+
+  const randomContacts = generateRandomCzechDeviceContacts(N_DEVICE_CONTACTS)
+  const allContacts = [...fakeDirectContacts, ...randomContacts]
+
+  mkdirSync(SEED_DIR, {recursive: true})
+  writeFileSync(SEED_DEVICE_NUMBERS_FILE, JSON.stringify(allContacts, null, 2))
+  writeFileSync(SEED_DEVICE_VCF_FILE, contactsToVcf(allContacts))
+  console.log(
+    `Wrote ${allContacts.length} contacts (${fakeDirectContacts.length} fake-direct + ${randomContacts.length} random) to ${SEED_DEVICE_VCF_FILE}`
+  )
+
+  if (WIPE_DEVICE_CONTACTS) {
+    console.log('Wiping device contacts (pm clear contacts provider)...')
+    adb('shell', 'pm', 'clear', 'com.android.providers.contacts')
+    await sleep(2000)
+  }
+
+  const baseline = countDevicePhoneRows()
+  const target = baseline + allContacts.length
+  console.log(
+    `Device has ${baseline} phone rows, importing to reach ~${target}`
+  )
+
+  const deviceVcfName = 'vexl-seed-contacts.vcf'
+  const deviceVcfPath = `/sdcard/Download/${deviceVcfName}`
+  adb('push', SEED_DEVICE_VCF_FILE, deviceVcfPath)
+
+  // The Contacts app can only read the file through a content:// URI —
+  // file:// is blocked by scoped storage. Wait for MediaStore to index it.
+  let mediaId: string | undefined
+  for (let attempt = 0; attempt < 20 && mediaId === undefined; attempt++) {
+    const out = adb(
+      'shell',
+      'content',
+      'query',
+      '--uri',
+      'content://media/external/file',
+      '--projection',
+      '_id',
+      '--where',
+      `"_display_name='${deviceVcfName}'"`
+    )
+    const match = /_id=(\d+)/.exec(out)
+    if (match !== null) {
+      mediaId = match[1]
+    } else {
+      if (attempt === 0) {
+        // Nudge the media scanner in case indexing does not happen on its own
+        adb(
+          'shell',
+          'content',
+          'call',
+          '--uri',
+          'content://media/none',
+          '--method',
+          'scan_volume',
+          '--arg',
+          'external_primary'
+        )
+      }
+      await sleep(1500)
+    }
+  }
+  if (mediaId === undefined) {
+    throw new Error(`MediaStore never indexed ${deviceVcfPath}`)
+  }
+
+  // Wake + dismiss keyguard so the import dialogs are actually tappable
+  adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
+  adb('shell', 'wm', 'dismiss-keyguard')
+
+  console.log(`Starting vCard import (media id ${mediaId})...`)
+  adb(
+    'shell',
+    'am',
+    'start',
+    '-a',
+    'android.intent.action.VIEW',
+    '-t',
+    'text/x-vcard',
+    '-d',
+    `content://media/external/file/${mediaId}`,
+    '--grant-read-uri-permission',
+    '-n',
+    'com.google.android.contacts/com.google.android.apps.contacts.vcard.ImportVCardActivity'
+  )
+
+  // Click through the (optional) account picker and the import confirmation.
+  // Which dialogs appear depends on whether a default account is already set.
+  const dialogDeadline = Date.now() + 60_000
+  let importConfirmed = false
+  while (!importConfirmed && Date.now() < dialogDeadline) {
+    await sleep(2000)
+    if (tapButtonWithText('Device only')) {
+      console.log('Tapped "Device only" account option')
+      continue
+    }
+    if (tapButtonWithText('Import')) {
+      console.log('Tapped "Import"')
+      importConfirmed = true
+    }
+  }
+  if (!importConfirmed) {
+    throw new Error(
+      'Never saw the "Import" confirmation dialog — check the emulator screen.'
+    )
+  }
+
+  // The Contacts app imports in a background service; poll until done.
+  const importDeadline = Date.now() + 15 * 60_000
+  let lastCount = baseline
+  while (Date.now() < importDeadline) {
+    await sleep(10_000)
+    const current = countDevicePhoneRows()
+    if (current >= target) {
+      console.log(`Import done: ${current} phone rows on device.`)
+      return
+    }
+    if (current !== lastCount) {
+      console.log(`[android-contacts] ${current}/${target} phone rows...`)
+      lastCount = current
+    }
+  }
+  throw new Error(
+    `Import did not finish in time (${lastCount}/${target} phone rows).`
+  )
+}
+
+// ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 
@@ -1083,8 +1463,12 @@ async function main(): Promise<void> {
   const targetPhoneRaw = process.env.TARGET_PHONE
   if (PHASE === undefined) {
     throw new Error(
-      'Usage: tsx tooling/dev/seed-perf-data.ts --phase <register|offers|chats|messages|verify>'
+      'Usage: tsx tooling/dev/seed-perf-data.ts --phase <register|android-contacts|offers|chats|messages|verify>'
     )
+  }
+  if (PHASE === 'android-contacts') {
+    await phaseAndroidContacts()
+    return
   }
   if (PHASE === 'register') {
     if (targetPhoneRaw === undefined) {

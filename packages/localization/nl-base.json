@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "Fout bij toevoegen van contactpersoon aan uw telefoon",
   "contacts.limitedAccessToContacts": "Beperkte toegang tot contacten",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl heeft beperkte toegang tot uw contacten. Om meer toe te voegen, geeft u Vexl volledige toegang of voegt u handmatig contacten toe in de instellingen van uw telefoon.",
-  "migrations.migrating": "Bijwerken Vexl",
   "notificationPrompt.errorAlert.title": "Kan geen meldingsrechten verkrijgen",
   "notificationPrompt.errorAlert.description": "Je moet de meldingen in de instellingen inschakelen.",
   "notificationPrompt.successMessage": "Meldingen ingeschakeld",

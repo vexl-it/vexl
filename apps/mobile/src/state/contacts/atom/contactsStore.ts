@@ -34,9 +34,11 @@ export const needsFullContactsReplaceAfterContactEditAtom = focusAtom(
 export const newPhoneContactsToReviewRawNumbersAtom = atom((get) =>
   pipe(
     get(storedContactsAtom),
-    Array.filter((contact) => !contact.flags.seen),
-    Array.map((contact) => contact.info.rawNumber),
-    Array.dedupe
+    Array.reduce(new Set<string>(), (rawNumbers, contact) => {
+      if (!contact.flags.seen) rawNumbers.add(contact.info.rawNumber)
+      return rawNumbers
+    }),
+    Array.fromIterable
   )
 )
 
@@ -73,6 +75,14 @@ export const resolveAllContactsAsSeenActionAtom = atom(
   }
 )
 
+// A derived contact only changes when its StoredContact object changes. Keep
+// the wrapper stable so a one-contact store update does not make every
+// splitAtom row observe a new value and rerender.
+const normalizedContactByStoredContact = new WeakMap<
+  object,
+  StoredContactWithComputedValues
+>()
+
 export const normalizedContactsAtom = atom(
   (get): StoredContactWithComputedValues[] => {
     // Set-keyed dedupe (keeps the first occurrence, same as dedupeWith)
@@ -88,7 +98,14 @@ export const normalizedContactsAtom = atom(
             seenNormalizedNumbers.add(computedValues.normalizedNumber)
             return true
           }),
-          Option.map((computedValues) => ({...contact, computedValues}))
+          Option.map((computedValues) => {
+            const cachedContact = normalizedContactByStoredContact.get(contact)
+            if (cachedContact !== undefined) return cachedContact
+
+            const normalizedContact = {...contact, computedValues}
+            normalizedContactByStoredContact.set(contact, normalizedContact)
+            return normalizedContact
+          })
         )
       )
     )

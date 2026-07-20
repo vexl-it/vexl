@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "Imeshindikana kuongeza mtu kwenye anwani za simu yako",
   "contacts.limitedAccessToContacts": "Ufikiaji mdogo wa mawasiliano",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl ina ufikiaji mdogo wa anwani zako. Ili kuongeza nyingine, ipe Vexl ufikiaji kamili au ongeza anwani wewe mwenyewe katika mipangilio ya simu yako.",
-  "migrations.migrating": "Inasasisha vexl",
   "notificationPrompt.errorAlert.title": "Haiwezekani kupata ruhusa za arifa",
   "notificationPrompt.errorAlert.description": "Unahitaji kuwezesha arifa kwenye mipangilio.",
   "notificationPrompt.successMessage": "Arifa zimewezeshwa",

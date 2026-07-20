@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "将联系人添加到通讯录时出错",
   "contacts.limitedAccessToContacts": "通讯录访问权限受限",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl 对您的通讯录访问权限有限。若需添加更多联系人，请授予 Vexl 完整访问权限，或在手机设置中手动添加联系人。",
-  "migrations.migrating": "正在更新 vexl",
   "notificationPrompt.errorAlert.title": "无法获取通知权限",
   "notificationPrompt.errorAlert.description": "您需要在设置中启用通知。",
   "notificationPrompt.successMessage": "通知已启用",

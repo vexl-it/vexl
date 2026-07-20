@@ -15,10 +15,7 @@ import {
   normalizedContactsAtom,
   storedContactsAtom,
 } from '../../../../state/contacts/atom/contactsStore'
-import loadContactsFromDeviceActionAtom, {
-  loadingContactsFromDeviceAtom,
-} from '../../../../state/contacts/atom/loadContactsFromDeviceActionAtom'
-import normalizeStoredContactsActionAtom from '../../../../state/contacts/atom/normalizeStoredContactsActionAtom'
+import loadAndNormalizeContactsFromDeviceActionAtom from '../../../../state/contacts/atom/loadAndNormalizeContactsFromDeviceActionAtom'
 import {submitContactsActionAtom} from '../../../../state/contacts/atom/submitContactsActionAtom'
 import {
   StoredContactWithComputedValues,
@@ -29,7 +26,6 @@ import {
   hashPhoneNumberE,
 } from '../../../../state/contacts/utils'
 import getValueFromSetStateActionOfAtom from '../../../../utils/atomUtils/getValueFromSetStateActionOfAtom'
-import {deduplicateBy} from '../../../../utils/deduplicate'
 import {translationAtom} from '../../../../utils/localization/I18nProvider'
 import toE164PhoneNumberWithDefaultCountryCode from '../../../../utils/toE164PhoneNumberWithDefaultCountryCode'
 import {showErrorAlert} from '../../../ErrorAlert'
@@ -101,11 +97,11 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   ): Atom<StoredContactWithComputedValues[]> =>
     atom((get) => {
       const searchText = get(searchTextAtom)
+      // normalizedContactsAtom already guarantees uniqueness by
+      // normalizedNumber, so no additional dedupe is needed here.
       const contactsToShow = pipe(
         get(normalizedContactsAtom),
-        Array.filter(shouldDisplayContact),
-        (contacts) =>
-          deduplicateBy(contacts, (one) => one.computedValues.normalizedNumber)
+        Array.filter(shouldDisplayContact)
       )
 
       return matchSorter(contactsToShow, searchText, {
@@ -194,8 +190,8 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   const displayInfoAboutContactsAccessPrivilegesAtom = atom<boolean>(false)
 
   const checkContactsAccessPrivilegesActionAtom = atom(null, (get, set) => {
-    return Effect.tryPromise({
-      try: async () => {
+    return Effect.promise(async () => {
+      try {
         const contactsPermissions = await getPermissionsAsync()
         set(contactsPermissionResponseAtom, contactsPermissions)
         set(contactsAccessPrivilegesAtom, contactsPermissions.accessPrivileges)
@@ -203,13 +199,12 @@ export const contactSelectMolecule = molecule((_, getScope) => {
           displayInfoAboutContactsAccessPrivilegesAtom,
           contactsPermissions.accessPrivileges === 'limited'
         )
-      },
-      catch: () => {
+      } catch {
         // ignore errors here, it's used to display only info modal to user
         set(contactsPermissionResponseAtom, undefined)
         set(contactsAccessPrivilegesAtom, undefined)
         set(displayInfoAboutContactsAccessPrivilegesAtom, false)
-      },
+      }
     })
   })
 
@@ -376,34 +371,14 @@ export const contactSelectMolecule = molecule((_, getScope) => {
   )
 
   const importContactsFromPhoneActionAtom = atom(null, (get, set) => {
-    return Effect.gen(function* (_) {
-      set(loadingContactsFromDeviceAtom, true)
-
-      const contactsLoaded = yield* _(
-        set(loadContactsFromDeviceActionAtom).pipe(
-          Effect.match({
-            onFailure: () => false,
-            onSuccess: () => true,
-          })
-        )
-      )
-
-      if (contactsLoaded) {
-        yield* _(
-          set(normalizeStoredContactsActionAtom, {
-            onProgress: () => {},
-          }).pipe(Effect.catchAll(() => Effect.void))
-        )
-        reloadContacts()
-      }
-
-      return contactsLoaded
-    }).pipe(
-      Effect.ensuring(
+    return set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
+      Effect.tap((contactsLoaded) =>
         Effect.sync(() => {
-          set(loadingContactsFromDeviceAtom, false)
+          if (contactsLoaded) reloadContacts()
         })
-      )
+      ),
+      Effect.catchAll(() => Effect.succeed(false)),
+      Effect.ensuring(set(checkContactsAccessPrivilegesActionAtom))
     )
   })
 

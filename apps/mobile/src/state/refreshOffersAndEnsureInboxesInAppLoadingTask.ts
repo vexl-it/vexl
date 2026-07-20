@@ -9,6 +9,7 @@ import * as TE from 'fp-ts/TaskEither'
 import {atom} from 'jotai'
 import {apiAtom} from '../api'
 import {
+  FIVE_MINUTES_MS,
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../utils/inAppLoadingTasks'
@@ -157,6 +158,7 @@ export const refreshOffersAndEnsureInboxesTaskId = registerInAppLoadingTask({
   requirements: {
     requiresUserLoggedIn: true,
     runOn: 'resume',
+    minTimeBetweenRunsMs: FIVE_MINUTES_MS,
   },
   task: (store) =>
     Effect.gen(function* (_) {

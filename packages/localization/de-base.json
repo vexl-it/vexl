@@ -1277,7 +1277,6 @@
   "contacts.errorAddingContactToYourPhoneContacts": "Fehler beim Hinzufügen des Kontakts zu deinen Telefonkontakten",
   "contacts.limitedAccessToContacts": "Eingeschränkter Zugriff auf Kontakte",
   "contacts.vexlHasLimitedAccessToYourContacts": "Vexl hat begrenzten Zugriff auf deine Kontakte. Um weitere Kontakte hinzuzufügen, gewähre bitte vollen Zugriff auf Vexl oder füge Kontakte manuell in den Einstellungen deines Telefons hinzu.",
-  "migrations.migrating": "Vexl wird aktualisiert",
   "notificationPrompt.errorAlert.title": "Nicht möglich, Benachrichtigungsberechtigungen zu erhalten",
   "notificationPrompt.errorAlert.description": "Du musst die Benachrichtigungen in den Einstellungen aktivieren.",
   "notificationPrompt.successMessage": "Benachrichtigungen eingeschaltet",

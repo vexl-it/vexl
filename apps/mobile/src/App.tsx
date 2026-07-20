@@ -24,7 +24,6 @@ import RootNavigation from './components/RootNavigation'
 import ToastNotification from './components/ToastNotification'
 import UploadingOfferProgressModal from './components/UploadingOfferProgressModal'
 import {UserFeedbackDialog} from './components/UserFeedback/UserFeedbackDialog'
-import VersionMigrations from './components/VersionMigrations'
 import {useSetAppLanguageFromStore} from './state/useSetAppLanguageFromStore'
 import {useSetRelativeDateFormatting} from './state/useSetRelativeDateFormatting'
 import ThemeProvider from './utils/ThemeProvider'
@@ -87,19 +86,17 @@ function App(): React.ReactElement {
           }}
         >
           <LoadingOverlayProvider>
-            <VersionMigrations>
-              <OverlayInfoScreen>
-                <GestureHandlerRootView
-                  style={{
-                    flex: 1,
-                    backgroundColor: theme.backgroundPrimary.get(),
-                  }}
-                >
-                  <RootNavigation />
-                  {/* <InAppLoadingTasksIndicator /> */}
-                </GestureHandlerRootView>
-              </OverlayInfoScreen>
-            </VersionMigrations>
+            <OverlayInfoScreen>
+              <GestureHandlerRootView
+                style={{
+                  flex: 1,
+                  backgroundColor: theme.backgroundPrimary.get(),
+                }}
+              >
+                <RootNavigation />
+                {/* <InAppLoadingTasksIndicator /> */}
+              </GestureHandlerRootView>
+            </OverlayInfoScreen>
             <UploadingOfferProgressModal />
           </LoadingOverlayProvider>
           <GlobalDialog />

@@ -1,6 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import {TouchableOpacity} from 'react-native'
-import {Gesture, GestureDetector} from 'react-native-gesture-handler'
+import {Gesture, GestureDetector, Pressable} from 'react-native-gesture-handler'
 import Swipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
@@ -106,7 +105,7 @@ function SwipeActionPanel({
             panelStyle,
           ]}
         >
-          <TouchableOpacity style={{flex: 1}} onPress={onPress}>
+          <Pressable style={{flex: 1}} onPress={onPress}>
             <YStack
               flex={1}
               alignItems="center"
@@ -134,7 +133,7 @@ function SwipeActionPanel({
                 {label}
               </Typography>
             </YStack>
-          </TouchableOpacity>
+          </Pressable>
         </Animated.View>
       </Animated.View>
     </Stack>

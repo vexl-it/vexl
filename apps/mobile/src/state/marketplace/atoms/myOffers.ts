@@ -11,6 +11,10 @@ import {atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {splitAtom} from 'jotai/utils'
 import {apiAtom} from '../../../api'
+import {
+  type MyOffersSection,
+  type OffersListItemData,
+} from '../../../components/OffersList/domain'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
 import {importedContactsHashesAtom} from '../../contacts/atom/contactsStore'
 import {sessionDataOrDummyAtom} from '../../session'
@@ -46,6 +50,81 @@ export const myOffersSortedAtomsAtom = splitAtom(
   myOffersSortedAtom,
   (offer) => offer.offerInfo.offerId
 )
+
+interface MyOffersListSection {
+  readonly section: MyOffersSection
+  readonly showHeader: boolean
+  readonly offers: MyOfferInState[]
+}
+
+const sectionedMyOffersAtom = atom((get): MyOffersListSection[] => {
+  const myOffers = get(myOffersSortedAtom)
+  const pausedOffers = pipe(
+    myOffers,
+    Array.filter((offer) => !offer.offerInfo.publicPart.active)
+  )
+
+  if (!Array.isNonEmptyArray(pausedOffers)) {
+    return [{section: 'ACTIVE', showHeader: false, offers: myOffers}]
+  }
+
+  const activeOffers = pipe(
+    myOffers,
+    Array.filter((offer) => offer.offerInfo.publicPart.active)
+  )
+
+  return pipe(
+    [
+      {section: 'ACTIVE', showHeader: true, offers: activeOffers},
+      {section: 'PAUSED', showHeader: true, offers: pausedOffers},
+    ] satisfies MyOffersListSection[],
+    Array.filter((one) => Array.isNonEmptyArray(one.offers))
+  )
+})
+
+const visibleMyOffersAtom = atom((get) =>
+  pipe(
+    get(sectionedMyOffersAtom),
+    Array.flatMap((one) => one.offers)
+  )
+)
+
+const visibleMyOffersAtomsAtom = splitAtom(
+  visibleMyOffersAtom,
+  (offer) => offer.offerInfo.offerId
+)
+
+export const myOffersListDataAtom = atom((get): OffersListItemData[] => {
+  const sections = get(sectionedMyOffersAtom)
+  const offerAtoms = get(visibleMyOffersAtomsAtom)
+
+  const items: OffersListItemData[] = []
+  let offerIndex = 0
+  for (const {section, showHeader, offers} of sections) {
+    if (showHeader) {
+      items.push({
+        type: 'sectionHeader',
+        key: `sectionHeader-${section}`,
+        section,
+      })
+    }
+
+    for (const offer of offers) {
+      const offerAtom = offerAtoms[offerIndex]
+      offerIndex += 1
+      if (offerAtom !== undefined) {
+        items.push({
+          type: 'offer',
+          key: offer.offerInfo.offerId,
+          offerAtom,
+          swipeEnabled: false,
+        })
+      }
+    }
+  }
+
+  return items
+})
 
 export const myActiveOffersAtom = focusAtom(myOffersAtom, (optic) =>
   optic.filter((myOffer) => myOffer.offerInfo.publicPart.active)

@@ -10,7 +10,7 @@ import {
   marketplaceListDataAtom,
   visibleMarketplaceOffersCountAtom,
 } from '../../../../../state/marketplace/atoms/marketplaceSections'
-import {myOffersSortedAtomsAtom} from '../../../../../state/marketplace/atoms/myOffers'
+import {myOffersListDataAtom} from '../../../../../state/marketplace/atoms/myOffers'
 import {areThereOffersToSeeInMarketplaceWithoutFiltersAtom} from '../../../../../state/marketplace/atoms/offersToSeeInMarketplace'
 import {
   marketplaceFirstOfferBannerAtom,
@@ -22,7 +22,6 @@ import {useHandleRedirectToContactsScreen} from '../../../../../state/useHandleR
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
 import {useAppState} from '../../../../../utils/useAppState'
 import OffersList from '../../../../OffersList'
-import {offersListItemsFromAtoms} from '../../../../OffersList/offersListItemsFromAtoms'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import {type MarketplaceTab} from '../index'
 import AllOffersListHeader from './AllOffersListHeader'
@@ -108,11 +107,7 @@ function MarketplaceScreenContent({
   const tabs = useTabs()
   const marketplaceListData = useAtomValue(marketplaceListDataAtom)
   const visibleOffersCount = useAtomValue(visibleMarketplaceOffersCountAtom)
-  const myOffersSortedAtoms = useAtomValue(myOffersSortedAtomsAtom)
-  const myOffersItems = useMemo(
-    () => offersListItemsFromAtoms(myOffersSortedAtoms),
-    [myOffersSortedAtoms]
-  )
+  const myOffersItems = useAtomValue(myOffersListDataAtom)
   const areThereOffersWithoutFilters = useAtomValue(
     areThereOffersToSeeInMarketplaceWithoutFiltersAtom
   )

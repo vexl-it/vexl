@@ -1,12 +1,12 @@
 import {Stack, Typography} from '@vexl-next/ui'
 import React from 'react'
 import {useTranslation} from '../../utils/localization/I18nProvider'
-import {type MarketplaceSection} from './domain'
+import {type OffersListSection} from './domain'
 
 function OffersListSectionHeader({
   section,
 }: {
-  readonly section: MarketplaceSection
+  readonly section: OffersListSection
 }): React.ReactElement {
   const {t} = useTranslation()
 

@@ -1,4 +1,8 @@
 import {CurrencyCode} from '@vexl-next/domain/src/general/currency.brand'
+import {
+  localizeDecimalInput,
+  normalizeLocalizedDecimalInput,
+} from '@vexl-next/ui/src/components/normalizeLocalizedDecimalInput'
 import {Schema} from 'effect'
 import {
   calculateBtcFromFiat,
@@ -32,6 +36,63 @@ describe('TradeCalculator domain transitions', () => {
   test('normalizes editable input without storing thousands separators', () => {
     expect(normalizeInputString('100 000')).toBe('100000')
     expect(normalizeInputString('1,25')).toBe('1.25')
+  })
+
+  test.each([
+    'en-US',
+    'ar',
+    'bg',
+    'cs',
+    'de',
+    'es',
+    'fa',
+    'fi',
+    'fr',
+    'id',
+    'it',
+    'ja',
+    'nl',
+    'no',
+    'pcm',
+    'pl',
+    'pt',
+    'sk',
+    'sv',
+    'sw',
+    'tr',
+    'uk',
+    'zh',
+  ])('preserves BTC decimals for the %s locale', (locale) => {
+    expect(normalizeLocalizedDecimalInput('0.005', locale)).toBe('0.005')
+    expect(normalizeLocalizedDecimalInput('0,005', locale)).toBe('0.005')
+    expect(
+      normalizeLocalizedDecimalInput(
+        localizeDecimalInput('0.005', locale),
+        locale
+      )
+    ).toBe('0.005')
+  })
+
+  test('normalizes localized digits and unambiguous grouping separators', () => {
+    expect(normalizeLocalizedDecimalInput('۰٫۰۰۵', 'fa')).toBe('0.005')
+    expect(normalizeLocalizedDecimalInput('1,234,567', 'en-US')).toBe('1234567')
+    expect(normalizeLocalizedDecimalInput('1.234.567', 'cs')).toBe('1234567')
+    expect(normalizeLocalizedDecimalInput('1.234,56', 'cs')).toBe('1234.56')
+  })
+
+  test('does not require Intl.NumberFormat.formatToParts support', () => {
+    const formatToPartsSpy = jest
+      .spyOn(Intl.NumberFormat.prototype, 'formatToParts')
+      .mockImplementation(() => {
+        throw new Error('formatToParts is unavailable')
+      })
+
+    try {
+      expect(normalizeLocalizedDecimalInput('0.005', 'cs')).toBe('0.005')
+      expect(formatToPartsSpy).not.toHaveBeenCalled()
+    } finally {
+      formatToPartsSpy.mockRestore()
+    }
   })
 
   test('BTC input updates fiat and clearing BTC clears fiat', () => {

@@ -6,7 +6,14 @@ import {
 } from '@shopify/flash-list'
 import {Stack, tokens, useTheme} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {RefreshControl, type View, type ViewProps} from 'react-native'
 import Animated, {
   LinearTransition,
@@ -214,7 +221,13 @@ function OffersList({
     setShouldAnimateListLayout(true)
   }, [])
 
-  currentItemsRef.current = items
+  // Cells read item keys during render (z-index for the exiting row), so
+  // getItemKey derives from items directly; the ref is only for
+  // animateNextListChange, which runs after commit, so a layout effect keeps
+  // the render phase pure without it ever observing a stale value.
+  useLayoutEffect(() => {
+    currentItemsRef.current = items
+  }, [items])
 
   const handleCommitLayoutEffect = useCallback(() => {
     onCommitLayoutEffect?.()
@@ -248,10 +261,7 @@ function OffersList({
     [animateNextListChange, onOfferExitAnimationStart, onOfferExitAnimationEnd]
   )
 
-  const getItemKey = useCallback(
-    (index: number) => currentItemsRef.current[index]?.key,
-    []
-  )
+  const getItemKey = useCallback((index: number) => items[index]?.key, [items])
 
   const cellAnimationContextValue = useMemo(
     () => ({

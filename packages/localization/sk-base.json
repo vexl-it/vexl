@@ -279,7 +279,7 @@
   "loginFlow.phoneNumber.errors.areYouOnVpn": "Používaš VPN? Skús ju vypnúť. Nepomohlo to? Kontaktuj našu podporu.",
   "loginFlow.verificationCode.errors.userAlreadyExists": "Používateľ s týmto telefónnym číslom už existuje.",
   "loginFlow.verificationCode.errors.challengeCouldNotBeGenerated": "Výzvu nebolo možné vytvoriť. Skús to znova neskôr.",
-  "loginFlow.verificationCode.errors.verificationNotFound": "Neplatný kód notifikácie",
+  "loginFlow.verificationCode.errors.verificationNotFound": "Tento kód nefungoval. Skontroluj ho a skús to znova.",
   "loginFlow.verificationCode.errors.verificationExpired": "Platnosť overovacieho kódu vypršala. Požiadaj o nový.",
   "loginFlow.verificationCode.errors.UserNotFound": "Používateľ nebol nájdený. Skús kód poslať znova.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "Podpis sa nepodarilo vygenerovať. Skús to znova neskôr.",

@@ -279,7 +279,7 @@
   "loginFlow.phoneNumber.errors.areYouOnVpn": "Използваш ли VPN? Опитай да го изключиш. Не помогна? Свържи се с поддръжката ни.",
   "loginFlow.verificationCode.errors.userAlreadyExists": "Потребител с този телефонен номер вече съществува",
   "loginFlow.verificationCode.errors.challengeCouldNotBeGenerated": "Предизвикателството не можа да бъде генерирано. Опитайте отново по-късно",
-  "loginFlow.verificationCode.errors.verificationNotFound": "Невалиден код за известяване.",
+  "loginFlow.verificationCode.errors.verificationNotFound": "Този код не проработи. Провери го и опитай отново.",
   "loginFlow.verificationCode.errors.verificationExpired": "Кодът за потвърждение е изтекъл. Моля, заявете нов.",
   "loginFlow.verificationCode.errors.UserNotFound": "Потребителят не е открит. Опитай пак да изпратиш кода.",
   "loginFlow.verificationCode.errors.SignatureCouldNotBeGenerated": "Неуспешно генериране на подпис. Опитай отново по-късно",

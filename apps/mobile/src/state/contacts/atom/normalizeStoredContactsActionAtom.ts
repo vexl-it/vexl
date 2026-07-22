@@ -93,13 +93,14 @@ const normalizeStoredContactsActionAtom = atom(
     }
   ): Effect.Effect<void> =>
     Effect.gen(function* (_) {
-      const measure = startMeasure('Normalizing contacts')
       const [toNormalize, alreadyNormalized] = pipe(
         get(storedContactsAtom),
         Array.partition((contact) => !needsNormalization(contact))
       )
 
-      if (Array.isEmptyArray(toNormalize)) return
+      if (!Array.isNonEmptyArray(toNormalize)) return
+
+      const measure = startMeasure('Normalizing contacts')
 
       onProgress({total: toNormalize.length, percentDone: 0})
 

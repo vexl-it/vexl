@@ -27,21 +27,44 @@ const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
 
 const offersListLayoutTransition = LinearTransition.duration(300)
-// FlashList repositions recycled cells while scrolling. Keeping a layout
-// transition mounted continuously would animate those recycling updates, so
-// this context enables it only for the explicitly armed mark-change render.
-const OffersListLayoutAnimationContext = React.createContext(false)
+
+interface OffersListCellAnimationState {
+  // FlashList repositions recycled cells while scrolling. Keeping a layout
+  // transition mounted continuously would animate those recycling updates, so
+  // it is enabled only for the explicitly armed mark-change render.
+  readonly shouldAnimateLayout: boolean
+  readonly exitingItemKey: string | null
+  readonly getItemKey: (index: number) => string | undefined
+}
+
+const OffersListCellAnimationContext =
+  React.createContext<OffersListCellAnimationState>({
+    shouldAnimateLayout: false,
+    exitingItemKey: null,
+    getItemKey: () => undefined,
+  })
 
 const AnimatedCellContainer = React.forwardRef<
   View,
   AnimatedProps<ViewProps> & {readonly index: number}
->(function AnimatedCellContainer({index: _index, ...props}, ref) {
-  const shouldAnimateLayout = React.useContext(OffersListLayoutAnimationContext)
+>(function AnimatedCellContainer({index, style, ...props}, ref) {
+  const {shouldAnimateLayout, exitingItemKey, getItemKey} = React.useContext(
+    OffersListCellAnimationContext
+  )
+
+  // While a marked offer slides towards its new section it must pass under
+  // the neighbouring rows, so every other cell is raised above it. Sibling
+  // cells otherwise stack in recycle order, which is arbitrary.
+  const zIndexStyle =
+    exitingItemKey === null
+      ? undefined
+      : {zIndex: getItemKey(index) === exitingItemKey ? 0 : 1}
 
   return (
     <Animated.View
       ref={ref}
       layout={shouldAnimateLayout ? offersListLayoutTransition : undefined}
+      style={[style, zIndexStyle]}
       {...props}
     />
   )
@@ -106,6 +129,7 @@ function OffersList({
     null
   )
   const [shouldAnimateListLayout, setShouldAnimateListLayout] = useState(false)
+  const [exitingItemKey, setExitingItemKey] = useState<string | null>(null)
   const theme = useTheme()
   const refreshIndicatorColor = hideRefreshIndicator
     ? tokens.color.transparent.val
@@ -205,9 +229,37 @@ function OffersList({
     })
   }, [items, onCommitLayoutEffect, shouldAnimateListLayout])
 
+  const onOfferExitAnimationStart = useCallback((offerKey: string) => {
+    setExitingItemKey(offerKey)
+  }, [])
+
+  // Clears only its own key so a commit on another offer that started in the
+  // meantime keeps its lowered row.
+  const onOfferExitAnimationEnd = useCallback((offerKey: string) => {
+    setExitingItemKey((current) => (current === offerKey ? null : current))
+  }, [])
+
   const animationContextValue = useMemo(
-    () => ({animateNextListChange}),
-    [animateNextListChange]
+    () => ({
+      animateNextListChange,
+      onOfferExitAnimationStart,
+      onOfferExitAnimationEnd,
+    }),
+    [animateNextListChange, onOfferExitAnimationStart, onOfferExitAnimationEnd]
+  )
+
+  const getItemKey = useCallback(
+    (index: number) => currentItemsRef.current[index]?.key,
+    []
+  )
+
+  const cellAnimationContextValue = useMemo(
+    () => ({
+      shouldAnimateLayout: shouldAnimateListLayout,
+      exitingItemKey,
+      getItemKey,
+    }),
+    [shouldAnimateListLayout, exitingItemKey, getItemKey]
   )
 
   useEffect(() => {
@@ -227,8 +279,8 @@ function OffersList({
 
   return (
     <OffersListAnimationProvider value={animationContextValue}>
-      <OffersListLayoutAnimationContext.Provider
-        value={shouldAnimateListLayout}
+      <OffersListCellAnimationContext.Provider
+        value={cellAnimationContextValue}
       >
         <ReanimatedFlashList
           ref={animatedFlashListRef}
@@ -259,7 +311,7 @@ function OffersList({
           onCommitLayoutEffect={handleCommitLayoutEffect}
           {...props}
         />
-      </OffersListLayoutAnimationContext.Provider>
+      </OffersListCellAnimationContext.Provider>
     </OffersListAnimationProvider>
   )
 }

@@ -4,8 +4,10 @@ import Swipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable'
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
@@ -26,8 +28,19 @@ const PANEL_GAP = getTokens().space.$5.val
 // Dragging past this distance commits the action on release. Shorter swipes
 // reveal the action, which commits when tapped.
 const FULL_SWIPE_COMMIT_DISTANCE = 180
-const CARD_FADE_OUT_DURATION_MS = 200
-const CARD_FADE_IN_DURATION_MS = 300
+// Vertical gap between list rows (matches the list's ItemSeparatorComponent).
+const LIST_ROW_GAP = getTokens().space.$5.val
+// Approximate settle time of the swipeable's closing spring. The exit slide
+// waits it out so the card visibly returns to its resting position first.
+const CLOSE_SETTLE_DURATION_MS = 250
+// Favourites live above browse offers and archived below, so after closing
+// the card slides towards its destination section, tucking in behind the
+// neighbouring rows until it is gone.
+const CARD_SLIDE_OUT_DURATION_MS = 250
+// Matches the layout transition the consuming list uses to close the gap, so
+// the card fades in at its destination only after the rows finish shifting.
+const LIST_SHIFT_DURATION_MS = 300
+const CARD_FADE_IN_DURATION_MS = 200
 
 export type SwipeableOfferCardMark = OfferCardMarkBadge
 
@@ -44,6 +57,12 @@ export interface SwipeableOfferCardProps {
   readonly mark?: SwipeableOfferCardMark
   readonly labels: SwipeableOfferCardLabels
   readonly onToggleMark: (target: SwipeableOfferCardMark) => void
+  /**
+   * Fires when a commit starts, before the card slides towards its new
+   * section. Lets the list drop this row below its siblings so the card
+   * visibly passes behind the neighbouring offers.
+   */
+  readonly onExitAnimationStart?: () => void
   readonly children: React.ReactNode
 }
 
@@ -145,26 +164,33 @@ export function SwipeableOfferCard({
   mark,
   labels,
   onToggleMark,
+  onExitAnimationStart,
   children,
 }: SwipeableOfferCardProps): React.JSX.Element {
   const theme = useTheme()
   const swipeableRef = useRef<SwipeableMethods>(null)
   const committedRef = useRef(false)
+  const cardHeightRef = useRef(0)
+  const offerIdRef = useRef(offerId)
+  offerIdRef.current = offerId
   // Signed per-gesture drag distance, latched on the UI thread by the
   // observer pan. The swipeable's own translation keeps animating after
   // release, so sampling it from JS in the will-open/close callbacks is
   // timing dependent.
   const dragTranslation = useSharedValue(0)
   const cardOpacity = useSharedValue(1)
+  const cardTranslateY = useSharedValue(0)
 
   // List cells get recycled. A cell reused for different data must not inherit
-  // a mid-fade opacity from the card it previously displayed.
+  // a mid-fade opacity or exit offset from the card it previously displayed.
   useEffect(() => {
     cardOpacity.set(1)
-  }, [cardOpacity, offerId])
+    cardTranslateY.set(0)
+  }, [cardOpacity, cardTranslateY, offerId])
 
   const fadeStyle = useAnimatedStyle(() => ({
     opacity: cardOpacity.get(),
+    transform: [{translateY: cardTranslateY.get()}],
   }))
 
   const commit = useCallback(
@@ -175,19 +201,61 @@ export function SwipeableOfferCard({
       if (committedRef.current) return
       committedRef.current = true
 
-      swipeableRef.current?.close()
-      cardOpacity.set(withTiming(0, {duration: CARD_FADE_OUT_DURATION_MS}))
+      // Toggling a mark off returns the offer to the browse section in the
+      // middle, so removing a favourite moves down and unarchiving moves up.
+      const movesUp =
+        target === 'favourite' ? mark !== 'favourite' : mark === 'archived'
+      // A full row of travel tucks the card completely behind the adjacent
+      // offer before the list closes the gap.
+      const slideDistance = cardHeightRef.current + LIST_ROW_GAP
+      const exitOffset = movesUp ? -slideDistance : slideDistance
 
-      // A JS timer keeps the commit independent from the animation callback:
-      // that callback can be skipped if FlashList recycles the closing row.
-      // Waiting for the fade still leaves a clear visual marker of where the
-      // offer moved from before the list closes the gap.
+      onExitAnimationStart?.()
+      swipeableRef.current?.close()
+
+      // JS timers rather than animation callbacks keep the sequence (and the
+      // mark commit itself) running even if FlashList recycles the closing
+      // row mid-way; the offerId guard only skips the visuals in that case.
+      setTimeout(() => {
+        if (offerIdRef.current !== offerId) return
+        cardTranslateY.set(
+          withTiming(exitOffset, {
+            duration: CARD_SLIDE_OUT_DURATION_MS,
+            easing: Easing.in(Easing.quad),
+          })
+        )
+        // Stays opaque while still between the rows and only fades once it
+        // is mostly tucked behind the neighbouring card.
+        cardOpacity.set(
+          withTiming(0, {
+            duration: CARD_SLIDE_OUT_DURATION_MS,
+            easing: Easing.in(Easing.cubic),
+          })
+        )
+      }, CLOSE_SETTLE_DURATION_MS)
+
       setTimeout(() => {
         onToggleMark(target)
-        cardOpacity.set(withTiming(1, {duration: CARD_FADE_IN_DURATION_MS}))
-      }, CARD_FADE_OUT_DURATION_MS)
+        if (offerIdRef.current !== offerId) return
+        // No entrance motion: the offer simply fades in at its destination
+        // once the list has finished closing the gap.
+        cardTranslateY.set(0)
+        cardOpacity.set(
+          withDelay(
+            LIST_SHIFT_DURATION_MS,
+            withTiming(1, {duration: CARD_FADE_IN_DURATION_MS})
+          )
+        )
+      }, CLOSE_SETTLE_DURATION_MS + CARD_SLIDE_OUT_DURATION_MS)
     },
-    [cardOpacity, onToggleMark]
+    [
+      cardOpacity,
+      cardTranslateY,
+      mark,
+      offerId,
+      onExitAnimationStart,
+      onToggleMark,
+    ]
   )
 
   const resetCommitGuard = useCallback(() => {
@@ -226,7 +294,12 @@ export function SwipeableOfferCard({
     // The detector wraps the whole Swipeable because the swipeable applies
     // pointerEvents box-only to children while a row is open.
     <GestureDetector gesture={observerPan}>
-      <Animated.View style={fadeStyle}>
+      <Animated.View
+        style={fadeStyle}
+        onLayout={(event) => {
+          cardHeightRef.current = event.nativeEvent.layout.height
+        }}
+      >
         <Swipeable
           key={offerId}
           ref={swipeableRef}

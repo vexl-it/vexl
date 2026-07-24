@@ -20,12 +20,16 @@ interface Props {
   readonly filteredOffersCount: number
   readonly isOffersLoaderVisible: boolean
   readonly onFilterChange: () => void
+  readonly onFilterChangeCancel: () => void
+  readonly onFilterChangeStart: () => void
 }
 
 function AllOffersListHeader({
   filteredOffersCount,
   isOffersLoaderVisible,
   onFilterChange,
+  onFilterChangeCancel,
+  onFilterChangeStart,
 }: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
@@ -47,9 +51,16 @@ function AllOffersListHeader({
 
   const topControls = (
     <Stack gap="$4" pb="$7">
-      <FilterTagBar postSelectActions={handleFilterChange} />
+      <FilterTagBar
+        onSelectStart={onFilterChangeStart}
+        postSelectActions={handleFilterChange}
+      />
       <XStack gap="$3" paddingHorizontal="$5">
-        <SearchOffers postSearchActions={handleFilterChange} />
+        <SearchOffers
+          onSearchCancel={onFilterChangeCancel}
+          onSearchStart={onFilterChangeStart}
+          postSearchActions={handleFilterChange}
+        />
         <FilterButton />
       </XStack>
     </Stack>

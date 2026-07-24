@@ -7,7 +7,6 @@ import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
@@ -37,9 +36,6 @@ const CLOSE_SETTLE_DURATION_MS = 250
 // the card slides towards its destination section, tucking in behind the
 // neighbouring rows until it is gone.
 const CARD_SLIDE_OUT_DURATION_MS = 250
-// Matches the layout transition the consuming list uses to close the gap, so
-// the card fades in at its destination only after the rows finish shifting.
-const LIST_SHIFT_DURATION_MS = 300
 const CARD_FADE_IN_DURATION_MS = 200
 
 export type SwipeableOfferCardMark = OfferCardMarkBadge
@@ -56,7 +52,13 @@ export interface SwipeableOfferCardProps {
   readonly offerId: string
   readonly mark?: SwipeableOfferCardMark
   readonly labels: SwipeableOfferCardLabels
-  readonly onToggleMark: (target: SwipeableOfferCardMark) => void
+  /**
+   * The returned promise can keep the card hidden until its consuming list
+   * finishes moving it to the new position.
+   */
+  readonly onToggleMark: (
+    target: SwipeableOfferCardMark
+  ) => void | Promise<void>
   /**
    * Fires when a commit starts, before the card slides towards its new
    * section. Lets the list drop this row below its siblings so the card
@@ -235,17 +237,17 @@ export function SwipeableOfferCard({
       }, CLOSE_SETTLE_DURATION_MS)
 
       setTimeout(() => {
-        onToggleMark(target)
-        if (offerIdRef.current !== offerId) return
-        // No entrance motion: the offer simply fades in at its destination
-        // once the list has finished closing the gap.
-        cardTranslateY.set(0)
-        cardOpacity.set(
-          withDelay(
-            LIST_SHIFT_DURATION_MS,
-            withTiming(1, {duration: CARD_FADE_IN_DURATION_MS})
-          )
-        )
+        const restoreCard = (): void => {
+          if (offerIdRef.current !== offerId) return
+          cardTranslateY.set(0)
+          cardOpacity.set(withTiming(1, {duration: CARD_FADE_IN_DURATION_MS}))
+        }
+
+        // Start from an already-resolved promise so synchronous callback
+        // errors follow the same recovery path as rejected promises.
+        void Promise.resolve()
+          .then(() => onToggleMark(target))
+          .then(restoreCard, restoreCard)
       }, CLOSE_SETTLE_DURATION_MS + CARD_SLIDE_OUT_DURATION_MS)
     },
     [

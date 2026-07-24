@@ -1,13 +1,16 @@
 import {createContext, useContext} from 'react'
 
 interface OffersListAnimation {
-  readonly animateNextListChange: () => void
+  readonly animateNextListChange: (applyChange: () => void) => Promise<void>
   readonly onOfferExitAnimationStart: (offerKey: string) => void
   readonly onOfferExitAnimationEnd: (offerKey: string) => void
 }
 
 const OffersListAnimationContext = createContext<OffersListAnimation>({
-  animateNextListChange: () => {},
+  animateNextListChange: (applyChange) => {
+    applyChange()
+    return Promise.resolve()
+  },
   onOfferExitAnimationStart: () => {},
   onOfferExitAnimationEnd: () => {},
 })

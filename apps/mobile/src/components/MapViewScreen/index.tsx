@@ -1,15 +1,10 @@
 import {useFocusEffect, useNavigation} from '@react-navigation/native'
-import {
-  Loader,
-  NavigationBar,
-  Typography,
-  type NavigationBarAction,
-} from '@vexl-next/ui'
+import {NavigationBar, type NavigationBarAction} from '@vexl-next/ui'
 import {ChevronLeft, TuneSettings} from '@vexl-next/ui/src/icons'
 import {Stack, YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {Dimensions, StyleSheet, type LayoutChangeEvent} from 'react-native'
+import {Dimensions, type LayoutChangeEvent} from 'react-native'
 import {type EdgePadding} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens} from 'tamagui'
@@ -17,6 +12,7 @@ import {isFilterActiveAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import FilterTagBar from '../InsideRouter/components/MarketplaceScreen/components/FilterTagBar'
+import MarketplaceLoadingOverlay from '../MarketplaceLoadingOverlay'
 import {
   clearMapViewSelectionActionAtom,
   fitMapViewToAllPinsActionAtom,
@@ -39,54 +35,6 @@ const MAP_FIT_BOTTOM_GAP = getTokens().space.$4.val
 
 function getMiddleSheetVisibleHeight(screenHeight: number): number {
   return Math.round(screenHeight * MAP_BOTTOM_SHEET_MIDDLE_VISIBLE_HEIGHT_RATIO)
-}
-
-function MapLoadingOverlay({
-  visible,
-}: {
-  readonly visible: boolean
-}): React.JSX.Element | null {
-  const {t} = useTranslation()
-
-  if (!visible) return null
-
-  return (
-    <Stack
-      position="absolute"
-      top={0}
-      right={0}
-      bottom={0}
-      left={0}
-      zIndex={100}
-      alignItems="center"
-      justifyContent="center"
-      pointerEvents="auto"
-      style={styles.loadingOverlay}
-    >
-      <Stack
-        position="absolute"
-        top={0}
-        right={0}
-        bottom={0}
-        left={0}
-        backgroundColor="$backgroundPrimary"
-        opacity={0.78}
-      />
-      <YStack
-        alignItems="center"
-        gap="$3"
-        backgroundColor="$backgroundSecondary"
-        borderRadius="$5"
-        paddingHorizontal="$5"
-        paddingVertical="$4"
-      >
-        <Loader size="medium" />
-        <Typography color="$foregroundPrimary" variant="paragraphSmall">
-          {t('marketplace.loadingMap')}
-        </Typography>
-      </YStack>
-    </Stack>
-  )
 }
 
 function MapViewScreen(): React.JSX.Element {
@@ -282,15 +230,12 @@ function MapViewScreen(): React.JSX.Element {
         shouldRenderOffers={shouldRenderOffers}
       />
       <SelectedOfferCard selectedOfferId={selectedOfferId} />
-      <MapLoadingOverlay visible={isMapLoading || !shouldRenderMap} />
+      <MarketplaceLoadingOverlay
+        label={t('marketplace.loadingMap')}
+        visible={isMapLoading || !shouldRenderMap}
+      />
     </Stack>
   )
 }
-
-const styles = StyleSheet.create({
-  loadingOverlay: {
-    elevation: 100,
-  },
-})
 
 export default MapViewScreen

@@ -104,14 +104,15 @@ function OffersListItem({offerAtom, swipeEnabled}: Props): React.ReactElement {
       // The card has finished sliding out (it is invisible by now), so the
       // row can return to normal stacking before the list re-sorts.
       onOfferExitAnimationEnd(offer.offerInfo.offerId)
-      Effect.runFork(
-        toggleOfferMark({
-          offer,
-          target: target === 'favourite' ? 'FAVOURITE' : 'ARCHIVED',
-          confirmCrossTransition: false,
-          onBeforeCommit: animateNextListChange,
-        })
-      )
+      return animateNextListChange(() => {
+        Effect.runFork(
+          toggleOfferMark({
+            offer,
+            target: target === 'favourite' ? 'FAVOURITE' : 'ARCHIVED',
+            confirmCrossTransition: false,
+          })
+        )
+      })
     },
     [animateNextListChange, offer, onOfferExitAnimationEnd, toggleOfferMark]
   )

@@ -33,7 +33,16 @@ interface ItemSeparatorProps {
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
 
-const offersListLayoutTransition = LinearTransition.duration(300)
+const OFFERS_LIST_LAYOUT_TRANSITION_DURATION_MS = 300
+const OFFERS_LIST_CHANGE_COMMIT_TIMEOUT_MS = 1000
+const offersListLayoutTransition = LinearTransition.duration(
+  OFFERS_LIST_LAYOUT_TRANSITION_DURATION_MS
+)
+
+interface PendingListChange {
+  readonly applyChange: () => void
+  readonly complete: () => void
+}
 
 interface OffersListCellAnimationState {
   // FlashList repositions recycled cells while scrolling. Keeping a layout
@@ -135,6 +144,17 @@ function OffersList({
   const itemsBeforeAnimationRef = useRef<readonly OffersListItemData[] | null>(
     null
   )
+  const pendingListChangesRef = useRef<readonly PendingListChange[]>([])
+  const activeListChangeRef = useRef<PendingListChange | null>(null)
+  const hasAppliedActiveListChangeRef = useRef(false)
+  const listChangeCommitTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
+  const listChangeCompletionTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
+  const resetListAnimationFrameRef = useRef<number | null>(null)
+  const isMountedRef = useRef(true)
   const [shouldAnimateListLayout, setShouldAnimateListLayout] = useState(false)
   const [exitingItemKey, setExitingItemKey] = useState<string | null>(null)
   const theme = useTheme()
@@ -215,11 +235,41 @@ function OffersList({
     )
   }, [ListFooterComponent, itemAfterFirstOffer, offerItemsCount])
 
-  const animateNextListChange = useCallback(() => {
+  const startNextListChange = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      activeListChangeRef.current !== null ||
+      !Array.isNonEmptyReadonlyArray(pendingListChangesRef.current)
+    ) {
+      return
+    }
+
+    const [nextListChange, ...remainingListChanges] =
+      pendingListChangesRef.current
+    pendingListChangesRef.current = remainingListChanges
+    activeListChangeRef.current = nextListChange
+    hasAppliedActiveListChangeRef.current = false
     itemsBeforeAnimationRef.current = currentItemsRef.current
-    animatedFlashListRef.current?.prepareForLayoutAnimationRender()
     setShouldAnimateListLayout(true)
   }, [])
+
+  const animateNextListChange = useCallback(
+    (applyChange: () => void): Promise<void> =>
+      new Promise((resolve) => {
+        if (!isMountedRef.current) {
+          applyChange()
+          resolve()
+          return
+        }
+
+        pendingListChangesRef.current = Array.append(
+          pendingListChangesRef.current,
+          {applyChange, complete: resolve}
+        )
+        startNextListChange()
+      }),
+    [startNextListChange]
+  )
 
   // Cells read item keys during render (z-index for the exiting row), so
   // getItemKey derives from items directly; the ref is only for
@@ -229,6 +279,35 @@ function OffersList({
     currentItemsRef.current = items
   }, [items])
 
+  useLayoutEffect(() => {
+    if (!shouldAnimateListLayout || activeListChangeRef.current === null) {
+      return
+    }
+
+    const activeListChange = activeListChangeRef.current
+    animatedFlashListRef.current?.prepareForLayoutAnimationRender()
+    hasAppliedActiveListChangeRef.current = true
+    activeListChange.applyChange()
+
+    // A stale/recycled offer can disappear before its delayed commit runs. In
+    // that case the mark action intentionally performs no state write, so no
+    // FlashList commit will arrive to complete this animation cycle.
+    listChangeCommitTimeoutRef.current = setTimeout(() => {
+      if (activeListChangeRef.current !== activeListChange) return
+
+      listChangeCommitTimeoutRef.current = null
+      itemsBeforeAnimationRef.current = null
+      setShouldAnimateListLayout(false)
+      resetListAnimationFrameRef.current = requestAnimationFrame(() => {
+        resetListAnimationFrameRef.current = null
+        activeListChangeRef.current = null
+        hasAppliedActiveListChangeRef.current = false
+        activeListChange.complete()
+        startNextListChange()
+      })
+    }, OFFERS_LIST_CHANGE_COMMIT_TIMEOUT_MS)
+  }, [shouldAnimateListLayout, startNextListChange])
+
   const handleCommitLayoutEffect = useCallback(() => {
     onCommitLayoutEffect?.()
 
@@ -236,11 +315,73 @@ function OffersList({
       return
     }
 
-    requestAnimationFrame(() => {
+    const activeListChange = activeListChangeRef.current
+    if (
+      activeListChange === null ||
+      listChangeCompletionTimeoutRef.current !== null ||
+      resetListAnimationFrameRef.current !== null
+    ) {
+      return
+    }
+
+    if (listChangeCommitTimeoutRef.current !== null) {
+      clearTimeout(listChangeCommitTimeoutRef.current)
+      listChangeCommitTimeoutRef.current = null
+    }
+
+    resetListAnimationFrameRef.current = requestAnimationFrame(() => {
+      resetListAnimationFrameRef.current = null
       setShouldAnimateListLayout(false)
       itemsBeforeAnimationRef.current = null
     })
-  }, [items, onCommitLayoutEffect, shouldAnimateListLayout])
+
+    listChangeCompletionTimeoutRef.current = setTimeout(() => {
+      listChangeCompletionTimeoutRef.current = null
+      activeListChangeRef.current = null
+      hasAppliedActiveListChangeRef.current = false
+      activeListChange.complete()
+      startNextListChange()
+    }, OFFERS_LIST_LAYOUT_TRANSITION_DURATION_MS)
+  }, [
+    items,
+    onCommitLayoutEffect,
+    shouldAnimateListLayout,
+    startNextListChange,
+  ])
+
+  useEffect(() => {
+    isMountedRef.current = true
+
+    return () => {
+      isMountedRef.current = false
+
+      if (listChangeCommitTimeoutRef.current !== null) {
+        clearTimeout(listChangeCommitTimeoutRef.current)
+      }
+      if (listChangeCompletionTimeoutRef.current !== null) {
+        clearTimeout(listChangeCompletionTimeoutRef.current)
+      }
+      if (resetListAnimationFrameRef.current !== null) {
+        cancelAnimationFrame(resetListAnimationFrameRef.current)
+      }
+
+      const activeListChange = activeListChangeRef.current
+      if (activeListChange !== null && !hasAppliedActiveListChangeRef.current) {
+        activeListChange.applyChange()
+      }
+      activeListChange?.complete()
+      Array.forEach(
+        pendingListChangesRef.current,
+        ({applyChange, complete}) => {
+          applyChange()
+          complete()
+        }
+      )
+      activeListChangeRef.current = null
+      hasAppliedActiveListChangeRef.current = false
+      pendingListChangesRef.current = []
+    }
+  }, [])
 
   const onOfferExitAnimationStart = useCallback((offerKey: string) => {
     setExitingItemKey(offerKey)

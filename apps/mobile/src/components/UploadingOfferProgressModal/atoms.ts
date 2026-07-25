@@ -5,7 +5,7 @@ import {atom} from 'jotai'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
-import {percentageAcrossItems} from './progressUtils'
+import {percentageAcrossItems, type AggregateProgress} from './progressUtils'
 
 export type {ProgressIndication} from '@vexl-next/ui'
 
@@ -67,10 +67,7 @@ export const offerProgressModalActionAtoms = {
         progress,
         textData,
       }: {
-        aggregateProgress?: {
-          readonly processingIndex: number
-          readonly totalToProcess: number
-        }
+        aggregateProgress?: AggregateProgress
         progress: OfferEncryptionProgress
         textData: ProgressStepDataActionParam
       }

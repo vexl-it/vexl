@@ -11,6 +11,7 @@ import {
   offerProgressModalActionAtoms,
   type ProgressIndication,
 } from '../../../components/UploadingOfferProgressModal/atoms'
+import {progressSpan} from '../../../components/UploadingOfferProgressModal/progressUtils'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import {formatInteger} from '../../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -18,8 +19,14 @@ import reportError from '../../../utils/reportError'
 import {waitForNextAnimationFrameEffect} from '../../../utils/runAfterAnimationFrames'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {syncConnectionsActionAtom} from '../../connections/atom/connectionStateAtom'
-import {updateAndReencryptAllNotesConnectionsActionAtom} from '../../connections/atom/noteToConnectionsAtom'
-import {updateAndReencryptAllOffersConnectionsActionAtom} from '../../connections/atom/offerToConnectionsAtom'
+import {
+  noteRecordsToReencryptCountAtom,
+  updateAndReencryptAllNotesConnectionsActionAtom,
+} from '../../connections/atom/noteToConnectionsAtom'
+import {
+  offersToReencryptCountAtom,
+  updateAndReencryptAllOffersConnectionsActionAtom,
+} from '../../connections/atom/offerToConnectionsAtom'
 import {
   updatePersistentDataAboutNumberOfImportedContactsActionAtom,
   updatePersistentDataAboutReachActionAtom,
@@ -567,6 +574,24 @@ const syncNetworkAfterContactsImportActionAtom = atom(
     const areThereAnyMyOffers = get(areThereAnyMyOffersAtom)
     const areThereAnyMyNotes = get(areThereAnyMyNotesAtom)
 
+    // Offers and notes are re-encrypted one batch after another but report into
+    // the same dialog. Each batch gets its own part of the bar - sized by how
+    // many items it is expected to process - so the bar never restarts at 0
+    // when the notes batch takes over.
+    const offersToReencryptCount = get(offersToReencryptCountAtom)
+    const noteRecordsToReencryptCount = get(noteRecordsToReencryptCountAtom)
+    const totalWeight = offersToReencryptCount + noteRecordsToReencryptCount
+    const offersProgressSpan = progressSpan({
+      weight: offersToReencryptCount,
+      weightBefore: 0,
+      totalWeight,
+    })
+    const notesProgressSpan = progressSpan({
+      weight: noteRecordsToReencryptCount,
+      weightBefore: offersToReencryptCount,
+      totalWeight,
+    })
+
     return Effect.gen(function* (_) {
       if (
         (areThereAnyMyOffers || areThereAnyMyNotes) &&
@@ -593,6 +618,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
                   aggregateProgress: {
                     processingIndex: offerI,
                     totalToProcess: totalOffers,
+                    span: offersProgressSpan,
                   },
                   progress,
                   textData: {
@@ -620,6 +646,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
                   aggregateProgress: {
                     processingIndex: noteI,
                     totalToProcess: totalNotes,
+                    span: notesProgressSpan,
                   },
                   progress,
                   textData: {

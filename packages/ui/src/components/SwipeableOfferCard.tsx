@@ -175,6 +175,10 @@ export function SwipeableOfferCard({
   const cardHeightRef = useRef(0)
   const offerIdRef = useRef(offerId)
   offerIdRef.current = offerId
+  const isMountedRef = useRef(true)
+  const slideOutTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  )
   // Signed per-gesture drag distance, latched on the UI thread by the
   // observer pan. The swipeable's own translation keeps animating after
   // release, so sampling it from JS in the will-open/close callbacks is
@@ -189,6 +193,16 @@ export function SwipeableOfferCard({
     cardOpacity.set(1)
     cardTranslateY.set(0)
   }, [cardOpacity, cardTranslateY, offerId])
+
+  // The exit choreography runs on JS timers, so it can outlive the row. Drop
+  // the purely visual timer and stop touching shared values once unmounted.
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      clearTimeout(slideOutTimeoutRef.current)
+    }
+  }, [])
 
   const fadeStyle = useAnimatedStyle(() => ({
     opacity: cardOpacity.get(),
@@ -215,11 +229,12 @@ export function SwipeableOfferCard({
       onExitAnimationStart?.()
       swipeableRef.current?.close()
 
-      // JS timers rather than animation callbacks keep the sequence (and the
-      // mark commit itself) running even if FlashList recycles the closing
-      // row mid-way; the offerId guard only skips the visuals in that case.
-      setTimeout(() => {
-        if (offerIdRef.current !== offerId) return
+      // JS timers rather than animation callbacks keep the mark commit itself
+      // running even if FlashList recycles the closing row mid-way; the
+      // offerId and mounted guards only skip the visuals in that case.
+      clearTimeout(slideOutTimeoutRef.current)
+      slideOutTimeoutRef.current = setTimeout(() => {
+        if (!isMountedRef.current || offerIdRef.current !== offerId) return
         cardTranslateY.set(
           withTiming(exitOffset, {
             duration: CARD_SLIDE_OUT_DURATION_MS,
@@ -236,9 +251,11 @@ export function SwipeableOfferCard({
         )
       }, CLOSE_SETTLE_DURATION_MS)
 
+      // Deliberately not cleared on unmount: the mark has to be committed even
+      // when the row is recycled before the slide-out finishes.
       setTimeout(() => {
         const restoreCard = (): void => {
-          if (offerIdRef.current !== offerId) return
+          if (!isMountedRef.current || offerIdRef.current !== offerId) return
           cardTranslateY.set(0)
           cardOpacity.set(withTiming(1, {duration: CARD_FADE_IN_DURATION_MS}))
         }
@@ -281,9 +298,14 @@ export function SwipeableOfferCard({
   )
 
   const handleSwipeRelease = useCallback(() => {
-    if (committedRef.current) return
-
+    // Consume the latched distance on every open/close, not just when the
+    // observer pan restarts. The swipeable's own pan can open or close a row
+    // without the observer activating, and a leftover distance from an earlier
+    // gesture would then commit an action the user never performed.
     const dragDistance = dragTranslation.get()
+    dragTranslation.set(0)
+
+    if (committedRef.current) return
     if (Math.abs(dragDistance) < FULL_SWIPE_COMMIT_DISTANCE) return
 
     commit(dragDistance > 0 ? 'favourite' : 'archived')

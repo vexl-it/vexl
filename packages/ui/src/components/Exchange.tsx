@@ -224,7 +224,14 @@ export function Exchange({
         <FieldInput
           value={btcDisplayValue}
           onChangeText={(value) => {
-            onBtcValueChange?.(normalizeLocalizedDecimalInput(value, locale))
+            onBtcValueChange?.(
+              normalizeLocalizedDecimalInput(
+                value,
+                locale,
+                // SATS amounts are whole numbers, BTC amounts have up to 8 decimals
+                btcUnit === 'SATS' ? 'thousandsSeparator' : 'decimalPoint'
+              )
+            )
           }}
           placeholder="0.00"
           placeholderTextColor={theme.foregroundTertiary.get()}
@@ -275,7 +282,13 @@ export function Exchange({
           autoFocus={fiatAutoFocus}
           value={fiatDisplayValue}
           onChangeText={(value) => {
-            onFiatValueChange(normalizeLocalizedDecimalInput(value, locale))
+            onFiatValueChange(
+              normalizeLocalizedDecimalInput(
+                value,
+                locale,
+                'thousandsSeparator'
+              )
+            )
           }}
           placeholder={fiatPlaceholder}
           placeholderTextColor={theme.foregroundTertiary.get()}

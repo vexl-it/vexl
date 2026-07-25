@@ -1,3 +1,5 @@
+import {Array, pipe} from 'effect'
+
 const ARABIC_INDIC_DIGITS = '٠١٢٣٤٥٦٧٨٩'
 const EXTENDED_ARABIC_INDIC_DIGITS = '۰۱۲۳۴۵۶۷۸۹'
 const ARABIC_DECIMAL_SEPARATOR = '٫'
@@ -92,9 +94,48 @@ function hasOnlyThreeDigitGroups(value: string, separator: string): boolean {
   return false
 }
 
+/**
+ * How to read a single separator that could be either a decimal point or a
+ * thousands separator. See the tie-break rules on `getDecimalSeparatorIndex`.
+ */
+export type LoneSeparatorMode = 'decimalPoint' | 'thousandsSeparator'
+
+function isLoneThousandsSeparator(
+  value: string,
+  separatorIndex: number,
+  separator: string,
+  localizedDecimalSeparator: string
+): boolean {
+  if (separator === localizedDecimalSeparator) return false
+  if (separatorIndex <= 0) return false
+
+  const trailing = value.slice(separatorIndex + 1)
+
+  return (
+    trailing.length === 3 &&
+    pipe(Array.fromIterable(trailing), Array.every(isAsciiDigit))
+  )
+}
+
+/**
+ * A value being typed is not a formatted number, so `.` and `,` are ambiguous.
+ * Tie-break rules, in order:
+ * 1. Different separators (`1.234,56`): the last one is the decimal point.
+ * 2. Repeated identical separators forming 3-digit groups (`1.234.567`): all of
+ *    them are thousands separators, there is no decimal point.
+ * 3. Repeated identical separators that do not form 3-digit groups (`1,5,`):
+ *    the first one is the decimal point, the rest are dropped - the decimal
+ *    point must never move while typing.
+ * 4. A lone separator is the decimal point, except in `thousandsSeparator`
+ *    mode, where a separator that is not the locale decimal separator and is
+ *    followed by exactly three digits (`1,000` in en-US) groups thousands.
+ *    Values with many decimals (BTC) use `decimalPoint` mode instead, because
+ *    `0.005` in a comma-decimal locale has to stay `0.005`.
+ */
 function getDecimalSeparatorIndex(
   value: string,
-  localizedDecimalSeparator: string
+  localizedDecimalSeparator: string,
+  loneSeparatorMode: LoneSeparatorMode
 ): number {
   let firstSeparatorIndex = -1
   let lastSeparatorIndex = -1
@@ -118,24 +159,36 @@ function getDecimalSeparatorIndex(
   }
 
   if (separatorCount === 0) return -1
-  if (separatorCount === 1 || hasDifferentSeparators) {
-    return lastSeparatorIndex
+  if (hasDifferentSeparators) return lastSeparatorIndex
+
+  if (separatorCount === 1) {
+    return loneSeparatorMode === 'thousandsSeparator' &&
+      isLoneThousandsSeparator(
+        value,
+        firstSeparatorIndex,
+        firstSeparator,
+        localizedDecimalSeparator
+      )
+      ? -1
+      : firstSeparatorIndex
   }
 
   return hasOnlyThreeDigitGroups(value, firstSeparator)
     ? -1
-    : lastSeparatorIndex
+    : firstSeparatorIndex
 }
 
 export function normalizeLocalizedDecimalInput(
   value: string,
-  locale: string
+  locale: string,
+  loneSeparatorMode: LoneSeparatorMode = 'decimalPoint'
 ): string {
   const normalizedDigits = normalizeDigits(value)
   const separators = getNumberSeparators(locale)
   const decimalSeparatorIndex = getDecimalSeparatorIndex(
     normalizedDigits,
-    separators.decimal
+    separators.decimal,
+    loneSeparatorMode
   )
   let normalized = ''
 

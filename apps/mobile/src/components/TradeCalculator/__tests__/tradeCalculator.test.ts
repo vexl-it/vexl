@@ -80,6 +80,57 @@ describe('TradeCalculator domain transitions', () => {
     expect(normalizeLocalizedDecimalInput('1.234,56', 'cs')).toBe('1234.56')
   })
 
+  test('reads a lone thousands separator as grouping in the fiat input', () => {
+    expect(
+      normalizeLocalizedDecimalInput('1,000', 'en-US', 'thousandsSeparator')
+    ).toBe('1000')
+    expect(
+      normalizeLocalizedDecimalInput('1.000', 'cs', 'thousandsSeparator')
+    ).toBe('1000')
+    expect(
+      normalizeLocalizedDecimalInput('1,5', 'cs', 'thousandsSeparator')
+    ).toBe('1.5')
+    expect(
+      normalizeLocalizedDecimalInput('0,50', 'en-US', 'thousandsSeparator')
+    ).toBe('0.50')
+    expect(
+      normalizeLocalizedDecimalInput('1.234.567,89', 'cs', 'thousandsSeparator')
+    ).toBe('1234567.89')
+    expect(
+      normalizeLocalizedDecimalInput(
+        '1,234,567.89',
+        'en-US',
+        'thousandsSeparator'
+      )
+    ).toBe('1234567.89')
+    expect(
+      normalizeLocalizedDecimalInput('١٬٠٠٠٫٥', 'ar', 'thousandsSeparator')
+    ).toBe('1000.5')
+    expect(
+      normalizeLocalizedDecimalInput('١٠٠٠', 'ar', 'thousandsSeparator')
+    ).toBe('1000')
+  })
+
+  test('keeps a lone separator as the decimal point in the BTC input', () => {
+    expect(normalizeLocalizedDecimalInput('0.005', 'cs', 'decimalPoint')).toBe(
+      '0.005'
+    )
+    expect(normalizeLocalizedDecimalInput('1,000', 'cs', 'decimalPoint')).toBe(
+      '1.000'
+    )
+    expect(normalizeLocalizedDecimalInput('٠٫٠٠٥', 'ar', 'decimalPoint')).toBe(
+      '0.005'
+    )
+  })
+
+  test('keeps the first separator when the same separator is typed twice', () => {
+    expect(normalizeLocalizedDecimalInput('1,5,', 'cs')).toBe('1.5')
+    expect(
+      normalizeLocalizedDecimalInput('1,5,', 'cs', 'thousandsSeparator')
+    ).toBe('1.5')
+    expect(normalizeLocalizedDecimalInput('0.5.5', 'en-US')).toBe('0.55')
+  })
+
   test('does not require Intl.NumberFormat.formatToParts support', () => {
     const formatToPartsSpy = jest
       .spyOn(Intl.NumberFormat.prototype, 'formatToParts')

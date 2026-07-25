@@ -200,6 +200,17 @@ export const ensureConnectionsForEveryOffer = atom(null, (get, set) => {
   }))
 })
 
+// Number of records `updateAndReencryptAllOffersConnectionsActionAtom` will
+// process — the pass keeps exactly one record per own offer. Read up front by
+// flows that need to size the offers part of an aggregated progress bar.
+export const offersToReencryptCountAtom = atom((get) =>
+  pipe(
+    get(offersStateAtom).offers,
+    Array.filter((one) => !!one.ownershipInfo?.adminId),
+    Array.length
+  )
+)
+
 type ClubConnections = Record<
   ClubUuid,
   ReadonlyArray<PublicKeyPemBase64 | PublicKeyV2>

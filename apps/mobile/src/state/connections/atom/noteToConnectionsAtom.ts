@@ -118,6 +118,15 @@ const dropOrphanRepostConnectionsRecordsActionAtom = atom(null, (get, set) => {
   }))
 })
 
+// Number of records `updateAndReencryptAllNotesConnectionsActionAtom` will
+// process — one per own note plus one per tracked repost. Read up front by
+// flows that need to size the notes part of an aggregated progress bar.
+export const noteRecordsToReencryptCountAtom = atom(
+  (get) =>
+    get(myNotesAtom).length +
+    get(repostToConnectionsAtom).repostToConnections.length
+)
+
 export const updateAndReencryptAllNotesConnectionsActionAtom = atom(
   null,
   (

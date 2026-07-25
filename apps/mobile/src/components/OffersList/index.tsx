@@ -156,6 +156,12 @@ function OffersList({
   const resetListAnimationFrameRef = useRef<number | null>(null)
   const isMountedRef = useRef(true)
   const [shouldAnimateListLayout, setShouldAnimateListLayout] = useState(false)
+  // Bumped by every arming. React collapses a reset to `false` and a re-arm to
+  // `true` queued in the same batch into no update at all, so arming must never
+  // rely on shouldAnimateListLayout changing value to re-run the arming effect
+  // below - otherwise the queued change would neither be applied nor completed
+  // and the queue would stall for the lifetime of the list.
+  const [listChangeGeneration, setListChangeGeneration] = useState(0)
   const [exitingItemKey, setExitingItemKey] = useState<string | null>(null)
   const theme = useTheme()
   const refreshIndicatorColor = hideRefreshIndicator
@@ -251,6 +257,7 @@ function OffersList({
     hasAppliedActiveListChangeRef.current = false
     itemsBeforeAnimationRef.current = currentItemsRef.current
     setShouldAnimateListLayout(true)
+    setListChangeGeneration((current) => current + 1)
   }, [])
 
   const animateNextListChange = useCallback(
@@ -279,6 +286,9 @@ function OffersList({
     currentItemsRef.current = items
   }, [items])
 
+  // Arms the layout transition for the next queued change. listChangeGeneration
+  // is part of the dependencies so a change armed within the same batch as the
+  // previous one's reset still re-runs this effect.
   useLayoutEffect(() => {
     if (!shouldAnimateListLayout || activeListChangeRef.current === null) {
       return
@@ -306,7 +316,7 @@ function OffersList({
         startNextListChange()
       })
     }, OFFERS_LIST_CHANGE_COMMIT_TIMEOUT_MS)
-  }, [shouldAnimateListLayout, startNextListChange])
+  }, [listChangeGeneration, shouldAnimateListLayout, startNextListChange])
 
   const handleCommitLayoutEffect = useCallback(() => {
     onCommitLayoutEffect?.()
@@ -337,6 +347,19 @@ function OffersList({
 
     listChangeCompletionTimeoutRef.current = setTimeout(() => {
       listChangeCompletionTimeoutRef.current = null
+
+      // Timers can outrun the frame loop - it stops while the app is
+      // backgrounded and overdue timers flush before it resumes - so the reset
+      // frame above may still be queued here. Running its work now keeps the
+      // animation disarmed before the next change arms itself and prevents the
+      // stale frame from disarming that next change mid-flight.
+      if (resetListAnimationFrameRef.current !== null) {
+        cancelAnimationFrame(resetListAnimationFrameRef.current)
+        resetListAnimationFrameRef.current = null
+        setShouldAnimateListLayout(false)
+        itemsBeforeAnimationRef.current = null
+      }
+
       activeListChangeRef.current = null
       hasAppliedActiveListChangeRef.current = false
       activeListChange.complete()

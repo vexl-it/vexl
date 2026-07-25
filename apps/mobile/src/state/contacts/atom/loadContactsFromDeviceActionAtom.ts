@@ -16,11 +16,13 @@ const loadContactsFromDeviceActionAtom = atom(null, (get, set) => {
     const contactsFromDevice = yield* _(
       getContactsAndTryToResolveThePermissionsAlongTheWay()
     )
-    const storedContacts = get(storedContactsAtom)
-
     yield* _(
       set(setDeviceContactsSnapshotFromContactsActionAtom, contactsFromDevice)
     )
+
+    // Read the store only after the last await - anything written to it while we
+    // were suspended must not be overwritten by a stale snapshot.
+    const storedContacts = get(storedContactsAtom)
 
     const contactsFromDeviceByRawNumber = new Map<string, ContactInfo>(
       Array.map(contactsFromDevice, (c) => [c.rawNumber, c])

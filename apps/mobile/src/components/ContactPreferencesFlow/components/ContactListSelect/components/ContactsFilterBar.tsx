@@ -2,7 +2,7 @@ import {Stack, Tabs, type TabItem} from '@vexl-next/ui'
 import React from 'react'
 import {type ContactsFilter} from '../../../../../state/contacts/domain'
 
-export default function ContactsFilterBar({
+function ContactsFilterBar({
   items,
   selectedFilter,
   onSelectedFilterChange,
@@ -22,3 +22,5 @@ export default function ContactsFilterBar({
     </Stack>
   )
 }
+
+export default React.memo(ContactsFilterBar)

@@ -40,14 +40,18 @@ function ContactsListSelect({
     areThereAnyContactsToDisplayForSelectedTabAtom,
     areAllContactsToDisplaySelectedAtom,
     contactsToDisplayCountAtom,
+    isBulkSelectionPreparingAtom,
     isContactsPreparingAtom,
+    isContactsSearchPreparingAtom,
     newContactsToDisplayCountAtom,
     shouldShowContactImportProgressDialogAtom,
     toggleAllContactsToDisplayActionAtom,
   } = useMolecule(contactSelectMolecule)
   const theme = useTheme()
   const normalizedContacts = useContactListSelectLifecycle()
+  const isBulkSelectionPreparing = useAtomValue(isBulkSelectionPreparingAtom)
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
+  const isContactsSearchPreparing = useAtomValue(isContactsSearchPreparingAtom)
   const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
   const contactsToDisplayCount = useAtomValue(contactsToDisplayCountAtom)
   const shouldShowContactImportProgressDialog = useAtomValue(
@@ -62,6 +66,18 @@ function ContactsListSelect({
   const toggleAllContactsToDisplay = useSetAtom(
     toggleAllContactsToDisplayActionAtom
   )
+  const cancelBulkSelectionRef = React.useRef<(() => void) | undefined>(
+    undefined
+  )
+  React.useEffect(() => {
+    return () => {
+      cancelBulkSelectionRef.current?.()
+    }
+  }, [])
+  const handleToggleAllContactsToDisplay = React.useCallback(() => {
+    cancelBulkSelectionRef.current?.()
+    cancelBulkSelectionRef.current = toggleAllContactsToDisplay()
+  }, [toggleAllContactsToDisplay])
   const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
   const {isSubmittingContacts, submitSelectedContacts} =
     useSubmitSelectedContacts()
@@ -117,7 +133,9 @@ function ContactsListSelect({
   }
 
   const isActivateAllButtonDisabled =
-    !areThereAnyContactsToDisplayForSelectedTab || isContactsPreparing
+    !areThereAnyContactsToDisplayForSelectedTab ||
+    isContactsPreparing ||
+    isBulkSelectionPreparing
   const shouldShowNewContactsBanner =
     selectedFilter === 'all' &&
     newContactsToDisplayCount > 0 &&
@@ -148,20 +166,22 @@ function ContactsListSelect({
             <Typography variant="description" color="$foregroundSecondary">
               {t('account.contactsCount', {count: contactsToDisplayCount})}
             </Typography>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={bulkToggleLabel}
-              disabled={isActivateAllButtonDisabled}
-              onPress={toggleAllContactsToDisplay}
-            >
-              <Typography
-                variant="descriptionBold"
-                color={theme.accentHighlightPrimary.get()}
-                opacity={isActivateAllButtonDisabled ? 0.45 : 1}
+            {areThereAnyContactsToDisplayForSelectedTab ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={bulkToggleLabel}
+                disabled={isActivateAllButtonDisabled}
+                onPress={handleToggleAllContactsToDisplay}
               >
-                {bulkToggleLabel}
-              </Typography>
-            </Pressable>
+                <Typography
+                  variant="descriptionBold"
+                  color={theme.accentHighlightPrimary.get()}
+                  opacity={isActivateAllButtonDisabled ? 0.45 : 1}
+                >
+                  {bulkToggleLabel}
+                </Typography>
+              </Pressable>
+            ) : null}
           </XStack>
           {shouldShowNewContactsBanner ? (
             <Banner
@@ -197,7 +217,10 @@ function ContactsListSelect({
           <FilteredContacts
             keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
           />
-          <PreparingContactsOverlay visible={isContactsPreparing} zIndex={10} />
+          <PreparingContactsOverlay
+            visible={isContactsSearchPreparing || isBulkSelectionPreparing}
+            zIndex={10}
+          />
         </Stack>
       </Stack>
       {shouldShowSubmitBar ? (
@@ -206,7 +229,7 @@ function ContactsListSelect({
         >
           <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
             <Button
-              disabled={isSubmittingContacts}
+              disabled={isSubmittingContacts || isBulkSelectionPreparing}
               onPress={submitSelectedContacts}
             >
               {t('common.submit')}

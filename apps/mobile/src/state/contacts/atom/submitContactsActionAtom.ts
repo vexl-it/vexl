@@ -387,39 +387,29 @@ const updateStoredContactsAfterImportActionAtom = atom(
   ) => {
     const {t} = get(translationAtom)
 
-    return Effect.gen(function* (_) {
-      const storedContacts = get(storedContactsAtom)
-      const updatedStoredContacts: typeof storedContacts = []
-
+    return Effect.sync(() => {
       set(showContactImportLoaderStepActionAtom, {
         enabled: showContactImportProgressDialog,
         title: t('contacts.importProgress.titleUpdatingNetwork'),
       })
 
-      for (const storedContactsChunk of pipe(
-        storedContacts,
-        Array.chunksOf(CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE)
-      )) {
-        const updatedChunk = pipe(
-          storedContactsChunk,
-          Array.map((contact) =>
-            updateStoredContactImportState({
-              contact,
-              doIncrementalUpdate,
-              hashedNumbersToServerClientHash,
-              importedNumbers,
-            })
-          )
-        )
-        updatedStoredContacts.push(...updatedChunk)
-        yield* _(
-          set(waitForContactImportProgressFrameActionAtom, {
-            enabled: showContactImportProgressDialog,
+      // The import spans server calls and animation frames, so the store can
+      // be written to while it runs (vcard import, manually added contact,
+      // contact resolved as seen, ...). Apply the import state as a single
+      // synchronous functional update over the current value instead of
+      // overwriting the store with a chunk-processed stale snapshot -
+      // updateStoredContactImportState is a cheap per-contact mapping, so
+      // chunking is not needed to keep the UI responsive.
+      set(storedContactsAtom, (prev) =>
+        Array.map(prev, (contact) =>
+          updateStoredContactImportState({
+            contact,
+            doIncrementalUpdate,
+            hashedNumbersToServerClientHash,
+            importedNumbers,
           })
         )
-      }
-
-      set(storedContactsAtom, updatedStoredContacts)
+      )
     })
   }
 )

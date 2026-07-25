@@ -187,14 +187,13 @@ export const internalUrls = {
 // ---------------------------------------------------------------------------
 // Dummy login (spec §3.1 / Decision §10.5). With LOGIN_CODE_DUMMY_FOR_ALL set,
 // any phone number gets this static code and NO SMS provider is ever called.
-// VERIFICATION_PROVIDER + PRELUDE_API_TOKEN are required-at-boot strings in
-// user-service but are unused on the dummy path, hence the placeholder token.
+// PRELUDE_API_TOKEN is a required-at-boot string in user-service but is
+// unused on the dummy path, hence the placeholder token.
 // Set a real PRELUDE_API_TOKEN in .env.local (and unset LOGIN_CODE_DUMMY_FOR_ALL)
 // to enable real SMS OTP.
 // ---------------------------------------------------------------------------
 export const dummyLogin = {
   LOGIN_CODE_DUMMY_FOR_ALL: "222222",
-  VERIFICATION_PROVIDER: "prelude",
   PRELUDE_API_TOKEN: "dummy-dev-token",
 };
 

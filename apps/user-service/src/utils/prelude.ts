@@ -4,6 +4,7 @@ import {type CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   UnableToSendVerificationSmsError,
   UnableToVerifySmsCodeError,
+  type VerificationChannel,
   type VerificationNotFoundError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Context, Effect, Layer, Option, pipe, Schema} from 'effect/index'
@@ -13,7 +14,8 @@ import {SmsVerificationSid} from './SmsVerificationSid.brand'
 export interface PreludeOperations {
   createVerification: (
     phoneNumber: E164PhoneNumber,
-    requestHeaders: CommonHeaders
+    requestHeaders: CommonHeaders,
+    channel: VerificationChannel
   ) => Effect.Effect<SmsVerificationSid, UnableToSendVerificationSmsError>
   checkVerification: (args: {
     sid: SmsVerificationSid
@@ -45,7 +47,8 @@ export class PreludeService extends Context.Tag('PreludeService')<
 
       const createVerification: PreludeOperations['createVerification'] = (
         phoneNumber: E164PhoneNumber,
-        headers
+        headers,
+        channel
       ) =>
         pipe(
           Effect.succeed(headers),
@@ -62,6 +65,9 @@ export class PreludeService extends Context.Tag('PreludeService')<
               try: async () =>
                 await preludeClient.verification.create({
                   target: {type: 'phone_number', value: phoneNumber},
+                  // Prelude falls back to the next best channel on its own
+                  // (e.g. whatsapp -> sms when the number has no WhatsApp).
+                  options: {preferred_channel: channel},
                   signals: {
                     device_model: Option.getOrUndefined(
                       headers.deviceModelOrNone
@@ -119,7 +125,7 @@ export class PreludeService extends Context.Tag('PreludeService')<
             Effect.succeed(Schema.decodeSync(SmsVerificationSid)(phoneNumber))
           ),
           Effect.withSpan('createPreludeVerification', {
-            attributes: {phoneNumber, headers},
+            attributes: {phoneNumber, headers, channel},
           })
         )
 

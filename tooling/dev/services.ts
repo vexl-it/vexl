@@ -130,6 +130,7 @@ export const SERVICES: readonly RunnableApp[] = [
     run: tsxService('src/index.ts'),
     secretKeys: [
       'PRELUDE_API_TOKEN',
+      'WHATSAPP_PREFERRED_PREFIXES',
       'TURNSTILE_SECRET_KEY',
       'TURNSTILE_EXPECTED_HOSTNAME',
     ],

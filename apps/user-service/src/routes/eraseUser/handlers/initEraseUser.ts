@@ -30,7 +30,9 @@ export const initEraseUserEndpoint = HttpApiBuilder.handler(
       let sid
       if (Option.isSome(dummyCodeForAll)) sid = dummySid
       else
-        sid = yield* _(createVerification(req.payload.phoneNumber, req.headers))
+        sid = yield* _(
+          createVerification(req.payload.phoneNumber, req.headers, 'sms')
+        )
 
       const verificationId = yield* _(
         createVerificationId({

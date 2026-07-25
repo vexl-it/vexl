@@ -1,11 +1,12 @@
 import {useFocusEffect} from '@react-navigation/native'
 import {KeyHolder} from '@vexl-next/cryptography'
+import {type RequestedVerificationChannel} from '@vexl-next/rest-api/src/services/user/contracts'
 import {Typography, XStack, YStack} from '@vexl-next/ui'
 import {parsePhoneNumber} from 'awesome-phonenumber'
 import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {DateTime} from 'luxon'
-import React, {useCallback, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Keyboard, Platform, TextInput, TouchableOpacity} from 'react-native'
 import {getTokens} from 'tamagui'
 import {type LoginFlowStackScreenProps} from '../../../navigationTypes'
@@ -22,6 +23,7 @@ import LoginFlowScreen, {LoginFlowTitle} from './LoginFlowScreen'
 
 type Props = LoginFlowStackScreenProps<'VerificationCode'>
 const codeBoxHeight = 48
+const SHOW_CHANNEL_SWITCH_AFTER_MILLIS = 20_000
 
 function CodeBox({
   value,
@@ -63,6 +65,7 @@ export default function VerificationCodeScreen({
   const [submitInProgress, setSubmitInProgress] = useState(false)
   const [resendInProgress, setResendInProgress] = useState(false)
   const [countdownFinished, setCountdownFinished] = useState(false)
+  const [channelSwitchVisible, setChannelSwitchVisible] = useState(false)
   const initPhoneVerification = useSetAtom(initPhoneVerificationAtom)
   const verifyPhoneNumber = useSetAtom(verifyPhoneNumberAtom)
   const finishLogin = useSetAtom(finishLoginActionAtom)
@@ -100,30 +103,47 @@ export default function VerificationCodeScreen({
       .catch(() => undefined)
   }, [nationalPhoneNumber, safeGoBack, showGlobalDialog, t])
 
-  const resendVerificationCode = useCallback((): void => {
-    if (resendInProgressRef.current || submitInProgressRef.current) return
+  const sentVia = currentInitPhoneVerificationResponse.sentVia ?? 'sms'
+  const otherChannel = sentVia === 'whatsapp' ? 'sms' : 'whatsapp'
 
-    resendInProgressRef.current = true
-    setErrorMessage(undefined)
-    setResendInProgress(true)
-    loadingOverlay.show()
-    void Effect.runPromise(initPhoneVerification(phoneNumber))
-      .then((result) => {
-        setCurrentInitPhoneVerificationResponse(result)
-        setCountdownFinished(false)
-        setUserCode('')
-      })
-      .catch((error: unknown) => {
-        setErrorMessage(
-          typeof error === 'string' ? error : t('common.somethingWentWrong')
-        )
-      })
-      .finally(() => {
-        resendInProgressRef.current = false
-        setResendInProgress(false)
-        loadingOverlay.hide()
-      })
-  }, [initPhoneVerification, loadingOverlay, phoneNumber, t])
+  useEffect(() => {
+    setChannelSwitchVisible(false)
+    const timeout = setTimeout(() => {
+      setChannelSwitchVisible(true)
+    }, SHOW_CHANNEL_SWITCH_AFTER_MILLIS)
+
+    return () => {
+      clearTimeout(timeout)
+    }
+  }, [currentInitPhoneVerificationResponse.verificationId])
+
+  const resendVerificationCode = useCallback(
+    (channel: RequestedVerificationChannel): void => {
+      if (resendInProgressRef.current || submitInProgressRef.current) return
+
+      resendInProgressRef.current = true
+      setErrorMessage(undefined)
+      setResendInProgress(true)
+      loadingOverlay.show()
+      void Effect.runPromise(initPhoneVerification({phoneNumber, channel}))
+        .then((result) => {
+          setCurrentInitPhoneVerificationResponse(result)
+          setCountdownFinished(false)
+          setUserCode('')
+        })
+        .catch((error: unknown) => {
+          setErrorMessage(
+            typeof error === 'string' ? error : t('common.somethingWentWrong')
+          )
+        })
+        .finally(() => {
+          resendInProgressRef.current = false
+          setResendInProgress(false)
+          loadingOverlay.hide()
+        })
+    },
+    [initPhoneVerification, loadingOverlay, phoneNumber, t]
+  )
 
   const submitVerificationCode = useCallback(
     (code: string): void => {
@@ -219,40 +239,63 @@ export default function VerificationCodeScreen({
         },
       }}
       footer={
-        countdownFinished ? (
-          <TouchableOpacity
-            disabled={resendInProgress}
-            onPress={resendVerificationCode}
-          >
+        <YStack gap="$4">
+          {channelSwitchVisible ? (
+            <TouchableOpacity
+              disabled={resendInProgress}
+              onPress={() => {
+                resendVerificationCode(otherChannel)
+              }}
+            >
+              <Typography
+                color="$foregroundSecondary"
+                textAlign="center"
+                textDecorationLine="underline"
+                variant="paragraphSmall"
+              >
+                {otherChannel === 'whatsapp'
+                  ? t('loginFlow.v2.verificationCode.sendViaWhatsapp')
+                  : t('loginFlow.v2.verificationCode.sendViaSms')}
+              </Typography>
+            </TouchableOpacity>
+          ) : null}
+          {countdownFinished ? (
+            <TouchableOpacity
+              disabled={resendInProgress}
+              onPress={() => {
+                resendVerificationCode(sentVia)
+              }}
+            >
+              <Typography
+                color="$foregroundSecondary"
+                textAlign="center"
+                textDecorationLine="underline"
+                variant="paragraphSmall"
+              >
+                {t('loginFlow.v2.verificationCode.retry')}
+              </Typography>
+            </TouchableOpacity>
+          ) : (
             <Typography
               color="$foregroundSecondary"
               textAlign="center"
-              textDecorationLine="underline"
               variant="paragraphSmall"
             >
-              {t('loginFlow.v2.verificationCode.retry')}
+              {t('loginFlow.v2.verificationCode.retryCountdown')}{' '}
+              <Countdown
+                color="$foregroundSecondary"
+                countUntil={DateTime.fromISO(
+                  currentInitPhoneVerificationResponse.expirationAt
+                )}
+                key={currentInitPhoneVerificationResponse.verificationId}
+                onFinished={() => {
+                  setCountdownFinished(true)
+                }}
+              />
+              {t('common.secondsShort')}
             </Typography>
-          </TouchableOpacity>
-        ) : (
-          <Typography
-            color="$foregroundSecondary"
-            textAlign="center"
-            variant="paragraphSmall"
-          >
-            {t('loginFlow.v2.verificationCode.retryCountdown')}{' '}
-            <Countdown
-              color="$foregroundSecondary"
-              countUntil={DateTime.fromISO(
-                currentInitPhoneVerificationResponse.expirationAt
-              )}
-              key={currentInitPhoneVerificationResponse.verificationId}
-              onFinished={() => {
-                setCountdownFinished(true)
-              }}
-            />
-            {t('common.secondsShort')}
-          </Typography>
-        )
+          )}
+        </YStack>
       }
       scroll
     >
@@ -262,7 +305,9 @@ export default function VerificationCodeScreen({
             {t('loginFlow.v2.verificationCode.title')}
           </LoginFlowTitle>
           <Typography color="$foregroundSecondary" variant="paragraphSmall">
-            {t('loginFlow.v2.verificationCode.text')}{' '}
+            {sentVia === 'whatsapp'
+              ? t('loginFlow.v2.verificationCode.textWhatsapp')
+              : t('loginFlow.v2.verificationCode.text')}{' '}
             <Typography
               color="$foregroundSecondary"
               onPress={showPhoneNumberConfirmationDialog}
@@ -274,6 +319,15 @@ export default function VerificationCodeScreen({
             </Typography>
             .
           </Typography>
+          {sentVia === 'whatsapp' ? (
+            <Typography
+              color="$foregroundSecondary"
+              textAlign="center"
+              variant="paragraphSmall"
+            >
+              {t('loginFlow.v2.verificationCode.whatsappFallbackHint')}
+            </Typography>
+          ) : null}
         </YStack>
         <TouchableOpacity
           activeOpacity={1}

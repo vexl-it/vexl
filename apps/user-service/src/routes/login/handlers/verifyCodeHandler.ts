@@ -47,6 +47,10 @@ export const verifyCodeHandler = HttpApiBuilder.handler(
         expiresAt: loginData.expiresAt,
         countryPrefix: loginData.countryPrefix,
         challenge: yield* _(generateVerificationChallenge()),
+        channel:
+          loginData.type === 'twilioSmsVerification'
+            ? loginData.channel
+            : undefined,
       } satisfies ChallengeVerificationState
 
       yield* _(loginDb.storeChallengeVerificationState(verificationState))

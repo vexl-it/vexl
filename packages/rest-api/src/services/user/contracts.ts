@@ -165,11 +165,28 @@ export class InvalidVerificationError extends Schema.TaggedError<InvalidVerifica
   status: Schema.Literal(400),
 }) {}
 
+export const VerificationChannel = Schema.Literal('sms', 'whatsapp')
+export type VerificationChannel = typeof VerificationChannel.Type
+
+/**
+ * Channel the client asks for. `auto` lets the server pick based on the
+ * country prefix. Absent on requests from older clients that only support
+ * sms copy in the UI - those must always get sms.
+ */
+export const RequestedVerificationChannel = Schema.Literal(
+  'auto',
+  'sms',
+  'whatsapp'
+)
+export type RequestedVerificationChannel =
+  typeof RequestedVerificationChannel.Type
+
 export class InitPhoneVerificationRequest extends Schema.Class<InitPhoneVerificationRequest>(
   'InitPhoneVerificationRequest'
 )({
   phoneNumber: E164PhoneNumber,
   challenge: CompletedLoginChallenge,
+  channel: Schema.optional(RequestedVerificationChannel),
 }) {}
 
 export class NumberDoesNotMatchOldHashError extends Schema.TaggedError<NumberDoesNotMatchOldHashError>(
@@ -192,6 +209,7 @@ export class InitPhoneVerificationResponse extends Schema.Class<InitPhoneVerific
 )({
   verificationId: PhoneNumberVerificationId,
   expirationAt: IsoDatetimeString,
+  sentVia: Schema.optional(VerificationChannel),
 }) {}
 
 export class VerifyPhoneNumberRequest extends Schema.Class<VerifyPhoneNumberRequest>(

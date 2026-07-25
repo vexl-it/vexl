@@ -54,7 +54,8 @@ describe('Initialize erase user', () => {
         })
         expect(createVerificationMock).toHaveBeenCalledWith(
           '+420733333333',
-          expect.anything()
+          expect.anything(),
+          'sms'
         )
         expect(data.verificationId).toBeDefined()
         const crypto = yield* _(ServerCrypto)

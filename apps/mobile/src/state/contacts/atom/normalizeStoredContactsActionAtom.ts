@@ -93,9 +93,9 @@ const normalizeStoredContactsActionAtom = atom(
     }
   ): Effect.Effect<void> =>
     Effect.gen(function* (_) {
-      const [toNormalize, alreadyNormalized] = pipe(
+      const toNormalize = pipe(
         get(storedContactsAtom),
-        Array.partition((contact) => !needsNormalization(contact))
+        Array.filter(needsNormalization)
       )
 
       if (!Array.isNonEmptyArray(toNormalize)) return
@@ -119,7 +119,21 @@ const normalizeStoredContactsActionAtom = atom(
       )
 
       onProgress({total: toNormalize.length, percentDone: 1})
-      set(storedContactsAtom, [...alreadyNormalized, ...normalizedContacts])
+
+      // Normalizing spans many animation frames, so the store can be written to
+      // while we work (vcard import, manually added contact, ...). Merge into
+      // the current value instead of overwriting it with our stale snapshot -
+      // contacts added meanwhile stay, removed ones stay removed. Unchanged
+      // contacts keep their object identity for the identity caches downstream.
+      const normalizedByOriginal = new Map(
+        Array.zip(toNormalize, normalizedContacts)
+      )
+      set(storedContactsAtom, (prev) =>
+        Array.map(
+          prev,
+          (contact) => normalizedByOriginal.get(contact) ?? contact
+        )
+      )
       measure()
     })
 )

@@ -24,6 +24,7 @@ import {
   type ContactsFilter,
 } from '../../../../state/contacts/domain'
 import {
+  areContactsPermissionsAlreadyGranted,
   areContactsPermissionsGranted,
   hashPhoneNumberE,
 } from '../../../../state/contacts/utils'
@@ -425,17 +426,40 @@ export const contactSelectMolecule = molecule((_, getScope) => {
     }
   )
 
-  const importContactsFromPhoneActionAtom = atom(null, (get, set) => {
-    return set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
-      Effect.tap((contactsLoaded) =>
-        Effect.sync(() => {
-          if (contactsLoaded) reloadContacts()
-        })
-      ),
-      Effect.catchAll(() => Effect.succeed(false)),
-      Effect.ensuring(set(checkContactsAccessPrivilegesActionAtom))
-    )
-  })
+  const importContactsFromPhoneActionAtom = atom(
+    null,
+    (
+      get,
+      set,
+      params: {
+        /**
+         * Whether the OS contacts permission prompt may be shown. Only
+         * user-initiated imports may ask - automatic runs (screen focus, app
+         * resume) must stay silent, otherwise a user who denied once gets the
+         * prompt again on every focus/resume.
+         */
+        readonly requestPermissions: boolean
+      }
+    ): Effect.Effect<boolean> =>
+      Effect.gen(function* (_) {
+        if (!params.requestPermissions) {
+          const permissionsAlreadyGranted = yield* _(
+            areContactsPermissionsAlreadyGranted()
+          )
+          if (!permissionsAlreadyGranted) return false
+        }
+
+        return yield* _(set(loadAndNormalizeContactsFromDeviceActionAtom))
+      }).pipe(
+        Effect.tap((contactsLoaded) =>
+          Effect.sync(() => {
+            if (contactsLoaded) reloadContacts()
+          })
+        ),
+        Effect.catchAll(() => Effect.succeed(false)),
+        Effect.ensuring(set(checkContactsAccessPrivilegesActionAtom))
+      )
+  )
 
   const addNewContactActionAtom = atom(
     null,

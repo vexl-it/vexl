@@ -35,6 +35,7 @@ import {
 import {useAppState} from '../../../../../utils/useAppState'
 import MarketplaceLoadingOverlay from '../../../../MarketplaceLoadingOverlay'
 import OffersList from '../../../../OffersList'
+import RetainedScene from '../../../../RetainedScene'
 import {InsideScreenListHeader, useInsideScreenScroll} from '../../InsideScreen'
 import {type MarketplaceTab} from '../index'
 import AllOffersListHeader from './AllOffersListHeader'
@@ -358,31 +359,6 @@ function AllOffersActiveEffects({
   return null
 }
 
-function RetainedMarketplaceScene({
-  children,
-  isActive,
-}: {
-  readonly children: React.ReactNode
-  readonly isActive: boolean
-}): React.ReactElement {
-  return (
-    <Stack
-      position="absolute"
-      top={0}
-      right={0}
-      bottom={0}
-      left={0}
-      opacity={isActive ? undefined : 0}
-      pointerEvents={isActive ? undefined : 'none'}
-      zIndex={isActive ? undefined : -1}
-      aria-hidden={!isActive}
-      importantForAccessibility={isActive ? 'auto' : 'no-hide-descendants'}
-    >
-      {children}
-    </Stack>
-  )
-}
-
 function MarketplaceScreenContent({
   activeTab,
   onActiveTabChange,
@@ -425,7 +401,7 @@ function MarketplaceScreenContent({
   return (
     <Stack f={1} position="relative">
       {activeTab === 'allOffers' || shouldMountInactiveScene ? (
-        <RetainedMarketplaceScene isActive={activeTab === 'allOffers'}>
+        <RetainedScene isActive={activeTab === 'allOffers'}>
           <AllOffersScene
             activeTab={activeTab}
             onTabPress={onActiveTabChange}
@@ -433,17 +409,17 @@ function MarketplaceScreenContent({
             tabs={tabs}
           />
           <AllOffersActiveEffects isActive={activeTab === 'allOffers'} />
-        </RetainedMarketplaceScene>
+        </RetainedScene>
       ) : null}
       {activeTab === 'myOffers' || shouldMountInactiveScene ? (
-        <RetainedMarketplaceScene isActive={activeTab === 'myOffers'}>
+        <RetainedScene isActive={activeTab === 'myOffers'}>
           <MyOffersScene
             activeTab={activeTab}
             onTabPress={onActiveTabChange}
             scrollToTopRef={myOffersScrollToTopRef}
             tabs={tabs}
           />
-        </RetainedMarketplaceScene>
+        </RetainedScene>
       ) : null}
     </Stack>
   )

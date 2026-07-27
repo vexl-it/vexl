@@ -6,9 +6,19 @@ import {
 } from '@shopify/flash-list'
 import {Stack, tokens, useTheme} from '@vexl-next/ui'
 import {Array, Option, pipe} from 'effect'
-import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import {LayoutAnimation, RefreshControl} from 'react-native'
-import Animated from 'react-native-reanimated'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import {RefreshControl, type View, type ViewProps} from 'react-native'
+import Animated, {
+  LinearTransition,
+  type AnimatedProps,
+} from 'react-native-reanimated'
 import usePixelsFromBottomWhereTabsEnd from '../InsideRouter/utils'
 import OffersListItem from './OffersListItem'
 import OffersListSectionHeader from './OffersListSectionHeader'
@@ -22,6 +32,59 @@ interface ItemSeparatorProps {
 
 const ReanimatedFlashList: React.ComponentType<any> =
   Animated.createAnimatedComponent(FlashList)
+
+const OFFERS_LIST_LAYOUT_TRANSITION_DURATION_MS = 300
+const OFFERS_LIST_CHANGE_COMMIT_TIMEOUT_MS = 1000
+const offersListLayoutTransition = LinearTransition.duration(
+  OFFERS_LIST_LAYOUT_TRANSITION_DURATION_MS
+)
+
+interface PendingListChange {
+  readonly applyChange: () => void
+  readonly complete: () => void
+}
+
+interface OffersListCellAnimationState {
+  // FlashList repositions recycled cells while scrolling. Keeping a layout
+  // transition mounted continuously would animate those recycling updates, so
+  // it is enabled only for the explicitly armed mark-change render.
+  readonly shouldAnimateLayout: boolean
+  readonly exitingItemKey: string | null
+  readonly getItemKey: (index: number) => string | undefined
+}
+
+const OffersListCellAnimationContext =
+  React.createContext<OffersListCellAnimationState>({
+    shouldAnimateLayout: false,
+    exitingItemKey: null,
+    getItemKey: () => undefined,
+  })
+
+const AnimatedCellContainer = React.forwardRef<
+  View,
+  AnimatedProps<ViewProps> & {readonly index: number}
+>(function AnimatedCellContainer({index, style, ...props}, ref) {
+  const {shouldAnimateLayout, exitingItemKey, getItemKey} = React.useContext(
+    OffersListCellAnimationContext
+  )
+
+  // While a marked offer slides towards its new section it must pass under
+  // the neighbouring rows, so every other cell is raised above it. Sibling
+  // cells otherwise stack in recycle order, which is arbitrary.
+  const zIndexStyle =
+    exitingItemKey === null
+      ? undefined
+      : {zIndex: getItemKey(index) === exitingItemKey ? 0 : 1}
+
+  return (
+    <Animated.View
+      ref={ref}
+      layout={shouldAnimateLayout ? offersListLayoutTransition : undefined}
+      style={[style, zIndexStyle]}
+      {...props}
+    />
+  )
+})
 
 function renderItem(
   info: ListRenderItemInfo<OffersListItemData>
@@ -47,7 +110,12 @@ function getItemType(item: OffersListItemData): string {
 
 export interface Props extends Omit<
   FlashListProps<OffersListItemData>,
-  'renderItem' | 'data' | 'ListFooterComponent' | 'keyExtractor' | 'getItemType'
+  | 'renderItem'
+  | 'data'
+  | 'ListFooterComponent'
+  | 'keyExtractor'
+  | 'getItemType'
+  | 'CellRendererComponent'
 > {
   readonly items: readonly OffersListItemData[]
   readonly itemAfterFirstOffer?: React.ReactElement | null
@@ -67,10 +135,28 @@ function OffersList({
   ListHeaderComponent,
   ListFooterComponent,
   contentContainerStyle: externalContentContainerStyle,
+  onCommitLayoutEffect,
   ...props
 }: Props): React.JSX.Element {
   const bottomOffset = usePixelsFromBottomWhereTabsEnd()
   const animatedFlashListRef = useRef<FlashListRef<OffersListItemData>>(null)
+  const currentItemsRef = useRef(items)
+  const itemsBeforeAnimationRef = useRef<readonly OffersListItemData[] | null>(
+    null
+  )
+  const pendingListChangesRef = useRef<readonly PendingListChange[]>([])
+  const activeListChangeRef = useRef<PendingListChange | null>(null)
+  const hasAppliedActiveListChangeRef = useRef(false)
+  const listChangeCommitTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
+  const listChangeCompletionTimeoutRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null)
+  const resetListAnimationFrameRef = useRef<number | null>(null)
+  const isMountedRef = useRef(true)
+  const [shouldAnimateListLayout, setShouldAnimateListLayout] = useState(false)
+  const [exitingItemKey, setExitingItemKey] = useState<string | null>(null)
   const theme = useTheme()
   const refreshIndicatorColor = hideRefreshIndicator
     ? tokens.color.transparent.val
@@ -149,20 +235,182 @@ function OffersList({
     )
   }, [ListFooterComponent, itemAfterFirstOffer, offerItemsCount])
 
-  const animateNextListChange = useCallback(() => {
+  const startNextListChange = useCallback(() => {
+    if (
+      !isMountedRef.current ||
+      activeListChangeRef.current !== null ||
+      !Array.isNonEmptyReadonlyArray(pendingListChangesRef.current)
+    ) {
+      return
+    }
+
+    const [nextListChange, ...remainingListChanges] =
+      pendingListChangesRef.current
+    pendingListChangesRef.current = remainingListChanges
+    activeListChangeRef.current = nextListChange
+    hasAppliedActiveListChangeRef.current = false
+    itemsBeforeAnimationRef.current = currentItemsRef.current
+    setShouldAnimateListLayout(true)
+  }, [])
+
+  const animateNextListChange = useCallback(
+    (applyChange: () => void): Promise<void> =>
+      new Promise((resolve) => {
+        if (!isMountedRef.current) {
+          applyChange()
+          resolve()
+          return
+        }
+
+        pendingListChangesRef.current = Array.append(
+          pendingListChangesRef.current,
+          {applyChange, complete: resolve}
+        )
+        startNextListChange()
+      }),
+    [startNextListChange]
+  )
+
+  // Cells read item keys during render (z-index for the exiting row), so
+  // getItemKey derives from items directly; the ref is only for
+  // animateNextListChange, which runs after commit, so a layout effect keeps
+  // the render phase pure without it ever observing a stale value.
+  useLayoutEffect(() => {
+    currentItemsRef.current = items
+  }, [items])
+
+  useLayoutEffect(() => {
+    if (!shouldAnimateListLayout || activeListChangeRef.current === null) {
+      return
+    }
+
+    const activeListChange = activeListChangeRef.current
     animatedFlashListRef.current?.prepareForLayoutAnimationRender()
-    LayoutAnimation.configureNext(
-      LayoutAnimation.create(
-        300,
-        LayoutAnimation.Types.easeInEaseOut,
-        LayoutAnimation.Properties.opacity
+    hasAppliedActiveListChangeRef.current = true
+    activeListChange.applyChange()
+
+    // A stale/recycled offer can disappear before its delayed commit runs. In
+    // that case the mark action intentionally performs no state write, so no
+    // FlashList commit will arrive to complete this animation cycle.
+    listChangeCommitTimeoutRef.current = setTimeout(() => {
+      if (activeListChangeRef.current !== activeListChange) return
+
+      listChangeCommitTimeoutRef.current = null
+      itemsBeforeAnimationRef.current = null
+      setShouldAnimateListLayout(false)
+      resetListAnimationFrameRef.current = requestAnimationFrame(() => {
+        resetListAnimationFrameRef.current = null
+        activeListChangeRef.current = null
+        hasAppliedActiveListChangeRef.current = false
+        activeListChange.complete()
+        startNextListChange()
+      })
+    }, OFFERS_LIST_CHANGE_COMMIT_TIMEOUT_MS)
+  }, [shouldAnimateListLayout, startNextListChange])
+
+  const handleCommitLayoutEffect = useCallback(() => {
+    onCommitLayoutEffect?.()
+
+    if (!shouldAnimateListLayout || items === itemsBeforeAnimationRef.current) {
+      return
+    }
+
+    const activeListChange = activeListChangeRef.current
+    if (
+      activeListChange === null ||
+      listChangeCompletionTimeoutRef.current !== null ||
+      resetListAnimationFrameRef.current !== null
+    ) {
+      return
+    }
+
+    if (listChangeCommitTimeoutRef.current !== null) {
+      clearTimeout(listChangeCommitTimeoutRef.current)
+      listChangeCommitTimeoutRef.current = null
+    }
+
+    resetListAnimationFrameRef.current = requestAnimationFrame(() => {
+      resetListAnimationFrameRef.current = null
+      setShouldAnimateListLayout(false)
+      itemsBeforeAnimationRef.current = null
+    })
+
+    listChangeCompletionTimeoutRef.current = setTimeout(() => {
+      listChangeCompletionTimeoutRef.current = null
+      activeListChangeRef.current = null
+      hasAppliedActiveListChangeRef.current = false
+      activeListChange.complete()
+      startNextListChange()
+    }, OFFERS_LIST_LAYOUT_TRANSITION_DURATION_MS)
+  }, [
+    items,
+    onCommitLayoutEffect,
+    shouldAnimateListLayout,
+    startNextListChange,
+  ])
+
+  useEffect(() => {
+    isMountedRef.current = true
+
+    return () => {
+      isMountedRef.current = false
+
+      if (listChangeCommitTimeoutRef.current !== null) {
+        clearTimeout(listChangeCommitTimeoutRef.current)
+      }
+      if (listChangeCompletionTimeoutRef.current !== null) {
+        clearTimeout(listChangeCompletionTimeoutRef.current)
+      }
+      if (resetListAnimationFrameRef.current !== null) {
+        cancelAnimationFrame(resetListAnimationFrameRef.current)
+      }
+
+      const activeListChange = activeListChangeRef.current
+      if (activeListChange !== null && !hasAppliedActiveListChangeRef.current) {
+        activeListChange.applyChange()
+      }
+      activeListChange?.complete()
+      Array.forEach(
+        pendingListChangesRef.current,
+        ({applyChange, complete}) => {
+          applyChange()
+          complete()
+        }
       )
-    )
+      activeListChangeRef.current = null
+      hasAppliedActiveListChangeRef.current = false
+      pendingListChangesRef.current = []
+    }
+  }, [])
+
+  const onOfferExitAnimationStart = useCallback((offerKey: string) => {
+    setExitingItemKey(offerKey)
+  }, [])
+
+  // Clears only its own key so a commit on another offer that started in the
+  // meantime keeps its lowered row.
+  const onOfferExitAnimationEnd = useCallback((offerKey: string) => {
+    setExitingItemKey((current) => (current === offerKey ? null : current))
   }, [])
 
   const animationContextValue = useMemo(
-    () => ({animateNextListChange}),
-    [animateNextListChange]
+    () => ({
+      animateNextListChange,
+      onOfferExitAnimationStart,
+      onOfferExitAnimationEnd,
+    }),
+    [animateNextListChange, onOfferExitAnimationStart, onOfferExitAnimationEnd]
+  )
+
+  const getItemKey = useCallback((index: number) => items[index]?.key, [items])
+
+  const cellAnimationContextValue = useMemo(
+    () => ({
+      shouldAnimateLayout: shouldAnimateListLayout,
+      exitingItemKey,
+      getItemKey,
+    }),
+    [shouldAnimateListLayout, exitingItemKey, getItemKey]
   )
 
   useEffect(() => {
@@ -182,33 +430,39 @@ function OffersList({
 
   return (
     <OffersListAnimationProvider value={animationContextValue}>
-      <ReanimatedFlashList
-        ref={animatedFlashListRef}
-        indicatorStyle="white"
-        refreshControl={
-          <RefreshControl
-            colors={[refreshIndicatorColor]}
-            progressBackgroundColor={
-              hideRefreshIndicator ? tokens.color.transparent.val : undefined
-            }
-            refreshing={refreshing ?? false}
-            onRefresh={onRefresh ?? (() => {})}
-            tintColor={refreshIndicatorColor}
-          />
-        }
-        ItemSeparatorComponent={itemSeparatorComponent}
-        progressViewOffset={20}
-        ListHeaderComponent={ListHeaderComponent}
-        ListFooterComponent={listFooterComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={contentContainerStyle}
-        data={items}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        getItemType={getItemType}
-        {...props}
-      />
+      <OffersListCellAnimationContext.Provider
+        value={cellAnimationContextValue}
+      >
+        <ReanimatedFlashList
+          ref={animatedFlashListRef}
+          indicatorStyle="white"
+          refreshControl={
+            <RefreshControl
+              colors={[refreshIndicatorColor]}
+              progressBackgroundColor={
+                hideRefreshIndicator ? tokens.color.transparent.val : undefined
+              }
+              refreshing={refreshing ?? false}
+              onRefresh={onRefresh ?? (() => {})}
+              tintColor={refreshIndicatorColor}
+            />
+          }
+          ItemSeparatorComponent={itemSeparatorComponent}
+          progressViewOffset={20}
+          ListHeaderComponent={ListHeaderComponent}
+          ListFooterComponent={listFooterComponent}
+          ListEmptyComponent={ListEmptyComponent}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={contentContainerStyle}
+          data={items}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          getItemType={getItemType}
+          CellRendererComponent={AnimatedCellContainer}
+          onCommitLayoutEffect={handleCommitLayoutEffect}
+          {...props}
+        />
+      </OffersListCellAnimationContext.Provider>
     </OffersListAnimationProvider>
   )
 }

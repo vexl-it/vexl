@@ -69,10 +69,7 @@ export async function scheduleTradeReminder({
   const notificationId = await scheduleNotificationAsync({
     content: {
       title: t('notifications.TRADE_REMINDER.title', {userName}),
-      body: t('notifications.TRADE_REMINDER.body', {
-        userName,
-        time: formattedTime,
-      }),
+      body: t('notifications.TRADE_REMINDER.body', {time: formattedTime}),
       data: new TradeReminderNotificationData({
         inbox: chat.inbox.privateKey.publicKeyPemBase64,
         sender: chat.otherSide.publicKey,

@@ -67,47 +67,61 @@ function normalizeContact(
   )
 }
 
+function needsNormalization(contact: StoredContact): boolean {
+  return (
+    Option.isNone(contact.computedValues) &&
+    contact.flags.invalidNumber !== 'invalid'
+  )
+}
+
+export interface NormalizationProgress {
+  readonly total: number
+  readonly percentDone: number
+}
+
+export type NormalizationProgressListener = (
+  progress: NormalizationProgress
+) => void
+
 const normalizeStoredContactsActionAtom = atom(
   null,
   (
     get,
     set,
-    {
-      onProgress,
-    }: {onProgress: (d: {total: number; percentDone: number}) => void} = {
+    {onProgress}: {onProgress: NormalizationProgressListener} = {
       onProgress: () => {},
     }
-  ) => {
-    const measure = startMeasure('Normalizing contacts')
-    const storedContacts = get(storedContactsAtom)
-
-    const [toNormalize, normalized] = pipe(
-      storedContacts,
-      Array.partition(
-        (c) =>
-          Option.isSome(c.computedValues) || c.flags.invalidNumber === 'invalid'
+  ): Effect.Effect<void> =>
+    Effect.gen(function* (_) {
+      const [toNormalize, alreadyNormalized] = pipe(
+        get(storedContactsAtom),
+        Array.partition((contact) => !needsNormalization(contact))
       )
-    )
 
-    if (Array.isEmptyArray(toNormalize)) return Effect.void
+      if (!Array.isNonEmptyArray(toNormalize)) return
 
-    onProgress({total: storedContacts.length, percentDone: 0})
+      const measure = startMeasure('Normalizing contacts')
 
-    return pipe(
-      toNormalize,
-      Array.map(flow(normalizeContact, effectToTask)),
-      sequenceTasksWithAnimationFrames(100, (percentage) => {
-        onProgress({total: storedContacts.length, percentDone: percentage})
-      }),
-      taskToEffect,
-      Effect.map((contacts) => {
-        onProgress({total: storedContacts.length, percentDone: 1})
+      onProgress({total: toNormalize.length, percentDone: 0})
 
-        set(storedContactsAtom, [...normalized, ...contacts])
-        measure()
-      })
-    )
-  }
+      const normalizedContacts = yield* _(
+        pipe(
+          toNormalize,
+          Array.map(flow(normalizeContact, effectToTask)),
+          sequenceTasksWithAnimationFrames(50, (percentage) => {
+            onProgress({
+              total: toNormalize.length,
+              percentDone: percentage,
+            })
+          }),
+          taskToEffect
+        )
+      )
+
+      onProgress({total: toNormalize.length, percentDone: 1})
+      set(storedContactsAtom, [...alreadyNormalized, ...normalizedContacts])
+      measure()
+    })
 )
 
 export default normalizeStoredContactsActionAtom

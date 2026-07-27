@@ -4,6 +4,7 @@ import {Array, Effect, Record, pipe} from 'effect'
 import {atom} from 'jotai'
 import {AppState} from 'react-native'
 import {apiAtom} from '../../../../api'
+import {markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom} from '../../../../utils/marketplaceReadyNotification/store'
 import {refreshLastSeenOffersActionAtom} from '../../../../utils/newOffersNotificationBackgroundTask/store'
 import reportError from '../../../../utils/reportError'
 import {startBenchmark} from '../../../ActionBenchmarks'
@@ -125,6 +126,9 @@ export const refreshOffersActionAtom = atom(
 
       if (AppState.currentState === 'active') {
         set(refreshLastSeenOffersActionAtom)
+        set(
+          markMarketplaceReadyNotificationFlowAsCompletedIfOffersAreVisibleActionAtom
+        )
       }
 
       endBenchmark(

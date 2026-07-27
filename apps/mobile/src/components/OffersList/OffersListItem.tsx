@@ -32,7 +32,11 @@ function OffersListItem({offerAtom, swipeEnabled}: Props): React.ReactElement {
   const offer = useAtomValue(offerAtom)
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const toggleOfferMark = useSetAtom(toggleOfferMarkActionAtom)
-  const {animateNextListChange} = useOffersListAnimation()
+  const {
+    animateNextListChange,
+    onOfferExitAnimationStart,
+    onOfferExitAnimationEnd,
+  } = useOffersListAnimation()
 
   const isMine = useMemo(
     () => !!offer.ownershipInfo?.adminId,
@@ -91,18 +95,26 @@ function OffersListItem({offerAtom, swipeEnabled}: Props): React.ReactElement {
     })
   }, [chatForOffer, navigation])
 
+  const handleExitAnimationStart = useCallback(() => {
+    onOfferExitAnimationStart(offer.offerInfo.offerId)
+  }, [offer.offerInfo.offerId, onOfferExitAnimationStart])
+
   const handleToggleOfferMark = useCallback(
     (target: SwipeableOfferCardMark) => {
-      Effect.runFork(
-        toggleOfferMark({
-          offer,
-          target: target === 'favourite' ? 'FAVOURITE' : 'ARCHIVED',
-          confirmCrossTransition: false,
-          onBeforeCommit: animateNextListChange,
-        })
-      )
+      // The card has finished sliding out (it is invisible by now), so the
+      // row can return to normal stacking before the list re-sorts.
+      onOfferExitAnimationEnd(offer.offerInfo.offerId)
+      return animateNextListChange(() => {
+        Effect.runFork(
+          toggleOfferMark({
+            offer,
+            target: target === 'favourite' ? 'FAVOURITE' : 'ARCHIVED',
+            confirmCrossTransition: false,
+          })
+        )
+      })
     },
-    [animateNextListChange, offer, toggleOfferMark]
+    [animateNextListChange, offer, onOfferExitAnimationEnd, toggleOfferMark]
   )
 
   const content = useMemo((): {
@@ -239,6 +251,7 @@ function OffersListItem({offerAtom, swipeEnabled}: Props): React.ReactElement {
             unarchive: t('offer.archive.unarchive'),
           }}
           onToggleMark={handleToggleOfferMark}
+          onExitAnimationStart={handleExitAnimationStart}
         >
           {card}
         </SwipeableOfferCard>

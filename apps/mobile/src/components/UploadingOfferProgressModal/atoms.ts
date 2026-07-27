@@ -1,15 +1,13 @@
 import {type OfferEncryptionProgress} from '@vexl-next/resources-utils/src/offers/OfferEncryptionProgress'
+import {type ProgressIndication} from '@vexl-next/ui'
 import {Effect, pipe} from 'effect'
 import {atom} from 'jotai'
 import {translationAtom} from '../../utils/localization/I18nProvider'
 import {formatInteger} from '../../utils/localization/formatting'
 import {formattingLocaleAtom} from '../../utils/localization/formattingLocaleAtom'
+import {percentageAcrossItems} from './progressUtils'
 
-export type ProgressIndication =
-  | {type: 'intermediate'}
-  | {type: 'loader'}
-  | {type: 'progress'; percentage: number}
-  | {type: 'done'}
+export type {ProgressIndication} from '@vexl-next/ui'
 
 export interface ShownData {
   mode: 'shown'
@@ -27,37 +25,7 @@ export type ModalData = ShownData | HiddenData
 
 const dataAtom = atom<ModalData>({mode: 'hidden'})
 
-export const uploadingProgressDataForRootElement = atom<{
-  isVisible: boolean
-  title: string
-  bottomText: string
-}>((get) => {
-  const modalData = get(dataAtom)
-
-  if (modalData.mode === 'hidden')
-    return {isVisible: false, title: '', bottomText: ''}
-
-  return {
-    isVisible: true,
-    title: modalData.title,
-    bottomText: modalData.bottomText ?? '',
-  }
-})
-
-export const uploadingProgressDataForProgressIndicatorElementAtom = atom<{
-  belowProgressRight?: string
-  belowProgressLeft?: string
-  indicateProgress: ProgressIndication
-}>((get) => {
-  const modalData = get(dataAtom)
-  if (modalData.mode === 'hidden') return {indicateProgress: {type: 'done'}}
-
-  return {
-    belowProgressLeft: modalData.belowProgressLeft,
-    belowProgressRight: modalData.belowProgressRight,
-    indicateProgress: modalData.indicateProgress,
-  }
-})
+export const uploadingProgressModalDataAtom = atom((get) => get(dataAtom))
 
 type DataActionParam = Omit<ShownData, 'mode'>
 type ProgressStepDataActionParam = Omit<
@@ -95,15 +63,29 @@ export const offerProgressModalActionAtoms = {
       get,
       set,
       {
+        aggregateProgress,
         progress,
         textData,
       }: {
+        aggregateProgress?: {
+          readonly processingIndex: number
+          readonly totalToProcess: number
+        }
         progress: OfferEncryptionProgress
         textData: ProgressStepDataActionParam
       }
     ) => {
       const {t} = get(translationAtom)
       const locale = get(formattingLocaleAtom)
+      const aggregatePercentage = aggregateProgress
+        ? percentageAcrossItems({...aggregateProgress, progress})
+        : undefined
+      const aggregateBelowProgressRight =
+        aggregatePercentage !== undefined
+          ? t('progressBar.percentDone', {
+              percentDone: formatInteger(aggregatePercentage, locale),
+            })
+          : undefined
 
       if (progress.type === 'ENCRYPTING_PRIVATE_PAYLOADS') {
         const {totalToEncrypt, currentlyProcessingIndex} = progress
@@ -113,10 +95,15 @@ export const offerProgressModalActionAtoms = {
 
         set(dataAtom, {
           mode: 'shown',
-          belowProgressRight: t('progressBar.ENCRYPTING_PRIVATE_PAYLOADS', {
-            percentDone: formatInteger(percentage, locale),
-          }),
-          indicateProgress: {type: 'progress', percentage},
+          belowProgressRight:
+            aggregateBelowProgressRight ??
+            t('progressBar.ENCRYPTING_PRIVATE_PAYLOADS', {
+              percentDone: formatInteger(percentage, locale),
+            }),
+          indicateProgress: {
+            type: 'progress',
+            percentage: aggregatePercentage ?? percentage,
+          },
           ...textData,
         })
       } else {
@@ -128,14 +115,15 @@ export const offerProgressModalActionAtoms = {
 
         set(dataAtom, {
           mode: 'shown',
-          belowProgressRight,
-          indicateProgress: ['SENDING_OFFER_TO_NETWORK', 'DONE'].includes(
-            progress.type
-          )
-            ? {type: 'progress', percentage: 100}
-            : {
-                type: 'intermediate',
-              },
+          belowProgressRight: aggregateBelowProgressRight ?? belowProgressRight,
+          indicateProgress:
+            aggregatePercentage !== undefined
+              ? {type: 'progress', percentage: aggregatePercentage}
+              : ['SENDING_OFFER_TO_NETWORK', 'DONE'].includes(progress.type)
+                ? {type: 'progress', percentage: 100}
+                : {
+                    type: 'intermediate',
+                  },
           ...textData,
         })
       }

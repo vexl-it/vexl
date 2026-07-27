@@ -1,7 +1,6 @@
 import {
   Banner,
   Button,
-  DismissKeyboardOnPressOutside,
   KeyboardStickyView,
   Stack,
   Typography,
@@ -17,7 +16,6 @@ import {Pressable, type LayoutChangeEvent} from 'react-native'
 import {type ContactsFilter} from '../../../../state/contacts/domain'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {useKeyboardAwareFooterListPadding} from '../../../../utils/useKeyboardAwareFooterListPadding'
-import NormalizeContactsWithLoadingScreen from '../../../NormalizeContactsWithLoadingScreen'
 import PreparingContactsOverlay from '../PreparingContactsOverlay'
 import {contactSelectMolecule} from './atom'
 import ContactsAccessPrivilegesInfoBanner from './components/ContactsAccessPrivilegesInfoBanner'
@@ -42,14 +40,18 @@ function ContactsListSelect({
     areThereAnyContactsToDisplayForSelectedTabAtom,
     areAllContactsToDisplaySelectedAtom,
     contactsToDisplayCountAtom,
+    isBulkSelectionPreparingAtom,
     isContactsPreparingAtom,
+    isContactsSearchPreparingAtom,
     newContactsToDisplayCountAtom,
     shouldShowContactImportProgressDialogAtom,
     toggleAllContactsToDisplayActionAtom,
   } = useMolecule(contactSelectMolecule)
   const theme = useTheme()
   const normalizedContacts = useContactListSelectLifecycle()
+  const isBulkSelectionPreparing = useAtomValue(isBulkSelectionPreparingAtom)
   const isContactsPreparing = useAtomValue(isContactsPreparingAtom)
+  const isContactsSearchPreparing = useAtomValue(isContactsSearchPreparingAtom)
   const newContactsToDisplayCount = useAtomValue(newContactsToDisplayCountAtom)
   const contactsToDisplayCount = useAtomValue(contactsToDisplayCountAtom)
   const shouldShowContactImportProgressDialog = useAtomValue(
@@ -64,6 +66,18 @@ function ContactsListSelect({
   const toggleAllContactsToDisplay = useSetAtom(
     toggleAllContactsToDisplayActionAtom
   )
+  const cancelBulkSelectionRef = React.useRef<(() => void) | undefined>(
+    undefined
+  )
+  React.useEffect(() => {
+    return () => {
+      cancelBulkSelectionRef.current?.()
+    }
+  }, [])
+  const handleToggleAllContactsToDisplay = React.useCallback(() => {
+    cancelBulkSelectionRef.current?.()
+    cancelBulkSelectionRef.current = toggleAllContactsToDisplay()
+  }, [toggleAllContactsToDisplay])
   const {selectedFilter, setSelectedFilter} = usePreparedContactsFilter(filter)
   const {isSubmittingContacts, submitSelectedContacts} =
     useSubmitSelectedContacts()
@@ -107,7 +121,7 @@ function ContactsListSelect({
         value: 'submitted',
       },
       {
-        label: t('postLoginFlow.contactsList.hidden'),
+        label: t('postLoginFlow.contactsList.unused'),
         value: 'nonSubmitted',
       },
     ],
@@ -119,7 +133,9 @@ function ContactsListSelect({
   }
 
   const isActivateAllButtonDisabled =
-    !areThereAnyContactsToDisplayForSelectedTab || isContactsPreparing
+    !areThereAnyContactsToDisplayForSelectedTab ||
+    isContactsPreparing ||
+    isBulkSelectionPreparing
   const shouldShowNewContactsBanner =
     selectedFilter === 'all' &&
     newContactsToDisplayCount > 0 &&
@@ -128,8 +144,8 @@ function ContactsListSelect({
     isSubmittingContacts && !shouldShowContactImportProgressDialog
   const bulkToggleLabel = t(
     areAllContactsToDisplaySelected
-      ? 'postLoginFlow.contactsList.deactivateAll'
-      : 'postLoginFlow.contactsList.activateAll'
+      ? 'postLoginFlow.contactsList.useNone'
+      : 'postLoginFlow.contactsList.useAll'
   )
 
   return (
@@ -150,20 +166,22 @@ function ContactsListSelect({
             <Typography variant="description" color="$foregroundSecondary">
               {t('account.contactsCount', {count: contactsToDisplayCount})}
             </Typography>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={bulkToggleLabel}
-              disabled={isActivateAllButtonDisabled}
-              onPress={toggleAllContactsToDisplay}
-            >
-              <Typography
-                variant="descriptionBold"
-                color={theme.accentHighlightPrimary.get()}
-                opacity={isActivateAllButtonDisabled ? 0.45 : 1}
+            {areThereAnyContactsToDisplayForSelectedTab ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={bulkToggleLabel}
+                disabled={isActivateAllButtonDisabled}
+                onPress={handleToggleAllContactsToDisplay}
               >
-                {bulkToggleLabel}
-              </Typography>
-            </Pressable>
+                <Typography
+                  variant="descriptionBold"
+                  color={theme.accentHighlightPrimary.get()}
+                  opacity={isActivateAllButtonDisabled ? 0.45 : 1}
+                >
+                  {bulkToggleLabel}
+                </Typography>
+              </Pressable>
+            ) : null}
           </XStack>
           {shouldShowNewContactsBanner ? (
             <Banner
@@ -189,17 +207,21 @@ function ContactsListSelect({
           ) : null}
           <ContactsAccessPrivilegesInfoBanner />
         </Stack>
-        <DismissKeyboardOnPressOutside>
-          <Stack f={1} pos="relative">
-            <FilteredContacts
-              keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
-            />
-            <PreparingContactsOverlay
-              visible={isContactsPreparing}
-              zIndex={10}
-            />
-          </Stack>
-        </DismissKeyboardOnPressOutside>
+        {/* Deliberately NOT wrapped in DismissKeyboardOnPressOutside: the
+            TouchableWithoutFeedback injects JS-responder handlers into the
+            list's parent, and on RN 0.86/Fabric the responder handoff blocks
+            the ScrollView's drag gesture entirely (list refuses to scroll).
+            Keyboard dismissal is handled by the FlashList itself via
+            keyboardDismissMode/keyboardShouldPersistTaps in ContactsList. */}
+        <Stack f={1} pos="relative">
+          <FilteredContacts
+            keyboardBottomSpacerHeight={keyboardBottomSpacerHeight}
+          />
+          <PreparingContactsOverlay
+            visible={isContactsSearchPreparing || isBulkSelectionPreparing}
+            zIndex={10}
+          />
+        </Stack>
       </Stack>
       {shouldShowSubmitBar ? (
         <KeyboardStickyView
@@ -207,7 +229,7 @@ function ContactsListSelect({
         >
           <Stack px="$5" py="$4" onLayout={handleSubmitBarLayout}>
             <Button
-              disabled={isSubmittingContacts}
+              disabled={isSubmittingContacts || isBulkSelectionPreparing}
               onPress={submitSelectedContacts}
             >
               {t('common.submit')}
@@ -232,11 +254,9 @@ export default function ContactListWithLoadStep({
   readonly filter?: ContactsFilter
 }): React.ReactElement {
   return (
-    <NormalizeContactsWithLoadingScreen>
-      <ContactsListSelect
-        addContactRequestId={addContactRequestId}
-        filter={filter}
-      />
-    </NormalizeContactsWithLoadingScreen>
+    <ContactsListSelect
+      addContactRequestId={addContactRequestId}
+      filter={filter}
+    />
   )
 }

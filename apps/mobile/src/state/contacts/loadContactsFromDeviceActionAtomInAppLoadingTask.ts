@@ -1,11 +1,10 @@
 import {Effect} from 'effect/index'
 import {
+  FIVE_MINUTES_MS,
   InAppLoadingTaskError,
   registerInAppLoadingTask,
 } from '../../utils/inAppLoadingTasks'
-import loadContactsFromDeviceActionAtom, {
-  loadingContactsFromDeviceAtom,
-} from './atom/loadContactsFromDeviceActionAtom'
+import loadAndNormalizeContactsFromDeviceActionAtom from './atom/loadAndNormalizeContactsFromDeviceActionAtom'
 import {areContactsPermissionsAlreadyGranted} from './utils'
 
 export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
@@ -14,6 +13,7 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
     requirements: {
       requiresUserLoggedIn: true,
       runOn: 'resume',
+      minTimeBetweenRunsMs: FIVE_MINUTES_MS,
     },
     task: (store) =>
       Effect.gen(function* (_) {
@@ -24,13 +24,11 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
 
         if (!contactsPermissionsAlreadyGranted) return
 
-        store.set(loadingContactsFromDeviceAtom, true)
-
         yield* _(
-          store.set(loadContactsFromDeviceActionAtom).pipe(
+          store.set(loadAndNormalizeContactsFromDeviceActionAtom).pipe(
             Effect.catchAll((error) => {
               if (error._tag === 'UnknownContactsError') {
-                return Effect.succeed('success')
+                return Effect.succeed(true)
               }
 
               return Effect.fail(
@@ -39,12 +37,7 @@ export const loadContactsFromDeviceActionAtomInAppLoadingTaskId =
                   cause: error,
                 })
               )
-            }),
-            Effect.ensuring(
-              Effect.sync(() => {
-                store.set(loadingContactsFromDeviceAtom, false)
-              })
-            )
+            })
           )
         )
       }),

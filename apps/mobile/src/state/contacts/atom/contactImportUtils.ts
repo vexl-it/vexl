@@ -9,8 +9,9 @@ import {
 
 export const CONTACT_IMPORT_BATCH_SIZE = 1000
 export const CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE = 500
-export const CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS =
-  CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE
+// UX threshold, intentionally independent of the processing chunk size above —
+// tuning chunk sizes for performance must not change when the dialog appears.
+export const CONTACT_IMPORT_PROGRESS_DIALOG_MIN_CONTACTS = 500
 
 export function percentageFromProgress({
   processed,
@@ -24,19 +25,18 @@ export function percentageFromProgress({
 
 export function determineContactsImportUpdatePlan({
   contactsThatShouldBeImported,
-  contactsThatShouldBeRemovedFromImport,
+  someContactsShouldBeRemovedFromImport,
   forceFullReplace,
 }: {
   readonly contactsThatShouldBeImported: readonly StoredContactWithComputedValues[]
-  readonly contactsThatShouldBeRemovedFromImport: HashSet.HashSet<StoredContactWithComputedValues>
+  readonly someContactsShouldBeRemovedFromImport: boolean
   readonly forceFullReplace: boolean
 }): {
   readonly doIncrementalUpdate: boolean
   readonly newContactsToImport: readonly StoredContactWithComputedValues[]
 } {
   const doIncrementalUpdate =
-    !forceFullReplace &&
-    HashSet.size(contactsThatShouldBeRemovedFromImport) === 0
+    !forceFullReplace && !someContactsShouldBeRemovedFromImport
 
   const newContactsToImport = doIncrementalUpdate
     ? pipe(

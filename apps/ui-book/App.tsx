@@ -20,6 +20,7 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
+import {KeyboardProvider} from 'react-native-keyboard-controller'
 import {SafeAreaProvider} from 'react-native-safe-area-context'
 import {toastAtom} from './state/toastAtom'
 
@@ -235,12 +236,14 @@ export default function App(): React.JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView style={{flex: 1}}>
-        <VexlThemeProvider>
-          <ScreenNav />
-          <Toast messageAtom={toastAtom} topOffset={60} />
-        </VexlThemeProvider>
-      </GestureHandlerRootView>
+      <KeyboardProvider>
+        <GestureHandlerRootView style={{flex: 1}}>
+          <VexlThemeProvider>
+            <ScreenNav />
+            <Toast messageAtom={toastAtom} topOffset={60} />
+          </VexlThemeProvider>
+        </GestureHandlerRootView>
+      </KeyboardProvider>
     </SafeAreaProvider>
   )
 }

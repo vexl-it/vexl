@@ -1,6 +1,6 @@
 import {FilterBar} from '@vexl-next/ui'
 import {useAtom, useAtomValue} from 'jotai'
-import React, {useCallback, useEffect, useRef} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {
   marketplaceFilterBarFieldsAtom,
   marketplaceFilterBarSelectedFieldAtom,
@@ -9,8 +9,8 @@ import {type MarketplaceFilterBarOption} from '../../../../../state/marketplace/
 import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 
 interface Props {
-  onSelectStart?: () => void
-  postSelectActions?: () => void
+  readonly onSelectStart?: () => void
+  readonly postSelectActions?: () => void
 }
 
 function FilterTagBar({
@@ -22,6 +22,9 @@ function FilterTagBar({
   )
   const [filterBarSelectedFields, setFilterBarSelectedFields] = useAtom(
     marketplaceFilterBarSelectedFieldAtom
+  )
+  const [displayedSelectedFields, setDisplayedSelectedFields] = useState(
+    filterBarSelectedFields
   )
   const cancelPendingSelectionFrameRef = useRef<(() => void) | undefined>(
     undefined
@@ -42,6 +45,8 @@ function FilterTagBar({
 
   const handleSelectedValuesChange = useCallback(
     (values: ReadonlySet<MarketplaceFilterBarOption>) => {
+      setDisplayedSelectedFields(new Set(values))
+
       if (!onSelectStart) {
         commitSelectedValues(values)
         return
@@ -57,12 +62,20 @@ function FilterTagBar({
     [clearPendingSelectionFrame, commitSelectedValues, onSelectStart]
   )
 
-  useEffect(() => clearPendingSelectionFrame, [clearPendingSelectionFrame])
+  useEffect(() => {
+    return clearPendingSelectionFrame
+  }, [clearPendingSelectionFrame])
+
+  useEffect(() => {
+    if (cancelPendingSelectionFrameRef.current !== undefined) return
+
+    setDisplayedSelectedFields(filterBarSelectedFields)
+  }, [filterBarSelectedFields])
 
   return (
     <FilterBar
       items={marketplaceFilterBarFields}
-      selectedValues={filterBarSelectedFields}
+      selectedValues={displayedSelectedFields}
       onSelectedValuesChange={handleSelectedValuesChange}
       containerStyle={{marginLeft: '$5'}}
     />

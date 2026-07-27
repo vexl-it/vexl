@@ -6,6 +6,7 @@ import {
   submitSearchActionAtom,
 } from '../../../../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../../../../utils/localization/I18nProvider'
+import {runAfterTwoAnimationFrames} from '../../../../../utils/runAfterAnimationFrames'
 
 const localSearchTextAtom = atom('')
 const SEARCH_DEBOUNCE_MS = 400
@@ -15,11 +16,13 @@ function normalizeSearchText(text: string): string | undefined {
 }
 
 interface Props {
-  onSearchStart?: () => void
-  postSearchActions?: () => void
+  readonly onSearchCancel?: () => void
+  readonly onSearchStart?: () => void
+  readonly postSearchActions?: () => void
 }
 
 function SearchOffers({
+  onSearchCancel,
   onSearchStart,
   postSearchActions,
 }: Props): React.JSX.Element {
@@ -32,9 +35,19 @@ function SearchOffers({
   const lastSubmittedSearchTextRef = useRef<string | undefined>(
     searchTextFromStorage ?? undefined
   )
+  const localSearchTextRef = useRef(localSearchText)
+  localSearchTextRef.current = localSearchText
+  const isSynchronizingSearchTextRef = useRef(false)
+  const isSearchPendingRef = useRef(false)
+  const cancelPendingSubmitFrameRef = useRef<(() => void) | undefined>(
+    undefined
+  )
   const submitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const clearPendingSubmit = useCallback(() => {
+    cancelPendingSubmitFrameRef.current?.()
+    cancelPendingSubmitFrameRef.current = undefined
+
     if (submitTimeoutRef.current !== null) {
       clearTimeout(submitTimeoutRef.current)
       submitTimeoutRef.current = null
@@ -43,37 +56,73 @@ function SearchOffers({
 
   const scheduleSubmit = useCallback(
     (searchText: string | undefined) => {
-      onSearchStart?.()
+      isSearchPendingRef.current = false
       lastSubmittedSearchTextRef.current = searchText
       submitSearch(searchText)
       postSearchActions?.()
     },
-    [onSearchStart, postSearchActions, submitSearch]
+    [postSearchActions, submitSearch]
   )
 
+  const cancelPendingSearch = useCallback(() => {
+    if (!isSearchPendingRef.current) return
+
+    isSearchPendingRef.current = false
+    onSearchCancel?.()
+  }, [onSearchCancel])
+
   useEffect(() => {
-    lastSubmittedSearchTextRef.current = searchTextFromStorage ?? undefined
-    setLocalSearchText(searchTextFromStorage ?? '')
+    const nextSearchText = searchTextFromStorage ?? ''
+    lastSubmittedSearchTextRef.current = normalizeSearchText(nextSearchText)
+
+    if (localSearchTextRef.current === nextSearchText) return
+
+    isSynchronizingSearchTextRef.current = true
+    setLocalSearchText(nextSearchText)
   }, [searchTextFromStorage, setLocalSearchText])
 
   useEffect(() => {
-    const nextSearchText = normalizeSearchText(localSearchText)
-
-    if (lastSubmittedSearchTextRef.current === nextSearchText) return
-
-    clearPendingSubmit()
-
-    if (nextSearchText === undefined) {
-      scheduleSubmit(undefined)
-    } else {
-      submitTimeoutRef.current = setTimeout(() => {
-        submitTimeoutRef.current = null
-        scheduleSubmit(nextSearchText)
-      }, SEARCH_DEBOUNCE_MS)
+    if (isSynchronizingSearchTextRef.current) {
+      isSynchronizingSearchTextRef.current = false
+      return
     }
 
+    const nextSearchText = normalizeSearchText(localSearchText)
+
+    clearPendingSubmit()
+    cancelPendingSearch()
+
+    if (lastSubmittedSearchTextRef.current === nextSearchText) {
+      return
+    }
+
+    submitTimeoutRef.current = setTimeout(() => {
+      submitTimeoutRef.current = null
+      isSearchPendingRef.current = true
+      onSearchStart?.()
+
+      // Let the overlay paint before applying the search and re-rendering the
+      // list. A new keystroke cancels both this frame and the visible loader.
+      cancelPendingSubmitFrameRef.current = runAfterTwoAnimationFrames(() => {
+        cancelPendingSubmitFrameRef.current = undefined
+        scheduleSubmit(nextSearchText)
+      })
+    }, SEARCH_DEBOUNCE_MS)
+
     return clearPendingSubmit
-  }, [clearPendingSubmit, localSearchText, scheduleSubmit])
+  }, [
+    cancelPendingSearch,
+    clearPendingSubmit,
+    localSearchText,
+    onSearchStart,
+    scheduleSubmit,
+  ])
+
+  useEffect(() => {
+    return () => {
+      cancelPendingSearch()
+    }
+  }, [cancelPendingSearch])
 
   return (
     <SearchBar

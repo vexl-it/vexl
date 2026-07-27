@@ -100,4 +100,4 @@ function ContactSearchBar({
   )
 }
 
-export default ContactSearchBar
+export default React.memo(ContactSearchBar)

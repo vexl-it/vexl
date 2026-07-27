@@ -50,7 +50,6 @@ export default function OfferOnMarketplace({
   const isMine = !!ownershipInfo?.adminId
   const isMyOffer = !!ownershipInfo
   const isExpiredMyOffer = isMine && isOfferExpired(publicPart.expirationDate)
-  const isPausedMyOffer = isMine && !publicPart.active
   const rerequestLimitDays = useAtomValue(offerRerequestLimitDaysAtom)
   const getAmountLabel = useSetAtom(getAmountLabelActionAtom)
   const visibleCommonFriends = useVisibleCommonFriendsForOffer(offer.offerInfo)
@@ -114,15 +113,9 @@ export default function OfferOnMarketplace({
     isMine && isProductOfferMissingCategory(offer)
   const statusLabel = isMissingProductCategory
     ? t('marketplace.missingProductCategoriesSuggestion.cardLabel')
-    : isExpiredMyOffer && isPausedMyOffer
-      ? t('editOffer.expiredAndPausedOffer')
-      : isExpiredMyOffer
-        ? t('editOffer.expiredOffer')
-        : isPausedMyOffer
-          ? t('editOffer.pausedOffer')
-          : undefined
-  const statusVariant =
-    isMissingProductCategory || isExpiredMyOffer ? 'warning' : 'waiting'
+    : isExpiredMyOffer
+      ? t('editOffer.expiredOffer')
+      : undefined
 
   const premiumLabel = useMemo(
     () =>
@@ -211,7 +204,6 @@ export default function OfferOnMarketplace({
       description={publicPart.offerDescription}
       details={details}
       statusLabel={statusLabel}
-      statusVariant={statusVariant}
       onPress={onPress}
       actionButton={actionButton}
     />

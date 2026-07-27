@@ -5,6 +5,10 @@ import {ArrowsVerticalSort} from '../icons/ArrowsVerticalSort'
 import {ChevronDown} from '../icons/ChevronDown'
 import {Input, SizableText, Stack, XStack, YStack} from '../primitives'
 import {Loader} from './Loader'
+import {
+  localizeDecimalInput,
+  normalizeLocalizedDecimalInput,
+} from './normalizeLocalizedDecimalInput'
 
 export type BtcUnit = 'BTC' | 'SATS'
 
@@ -108,20 +112,6 @@ function formatNumber(value: string, locale: string): string {
   }).format(num)
 }
 
-function getDecimalSeparator(locale: string): string {
-  return new Intl.NumberFormat(locale).format(1.1).includes(',') ? ',' : '.'
-}
-
-function normalizeDecimalSeparator(value: string, locale: string): string {
-  const decimalSeparator = getDecimalSeparator(locale)
-  const otherSeparator = decimalSeparator === ',' ? '.' : ','
-  const escapedOtherSeparator = otherSeparator === '.' ? '\\.' : otherSeparator
-
-  return value
-    .replace(new RegExp(`${escapedOtherSeparator}(?=\\d{3}(?!\\d))`, 'g'), '')
-    .replace(/[.,]/, decimalSeparator)
-}
-
 export function Exchange({
   btcValue,
   btcUnit,
@@ -173,12 +163,18 @@ export function Exchange({
   }, [btcUnit, btcValue, onBtcValueChange, onBtcUnitChange, onToggleBtcUnit])
 
   const btcDisplayValue = useMemo(
-    () => (btcFocused ? btcValue : formatNumber(btcValue, locale)),
+    () =>
+      btcFocused
+        ? localizeDecimalInput(btcValue, locale)
+        : formatNumber(btcValue, locale),
     [btcFocused, btcValue, locale]
   )
 
   const fiatDisplayValue = useMemo(
-    () => (fiatFocused ? fiatValue : formatNumber(fiatValue, locale)),
+    () =>
+      fiatFocused
+        ? localizeDecimalInput(fiatValue, locale)
+        : formatNumber(fiatValue, locale),
     [fiatFocused, fiatValue, locale]
   )
 
@@ -228,11 +224,7 @@ export function Exchange({
         <FieldInput
           value={btcDisplayValue}
           onChangeText={(value) => {
-            onBtcValueChange?.(
-              btcUnit === 'BTC'
-                ? normalizeDecimalSeparator(value, locale)
-                : value
-            )
+            onBtcValueChange?.(normalizeLocalizedDecimalInput(value, locale))
           }}
           placeholder="0.00"
           placeholderTextColor={theme.foregroundTertiary.get()}
@@ -283,7 +275,7 @@ export function Exchange({
           autoFocus={fiatAutoFocus}
           value={fiatDisplayValue}
           onChangeText={(value) => {
-            onFiatValueChange(normalizeDecimalSeparator(value, locale))
+            onFiatValueChange(normalizeLocalizedDecimalInput(value, locale))
           }}
           placeholder={fiatPlaceholder}
           placeholderTextColor={theme.foregroundTertiary.get()}

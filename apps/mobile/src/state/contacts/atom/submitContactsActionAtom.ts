@@ -40,8 +40,7 @@ import {
   normalizedContactsAtom,
   storedContactsAtom,
 } from './contactsStore'
-import loadContactsFromDeviceActionAtom from './loadContactsFromDeviceActionAtom'
-import normalizeStoredContactsActionAtom from './normalizeStoredContactsActionAtom'
+import loadAndNormalizeContactsFromDeviceActionAtom from './loadAndNormalizeContactsFromDeviceActionAtom'
 
 type ContactsImportSource =
   | {
@@ -229,18 +228,19 @@ const prepareContactsForImportActionAtom = atom(
         enabled: showContactImportProgressDialog,
         title: t('contacts.importProgress.titleReadingContacts'),
       })
-      yield* _(set(loadContactsFromDeviceActionAtom))
 
       const titlePreparingContacts = t(
         'contacts.importProgress.titlePreparingContacts'
       )
-      set(showContactImportLoaderStepActionAtom, {
-        enabled: showContactImportProgressDialog,
-        title: titlePreparingContacts,
-      })
       yield* _(
-        set(normalizeStoredContactsActionAtom, {
-          onProgress: ({total, percentDone}) => {
+        set(loadAndNormalizeContactsFromDeviceActionAtom, {
+          onContactsLoaded: () => {
+            set(showContactImportLoaderStepActionAtom, {
+              enabled: showContactImportProgressDialog,
+              title: titlePreparingContacts,
+            })
+          },
+          onNormalizationProgress: ({total, percentDone}) => {
             set(showContactImportCountProgressActionAtom, {
               enabled: showContactImportProgressDialog,
               title: titlePreparingContacts,
@@ -284,12 +284,12 @@ const determineContactsImportUpdatePlanActionAtom = atom(
       const contactsToCheckTotal = allContacts.length + numbersToImport.length
 
       let checkedContactsCount = 0
-      let allContactsByNumber = HashMap.empty<
+      const allContactsByNumber = new Map<
         E164PhoneNumber,
         StoredContactWithComputedValues
       >()
-      const removedFromImportChunks: StoredContactWithComputedValues[][] = []
-      const contactsToImportChunks: StoredContactWithComputedValues[][] = []
+      let someContactsShouldBeRemovedFromImport = false
+      const contactsToImport: StoredContactWithComputedValues[] = []
 
       set(showContactImportCountProgressActionAtom, {
         enabled: showContactImportProgressDialog,
@@ -302,23 +302,24 @@ const determineContactsImportUpdatePlanActionAtom = atom(
         allContacts,
         Array.chunksOf(CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE)
       )) {
-        allContactsByNumber = pipe(
+        pipe(
           contactsChunk,
-          Array.reduce(allContactsByNumber, (map, contact) =>
-            HashMap.set(map, contact.computedValues.normalizedNumber, contact)
-          )
-        )
-        removedFromImportChunks.push(
-          pipe(
-            contactsChunk,
-            Array.filter(
-              (one) =>
-                one.flags.imported &&
-                !HashSet.has(
-                  numbersToImportSet,
-                  one.computedValues.normalizedNumber
-                )
+          Array.forEach((contact) => {
+            allContactsByNumber.set(
+              contact.computedValues.normalizedNumber,
+              contact
             )
+          })
+        )
+        someContactsShouldBeRemovedFromImport ||= pipe(
+          contactsChunk,
+          Array.some(
+            (one) =>
+              one.flags.imported &&
+              !HashSet.has(
+                numbersToImportSet,
+                one.computedValues.normalizedNumber
+              )
           )
         )
         checkedContactsCount += contactsChunk.length
@@ -339,13 +340,12 @@ const determineContactsImportUpdatePlanActionAtom = atom(
         numbersToImport,
         Array.chunksOf(CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE)
       )) {
-        contactsToImportChunks.push(
-          pipe(
-            numbersToImportChunk,
-            Array.filterMap((numberToImport) =>
-              HashMap.get(allContactsByNumber, numberToImport)
-            )
-          )
+        pipe(
+          numbersToImportChunk,
+          Array.forEach((numberToImport) => {
+            const contact = allContactsByNumber.get(numberToImport)
+            if (contact !== undefined) contactsToImport.push(contact)
+          })
         )
         checkedContactsCount += numbersToImportChunk.length
         set(showContactImportCountProgressActionAtom, {
@@ -362,10 +362,8 @@ const determineContactsImportUpdatePlanActionAtom = atom(
       }
 
       return determineContactsImportUpdatePlan({
-        contactsThatShouldBeImported: Array.flatten(contactsToImportChunks),
-        contactsThatShouldBeRemovedFromImport: HashSet.fromIterable(
-          Array.flatten(removedFromImportChunks)
-        ),
+        contactsThatShouldBeImported: contactsToImport,
+        someContactsShouldBeRemovedFromImport,
         forceFullReplace: needsFullContactsReplaceAfterContactEdit,
       })
     })
@@ -391,7 +389,7 @@ const updateStoredContactsAfterImportActionAtom = atom(
 
     return Effect.gen(function* (_) {
       const storedContacts = get(storedContactsAtom)
-      let updatedStoredContacts: typeof storedContacts = []
+      const updatedStoredContacts: typeof storedContacts = []
 
       set(showContactImportLoaderStepActionAtom, {
         enabled: showContactImportProgressDialog,
@@ -402,22 +400,18 @@ const updateStoredContactsAfterImportActionAtom = atom(
         storedContacts,
         Array.chunksOf(CONTACT_IMPORT_LOCAL_PROCESSING_CHUNK_SIZE)
       )) {
-        updatedStoredContacts = pipe(
-          updatedStoredContacts,
-          Array.appendAll(
-            pipe(
-              storedContactsChunk,
-              Array.map((contact) =>
-                updateStoredContactImportState({
-                  contact,
-                  doIncrementalUpdate,
-                  hashedNumbersToServerClientHash,
-                  importedNumbers,
-                })
-              )
-            )
+        const updatedChunk = pipe(
+          storedContactsChunk,
+          Array.map((contact) =>
+            updateStoredContactImportState({
+              contact,
+              doIncrementalUpdate,
+              hashedNumbersToServerClientHash,
+              importedNumbers,
+            })
           )
         )
+        updatedStoredContacts.push(...updatedChunk)
         yield* _(
           set(waitForContactImportProgressFrameActionAtom, {
             enabled: showContactImportProgressDialog,
@@ -596,6 +590,7 @@ const syncNetworkAfterContactsImportActionAtom = atom(
           bottomText: t(
             'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
           ),
+          belowProgressLeft: t('contacts.importProgress.titleUpdatingNetwork'),
           indicateProgress: {type: 'intermediate'},
         })
 
@@ -605,6 +600,10 @@ const syncNetworkAfterContactsImportActionAtom = atom(
             set(updateAndReencryptAllOffersConnectionsActionAtom, {
               onProgres: ({offerI, totalOffers, progress}) => {
                 set(offerProgressModalActionAtoms.showStep, {
+                  aggregateProgress: {
+                    processingIndex: offerI,
+                    totalToProcess: totalOffers,
+                  },
                   progress,
                   textData: {
                     title: t('contacts.refreshingOffers.title'),
@@ -628,6 +627,10 @@ const syncNetworkAfterContactsImportActionAtom = atom(
             set(updateAndReencryptAllNotesConnectionsActionAtom, {
               onProgres: ({noteI, totalNotes, progress}) => {
                 set(offerProgressModalActionAtoms.showStep, {
+                  aggregateProgress: {
+                    processingIndex: noteI,
+                    totalToProcess: totalNotes,
+                  },
                   progress,
                   textData: {
                     title: t('contacts.refreshingNotes.title'),

@@ -26,7 +26,7 @@ export function MarketplaceIntroDialogContent({
       <YStack
         alignSelf="center"
         width="100%"
-        aspectRatio={311 / 371}
+        aspectRatio={320 / 422}
         overflow="hidden"
       >
         <Image source={graphic} width="100%" height="100%" objectFit="fill" />

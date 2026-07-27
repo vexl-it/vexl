@@ -33,9 +33,20 @@ export type InAppLoadingTaskStatus =
       _tag: 'notStartedYet'
     }
 
+/** Default throttle for expensive resume tasks — see minTimeBetweenRunsMs. */
+export const FIVE_MINUTES_MS = 5 * 60 * 1000
+
 export interface InAppLoadingTasksRequirements {
   requiresUserLoggedIn: boolean
   runOn: 'resume' | 'start'
+  /**
+   * Skip the run when the task last completed successfully less than this many
+   * milliseconds ago. Use for expensive resume tasks (full server re-syncs,
+   * device-contact reloads) that would otherwise re-run on every foregrounding.
+   * A skipped run counts as succeeded for dependents. Cold starts always run —
+   * the registry (and with it the last-completion time) lives in memory only.
+   */
+  minTimeBetweenRunsMs?: number
 }
 
 export interface InAppLoadingTaskDependency {

@@ -38,9 +38,6 @@ export const setOfferMarkActionAtom = atom(
  * - crossing FAVOURITE <-> ARCHIVED with `confirmCrossTransition` -> asks
  *   for confirmation first
  *
- * `onBeforeCommit` runs synchronously right before the state write (after
- * the confirmation dialog resolves) so callers can arm list layout
- * animations in the same JS task as the update.
  */
 export const toggleOfferMarkActionAtom = atom(
   null,
@@ -51,11 +48,10 @@ export const toggleOfferMarkActionAtom = atom(
       readonly offer: OneOfferInState
       readonly target: OfferMarkType
       readonly confirmCrossTransition: boolean
-      readonly onBeforeCommit?: () => void
     }
   ): Effect.Effect<boolean> => {
     const {t} = get(translationAtom)
-    const {offer, target, confirmCrossTransition, onBeforeCommit} = params
+    const {offer, target, confirmCrossTransition} = params
     const offerId = offer.offerInfo.offerId
     const getCurrentOffer = (): OneOfferInState | undefined =>
       Option.getOrUndefined(
@@ -110,7 +106,6 @@ export const toggleOfferMarkActionAtom = atom(
         return false
       }
 
-      onBeforeCommit?.()
       set(setOfferMarkActionAtom, {
         offerId,
         mark:

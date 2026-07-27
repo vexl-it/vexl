@@ -2,7 +2,6 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import {Button, Stack, Typography} from '@vexl-next/ui'
 import {atom, getDefaultStore, useAtomValue, useSetAtom} from 'jotai'
 import React from 'react'
-import {useWindowDimensions} from 'react-native'
 import {useTranslation} from '../utils/localization/I18nProvider'
 import {toastNotificationAtom} from './ToastNotification/atom'
 
@@ -21,7 +20,6 @@ export function showErrorAlert(props: ErrorAlertProps | null): void {
 
 function ErrorAlert(): React.ReactElement | null {
   const {t} = useTranslation()
-  const {width} = useWindowDimensions()
   const errorAlert = useAtomValue(errorAlertAtom)
   const setToastNotification = useSetAtom(toastNotificationAtom)
 
@@ -36,10 +34,18 @@ function ErrorAlert(): React.ReactElement | null {
       left={0}
       right={0}
       bottom={0}
-      zIndex="$100"
-      backgroundColor="rgba(0, 0, 0, 0.4)"
+      zIndex="$5"
     >
-      <Stack bc="$backgroundPrimary" maxWidth={width * 0.8} br="$4" p="$4">
+      <Stack
+        pos="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        backgroundColor="$black100"
+        opacity={0.9}
+      />
+      <Stack bc="$backgroundPrimary" maxWidth="80%" br="$4" p="$4">
         <Stack gap="$2" bc="$backgroundSecondary" br="$4" p="$4" mb="$4">
           <Typography variant="heading3" color="$foregroundPrimary">
             {errorAlert.title}

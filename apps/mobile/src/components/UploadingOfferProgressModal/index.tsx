@@ -1,28 +1,30 @@
-import {Dialog, Typography} from '@vexl-next/ui'
+import {ProgressDialog} from '@vexl-next/ui'
 import {useAtomValue} from 'jotai'
 import React from 'react'
-import {uploadingProgressDataForRootElement} from './atoms'
-import ProgressIndicator from './components/ProgressIndicator'
+import {uploadingProgressModalDataAtom} from './atoms'
 
 function UploadingOfferProgressModal(): React.JSX.Element {
-  const data = useAtomValue(uploadingProgressDataForRootElement)
+  const data = useAtomValue(uploadingProgressModalDataAtom)
+
+  if (data.mode === 'hidden') {
+    return (
+      <ProgressDialog
+        visible={false}
+        title=""
+        indicateProgress={{type: 'done'}}
+      />
+    )
+  }
 
   return (
-    <Dialog visible={data.isVisible}>
-      <Typography
-        variant="heading2"
-        fontWeight="700"
-        color="$foregroundPrimary"
-      >
-        {data.title}
-      </Typography>
-      <ProgressIndicator />
-      {!!data.bottomText && (
-        <Typography variant="paragraphSmall" color="$foregroundSecondary">
-          {data.bottomText}
-        </Typography>
-      )}
-    </Dialog>
+    <ProgressDialog
+      visible
+      title={data.title}
+      bottomText={data.bottomText}
+      belowProgressLeft={data.belowProgressLeft}
+      belowProgressRight={data.belowProgressRight}
+      indicateProgress={data.indicateProgress}
+    />
   )
 }
 

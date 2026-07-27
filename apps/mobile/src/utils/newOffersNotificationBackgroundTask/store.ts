@@ -6,9 +6,12 @@ import {
 import {Array, Schema, pipe} from 'effect'
 import {atom} from 'jotai'
 import {filteredOffersIncludingLocationFilterAtom} from '../../state/marketplace/atoms/filteredOffers'
-import {atomWithParsedMmkvStorage} from '../atomUtils/atomWithParsedMmkvStorage'
+import {atomWithParsedMmkvStorageWithImmediateSaveOption} from '../atomUtils/atomWithParsedMmkvStorage'
 
-export const newOfferNotificationsPreferencesStore = atomWithParsedMmkvStorage(
+const {
+  atom: newOfferNotificationsPreferencesStore,
+  setAndSaveImmediatelyAtom: setNewOfferNotificationsPreferencesImmediatelyAtom,
+} = atomWithParsedMmkvStorageWithImmediateSaveOption(
   'newOfferNotificationPreferences',
   {
     lastSentNotificationAt: UnixMilliseconds0,
@@ -19,6 +22,8 @@ export const newOfferNotificationsPreferencesStore = atomWithParsedMmkvStorage(
     lastSeenOffers: Schema.Array(OfferId),
   })
 )
+
+export {newOfferNotificationsPreferencesStore}
 
 export const refreshLastSeenOffersActionAtom = atom(null, (get, set) => {
   const currentOfferIds = pipe(
@@ -40,3 +45,23 @@ export const refreshLastSeenOffersActionAtom = atom(null, (get, set) => {
     lastSeenOffers: currentOfferIds,
   }))
 })
+
+export const recordNewOffersNotificationSentActionAtom = atom(
+  null,
+  (
+    _,
+    set,
+    {
+      lastSeenOffers,
+      notificationSentAt,
+    }: {
+      readonly lastSeenOffers: readonly OfferId[]
+      readonly notificationSentAt: UnixMilliseconds
+    }
+  ) => {
+    set(setNewOfferNotificationsPreferencesImmediatelyAtom, {
+      lastSentNotificationAt: notificationSentAt,
+      lastSeenOffers,
+    })
+  }
+)

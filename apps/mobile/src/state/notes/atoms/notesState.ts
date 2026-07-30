@@ -5,11 +5,12 @@ import {
   type OneNoteInState,
 } from '@vexl-next/domain/src/general/notes'
 import {MINIMAL_DATE} from '@vexl-next/domain/src/utility/IsoDatetimeString.brand'
-import {Array} from 'effect'
+import {Array, pipe} from 'effect'
 import {atom, type Atom} from 'jotai'
 import {focusAtom} from 'jotai-optics'
 import {type FocusAtomType} from '../../../utils/atomUtils/FocusAtomType'
 import {atomWithParsedMmkvStorage} from '../../../utils/atomUtils/atomWithParsedMmkvStorage'
+import isNoteChatOrigin from '../../chat/utils/isNoteChatOrigin'
 import {NotesState} from '../domain'
 
 export const notesStateAtom = atomWithParsedMmkvStorage(
@@ -34,9 +35,13 @@ export const myNotesAtom = focusAtom(notesAtom, (optic) =>
   optic.filter((note): note is MyNoteInState => !!note.ownershipInfo?.adminId)
 )
 
-// Notes from the network only - the user's own notes live under "My notes".
-export const othersNotesAtom = focusAtom(notesAtom, (optic) =>
-  optic.filter((note) => !note.ownershipInfo?.adminId)
+// Unreported notes from the network only - the user's own notes live under
+// "My notes", and reported notes stay hidden like reported marketplace offers.
+export const othersNotesAtom = atom((get) =>
+  pipe(
+    get(notesAtom),
+    Array.filter((note) => !note.ownershipInfo?.adminId && !note.flags.reported)
+  )
 )
 
 export function singleNoteAtom(
@@ -49,13 +54,11 @@ export function singleNoteAtom(
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function noteForChatOriginAtom(chatOrigin: ChatOrigin) {
-  const singleNoteAtomOrNull =
-    chatOrigin.type === 'myNote' || chatOrigin.type === 'theirNote'
-      ? singleNoteAtom(chatOrigin.noteId)
-      : null
+  const singleNoteAtomOrNull = isNoteChatOrigin(chatOrigin)
+    ? singleNoteAtom(chatOrigin.noteId)
+    : null
   return atom((get) => {
-    if (chatOrigin.type !== 'myNote' && chatOrigin.type !== 'theirNote')
-      return undefined
+    if (!isNoteChatOrigin(chatOrigin)) return undefined
 
     if (chatOrigin.note) return chatOrigin.note
     return singleNoteAtomOrNull ? get(singleNoteAtomOrNull) : undefined

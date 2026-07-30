@@ -16,6 +16,7 @@ import {
   type ChatMessageWithState,
   type ChatWithMessages,
 } from '../../../../../state/chat/domain'
+import isNoteChatOrigin from '../../../../../state/chat/utils/isNoteChatOrigin'
 import {useOfferForChatOrigin} from '../../../../../state/marketplace'
 import {noteForChatOriginAtom} from '../../../../../state/notes/atoms/notesState'
 import {getOtherSideRealNameOrFriendLevel} from '../../../../../utils/chat/getOtherSideFriendLevel'
@@ -99,8 +100,7 @@ function ChatListItem({
       chat,
       t,
     }) ?? userName
-  const isNoteChat =
-    chatInfo.origin.type === 'myNote' || chatInfo.origin.type === 'theirNote'
+  const isNoteChat = isNoteChatOrigin(chatInfo.origin)
   const preview: {text: string; variant?: ChatMessageItemVariant} =
     isNoteChat && lastMessage.message.messageType === 'REQUEST_MESSAGING'
       ? {

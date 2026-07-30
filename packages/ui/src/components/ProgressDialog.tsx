@@ -18,6 +18,7 @@ export type ProgressIndication =
   | {type: 'loader'}
   | {type: 'progress'; percentage: number}
   | {type: 'done'}
+  | {type: 'success'}
 
 export interface ProgressDialogProps {
   readonly belowProgressLeft?: string
@@ -56,6 +57,7 @@ function percentageFromIndicateProgress(
   if (indicateProgress.type === 'intermediate') return 0
   if (indicateProgress.type === 'loader') return 0
   if (indicateProgress.type === 'done') return 100
+  if (indicateProgress.type === 'success') return 100
   return indicateProgress.percentage
 }
 
@@ -210,11 +212,13 @@ export function ProgressDialog({
       >
         {title}
       </Typography>
-      <ProgressIndicator
-        belowProgressLeft={belowProgressLeft}
-        belowProgressRight={belowProgressRight}
-        indicateProgress={indicateProgress}
-      />
+      {indicateProgress.type === 'success' ? null : (
+        <ProgressIndicator
+          belowProgressLeft={belowProgressLeft}
+          belowProgressRight={belowProgressRight}
+          indicateProgress={indicateProgress}
+        />
+      )}
       {!!bottomText && (
         <Typography variant="paragraphSmall" color="$foregroundSecondary">
           {bottomText}

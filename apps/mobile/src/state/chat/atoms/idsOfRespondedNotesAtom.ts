@@ -1,17 +1,11 @@
 import {type NoteId} from '@vexl-next/domain/src/general/notes'
+import {Array} from 'effect'
 import {selectAtom} from 'jotai/utils'
-import notEmpty from '../../../utils/notEmpty'
-import allChatsAtom from './allChatsAtom'
+import {chatWithMessagesByNoteIdAtom} from './chatWithMessagesForNoteAtom'
 
 const idsOfRespondedNotesAtom = selectAtom(
-  allChatsAtom,
-  (allChats): NoteId[] =>
-    allChats
-      .flat()
-      .map((chat) =>
-        chat.chat.origin.type === 'theirNote' ? chat.chat.origin.noteId : null
-      )
-      .filter(notEmpty),
+  chatWithMessagesByNoteIdAtom,
+  (chatsByNoteId): NoteId[] => Array.fromIterable(chatsByNoteId.keys()),
   (a, b) => b.join(',') === a.join(',')
 )
 

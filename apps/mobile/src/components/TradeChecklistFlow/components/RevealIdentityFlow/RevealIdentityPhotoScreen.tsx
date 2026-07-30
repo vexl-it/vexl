@@ -14,7 +14,7 @@ import {
   YStack,
 } from '@vexl-next/ui'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {StyleSheet, TouchableOpacity} from 'react-native'
 import Svg, {Rect} from 'react-native-svg'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
@@ -22,11 +22,11 @@ import {selectImageActionAtom} from '../../../../state/selectImageActionAtom'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../../utils/resolveLocalUri'
 import {
-  discardRevealIdentityDraftActionAtom,
   initializeEmptyRevealIdentityDraftFromProfileActionAtom,
   revealIdentityImageUriAtom,
 } from '../../atoms/revealIdentityAtoms'
 import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
+import useRevealIdentityFlowNavigation from './useRevealIdentityFlowNavigation'
 
 type Props = TradeChecklistStackScreenProps<'RevealIdentityPhoto'>
 
@@ -39,14 +39,12 @@ const DASHED_BORDER_RADIUS = tokens.radius[5].val
 function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
+  const {closeFlow} = useRevealIdentityFlowNavigation()
   const previousRouteName = useNavigationState(
     (state) => state.routes[state.index - 1]?.name
   )
   const revealIdentityImageUri = useAtomValue(revealIdentityImageUriAtom)
   const selectImage = useSetAtom(selectImageActionAtom)
-  const discardRevealIdentityDraft = useSetAtom(
-    discardRevealIdentityDraftActionAtom
-  )
   const initializeEmptyRevealIdentityDraftFromProfile = useSetAtom(
     initializeEmptyRevealIdentityDraftFromProfileActionAtom
   )
@@ -56,22 +54,17 @@ function RevealIdentityPhotoScreen({navigation}: Props): React.ReactElement {
     initializeEmptyRevealIdentityDraftFromProfile()
   }, [initializeEmptyRevealIdentityDraftFromProfile])
 
-  const closeFlow = useCallback(() => {
-    discardRevealIdentityDraft()
-    navigation.popTo('AgreeOnTradeDetails')
-  }, [discardRevealIdentityDraft, navigation])
-
   return (
     <TradeChecklistItemPageLayout
       header={{
         title: t('tradeChecklist.revealIdentity.addPhotoTitle'),
         onBackPress: () => {
-          if (previousRouteName === 'AgreeOnTradeDetails') {
-            closeFlow()
+          if (previousRouteName === 'RevealIdentitySummary') {
+            navigation.goBack()
             return
           }
 
-          navigation.goBack()
+          closeFlow()
         },
         rightActions: [
           {

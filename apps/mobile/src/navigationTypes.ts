@@ -191,7 +191,9 @@ export type CommunityParamsList = {
   Discover: undefined
   Events: undefined
   Clubs: undefined
-  Board: undefined
+  Board:
+    | {initialFilter?: 'all' | 'mine'; filterSwitchRequestId?: string}
+    | undefined
   Blog: undefined
 }
 

@@ -64,7 +64,11 @@ export function NoteInfoHeader({note, now}: Props): React.JSX.Element {
       </XStack>
       <XStack alignItems="center" gap="$1" flexShrink={0}>
         <SandWatch color={theme.foregroundSecondary.get()} size={iconSize} />
-        <Typography variant="micro" color="$foregroundSecondary">
+        <Typography
+          variant="micro"
+          color="$foregroundSecondary"
+          lineHeight={iconSize}
+        >
           {expiryText}
         </Typography>
       </XStack>

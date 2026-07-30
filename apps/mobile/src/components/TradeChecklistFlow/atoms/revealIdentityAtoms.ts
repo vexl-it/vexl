@@ -18,7 +18,9 @@ import {
 } from '../../../state/tradeChecklist/atoms/fromChatAtoms'
 import getIdentityRevealStatus from '../../../state/tradeChecklist/utils/getIdentityRevealStatus'
 import {revealIdentityFlowTypeFromStatus} from './revealIdentityFlowType'
-import updatesToBeSentAtom from './updatesToBeSentAtom'
+import updatesToBeSentAtom, {
+  clearUpdatesToBeSentActionAtom,
+} from './updatesToBeSentAtom'
 
 export const revealIdentityUsernameAtom = atom<string>('')
 export const revealIdentityImageUriAtom = atom<UriString | undefined>(undefined)
@@ -107,6 +109,16 @@ export const prepareRevealIdentityDraftActionAtom = atom(null, (get, set) => {
   set(revealIdentityPhoneNumberAtom, Boolean(updates.contact))
   set(revealIdentityDraftInitializedAtom, true)
 })
+
+// The draft must be restored from `updatesToBeSentAtom` before it is cleared,
+// so a failed reveal cannot leak into another chat's checklist send.
+export const restoreRevealIdentityDraftAfterFailedSubmitActionAtom = atom(
+  null,
+  (_get, set) => {
+    set(prepareRevealIdentityDraftActionAtom)
+    set(clearUpdatesToBeSentActionAtom)
+  }
+)
 
 export const discardRevealIdentityDraftActionAtom = atom(null, (_get, set) => {
   set(revealIdentityUsernameAtom, '')

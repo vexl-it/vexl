@@ -64,11 +64,7 @@ interface ContactsQuery {
 function isContactDefaultSelected(
   contact: StoredContactWithComputedValues
 ): boolean {
-  return (
-    contact.flags.imported ||
-    !contact.flags.seen ||
-    (contact.flags.importedManually && !contact.flags.imported)
-  )
+  return contact.flags.imported || !contact.flags.seen
 }
 
 function isNewContact(contact: StoredContactWithComputedValues): boolean {

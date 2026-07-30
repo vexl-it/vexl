@@ -61,6 +61,16 @@ export const deleteNoteToConnectionsActionAtom = atom(
   }
 )
 
+const filterNotExpiredNotes = <T extends {noteInfo: {expiresAt: number}}>(
+  notes: readonly T[]
+): readonly T[] => {
+  const now = unixMillisecondsNow()
+  return pipe(
+    notes,
+    Array.filter((note) => note.noteInfo.expiresAt > now)
+  )
+}
+
 // Drops records of deleted/expired notes and creates empty records for notes
 // that miss one (notes created before connection tracking existed). An empty
 // record makes the next update re-encrypt for every current connection —
@@ -69,7 +79,7 @@ export const deleteNoteToConnectionsActionAtom = atom(
 const ensureConnectionsRecordForEveryMyNoteActionAtom = atom(
   null,
   (get, set) => {
-    const myNotes = get(myNotesAtom)
+    const myNotes = filterNotExpiredNotes(get(myNotesAtom))
 
     set(noteToConnectionsAtom, (old) => ({
       noteToConnections: pipe(
@@ -123,7 +133,7 @@ const dropOrphanRepostConnectionsRecordsActionAtom = atom(null, (get, set) => {
 // flows that need to size the notes part of an aggregated progress bar.
 export const noteRecordsToReencryptCountAtom = atom(
   (get) =>
-    get(myNotesAtom).length +
+    filterNotExpiredNotes(get(myNotesAtom)).length +
     get(repostToConnectionsAtom).repostToConnections.length
 )
 

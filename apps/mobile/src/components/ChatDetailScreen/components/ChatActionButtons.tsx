@@ -5,6 +5,7 @@ import {pipe} from 'effect/Function'
 import {Effect} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {chatMolecule} from '../atoms'
@@ -23,8 +24,7 @@ function ActionsToRender(): React.ReactElement {
   const deleteChat = useSetAtom(deleteChatWithUiFeedbackAtom)
   const {t} = useTranslation()
   const chat = useAtomValue(chatAtom)
-  const isNoteOrigin =
-    chat.origin.type === 'myNote' || chat.origin.type === 'theirNote'
+  const isNoteOrigin = isNoteChatOrigin(chat.origin)
   const canBeRerequested = useAtomValue(canBeRerequestedAtom)
   const safeGoBack = useSafeGoBack()
   const navigation =

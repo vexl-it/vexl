@@ -5,11 +5,17 @@ import {PeopleUsers} from '../icons/PeopleUsers'
 import {SandWatch} from '../icons/SandWatch'
 import {type IconProps} from '../icons/types'
 import {XStack, YStack} from '../primitives'
+import {CardButton} from './CardButton'
 import {Typography} from './Typography'
 
 export interface NoteTag {
   readonly icon?: React.ComponentType<IconProps>
   readonly label: string
+}
+
+export interface NoteActionButton {
+  readonly label: string
+  readonly onPress: () => void
 }
 
 export interface NoteProps {
@@ -21,6 +27,7 @@ export interface NoteProps {
   readonly messageNumberOfLines?: number
   readonly tag?: NoteTag
   readonly onPress?: () => void
+  readonly actionButton?: NoteActionButton
 }
 
 const CardFrame = styled(YStack, {
@@ -38,38 +45,27 @@ const CardFrame = styled(YStack, {
   } as const,
 })
 
-const TagFrame = styled(XStack, {
-  name: 'NoteTag',
-  backgroundColor: '$backgroundTertiary',
-  paddingHorizontal: '$4',
-  paddingVertical: '$2',
-  borderTopLeftRadius: '$5',
-  borderTopRightRadius: '$5',
-  borderBottomLeftRadius: '$2',
-  borderBottomRightRadius: '$2',
-  alignItems: 'center',
-  gap: '$2',
-})
-
-const HeaderFrame = styled(XStack, {
-  name: 'NoteHeader',
+const InformationFrame = styled(YStack, {
+  name: 'NoteInformation',
   backgroundColor: '$backgroundTertiary',
   padding: '$4',
   borderTopLeftRadius: '$5',
   borderTopRightRadius: '$5',
   borderBottomLeftRadius: '$2',
   borderBottomRightRadius: '$2',
+  gap: '$4',
+})
+
+const TagFrame = styled(XStack, {
+  name: 'NoteTag',
+  alignItems: 'center',
+  gap: '$1',
+})
+
+const HeaderFrame = styled(XStack, {
+  name: 'NoteHeader',
   alignItems: 'center',
   gap: '$3',
-
-  variants: {
-    belowTag: {
-      true: {
-        borderTopLeftRadius: '$2',
-        borderTopRightRadius: '$2',
-      },
-    },
-  } as const,
 })
 
 const ContentFrame = styled(YStack, {
@@ -81,6 +77,7 @@ const ContentFrame = styled(YStack, {
   borderBottomLeftRadius: '$5',
   borderBottomRightRadius: '$5',
   overflow: 'hidden',
+  gap: '$3',
 })
 
 export function Note({
@@ -92,6 +89,7 @@ export function Note({
   messageNumberOfLines,
   tag,
   onPress,
+  actionButton,
 }: NoteProps): React.JSX.Element {
   const theme = useTheme()
   const iconColor = theme.foregroundSecondary.get()
@@ -100,40 +98,42 @@ export function Note({
 
   return (
     <CardFrame pressable={isPressable} onPress={onPress}>
-      {tag ? (
-        <TagFrame>
-          {TagIcon ? <TagIcon size={16} color={iconColor} /> : null}
-          <Typography variant="micro" color="$foregroundSecondary">
-            {tag.label}
-          </Typography>
-        </TagFrame>
-      ) : null}
-      <HeaderFrame belowTag={!!tag}>
-        {avatar}
-        <YStack gap="$1" flexShrink={1} flexGrow={1}>
-          {name ? (
-            <Typography variant="descriptionBold" color="$foregroundPrimary">
-              {name}
+      <InformationFrame>
+        {tag ? (
+          <TagFrame>
+            {TagIcon ? <TagIcon size={16} color={iconColor} /> : null}
+            <Typography variant="micro" color="$foregroundSecondary">
+              {tag.label}
             </Typography>
-          ) : null}
-          <XStack gap="$3" alignItems="center">
-            {commonFriends ? (
+          </TagFrame>
+        ) : null}
+        <HeaderFrame>
+          {avatar}
+          <YStack gap="$1" flexShrink={1} flexGrow={1}>
+            {name ? (
+              <Typography variant="descriptionBold" color="$foregroundPrimary">
+                {name}
+              </Typography>
+            ) : null}
+            <XStack gap="$3" alignItems="center">
+              {commonFriends ? (
+                <XStack gap="$1" alignItems="center">
+                  <PeopleUsers size={16} color={iconColor} />
+                  <Typography variant="micro" color="$foregroundSecondary">
+                    {commonFriends}
+                  </Typography>
+                </XStack>
+              ) : null}
               <XStack gap="$1" alignItems="center">
-                <PeopleUsers size={16} color={iconColor} />
+                <SandWatch size={16} color={iconColor} />
                 <Typography variant="micro" color="$foregroundSecondary">
-                  {commonFriends}
+                  {expiration}
                 </Typography>
               </XStack>
-            ) : null}
-            <XStack gap="$1" alignItems="center">
-              <SandWatch size={16} color={iconColor} />
-              <Typography variant="micro" color="$foregroundSecondary">
-                {expiration}
-              </Typography>
             </XStack>
-          </XStack>
-        </YStack>
-      </HeaderFrame>
+          </YStack>
+        </HeaderFrame>
+      </InformationFrame>
       <ContentFrame>
         <Typography
           variant="description"
@@ -143,6 +143,11 @@ export function Note({
         >
           {message}
         </Typography>
+        {actionButton ? (
+          <CardButton contrast onPress={actionButton.onPress}>
+            {actionButton.label}
+          </CardButton>
+        ) : null}
       </ContentFrame>
     </CardFrame>
   )

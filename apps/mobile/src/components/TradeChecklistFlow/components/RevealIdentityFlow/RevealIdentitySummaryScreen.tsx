@@ -1,3 +1,4 @@
+import {useNavigationState} from '@react-navigation/native'
 import {
   InfoCircle,
   PencilWriteEdit,
@@ -5,7 +6,7 @@ import {
   Typography,
 } from '@vexl-next/ui'
 import {useAtom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {TouchableOpacity} from 'react-native'
 import {Stack, useTheme, XStack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
@@ -14,7 +15,6 @@ import {getInternationalPhoneNumber} from '../../../../utils/getInternationalPho
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import UserAvatar from '../../../UserAvatar'
 import {
-  discardRevealIdentityDraftActionAtom,
   initializeEmptyRevealIdentityDraftFromProfileActionAtom,
   revealIdentityFlowTypeAtom,
   revealIdentityPhoneNumberAtom,
@@ -24,12 +24,18 @@ import {
   showRevealIdentityPhoneNumberCheckboxAtom,
 } from '../../atoms/revealIdentityAtoms'
 import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
+import useRevealIdentityFlowNavigation from './useRevealIdentityFlowNavigation'
 
 type Props = TradeChecklistStackScreenProps<'RevealIdentitySummary'>
 
 function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
   const theme = useTheme()
+  const previousRouteName = useNavigationState(
+    (state) => state.routes[state.index - 1]?.name
+  )
+  const {closeFlow, finishFlowWithPendingUpdates} =
+    useRevealIdentityFlowNavigation()
   const revealIdentityType = useAtomValue(revealIdentityFlowTypeAtom)
   const revealIdentityPreviewImage = useAtomValue(
     revealIdentityPreviewImageAtom
@@ -42,9 +48,6 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
     showRevealIdentityPhoneNumberCheckboxAtom
   )
   const {phoneNumber} = useAtomValue(sessionDataOrDummyAtom)
-  const discardRevealIdentityDraft = useSetAtom(
-    discardRevealIdentityDraftActionAtom
-  )
   const initializeEmptyRevealIdentityDraftFromProfile = useSetAtom(
     initializeEmptyRevealIdentityDraftFromProfileActionAtom
   )
@@ -54,15 +57,18 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
     initializeEmptyRevealIdentityDraftFromProfile()
   }, [initializeEmptyRevealIdentityDraftFromProfile])
 
-  const closeFlow = useCallback(() => {
-    discardRevealIdentityDraft()
-    navigation.popTo('AgreeOnTradeDetails')
-  }, [discardRevealIdentityDraft, navigation])
-
   return (
     <TradeChecklistItemPageLayout
       header={{
         title: t('tradeChecklist.revealIdentity.summaryTitle'),
+        onBackPress: () => {
+          if (previousRouteName) {
+            navigation.goBack()
+            return
+          }
+
+          closeFlow()
+        },
       }}
       bottomButton={{
         disabled: !revealIdentityUsername.trim(),
@@ -74,7 +80,7 @@ function RevealIdentitySummaryScreen({navigation}: Props): React.ReactElement {
           const wasSaved = saveRevealIdentityDraft()
 
           if (wasSaved) {
-            navigation.popTo('AgreeOnTradeDetails')
+            finishFlowWithPendingUpdates()
           }
         },
       }}

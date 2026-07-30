@@ -15,17 +15,16 @@ import {
   YStack,
   useTheme,
 } from '@vexl-next/ui'
-import {Effect, Either} from 'effect'
+import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import React, {useCallback, useState} from 'react'
 import {getTokens} from 'tamagui'
 import {type RootStackScreenProps} from '../../navigationTypes'
-import {createNoteActionAtom} from '../../state/notes/atoms/createNoteActionAtom'
+import {postNoteActionAtom} from '../../state/notes/atoms/postNoteActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import usePreventDiscardChangesWithConfirmation from '../../utils/usePreventDiscardChangesWithConfirmation'
 import useSafeGoBack from '../../utils/useSafeGoBack'
-import {showErrorAlert} from '../ErrorAlert'
-import {toastNotificationAtom} from '../ToastNotification/atom'
-import {offerProgressModalActionAtoms} from '../UploadingOfferProgressModal/atoms'
+import {globalDialogAtom} from '../GlobalDialog'
 
 type Props = RootStackScreenProps<'CreateNote'>
 
@@ -33,77 +32,68 @@ type ExpiresValue = '7' | '3' | '1'
 
 const EXPIRES_VALUES: readonly ExpiresValue[] = ['7', '3', '1']
 
-export default function CreateNoteScreen(_props: Props): React.JSX.Element {
+export default function CreateNoteScreen({
+  navigation,
+}: Props): React.JSX.Element {
   const {t} = useTranslation()
   const theme = useTheme()
   const goBack = useSafeGoBack()
-
-  const createNote = useSetAtom(createNoteActionAtom)
-  const showProgressModal = useSetAtom(offerProgressModalActionAtoms.show)
-  const showProgressStep = useSetAtom(offerProgressModalActionAtoms.showStep)
-  const hideProgressModal = useSetAtom(offerProgressModalActionAtoms.hide)
-  const setToast = useSetAtom(toastNotificationAtom)
+  const postNote = useSetAtom(postNoteActionAtom)
+  const showDialog = useSetAtom(globalDialogAtom)
 
   const [text, setText] = useState('')
   const [expiresValue, setExpiresValue] = useState<ExpiresValue>('7')
   const [allowRepost, setAllowRepost] = useState(false)
+  const [isPosting, setIsPosting] = useState(false)
 
   const trimmedText = text.trim()
-  const canPost = trimmedText.length > 0
+  const canPost = trimmedText.length > 0 && !isPosting
+  const hasChanges = text.length > 0 || expiresValue !== '7' || allowRepost
 
-  const iconSize = getTokens().size.$6.val
+  const iconSize = getTokens().size.$7.val
+
+  const confirmDiscardNote = useCallback(
+    (): Promise<boolean> =>
+      Effect.runPromise(
+        showDialog({
+          title: t('common.youSure'),
+          subtitle: t('offerForm.discardNewOfferDescription'),
+          positiveButtonText: t('common.discard'),
+          positiveButtonVariant: 'destructive',
+          negativeButtonText: t('common.goBack'),
+        })
+      ),
+    [showDialog, t]
+  )
+
+  const {allowNextRemove} = usePreventDiscardChangesWithConfirmation({
+    enabled: hasChanges,
+    confirmLeave: confirmDiscardNote,
+    fallbackLeave: goBack,
+  })
 
   const handlePost = useCallback(() => {
     if (!canPost) return
 
-    showProgressModal({
-      title: t('notes.create.encryptingYourNote'),
-      bottomText: t('offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'),
-      indicateProgress: {type: 'intermediate'},
-    })
+    setIsPosting(true)
     void Effect.runPromise(
-      createNote({
+      postNote({
         text: trimmedText,
         allowRepost,
         expiresAfterDays: Number(expiresValue),
-        onProgress: (progress) => {
-          showProgressStep({
-            progress,
-            textData: {
-              title: t('notes.create.encryptingYourNote'),
-              bottomText: t(
-                'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
-              ),
-            },
-          })
-        },
-      }).pipe(Effect.either)
-    ).then((result) => {
-      hideProgressModal()
-      if (Either.isRight(result)) {
-        setToast({
-          title: t('notes.create.postedToastTitle'),
-          description: t('notes.create.postedToastDescription'),
-        })
-        goBack()
-      } else {
-        showErrorAlert({
-          title: t('common.somethingWentWrong'),
-          error: result.left,
-        })
-      }
+        navigation,
+        allowNextRemove,
+      })
+    ).then((success) => {
+      if (!success) setIsPosting(false)
     })
   }, [
+    allowNextRemove,
     allowRepost,
     canPost,
-    createNote,
     expiresValue,
-    goBack,
-    hideProgressModal,
-    setToast,
-    showProgressModal,
-    showProgressStep,
-    t,
+    navigation,
+    postNote,
     trimmedText,
   ])
 
@@ -133,7 +123,7 @@ export default function CreateNoteScreen(_props: Props): React.JSX.Element {
         />
 
         <YStack gap="$3">
-          <XStack alignItems="center" gap="$2">
+          <XStack alignItems="center" gap="$2" py="$3">
             <SandWatch color={theme.foregroundPrimary.get()} size={iconSize} />
             <Typography variant="paragraphSmallBold" color="$foregroundPrimary">
               {t('notes.create.expires')}
@@ -158,7 +148,7 @@ export default function CreateNoteScreen(_props: Props): React.JSX.Element {
         </YStack>
 
         <YStack gap="$3">
-          <XStack alignItems="center" gap="$2">
+          <XStack alignItems="center" gap="$2" py="$3">
             <RefreshArrowsRectangle
               color={theme.foregroundPrimary.get()}
               size={iconSize}

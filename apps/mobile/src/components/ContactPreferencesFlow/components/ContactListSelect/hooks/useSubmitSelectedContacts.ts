@@ -3,6 +3,7 @@ import {Effect} from 'effect'
 import {useSetAtom} from 'jotai'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {andThenExpectBooleanNoErrors} from '../../../../../utils/andThenExpectNoErrors'
+import {runAfterKeyboardDismiss} from '../../../../../utils/dismissKeyboardPromise'
 import {runAfterAnimationFrame} from '../../../../../utils/runAfterAnimationFrames'
 import useSafeGoBack from '../../../../../utils/useSafeGoBack'
 import {contactSelectMolecule} from '../atom'
@@ -19,12 +20,16 @@ export default function useSubmitSelectedContacts(): {
     submitAllSelectedContactsActionAtom
   )
   const [isSubmittingContacts, setIsSubmittingContacts] = useState(false)
+  const isUnmountedRef = useRef(false)
   const cancelDeferredSubmitFrameRef = useRef<(() => void) | undefined>(
     undefined
   )
 
   useEffect(() => {
+    isUnmountedRef.current = false
+
     return () => {
+      isUnmountedRef.current = true
       cancelDeferredSubmitFrameRef.current?.()
     }
   }, [])
@@ -33,14 +38,18 @@ export default function useSubmitSelectedContacts(): {
     if (isSubmittingContacts) return
 
     setIsSubmittingContacts(true)
-    cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(() => {
-      cancelDeferredSubmitFrameRef.current = undefined
-      void Effect.runPromise(
-        andThenExpectBooleanNoErrors((success) => {
-          if (success) goBack()
-        })(submitAllSelectedContacts())
-      ).finally(() => {
-        setIsSubmittingContacts(false)
+    runAfterKeyboardDismiss(() => {
+      if (isUnmountedRef.current) return
+
+      cancelDeferredSubmitFrameRef.current = runAfterAnimationFrame(() => {
+        cancelDeferredSubmitFrameRef.current = undefined
+        void Effect.runPromise(
+          andThenExpectBooleanNoErrors((success) => {
+            if (success) goBack()
+          })(submitAllSelectedContacts())
+        ).finally(() => {
+          setIsSubmittingContacts(false)
+        })
       })
     })
   }, [goBack, isSubmittingContacts, submitAllSelectedContacts])

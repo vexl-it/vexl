@@ -41,7 +41,7 @@ export const areThereUpdatesToBeSentAtom = atom(
     !deepEqual(get(updatesToBeSentAtom), UPDATES_TO_BE_SENT_INITIAL_STATE)
 )
 
-const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {
+export const clearUpdatesToBeSentActionAtom = atom(null, (get, set) => {
   set(updatesToBeSentAtom, UPDATES_TO_BE_SENT_INITIAL_STATE)
 })
 

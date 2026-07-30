@@ -84,7 +84,6 @@ export async function showChatNotification({
   }
 
   const {t} = getDefaultStore().get(translationAtom)
-
   const data = SystemChatNotificationData.encode(
     new SystemChatNotificationData({
       inbox: inbox.inbox.privateKey.publicKeyPemBase64,
@@ -124,11 +123,18 @@ export async function showChatNotification({
       },
     })
   } else {
+    const notificationTitle =
+      type === 'REQUEST_MESSAGING' && chat?.chat.origin.type === 'myNote'
+        ? t(`notifications.${type}.noteTitle`, {
+            them: userName ?? '',
+          })
+        : t(`notifications.${type}.title`, {them: userName ?? ''})
+
     await displayLocalNotification({
       id: newMessage.message.uuid,
       channelId,
       content: {
-        title: t(`notifications.${type}.title`, {them: userName ?? ''}),
+        title: notificationTitle,
         body: t(`notifications.${type}.body`, {them: userName ?? ''}),
         data,
         priority: AndroidNotificationPriority.HIGH,

@@ -1,5 +1,8 @@
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {Array} from 'effect'
+import {useAtomValue} from 'jotai'
+import {importedContactsHashesAtom} from '../../state/contacts/atom/contactsStore'
+import {deriveVisibleCommonFriendsForNote} from '../../state/marketplace/utils/visibleCommonFriends'
 import {noteExpiryText} from '../../state/notes/utils/noteExpiryText'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 
@@ -21,8 +24,14 @@ export function useNoteDisplayData(
 ): NoteDisplayData {
   const {t} = useTranslation()
 
+  const importedContactsHashes = useAtomValue(importedContactsHashesAtom)
+
   const isMine = !!note.ownershipInfo?.adminId
-  const {friendLevel, viaRepost, commonFriends} = note.noteInfo.privatePart
+  const {friendLevel, viaRepost} = note.noteInfo.privatePart
+  const visibleCommonFriends = deriveVisibleCommonFriendsForNote({
+    noteInfo: note.noteInfo,
+    importedContactsHashes,
+  })
 
   const tierLabel = isMine
     ? t('notes.detail.you')
@@ -34,10 +43,9 @@ export function useNoteDisplayData(
           ? t('notes.card.friendOfFriend')
           : undefined
 
-  const commonFriendsText =
-    !isMine && commonFriends.length > 0
-      ? t('notes.card.commonFriendsCount', {count: commonFriends.length})
-      : undefined
+  const commonFriendsText = !isMine
+    ? t('notes.card.commonFriendsCount', {count: visibleCommonFriends.length})
+    : undefined
 
   const repostLabel = note.repostInfo
     ? t('notes.card.youReposted')

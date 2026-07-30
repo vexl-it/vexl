@@ -15,7 +15,7 @@ import {
 } from '../../connections/atom/repostToConnectionsAtom'
 import {ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom} from '../../contacts/atom/ensureAndGetAllImportedContactsHaveServerToClientHashActionAtom'
 import {sessionDataOrDummyAtom} from '../../session'
-import {NoteNotFoundError} from '../domainErrors'
+import {NoteNotFoundError, NoteRepostNotAllowedError} from '../domainErrors'
 import {notesAtom, singleNoteAtom} from './notesState'
 
 export const repostNoteActionAtom = atom<
@@ -27,6 +27,7 @@ export const repostNoteActionAtom = atom<
     | ApiErrorWhileRepostingNote
     | NotePrivatePartEncryptionError
     | NoteNotFoundError
+    | NoteRepostNotAllowedError
   >
 >(null, (get, set, {noteId}) => {
   return Effect.gen(function* (_) {
@@ -36,6 +37,15 @@ export const repostNoteActionAtom = atom<
 
     if (!note) {
       return yield* _(Effect.fail(new NoteNotFoundError({noteId})))
+    }
+
+    // Reposting is only ever one level deep - a note received via someone
+    // else's repost must not be repostable again.
+    if (
+      !note.noteInfo.publicPart.allowRepost ||
+      note.noteInfo.privatePart.viaRepost
+    ) {
+      return yield* _(Effect.fail(new NoteRepostNotAllowedError({noteId})))
     }
 
     const serverToClientHashesToHashedPhoneNumbersMap = yield* _(

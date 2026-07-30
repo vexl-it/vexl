@@ -1,4 +1,5 @@
 import {type HashedPhoneNumber} from '@vexl-next/domain/src/general/HashedPhoneNumber.brand'
+import {type NoteInfo} from '@vexl-next/domain/src/general/notes'
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 
@@ -50,17 +51,47 @@ export function deriveVisibleCommonFriendsFromHashes({
   }
 }
 
-// Visible common friends for an offer only change when the offer or the
+// Visible common friends only change when the entity (offer/note) or the
 // imported contacts change, but they are read from multiple places (marketplace
-// filter, sorting, text search, offer cards). Memoize per offerInfo identity so
-// the work happens once per offer per input change.
-const visibleCommonFriendsForOfferCache = new WeakMap<
-  OfferInfo,
-  {
-    importedContactsHashesSet: ReadonlySet<HashedPhoneNumber>
-    visibleCommonFriends: VisibleCommonFriends
+// filter, sorting, text search, cards). Memoize per entity identity so the
+// work happens once per entity per input change.
+function memoizePerEntityAndContacts<Entity extends object, Result>(
+  derive: (
+    entity: Entity,
+    importedContactsHashes: readonly HashedPhoneNumber[]
+  ) => Result
+): (
+  entity: Entity,
+  importedContactsHashes: readonly HashedPhoneNumber[]
+) => Result {
+  const cache = new WeakMap<
+    Entity,
+    {
+      importedContactsHashesSet: ReadonlySet<HashedPhoneNumber>
+      result: Result
+    }
+  >()
+
+  return (entity, importedContactsHashes) => {
+    const importedContactsHashesSet = toHashesSet(importedContactsHashes)
+    const cached = cache.get(entity)
+    if (cached?.importedContactsHashesSet === importedContactsHashesSet)
+      return cached.result
+
+    const result = derive(entity, importedContactsHashes)
+    cache.set(entity, {importedContactsHashesSet, result})
+    return result
   }
->()
+}
+
+const memoizedVisibleCommonFriendsForOffer = memoizePerEntityAndContacts(
+  (offerInfo: OfferInfo, importedContactsHashes) =>
+    deriveVisibleCommonFriendsFromHashes({
+      commonFriends: offerInfo.privatePart.commonFriends,
+      verifiedCommonFriends: offerInfo.privatePart.verifiedCommonFriends,
+      importedContactsHashes,
+    })
+)
 
 export function deriveVisibleCommonFriendsForOffer({
   offerInfo,
@@ -69,21 +100,24 @@ export function deriveVisibleCommonFriendsForOffer({
   readonly offerInfo: OfferInfo
   readonly importedContactsHashes: readonly HashedPhoneNumber[]
 }): VisibleCommonFriends {
-  const importedContactsHashesSet = toHashesSet(importedContactsHashes)
-  const cached = visibleCommonFriendsForOfferCache.get(offerInfo)
-  if (cached?.importedContactsHashesSet === importedContactsHashesSet)
-    return cached.visibleCommonFriends
+  return memoizedVisibleCommonFriendsForOffer(offerInfo, importedContactsHashes)
+}
 
-  const visibleCommonFriends = deriveVisibleCommonFriendsFromHashes({
-    commonFriends: offerInfo.privatePart.commonFriends,
-    verifiedCommonFriends: offerInfo.privatePart.verifiedCommonFriends,
-    importedContactsHashes,
-  })
-  visibleCommonFriendsForOfferCache.set(offerInfo, {
-    importedContactsHashesSet,
-    visibleCommonFriends,
-  })
-  return visibleCommonFriends
+const memoizedVisibleCommonFriendsForNote = memoizePerEntityAndContacts(
+  (noteInfo: NoteInfo, importedContactsHashes) =>
+    Array.filter(noteInfo.privatePart.commonFriends, (one) =>
+      toHashesSet(importedContactsHashes).has(one)
+    )
+)
+
+export function deriveVisibleCommonFriendsForNote({
+  noteInfo,
+  importedContactsHashes,
+}: {
+  readonly noteInfo: NoteInfo
+  readonly importedContactsHashes: readonly HashedPhoneNumber[]
+}): readonly HashedPhoneNumber[] {
+  return memoizedVisibleCommonFriendsForNote(noteInfo, importedContactsHashes)
 }
 
 export function deriveVisibleCommonFriendsForChat({

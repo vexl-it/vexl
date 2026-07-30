@@ -12,6 +12,7 @@ import {getOtherSideData} from '../../state/chat/atoms/selectOtherSideDataAtom'
 import {type ChatMessageWithState} from '../../state/chat/domain'
 import compareMessages from '../../state/chat/utils/compareMessages'
 import chatShouldBeVisible from '../../state/chat/utils/isChatActive'
+import isNoteChatOrigin from '../../state/chat/utils/isNoteChatOrigin'
 import {offersAtom} from '../../state/marketplace/atoms/offersState'
 import {notesAtom} from '../../state/notes/atoms/notesState'
 import {getOtherSideRealNameOrFriendLevel} from '../../utils/chat/getOtherSideFriendLevel'
@@ -61,7 +62,7 @@ function getNoteForChat({
 }): OneNoteInState | undefined {
   const {origin} = chat
 
-  if (origin.type !== 'myNote' && origin.type !== 'theirNote') return undefined
+  if (!isNoteChatOrigin(origin)) return undefined
   if (origin.note) return origin.note
 
   return notes.find((one) => one.noteInfo.noteId === origin.noteId)

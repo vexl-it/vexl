@@ -25,6 +25,7 @@ import {Alert, ScrollView} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {Stack, getTokens, useTheme} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useGetAllClubsNamesForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useStatusBarStyleForScreen} from '../../../state/statusBarStyleAtom'
 import {andThenExpectBooleanNoErrors} from '../../../utils/andThenExpectNoErrors'
@@ -36,12 +37,9 @@ import {isDeveloperAtom} from '../../../utils/preferences'
 import useResetNavigationToMessagingScreen from '../../../utils/useResetNavigationToMessagingScreen'
 import OfferAuthorBanner from '../../OfferAuthorBanner'
 import {reportOfferActionAtom} from '../../OfferDetailScreen/atoms'
-import {
-  prepareRevealIdentityDraftActionAtom,
-  shouldOpenRevealIdentitySummaryAtom,
-} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
+import useOpenRevealIdentityFlow from './useOpenRevealIdentityFlow'
 
 function SectionSeparator(): React.ReactElement {
   return <Stack height="$0.5" backgroundColor="$backgroundTertiary" ml="$12" />
@@ -215,17 +213,14 @@ export default function ChatInfoContent({
   const shouldGrayScaleAvatar = useAtomValue(shouldGrayScaleAvatarAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
   const theirOfferAndNotReported = useAtomValue(theirOfferAndNotReportedAtom)
-  const shouldOpenRevealIdentitySummary = useAtomValue(
-    shouldOpenRevealIdentitySummaryAtom
-  )
-  const prepareRevealIdentityDraft = useSetAtom(
-    prepareRevealIdentityDraftActionAtom
-  )
+  const openRevealIdentityFlow = useOpenRevealIdentityFlow()
   const localizedCommonConnectionsCount = localizeNumber({
     number: commonConnectionsCount,
   })
   const showTradeChecklistAction =
-    !!otherSideSupportsTradingChecklist && !listingTypeIsOther
+    !!otherSideSupportsTradingChecklist &&
+    !listingTypeIsOther &&
+    !isNoteChatOrigin(chat.origin)
   const showRevealIdentityAction =
     canSendMessages && identityRevealStatus === 'notStarted'
   const showOfferDetailAction = !!offer
@@ -374,16 +369,7 @@ export default function ChatInfoContent({
                   color="foregroundPrimary"
                   icon={EyeShut}
                   label={t('messages.askToReveal')}
-                  onPress={() => {
-                    prepareRevealIdentityDraft()
-                    navigation.navigate('TradeChecklistFlow', {
-                      screen: shouldOpenRevealIdentitySummary
-                        ? 'RevealIdentitySummary'
-                        : 'RevealIdentityPhoto',
-                      chatId,
-                      inboxKey,
-                    })
-                  }}
+                  onPress={openRevealIdentityFlow}
                 />
                 <SectionSeparator />
               </>

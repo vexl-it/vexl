@@ -121,13 +121,11 @@ export interface Props extends Omit<
   readonly itemAfterFirstOffer?: React.ReactElement | null
   readonly ListFooterComponent?: React.ReactElement | null
   readonly scrollToTopRef?: React.RefObject<(() => void) | null>
-  readonly hideRefreshIndicator?: boolean
 }
 
 function OffersList({
   onRefresh,
   refreshing,
-  hideRefreshIndicator,
   items,
   itemAfterFirstOffer,
   scrollToTopRef,
@@ -164,9 +162,7 @@ function OffersList({
   const [listChangeGeneration, setListChangeGeneration] = useState(0)
   const [exitingItemKey, setExitingItemKey] = useState<string | null>(null)
   const theme = useTheme()
-  const refreshIndicatorColor = hideRefreshIndicator
-    ? tokens.color.transparent.val
-    : theme.foregroundSecondary.get()
+  const refreshIndicatorColor = theme.foregroundSecondary.get()
 
   const contentContainerStyle = useMemo(
     () => ({
@@ -462,9 +458,6 @@ function OffersList({
           refreshControl={
             <RefreshControl
               colors={[refreshIndicatorColor]}
-              progressBackgroundColor={
-                hideRefreshIndicator ? tokens.color.transparent.val : undefined
-              }
               refreshing={refreshing ?? false}
               onRefresh={onRefresh ?? (() => {})}
               tintColor={refreshIndicatorColor}

@@ -601,7 +601,11 @@ const syncNetworkAfterContactsImportActionAtom = atom(
           set(loadingOverlayDisplayedAtom, false)
         }
         set(offerProgressModalActionAtoms.show, {
-          title: t('contacts.refreshingOffers.title'),
+          // The offers batch runs first, so lead with the offers title unless
+          // there are only notes to refresh.
+          title: areThereAnyMyOffers
+            ? t('contacts.refreshingOffers.title')
+            : t('contacts.refreshingNotes.title'),
           bottomText: t(
             'offerForm.offerEncryption.dontCloseTheAppCanTakeAWhile'
           ),
@@ -669,14 +673,37 @@ const syncNetworkAfterContactsImportActionAtom = atom(
           )
         )
 
+        const refreshingDoneCopy =
+          areThereAnyMyOffers && areThereAnyMyNotes
+            ? {
+                title: t('contacts.refreshingNotesAndOffers.titleDone'),
+                bottomText: t(
+                  'contacts.refreshingNotesAndOffers.bottomTextDone'
+                ),
+                belowProgressLeft: t(
+                  'contacts.refreshingNotesAndOffers.belowProgressLeftDone'
+                ),
+              }
+            : areThereAnyMyNotes
+              ? {
+                  title: t('contacts.refreshingNotes.titleDone'),
+                  bottomText: t('contacts.refreshingNotes.bottomTextDone'),
+                  belowProgressLeft: t(
+                    'contacts.refreshingNotes.belowProgressLeftDone'
+                  ),
+                }
+              : {
+                  title: t('contacts.refreshingOffers.titleDone'),
+                  bottomText: t('contacts.refreshingOffers.bottomTextDone'),
+                  belowProgressLeft: t(
+                    'contacts.refreshingOffers.belowProgressLeftDone'
+                  ),
+                }
+
         yield* _(
           set(offerProgressModalActionAtoms.hideDeffered, {
             data: {
-              title: t('contacts.refreshingOffers.titleDone'),
-              bottomText: t('contacts.refreshingOffers.bottomTextDone'),
-              belowProgressLeft: t(
-                'contacts.refreshingOffers.belowProgressLeftDone'
-              ),
+              ...refreshingDoneCopy,
               belowProgressRight: t('progressBar.DONE'),
               indicateProgress: {
                 type: 'done',

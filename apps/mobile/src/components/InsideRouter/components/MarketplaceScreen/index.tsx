@@ -84,6 +84,7 @@ function MarketplaceScreen(): React.ReactElement {
       <MarketplaceScreenContent
         activeTab={activeTab}
         onActiveTabChange={setActiveTab}
+        scrollToTopRequestId={route.params?.tabSwitchRequestId}
       />
       <NewOfferFab activeTab={activeTab} />
     </InsideScreen>

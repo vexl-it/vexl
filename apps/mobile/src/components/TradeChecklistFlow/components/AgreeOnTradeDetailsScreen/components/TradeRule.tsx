@@ -15,6 +15,7 @@ function TradeRule({ruleNumber, title}: Props): React.ReactElement {
         jc="center"
         h={40}
         w={40}
+        flexShrink={0}
         bc="$backgroundSecondary"
         br="$3"
       >
@@ -22,7 +23,13 @@ function TradeRule({ruleNumber, title}: Props): React.ReactElement {
           {ruleNumber}
         </Typography>
       </Stack>
-      <Typography variant="paragraph" color="$foregroundPrimary">
+      <Typography
+        variant="paragraph"
+        color="$foregroundPrimary"
+        flexShrink={1}
+        minWidth={0}
+        numberOfLines={2}
+      >
         {title}
       </Typography>
     </XStack>

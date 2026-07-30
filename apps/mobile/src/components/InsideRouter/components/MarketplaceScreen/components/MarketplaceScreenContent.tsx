@@ -33,6 +33,7 @@ import {
   runAfterTwoAnimationFrames,
 } from '../../../../../utils/runAfterAnimationFrames'
 import {useAppState} from '../../../../../utils/useAppState'
+import useScrollToTopOnFocus from '../../../../../utils/useScrollToTopOnFocus'
 import MarketplaceLoadingOverlay from '../../../../MarketplaceLoadingOverlay'
 import OffersList from '../../../../OffersList'
 import RetainedScene from '../../../../RetainedScene'
@@ -131,6 +132,7 @@ const AllOffersScene = React.memo(function AllOffersScene({
     marketplaceFirstOfferBannerAtom
   )
   const loading = useAreOffersLoading()
+  const [isPullToRefreshActive, setIsPullToRefreshActive] = useState(false)
   const [listHeaderHeight, setListHeaderHeight] = useState(0)
   const [isFilterTransitionPending, setIsFilterTransitionPending] =
     useState(false)
@@ -194,7 +196,16 @@ const AllOffersScene = React.memo(function AllOffersScene({
   }, [])
 
   const handleRefresh = useCallback(() => {
-    Effect.runFork(refreshOffers({forceRemovedOffersReconciliation: true}))
+    setIsPullToRefreshActive(true)
+    Effect.runFork(
+      refreshOffers({forceRemovedOffersReconciliation: true}).pipe(
+        Effect.ensuring(
+          Effect.sync(() => {
+            setIsPullToRefreshActive(false)
+          })
+        )
+      )
+    )
   }, [refreshOffers])
 
   const listHeaderComponent = useMemo(
@@ -277,8 +288,12 @@ const AllOffersScene = React.memo(function AllOffersScene({
         items={marketplaceListData}
         itemAfterFirstOffer={itemAfterFirstOffer}
         onRefresh={handleRefresh}
-        refreshing={loading}
-        hideRefreshIndicator={areThereOffersWithoutFilters}
+        // Programmatically activating RefreshControl changes the content inset
+        // on iOS. Drive it only from an actual pull, never a background refresh.
+        // Existing offers use the inline header loader to avoid two indicators.
+        refreshing={
+          areThereOffersWithoutFilters ? false : isPullToRefreshActive
+        }
         onScroll={activeTab === 'allOffers' ? onScroll : undefined}
         scrollEventThrottle={16}
         maintainVisibleContentPosition={{disabled: true}}
@@ -362,9 +377,11 @@ function AllOffersActiveEffects({
 function MarketplaceScreenContent({
   activeTab,
   onActiveTabChange,
+  scrollToTopRequestId,
 }: {
   readonly activeTab: MarketplaceTab
   readonly onActiveTabChange: (tab: MarketplaceTab) => void
+  readonly scrollToTopRequestId: string | undefined
 }): React.ReactElement {
   const {scrollY} = useInsideScreenScroll()
   const tabs = useTabs()
@@ -388,9 +405,18 @@ function MarketplaceScreenContent({
     [scrollY]
   )
 
+  const scrollActiveTabToTop = useCallback(() => {
+    scrollTabToTop(activeTab)
+  }, [activeTab, scrollTabToTop])
+
   useLayoutEffect(() => {
     scrollTabToTop(activeTab)
   }, [activeTab, scrollTabToTop])
+
+  useScrollToTopOnFocus({
+    requestId: scrollToTopRequestId,
+    scrollToTop: scrollActiveTabToTop,
+  })
 
   useEffect(() => {
     return runAfterTwoAnimationFrames(() => {

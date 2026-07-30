@@ -46,6 +46,7 @@ import {
   type ChatTransientMessageId,
   type ChatWithMessages,
 } from '../../../state/chat/domain'
+import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {getChatState} from '../../../state/chat/utils/offerStates'
 import {importedContactsHashesAtom} from '../../../state/contacts/atom/contactsStore'
 import {createBtcPriceForCurrencyAtom} from '../../../state/currentBtcPriceAtoms'
@@ -797,8 +798,8 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
   )
 
   const cancelRequestActionAtom = atom(null, (get, set) => {
-    const originType = get(chatAtom)?.origin.type
-    const isNoteOrigin = originType === 'theirNote' || originType === 'myNote'
+    const origin = get(chatAtom)?.origin
+    const isNoteOrigin = !!origin && isNoteChatOrigin(origin)
     const offerInfo = get(offerForChatAtom)?.offerInfo
     // Note-origin chats have no backing offer, so the "offer deleted" gate
     // must not block cancelling a pending note request.

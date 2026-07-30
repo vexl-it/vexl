@@ -5,6 +5,7 @@ import {useAtomValue} from 'jotai'
 import {useCallback} from 'react'
 import {type RootStackScreenProps} from '../../../navigationTypes'
 import {type ChatMessageWithState} from '../../../state/chat/domain'
+import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useGetAllClubsForIds} from '../../../state/clubs/atom/clubsWithMembersAtom'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {chatMolecule} from '../atoms'
@@ -63,10 +64,23 @@ export function VexlBotRequestHelp({
     verifiedConnectionsHashes,
   ])
 
+  const isNoteChat = isNoteChatOrigin(chat.origin)
+
   if (
     message.message.messageType === 'APPROVE_MESSAGING' &&
     chatState === 'chatOpen'
   ) {
+    if (isNoteChat) {
+      return (
+        <VexlbotActionCard
+          mt="$2"
+          managedHidingId={message.message.uuid}
+          title={t('notifications.APPROVE_MESSAGING.title')}
+          description={t('notifications.APPROVE_MESSAGING.body')}
+        />
+      )
+    }
+
     return (
       <VexlbotActionCard
         mt="$2"
@@ -97,14 +111,14 @@ export function VexlBotRequestHelp({
 
   if (message.message.messageType === 'REQUEST_MESSAGING') {
     if (message.state === 'received') {
-      const isNoteChat = chat.origin.type === 'myNote'
+      const isMyNoteChat = chat.origin.type === 'myNote'
 
       // Other side sent the request messaging
       return (
         <VexlbotActionCard
           title={t('messages.vexlBot.welcomeToTheTradeChat.title')}
           description={
-            isNoteChat
+            isMyNoteChat
               ? t('notes.chat.welcomeReceiverDescription')
               : t('messages.vexlBot.welcomeToTheTradeChat.receiverDescription')
           }
@@ -115,10 +129,10 @@ export function VexlBotRequestHelp({
               variant="secondary"
               size="medium"
               onPress={
-                isNoteChat ? handleNoteDetailPress : handleOfferDetailsPress
+                isMyNoteChat ? handleNoteDetailPress : handleOfferDetailsPress
               }
             >
-              {isNoteChat
+              {isMyNoteChat
                 ? t('notes.chat.noteDetail')
                 : t('common.offerDetails')}
             </Button>

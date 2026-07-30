@@ -2,6 +2,7 @@ import {
   Button,
   FlagReport,
   NavigationBar,
+  PeopleUsers,
   RefreshArrowsRectangle,
   Screen,
   Stack,
@@ -16,6 +17,8 @@ import {Effect, Either} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
 import React, {useCallback, useMemo} from 'react'
 import {type RootStackScreenProps} from '../../navigationTypes'
+import {importedContactsHashesAtom} from '../../state/contacts/atom/contactsStore'
+import {deriveVisibleCommonFriendsForNote} from '../../state/marketplace/utils/visibleCommonFriends'
 import {deleteNoteActionAtom} from '../../state/notes/atoms/deleteNoteActionAtom'
 import {singleNoteAtom} from '../../state/notes/atoms/notesState'
 import {reportNoteWithPromptActionAtom} from '../../state/notes/atoms/reportNoteActionAtom'
@@ -24,13 +27,14 @@ import {
   undoRepostNoteActionAtom,
 } from '../../state/notes/atoms/repostNoteActionAtom'
 import {useTranslation} from '../../utils/localization/I18nProvider'
+import navigateToBoard from '../../utils/navigateToBoard'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import CommonFriends from '../CommonFriends'
 import {showErrorAlert} from '../ErrorAlert'
 import {globalDialogAtom} from '../GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../LoadingOverlayProvider'
 import {NotePreview} from '../Notes/NotePreview'
-import {toastNotificationAtom} from '../ToastNotification/atom'
+import {useNoteChatNavigation} from '../Notes/useNoteChatNavigation'
 
 type Props = RootStackScreenProps<'NoteDetail'>
 
@@ -76,14 +80,16 @@ export default function NoteDetailScreen({
 }: Props): React.JSX.Element {
   const {noteId} = route.params
   const {t} = useTranslation()
+  const theme = useTheme()
   const goBack = useSafeGoBack()
 
   const noteAtom = useMemo(() => singleNoteAtom(noteId), [noteId])
   const note = useAtomValue(noteAtom)
+  const importedContactsHashes = useAtomValue(importedContactsHashesAtom)
+  const {isChatOpen, navigateToChat} = useNoteChatNavigation(noteId)
 
   const askDialog = useSetAtom(globalDialogAtom)
   const setLoading = useSetAtom(loadingOverlayDisplayedAtom)
-  const setToast = useSetAtom(toastNotificationAtom)
   const deleteNote = useSetAtom(deleteNoteActionAtom)
   const repostNote = useSetAtom(repostNoteActionAtom)
   const undoRepostNote = useSetAtom(undoRepostNoteActionAtom)
@@ -126,22 +132,51 @@ export default function NoteDetailScreen({
     })
   }, [adminId, askDialog, deleteNote, goBack, runNoteAction, t])
 
+  const navigateToAllNotes = useCallback(() => {
+    navigateToBoard(navigation, 'all')
+  }, [navigation])
+
   const handleRepost = useCallback(() => {
     runNoteAction(repostNote({noteId}), () => {
-      setToast({
-        title: t('notes.repost.toastTitle'),
-        description: t('notes.repost.toastDescription'),
-      })
+      Effect.runFork(
+        askDialog({
+          title: t('notes.repost.toastTitle'),
+          subtitle: t('notes.repost.toastDescription'),
+        })
+      )
+      navigateToAllNotes()
     })
-  }, [noteId, repostNote, runNoteAction, setToast, t])
+  }, [askDialog, navigateToAllNotes, noteId, repostNote, runNoteAction, t])
 
   const handleUndoRepost = useCallback(() => {
-    runNoteAction(undoRepostNote({noteId}))
-  }, [noteId, runNoteAction, undoRepostNote])
+    runNoteAction(undoRepostNote({noteId}), () => {
+      Effect.runFork(
+        askDialog({
+          title: t('notes.repost.undoSuccessTitle'),
+          subtitle: t('notes.repost.undoSuccessDescription'),
+        })
+      )
+      navigateToAllNotes()
+    })
+  }, [askDialog, navigateToAllNotes, noteId, runNoteAction, t, undoRepostNote])
+
+  const handleNoCommonFriendsPress = useCallback(() => {
+    Effect.runFork(
+      askDialog({
+        title: t('offer.noCommonFriends.title'),
+        subtitle: t('notes.detail.noCommonFriendsDescription'),
+        positiveButtonText: t('common.gotIt'),
+      })
+    )
+  }, [askDialog, t])
 
   const handleReport = useCallback(() => {
-    void Effect.runPromise(reportNoteWithPrompt({noteId}))
-  }, [noteId, reportNoteWithPrompt])
+    void Effect.runPromise(reportNoteWithPrompt({noteId})).then((reported) => {
+      if (!reported) return
+
+      navigateToAllNotes()
+    })
+  }, [navigateToAllNotes, noteId, reportNoteWithPrompt])
 
   const navigationBar = (
     <NavigationBar
@@ -155,10 +190,16 @@ export default function NoteDetailScreen({
     return <Screen navigationBar={navigationBar}>{null}</Screen>
   }
 
-  const commonFriends = note.noteInfo.privatePart.commonFriends
+  const commonFriends = deriveVisibleCommonFriendsForNote({
+    noteInfo: note.noteInfo,
+    importedContactsHashes,
+  })
   const isReported = note.flags.reported
   const canRepost =
-    !isMine && !note.repostInfo && note.noteInfo.publicPart.allowRepost
+    !isMine &&
+    !note.repostInfo &&
+    note.noteInfo.publicPart.allowRepost &&
+    !note.noteInfo.privatePart.viaRepost
   const showRepostRow = !isMine && (!!note.repostInfo || canRepost)
   const showReportRow = !isMine && !isReported
   const showActionsCard = showRepostRow || showReportRow
@@ -166,6 +207,10 @@ export default function NoteDetailScreen({
   const footer = isMine ? (
     <Button variant="destructive" onPress={handleDelete}>
       {t('notes.detail.deleteNote')}
+    </Button>
+  ) : isChatOpen ? (
+    <Button variant="primary" onPress={navigateToChat}>
+      {t('offer.goToChat')}
     </Button>
   ) : (
     <Button
@@ -183,14 +228,31 @@ export default function NoteDetailScreen({
       <YStack gap="$5" paddingTop="$4">
         <NotePreview note={note} />
 
-        {!isMine && commonFriends.length > 0 ? (
-          <CommonFriends
-            commonConnectionsHashes={commonFriends}
-            otherSideClubs={[]}
-            label={t('notes.detail.commonFriendsCount', {
-              count: commonFriends.length,
-            })}
-          />
+        {!isMine ? (
+          commonFriends.length > 0 ? (
+            <CommonFriends
+              commonConnectionsHashes={commonFriends}
+              otherSideClubs={[]}
+              label={t('notes.detail.commonFriendsCount', {
+                count: commonFriends.length,
+              })}
+            />
+          ) : (
+            <XStack
+              backgroundColor="$backgroundSecondary"
+              borderRadius="$5"
+              padding="$5"
+              gap="$1"
+              alignItems="center"
+              pressStyle={{opacity: 0.7}}
+              onPress={handleNoCommonFriendsPress}
+            >
+              <PeopleUsers size={18} color={theme.foregroundSecondary.get()} />
+              <Typography variant="micro" color="$foregroundSecondary" flex={1}>
+                {t('offer.noCommonFriendsExplanation')}
+              </Typography>
+            </XStack>
+          )
         ) : null}
 
         {showActionsCard ? (

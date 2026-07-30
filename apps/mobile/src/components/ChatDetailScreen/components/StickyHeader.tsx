@@ -13,6 +13,7 @@ import React, {useCallback, useMemo} from 'react'
 import {type GestureResponderEvent} from 'react-native'
 import {Stack} from 'tamagui'
 import {type RootStackScreenProps} from '../../../navigationTypes'
+import isNoteChatOrigin from '../../../state/chat/utils/isNoteChatOrigin'
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import {formatFullCurrencyAmount} from '../../../utils/localization/currency'
 import {formattingLocaleAtom} from '../../../utils/localization/formattingLocaleAtom'
@@ -116,8 +117,7 @@ function StickyHeader(): React.ReactElement | null {
     })
   }, [chat.otherSide.publicKey, inboxKey, navigation])
 
-  const isNoteOrigin =
-    chat.origin.type === 'myNote' || chat.origin.type === 'theirNote'
+  const isNoteOrigin = isNoteChatOrigin(chat.origin)
 
   const openNoteDetail = useCallback(() => {
     navigation.navigate('ChatNoteDetail', {

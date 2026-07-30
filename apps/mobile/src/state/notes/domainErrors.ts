@@ -6,3 +6,9 @@ export class NoteNotFoundError extends Schema.TaggedError<NoteNotFoundError>(
 )('NoteNotFoundError', {
   noteId: NoteId,
 }) {}
+
+export class NoteRepostNotAllowedError extends Schema.TaggedError<NoteRepostNotAllowedError>(
+  'NoteRepostNotAllowedError'
+)('NoteRepostNotAllowedError', {
+  noteId: NoteId,
+}) {}

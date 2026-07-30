@@ -6,7 +6,6 @@ import {apiAtom} from '../../../api'
 import {showErrorAlert} from '../../../components/ErrorAlert'
 import {globalDialogAtom} from '../../../components/GlobalDialog'
 import {loadingOverlayDisplayedAtom} from '../../../components/LoadingOverlayProvider'
-import {toastNotificationAtom} from '../../../components/ToastNotification/atom'
 import {translationAtom} from '../../../utils/localization/I18nProvider'
 import reportError from '../../../utils/reportError'
 import {notesAtom} from './notesState'
@@ -39,7 +38,7 @@ export const reportNoteActionAtom = atom<
 
 /**
  * Full report flow with UI feedback: confirmation dialog, loading overlay,
- * success toast / error alert. Resolves to true when the note was reported.
+ * success dialog / error alert. Resolves to true when the note was reported.
  */
 export const reportNoteWithPromptActionAtom = atom(
   null,
@@ -73,10 +72,12 @@ export const reportNoteWithPromptActionAtom = atom(
         return false
       }
 
-      set(toastNotificationAtom, {
-        title: t('notes.report.toastTitle'),
-        description: t('notes.report.toastDescription'),
-      })
+      yield* _(
+        set(globalDialogAtom, {
+          title: t('notes.report.toastTitle'),
+          subtitle: t('notes.report.toastDescription'),
+        })
+      )
       return true
     })
 )

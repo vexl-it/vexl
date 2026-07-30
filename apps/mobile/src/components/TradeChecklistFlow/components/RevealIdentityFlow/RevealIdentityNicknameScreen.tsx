@@ -2,26 +2,24 @@ import {UserName} from '@vexl-next/domain/src/general/UserName.brand'
 import {TextField, Typography, XmarkCancelClose} from '@vexl-next/ui'
 import {Option, Schema} from 'effect/index'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect} from 'react'
+import React, {useEffect} from 'react'
 import {Stack} from 'tamagui'
 import {type TradeChecklistStackScreenProps} from '../../../../navigationTypes'
 import {invalidUsernameUIFeedbackAtom} from '../../../../state/session/userDataAtoms'
 import {useTranslation} from '../../../../utils/localization/I18nProvider'
 import {
-  discardRevealIdentityDraftActionAtom,
   initializeEmptyRevealIdentityDraftFromProfileActionAtom,
   revealIdentityUsernameAtom,
 } from '../../atoms/revealIdentityAtoms'
 import {TradeChecklistItemPageLayout} from '../TradeChecklistItemPageLayout'
+import useRevealIdentityFlowNavigation from './useRevealIdentityFlowNavigation'
 
 type Props = TradeChecklistStackScreenProps<'RevealIdentityNickname'>
 
 function RevealIdentityNicknameScreen({navigation}: Props): React.ReactElement {
   const {t} = useTranslation()
+  const {closeFlow} = useRevealIdentityFlowNavigation()
   const revealIdentityUsername = useAtomValue(revealIdentityUsernameAtom)
-  const discardRevealIdentityDraft = useSetAtom(
-    discardRevealIdentityDraftActionAtom
-  )
   const initializeEmptyRevealIdentityDraftFromProfile = useSetAtom(
     initializeEmptyRevealIdentityDraftFromProfileActionAtom
   )
@@ -32,11 +30,6 @@ function RevealIdentityNicknameScreen({navigation}: Props): React.ReactElement {
   useEffect(() => {
     initializeEmptyRevealIdentityDraftFromProfile()
   }, [initializeEmptyRevealIdentityDraftFromProfile])
-
-  const closeFlow = useCallback(() => {
-    discardRevealIdentityDraft()
-    navigation.popTo('AgreeOnTradeDetails')
-  }, [discardRevealIdentityDraft, navigation])
 
   return (
     <TradeChecklistItemPageLayout

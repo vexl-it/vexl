@@ -1,5 +1,9 @@
 import {useFocusEffect} from '@react-navigation/native'
-import {FlashList, type ListRenderItemInfo} from '@shopify/flash-list'
+import {
+  FlashList,
+  type FlashListRef,
+  type ListRenderItemInfo,
+} from '@shopify/flash-list'
 import {type OneNoteInState} from '@vexl-next/domain/src/general/notes'
 import {
   Button,
@@ -14,7 +18,7 @@ import {
 } from '@vexl-next/ui'
 import {Array, Effect, Option, Order, pipe} from 'effect'
 import {useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {RefreshControl} from 'react-native'
 import {getTokens} from 'tamagui'
 import {type CommunityTabsScreenProps} from '../../../../../../navigationTypes'
@@ -26,12 +30,31 @@ import {refreshNotesActionAtom} from '../../../../../../state/notes/atoms/refres
 import {showNotesBoardIntroSheetIfNeededActionAtom} from '../../../../../../state/notes/atoms/showNotesBoardIntroSheetIfNeededActionAtom'
 import {useTranslation} from '../../../../../../utils/localization/I18nProvider'
 import {notesBoardEnabledAtom} from '../../../../../../utils/preferences'
+import useScrollToTopOnFocus from '../../../../../../utils/useScrollToTopOnFocus'
 import {NoteCard} from '../../../../../Notes/NoteCard'
-import {boardFilterAtom, type BoardFilter} from './atoms'
 
 type Props = CommunityTabsScreenProps<'Board'>
+type BoardFilter = 'all' | 'mine'
+type BoardSection = 'ACTIVE' | 'EXPIRED'
 
-const keyExtractor = (note: OneNoteInState): string => note.noteInfo.noteId
+type BoardListItem =
+  | {readonly type: 'sectionHeader'; readonly section: BoardSection}
+  | {readonly type: 'note'; readonly note: OneNoteInState}
+
+interface ItemSeparatorProps {
+  readonly leadingItem?: BoardListItem
+  readonly trailingItem?: BoardListItem
+}
+
+const keyExtractor = (item: BoardListItem): string =>
+  item.type === 'sectionHeader'
+    ? `sectionHeader-${item.section}`
+    : item.note.noteInfo.noteId
+
+const toNoteItem = (note: OneNoteInState): BoardListItem => ({
+  type: 'note',
+  note,
+})
 
 // Newest first - notes carry an incrementing numeric id used for ordering.
 const byNewestFirst = Order.mapInput(
@@ -96,12 +119,11 @@ function BoardComingSoon(): React.JSX.Element {
   )
 }
 
-function NotesBoard({navigation}: Props): React.JSX.Element {
+function NotesBoard({navigation, route}: Props): React.JSX.Element {
   const {t} = useTranslation()
   const theme = useTheme()
+  const listRef = useRef<FlashListRef<BoardListItem>>(null)
 
-  const filter = useAtomValue(boardFilterAtom)
-  const setFilter = useSetAtom(boardFilterAtom)
   const othersNotes = useAtomValue(othersNotesAtom)
   const myNotes = useAtomValue(myNotesAtom)
   const refreshNotes = useSetAtom(refreshNotesActionAtom)
@@ -109,24 +131,69 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
     showNotesBoardIntroSheetIfNeededActionAtom
   )
 
+  const [filter, setFilter] = useState<BoardFilter>(
+    route.params?.initialFilter ?? 'all'
+  )
   const [refreshing, setRefreshing] = useState(false)
+
+  const scrollToTop = useCallback(() => {
+    listRef.current?.scrollToOffset({offset: 0, animated: false})
+  }, [])
 
   useEffect(() => {
     void Effect.runPromise(showIntroIfNeeded())
   }, [showIntroIfNeeded])
 
-  const visibleNotes = useMemo(() => {
+  useEffect(() => {
+    scrollToTop()
+  }, [filter, scrollToTop])
+
+  useEffect(() => {
+    if (route.params?.initialFilter) {
+      setFilter(route.params.initialFilter)
+    }
+  }, [route.params?.filterSwitchRequestId, route.params?.initialFilter])
+
+  const listItems = useMemo((): BoardListItem[] => {
     const now = Date.now()
-    const source: readonly OneNoteInState[] =
-      filter === 'mine' ? myNotes : othersNotes
-    return pipe(
-      source,
-      Array.filter((note) => note.noteInfo.expiresAt > now),
-      Array.sort(byNewestFirst)
+
+    if (filter !== 'mine') {
+      return pipe(
+        othersNotes,
+        Array.filter((note) => note.noteInfo.expiresAt > now),
+        Array.sort(byNewestFirst),
+        Array.map(toNoteItem)
+      )
+    }
+
+    // Own notes stay visible after expiry until the state purges them.
+    const sorted = pipe(myNotes, Array.sort(byNewestFirst))
+    const expiredNotes = pipe(
+      sorted,
+      Array.filter((note) => note.noteInfo.expiresAt <= now)
     )
+
+    if (!Array.isNonEmptyArray(expiredNotes))
+      return Array.map(sorted, toNoteItem)
+
+    const activeNotes = pipe(
+      sorted,
+      Array.filter((note) => note.noteInfo.expiresAt > now)
+    )
+
+    return [
+      ...(Array.isNonEmptyArray(activeNotes)
+        ? [
+            {type: 'sectionHeader', section: 'ACTIVE'} satisfies BoardListItem,
+            ...Array.map(activeNotes, toNoteItem),
+          ]
+        : []),
+      {type: 'sectionHeader', section: 'EXPIRED'} satisfies BoardListItem,
+      ...Array.map(expiredNotes, toNoteItem),
+    ]
   }, [othersNotes, filter, myNotes])
 
-  const handleRefresh = useCallback(() => {
+  const handlePullToRefresh = useCallback(() => {
     setRefreshing(true)
     void Effect.runPromise(refreshNotes()).finally(() => {
       setRefreshing(false)
@@ -135,25 +202,40 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      handleRefresh()
-    }, [handleRefresh])
+      Effect.runFork(refreshNotes())
+    }, [refreshNotes])
   )
+
+  useScrollToTopOnFocus({
+    requestId: route.params?.filterSwitchRequestId,
+    scrollToTop,
+  })
 
   const goToCreateNote = useCallback(() => {
     navigation.navigate('CreateNote')
   }, [navigation])
 
   const renderItem = useCallback(
-    ({item}: ListRenderItemInfo<OneNoteInState>) => (
-      <NoteCard
-        note={item}
-        messageNumberOfLines={2}
-        onPress={() => {
-          navigation.navigate('NoteDetail', {noteId: item.noteInfo.noteId})
-        }}
-      />
-    ),
-    [navigation]
+    ({item}: ListRenderItemInfo<BoardListItem>) => {
+      if (item.type === 'sectionHeader')
+        return (
+          <Typography variant="titlesSmall" color="$foregroundPrimary">
+            {t(`notes.board.section.${item.section}`)}
+          </Typography>
+        )
+
+      const {note} = item
+      return (
+        <NoteCard
+          note={note}
+          messageNumberOfLines={2}
+          onPress={() => {
+            navigation.navigate('NoteDetail', {noteId: note.noteInfo.noteId})
+          }}
+        />
+      )
+    },
+    [navigation, t]
   )
 
   const filterItems: ReadonlyArray<FilterBarItem<BoardFilter>> = useMemo(
@@ -184,7 +266,7 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
 
   return (
     <Stack flex={1}>
-      <YStack paddingHorizontal="$4" paddingTop="$4" paddingBottom="$2">
+      <YStack paddingHorizontal="$5" paddingVertical="$7">
         <FilterBar
           items={filterItems}
           selectedValues={selectedFilterValues}
@@ -193,18 +275,25 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
       </YStack>
 
       <FlashList
-        data={visibleNotes}
+        ref={listRef}
+        contentContainerStyle={
+          Array.isEmptyReadonlyArray(listItems)
+            ? emptyContentContainerStyle
+            : listContentContainerStyle
+        }
+        data={listItems}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        ItemSeparatorComponent={NoteCardSeparator}
+        getItemType={(item) => item.type}
+        maintainVisibleContentPosition={{disabled: true}}
+        ItemSeparatorComponent={BoardListSeparator}
         ListEmptyComponent={
           <YStack
             flex={1}
-            pt="$5"
             alignItems="center"
             justifyContent="flex-start"
-            gap="$4"
-            paddingHorizontal="$6"
+            gap="$5"
+            padding="$7"
           >
             <Typography
               variant="heading3"
@@ -234,12 +323,11 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
             </Button>
           </YStack>
         }
-        contentContainerStyle={LIST_CONTENT_STYLE}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={handleRefresh}
+            onRefresh={handlePullToRefresh}
             tintColor={theme.foregroundSecondary.get()}
           />
         }
@@ -257,15 +345,29 @@ function NotesBoard({navigation}: Props): React.JSX.Element {
   )
 }
 
-function NoteCardSeparator(): React.JSX.Element {
-  return <Stack height={getTokens().space.$3.val} />
+function BoardListSeparator({
+  leadingItem,
+  trailingItem,
+}: ItemSeparatorProps): React.JSX.Element {
+  if (trailingItem?.type === 'sectionHeader')
+    return <Stack height="$7" flexShrink={0} />
+  if (leadingItem?.type === 'sectionHeader')
+    return <Stack height="$4" flexShrink={0} />
+  return <Stack height="$3" flexShrink={0} />
 }
 
-const LIST_CONTENT_STYLE = {
+const listContentContainerStyle = {
   flexGrow: 1,
   paddingHorizontal: getTokens().space.$4.val,
   paddingTop: getTokens().space.$2.val,
   paddingBottom: getTokens().space.$12.val,
+}
+
+const emptyContentContainerStyle = {
+  flexGrow: 1,
+  paddingHorizontal: getTokens().space.$5.val,
+  paddingTop: 0,
+  paddingBottom: 0,
 }
 
 export default BoardScreen

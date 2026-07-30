@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native'
-import {Checklist, ChevronLeft, NavigationBar, Stack} from '@vexl-next/ui'
+import {ChevronLeft, NavigationBar, Stack} from '@vexl-next/ui'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue, useSetAtom} from 'jotai'
 import {TouchableOpacity} from 'react-native'
@@ -13,6 +13,7 @@ import useSafeGoBack from '../../../utils/useSafeGoBack'
 import {showGoldenAvatarInfoModalActionAton} from '../../GoldenAvatar/atoms'
 import UserAvatar from '../../UserAvatar'
 import {chatMolecule} from '../atoms'
+import useChatHeaderRightAction from './useChatHeaderRightAction'
 
 export function MessagesScreenChatHeader(): React.ReactElement {
   const safeGoBack = useSafeGoBack()
@@ -23,7 +24,6 @@ export function MessagesScreenChatHeader(): React.ReactElement {
 
   const {
     chatAtom,
-    chatIdAtom,
     commonConnectionsCountAtom,
     friendLevelInfoAtom,
     offerForChatAtom,
@@ -33,7 +33,6 @@ export function MessagesScreenChatHeader(): React.ReactElement {
     shouldGrayScaleAvatarAtom,
   } = useMolecule(chatMolecule)
   const chat = useAtomValue(chatAtom)
-  const chatId = useAtomValue(chatIdAtom)
   const commonConnectionsCount = useAtomValue(commonConnectionsCountAtom)
   const friendLevelInfo = useAtomValue(friendLevelInfoAtom)
   const inboxKey = useAtomValue(publicKeyPemBase64Atom)
@@ -44,6 +43,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
   const showGoldenAvatarInfoModal = useSetAtom(
     showGoldenAvatarInfoModalActionAton
   )
+  const rightAction = useChatHeaderRightAction()
 
   const noImageUri =
     otherSideData.image.type === 'imageUri' && !otherSideData.image.imageUri
@@ -101,18 +101,7 @@ export function MessagesScreenChatHeader(): React.ReactElement {
             otherSideKey: chat.otherSide.publicKey,
           })
         }}
-        rightActions={[
-          {
-            icon: Checklist,
-            onPress: () => {
-              navigation.navigate('TradeChecklistFlow', {
-                screen: 'AgreeOnTradeDetails',
-                chatId,
-                inboxKey,
-              })
-            },
-          },
-        ]}
+        rightActions={[rightAction]}
       />
     </Stack>
   )

@@ -15,16 +15,13 @@ import {getInternationalPhoneNumber} from '../../../utils/getInternationalPhoneN
 import {useTranslation} from '../../../utils/localization/I18nProvider'
 import resolveLocalUri from '../../../utils/resolveLocalUri'
 import {
-  prepareRevealIdentityDraftActionAtom,
-  shouldOpenRevealIdentitySummaryAtom,
-} from '../../TradeChecklistFlow/atoms/revealIdentityAtoms'
-import {
   revealContactActionAtom,
   submitTradeChecklistUpdatesActionAtom,
 } from '../../TradeChecklistFlow/atoms/updatesToBeSentAtom'
 import {chatMolecule} from '../atoms'
 import {useHideActionForMessage} from '../atoms/createHideActionForMessageMmkvAtom'
 import RevealedInfoCard from './RevealedInfoCard'
+import useOpenRevealIdentityFlow from './useOpenRevealIdentityFlow'
 import VexlbotActionCard from './VexlbotMessageItem/components/VexlbotActionCard'
 
 const requestDeclinedAvatar = require('./images/requestDeclined.png')
@@ -50,7 +47,6 @@ function IdentityRevealMessageItem({
   const navigation =
     useNavigation<RootStackScreenProps<'ChatDetail'>['navigation']>()
   const {
-    chatAtom,
     identityRevealStatusAtom,
     contactRevealStatusAtom,
     otherSideDataAtom,
@@ -60,7 +56,6 @@ function IdentityRevealMessageItem({
   } = useMolecule(chatMolecule)
   const {image, userName, partialPhoneNumber, fullPhoneNumber} =
     useAtomValue(otherSideDataAtom)
-  const chat = useAtomValue(chatAtom)
   const messages = useAtomValue(messagesAtom)
   const store = useStore()
   const identityRevealStatus = useAtomValue(identityRevealStatusAtom)
@@ -73,12 +68,7 @@ function IdentityRevealMessageItem({
   const disapproveIdentityReveal = useSetAtom(
     disapproveIdentityRevealWithUiFeedbackAtom
   )
-  const prepareRevealIdentityDraft = useSetAtom(
-    prepareRevealIdentityDraftActionAtom
-  )
-  const shouldOpenRevealIdentitySummary = useAtomValue(
-    shouldOpenRevealIdentitySummaryAtom
-  )
+  const openRevealIdentityFlow = useOpenRevealIdentityFlow()
   const revealContact = useSetAtom(revealContactActionAtom)
   const [identityRevealRequestHidden, hideIdentityRevealRequest] =
     useHideActionForMessage(identityRevealRequestMessageId)
@@ -128,16 +118,7 @@ function IdentityRevealMessageItem({
           </Button>
           <Button
             flex={1}
-            onPress={() => {
-              prepareRevealIdentityDraft()
-              navigation.navigate('TradeChecklistFlow', {
-                screen: shouldOpenRevealIdentitySummary
-                  ? 'RevealIdentitySummary'
-                  : 'RevealIdentityPhoto',
-                chatId: chat.id,
-                inboxKey: chat.inbox.privateKey.publicKeyPemBase64,
-              })
-            }}
+            onPress={openRevealIdentityFlow}
             size="medium"
             variant="primary"
           >

@@ -1,42 +1,68 @@
 import {type UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type TFunction} from '../../../utils/localization/I18nProvider'
-
-const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000
-
-function padTwo(value: number): string {
-  return value.toString().padStart(2, '0')
-}
+import {DateTime} from 'luxon'
+import {
+  getLocaleFromTranslation,
+  type TFunction,
+} from '../../../utils/localization/I18nProvider'
+import {formatDate, formatInteger} from '../../../utils/localization/formatting'
 
 /**
  * Builds the human readable expiry label for a note.
  *
  * The returned string is a plain snapshot for the given `now` - it is fine to
- * recompute it on every render (the sub-day countdown ticks as the parent
- * re-renders).
+ * recompute it on every render.
  */
 export function noteExpiryText(
   expiresAt: UnixMilliseconds,
   now: number,
   t: TFunction
 ): string {
-  const remaining = expiresAt - now
+  const expirationDateTime = DateTime.fromMillis(expiresAt)
+  const nowDateTime = DateTime.fromMillis(now)
+  const remainingDuration = expirationDateTime.diff(nowDateTime)
+  const remainingMinutes = remainingDuration.as('minutes')
 
-  if (remaining <= 0) {
-    return t('notes.expiry.expired')
+  const locale = getLocaleFromTranslation(t)
+
+  if (remainingMinutes <= 0) {
+    return t('offerForm.expiration.expiredOn', {
+      expirationDate: formatDate(expiresAt, locale, {dateStyle: 'short'}),
+    })
   }
 
-  if (remaining >= MILLISECONDS_IN_DAY) {
-    const days = Math.ceil(remaining / MILLISECONDS_IN_DAY)
+  if (remainingMinutes >= 60 * 24) {
+    // "Tomorrow" only replaces the day-based label. Notes expiring on the
+    // next calendar day with less than 24 hours left keep the more urgent
+    // hour/minute countdown below.
+    if (expirationDateTime.hasSame(nowDateTime.plus({days: 1}), 'day')) {
+      return t('notes.expiry.expiresTomorrow')
+    }
+
+    const days = Math.ceil(remainingMinutes / (60 * 24))
     return days === 1
-      ? t('notes.expiry.expiresInOneDay')
-      : t('notes.expiry.expiresInDays', {count: days})
+      ? t('donations.expiresInOneDay')
+      : t('donations.expiresInDays', {
+          days: formatInteger(days, locale),
+        })
   }
 
-  const totalSeconds = Math.floor(remaining / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-  const time = `${padTwo(hours)}:${padTwo(minutes)}:${padTwo(seconds)}`
+  if (remainingMinutes >= 60) {
+    const hours = remainingDuration.shiftTo('hours', 'minutes').hours
+    return hours === 1
+      ? t('donations.expiresInOneHour')
+      : t('donations.expiresInHours', {
+          hours: formatInteger(hours, locale),
+        })
+  }
 
-  return t('notes.expiry.expiresIn', {time})
+  const minutes = Math.max(
+    1,
+    remainingDuration.shiftTo('minutes', 'seconds').minutes
+  )
+
+  return minutes === 1
+    ? t('donations.expiresInOneMinute')
+    : t('donations.expiresIn', {
+        minutes: formatInteger(minutes, locale),
+      })
 }

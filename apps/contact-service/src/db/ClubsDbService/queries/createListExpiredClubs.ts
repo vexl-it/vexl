@@ -18,6 +18,7 @@ export const createListExpiredClubs = Effect.gen(function* (_) {
       WHERE
         valid_until < now()
         AND valid_until IS NOT NULL
+        AND made_inactive_at IS NULL
     `,
   })
 

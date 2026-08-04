@@ -1,4 +1,7 @@
-import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {
+  ClubMadeInactiveReason,
+  ClubUuid,
+} from '@vexl-next/domain/src/general/clubs'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {Schema} from 'effect'
 
@@ -18,6 +21,10 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   clubImageUrl: UriString,
   validUntil: Schema.DateFromSelf,
   madeInactiveAt: Schema.optionalWith(Schema.DateFromSelf, {
+    as: 'Option',
+    nullable: true,
+  }),
+  madeInactiveReason: Schema.optionalWith(ClubMadeInactiveReason, {
     as: 'Option',
     nullable: true,
   }),

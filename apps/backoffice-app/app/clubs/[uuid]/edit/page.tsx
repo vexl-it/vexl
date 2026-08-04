@@ -4,15 +4,14 @@ import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
-import type {ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
 import {Option} from 'effect'
 import {useParams, useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
 export default function EditClubPage() {
-  const params = useParams()
-  const clubUuid = params.uuid as string
-  const [formData, setFormData] = useState<ClubInfo | null>(null)
+  const {uuid: clubUuid} = useParams<{uuid: string}>()
+  const [formData, setFormData] = useState<ClubAdminInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -99,7 +98,17 @@ export default function EditClubPage() {
       await runEffect(
         client.modifyClub({
           headers: {'x-admin-token': adminToken},
-          payload: {clubInfo: formData as any},
+          payload: {
+            clubInfo: {
+              uuid: formData.uuid,
+              name: formData.name,
+              description: formData.description,
+              membersCountLimit: formData.membersCountLimit,
+              clubImageUrl: formData.clubImageUrl,
+              validUntil: formData.validUntil,
+              reportLimit: formData.reportLimit,
+            },
+          },
         })
       )
       router.push('/clubs')
@@ -148,6 +157,18 @@ export default function EditClubPage() {
           </p>
         </div>
       </div>
+
+      {Option.isSome(formData.madeInactiveAt) && (
+        <div className="mt-8 max-w-2xl rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-900">
+          <p className="font-semibold">This club is INACTIVE.</p>
+          <p className="mt-1 text-sm">
+            Inactive since {formData.madeInactiveAt.value.toLocaleDateString()},
+            reason{' '}
+            {Option.getOrElse(formData.madeInactiveReason, () => 'UNKNOWN')},
+            current reports {formData.report}/{formData.reportLimit}.
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
         <div className="bg-white shadow-sm rounded-lg p-6 space-y-6">

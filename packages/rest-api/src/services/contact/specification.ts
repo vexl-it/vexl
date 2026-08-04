@@ -25,6 +25,7 @@ import {
   AddUserToTheClubResponse,
   CheckUserExistsRequest,
   ClubAlreadyExistsError,
+  ClubCannotBeReactivatedError,
   ClubUserLimitExceededError,
   ConvertPhoneNumberHashesToServerHashesRequest,
   ConvertPhoneNumberHashesToServerHashesResponse,
@@ -64,6 +65,8 @@ import {
   MemberAlreadyInClubError,
   ModifyClubRequest,
   ModifyClubResponse,
+  ReactivateClubRequest,
+  ReactivateClubResponse,
   RefreshUserRequest,
   ReportClubLimitReachedError,
   ReportClubRequest,
@@ -223,6 +226,18 @@ export const ListClubsEndpoint = HttpApiEndpoint.get(
   .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
+export const ReactivateClubEndpoint = HttpApiEndpoint.put(
+  'reactivateClub',
+  '/api/v1/clubs/admin/reactivate'
+)
+  .setHeaders(AdminTokenHeaders)
+  .setPayload(ReactivateClubRequest)
+  .addSuccess(ReactivateClubResponse)
+  .addError(InvalidAdminTokenError, {status: 401})
+  .addError(ClubCannotBeReactivatedError, {status: 400})
+  .addError(NotFoundError, {status: 404})
+  .annotate(MaxExpectedDailyCall, 100)
+
 export const RequestClubImageUploadEndpoint = HttpApiEndpoint.post(
   'requestClubImageUpload',
   '/api/v1/clubs/admin/request-image-upload'
@@ -369,6 +384,7 @@ const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
   .add(ModfiyClubEndpoint)
   .add(GenerateClubInviteLinkForAdminEndpoint)
   .add(ListClubsEndpoint)
+  .add(ReactivateClubEndpoint)
   .add(RequestClubImageUploadEndpoint)
 
 const ClubsMemberApiGroup = HttpApiGroup.make('ClubsMember')

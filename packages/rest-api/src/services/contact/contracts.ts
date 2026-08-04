@@ -4,6 +4,7 @@ import {
   ClubAdmitionRequest,
   ClubCode,
   ClubInfo,
+  ClubInfoAdminInput,
   ClubInfoForUser,
   ClubLinkInfo,
   ClubUuid,
@@ -213,7 +214,7 @@ export class ClubUserLimitExceededError extends Schema.TaggedError<ClubUserLimit
 }) {}
 
 export const CreateClubRequest = Schema.Struct({
-  club: ClubInfo,
+  club: ClubInfoAdminInput,
 })
 export type CreateClubRequest = typeof CreateClubRequest.Type
 
@@ -236,7 +237,7 @@ export type GenerateInviteLinkForAdminResponse =
   typeof GenerateInviteLinkForAdminResponse.Type
 
 export const ModifyClubRequest = Schema.Struct({
-  clubInfo: ClubInfo,
+  clubInfo: ClubInfoAdminInput,
 })
 export type ModifyClubRequest = typeof ModifyClubRequest.Type
 

@@ -31,6 +31,16 @@ export const ClubInfo = Schema.Struct({
 })
 export type ClubInfo = typeof ClubInfo.Type
 
+/** Must be positive because a limit of 0 auto-deactivates the club immediately. */
+export const ClubReportLimit = Schema.Int.pipe(Schema.greaterThan(0))
+export type ClubReportLimit = typeof ClubReportLimit.Type
+
+export const ClubInfoAdminInput = Schema.Struct({
+  ...ClubInfo.fields,
+  reportLimit: ClubReportLimit,
+})
+export type ClubInfoAdminInput = typeof ClubInfoAdminInput.Type
+
 export const ClubInfoForUser = Schema.Struct({
   club: ClubInfo,
   isModerator: Schema.Boolean,

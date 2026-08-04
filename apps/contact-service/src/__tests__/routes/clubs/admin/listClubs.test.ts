@@ -121,6 +121,7 @@ describe('List clubs', () => {
           expect.arrayContaining([
             expect.objectContaining({
               report: 0,
+              membersCount: 0,
               madeInactiveAt: Option.none(),
               madeInactiveReason: Option.none(),
             }),

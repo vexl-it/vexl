@@ -186,7 +186,7 @@ export default function ClubsListPage() {
                       UUID
                     </th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Members Limit
+                      Members
                     </th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Valid Until
@@ -242,7 +242,7 @@ export default function ClubsListPage() {
                         {club.uuid}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {club.membersCountLimit}
+                        {club.membersCount} / {club.membersCountLimit}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {new Date(club.validUntil).toLocaleDateString()}

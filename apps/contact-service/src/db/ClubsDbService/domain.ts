@@ -32,6 +32,13 @@ export class ClubDbRecord extends Schema.Class<ClubDbRecord>('ClubDbRecord')({
   reportLimit: Schema.Int,
 }) {}
 
+export class ClubAdminDbRecord extends Schema.Class<ClubAdminDbRecord>(
+  'ClubAdminDbRecord'
+)({
+  ...ClubDbRecord.fields,
+  membersCount: Schema.Int,
+}) {}
+
 // Club offer reported info table schema
 export const ClubOfferReporedInfoRecordId = Schema.BigInt.pipe(
   Schema.brand('ClubOfferReporedInfoRecordId')

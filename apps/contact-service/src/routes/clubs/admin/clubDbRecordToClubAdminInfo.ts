@@ -1,13 +1,14 @@
 import {type ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
-import {type ClubDbRecord} from '../../../db/ClubsDbService/domain'
+import {type ClubAdminDbRecord} from '../../../db/ClubsDbService/domain'
 
 export const clubDbRecordToClubAdminInfo = (
-  club: ClubDbRecord
+  club: ClubAdminDbRecord
 ): ClubAdminInfo => ({
   uuid: club.uuid,
   name: club.name,
   description: club.description,
   membersCountLimit: club.membersCountLimit,
+  membersCount: club.membersCount,
   clubImageUrl: club.clubImageUrl,
   validUntil: club.validUntil,
   reportLimit: club.reportLimit,

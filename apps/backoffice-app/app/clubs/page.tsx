@@ -25,6 +25,7 @@ const getReactivationErrorMessage = (
 
 export default function ClubsListPage() {
   const [clubs, setClubs] = useState<readonly ClubAdminInfo[]>([])
+  const [nameFilter, setNameFilter] = useState('')
   const [loading, setLoading] = useState(true)
   const [reactivatingClubUuid, setReactivatingClubUuid] = useState<
     string | null
@@ -36,6 +37,9 @@ export default function ClubsListPage() {
   const [tooltipPosition, setTooltipPosition] = useState({x: 0, y: 0})
   const runEffect = useRunEffect()
   const router = useRouter()
+  const filteredClubs = clubs.filter((club) =>
+    club.name.toLowerCase().includes(nameFilter.trim().toLowerCase())
+  )
 
   // Truncate helper for descriptions
   const truncate = (s: string, n = 50) =>
@@ -160,6 +164,18 @@ export default function ClubsListPage() {
           </button>
         </div>
       </div>
+      <div className="mt-6 max-w-sm">
+        <input
+          type="text"
+          value={nameFilter}
+          onChange={(event) => {
+            setNameFilter(event.target.value)
+          }}
+          placeholder="Filter by name..."
+          aria-label="Filter clubs by name"
+          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        />
+      </div>
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -175,6 +191,8 @@ export default function ClubsListPage() {
                   Create your first club
                 </button>
               </div>
+            ) : filteredClubs.length === 0 ? (
+              <div className="py-4 text-sm text-gray-500">No clubs match</div>
             ) : (
               <table className="min-w-full divide-y divide-gray-300 bg-white shadow-sm rounded-lg overflow-hidden">
                 <thead className="bg-gray-50">
@@ -206,7 +224,7 @@ export default function ClubsListPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {clubs.map((club) => (
+                  {filteredClubs.map((club) => (
                     <tr key={club.uuid}>
                       <td className="whitespace-nowrap px-3 py-4 text-sm">
                         <div className="flex items-center">

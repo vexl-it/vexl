@@ -39,6 +39,8 @@ export const createListClubs = Effect.gen(function* (_) {
           GROUP BY
             club_id
         ) AS changes ON changes.club_id = club.id
+      ORDER BY
+        lower(club.name)
     `,
   })
 

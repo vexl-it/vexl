@@ -9,6 +9,8 @@ export const clubDbRecordToClubAdminInfo = (
   description: club.description,
   membersCountLimit: club.membersCountLimit,
   membersCount: club.membersCount,
+  membersJoinedLast30Days: club.membersJoinedLast30Days,
+  membersLeftLast30Days: club.membersLeftLast30Days,
   clubImageUrl: club.clubImageUrl,
   validUntil: club.validUntil,
   reportLimit: club.reportLimit,

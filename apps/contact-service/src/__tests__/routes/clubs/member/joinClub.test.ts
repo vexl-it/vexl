@@ -57,6 +57,7 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM club_invitation_link`)
       yield* _(sql`DELETE FROM club_member`)
+      yield* _(sql`DELETE FROM club_member_count_change`)
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
@@ -136,6 +137,19 @@ describe('Join club', () => {
             'vexl_nt_test' as VexlNotificationToken
           ),
         })
+
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
+        const clubs = yield* _(
+          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+        )
+        expect(clubs.clubs).toEqual([
+          expect.objectContaining({
+            uuid: club.uuid,
+            membersCount: 1,
+            membersJoinedLast30Days: 1,
+            membersLeftLast30Days: 0,
+          }),
+        ])
       })
     )
   })

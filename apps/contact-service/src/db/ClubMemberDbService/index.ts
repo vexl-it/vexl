@@ -13,6 +13,7 @@ import {
 import {
   createDeleteClubMembersLastActiveBefore,
   type DeleteClubMembersLastActiveBeforeParams,
+  type DeletedClubMember,
 } from './queries/createDeleteClubMembersLastActiveBefore'
 import {
   createDeleteClubMemeber,
@@ -84,7 +85,7 @@ export interface ClubMembersDbOperations {
   ) => Effect.Effect<void, UnexpectedServerError>
   deleteClubMembersLastActiveBefore: (
     params: DeleteClubMembersLastActiveBeforeParams
-  ) => Effect.Effect<void, UnexpectedServerError>
+  ) => Effect.Effect<readonly DeletedClubMember[], UnexpectedServerError>
   deleteClubReportedRecordByReportedAtBefore: (
     params: number
   ) => Effect.Effect<void, UnexpectedServerError>

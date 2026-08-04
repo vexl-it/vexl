@@ -19,6 +19,7 @@ describe('Reactivate club', () => {
         const sql = yield* _(SqlClient.SqlClient)
         yield* _(sql`DELETE FROM club_invitation_link`)
         yield* _(sql`DELETE FROM club_member`)
+        yield* _(sql`DELETE FROM club_member_count_change`)
         yield* _(sql`DELETE FROM club`)
       })
     )
@@ -57,7 +58,6 @@ describe('Reactivate club', () => {
           WHERE
             UUID = ${clubUuid}
         `)
-
         yield* _(sql`
           INSERT INTO
             club_member (
@@ -82,6 +82,19 @@ describe('Reactivate club', () => {
           WHERE
             UUID = ${clubUuid}
         `)
+        yield* _(sql`
+          INSERT INTO
+            club_member_count_change (club_id, DAY, joined_count, left_count)
+          SELECT
+            id,
+            current_date,
+            2,
+            3
+          FROM
+            club
+          WHERE
+            UUID = ${clubUuid}
+        `)
 
         const response = yield* _(
           app.ClubsAdmin.reactivateClub({
@@ -92,7 +105,11 @@ describe('Reactivate club', () => {
 
         expect(response.clubInfo.madeInactiveAt).toEqual(Option.none())
         expect(response.clubInfo.madeInactiveReason).toEqual(Option.none())
-        expect(response.clubInfo.membersCount).toBe(1)
+        expect(response.clubInfo).toMatchObject({
+          membersCount: 1,
+          membersJoinedLast30Days: 2,
+          membersLeftLast30Days: 3,
+        })
       })
     )
   })

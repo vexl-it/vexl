@@ -37,6 +37,8 @@ export class ClubAdminDbRecord extends Schema.Class<ClubAdminDbRecord>(
 )({
   ...ClubDbRecord.fields,
   membersCount: Schema.Int,
+  membersJoinedLast30Days: Schema.Int,
+  membersLeftLast30Days: Schema.Int,
 }) {}
 
 // Club offer reported info table schema

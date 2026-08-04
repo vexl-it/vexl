@@ -51,6 +51,8 @@ export type ClubInfoAdminInput = typeof ClubInfoAdminInput.Type
 export const ClubAdminInfo = Schema.Struct({
   ...ClubInfo.fields,
   membersCount: Schema.Int,
+  membersJoinedLast30Days: Schema.Int,
+  membersLeftLast30Days: Schema.Int,
   report: Schema.Int,
   madeInactiveAt: Schema.optionalWith(Schema.DateFromString, {
     as: 'Option',

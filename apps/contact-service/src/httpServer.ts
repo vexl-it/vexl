@@ -27,6 +27,7 @@ import {
   redisUrl,
 } from './configs'
 import {ClubInvitationLinkDbService} from './db/ClubInvitationLinkDbService'
+import {ClubMemberCountChangeDbService} from './db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from './db/ClubMemberDbService'
 import {ClubsDbService} from './db/ClubsDbService'
 import {ContactDbService} from './db/ContactDbService'
@@ -166,6 +167,7 @@ const DbsLive = Layer.mergeAll(
   UserDbService.Live,
   ClubsDbService.Live,
   ClubMembersDbService.Live,
+  ClubMemberCountChangeDbService.Live,
   ClubInvitationLinkDbService.Live
 ).pipe(Layer.provideMerge(DbLayer))
 

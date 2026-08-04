@@ -36,6 +36,7 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM club_invitation_link`)
       yield* _(sql`DELETE FROM club_member`)
+      yield* _(sql`DELETE FROM club_member_count_change`)
       yield* _(sql`DELETE FROM club`)
 
       const app = yield* _(NodeTestingApp)
@@ -102,6 +103,19 @@ describe('Leave club', () => {
         )
 
         expectErrorResponse(NotFoundError)(errorResponse)
+
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
+        const clubs = yield* _(
+          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+        )
+        expect(clubs.clubs).toEqual([
+          expect.objectContaining({
+            uuid: club.uuid,
+            membersCount: 0,
+            membersJoinedLast30Days: 0,
+            membersLeftLast30Days: 1,
+          }),
+        ])
       })
     )
   })

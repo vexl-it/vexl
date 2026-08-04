@@ -3,8 +3,10 @@ import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
+import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, flow, Option} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
+import {ClubMemberCountChangeDbService} from '../../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {findClubMemberByPublicKeyV1OrV2} from '../../../utils/findClubMemberByPublicKeyV1OrV2'
@@ -19,6 +21,7 @@ export const leaveClub = HttpApiBuilder.handler(
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
+      const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
       const linkDb = yield* _(ClubInvitationLinkDbService)
 
       const member = yield* _(
@@ -72,6 +75,8 @@ export const leaveClub = HttpApiBuilder.handler(
         )
       }
 
+      yield* _(memberCountChangesDb.incrementLeft({clubId: club.id, count: 1}))
+
       return {}
-    }).pipe(makeEndpointEffect)
+    }).pipe(withDbTransaction, makeEndpointEffect)
 )

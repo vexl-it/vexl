@@ -29,6 +29,7 @@ export const modifyClub = HttpApiBuilder.handler(
           data: {
             ...req.payload.clubInfo,
             madeInactiveAt: existingClub.madeInactiveAt,
+            madeInactiveReason: existingClub.madeInactiveReason,
             report: existingClub.report,
           },
         })

@@ -117,6 +117,15 @@ describe('List clubs', () => {
             clubsToSave
           )
         )
+        expect(clubs).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              report: 0,
+              madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
+            }),
+          ])
+        )
       })
     )
   })

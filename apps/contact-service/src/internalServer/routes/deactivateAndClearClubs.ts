@@ -50,14 +50,48 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
 
   const expiredClubs = yield* _(findExpiredClubs)
   const flaggedClubs = yield* _(findFlaggedClubs)
-
-  const idsOfClubsToDeactivate = [...expiredClubs, ...flaggedClubs].map(
-    (club) => club.id
+  const flaggedClubsToDeactivate = pipe(
+    flaggedClubs,
+    Array.filter(
+      (flaggedClub) =>
+        !pipe(
+          expiredClubs,
+          Array.some((expiredClub) => expiredClub.id === flaggedClub.id)
+        )
+    )
+  )
+  const expiredClubIds = pipe(
+    expiredClubs,
+    Array.map((club) => club.id)
+  )
+  const flaggedClubIds = pipe(
+    flaggedClubsToDeactivate,
+    Array.map((club) => club.id)
+  )
+  const idsOfClubsToDeactivate = pipe(
+    expiredClubIds,
+    Array.appendAll(flaggedClubIds)
   )
 
   yield* _(Effect.log('Deactivating clubs', idsOfClubsToDeactivate))
 
-  yield* _(clubsDb.updateSetClubsInactive({id: idsOfClubsToDeactivate}))
+  if (Array.isNonEmptyArray(expiredClubIds)) {
+    yield* _(
+      clubsDb.updateSetClubsInactive({
+        id: expiredClubIds,
+        reason: 'EXPIRED',
+      })
+    )
+  }
+
+  if (Array.isNonEmptyArray(flaggedClubIds)) {
+    yield* _(
+      clubsDb.updateSetClubsInactive({
+        id: flaggedClubIds,
+        reason: 'FLAGGED',
+      })
+    )
+  }
 
   yield* _(
     expiredClubs,

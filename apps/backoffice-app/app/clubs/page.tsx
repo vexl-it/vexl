@@ -3,13 +3,13 @@
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
-import type {ClubInfo} from '@vexl-next/domain/src/general/clubs'
+import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
 import {Option} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
 export default function ClubsListPage() {
-  const [clubs, setClubs] = useState<readonly ClubInfo[]>([])
+  const [clubs, setClubs] = useState<readonly ClubAdminInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [hoveredDescription, setHoveredDescription] = useState<string | null>(
@@ -135,7 +135,10 @@ export default function ClubsListPage() {
                       Valid Until
                     </th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Report Limit
+                      Status
+                    </th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Reports
                     </th>
                     <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
                       <span className="sr-only">Actions</span>
@@ -188,7 +191,30 @@ export default function ClubsListPage() {
                         {new Date(club.validUntil).toLocaleDateString()}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {club.reportLimit}
+                        {Option.isSome(club.madeInactiveAt) ? (
+                          <div>
+                            <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-700">
+                              Inactive
+                            </span>
+                            <div className="mt-1 text-xs text-red-700">
+                              {Option.getOrElse(
+                                club.madeInactiveReason,
+                                () => 'UNKNOWN'
+                              )}
+                              ,{' '}
+                              {club.madeInactiveAt.value
+                                .toISOString()
+                                .slice(0, 10)}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+                            Active
+                          </span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {club.report} / {club.reportLimit}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <button

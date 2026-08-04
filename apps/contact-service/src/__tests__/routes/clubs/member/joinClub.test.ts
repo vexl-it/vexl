@@ -420,6 +420,7 @@ describe('Join club', () => {
             data: {
               ...club,
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               membersCountLimit: 100,
               report: 0,
               reportLimit: 10,
@@ -508,6 +509,7 @@ describe('Join club', () => {
             data: {
               ...club,
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               membersCountLimit: 100,
               report: 0,
               reportLimit: 10,
@@ -609,6 +611,7 @@ describe('Join club', () => {
             data: {
               ...club,
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               membersCountLimit: 100,
               report: 0,
               reportLimit: 10,
@@ -681,6 +684,7 @@ describe('Join club', () => {
             data: {
               ...club,
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               membersCountLimit: 100,
               report: 0,
               reportLimit: 10,
@@ -768,6 +772,7 @@ describe('Join club', () => {
             data: {
               ...club,
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               membersCountLimit: 100,
               report: 0,
               reportLimit: 10,

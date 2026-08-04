@@ -28,6 +28,7 @@ export const createClub = HttpApiBuilder.handler(
         clubsDb.insertClub({
           ...req.payload.club,
           madeInactiveAt: Option.none(),
+          madeInactiveReason: Option.none(),
           report: 0,
         })
       )

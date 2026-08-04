@@ -27,6 +27,7 @@ import backfill_refreshed_at_for_existing_users from './migrations/0022_backfill
 import add_user_contact_indexes_for_dashboard from './migrations/0023_add_user_contact_indexes_for_dashboard'
 import drop_redundant_user_contact_indexes from './migrations/0024_drop_redundant_user_contact_indexes'
 import bump_zero_club_report_limits from './migrations/0025_bump_zero_club_report_limits'
+import add_club_made_inactive_reason from './migrations/0026_add_club_made_inactive_reason'
 
 const migrations = [
   {
@@ -154,6 +155,11 @@ const migrations = [
     id: 25,
     name: 'bump_zero_club_report_limits',
     migrationEffect: bump_zero_club_report_limits,
+  },
+  {
+    id: 26,
+    name: 'add_club_made_inactive_reason',
+    migrationEffect: add_club_made_inactive_reason,
   },
 ] as const
 

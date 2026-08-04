@@ -39,7 +39,7 @@ const club = {
   description: Option.some('someDescription'),
   membersCountLimit: 100,
   uuid: generateClubUuid(),
-  validUntil: new Date(),
+  validUntil: new Date(Date.now() + 24 * 60 * 60 * 1000),
   reportLimit: 2,
 }
 
@@ -206,6 +206,10 @@ describe('Report club', () => {
         `)
 
         expect(inactiveClubInDb.at(0)).toBeDefined()
+        expect(inactiveClubInDb.at(0)).toHaveProperty(
+          'madeInactiveReason',
+          'FLAGGED'
+        )
       })
     )
   })

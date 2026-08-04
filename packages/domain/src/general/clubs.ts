@@ -31,6 +31,13 @@ export const ClubInfo = Schema.Struct({
 })
 export type ClubInfo = typeof ClubInfo.Type
 
+export const ClubMadeInactiveReason = Schema.Literal(
+  'EXPIRED',
+  'FLAGGED',
+  'UNKNOWN'
+)
+export type ClubMadeInactiveReason = typeof ClubMadeInactiveReason.Type
+
 /** Must be positive because a limit of 0 auto-deactivates the club immediately. */
 export const ClubReportLimit = Schema.Int.pipe(Schema.greaterThan(0))
 export type ClubReportLimit = typeof ClubReportLimit.Type
@@ -40,6 +47,20 @@ export const ClubInfoAdminInput = Schema.Struct({
   reportLimit: ClubReportLimit,
 })
 export type ClubInfoAdminInput = typeof ClubInfoAdminInput.Type
+
+export const ClubAdminInfo = Schema.Struct({
+  ...ClubInfo.fields,
+  report: Schema.Int,
+  madeInactiveAt: Schema.optionalWith(Schema.DateFromString, {
+    as: 'Option',
+    nullable: true,
+  }),
+  madeInactiveReason: Schema.optionalWith(ClubMadeInactiveReason, {
+    as: 'Option',
+    nullable: true,
+  }),
+})
+export type ClubAdminInfo = typeof ClubAdminInfo.Type
 
 export const ClubInfoForUser = Schema.Struct({
   club: ClubInfo,

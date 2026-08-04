@@ -379,6 +379,7 @@ describe('Add user to the club', () => {
             id: clubId,
             data: {
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               report: 0,
               ...club,
               membersCountLimit: 100,
@@ -542,6 +543,7 @@ describe('Add user to the club', () => {
             id: clubId,
             data: {
               madeInactiveAt: Option.none(),
+              madeInactiveReason: Option.none(),
               report: 0,
               ...club,
               membersCountLimit: 100,

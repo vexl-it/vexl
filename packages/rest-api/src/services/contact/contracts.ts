@@ -1,6 +1,7 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {PublicKeyV2} from '@vexl-next/cryptography/src/KeyHolder/brandsV2'
 import {
+  ClubAdminInfo,
   ClubAdmitionRequest,
   ClubCode,
   ClubInfo,
@@ -247,7 +248,7 @@ export const ModifyClubResponse = Schema.Struct({
 export type ModifyClubResponse = typeof ModifyClubResponse.Type
 
 export const ListClubsResponse = Schema.Struct({
-  clubs: Schema.Array(ClubInfo),
+  clubs: Schema.Array(ClubAdminInfo),
 })
 
 export type ListClubsResponse = typeof ListClubsResponse.Type

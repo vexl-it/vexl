@@ -202,6 +202,16 @@ export class ClubAlreadyExistsError extends Schema.TaggedError<ClubAlreadyExists
   status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
 }) {}
 
+export class ClubCannotBeReactivatedError extends Schema.TaggedError<ClubCannotBeReactivatedError>(
+  'ClubCannotBeReactivatedError'
+)('ClubCannotBeReactivatedError', {
+  status: Schema.optionalWith(Schema.Literal(400), {default: () => 400}),
+  reactivationBlockedReason: Schema.Literal(
+    'PAST_VALIDITY',
+    'REPORT_LIMIT_REACHED'
+  ),
+}) {}
+
 export class InvalidAdminTokenError extends Schema.TaggedError<InvalidAdminTokenError>(
   'InvalidAdminToken'
 )('InvalidAdminToken', {
@@ -252,6 +262,16 @@ export const ListClubsResponse = Schema.Struct({
 })
 
 export type ListClubsResponse = typeof ListClubsResponse.Type
+
+export const ReactivateClubRequest = Schema.Struct({
+  clubUuid: ClubUuid,
+})
+export type ReactivateClubRequest = typeof ReactivateClubRequest.Type
+
+export const ReactivateClubResponse = Schema.Struct({
+  clubInfo: ClubAdminInfo,
+})
+export type ReactivateClubResponse = typeof ReactivateClubResponse.Type
 
 export class S3ServiceError extends Schema.TaggedError<S3ServiceError>(
   'S3ServiceError'

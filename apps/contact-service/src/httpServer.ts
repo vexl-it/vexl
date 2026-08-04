@@ -39,6 +39,7 @@ import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
 import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
+import {reactivateClub} from './routes/clubs/admin/reactivateClub'
 import {requestClubImageUpload} from './routes/clubs/admin/requestClubImageUpload'
 import {getClubContacts} from './routes/clubs/member/getClubContacts'
 import {getClubInfo} from './routes/clubs/member/getClubInfo'
@@ -104,6 +105,7 @@ const ClubsAdminApiGroupLive = HttpApiBuilder.group(
       .handle('modifyClub', modifyClub)
       .handle('generateClubInviteLinkForAdmin', generateClubInviteLink)
       .handle('listClubs', listClubs)
+      .handle('reactivateClub', reactivateClub)
       .handle('requestClubImageUpload', requestClubImageUpload)
 )
 

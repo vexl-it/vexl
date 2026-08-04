@@ -29,6 +29,10 @@ import {
   type UpdateClubParams,
 } from './queries/createUpdateClub'
 import {
+  createUpdateReactivateClub,
+  type UpdateReactivateClubParams,
+} from './queries/createUpdateReactivateClub'
+import {
   createUpdateReportClub,
   type UpdateReportClubRequest,
 } from './queries/createUpdateReportClub'
@@ -65,6 +69,9 @@ export interface ClubsDbOperations {
   updateSetClubsInactive: (
     params: UpdateSetClubsInactiveParams
   ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
+  updateReactivateClub: (
+    params: UpdateReactivateClubParams
+  ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
   listClubs: () => Effect.Effect<readonly ClubDbRecord[], UnexpectedServerError>
   listExpiredClubs: () => Effect.Effect<
     readonly ClubDbRecord[],
@@ -99,6 +106,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
       )
       const updateClub = yield* _(createUpdateClub)
       const updateSetClubsInactive = yield* _(createUpdateSetClubsInactive)
+      const updateReactivateClub = yield* _(createUpdateReactivateClub)
       const listClubs = yield* _(createListClubs)
       const listExpiredClubs = yield* _(createListExpiredClubs)
       const listClubsWithExceededReportsCount = yield* _(
@@ -119,6 +127,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
         insertClubOfferReportedInfo,
         updateClub,
         updateSetClubsInactive,
+        updateReactivateClub,
         listClubs,
         listExpiredClubs,
         listClubsWithExceededReportsCount,

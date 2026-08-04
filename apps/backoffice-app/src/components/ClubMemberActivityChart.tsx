@@ -39,8 +39,10 @@ interface DayPoint {
   count: number | null
 }
 
+// The server serializes the date-only `day` column as local midnight, so key
+// days by local date components — UTC components would shift days one back.
 const utcMidnight = (date: Date): number =>
-  Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
 
 const formatDay = (dayMs: number): string =>
   new Date(dayMs).toLocaleDateString(undefined, {

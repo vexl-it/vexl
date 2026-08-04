@@ -4,7 +4,9 @@ import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
-import {Option} from 'effect'
+import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
+import {Option, Schema} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
@@ -19,7 +21,7 @@ export default function CreateClubPage() {
       new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0] ?? '',
-    reportLimit: 0,
+    reportLimit: 10,
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,6 +50,13 @@ export default function CreateClubPage() {
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    if (formData.reportLimit <= 0) {
+      setError(
+        'Report limit must be greater than 0. A club with report limit 0 would be automatically deactivated the next time the cleanup job runs.'
+      )
+      return
+    }
+
     const adminToken = getAdminToken()
     if (!adminToken) {
       router.push('/login')
@@ -64,13 +73,13 @@ export default function CreateClubPage() {
           headers: {'x-admin-token': adminToken},
           payload: {
             club: {
-              uuid: formData.uuid as any,
+              uuid: Schema.decodeSync(ClubUuid)(formData.uuid),
               name: formData.name,
               description: formData.description
                 ? Option.some(formData.description)
                 : Option.none(),
               membersCountLimit: formData.membersCountLimit,
-              clubImageUrl: formData.clubImageUrl as any,
+              clubImageUrl: Schema.decodeSync(UriString)(formData.clubImageUrl),
               validUntil: new Date(formData.validUntil),
               reportLimit: formData.reportLimit,
             },
@@ -335,7 +344,7 @@ export default function CreateClubPage() {
                 })
               }}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-              min="0"
+              min="1"
             />
           </div>
 

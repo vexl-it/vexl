@@ -18,7 +18,7 @@ const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
 const clubsToSave = [
   {
     clubImageUrl: SOME_URL,
-    name: 'someName',
+    name: 'zeta',
     description: Option.some('someDescription'),
     membersCountLimit: 100,
     uuid: generateClubUuid(),
@@ -27,7 +27,7 @@ const clubsToSave = [
   },
   {
     clubImageUrl: SOME_URL,
-    name: 'someName2',
+    name: 'Alpha',
     description: Option.some('someDescription2'),
     membersCountLimit: 104,
     uuid: generateClubUuid(),
@@ -36,7 +36,7 @@ const clubsToSave = [
   },
   {
     clubImageUrl: SOME_URL,
-    name: 'someName3',
+    name: 'middle',
     description: Option.some('someDescription3'),
     membersCountLimit: 1003,
     uuid: generateClubUuid(),
@@ -109,12 +109,20 @@ describe('List clubs', () => {
         yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
         const clubs = yield* _(
           app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}}),
-          Effect.map((o) => o.clubs),
-          Effect.map(
+          Effect.map((o) => o.clubs)
+        )
+        expect(
+          pipe(
+            clubs,
+            Array.map((club) => club.name)
+          )
+        ).toEqual(['Alpha', 'middle', 'zeta'])
+        expect(
+          pipe(
+            clubs,
             Array.sortBy((a, b) => String.localeCompare(a.uuid)(b.uuid))
           )
-        )
-        expect(clubs).toMatchObject(
+        ).toMatchObject(
           Array.sortBy((a, b) => String.localeCompare(a.uuid)(b.uuid))(
             clubsToSave
           )

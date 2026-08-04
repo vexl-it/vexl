@@ -7,7 +7,8 @@ import {
   addTestHeaders,
   clearTestAuthHeaders,
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
-import {Array, Effect, Option, Schema, String} from 'effect'
+import {Array, Effect, Option, pipe, Schema, String} from 'effect'
+import {ClubsDbService} from '../../../../db/ClubsDbService'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
 
@@ -51,6 +52,7 @@ describe('List clubs', () => {
         const sql = yield* _(SqlClient.SqlClient)
         yield* _(sql`DELETE FROM club_invitation_link`)
         yield* _(sql`DELETE FROM club_member`)
+        yield* _(sql`DELETE FROM club_member_count_change`)
         yield* _(sql`DELETE FROM club`)
 
         const app = yield* _(NodeTestingApp)
@@ -122,11 +124,58 @@ describe('List clubs', () => {
             expect.objectContaining({
               report: 0,
               membersCount: 0,
+              membersJoinedLast30Days: 0,
+              membersLeftLast30Days: 0,
               madeInactiveAt: Option.none(),
               madeInactiveReason: Option.none(),
             }),
           ])
         )
+      })
+    )
+  })
+
+  it('Excludes member changes older than 30 days', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const clubsDb = yield* _(ClubsDbService)
+        const clubInDb = yield* _(
+          clubsDb.findClubByUuid({uuid: clubsToSave[0].uuid}),
+          Effect.flatten
+        )
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          INSERT INTO
+            club_member_count_change (club_id, DAY, joined_count, left_count)
+          VALUES
+            (
+              ${clubInDb.id},
+              current_date,
+              2,
+              3
+            ),
+            (
+              ${clubInDb.id},
+              current_date - 31,
+              7,
+              8
+            )
+        `)
+
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
+        const result = yield* _(
+          app.ClubsAdmin.listClubs({headers: {'x-admin-token': ADMIN_TOKEN}})
+        )
+        const clubInfo = yield* _(
+          pipe(
+            result.clubs,
+            Array.findFirst((club) => club.uuid === clubsToSave[0].uuid)
+          )
+        )
+
+        expect(clubInfo.membersJoinedLast30Days).toBe(2)
+        expect(clubInfo.membersLeftLast30Days).toBe(3)
       })
     )
   })

@@ -28,6 +28,7 @@ import add_user_contact_indexes_for_dashboard from './migrations/0023_add_user_c
 import drop_redundant_user_contact_indexes from './migrations/0024_drop_redundant_user_contact_indexes'
 import bump_zero_club_report_limits from './migrations/0025_bump_zero_club_report_limits'
 import add_club_made_inactive_reason from './migrations/0026_add_club_made_inactive_reason'
+import add_club_member_count_change_table from './migrations/0027_add_club_member_count_change_table'
 
 const migrations = [
   {
@@ -160,6 +161,11 @@ const migrations = [
     id: 26,
     name: 'add_club_made_inactive_reason',
     migrationEffect: add_club_made_inactive_reason,
+  },
+  {
+    id: 27,
+    name: 'add_club_member_count_change_table',
+    migrationEffect: add_club_member_count_change_table,
   },
 ] as const
 

@@ -20,6 +20,7 @@ import {
 import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {ClubInvitationLinkDbService} from '../../db/ClubInvitationLinkDbService'
+import {ClubMemberCountChangeDbService} from '../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../db/ClubsDbService'
 import {ContactDbService} from '../../db/ContactDbService'
@@ -44,6 +45,7 @@ export type MockedContexts =
   | ImportContactsQuotaService
   | ClubsDbService
   | ClubMembersDbService
+  | ClubMemberCountChangeDbService
   | ClubInvitationLinkDbService
   | HttpClient
   | TestRequestHeaders
@@ -74,6 +76,7 @@ const dbServiceLayers = Layer.mergeAll(
   ContactDbService.Live,
   ClubsDbService.Live,
   ClubMembersDbService.Live,
+  ClubMemberCountChangeDbService.Live,
   ClubInvitationLinkDbService.Live
 ).pipe(Layer.provideMerge(DbLayer))
 

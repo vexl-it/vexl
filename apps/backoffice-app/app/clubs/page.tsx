@@ -189,6 +189,9 @@ export default function ClubsListPage() {
                       Members
                     </th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Δ 30d
+                    </th>
+                    <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Valid Until
                     </th>
                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -243,6 +246,22 @@ export default function ClubsListPage() {
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {club.membersCount} / {club.membersCountLimit}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm">
+                        {club.membersJoinedLast30Days === 0 &&
+                        club.membersLeftLast30Days === 0 ? (
+                          <span className="text-gray-500">+0 / -0</span>
+                        ) : (
+                          <>
+                            <span className="text-green-700">
+                              +{club.membersJoinedLast30Days}
+                            </span>{' '}
+                            <span className="text-gray-500">/</span>{' '}
+                            <span className="text-red-700">
+                              -{club.membersLeftLast30Days}
+                            </span>
+                          </>
+                        )}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {new Date(club.validUntil).toLocaleDateString()}

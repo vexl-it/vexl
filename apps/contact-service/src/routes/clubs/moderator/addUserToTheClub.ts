@@ -13,6 +13,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
+import {ClubMemberCountChangeDbService} from '../../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {UserNotificationService} from '../../../services/UserNotificationService'
@@ -29,6 +30,7 @@ export const addUserToTheClub = HttpApiBuilder.handler(
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
+      const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
       const userNotificationService = yield* _(UserNotificationService)
 
       const moderatorMember = yield* _(
@@ -84,6 +86,10 @@ export const addUserToTheClub = HttpApiBuilder.handler(
           ),
           publicKeyV2: req.payload.adminitionRequest.publicKeyV2,
         })
+      )
+
+      yield* _(
+        memberCountChangesDb.incrementJoined({clubId: club.id, count: 1})
       )
 
       yield* _(

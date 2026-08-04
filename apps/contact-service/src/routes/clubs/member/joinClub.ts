@@ -10,6 +10,7 @@ import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/chal
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ClubInvitationLinkDbService} from '../../../db/ClubInvitationLinkDbService'
+import {ClubMemberCountChangeDbService} from '../../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../../db/ClubsDbService'
 import {reportUserJoinedClubAndImportedContacts} from '../../../metrics'
@@ -28,6 +29,7 @@ export const joinClub = HttpApiBuilder.handler(
 
       const clubsDb = yield* _(ClubsDbService)
       const membersDb = yield* _(ClubMembersDbService)
+      const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
       const linksDb = yield* _(ClubInvitationLinkDbService)
       const userNotificationService = yield* _(UserNotificationService)
 
@@ -93,6 +95,10 @@ export const joinClub = HttpApiBuilder.handler(
                 req.payload.vexlNotificationToken
               ),
             })
+          )
+
+          yield* _(
+            memberCountChangesDb.incrementJoined({clubId: club.id, count: 1})
           )
 
           if (inviteLink.forAdmin) {

@@ -26,7 +26,31 @@ export const createFindClubAdminByUuid = Effect.gen(function* (_) {
             club_member
           WHERE
             club_id = club.id
-        ) AS members_count
+        ) AS members_count,
+        coalesce(
+          (
+            SELECT
+              sum(joined_count)
+            FROM
+              club_member_count_change
+            WHERE
+              club_id = club.id
+              AND DAY >= current_date - 30
+          ),
+          0
+        )::int AS members_joined_last30_days,
+        coalesce(
+          (
+            SELECT
+              sum(left_count)
+            FROM
+              club_member_count_change
+            WHERE
+              club_id = club.id
+              AND DAY >= current_date - 30
+          ),
+          0
+        )::int AS members_left_last30_days
       FROM
         club
       WHERE

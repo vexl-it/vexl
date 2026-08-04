@@ -13,7 +13,9 @@ export const createListClubs = Effect.gen(function* (_) {
     execute: (params) => sql`
       SELECT
         club.*,
-        coalesce(members.members_count, 0)::int AS members_count
+        coalesce(members.members_count, 0)::int AS members_count,
+        coalesce(changes.members_joined_last30_days, 0)::int AS members_joined_last30_days,
+        coalesce(changes.members_left_last30_days, 0)::int AS members_left_last30_days
       FROM
         club
         LEFT JOIN (
@@ -25,6 +27,18 @@ export const createListClubs = Effect.gen(function* (_) {
           GROUP BY
             club_id
         ) AS members ON members.club_id = club.id
+        LEFT JOIN (
+          SELECT
+            club_id,
+            sum(joined_count)::int AS members_joined_last30_days,
+            sum(left_count)::int AS members_left_last30_days
+          FROM
+            club_member_count_change
+          WHERE
+            DAY >= current_date - 30
+          GROUP BY
+            club_id
+        ) AS changes ON changes.club_id = club.id
     `,
   })
 

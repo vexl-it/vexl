@@ -17,6 +17,7 @@ describe('Deactivate and clear clubs', () => {
         const sql = yield* _(SqlClient.SqlClient)
         yield* _(sql`DELETE FROM club_invitation_link`)
         yield* _(sql`DELETE FROM club_member`)
+        yield* _(sql`DELETE FROM club_member_count_change`)
         yield* _(sql`DELETE FROM club`)
       })
     )
@@ -67,6 +68,103 @@ describe('Deactivate and clear clubs', () => {
         `)
 
         expect(clubs.at(0)).toHaveProperty('madeInactiveReason', 'EXPIRED')
+      })
+    )
+  })
+
+  it('clears member changes before deleting a club and removes expired aggregates', async () => {
+    await runPromiseInMockedEnvironment(
+      Effect.gen(function* (_) {
+        const app = yield* _(NodeTestingApp)
+        const removableClubUuid = generateClubUuid()
+        const activeClubUuid = generateClubUuid()
+        const validUntil = new Date(Date.now() + 24 * 60 * 60 * 1000)
+
+        yield* _(addTestHeaders({'x-admin-token': ADMIN_TOKEN}))
+        yield* _(
+          app.ClubsAdmin.createClub({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+            payload: {
+              club: {
+                uuid: removableClubUuid,
+                name: 'Removable club',
+                description: Option.none(),
+                membersCountLimit: 100,
+                clubImageUrl: SOME_URL,
+                validUntil,
+                reportLimit: 10,
+              },
+            },
+          })
+        )
+        yield* _(
+          app.ClubsAdmin.createClub({
+            headers: {'x-admin-token': ADMIN_TOKEN},
+            payload: {
+              club: {
+                uuid: activeClubUuid,
+                name: 'Active club',
+                description: Option.none(),
+                membersCountLimit: 100,
+                clubImageUrl: SOME_URL,
+                validUntil,
+                reportLimit: 10,
+              },
+            },
+          })
+        )
+
+        const sql = yield* _(SqlClient.SqlClient)
+        yield* _(sql`
+          UPDATE club
+          SET
+            made_inactive_at = now() - INTERVAL '8 days',
+            made_inactive_reason = 'UNKNOWN'
+          WHERE
+            UUID = ${removableClubUuid}
+        `)
+        yield* _(sql`
+          INSERT INTO
+            club_member_count_change (club_id, DAY, joined_count, left_count)
+          SELECT
+            id,
+            current_date,
+            1,
+            1
+          FROM
+            club
+          WHERE
+            UUID = ${removableClubUuid}
+          UNION ALL
+          SELECT
+            id,
+            current_date - 32,
+            2,
+            2
+          FROM
+            club
+          WHERE
+            UUID = ${activeClubUuid}
+        `)
+
+        yield* _(deactivateAndClearClubs)
+
+        const remainingClubs = yield* _(sql`
+          SELECT
+            UUID
+          FROM
+            club
+          WHERE
+            UUID = ${removableClubUuid}
+        `)
+        const remainingChanges = yield* _(sql`
+          SELECT
+            club_member_count_change.id
+          FROM
+            club_member_count_change
+        `)
+        expect(remainingClubs).toEqual([])
+        expect(remainingChanges).toEqual([])
       })
     )
   })

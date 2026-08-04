@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import {Array, Effect, Option, pipe} from 'effect'
 import {clubRemoveAfterMarkedAsDeletedDaysConfig} from '../../configs'
 import {ClubInvitationLinkDbService} from '../../db/ClubInvitationLinkDbService'
+import {ClubMemberCountChangeDbService} from '../../db/ClubMemberCountChangeDbService'
 import {ClubMembersDbService} from '../../db/ClubMemberDbService'
 import {ClubsDbService} from '../../db/ClubsDbService'
 import {type ClubDbRecord} from '../../db/ClubsDbService/domain'
@@ -21,12 +22,16 @@ const removeClubCompletely = (
 ): Effect.Effect<
   void,
   UnexpectedServerError,
-  ClubsDbService | ClubInvitationLinkDbService | ClubMembersDbService
+  | ClubsDbService
+  | ClubInvitationLinkDbService
+  | ClubMembersDbService
+  | ClubMemberCountChangeDbService
 > =>
   Effect.gen(function* (_) {
     const clubsDb = yield* _(ClubsDbService)
     const linkDb = yield* _(ClubInvitationLinkDbService)
     const membersDb = yield* _(ClubMembersDbService)
+    const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
 
     yield* _(Effect.log('Removing club', club.id))
 
@@ -35,6 +40,9 @@ const removeClubCompletely = (
 
     yield* _(Effect.log('Removing club members'))
     yield* _(membersDb.deleteAllClubMembers({clubId: club.id}))
+
+    yield* _(Effect.log('Removing club member count changes'))
+    yield* _(memberCountChangesDb.deleteForClub({clubId: club.id}))
 
     yield* _(Effect.log('Removing club'))
     yield* _(clubsDb.deleteClub({id: club.id}))
@@ -118,6 +126,9 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
 
 const clearDeactivatedClubs = Effect.gen(function* (_) {
   const clubsDb = yield* _(ClubsDbService)
+  const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
+
+  yield* _(memberCountChangesDb.deleteOlderThanDays({days: 31}))
 
   const removeAfterDays = yield* _(clubRemoveAfterMarkedAsDeletedDaysConfig)
   const deactivatedClubs = yield* _(clubsDb.listInactiveClubs())

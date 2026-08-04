@@ -4,32 +4,14 @@ import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
-import type {ClubCannotBeReactivatedError} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Effect, Option} from 'effect'
+import {Option} from 'effect'
 import {useRouter} from 'next/navigation'
 import {useCallback, useEffect, useState} from 'react'
-
-const REACTIVATION_WARNING =
-  'Reactivating is not recommended: members were already notified about the deactivation and most of them will have the club data erased from their devices, so reactivating will not restore the club for them. Reactivate anyway?'
-
-const getReactivationErrorMessage = (
-  error: ClubCannotBeReactivatedError
-): string => {
-  switch (error.reactivationBlockedReason) {
-    case 'PAST_VALIDITY':
-      return 'Cannot reactivate: the club is past its validity date. Edit the club and extend "Valid until" first, then reactivate.'
-    case 'REPORT_LIMIT_REACHED':
-      return "Cannot reactivate: the club's report count has reached its report limit, so it would be deactivated again immediately. Edit the club and increase the report limit first, then reactivate."
-  }
-}
 
 export default function ClubsListPage() {
   const [clubs, setClubs] = useState<readonly ClubAdminInfo[]>([])
   const [nameFilter, setNameFilter] = useState('')
   const [loading, setLoading] = useState(true)
-  const [reactivatingClubUuid, setReactivatingClubUuid] = useState<
-    string | null
-  >(null)
   const [error, setError] = useState<string | null>(null)
   const [hoveredDescription, setHoveredDescription] = useState<string | null>(
     null
@@ -80,45 +62,6 @@ export default function ClubsListPage() {
   useEffect(() => {
     void loadClubs()
   }, [loadClubs])
-
-  const handleReactivate = async (club: ClubAdminInfo): Promise<void> => {
-    if (!window.confirm(REACTIVATION_WARNING)) return
-
-    const adminToken = getAdminToken()
-    if (!adminToken) {
-      router.push('/login')
-      return
-    }
-
-    setReactivatingClubUuid(club.uuid)
-    setError(null)
-
-    try {
-      const client = await runEffect(makeClubsAdminClient())
-      const blockedMessage = await runEffect(
-        client
-          .reactivateClub({
-            headers: {'x-admin-token': adminToken},
-            payload: {clubUuid: club.uuid},
-          })
-          .pipe(
-            Effect.map(() => null),
-            Effect.catchTag('ClubCannotBeReactivatedError', (e) =>
-              Effect.succeed(getReactivationErrorMessage(e))
-            )
-          )
-      )
-      if (blockedMessage !== null) {
-        setError(blockedMessage)
-        return
-      }
-      await loadClubs()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reactivate club')
-    } finally {
-      setReactivatingClubUuid(null)
-    }
-  }
 
   if (loading) {
     return (
@@ -311,29 +254,14 @@ export default function ClubsListPage() {
                         {club.report} / {club.reportLimit}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <div className="flex justify-end gap-3">
-                          {Option.isSome(club.madeInactiveAt) && (
-                            <button
-                              onClick={() => {
-                                void handleReactivate(club)
-                              }}
-                              disabled={reactivatingClubUuid === club.uuid}
-                              className="text-green-700 hover:text-green-900 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {reactivatingClubUuid === club.uuid
-                                ? 'Reactivating...'
-                                : 'Reactivate'}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => {
-                              router.push(`/clubs/${club.uuid}/edit`)
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900"
-                          >
-                            Edit
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => {
+                            router.push(`/clubs/${club.uuid}/edit`)
+                          }}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   ))}

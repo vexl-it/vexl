@@ -6,10 +6,24 @@ import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
-import type {GetClubStatsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
-import {Option} from 'effect'
+import type {
+  ClubCannotBeReactivatedError,
+  GetClubStatsResponse,
+} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {Effect, Option} from 'effect'
 import {useParams, useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
+
+const getReactivationErrorMessage = (
+  error: ClubCannotBeReactivatedError
+): string => {
+  switch (error.reactivationBlockedReason) {
+    case 'PAST_VALIDITY':
+      return 'Cannot reactivate: the club is past its validity date. Extend "Valid until" below and save first, then reactivate.'
+    case 'REPORT_LIMIT_REACHED':
+      return "Cannot reactivate: the club's report count has reached its report limit, so it would be deactivated again immediately. Increase the report limit below and save first, then reactivate."
+  }
+}
 
 export default function EditClubPage() {
   const {uuid: clubUuid} = useParams<{uuid: string}>()
@@ -18,6 +32,8 @@ export default function EditClubPage() {
   const [statsError, setStatsError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [reactivating, setReactivating] = useState(false)
+  const [reactivateError, setReactivateError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const runEffect = useRunEffect()
   const router = useRouter()
@@ -139,6 +155,57 @@ export default function EditClubPage() {
     }
   }
 
+  const handleReactivate = async (): Promise<void> => {
+    if (!formData) return
+    if (
+      !window.confirm(
+        'Reactivate this club? Make sure you have read the warning above.'
+      )
+    )
+      return
+
+    const adminToken = getAdminToken()
+    if (!adminToken) {
+      router.push('/login')
+      return
+    }
+
+    setReactivating(true)
+    setReactivateError(null)
+
+    try {
+      const client = await runEffect(makeClubsAdminClient())
+      const blockedMessage = await runEffect(
+        client
+          .reactivateClub({
+            headers: {'x-admin-token': adminToken},
+            payload: {clubUuid: formData.uuid},
+          })
+          .pipe(
+            Effect.map(() => null),
+            Effect.catchTag('ClubCannotBeReactivatedError', (e) =>
+              Effect.succeed(getReactivationErrorMessage(e))
+            )
+          )
+      )
+      if (blockedMessage !== null) {
+        setReactivateError(blockedMessage)
+        return
+      }
+      setFormData({
+        ...formData,
+        madeInactiveAt: Option.none(),
+        madeInactiveReason: Option.none(),
+      })
+    } catch (err) {
+      setReactivateError(
+        err instanceof Error ? err.message : 'Failed to reactivate club'
+      )
+    } finally {
+      setReactivating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -187,6 +254,30 @@ export default function EditClubPage() {
             {Option.getOrElse(formData.madeInactiveReason, () => 'UNKNOWN')},
             current reports {formData.report}/{formData.reportLimit}.
           </p>
+          <p className="mt-3 text-sm">
+            Reactivating will <span className="font-semibold">not</span> restore
+            the club for its members: they were already notified about the
+            deactivation and most of their devices have erased the club data.
+            Only reactivate if you know what you are doing — if you are not
+            sure, ask the developers first.
+          </p>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                void handleReactivate()
+              }}
+              disabled={reactivating}
+              className="rounded-md bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {reactivating ? 'Reactivating...' : 'Reactivate club'}
+            </button>
+          </div>
+          {!!reactivateError && (
+            <p className="mt-2 text-sm font-medium text-red-700">
+              {reactivateError}
+            </p>
+          )}
         </div>
       )}
 

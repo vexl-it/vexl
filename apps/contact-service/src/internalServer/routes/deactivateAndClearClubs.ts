@@ -126,9 +126,6 @@ const deactivateClubsAndSendNotifications = Effect.gen(function* (_) {
 
 const clearDeactivatedClubs = Effect.gen(function* (_) {
   const clubsDb = yield* _(ClubsDbService)
-  const memberCountChangesDb = yield* _(ClubMemberCountChangeDbService)
-
-  yield* _(memberCountChangesDb.deleteOlderThanDays({days: 31}))
 
   const removeAfterDays = yield* _(clubRemoveAfterMarkedAsDeletedDaysConfig)
   const deactivatedClubs = yield* _(clubsDb.listInactiveClubs())

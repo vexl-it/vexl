@@ -5,10 +5,6 @@ import {
   type DeleteForClubParams,
 } from './queries/createDeleteForClub'
 import {
-  createDeleteOlderThanDays,
-  type DeleteOlderThanDaysParams,
-} from './queries/createDeleteOlderThanDays'
-import {
   createIncrementJoined,
   type IncrementJoinedParams,
 } from './queries/createIncrementJoined'
@@ -16,6 +12,11 @@ import {
   createIncrementLeft,
   type IncrementLeftParams,
 } from './queries/createIncrementLeft'
+import {
+  createListForClub,
+  type ListForClubParams,
+  type ListForClubResult,
+} from './queries/createListForClub'
 
 export interface ClubMemberCountChangeDbOperations {
   incrementJoined: (
@@ -27,9 +28,9 @@ export interface ClubMemberCountChangeDbOperations {
   deleteForClub: (
     params: DeleteForClubParams
   ) => Effect.Effect<void, UnexpectedServerError>
-  deleteOlderThanDays: (
-    params: DeleteOlderThanDaysParams
-  ) => Effect.Effect<void, UnexpectedServerError>
+  listForClub: (
+    params: ListForClubParams
+  ) => Effect.Effect<readonly ListForClubResult[], UnexpectedServerError>
 }
 
 export class ClubMemberCountChangeDbService extends Context.Tag(
@@ -41,13 +42,13 @@ export class ClubMemberCountChangeDbService extends Context.Tag(
       const incrementJoined = yield* _(createIncrementJoined)
       const incrementLeft = yield* _(createIncrementLeft)
       const deleteForClub = yield* _(createDeleteForClub)
-      const deleteOlderThanDays = yield* _(createDeleteOlderThanDays)
+      const listForClub = yield* _(createListForClub)
 
       return {
         incrementJoined,
         incrementLeft,
         deleteForClub,
-        deleteOlderThanDays,
+        listForClub,
       }
     })
   )

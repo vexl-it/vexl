@@ -72,7 +72,7 @@ describe('Deactivate and clear clubs', () => {
     )
   })
 
-  it('clears member changes before deleting a club and removes expired aggregates', async () => {
+  it('clears member changes for deleted clubs and keeps active club history', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const app = yield* _(NodeTestingApp)
@@ -159,12 +159,13 @@ describe('Deactivate and clear clubs', () => {
         `)
         const remainingChanges = yield* _(sql`
           SELECT
-            club_member_count_change.id
+            club_member_count_change.joined_count,
+            club_member_count_change.left_count
           FROM
             club_member_count_change
         `)
         expect(remainingClubs).toEqual([])
-        expect(remainingChanges).toEqual([])
+        expect(remainingChanges).toEqual([{joinedCount: 2, leftCount: 2}])
       })
     )
   })

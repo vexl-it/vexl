@@ -38,6 +38,7 @@ import {internalServerLive} from './internalServer'
 import {reportGaguesLayer} from './metrics'
 import {createClub} from './routes/clubs/admin/createClub'
 import {generateClubInviteLink} from './routes/clubs/admin/generateClubInviteLink'
+import {getClubStats} from './routes/clubs/admin/getClubStats'
 import {listClubs} from './routes/clubs/admin/listClubs'
 import {modifyClub} from './routes/clubs/admin/modifyClub'
 import {reactivateClub} from './routes/clubs/admin/reactivateClub'
@@ -106,6 +107,7 @@ const ClubsAdminApiGroupLive = HttpApiBuilder.group(
       .handle('modifyClub', modifyClub)
       .handle('generateClubInviteLinkForAdmin', generateClubInviteLink)
       .handle('listClubs', listClubs)
+      .handle('getClubStats', getClubStats)
       .handle('reactivateClub', reactivateClub)
       .handle('requestClubImageUpload', requestClubImageUpload)
 )

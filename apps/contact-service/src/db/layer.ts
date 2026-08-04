@@ -26,6 +26,7 @@ import add_public_key_v2_indexes from './migrations/0021_add_public_key_v2_index
 import backfill_refreshed_at_for_existing_users from './migrations/0022_backfill_refreshed_at_for_existing_users'
 import add_user_contact_indexes_for_dashboard from './migrations/0023_add_user_contact_indexes_for_dashboard'
 import drop_redundant_user_contact_indexes from './migrations/0024_drop_redundant_user_contact_indexes'
+import bump_zero_club_report_limits from './migrations/0025_bump_zero_club_report_limits'
 
 const migrations = [
   {
@@ -148,6 +149,11 @@ const migrations = [
     id: 24,
     name: 'drop_redundant_user_contact_indexes',
     migrationEffect: drop_redundant_user_contact_indexes,
+  },
+  {
+    id: 25,
+    name: 'bump_zero_club_report_limits',
+    migrationEffect: bump_zero_club_report_limits,
   },
 ] as const
 

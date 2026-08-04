@@ -1,10 +1,12 @@
 'use client'
 
+import {ClubMemberActivityChart} from '@/src/components/ClubMemberActivityChart'
 import {useClubImageUpload} from '@/src/hooks/useClubImageUpload'
 import {useRunEffect} from '@/src/hooks/useRunEffect'
 import {getAdminToken} from '@/src/services/adminTokenService'
 import {makeClubsAdminClient} from '@/src/services/clubsAdminApi'
 import type {ClubAdminInfo} from '@vexl-next/domain/src/general/clubs'
+import type {GetClubStatsResponse} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {Option} from 'effect'
 import {useParams, useRouter} from 'next/navigation'
 import {useEffect, useState} from 'react'
@@ -12,6 +14,8 @@ import {useEffect, useState} from 'react'
 export default function EditClubPage() {
   const {uuid: clubUuid} = useParams<{uuid: string}>()
   const [formData, setFormData] = useState<ClubAdminInfo | null>(null)
+  const [stats, setStats] = useState<GetClubStatsResponse | null>(null)
+  const [statsError, setStatsError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -63,6 +67,22 @@ export default function EditClubPage() {
         }
 
         setFormData(club)
+
+        try {
+          const statsResult = await runEffect(
+            client.getClubStats({
+              headers: {'x-admin-token': adminToken},
+              urlParams: {clubUuid: club.uuid},
+            })
+          )
+          setStats(statsResult)
+        } catch (statsErr) {
+          setStatsError(
+            statsErr instanceof Error
+              ? statsErr.message
+              : 'Failed to load member activity'
+          )
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load club')
       } finally {
@@ -169,6 +189,22 @@ export default function EditClubPage() {
           </p>
         </div>
       )}
+
+      <div className="mt-8 max-w-2xl rounded-lg bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-gray-900">Member activity</h2>
+        {stats !== null ? (
+          <div className="mt-2">
+            <ClubMemberActivityChart
+              membersCount={stats.membersCount}
+              changes={stats.changes}
+            />
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-gray-500">
+            {statsError ?? 'Loading member activity...'}
+          </p>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-8 max-w-2xl">
         <div className="bg-white shadow-sm rounded-lg p-6 space-y-6">

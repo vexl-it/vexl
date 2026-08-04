@@ -40,8 +40,11 @@ export const reactivateClub = HttpApiBuilder.handler(
         )
       }
 
+      yield* _(clubsDb.updateReactivateClub({clubUuid: club.uuid}))
       const reactivatedClub = yield* _(
-        clubsDb.updateReactivateClub({clubUuid: club.uuid})
+        clubsDb.findClubAdminByUuid({uuid: club.uuid}),
+        Effect.flatten,
+        Effect.catchTag('NoSuchElementException', () => new NotFoundError())
       )
 
       return {clubInfo: clubDbRecordToClubAdminInfo(reactivatedClub)}

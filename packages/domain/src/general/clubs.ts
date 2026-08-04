@@ -50,6 +50,7 @@ export type ClubInfoAdminInput = typeof ClubInfoAdminInput.Type
 
 export const ClubAdminInfo = Schema.Struct({
   ...ClubInfo.fields,
+  membersCount: Schema.Int,
   report: Schema.Int,
   madeInactiveAt: Schema.optionalWith(Schema.DateFromString, {
     as: 'Option',

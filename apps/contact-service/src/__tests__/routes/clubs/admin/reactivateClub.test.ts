@@ -58,6 +58,31 @@ describe('Reactivate club', () => {
             UUID = ${clubUuid}
         `)
 
+        yield* _(sql`
+          INSERT INTO
+            club_member (
+              club_id,
+              public_key,
+              public_key_v2,
+              notification_token,
+              vexl_notification_token,
+              last_refreshed_at,
+              is_moderator
+            )
+          SELECT
+            id,
+            'reactivate-test-key',
+            NULL,
+            NULL,
+            NULL,
+            now(),
+            FALSE
+          FROM
+            club
+          WHERE
+            UUID = ${clubUuid}
+        `)
+
         const response = yield* _(
           app.ClubsAdmin.reactivateClub({
             headers: {'x-admin-token': ADMIN_TOKEN},
@@ -67,6 +92,7 @@ describe('Reactivate club', () => {
 
         expect(response.clubInfo.madeInactiveAt).toEqual(Option.none())
         expect(response.clubInfo.madeInactiveReason).toEqual(Option.none())
+        expect(response.clubInfo.membersCount).toBe(1)
       })
     )
   })

@@ -1,12 +1,20 @@
 import {type OfferIdHashed} from '@vexl-next/domain/src/general/clubs'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {Context, Effect, Layer, type Option} from 'effect'
-import {type ClubDbRecord, type ClubOfferReporedInfoRecord} from './domain'
+import {
+  type ClubAdminDbRecord,
+  type ClubDbRecord,
+  type ClubOfferReporedInfoRecord,
+} from './domain'
 import {
   createDeleteClub,
   type DeleteClubParams,
 } from './queries/createDeleteClubs'
 import {createFindClub, type FindClubParams} from './queries/createFindClub'
+import {
+  createFindClubAdminByUuid,
+  type FindClubAdminByUuidParams,
+} from './queries/createFindClubAdminByClubUuid'
 import {
   createFindClubByUuid,
   type FindClubByUuidParams,
@@ -51,6 +59,9 @@ export interface ClubsDbOperations {
   findClubByUuid: (
     params: FindClubByUuidParams
   ) => Effect.Effect<Option.Option<ClubDbRecord>, UnexpectedServerError>
+  findClubAdminByUuid: (
+    params: FindClubAdminByUuidParams
+  ) => Effect.Effect<Option.Option<ClubAdminDbRecord>, UnexpectedServerError>
   findReportInfoForOfferIdHashed: (
     args: OfferIdHashed
   ) => Effect.Effect<
@@ -72,7 +83,10 @@ export interface ClubsDbOperations {
   updateReactivateClub: (
     params: UpdateReactivateClubParams
   ) => Effect.Effect<ClubDbRecord, UnexpectedServerError>
-  listClubs: () => Effect.Effect<readonly ClubDbRecord[], UnexpectedServerError>
+  listClubs: () => Effect.Effect<
+    readonly ClubAdminDbRecord[],
+    UnexpectedServerError
+  >
   listExpiredClubs: () => Effect.Effect<
     readonly ClubDbRecord[],
     UnexpectedServerError
@@ -99,6 +113,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
     Effect.gen(function* (_) {
       const deleteClub = yield* _(createDeleteClub)
       const findClub = yield* _(createFindClub)
+      const findClubAdminByUuid = yield* _(createFindClubAdminByUuid)
       const findClubByUuid = yield* _(createFindClubByUuid)
       const insertClub = yield* _(createInsertClub)
       const insertClubOfferReportedInfo = yield* _(
@@ -121,6 +136,7 @@ export class ClubsDbService extends Context.Tag('ClubsDbService')<
       return {
         deleteClub,
         findClub,
+        findClubAdminByUuid,
         findClubByUuid,
         findReportInfoForOfferIdHashed,
         insertClub,

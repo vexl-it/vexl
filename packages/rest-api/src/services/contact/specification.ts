@@ -50,6 +50,8 @@ import {
   GetClubInfoByAccessCodeResponse,
   GetClubInfoRequest,
   GetClubInfoResponse,
+  GetClubStatsRequest,
+  GetClubStatsResponse,
   ImportContactsQuotaReachedError,
   ImportContactsRequest,
   ImportContactsResponse,
@@ -226,6 +228,17 @@ export const ListClubsEndpoint = HttpApiEndpoint.get(
   .addError(InvalidAdminTokenError, {status: 401})
   .annotate(MaxExpectedDailyCall, 100)
 
+export const GetClubStatsEndpoint = HttpApiEndpoint.get(
+  'getClubStats',
+  '/api/v1/clubs/admin/stats'
+)
+  .setHeaders(AdminTokenHeaders)
+  .setUrlParams(GetClubStatsRequest)
+  .addSuccess(GetClubStatsResponse)
+  .addError(InvalidAdminTokenError, {status: 401})
+  .addError(NotFoundError, {status: 404})
+  .annotate(MaxExpectedDailyCall, 100)
+
 export const ReactivateClubEndpoint = HttpApiEndpoint.put(
   'reactivateClub',
   '/api/v1/clubs/admin/reactivate'
@@ -384,6 +397,7 @@ const ClubsAdminApiGroup = HttpApiGroup.make('ClubsAdmin')
   .add(ModfiyClubEndpoint)
   .add(GenerateClubInviteLinkForAdminEndpoint)
   .add(ListClubsEndpoint)
+  .add(GetClubStatsEndpoint)
   .add(ReactivateClubEndpoint)
   .add(RequestClubImageUploadEndpoint)
 

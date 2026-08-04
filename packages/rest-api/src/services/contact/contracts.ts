@@ -263,6 +263,22 @@ export const ListClubsResponse = Schema.Struct({
 
 export type ListClubsResponse = typeof ListClubsResponse.Type
 
+export const ClubMemberCountChangeItem = Schema.Struct({
+  day: Schema.DateFromString,
+  joinedCount: Schema.Int,
+  leftCount: Schema.Int,
+})
+export type ClubMemberCountChangeItem = typeof ClubMemberCountChangeItem.Type
+
+export const GetClubStatsRequest = Schema.Struct({clubUuid: ClubUuid})
+export type GetClubStatsRequest = typeof GetClubStatsRequest.Type
+
+export const GetClubStatsResponse = Schema.Struct({
+  membersCount: Schema.Int,
+  changes: Schema.Array(ClubMemberCountChangeItem),
+})
+export type GetClubStatsResponse = typeof GetClubStatsResponse.Type
+
 export const ReactivateClubRequest = Schema.Struct({
   clubUuid: ClubUuid,
 })

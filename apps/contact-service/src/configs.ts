@@ -79,6 +79,10 @@ export const deleteInactiveClubMembersCronConfig = Config.string(
   'DELETE_INACTIVE_CLUB_MEMBERS_CRON'
 ).pipe(Config.withDefault('0 0 * * *'))
 
+export const deactivateAndClearClubsCronConfig = Config.string(
+  'DEACTIVATE_AND_CLEAR_CLUBS_CRON'
+).pipe(Config.withDefault('0 9 * * *'))
+
 export const secretSaltForServerContact = Config.string(
   'SECRET_SALT_FOR_SERVER_CONTACTS'
 )

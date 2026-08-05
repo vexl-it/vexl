@@ -23,7 +23,7 @@ import {InboxDbService} from './db/InboxDbService'
 import {MessagesDbService} from './db/MessagesDbService'
 import {WhitelistDbService} from './db/WhiteListDbService'
 import DbLayer from './db/layer'
-import {InternalServerLive} from './internalServer'
+import {ExpiredMessagesCleanupWorkerLayer} from './expiredMessagesCleanupWorker'
 import {reportMetricsLayer} from './metrics'
 import {approveRequest} from './routes/inbox/approveReqest'
 import {blockInbox} from './routes/inbox/blockInbox'
@@ -97,7 +97,7 @@ export const ApiServerLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 
 export const HttpServerLive = Layer.mergeAll(
   ApiServerLive,
-  InternalServerLive,
+  ExpiredMessagesCleanupWorkerLayer,
   reportMetricsLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(

@@ -1,9 +1,11 @@
 import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
 import {Effect, Layer} from 'effect'
 import {
+  deleteInactiveClubMembersCronConfig,
   processNewContentNotificationCronConfig,
   processUserInactivityCronConfig,
 } from './configs'
+import {checkForInactiveUsers} from './internalServer/routes/checkForInactiveUsers'
 import {UserNotificationService} from './services/UserNotificationService'
 
 const processUserInactivityLayer = makeRepeatingTaskLayer({
@@ -28,7 +30,17 @@ const processNewContentNotificationLayer = makeRepeatingTaskLayer({
   ),
 })
 
+const deleteInactiveClubMembersLayer = makeRepeatingTaskLayer({
+  queueName: 'contact-service-delete-inactive-club-members',
+  jobName: 'delete_inactive_club_members',
+  cronPattern: deleteInactiveClubMembersCronConfig,
+  lockResource: 'contactService:deleteInactiveClubMembers',
+  lockDuration: '30 minutes',
+  task: checkForInactiveUsers,
+})
+
 export const ScheduledTaskWorkersLayer = Layer.mergeAll(
   processUserInactivityLayer,
-  processNewContentNotificationLayer
+  processNewContentNotificationLayer,
+  deleteInactiveClubMembersLayer
 )

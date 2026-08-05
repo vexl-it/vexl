@@ -5,11 +5,17 @@ import {RedisConnectionService} from './RedisConnection'
 import {type RedisService, withRedisLock} from './RedisService'
 
 /**
- * Creates a layer that runs `task` every `intervalMs` milliseconds on a BullMQ
- * repeatable job (job scheduler). The schedule lives in Redis, so it fires
- * even across service restarts, and the task itself is guarded by a Redis
- * lock so only one replica executes it per tick (other replicas skip the
- * tick). Task errors are logged and never crash the layer.
+ * Creates a layer that runs `task` on a BullMQ repeatable job (job
+ * scheduler), either every `intervalMs` milliseconds or on a `cronPattern`
+ * (standard cron expression, evaluated in the server timezone — UTC in our
+ * deployments). The schedule lives in Redis, so it fires even across service
+ * restarts, and the task itself is guarded by a Redis lock so only one
+ * replica executes it per tick (other replicas skip the tick). Task errors
+ * are logged and never crash the layer.
+ *
+ * Note: an `intervalMs` schedule fires its first tick immediately when the
+ * scheduler is first created; a `cronPattern` schedule waits for the next
+ * matching time.
  *
  * `queueName` must be dedicated to this single task: BullMQ workers consume
  * every job in a queue regardless of job name, so two repeating tasks sharing
@@ -19,17 +25,26 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
   queueName,
   jobName,
   intervalMs,
+  cronPattern,
   lockResource,
   lockDuration,
   task,
 }: {
   queueName: string
   jobName: string
-  intervalMs: Effect.Effect<number, E1, R1>
   lockResource: string
   lockDuration: Duration.DurationInput
   task: Effect.Effect<void, E2, R2>
-}): Layer.Layer<
+} & (
+  | {
+      intervalMs: Effect.Effect<number, E1, R1>
+      cronPattern?: undefined
+    }
+  | {
+      intervalMs?: undefined
+      cronPattern: Effect.Effect<string, E1, R1>
+    }
+)): Layer.Layer<
   never,
   never,
   R1 | R2 | RedisConnectionService | RedisService
@@ -58,7 +73,10 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
     Effect.gen(function* (_) {
       const redisConnection = yield* _(RedisConnectionService)
       const prefix = yield* _(RedisNamespacePrefixConfig)
-      const interval = yield* _(intervalMs)
+      const repeatOptions =
+        intervalMs !== undefined
+          ? {every: yield* _(intervalMs)}
+          : {pattern: yield* _(cronPattern)}
 
       const queue = yield* _(
         Effect.acquireRelease(
@@ -84,15 +102,11 @@ export const makeRepeatingTaskLayer = <E1, R1, E2, R2>({
       yield* _(
         Effect.tryPromise({
           try: async () =>
-            await queue.upsertJobScheduler(
-              jobName,
-              {every: interval},
-              {
-                name: jobName,
-                data: {},
-                opts: {removeOnComplete: true, removeOnFail: true},
-              }
-            ),
+            await queue.upsertJobScheduler(jobName, repeatOptions, {
+              name: jobName,
+              data: {},
+              opts: {removeOnComplete: true, removeOnFail: true},
+            }),
           catch: (e) => e,
         })
       )

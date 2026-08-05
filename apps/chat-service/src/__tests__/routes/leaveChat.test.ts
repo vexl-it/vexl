@@ -7,7 +7,6 @@ import {
   SenderInboxDoesNotExistError,
   type SendMessageRequest,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {NotPermittedToSendMessageToTargetInboxError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
@@ -31,7 +30,6 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM inbox`)
       yield* _(sql`DELETE FROM message`)
-      yield* _(sql`DELETE FROM white_list`)
 
       user1 = yield* _(createMockedUser('+420733333330'))
       user2 = yield* _(createMockedUser('+420733333331'))
@@ -90,7 +88,7 @@ beforeEach(async () => {
 })
 
 describe('Leave chat', () => {
-  it('Leaves chat, removes whitelist records, sends message to other party about leaving', async () => {
+  it('leaves chat and sends a message to the other party', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
@@ -107,15 +105,6 @@ describe('Leave chat', () => {
             ),
           })
         )
-
-        const sql = yield* _(SqlClient.SqlClient)
-        const whitelistRecords = yield* _(sql`
-          SELECT
-            *
-          FROM
-            white_list
-        `)
-        expect(whitelistRecords).toHaveLength(0)
 
         yield* _(setAuthHeaders(user1.authHeaders))
         const messagesForUser1 = yield* _(
@@ -184,7 +173,7 @@ describe('Leave chat', () => {
       )
     })
 
-    it('Not permitted to send messages to each other', async () => {
+    it('allows leaving without prior approval', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -203,9 +192,7 @@ describe('Leave chat', () => {
             Effect.either
           )
 
-          expectErrorResponse(NotPermittedToSendMessageToTargetInboxError)(
-            failedResponse
-          )
+          expect(failedResponse._tag).toBe('Right')
         })
       )
     })

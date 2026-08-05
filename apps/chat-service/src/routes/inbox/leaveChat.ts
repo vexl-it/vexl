@@ -7,11 +7,9 @@ import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/chal
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {MessagesDbService} from '../../db/MessagesDbService'
-import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
 import {reportChatClosed, reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
-import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 import {messageRecordToServerMessage} from '../messages/messageRecordToServerMessage'
 
@@ -29,37 +27,13 @@ export const leaveChat = HttpApiBuilder.handler(
         })
       )
 
-      const {receiverInbox, senderInbox} = yield* _(
+      const {receiverInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
           sender: req.payload.senderPublicKey,
           receiver: req.payload.receiverPublicKey,
         })
       )
 
-      yield* _(
-        ensureSenderInReceiverWhitelist({
-          sender: req.payload.senderPublicKey,
-          receiver: receiverInbox.id,
-        })
-      )
-
-      const whitelistDb = yield* _(WhitelistDbService)
-
-      // Remove both whitelist records
-      yield* _(
-        whitelistDb.deleteWhitelistRecordBySenderAndReceiver({
-          sender: senderInbox.publicKey,
-          receiver: receiverInbox.id,
-        })
-      )
-      yield* _(
-        whitelistDb.deleteWhitelistRecordBySenderAndReceiver({
-          sender: receiverInbox.publicKey,
-          receiver: senderInbox.id,
-        })
-      )
-
-      // send message about leaving
       const senderKeyEncrypted = yield* _(
         encryptPublicKey(req.payload.senderPublicKey)
       )

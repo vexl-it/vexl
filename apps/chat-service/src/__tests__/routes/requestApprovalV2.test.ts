@@ -1,11 +1,10 @@
 import {SqlClient} from '@effect/sql'
 import {generatePrivateKey} from '@vexl-next/cryptography/src/KeyHolder'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
-import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
+import {MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
-  RequestMessagingNotAllowedError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -27,11 +26,9 @@ let user2: MockedUser
 beforeEach(async () => {
   await runPromiseInMockedEnvironment(
     Effect.gen(function* (_) {
-      // Clear database before each to start fresh
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM inbox`)
       yield* _(sql`DELETE FROM message`)
-      yield* _(sql`DELETE FROM white_list`)
 
       user1 = yield* _(createMockedUser('+420733333330'))
       user2 = yield* _(createMockedUser('+420733333331'))
@@ -40,26 +37,37 @@ beforeEach(async () => {
 })
 
 describe('Request approval V2', () => {
-  it('Request approval sends an message to the other side', async () => {
+  it('delivers repeated request messages to the receiver', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-
         yield* _(setAuthHeaders(user1.authHeaders))
+
         yield* _(
           client.Inboxes.requestApprovalV2({
             headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                message: Schema.decodeSync(MessageCypher)('request message 1'),
+              })
+            ),
+          })
+        )
+        yield* _(
+          client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
+            payload: yield* _(
+              user1.inbox1.addChallenge({
+                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
+                message: Schema.decodeSync(MessageCypher)('request message 2'),
               })
             ),
           })
         )
 
         yield* _(setAuthHeaders(user2.authHeaders))
-        const messagesForUser2 = yield* _(
+        const messages = yield* _(
           client.Messages.retrieveMessages({
             payload: yield* _(user2.inbox1.addChallenge({})),
             headers: Schema.decodeSync(CommonHeaders)({
@@ -68,381 +76,25 @@ describe('Request approval V2', () => {
           })
         )
 
-        expect(messagesForUser2.messages).toHaveLength(1)
-        expect(messagesForUser2.messages[0]).toHaveProperty(
-          'message',
-          'request message'
-        )
+        expect(messages.messages).toHaveLength(2)
+        expect(messages.messages[0].message).toBe('request message 1')
+        expect(messages.messages[1].message).toBe('request message 2')
       })
     )
   })
 
-  it('Can not request approval twice in a row', async () => {
+  it('returns an error when the receiver inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-
         yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
+
+        const response = yield* _(
           client.Inboxes.requestApprovalV2({
             headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('Can request approval twice within timeout interval', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
-          UPDATE white_list
-          SET
-            date = NOW() - INTERVAL '1 day'
-        `)
-
-        const toNotFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expect(toNotFail._tag).toBe('Right')
-
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('Cannot send request when already approved', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Inboxes.approveRequest({
-            headers: commonHeaders,
-            payload: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'approval message' as MessageCypher,
-                approve: true,
-                publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('Cannot send request when already disaproved', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Inboxes.approveRequest({
-            headers: commonHeaders,
-            payload: yield* _(
-              user2.inbox1.addChallenge({
-                message: 'approval message' as MessageCypher,
-                approve: false,
-                publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('Cannot send request when the other side blocked', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(setAuthHeaders(user2.authHeaders))
-        yield* _(
-          client.Inboxes.blockInbox({
-            payload: yield* _(
-              user2.inbox1.addChallenge({
-                publicKeyToBlock: user1.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('Cannot send request right after cancelation', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(
-          client.Inboxes.cancelRequestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'cancel message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('can send request after cancelation when request timeout period has passed', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        yield* _(
-          client.Inboxes.cancelRequestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'cancel message' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          })
-        )
-
-        const sql = yield* _(SqlClient.SqlClient)
-        yield* _(sql`
-          UPDATE white_list
-          SET
-            date = NOW() - INTERVAL '1 day'
-        `)
-
-        const toNotFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-
-        expect(toNotFail._tag).toBe('Right')
-
-        const toFail = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request' as MessageCypher,
-                receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
-              })
-            ),
-          }),
-          Effect.either
-        )
-        expectErrorResponse(RequestMessagingNotAllowedError)(toFail)
-      })
-    )
-  })
-
-  it('Returns error when sending request to non existing inbox', async () => {
-    await runPromiseInMockedEnvironment(
-      Effect.gen(function* (_) {
-        const client = yield* _(NodeTestingApp)
-
-        yield* _(setAuthHeaders(user1.authHeaders))
-        const failedResponse = yield* _(
-          client.Inboxes.requestApprovalV2({
-            headers: commonHeaders,
-            payload: yield* _(
-              user1.inbox1.addChallenge({
-                message: 'request message' as MessageCypher,
+                message: Schema.decodeSync(MessageCypher)('request message'),
                 receiverPublicKey: generatePrivateKey().publicKeyPemBase64,
               })
             ),
@@ -450,16 +102,15 @@ describe('Request approval V2', () => {
           Effect.either
         )
 
-        expectErrorResponse(ReceiverInboxDoesNotExistError)(failedResponse)
+        expectErrorResponse(ReceiverInboxDoesNotExistError)(response)
       })
     )
   })
 
-  it('Returns error when sending request from non existing inbox', async () => {
+  it('returns an error when the sender inbox does not exist', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
-
         const dummyKeyPair = generatePrivateKey()
         const dummyAuthHeaders = yield* _(
           createDummyAuthHeadersForUser({
@@ -467,18 +118,17 @@ describe('Request approval V2', () => {
             publicKey: dummyKeyPair.publicKeyPemBase64,
           })
         )
-        const dummyAddChallenge = addChallengeForKey(
-          dummyKeyPair,
-          dummyAuthHeaders
-        )
-
         yield* _(setAuthHeaders(dummyAuthHeaders))
-        const failedResponse = yield* _(
+
+        const response = yield* _(
           client.Inboxes.requestApprovalV2({
             headers: commonHeaders,
             payload: yield* _(
-              dummyAddChallenge({
-                message: 'request message' as MessageCypher,
+              addChallengeForKey(
+                dummyKeyPair,
+                dummyAuthHeaders
+              )({
+                message: Schema.decodeSync(MessageCypher)('request message'),
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
               })
             ),
@@ -486,7 +136,7 @@ describe('Request approval V2', () => {
           Effect.either
         )
 
-        expectErrorResponse(SenderInboxDoesNotExistError)(failedResponse)
+        expectErrorResponse(SenderInboxDoesNotExistError)(response)
       })
     )
   })

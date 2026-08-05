@@ -15,8 +15,6 @@ export {
   secretPublicKey,
 } from '@vexl-next/server-utils/src/commonConfigs'
 
-export const requestTimeoutDaysConfig = Config.number('REQUEST_TIMEOUT_DAYS')
-
 export const messageExpirationLowerLimitDaysConfig = Config.number(
   'MESSAGE_EXPIRATION_LOWER_LIMIT_DAYS'
 )

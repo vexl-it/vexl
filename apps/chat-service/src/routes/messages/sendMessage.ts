@@ -12,7 +12,6 @@ import {encryptPublicKey} from '../../db/domain'
 import {reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
-import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 import {messageRecordToServerMessage} from './messageRecordToServerMessage'
 
@@ -38,13 +37,6 @@ export const sendMessage = HttpApiBuilder.handler(
         findAndEnsureReceiverAndSenderInbox({
           sender: req.payload.senderPublicKey,
           receiver: req.payload.receiverPublicKey,
-        })
-      )
-
-      yield* _(
-        ensureSenderInReceiverWhitelist({
-          receiver: receiverInbox.id,
-          sender: req.payload.senderPublicKey,
         })
       )
 

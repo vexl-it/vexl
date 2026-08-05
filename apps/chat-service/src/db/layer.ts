@@ -9,6 +9,7 @@ import dropChallengeTable from './migrations/0004_drop_challenge_table'
 import addReceivedByServerAtToMessage from './migrations/0005_add_received_by_server_at_to_message'
 import dropInboxTokenColumn from './migrations/0006_drop_inbox_token_column'
 import makeReceivedByServerAtNonNullable from './migrations/0007_make_received_by_server_at_non_nullable'
+import dropWhiteListTable from './migrations/0008_drop_white_list_table'
 
 const migrations = [
   {
@@ -45,6 +46,11 @@ const migrations = [
     id: 7,
     name: 'Make received_by_server_at non-nullable',
     migrationEffect: makeReceivedByServerAtNonNullable,
+  },
+  {
+    id: 8,
+    name: 'Drop white_list table',
+    migrationEffect: dropWhiteListTable,
   },
 ] as const
 

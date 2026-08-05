@@ -5,7 +5,6 @@ import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
-  RequestNotPendingError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
@@ -30,7 +29,6 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM inbox`)
       yield* _(sql`DELETE FROM message`)
-      yield* _(sql`DELETE FROM white_list`)
 
       user1 = yield* _(createMockedUser('+420733333330'))
       user2 = yield* _(createMockedUser('+420733333331'))
@@ -94,8 +92,8 @@ describe('Cancel request', () => {
     )
   })
 
-  describe('fail when', () => {
-    it('Request not fonud', async () => {
+  describe('succeeds without whitelist state', () => {
+    it('when a request was not found', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -117,12 +115,12 @@ describe('Cancel request', () => {
             Effect.either
           )
 
-          expectErrorResponse(RequestNotPendingError)(failedReqResponse)
+          expect(failedReqResponse._tag).toBe('Right')
         })
       )
     })
 
-    it('Request is approved', async () => {
+    it('when a request was approved', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -158,12 +156,12 @@ describe('Cancel request', () => {
             Effect.either
           )
 
-          expectErrorResponse(RequestNotPendingError)(failedReqResponse)
+          expect(failedReqResponse._tag).toBe('Right')
         })
       )
     })
 
-    it('Request is disaproved', async () => {
+    it('when a request was disapproved', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -199,7 +197,7 @@ describe('Cancel request', () => {
             Effect.either
           )
 
-          expectErrorResponse(RequestNotPendingError)(failedReqResponse)
+          expect(failedReqResponse._tag).toBe('Right')
         })
       )
     })

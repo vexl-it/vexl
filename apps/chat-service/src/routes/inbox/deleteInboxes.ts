@@ -7,7 +7,6 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
-import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {hashPublicKey} from '../../db/domain'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 
@@ -37,14 +36,6 @@ export const deleteInboxes = HttpApiBuilder.handler(
               'NoSuchElementException',
               () => new InboxDoesNotExistError()
             )
-          )
-
-          const whitelistDb = yield* _(WhitelistDbService)
-          yield* _(
-            whitelistDb.deleteWhitelistRecordsWhereInboxIsReceiverOrSender({
-              inboxId: inbox.id,
-              publicKey: hashedPublicKey,
-            })
           )
 
           const messagesDb = yield* _(MessagesDbService)

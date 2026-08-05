@@ -21,7 +21,6 @@ import {Layer} from 'effect'
 import {cryptoConfig, healthServerPortConfig, redisUrl} from './configs'
 import {InboxDbService} from './db/InboxDbService'
 import {MessagesDbService} from './db/MessagesDbService'
-import {WhitelistDbService} from './db/WhiteListDbService'
 import DbLayer from './db/layer'
 import {ExpiredMessagesCleanupWorkerLayer} from './expiredMessagesCleanupWorker'
 import {reportMetricsLayer} from './metrics'
@@ -104,11 +103,7 @@ export const HttpServerLive = Layer.mergeAll(
   Layer.provideMerge(RateLimitingService.Live),
   Layer.provide(ServerCrypto.layer(cryptoConfig)),
   Layer.provideMerge(
-    Layer.mergeAll(
-      InboxDbService.Live,
-      MessagesDbService.Live,
-      WhitelistDbService.Live
-    )
+    Layer.mergeAll(InboxDbService.Live, MessagesDbService.Live)
   ),
   Layer.provideMerge(DbLayer),
   Layer.provideMerge(MetricsClientService.Live),

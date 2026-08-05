@@ -16,14 +16,10 @@ import {
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
 import {Effect, type ParseResult} from 'effect'
-import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {
-  callWithNotificationService,
-  type NotificationTokenOrCypher,
-} from '../notifications/callWithNotificationService'
+import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
+import sendMessage, {type SendMessageApiErrors} from './sendMessage'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {messageToNetwork} from './utils/messageIO'
 
 function createApproveChatMessage({
   text,
@@ -60,9 +56,7 @@ function createApproveChatMessage({
   }
 }
 
-export type ApiConfirmMessagingRequest = Effect.Effect.Error<
-  ReturnType<ChatApi['approveRequest']>
->
+export type ApiConfirmMessagingRequest = SendMessageApiErrors
 
 export interface SentConfirmMessagingRequest {
   message: ChatMessage
@@ -110,21 +104,15 @@ export default function confirmMessagingRequest({
       lastReceivedNotificationCypher,
     })
 
-    const message = yield* _(
-      taskEitherToEffect(messageToNetwork(toPublicKey)(approvedMessage))
-    )
-
     const serverMessage = yield* _(
-      callWithNotificationService(api.approveRequest, {
-        message,
-        approve,
-        keyPair: fromKeypair,
-        publicKeyToConfirm: toPublicKey,
-      })({
-        notificationCypher: theirNotificationCypher,
+      sendMessage({
+        api,
+        receiverPublicKey: toPublicKey,
+        message: approvedMessage,
+        senderKeypair: fromKeypair,
+        theirNotificationCypher,
         otherSideVersion,
         notificationApi,
-        sendSystemNotification: true,
       })
     )
 

@@ -17,23 +17,13 @@ import {
   now,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
-} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Effect, type ParseResult} from 'effect'
-import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {
-  callWithNotificationService,
-  type NotificationTokenOrCypher,
-} from '../notifications/callWithNotificationService'
+import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
+import sendMessage, {type SendMessageApiErrors} from './sendMessage'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {messageToNetwork} from './utils/messageIO'
 
 function createRequestChatMessage({
   text,
@@ -75,9 +65,7 @@ function createRequestChatMessage({
   }
 }
 
-export type ApiErrorRequestMessaging = Effect.Effect.Error<
-  ReturnType<ChatApi['requestApproval']>
->
+export type ApiErrorRequestMessaging = SendMessageApiErrors
 
 export interface SentMessagingRequest {
   message: ChatMessage
@@ -119,10 +107,6 @@ export function sendMessagingRequest({
 }): Effect.Effect<
   SentMessagingRequest,
   | ApiErrorRequestMessaging
-  | InvalidChallengeError
-  | ErrorGeneratingChallenge
-  | ErrorSigningChallenge
-  | CryptoError
   | JsonStringifyError
   | ParseResult.ParseError
   | ErrorEncryptingMessage
@@ -141,20 +125,15 @@ export function sendMessagingRequest({
       friendLevel,
     })
 
-    const message = yield* _(
-      taskEitherToEffect(messageToNetwork(toPublicKey)(requestChatMessage))
-    )
-
     const serverMessage = yield* _(
-      callWithNotificationService(api.requestApprovalV2, {
-        message,
+      sendMessage({
+        api,
         receiverPublicKey: toPublicKey,
-        keyPair: fromKeypair,
-      })({
-        notificationCypher: theirNotificationCypher,
+        message: requestChatMessage,
+        senderKeypair: fromKeypair,
+        theirNotificationCypher,
         otherSideVersion,
         notificationApi,
-        sendSystemNotification: true,
       })
     )
 

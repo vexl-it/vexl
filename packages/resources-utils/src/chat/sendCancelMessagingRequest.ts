@@ -11,23 +11,13 @@ import {
   now,
   type UnixMilliseconds,
 } from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
-} from '@vexl-next/rest-api/src/challenges/contracts'
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {type NotificationApi} from '@vexl-next/rest-api/src/services/notification'
-import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Effect, type ParseResult} from 'effect'
-import {taskEitherToEffect} from '../effect-helpers/TaskEitherConverter'
-import {
-  callWithNotificationService,
-  type NotificationTokenOrCypher,
-} from '../notifications/callWithNotificationService'
+import {type NotificationTokenOrCypher} from '../notifications/callWithNotificationService'
 import {type JsonStringifyError} from '../utils/parsing'
+import sendMessage, {type SendMessageApiErrors} from './sendMessage'
 import {type ErrorEncryptingMessage} from './utils/chatCrypto'
-import {messageToNetwork} from './utils/messageIO'
 
 function createCancelRequestChatMessage({
   text,
@@ -51,9 +41,7 @@ function createCancelRequestChatMessage({
   }
 }
 
-export type ApiErrorRequestMessaging = Effect.Effect.Error<
-  ReturnType<ChatApi['cancelRequestApproval']>
->
+export type ApiErrorRequestMessaging = SendMessageApiErrors
 
 export interface SentCancelMessagingRequest {
   message: ChatMessage
@@ -84,10 +72,6 @@ export function sendCancelMessagingRequest({
   | JsonStringifyError
   | ParseResult.ParseError
   | ErrorEncryptingMessage
-  | InvalidChallengeError
-  | ErrorGeneratingChallenge
-  | ErrorSigningChallenge
-  | CryptoError
 > {
   return Effect.gen(function* (_) {
     const cancelRequestMessage = createCancelRequestChatMessage({
@@ -96,20 +80,15 @@ export function sendCancelMessagingRequest({
       senderPublicKey: fromKeypair.publicKeyPemBase64,
     })
 
-    const message = yield* _(
-      taskEitherToEffect(messageToNetwork(toPublicKey)(cancelRequestMessage))
-    )
-
     const serverMessage = yield* _(
-      callWithNotificationService(api.cancelRequestApprovalV2, {
-        message,
+      sendMessage({
+        api,
         receiverPublicKey: toPublicKey,
-        keyPair: fromKeypair,
-      })({
+        message: cancelRequestMessage,
+        senderKeypair: fromKeypair,
+        theirNotificationCypher,
         otherSideVersion,
-        notificationCypher: theirNotificationCypher,
         notificationApi,
-        sendSystemNotification: true,
       })
     )
 

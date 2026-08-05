@@ -2,16 +2,12 @@ import {
   toBasicError,
   type BasicError,
 } from '@vexl-next/domain/src/utility/errors'
-import {type CryptoError} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
-import {sendCancelMessagingRequest} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
+import {
+  sendCancelMessagingRequest,
+  type ApiErrorRequestMessaging,
+} from '@vexl-next/resources-utils/src/chat/sendCancelMessagingRequest'
 import {type ErrorEncryptingMessage} from '@vexl-next/resources-utils/src/chat/utils/chatCrypto'
 import {type JsonStringifyError} from '@vexl-next/resources-utils/src/utils/parsing'
-import {
-  type ErrorSigningChallenge,
-  type InvalidChallengeError,
-} from '@vexl-next/rest-api/src/challenges/contracts'
-import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
-import {type ErrorGeneratingChallenge} from '@vexl-next/rest-api/src/services/utils/addChallengeToRequest2'
 import {Effect, type ParseResult} from 'effect'
 import {atom} from 'jotai'
 import {Alert} from 'react-native'
@@ -29,10 +25,6 @@ import {type ChatWithMessagesAtom} from './focusChatWithMessagesAtom'
 
 type ChatNotFoundError = BasicError<'ChatNotFoundError'>
 type UserDeclinedError = BasicError<'UserDeclinedError'>
-type CancelRequestApprovalErrors = Effect.Effect.Error<
-  ReturnType<ChatApi['cancelRequestApproval']>
->
-
 const cancelRequestActionAtomHandleUI = atom(
   null,
   (
@@ -42,15 +34,11 @@ const cancelRequestActionAtomHandleUI = atom(
   ): Effect.Effect<
     ChatMessageWithState,
     | ChatNotFoundError
-    | CancelRequestApprovalErrors
+    | ApiErrorRequestMessaging
     | UserDeclinedError
     | JsonStringifyError
     | ParseResult.ParseError
     | ErrorEncryptingMessage
-    | InvalidChallengeError
-    | ErrorGeneratingChallenge
-    | ErrorSigningChallenge
-    | CryptoError
   > => {
     const chatWithMessages = get(chatAtom)
     if (!chatWithMessages)

@@ -1,5 +1,8 @@
 import {type OfferInfo} from '@vexl-next/domain/src/general/offers'
-import {DateTime} from 'luxon'
+import {
+  type UnixMilliseconds,
+  unixMillisecondsNow,
+} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {isOfferExpired} from '../../../utils/isOfferExpired'
 import unixMillisecondsToLocaleDateTime from '../../../utils/unixMillisecondsToLocaleDateTime'
 import {type ChatWithMessages, type RequestState} from '../domain'
@@ -48,11 +51,10 @@ export function canChatBeRequested(
     lastMessage?.message.messageType === 'CANCEL_REQUEST_MESSAGING' ||
     lastMessage?.message.messageType === 'DELETE_CHAT'
   ) {
-    const now = DateTime.now().startOf('day')
-    const lastMessageAt = unixMillisecondsToLocaleDateTime(
-      lastMessage.message.time
-    ).startOf('day')
-    const diff = now.diff(lastMessageAt, 'days').toObject().days ?? 0
+    const diff = getRerequestDifferenceInDays({
+      earlierAt: lastMessage.receivedByServerAt ?? lastMessage.message.time,
+      laterAt: unixMillisecondsNow(),
+    })
     const canBeRerequested = diff >= limitDays
     if (canBeRerequested) return {canBeRerequested: true}
 
@@ -60,6 +62,30 @@ export function canChatBeRequested(
   }
 
   return {canBeRerequested: false}
+}
+
+export function getRerequestDifferenceInDays({
+  earlierAt,
+  laterAt,
+}: {
+  earlierAt: UnixMilliseconds
+  laterAt: UnixMilliseconds
+}): number {
+  const earlierDay = unixMillisecondsToLocaleDateTime(earlierAt).startOf('day')
+  const laterDay = unixMillisecondsToLocaleDateTime(laterAt).startOf('day')
+  return laterDay.diff(earlierDay, 'days').toObject().days ?? 0
+}
+
+export function isRerequestCooldownElapsed({
+  earlierAt,
+  laterAt,
+  limitDays,
+}: {
+  earlierAt: UnixMilliseconds
+  laterAt: UnixMilliseconds
+  limitDays: number
+}): boolean {
+  return getRerequestDifferenceInDays({earlierAt, laterAt}) >= limitDays
 }
 
 export function shouldUseGrayscaleColours({

@@ -4,6 +4,8 @@ import {Array, Effect, Option, pipe} from 'effect/index'
 import {atom} from 'jotai'
 import reportError from '../../../utils/reportError'
 import {type InboxInState} from '../domain'
+import {shouldAcceptIncomingStreamOnlyMessage} from '../utils/filterIncomingMessages'
+import {blockedChatSendersAtom} from './blockedChatSendersAtom'
 import {reportTypingIndicationReceivedActionAtom} from './typingIndication'
 
 export const processStreamOnlyNotificationActionAtom = atom(
@@ -22,6 +24,16 @@ export const processStreamOnlyNotificationActionAtom = atom(
       )
 
       if (payload._tag === 'TypingMessage') {
+        if (
+          !shouldAcceptIncomingStreamOnlyMessage({
+            inbox,
+            senderPublicKey: payload.myPublicKey,
+            blockedSenders: get(blockedChatSendersAtom),
+          })
+        ) {
+          return
+        }
+
         pipe(
           inbox.chats,
           Array.findFirst(

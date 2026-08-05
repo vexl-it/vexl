@@ -17,7 +17,6 @@ import {
 import {type ChatApi} from '@vexl-next/rest-api/src/services/chat'
 import {Array, Effect, Fiber, Option, Record, Schema} from 'effect/index'
 import * as A from 'fp-ts/Array'
-import * as E from 'fp-ts/Either'
 import * as T from 'fp-ts/Task'
 import * as TE from 'fp-ts/TaskEither'
 import {flow, pipe} from 'fp-ts/function'
@@ -37,6 +36,7 @@ import {
 import {showChatNotification} from '../../../utils/notifications/chatNotifications'
 import reportError from '../../../utils/reportError'
 import {startMeasure} from '../../../utils/reportTime'
+import {offerRerequestLimitDaysAtom} from '../../../utils/versionService/atoms'
 import {effectWithEnsuredBenchmark} from '../../ActionBenchmarks'
 import {
   createSingleOfferReportedFlagFromAtomAtom,
@@ -47,8 +47,10 @@ import {vexlTokenToKeyHolderAtom} from '../../notifications/vexlTokenToKeyHolder
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {type InboxInState} from '../domain'
 import addMessagesToChats from '../utils/addMessagesToChats'
+import {filterIncomingMessages} from '../utils/filterIncomingMessages'
 import replaceBase64UriWithImageFileUri from '../utils/replaceBase64UriWithImageFileUri'
 import {type ChatMessageWithState} from './../domain'
+import {blockedChatSendersAtom} from './blockedChatSendersAtom'
 import {sendUpdateNoticeMessageActionAtom} from './checkAndReportCurrentVersionToChatsActionAtom'
 import createNewChatsFromMessagesActionAtom from './createNewChatsFromFirstMessagesActionAtom'
 import focusChatByInboxKeyAndSenderKey from './focusChatByInboxKeyAndSenderKey'
@@ -183,18 +185,30 @@ export interface NoMessagesLeft {
   _tag: 'noMessages'
 }
 
+function noMessagesLeft(): NoMessagesLeft {
+  return {_tag: 'noMessages'}
+}
+
+function noMessages(): 'noMessages' {
+  return 'noMessages'
+}
+
+interface RefreshInboxResult {
+  updatedInbox: InboxInState
+  newMessages: readonly ChatMessageWithState[]
+}
+
+type RefreshInboxTask = TE.TaskEither<
+  ApiErrorRetrievingMessages | NoMessagesLeft,
+  RefreshInboxResult
+>
+
 function refreshInboxActionAtom(
   api: ChatApi
 ): (
   getInbox: () => InboxInState,
   inboxOffer?: OneOfferInState
-) => ActionAtomType<
-  [],
-  TE.TaskEither<
-    ApiErrorRetrievingMessages | NoMessagesLeft,
-    {updatedInbox: InboxInState; newMessages: readonly ChatMessageWithState[]}
-  >
-> {
+) => ActionAtomType<[], RefreshInboxTask> {
   return (getInbox, inboxOffer) =>
     atom(null, (get, set) =>
       pipe(
@@ -230,9 +244,14 @@ function refreshInboxActionAtom(
             ...one.messages.map(messageToChatMessageWithState),
           ]
         }),
-        TE.filterOrElseW(
-          (messages) => messages.length > 0,
-          () => 'noMessages' as const
+        TE.filterOrElseW((messages) => messages.length > 0, noMessages),
+        TE.map((messages) =>
+          filterIncomingMessages({
+            inbox: getInbox(),
+            messages,
+            blockedSenders: get(blockedChatSendersAtom),
+            rerequestLimitDays: get(offerRerequestLimitDaysAtom),
+          })
         ),
         TE.chainW(
           flow(
@@ -282,15 +301,10 @@ function refreshInboxActionAtom(
             })
           )
         ),
-        TE.match(
-          (e) => {
-            if (e === 'noMessages') {
-              return E.left({_tag: 'noMessages'} as const)
-            }
-            return E.left(e)
-          },
-          (right) => E.right(right)
-        )
+        TE.mapLeft((error) =>
+          error === 'noMessages' ? noMessagesLeft() : error
+        ),
+        TE.map((result): RefreshInboxResult => result)
       )
     )
 }

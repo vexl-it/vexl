@@ -30,7 +30,6 @@ import {refreshNotificationBadgeCountActionAtom} from '../../../components/Badge
 import {type ActionAtomType} from '../../../utils/atomUtils/ActionAtomType'
 import {version} from '../../../utils/environment'
 import {isOnSpecificChat} from '../../../utils/navigation'
-import {getNotificationToken} from '../../../utils/notifications'
 import {
   cancelNewChatNotifications,
   cancelNewChatNotificationsForTargetTokens,
@@ -395,15 +394,10 @@ export const fetchAndStoreMessagesForInboxAtom = atom<
             {error}
           )
           return pipe(
-            getNotificationToken(),
-            TE.fromTask,
-            TE.chainW((token) =>
-              effectToTaskEither(
-                api.chat.createInbox({
-                  token: token ?? undefined,
-                  keyPair: inbox.inbox.privateKey,
-                })
-              )
+            effectToTaskEither(
+              api.chat.createInbox({
+                keyPair: inbox.inbox.privateKey,
+              })
             ),
             TE.match(
               (e) => {

@@ -5,7 +5,6 @@ import {generateKeyPairE} from '@vexl-next/resources-utils/src/utils/crypto'
 import {Array, Effect, Option} from 'effect/index'
 import {atom} from 'jotai'
 import {apiAtom} from '../../../api'
-import {getNotificationTokenE} from '../../../utils/notifications'
 import messagingStateAtom from '../atoms/messagingStateAtom'
 import {ApiErrorCreatingInbox, type InboxInState} from '../domain'
 
@@ -43,7 +42,6 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
         // Always hit create inbox. The backend wont fail if the inbox exists
         yield* _(
           api.chat.createInbox({
-            token: (yield* _(getNotificationTokenE())) ?? undefined,
             keyPair: existingInbox.value.inbox.privateKey,
           })
         )
@@ -51,10 +49,8 @@ export const upsertInboxOnBeAndLocallyActionAtom = atom(
       }
 
       const inboxKeypair = yield* _(generateKeyPairE())
-      const notificationToken = yield* _(getNotificationTokenE())
       yield* _(
         api.chat.createInbox({
-          token: notificationToken ?? undefined,
           keyPair: inboxKeypair,
         }),
         Effect.mapError((e) => new ApiErrorCreatingInbox({cause: e}))

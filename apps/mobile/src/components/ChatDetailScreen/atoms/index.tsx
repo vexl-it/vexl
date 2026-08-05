@@ -1070,10 +1070,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
         set(loadingOverlayDisplayedAtom, false)
 
         if (Either.isLeft(result)) {
-          if (
-            result.left._tag === 'RequestCancelledError' ||
-            result.left._tag === 'SenderInboxDoesNotExistError'
-          ) {
+          if (result.left._tag === 'SenderInboxDoesNotExistError') {
             const shouldDeleteChat = yield* _(
               set(globalDialogAtom, {
                 title: t('common.somethingWentWrong'),
@@ -1110,9 +1107,7 @@ export const chatMolecule = molecule((getMolecule, getScope) => {
             return true
           }
 
-          if (result.left._tag === 'RequestNotFoundError') {
-            Alert.alert(t('offer.requestNotFound'))
-          } else if (result.left._tag === 'ReceiverInboxDoesNotExistError') {
+          if (result.left._tag === 'ReceiverInboxDoesNotExistError') {
             Alert.alert(t('offer.otherSideAccountDeleted'))
           } else {
             showErrorAlert({

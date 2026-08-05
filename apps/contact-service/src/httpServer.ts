@@ -65,6 +65,7 @@ import {deleteUser} from './routes/user/deleteUser'
 import {eraseUserFromNetwork} from './routes/user/eraseUserFromNetwork'
 import {refreshUser} from './routes/user/refreshUser'
 import {updateNotificationToken} from './routes/user/updateNotificationToken'
+import {ScheduledTaskWorkersLayer} from './scheduledTaskWorkers'
 import {UserNotificationService} from './services/UserNotificationService'
 import {S3Service} from './utils/S3Service'
 
@@ -178,6 +179,7 @@ export const HttpServerLive = Layer.mergeAll(
   reportGaguesLayer,
   internalServerLive,
   CleanReportedClubRecordsWorkerLayer,
+  ScheduledTaskWorkersLayer,
   healthServerLayer({port: healthServerPortConfig})
 ).pipe(
   Layer.provide(RateLimitingService.Live),

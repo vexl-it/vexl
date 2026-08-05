@@ -14,19 +14,6 @@ import {testHasingSpeed} from './routes/testHashingSpeed'
 export const internalServerLive = makeInternalServer(
   HttpRouter.empty.pipe(
     HttpRouter.post(
-      '/process-user-inactivity',
-      Effect.gen(function* (_) {
-        const userNotificationService = yield* _(UserNotificationService)
-        yield* _(userNotificationService.notifyUsersAboutInactivity())
-      }).pipe(
-        Effect.mapBoth({
-          onFailure: (error) =>
-            HttpServerResponse.text(error.message, {status: 500}),
-          onSuccess: () => HttpServerResponse.text('ok', {status: 200}),
-        })
-      )
-    ),
-    HttpRouter.post(
       '/process-new-content-notification',
       Effect.gen(function* (_) {
         const userNotificationService = yield* _(UserNotificationService)

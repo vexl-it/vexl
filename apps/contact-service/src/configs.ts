@@ -67,6 +67,10 @@ export const cleanReportedClubRecordsIntervalMsConfig = Config.number(
 
 export const clubReportLimistCount = Config.number('CLUB_REPORT_LIMIT_COUNT')
 
+export const processUserInactivityCronConfig = Config.string(
+  'PROCESS_USER_INACTIVITY_CRON'
+).pipe(Config.withDefault('0 0 * * *'))
+
 export const secretSaltForServerContact = Config.string(
   'SECRET_SALT_FOR_SERVER_CONTACTS'
 )

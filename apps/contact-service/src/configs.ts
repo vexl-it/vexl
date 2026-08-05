@@ -75,6 +75,10 @@ export const processNewContentNotificationCronConfig = Config.string(
   'PROCESS_NEW_CONTENT_NOTIFICATION_CRON'
 ).pipe(Config.withDefault('0 0 * * *'))
 
+export const deleteInactiveClubMembersCronConfig = Config.string(
+  'DELETE_INACTIVE_CLUB_MEMBERS_CRON'
+).pipe(Config.withDefault('0 0 * * *'))
+
 export const secretSaltForServerContact = Config.string(
   'SECRET_SALT_FOR_SERVER_CONTACTS'
 )

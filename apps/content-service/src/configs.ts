@@ -1,4 +1,5 @@
-import {Config} from 'effect'
+import {HttpsUrlString} from '@vexl-next/domain/src/utility/HttpsUrlString.brand'
+import {Config, Schema} from 'effect'
 
 export {
   cryptoConfig,
@@ -42,3 +43,25 @@ export const forceUpdateForVersionAndLowerConfig = Config.number(
 export const appInMaintenanceModeConfig = Config.boolean(
   'APP_IN_MAINTENANCE_MODE'
 ).pipe(Config.withDefault(false))
+
+export const lightMapStyleUrlConfig = Schema.Config(
+  'LIGHT_MAP_STYLE_URL',
+  HttpsUrlString
+).pipe(
+  Config.withDefault(
+    Schema.decodeSync(HttpsUrlString)(
+      'https://tiles.openfreemap.org/styles/positron'
+    )
+  )
+)
+
+export const darkMapStyleUrlConfig = Schema.Config(
+  'DARK_MAP_STYLE_URL',
+  HttpsUrlString
+).pipe(
+  Config.withDefault(
+    Schema.decodeSync(HttpsUrlString)(
+      'https://tiles.openfreemap.org/styles/dark'
+    )
+  )
+)

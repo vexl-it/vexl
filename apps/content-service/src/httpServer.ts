@@ -29,6 +29,7 @@ import {getInvoiceStatusTypeHandler} from './handlers/donations/getInvoiceStatus
 import {updateInvoiceStateWebhook} from './handlers/donations/updateInvoiceStateWebhook'
 import {UpdateInvoiceStateWebhookService} from './handlers/donations/UpdateInvoiceStateWebhookService'
 import {getEventsHandler} from './handlers/events'
+import {getMapStyleUrlsHandler} from './handlers/getMapStyleUrls'
 import {newsAndAnonouncementsHandler} from './handlers/getNewsAndAnnonuncements'
 import {CacheService} from './utils/cache'
 import {BtcPayServerService} from './utils/donations'
@@ -48,6 +49,12 @@ const NewsAndAnnouncementsApiGroupLive = HttpApiBuilder.group(
   ContentApiSpecification,
   'NewsAndAnnouncements',
   (h) => h.handle('getNewsAndAnnouncements', newsAndAnonouncementsHandler)
+)
+
+const MapApiGroupLive = HttpApiBuilder.group(
+  ContentApiSpecification,
+  'Map',
+  (h) => h.handle('getMapStyleUrls', getMapStyleUrlsHandler)
 )
 
 const VexlProductNotificationsApiGroupLive = HttpApiBuilder.group(
@@ -76,6 +83,7 @@ const DonationsApiGroupLive = HttpApiBuilder.group(
 export const ContentApiLive = HttpApiBuilder.api(ContentApiSpecification).pipe(
   Layer.provide(CmsApiGroupLive),
   Layer.provide(NewsAndAnnouncementsApiGroupLive),
+  Layer.provide(MapApiGroupLive),
   Layer.provide(VexlProductNotificationsApiGroupLive),
   Layer.provide(VexlProductNotificationsDbService.Live),
   Layer.provide(DonationsApiGroupLive),

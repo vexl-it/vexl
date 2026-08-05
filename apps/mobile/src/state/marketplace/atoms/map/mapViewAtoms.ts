@@ -1,41 +1,43 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Array, pipe} from 'effect'
 import {atom} from 'jotai'
-import type MapView from 'react-native-map-clustering'
-import {type EdgePadding, type LatLng, type Region} from 'react-native-maps'
+import {
+  type EdgePadding,
+  type LatLng,
+  type MapCameraControls,
+  type Region,
+} from '../../../../components/Map/types'
+import {
+  coordinatesToBounds,
+  regionToBounds,
+} from '../../../../components/Map/utils/mapLibreRegion'
 import {filterLocationsByCircularLocationFilter} from '../../utils/circularLocationFilter'
 import getOfferLocationBorderPoints from '../../utils/getOfferLocationBorderPoints'
 import {locationFilterAtom} from '../filterAtoms'
 import {requestMapRegionCommitAfterCameraMoveActionAtom} from '../mapRegionAtom'
 
-const mapViewRefAtom = atom<MapView | undefined>(undefined)
-export const setMapViewRefAtom = atom(
+const DEFAULT_FIT_EDGE_PADDING: EdgePadding = {
+  top: 50,
+  right: 50,
+  bottom: 50,
+  left: 50,
+}
+
+const mapCameraControlsAtom = atom<MapCameraControls | undefined>(undefined)
+export const setMapCameraControlsAtom = atom(
   null,
-  (_, set, v: MapView | undefined) => {
-    set(mapViewRefAtom, v)
+  (_, set, v: MapCameraControls | undefined) => {
+    set(mapCameraControlsAtom, v)
   }
 )
 export const animateToRegionActionAtom = atom(
   null,
   (get, set, region: Region) => {
-    const ref = get(mapViewRefAtom)
-    if (!ref) return
+    const camera = get(mapCameraControlsAtom)
+    if (!camera) return
 
     set(requestMapRegionCommitAfterCameraMoveActionAtom)
-    // @ts-expect-error bad typing of react-native-map-clustering
-    ref.animateToRegion(region)
-  }
-)
-
-export const animateToCoordinateActionAtom = atom(
-  null,
-  (get, set, coordinates: readonly LatLng[]) => {
-    const ref = get(mapViewRefAtom)
-    if (!ref) return
-
-    set(requestMapRegionCommitAfterCameraMoveActionAtom)
-    // @ts-expect-error bad typing of react-native-map-clustering
-    ref.fitToCoordinates(coordinates)
+    camera.fitBounds(regionToBounds(region))
   }
 )
 
@@ -52,14 +54,13 @@ export const fitToCoordinatesActionAtom = atom(
       edgePadding?: EdgePadding
     }
   ) => {
-    const ref = get(mapViewRefAtom)
-    if (!ref) return
+    const camera = get(mapCameraControlsAtom)
+    if (!camera) return
+    if (!Array.isNonEmptyReadonlyArray(coordinates)) return
 
     set(requestMapRegionCommitAfterCameraMoveActionAtom)
-    // @ts-expect-error bad typing of react-native-map-clustering
-    ref.fitToCoordinates(coordinates, {
-      animated: true,
-      edgePadding,
+    camera.fitBounds(coordinatesToBounds(coordinates), {
+      padding: edgePadding ?? DEFAULT_FIT_EDGE_PADDING,
     })
   }
 )
@@ -67,8 +68,6 @@ export const fitToCoordinatesActionAtom = atom(
 export const animateToOfferActionAtom = atom(
   null,
   (get, set, offer: OneOfferInState) => {
-    if (offer.offerInfo.publicPart.location.length === 0) return
-
     const borderPoints = pipe(
       filterLocationsByCircularLocationFilter({
         locations: offer.offerInfo.publicPart.location,
@@ -76,13 +75,7 @@ export const animateToOfferActionAtom = atom(
       }),
       Array.flatMap(getOfferLocationBorderPoints)
     )
-    if (!Array.isNonEmptyReadonlyArray(borderPoints)) return
 
-    const ref = get(mapViewRefAtom)
-    if (!ref) return
-
-    set(requestMapRegionCommitAfterCameraMoveActionAtom)
-    // @ts-expect-error bad typing of react-native-map-clustering
-    ref.fitToCoordinates(borderPoints)
+    set(fitToCoordinatesActionAtom, {coordinates: borderPoints})
   }
 )

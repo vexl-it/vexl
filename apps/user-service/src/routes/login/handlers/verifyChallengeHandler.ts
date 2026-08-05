@@ -88,7 +88,12 @@ export const verifyChallengeHandler = HttpApiBuilder.handler(
         loginDb.deleteChallengeVerificationState(req.payload.userPublicKey)
       )
 
-      yield* _(reportUserLoggedIn(verificationState.countryPrefix))
+      yield* _(
+        reportUserLoggedIn(
+          verificationState.countryPrefix,
+          verificationState.channel
+        )
+      )
 
       return new VerifyChallengeResponse({
         ...authData,

@@ -31,6 +31,7 @@ export const repoRoot = join(__dirname, '..', '..')
  */
 export const OPTIONAL_SECRET_KEYS: ReadonlySet<string> = new Set([
   'PRELUDE_API_TOKEN',
+  'WHATSAPP_PREFERRED_PREFIXES',
   'TURNSTILE_SECRET_KEY',
   'TURNSTILE_EXPECTED_HOSTNAME',
   'EXPO_ACCESS_TOKEN',

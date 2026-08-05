@@ -20,7 +20,10 @@ import {
   loginCodeDummyForAll,
   lowestSupportVersionToLoginConfig,
 } from '../../../configs'
-import {createVerification} from '../../../utils/smsVerificationUtils'
+import {
+  createVerification,
+  resolveVerificationChannel,
+} from '../../../utils/smsVerificationUtils'
 import {VERIFICATION_EXPIRES_AFTER_MILIS} from '../constants'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 import {type PhoneVerificationState} from '../domain'
@@ -145,6 +148,10 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         )
       )
 
+      const channel = yield* _(
+        resolveVerificationChannel(req.payload.channel, countryPrefix)
+      )
+
       const dummyCodeForAll = yield* _(loginCodeDummyForAll)
 
       if (Option.isSome(dummyCodeForAll)) {
@@ -161,6 +168,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         return new InitPhoneVerificationResponse({
           expirationAt: fromMilliseconds(expirationAt),
           verificationId: verificationState.id,
+          sentVia: channel,
         })
       }
 
@@ -182,22 +190,20 @@ export const initVerificationHandler = HttpApiBuilder.handler(
         return new InitPhoneVerificationResponse({
           expirationAt: fromMilliseconds(expirationAt),
           verificationId: verificationState.id,
+          sentVia: channel,
         })
       }
 
-      const verificationStateBase = {
+      const sid = yield* _(
+        createVerification(req.payload.phoneNumber, req.headers, channel)
+      )
+      const verificationState = makeTwilioSmsVerificationState({
         id: generateVerificationId(),
         expiresAt: expirationAt,
         phoneNumber: phoneNumberHashed,
         countryPrefix,
-      }
-
-      const sid = yield* _(
-        createVerification(req.payload.phoneNumber, req.headers)
-      )
-      const verificationState = makeTwilioSmsVerificationState({
-        ...verificationStateBase,
         sid,
+        channel,
       })
 
       yield* _(loginDbService.storePhoneVerificationState(verificationState))
@@ -205,6 +211,7 @@ export const initVerificationHandler = HttpApiBuilder.handler(
       return new InitPhoneVerificationResponse({
         expirationAt: fromMilliseconds(expirationAt),
         verificationId: verificationState.id,
+        sentVia: channel,
       })
     }).pipe(Effect.withSpan('initVerificationHandler'), makeEndpointEffect)
 )

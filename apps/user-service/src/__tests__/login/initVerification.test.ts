@@ -9,6 +9,8 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   UnableToSendVerificationSmsError,
   UnsupportedVersionToLoginError,
+  type RequestedVerificationChannel,
+  type VerificationChannel,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {generateAndSignLoginChallenge} from '@vexl-next/server-utils/src/loginChallengeServerOperations'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -32,6 +34,25 @@ beforeEach(() => {
   createVerificationMock.mockClear()
   checkVerificationMock.mockClear()
 })
+
+const channelResolutionCases: ReadonlyArray<{
+  channel: RequestedVerificationChannel | undefined
+  phoneNumber: string
+  expectedChannel: VerificationChannel
+}> = [
+  // legacy clients without channel support always get sms
+  {channel: undefined, phoneNumber: '+393331234567', expectedChannel: 'sms'},
+  // auto resolves via WHATSAPP_PREFERRED_PREFIXES (39 in .env.test)
+  {channel: 'auto', phoneNumber: '+393331234567', expectedChannel: 'whatsapp'},
+  {channel: 'auto', phoneNumber: '+420733333333', expectedChannel: 'sms'},
+  // explicit channel is honored regardless of prefix
+  {
+    channel: 'whatsapp',
+    phoneNumber: '+420733333333',
+    expectedChannel: 'whatsapp',
+  },
+  {channel: 'sms', phoneNumber: '+393331234567', expectedChannel: 'sms'},
+]
 
 const smsProviderErrorReasons: ReadonlyArray<
   UnableToSendVerificationSmsError['reason']
@@ -69,14 +90,48 @@ describe('Initialize verification', () => {
 
         expect(createVerificationMock).toHaveBeenCalledWith(
           '+420733333333',
-          expect.anything()
+          expect.anything(),
+          'sms'
         )
 
         expect(data.verificationId).toBeDefined()
         expect(data.expirationAt).toBeDefined()
+        expect(data.sentVia).toEqual('sms')
       })
     )
   })
+
+  it.each(channelResolutionCases)(
+    'resolves channel $channel for $phoneNumber to $expectedChannel',
+    async ({channel, phoneNumber, expectedChannel}) => {
+      await runPromiseInMockedEnvironment(
+        Effect.gen(function* (_) {
+          const client = yield* _(NodeTestingApp)
+          const challenge = yield* _(generateAndSignChallenge)
+
+          const data = yield* _(
+            client.Login.initVerification({
+              headers: Schema.decodeSync(CommonHeaders)({
+                'user-agent': 'Vexl/2 (1.0.0) IOS',
+              }),
+              payload: {
+                challenge,
+                phoneNumber: Schema.decodeSync(E164PhoneNumber)(phoneNumber),
+                ...(channel === undefined ? {} : {channel}),
+              },
+            })
+          )
+
+          expect(createVerificationMock).toHaveBeenCalledWith(
+            phoneNumber,
+            expect.anything(),
+            expectedChannel
+          )
+          expect(data.sentVia).toEqual(expectedChannel)
+        })
+      )
+    }
+  )
 
   it('fails when called with unsupported version', async () => {
     await runPromiseInMockedEnvironment(

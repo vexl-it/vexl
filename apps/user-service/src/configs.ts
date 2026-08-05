@@ -1,6 +1,15 @@
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumber.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
-import {Config, ConfigError, Effect, Either, Schema, String} from 'effect'
+import {
+  Array,
+  Config,
+  ConfigError,
+  Effect,
+  Either,
+  Schema,
+  String,
+} from 'effect'
 
 export {
   cryptoConfig,
@@ -58,14 +67,21 @@ export const turnstileExpectedHostnameConfig = Config.option(
   Config.string('TURNSTILE_EXPECTED_HOSTNAME')
 )
 
-export const verificationProviderConfig = Config.string(
-  'VERIFICATION_PROVIDER'
-).pipe(
-  Config.validate({
-    message:
-      'Invalid verification provider. Should be one of "twilio" or "prelude"',
-    validation: (v) => v === 'twilio' || v === 'prelude',
-  })
+export const whatsappPreferredPrefixesConfig = Config.option(
+  Config.string('WHATSAPP_PREFERRED_PREFIXES').pipe(
+    Config.map(String.split(',')),
+    Config.map(Array.map(String.trim)),
+    Config.map(Array.filter(String.isNonEmpty)),
+    Config.mapOrFail((v) =>
+      Either.mapLeft(
+        Schema.decodeEither(
+          Schema.Array(Schema.compose(Schema.NumberFromString, CountryPrefix))
+        )(v),
+        (e) =>
+          ConfigError.InvalidData(['WHATSAPP_PREFERRED_PREFIXES'], e.message)
+      )
+    )
+  )
 )
 
 export const lowestSupportVersionToLoginConfig = Config.number(

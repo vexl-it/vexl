@@ -151,7 +151,12 @@ export default function PhoneNumberScreen({
           initPhoneVerificationInProgressRef.current = true
           setErrorMessage(undefined)
           loadingOverlay.show()
-          void Effect.runPromise(initPhoneVerification(phoneNumber.value))
+          void Effect.runPromise(
+            initPhoneVerification({
+              phoneNumber: phoneNumber.value,
+              channel: 'auto',
+            })
+          )
             .then(async (result) => {
               navigationInProgressRef.current = true
               await dismissKeyboardAndResolveOnLayoutUpdate()

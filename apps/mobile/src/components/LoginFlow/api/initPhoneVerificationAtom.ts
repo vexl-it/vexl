@@ -2,6 +2,7 @@ import {type E164PhoneNumber} from '@vexl-next/domain/src/general/E164PhoneNumbe
 import {signLoginChallenge} from '@vexl-next/resources-utils/src/loginChallenge'
 import {
   InitPhoneVerificationResponse,
+  type RequestedVerificationChannel,
   type UnableToSendVerificationSmsError,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Effect, Schema} from 'effect'
@@ -40,7 +41,13 @@ export const initPhoneVerificationAtom = atom(
   (
     get,
     set,
-    phoneNumber: E164PhoneNumber
+    {
+      phoneNumber,
+      channel,
+    }: {
+      phoneNumber: E164PhoneNumber
+      channel: RequestedVerificationChannel
+    }
   ): Effect.Effect<InitPhoneVerificationResponse, string, never> => {
     const {t} = get(translationAtom)
     const failWithSmsProviderErrorDialog = (
@@ -75,6 +82,7 @@ export const initPhoneVerificationAtom = atom(
             serverSignature: loginChallenge.serverSignature,
           },
           phoneNumber,
+          channel,
         })
       )
 

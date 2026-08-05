@@ -1,6 +1,7 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
+import {type VerificationChannel} from '@vexl-next/rest-api/src/services/user/contracts'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
@@ -13,14 +14,15 @@ const NUMBER_OF_USERS = 'NUMBER_OF_USERS_BY_COUNTRY' as const
 const NUMBER_OF_USERS_ALL_COUNTRIES = 'NUMBER_OF_USERS' as const
 
 export const reportUserLoggedIn = (
-  countryPrefix: CountryPrefix
+  countryPrefix: CountryPrefix,
+  channel?: VerificationChannel
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_LOGGED_IN,
-      attributes: {countryPrefix},
+      attributes: {countryPrefix, channel: channel ?? 'sms'},
     })
   )
 

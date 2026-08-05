@@ -5,6 +5,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {
   PhoneNumberVerificationId,
   VerificationChallenge,
+  VerificationChannel,
 } from '@vexl-next/rest-api/src/services/user/contracts'
 import {Schema} from 'effect'
 import {SmsVerificationSid} from '../../utils/SmsVerificationSid.brand'
@@ -15,6 +16,8 @@ export const ChallengeVerificationState = Schema.Struct({
   phoneNumber: HashedPhoneNumber,
   expiresAt: UnixMilliseconds,
   challenge: VerificationChallenge,
+  // optional - states written before channel support was added lack it
+  channel: Schema.optional(VerificationChannel),
 })
 
 export type ChallengeVerificationState = typeof ChallengeVerificationState.Type
@@ -27,6 +30,8 @@ export const PhoneVerificationState = Schema.Union(
     phoneNumber: HashedPhoneNumber,
     countryPrefix: CountryPrefix,
     expiresAt: UnixMilliseconds,
+    // optional - states written before channel support was added lack it
+    channel: Schema.optional(VerificationChannel),
   }),
   Schema.Struct({
     id: PhoneNumberVerificationId,

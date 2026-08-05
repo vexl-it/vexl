@@ -144,6 +144,12 @@ export const NewsAndAnnouncementsResponse = Schema.Struct({
 export type NewsAndAnnouncementsResponse =
   typeof NewsAndAnnouncementsResponse.Type
 
+export const MapStyleUrlsResponse = Schema.Struct({
+  light: HttpsUrlString,
+  dark: HttpsUrlString,
+})
+export type MapStyleUrlsResponse = typeof MapStyleUrlsResponse.Type
+
 export class CreateInvoiceError extends Schema.TaggedError<CreateInvoiceError>(
   'CreateInvoiceError'
 )('CreateInvoiceError', {

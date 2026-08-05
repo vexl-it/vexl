@@ -5,17 +5,17 @@ import {
   type Radius,
 } from '@vexl-next/domain/src/utility/geoCoordinates'
 
-export interface LatLong {
+interface LatLong {
   latitude: Latitude
   longitude: Longitude
 }
 
-export interface Viewport {
+interface Viewport {
   northeast: LatLong
   southwest: LatLong
 }
 
-export type Address = string
+type Address = string
 
 export type MapValue = {
   placeId: LocationPlaceId

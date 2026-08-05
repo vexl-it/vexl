@@ -1,24 +1,24 @@
 import {type OneOfferInState} from '@vexl-next/domain/src/general/offers'
 import {Stack} from '@vexl-next/ui/src/primitives'
 import {useSetAtom, useStore} from 'jotai'
-import React, {useCallback, useEffect, useRef} from 'react'
-import {
-  type Details,
-  type EdgePadding,
-  type LatLng,
-  type Region,
-} from 'react-native-maps'
+import React, {useCallback, useRef} from 'react'
 import {focusedOfferIdAtom} from '../../../state/marketplace/atoms/map/focusedOffer'
 import {
   animateToRegionActionAtom,
   fitToCoordinatesActionAtom,
-  setMapViewRefAtom,
+  setMapCameraControlsAtom,
 } from '../../../state/marketplace/atoms/map/mapViewAtoms'
 import {
   commitMapRegionAfterCameraMoveActionAtom,
   mapRegionAtom,
 } from '../../../state/marketplace/atoms/mapRegionAtom'
 import MapDisplayMultiplePoints from '../../Map/components/MapDisplayMultiplePoints'
+import {
+  type EdgePadding,
+  type LatLng,
+  type Region,
+  type RegionChangeDetails,
+} from '../../Map/types'
 import {
   fitMapViewToAllPinsActionAtom,
   focusedPointsIdsAtom,
@@ -27,10 +27,7 @@ import {
 } from '../atoms'
 
 interface Props {
-  readonly bottomSheetRecenterKey: number
-  readonly bottomSheetVisibleHeight: number
   readonly fitEdgePadding: EdgePadding
-  readonly mapHeight: number
   readonly onMapReady?: () => void
 }
 
@@ -52,41 +49,12 @@ function getZoomedOutRegion(region: Region): Region {
   }
 }
 
-export function getRegionAdjustedForBottomSheetVisibleHeightChange({
-  mapHeight,
-  nextVisibleHeight,
-  previousVisibleHeight,
-  region,
-}: {
-  readonly mapHeight: number
-  readonly nextVisibleHeight: number
-  readonly previousVisibleHeight: number
-  readonly region: Region
-}): Region {
-  if (mapHeight <= 0) return region
-
-  const visibleHeightDelta = nextVisibleHeight - previousVisibleHeight
-  const latitudeOffset =
-    (visibleHeightDelta / 2 / mapHeight) * region.latitudeDelta
-
-  return {
-    ...region,
-    latitude: region.latitude - latitudeOffset,
-  }
-}
-
 function FullScreenMap({
-  bottomSheetRecenterKey,
-  bottomSheetVisibleHeight,
   fitEdgePadding,
-  mapHeight,
   onMapReady: onMapReadyProp,
 }: Props): React.JSX.Element {
   const store = useStore()
   const latestRegionRef = useRef<Region | null>(null)
-  const previousBottomSheetVisibleHeightRef = useRef(bottomSheetVisibleHeight)
-  const handledBottomSheetRecenterKeyRef = useRef(bottomSheetRecenterKey)
-  const currentCameraMoveStartedAsGestureRef = useRef(false)
   const setSelectedRegion = useSetAtom(mapRegionAtom)
   const commitMapRegionAfterCameraMove = useSetAtom(
     commitMapRegionAfterCameraMoveActionAtom
@@ -96,21 +64,12 @@ function FullScreenMap({
   const fitToCoordinates = useSetAtom(fitToCoordinatesActionAtom)
   const selectOffer = useSetAtom(selectMapViewOfferActionAtom)
 
-  const handleRegionChangeStart = useCallback(
-    (_region: Region, details: Details): void => {
-      currentCameraMoveStartedAsGestureRef.current = details.isGesture === true
-    },
-    []
-  )
-
   const handleRegionChangeComplete = useCallback(
-    (region: Region): void => {
+    (region: Region, details: RegionChangeDetails): void => {
       latestRegionRef.current = region
       const focusedOfferId = store.get(focusedOfferIdAtom)
-      const wasGesture = currentCameraMoveStartedAsGestureRef.current
-      currentCameraMoveStartedAsGestureRef.current = false
 
-      if (wasGesture) {
+      if (details.isGesture) {
         if (!focusedOfferId) {
           setSelectedRegion(region)
         }
@@ -129,8 +88,6 @@ function FullScreenMap({
     (coordinates: readonly LatLng[]) => {
       selectOffer(null)
 
-      if (coordinates.length === 0) return
-
       fitToCoordinates({
         coordinates,
         edgePadding: fitEdgePadding,
@@ -144,42 +101,12 @@ function FullScreenMap({
     onMapReadyProp?.()
   }, [fitEdgePadding, fitMapToAllPins, onMapReadyProp])
 
-  useEffect(() => {
-    if (handledBottomSheetRecenterKeyRef.current === bottomSheetRecenterKey)
-      return
-
-    handledBottomSheetRecenterKeyRef.current = bottomSheetRecenterKey
-
-    const previousVisibleHeight = previousBottomSheetVisibleHeightRef.current
-    if (previousVisibleHeight === bottomSheetVisibleHeight) return
-    if (mapHeight <= 0) return
-
-    previousBottomSheetVisibleHeightRef.current = bottomSheetVisibleHeight
-
-    const latestRegion = latestRegionRef.current
-    if (!latestRegion) return
-
-    animateToRegion(
-      getRegionAdjustedForBottomSheetVisibleHeightChange({
-        mapHeight,
-        nextVisibleHeight: bottomSheetVisibleHeight,
-        previousVisibleHeight,
-        region: latestRegion,
-      })
-    )
-  }, [
-    animateToRegion,
-    bottomSheetRecenterKey,
-    bottomSheetVisibleHeight,
-    mapHeight,
-  ])
-
   const handlePointPress = useCallback(
     (point: {data: OneOfferInState}) => {
       const offerId = point.data.offerInfo.offerId
 
       if (store.get(focusedOfferIdAtom) === offerId) {
-        selectOffer(offerId)
+        selectOffer(null)
 
         const latestRegion = latestRegionRef.current
         if (latestRegion) {
@@ -194,19 +121,23 @@ function FullScreenMap({
     [animateToRegion, selectOffer, store]
   )
 
+  const handleMapPress = useCallback(() => {
+    if (!store.get(focusedOfferIdAtom)) return
+    selectOffer(null)
+  }, [selectOffer, store])
+
   return (
     <Stack flex={1}>
       <MapDisplayMultiplePoints
         mapPadding={{top: 0, left: 0, right: 0, bottom: 0}}
         onMapReady={onMapReady}
         pointsAtom={mapPointsAtom}
-        onRegionChangeStart={handleRegionChangeStart}
         onRegionChangeComplete={handleRegionChangeComplete}
         onClusterPress={handleClusterPress}
+        onMapPress={handleMapPress}
         pointIdsToFocusAtom={focusedPointsIdsAtom}
-        refAtom={setMapViewRefAtom}
+        refAtom={setMapCameraControlsAtom}
         onPointPress={handlePointPress}
-        showAllPointsInFocusMode
       />
     </Stack>
   )

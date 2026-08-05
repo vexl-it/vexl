@@ -85,8 +85,9 @@ jobs:
         #
         # --environment production matches the store build profiles
         # (staging and production alike — see eas.json): it pulls the same
-        # EAS env vars (the react-native-maps API keys) into app config
-        # evaluation, which are part of the runtime fingerprint.
+        # EAS env vars into app config evaluation, which are part of the
+        # runtime fingerprint (no map API keys needed anymore since the
+        # MapLibre migration).
         run: |
           {
             echo "## ⚠️ OTA update (${{ inputs.environment }})"

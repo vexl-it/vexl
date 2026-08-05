@@ -4,8 +4,7 @@ import {ChevronLeft} from '@vexl-next/ui/src/icons'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useMolecule} from 'bunshi/dist/react'
 import {useAtomValue} from 'jotai'
-import React, {useCallback, useEffect, useRef, useState} from 'react'
-import type MapView from 'react-native-maps'
+import React, {useCallback, useEffect, useState} from 'react'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import {type MapValueWithRadius} from '../Map/brands'
@@ -28,7 +27,6 @@ export default function LocationRadiusPicker({
   const {selectedMapValueAtom} = useMolecule(LocationPickerMolecule)
   const selectedMapValue = useAtomValue(selectedMapValueAtom)
   const initialValue = selectedMapValue ?? pragueCenterLocation
-  const mapRef = useRef<MapView>(null)
 
   const [pickedLocation, setPickedLocation] =
     useState<MapValueWithRadius | null>(null)
@@ -94,7 +92,6 @@ export default function LocationRadiusPicker({
         <MapLocationWithRadiusSelect
           initialValue={initialValue}
           onPick={handlePick}
-          mapRef={mapRef}
           onMapGesture={handleMapGesture}
           bottomChildren={
             <Stack paddingBottom="$4" paddingHorizontal="$3">

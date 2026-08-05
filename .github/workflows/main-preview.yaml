@@ -44,8 +44,8 @@ jobs:
       - name: Publish EAS Update
         # The env must produce the same runtime fingerprint as the staging
         # build profiles (eas.json): ENV_PRESET=stage, and --environment
-        # production pulls the same EAS env vars (the react-native-maps API
-        # keys) into app config evaluation.
+        # production pulls the same EAS env vars into app config evaluation
+        # (no map API keys needed anymore since the MapLibre migration).
         run: |
           eas update --channel main \
             --environment production \

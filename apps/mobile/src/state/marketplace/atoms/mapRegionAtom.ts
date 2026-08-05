@@ -1,5 +1,5 @@
 import {atom} from 'jotai'
-import {type Region} from 'react-native-maps'
+import {type Region} from '../../../components/Map/types'
 
 export const mapRegionAtom = atom<Region | null>(null)
 

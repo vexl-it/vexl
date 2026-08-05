@@ -285,15 +285,14 @@ function createDebugEuropeOfferPublicPart({
   const city =
     EUROPE_DEBUG_LOCATIONS[index % EUROPE_DEBUG_LOCATIONS.length] ??
     DEFAULT_EUROPE_DEBUG_LOCATION
-  const groupIndex = Math.floor(index / EUROPE_DEBUG_LOCATIONS.length)
-  const latitudeOffset = ((groupIndex % 4) - 1.5) * 0.18
-  const longitudeOffset = (((index + groupIndex) % 5) - 2) * 0.22
+  const latitudeOffset = (Math.random() - 0.5) * 0.54
+  const longitudeOffset = (Math.random() - 0.5) * 0.88
 
   return Schema.decodeSync(OfferPublicPart)({
     offerPublicKey,
     location: [
       {
-        placeId: `${DEBUG_EUROPE_OFFERS_PREFIX}place-${index}`,
+        placeId: `${DEBUG_EUROPE_OFFERS_PREFIX}place-${index}-${Math.floor(Math.random() * 1e9)}`,
         latitude: city.latitude + latitudeOffset,
         longitude: city.longitude + longitudeOffset,
         radius: 0.15,

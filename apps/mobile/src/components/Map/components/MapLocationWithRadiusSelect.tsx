@@ -1,4 +1,9 @@
 import {
+  Camera,
+  type MapRef,
+  type ViewStateChangeEvent,
+} from '@maplibre/maplibre-react-native'
+import {
   Latitude,
   Longitude,
   Radius,
@@ -10,15 +15,13 @@ import {
   Typography,
   tokens,
   useTheme,
-  useVexlTheme,
 } from '@vexl-next/ui'
 import {Effect, Schema} from 'effect'
 import * as E from 'fp-ts/Either'
 import {pipe} from 'fp-ts/lib/function'
 import {atom, useAtomValue, useSetAtom} from 'jotai'
-import React, {useCallback, useMemo, useState} from 'react'
-import {StyleSheet, type LayoutChangeEvent} from 'react-native'
-import MapView, {PROVIDER_GOOGLE, type Region} from 'react-native-maps'
+import React, {useCallback, useMemo, useRef, useState} from 'react'
+import {type LayoutChangeEvent, type NativeSyntheticEvent} from 'react-native'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {apiAtom} from '../../../api'
 import {createEffectAtomWithProgress} from '../../../utils/atomUtils/createEffectAtomWithProgress'
@@ -31,14 +34,14 @@ import {formattingLocaleAtom} from '../../../utils/localization/formattingLocale
 import reportError from '../../../utils/reportError'
 import {toCommonErrorMessage} from '../../../utils/useCommonErrorMessages'
 import {type MapValue, type MapValueWithRadius} from '../brands'
-import {getMapTheme} from '../utils/mapStyle'
-import mapValueToRegion from '../utils/mapValueToRegion'
+import {mapValueToBounds} from '../utils/mapLibreRegion'
 import {
   calculateAvailableSelectionFrame,
   calculateLongitudeRadiusDelta,
   calculateRingDiameter,
 } from './MapLocationWithRadiusSelect.geometry'
 import {MapPinAsset, RadiusRingAsset} from './MapSvgAssets'
+import VexlMap from './VexlMap'
 
 type Props = React.ComponentProps<typeof Stack> & {
   topChildren?: React.ReactNode
@@ -46,17 +49,9 @@ type Props = React.ComponentProps<typeof Stack> & {
   initialValue: MapValue
   onPick: (place: MapValueWithRadius | null) => void
   onMapGesture?: () => void
-  mapRef: React.RefObject<MapView | null>
 }
 
 const circleMargin = tokens.space[2].val
-
-const styles = StyleSheet.create({
-  map: {
-    width: '100%',
-    height: '100%',
-  },
-})
 
 interface SelectedMapState {
   center: {
@@ -187,28 +182,30 @@ export default function MapLocationWithRadiusSelect({
   topChildren,
   bottomChildren,
   onMapGesture,
-  mapRef,
   ...restProps
 }: Props): React.ReactElement {
   const safeAreaInsets = useSafeAreaInsets()
-  const {resolvedTheme} = useVexlTheme()
   const theme = useTheme()
   const accentHighlightSecondary = theme.accentHighlightSecondary.get()
-  const backgroundPrimary = theme.backgroundPrimary.get()
-  const initialRegion = useMemo(
-    () => mapValueToRegion(initialValue),
+  const mapRef = useRef<MapRef>(null)
+  const initialBounds = useMemo(
+    () => mapValueToBounds(initialValue),
     [initialValue]
   )
 
   const initialSelectedMapState = useMemo(
     () => ({
       center: {
-        latitude: initialRegion.latitude,
-        longitude: initialRegion.longitude,
+        latitude: initialValue.latitude,
+        longitude: initialValue.longitude,
       },
-      radius: Math.abs(initialRegion.longitudeDelta) / 2,
+      radius:
+        Math.abs(
+          initialValue.viewport.northeast.longitude -
+            initialValue.viewport.southwest.longitude
+        ) / 2,
     }),
-    [initialRegion]
+    [initialValue]
   )
   const [containerSize, setContainerSize] = useState({width: 0, height: 0})
   const [topOverlayHeight, setTopOverlayHeight] = useState(0)
@@ -269,9 +266,9 @@ export default function MapLocationWithRadiusSelect({
   const handleMapReady = useCallback(() => {
     setIsMapReady(true)
   }, [])
-  const handleRegionChangeComplete = useCallback(
-    (_region: Region, details: {isGesture?: boolean}) => {
-      if (details.isGesture === true && isMapReady) {
+  const handleRegionDidChange = useCallback(
+    (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
+      if (event.nativeEvent.userInteraction && isMapReady) {
         onMapGesture?.()
       }
 
@@ -281,28 +278,22 @@ export default function MapLocationWithRadiusSelect({
       const map = mapRef.current
       if (!map) return
 
-      const centerPoint = {
-        x: selectionFrame.centerX,
-        y: selectionFrame.centerY,
-      }
-      const radiusPoint = {
-        x: selectionFrame.centerX + ringDiameter / 2,
-        y: selectionFrame.centerY,
-      }
-
       void Promise.all([
-        map.coordinateForPoint(centerPoint),
-        map.coordinateForPoint(radiusPoint),
+        map.unproject([selectionFrame.centerX, selectionFrame.centerY]),
+        map.unproject([
+          selectionFrame.centerX + ringDiameter / 2,
+          selectionFrame.centerY,
+        ]),
       ])
         .then(([centerCoordinate, radiusCoordinate]) => {
           const selectedMapState = {
             center: {
-              latitude: centerCoordinate.latitude,
-              longitude: centerCoordinate.longitude,
+              latitude: centerCoordinate[1],
+              longitude: centerCoordinate[0],
             },
             radius: calculateLongitudeRadiusDelta({
-              centerLongitude: centerCoordinate.longitude,
-              edgeLongitude: radiusCoordinate.longitude,
+              centerLongitude: centerCoordinate[0],
+              edgeLongitude: radiusCoordinate[0],
             }),
           }
 
@@ -321,7 +312,6 @@ export default function MapLocationWithRadiusSelect({
     [
       isContainerMeasured,
       isMapReady,
-      mapRef,
       onMapGesture,
       ringDiameter,
       selectionFrame,
@@ -336,17 +326,15 @@ export default function MapLocationWithRadiusSelect({
       backgroundColor="$backgroundPrimary"
       onLayout={handleContainerLayout}
     >
-      <MapView
+      <VexlMap
         ref={mapRef}
-        mapPadding={isMapReady ? overlayInsets : undefined}
-        provider={PROVIDER_GOOGLE}
-        customMapStyle={getMapTheme(resolvedTheme)}
-        style={[styles.map, {backgroundColor: backgroundPrimary}]}
-        toolbarEnabled={false}
-        onMapReady={handleMapReady}
-        onRegionChangeComplete={handleRegionChangeComplete}
-        initialRegion={initialRegion}
-      />
+        contentInset={isMapReady ? overlayInsets : undefined}
+        onDidFinishLoadingMap={handleMapReady}
+        onDidFailLoadingMap={handleMapReady}
+        onRegionDidChange={handleRegionDidChange}
+      >
+        <Camera initialViewState={{bounds: initialBounds}} />
+      </VexlMap>
       {isContainerMeasured ? (
         <React.Fragment>
           <Stack

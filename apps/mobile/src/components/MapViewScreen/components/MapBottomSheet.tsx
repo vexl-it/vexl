@@ -5,7 +5,7 @@ import {Button, Loader, Typography} from '@vexl-next/ui'
 import {Stack, XStack, YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue, useSetAtom, type Atom} from 'jotai'
 import {splitAtom} from 'jotai/utils'
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {Dimensions, StyleSheet} from 'react-native'
 import {Gesture, GestureDetector} from 'react-native-gesture-handler'
 import {useReanimatedKeyboardAnimation} from 'react-native-keyboard-controller'
@@ -59,10 +59,7 @@ interface Props {
   readonly visible: boolean
   readonly onSearchStart?: () => void
   readonly onSearchChange?: () => void
-  readonly onVisibleHeightChange?: (change: {
-    readonly height: number
-    readonly recenterMap: boolean
-  }) => void
+  readonly onVisibleHeightChange?: (height: number) => void
   readonly sheetTopOffset: number
   readonly shouldRenderOffers: boolean
 }
@@ -230,7 +227,6 @@ function MapBottomSheet({
   const collapsedY = sheetHeight - HEADER_HEIGHT - insets.bottom
   const translateY = useSharedValue(sheetHeight)
   const startY = useSharedValue(middleY)
-  const wasFullyExpandedSnapRef = useRef(false)
   const [listViewportHeight, setListViewportHeight] = useState(0)
 
   const getSheetVisibleHeight = useCallback(
@@ -240,21 +236,11 @@ function MapBottomSheet({
 
   const updateSheetVisibleHeight = useCallback(
     (sheetTranslateY: number) => {
-      if (sheetTranslateY <= FULL_Y) {
-        wasFullyExpandedSnapRef.current = true
-        return
-      }
+      if (sheetTranslateY <= FULL_Y) return
 
-      const isCollapsedSnap = sheetTranslateY >= collapsedY
-      const recenterMap = !(wasFullyExpandedSnapRef.current && isCollapsedSnap)
-      wasFullyExpandedSnapRef.current = false
-
-      onVisibleHeightChange?.({
-        height: getSheetVisibleHeight(sheetTranslateY),
-        recenterMap,
-      })
+      onVisibleHeightChange?.(getSheetVisibleHeight(sheetTranslateY))
     },
-    [collapsedY, getSheetVisibleHeight, onVisibleHeightChange]
+    [getSheetVisibleHeight, onVisibleHeightChange]
   )
 
   const getListViewportHeight = useCallback(

@@ -1,5 +1,5 @@
 import {createStore} from 'jotai'
-import {type Region} from 'react-native-maps'
+import {type Region} from '../../../components/Map/types'
 import {
   commitMapRegionAfterCameraMoveActionAtom,
   mapRegionAtom,

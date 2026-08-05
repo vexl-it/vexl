@@ -27,7 +27,6 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM inbox`)
       yield* _(sql`DELETE FROM message`)
-      yield* _(sql`DELETE FROM white_list`)
 
       user1 = yield* _(createMockedUser('+420733333330'))
       user2 = yield* _(createMockedUser('+420733333331'))

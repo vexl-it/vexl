@@ -1,9 +1,6 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
-import {
-  RequestNotPendingError,
-  type CancelApprovalResponse,
-} from '@vexl-next/rest-api/src/services/chat/contracts'
+import {type CancelApprovalResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
@@ -11,7 +8,6 @@ import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/chal
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {MessagesDbService} from '../../db/MessagesDbService'
-import {WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey} from '../../db/domain'
 import {reportMessageSent, reportRequestCanceled} from '../../metrics'
 import {findAndEnsureReceiverAndSenderInbox} from '../../utils/findAndEnsureReceiverAndSenderInbox'
@@ -29,35 +25,10 @@ export const cancelRequest = HttpApiBuilder.handler(
       )
       const security = yield* _(CurrentSecurity)
 
-      const {receiverInbox, senderInbox} = yield* _(
+      const {receiverInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
           receiver: req.payload.publicKey,
           sender: security.publicKey,
-        })
-      )
-
-      const whitelistDb = yield* _(WhitelistDbService)
-
-      const whitelistRecord = yield* _(
-        whitelistDb.findWhitelistRecordBySenderAndReceiver({
-          receiver: receiverInbox.id,
-          sender: senderInbox.publicKey,
-        }),
-        Effect.flatten,
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new RequestNotPendingError()
-        )
-      )
-
-      if (whitelistRecord.state !== 'WAITING') {
-        return yield* _(Effect.fail(new RequestNotPendingError()))
-      }
-
-      yield* _(
-        whitelistDb.updateWhitelistRecordState({
-          id: whitelistRecord.id,
-          state: 'CANCELED',
         })
       )
 
@@ -107,35 +78,10 @@ export const cancelRequestV2 = HttpApiBuilder.handler(
       )
       yield* _(validateChallengeInBody(req.payload))
 
-      const {receiverInbox, senderInbox} = yield* _(
+      const {receiverInbox} = yield* _(
         findAndEnsureReceiverAndSenderInbox({
           receiver: req.payload.receiverPublicKey,
           sender: req.payload.publicKey,
-        })
-      )
-
-      const whitelistDb = yield* _(WhitelistDbService)
-
-      const whitelistRecord = yield* _(
-        whitelistDb.findWhitelistRecordBySenderAndReceiver({
-          receiver: receiverInbox.id,
-          sender: senderInbox.publicKey,
-        }),
-        Effect.flatten,
-        Effect.catchTag(
-          'NoSuchElementException',
-          () => new RequestNotPendingError()
-        )
-      )
-
-      if (whitelistRecord.state !== 'WAITING') {
-        return yield* _(Effect.fail(new RequestNotPendingError()))
-      }
-
-      yield* _(
-        whitelistDb.updateWhitelistRecordState({
-          id: whitelistRecord.id,
-          state: 'CANCELED',
         })
       )
 

@@ -8,10 +8,7 @@ import {
   type SendMessageResponse,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
-import {
-  ForbiddenMessageTyperror,
-  type NotPermittedToSendMessageToTargetInboxError,
-} from '@vexl-next/rest-api/src/services/contact/contracts'
+import {ForbiddenMessageTyperror} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {
   type RedisLockError,
   type RedisService,
@@ -28,12 +25,10 @@ import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option, pipe, type ConfigError} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
-import {type WhitelistDbService} from '../../db/WhiteListDbService'
 import {encryptPublicKey, hashPublicKey} from '../../db/domain'
 import {reportMessageSent} from '../../metrics'
 import {findAndEnsureReceiverInbox} from '../../utils/findAndEnsureReceiverInbox'
 import {forbiddenMessageTypes} from '../../utils/forbiddenMessageTypes'
-import {ensureSenderInReceiverWhitelist} from '../../utils/isSenderInReceiverWhitelist'
 import {withInboxActionRedisLock} from '../../utils/withInboxActionRedisLock'
 import {messageRecordToServerMessage} from './messageRecordToServerMessage'
 
@@ -45,11 +40,9 @@ const sendMessage = (
   SendMessageResponse,
   | ReceiverInboxDoesNotExistError
   | UnexpectedServerError
-  | NotPermittedToSendMessageToTargetInboxError
   | ConfigError.ConfigError
   | RedisLockError
   | ForbiddenMessageTyperror,
-  | WhitelistDbService
   | MessagesDbService
   | InboxDbService
   | ServerCrypto
@@ -59,13 +52,6 @@ const sendMessage = (
   Effect.gen(function* (_) {
     const receiverInbox = yield* _(
       findAndEnsureReceiverInbox(message.receiverPublicKey)
-    )
-
-    yield* _(
-      ensureSenderInReceiverWhitelist({
-        receiver: receiverInbox.id,
-        sender: senderPublicKey,
-      })
     )
 
     if (forbiddenMessageTypes.includes(message.messageType)) {

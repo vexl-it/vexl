@@ -6,7 +6,6 @@ import {
   SenderInboxDoesNotExistError,
   type SendMessageRequest,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
-import {NotPermittedToSendMessageToTargetInboxError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
@@ -29,7 +28,6 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM inbox`)
       yield* _(sql`DELETE FROM message`)
-      yield* _(sql`DELETE FROM white_list`)
 
       user1 = yield* _(createMockedUser('+420733333330'))
       user2 = yield* _(createMockedUser('+420733333331'))
@@ -71,7 +69,7 @@ beforeEach(async () => {
 })
 
 describe('Block inbox', () => {
-  it('Block inbox of user1 as user2, messages should not be possible to sent after that', async () => {
+  it('accepts messages after blocking because filtering is client-side', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
         const client = yield* _(NodeTestingApp)
@@ -88,7 +86,7 @@ describe('Block inbox', () => {
         )
 
         yield* _(setAuthHeaders(user1.authHeaders))
-        const shouldBeRejectedResponse = yield* _(
+        const response = yield* _(
           client.Messages.sendMessage({
             headers: commonHeaders,
             payload: (yield* _(
@@ -102,9 +100,7 @@ describe('Block inbox', () => {
           Effect.either
         )
 
-        expectErrorResponse(NotPermittedToSendMessageToTargetInboxError)(
-          shouldBeRejectedResponse
-        )
+        expect(response._tag).toBe('Right')
       })
     )
   })

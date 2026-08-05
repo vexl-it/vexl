@@ -4,8 +4,6 @@ import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ReceiverInboxDoesNotExistError,
-  RequestCancelledError,
-  RequestNotFoundError,
   SenderInboxDoesNotExistError,
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -30,7 +28,6 @@ beforeEach(async () => {
       const sql = yield* _(SqlClient.SqlClient)
       yield* _(sql`DELETE FROM inbox`)
       yield* _(sql`DELETE FROM message`)
-      yield* _(sql`DELETE FROM white_list`)
 
       user1 = yield* _(createMockedUser('+420733333330'))
       user2 = yield* _(createMockedUser('+420733333331'))
@@ -201,16 +198,15 @@ describe('Approve request', () => {
           ])
         )
 
-        console.log(sendingMessagesToEachOtherRequests)
         expect(
           sendingMessagesToEachOtherRequests.map((one) => one._tag).join(', ')
-        ).toBe('Left, Left')
+        ).toBe('Right, Right')
       })
     )
   })
 
-  describe('Request can not be approved when it is', () => {
-    it('canceled', async () => {
+  describe('Request can be approved without whitelist state', () => {
+    it('after a cancellation', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -245,12 +241,12 @@ describe('Approve request', () => {
             }),
             Effect.either
           )
-          expectErrorResponse(RequestCancelledError)(errorResponse)
+          expect(errorResponse._tag).toBe('Right')
         })
       )
     })
 
-    it('not found', async () => {
+    it('without a prior request', async () => {
       await runPromiseInMockedEnvironment(
         Effect.gen(function* (_) {
           const client = yield* _(NodeTestingApp)
@@ -269,7 +265,7 @@ describe('Approve request', () => {
             }),
             Effect.either
           )
-          expectErrorResponse(RequestNotFoundError)(errorResponse)
+          expect(errorResponse._tag).toBe('Right')
         })
       )
     })

@@ -20,7 +20,6 @@ import {Console, Effect, Layer, ManagedRuntime, type Scope} from 'effect'
 import {cryptoConfig} from '../../configs'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
-import {WhitelistDbService} from '../../db/WhiteListDbService'
 import DbLayer from '../../db/layer'
 import {ChatApiLive} from '../../httpServer'
 
@@ -30,7 +29,6 @@ export type MockedContexts =
   | SqlClient
   | InboxDbService
   | MessagesDbService
-  | WhitelistDbService
   | MetricsClientService
   | HttpClient
   | TestRequestHeaders
@@ -50,11 +48,7 @@ const context = Layer.empty.pipe(
   Layer.provideMerge(TestRequestHeaders.Live),
   Layer.provideMerge(mockedMetricsClientService),
   Layer.provideMerge(
-    Layer.mergeAll(
-      InboxDbService.Live,
-      MessagesDbService.Live,
-      WhitelistDbService.Live
-    )
+    Layer.mergeAll(InboxDbService.Live, MessagesDbService.Live)
   ),
   Layer.provideMerge(universalContext),
   Layer.provideMerge(mockedDashboardReportsService),

@@ -1,6 +1,9 @@
 import {makeRepeatingTaskLayer} from '@vexl-next/server-utils/src/repeatingTask'
 import {Effect, Layer} from 'effect'
-import {processUserInactivityCronConfig} from './configs'
+import {
+  processNewContentNotificationCronConfig,
+  processUserInactivityCronConfig,
+} from './configs'
 import {UserNotificationService} from './services/UserNotificationService'
 
 const processUserInactivityLayer = makeRepeatingTaskLayer({
@@ -14,6 +17,18 @@ const processUserInactivityLayer = makeRepeatingTaskLayer({
   ),
 })
 
+const processNewContentNotificationLayer = makeRepeatingTaskLayer({
+  queueName: 'contact-service-process-new-content-notification',
+  jobName: 'process_new_content_notification',
+  cronPattern: processNewContentNotificationCronConfig,
+  lockResource: 'contactService:processNewContentNotification',
+  lockDuration: '30 minutes',
+  task: Effect.flatMap(UserNotificationService, (userNotificationService) =>
+    userNotificationService.notifyUsersAboutNewContent()
+  ),
+})
+
 export const ScheduledTaskWorkersLayer = Layer.mergeAll(
-  processUserInactivityLayer
+  processUserInactivityLayer,
+  processNewContentNotificationLayer
 )

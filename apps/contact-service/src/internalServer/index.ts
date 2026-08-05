@@ -6,26 +6,12 @@ import {
 import {makeInternalServer} from '@vexl-next/server-utils/src/InternalServer'
 import {internalServerPortConfig} from '@vexl-next/server-utils/src/commonConfigs'
 import {Effect, Schema} from 'effect'
-import {UserNotificationService} from '../services/UserNotificationService'
 import {checkForInactiveUsers} from './routes/checkForInactiveUsers'
 import {deactivateAndClearClubs} from './routes/deactivateAndClearClubs'
 import {testHasingSpeed} from './routes/testHashingSpeed'
 
 export const internalServerLive = makeInternalServer(
   HttpRouter.empty.pipe(
-    HttpRouter.post(
-      '/process-new-content-notification',
-      Effect.gen(function* (_) {
-        const userNotificationService = yield* _(UserNotificationService)
-        yield* _(userNotificationService.notifyUsersAboutNewContent())
-      }).pipe(
-        Effect.mapBoth({
-          onFailure: (error) =>
-            HttpServerResponse.text(error.message, {status: 500}),
-          onSuccess: () => HttpServerResponse.text('ok', {status: 200}),
-        })
-      )
-    ),
     HttpRouter.post(
       '/deactivate-and-clear-clubs',
       deactivateAndClearClubs.pipe(

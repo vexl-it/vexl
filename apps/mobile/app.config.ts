@@ -322,13 +322,7 @@ export default {
         'backgroundColor': '#FCCD6C',
       },
     ],
-    [
-      'react-native-maps',
-      {
-        'iosGoogleMapsApiKey': process.env.IOS_MAP_API_KEY,
-        'androidGoogleMapsApiKey': process.env.ANDROID_MAP_API_KEY,
-      },
-    ],
+    '@maplibre/maplibre-react-native',
   ],
   'extra': {
     'eas': {

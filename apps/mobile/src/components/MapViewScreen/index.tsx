@@ -5,13 +5,13 @@ import {Stack, YStack} from '@vexl-next/ui/src/primitives'
 import {useAtomValue, useSetAtom, useStore} from 'jotai'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Dimensions, type LayoutChangeEvent} from 'react-native'
-import {type EdgePadding} from 'react-native-maps'
 import {useSafeAreaInsets} from 'react-native-safe-area-context'
 import {getTokens} from 'tamagui'
 import {isFilterActiveAtom} from '../../state/marketplace/atoms/filterAtoms'
 import {useTranslation} from '../../utils/localization/I18nProvider'
 import useSafeGoBack from '../../utils/useSafeGoBack'
 import FilterTagBar from '../InsideRouter/components/MarketplaceScreen/components/FilterTagBar'
+import {type EdgePadding} from '../Map/types'
 import MarketplaceLoadingOverlay from '../MarketplaceLoadingOverlay'
 import {
   clearMapViewSelectionActionAtom,
@@ -52,12 +52,10 @@ function MapViewScreen(): React.JSX.Element {
   const [shouldRenderMap, setShouldRenderMap] = useState(false)
   const [shouldRenderOffers, setShouldRenderOffers] = useState(false)
   const [screenHeight, setScreenHeight] = useState(0)
-  const [mapHeight, setMapHeight] = useState(0)
   const [mapTopOffset, setMapTopOffset] = useState(0)
   const [bottomSheetVisibleHeight, setBottomSheetVisibleHeight] = useState(() =>
     getMiddleSheetVisibleHeight(DEFAULT_SCREEN_HEIGHT)
   )
-  const [bottomSheetRecenterKey, setBottomSheetRecenterKey] = useState(0)
   const mapLoadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   )
@@ -106,21 +104,12 @@ function MapViewScreen(): React.JSX.Element {
   }, [refocusMapAfterOfferSetChange])
 
   const handleBottomSheetVisibleHeightChange = useCallback(
-    ({
-      height: nextVisibleHeight,
-      recenterMap,
-    }: {
-      readonly height: number
-      readonly recenterMap: boolean
-    }) => {
+    (nextVisibleHeight: number) => {
       setBottomSheetVisibleHeight((currentVisibleHeight) =>
         currentVisibleHeight === nextVisibleHeight
           ? currentVisibleHeight
           : nextVisibleHeight
       )
-      if (recenterMap) {
-        setBottomSheetRecenterKey((currentKey) => currentKey + 1)
-      }
     },
     []
   )
@@ -143,13 +132,9 @@ function MapViewScreen(): React.JSX.Element {
 
   const handleMapAreaLayout = useCallback((event: LayoutChangeEvent) => {
     const nextTopOffset = event.nativeEvent.layout.y
-    const nextHeight = event.nativeEvent.layout.height
 
     setMapTopOffset((currentTopOffset) =>
       currentTopOffset === nextTopOffset ? currentTopOffset : nextTopOffset
-    )
-    setMapHeight((currentHeight) =>
-      currentHeight === nextHeight ? currentHeight : nextHeight
     )
   }, [])
 
@@ -211,10 +196,7 @@ function MapViewScreen(): React.JSX.Element {
         <Stack flex={1} onLayout={handleMapAreaLayout}>
           {shouldRenderMap ? (
             <FullScreenMap
-              bottomSheetRecenterKey={bottomSheetRecenterKey}
-              bottomSheetVisibleHeight={bottomSheetVisibleHeight}
               fitEdgePadding={mapFitEdgePadding}
-              mapHeight={mapHeight}
               onMapReady={hideMapLoadingAfterMarkersSettle}
             />
           ) : null}

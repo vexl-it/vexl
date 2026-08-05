@@ -13,8 +13,6 @@ export function messageRecordToServerMessage({
     id: Number(messageRecord.id),
     message: messageRecord.message,
     senderPublicKey,
-    receivedByServerAt: messageRecord.receivedByServerAt
-      ? fromDate(messageRecord.receivedByServerAt)
-      : undefined,
+    receivedByServerAt: fromDate(messageRecord.receivedByServerAt),
   }
 }

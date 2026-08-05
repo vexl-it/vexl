@@ -8,6 +8,7 @@ import removeUnusedTables from './migrations/0003_remove_unused_tables'
 import dropChallengeTable from './migrations/0004_drop_challenge_table'
 import addReceivedByServerAtToMessage from './migrations/0005_add_received_by_server_at_to_message'
 import dropInboxTokenColumn from './migrations/0006_drop_inbox_token_column'
+import makeReceivedByServerAtNonNullable from './migrations/0007_make_received_by_server_at_non_nullable'
 
 const migrations = [
   {
@@ -39,6 +40,11 @@ const migrations = [
     id: 6,
     name: 'Drop inbox token column',
     migrationEffect: dropInboxTokenColumn,
+  },
+  {
+    id: 7,
+    name: 'Make received_by_server_at non-nullable',
+    migrationEffect: makeReceivedByServerAtNonNullable,
   },
 ] as const
 

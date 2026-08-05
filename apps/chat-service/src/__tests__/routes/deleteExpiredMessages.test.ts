@@ -4,7 +4,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
-import {clearExpiredMessages} from '../../internalServer/routes/clearExpiredMessages'
+import {clearExpiredMessagesTask} from '../../expiredMessagesCleanupWorker'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
   createMockedUser,
@@ -102,7 +102,7 @@ describe('clear expired messages', () => {
             message = 'someMessageToBeDeleted'
         `)
 
-        yield* _(clearExpiredMessages)
+        yield* _(clearExpiredMessagesTask)
 
         yield* _(setAuthHeaders(user2.authHeaders))
         const messagesReceived = yield* _(

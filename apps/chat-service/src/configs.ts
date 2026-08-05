@@ -24,3 +24,7 @@ export const messageExpirationLowerLimitDaysConfig = Config.number(
 export const messageExpirationUpperLimitDaysConfig = Config.number(
   'MESSAGE_EXPIRATION_UPPER_LIMIT_DAYS'
 )
+
+export const clearExpiredMessagesCronConfig = Config.string(
+  'CLEAR_EXPIRED_MESSAGES_CRON'
+).pipe(Config.withDefault('0 0 * * *'))

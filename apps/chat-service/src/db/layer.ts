@@ -7,6 +7,7 @@ import addExpiresAtToMessage from './migrations/0002_add_expires_at_to_messages'
 import removeUnusedTables from './migrations/0003_remove_unused_tables'
 import dropChallengeTable from './migrations/0004_drop_challenge_table'
 import addReceivedByServerAtToMessage from './migrations/0005_add_received_by_server_at_to_message'
+import dropInboxTokenColumn from './migrations/0006_drop_inbox_token_column'
 
 const migrations = [
   {
@@ -33,6 +34,11 @@ const migrations = [
     id: 5,
     name: 'Add received_by_server_at to message',
     migrationEffect: addReceivedByServerAtToMessage,
+  },
+  {
+    id: 6,
+    name: 'Drop inbox token column',
+    migrationEffect: dropInboxTokenColumn,
   },
 ] as const
 

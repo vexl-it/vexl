@@ -76,18 +76,14 @@ export type ServerMessageWithId = Schema.Schema.Type<typeof ServerMessageWithId>
 
 export const UpdateInboxRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  token: Schema.optional(Schema.String),
 })
 export type UpdateInboxRequest = Schema.Schema.Type<typeof UpdateInboxRequest>
 
-export const UpdateInboxResponse = Schema.Struct({
-  firebaseToken: Schema.optional(Schema.String),
-})
+export const UpdateInboxResponse = Schema.Struct({})
 export type UpdateInboxResponse = Schema.Schema.Type<typeof UpdateInboxResponse>
 
 export const CreateInboxRequest = Schema.Struct({
   ...RequestBaseWithChallenge.fields,
-  token: Schema.optional(Schema.String),
 })
 export type CreateInboxRequest = Schema.Schema.Type<typeof CreateInboxRequest>
 

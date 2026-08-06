@@ -79,6 +79,7 @@ export const VerifyChallengeEndpoint = HttpApiEndpoint.post(
   'verifyChallenge',
   '/api/v1/user/confirmation/challenge'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(VerifyChallengeRequest)
   .addSuccess(VerifyChallengeResponse)
   .addError(InvalidSignatureError, {status: 400})

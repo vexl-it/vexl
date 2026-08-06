@@ -76,6 +76,9 @@ describe('loginFlow', () => {
 
         const verifyChallenge = yield* _(
           client.Login.verifyChallenge({
+            headers: Schema.decodeSync(CommonHeaders)({
+              'user-agent': 'Vexl/2 (1.0.0) IOS',
+            }),
             payload: {
               userPublicKey: keypair.publicKeyPemBase64,
               signature: signedChallenge,

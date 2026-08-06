@@ -2,6 +2,7 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
@@ -34,7 +35,12 @@ export const deletePulledMessages = HttpApiBuilder.handler(
       const messagesService = yield* _(MessagesDbService)
       yield* _(
         messagesService.deletePulledMessagesByInboxId(inboxRecord.id),
-        Effect.tap(reportMessageFetchedAndRemoved)
+        Effect.tap((count) =>
+          reportMessageFetchedAndRemoved(
+            count,
+            commonMetricAttributesFromHeaders(req.headers)
+          )
+        )
       )
 
       return {}

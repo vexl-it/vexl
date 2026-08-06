@@ -101,6 +101,7 @@ describe('Delete pulled messages', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.deletePulledMessages({
+            headers: commonHeaders,
             payload: yield* _(user1.addChallengeForMainInbox({})),
           })
         )
@@ -141,6 +142,7 @@ describe('Delete pulled messages', () => {
 
         const errorResponse = yield* _(
           client.Inboxes.deletePulledMessages({
+            headers: commonHeaders,
             payload: yield* _(
               addChallengeForKey(generatePrivateKey(), user1.authHeaders)({})
             ),

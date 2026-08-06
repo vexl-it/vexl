@@ -140,7 +140,7 @@ export function api({
       refreshOffer: (body: RefreshOfferRequest) =>
         client.refreshOffer({payload: body}),
       deleteOffer: (req: DeleteOfferRequest) =>
-        client.deleteOffer({urlParams: req}),
+        client.deleteOffer({urlParams: req, headers: commonHeaders}),
       updateOffer: (body: UpdateOfferRequest) =>
         withSecurityHeaders((headers) =>
           client.updateOffer({payload: body, headers})

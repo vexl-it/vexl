@@ -15,6 +15,7 @@ import {
 } from '../../apiSecurity'
 import {InvalidChallengeError} from '../../challenges/contracts'
 import {ChallengeApiGroup} from '../../challenges/specification'
+import {CommonHeaders} from '../../commonHeaders'
 import {MaxExpectedDailyCall} from '../../MaxExpectedDailyCountAnnotation'
 import {RateLimitingMiddleware} from '../../rateLimititing'
 import {
@@ -106,6 +107,7 @@ export const DeleteOfferEndpoint = HttpApiEndpoint.del(
   '/api/v1/offers'
 )
   .annotate(OpenApi.Summary, 'Delete offer')
+  .setHeaders(CommonHeaders)
   .setUrlParams(DeleteOfferRequest)
   .addSuccess(DeleteOfferResponse)
   .annotate(MaxExpectedDailyCall, 50)

@@ -36,16 +36,15 @@ const MEAN_OFFER_VISIBILITY_PER_COUNTRY =
 const MEDIAN_OFFER_VISIBILITY_PER_COUNTRY =
   'MEDIAN_OFFER_VISIBILITY_PER_COUNTRY' as const
 
-export const reportOfferPublicPartDeleted = (): Effect.Effect<
-  void,
-  never,
-  MetricsClientService
-> =>
+export const reportOfferPublicPartDeleted = (
+  attributes: CommonMetricAttributes
+): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_PUBLIC_PART_DELETED,
+      attributes,
     })
   )
 

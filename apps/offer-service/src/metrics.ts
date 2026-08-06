@@ -49,16 +49,15 @@ export const reportOfferPublicPartDeleted = (): Effect.Effect<
     })
   )
 
-export const reportOfferModified = (): Effect.Effect<
-  void,
-  never,
-  MetricsClientService
-> =>
+export const reportOfferModified = (
+  attributes: CommonMetricAttributes
+): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_MODIFIED,
+      attributes,
     })
   )
 

@@ -4,6 +4,7 @@ import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ReportOfferLimitReachedError} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
@@ -67,7 +68,12 @@ export const reportClubOffer = HttpApiBuilder.handler(
         offerId: req.payload.offerId,
       }),
       withDbTransaction,
-      Effect.zipLeft(reportClubOfferReported(req.payload.offerId)),
+      Effect.zipLeft(
+        reportClubOfferReported(
+          req.payload.offerId,
+          commonMetricAttributesFromHeaders(req.headers)
+        )
+      ),
       makeEndpointEffect
     )
 )

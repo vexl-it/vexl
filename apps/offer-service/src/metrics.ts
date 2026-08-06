@@ -75,26 +75,28 @@ export const reportOfferCreated = (
   )
 
 export const reportOfferReported = (
-  offerId: OfferId
+  offerId: OfferId,
+  commonMetricAttributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_REPORTED,
-      attributes: {offerId},
+      attributes: {...commonMetricAttributes, offerId},
     })
   )
 
 export const reportClubOfferReported = (
-  offerId: OfferId
+  offerId: OfferId,
+  commonMetricAttributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_REPORTED,
-      attributes: {offerId},
+      attributes: {...commonMetricAttributes, offerId},
     })
   )
 

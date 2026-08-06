@@ -118,7 +118,7 @@ export const reportClub = HttpApiBuilder.handler(
         reportedClub.value.report >= club.reportLimit
       ) {
         yield* _(deactivateAndClearClubs)
-        yield* _(reportClubDeactivated(1))
+        yield* _(reportClubDeactivated(1, commonMetricAttributes))
       }
 
       return {}

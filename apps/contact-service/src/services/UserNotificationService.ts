@@ -1,4 +1,5 @@
 import {type SqlClient} from '@effect/sql/SqlClient'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
@@ -31,7 +32,7 @@ import {ClubsDbService} from '../db/ClubsDbService'
 import {type ClubRecordId} from '../db/ClubsDbService/domain'
 import {UserDbService} from '../db/UserDbService'
 import {NotificationsTokensEquivalence} from '../db/UserDbService/domain'
-import {queryAndReportNumberOfInnactiveUsers} from '../metrics'
+import {queryAndReportNumberOfInactiveUsers} from '../metrics'
 import {type ServerHashedNumber} from '../utils/serverHashContact'
 
 export interface UserNotificationServiceOperations {
@@ -49,7 +50,7 @@ export interface UserNotificationServiceOperations {
   notifyUsersAboutInactivity: () => Effect.Effect<
     void,
     UnexpectedServerError,
-    SqlClient
+    SqlClient | MetricsClientService
   >
   notifyUsersAboutFlaggedClub: (
     id: ClubRecordId,
@@ -386,7 +387,7 @@ export class UserNotificationService extends Context.Tag(
             )
 
             yield* _(Effect.logInfo('Reporting number of inactive users'))
-            yield* _(queryAndReportNumberOfInnactiveUsers)
+            yield* _(queryAndReportNumberOfInactiveUsers)
           }).pipe(
             Effect.tapError((e) =>
               Effect.logError('Error processing user inactivity', e)

@@ -1,6 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {MetricsApiSpecification} from '@vexl-next/rest-api/src/services/metrics/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {Effect, Option} from 'effect/index'
 import {MetricsDbService} from '../db/MetricsDbService'
 
@@ -11,6 +12,7 @@ export const reportNotificationInteraction = HttpApiBuilder.handler(
   ({headers, urlParams: query}) =>
     Effect.gen(function* (_) {
       const dataToSave = {
+        ...commonMetricAttributesFromHeaders(headers),
         clientVersion: Option.getOrElse(
           headers.clientVersionOrNone,
           () => 'UNKNOWN'

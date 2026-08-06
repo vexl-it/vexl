@@ -77,7 +77,7 @@ These are referred to as *common* in the tables below.
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
 | `NOTIFICATION_SENT` | Increment | `trackingId`, `clientVersion`, `clientPlatform`, `systemNotificationSent`, `sentAt` | A push notification is issued to a device. |
-| `NOTIFICATION_PROCESSED` | Increment | `trackingId`, `processedAt` | Client reports it processed a received notification. |
+| `NOTIFICATION_PROCESSED` | Increment | common + `trackingId`, `processedAt` | Client reports it processed a received notification. |
 
 ## metrics-service
 

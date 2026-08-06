@@ -3,6 +3,7 @@ import {UnixMilliseconds} from '@vexl-next/domain/src/utility/UnixMilliseconds.b
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {VersionCode} from '@vexl-next/domain/src/utility/VersionCode.brand'
 import {PlatformName} from '@vexl-next/rest-api'
+import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
@@ -31,6 +32,7 @@ export interface NotificationMetricsServiceOperations {
   reportNotificationProcessed: (args: {
     id: NotificationTrackingId
     processedAt: UnixMilliseconds
+    commonMetricAttributes: CommonMetricAttributes
   }) => Effect.Effect<void>
 }
 
@@ -65,13 +67,18 @@ export class NotificationMetricsService extends Context.Tag(
             })
           ).pipe(Effect.provideService(MetricsClientService, metricsClient)),
 
-        reportNotificationProcessed: ({id, processedAt}) =>
+        reportNotificationProcessed: ({
+          id,
+          processedAt,
+          commonMetricAttributes,
+        }) =>
           reportMetricForked(
             new MetricsMessage({
               uuid: generateUuid(),
               timestamp: new Date(),
               name: NOTIFICATION_PROCESSED,
               attributes: {
+                ...commonMetricAttributes,
                 trackingId: id,
                 processedAt,
               },

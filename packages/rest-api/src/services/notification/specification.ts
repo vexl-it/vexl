@@ -50,6 +50,7 @@ export const ReportNotificationProcessedEndpoint = HttpApiEndpoint.post(
   'reportNotificationProcessed',
   '/report-notification'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(ReportNotificationProcessedRequest)
   .addSuccess(NoContentResponse)
   .annotate(MaxExpectedDailyCall, 5000)

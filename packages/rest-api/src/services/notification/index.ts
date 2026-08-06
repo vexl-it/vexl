@@ -85,7 +85,7 @@ export function api({
         client.issueNotification({payload}),
       reportNotificationProcessed: (
         request: ReportNotificationProcessedRequest
-      ) => client.reportNotificationProcessed({payload: request}),
+      ) => client.reportNotificationProcessed({payload: request, headers}),
       createNotificationSecret: (payload: CreateNotificationSecretRequest) =>
         client.NotificationTokenGroup.CreateNotificationSecret({
           payload,

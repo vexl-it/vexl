@@ -2,6 +2,7 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {unixMillisecondsNow} from '@vexl-next/domain/src/utility/UnixMilliseconds.brand'
 import {NotificationApiSpecification} from '@vexl-next/rest-api/src/services/notification/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {Effect} from 'effect'
 import {NotificationMetricsService} from '../metrics'
 
@@ -17,6 +18,9 @@ export const reportNotificationProcessedHandler = HttpApiBuilder.handler(
           notificationMetrics.reportNotificationProcessed({
             id: req.payload.trackingId,
             processedAt: unixMillisecondsNow(),
+            commonMetricAttributes: commonMetricAttributesFromHeaders(
+              req.headers
+            ),
           })
         )
         return {}

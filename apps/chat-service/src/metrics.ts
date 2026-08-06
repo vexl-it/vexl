@@ -64,7 +64,8 @@ export const reportRequestApproved = (
   )
 
 export const reportRequestRejected = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -72,6 +73,7 @@ export const reportRequestRejected = (
       value: number,
       timestamp: new Date(),
       name: REQUEST_REJECTED,
+      attributes,
     })
   )
 

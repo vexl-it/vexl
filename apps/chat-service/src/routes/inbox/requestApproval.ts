@@ -7,6 +7,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import dayjs from 'dayjs'
@@ -73,6 +74,9 @@ export const requestApproval = HttpApiBuilder.handler(
   'requestApproval',
   (req) =>
     Effect.gen(function* (_) {
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
       const security = yield* _(CurrentSecurity)
 
       const {receiverInbox, senderInbox} = yield* _(
@@ -114,7 +118,7 @@ export const requestApproval = HttpApiBuilder.handler(
         })
       )
 
-      yield* _(reportMessageSent(1))
+      yield* _(reportMessageSent(1, commonMetricAttributes))
       yield* _(reportRequestSent(1))
 
       return {
@@ -137,6 +141,9 @@ export const requestApprovalV2 = HttpApiBuilder.handler(
   'requestApprovalV2',
   (req) =>
     Effect.gen(function* (_) {
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
       yield* _(validateChallengeInBody(req.payload))
 
       const {receiverInbox, senderInbox} = yield* _(
@@ -179,7 +186,7 @@ export const requestApprovalV2 = HttpApiBuilder.handler(
         })
       )
 
-      yield* _(reportMessageSent(1))
+      yield* _(reportMessageSent(1, commonMetricAttributes))
       yield* _(reportRequestSent(1))
 
       return {

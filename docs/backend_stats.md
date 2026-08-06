@@ -48,7 +48,7 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
-| `OFFER_CREATED` | Increment | common + `countryPrefix` (the offer's country) | New offer is created. |
+| `OFFER_CREATED` | Increment | common + `countryPrefix` (the offer's country), `offerType` (`BUY`/`SELL`) | New offer is created. |
 | `OFFER_MODIFIED` | Increment | common | Offer is updated. |
 | `OFFER_REPORTED` | Increment | common + `offerId` | Offer is reported — both the contact-network and the club report endpoints report under this name. |
 | `OFFER_PUBLIC_PART_DELETED` | Increment | common | Offer is deleted. |

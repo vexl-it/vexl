@@ -1,6 +1,9 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
-import {type OfferId} from '@vexl-next/domain/src/general/offers'
+import {
+  type OfferId,
+  type OfferType,
+} from '@vexl-next/domain/src/general/offers'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
@@ -60,16 +63,21 @@ export const reportOfferModified = (
     })
   )
 
-export const reportOfferCreated = (
-  countryPrefix: CountryPrefix,
+export const reportOfferCreated = ({
+  countryPrefix,
+  offerType,
+  commonMetricAttributes,
+}: {
+  countryPrefix: CountryPrefix
+  offerType: OfferType
   commonMetricAttributes: CommonMetricAttributes
-): Effect.Effect<void, never, MetricsClientService> =>
+}): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_CREATED,
-      attributes: {...commonMetricAttributes, countryPrefix},
+      attributes: {...commonMetricAttributes, countryPrefix, offerType},
     })
   )
 

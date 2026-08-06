@@ -13,6 +13,7 @@ import {inactivityNotificationAfterDaysConfig} from './configs'
 const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
 const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
+const COUNT_OF_INACTIVE_USERS = 'COUNT_OF_INACTIVE_USERS' as const
 const USER_REFRESH = 'USER_REFRESH' as const
 const NEW_APP_USER_NOTIFICATIONS_SENT =
   'NEW_APP_USER_NOTIFICATIONS_SENT' as const
@@ -56,6 +57,19 @@ export const reportCountOfConnections = (
       uuid: generateUuid(),
       timestamp: new Date(),
       name: COUNT_OF_CONNECTIONS,
+      value: count,
+      type: 'Total',
+    })
+  )
+
+export const reportCountOfInactiveUsers = (
+  count: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: COUNT_OF_INACTIVE_USERS,
       value: count,
       type: 'Total',
     })
@@ -232,27 +246,32 @@ export const reportGaguesLayer = Layer.effectDiscard(
   })
 )
 
-export const queryAndReportNumberOfInnactiveUsers = Effect.gen(function* (_) {
+export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
   const inactivityNotificationAfterDays = yield* _(
     inactivityNotificationAfterDaysConfig
   )
   const sql = yield* _(SqlClient.SqlClient)
-  return sql`
-    SELECT
-      count(*)
-    FROM
-      users
-    WHERE
-      refreshed_at IS NULL
-      OR refreshed_at < now() - interval '${inactivityNotificationAfterDays} day'
-  `.pipe(
+  yield* _(
+    sql`
+      SELECT
+        count(*)
+      FROM
+        users
+      WHERE
+        refreshed_at IS NULL
+        OR refreshed_at < now() - interval '${inactivityNotificationAfterDays} day'
+    `,
     Effect.map((one) => Number(one[0].count)),
     Effect.flatMap((v) =>
       Effect.zipRight(
-        Effect.logInfo(`Reporting number of innactive users: ${v}`),
-        reportCountOfUniqueContacts(v)
+        Effect.logInfo(`Reporting number of inactive users: ${v}`),
+        reportCountOfInactiveUsers(v)
       )
     ),
+    Effect.tapError((e) =>
+      Effect.logError('Error reporting number of inactive users', e)
+    ),
+    Effect.ignore,
     Effect.withSpan('Query number of inactive users')
   )
 })

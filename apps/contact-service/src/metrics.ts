@@ -1,5 +1,5 @@
-import {SqlClient} from '@effect/sql'
-import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
+import {SqlClient, SqlSchema} from '@effect/sql'
+import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
@@ -8,7 +8,7 @@ import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/Met
 import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
-import {Effect, Layer} from 'effect'
+import {Array, Effect, Layer, pipe, Schema} from 'effect'
 import {
   activeUserWindowDaysConfig,
   inactivityNotificationAfterDaysConfig,
@@ -19,6 +19,8 @@ const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
 const COUNT_OF_INACTIVE_USERS = 'COUNT_OF_INACTIVE_USERS' as const
 const COUNT_OF_ACTIVE_USERS = 'COUNT_OF_ACTIVE_USERS' as const
+const COUNT_OF_ACTIVE_USERS_BY_COUNTRY =
+  'COUNT_OF_ACTIVE_USERS_BY_COUNTRY' as const
 const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
 const USER_REFRESH = 'USER_REFRESH' as const
 const USER_REACTIVATED = 'USER_REACTIVATED' as const
@@ -83,14 +85,35 @@ export const reportCountOfInactiveUsers = (
   )
 
 export const reportCountOfActiveUsers = (
-  count: number
+  count: number,
+  timestamp: Date = new Date()
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
-      timestamp: new Date(),
+      timestamp,
       name: COUNT_OF_ACTIVE_USERS,
       value: count,
+      type: 'Total',
+    })
+  )
+
+export const reportCountOfActiveUsersByCountry = ({
+  count,
+  countryPrefix,
+  timestamp,
+}: {
+  count: number
+  countryPrefix: CountryPrefix | 'none'
+  timestamp: Date
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp,
+      name: COUNT_OF_ACTIVE_USERS_BY_COUNTRY,
+      value: count,
+      attributes: {countryPrefix},
       type: 'Total',
     })
   )
@@ -326,24 +349,56 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
   )
 })
 
+const ActiveUsersByCountryQueryResult = Schema.Struct({
+  count: Schema.NumberFromString,
+  countryPrefix: Schema.Union(CountryPrefix, Schema.Null),
+})
+
 export const queryAndReportNumberOfActiveUsers = Effect.gen(function* (_) {
   const activeUserWindowDays = yield* _(activeUserWindowDaysConfig)
   const sql = yield* _(SqlClient.SqlClient)
+
+  const activeUsersByCountry = yield* _(
+    SqlSchema.findAll({
+      Request: Schema.Null,
+      Result: ActiveUsersByCountryQueryResult,
+      execute: () => sql`
+        SELECT
+          count(*) AS "count",
+          country_prefix AS "countryPrefix"
+        FROM
+          users
+        WHERE
+          refreshed_at >= now() - interval '1 day' * ${activeUserWindowDays}
+        GROUP BY
+          country_prefix
+      `,
+    })(null)
+  )
+
+  const totalActiveUsers = pipe(
+    activeUsersByCountry,
+    Array.map(({count}) => count),
+    Array.reduce(0, (sum, count) => sum + count)
+  )
+  const snapshotTimestamp = new Date()
+
+  const reportEffects = pipe(
+    activeUsersByCountry,
+    Array.map(({count, countryPrefix}) =>
+      reportCountOfActiveUsersByCountry({
+        count,
+        countryPrefix: countryPrefix ?? 'none',
+        timestamp: snapshotTimestamp,
+      })
+    ),
+    Array.prepend(reportCountOfActiveUsers(totalActiveUsers, snapshotTimestamp))
+  )
+
   yield* _(
-    sql`
-      SELECT
-        count(*)
-      FROM
-        users
-      WHERE
-        refreshed_at >= now() - interval '1 day' * ${activeUserWindowDays}
-    `,
-    Effect.map((one) => Number(one[0].count)),
-    Effect.flatMap((v) =>
-      Effect.zipRight(
-        Effect.logInfo(`Reporting number of active users: ${v}`),
-        reportCountOfActiveUsers(v)
-      )
+    Effect.all(reportEffects, {concurrency: 'unbounded'}),
+    Effect.zipLeft(
+      Effect.logInfo(`Reported ${totalActiveUsers} active users by country`)
     ),
     Effect.withSpan('Query number of active users')
   )

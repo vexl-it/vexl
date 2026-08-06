@@ -25,7 +25,7 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
-| `USER_LOGGED_IN` | Increment | `countryPrefix` | User completes phone number verification (login). |
+| `USER_LOGGED_IN` | Increment | common + `countryPrefix` (of the verified number) | User completes phone number verification (login). |
 | `NUMBER_OF_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 60 s; count of rows in `users` per country. |
 | `NUMBER_OF_USERS` | Total | — | Gauge, every 60 s; total count of users across all countries. |
 

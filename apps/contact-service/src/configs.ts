@@ -83,6 +83,14 @@ export const deactivateAndClearClubsCronConfig = Config.string(
   'DEACTIVATE_AND_CLEAR_CLUBS_CRON'
 ).pipe(Config.withDefault('0 9 * * *'))
 
+export const reportActiveUsersCronConfig = Config.string(
+  'REPORT_ACTIVE_USERS_CRON'
+).pipe(Config.withDefault('30 0 * * *'))
+
+export const activeUserWindowDaysConfig = Config.number(
+  'ACTIVE_USER_WINDOW_DAYS'
+).pipe(Config.withDefault(30))
+
 export const secretSaltForServerContact = Config.string(
   'SECRET_SALT_FOR_SERVER_CONTACTS'
 )

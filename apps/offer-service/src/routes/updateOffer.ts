@@ -6,6 +6,7 @@ import {
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
@@ -84,7 +85,9 @@ export const updateOffer = HttpApiBuilder.handler(
     }).pipe(
       withDbTransaction,
       withOfferAdminActionRedisLock(req.payload.adminId),
-      Effect.zipLeft(reportOfferModified()),
+      Effect.zipLeft(
+        reportOfferModified(commonMetricAttributesFromHeaders(req.headers))
+      ),
       makeEndpointEffect
     )
 )

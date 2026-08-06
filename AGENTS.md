@@ -32,6 +32,10 @@ When changing any UI / UX in the mobile app or in the ui package you must read @
 - packages/rest-api - effect-ts based rest api definitions and client for both backend and mobile app
 - tooling/* - shared tooling for the repo (esling, prettier, etc...)
 
+## Backend metrics
+
+All backend metrics are documented in docs/backend_stats.md. When you add, remove, or change a metric or its attributes, update that doc as part of the same change.
+
 ## Verification
 IMPORTANT -- Verification steps (do this to verify your code changes. Not all bugs / errors will be caught by CI, but the most obvious ones will):
 1. Run `pnpm turbo:typecheck` in the affected workspace. Read the output and fix all errors.

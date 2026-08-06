@@ -103,7 +103,8 @@ export const reportClubReported = (
   )
 
 export const reportClubDeactivated = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -111,6 +112,7 @@ export const reportClubDeactivated = (
       value: number,
       timestamp: new Date(),
       name: CLUB_DEACTIVATED,
+      attributes,
     })
   )
 

@@ -96,7 +96,7 @@ export const approveRequest = HttpApiBuilder.handler(
             sender: receiverInbox.publicKey,
           })
         )
-        yield* _(reportRequestRejected(0))
+        yield* _(reportRequestRejected(0, commonMetricAttributes))
       }
 
       const encryptedSenderPublicKey = yield* _(

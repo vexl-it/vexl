@@ -38,6 +38,7 @@ These are referred to as *common* in the tables below.
 | `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, every 60 s; users that have imported at least one contact. |
 | `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, every 60 s; distinct imported contacts. |
 | `COUNT_OF_INACTIVE_USERS` | Total | — | Reported by the user-inactivity notification job; users whose `refreshed_at` is older than the inactivity threshold (or null). |
+| `COUNT_OF_ACTIVE_USERS` | Total | — | Daily scheduled task (`REPORT_ACTIVE_USERS_CRON`, default 00:30 UTC); users refreshed within the active window (`ACTIVE_USER_WINDOW_DAYS`, default 30 days). |
 | `COUNT_OF_CONNECTIONS` | Total | — | Gauge, every 60 s; total user⇄contact connections. |
 | `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS` | Increment | common + `clubUUid`, `contactsImported` | User joins a club (attribute says whether they imported contacts). |
 | `CLUB_REPORTED` | Increment | common | Club member reports a club. |

@@ -9,12 +9,16 @@ import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/c
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Effect, Layer} from 'effect'
-import {inactivityNotificationAfterDaysConfig} from './configs'
+import {
+  activeUserWindowDaysConfig,
+  inactivityNotificationAfterDaysConfig,
+} from './configs'
 
 const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
 const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
 const COUNT_OF_INACTIVE_USERS = 'COUNT_OF_INACTIVE_USERS' as const
+const COUNT_OF_ACTIVE_USERS = 'COUNT_OF_ACTIVE_USERS' as const
 const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
 const USER_REFRESH = 'USER_REFRESH' as const
 const USER_REACTIVATED = 'USER_REACTIVATED' as const
@@ -73,6 +77,19 @@ export const reportCountOfInactiveUsers = (
       uuid: generateUuid(),
       timestamp: new Date(),
       name: COUNT_OF_INACTIVE_USERS,
+      value: count,
+      type: 'Total',
+    })
+  )
+
+export const reportCountOfActiveUsers = (
+  count: number
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: COUNT_OF_ACTIVE_USERS,
       value: count,
       type: 'Total',
     })
@@ -292,7 +309,7 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
         users
       WHERE
         refreshed_at IS NULL
-        OR refreshed_at < now() - interval '${inactivityNotificationAfterDays} day'
+        OR refreshed_at < now() - interval '1 day' * ${inactivityNotificationAfterDays}
     `,
     Effect.map((one) => Number(one[0].count)),
     Effect.flatMap((v) =>
@@ -306,5 +323,28 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
     ),
     Effect.ignore,
     Effect.withSpan('Query number of inactive users')
+  )
+})
+
+export const queryAndReportNumberOfActiveUsers = Effect.gen(function* (_) {
+  const activeUserWindowDays = yield* _(activeUserWindowDaysConfig)
+  const sql = yield* _(SqlClient.SqlClient)
+  yield* _(
+    sql`
+      SELECT
+        count(*)
+      FROM
+        users
+      WHERE
+        refreshed_at >= now() - interval '1 day' * ${activeUserWindowDays}
+    `,
+    Effect.map((one) => Number(one[0].count)),
+    Effect.flatMap((v) =>
+      Effect.zipRight(
+        Effect.logInfo(`Reporting number of active users: ${v}`),
+        reportCountOfActiveUsers(v)
+      )
+    ),
+    Effect.withSpan('Query number of active users')
   )
 })

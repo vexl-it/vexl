@@ -4,6 +4,7 @@ import {newOfferId} from '@vexl-next/domain/src/general/offers'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
@@ -78,7 +79,12 @@ export const createNewOffer = HttpApiBuilder.handler(
       withDbTransaction,
       withOfferAdminActionRedisLock(req.payload.adminId),
       Effect.withSpan('createNewOffer'),
-      Effect.zipLeft(reportOfferCreated(req.payload.countryPrefix)),
+      Effect.zipLeft(
+        reportOfferCreated(
+          req.payload.countryPrefix,
+          commonMetricAttributesFromHeaders(req.headers)
+        )
+      ),
       makeEndpointEffect
     )
 )

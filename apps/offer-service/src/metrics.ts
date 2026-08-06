@@ -3,6 +3,7 @@ import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type OfferId} from '@vexl-next/domain/src/general/offers'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
+import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
@@ -62,14 +63,15 @@ export const reportOfferModified = (): Effect.Effect<
   )
 
 export const reportOfferCreated = (
-  countryPrefix: CountryPrefix
+  countryPrefix: CountryPrefix,
+  commonMetricAttributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: OFFER_CREATED,
-      attributes: {countryPrefix},
+      attributes: {...commonMetricAttributes, countryPrefix},
     })
   )
 

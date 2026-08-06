@@ -13,6 +13,7 @@ import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contra
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {
   clearEnqueuedNotifications,
@@ -68,6 +69,7 @@ describe('Refresh user', () => {
   it('Refreshses user in database (refreshedAt clientVersion, and countryPrefix)', async () => {
     await runPromiseInMockedEnvironment(
       Effect.gen(function* (_) {
+        mockedReportMetric.mockClear()
         const sql = yield* _(SqlClient.SqlClient)
         yield* _(sql`
           UPDATE users
@@ -90,7 +92,7 @@ describe('Refresh user', () => {
         const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
           'user-agent': 'Vexl/2 (1.0.0) ANDROID',
           'vexl-app-meta':
-            '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false}',
+            '{"appSource":"Some test123", "versionCode": 2, "platform":"ANDROID", "semver": "1.0.0", "language": "en", "isDeveloper": false, "prefix": 420}',
         })
 
         const commonAndSecurityHeaders = makeCommonAndSecurityHeaders(
@@ -123,6 +125,19 @@ describe('Refresh user', () => {
         expect(userInDb[0]).toHaveProperty('clientVersion', 2)
         expect(userInDb[0]).toHaveProperty('refreshedAt', expect.any(Date))
         expect(userInDb[0]).toHaveProperty('appSource', 'Some test123')
+        expect(userInDb[0]).toHaveProperty('countryPrefix', 420)
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'USER_REFRESH',
+            attributes: {
+              appVersion: '1.0.0',
+              appVersionCode: 2,
+              appPlatform: 'ANDROID',
+              appSource: 'Some test123',
+              clientCountryPrefix: 420,
+            },
+          })
+        )
       })
     )
   })

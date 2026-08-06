@@ -18,12 +18,12 @@ describe('Active and inactive user gauges', () => {
         // (.env.test). pk1 and pk2 are active; pk2, pk3 and pk4 are inactive.
         yield* _(sql`
           INSERT INTO
-            users (public_key, hash, refreshed_at)
+            users (public_key, hash, refreshed_at, country_prefix)
           VALUES
-            ('pk1', 'h1', CURRENT_DATE),
-            ('pk2', 'h2', CURRENT_DATE - 10),
-            ('pk3', 'h3', CURRENT_DATE - 40),
-            ('pk4', 'h4', NULL)
+            ('pk1', 'h1', CURRENT_DATE, 420),
+            ('pk2', 'h2', CURRENT_DATE - 10, 420),
+            ('pk3', 'h3', CURRENT_DATE - 40, 421),
+            ('pk4', 'h4', NULL, NULL)
         `)
 
         mockedReportMetric.mockClear()
@@ -41,11 +41,20 @@ describe('Active and inactive user gauges', () => {
         )
         expect(mockedReportMetric).toHaveBeenCalledWith(
           expect.objectContaining({
+            name: 'COUNT_OF_ACTIVE_USERS_BY_COUNTRY',
+            value: 2,
+            attributes: {countryPrefix: 420},
+            type: 'Total',
+          })
+        )
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
             name: 'COUNT_OF_INACTIVE_USERS',
             value: 3,
             type: 'Total',
           })
         )
+        expect(mockedReportMetric).toHaveBeenCalledTimes(3)
       })
     )
   })

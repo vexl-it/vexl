@@ -100,7 +100,7 @@ export function api({
       verifyPhoneNumber: (body: VerifyPhoneNumberRequest) =>
         client.Login.verifyCode({payload: body}),
       verifyChallenge: (body: VerifyChallengeRequest) =>
-        client.Login.verifyChallenge({payload: body, headers: commonHeaders}),
+        client.Login.verifyChallenge({payload: body}),
       deleteUser: () =>
         withSecurityHeaders((headers) => client.logoutUser({headers})),
       getVersionServiceInfo: () =>

@@ -9,6 +9,7 @@ import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ReportClubLimitReachedError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {Effect, Option, Schema} from 'effect'
 import {clubReportLimistCount} from '../../../configs'
@@ -24,6 +25,9 @@ export const reportClub = HttpApiBuilder.handler(
   'reportClub',
   (req) =>
     Effect.gen(function* (_) {
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
       yield* _(validateChallengeInBody(req.payload))
       const security = yield* _(CurrentSecurity)
 
@@ -105,7 +109,7 @@ export const reportClub = HttpApiBuilder.handler(
         })
       )
 
-      yield* _(reportClubReported(1))
+      yield* _(reportClubReported(1, commonMetricAttributes))
 
       const reportedClub = yield* _(clubsDb.findClubByUuid({uuid: club.uuid}))
 

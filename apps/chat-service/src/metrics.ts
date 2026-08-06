@@ -78,7 +78,8 @@ export const reportRequestRejected = (
   )
 
 export const reportChatClosed = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -86,6 +87,7 @@ export const reportChatClosed = (
       value: number,
       timestamp: new Date(),
       name: CHAT_CLOSED,
+      attributes,
     })
   )
 

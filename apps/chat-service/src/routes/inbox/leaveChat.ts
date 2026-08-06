@@ -76,7 +76,7 @@ export const leaveChat = HttpApiBuilder.handler(
         req.headers
       )
       yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportChatClosed(1))
+      yield* _(reportChatClosed(1, commonMetricAttributes))
 
       return {
         ...messageRecordToServerMessage({

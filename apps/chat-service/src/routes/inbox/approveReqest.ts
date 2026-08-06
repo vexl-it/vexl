@@ -29,6 +29,9 @@ export const approveRequest = HttpApiBuilder.handler(
   'approveRequest',
   (req) =>
     Effect.gen(function* (_) {
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
       yield* _(validateChallengeInBody(req.payload))
 
       // from the point of view of the one that sent the request
@@ -76,7 +79,7 @@ export const approveRequest = HttpApiBuilder.handler(
           })
         )
 
-        yield* _(reportRequestApproved(1))
+        yield* _(reportRequestApproved(1, commonMetricAttributes))
       } else {
         // Not approved
         yield* _(

@@ -6,6 +6,7 @@ import {
 import {MemberAlreadyInClubError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
@@ -125,6 +126,9 @@ export const joinClub = HttpApiBuilder.handler(
               clubUUid: club.uuid,
               contactsImported: req.payload.contactsImported,
               value: 1,
+              commonMetricAttributes: commonMetricAttributesFromHeaders(
+                req.headers
+              ),
             })
           )
 

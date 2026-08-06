@@ -120,17 +120,19 @@ export const reportUserJoinedClubAndImportedContacts = ({
   clubUUid,
   contactsImported,
   value,
+  commonMetricAttributes,
 }: {
   clubUUid: ClubUuid
   contactsImported: boolean
   value: number
+  commonMetricAttributes: CommonMetricAttributes
 }): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_JOINED_CLUB_AND_IMPORTED_CONTACTS,
-      attributes: {clubUUid, contactsImported},
+      attributes: {...commonMetricAttributes, clubUUid, contactsImported},
       value,
     })
   )

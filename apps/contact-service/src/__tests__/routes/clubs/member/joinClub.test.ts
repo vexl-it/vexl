@@ -9,6 +9,7 @@ import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifica
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   ClubUserLimitExceededError,
   MemberAlreadyInClubError,
@@ -27,6 +28,10 @@ import {
 } from '../../../utils/mockEnqueueUserNotification'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
+
+const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
 
 const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
@@ -99,6 +104,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         const joinedClub = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -170,6 +176,7 @@ describe('Join club', () => {
 
         const joinedClub = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: inviteLink.link.code,
@@ -228,6 +235,7 @@ describe('Join club', () => {
 
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: inviteLink.link.code,
@@ -245,6 +253,7 @@ describe('Join club', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(generatePrivateKey()))),
               code: inviteLink.link.code,
@@ -272,6 +281,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(user1))),
               code: INVITATION_CODE,
@@ -289,6 +299,7 @@ describe('Join club', () => {
 
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(user2))),
               code: INVITATION_CODE,
@@ -306,6 +317,7 @@ describe('Join club', () => {
 
         const failedResponse = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(user3))),
               code: INVITATION_CODE,
@@ -336,6 +348,7 @@ describe('Join club', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               signedChallenge: signedChallenge.signedChallenge,
               publicKey: invalidKey.publicKeyPemBase64,
@@ -362,6 +375,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -379,6 +393,7 @@ describe('Join club', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -404,6 +419,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         const errorResponse = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: '123445' as ClubCode,
@@ -473,6 +489,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -576,6 +593,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -656,6 +674,7 @@ describe('Join club', () => {
         // with a different user who has same token pattern
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -738,6 +757,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,
@@ -834,6 +854,7 @@ describe('Join club', () => {
         const app = yield* _(NodeTestingApp)
         yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               ...(yield* _(generateAndSignChallenge(userKey))),
               code: INVITATION_CODE,

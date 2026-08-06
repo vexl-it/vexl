@@ -49,7 +49,7 @@ These are referred to as *common* in the tables below.
 | `OFFER_CREATED` | Increment | common + `countryPrefix` (the offer's country) | New offer is created. |
 | `OFFER_MODIFIED` | Increment | common | Offer is updated. |
 | `OFFER_REPORTED` | Increment | common + `offerId` | Offer is reported — both the contact-network and the club report endpoints report under this name. |
-| `OFFER_PUBLIC_PART_DELETED` | Increment | — | Offer is deleted. |
+| `OFFER_PUBLIC_PART_DELETED` | Increment | common | Offer is deleted. |
 | `TOTAL_BUY_OFFERS`, `TOTAL_SELL_OFFERS` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 10 min; active offers (refreshed within last 30 days) per country. |
 | `TOTAL_BUY_OFFERS_ACROSS_ALL`, `TOTAL_SELL_OFFERS_ACROSS_ALL`, `TOTAL_OFFERS_ACROSS_ALL` | Total | — | Gauge, every 10 min; sums of the above across countries. |
 | `TOTAL_BUY_OFFERS_EXPIRED`, `TOTAL_SELL_OFFERS_EXPIRED` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 10 min; offers not refreshed within the expiration period, per country. |

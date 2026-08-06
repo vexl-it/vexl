@@ -1,6 +1,7 @@
 import {HttpApiBuilder} from '@effect/platform/index'
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
 import {OfferDbService} from '../db/OfferDbService'
@@ -34,7 +35,11 @@ export const deleteOffer = HttpApiBuilder.handler(
         })
       )
 
-      yield* _(reportOfferPublicPartDeleted())
+      yield* _(
+        reportOfferPublicPartDeleted(
+          commonMetricAttributesFromHeaders(req.headers)
+        )
+      )
 
       return {}
     }).pipe(

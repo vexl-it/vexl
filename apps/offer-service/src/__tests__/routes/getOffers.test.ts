@@ -11,6 +11,7 @@ import {
 } from '@vexl-next/domain/src/general/offers'
 import {objectToBase64UrlEncoded} from '@vexl-next/generic-utils/src/base64NextPageTokenEncoding'
 import {generateV2KeyPair} from '@vexl-next/generic-utils/src/effect-helpers/crypto'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   type CreateNewOfferRequest,
   type CreateNewOfferResponse,
@@ -27,6 +28,10 @@ import {
 import {makeTestCommonAndSecurityHeadersWithPublicKeyV2} from '../utils/makeTestCommonAndSecurityHeadersWithPublicKeyV2'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
+
+const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
 
 let user1: MockedUser
 let user2: MockedUser
@@ -879,6 +884,7 @@ describe('Get removed offers', () => {
 
         yield* _(
           client.deleteOffer({
+            headers: testCommonHeaders,
             urlParams: {adminIds: [newOffer.adminId]},
           })
         )

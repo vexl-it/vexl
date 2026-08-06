@@ -8,6 +8,7 @@ import {
   type PrivatePayloadEncrypted,
   type PublicPayloadEncrypted,
 } from '@vexl-next/domain/src/general/offers'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type CreateNewOfferRequest} from '@vexl-next/rest-api/src/services/offer/contracts'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
@@ -15,6 +16,10 @@ import {Effect, Schema} from 'effect'
 import {makeTestCommonAndSecurityHeaders} from '../utils/createMockedUser'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
+
+const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
 
 type DummyAuthHeaders = Parameters<typeof makeTestCommonAndSecurityHeaders>[0]
 
@@ -106,6 +111,7 @@ describe('Delete offer', () => {
 
         yield* _(
           api.deleteOffer({
+            headers: testCommonHeaders,
             urlParams: {adminIds: [offer1.adminId, offer2.adminId]},
           })
         )
@@ -172,6 +178,7 @@ describe('Delete offer', () => {
 
         yield* _(
           api.deleteOffer({
+            headers: testCommonHeaders,
             urlParams: {adminIds: []},
           })
         )
@@ -221,6 +228,7 @@ describe('Delete offer', () => {
 
         yield* _(
           api.deleteOffer({
+            headers: testCommonHeaders,
             urlParams: {
               adminIds: [offer1.adminId, offer2.adminId, generateAdminId()],
             },

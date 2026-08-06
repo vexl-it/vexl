@@ -4,6 +4,7 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Effect, Layer} from 'effect'
@@ -60,16 +61,15 @@ export const reportCountOfConnections = (
     })
   )
 
-export const reportUserRefresh = (): Effect.Effect<
-  void,
-  never,
-  MetricsClientService
-> =>
+export const reportUserRefresh = (
+  attributes: CommonMetricAttributes
+): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_REFRESH,
+      attributes,
     })
   )
 

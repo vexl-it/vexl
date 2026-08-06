@@ -3,6 +3,7 @@ import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect} from 'effect'
 import {contactActiveWindowDaysConfig} from '../../configs'
@@ -38,7 +39,9 @@ export const refreshUser = HttpApiBuilder.handler(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
-          yield* _(reportUserRefresh())
+          yield* _(
+            reportUserRefresh(commonMetricAttributesFromHeaders(req.headers))
+          )
           const userDb = yield* _(UserDbService)
           const contactDb = yield* _(ContactDbService)
           const contactActiveWindowDays = yield* _(

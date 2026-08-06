@@ -25,7 +25,6 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
-| `USER_LOGGED_IN` | Increment | common + `countryPrefix` (of the verified number) | User completes phone number verification (login). |
 | `NUMBER_OF_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Gauge, every 60 s; count of rows in `users` per country. |
 | `NUMBER_OF_USERS` | Total | — | Gauge, every 60 s; total count of users across all countries. |
 
@@ -33,6 +32,7 @@ These are referred to as *common* in the tables below.
 
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
+| `USER_LOGGED_IN` | Increment | common + `countryPrefix`, `numberExists` | User registers with the contact service right after login. `numberExists` is true when a user with the same phone number already existed (login from a new device / re-login without account deletion). |
 | `USER_REFRESH` | Increment | common | User refresh endpoint is called (app foregrounded / periodic refresh). |
 | `USER_REACTIVATED` | Increment | common | An inactive user (per the contact active-window threshold) comes back — their refresh transitions them from inactive to active. |
 | `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, every 60 s; users that have imported at least one contact. |

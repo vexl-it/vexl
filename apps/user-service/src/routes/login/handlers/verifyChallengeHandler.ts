@@ -16,10 +16,8 @@ import {UserApiSpecification} from '@vexl-next/rest-api/src/services/user/specif
 import {DashboardReportsService} from '@vexl-next/server-utils/src/DashboardReportsService'
 import {generateUserAuthData} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
-import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {Effect} from 'effect'
 import {LoggedInUsersDbService} from '../../../db/loggedInUsersDb'
-import {reportUserLoggedIn} from '../../../metrics'
 import {VerificationStateDbService} from '../db/verificationStateDb'
 
 const insertUserIntoDb = (
@@ -87,13 +85,6 @@ export const verifyChallengeHandler = HttpApiBuilder.handler(
       )
       yield* _(
         loginDb.deleteChallengeVerificationState(req.payload.userPublicKey)
-      )
-
-      yield* _(
-        reportUserLoggedIn(
-          verificationState.countryPrefix,
-          commonMetricAttributesFromHeaders(req.headers)
-        )
       )
 
       return new VerifyChallengeResponse({

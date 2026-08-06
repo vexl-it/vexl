@@ -11,6 +11,7 @@ import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificat
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {hashPhoneNumber} from '@vexl-next/server-utils/src/generateUserAuthData'
 import {createDummyAuthHeadersForUser} from '@vexl-next/server-utils/src/tests/createDummyAuthHeaders'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {serverHashPhoneNumber} from '../../../utils/serverHashContact'
 import {makeTestCommonAndSecurityHeaders} from '../contacts/utils'
@@ -43,6 +44,7 @@ describe('create user', () => {
           testCommonHeaders
         )
 
+        mockedReportMetric.mockClear()
         yield* _(
           app.User.createUser({
             payload: {
@@ -54,6 +56,21 @@ describe('create user', () => {
               publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders,
+          })
+        )
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'USER_LOGGED_IN',
+            attributes: {
+              appVersion: '1.0.0',
+              appVersionCode: 1,
+              appPlatform: 'ANDROID',
+              appSource: 'googlePlay',
+              clientCountryPrefix: 'none',
+              countryPrefix: 'none',
+              numberExists: false,
+            },
           })
         )
 
@@ -163,6 +180,7 @@ describe('create user', () => {
         const commonAndSecurityHeaders2 =
           makeTestCommonAndSecurityHeaders(authHeaders2)
 
+        mockedReportMetric.mockClear()
         yield* _(
           app.User.createUser({
             payload: {
@@ -174,6 +192,15 @@ describe('create user', () => {
               publicKeyV2: Option.none(),
             },
             headers: commonAndSecurityHeaders2,
+          })
+        )
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'USER_LOGGED_IN',
+            attributes: expect.objectContaining({
+              numberExists: true,
+            }),
           })
         )
 

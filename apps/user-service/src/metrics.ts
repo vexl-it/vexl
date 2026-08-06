@@ -2,29 +2,14 @@ import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
-import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
 import {Array, Effect, Layer, pipe, Schema} from 'effect'
 import {type ReadonlyArray} from 'effect/Array'
 
-const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
 const NUMBER_OF_USERS = 'NUMBER_OF_USERS_BY_COUNTRY' as const
 const NUMBER_OF_USERS_ALL_COUNTRIES = 'NUMBER_OF_USERS' as const
-
-export const reportUserLoggedIn = (
-  countryPrefix: CountryPrefix,
-  commonMetricAttributes: CommonMetricAttributes
-): Effect.Effect<void, never, MetricsClientService> =>
-  reportMetricForked(
-    new MetricsMessage({
-      uuid: generateUuid(),
-      timestamp: new Date(),
-      name: USER_LOGGED_IN,
-      attributes: {...commonMetricAttributes, countryPrefix},
-    })
-  )
 
 export const reportTotalNumberOfUsers = (
   dataToReport: ReadonlyArray<{

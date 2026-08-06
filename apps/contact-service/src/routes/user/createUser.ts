@@ -1,12 +1,15 @@
 import {HttpApiBuilder} from '@effect/platform/index'
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
+import {reportUserLoggedIn} from '../../metrics'
 import {
   serverHashPhoneNumber,
   type ServerHashedNumber,
@@ -16,7 +19,7 @@ import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 const deleteIfExists = (
   hash: ServerHashedNumber
 ): Effect.Effect<
-  void,
+  boolean,
   UnexpectedServerError,
   UserDbService | ContactDbService
 > =>
@@ -27,7 +30,7 @@ const deleteIfExists = (
     const user = yield* _(userDb.findUserByHash(hash))
     if (Option.isNone(user)) {
       yield* _(Effect.logInfo('No existing user found. Db is clean.'))
-      return
+      return false
     }
 
     yield* _(Effect.log('Removing existing user from database', user.value))
@@ -39,6 +42,7 @@ const deleteIfExists = (
         hash: user.value.hash,
       })
     )
+    return true
   }).pipe(Effect.withSpan('Check and delete existing user'))
 
 export const createUser = HttpApiBuilder.handler(
@@ -51,7 +55,20 @@ export const createUser = HttpApiBuilder.handler(
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
           const userDb = yield* _(UserDbService)
-          yield* _(deleteIfExists(security.serverHash))
+          const numberExists = yield* _(deleteIfExists(security.serverHash))
+
+          yield* _(
+            reportUserLoggedIn({
+              countryPrefix: Option.getOrElse(
+                req.headers.prefixOrNone,
+                (): CountryPrefix | 'none' => 'none'
+              ),
+              numberExists,
+              commonMetricAttributes: commonMetricAttributesFromHeaders(
+                req.headers
+              ),
+            })
+          )
 
           yield* _(
             userDb.insertUser({

@@ -1,4 +1,5 @@
 import {SqlClient} from '@effect/sql'
+import {type CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
@@ -14,6 +15,7 @@ const CONT_OF_UNIQUE_USERS = 'COUNT_OF_UNIQUE_USERS' as const
 const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
 const COUNT_OF_INACTIVE_USERS = 'COUNT_OF_INACTIVE_USERS' as const
+const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
 const USER_REFRESH = 'USER_REFRESH' as const
 const USER_REACTIVATED = 'USER_REACTIVATED' as const
 const NEW_APP_USER_NOTIFICATIONS_SENT =
@@ -73,6 +75,24 @@ export const reportCountOfInactiveUsers = (
       name: COUNT_OF_INACTIVE_USERS,
       value: count,
       type: 'Total',
+    })
+  )
+
+export const reportUserLoggedIn = ({
+  countryPrefix,
+  numberExists,
+  commonMetricAttributes,
+}: {
+  countryPrefix: CountryPrefix | 'none'
+  numberExists: boolean
+  commonMetricAttributes: CommonMetricAttributes
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: USER_LOGGED_IN,
+      attributes: {...commonMetricAttributes, countryPrefix, numberExists},
     })
   )
 

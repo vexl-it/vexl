@@ -3,6 +3,7 @@ import {type MessageCypher} from '@vexl-next/domain/src/general/messaging'
 import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -39,6 +40,7 @@ beforeAll(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,

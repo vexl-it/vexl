@@ -14,6 +14,7 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -129,6 +130,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,
@@ -169,6 +171,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   publicKeyToConfirm: user1.mainKeyPair.publicKeyPemBase64,

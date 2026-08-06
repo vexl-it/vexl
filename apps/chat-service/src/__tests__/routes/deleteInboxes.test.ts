@@ -9,6 +9,7 @@ import {hashPublicKey} from '../../db/domain'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -53,6 +54,7 @@ beforeEach(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,
@@ -83,6 +85,7 @@ beforeEach(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox2.addChallenge({
               message: 'someMessage2' as MessageCypher,

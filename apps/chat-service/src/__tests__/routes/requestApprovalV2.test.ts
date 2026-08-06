@@ -14,7 +14,11 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  commonHeaders,
+  createMockedUser,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
@@ -44,6 +48,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -80,6 +85,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -91,6 +97,7 @@ describe('Request approval V2', () => {
 
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -113,6 +120,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -131,6 +139,7 @@ describe('Request approval V2', () => {
 
         const toNotFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -144,6 +153,7 @@ describe('Request approval V2', () => {
 
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -166,6 +176,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -178,6 +189,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.approveRequest({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'approval message' as MessageCypher,
@@ -191,6 +203,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -213,6 +226,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -225,6 +239,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.approveRequest({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'approval message' as MessageCypher,
@@ -238,6 +253,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -260,6 +276,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -283,6 +300,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -305,6 +323,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -316,6 +335,7 @@ describe('Request approval V2', () => {
 
         yield* _(
           client.Inboxes.cancelRequestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'cancel message' as MessageCypher,
@@ -327,6 +347,7 @@ describe('Request approval V2', () => {
 
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -349,6 +370,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -360,6 +382,7 @@ describe('Request approval V2', () => {
 
         yield* _(
           client.Inboxes.cancelRequestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'cancel message' as MessageCypher,
@@ -378,6 +401,7 @@ describe('Request approval V2', () => {
 
         const toNotFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -392,6 +416,7 @@ describe('Request approval V2', () => {
 
         const toFail = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request' as MessageCypher,
@@ -414,6 +439,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const failedResponse = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 message: 'request message' as MessageCypher,
@@ -449,6 +475,7 @@ describe('Request approval V2', () => {
         yield* _(setAuthHeaders(dummyAuthHeaders))
         const failedResponse = yield* _(
           client.Inboxes.requestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               dummyAddChallenge({
                 message: 'request message' as MessageCypher,

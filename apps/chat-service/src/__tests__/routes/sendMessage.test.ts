@@ -21,6 +21,7 @@ import {
 } from '../../configs'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -57,6 +58,7 @@ beforeAll(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,
@@ -90,6 +92,7 @@ describe('Send message', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const sendMessageResponse = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           })
         )
@@ -139,6 +142,7 @@ describe('Send message', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           })
         )
@@ -181,6 +185,7 @@ describe('Send message', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const response = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           }),
           Effect.either
@@ -210,6 +215,7 @@ describe('Send message', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         const response = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           }),
           Effect.either
@@ -236,6 +242,7 @@ describe('Send message', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         const response = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           }),
           Effect.either
@@ -263,6 +270,7 @@ describe('Send message', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         const response = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: {...messageToSend, messageType: 'REQUEST_MESSAGING'},
           }),
           Effect.either
@@ -272,6 +280,7 @@ describe('Send message', () => {
 
         const response2 = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: {...messageToSend, messageType: 'APPROVE_MESSAGING'},
           }),
           Effect.either
@@ -281,6 +290,7 @@ describe('Send message', () => {
 
         const response3 = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: {...messageToSend, messageType: 'DISAPPROVE_MESSAGING'},
           }),
           Effect.either
@@ -290,6 +300,7 @@ describe('Send message', () => {
 
         const response4 = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: {
               ...messageToSend,
               messageType: 'CANCEL_REQUEST_MESSAGING',
@@ -302,6 +313,7 @@ describe('Send message', () => {
 
         const response5 = yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: {
               ...messageToSend,
               messageType: 'INACTIVITY_REMINDER',

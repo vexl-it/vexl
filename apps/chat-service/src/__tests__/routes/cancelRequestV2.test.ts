@@ -14,7 +14,11 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
-import {createMockedUser, type MockedUser} from '../utils/createMockedUser'
+import {
+  commonHeaders,
+  createMockedUser,
+  type MockedUser,
+} from '../utils/createMockedUser'
 import {runPromiseInMockedEnvironment} from '../utils/runPromiseInMockedEnvironment'
 
 let user1: MockedUser
@@ -35,6 +39,7 @@ beforeEach(async () => {
       yield* _(setAuthHeaders(user1.authHeaders))
       yield* _(
         client.Inboxes.requestApprovalV2({
+          headers: commonHeaders,
           payload: yield* _(
             user1.inbox1.addChallenge({
               receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
@@ -58,6 +63,7 @@ describe('Cancel request', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.cancelRequestApprovalV2({
+            headers: commonHeaders,
             payload: yield* _(
               user1.inbox1.addChallenge({
                 receiverPublicKey: user2.inbox1.keyPair.publicKeyPemBase64,
@@ -91,6 +97,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
             client.Inboxes.cancelRequestApprovalV2({
+              headers: commonHeaders,
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
@@ -114,6 +121,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
@@ -127,6 +135,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
             client.Inboxes.cancelRequestApprovalV2({
+              headers: commonHeaders,
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
@@ -150,6 +159,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   publicKeyToConfirm: user1.inbox1.keyPair.publicKeyPemBase64,
@@ -163,6 +173,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
             client.Inboxes.cancelRequestApprovalV2({
+              headers: commonHeaders,
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: user2.inbox2.keyPair.publicKeyPemBase64,
@@ -194,6 +205,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(dummyAuthHeaders))
           const failedReqResponse = yield* _(
             client.Inboxes.cancelRequestApprovalV2({
+              headers: commonHeaders,
               payload: yield* _(
                 addChallengeForKey(
                   dummyKeyPair,
@@ -219,6 +231,7 @@ describe('Cancel request', () => {
           yield* _(setAuthHeaders(user1.authHeaders))
           const failedReqResponse = yield* _(
             client.Inboxes.cancelRequestApprovalV2({
+              headers: commonHeaders,
               payload: yield* _(
                 user1.inbox1.addChallenge({
                   receiverPublicKey: generatePrivateKey().publicKeyPemBase64,

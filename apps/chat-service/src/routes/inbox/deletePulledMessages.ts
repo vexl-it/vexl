@@ -5,7 +5,7 @@ import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Effect} from 'effect'
+import {Effect, Option} from 'effect'
 import {InboxDbService} from '../../db/InboxDbService'
 import {MessagesDbService} from '../../db/MessagesDbService'
 import {hashPublicKey} from '../../db/domain'
@@ -35,9 +35,13 @@ export const deletePulledMessages = HttpApiBuilder.handler(
       const messagesService = yield* _(MessagesDbService)
       yield* _(
         messagesService.deletePulledMessagesByInboxId(inboxRecord.id),
-        Effect.tap((count) =>
+        Effect.tap(({count, avgMessageAgeSeconds}) =>
           reportMessageFetchedAndRemoved(
             count,
+            Option.getOrElse(
+              avgMessageAgeSeconds,
+              (): number | 'unknown' => 'unknown'
+            ),
             commonMetricAttributesFromHeaders(req.headers)
           )
         )

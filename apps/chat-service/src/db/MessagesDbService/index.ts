@@ -4,7 +4,10 @@ import {type InboxRecordId} from '../InboxDbService/domain'
 import {type MessageRecord, type MessageRecordId} from './domain'
 import {createDeleteAllMessagesByInboxId} from './query/createDeleteAllMessagesByInboxId'
 import {createDeleteExpiredMessages} from './query/createDeleteExpiredMessages'
-import {createDeletePulledMessagesMessagesByInboxId} from './query/createDeletePulledMessagesByInboxId'
+import {
+  createDeletePulledMessagesMessagesByInboxId,
+  type DeletedPulledMessagesSummary,
+} from './query/createDeletePulledMessagesByInboxId'
 import {createFindMessagesByInboxId} from './query/createFindMessagesByInboxId'
 import {
   createInsertMessageForInbox,
@@ -19,7 +22,7 @@ export interface MessagesDbOperations {
 
   deletePulledMessagesByInboxId: (
     args: InboxRecordId
-  ) => Effect.Effect<number, UnexpectedServerError>
+  ) => Effect.Effect<DeletedPulledMessagesSummary, UnexpectedServerError>
 
   deleteExpiredMessages: () => Effect.Effect<number, UnexpectedServerError>
 

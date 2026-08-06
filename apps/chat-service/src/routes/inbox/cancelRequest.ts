@@ -6,6 +6,7 @@ import {
 } from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect} from 'effect'
@@ -23,6 +24,9 @@ export const cancelRequest = HttpApiBuilder.handler(
   'cancelRequestApproval',
   (req) =>
     Effect.gen(function* (_) {
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
       const security = yield* _(CurrentSecurity)
 
       const {receiverInbox, senderInbox} = yield* _(
@@ -69,7 +73,7 @@ export const cancelRequest = HttpApiBuilder.handler(
         })
       )
 
-      yield* _(reportMessageSent(1))
+      yield* _(reportMessageSent(1, commonMetricAttributes))
       yield* _(reportRequestCanceled(1))
 
       return {
@@ -98,6 +102,9 @@ export const cancelRequestV2 = HttpApiBuilder.handler(
   'cancelRequestApprovalV2',
   (req) =>
     Effect.gen(function* (_) {
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
       yield* _(validateChallengeInBody(req.payload))
 
       const {receiverInbox, senderInbox} = yield* _(
@@ -144,7 +151,7 @@ export const cancelRequestV2 = HttpApiBuilder.handler(
         })
       )
 
-      yield* _(reportMessageSent(1))
+      yield* _(reportMessageSent(1, commonMetricAttributes))
       yield* _(reportRequestCanceled(1))
 
       return {

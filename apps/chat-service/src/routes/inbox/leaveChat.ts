@@ -2,6 +2,7 @@ import {HttpApiBuilder} from '@effect/platform/index'
 import {type CancelApprovalResponse} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {ChatApiSpecification} from '@vexl-next/rest-api/src/services/chat/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
@@ -71,7 +72,10 @@ export const leaveChat = HttpApiBuilder.handler(
           type: 'DELETE_CHAT',
         })
       )
-      yield* _(reportMessageSent(1))
+      const commonMetricAttributes = commonMetricAttributesFromHeaders(
+        req.headers
+      )
+      yield* _(reportMessageSent(1, commonMetricAttributes))
       yield* _(reportChatClosed(1))
 
       return {

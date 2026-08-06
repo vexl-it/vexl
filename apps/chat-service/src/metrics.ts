@@ -3,6 +3,7 @@
 import {SqlClient, SqlSchema} from '@effect/sql'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
+import {type CommonMetricAttributes} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {MetricsMessage} from '@vexl-next/server-utils/src/metrics/domain'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {reportMetricForked} from '@vexl-next/server-utils/src/metrics/reportMetricForked'
@@ -81,7 +82,8 @@ export const reportChatClosed = (
   )
 
 export const reportMessageSent = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -89,6 +91,7 @@ export const reportMessageSent = (
       value: number,
       timestamp: new Date(),
       name: MESSAGE_SENT,
+      attributes,
     })
   )
 

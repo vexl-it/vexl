@@ -19,6 +19,10 @@ import {
 import {type ServerCrypto} from '@vexl-next/server-utils/src/ServerCrypto'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
+import {
+  commonMetricAttributesFromHeaders,
+  type CommonMetricAttributes,
+} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {validateChallengeInBody} from '@vexl-next/server-utils/src/services/challenge/utils/validateChallengeInBody'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Array, Effect, Option, pipe, type ConfigError} from 'effect'
@@ -35,7 +39,8 @@ import {messageRecordToServerMessage} from './messageRecordToServerMessage'
 
 const sendMessage = (
   senderPublicKey: PublicKeyPemBase64,
-  message: MessageInBatch
+  message: MessageInBatch,
+  commonMetricAttributes: CommonMetricAttributes
 ): Effect.Effect<
   SendMessageResponse,
   | ReceiverInboxDoesNotExistError
@@ -83,7 +88,7 @@ const sendMessage = (
     } satisfies SendMessageResponse
   }).pipe(
     withInboxActionRedisLock(message.receiverPublicKey),
-    Effect.zipLeft(reportMessageSent(1))
+    Effect.zipLeft(reportMessageSent(1, commonMetricAttributes))
   ) // TODO lock two inboxes
 
 export const sendMessages = HttpApiBuilder.handler(
@@ -119,7 +124,11 @@ export const sendMessages = HttpApiBuilder.handler(
           const result = yield* _(
             oneMessage.messages,
             Array.map((message) =>
-              sendMessage(oneMessage.senderPublicKey, message)
+              sendMessage(
+                oneMessage.senderPublicKey,
+                message,
+                commonMetricAttributesFromHeaders(req.headers)
+              )
             ),
             Effect.all
           )

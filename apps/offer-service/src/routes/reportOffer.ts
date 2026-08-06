@@ -5,6 +5,7 @@ import {ReportOfferLimitReachedError} from '@vexl-next/rest-api/src/services/off
 import {OfferApiSpecification} from '@vexl-next/rest-api/src/services/offer/specification'
 import {withRedisLockFromEffect} from '@vexl-next/server-utils/src/RedisService'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {Effect, Option} from 'effect'
 import {reportLimitCountConfig} from '../configs'
 import {OfferDbService} from '../db/OfferDbService'
@@ -62,7 +63,12 @@ export const reportOffer = HttpApiBuilder.handler(
         ),
         500
       ),
-      Effect.zipLeft(reportOfferReported(req.payload.offerId)),
+      Effect.zipLeft(
+        reportOfferReported(
+          req.payload.offerId,
+          commonMetricAttributesFromHeaders(req.headers)
+        )
+      ),
       makeEndpointEffect
     )
 )

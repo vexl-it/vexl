@@ -80,10 +80,13 @@ export const createNewOffer = HttpApiBuilder.handler(
       withOfferAdminActionRedisLock(req.payload.adminId),
       Effect.withSpan('createNewOffer'),
       Effect.zipLeft(
-        reportOfferCreated(
-          req.payload.countryPrefix,
-          commonMetricAttributesFromHeaders(req.headers)
-        )
+        reportOfferCreated({
+          countryPrefix: req.payload.countryPrefix,
+          offerType: req.payload.offerType,
+          commonMetricAttributes: commonMetricAttributesFromHeaders(
+            req.headers
+          ),
+        })
       ),
       makeEndpointEffect
     )

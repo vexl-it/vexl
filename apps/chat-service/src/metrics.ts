@@ -22,7 +22,8 @@ const REQUEST_REJECTED = 'REQUEST_REJECTED'
 const CHAT_CLOSED = 'CHAT_CLOSED'
 
 export const reportRequestSent = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -30,6 +31,7 @@ export const reportRequestSent = (
       value: number,
       timestamp: new Date(),
       name: REQUEST_SENT,
+      attributes,
     })
   )
 

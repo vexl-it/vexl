@@ -119,7 +119,7 @@ export const requestApproval = HttpApiBuilder.handler(
       )
 
       yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestSent(1))
+      yield* _(reportRequestSent(1, commonMetricAttributes))
 
       return {
         ...messageRecordToServerMessage({
@@ -187,7 +187,7 @@ export const requestApprovalV2 = HttpApiBuilder.handler(
       )
 
       yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestSent(1))
+      yield* _(reportRequestSent(1, commonMetricAttributes))
 
       return {
         ...messageRecordToServerMessage({

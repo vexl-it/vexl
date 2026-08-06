@@ -36,7 +36,8 @@ export const reportRequestSent = (
   )
 
 export const reportRequestCanceled = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -44,6 +45,7 @@ export const reportRequestCanceled = (
       value: number,
       timestamp: new Date(),
       name: REQUEST_CANCEL,
+      attributes,
     })
   )
 

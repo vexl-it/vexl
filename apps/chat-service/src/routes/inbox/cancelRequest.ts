@@ -74,7 +74,7 @@ export const cancelRequest = HttpApiBuilder.handler(
       )
 
       yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestCanceled(1))
+      yield* _(reportRequestCanceled(1, commonMetricAttributes))
 
       return {
         ...messageRecordToServerMessage({
@@ -152,7 +152,7 @@ export const cancelRequestV2 = HttpApiBuilder.handler(
       )
 
       yield* _(reportMessageSent(1, commonMetricAttributes))
-      yield* _(reportRequestCanceled(1))
+      yield* _(reportRequestCanceled(1, commonMetricAttributes))
 
       return {
         ...messageRecordToServerMessage({

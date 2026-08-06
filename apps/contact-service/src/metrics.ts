@@ -15,6 +15,7 @@ const COUNT_OF_UNIQUE_CONTACTS = 'COUNT_OF_UNIQUE_CONTACTS' as const
 const COUNT_OF_CONNECTIONS = 'COUNT_OF_CONNECTIONS' as const
 const COUNT_OF_INACTIVE_USERS = 'COUNT_OF_INACTIVE_USERS' as const
 const USER_REFRESH = 'USER_REFRESH' as const
+const USER_REACTIVATED = 'USER_REACTIVATED' as const
 const NEW_APP_USER_NOTIFICATIONS_SENT =
   'NEW_APP_USER_NOTIFICATIONS_SENT' as const
 
@@ -83,6 +84,18 @@ export const reportUserRefresh = (
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_REFRESH,
+      attributes,
+    })
+  )
+
+export const reportUserReactivated = (
+  attributes: CommonMetricAttributes
+): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: USER_REACTIVATED,
       attributes,
     })
   )

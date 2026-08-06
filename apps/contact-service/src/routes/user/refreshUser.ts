@@ -9,7 +9,7 @@ import {Array, Effect} from 'effect'
 import {contactActiveWindowDaysConfig} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
-import {reportUserRefresh} from '../../metrics'
+import {reportUserReactivated, reportUserRefresh} from '../../metrics'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
 import {withUserActionRedisLock} from '../../utils/withUserActionRedisLock'
 import {notifyOthersAboutNewUserForked} from '../contacts/utils/notifyOthersAboutNewUser'
@@ -39,9 +39,10 @@ export const refreshUser = HttpApiBuilder.handler(
       Effect.bind('serverHash', (s) => serverHashPhoneNumber(s.hash)),
       Effect.flatMap((security) =>
         Effect.gen(function* (_) {
-          yield* _(
-            reportUserRefresh(commonMetricAttributesFromHeaders(req.headers))
+          const commonMetricAttributes = commonMetricAttributesFromHeaders(
+            req.headers
           )
+          yield* _(reportUserRefresh(commonMetricAttributes))
           const userDb = yield* _(UserDbService)
           const contactDb = yield* _(ContactDbService)
           const contactActiveWindowDays = yield* _(
@@ -76,6 +77,10 @@ export const refreshUser = HttpApiBuilder.handler(
               publicKeyV2: security.publicKeyV2,
             })
           )
+
+          if (wasInactiveBeforeRefresh) {
+            yield* _(reportUserReactivated(commonMetricAttributes))
+          }
 
           const importedHashes = wasInactiveBeforeRefresh
             ? yield* _(

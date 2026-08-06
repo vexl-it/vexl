@@ -34,6 +34,7 @@ These are referred to as *common* in the tables below.
 | Metric | Type | Attributes | Reported when |
 | --- | --- | --- | --- |
 | `USER_REFRESH` | Increment | common | User refresh endpoint is called (app foregrounded / periodic refresh). |
+| `USER_REACTIVATED` | Increment | common | An inactive user (per the contact active-window threshold) comes back — their refresh transitions them from inactive to active. |
 | `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, every 60 s; users that have imported at least one contact. |
 | `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, every 60 s; distinct imported contacts. |
 | `COUNT_OF_INACTIVE_USERS` | Total | — | Reported by the user-inactivity notification job; users whose `refreshed_at` is older than the inactivity threshold (or null). |

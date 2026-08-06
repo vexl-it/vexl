@@ -7,6 +7,7 @@ import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {type SendMessageRequest} from '@vexl-next/rest-api/src/services/chat/contracts'
 import {InboxDoesNotExistError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
+import {mockedReportMetric} from '@vexl-next/server-utils/src/tests/mockedMetricsClientService'
 import {
   clearTestAuthHeaders,
   setAuthHeaders,
@@ -98,11 +99,22 @@ describe('Delete pulled messages', () => {
           })
         )
 
+        mockedReportMetric.mockClear()
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Inboxes.deletePulledMessages({
             headers: commonHeaders,
             payload: yield* _(user1.addChallengeForMainInbox({})),
+          })
+        )
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'MESSAGE_FETCHED_AND_REMOVED',
+            value: messagesForUser1Before.messages.length,
+            attributes: expect.objectContaining({
+              messageAgeSeconds: expect.any(Number),
+            }),
           })
         )
 

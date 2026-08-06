@@ -14,6 +14,7 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -194,6 +195,7 @@ describe('Request approval', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.approveRequest({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'approval message' as MessageCypher,
@@ -244,6 +246,7 @@ describe('Request approval', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.approveRequest({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'approval message' as MessageCypher,

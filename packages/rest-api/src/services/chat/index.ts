@@ -162,7 +162,10 @@ export function api({
       ) =>
         addChallenge(requestApprovalV2Request).pipe(
           Effect.flatMap((body) =>
-            client.Inboxes.requestApprovalV2({payload: body})
+            client.Inboxes.requestApprovalV2({
+              payload: body,
+              headers: commonHeaders,
+            })
           )
         ),
       /** @deprecated use `cancelRequestApprovalV2` */
@@ -178,7 +181,10 @@ export function api({
       ) =>
         addChallenge(cancelApprovalV2Request).pipe(
           Effect.flatMap((body) =>
-            client.Inboxes.cancelRequestApprovalV2({payload: body})
+            client.Inboxes.cancelRequestApprovalV2({
+              payload: body,
+              headers: commonHeaders,
+            })
           )
         ),
       approveRequest: (
@@ -186,7 +192,10 @@ export function api({
       ) =>
         addChallenge(approveRequestRequest).pipe(
           Effect.flatMap((body) =>
-            client.Inboxes.approveRequest({payload: body})
+            client.Inboxes.approveRequest({
+              payload: body,
+              headers: commonHeaders,
+            })
           )
         ),
       deleteInboxes: (deleteInboxesRequest: DeleteInboxesRequest) =>
@@ -195,7 +204,9 @@ export function api({
         leaveChatRequest: RequestWithGeneratableChallenge<LeaveChatRequest>
       ) =>
         addChallenge(leaveChatRequest).pipe(
-          Effect.flatMap((body) => client.Inboxes.leaveChat({payload: body}))
+          Effect.flatMap((body) =>
+            client.Inboxes.leaveChat({payload: body, headers: commonHeaders})
+          )
         ),
       // ----------------------
       // 👇 Message
@@ -218,11 +229,15 @@ export function api({
           Effect.flatMap((body) =>
             client.Messages.sendMessage({
               payload: body,
+              headers: commonHeaders,
             })
           )
         ),
       sendMessages: (sendMessagesRequest: SendMessagesRequest) =>
-        client.Messages.sendMessages({payload: sendMessagesRequest}),
+        client.Messages.sendMessages({
+          payload: sendMessagesRequest,
+          headers: commonHeaders,
+        }),
       // ----------------------
       // 👇 Challenge
       // ----------------------

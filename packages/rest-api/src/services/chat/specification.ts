@@ -130,6 +130,7 @@ export const RequestApprovalV2Endpoint = HttpApiEndpoint.post(
   'requestApprovalV2',
   '/api/v2/inboxes/approval/request'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(RequestApprovalV2Request)
   .addSuccess(RequestApprovalResponse)
   .addError(ReceiverInboxDoesNotExistError, {status: 404})
@@ -156,6 +157,7 @@ export const CancelRequestApprovalV2Endpoint = HttpApiEndpoint.post(
   'cancelRequestApprovalV2',
   '/api/v2/inboxes/approval/cancel'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(CancelApprovalV2Request)
   .addSuccess(CancelApprovalResponse)
   .addError(RequestNotPendingError, {status: 400})
@@ -168,6 +170,7 @@ export const ApproveRequestEndpoint = HttpApiEndpoint.post(
   'approveRequest',
   '/api/v1/inboxes/approval/confirm'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(ApproveRequestRequest)
   .addSuccess(ApproveRequestResponse)
   .addError(InvalidChallengeError, {status: 401})
@@ -193,6 +196,7 @@ export const LeaveChatEndpoint = HttpApiEndpoint.post(
   'leaveChat',
   '/api/v1/inboxes/leave-chat'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(LeaveChatRequest)
   .addSuccess(LeaveChatResponse)
   .addError(InvalidChallengeError, {status: 401})
@@ -216,6 +220,7 @@ export const SendMessageEndpoint = HttpApiEndpoint.post(
   'sendMessage',
   '/api/v1/inboxes/messages'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(SendMessageRequest)
   .addSuccess(SendMessageResponse)
   .addError(ReceiverInboxDoesNotExistError, {status: 404})
@@ -230,6 +235,7 @@ export const SendMessagesEndpoint = HttpApiEndpoint.post(
   '/api/v1/inboxes/messages/batch'
 )
   .annotate(OpenApi.Deprecated, true)
+  .setHeaders(CommonHeaders)
   .setPayload(SendMessagesRequest)
   .addSuccess(SendMessagesResponse)
   .addError(ReceiverInboxDoesNotExistError, {status: 404})

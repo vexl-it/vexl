@@ -14,6 +14,7 @@ import {Effect, Schema} from 'effect'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -65,6 +66,7 @@ describe('Approve request', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.approveRequest({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'acceptMessage' as MessageCypher,
@@ -93,6 +95,7 @@ describe('Approve request', () => {
               yield* _(setAuthHeaders(user2.authHeaders))
               return yield* _(
                 client.Messages.sendMessage({
+                  headers: commonHeaders,
                   payload: yield* _(
                     user2.inbox1.addChallenge({
                       message: 'someOtherMessage' as MessageCypher,
@@ -108,6 +111,7 @@ describe('Approve request', () => {
               yield* _(setAuthHeaders(user1.authHeaders))
               return yield* _(
                 client.Messages.sendMessage({
+                  headers: commonHeaders,
                   payload: yield* _(
                     user1.addChallengeForMainInbox({
                       message: 'someOtherMessage2' as MessageCypher,
@@ -135,6 +139,7 @@ describe('Approve request', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.approveRequest({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'disapproveMessage' as MessageCypher,
@@ -163,6 +168,7 @@ describe('Approve request', () => {
               yield* _(setAuthHeaders(user2.authHeaders))
               return yield* _(
                 client.Messages.sendMessage({
+                  headers: commonHeaders,
                   payload: yield* _(
                     user2.inbox1.addChallenge({
                       message: 'someOtherMessage' as MessageCypher,
@@ -179,6 +185,7 @@ describe('Approve request', () => {
               yield* _(setAuthHeaders(user1.authHeaders))
               return yield* _(
                 client.Messages.sendMessage({
+                  headers: commonHeaders,
                   payload: yield* _(
                     user1.addChallengeForMainInbox({
                       message: 'someOtherMessage2' as MessageCypher,
@@ -227,6 +234,7 @@ describe('Approve request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const errorResponse = yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   message: 'acceptMessage' as MessageCypher,
@@ -250,6 +258,7 @@ describe('Approve request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const errorResponse = yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   message: 'acceptMessage' as MessageCypher,
@@ -273,6 +282,7 @@ describe('Approve request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const errorResponse = yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   message: 'acceptMessage' as MessageCypher,
@@ -296,6 +306,7 @@ describe('Approve request', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const errorResponse = yield* _(
             client.Inboxes.approveRequest({
+              headers: commonHeaders,
               payload: yield* _(
                 addChallengeForKey(
                   generatePrivateKey(),

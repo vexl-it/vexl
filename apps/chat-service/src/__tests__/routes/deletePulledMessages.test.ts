@@ -13,6 +13,7 @@ import {
 } from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -48,6 +49,7 @@ beforeAll(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,
@@ -91,6 +93,7 @@ describe('Delete pulled messages', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           })
         )

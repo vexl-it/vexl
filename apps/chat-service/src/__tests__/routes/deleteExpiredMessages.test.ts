@@ -7,6 +7,7 @@ import {Effect, Schema} from 'effect'
 import {clearExpiredMessagesTask} from '../../expiredMessagesCleanupWorker'
 import {NodeTestingApp} from '../utils/NodeTestingApp'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -42,6 +43,7 @@ beforeAll(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,
@@ -83,12 +85,14 @@ describe('clear expired messages', () => {
         yield* _(setAuthHeaders(user1.authHeaders))
         yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend,
           })
         )
 
         yield* _(
           client.Messages.sendMessage({
+            headers: commonHeaders,
             payload: messageToSend2,
           })
         )

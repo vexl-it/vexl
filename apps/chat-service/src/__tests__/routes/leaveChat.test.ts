@@ -13,6 +13,7 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect, Schema} from 'effect'
 import {addChallengeForKey} from '../utils/addChallengeForKey'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -56,6 +57,7 @@ beforeEach(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,
@@ -77,6 +79,7 @@ beforeEach(async () => {
 
       yield* _(
         client.Messages.sendMessage({
+          headers: commonHeaders,
           payload: messageToSend,
         })
       )
@@ -95,6 +98,7 @@ describe('Leave chat', () => {
         yield* _(setAuthHeaders(user2.authHeaders))
         yield* _(
           client.Inboxes.leaveChat({
+            headers: commonHeaders,
             payload: yield* _(
               user2.inbox1.addChallenge({
                 message: 'leaveMessage' as MessageCypher,
@@ -137,6 +141,7 @@ describe('Leave chat', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const failedResponse = yield* _(
             client.Inboxes.leaveChat({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   message: 'leaveMessage' as MessageCypher,
@@ -160,6 +165,7 @@ describe('Leave chat', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const failedResponse = yield* _(
             client.Inboxes.leaveChat({
+              headers: commonHeaders,
               payload: yield* _(
                 addChallengeForKey(
                   generatePrivateKey(),
@@ -186,6 +192,7 @@ describe('Leave chat', () => {
           yield* _(setAuthHeaders(user2.authHeaders))
           const failedResponse = yield* _(
             client.Inboxes.leaveChat({
+              headers: commonHeaders,
               payload: yield* _(
                 user2.inbox1.addChallenge({
                   message: 'leaveMessage' as MessageCypher,

@@ -7,6 +7,7 @@ import {setAuthHeaders} from '@vexl-next/server-utils/src/tests/nodeTestingApp'
 import {Effect} from 'effect'
 import {hashPublicKey} from '../../db/domain'
 import {
+  commonHeaders,
   createMockedUser,
   makeTestCommonAndSecurityHeaders,
   type MockedUser,
@@ -50,6 +51,7 @@ beforeEach(async () => {
       yield* _(setAuthHeaders(user2.authHeaders))
       yield* _(
         client.Inboxes.approveRequest({
+          headers: commonHeaders,
           payload: yield* _(
             user2.inbox1.addChallenge({
               message: 'someMessage2' as MessageCypher,
@@ -71,6 +73,7 @@ beforeEach(async () => {
 
       yield* _(
         client.Messages.sendMessage({
+          headers: commonHeaders,
           payload: messageToSend,
         })
       )

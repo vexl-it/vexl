@@ -1,5 +1,4 @@
 import {type SqlClient} from '@effect/sql/SqlClient'
-import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {
   type PublicKeyPemBase64,
   type PublicKeyV2,
@@ -8,6 +7,7 @@ import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
 import {
   ClubExpiredNotificationMqEntry,
   ClubFlaggedNotificationMqEntry,

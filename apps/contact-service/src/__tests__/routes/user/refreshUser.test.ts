@@ -381,6 +381,7 @@ describe('Refresh user', () => {
         `)
 
         yield* _(clearEnqueuedNotifications)
+        mockedReportMetric.mockClear()
         yield* _(setAuthHeaders(firstUserAuthHeaders))
         yield* _(
           app.User.refreshUser({
@@ -392,6 +393,19 @@ describe('Refresh user', () => {
           })
         )
         yield* _(Effect.sleep(200))
+
+        expect(mockedReportMetric).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'USER_REACTIVATED',
+            attributes: {
+              appVersion: '1.0.0',
+              appVersionCode: 1,
+              appPlatform: 'ANDROID',
+              appSource: 'unknown',
+              clientCountryPrefix: 'none',
+            },
+          })
+        )
 
         const notifications = yield* _(getEnqueuedNotifications)
         const newUserNotifications = notifications.filter(

@@ -1,10 +1,9 @@
 import {SqlClient} from '@effect/sql'
 import {generateClubUuid} from '@vexl-next/domain/src/general/clubs'
-import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
-
 import {NotFoundError} from '@vexl-next/domain/src/general/commonErrors'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
+import {UriString} from '@vexl-next/domain/src/utility/UriString.brand'
 import {InvalidChallengeError} from '@vexl-next/rest-api/src/challenges/contracts'
 import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {expectErrorResponse} from '@vexl-next/server-utils/src/tests/expectErrorResponse'
@@ -87,6 +86,7 @@ describe('Get club contacts', () => {
         // user1 joins the club
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink1.link.code,
               contactsImported: false,
@@ -115,6 +115,7 @@ describe('Get club contacts', () => {
         // user2 joins the club
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink2.link.code,
               contactsImported: false,
@@ -198,6 +199,7 @@ describe('Get club contacts', () => {
 
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink.link.code,
               contactsImported: false,
@@ -276,6 +278,7 @@ describe('Get club contacts', () => {
         // user1 joins the first club
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink1.link.code,
               contactsImported: false,
@@ -325,6 +328,7 @@ describe('Get club contacts', () => {
         // user2 joins the second club
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink2.link.code,
               contactsImported: false,
@@ -402,6 +406,7 @@ describe('Get club contacts', () => {
         // user1 joins the club
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink.link.code,
               contactsImported: false,
@@ -479,6 +484,7 @@ describe('Get club contacts', () => {
         // user1 joins the club
         yield* _(
           app.ClubsMember.joinClub({
+            headers: commonHeaders,
             payload: {
               code: inviteLink.link.code,
               contactsImported: false,

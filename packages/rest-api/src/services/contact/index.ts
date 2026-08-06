@@ -175,6 +175,7 @@ export function api({
           Effect.flatMap((body) =>
             client.ClubsMember.joinClub({
               payload: body,
+              headers: commonHeaders,
             })
           )
         ),

@@ -275,6 +275,7 @@ export const JoinClubEndpoint = HttpApiEndpoint.post(
   'joinClub',
   '/api/v1/clubs/member/join-club'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(JoinClubRequest)
   .addSuccess(JoinClubResponse)
   .addError(MemberAlreadyInClubError, {status: 400})

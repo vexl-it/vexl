@@ -12,6 +12,7 @@ import {
   InvalidChallengeError,
   type SignedChallenge,
 } from '@vexl-next/rest-api/src/challenges/contracts'
+import {CommonHeaders} from '@vexl-next/rest-api/src/commonHeaders'
 import {
   InviteCodeNotFoundError,
   UserIsNotModeratorError,
@@ -25,6 +26,10 @@ import {type ClubRecordId} from '../../../../db/ClubsDbService/domain'
 import {generateAndSignChallenge} from '../../../utils/generateAndSignChallenge'
 import {NodeTestingApp} from '../../../utils/NodeTestingApp'
 import {runPromiseInMockedEnvironment} from '../../../utils/runPromiseInMockedEnvironment'
+
+const testCommonHeaders = Schema.decodeSync(CommonHeaders)({
+  'user-agent': 'Vexl/1 (1.0.0) ANDROID',
+})
 
 const ADMIN_TOKEN = 'dev'
 const SOME_URL = Schema.decodeSync(UriString)('https://some.url')
@@ -120,6 +125,7 @@ describe('Deactivate link', () => {
 
         const errorResponse = yield* _(
           app.ClubsMember.joinClub({
+            headers: testCommonHeaders,
             payload: {
               code,
               notificationToken: Option.none(),

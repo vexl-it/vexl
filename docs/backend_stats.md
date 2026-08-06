@@ -37,7 +37,7 @@ These are referred to as *common* in the tables below.
 | `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, every 60 s; users that have imported at least one contact. |
 | `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, every 60 s; distinct imported contacts. ⚠️ Also (mis)used by the inactivity notification job to report the number of inactive users under this same name. |
 | `COUNT_OF_CONNECTIONS` | Total | — | Gauge, every 60 s; total user⇄contact connections. |
-| `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS` | Increment | `clubUUid`, `contactsImported` | User joins a club (attribute says whether they imported contacts). |
+| `USER_JOINED_CLUB_AND_IMPORTED_CONTACTS` | Increment | common + `clubUUid`, `contactsImported` | User joins a club (attribute says whether they imported contacts). |
 | `CLUB_REPORTED` | Increment | common | Club member reports a club. |
 | `CLUB_DEACTIVATED` | Increment | common | A report pushes a club over its report limit and it gets deactivated. |
 | `NEW_APP_USER_NOTIFICATIONS_SENT` | Increment | `trackingId`, `metricVersion` | Currently unused — reporter exists but has no callers. |

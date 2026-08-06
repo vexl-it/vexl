@@ -140,7 +140,10 @@ export function api({
       ) =>
         addChallenge(deletePulledMessagesRequest).pipe(
           Effect.flatMap((body) =>
-            client.Inboxes.deletePulledMessages({payload: body})
+            client.Inboxes.deletePulledMessages({
+              payload: body,
+              headers: commonHeaders,
+            })
           )
         ),
       blockInbox: (

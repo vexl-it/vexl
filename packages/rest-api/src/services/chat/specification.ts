@@ -96,6 +96,7 @@ export const DeletePulledMessagesEndpoint = HttpApiEndpoint.del(
   'deletePulledMessages',
   '/api/v1/inboxes/messages'
 )
+  .setHeaders(CommonHeaders)
   .setPayload(DeletePulledMessagesRequest)
   .addSuccess(DeletePulledMessagesResponse)
   .addError(InvalidChallengeError, {status: 401})

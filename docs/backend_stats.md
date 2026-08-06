@@ -67,7 +67,7 @@ These are referred to as *common* in the tables below.
 | `REQUEST_APPROVED` | Increment | common | Messaging request is approved. |
 | `REQUEST_REJECTED` | Increment (value 0) | common | Messaging request is disapproved. ⚠️ Reported with value 0, so it records the event but never increments. |
 | `CHAT_CLOSED` | Increment | common | User leaves a chat. |
-| `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | — | Client confirms pulled messages, which deletes them from the inbox. |
+| `MESSAGE_FETCHED_AND_REMOVED` | Increment (value = count) | common | Client confirms pulled messages, which deletes them from the inbox. |
 | `MESSAGE_EXPIRED` | Increment (value = count) | — | Expired-messages cleanup task deletes old undelivered messages. |
 | `TOTAL_INBOXES` | Total | — | Gauge, every 60 s; total inboxes. |
 | `TOTAL_INBOXES_WITH_UNREAD_MESSAGES` | Total | — | Gauge, every 60 s; inboxes that have undelivered messages waiting. |

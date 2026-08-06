@@ -106,7 +106,8 @@ export const reportMessageSent = (
   )
 
 export const reportMessageFetchedAndRemoved = (
-  number: number
+  number: number,
+  attributes: CommonMetricAttributes
 ): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
@@ -114,6 +115,7 @@ export const reportMessageFetchedAndRemoved = (
       uuid: generateUuid(),
       timestamp: new Date(),
       name: MESSAGE_FETCHED_AND_REMOVED,
+      attributes,
     })
   )
 

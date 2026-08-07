@@ -2,8 +2,13 @@ import {SqlSchema} from '@effect/sql'
 import {PgClient} from '@effect/sql-pg'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
-import {Effect, flow, Schema} from 'effect'
+import {Array, Effect, Schema} from 'effect'
 import {UserRecordId} from '../domain'
+
+// Keeps each UPDATE well under the ~65k bind-parameter limit of the
+// postgres protocol - the first run after deploy can select every
+// long-inactive user at once.
+const IDS_PER_QUERY = 5000
 
 export const UpdateInactivityNotificationSentParams = Schema.Struct({
   ids: Schema.Array(UserRecordId),
@@ -33,14 +38,18 @@ export const createUpdateInactivityNotificationSent = Effect.gen(function* (_) {
     `,
   })
 
-  return flow(
-    query,
-    Effect.catchAll((e) =>
-      Effect.zipRight(
-        Effect.logError('Error in updateInactivityNotificationSent', e),
-        Effect.fail(new UnexpectedServerError({status: 500}))
-      )
-    ),
-    Effect.withSpan('updateInactivityNotificationSent query')
-  )
+  return (params: UpdateInactivityNotificationSentParams) =>
+    Effect.forEach(
+      Array.chunksOf(params.ids, IDS_PER_QUERY),
+      (ids) => query({...params, ids}),
+      {discard: true}
+    ).pipe(
+      Effect.catchAll((e) =>
+        Effect.zipRight(
+          Effect.logError('Error in updateInactivityNotificationSent', e),
+          Effect.fail(new UnexpectedServerError({status: 500}))
+        )
+      ),
+      Effect.withSpan('updateInactivityNotificationSent query')
+    )
 })

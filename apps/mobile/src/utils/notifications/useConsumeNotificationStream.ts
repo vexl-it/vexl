@@ -11,6 +11,7 @@ import {
   type NotificationStreamMessage,
   Rpcs,
   type StreamOnlyChatMessage,
+  type UserInactivityNoticeMessage,
 } from '@vexl-next/rest-api/src/services/notification/Rpcs'
 import {
   Array,
@@ -264,32 +265,44 @@ const processClubExpiredOrFlaggedNotificationActionAtom = atom(
     })
 )
 
-const processUserInactivityNotificationActionAtom = atom(null, (get, set) =>
-  Effect.gen(function* (_) {
-    const {t} = get(translationAtom)
-    const notificationPreferences = get(notificationPreferencesAtom)
+const processUserInactivityNotificationActionAtom = atom(
+  null,
+  (get, set, message: UserInactivityNoticeMessage) =>
+    Effect.gen(function* (_) {
+      const {t} = get(translationAtom)
+      const notificationPreferences = get(notificationPreferencesAtom)
 
-    if (!notificationPreferences.inactivityWarnings) {
-      yield* _(
-        Effect.log(
-          'Received inactivity reminder notification but INACTIVITY_REMINDER notifications are disabled. Not showing notification.'
+      if (!notificationPreferences.inactivityWarnings) {
+        yield* _(
+          Effect.log(
+            'Received inactivity reminder notification but INACTIVITY_REMINDER notifications are disabled. Not showing notification.'
+          )
         )
-      )
-      return true
-    }
+        return true
+      }
 
-    yield* _(
-      Effect.promise(async () => {
-        void displayLocalNotification({
-          channelId: await getDefaultChannel(),
-          content: {
-            title: t(`notifications.INACTIVITY_REMINDER.title`),
-            body: t(`notifications.INACTIVITY_REMINDER.body`),
-          },
+      yield* _(
+        Effect.promise(async () => {
+          void displayLocalNotification({
+            channelId: await getDefaultChannel(),
+            content:
+              message.variant === 'OFFERS_DEACTIVATED'
+                ? {
+                    title: t(
+                      `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title`
+                    ),
+                    body: t(
+                      `notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body`
+                    ),
+                  }
+                : {
+                    title: t(`notifications.INACTIVITY_REMINDER.title`),
+                    body: t(`notifications.INACTIVITY_REMINDER.body`),
+                  },
+          })
         })
-      })
-    )
-  })
+      )
+    })
 )
 
 const processUserLoginOnDifferentDeviceNotificationActionAtom = atom(
@@ -361,8 +374,8 @@ const processNewStreamNotificationActionAtom = atom(
           Match.tag('ClubFlaggedNoticeMessage', (m) =>
             set(processClubExpiredOrFlaggedNotificationActionAtom, m)
           ),
-          Match.tag('UserInactivityNoticeMessage', () =>
-            set(processUserInactivityNotificationActionAtom)
+          Match.tag('UserInactivityNoticeMessage', (m) =>
+            set(processUserInactivityNotificationActionAtom, m)
           ),
           Match.tag('UserLoginOnDifferentDeviceNoticeMessage', () =>
             set(processUserLoginOnDifferentDeviceNotificationActionAtom)

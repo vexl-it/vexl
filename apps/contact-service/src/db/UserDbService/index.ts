@@ -15,10 +15,6 @@ import {
 } from './queries/createClearVexlNotificationTokenHeldByOtherUsers'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
 import {
-  createFindFirebaseTokensOfInactiveUsers,
-  type FindFirebaseTokensOfInactiveUsersResult,
-} from './queries/createFindFirebaseTokensOfInactiveUsers'
-import {
   createFindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContact,
   type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactParams,
   type FindFirebaseTokensOfUsersWhoHaveHashAsSecondLevelContactResult,
@@ -35,13 +31,14 @@ import {
 import {createFindUserByHash} from './queries/createFindUserByHash'
 import {createFindUserbyPublicKeyAndHash} from './queries/createFindUserByPublicKeyAndHash'
 import {
+  createFindUsersToNotifyAboutInactivity,
+  type FindUsersToNotifyAboutInactivityParams,
+  type UserToNotifyAboutInactivity,
+} from './queries/createFindUsersToNotifyAboutInactivity'
+import {
   createFindVexlNotificationTokensForNewContentNotification,
   type NewContentNotificationResults,
 } from './queries/createFindVexlNotificationTokensForNewContentNotification'
-import {
-  createFindVexlNotificationTokensOfInactiveUsers,
-  type InactiveUsersNotificationResults,
-} from './queries/createFindVexlNotificationTokensOfInactiveUsers'
 import {
   createFindVexlNotificationTokensOfUsersWhoDirectlyImportedHash,
   type FindVexlNotificationTokensOfUsersWhoDirectlyImportedHashParams,
@@ -64,6 +61,10 @@ import {
   createUpdateExpoToken,
   type UpdateExpoTokenParams,
 } from './queries/createUpdateExpoToken'
+import {
+  createUpdateInactivityNotificationSent,
+  type UpdateInactivityNotificationSentParams,
+} from './queries/createUpdateInactivityNotificationSent'
 import {createUpdateInvalidateExpoToken} from './queries/createUpdateInvalidateExpoToken'
 import {createUpdateInvalidateFirebaseToken} from './queries/createUpdateInvalidateFirebaseToken'
 import {
@@ -129,19 +130,16 @@ export interface UserDbOperations {
     UnexpectedServerError
   >
 
-  findFirebaseTokensOfInactiveUsers: (
-    beforeRefreshetAt: Date
+  findUsersToNotifyAboutInactivity: (
+    args: FindUsersToNotifyAboutInactivityParams
   ) => Effect.Effect<
-    readonly FindFirebaseTokensOfInactiveUsersResult[],
+    readonly UserToNotifyAboutInactivity[],
     UnexpectedServerError
   >
 
-  findVexlNotificationTokensOfInactiveUsers: (
-    beforeRefreshetAt: Date
-  ) => Effect.Effect<
-    readonly InactiveUsersNotificationResults[],
-    UnexpectedServerError
-  >
+  updateInactivityNotificationSent: (
+    args: UpdateInactivityNotificationSentParams
+  ) => Effect.Effect<void, UnexpectedServerError>
 
   findFirebaseTokensForNewContentNotification: (
     beforeRefreshetAt: Date
@@ -236,12 +234,12 @@ export class UserDbService extends Context.Tag('UserDbService')<
           createFindVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact
         )
 
-      const findFirebaseTokensOfInactiveUsers = yield* _(
-        createFindFirebaseTokensOfInactiveUsers
+      const findUsersToNotifyAboutInactivity = yield* _(
+        createFindUsersToNotifyAboutInactivity
       )
 
-      const findVexlNotificationTokensOfInactiveUsers = yield* _(
-        createFindVexlNotificationTokensOfInactiveUsers
+      const updateInactivityNotificationSent = yield* _(
+        createUpdateInactivityNotificationSent
       )
 
       const findFirebaseTokensForNewContentNotification = yield* _(
@@ -274,8 +272,8 @@ export class UserDbService extends Context.Tag('UserDbService')<
         findFirebaseTokensOfUsersWhoHaveHAshAsSecondLevelContact,
         findVexlNotificationTokensOfUsersWhoDirectlyImportedHash,
         findVexlNotificationTokensOfUsersWhoHaveHashAsSecondLevelContact,
-        findFirebaseTokensOfInactiveUsers,
-        findVexlNotificationTokensOfInactiveUsers,
+        findUsersToNotifyAboutInactivity,
+        updateInactivityNotificationSent,
         findFirebaseTokensForNewContentNotification,
         findVexlNotificationTokensForNewContentNotification,
         updateUserInitialImportDone,

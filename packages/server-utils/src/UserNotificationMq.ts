@@ -1,5 +1,6 @@
 import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {VexlProductNotification} from '@vexl-next/domain/src/general/vexlProductNotification'
 import {ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
@@ -57,6 +58,10 @@ export class UserInactivityNotificationMqEntry extends Schema.TaggedClass<UserIn
   notificationToken: Schema.NullOr(ExpoNotificationToken),
   // todo #2142: remove nullability after moving to vexlNotificationToken
   token: Schema.NullOr(VexlNotificationToken),
+  // Optional so entries enqueued before this field existed still decode
+  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
+    default: () => 'FIRST',
+  }),
 }) {}
 
 export class UserLoginOnDifferentDeviceNotificationMqEntry extends Schema.TaggedClass<UserLoginOnDifferentDeviceNotificationMqEntry>(

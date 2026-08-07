@@ -4,6 +4,7 @@ import {PublicKeyPemBase64} from '@vexl-next/cryptography/src/KeyHolder/brands'
 import {ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
 import {StreamOnlyMessageCypher} from '@vexl-next/domain/src/general/messaging'
+import {UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {NotificationCypher} from '@vexl-next/domain/src/general/notifications/NotificationCypher.brand'
 import {
   VexlNotificationToken,
@@ -90,6 +91,10 @@ export class UserInactivityNoticeMessage extends Schema.TaggedClass<UserInactivi
 )('UserInactivityNoticeMessage', {
   sentAt: UnixMilliseconds,
   trackingId: NotificationTrackingId,
+  // Optional so messages sent by older backends still decode
+  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
+    default: () => 'FIRST',
+  }),
 }) {}
 
 export class UserLoginOnDifferentDeviceNoticeMessage extends Schema.TaggedClass<UserLoginOnDifferentDeviceNoticeMessage>(

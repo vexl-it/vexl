@@ -5,6 +5,7 @@ import {
 } from '@vexl-next/cryptography/src/KeyHolder'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
 import {UnexpectedServerError} from '@vexl-next/domain/src/general/commonErrors'
+import {type UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {type VexlNotificationToken} from '@vexl-next/domain/src/general/notifications/VexlNotificationToken'
 import {type ExpoNotificationToken} from '@vexl-next/domain/src/utility/ExpoNotificationToken.brand'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
@@ -25,6 +26,8 @@ import {Array, Context, Effect, flow, Layer, Option, pipe} from 'effect/index'
 import {
   contactPublicImportCountThresholdConfig,
   inactivityNotificationAfterDaysConfig,
+  inactivityNotificationFollowUpAfterDaysConfig,
+  inactivityNotificationRecurringIntervalDaysConfig,
   newContentNotificationAfterConfig,
 } from '../configs'
 import {ClubMembersDbService} from '../db/ClubMemberDbService'
@@ -32,6 +35,7 @@ import {ClubsDbService} from '../db/ClubsDbService'
 import {type ClubRecordId} from '../db/ClubsDbService/domain'
 import {UserDbService} from '../db/UserDbService'
 import {NotificationsTokensEquivalence} from '../db/UserDbService/domain'
+import {type UserToNotifyAboutInactivity} from '../db/UserDbService/queries/createFindUsersToNotifyAboutInactivity'
 import {queryAndReportNumberOfInactiveUsers} from '../metrics'
 import {type ServerHashedNumber} from '../utils/serverHashContact'
 
@@ -307,65 +311,71 @@ export class UserNotificationService extends Context.Tag(
             const inactivityNotificationAfterDays = yield* _(
               inactivityNotificationAfterDaysConfig
             )
+            const followUpAfterDays = yield* _(
+              inactivityNotificationFollowUpAfterDaysConfig
+            )
+            const recurringIntervalDays = yield* _(
+              inactivityNotificationRecurringIntervalDaysConfig
+            )
 
-            const notifyBeforeDate = dayjs()
-              .subtract(inactivityNotificationAfterDays, 'day')
-              .toDate()
+            const now = dayjs()
+            const usersToNotify = yield* _(
+              userDbService.findUsersToNotifyAboutInactivity({
+                firstNotificationBefore: now
+                  .subtract(inactivityNotificationAfterDays, 'day')
+                  .toDate(),
+                followUpDueBefore: now
+                  .subtract(followUpAfterDays, 'day')
+                  .toDate(),
+                recurringDueBefore: now
+                  .subtract(recurringIntervalDays, 'day')
+                  .toDate(),
+              })
+            )
 
-            // todo #2142 - remove after moving to vexlNotificationToken
-            const inactivityNotifications = yield* _(
-              userDbService.findFirebaseTokensOfInactiveUsers(notifyBeforeDate),
-              Effect.map(
-                Array.filter(
-                  (token) =>
-                    Option.isSome(token.expoToken) ||
-                    Option.isSome(token.vexlNotificationToken)
-                )
-              ),
-              Effect.map(
-                flow(
-                  Array.map(
-                    (one) =>
-                      new UserInactivityNotificationMqEntry({
-                        token: Option.getOrNull(one.vexlNotificationToken),
-                        notificationToken: Option.getOrNull(one.expoToken),
-                      })
-                  )
-                )
+            // Users inactive for longer than the first-notification window
+            // get the follow-up wording right away - their offers are no
+            // longer active, so the first wording would be wrong.
+            const firstWordingCutoff = now.subtract(
+              inactivityNotificationAfterDays + followUpAfterDays,
+              'day'
+            )
+            const [followUpUsers, firstTimeUsers] = pipe(
+              usersToNotify,
+              Array.partition(
+                (user) =>
+                  user.numberOfInactivityNotificationsSent === 0 &&
+                  dayjs(user.refreshedAt).isAfter(firstWordingCutoff)
               )
             )
 
-            // todo #2142 - uncomment and use this after moving to vexlNotificationToken
-            /**
-             const inactivityNotifications = yield* _(
-              userDbService.findVexlNotificationTokensOfInactiveUsers(
-                notifyBeforeDate
-              ),
-              Effect.map(
-                flow(
-                  Array.filterMap((r) =>
-                    Option.fromNullable(r.vexlNotificationToken)
-                  ),
-                  Array.map(
-                    (token) => new UserInactivityNotificationMqEntry({token})
-                  )
-                )
-              )
-            )
-             */
-
-            if (Array.isEmptyReadonlyArray(inactivityNotifications)) {
+            if (Array.isEmptyReadonlyArray(usersToNotify)) {
               yield* _(Effect.log('No inactive users to notify'))
             }
 
             yield* _(
               Effect.log('Notifying inactive users', {
-                count: inactivityNotifications.length,
+                firstNotificationCount: firstTimeUsers.length,
+                followUpNotificationCount: followUpUsers.length,
               })
             )
 
+            const toMqEntry =
+              (variant: UserInactivityNotificationVariant) =>
+              (user: UserToNotifyAboutInactivity) =>
+                new UserInactivityNotificationMqEntry({
+                  token: Option.getOrNull(user.vexlNotificationToken),
+                  notificationToken: Option.getOrNull(user.expoToken),
+                  variant,
+                })
+
             yield* _(
-              inactivityNotifications,
+              pipe(
+                Array.map(firstTimeUsers, toMqEntry('FIRST')),
+                Array.appendAll(
+                  Array.map(followUpUsers, toMqEntry('OFFERS_DEACTIVATED'))
+                )
+              ),
               Array.map((one) =>
                 pipe(
                   enqueueUserNotification(one, {delay: 0}),
@@ -381,10 +391,29 @@ export class UserNotificationService extends Context.Tag(
               Effect.withSpan(
                 'Enqueue inactivity notifications via VexlNotificationToken',
                 {
-                  attributes: {count: inactivityNotifications.length},
+                  attributes: {count: usersToNotify.length},
                 }
               )
             )
+
+            if (Array.isNonEmptyReadonlyArray(firstTimeUsers)) {
+              yield* _(
+                userDbService.updateInactivityNotificationSent({
+                  ids: Array.map(firstTimeUsers, (user) => user.id),
+                  sentAt: now.toDate(),
+                  variant: 'FIRST',
+                })
+              )
+            }
+            if (Array.isNonEmptyReadonlyArray(followUpUsers)) {
+              yield* _(
+                userDbService.updateInactivityNotificationSent({
+                  ids: Array.map(followUpUsers, (user) => user.id),
+                  sentAt: now.toDate(),
+                  variant: 'OFFERS_DEACTIVATED',
+                })
+              )
+            }
 
             yield* _(Effect.logInfo('Reporting number of inactive users'))
             yield* _(queryAndReportNumberOfInactiveUsers)

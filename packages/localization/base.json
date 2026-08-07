@@ -676,6 +676,8 @@
   "notifications.BLOCK_CHAT.title": "You've been blocked",
   "notifications.BLOCK_CHAT.body": "You won't be able to message them anymore.",
   "notifications.INACTIVITY_REMINDER.title": "Long time no see!",
+  "notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.title": "Long time no see!",
+  "notifications.INACTIVITY_REMINDER_OFFERS_DEACTIVATED.body": "Your offers are no longer active - open Vexl to reactivate them automatically.",
   "notifications.preferences.marketing.title": "Product updates",
   "notifications.INACTIVITY_REMINDER.body": "Your offers are still live - open Vexl to keep them active.",
   "notifications.CANCEL_REQUEST_MESSAGING.title": "{{them}} cancelled their message",

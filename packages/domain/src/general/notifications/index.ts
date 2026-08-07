@@ -100,10 +100,21 @@ export class AdmitedToClubNetworkNotificationData extends Schema.TaggedClass<Adm
     Schema.encodeSync(AdmitedToClubNetworkNotificationData)(this)
 }
 
+export const UserInactivityNotificationVariant = Schema.Literal(
+  'FIRST',
+  'OFFERS_DEACTIVATED'
+)
+export type UserInactivityNotificationVariant =
+  typeof UserInactivityNotificationVariant.Type
+
 export class UserInactivityNotificationData extends Schema.TaggedClass<UserInactivityNotificationData>(
   'UserInactivityNotificationData'
 )('UserInactivityNotificationData', {
   trackingId: Schema.optionalWith(NotificationTrackingId, {as: 'Option'}),
+  // Optional so notifications sent by older backends still decode
+  variant: Schema.optionalWith(UserInactivityNotificationVariant, {
+    default: () => 'FIRST',
+  }),
 }) {
   toData = (): typeof UserInactivityNotificationData.Encoded =>
     Schema.encodeSync(UserInactivityNotificationData)(this)

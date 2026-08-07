@@ -5,7 +5,7 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
-import {Array, Effect} from 'effect'
+import {Array, Effect, Option} from 'effect'
 import {contactActiveWindowDaysConfig} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
@@ -64,6 +64,16 @@ export const refreshUser = HttpApiBuilder.handler(
             refreshedAt: existingUser.refreshedAt,
             activeWithinDays: contactActiveWindowDays,
           })
+
+          if (Option.isSome(req.payload.vexlNotificationToken)) {
+            yield* _(
+              userDb.clearVexlNotificationTokenHeldByOtherUsers({
+                publicKey: security.publicKey,
+                hash: security.serverHash,
+                token: req.payload.vexlNotificationToken.value,
+              })
+            )
+          }
 
           yield* _(
             userDb.updateRefreshUser({

@@ -3,6 +3,7 @@ import {CurrentSecurity} from '@vexl-next/rest-api/src/apiSecurity'
 import {UserNotFoundError} from '@vexl-next/rest-api/src/services/contact/contracts'
 import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/specification'
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
+import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
 import {Effect, Option} from 'effect'
 import {UserDbService} from '../../db/UserDbService'
 import {serverHashPhoneNumber} from '../../utils/serverHashContact'
@@ -29,13 +30,24 @@ export const updateNotificationToken = HttpApiBuilder.handler(
         )
       )
 
+      const expoToken = Option.fromNullable(req.payload.expoToken)
+      if (Option.isSome(expoToken)) {
+        yield* _(
+          userDb.clearExpoTokenHeldByOtherUsers({
+            publicKey: security.publicKey,
+            hash: security.serverHash,
+            token: expoToken.value,
+          })
+        )
+      }
+
       yield* _(
         userDb.updateExpoToken({
           publicKey: security.publicKey,
           hash: security.serverHash,
-          expoToken: Option.fromNullable(req.payload.expoToken),
+          expoToken,
         })
       )
       return {}
-    }).pipe(makeEndpointEffect)
+    }).pipe(withDbTransaction, makeEndpointEffect)
 )

@@ -5,6 +5,14 @@ import {type FcmToken} from '@vexl-next/domain/src/utility/FcmToken.brand'
 import {Context, Effect, Layer, type Option} from 'effect'
 import {type ServerHashedNumber} from '../../utils/serverHashContact'
 import {type UserRecord} from './domain'
+import {
+  createClearExpoTokenHeldByOtherUsers,
+  type ClearExpoTokenHeldByOtherUsersParams,
+} from './queries/createClearExpoTokenHeldByOtherUsers'
+import {
+  createClearVexlNotificationTokenHeldByOtherUsers,
+  type ClearVexlNotificationTokenHeldByOtherUsersParams,
+} from './queries/createClearVexlNotificationTokenHeldByOtherUsers'
 import {createDeleteUserByPublicKeyAndHash} from './queries/createDeleteUserByPublicKeyAndHash'
 import {
   createFindFirebaseTokensOfInactiveUsers,
@@ -72,6 +80,14 @@ import {
 } from './queries/createUpdateUserInitialImportDone'
 
 export interface UserDbOperations {
+  clearExpoTokenHeldByOtherUsers: (
+    args: ClearExpoTokenHeldByOtherUsersParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
+  clearVexlNotificationTokenHeldByOtherUsers: (
+    args: ClearVexlNotificationTokenHeldByOtherUsersParams
+  ) => Effect.Effect<void, UnexpectedServerError>
+
   insertUser: (
     args: CreateUserParams
   ) => Effect.Effect<UserRecord, UnexpectedServerError>
@@ -182,6 +198,12 @@ export class UserDbService extends Context.Tag('UserDbService')<
   static readonly Live = Layer.effect(
     UserDbService,
     Effect.gen(function* (_) {
+      const clearExpoTokenHeldByOtherUsers = yield* _(
+        createClearExpoTokenHeldByOtherUsers
+      )
+      const clearVexlNotificationTokenHeldByOtherUsers = yield* _(
+        createClearVexlNotificationTokenHeldByOtherUsers
+      )
       const insertUser = yield* _(createInsertUser)
       const findUserByHash = yield* _(createFindUserByHash)
       const findUserByPublicKeyAndHash = yield* _(
@@ -238,6 +260,8 @@ export class UserDbService extends Context.Tag('UserDbService')<
       const updatePublicKeyV2 = yield* _(createUpdatePublicKeyV2)
 
       return {
+        clearExpoTokenHeldByOtherUsers,
+        clearVexlNotificationTokenHeldByOtherUsers,
         insertUser,
         findUserByHash,
         findUserByPublicKeyAndHash,

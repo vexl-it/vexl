@@ -29,6 +29,7 @@ import drop_redundant_user_contact_indexes from './migrations/0024_drop_redundan
 import bump_zero_club_report_limits from './migrations/0025_bump_zero_club_report_limits'
 import add_club_made_inactive_reason from './migrations/0026_add_club_made_inactive_reason'
 import add_club_member_count_change_table from './migrations/0027_add_club_member_count_change_table'
+import remove_duplicate_users_by_hash_and_add_unique_constraint from './migrations/0028_remove_duplicate_users_by_hash_and_add_unique_constraint'
 
 const migrations = [
   {
@@ -166,6 +167,11 @@ const migrations = [
     id: 27,
     name: 'add_club_member_count_change_table',
     migrationEffect: add_club_member_count_change_table,
+  },
+  {
+    id: 28,
+    name: 'remove_duplicate_users_by_hash_and_add_unique_constraint',
+    migrationEffect: remove_duplicate_users_by_hash_and_add_unique_constraint,
   },
 ] as const
 

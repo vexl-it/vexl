@@ -5,8 +5,12 @@ import {ContactApiSpecification} from '@vexl-next/rest-api/src/services/contact/
 import {makeEndpointEffect} from '@vexl-next/server-utils/src/makeEndpointEffect'
 import {commonMetricAttributesFromHeaders} from '@vexl-next/server-utils/src/metrics/commonMetricAttributesFromHeaders'
 import {withDbTransaction} from '@vexl-next/server-utils/src/withDbTransaction'
+import dayjs from 'dayjs'
 import {Array, Effect, Option} from 'effect'
-import {contactActiveWindowDaysConfig} from '../../configs'
+import {
+  contactActiveWindowDaysConfig,
+  contactConsideredAsExpiredForMetricsAfterDaysConfig,
+} from '../../configs'
 import {ContactDbService} from '../../db/ContactDbService'
 import {UserDbService} from '../../db/UserDbService'
 import {reportUserReactivated, reportUserRefresh} from '../../metrics'
@@ -65,6 +69,18 @@ export const refreshUser = HttpApiBuilder.handler(
             activeWithinDays: contactActiveWindowDays,
           })
 
+          const expiredForMetricsAfterDays = yield* _(
+            contactConsideredAsExpiredForMetricsAfterDaysConfig
+          )
+          const daysInactive = dayjs().diff(existingUser.refreshedAt, 'day')
+          const remindersReceived =
+            existingUser.numberOfInactivityNotificationsSent
+          // Reminded users count as reactivated even below the metrics
+          // window - reminders start earlier and those returns would
+          // otherwise be invisible.
+          const isReactivatedForMetrics =
+            remindersReceived > 0 || daysInactive >= expiredForMetricsAfterDays
+
           if (Option.isSome(req.payload.vexlNotificationToken)) {
             yield* _(
               userDb.clearVexlNotificationTokenHeldByOtherUsers({
@@ -88,8 +104,21 @@ export const refreshUser = HttpApiBuilder.handler(
             })
           )
 
-          if (wasInactiveBeforeRefresh) {
-            yield* _(reportUserReactivated(commonMetricAttributes))
+          if (isReactivatedForMetrics) {
+            yield* _(
+              reportUserReactivated({
+                commonMetricAttributes,
+                daysInactive,
+                remindersReceived,
+                daysSinceLastReminder: Option.match(
+                  existingUser.lastInactivityNotificationSentAt,
+                  {
+                    onNone: () => 'none',
+                    onSome: (sentAt) => dayjs().diff(sentAt, 'day'),
+                  }
+                ),
+              })
+            )
           }
 
           const importedHashes = wasInactiveBeforeRefresh

@@ -34,10 +34,12 @@ These are referred to as *common* in the tables below.
 | --- | --- | --- | --- |
 | `USER_LOGGED_IN` | Increment | common + `countryPrefix`, `numberExists` | User registers with the contact service right after login. `numberExists` is true when a user with the same phone number already existed (login from a new device / re-login without account deletion). |
 | `USER_REFRESH` | Increment | common | User refresh endpoint is called (app foregrounded / periodic refresh). |
-| `USER_REACTIVATED` | Increment | common | An inactive user (per the contact active-window threshold) comes back — their refresh transitions them from inactive to active. |
+| `USER_REACTIVATED` | Increment | common + `daysInactive` (int), `remindersReceived` (int), `daysSinceLastReminder` (int or `none`) | A returning user refreshes after being inactive longer than `CONTACT_CONSIDERED_AS_EXPIRED_FOR_METRICS_AFTER_DAYS` (default 30), or after having received at least one inactivity reminder (so reminder-driven returns below the window are counted too). |
 | `COUNT_OF_UNIQUE_USERS` | Total | — | Gauge, every 60 s; users that have imported at least one contact. |
 | `COUNT_OF_UNIQUE_CONTACTS` | Total | — | Gauge, every 60 s; distinct imported contacts. |
 | `COUNT_OF_INACTIVE_USERS` | Total | — | Reported by the user-inactivity notification job; users whose `refreshed_at` is older than the inactivity threshold (or null). |
+| `COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT` | Total | `remindersSent` (int) | Reported alongside `COUNT_OF_INACTIVE_USERS`; inactive users grouped by how many inactivity reminders they have received so far. Rows from one report share a timestamp. |
+| `INACTIVITY_NOTIFICATION_SENT` | Increment (value = user count) | `variant` (`FIRST`/`OFFERS_DEACTIVATED`), `notificationOrdinal` (int — which reminder in a row this was) | The user-inactivity notification job enqueued reminders; one message per (variant, ordinal) group. |
 | `COUNT_OF_ACTIVE_USERS` | Total | — | Daily scheduled task (`REPORT_ACTIVE_USERS_CRON`, default 00:30 UTC); users refreshed within the active window (`ACTIVE_USER_WINDOW_DAYS`, default 30 days). |
 | `COUNT_OF_ACTIVE_USERS_BY_COUNTRY` | Total | `countryPrefix` (`none` if unknown) | Reported alongside `COUNT_OF_ACTIVE_USERS`; active users grouped by their phone country prefix. Rows from one report share a timestamp, and countries with no active users are omitted. |
 | `COUNT_OF_CONNECTIONS` | Total | — | Gauge, every 60 s; total user⇄contact connections. |

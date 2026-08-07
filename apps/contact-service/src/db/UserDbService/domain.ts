@@ -52,6 +52,13 @@ export class UserRecord extends Schema.Class<UserRecord>('UserRecord')({
     as: 'Option',
     nullable: true,
   }),
+  lastInactivityNotificationSentAt: Schema.optionalWith(Schema.DateFromSelf, {
+    as: 'Option',
+    nullable: true,
+  }),
+  numberOfInactivityNotificationsSent: Schema.optionalWith(Schema.Number, {
+    default: () => 0,
+  }),
 }) {}
 
 export const NotificationTokens = Schema.Struct({

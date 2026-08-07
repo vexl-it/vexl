@@ -2,6 +2,7 @@ import {SqlClient, SqlSchema} from '@effect/sql'
 import {CountryPrefix} from '@vexl-next/domain/src/general/CountryPrefix.brand'
 import {type NotificationTrackingId} from '@vexl-next/domain/src/general/NotificationTrackingId.brand'
 import {type ClubUuid} from '@vexl-next/domain/src/general/clubs'
+import {type UserInactivityNotificationVariant} from '@vexl-next/domain/src/general/notifications'
 import {generateUuid} from '@vexl-next/domain/src/utility/Uuid.brand'
 import {shouldDisableMetrics} from '@vexl-next/server-utils/src/commonConfigs'
 import {type MetricsClientService} from '@vexl-next/server-utils/src/metrics/MetricsClientService'
@@ -21,6 +22,9 @@ const COUNT_OF_INACTIVE_USERS = 'COUNT_OF_INACTIVE_USERS' as const
 const COUNT_OF_ACTIVE_USERS = 'COUNT_OF_ACTIVE_USERS' as const
 const COUNT_OF_ACTIVE_USERS_BY_COUNTRY =
   'COUNT_OF_ACTIVE_USERS_BY_COUNTRY' as const
+const COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT =
+  'COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT' as const
+const INACTIVITY_NOTIFICATION_SENT = 'INACTIVITY_NOTIFICATION_SENT' as const
 const USER_LOGGED_IN = 'USER_LOGGED_IN' as const
 const USER_REFRESH = 'USER_REFRESH' as const
 const USER_REACTIVATED = 'USER_REACTIVATED' as const
@@ -148,15 +152,68 @@ export const reportUserRefresh = (
     })
   )
 
-export const reportUserReactivated = (
-  attributes: CommonMetricAttributes
-): Effect.Effect<void, never, MetricsClientService> =>
+export const reportUserReactivated = ({
+  commonMetricAttributes,
+  daysInactive,
+  remindersReceived,
+  daysSinceLastReminder,
+}: {
+  commonMetricAttributes: CommonMetricAttributes
+  daysInactive: number
+  remindersReceived: number
+  daysSinceLastReminder: number | 'none'
+}): Effect.Effect<void, never, MetricsClientService> =>
   reportMetricForked(
     new MetricsMessage({
       uuid: generateUuid(),
       timestamp: new Date(),
       name: USER_REACTIVATED,
-      attributes,
+      attributes: {
+        ...commonMetricAttributes,
+        daysInactive,
+        remindersReceived,
+        daysSinceLastReminder,
+      },
+    })
+  )
+
+export const reportInactivityNotificationsSent = ({
+  count,
+  variant,
+  notificationOrdinal,
+}: {
+  count: number
+  variant: UserInactivityNotificationVariant
+  notificationOrdinal: number
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp: new Date(),
+      name: INACTIVITY_NOTIFICATION_SENT,
+      value: count,
+      type: 'Increment',
+      attributes: {variant, notificationOrdinal},
+    })
+  )
+
+const reportCountOfInactiveUsersByRemindersSent = ({
+  count,
+  remindersSent,
+  timestamp,
+}: {
+  count: number
+  remindersSent: number
+  timestamp: Date
+}): Effect.Effect<void, never, MetricsClientService> =>
+  reportMetricForked(
+    new MetricsMessage({
+      uuid: generateUuid(),
+      timestamp,
+      name: COUNT_OF_INACTIVE_USERS_BY_REMINDERS_SENT,
+      value: count,
+      type: 'Total',
+      attributes: {remindersSent},
     })
   )
 
@@ -348,6 +405,58 @@ export const queryAndReportNumberOfInactiveUsers = Effect.gen(function* (_) {
     Effect.withSpan('Query number of inactive users')
   )
 })
+
+const InactiveUsersByRemindersSentQueryResult = Schema.Struct({
+  count: Schema.NumberFromString,
+  remindersSent: Schema.Number,
+})
+
+export const queryAndReportInactiveUsersByRemindersSent = Effect.gen(
+  function* (_) {
+    const inactivityNotificationAfterDays = yield* _(
+      inactivityNotificationAfterDaysConfig
+    )
+    const sql = yield* _(SqlClient.SqlClient)
+
+    const inactiveUsersByRemindersSent = yield* _(
+      SqlSchema.findAll({
+        Request: Schema.Null,
+        Result: InactiveUsersByRemindersSentQueryResult,
+        execute: () => sql`
+          SELECT
+            count(*) AS "count",
+            number_of_inactivity_notifications_sent AS "remindersSent"
+          FROM
+            users
+          WHERE
+            refreshed_at IS NULL
+            OR refreshed_at < now() - interval '1 day' * ${inactivityNotificationAfterDays}
+          GROUP BY
+            number_of_inactivity_notifications_sent
+        `,
+      })(null)
+    )
+
+    const snapshotTimestamp = new Date()
+    yield* _(
+      inactiveUsersByRemindersSent,
+      Array.map(({count, remindersSent}) =>
+        reportCountOfInactiveUsersByRemindersSent({
+          count,
+          remindersSent,
+          timestamp: snapshotTimestamp,
+        })
+      ),
+      Effect.all
+    )
+  }
+).pipe(
+  Effect.tapError((e) =>
+    Effect.logError('Error reporting inactive users by reminders sent', e)
+  ),
+  Effect.ignore,
+  Effect.withSpan('Query inactive users by reminders sent')
+)
 
 const ActiveUsersByCountryQueryResult = Schema.Struct({
   count: Schema.NumberFromString,
